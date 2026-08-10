@@ -72,6 +72,8 @@ const GlobalCallContent = ({
   const { roomData, user } = callInfo ?? {}
   const isAISession = callInfo?.isAISession ?? false
 
+  const [aiMode, setAiMode] = useState("room-context")
+
   // ── UI state ──
   const [showCC, setShowCC] = useState(false)
   const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
@@ -682,6 +684,7 @@ const GlobalCallContent = ({
     subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,
     startSubtitles: subtitleControls.startSubtitles,
     stopSubtitles: subtitleControls.stopSubtitles,
+    changeSubtitleLanguage: subtitleControls.changeSubtitleLanguage,
 
     // Chat
     messages: chatMessages,
@@ -689,6 +692,8 @@ const GlobalCallContent = ({
     addOptimisticAiMessage,
     chatPublicAi,
     chatPrivateAi,
+    aiMode,
+    setAiMode,
     receiveSystemMsgs,
     setReceiveSystemMsgs,
     speakingAssistantEnabled,

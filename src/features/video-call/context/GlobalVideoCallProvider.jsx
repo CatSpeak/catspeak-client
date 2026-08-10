@@ -10,23 +10,6 @@ import {
 } from "@/features/video-call/services/callBroadcastChannel"
 import GlobalCallContent from "./GlobalCallContent"
 
-const GlobalVideoCallContext = createContext(null)
-
-export const useGlobalVideoCall = () => {
-  const ctx = useContext(GlobalVideoCallContext)
-  if (!ctx)
-    throw new Error(
-      "useGlobalVideoCall must be used within GlobalVideoCallProvider",
-    )
-  return ctx
-}
-
-// Backward-compat alias (existing components import VideoCallContext)
-export { GlobalVideoCallContext as VideoCallContext }
-
-// Re-export navigate bridge (used by routesConfig RootLayout)
-export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
-
 import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
 
 // --- Idle context (no active call) ------------------------------------------
@@ -98,6 +81,7 @@ const IDLE_VALUE = {
   subtitleSupportedLangs: ["en", "vi"],
   startSubtitles: async () => {},
   stopSubtitles: async () => {},
+  changeSubtitleLanguage: async () => {},
 
   lkRoomName: null,
   unreadRoomChat: 0,
@@ -112,6 +96,8 @@ const IDLE_VALUE = {
   setSpeakingAssistantEnabled: () => {},
   activeChatTab: "room",
   setActiveChatTab: () => {},
+  aiMode: "room-context",
+  setAiMode: () => {},
   layoutMode: "auto",
   setLayoutMode: () => {},
   maxTiles: 16,
@@ -125,6 +111,19 @@ const IDLE_VALUE = {
   setActiveSettingsTab: () => {},
   deviceSelection: null,
 }
+
+const GlobalVideoCallContext = createContext(IDLE_VALUE)
+
+export const useGlobalVideoCall = () => {
+  const ctx = useContext(GlobalVideoCallContext)
+  return ctx || IDLE_VALUE
+}
+
+// Backward-compat alias (existing components import VideoCallContext)
+export { GlobalVideoCallContext as VideoCallContext }
+
+// Re-export navigate bridge (used by routesConfig RootLayout)
+export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 const IdleCallContent = ({
   children,

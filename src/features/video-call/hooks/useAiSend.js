@@ -20,6 +20,8 @@ export const useAiSend = () => {
     addOptimisticAiMessage,
     chatPublicAi,
     chatPrivateAi,
+    aiMode,
+    sessionId: callSessionId,
     currentUserId,
     lkRoomName,
     localParticipant,
@@ -124,8 +126,12 @@ export const useAiSend = () => {
         // Remove the last entry (current user prompt) — it goes as `message`
         const conversations = threadHistory.slice(0, -1)
 
-        const payload = { roomName, message: text, conversations }
-        console.log("Sending AI payload:", payload)
+        const payload = {
+          roomName,
+          message: text,
+          conversations,
+          mode: aiMode || "room-context",
+        }
 
         if (isPublic) {
           await chatPublicAi(payload).unwrap()
@@ -149,6 +155,8 @@ export const useAiSend = () => {
       addOptimisticAiMessage,
       chatPublicAi,
       chatPrivateAi,
+      aiMode,
+      callSessionId,
       currentUserId,
       t,
       isCurrentUserPrompting,

@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { AnimatePresence } from "framer-motion"
@@ -19,10 +18,14 @@ const ControlBarMoreMenu = ({
 }) => {
   const { id: roomId } = useParams()
   const { t } = useLanguage()
-  const { isAISession, subtitleSupportedLangs, subtitleSelectedLanguage } =
-    useGlobalVideoCall()
-  const { isSubtitleActive, startSubtitles, changeSubtitleLanguage } =
-    useSubtitleControls()
+  const {
+    isAISession,
+    subtitleSupportedLangs,
+    subtitleSelectedLanguage,
+    isSubtitleActive,
+    startSubtitles,
+    changeSubtitleLanguage,
+  } = useGlobalVideoCall()
 
   const [showGameSetup, setShowGameSetup] = useState(false)
   const [showGameHistory, setShowGameHistory] = useState(false)

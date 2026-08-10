@@ -20,8 +20,13 @@ const LANG_FLAGS = { en: UK, vi: VietNam, zh: China }
  * Includes an inline language switcher that invokes changeSubtitleLanguage to trigger backend API sessions.
  */
 const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
-  const { room, subtitleSelectedLanguage, stopSubtitles } = useGlobalVideoCall()
-  const { changeSubtitleLanguage } = useSubtitleControls()
+  const {
+    room,
+    subtitleSelectedLanguage,
+    stopSubtitles,
+    changeSubtitleLanguage,
+  } = useGlobalVideoCall()
+  const { subtitles } = useSubtitles()
   const { t } = useLanguage()
 
   const [showLangPicker, setShowLangPicker] = useState(false)

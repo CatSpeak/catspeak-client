@@ -42,7 +42,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   }, [activeChatTab, setIsChatCollapsed, setIsAiCollapsed])
 
   const settingsPopoverContent = (
-    <MenuList className="w-[320px]">
+    <MenuList className="w-[340px]">
       <ListItem
         lines={1}
         rightContent={
