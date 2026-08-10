@@ -49,7 +49,8 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
   )
 
   const { data: bgData } = useGetCurrentBackgroundQuery()
-  const virtualBackgroundUrl = bgData?.data?.activeBackgroundUrl
+  const virtualBackgroundUrl =
+    bgData?.activeBackgroundUrl ?? bgData?.data?.activeBackgroundUrl
 
   // Update background if it changes (via CombinedVideoTransformer.updateTransformerOptions)
   useEffect(() => {
