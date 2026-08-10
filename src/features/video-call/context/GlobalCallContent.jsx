@@ -38,6 +38,11 @@ import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.j
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
+import {
+  getRoomSetting,
+  setRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
@@ -59,6 +64,7 @@ const GlobalCallContent = ({
   const { t, language } = useLanguage()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
+  const currentRoomId = callInfo?.roomId || roomData?.id
   const isAISession = callInfo?.isAISession ?? false
 
   // ── UI state ──
@@ -390,6 +396,8 @@ const GlobalCallContent = ({
     startedByAccountId,
     setStartedByAccountId,
     sessionId,
+    roomId: currentRoomId,
+    isHost: isRoomHost(roomData, user?.accountId),
   })
 
   const subtitleControls = useSubtitleControls({
@@ -516,9 +524,10 @@ const GlobalCallContent = ({
         }
 
         if (data.action === "TOGGLE_JOIN_SOUND") {
-          localStorage.setItem(
-            "catspeak_join_leave_sound",
-            data.enabled ? "true" : "false"
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
+            data.enabled
           )
           window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
           toast.info(
@@ -530,9 +539,10 @@ const GlobalCallContent = ({
         }
 
         if (data.action === "TOGGLE_MEMBER_RECORDING") {
-          localStorage.setItem(
-            "catspeak_member_recording_allowed",
-            data.allowed ? "true" : "false"
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.MEMBER_RECORDING,
+            data.allowed
           )
           window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
           toast.info(
@@ -540,13 +550,17 @@ const GlobalCallContent = ({
               ? (pl.hostAllowedRecording || "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
               : (pl.hostDisabledRecording || "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
           )
+          if (!isHost && !data.allowed && isRecording) {
+            recordingState.handleToggleRecording?.()
+          }
           return
         }
 
         if (data.action === "TOGGLE_MEMBER_PRIVATE_AI") {
-          localStorage.setItem(
-            "catspeak_member_private_ai_allowed",
-            data.allowed ? "true" : "false"
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
+            data.allowed
           )
           window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
           toast.info(
@@ -554,6 +568,47 @@ const GlobalCallContent = ({
               ? (pl.hostAllowedPrivateAi || "Host đã CHO PHÉP thành viên sử dụng AI Chat riêng tư.")
               : (pl.hostDisabledPrivateAi || "Host đã TẮT quyền sử dụng AI Chat riêng tư đối với thành viên.")
           )
+          return
+        }
+
+        if (data.action === "REQUEST_ROOM_SETTINGS_SYNC") {
+          if (isHost && localParticipant) {
+            try {
+              const syncPayload = new TextEncoder().encode(
+                JSON.stringify({
+                  action: "SYNC_ROOM_SETTINGS",
+                  settings: {
+                    joinLeaveSound: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
+                    memberRecording: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING),
+                    memberPrivateAi: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI),
+                  },
+                  targetIdentity: participant?.identity,
+                })
+              )
+              localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true })
+            } catch (err) {
+              console.error("Error responding to REQUEST_ROOM_SETTINGS_SYNC:", err)
+            }
+          }
+          return
+        }
+
+        if (data.action === "SYNC_ROOM_SETTINGS") {
+          const isTargetMe = !data.targetIdentity || String(data.targetIdentity) === String(localParticipant?.identity)
+          if (isTargetMe && data.settings) {
+            if (data.settings.joinLeaveSound !== undefined) {
+              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND, data.settings.joinLeaveSound)
+              window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
+            }
+            if (data.settings.memberRecording !== undefined) {
+              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING, data.settings.memberRecording)
+              window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
+            }
+            if (data.settings.memberPrivateAi !== undefined) {
+              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI, data.settings.memberPrivateAi)
+              window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
+            }
+          }
           return
         }
 
@@ -580,6 +635,26 @@ const GlobalCallContent = ({
     }
 
     const handleParticipantJoined = (participant) => {
+      const isHost = isRoomHost(roomData, user?.accountId)
+      if (isHost && localParticipant) {
+        try {
+          const syncPayload = new TextEncoder().encode(
+            JSON.stringify({
+              action: "SYNC_ROOM_SETTINGS",
+              settings: {
+                joinLeaveSound: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
+                memberRecording: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING),
+                memberPrivateAi: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI),
+              },
+              targetIdentity: participant.identity,
+            })
+          )
+          localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true })
+        } catch (err) {
+          console.error("Error syncing room settings to new participant:", err)
+        }
+      }
+
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext
         if (!AudioContext) return
@@ -598,6 +673,18 @@ const GlobalCallContent = ({
         osc.stop(now + 0.3)
       } catch (e) {
         // autoplay restriction fallback
+      }
+    }
+
+    // Request settings sync from Host on join if not Host
+    if (localParticipant && !isRoomHost(roomData, user?.accountId)) {
+      try {
+        const reqPayload = new TextEncoder().encode(
+          JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" })
+        )
+        localParticipant.publishData(reqPayload, { topic: "moderation", reliable: true })
+      } catch (e) {
+        // ignore
       }
     }
 

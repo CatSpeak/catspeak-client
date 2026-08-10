@@ -1,4 +1,8 @@
 import { useEffect, useRef } from "react"
+import {
+  getRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 
 export const globalSounds = {
   correct: new Audio("/sounds/correct.mp3"),
@@ -38,7 +42,7 @@ export const playGlobalSound = (name) => {
     audio.play().catch(() => {});
   }
 };
-export const useParticipantAudioEffect = (participants) => {
+export const useParticipantAudioEffect = (participants, roomId = null) => {
   const prevParticipantsRef = useRef(participants)
 
   useEffect(() => {
@@ -59,9 +63,10 @@ export const useParticipantAudioEffect = (participants) => {
         ),
     )
 
-    const isSoundEnabled =
-      typeof window === "undefined" ||
-      localStorage.getItem("catspeak_join_leave_sound") !== "false"
+    const isSoundEnabled = getRoomSetting(
+      roomId,
+      ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND
+    )
 
     if (isSoundEnabled) {
       if (newlyJoined.length > 0) {

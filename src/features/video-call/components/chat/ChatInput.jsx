@@ -11,6 +11,10 @@ import { toast } from "react-hot-toast"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { useAiSend } from "@/features/video-call/hooks/useAiSend"
+import {
+  getRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 
 const ChatInput = ({
   onSendMessage,
@@ -27,26 +31,28 @@ const ChatInput = ({
   const { t } = useLanguage()
   const { sendAiMessage, isBlocked: isAiBlocked } = useAiSend()
   const { insertEmoji, addRecent } = useEmojiPicker()
-  const { room, user, isHost: isHostFromContext } = useGlobalVideoCall()
+  const { room, id: roomIdFromContext, user, isHost: isHostFromContext } = useGlobalVideoCall()
+  const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   const [isMemberPrivateAiAllowed, setIsMemberPrivateAiAllowed] = React.useState(() => {
-    return localStorage.getItem("catspeak_member_private_ai_allowed") !== "false"
+    return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
   })
 
   React.useEffect(() => {
     const handlePrivateAiChange = () => {
-      const allowed = localStorage.getItem("catspeak_member_private_ai_allowed") !== "false"
+      const allowed = getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
       setIsMemberPrivateAiAllowed(allowed)
       if (!isHost && !allowed) {
         setIsPrivateAi(false)
       }
     }
+    handlePrivateAiChange()
     window.addEventListener("catspeak_member_private_ai_allowed_changed", handlePrivateAiChange)
     return () => {
       window.removeEventListener("catspeak_member_private_ai_allowed_changed", handlePrivateAiChange)
     }
-  }, [isHost])
+  }, [isHost, currentRoomId])
 
   const hasContent = message.trim().length > 0
 
@@ -158,6 +164,7 @@ const ChatInput = ({
             <div className="origin-left flex items-center justify-center">
               <Switch
                 checked={isPrivateAi}
+                disabled={!isHost && !isMemberPrivateAiAllowed}
                 onChange={(e) => {
                   if (!isHost && !isMemberPrivateAiAllowed && e.target.checked) {
                     toast.error(

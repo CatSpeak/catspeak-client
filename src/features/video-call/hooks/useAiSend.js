@@ -3,6 +3,10 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { toast } from "react-hot-toast"
+import {
+  getRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 
 /**
  * Encapsulates the entire AI send flow:
@@ -31,6 +35,7 @@ export const useAiSend = () => {
     continueThread,
     getConversationThread,
     room,
+    id: roomIdFromContext,
     user,
     isHost: isHostFromContext,
   } = useGlobalVideoCall()
@@ -46,9 +51,12 @@ export const useAiSend = () => {
       if (sendingRef.current || isCurrentUserPrompting) return
       sendingRef.current = true
 
+      const currentRoomId = room?.id || roomIdFromContext
       const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
-      const isMemberPrivateAiAllowed =
-        localStorage.getItem("catspeak_member_private_ai_allowed") !== "false"
+      const isMemberPrivateAiAllowed = getRoomSetting(
+        currentRoomId,
+        ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI
+      )
 
       if (!isHost && isPrivateAi && !isMemberPrivateAiAllowed) {
         toast.error(

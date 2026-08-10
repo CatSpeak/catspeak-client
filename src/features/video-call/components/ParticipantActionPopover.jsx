@@ -201,7 +201,8 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     try {
       await kickParticipant({
         id: roomId,
-        participantId: targetAccountId,
+        targetAccountId: Number(targetAccountId),
+        participantId: Number(targetAccountId),
         banRejoin,
       }).unwrap()
     } catch (err) {
