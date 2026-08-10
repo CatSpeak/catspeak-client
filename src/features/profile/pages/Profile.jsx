@@ -50,7 +50,9 @@ const Profile = () => {
   const { data: publicProfileResponse, isLoading: loadingPublic } =
     useGetPublicProfileQuery(targetAccountId, { skip: isOwnProfile })
 
-  const profileData = isOwnProfile ? privateProfileData : publicProfileResponse
+  // Normalize profile data (handle both raw object and wrapped response { data: ... })
+  const rawProfileData = isOwnProfile ? privateProfileData : publicProfileResponse
+  const profile = rawProfileData?.data ?? rawProfileData ?? null
   const isLoading = isOwnProfile ? loadingPrivate : loadingPublic
 
   // Fetch Friendship Data
@@ -78,8 +80,8 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("home")
   const [friendsSubTab, setFriendsSubTab] = useState(null)
 
-  const stateHooks = useProfileState(profileData)
-  const mutationHooks = useProfileMutations(t, profileData, stateHooks)
+  const stateHooks = useProfileState(profile)
+  const mutationHooks = useProfileMutations(t, profile, stateHooks)
 
   const {
     formData,
@@ -107,7 +109,9 @@ const Profile = () => {
   if (isLoading) return <div>Loading...</div>
 
   // Use avatarImageUrl as the primary avatar for the profile
-  const displayAvatarUrl = formData.avatarImageUrl
+  const displayAvatarUrl = isOwnProfile
+    ? formData.avatarImageUrl
+    : profile?.avatarImageUrl
 
   const tabs = [
     { id: "home", label: t.profile?.tabs?.home || "Nhà" },
@@ -121,13 +125,24 @@ const Profile = () => {
     { id: "completedClass", label: t.profile?.tabs?.completedClass || "Lớp học đã hoàn thành" }
   ]
 
+  // Prepare normalized data for header
+  const headerData = isOwnProfile
+    ? {
+        ...formData,
+        location: formData.location || formData.address || profile?.location || profile?.address,
+      }
+    : {
+        ...profile,
+        location: profile?.location || profile?.address,
+      }
+
   return (
     <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-primaryBg">
       <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Top Header Section */}
         <SocialProfileHeader
-          user={profileData?.data}
-          formData={isOwnProfile ? formData : profileData?.data}
+          user={profile}
+          formData={headerData}
           t={t}
           targetAccountId={targetAccountId}
           isOwnProfile={isOwnProfile}
@@ -186,7 +201,7 @@ const Profile = () => {
         <ProfileOtpModal
           open={isOtpModalOpen}
           onClose={() => setIsOtpModalOpen(false)}
-          email={profileData?.data?.email}
+          email={profile?.email}
           title={
             editingField === "phoneNumber"
               ? t.profile?.personalInfo?.verifyPhoneTitle ||
