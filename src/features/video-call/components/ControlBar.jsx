@@ -30,6 +30,7 @@ import RightSideControls from "./RightSideControls"
 import { useGame } from "@/features/games/context/GameContext"
 import RecordingButton from "./RecordingButton"
 import toast from "react-hot-toast"
+import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 
 const VideoCallControlBar = () => {
   const { t } = useLanguage()
@@ -67,6 +68,7 @@ const VideoCallControlBar = () => {
     isHandRaised,
     sessionId,
     room,
+    lkRoom,
     user,
     participants,
     isAISession,
@@ -85,20 +87,19 @@ const VideoCallControlBar = () => {
   const [showGameModal, setShowGameModal] = useState(false)
 
   const handleToggleHand = async () => {
-    console.log(
-      "Toggle hand clicked. SessionId:",
-      sessionId,
-      "isHandRaised:",
-      isHandRaised,
-    )
-    if (!sessionId) {
-      console.warn("Cannot raise hand: sessionId is missing in context!")
-      return
+    const newRaised = !isHandRaised
+    if (lkRoom?.localParticipant) {
+      safeSetLiveKitMetadata(lkRoom.localParticipant, {
+        handRaised: newRaised,
+        handRaisedAt: newRaised ? Date.now() : 0,
+      })
     }
-    try {
-      await raiseHand({ sessionId, isRaised: !isHandRaised }).unwrap()
-    } catch (error) {
-      console.error("Failed to toggle hand raise:", error)
+    if (sessionId) {
+      try {
+        await raiseHand({ sessionId, isRaised: newRaised }).unwrap()
+      } catch (error) {
+        console.warn("Backend raiseHand notification error (LiveKit metadata active):", error)
+      }
     }
   }
 

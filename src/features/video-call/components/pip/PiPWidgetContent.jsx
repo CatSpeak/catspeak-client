@@ -3,6 +3,7 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useDominantSpeaker } from "@/features/video-call/hooks/useDominantSpeaker"
 import { useSessionTimer } from "@/features/video-call/hooks/useSessionTimer"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
+import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 
 import PiPVideoContent from "./PiPVideoContent"
 import PiPControlBar from "./PiPControlBar"
@@ -39,6 +40,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
     messages,
     handleSendMessage,
     isConnected,
+    lkRoom,
   } = useGlobalVideoCall()
 
   const [isPiPChatOpen, setIsPiPChatOpen] = useState(false)
@@ -46,11 +48,19 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
   const [raiseHand] = useRaiseHandMutation()
 
   const handleToggleHand = async () => {
-    if (!sessionId) return
-    try {
-      await raiseHand({ sessionId, isRaised: !isHandRaised }).unwrap()
-    } catch (error) {
-      console.error("Failed to toggle hand raise:", error)
+    const newRaised = !isHandRaised
+    if (lkRoom?.localParticipant) {
+      safeSetLiveKitMetadata(lkRoom.localParticipant, {
+        handRaised: newRaised,
+        handRaisedAt: newRaised ? Date.now() : 0,
+      })
+    }
+    if (sessionId) {
+      try {
+        await raiseHand({ sessionId, isRaised: newRaised }).unwrap()
+      } catch (error) {
+        console.warn("Backend raiseHand notification error (LiveKit metadata active):", error)
+      }
     }
   }
 

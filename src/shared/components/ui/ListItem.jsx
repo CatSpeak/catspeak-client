@@ -36,8 +36,9 @@ const ListItem = ({
     1: "h-14",
     2: "h-[72px]",
     3: "h-[88px]",
+    auto: "min-h-[56px] py-3 h-auto",
   }
-  const heightClass = linesClasses[lines] || "h-14"
+  const heightClass = linesClasses[lines] || (lines === "auto" ? "min-h-[56px] py-3 h-auto" : "h-14")
 
   const effectiveRightContent =
     variant === "radio" ? (
@@ -69,7 +70,7 @@ const ListItem = ({
           hoverEffect || selected ? hoverClasses : ""
         } ${contentClassName}`}
       >
-        <div className="flex items-center gap-4 overflow-hidden flex-1">
+        <div className="flex items-center gap-4 min-w-0 flex-1 my-auto">
           {leftContent && (
             <div className="shrink-0 flex items-center justify-center [&_svg]:w-6 [&_svg]:h-6 [&_img]:w-[56px] [&_img]:h-[56px] [&_img]:object-contain">
               {leftContent}

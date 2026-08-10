@@ -281,6 +281,8 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
     }),
 
+
+
     // Invite user to a room
     inviteToRoom: builder.mutation({
       query: ({ roomId, email }) => ({
