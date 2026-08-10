@@ -2,8 +2,7 @@ import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import EventBlock from './EventBlock'
 import EventBlockDetail from './EventBlockDetail'
-
-const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+import { useTimezone } from '@/shared/hooks/useTimezone'
 const HOURS = Array.from({ length: 24 }, (_, i) => i) // 0 to 23
 
 const CalendarWeekView = ({
@@ -11,6 +10,13 @@ const CalendarWeekView = ({
   selectedDate,
   events,
 }) => {
+  const { formatScheduleDays } = useTimezone()
+  
+  // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
+  const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day => 
+    formatScheduleDays([day])
+  )
+
   const daysInMonth = currentDate.daysInMonth()
   const [selectedEvent, setSelectedEvent] = useState(null)
 

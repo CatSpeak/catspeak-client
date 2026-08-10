@@ -2,7 +2,6 @@ import React from 'react'
 import dayjs from 'dayjs'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 
-const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
 const CalendarMonthView = ({
   currentDate,
@@ -10,7 +9,13 @@ const CalendarMonthView = ({
   onSelectDate,
   events
 }) => {
-  const { userTimeZone } = useTimezone()
+  const { userTimeZone, formatScheduleDays } = useTimezone()
+  
+  // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
+  const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day => 
+    formatScheduleDays([day])
+  )
+
   const startDay = (currentDate.startOf('month').day() + 6) % 7 // Make Monday = 0
   const prevDays = currentDate.subtract(1, 'month').daysInMonth()
   const daysInMonth = currentDate.daysInMonth()
@@ -43,7 +48,7 @@ const CalendarMonthView = ({
       {/* Days Header */}
       <div className="grid grid-cols-7 gap-1 text-center border-b border-[#E5E5E5] pb-4 mb-4">
         {DAY_LABELS.map((label) => (
-          <div key={label} className="text-base uppercase text-[#1A1A1A] font-medium tracking-wider">
+          <div key={label} className="text-base text-[#1A1A1A] font-medium tracking-wider">
             {label}
           </div>
         ))}
