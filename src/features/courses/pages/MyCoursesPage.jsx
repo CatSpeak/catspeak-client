@@ -18,6 +18,7 @@ import {
   mapTeacherCourseSummary,
 } from "../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const MyCoursesPage = () => {
   const { t } = useLanguage()
@@ -98,9 +99,20 @@ const MyCoursesPage = () => {
     manageDetails: c.manageDetails || "Manage Details",
     progress: c.progress || "Progress",
     courseLabel: c.course || "Course",
+    share: c.courseDetail?.shareCourse || c.share || "Share",
     classLabel: c.class || "Class",
     classCount: c.classCount || "{{count}} classes",
     actionsFor: c.actionsForCourse || "Actions for {{title}}",
+  }
+
+  const handleShare = async (item) => {
+    const courseId = item.id || item._id
+    const shareUrl = `${window.location.origin}/explore-courses/details/${courseId}`
+    await copyShareLink({
+      url: shareUrl,
+      successMessage: c.courseDetail?.linkCopied || "Link copied!",
+      errorMessage: c.courseDetail?.linkCopyFailed || "Failed to copy link",
+    })
   }
 
   if (isLoading) {
@@ -216,6 +228,7 @@ const MyCoursesPage = () => {
                 onDelete={() => {
                   deleteHelper.setTargetId(item.id)
                 }}
+                onShare={handleShare}
               />
             ))}
           </div>

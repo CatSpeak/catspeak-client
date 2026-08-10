@@ -120,7 +120,9 @@ const ClassOverviewTab = ({
 
   const [linkCopied, setLinkCopied] = useState(false)
   const handleCopyLink = async () => {
+    const shareUrl = `${window.location.origin}/explore-courses/class/${id}`
     const ok = await copyShareLink({
+      url: shareUrl,
       successMessage: cd.linkCopied || "Link copied!",
       errorMessage: cd.linkCopyFailed || "Failed to copy link",
     })

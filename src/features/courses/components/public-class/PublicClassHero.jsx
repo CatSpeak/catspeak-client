@@ -1,7 +1,8 @@
-import React from "react"
-import { ShieldCheck, Share2 } from "lucide-react"
+import React, { useState } from "react"
+import { ShieldCheck, Share2, Check } from "lucide-react"
 import { getSafeMediaUrl, defaultCourseThumbnail } from "../../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const PublicClassHero = ({
   classData,
@@ -13,6 +14,7 @@ const PublicClassHero = ({
   const { t } = useLanguage()
   const c = t.courses || {}
   const pc = c.publicClass || {}
+  const [linkCopied, setLinkCopied] = useState(false)
 
   const teacher = classData?.teacher || {}
   const teacherName = teacher.fullName || teacher.name || teacher.title || c.defaultInstructor || "CatSpeak Instructor"
@@ -110,17 +112,20 @@ const PublicClassHero = ({
 
             <button
               type="button"
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({ title: classData?.title, url: window.location.href })
-                } else {
-                  navigator.clipboard.writeText(window.location.href)
-                }
+              onClick={async () => {
+                const shareUrl = `${window.location.origin}/explore-courses/class/${classData?.id || classData?._id}`
+                await copyShareLink({
+                  url: shareUrl,
+                  successMessage: c.classDetail?.linkCopied || "Link copied!",
+                  errorMessage: c.classDetail?.linkCopyFailed || "Failed to copy link",
+                })
+                setLinkCopied(true)
+                setTimeout(() => setLinkCopied(false), 2000)
               }}
               className="bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 p-3.5 rounded-2xl transition-colors backdrop-blur-md cursor-pointer"
               title={pc.shareClass || "Chia sẻ lớp học"}
             >
-              <Share2 size={20} />
+              {linkCopied ? <Check size={20} /> : <Share2 size={20} />}
             </button>
           </div>
 

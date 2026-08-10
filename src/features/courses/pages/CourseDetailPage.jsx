@@ -41,7 +41,9 @@ const CourseDetailPage = () => {
   const [linkCopied, setLinkCopied] = useState(false)
 
   const handleCopyLink = async () => {
+    const shareUrl = `${window.location.origin}/explore-courses/details/${id}`
     const ok = await copyShareLink({
+      url: shareUrl,
       successMessage: c.courseDetail?.linkCopied || "Link copied!",
       errorMessage: c.courseDetail?.linkCopyFailed || "Failed to copy link",
     })
@@ -49,6 +51,15 @@ const CourseDetailPage = () => {
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
     }
+  }
+
+  const handleShareClass = async (clsItem) => {
+    const shareUrl = `${window.location.origin}/explore-courses/class/${clsItem.id || clsItem._id}`
+    await copyShareLink({
+      url: shareUrl,
+      successMessage: c.classDetail?.linkCopied || "Link copied!",
+      errorMessage: c.classDetail?.linkCopyFailed || "Failed to copy link",
+    })
   }
 
   useEffect(() => {
@@ -386,6 +397,7 @@ const CourseDetailPage = () => {
                       onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)}
                       progressLabel={c.progress || "Progress"}
                       courseTitle={courseData.title}
+                      onShare={handleShareClass}
                     />
                   )
                 })
@@ -449,7 +461,7 @@ const CourseDetailPage = () => {
         confirmText={c.courseDetail?.deleteCourse || "Delete"}
         cancelText={c.createClass?.cancel || "Cancel"}
       />
-    </div>
+    </div >
   )
 }
 

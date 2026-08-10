@@ -1550,6 +1550,8 @@ export default {
       writeCommentPlaceholder: "写评论...",
       writeReplyPlaceholder: "写回复...",
       send: "发送",
+      cancel: "取消",
+      sendComment: "发送评论",
       locked: "此帖子已锁定评论",
       toastCommentSuccess: "评论已发送",
       toastReplySuccess: "回复已发送",

@@ -27,7 +27,10 @@ const StudentClassOverviewTab = ({
 
   const [linkCopied, setLinkCopied] = useState(false)
   const handleCopyLink = async () => {
+    const classId = classData?.id
+    const shareUrl = `${window.location.origin}/explore-courses/class/${classId}`
     const ok = await copyShareLink({
+      url: shareUrl,
       successMessage: cd.linkCopied || "Link copied!",
       errorMessage: cd.linkCopyFailed || "Failed to copy link",
     })
@@ -62,10 +65,10 @@ const StudentClassOverviewTab = ({
       : null
   const instructorName = String(
     instructor?.fullName ??
-      instructor?.name ??
-      classData.instructorName ??
-      classData.teacherName ??
-      "",
+    instructor?.name ??
+    classData.instructorName ??
+    classData.teacherName ??
+    "",
   ).trim()
   const instructorBio = String(
     instructor?.bio ?? instructor?.description ?? "",
@@ -76,7 +79,7 @@ const StudentClassOverviewTab = ({
   const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || ""
   const nextSession =
     classData.nextSession?.date &&
-    (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
+      (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
       ? classData.nextSession
       : null
   const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime
@@ -84,7 +87,7 @@ const StudentClassOverviewTab = ({
   const sessionDate =
     nextSession?.date ||
     (nextSession?.rawStartTime &&
-    (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
+      (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
       ? nextSession.rawStartTime
       : null)
 
@@ -164,9 +167,9 @@ const StudentClassOverviewTab = ({
                   {formatDateMonth(classData.startDate, ui.tba)}
                   {totalSessions > 0
                     ? ` • ${(ui.sessionsCount || "{{count}} sessions").replace(
-                        "{{count}}",
-                        String(totalSessions),
-                      )}`
+                      "{{count}}",
+                      String(totalSessions),
+                    )}`
                     : ""}
                 </span>
               </div>

@@ -1553,6 +1553,8 @@ export default {
       writeCommentPlaceholder: "Write a comment...",
       writeReplyPlaceholder: "Write a reply...",
       send: "Send",
+      cancel: "Cancel",
+      sendComment: "Send comment",
       locked: "Comments are locked for this post",
       toastCommentSuccess: "Comment posted",
       toastReplySuccess: "Reply posted",
