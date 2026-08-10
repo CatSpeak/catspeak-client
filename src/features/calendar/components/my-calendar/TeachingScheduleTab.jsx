@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, X, MoreVertical, Edit, DoorOpen } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Clock, X, Edit, DoorOpen, MoreVertical } from 'lucide-react'
 import { useGetScheduleSessionsQuery } from '@/store/api/coursesApi'
 import DataTable from '@/shared/components/ui/DataTable'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
@@ -10,13 +10,13 @@ import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import TablePagination from "@/features/courses/components/shared/TablePagination"
 import DatePicker from '@/shared/components/ui/inputs/DatePicker'
+import SearchInput from '@/shared/components/ui/inputs/SearchInput'
 import Popover from '@/shared/components/ui/Popover'
 import MenuItem from '@/shared/components/ui/MenuItem'
-import toast from 'react-hot-toast'
 
 const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const { t, language } = useLanguage()
-  const { formatDate, formatTime, formatScheduleTime, userTimeZone } = useTimezone()
+  const { formatDate, formatTime, formatScheduleTime, getZoneDateStr, toIsoInZone } = useTimezone()
   const navigate = useNavigate()
   const fromDate = currentDate.startOf('month').format('YYYY-MM-DD')
   const toDate = currentDate.endOf('month').format('YYYY-MM-DD')
@@ -24,6 +24,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const { data: sessionsResponse, isLoading } = useGetScheduleSessionsQuery({ from: fromDate, to: toDate })
 
   const [filterDate, setFilterDate] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
 
@@ -38,20 +39,30 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   if (currentMonth !== prevMonth) {
     setPrevMonth(currentMonth)
     setFilterDate(null)
+    setSearchQuery('')
     setCurrentPage(1)
   }
 
-  // Filter by date
-  const filteredSessions = filterDate
-    ? rawSessions.filter(s => {
-        const raw = s.rawStartTime || (s.startTime && (s.startTime.includes('T') || s.startTime.includes('-')) ? s.startTime : null) || s.date
-        if (!raw) return false
-        const sDate = raw.includes("T")
-          ? dayjs(raw).tz(userTimeZone).format("YYYY-MM-DD")
-          : dayjs(raw).format("YYYY-MM-DD")
-        return sDate === dayjs(filterDate).format("YYYY-MM-DD")
-      })
-    : rawSessions
+  // Filter by date and search query
+  const filteredSessions = rawSessions.filter(s => {
+    let matchDate = true
+    if (filterDate) {
+      const isoStart = toIsoInZone(s.date || s.startTime, s.startTime) || s.date
+      if (!isoStart) matchDate = false
+      else {
+        const sDate = getZoneDateStr(isoStart)
+        matchDate = sDate === dayjs(filterDate).format("YYYY-MM-DD")
+      }
+    }
+
+    let matchSearch = true
+    if (searchQuery) {
+      const className = (s.class?.name || '').toLowerCase()
+      matchSearch = className.includes(searchQuery.toLowerCase())
+    }
+
+    return matchDate && matchSearch
+  })
 
   // Paginate
   const totalPages = Math.max(1, Math.ceil(filteredSessions.length / pageSize))
@@ -72,16 +83,18 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       key: 'date',
       label: t.calendar?.day || 'Ngày',
       render: (row) => {
-        const raw = row.rawStartTime || (row.startTime && (row.startTime.includes('T') || row.startTime.includes('-')) ? row.startTime : null) || (row.date && row.startTime ? `${row.date}T${row.startTime}:00Z` : row.date)
-        return raw ? formatDate(raw) : '-'
+        const isoStart = toIsoInZone(row.date || row.startTime, row.startTime) || row.date
+        return isoStart ? formatDate(isoStart) : '-'
       }
     },
     {
       key: 'time',
       label: t.calendar?.timeLabel || 'Thời gian',
       render: (row) => {
-        const startStr = formatScheduleTime(row.startTime, row.date)
-        const endStr = formatScheduleTime(row.endTime, row.date)
+        const isoStart = toIsoInZone(row.date || row.startTime, row.startTime)
+        const isoEnd = toIsoInZone(row.date || row.endTime, row.endTime)
+        const startStr = isoStart ? formatTime(isoStart) : formatScheduleTime(row.startTime, row.date)
+        const endStr = isoEnd ? formatTime(isoEnd) : formatScheduleTime(row.endTime, row.date)
         return startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
       }
     },
@@ -120,7 +133,9 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    toast.success(t.comingSoon?.title || "Tính năng đang phát triển")
+                    if (row.class?.id) {
+                      navigate(`/workspace/courses/edit-class/${row.class.id}`)
+                    }
                     close && close()
                   }}
                   icon={<Edit className="w-4 h-4 text-gray-400" />}
@@ -149,11 +164,10 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   if (isLoading) return <LoadingSpinner className="py-20 flex justify-center w-full" />
 
   const renderMobileCard = (row) => {
-    const raw = row.rawStartTime || row.startTime || row.date
-    const rawStart = row.rawStartTime || row.startTime
-    const rawEnd = row.rawEndTime || row.endTime
-    const startStr = rawStart && (rawStart.includes('T') || rawStart.includes('-')) ? formatTime(rawStart) : formatScheduleTime(row.startTime)
-    const endStr = rawEnd && (rawEnd.includes('T') || rawEnd.includes('-')) ? formatTime(rawEnd) : formatScheduleTime(row.endTime)
+    const isoStart = toIsoInZone(row.date || row.startTime, row.startTime) || row.date
+    const isoEnd = toIsoInZone(row.date || row.endTime, row.endTime) || row.date
+    const startStr = isoStart ? formatTime(isoStart) : formatScheduleTime(row.startTime)
+    const endStr = isoEnd ? formatTime(isoEnd) : formatScheduleTime(row.endTime)
     const timeText = startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
 
     return (
@@ -169,7 +183,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
         <div className="text-sm text-gray-600 space-y-2 mt-2">
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-            <span>{raw ? formatDate(raw) : '-'}</span>
+            <span>{isoStart ? formatDate(isoStart) : '-'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-gray-400 shrink-0" />
@@ -203,7 +217,15 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           </IconButton>
         </div>
 
-        <div className="flex items-center gap-2 relative z-10">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 relative z-10">
+          <SearchInput
+            value={searchQuery}
+            onChange={(val) => { setSearchQuery(val); setCurrentPage(1); }}
+            placeholder={t.calendar?.searchClass || "Tìm tên lớp..."}
+            className="!min-w-0 w-full sm:w-64 !h-10 !rounded-xl"
+            inputClassName="!pl-4 !text-sm"
+            buttonClassName="!w-8 !h-8"
+          />
           <DatePicker
             value={filterDate}
             onChange={(d) => { setFilterDate(d); setCurrentPage(1); }}
