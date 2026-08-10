@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { Link, useLocation } from "react-router-dom"
 // eslint-disable-next-line no-unused-vars
 import { LayoutGroup, motion, AnimatePresence } from "framer-motion"
@@ -153,6 +153,17 @@ const DesktopSidebar = () => {
     activeDockSection === "settings" ||
     Boolean(currentSectionData?.items?.length)
 
+  // Auto-expand secondary sidebar panel when switching into a section with sublinks
+  const prevSectionRef = useRef(null)
+  useEffect(() => {
+    if (prevSectionRef.current !== activeDockSection) {
+      prevSectionRef.current = activeDockSection
+      if (currentHasSublinks) {
+        setIsDesktopExpanded(true)
+      }
+    }
+  }, [activeDockSection, currentHasSublinks, setIsDesktopExpanded])
+
   const handleDockClick = (item, e) => {
     if (activeDockSection === item.key) {
       if (item.hasSublinks) {
@@ -162,8 +173,6 @@ const DesktopSidebar = () => {
     } else {
       if (item.hasSublinks) {
         setIsDesktopExpanded(true);
-      } else {
-        setIsDesktopExpanded(false);
       }
     }
   }

@@ -17,12 +17,9 @@ import {
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { AnimatePresence, motion } from "framer-motion"
-import {
-  useGetProfileQuery,
-  useAuth,
-  useLogoutMutation,
-} from "@/features/auth"
+import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSidebar } from "@/shared/context/SidebarContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
@@ -44,6 +41,7 @@ const useIsMobile = (breakpoint = 425) => {
 
 const ProfileDropdown = () => {
   const { t } = useLanguage()
+  const { setIsDesktopExpanded } = useSidebar()
   const navigate = useNavigate()
   const { user: authUser, isAuthenticated } = useAuth()
   const [logoutApi] = useLogoutMutation()
@@ -53,7 +51,8 @@ const ProfileDropdown = () => {
   const { data: detailedProfile } = useGetUserProfileQuery(undefined, {
     skip: !isAuthenticated,
   })
-  const { isTeacherProfile, isTeacher, isStudent, switchRole } = useRoleOverride()
+  const { isTeacherProfile, isTeacher, isStudent, switchRole } =
+    useRoleOverride()
   const [isOpen, setIsOpen] = useState(false)
   const [showLogoutWarning, setShowLogoutWarning] = useState(false)
   const menuRef = useRef(null)
@@ -89,9 +88,9 @@ const ProfileDropdown = () => {
   }
 
   const handleProfileClick = () => {
-    handleCloseMenu();
-    navigate(`/workspace/profile/${user?.accountId || user?.id || ""}`);
-  };
+    handleCloseMenu()
+    navigate(`/workspace/profile/${user?.accountId || user?.id || ""}`)
+  }
 
   const handlePricingClick = () => {
     handleCloseMenu()
@@ -99,16 +98,19 @@ const ProfileDropdown = () => {
   }
 
   const handleSettingsClick = () => {
+    setIsDesktopExpanded(true)
     handleCloseMenu()
     navigate("/setting")
   }
 
   const handleInstructorClick = () => {
+    setIsDesktopExpanded(true)
     handleCloseMenu()
     navigate("/setting/instructor")
   }
 
   const handleBillingClick = () => {
+    setIsDesktopExpanded(true)
     handleCloseMenu()
     navigate("/billing")
   }
@@ -158,7 +160,8 @@ const ProfileDropdown = () => {
           </p>
           {user?.nickname && (
             <p className="m-0 truncate text-xs text-gray-500 mt-0.5">
-              {user.nickname} ({t.profile?.personalInfo?.nickname || "Biệt danh"})
+              {user.nickname} (
+              {t.profile?.personalInfo?.nickname || "Biệt danh"})
             </p>
           )}
         </div>
@@ -166,13 +169,15 @@ const ProfileDropdown = () => {
 
       {isTeacherProfile && (
         <div className="my-1 flex flex-col gap-1 p-2 bg-[#F6F6F6] rounded-lg mx-1">
-          <p className="text-xs font-semibold text-gray-500 px-2 pb-1 uppercase">{t.header?.switchRole || "Chuyển vai trò"}</p>
+          <p className="text-xs font-semibold text-gray-500 px-2 pb-1 uppercase">
+            {t.header?.switchRole || "Chuyển vai trò"}
+          </p>
           <button
             onClick={async () => {
-              const success = await switchRole("Student");
+              const success = await switchRole("Student")
               if (success) {
-                handleCloseMenu();
-                navigate("/workspace/learning");
+                handleCloseMenu()
+                navigate("/workspace/learning")
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isStudent ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
@@ -182,10 +187,10 @@ const ProfileDropdown = () => {
           </button>
           <button
             onClick={async () => {
-              const success = await switchRole("Teacher");
+              const success = await switchRole("Teacher")
               if (success) {
-                handleCloseMenu();
-                navigate("/workspace/courses");
+                handleCloseMenu()
+                navigate("/workspace/courses")
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isTeacher ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
