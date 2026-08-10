@@ -15,6 +15,12 @@ const MobileNavItem = ({ navKey, onClose }) => {
   let href;
   if (navKey === "catSpeak") {
     href = `/${currentLang}/cat-speak/news`;
+  } else if (navKey === "exploreCourses") {
+    href = "/explore-courses";
+  } else if (navKey === "learningResources") {
+    href = "/resources";
+  } else if (navKey === "community") {
+    href = "/community";
   } else if (navKey === "cart") {
     href = "/cart";
   } else if (navKey === "connect") {
@@ -33,7 +39,7 @@ const MobileNavItem = ({ navKey, onClose }) => {
           : "hover:bg-[#F2F2F2]"
       }`}
     >
-      {t.nav[navKey]}
+      {t.nav?.[navKey] || navKey}
     </NavLink>
   );
 };
