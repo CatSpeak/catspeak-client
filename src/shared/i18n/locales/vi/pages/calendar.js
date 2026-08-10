@@ -1,4 +1,5 @@
 export default {
+  searchClass: "Tìm tên lớp...",
   generalCalendar: "Lịch tổng hợp",
   personalCalendar: "Lịch cá nhân",
   studentSchedule: "Lịch học",

@@ -21,6 +21,7 @@ import {
 } from "../utils/courseTransforms"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const MyClassesPage = () => {
   const { t } = useLanguage()
@@ -118,6 +119,17 @@ const MyClassesPage = () => {
     standaloneClass: c.createClass?.standaloneClass || "Lớp độc lập",
     classCount: c.classCount || "{{count}} classes",
     actionsFor: c.actionsForCourse || "Actions for {{title}}",
+    share: c.classDetail?.shareClass || c.share || "Share",
+  }
+
+  const handleShare = async (item) => {
+    const classId = item.id || item._id
+    const shareUrl = `${window.location.origin}/explore-courses/class/${classId}`
+    await copyShareLink({
+      url: shareUrl,
+      successMessage: c.classDetail?.linkCopied || "Link copied!",
+      errorMessage: c.classDetail?.linkCopyFailed || "Failed to copy link",
+    })
   }
 
   if (isLoading) {
@@ -261,6 +273,7 @@ const MyClassesPage = () => {
                     courseId: item.courseId,
                   })
                 }}
+                onShare={handleShare}
               />
             ))}
           </div>

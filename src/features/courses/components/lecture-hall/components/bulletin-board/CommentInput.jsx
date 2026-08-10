@@ -12,7 +12,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * @param {string}   [placeholder]       - Placeholder cho editor
  * @param {function} [onSubmit]          - Callback(htmlContent) khi gửi bình luận
  */
-const CommentInput = ({ onSubmit }) => {
+const CommentInput = ({ onSubmit, placeholder }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall.postDetail
 
@@ -80,20 +80,20 @@ const CommentInput = ({ onSubmit }) => {
                 editorRef.current.setContent("")
               }
             }}
-            title={"Huỷ"}
+            title={dict.cancel || "Hủy"}
             startIcon={<X size={16} />}
           >
-            Hủy
+            {dict.cancel || "Hủy"}
           </PillButton>
           <PillButton
             variant="primary"
             size="xs"
             onClick={handleSubmit}
             disabled={!hasContent}
-            title={dict.sendTooltip}
+            title={dict.sendTooltip || dict.sendComment || "Gửi bình luận"}
           >
             <SendHorizonal size={16} />
-            Gửi bình luận
+            {dict.sendComment || "Gửi bình luận"}
           </PillButton>
         </div>
       </div>

@@ -1553,6 +1553,8 @@ export default {
       writeCommentPlaceholder: "Viết bình luận...",
       writeReplyPlaceholder: "Viết phản hồi...",
       send: "Gửi",
+      cancel: "Hủy",
+      sendComment: "Gửi bình luận",
       locked: "Bài viết đã khóa bình luận",
       toastCommentSuccess: "Đã gửi bình luận",
       toastReplySuccess: "Đã phản hồi bình luận",
