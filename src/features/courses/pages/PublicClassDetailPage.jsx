@@ -10,16 +10,16 @@ import {
   useGetExploreClassDetailQuery,
   useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
-import { getSafeMediaUrl } from "../utils/courseUtils"
+import { getSafeMediaUrl, getClassEnrollmentIssue, getClassEnrollmentIssueMessage } from "../utils/courseUtils"
 
 import PublicClassHero from "../components/public-class/PublicClassHero"
 import PublicClassStatsBar from "../components/public-class/PublicClassStatsBar"
-import PublicClassOutcomes from "../components/public-class/PublicClassOutcomes"
-import PublicClassSyllabus from "../components/public-class/PublicClassSyllabus"
+// import PublicClassOutcomes from "../components/public-class/PublicClassOutcomes"
+// import PublicClassSyllabus from "../components/public-class/PublicClassSyllabus"
 import PublicClassInstructor from "../components/public-class/PublicClassInstructor"
-import PublicClassReviews from "../components/public-class/PublicClassReviews"
+// import PublicClassReviews from "../components/public-class/PublicClassReviews"
 import PublicClassSidebarCTA from "../components/public-class/PublicClassSidebarCTA"
-import PublicClassFAQ from "../components/public-class/PublicClassFAQ"
+// import PublicClassFAQ from "../components/public-class/PublicClassFAQ"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 
 const PublicClassDetailPage = () => {
@@ -53,11 +53,28 @@ const PublicClassDetailPage = () => {
   const isEnrolled = classData?.isEnrolled === true
   const courseTitle = classData?.courseName || classData?.courseTitle || ""
 
+  const enrollmentIssue = isEnrolled
+    ? null
+    : getClassEnrollmentIssue({ classData })
+  const isUpcoming = enrollmentIssue === "upcoming" || String(classData?.status || "").toUpperCase() === "UPCOMING"
+
+  const tuitionValue = classData?.tuitionFee ?? classData?.price
+
   // Handle Enrollment Action
   const handleEnrollAction = async () => {
     if (isEnrolled) {
       // Go to learning class view
       navigate(`/workspace/learning/class/${id}`)
+      return
+    }
+
+    if (isUpcoming || enrollmentIssue === "upcoming") {
+      toast.error(pc.upcomingNotice || getClassEnrollmentIssueMessage("upcoming", pc))
+      return
+    }
+
+    if (enrollmentIssue) {
+      toast.error(getClassEnrollmentIssueMessage(enrollmentIssue, pc))
       return
     }
 
@@ -145,6 +162,7 @@ const PublicClassDetailPage = () => {
         courseTitle={courseTitle}
         isEnrolled={isEnrolled}
         isEnrolling={isEnrolling}
+        isUpcoming={isUpcoming}
         onEnroll={handleEnrollAction}
       />
 
@@ -179,7 +197,7 @@ const PublicClassDetailPage = () => {
             <PublicClassInstructor classData={classData} />
 
             {/* FAQ */}
-            <PublicClassFAQ />
+            {/* <PublicClassFAQ /> */}
           </div>
 
           {/* Sticky Sidebar Column (Desktop) */}
@@ -187,6 +205,8 @@ const PublicClassDetailPage = () => {
             <PublicClassSidebarCTA
               classData={classData}
               isEnrolled={isEnrolled}
+              isEnrolling={isEnrolling}
+              isUpcoming={isUpcoming}
               onEnroll={handleEnrollAction}
             />
           </div>
@@ -200,7 +220,7 @@ const PublicClassDetailPage = () => {
             {c.tuition || pc.tuitionFeeFull || "Học phí trọn gói"}
           </span>
           <span className="text-lg font-black text-slate-950">
-            {classData?.tuitionFee != null ? `${classData.tuitionFee.toLocaleString()} VNĐ` : (pc.tbaFee || "Chưa xác định")}
+            {tuitionValue != null ? `${Number(tuitionValue).toLocaleString()} VNĐ` : (pc.tbaFee || "Chưa xác định")}
           </span>
         </div>
 
@@ -211,6 +231,14 @@ const PublicClassDetailPage = () => {
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
           >
             <Check size={16} /> {c.enterClass || pc.enterClass || "Vào Lớp Học"}
+          </button>
+        ) : isUpcoming ? (
+          <button
+            type="button"
+            onClick={handleEnrollAction}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm cursor-pointer shadow-md"
+          >
+            {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
           </button>
         ) : (
           <button

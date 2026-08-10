@@ -15,7 +15,7 @@ import { mapClassTableRow } from "../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const AllClassesPage = () => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const ac = c.allClasses || {}

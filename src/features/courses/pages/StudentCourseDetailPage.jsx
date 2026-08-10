@@ -16,13 +16,14 @@ import {
 } from "../utils/courseUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap } from "lucide-react"
+import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap, Share2, Check } from "lucide-react"
+import useRoleOverride from "../components/RoleSwitcher"
 
 const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isStudent } = useRoleOverride()
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}

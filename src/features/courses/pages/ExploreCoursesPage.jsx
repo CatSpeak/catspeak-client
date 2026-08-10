@@ -7,7 +7,6 @@ import {
 } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
 import CourseSearchInput from "../components/CourseSearchInput"
 import CourseSelectFilter from "../components/CourseSelectFilter"
