@@ -217,12 +217,12 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           </IconButton>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 relative z-10">
+        <div className="flex flex-row items-stretch sm:items-center gap-2 relative z-10">
           <SearchInput
             value={searchQuery}
             onChange={(val) => { setSearchQuery(val); setCurrentPage(1); }}
             placeholder={t.calendar?.searchClass || "Tìm tên lớp..."}
-            className="!min-w-0 w-full sm:w-64 !h-10 !rounded-xl"
+            className="!min-w-0 w-full sm:w-64 !h-12 !rounded-xl"
             inputClassName="!pl-4 !text-sm"
             buttonClassName="!w-8 !h-8"
           />
