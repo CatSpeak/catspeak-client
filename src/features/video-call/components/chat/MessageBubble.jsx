@@ -5,6 +5,7 @@ import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
 import YouTubeEmbed from "@/features/chat/components/messages/YouTubeEmbed"
 import LinkPreviewCard from "@/features/chat/components/messages/LinkPreviewCard"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 /**
  * Renders vocabulary suggestions inside dynamic cat-head styled pills
@@ -190,7 +191,17 @@ const SentenceSuggestions = ({
  */
 const MessageBubble = ({ msg, t, onReplyTo }) => {
   const { formatTime } = useTimezone()
+  const { user } = useGlobalVideoCall()
   const [expandedIdx, setExpandedIdx] = React.useState(null)
+
+  const currentUserName = user?.fullName || user?.username || user?.nickname || user?.email || ""
+  const isMe = msg.from?.isLocal ?? false
+
+  const isMentionedMe = React.useMemo(() => {
+    if (!currentUserName || isMe || !msg.message) return false
+    const regex = new RegExp(`@${currentUserName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, "i")
+    return regex.test(msg.message)
+  }, [currentUserName, isMe, msg.message])
 
   const renderFormattedMessage = (text) => {
     if (!text) return text
@@ -218,12 +229,11 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
     return (
       <>
         {prefixNode}
-        <FormattedText text={mainText} isOwn={isMe} />
+        <FormattedText text={mainText} isOwn={isMe} currentUserName={currentUserName} />
       </>
     )
   }
 
-  const isMe = msg.from?.isLocal ?? false
   const isSystem =
     msg.from?.isSystem || msg.isSystem || (!msg.from && !msg.topic)
   const isAi = msg.from?.isAi || false
@@ -273,15 +283,17 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
           />
         ) : (
           <div
-            className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${isMe
+            className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words transition-all ${isMe
               ? "bg-[#990011] text-white"
-              : msg.status === "error"
-                ? "bg-red-100 text-red-900 border border-red-200"
-                : isSystem
-                  ? "bg-orange-100 text-orange-900"
-                  : isAi
-                    ? "bg-amber-50 text-amber-900"
-                    : "bg-[#F0F0F0] text-black"
+              : isMentionedMe
+                ? "bg-amber-100/90 text-amber-950 border-2 border-amber-400 shadow-sm"
+                : msg.status === "error"
+                  ? "bg-red-100 text-red-900 border border-red-200"
+                  : isSystem
+                    ? "bg-orange-100 text-orange-900"
+                    : isAi
+                      ? "bg-amber-50 text-amber-900"
+                      : "bg-[#F0F0F0] text-black"
               }`}
           >
             {/* Reply Context - Zalo Style */}
