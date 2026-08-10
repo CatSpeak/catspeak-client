@@ -10,7 +10,7 @@ import {
   useUpdateAssignmentMutation
 } from "@/store/api/coursesApi"
 import { formatFileSize } from "../utils/courseUtils"
-import { toDueDateIso, toLocalDateString } from "../utils/dateUtils"
+import { toLocalDateString } from "../utils/dateUtils"
 import {
   clampMaxFiles,
   getAssignmentErrorMessage,
@@ -75,9 +75,8 @@ const getExistingAttachmentReference = (file) => {
 const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, t }) => {
   const navigate = useNavigate()
   const c = t.courses || {}
-  const { language } = useLanguage()
   const { userTimeZone, toIsoInZone } = useTimezone()
-  const ca = useMemo(() => t.courses?.createAssignment || {}, [t.courses, language])
+  const ca = useMemo(() => t.courses?.createAssignment || {}, [t.courses])
   const defaults = getAssignmentFormDefaults(initialAssignment, userTimeZone)
 
   const [createAssignment, { isLoading: isCreating }] = useCreateAssignmentMutation()
@@ -262,11 +261,11 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
           { label: c.allCourses?.title || "Toàn bộ khóa học", onClick: () => navigate("/workspace/courses/all") },
           ...(classData.courseId
             ? [
-                {
-                  label: c.student?.courseDetails || "Chi tiết khóa học",
-                  onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
-                },
-              ]
+              {
+                label: c.student?.courseDetails || "Chi tiết khóa học",
+                onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
+              },
+            ]
             : []),
           {
             label: classData.name || c.student?.classDetails || "Chi tiết lớp học",

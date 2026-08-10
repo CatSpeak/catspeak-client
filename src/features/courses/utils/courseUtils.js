@@ -205,6 +205,9 @@ export const getClassEnrollmentIssue = ({
   const status = typeof classData.status === "string"
     ? classData.status.trim().toUpperCase()
     : ""
+  if (status === "UPCOMING") {
+    return "upcoming"
+  }
   const closedStatuses = ["CLOSED", "ARCHIVED", "COMPLETED", "CANCELLED"]
   if (status && closedStatuses.includes(status)) {
     return "closed"
@@ -251,7 +254,7 @@ export const getClassEnrollmentIssue = ({
     return "unavailable"
   }
   if (Number.isFinite(enrollmentStartMs) && nowMs < enrollmentStartMs) {
-    return "closed"
+    return "upcoming"
   }
 
   const hasEnrollmentEnd = Boolean(classData.enrollmentEnd)
@@ -272,6 +275,8 @@ export const getClassEnrollmentIssueMessage = (issue, studentText = {}) => {
       studentText.alreadyEnrolledInCourse || "You are already enrolled in a class for this course.",
     not_open:
       studentText.enrollmentNotOpen || "Class enrollment is not open.",
+    upcoming:
+      studentText.upcomingNotice || studentText.enrollmentNotOpen || "Lớp học này sắp diễn ra và chưa mở đăng ký.",
     full:
       studentText.classFull || "This class is full.",
     not_started:
@@ -290,6 +295,8 @@ export const getClassEnrollmentIssueLabel = (issue, studentText = {}) => {
       studentText.alreadyEnrolled || "Already enrolled",
     not_open:
       studentText.notOpen || "Not open",
+    upcoming:
+      studentText.upcomingStatus || studentText.upcoming || "Sắp diễn ra",
     full:
       studentText.full || "Full",
     not_started:

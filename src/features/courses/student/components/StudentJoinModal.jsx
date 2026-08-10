@@ -24,7 +24,6 @@ const StudentJoinModal = ({
   success,
   onSuccessClose,
   t,
-  language,
 }) => {
   const { formatScheduleDays, formatScheduleTime } = useTimezone()
   const dialogRef = useRef(null)

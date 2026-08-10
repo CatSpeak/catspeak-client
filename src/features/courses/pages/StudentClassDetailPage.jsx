@@ -260,11 +260,11 @@ const StudentClassDetailPage = () => {
           { label: c.student?.dashboardTitle || "Lớp học của tôi", onClick: () => navigate("/workspace/learning") },
           ...(classData.courseId
             ? [
-                {
-                  label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
-                  onClick: () => navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`),
-                },
-              ]
+              {
+                label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
+                onClick: () => navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`),
+              },
+            ]
             : []),
           { label: c.student?.classDetails || "Class Details" },
         ]}

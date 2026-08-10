@@ -1810,6 +1810,8 @@ export default {
     tbaFee: "待定",
     enterClass: "进入班级",
     enrollNow: "立即报名",
+    upcomingLabel: "即将开始",
+    upcomingNotice: "该班级尚未开放报名。",
     processing: "处理中...",
     onlineBadge: "在线直播班",
     defaultTitle: "CatSpeak 班级详情",

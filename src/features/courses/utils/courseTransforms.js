@@ -280,9 +280,6 @@ export const mapUpcomingSession = (
     ? session.schedule[0]
     : (Array.isArray(matchedClass?.schedule) ? matchedClass.schedule[0] : (session.schedule || matchedClass?.schedule))
 
-  const isoStart = ns.rawStartTime || (typeof ns.startTime === "string" && ns.startTime.includes("T") ? ns.startTime : null) || session.rawStartTime || (typeof session.startTime === "string" && session.startTime.includes("T") ? session.startTime : null)
-  const isoEnd = ns.rawEndTime || (typeof ns.endTime === "string" && ns.endTime.includes("T") ? ns.endTime : null) || session.rawEndTime || (typeof session.endTime === "string" && session.endTime.includes("T") ? session.endTime : null)
-
   const fallbackStart = schedObj?.startTime || ns.startTime || session.startTime
   const fallbackEnd = schedObj?.endTime || ns.endTime || session.endTime
   const fallbackDate = ns.date || session.date || session.startDate || matchedClass?.startDate

@@ -11,7 +11,7 @@ const PublicClassInstructor = ({ classData }) => {
   const teacher = classData?.teacher || {}
   const teacherName = teacher.fullName || teacher.name || teacher.title || c.defaultInstructor || "CatSpeak Instructor"
   const teacherTitle = teacher.title || pc.defaultTeacherTitle || "Giảng Viên Ngôn Ngữ Cao Cấp"
-  const teacherAvatar = getSafeMediaUrl(teacher.avatar)
+  const teacherAvatar = getSafeMediaUrl(teacher.avatar || teacher.avatarImageUrl || teacher.avatarUrl)
   const teacherBio = teacher.introduction || teacher.description || pc.defaultTeacherBio ||
     "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc."
 

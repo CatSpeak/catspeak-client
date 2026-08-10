@@ -18,7 +18,7 @@ const ClassCard = ({
   onEnroll,
   progressLabel,
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}

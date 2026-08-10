@@ -321,7 +321,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       type: "HYDRATE",
       payload: mappedForm,
     })
-  }, [effectiveQuizId, quizDetail])
+  }, [effectiveQuizId, quizDetail, userTimeZone])
 
   // Question management handlers
   const handleAddQuestion = () => {
@@ -1365,11 +1365,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           { label: c.allCourses?.title || "Toàn bộ khóa học", onClick: () => navigate("/workspace/courses/all") },
           ...(classData.courseId
             ? [
-                {
-                  label: t.courses?.student?.courseDetails || "Chi tiết khóa học",
-                  onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
-                },
-              ]
+              {
+                label: t.courses?.student?.courseDetails || "Chi tiết khóa học",
+                onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
+              },
+            ]
             : []),
           {
             label: t.courses?.student?.classDetails || "Chi tiết lớp học",

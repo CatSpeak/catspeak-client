@@ -17,7 +17,7 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { formatDateMonth, formatScheduleTime } = useTimezone();
   const ui = t.courses?.workspaceUi || {};
 
@@ -61,7 +61,7 @@ const UpcomingSessionCard = ({
                     ns?.rawStartTime ||
                     ns?.date ||
                     (typeof ns?.startTime === "string" &&
-                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                      (ns.startTime.includes("T") || ns.startTime.includes("-"))
                       ? ns.startTime
                       : null) ||
                     nextClass?.date ||
@@ -107,7 +107,7 @@ const UpcomingSessionCard = ({
                     ns?.rawStartTime ||
                     ns?.date ||
                     (typeof ns?.startTime === "string" &&
-                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                      (ns.startTime.includes("T") || ns.startTime.includes("-"))
                       ? ns.startTime
                       : null) ||
                     nextClass?.date ||
