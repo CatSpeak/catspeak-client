@@ -206,17 +206,13 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
 
     window.addEventListener("resize", scheduleMeasure);
     window.addEventListener("orientationchange", scheduleMeasure);
-    window.addEventListener("scroll", scheduleMeasure, { passive: true });
     visualViewport?.addEventListener("resize", scheduleMeasure);
-    visualViewport?.addEventListener("scroll", scheduleMeasure);
 
     return () => {
       window.clearTimeout(settleTimer);
       window.removeEventListener("resize", scheduleMeasure);
       window.removeEventListener("orientationchange", scheduleMeasure);
-      window.removeEventListener("scroll", scheduleMeasure);
       visualViewport?.removeEventListener("resize", scheduleMeasure);
-      visualViewport?.removeEventListener("scroll", scheduleMeasure);
 
       if (measureRafRef.current !== null) {
         window.cancelAnimationFrame(measureRafRef.current);
@@ -224,19 +220,6 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
       }
     };
   }, [bottomGap]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || reels.length === 0) return;
-
-    const height = container.clientHeight;
-    if (height <= 0) return;
-
-    const expectedScrollTop = activeIndexRef.current * height;
-    if (Math.abs(container.scrollTop - expectedScrollTop) > 2) {
-      container.scrollTop = expectedScrollTop;
-    }
-  }, [effectiveContainerHeight, reels.length]);
 
   const commitActiveIndex = useCallback(
     (nextIndex) => {

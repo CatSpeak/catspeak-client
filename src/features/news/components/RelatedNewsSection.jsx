@@ -1,22 +1,19 @@
-import React, { useRef, useMemo, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import React, { useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetPostsQuery } from "@/store/api/social/postsApi";
-import { incrementPage, selectNewsPage } from "@/store/slices/newsSlice";
-import NewsCard from "./NewsCard";
-import NewsCardSkeleton from "./NewsCardSkeleton";
-import useColumnCount from "@/shared/hooks/useColumnCount";
+import { ArrowRight } from "lucide-react";
+import RelatedNewsCard from "./RelatedNewsCard";
 import { getCommunityName } from "../utils/newsUtils";
 
 /**
- * RelatedNewsSection — displays related news in responsive masonry columns with infinite scroll.
+ * RelatedNewsSection — Displays a clean, curated 4-item grid of related news articles.
  */
 const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
   const { lang } = useParams();
   const { t, language } = useLanguage();
   const newsDetail = t.news?.newsDetail;
-  const dispatch = useDispatch();
+  const currentLang = lang || "vi";
 
   const currentCommunity = useMemo(() => {
     return getCommunityName(
@@ -24,85 +21,51 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
     );
   }, [lang, language]);
 
-  const page = useSelector(selectNewsPage);
-  const pageSize = 26;
-
-  const { data, isLoading, isFetching } = useGetPostsQuery({
-    page,
-    pageSize,
+  const { data, isLoading } = useGetPostsQuery({
+    page: 1,
+    pageSize: 12,
     postType,
   });
 
-  // Filter out current post, non-public posts, and filter by current language community or "All"
-  const relatedPosts = useMemo(() => {
-    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+  // Filter out current post, non-public posts, filter by community, limit to 4 posts
+  const { displayPosts, hasMore } = useMemo(() => {
+    const rawList = Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data)
+        ? data
+        : [];
     const targetCommunity = currentCommunity.toLowerCase();
 
-    return rawList.filter((post) => {
-      if (post.postId === currentPostId) return false;
-      if (post.privacy !== "Public") return false;
+    const filtered = rawList.filter((post) => {
+      const postId = post.postId || post.id;
+      if (postId === currentPostId) return false;
+      if (post.privacy && post.privacy !== "Public") return false;
 
       const postCommunity = (post.languageCommunity || "All").toLowerCase();
       return postCommunity === "all" || postCommunity === targetCommunity;
     });
+
+    return {
+      displayPosts: filtered.slice(0, 4),
+      hasMore: filtered.length > 4,
+    };
   }, [data, currentPostId, currentCommunity]);
 
-  const columnsCount = useColumnCount();
-
-  // Distribute posts into masonry columns
-  const columns = useMemo(() => {
-    const colsArray = Array.from({ length: columnsCount }, () => []);
-    relatedPosts.forEach((post, i) => {
-      colsArray[i % columnsCount].push(post);
-    });
-    return colsArray;
-  }, [relatedPosts, columnsCount]);
-
-  // Infinite scroll observer — trigger fetch when the second-to-last post appears
-  const secondLastPostElementRef = useRef(null);
-  useEffect(() => {
-    if (
-      !secondLastPostElementRef.current ||
-      isFetching ||
-      data?.hasMore === false
-    )
-      return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          dispatch(incrementPage());
-        }
-      },
-      {
-        rootMargin: "200px",
-      },
-    );
-    observer.observe(secondLastPostElementRef.current);
-    return () => observer.disconnect();
-  }, [relatedPosts, isFetching, data?.hasMore, dispatch]);
-
   // ── Initial Loading State ─────────────────────────────────────────
-  if (isLoading && relatedPosts.length === 0) {
-    const skeletonCols = Array.from({ length: columnsCount }, () => []);
-    const totalSkeletons = columnsCount * 3;
-    for (let i = 0; i < totalSkeletons; i++) {
-      skeletonCols[i % columnsCount].push(i);
-    }
-
+  if (isLoading) {
     return (
-      <section className="w-full pb-4 sm:pb-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-bold text-[28px] leading-[1.4] text-black">
+      <section className="w-full pt-6 pb-8 border-t border-gray-200/60 mt-10">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-bold text-2xl text-gray-900">
             {newsDetail?.relatedNews || "Bản tin liên quan"}
           </h2>
         </div>
-        <div className="flex flex-row w-full gap-4 items-start">
-          {skeletonCols.map((col, colIndex) => (
-            <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
-              {col.map((itemIndex) => (
-                <NewsCardSkeleton key={itemIndex} index={itemIndex} />
-              ))}
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          {[1, 2, 3, 4].map((index) => (
+            <div
+              key={index}
+              className="flex flex-col bg-gray-100 rounded-2xl animate-pulse h-[280px]"
+            />
           ))}
         </div>
       </section>
@@ -110,60 +73,36 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
   }
 
   // ── Empty State ───────────────────────────────────────────────────
-  if (!isLoading && relatedPosts.length === 0) {
-    return (
-      <section className="w-full pb-4 sm:pb-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-bold text-[28px] leading-[1.4] text-black">
-            {newsDetail?.relatedNews || "Bản tin liên quan"}
-          </h2>
-        </div>
-        <p className="text-base text-[#7b7979] leading-[1.4]">
-          {newsDetail?.noRelatedNews || "Không có bản tin liên quan."}
-        </p>
-      </section>
-    );
+  if (displayPosts.length === 0) {
+    return null;
   }
 
-  const secondLastPostId =
-    relatedPosts[relatedPosts.length - 2]?.postId ??
-    relatedPosts[relatedPosts.length - 1]?.postId;
-
-  // ── Main Layout with Masonry Grid & Infinite Scroll Spinner ────────
+  // ── Main Layout ───────────────────────────────────────────────────
   return (
-    <section className="w-full pb-4 sm:pb-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-bold text-[28px] leading-[1.4] text-black">
+    <section className="w-full pt-8 pb-10 border-t border-gray-200/80 mt-10">
+      {/* Header with Title and View All Link */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-bold text-2xl md:text-3xl text-gray-900 tracking-tight">
           {newsDetail?.relatedNews || "Bản tin liên quan"}
         </h2>
+
+        {hasMore && (
+          <Link
+            to={`/${currentLang}/cat-speak/news`}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-cath-red-700 hover:text-cath-red-800 transition-colors group"
+          >
+            <span>{newsDetail?.viewAll || "Xem tất cả bản tin"}</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        )}
       </div>
 
-      {/* Masonry Card Grid */}
-      <div className="flex flex-row w-full gap-4 items-start">
-        {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
-            {col.map((post) => {
-              const isSecondLast = post.postId === secondLastPostId;
-              return (
-                <div
-                  ref={isSecondLast ? secondLastPostElementRef : null}
-                  key={post.postId}
-                >
-                  <NewsCard news={post} />
-                </div>
-              );
-            })}
-          </div>
+      {/* Responsive 4-card Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 items-start">
+        {displayPosts.map((post) => (
+          <RelatedNewsCard key={post.postId || post.id} news={post} />
         ))}
       </div>
-
-      {/* Infinite Scroll Fetching Spinner */}
-      {isFetching && relatedPosts.length > 0 && (
-        <div className="flex justify-center py-4">
-          <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
     </section>
   );
 };
