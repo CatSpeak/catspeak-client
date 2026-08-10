@@ -6,6 +6,7 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import SharePopover from '../EventDetailModal/SharePopover'
 
 const EventBlockDetail = ({ event, open, onClose }) => {
   const navigate = useNavigate()
@@ -58,57 +59,57 @@ const EventBlockDetail = ({ event, open, onClose }) => {
   }
 
 
-  const renderFooter = () => {
-    const isSchedule = ["teaching-schedule", "student-schedule"].includes(event.eventType);
-    const isEvent = ["registered-event", "my-event"].includes(event.eventType);
+  const renderFooter = (event) => {
+    const isRegister = ["registered-event", "my-event", "teaching-schedule", "student-schedule"].includes(event.eventType);
+    if (!isRegister) return null;
 
-    if (!isSchedule && !isEvent) return null;
+    switch (event.eventType) {
+      case 'registered-event': case "my-event": {
+        const now = dayjs();
+        const start = dayjs(event.startTime);
+        const end = event.endTime ? dayjs(event.endTime) : start;
 
-    if (isSchedule) {
-      return (
-        <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
-          <PillButton
-            variant='outline'
-            onClick={() => navigate(`/${language || 'vi'}/meet/class-${event?.classId}`)}
-          >
-            {t.calendar?.enterRoom || "Vào phòng"}
-          </PillButton>
-          <PillButton
-            onClick={() => handleNavigate(event)}
-          >
-            {t.calendar?.viewClass || "Xem lớp học"}
-          </PillButton>
-        </div>
-      )
-    }
+        const isPast = now.isAfter(end);
+        const isUpcoming = now.isBefore(start);
 
-    if (isEvent) {
-      const now = dayjs();
-      const start = dayjs(event.startTime);
-      const end = event.endTime ? dayjs(event.endTime) : start;
+        let statusLabel = "";
+        if (isPast) {
+          statusLabel = t.calendar?.ended || "Đã kết thúc";
+        } else if (event.eventType === "my-event") {
+          statusLabel = isUpcoming ? (t.calendar?.upcoming || "Sắp diễn ra") : (t.calendar?.ongoing || "Đang diễn ra");
+        } else {
+          statusLabel = t.calendar?.registered || "Đã đăng ký";
+        }
 
-      const isPast = now.isAfter(end);
-      const isUpcoming = now.isBefore(start);
-
-      let statusLabel = "";
-      if (isPast) {
-        statusLabel = t.calendar?.ended || "Đã kết thúc";
-      } else if (event.eventType === "my-event") {
-        statusLabel = isUpcoming ? (t.calendar?.upcoming || "Sắp diễn ra") : (t.calendar?.ongoing || "Đang diễn ra");
-      } else {
-        statusLabel = t.calendar?.registered || "Đã đăng ký";
+        return (
+          <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
+            <PillButton bgColor={isPast ? "#d1d5db" : undefined}>
+              {statusLabel}
+            </PillButton>
+            <SharePopover
+              eventId={event.id || event._id}
+              occurrenceId={event.occurrenceId}
+              className="!bg-transparent border border-gray-200 !text-[#1A1A1A] !w-11 !h-11 hover:!bg-gray-50"
+            />
+          </div>
+        )
       }
-
-      return (
-        <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
-          <PillButton bgColor={isPast ? "#d1d5db" : undefined}>
-            {statusLabel}
-          </PillButton>
-          <IconButton variant="outline" innerClassName="!w-11 !h-11 rounded-full border-gray-200 text-[#1A1A1A]">
-            <Share2 size={18} />
-          </IconButton>
-        </div>
-      )
+      case "teaching-schedule": case "student-schedule":
+        return (
+          <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
+            <PillButton
+              variant='outline'
+              onClick={() => navigate(`/${language || 'vi'}/meet/class-${event?.classId}`)}
+            >
+              {t.calendar?.enterRoom || "Vào phòng"}
+            </PillButton>
+            <PillButton
+              onClick={() => handleNavigate(event)}
+            >
+              {t.calendar?.viewClass || "Xem lớp học"}
+            </PillButton>
+          </div>
+        )
     }
   }
 
@@ -117,13 +118,12 @@ const EventBlockDetail = ({ event, open, onClose }) => {
       open={open}
       onClose={onClose}
       title={t.calendar?.eventDetail || "Chi tiết sự kiện"}
-      className="max-w-md w-full "
-      bodyClassName="p-0"
+      className="max-w-md w-full"
+      bodyClassName="p-0 flex flex-col flex-1 min-h-0"
     >
-      <div className="flex flex-col">
-        {/* Header section with event specific color background */}
-        <div
-          className="p-6 border-b border-[#E5E5E5]"
+      {/* Header section with event specific color background */}
+      <div
+        className="p-6 border-b border-[#E5E5E5] shrink-0"
           style={{ backgroundColor: style.background }}
         >
           <div className="flex items-center gap-2 mb-2">
@@ -135,7 +135,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
         </div>
 
         {/* Content section */}
-        <div className="p-6 space-y-3">
+        <div className="p-6 space-y-3 overflow-y-auto flex-1 min-h-0">
           {/* Status */}
           {event.status && (
             <div className="flex items-start gap-3">
@@ -187,8 +187,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
         </div>
 
         {/* Footer */}
-        {renderFooter()}
-      </div>
+        {renderFooter(event)}
     </Modal>
   )
 }
