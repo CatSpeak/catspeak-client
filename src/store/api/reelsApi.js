@@ -117,8 +117,9 @@ export const reelsApi = baseApi.injectEndpoints({
       }),
       serializeQueryArgs: ({ endpointName, queryArgs = {} }) => {
         const sourceFilter = queryArgs.sourceFilter || "All"
+        const search = queryArgs.search || ""
         const pageSize = queryArgs.pageSize || 20
-        return `${endpointName}-${sourceFilter}-${pageSize}`
+        return `${endpointName}-${sourceFilter}-${search}-${pageSize}`
       },
       merge: (currentCache, incomingResponse, { arg }) => {
         const incomingReels = getReelList(incomingResponse)
@@ -132,9 +133,9 @@ export const reelsApi = baseApi.injectEndpoints({
         }
 
         const currentReels = getReelList(currentCache)
-        const existingIds = new Set(currentReels.map((reel) => String(reel.reelId)))
+        const existingIds = new Set(currentReels.map((reel) => String(reel.reelId || reel.id)))
         incomingReels.forEach((reel) => {
-          if (!existingIds.has(String(reel.reelId))) {
+          if (!existingIds.has(String(reel.reelId || reel.id))) {
             currentReels.push(reel)
           }
         })
@@ -147,7 +148,7 @@ export const reelsApi = baseApi.injectEndpoints({
       forceRefetch({ currentArg, previousArg }) {
         return (
           currentArg?.sourceFilter !== previousArg?.sourceFilter ||
-          currentArg?.page !== previousArg?.page ||
+          currentArg?.search !== previousArg?.search ||
           currentArg?.pageSize !== previousArg?.pageSize
         )
       },
