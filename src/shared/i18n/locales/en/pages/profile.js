@@ -61,6 +61,12 @@ export default {
     mainAvatarLabel: "Main Account Avatar",
     changeMeetingAvatar: "Change Meeting Avatar",
     clickToChangeMeetingAvatar: "Click to change meeting avatar",
+    updatingCover: "Updating cover photo...",
+    updateCoverSuccess: "Cover photo updated successfully",
+    updateCoverError: "Failed to update cover photo",
+    editCover: "Edit cover photo",
+    invalidImageFormat: "Please select a valid image file",
+    coverSizeLimit: "Cover image size must not exceed 5MB",
   },
   instructor: {
     title: "Instructor",
@@ -100,9 +106,7 @@ export default {
     submit: "Submit",
     edit: "Edit",
     addCredential: "Add credential",
-    selectLanguages: "Select language",
     selectNationality: "Select nationality",
-    selectNativeLanguage: "Select native language",
     inputFieldPlaceholder: "Input field",
     notAppliedTitle: "You haven't applied yet",
     notAppliedDescription:

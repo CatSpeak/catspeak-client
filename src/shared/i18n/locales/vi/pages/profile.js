@@ -61,6 +61,12 @@ export default {
     mainAvatarLabel: "Ảnh đại diện chính tài khoản",
     changeMeetingAvatar: "Đổi ảnh phòng họp",
     clickToChangeMeetingAvatar: "Bấm để đổi ảnh phòng họp",
+    updatingCover: "Đang cập nhật hình nền...",
+    updateCoverSuccess: "Cập nhật ảnh bìa thành công",
+    updateCoverError: "Không thể cập nhật ảnh bìa",
+    editCover: "Sửa ảnh bìa",
+    invalidImageFormat: "Vui lòng chọn tệp hình ảnh hợp lệ",
+    coverSizeLimit: "Kích thước ảnh bìa không được vượt quá 5MB",
   },
   instructor: {
     title: "Giảng viên",
@@ -100,9 +106,7 @@ export default {
     submit: "Gửi",
     edit: "Chỉnh sửa",
     addCredential: "Thêm chứng chỉ",
-    selectLanguages: "Chọn ngôn ngữ",
     selectNationality: "Chọn quốc tịch",
-    selectNativeLanguage: "Chọn ngôn ngữ mẹ đẻ",
     inputFieldPlaceholder: "Nhập thông tin",
     notAppliedTitle: "Bạn chưa đăng ký",
     notAppliedDescription:
