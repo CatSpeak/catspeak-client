@@ -147,7 +147,7 @@ export const NOTIFICATION_TYPES = {
     color: "text-green-500",
     resolveTitle: (m, t) =>
       t.profile?.notifications?.friend_accepted?.title ||
-      "Đã chấp nhận kết bạn",
+      "Đã chấp nhận kết bạn.",
     resolveBody: (m, t) => {
       const name = m.userName || "Ai đó";
       return (
