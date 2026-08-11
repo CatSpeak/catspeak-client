@@ -9,6 +9,8 @@ import {
   formatInTimeZone,
   formatRelativeTime,
   convertTimeStrToTz,
+  convertTimeStrToUtc,
+  getShiftedDayOfWeek,
   ensureDate,
   formatScheduleDays as formatScheduleDaysUtil,
   formatWeeklyScheduleText,
@@ -262,6 +264,9 @@ export const useTimezone = () => {
     formatScheduleDays,
     formatWeeklySchedule,
     formatCustom,
+    convertTimeToUtc: (timeStr) => convertTimeStrToUtc(timeStr, userTimeZone),
+    getShiftedDayToUtc: (dayOfWeek, timeStr) =>
+      getShiftedDayOfWeek(dayOfWeek, timeStr, "UTC", userTimeZone),
     buildDateTimeInZone,
     toIsoInZone,
     parseIsoToZoneDate,

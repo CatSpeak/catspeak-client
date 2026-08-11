@@ -212,6 +212,24 @@ export const convertTimeStrToTz = (timeStr, userTimeZone = null) => {
 };
 
 /**
+ * Convert local HH:mm time string in userTimeZone to UTC HH:mm time string (e.g. "18:30" in GMT+7 -> "11:30" UTC)
+ */
+export const convertTimeStrToUtc = (timeStr, userTimeZone = null) => {
+  if (!timeStr) return "";
+  const str = String(timeStr).trim();
+  const match = str.match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return str;
+
+  const tz = userTimeZone || DEFAULT_TIMEZONE;
+  const hours = match[1].padStart(2, "0");
+  const minutes = match[2].padStart(2, "0");
+
+  const d = dayjs.tz(`2026-08-10T${hours}:${minutes}:00`, tz);
+  if (!d.isValid()) return str.slice(0, 5);
+  return d.utc().format("HH:mm");
+};
+
+/**
  * Calculate end date based on start date and duration in minutes
  */
 export const calculateEndDate = (startDate, durationMinutes) => {

@@ -33,15 +33,16 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   // Group Room Form Hook
   const groupForm = useCreateRoomForm()
 
+  const { resetForm: resetCustomForm } = customForm
+  const { resetForm: resetGroupForm } = groupForm
+
   useEffect(() => {
     if (open) {
-      queueMicrotask(() => {
-        setMode(initialMode)
-        groupForm.resetForm()
-        customForm.resetForm()
-      })
+      setMode(initialMode)
+      resetGroupForm()
+      resetCustomForm()
     }
-  }, [open, initialMode, groupForm, customForm])
+  }, [open, initialMode, resetGroupForm, resetCustomForm])
 
   // Call interceptor
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =

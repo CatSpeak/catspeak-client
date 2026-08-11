@@ -6,6 +6,7 @@ import RegisterFormFields from "./RegisterFormFields";
 import AgreementSection from "./AgreementSection";
 import Modal from "@/shared/components/ui/Modal";
 import { parseRegisterError } from "@/features/auth/utils/registerErrors";
+import { getBrowserTimeZone } from "@/shared/constants/timezones";
 
 const initialFormData = {
   username: "",
@@ -77,7 +78,10 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     }
 
     try {
-      const payload = { ...formData };
+      const payload = {
+        ...formData,
+        timeZone: getBrowserTimeZone(),
+      };
       if (payload.phoneNumber) {
         let phone = payload.phoneNumber.replace(/\s+/g, "");
         if (phone.startsWith("0")) {
