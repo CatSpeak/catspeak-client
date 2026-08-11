@@ -64,7 +64,7 @@ const Profile = () => {
   })
   const { data: pendingResponse } = useGetPendingFriendRequestsQuery(
     undefined,
-    { skip: !isOwnProfile },
+    { skip: !isOwnProfile, pollingInterval: 4000 },
   )
 
   const friendsCount = Array.isArray(friendsResponse)

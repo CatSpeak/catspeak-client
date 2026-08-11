@@ -53,6 +53,7 @@ const SocialProfileHeader = ({
     targetAccountId,
     {
       skip: isOwnProfile || !targetAccountId,
+      pollingInterval: 3000,
     },
   );
   const status =

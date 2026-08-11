@@ -91,6 +91,7 @@ const ProfileFriendsTab = ({
   const { data: pendingResponse, isLoading: loadingPending } =
     useGetPendingFriendRequestsQuery(undefined, {
       skip: !isOwnProfile,
+      pollingInterval: 4000,
     })
   const {
     data: recResponse,
