@@ -16,6 +16,8 @@ export default {
       followSuccess: "Followed successfully",
       unfollowSuccess: "Unfollowed successfully",
       friendRequestReceived: "sent you a friend request",
+      friendRequestAccepted: "accepted your friend request",
+      friendRequestDeclined: "declined your friend request",
     },
     personalInfo: {
       title: "Personal Information",

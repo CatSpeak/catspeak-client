@@ -16,6 +16,8 @@ export default {
       followSuccess: "已关注",
       unfollowSuccess: "已取消关注",
       friendRequestReceived: "向您发送了好友申请",
+      friendRequestAccepted: "已接受您的好友申请",
+      friendRequestDeclined: "已拒绝您的好友申请",
     },
     personalInfo: {
       title: "个人信息",
