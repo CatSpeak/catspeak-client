@@ -278,12 +278,12 @@ const ChatInput = ({
     }
   }, [isHost, currentRoomId])
 
-  const hasContent = message.trim().length > 0
+  const currentInputText = (message || editableRef.current?.innerText || "").replace(/\u00a0/g, " ").trim()
+  const hasContent = currentInputText.length > 0
 
   const handleSend = useCallback(async () => {
-    if (sendingRef.current) return
     const text = (message || editableRef.current?.innerText || "").replace(/\u00a0/g, " ").trim()
-    if (!text) return
+    if (sendingRef.current || !text) return
 
     sendingRef.current = true
 
@@ -317,7 +317,11 @@ const ChatInput = ({
     }
 
     // Normal chat message
-    onSendMessage(text)
+    try {
+      await onSendMessage(text)
+    } catch (err) {
+      console.error("Failed to send message:", err)
+    }
     setMessage("")
     setIsMultiline(false)
     // Clear the contenteditable div
@@ -336,6 +340,9 @@ const ChatInput = ({
     isAiInput,
     isPrivateAi,
     replyTarget,
+    isHost,
+    isMemberPrivateAiAllowed,
+    t,
   ])
 
   const handleKeyDown = (e) => {
@@ -471,6 +478,8 @@ const ChatInput = ({
             contentEditable={!isInputDisabled}
             suppressContentEditableWarning
             onInput={handleContentInput}
+            onKeyUp={handleContentInput}
+            onCompositionEnd={handleContentInput}
             onKeyDown={handleKeyDown}
             onBlur={saveSelection}
             data-placeholder={placeholderText}
@@ -557,6 +566,12 @@ const ChatInput = ({
 
           <IconButton
             onClick={handleSend}
+            onTouchEnd={(e) => {
+              if (!isInputDisabled && hasContent) {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
             disabled={isInputDisabled || !hasContent}
             variant={hasContent ? "primary" : "ghost"}
             aria-label="Send message"
