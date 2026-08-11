@@ -90,7 +90,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               if (item.lang && item.lang !== currentLang) return false
               if (isHorizontal && item.showOnHorizontalBar === false) return false
               if (item.isPrivate && !isAuthenticated) return false
-              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+              const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
               if (teacherTabs.includes(item.key) && isStudent) return false
               return true
             })
@@ -212,7 +212,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 flex flex-col gap-1 scrollbar-none">
           {(activeDrilldownItem?.subItems || [])
             .filter((sub) => {
-              const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+              const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
               if (teacherTabs.includes(sub.key) && isStudent) return false
               if (sub.lang && sub.lang !== currentLang) return false
               if (isHorizontal && sub.showOnHorizontalBar === false) return false

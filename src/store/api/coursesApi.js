@@ -581,6 +581,18 @@ const buildAnalyticsQueryParams = (params = {}) => {
   const mapping = {
     groupBy: "GroupBy",
     GroupBy: "GroupBy",
+    period: "Period",
+    Period: "Period",
+    compare: "Compare",
+    Compare: "Compare",
+    customStartDate: "CustomStartDate",
+    CustomStartDate: "CustomStartDate",
+    customEndDate: "CustomEndDate",
+    CustomEndDate: "CustomEndDate",
+    compareCustomStartDate: "CompareCustomStartDate",
+    CompareCustomStartDate: "CompareCustomStartDate",
+    compareCustomEndDate: "CompareCustomEndDate",
+    CompareCustomEndDate: "CompareCustomEndDate",
     startDate: "StartDate",
     StartDate: "StartDate",
     endDate: "EndDate",
@@ -603,6 +615,32 @@ const buildAnalyticsQueryParams = (params = {}) => {
     SortBy: "SortBy",
     sortOrder: "SortOrder",
     SortOrder: "SortOrder",
+  }
+
+  const queryParams = {}
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && val !== "") {
+      const targetKey = mapping[key] || key
+      queryParams[targetKey] = val
+    }
+  })
+  return queryParams
+}
+
+const buildDashboardQueryParams = (params = {}) => {
+  const mapping = {
+    periodType: "PeriodType",
+    PeriodType: "PeriodType",
+    fromDate: "FromDate",
+    FromDate: "FromDate",
+    toDate: "ToDate",
+    ToDate: "ToDate",
+    compareType: "CompareType",
+    CompareType: "CompareType",
+    courseId: "CourseId",
+    CourseId: "CourseId",
+    classId: "ClassId",
+    ClassId: "ClassId",
   }
 
   const queryParams = {}
@@ -2591,6 +2629,25 @@ export const coursesApi = baseApi.injectEndpoints({
         responseHandler: (response) => response.blob(),
       }),
     }),
+
+    // 5. Dashboard
+    getDashboard: builder.query({
+      query: (params) => ({
+        url: "/teacher/dashboard",
+        method: "GET",
+        params: buildDashboardQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportDashboard: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/dashboard/export",
+        method: "GET",
+        params: buildDashboardQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
   }),
 })
 
@@ -2721,4 +2778,7 @@ export const {
   useGetAnalyticsStudentsByClassQuery,
   useGetAnalyticsStudentsByCourseQuery,
   useExportAnalyticsStudentsMutation,
+  // Dashboard Hooks
+  useGetDashboardQuery,
+  useExportDashboardMutation,
 } = coursesApi
