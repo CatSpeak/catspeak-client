@@ -2,7 +2,7 @@ import { Provider } from "react-redux"
 import AppRouter from "@routes"
 import { store } from "@store"
 import "@styles/app.css"
-import { Toaster } from "react-hot-toast"
+import AppToaster from "@/shared/components/ui/AppToaster"
 
 import { ConversationSignalRProvider } from "@/features/chat/context/ConversationSignalRContext"
 import GlobalSignalRHandler from "@/features/chat/components/GlobalSignalRHandler"
@@ -34,7 +34,7 @@ function App() {
               <ConversationSignalRProvider>
                 <GlobalPresenceProvider>
                   <GlobalSignalRHandler />
-                  <Toaster position="top-center" limit={1} />
+                  <AppToaster />
                   {/* <ScrollToTopButton /> */}
                   <AppRouter />
                   <PiPWidget />
