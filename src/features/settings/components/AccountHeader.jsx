@@ -45,8 +45,6 @@ const AccountHeader = ({ user, formData, t }) => {
 
   const isCoverUpdating = isUploadingCover || isSettingActiveBackground;
 
-  const displayCoverUrl = coverImageUrl || fetchedCoverUrl || backgroundAccount;
-
   // Clean up object URL when coverImageUrl changes or component unmounts
   useEffect(() => {
     return () => {
@@ -346,30 +344,6 @@ const AccountHeader = ({ user, formData, t }) => {
           className="hidden"
           accept="image/*"
           onChange={handleAvatarChange}
-        />
-      </div>
-
-      {/* Edit Cover Photo Button at Bottom-Right */}
-      <div className="absolute -bottom-10 right-4 sm:right-8 z-20">
-        <PillButton
-          variant="secondary"
-          onClick={() => {
-            if (coverInputRef.current && !isCoverUpdating) {
-              coverInputRef.current.click();
-            }
-          }}
-          loading={isCoverUpdating}
-          startIcon={<Camera size={18} />}
-          className="shadow-sm"
-        >
-          {t.profile?.personalInfo?.editCover || "Sửa ảnh bìa"}
-        </PillButton>
-        <input
-          type="file"
-          ref={coverInputRef}
-          className="hidden"
-          accept="image/*"
-          onChange={handleCoverChange}
         />
       </div>
 
