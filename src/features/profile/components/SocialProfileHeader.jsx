@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
@@ -45,7 +45,10 @@ const SocialProfileHeader = ({
   // API Hooks
   const { data: statusResponse } = useGetConnectionStatusQuery(
     targetAccountId,
-    { skip: isOwnProfile || !targetAccountId },
+    {
+      skip: isOwnProfile || !targetAccountId,
+      pollingInterval: 4000,
+    },
   );
   const status =
     statusResponse?.data !== undefined ? statusResponse.data : statusResponse;
@@ -60,6 +63,51 @@ const SocialProfileHeader = ({
     useDeleteFriendshipMutation();
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation();
+
+  // Track previous connection status to detect real-time transition from Pending -> Accepted / Declined
+  const prevStatusRef = useRef(null);
+
+  useEffect(() => {
+    if (isOwnProfile || !status) return;
+
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = status;
+
+    if (!prev) return;
+
+    const wasPending =
+      (prev?.friendshipStatus === 1 ||
+        prev?.friendshipStatus === "Pending" ||
+        (!prev?.isFriend && Boolean(prev?.friendshipId))) &&
+      !prev?.isFriend;
+
+    const isNowAccepted =
+      status?.isFriend === true ||
+      status?.friendshipStatus === 2 ||
+      status?.friendshipStatus === "Accepted";
+
+    const isNowDeclinedOrDeleted =
+      !status?.isFriend &&
+      !status?.friendshipId &&
+      (status?.friendshipStatus === 0 ||
+        status?.friendshipStatus === null ||
+        status?.friendshipStatus === undefined ||
+        status?.friendshipStatus === "None");
+
+    if (wasPending && isNowAccepted) {
+      const toastKey = `friend-response-${targetAccountId}-accept`;
+      toast.success(
+        `${displayName} ${t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn"}`,
+        { id: toastKey },
+      );
+    } else if (wasPending && isNowDeclinedOrDeleted && !isDeletingFriendship) {
+      const toastKey = `friend-response-${targetAccountId}-decline`;
+      toast(
+        `${displayName} ${t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn"}`,
+        { id: toastKey, icon: "ℹ️" },
+      );
+    }
+  }, [status, isOwnProfile, displayName, t, isDeletingFriendship, targetAccountId]);
 
   const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
   const isFriendshipLoading = isSendingRequest || isDeletingFriendship;
