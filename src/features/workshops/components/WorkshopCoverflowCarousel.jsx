@@ -80,7 +80,7 @@ const WorkshopCoverflowCarousel = ({ slides: propSlides = [] }) => {
         onMouseLeave={() => setIsHovered(false)}
       >
 
-        <div className="relative w-full h-[250px] sm:h-[290px] md:h-[330px] lg:h-[370px] xl:h-[390px] overflow-hidden">
+        <div className="relative w-full h-[290px] sm:h-[290px] md:h-[300px] lg:h-[350px] xl:h-[450px] 2xl:h-[550px]  overflow-hidden">
           {slides.map((slide, idx) => {
             const diff = getShortestOffset(idx);
             const style = getStyleForOffset(diff);
@@ -89,7 +89,7 @@ const WorkshopCoverflowCarousel = ({ slides: propSlides = [] }) => {
             return (
               <motion.div
                 key={slide.id ?? idx}
-                className="absolute top-1/2 w-[82%] sm:w-[65%] md:w-[52%] lg:w-[42%] xl:w-[38%] max-w-[620px]"
+                className="absolute top-1/2 w-[82%] sm:w-[65%] md:w-[52%] lg:w-[42%] xl:w-[38%] max-w-full"
                 style={{
                   left: "50%",
                   top: "50%",
