@@ -130,6 +130,7 @@ const Profile = () => {
   // Prepare normalized data for header
   const headerData = isOwnProfile
     ? {
+        ...profile,
         ...formData,
         location: formData.location || formData.address || profile?.location || profile?.address,
       }
