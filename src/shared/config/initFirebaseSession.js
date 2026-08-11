@@ -4,7 +4,7 @@ import { auth as firebaseAuth } from "./firebase";
 let failedToken = null;
 
 export async function initFirebaseSession(internalJwt) {
-  if (!internalJwt || firebaseAuth.currentUser || failedToken === internalJwt) return;
+  if (!internalJwt || failedToken === internalJwt) return;
   try {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
     const res = await fetch(`${baseUrl}/firebase/token`, {
