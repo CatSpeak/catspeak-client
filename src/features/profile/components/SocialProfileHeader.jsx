@@ -32,6 +32,8 @@ const SocialProfileHeader = ({
   targetAccountId,
   isOwnProfile,
   onEditClick,
+  friendsCount = 0,
+  followersCount = 0,
 }) => {
   // Use avatarImageUrl as the primary avatar for the profile
   const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl;
@@ -47,7 +49,7 @@ const SocialProfileHeader = ({
     targetAccountId,
     {
       skip: isOwnProfile || !targetAccountId,
-      pollingInterval: 4000,
+      pollingInterval: 3000,
     },
   );
   const status =
@@ -66,6 +68,7 @@ const SocialProfileHeader = ({
 
   // Track previous connection status to detect real-time transition from Pending -> Accepted / Declined
   const prevStatusRef = useRef(null);
+  const userActionInitiatedRef = useRef(false);
 
   useEffect(() => {
     if (isOwnProfile || !status) return;
@@ -75,6 +78,7 @@ const SocialProfileHeader = ({
 
     if (!prev) return;
 
+    // Only detect if it was previously truly pending
     const wasPending =
       (prev?.friendshipStatus === 1 ||
         prev?.friendshipStatus === "Pending" ||
@@ -94,20 +98,37 @@ const SocialProfileHeader = ({
         status?.friendshipStatus === undefined ||
         status?.friendshipStatus === "None");
 
+    // If user A clicked "Hủy yêu cầu" or "Hủy kết bạn" themselves, DO NOT show "B đã từ chối" toast
+    if (
+      userActionInitiatedRef.current ||
+      isDeletingFriendship ||
+      isSendingRequest
+    ) {
+      return;
+    }
+
     if (wasPending && isNowAccepted) {
       const toastKey = `friend-response-${targetAccountId}-accept`;
       toast.success(
         `${displayName} ${t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn"}`,
         { id: toastKey },
       );
-    } else if (wasPending && isNowDeclinedOrDeleted && !isDeletingFriendship) {
+    } else if (wasPending && isNowDeclinedOrDeleted) {
       const toastKey = `friend-response-${targetAccountId}-decline`;
       toast(
         `${displayName} ${t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn"}`,
         { id: toastKey, icon: "ℹ️" },
       );
     }
-  }, [status, isOwnProfile, displayName, t, isDeletingFriendship, targetAccountId]);
+  }, [
+    status,
+    isOwnProfile,
+    displayName,
+    t,
+    isDeletingFriendship,
+    isSendingRequest,
+    targetAccountId,
+  ]);
 
   const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
   const isFriendshipLoading = isSendingRequest || isDeletingFriendship;
@@ -141,22 +162,19 @@ const SocialProfileHeader = ({
     try {
       if (status?.isFollowing) {
         await unfollowUser(targetAccountId).unwrap();
-        // toast.success(
-        //   t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi",
-        //   { id: toastId },
-        // );
+        toast.success(t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi", {
+          id: toastId,
+        });
       } else {
         await followUser(targetAccountId).unwrap();
-        // toast.success(
-        //   t.profile?.social?.followSuccess || "Đã theo dõi",
-        //   { id: toastId },
-        // );
+        toast.success(t.profile?.social?.followSuccess || "Đã theo dõi", {
+          id: toastId,
+        });
       }
     } catch (error) {
-      // toast.error(
-      //   t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
-      //   { id: toastId },
-      // );
+      toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
+        id: toastId,
+      });
       console.error(error);
     }
   };
@@ -197,47 +215,47 @@ const SocialProfileHeader = ({
 
   const handleFriendshipToggle = async () => {
     if (isFriendshipLoading) return;
-    // const toastId = "friendship-action";
-    // toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
-    //   id: toastId,
-    // });
+    userActionInitiatedRef.current = true;
 
     try {
       if (isFriendOrPending) {
         if (status?.friendshipId) {
           await deleteFriendship(status.friendshipId).unwrap();
-          // toast.success(
-          //   status?.isFriend
-          //     ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
-          //     : t.profile?.social?.cancelRequestSuccess ||
-          //         "Đã hủy yêu cầu kết bạn",
-          //   { id: toastId },
-          // );
+          toast.success(
+            status?.isFriend
+              ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
+              : t.profile?.social?.cancelRequestSuccess ||
+                  "Đã hủy yêu cầu kết bạn",
+            { id: "friendship-action" },
+          );
         }
       } else {
         if (status?.friendshipId) {
           await deleteFriendship(status.friendshipId).unwrap();
         }
         await sendFriendRequest(targetAccountId).unwrap();
-        // toast.success(
-        //   t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-        //   { id: toastId },
-        // );
+        toast.success(
+          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+          { id: "friendship-action" },
+        );
       }
     } catch (err) {
       if (err?.status === 422) {
-        // toast.error(
-        //   t.profile?.social?.requestPending ||
-        //     "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-        //   { id: toastId },
-        // );
+        toast.error(
+          t.profile?.social?.requestPending ||
+            "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+          { id: "friendship-action" },
+        );
       } else {
-        // toast.error(
-        //   t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
-        //   { id: toastId },
-        // );
+        toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
+          id: "friendship-action",
+        });
       }
       console.error(err);
+    } finally {
+      setTimeout(() => {
+        userActionInitiatedRef.current = false;
+      }, 2000);
     }
   };
 
@@ -372,6 +390,17 @@ const SocialProfileHeader = ({
                   <span>{location}</span>
                 </div>
               )}
+              <div className="flex items-center gap-3 text-sm text-[#606060] mt-0.5 font-medium">
+                <span>
+                  <strong className="text-gray-900">{friendsCount}</strong>{" "}
+                  {t.profile?.tabs?.friends || "Bạn bè"}
+                </span>
+                <span>•</span>
+                <span>
+                  <strong className="text-gray-900">{followersCount}</strong>{" "}
+                  {t.profile?.friends?.subTabs?.followers || "Người theo dõi"}
+                </span>
+              </div>
             </div>
           </div>
         </div>

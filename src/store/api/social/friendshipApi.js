@@ -10,18 +10,21 @@ export const friendshipApi = socialApi.injectEndpoints({
       query: (accountId) => `/friendships/user/${accountId}`,
       providesTags: (result, error, accountId) => [
         { type: "Friend", id: `LIST-${accountId}` },
+        "Friend",
       ],
     }),
     getFollowers: builder.query({
       query: (accountId) => `/friendships/user/${accountId}/followers`,
       providesTags: (result, error, accountId) => [
         { type: "Follower", id: `LIST-${accountId}` },
+        "Follower",
       ],
     }),
     getFollowing: builder.query({
       query: (accountId) => `/friendships/user/${accountId}/following`,
       providesTags: (result, error, accountId) => [
         { type: "Following", id: `LIST-${accountId}` },
+        "Following",
       ],
     }),
     getFriendRecommendations: builder.query({
@@ -121,6 +124,8 @@ export const friendshipApi = socialApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, targetAccountId) => [
         { type: "Friendship", id: targetAccountId },
+        "Follower",
+        "Following",
         "Recommendation",
       ],
     }),
@@ -131,6 +136,8 @@ export const friendshipApi = socialApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, targetAccountId) => [
         { type: "Friendship", id: targetAccountId },
+        "Follower",
+        "Following",
       ],
     }),
     getPendingFriendRequests: builder.query({
@@ -145,7 +152,10 @@ export const friendshipApi = socialApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, targetAccountId) => [
         { type: "Friendship", id: targetAccountId },
+        "Friendship",
         "FriendRequest",
+        "Friend",
+        "Recommendation",
       ],
     }),
     deleteFriendship: builder.mutation({
@@ -153,7 +163,14 @@ export const friendshipApi = socialApi.injectEndpoints({
         url: `/friendships/${friendshipId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Friendship", "Friend", "PendingRequest"],
+      invalidatesTags: [
+        "Friendship",
+        "Friend",
+        "Follower",
+        "Following",
+        "FriendRequest",
+        "Recommendation",
+      ],
     }),
     respondFriendRequest: builder.mutation({
       query: ({ friendshipId, action }) => ({
@@ -164,7 +181,10 @@ export const friendshipApi = socialApi.injectEndpoints({
       invalidatesTags: [
         "FriendRequest",
         "Friendship",
-        { type: "Friend", id: "LIST-undefined" },
+        "Friend",
+        "Follower",
+        "Following",
+        "Recommendation",
       ],
     }),
   }),

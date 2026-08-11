@@ -74,15 +74,27 @@ const ProfileFriendsTab = ({
 
   // Fetch all potential data
   const { data: friendsResponse, isLoading: loadingFriends } =
-    useGetFriendsQuery(targetAccountId, { skip: !targetAccountId })
+    useGetFriendsQuery(targetAccountId, {
+      skip: !targetAccountId,
+      pollingInterval: 4000,
+    })
   const { data: followersResponse, isLoading: loadingFollowers } =
-    useGetFollowersQuery(targetAccountId, { skip: !targetAccountId })
+    useGetFollowersQuery(targetAccountId, {
+      skip: !targetAccountId,
+      pollingInterval: 10000,
+    })
   const { data: followingResponse, isLoading: loadingFollowing } =
-    useGetFollowingQuery(targetAccountId, { skip: !targetAccountId })
+    useGetFollowingQuery(targetAccountId, {
+      skip: !targetAccountId,
+      pollingInterval: 10000,
+    })
 
   // Only fetch pending requests if viewing own profile
   const { data: pendingResponse, isLoading: loadingPending } =
-    useGetPendingFriendRequestsQuery(undefined, { skip: !isOwnProfile })
+    useGetPendingFriendRequestsQuery(undefined, {
+      skip: !isOwnProfile,
+      pollingInterval: 4000,
+    })
   const {
     data: recResponse,
     isLoading: loadingRecs,
@@ -122,13 +134,24 @@ const ProfileFriendsTab = ({
 
   const getArray = (res) => (Array.isArray(res) ? res : res?.data || [])
 
-  // The backend might return the array directly or wrap it in a data property
+  const friends = getArray(friendsResponse)
+  const following = getArray(followingResponse)
+  const followers = getArray(followersResponse)
   const pendingRequests = getArray(pendingResponse)
 
   const subTabs = [
-    { id: "all", label: t.profile?.friends?.subTabs?.all || "Tất cả bạn bè" },
-    { id: "following", label: t.profile?.friends?.subTabs?.following || "Đang theo dõi" },
-    { id: "followers", label: t.profile?.friends?.subTabs?.followers || "Người theo dõi" },
+    {
+      id: "all",
+      label: `${t.profile?.friends?.subTabs?.all || "Tất cả bạn bè"} (${friends.length})`,
+    },
+    {
+      id: "following",
+      label: `${t.profile?.friends?.subTabs?.following || "Đang theo dõi"} (${following.length})`,
+    },
+    {
+      id: "followers",
+      label: `${t.profile?.friends?.subTabs?.followers || "Người theo dõi"} (${followers.length})`,
+    },
   ]
 
   // Add "Pending Requests" only for own profile

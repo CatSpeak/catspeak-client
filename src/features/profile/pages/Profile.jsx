@@ -58,13 +58,15 @@ const Profile = () => {
   // Fetch Friendship Data
   const { data: friendsResponse } = useGetFriendsQuery(targetAccountId, {
     skip: !targetAccountId,
+    pollingInterval: 4000,
   })
   const { data: followersResponse } = useGetFollowersQuery(targetAccountId, {
     skip: !targetAccountId,
+    pollingInterval: 10000,
   })
   const { data: pendingResponse } = useGetPendingFriendRequestsQuery(
     undefined,
-    { skip: !isOwnProfile },
+    { skip: !isOwnProfile, pollingInterval: 4000 },
   )
 
   const friendsCount = Array.isArray(friendsResponse)
@@ -146,6 +148,8 @@ const Profile = () => {
           t={t}
           targetAccountId={targetAccountId}
           isOwnProfile={isOwnProfile}
+          friendsCount={friendsCount}
+          followersCount={followersCount}
         />
 
         {/* Tab Navigation */}
