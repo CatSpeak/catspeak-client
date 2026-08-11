@@ -1,64 +1,79 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Modal from '@/shared/components/ui/Modal';
-import { Search, FolderPlus } from 'lucide-react';
+import { Search, FolderPlus, FolderOpen } from 'lucide-react';
 import TextInput from '@/shared/components/ui/inputs/TextInput';
 import FolderNode from '../teaching-material/FolderNode';
 import { PillButton } from '@/shared/components/ui/buttons';
 
-const mockFolders = [
-  {
-    id: "1",
-    name: "My Files",
-    children: [
-      {
-        id: "1-1",
-        name: "Khóa học Mùa Thu",
-        children: [
-          {
-            id: "1-1-1",
-            name: "Bài giảng",
-            children: [
-              { id: "1-1-1-1", name: "Tuần 1", children: [] },
-              { id: "1-1-1-2", name: "Tuần 2", children: [] }
-            ]
-          },
-          {
-            id: "1-1-2",
-            name: "Tài liệu tham khảo",
-            children: []
-          }
-        ]
-      },
-      {
-        id: "1-2",
-        name: "Dự án phụ",
-        children: []
-      }
-    ]
-  },
-  {
-    id: "2",
-    name: "Shared with me",
-    children: [
-      {
-        id: "2-1",
-        name: "Tài liệu team",
-        children: []
-      }
-    ]
-  }
-];
+import { useGetFolderTreeQuery, useCreateFolderMutation } from '@/store/api/materialApi';
+import { LoadingSpinner } from '@/shared/components/ui/indicators';
+import toast from 'react-hot-toast';
 
 const CreateFolderModal = ({ open, onClose }) => {
   const [folderName, setFolderName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedIds, setExpandedIds] = useState(["1", "1-1"]);
-  const [selectedFolder, setSelectedFolder] = useState({ id: "1-1-1", name: "Bài giảng" });
+  const [expandedIds, setExpandedIds] = useState([]);
+  const [selectedFolder, setSelectedFolder] = useState(null);
+
+  const { data: treeData, isLoading: isFetchingTree } = useGetFolderTreeQuery(undefined, { skip: !open });
+  const [createFolder, { isLoading: isCreating }] = useCreateFolderMutation();
+
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (!open) {
+      setFolderName("");
+      setSearchQuery("");
+      setExpandedIds([]);
+      setSelectedFolder(null);
+    }
+  }
+
+  // Filter folders based on search query
+  const folders = useMemo(() => {
+    const rawFolders = treeData?.data || treeData || [];
+
+    if (!searchQuery.trim()) return rawFolders;
+
+    const lowerQuery = searchQuery.toLowerCase();
+    const filterTree = (nodes) => {
+      return nodes.reduce((acc, node) => {
+        const isMatch = node.name.toLowerCase().includes(lowerQuery);
+        let filteredChildren = [];
+        if (node.children) {
+          filteredChildren = filterTree(node.children);
+        }
+
+        if (isMatch || filteredChildren.length > 0) {
+          acc.push({ ...node, children: filteredChildren });
+        }
+        return acc;
+      }, []);
+    };
+
+    return filterTree(rawFolders);
+  }, [treeData, searchQuery]);
 
   const toggleExpand = (id) => {
     setExpandedIds(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
+  };
+
+  const handleCreate = async () => {
+    if (!folderName.trim()) return;
+    try {
+      await createFolder({
+        name: folderName.trim(),
+        parentId: selectedFolder?.id,
+      }).unwrap();
+      toast.success('Tạo thư mục thành công');
+      setFolderName("");
+      onClose();
+    } catch (error) {
+      console.error("Failed to create folder", error);
+      toast.error('Tạo thư mục thất bại');
+    }
   };
 
   const footer = (
@@ -73,6 +88,9 @@ const CreateFolderModal = ({ open, onClose }) => {
       <PillButton
         startIcon={<FolderPlus />}
         roundedClass='rounded-xl'
+        onClick={handleCreate}
+        loading={isCreating}
+        disabled={!folderName.trim()}
       >
         Tạo thư mục
       </PillButton>
@@ -107,24 +125,38 @@ const CreateFolderModal = ({ open, onClose }) => {
             className='!h-12 rounded-xl'
           />
 
-          <div className="border border-[#E2E2E2] rounded-xl p-3 flex-1 overflow-y-auto mt-3">
-            <div className="flex flex-col gap-1">
-              {mockFolders.map(folder => (
-                <FolderNode
-                  key={folder.id}
-                  folder={folder}
-                  level={0}
-                  selectedId={selectedFolder?.id}
-                  onSelect={setSelectedFolder}
-                  expandedIds={expandedIds}
-                  toggleExpand={toggleExpand}
-                />
-              ))}
-            </div>
+          <div className="border border-[#E2E2E2] rounded-xl p-3 flex-1 overflow-y-auto mt-3 min-h-[160px] flex flex-col">
+            {isFetchingTree ? (
+              <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
+                <LoadingSpinner />
+                <span>Đang tải danh sách thư mục...</span>
+              </div>
+            ) : folders.length === 0 ? (
+              <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
+                <FolderOpen className="w-8 h-8" />
+                <span>Chưa có thư mục nào</span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                {folders.map(folder => (
+                  <FolderNode
+                    key={folder.id}
+                    folder={folder}
+                    level={0}
+                    selectedId={selectedFolder?.id}
+                    onSelect={setSelectedFolder}
+                    expandedIds={expandedIds}
+                    toggleExpand={toggleExpand}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           <p className="text-sm text-[#5B403E] mt-2">
-            Thư mục mới sẽ được tạo bên trong "{selectedFolder?.name}".
+            {selectedFolder
+              ? `Thư mục mới sẽ được tạo bên trong "${selectedFolder.name}".`
+              : 'Thư mục mới sẽ được tạo ở thư mục gốc.'}
           </p>
         </div>
       </div>

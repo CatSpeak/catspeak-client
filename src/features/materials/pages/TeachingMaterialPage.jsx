@@ -11,7 +11,9 @@ import FileDetailModal from '../components/teaching-material/FileDetailModal';
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
-
+import { useGetPersonalMaterialsQuery } from '@/store/api/materialApi';
+import dayjs from 'dayjs';
+import { LoadingSpinner } from '@/shared/components/ui/indicators';
 const TeachingMaterialPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("");
@@ -22,6 +24,25 @@ const TeachingMaterialPage = () => {
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
   const [isFileDetailOpen, setIsFileDetailOpen] = useState(false);
   const [deletingFolder, setDeletingFolder] = useState({ name: "", count: 0 });
+
+  const { data: materialsData, isLoading } = useGetPersonalMaterialsQuery({
+    keyword: searchQuery,
+    sortBy: sortBy,
+  });
+
+  const responseData = materialsData?.data || materialsData || {};
+  const folders = Array.isArray(responseData.folders) ? responseData.folders : [];
+  const files = Array.isArray(responseData.recentFiles) ? responseData.recentFiles : [];
+  const materials = [...folders, ...files];
+
+  const formatSize = (bytes) => {
+    if (bytes === 0) return '0 B';
+    if (!bytes) return '';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  };
 
   return (
     <div className=" bg-[#f3f3f3] min-h-screen">
@@ -76,7 +97,7 @@ const TeachingMaterialPage = () => {
             <IconButton
               variant="iconOnly"
               size="sm"
-              className={`rounded-[8px] h-[30px] hover:bg-[#E3BEBA] transition-colors ${viewLayout === 'grid' ? 'bg-[#F9F9F9]' : ''}`}
+              className={`!rounded-[8px] h-[30px] hover:bg-[#E3BEBA] transition-colors ${viewLayout === 'grid' ? 'bg-[#F9F9F9]' : ''}`}
               onClick={() => setViewLayout('grid')}
             >
               <LayoutGrid className={`w-4 h-4 ${viewLayout === 'grid' ? 'text-[#6E0009]' : 'text-[#5B403E]'}`} />
@@ -84,7 +105,7 @@ const TeachingMaterialPage = () => {
             <IconButton
               variant="iconOnly"
               size="sm"
-              className={`rounded-[8px] h-[30px] hover:bg-[#E3BEBA] transition-colors ${viewLayout === 'list' ? 'bg-[#F9F9F9]' : ''}`}
+              className={`!rounded-[8px] h-[30px] hover:bg-[#E3BEBA] transition-colors ${viewLayout === 'list' ? 'bg-[#F9F9F9]' : ''}`}
               onClick={() => setViewLayout('list')}
             >
               <TableProperties className={`w-4 h-4 ${viewLayout === 'list' ? 'text-[#6E0009]' : 'text-[#5B403E]'}`} />
@@ -119,7 +140,12 @@ const TeachingMaterialPage = () => {
         </div>
       </div>
 
-      {searchQuery ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <LoadingSpinner />
+          <span className="text-[#5B403E]">Đang tải dữ liệu...</span>
+        </div>
+      ) : searchQuery && materials.length === 0 ? (
         <div className="mt-4">
           <div className="mb-8">
             <h2 className="text-2xl font-semibold text-[#1A1C1C]">Kết quả tìm kiếm</h2>
@@ -134,79 +160,66 @@ const TeachingMaterialPage = () => {
         </div>
       ) : (
         <>
-          {/* Folders Section */}
-          <div className='space-y-4 mb-6'>
-            <h2 className="text-2xl font-semibold text-[#1A1C1C]">Thư mục</h2>
-            <div className={viewLayout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-3"}>
-              <FolderItem
-                title="Bài giảng Grammar"
-                subtitle="12 mục - Cập nhật hôm qua"
-                onDelete={() => {
-                  setDeletingFolder({ name: "Bài giảng Grammar", count: 12 });
-                  setIsDeleteFolderOpen(true);
-                }}
-              />
-              <FolderItem
-                title="Đề thi IELTS"
-                subtitle="5 mục - 22/10/2023"
-                onDelete={() => {
-                  setDeletingFolder({ name: "Đề thi IELTS", count: 5 });
-                  setIsDeleteFolderOpen(true);
-                }}
-              />
-              <FolderItem
-                title="Tài liệu tham khảo"
-                subtitle="8 mục - Đã chia sẻ"
-                onDelete={() => {
-                  setDeletingFolder({ name: "Tài liệu tham khảo", count: 8 });
-                  setIsDeleteFolderOpen(true);
-                }}
-              />
+          {searchQuery && materials.length > 0 && (
+            <div className="mb-8 mt-4">
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">Kết quả tìm kiếm</h2>
+              <p className="text-base text-[#5B403E]">
+                Tìm thấy {materials.length} kết quả cho <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
+              </p>
             </div>
-          </div>
+          )}
+
+          {/* Folders Section */}
+          {folders.length > 0 && (
+            <div className='space-y-4 mb-6'>
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">Thư mục</h2>
+              <div className={viewLayout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-3"}>
+                {folders.map(folder => (
+                  <FolderItem
+                    key={folder.id}
+                    title={folder.name}
+                    totalItems={`${(folder.subFolderCount || 0) + (folder.materialCount || 0)} mục`}
+                    status={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
+                    onDelete={() => {
+                      setDeletingFolder({ name: folder.name, count: (folder.subFolderCount || 0) + (folder.materialCount || 0) });
+                      setIsDeleteFolderOpen(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Recent Files Section */}
-          <div className='space-y-4'>
-            <h2 className="text-2xl font-semibold text-[#1A1C1C]">Tệp gần đây</h2>
-            <div className={viewLayout === 'grid' ? "grid grid-cols-1 lg:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
-              <FileItem
-                title="Unit_1_Grammar_Review.pdf"
-                size="2.4 MB"
-                date="10:30 AM"
-                isPublic={true}
-                isStarred={true}
-                type="pdf"
-                layout={viewLayout}
-                onShare={() => setIsShareModalOpen(true)}
-                onDetails={() => setIsFileDetailOpen(true)}
-                onClick={() => setIsFileDetailOpen(true)}
-              />
-              <FileItem
-                title="Infographic_Tenses.png"
-                size="4.5 MB"
-                date="20/10/2023"
-                isPublic={true}
-                isStarred={false}
-                type="image"
-                layout={viewLayout}
-                onShare={() => setIsShareModalOpen(true)}
-                onDetails={() => setIsFileDetailOpen(true)}
-                onClick={() => setIsFileDetailOpen(true)}
-              />
-              <FileItem
-                title="Speaking_Part"
-                size="8.2 MB"
-                date="15/10/2023"
-                isPublic={false}
-                isStarred={false}
-                type="video"
-                layout={viewLayout}
-                onShare={() => setIsShareModalOpen(true)}
-                onDetails={() => setIsFileDetailOpen(true)}
-                onClick={() => setIsFileDetailOpen(true)}
-              />
+          {files.length > 0 && (
+            <div className='space-y-4'>
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">{searchQuery ? 'Tệp' : 'Tệp gần đây'}</h2>
+              <div className={viewLayout === 'grid' ? "grid grid-cols-1 lg:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+                {files.map(file => (
+                  <FileItem
+                    key={file.id}
+                    title={file.name}
+                    size={formatSize(file.fileSize || file.size || file.sizeBytes)}
+                    date={file.updatedAt ? dayjs(file.updatedAt).format('DD/MM/YYYY') : ''}
+                    isPublic={file.isPublic}
+                    isStarred={file.isStarred}
+                    type={file.fileType || 'file'}
+                    layout={viewLayout}
+                    onShare={() => setIsShareModalOpen(true)}
+                    onDetails={() => setIsFileDetailOpen(true)}
+                    onClick={() => setIsFileDetailOpen(true)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {!isLoading && materials.length === 0 && !searchQuery && (
+            <div className="flex flex-col items-center justify-center py-20 text-[#5B403E] opacity-70">
+              <FolderPlus className="w-12 h-12 mb-4 text-[#E3BEBA]" />
+              <p>Chưa có thư mục hoặc tài liệu nào.</p>
+            </div>
+          )}
         </>
       )}
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, Image, Video, File } from 'lucide-react';
+import { X, FileText, Image, Video, File, Check } from 'lucide-react';
 import ProgressBar from '@/shared/components/ui/ProgressBar';
 import { IconButton } from '@/shared/components/ui/buttons';
 
@@ -17,7 +17,12 @@ const getFileIcon = (type) => {
 };
 
 const formatSize = (bytes) => {
-  if (!bytes) return '0 MB';
+  if (!bytes || bytes === 0) return '0 KB';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) {
+    const kb = bytes / 1024;
+    return `${kb.toFixed(1)} KB`;
+  }
   const mb = bytes / (1024 * 1024);
   return `${mb.toFixed(1)} MB`;
 };
@@ -31,34 +36,63 @@ const UploadItem = ({
   type,
   onCancel
 }) => {
-  const isWaiting = status === 'waiting';
+  // status: 'reading' | 'ready' | 'uploading' | 'success' | 'error'
 
   return (
-    <div className={`border rounded-xl p-3 flex items-center gap-4 transition-colors ${isWaiting ? 'border-[#E2E2E2] bg-[#F9F9F9]' : 'border-[#E2E2E2] bg-[#F9F9F9]'}`}>
+    <div className={`border rounded-xl p-3 flex items-center gap-4 transition-colors border-[#E2E2E2] bg-[#F9F9F9]`}>
       <div className={`w-10 h-10 bg-[#EEEEEE] rounded-xl flex items-center justify-center shrink-0`}>
         {getFileIcon(type)}
       </div>
 
-      <div className={`flex-1 min-w-0 ${isWaiting ? 'opacity-50' : ''}`}>
-        {isWaiting ? (
-          <div className="flex justify-between items-center">
-            <div className="flex flex-col">
+      <div className="flex-1 min-w-0">
+        {status === 'reading' ? (
+          <>
+            <div className="flex justify-between items-center gap-3 mb-2">
+              <span className="text-sm font-semibold text-[#5B403E] truncate min-w-0">{name}</span>
+              <span className="text-xs text-[#5B403E] shrink-0 whitespace-nowrap">
+                {progress}% ({formatSize(sizeBytes * progress / 100)} / {formatSize(sizeBytes)})
+              </span>
+            </div>
+            <ProgressBar progress={progress} heightClass="h-1.5" colorClass="bg-[#5B403E]" />
+          </>
+        ) : status === 'ready' ? (
+          <div className="flex justify-between items-center gap-3">
+            <div className="flex flex-col min-w-0">
               <span className="text-sm font-semibold text-[#1A1C1C] truncate">{name}</span>
               <span className="text-xs text-[#5B403E] mt-0.5">{formatSize(sizeBytes)}</span>
             </div>
-            <span className="text-xs text-[#5B403E]">Đang chờ...</span>
+            <div className="flex items-center gap-1 text-green-600 shrink-0">
+              <Check className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Sẵn sàng</span>
+            </div>
           </div>
-        ) : (
+        ) : status === 'uploading' ? (
           <>
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-semibold text-[#5B403E] truncate">{name}</span>
-              <span className="text-xs text-[#5B403E]">
+            <div className="flex justify-between items-center gap-3 mb-2">
+              <span className="text-sm font-semibold text-[#5B403E] truncate min-w-0">{name}</span>
+              <span className="text-xs text-[#5B403E] shrink-0 whitespace-nowrap">
                 {progress}% ({formatSize(uploadedBytes)} / {formatSize(sizeBytes)})
               </span>
             </div>
             <ProgressBar progress={progress} heightClass="h-1.5" colorClass="bg-[#990011]" />
           </>
-        )}
+        ) : status === 'success' ? (
+          <div className="flex justify-between items-center gap-3">
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-semibold text-[#1A1C1C] truncate">{name}</span>
+              <span className="text-xs text-green-600 mt-0.5">{formatSize(sizeBytes)}</span>
+            </div>
+            <span className="text-xs text-green-600 font-medium shrink-0">Hoàn tất</span>
+          </div>
+        ) : status === 'error' ? (
+          <div className="flex justify-between items-center gap-3">
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-semibold text-[#1A1C1C] truncate">{name}</span>
+              <span className="text-xs text-red-500 mt-0.5">Lỗi khi tải lên</span>
+            </div>
+            <span className="text-xs text-red-500 font-medium shrink-0">Thất bại</span>
+          </div>
+        ) : null}
       </div>
 
       <IconButton
