@@ -60,6 +60,7 @@ export const navSections = [
     defaultLabel: "My Workspace",
     maxInitial: 5,
     items: [
+      { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
       { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
@@ -116,6 +117,7 @@ export const navLinks = [
     icon: Briefcase,
     requiresAuth: true,
     subItems: [
+      { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
       { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },

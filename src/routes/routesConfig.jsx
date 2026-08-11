@@ -109,6 +109,9 @@ const MyClassesPage = lazy(
 const WorkspaceAnalyticsPage = lazy(
   () => import("@/features/courses/components/WorkspaceAnalyticsPage"),
 );
+const WorkspaceDashboardPage = lazy(
+  () => import("@/features/courses/components/WorkspaceDashboardPage"),
+);
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
 );
@@ -454,6 +457,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <WorkspaceAnalyticsPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "dashboard",
+                element: (
+                  <LazyRoute>
+                    <WorkspaceDashboardPage />
                   </LazyRoute>
                 ),
               },

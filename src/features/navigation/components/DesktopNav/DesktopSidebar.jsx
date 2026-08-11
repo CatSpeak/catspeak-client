@@ -219,6 +219,7 @@ const DesktopSidebar = () => {
           {mainDockItems
             .filter((item) => {
               const teacherTabs = [
+                "dashboard",
                 "myCourses",
                 "myClass",
                 "analytics",
@@ -409,6 +410,7 @@ const DesktopSidebar = () => {
                           if (item.isPrivate && !isAuthenticated) return false
 
                           const teacherTabs = [
+                            "dashboard",
                             "myCourses",
                             "myClass",
                             "analytics",
