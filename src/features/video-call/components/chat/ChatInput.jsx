@@ -86,8 +86,36 @@ const ChatInput = ({
     return matchesAll ? [allMentionItem, ...list] : list
   }, [mentionState.isOpen, mentionState.query, availableMentionParticipants, allMentionItem])
 
+  const justSelectedMentionRef = useRef(false)
+
+  const isOffsetInMentionSpan = (offset) => {
+    const el = editableRef.current
+    if (!el) return false
+    const spans = el.querySelectorAll('[data-mention], [contenteditable="false"]')
+    if (spans.length === 0) return false
+    let currentPos = 0
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+    let node = walker.nextNode()
+    while (node) {
+      const len = node.textContent.length
+      const isInsideSpan = Array.from(spans).some((span) => span.contains(node))
+      if (isInsideSpan && offset >= currentPos && offset <= currentPos + len) {
+        return true
+      }
+      currentPos += len
+      node = walker.nextNode()
+    }
+    return false
+  }
+
   // Detect @ mention trigger at current input position
   const updateMentionTrigger = (text, caretPos) => {
+    if (justSelectedMentionRef.current) {
+      justSelectedMentionRef.current = false
+      setMentionState((prev) => ({ ...prev, isOpen: false }))
+      return
+    }
+
     if (!text || caretPos <= 0 || isAiInput) {
       setMentionState((prev) => ({ ...prev, isOpen: false }))
       return
@@ -99,12 +127,18 @@ const ChatInput = ({
     if (match) {
       const query = match[1]
       const matchIndex = caretPos - query.length - 1
-      setMentionState({
+
+      if (isOffsetInMentionSpan(matchIndex)) {
+        setMentionState((prev) => ({ ...prev, isOpen: false }))
+        return
+      }
+
+      setMentionState((prev) => ({
         isOpen: true,
         query,
         matchIndex,
-        selectedIndex: 0,
-      })
+        selectedIndex: prev.query === query ? prev.selectedIndex : 0,
+      }))
     } else {
       setMentionState((prev) => ({ ...prev, isOpen: false }))
     }
@@ -137,10 +171,29 @@ const ChatInput = ({
     if (!el) return 0
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0) return 0
-    const range = sel.getRangeAt(0).cloneRange()
-    range.selectNodeContents(el)
-    range.setEnd(sel.getRangeAt(0).endContainer, sel.getRangeAt(0).endOffset)
-    return range.toString().length
+    try {
+      const range = sel.getRangeAt(0)
+      const treeWalker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false)
+      let caretOffset = 0
+      let currentNode = treeWalker.nextNode()
+
+      while (currentNode) {
+        if (currentNode === range.endContainer) {
+          caretOffset += range.endOffset
+          return caretOffset
+        }
+        caretOffset += currentNode.textContent.length
+        currentNode = treeWalker.nextNode()
+      }
+
+      if (range.endContainer === el) {
+        return range.endOffset
+      }
+
+      return caretOffset
+    } catch {
+      return el.innerText?.replace(/\n$/, "").length || 0
+    }
   }
 
   /** Set caret to absolute character offset inside the contenteditable */
@@ -255,7 +308,8 @@ const ChatInput = ({
     } else {
       setIsMultiline(false)
     }
-    setMentionState((prev) => ({ ...prev, isOpen: false }))
+    justSelectedMentionRef.current = true
+    setMentionState({ isOpen: false, query: "", matchIndex: -1, selectedIndex: 0 })
     el.focus()
   }
 
