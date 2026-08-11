@@ -4,7 +4,7 @@
 
 /* CSS Variables */
 :root {
-  --font-primary: "Nunito", "Noto Sans", sans-serif;
+  --font-primary: "Nunito", "Noto Sans SC", "Noto Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
   --cath-red-50: #100002;
@@ -49,6 +49,14 @@ body {
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Perfectly balanced bold styling (especially for CJK / Chinese text) */
+strong,
+b {
+  font-weight: 700;
+  -webkit-text-stroke: 0.2px currentColor;
+  color: #0f172a;
 }
 
 #root {

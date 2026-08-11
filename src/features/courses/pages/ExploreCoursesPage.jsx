@@ -253,7 +253,7 @@ const ExploreCoursesPage = () => {
 
               {/* Price Popover Dropdown Card */}
               {showPricePopover && (
-                <div className="absolute right-0 top-11 z-50 w-80 bg-white border border-border rounded-3xl p-5 shadow-2xl flex flex-col gap-4 animate-fadeIn">
+                <div className="absolute left-0 sm:left-auto sm:right-0 top-11 z-50 w-80 max-w-[calc(100vw-2rem)] bg-white border border-border/80 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 animate-fadeIn">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                     <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
                       <Sparkles size={14} className="text-[#b20a1c]" /> Lọc Theo Học Phí
@@ -261,7 +261,8 @@ const ExploreCoursesPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowPricePopover(false)}
-                      className="text-slate-400 hover:text-slate-700 transition-colors"
+                      className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+                      aria-label="Close"
                     >
                       <X size={14} />
                     </button>
@@ -274,8 +275,8 @@ const ExploreCoursesPage = () => {
                       <button
                         type="button"
                         onClick={() => setPricePreset("", "")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "" && maxPriceInput === ""
-                          ? "bg-slate-950 text-white"
+                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "" && maxPriceInput === ""
+                          ? "bg-slate-950 text-white shadow-xs"
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
@@ -284,8 +285,8 @@ const ExploreCoursesPage = () => {
                       <button
                         type="button"
                         onClick={() => setPricePreset("0", "500000")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "0" && maxPriceInput === "500000"
-                          ? "bg-[#b20a1c] text-white"
+                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "0" && maxPriceInput === "500000"
+                          ? "bg-[#b20a1c] text-white shadow-xs"
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
@@ -294,8 +295,8 @@ const ExploreCoursesPage = () => {
                       <button
                         type="button"
                         onClick={() => setPricePreset("500000", "2000000")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "500000" && maxPriceInput === "2000000"
-                          ? "bg-[#b20a1c] text-white"
+                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "500000" && maxPriceInput === "2000000"
+                          ? "bg-[#b20a1c] text-white shadow-xs"
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
@@ -304,8 +305,8 @@ const ExploreCoursesPage = () => {
                       <button
                         type="button"
                         onClick={() => setPricePreset("2000000", "")}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "2000000" && maxPriceInput === ""
-                          ? "bg-[#b20a1c] text-white"
+                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "2000000" && maxPriceInput === ""
+                          ? "bg-[#b20a1c] text-white shadow-xs"
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
@@ -318,47 +319,53 @@ const ExploreCoursesPage = () => {
                   <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
                     <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Tùy chỉnh khoảng giá</span>
                     <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Từ (VNĐ)"
-                        value={minPriceInput}
-                        onChange={(e) => {
-                          setMinPriceInput(e.target.value)
-                          setCurrentPage(1)
-                        }}
-                        className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white"
-                      />
-                      <span className="text-slate-400 font-bold text-xs">-</span>
-                      <input
-                        type="number"
-                        min="0"
-                        placeholder="Đến (VNĐ)"
-                        value={maxPriceInput}
-                        onChange={(e) => {
-                          setMaxPriceInput(e.target.value)
-                          setCurrentPage(1)
-                        }}
-                        className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white"
-                      />
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="Từ (VNĐ)"
+                          value={minPriceInput}
+                          onChange={(e) => {
+                            setMinPriceInput(e.target.value)
+                            setCurrentPage(1)
+                          }}
+                          className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
+                      <span className="text-slate-400 font-bold text-xs shrink-0">-</span>
+                      <div className="relative flex-1">
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="Đến (VNĐ)"
+                          value={maxPriceInput}
+                          onChange={(e) => {
+                            setMaxPriceInput(e.target.value)
+                            setCurrentPage(1)
+                          }}
+                          className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
                     </div>
                   </div>
 
                   {/* Footer Actions */}
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                     {hasPriceFilter ? (
                       <button
                         type="button"
                         onClick={() => setPricePreset("", "")}
-                        className="text-xs font-bold text-rose-600 hover:underline"
+                        className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
                       >
                         Xóa lọc giá
                       </button>
-                    ) : <span />}
+                    ) : (
+                      <span />
+                    )}
                     <button
                       type="button"
                       onClick={() => setShowPricePopover(false)}
-                      className="bg-[#b20a1c] text-white text-xs font-bold px-4 py-1.5 rounded-xl shadow-xs hover:bg-[#960817] transition-all"
+                      className="bg-[#b20a1c] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs hover:bg-[#960817] transition-all cursor-pointer"
                     >
                       Áp dụng
                     </button>

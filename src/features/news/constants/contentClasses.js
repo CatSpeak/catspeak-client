@@ -3,7 +3,7 @@ export const CONTENT_CLASSES = [
   "text-[15px] sm:text-[16px] leading-[1.65] text-slate-800",
 
   // Inline formatting
-  "[&_strong]:font-semibold [&_b]:font-semibold",
+  "[&_strong]:font-bold [&_b]:font-bold [&_strong]:text-slate-900 [&_b]:text-slate-900 [&_strong]:[-webkit-text-stroke:0.2px_currentColor] [&_b]:[-webkit-text-stroke:0.2px_currentColor]",
   "[&_em]:italic [&_i]:italic",
   "[&_u]:underline [&_s]:line-through",
 
