@@ -25,6 +25,16 @@ import Popover from "@/shared/components/ui/Popover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 
+// Helper to strip diacritics / accents and convert to lowercase for unicode-insensitive matching
+const normalizeString = (str) => {
+  if (!str || typeof str !== "string") return ""
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[đĐ]/g, "d")
+    .toLowerCase()
+}
+
 const ProfileFriendsTab = ({
   targetAccountId,
   isOwnProfile,
@@ -173,13 +183,17 @@ const ProfileFriendsTab = ({
       emptyMessage = t.profile?.friends?.empty?.noRecommendations || "Không có gợi ý nào."
     }
 
-    // Only filter in FE for tabs that do not have backend search
+    // Only filter in FE for tabs that do not have backend search (Unicode / diacritics insensitive)
     if (searchQuery && activeSubTab !== "find") {
-      list = list.filter(
-        (user) =>
-          user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.nickname?.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+      const normalizedQuery = normalizeString(searchQuery)
+      list = list.filter((user) => {
+        const normalizedUsername = normalizeString(user.username)
+        const normalizedNickname = normalizeString(user.nickname)
+        return (
+          normalizedUsername.includes(normalizedQuery) ||
+          normalizedNickname.includes(normalizedQuery)
+        )
+      })
     }
 
     if (isLoading) {
