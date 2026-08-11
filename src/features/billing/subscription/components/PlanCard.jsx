@@ -123,19 +123,19 @@ const PlanCard = ({
 
   const badge = isHighlighted
     ? {
-        icon: Sparkles,
-        label: highlightBadge || "Required",
-      }
+      icon: Sparkles,
+      label: highlightBadge || "Required",
+    }
     : isActive
       ? {
-          icon: BadgeCheck,
-          label: t.billing.pricing.activated || "Activated",
-        }
+        icon: BadgeCheck,
+        label: t.billing.pricing.activated || "Activated",
+      }
       : isPaidPlan
         ? {
-            icon: Star,
-            label: t.billing.pricing.popular || "Popular",
-          }
+          icon: Star,
+          label: t.billing.pricing.popular || "Popular",
+        }
         : null
 
   const BadgeIcon = badge?.icon
@@ -146,29 +146,28 @@ const PlanCard = ({
       : "0 18px 40px rgba(15, 23, 42, 0.08)"
 
   return (
-    <motion.article
+    <article
       animate={
         isHighlighted
           ? {
-              y: [0, -32, 0, -20, 0, -8, 0],
-              scale: [1, 1.05, 0.98, 1.03, 0.99, 1.01, 1],
-              rotate: [0, -1.5, 1.5, -1, 1, 0],
-            }
+            y: [0, -32, 0, -20, 0, -8, 0],
+            scale: [1, 1.05, 0.98, 1.03, 0.99, 1.01, 1],
+            rotate: [0, -1.5, 1.5, -1, 1, 0],
+          }
           : { y: 0, scale: 1, rotate: 0 }
       }
       transition={
         isHighlighted
           ? {
-              duration: 1.2,
-              repeat: 1,
-              repeatDelay: 0.15,
-              ease: "easeOut",
-            }
+            duration: 1.2,
+            repeat: 1,
+            repeatDelay: 0.15,
+            ease: "easeOut",
+          }
           : { duration: 0.5 }
       }
-      className={`group relative flex h-full min-h-[560px] flex-col overflow-hidden rounded-xl border bg-white transition-[box-shadow,border-color,background-color] duration-500 ${
-        isHighlighted ? "ring-4 ring-cath-red-700/60 shadow-2xl" : ""
-      }`}
+      className={`group relative flex h-full min-h-[560px] flex-col overflow-hidden rounded-xl border bg-white transition-[box-shadow,border-color,background-color] duration-500 ${isHighlighted ? "ring-4 ring-cath-red-700/60 shadow-2xl" : ""
+        }`}
       style={{
         background: `linear-gradient(180deg, ${hexToRgbA(
           cardColor,
@@ -212,7 +211,7 @@ const PlanCard = ({
           {description}
         </p>
 
-        <section className="mt-7 border-b border-gray-100 pb-6">
+        <section className="mt-7 border-b border-border pb-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="min-w-0">
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -237,7 +236,7 @@ const PlanCard = ({
             <span className="h-px flex-1 bg-gray-100" />
           </div>
 
-          <ul className="flex flex-1 flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1">
+          <ul className="flex flex-1 flex-col gap-3.5">
             {features.map((feature, index) => {
               const isString = typeof feature === "string"
               const isBoolean = !isString && feature.valueType === "boolean"
@@ -249,9 +248,8 @@ const PlanCard = ({
               return (
                 <li
                   key={featureKey}
-                  className={`grid grid-cols-[20px_1fr] gap-3 text-sm leading-relaxed ${
-                    isFalsy ? "text-gray-400" : "text-gray-700"
-                  }`}
+                  className={`grid grid-cols-[20px_1fr] gap-3 text-sm leading-relaxed ${isFalsy ? "text-gray-400" : "text-gray-700"
+                    }`}
                 >
                   <span
                     className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
@@ -259,8 +257,8 @@ const PlanCard = ({
                       isFalsy
                         ? undefined
                         : {
-                            color: cardColor,
-                          }
+                          color: cardColor,
+                        }
                     }
                   >
                     {isFalsy ? (
@@ -271,9 +269,8 @@ const PlanCard = ({
                   </span>
 
                   <span
-                    className={`min-w-0 font-semibold ${
-                      isFalsy ? "line-through decoration-gray-300" : ""
-                    }`}
+                    className={`min-w-0 font-semibold ${isFalsy ? "line-through decoration-gray-300" : ""
+                      }`}
                   >
                     {isString ? (
                       renderFeatureText(feature, cardColor)
@@ -295,7 +292,7 @@ const PlanCard = ({
           </ul>
         </section>
 
-        <footer className="mt-7 border-t border-gray-100 pt-5">
+        <footer className="mt-7 border-t border-border pt-5">
           {isActive ? (
             <div
               className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-center text-sm font-extrabold"
@@ -309,7 +306,7 @@ const PlanCard = ({
               <span className="leading-snug">{buttonText}</span>
             </div>
           ) : !onAction ? (
-            <div className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm font-extrabold text-gray-400">
+            <div className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-lg border border-border bg-gray-50 px-4 py-3 text-center text-sm font-extrabold text-gray-400">
               <Check size={17} strokeWidth={2.4} />
               <span className="leading-snug">{buttonText}</span>
             </div>
@@ -335,7 +332,7 @@ const PlanCard = ({
           )}
         </footer>
       </div>
-    </motion.article>
+    </article>
   )
 }
 

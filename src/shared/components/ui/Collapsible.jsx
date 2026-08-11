@@ -19,7 +19,7 @@ const Collapsible = ({
       <button
         type="button"
         onClick={toggleOpen}
-        className="flex items-center justify-between w-full text-left bg-transparent border-none cursor-pointer h-10 rounded-md px-4 transition-colors hover:bg-[#F2F2F2]"
+        className="flex items-center justify-between w-full text-left bg-transparent border-none cursor-pointer h-10 rounded-md px-4 transition-colors hover:bg-primaryBg"
         aria-expanded={isOpen}
       >
         <span className="font-bold text-sm">{title}</span>

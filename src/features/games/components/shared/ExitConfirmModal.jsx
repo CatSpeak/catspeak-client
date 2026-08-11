@@ -15,15 +15,15 @@ const ExitConfirmModal = ({ showExitConfirm, setShowExitConfirm }) => {
       open={showExitConfirm}
       onClose={() => setShowExitConfirm(false)}
       title={tm.exitConfirmTitle || "Xác nhận thoát"}
-      className="bg-white text-slate-900 max-w-sm rounded-3xl overflow-hidden border border-gray-200 shadow-2xl"
-      headerClassName="flex items-center justify-between p-4 pl-6 border-b border-gray-100"
+      className="bg-white text-slate-900 max-w-sm rounded-3xl overflow-hidden border border-border shadow-2xl"
+      headerClassName="flex items-center justify-between p-4 pl-6 border-b border-border"
       fullScreenOnMobile={false}
     >
       <div className="py-6 px-6 text-center text-slate-600">
         <p>{tm.exitConfirmDesc1 || "Bạn có chắc chắn muốn thoát khỏi trò chơi này không?"}</p>
         <p className="text-cath-red-600 font-semibold mt-2">{tm.exitConfirmDesc2 || "Bạn sẽ không thể tham gia lại ván chơi này nữa!"}</p>
       </div>
-      <div className="flex gap-3 p-4 border-t border-gray-100 bg-gray-50">
+      <div className="flex gap-3 p-4 border-t border-border bg-gray-50">
         <button
           onClick={() => setShowExitConfirm(false)}
           className="flex-1 py-3 px-4 rounded-xl font-bold bg-gray-200 hover:bg-gray-300 text-slate-700 transition-all"

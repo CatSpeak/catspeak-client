@@ -149,7 +149,7 @@ const ScreenShareTile = ({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`relative flex h-full w-full items-center justify-center overflow-hidden bg-neutral-900 shadow-sm ${
-        isFullscreen ? "" : "rounded-2xl border border-[#E5E5E5]"
+        isFullscreen ? "" : "rounded-2xl border border-border"
       } ${!isHovered && isFullscreen ? "cursor-none" : onClick ? "cursor-pointer" : ""}`}
     >
       <video

@@ -47,7 +47,7 @@ export default {
         text555: "#555",
         secondary: "#606060",
         dusk: "#1a1a2e",
-        border: "#e5e5e5",
+        border: "#E2E8F0",
         primaryBg: "#F5F5F7",
       },
       width: {

@@ -91,9 +91,9 @@ export default function ChallengeLeaderboardView({
 
   return (
     <>
-      <div className="w-full bg-white lg:rounded-2xl border-y lg:border border-gray-200 lg:shadow-sm py-4 sm:p-6 lg:mt-4 overflow-hidden">
+      <div className="w-full bg-white lg:rounded-2xl border-y lg:border border-border lg:shadow-sm py-4 sm:p-6 lg:mt-4 overflow-hidden">
         {/* Header */}
-        <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-4 px-2 sm:px-6 sm:-mx-6 gap-1.5 sm:gap-2 border-b border-gray-200">
+        <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 pb-4 px-2 sm:px-6 sm:-mx-6 gap-1.5 sm:gap-2 border-b border-border">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="text-2xl sm:text-3xl shrink-0">🏆</div>
             <div className="flex flex-col min-w-0">
@@ -201,7 +201,7 @@ export default function ChallengeLeaderboardView({
                                 </div>
                               )}
                             </div>
-                            <div className="w-10 h-10 rounded-full border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-full border-2 border-dashed border-border bg-gray-50 flex items-center justify-center shrink-0">
                               <span className="text-gray-300 text-xl font-medium">
                                 ?
                               </span>
@@ -222,7 +222,7 @@ export default function ChallengeLeaderboardView({
                             <span className="font-bold text-[14px] flex items-center gap-1.5 text-gray-300">
                               0 <Heart size={14} className="text-gray-300" />
                             </span>
-                            <div className="w-16 h-10 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 shrink-0 flex items-center justify-center">
+                            <div className="w-16 h-10 rounded-lg border-2 border-dashed border-border bg-gray-50 shrink-0 flex items-center justify-center">
                               <Play size={16} className="text-gray-300" />
                             </div>
                           </div>
@@ -233,11 +233,11 @@ export default function ChallengeLeaderboardView({
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-4 pt-4 px-4 sm:px-0 border-t border-gray-100">
+                  <div className="flex items-center justify-center gap-2 mt-4 pt-4 px-4 sm:px-0 border-t border-border">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-[13px] font-medium border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                      className="px-3 py-1.5 text-[13px] font-medium border border-border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
                     >
                       {t?.catSpeak?.reels?.leaderboard?.prev || "Trước"}
                     </button>
@@ -250,7 +250,7 @@ export default function ChallengeLeaderboardView({
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-[13px] font-medium border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                      className="px-3 py-1.5 text-[13px] font-medium border border-border rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
                     >
                       {t?.catSpeak?.reels?.leaderboard?.next || "Sau"}
                     </button>
@@ -279,7 +279,7 @@ export default function ChallengeLeaderboardView({
                             </div>
                           )}
                         </div>
-                        <div className="w-10 h-10 rounded-full border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-full border-2 border-dashed border-border bg-gray-50 flex items-center justify-center shrink-0">
                           <span className="text-gray-300 text-xl font-medium">
                             ?
                           </span>
@@ -300,7 +300,7 @@ export default function ChallengeLeaderboardView({
                         <span className="font-bold text-[14px] flex items-center gap-1.5 text-gray-300">
                           0 <Heart size={14} className="text-gray-300" />
                         </span>
-                        <div className="w-16 h-10 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 shrink-0 flex items-center justify-center">
+                        <div className="w-16 h-10 rounded-lg border-2 border-dashed border-border bg-gray-50 shrink-0 flex items-center justify-center">
                           <Play size={16} className="text-gray-300" />
                         </div>
                       </div>
@@ -373,7 +373,7 @@ export default function ChallengeLeaderboardView({
                         </span>
                       </div>
                       <div
-                        className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-gray-200 bg-gray-100 cursor-pointer"
+                        className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-border bg-gray-100 cursor-pointer"
                         onClick={() =>
                           onReelClick &&
                           onReelClick(currentUserEntry.reel || currentUserEntry)

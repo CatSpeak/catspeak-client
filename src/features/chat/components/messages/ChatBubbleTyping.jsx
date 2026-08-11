@@ -25,7 +25,7 @@ const ChatBubbleTyping = ({ sender }) => {
             }
           />
         </div>
-        <div className="rounded-2xl bg-[#F2F2F2] dark:bg-zinc-800 px-4 py-3 min-h-[40px] flex items-center gap-1.5 shadow-xs">
+        <div className="rounded-2xl bg-primaryBg dark:bg-zinc-800 px-4 py-3 min-h-[40px] flex items-center gap-1.5 shadow-xs">
           <span className="w-[6px] h-[6px] bg-[#606060] rounded-full animate-bounce [animation-delay:-0.3s]" />
           <span className="w-[6px] h-[6px] bg-[#606060] rounded-full animate-bounce [animation-delay:-0.15s]" />
           <span className="w-[6px] h-[6px] bg-[#606060] rounded-full animate-bounce" />

@@ -104,7 +104,7 @@ const AnalyticsFilterBar = ({
           id="select-group"
           value={group}
           onChange={handleGroupChange}
-          className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
           {Object.keys(filterMeta || {}).map((key) => (
             <option key={key} value={key}>
@@ -121,7 +121,7 @@ const AnalyticsFilterBar = ({
           id="select-period"
           value={period}
           onChange={(e) => setPeriod(e.target.value)}
-          className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
           {meta.periods.map((item) => (
             <option key={item.value} value={item.value}>
@@ -138,7 +138,7 @@ const AnalyticsFilterBar = ({
           id="select-compare"
           value={compare}
           onChange={(e) => setCompare(e.target.value)}
-          className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
           {meta.comparisons.map((item) => (
             <option key={item.value} value={item.value}>
@@ -155,7 +155,7 @@ const AnalyticsFilterBar = ({
           id="select-course"
           value={course}
           onChange={handleCourseChange}
-          className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
           <option value={ALL_COURSES_VALUE}>{allCoursesLabel}</option>
           {courseList.map((item) => (
@@ -174,7 +174,7 @@ const AnalyticsFilterBar = ({
           id="select-class"
           value={className}
           onChange={(e) => setClassName(e.target.value)}
-          className="h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
         >
           {getClassOptions().map((item) => (
             <option key={item.value} value={item.value}>

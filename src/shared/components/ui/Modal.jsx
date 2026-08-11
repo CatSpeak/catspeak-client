@@ -117,8 +117,8 @@ const ModalContent = ({
           /(^|\s)rounded/.test(className)
             ? ""
             : fullScreenOnMobile
-              ? "rounded-none md:rounded-3xl md:border md:border-[#E5e5e5]"
-              : "rounded-3xl border border-[#E5e5e5]"
+              ? "rounded-none md:rounded-3xl md:border md:border-border"
+              : "rounded-3xl border border-border"
         } ${className}`}
         role="dialog"
         aria-modal="true"

@@ -11,7 +11,7 @@ const GeneralSettingsTab = ({
   const gt = t?.rooms?.videoCall?.general || {}
 
   return (
-    <div className="bg-white rounded-xl border border-[#e5e5e5]">
+    <div className="bg-white rounded-xl border border-border">
       <ListItem
         lines={2}
         rightContent={

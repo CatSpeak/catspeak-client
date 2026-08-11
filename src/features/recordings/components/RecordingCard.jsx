@@ -162,7 +162,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
   }
 
   return (
-    <div className="group flex flex-col gap-3 rounded-xl border border-[#e5e5e5] bg-white min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="group flex flex-col gap-3 rounded-xl border border-border bg-white min-h-[69px] p-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Left: metadata */}
       <div className="flex flex-col">
         {/* Top row: meeting ID & potential status badge */}
@@ -218,7 +218,7 @@ const RecordingCard = ({ recording, onPlay, onDelete, t }) => {
       {/* Right: action buttons */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {status === RECORDING_STATUS.UPLOADED_TO_DRIVE ? (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#F2F2F2] text-sm">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-primaryBg text-sm">
             <FaGoogleDrive className="h-5 w-5" />
             {t?.recordings?.actions?.savedToDrive || "Saved to Drive"}
           </div>

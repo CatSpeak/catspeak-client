@@ -25,7 +25,7 @@ const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
   return (
     <div
       onClick={handleOpen}
-      className="group flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all duration-200"
+      className="group flex flex-col gap-3 rounded-lg border border-border bg-white p-4 sm:flex-row sm:items-center sm:justify-between hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all duration-200"
     >
       <div className="flex items-center gap-3 min-w-0">
         {reel.coverUrl ? (
@@ -33,10 +33,10 @@ const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
             src={reel.coverUrl}
             alt={reel.title}
             loading="lazy"
-            className="w-16 h-16 rounded object-cover flex-shrink-0 bg-gray-100 border border-gray-200 group-hover:scale-[1.02] transition-transform duration-200"
+            className="w-16 h-16 rounded object-cover flex-shrink-0 bg-gray-100 border border-border group-hover:scale-[1.02] transition-transform duration-200"
           />
         ) : (
-          <div className="w-16 h-16 rounded flex items-center justify-center bg-gray-50 border border-gray-100 flex-shrink-0 text-gray-400">
+          <div className="w-16 h-16 rounded flex items-center justify-center bg-gray-50 border border-border flex-shrink-0 text-gray-400">
             <Film size={24} />
           </div>
         )}

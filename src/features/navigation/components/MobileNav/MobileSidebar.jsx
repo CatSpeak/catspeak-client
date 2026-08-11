@@ -17,15 +17,14 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-[280px] bg-white border-r rounded-r-3xl shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-50 lg:hidden ${
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 bottom-0 h-full h-[100dvh] max-h-[100dvh] w-[320px] bg-white rounded-r-xl shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-50 lg:hidden overflow-hidden ${isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         {/* Header/Logo section */}
         <div className="flex items-center justify-between h-[64px] mx-2 shrink-0">
           <div className="flex items-center w-full h-full relative overflow-hidden">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="flex items-center h-full flex-1"
               onClick={() => setIsMobileOpen(false)}
             >
@@ -34,9 +33,9 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
               </div>
               <img src={MainLogo} alt="Cat Speak" className="h-6 w-auto shrink-0" />
             </Link>
-            <button 
+            <button
               onClick={() => setIsMobileOpen(false)}
-              className="p-2 mr-2 text-gray-500 hover:bg-[#F2F2F2] rounded-full transition-colors shrink-0"
+              className="p-2 mr-2 text-gray-500 hover:bg-primaryBg rounded-full transition-colors shrink-0"
             >
               <X size={20} />
             </button>

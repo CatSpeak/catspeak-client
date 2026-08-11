@@ -73,7 +73,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
   const isMuted = volume <= 0.001
 
   return (
-    <div className={`flex flex-col gap-2 relative ${isInline ? 'w-full' : 'bg-white rounded-lg shadow-lg border border-[#e5e5e5] p-3 w-48'} ${className}`}>
+    <div className={`flex flex-col gap-2 relative ${isInline ? 'w-full' : 'bg-white rounded-lg shadow-lg border border-border p-3 w-48'} ${className}`}>
       <div className="flex items-center justify-between text-xs text-[#606060] mb-1">
         <span>{pl.volume}</span>
         <span>{Math.round(volume * 100)}%</span>
@@ -203,11 +203,11 @@ export const ParticipantVolumePopover = ({ participant, children }) => {
 
 
   const popoverContent = (
-    <div className="bg-white rounded-lg shadow-lg border border-[#e5e5e5] p-3 w-56 flex flex-col gap-3">
+    <div className="bg-white rounded-lg shadow-lg border border-border p-3 w-56 flex flex-col gap-3">
       <ParticipantVolumeSlider participant={participant} isInline />
 
       {isCurrentHost && (
-        <div className="border-t border-[#e5e5e5] pt-2 flex flex-col gap-1">
+        <div className="border-t border-border pt-2 flex flex-col gap-1">
           <span className="text-[11px] font-semibold text-[#8F8F8F] uppercase tracking-wider px-1 mb-0.5">
             Quản lý phòng (Host)
           </span>
@@ -248,7 +248,7 @@ export const ParticipantVolumePopover = ({ participant, children }) => {
       className="w-full"
       triggerClassName="w-full text-left"
       trigger={
-        <button className="w-full text-left rounded hover:bg-[#F2F2F2] transition-colors focus:outline-none">
+        <button className="w-full text-left rounded hover:bg-primaryBg transition-colors focus:outline-none">
           {children}
         </button>
       }

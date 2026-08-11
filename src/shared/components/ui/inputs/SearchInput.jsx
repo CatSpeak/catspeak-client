@@ -22,7 +22,7 @@ const SearchInput = ({
 }) => {
   return (
     <div
-      className={`flex items-center w-full min-w-0 sm:min-w-[360px] h-14 bg-white text-black border border-[#e5e5e5] rounded-full transition-colors ${
+      className={`flex items-center w-full min-w-0 sm:min-w-[360px] h-14 bg-white text-black border border-border rounded-full transition-colors ${
         focusBorder ? "focus-within:border-cath-red-700" : ""
       } ${className}`}
     >

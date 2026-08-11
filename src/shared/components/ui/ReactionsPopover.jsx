@@ -74,7 +74,7 @@ const ReactionsPopover = ({
           className={`absolute bottom-full left-0 mb-1 z-20 origin-bottom-left group-hover/reactions:block ${className}`}
         >
           <FluentAnimation direction="up" distance={10} duration={0.2} exit>
-            <div className="bg-white rounded-full shadow-lg border border-[#e5e5e5] p-1 flex items-center">
+            <div className="bg-white rounded-full shadow-lg border border-border p-1 flex items-center">
               {reactions.map((item) => {
                 const IconComp = item.icon;
                 return (

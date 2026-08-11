@@ -15,7 +15,7 @@ const TroubleshootPanel = ({ hideTitle = false }) => {
   return (
     <div className="flex flex-col h-full bg-white">
       {!hideTitle && (
-        <div className="flex shrink-0 items-center border-b border-[#E5E5E5] px-4 py-3 min-h-12">
+        <div className="flex shrink-0 items-center border-b border-border px-4 py-3 min-h-12">
           <h2 className="text-base font-semibold">
             {t?.rooms?.videoCall?.reconnect || "Troubleshoot connection"}
           </h2>

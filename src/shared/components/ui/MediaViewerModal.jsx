@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { createPortal } from "react-dom"
 import { X, RotateCcw } from "lucide-react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 
 /**
  * A reusable interactive media lightbox modal supporting whole-overlay drag panning, mousewheel zoom, and view reset.
@@ -14,6 +15,8 @@ const MediaViewerModal = ({ media, onClose }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
+  useScrollLock(!!media)
 
   const mediaUrl =
     typeof media === "string" ? media : media?.mediaUrl || media?.url || ""
@@ -32,17 +35,14 @@ const MediaViewerModal = ({ media, onClose }) => {
     setIsDragging(false)
   }
 
-  useEffect(() => {
-    if (media) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
-      resetZoom()
-    }
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [media])
+  const [prevMediaUrl, setPrevMediaUrl] = useState(mediaUrl)
+
+  if (mediaUrl !== prevMediaUrl) {
+    setPrevMediaUrl(mediaUrl)
+    setScale(1)
+    setPosition({ x: 0, y: 0 })
+    setIsDragging(false)
+  }
 
   if (!media || !mediaUrl) return null
 
@@ -79,9 +79,8 @@ const MediaViewerModal = ({ media, onClose }) => {
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 overflow-hidden select-none ${
-        isDragging ? "cursor-grabbing" : "cursor-grab"
-      }`}
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 overflow-hidden select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -121,9 +120,8 @@ const MediaViewerModal = ({ media, onClose }) => {
         <img
           src={mediaUrl}
           alt={fileName}
-          className={`max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform ${
-            isDragging ? "duration-0" : "duration-100 ease-out"
-          }`}
+          className={`max-w-full max-h-full object-contain rounded-lg shadow-2xl transition-transform ${isDragging ? "duration-0" : "duration-100 ease-out"
+            }`}
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
           }}

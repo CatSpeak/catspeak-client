@@ -66,7 +66,7 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
   );
 
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm border border-[#E5E5E5] hover:shadow-md hover:border-gray-300 transition-all duration-200">
+    <div className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm border border-border hover:shadow-md hover:border-gray-300 transition-all duration-200">
       {/* Card body — match CreateEventPage preview card layout */}
       <div className="flex items-start gap-3">
         {/* Circular thumbnail — matches preview card */}
@@ -138,12 +138,12 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
       </div>
 
       {/* Action buttons row */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 pt-3 border-t border-gray-100">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 pt-3 border-t border-border">
         {/* View registrations */}
         {occIdForReg && (
           <button
             onClick={handleViewReg}
-            className="flex flex-1 py-2 sm:py-2.5 px-4 items-center justify-center gap-1.5 rounded-xl bg-[#F2F2F2] hover:bg-blue-50 hover:text-blue-600 text-gray-700 transition-colors text-xs font-medium"
+            className="flex flex-1 py-2 sm:py-2.5 px-4 items-center justify-center gap-1.5 rounded-xl bg-primaryBg hover:bg-blue-50 hover:text-blue-600 text-gray-700 transition-colors text-xs font-medium"
             title={cal?.workspaceViewRegistrations || "View registrations"}
           >
             <Users size={14} className="shrink-0" />
@@ -158,7 +158,7 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
           className={`flex flex-1 py-2 sm:py-2.5 px-4 items-center justify-center gap-1.5 rounded-xl text-xs font-medium transition-colors ${
             isPast
               ? "bg-gray-50 text-gray-400 cursor-not-allowed"
-              : "bg-[#F2F2F2] hover:bg-amber-50 hover:text-amber-600 text-gray-700"
+              : "bg-primaryBg hover:bg-amber-50 hover:text-amber-600 text-gray-700"
           }`}
           title={isPast ? "Không thể chỉnh sửa sự kiện đã qua" : (cal?.workspaceEditEvent || "Edit event")}
         >
@@ -169,7 +169,7 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
         {/* Delete */}
         <button
           onClick={handleDelete}
-          className="flex flex-1 py-2 sm:py-2.5 px-4 items-center justify-center gap-1.5 rounded-xl bg-[#F2F2F2] hover:bg-red-50 hover:text-red-600 text-gray-700 transition-colors text-xs font-medium"
+          className="flex flex-1 py-2 sm:py-2.5 px-4 items-center justify-center gap-1.5 rounded-xl bg-primaryBg hover:bg-red-50 hover:text-red-600 text-gray-700 transition-colors text-xs font-medium"
           title={cal?.workspaceDeleteEvent || "Delete event"}
         >
           <Trash2 size={14} className="shrink-0" />

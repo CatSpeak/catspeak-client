@@ -15,8 +15,8 @@ export const VideoPreviewStep = () => {
   } = useCreateReelContext()
 
   return (
-    <div className={`flex-col gap-4 text-left border-l-0 md:border-l border-gray-100 pl-0 md:pl-6 h-full ${mobileTab === "preview" ? "flex" : "hidden md:flex"}`}>
-      <div className="flex flex-col gap-1 border-b border-gray-100 pb-2">
+    <div className={`flex-col gap-4 text-left border-l-0 md:border-l border-border pl-0 md:pl-6 h-full ${mobileTab === "preview" ? "flex" : "hidden md:flex"}`}>
+      <div className="flex flex-col gap-1 border-b border-border pb-2">
         <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
           {t?.catSpeak?.reels?.createModal?.preview || "Preview"}
         </h3>

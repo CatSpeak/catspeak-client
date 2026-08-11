@@ -97,7 +97,7 @@ const ChatInput = ({
   const isInputDisabled = !isConnected || (isAiInput && isAiBlocked)
 
   return (
-    <div className="p-3 bg-white flex flex-col gap-2 relative shrink-0 border-t border-[#E5E5E5]">
+    <div className="p-3 bg-white flex flex-col gap-2 relative shrink-0 border-t border-border">
       {/* Replying banner */}
       {replyTarget && (
         <RepliedMessage
@@ -113,7 +113,7 @@ const ChatInput = ({
         className={`w-full grid grid-cols-[auto_1fr_auto] items-center h-14 border focus-within:border-cath-red-700 transition-all cursor-text rounded-[28px] pl-3 pr-1 ${
           isAiInput
             ? "border-red-200 bg-gradient-to-r from-red-50/40 via-white to-red-50/20 shadow-sm"
-            : "border-[#E5E5E5] bg-gray-50/60"
+            : "border-border bg-gray-50/60"
         }`}
       >
         {/* Left AI Switch Control */}

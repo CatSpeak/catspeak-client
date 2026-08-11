@@ -276,7 +276,7 @@ const SchedulePage = () => {
       </div>
 
       {/* ─── Upcoming Section bar ─── */}
-      <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col gap-6">
+      <div className="bg-white rounded-2xl p-5 border border-border shadow-sm flex flex-col gap-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-4 bg-[#990011] rounded-full" />
@@ -293,7 +293,7 @@ const SchedulePage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Calendar selector (Span 5 of 12) */}
           <div className="lg:col-span-5 flex flex-col gap-6">
-            <div className="border border-gray-100 bg-[#FDFDFD] rounded-2xl p-5 flex flex-col gap-5">
+            <div className="border border-border bg-[#FDFDFD] rounded-2xl p-5 flex flex-col gap-5">
               {/* Month Selector header */}
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
@@ -412,7 +412,7 @@ const SchedulePage = () => {
 
           {/* Right Column: Classes Scheduled (Span 7 of 12) */}
           <div className="lg:col-span-7 flex flex-col gap-5">
-            <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2 pb-1 border-b border-gray-100">
+            <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider flex items-center gap-2 pb-1 border-b border-border">
               <span>{c.teachingSchedule || "My Schedule"}</span>
             </h3>
 
@@ -464,7 +464,7 @@ const SchedulePage = () => {
                           );
                         }
                       }}
-                      className="bg-[#FDFDFD] border border-gray-100 hover:border-gray-250 rounded-2xl p-5 flex flex-col gap-3 shadow-xs hover:shadow-sm transition-all duration-300 cursor-pointer"
+                      className="bg-[#FDFDFD] border border-border hover:border-gray-250 rounded-2xl p-5 flex flex-col gap-3 shadow-xs hover:shadow-sm transition-all duration-300 cursor-pointer"
                     >
                       <div className="flex justify-between items-start">
                         {/* Pills */}
@@ -573,7 +573,7 @@ const SchedulePage = () => {
                 })}
               </div>
             ) : (
-              <div className="py-12 text-center text-xs font-semibold text-gray-400 border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+              <div className="py-12 text-center text-xs font-semibold text-gray-400 border border-dashed border-border rounded-2xl bg-gray-50/50">
                 {c.noClassesOnDate || "No classes scheduled for this date"}
               </div>
             )}

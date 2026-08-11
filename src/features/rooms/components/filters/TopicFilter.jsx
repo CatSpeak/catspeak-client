@@ -57,8 +57,8 @@ const TopicFilter = () => {
                 key={topic}
                 className={`h-10 shrink-0 flex items-center gap-3 cursor-pointer rounded-md px-2 transition-colors ${
                   isChecked
-                    ? "bg-[#F2F2F2] hover:bg-[#E5E5E5]"
-                    : "hover:bg-[#F2F2F2]"
+                    ? "bg-primaryBg hover:bg-[#E5E5E5]"
+                    : "hover:bg-primaryBg"
                 }`}
               >
                 <input

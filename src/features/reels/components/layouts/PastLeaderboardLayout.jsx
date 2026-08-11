@@ -113,7 +113,7 @@ export default function PastLeaderboardLayout({
                   />
                 </>
               ) : (
-                <div className="py-12 px-4 bg-gray-50 rounded-2xl border border-gray-200 text-center">
+                <div className="py-12 px-4 bg-gray-50 rounded-2xl border border-border text-center">
                   <p className="text-[14px] font-semibold text-gray-600">{t?.catSpeak?.reels?.noPastChallenges || "Chưa có thử thách nào đã kết thúc."}</p>
                 </div>
               )}

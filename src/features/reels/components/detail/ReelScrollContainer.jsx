@@ -507,7 +507,7 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
                   e.stopPropagation();
                   onClose();
                 }}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center cursor-pointer transition-colors duration-200 border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:bg-gray-50"
+                className="w-10 h-10 rounded-full bg-white flex items-center justify-center cursor-pointer transition-colors duration-200 border border-border shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:bg-gray-50"
                 aria-label="Back"
               >
                 <ChevronLeft size={24} className="text-gray-700" />

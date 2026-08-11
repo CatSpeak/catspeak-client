@@ -32,7 +32,7 @@ export const CONTENT_CLASSES = [
   "[&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0",
 
   // Horizontal rule
-  "[&_hr]:border-t [&_hr]:border-gray-200 [&_hr]:my-5",
+  "[&_hr]:border-t [&_hr]:border-border [&_hr]:my-5",
 
   // Images
   "[&_img]:inline-block [&_img]:max-w-full [&_img]:h-auto [&_img]:py-2 [&_img]:rounded-lg",

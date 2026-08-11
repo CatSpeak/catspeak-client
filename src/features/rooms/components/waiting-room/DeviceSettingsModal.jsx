@@ -201,7 +201,7 @@ const DeviceSettingsModal = ({
         dropdownClassName="md:min-w-[480px]"
       />
 
-      <div className="pt-2 border-t border-[#E5E5E5]">
+      <div className="pt-2 border-t border-border">
         <MicTestVisualizer
           testMic={testMic}
           onToggleTest={() => handleTestMicToggle(!testMic)}

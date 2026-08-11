@@ -121,7 +121,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
               </IconButton>
             }
             content={(close) => (
-              <div className="flex flex-col min-w-[200px] p-1 bg-white rounded-xl shadow-lg border border-gray-100">
+              <div className="flex flex-col min-w-[200px] p-1 bg-white rounded-xl shadow-lg border border-border">
                 <MenuItem
                   onClick={() => {
                     navigate(`/workspace/courses/class/${row.class?.id}`)
@@ -171,7 +171,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
     const timeText = startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
 
     return (
-      <div className="bg-gray-50 border border-gray-100 p-4 rounded-xl flex flex-col gap-2">
+      <div className="bg-gray-50 border border-border p-4 rounded-xl flex flex-col gap-2">
         <div className="flex justify-between items-start gap-4">
           <span className="font-semibold text-gray-900 line-clamp-2">
             {row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}
@@ -195,8 +195,8 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   }
 
   return (
-    <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E5E5E5] gap-4">
+    <div className="w-full bg-white rounded-2xl shadow-sm border border-border p-6 flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-border gap-4">
         <div className="flex items-center gap-2">
           <IconButton
             onClick={onPrev}

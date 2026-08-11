@@ -223,7 +223,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
       {/* LEFT/MAIN COLUMN: Materials List (Full width for student) */}
       <div className={`${isStudent ? "lg:col-span-3" : "lg:col-span-2"} flex flex-col gap-4`}>
         {/* Header and Search */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
             <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
@@ -238,7 +238,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               placeholder={cm.searchMaterials || cd.searchMaterials || "Search materials..."}
               value={materialSearch}
               onChange={(e) => setMaterialSearch(e.target.value)}
-              className="w-full h-9 pl-9 pr-4 bg-gray-50 hover:bg-gray-100/70 focus:bg-white border border-transparent focus:border-gray-200 outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400"
+              className="w-full h-9 pl-9 pr-4 bg-gray-50 hover:bg-gray-100/70 focus:bg-white border border-transparent focus:border-border outline-none rounded-xl text-xs font-semibold text-gray-800 transition-all placeholder:text-gray-400"
             />
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>}
@@ -246,7 +246,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
 
         {/* List of files */}
         <div
-          className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-3 min-h-[300px]"
+          className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col gap-3 min-h-[300px]"
           aria-busy={isMaterialsLoading || isMaterialsFetching}
         >
           {isStudent ? (
@@ -254,7 +254,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               role="status"
               className="flex flex-col items-center justify-center py-16 text-center"
             >
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 mb-4 border border-gray-100">
+              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 mb-4 border border-border">
                 <FileText size={24} />
               </div>
               <h4 className="text-sm font-bold text-gray-800 mb-1">
@@ -310,7 +310,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
                 </div>
               ) : filteredMaterials.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 mb-4 border border-gray-100">
+                  <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 mb-4 border border-border">
                     <FileText size={24} />
                   </div>
                   <h4 className="text-sm font-bold text-gray-800 mb-1">
@@ -416,7 +416,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
       {/* RIGHT COLUMN: Upload Panel (Hidden for students) */}
       {!isStudent && (
         <div className="flex flex-col gap-6">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm flex flex-col gap-4">
+          <div className="bg-white rounded-2xl border border-border p-5 shadow-sm flex flex-col gap-4">
             <div className="flex items-center gap-2 border-b border-gray-50 pb-2.5">
               <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
               <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
@@ -428,7 +428,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               <div
                 className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${dragActive
                   ? "border-[#990011] bg-[#990011]/5"
-                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/55"
+                  : "border-border hover:border-gray-300 hover:bg-gray-50/55"
                   }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -469,7 +469,7 @@ const ClassMaterialsTab = ({ id, isStudent, cd = {}, cancelText }) => {
               />
 
               {selectedUploadFile && (
-                <div className="p-3 bg-gray-50/80 rounded-xl border border-gray-100 flex items-center justify-between gap-3 animate-fadeIn">
+                <div className="p-3 bg-gray-50/80 rounded-xl border border-border flex items-center justify-between gap-3 animate-fadeIn">
                   <div className="flex items-center gap-2.5 overflow-hidden">
                     {getFileIcon(selectedUploadFile.name)}
                     <div className="flex flex-col overflow-hidden">

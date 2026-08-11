@@ -58,7 +58,7 @@ const DayScheduleDayView = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex w-full border-b border-[#E5E5E5] mb-5">
+      <div className="flex w-full border-b border-border mb-5">
         <button
           onClick={() => setTab("unregistered")}
           className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[15px] font-medium border-b-2 transition-all ${

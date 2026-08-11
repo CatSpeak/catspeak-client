@@ -129,7 +129,7 @@ const CreateReelModalContent = ({ open }) => {
                 <button
                   type="button"
                   onClick={handleDiscardVideo}
-                  className="p-2 border border-gray-200 bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
+                  className="p-2 border border-border bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 hover:border-red-100 rounded-full shadow-sm transition-all active:scale-95 shrink-0"
                   title="Discard video"
                 >
                   <X size={16} />
@@ -138,7 +138,7 @@ const CreateReelModalContent = ({ open }) => {
             </div>
 
             {/* Mobile View Toggle Segment Tabs (Only visible on mobile/tablet viewports) */}
-            <div className="flex md:hidden bg-gray-100 p-1 rounded-2xl mb-1 border border-gray-200/40">
+            <div className="flex md:hidden bg-gray-100 p-1 rounded-2xl mb-1 border border-border/40">
               <button
                 type="button"
                 onClick={() => setMobileTab("details")}
@@ -170,7 +170,7 @@ const CreateReelModalContent = ({ open }) => {
         )}
 
         {/* BOTTOM FORM BUTTONS */}
-        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-gray-100 mt-2 w-full">
+        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-border mt-2 w-full">
           <PillButton
             type="button"
             variant="secondary"

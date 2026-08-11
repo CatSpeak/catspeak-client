@@ -281,7 +281,7 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
                   ? "bg-orange-100 text-orange-900"
                   : isAi
                     ? "bg-amber-50 text-amber-900"
-                    : "bg-[#F0F0F0] text-black"
+                    : "bg-primaryBg text-black"
               }`}
           >
             {/* Reply Context - Zalo Style */}

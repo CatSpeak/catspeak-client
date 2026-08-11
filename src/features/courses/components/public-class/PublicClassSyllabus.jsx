@@ -109,7 +109,7 @@ const PublicClassSyllabus = ({ classData }) => {
           return (
             <div
               key={idx}
-              className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs transition-all"
+              className="bg-white border border-border rounded-2xl overflow-hidden shadow-2xs transition-all"
             >
               <button
                 type="button"

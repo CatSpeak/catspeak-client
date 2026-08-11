@@ -211,7 +211,7 @@ const SocialProfileHeader = ({
       ];
 
   return (
-    <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
+    <div className="w-full bg-white border border-border rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}
       <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group overflow-hidden">
         {isBackgroundLoading ? (
@@ -230,7 +230,7 @@ const SocialProfileHeader = ({
       </div>
 
       {/* Profile Info Area */}
-      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap gap-4">
+      <div className="p-4 sm:p-6 relative border-b border-border flex flex-wrap gap-4">
         <div className="flex-1 min-w-0">
           {" "}
           {/* Avatar floating above the bottom border of the cover photo */}

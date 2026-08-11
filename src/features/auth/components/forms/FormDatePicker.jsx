@@ -44,7 +44,10 @@ const FormDatePicker = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState(value);
+
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (value) {
       const newDate = dayjs(value);
       setDate(newDate);
@@ -55,7 +58,7 @@ const FormDatePicker = ({
       setDate(null);
       setInputValue("");
     }
-  }, [value]);
+  }
 
   const [portalCoords, setPortalCoords] = useState(null);
 
@@ -102,12 +105,12 @@ const FormDatePicker = ({
 
   const handleInputChange = (e) => {
     let val = e.target.value.replace(/[^0-9/]/g, "");
-    
+
     // Auto-format DD/MM/YYYY
     if (e.nativeEvent.inputType !== "deleteContentBackward") {
       let clean = val.replace(/\D/g, "");
       if (clean.length > 8) clean = clean.slice(0, 8);
-      
+
       if (clean.length >= 5) {
         val = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4)}`;
       } else if (clean.length >= 3) {
@@ -118,15 +121,15 @@ const FormDatePicker = ({
         val = clean;
       }
     }
-    
+
     setInputValue(val);
-    
+
     const parts = val.split("/");
     if (parts.length === 3) {
       const day = parseInt(parts[0], 10);
       const month = parseInt(parts[1], 10) - 1;
       const year = parseInt(parts[2], 10);
-      
+
       if (year >= 1900 && year <= 2100 && month >= 0 && month < 12 && day > 0 && day <= 31) {
         const newD = dayjs(new Date(year, month, day));
         if (newD.isValid()) {
@@ -137,10 +140,10 @@ const FormDatePicker = ({
         }
       }
     } else if (val === "") {
-       setDate(null);
-       if (onChange) {
-         onChange({ target: { value: "", type: "text" } });
-       }
+      setDate(null);
+      if (onChange) {
+        onChange({ target: { value: "", type: "text" } });
+      }
     }
   };
 
@@ -220,8 +223,8 @@ const FormDatePicker = ({
       className={`relative inline-block w-full ${className}`}
     >
       <div
-        className={`h-[56px] w-full flex items-center justify-between rounded-3xl border px-4 text-sm text-left transition-colors focus-within:border-[${color}] hover:border-[${color}]
-        ${error ? "border-red-500 focus-within:border-red-500" : "border-[#e5e5e5]"}
+        className={`h-[56px] w-full flex items-center justify-between rounded-2xl border px-4 text-sm text-left transition-colors focus-within:border-[${color}] hover:border-[${color}]
+        ${error ? "border-red-500 focus-within:border-red-500" : "border-border"}
         ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "bg-white"}`}
         onClick={() => {
           if (!disabled && !isOpen) setIsOpen(true);
@@ -274,7 +277,7 @@ const FormDatePicker = ({
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto bg-white border border-[#E5E5E5] rounded-md shadow-lg p-4 flex flex-col"
+                      className="pointer-events-auto bg-white border border-border rounded-md shadow-lg p-4 flex flex-col"
                     >
                       {view === "days" ? (
                         <>
@@ -315,7 +318,7 @@ const FormDatePicker = ({
                             {weekDays.map((day) => (
                               <div
                                 key={day}
-                                className="text-center text-[12px] font-bold text-gray-400 pb-2 border-b border-gray-100"
+                                className="text-center text-[12px] font-bold text-gray-400 pb-2 border-b border-border"
                               >
                                 {day}
                               </div>
@@ -354,9 +357,9 @@ const FormDatePicker = ({
                                       : {}),
                                     ...(isToday && !isSelected
                                       ? {
-                                          border: `1px solid ${color}`,
-                                          color: color,
-                                        }
+                                        border: `1px solid ${color}`,
+                                        color: color,
+                                      }
                                       : {}),
                                   }}
                                 >

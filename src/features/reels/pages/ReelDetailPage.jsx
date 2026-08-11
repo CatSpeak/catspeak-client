@@ -360,7 +360,7 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
       {!isMobile && (
         <button
           onClick={handleClose}
-          className="absolute top-6 left-6 z-50 w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-gray-100"
+          className="absolute top-6 left-6 z-50 w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-border"
           aria-label="Close"
         >
           <X size={20} className="text-gray-600" />
@@ -408,14 +408,14 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
           <button
             onClick={() => scrollRef.current?.scrollToPrev()}
             disabled={isAtTop}
-            className={`w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center transition-all border border-gray-100 ${isAtTop ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105 hover:bg-gray-50"}`}
+            className={`w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center transition-all border border-border ${isAtTop ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105 hover:bg-gray-50"}`}
             aria-label="Previous reel"
           >
             <ArrowUp size={20} className="text-gray-600" />
           </button>
           <button
             onClick={() => scrollRef.current?.scrollToNext()}
-            className="w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-gray-100"
+            className="w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-border"
             aria-label="Next reel"
           >
             <ArrowDown size={20} className="text-gray-600" />
@@ -440,7 +440,7 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
                 refetchPublic()
               }
             }}
-            className="w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-gray-100"
+            className="w-10 h-10 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-all hover:scale-105 hover:bg-gray-50 border border-border"
             aria-label="Refresh feed"
           >
             <RefreshCw size={20} className={`text-gray-600 ${isFeedFetching || isDetailLoading ? "animate-spin text-cath-red-600" : ""}`} />

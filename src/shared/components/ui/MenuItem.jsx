@@ -19,7 +19,7 @@ const MenuItem = ({
   rightContent,
   isSelected = false,
   activeColor = "inherit",
-  hoverBg = "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2]",
+  hoverBg = "hover:bg-primaryBg group-hover:bg-primaryBg",
   className = "",
   onClick,
   ...props

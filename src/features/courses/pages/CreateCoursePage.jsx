@@ -358,7 +358,7 @@ const CreateCoursePage = () => {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
+          className="p-2.5 border border-border hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center"
           title={t.common?.back || "Quay lại"}
         >
           <ArrowLeft size={18} />
@@ -369,9 +369,9 @@ const CreateCoursePage = () => {
       </div>
 
       {/* ─── Form Container ─── */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm flex flex-col gap-6 flex-1">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-border shadow-sm flex flex-col gap-6 flex-1">
 
-        <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
+        <h2 className="text-lg font-bold text-gray-900 border-b border-border pb-3">
           {labelCourseInfoTitle}
         </h2>
 
@@ -394,7 +394,7 @@ const CreateCoursePage = () => {
               }}
               role="button"
               tabIndex={0}
-              className="group relative w-full aspect-[4/3] rounded-xl border border-dashed border-gray-200 hover:border-gray-300 bg-gray-50/50 hover:bg-gray-100/50 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden shadow-2xs"
+              className="group relative w-full aspect-[4/3] rounded-xl border border-dashed border-border hover:border-gray-300 bg-gray-50/50 hover:bg-gray-100/50 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 overflow-hidden shadow-2xs"
             >
               <input
                 ref={fileInputRef}
@@ -431,7 +431,7 @@ const CreateCoursePage = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 p-4 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 shadow-2xs flex items-center justify-center text-gray-400 group-hover:text-[#990011] group-hover:scale-105 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-white border border-border shadow-2xs flex items-center justify-center text-gray-400 group-hover:text-[#990011] group-hover:scale-105 transition-all">
                     <Upload size={18} />
                   </div>
                   <div className="space-y-0.5">
@@ -464,7 +464,7 @@ const CreateCoursePage = () => {
                 value={courseName}
                 onChange={(e) => setCourseName(e.target.value)}
                 variant="semi-round"
-                className="!h-11 !rounded-xl bg-gray-50/50 hover:bg-gray-100/50 border border-gray-100 text-sm font-medium text-gray-800"
+                className="!h-11 !rounded-xl bg-gray-50/50 hover:bg-gray-100/50 border border-border text-sm font-medium text-gray-800"
                 containerClassName="!gap-0"
               />
             </div>
@@ -491,7 +491,7 @@ const CreateCoursePage = () => {
                     <button
                       type="button"
                       onClick={toggle}
-                      className="w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border border-gray-100 text-gray-800 hover:bg-gray-100/50 cursor-pointer text-sm font-medium"
+                      className="w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border border-border text-gray-800 hover:bg-gray-100/50 cursor-pointer text-sm font-medium"
                     >
                       <span className={selectedLanguage ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
                         {selectedLanguage || (cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ")}
@@ -522,8 +522,8 @@ const CreateCoursePage = () => {
                       onClick={toggle}
                       disabled={!selectedLanguage}
                       className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition text-sm font-medium border ${!selectedLanguage
-                        ? "bg-gray-50/50 border-gray-100 text-gray-400 cursor-not-allowed opacity-60"
-                        : "bg-gray-50/50 border-gray-100 text-gray-800 hover:bg-gray-100/50 cursor-pointer"
+                        ? "bg-gray-50/50 border-border text-gray-400 cursor-not-allowed opacity-60"
+                        : "bg-gray-50/50 border-border text-gray-800 hover:bg-gray-100/50 cursor-pointer"
                         }`}
                     >
                       <span className={level ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
@@ -572,7 +572,7 @@ const CreateCoursePage = () => {
         </div>
 
         {/* ─── Action Buttons ─── */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-auto w-full">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-border mt-auto w-full">
           {isEditMode && (
             <PillButton
               type="button"

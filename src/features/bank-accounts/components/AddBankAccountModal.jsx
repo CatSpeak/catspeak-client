@@ -195,7 +195,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                           <img
                             src={bank.logo}
                             alt={bank.shortName || bank.name}
-                            className="border border-[#e5e5e5] rounded-xl p-1 bg-white"
+                            className="border border-border rounded-xl p-1 bg-white"
                           />
                         ) : (
                           <Building2 className="text-neutral-400" />
@@ -231,10 +231,10 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                     <img
                       src={selectedBank.logo}
                       alt={selectedBank.shortName || selectedBank.name}
-                      className="w-14 h-14 object-contain shrink-0 border border-[#e5e5e5] rounded-xl p-1 bg-white"
+                      className="w-14 h-14 object-contain shrink-0 border border-border rounded-xl p-1 bg-white"
                     />
                   ) : (
-                    <div className="w-14 h-14 shrink-0 flex items-center justify-center rounded-xl border border-[#e5e5e5] bg-white">
+                    <div className="w-14 h-14 shrink-0 flex items-center justify-center rounded-xl border border-border bg-white">
                       <Building2 className="w-8 h-8 text-neutral-400" />
                     </div>
                   )}

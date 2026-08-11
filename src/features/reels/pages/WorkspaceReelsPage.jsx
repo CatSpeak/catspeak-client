@@ -59,7 +59,7 @@ const WorkspaceReelsContent = ({ userId }) => {
         <Outlet />
       ) : (
         <>
-          <div className="flex justify-between items-center border-b border-gray-200 mb-4">
+          <div className="flex justify-between items-center border-b border-border mb-4">
             <Tabs
               tabs={tabs}
               activeTab={activeTab}

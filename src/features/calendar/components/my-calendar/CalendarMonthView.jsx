@@ -41,7 +41,7 @@ const CalendarMonthView = ({
   return (
     <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto scrollbar-app pr-2">
       {/* Days Header */}
-      <div className="grid grid-cols-7 gap-1 text-center border-b border-[#E5E5E5] pb-4 mb-4">
+      <div className="grid grid-cols-7 gap-1 text-center border-b border-border pb-4 mb-4">
         {DAY_LABELS.map((label) => (
           <div key={label} className="text-base uppercase text-[#1A1A1A] font-medium tracking-wider">
             {label}

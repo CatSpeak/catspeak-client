@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 
 /**
  * A custom-built carousel component with smooth transitions and premium feel.
@@ -26,6 +27,8 @@ const Carousel = ({
   const [isHovered, setIsHovered] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [firstAspectRatio, setFirstAspectRatio] = useState(null)
+
+  useScrollLock(isFullscreen)
 
   useEffect(() => {
     if (!lockToFirstImage || !images[0]?.url) return
@@ -68,17 +71,6 @@ const Carousel = ({
       return () => clearInterval(timer)
     }
   }, [autoPlay, isHovered, isFullscreen, images.length, nextSlide, interval])
-
-  useEffect(() => {
-    if (isFullscreen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
-    }
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isFullscreen])
 
   if (!images || images.length === 0) return null
 
@@ -137,42 +129,41 @@ const Carousel = ({
               src={images[currentIndex].url}
               alt={images[currentIndex].alt || `Slide ${currentIndex}`}
               onClick={() => allowFullscreen && !isFullscreen && setIsFullscreen(true)}
-              className={`relative z-10 w-full h-full transition-all duration-300 ${
-                isFullscreen
+              className={`relative z-10 w-full h-full transition-all duration-300 ${isFullscreen
                   ? "object-contain cursor-default"
                   : `${allowFullscreen ? "cursor-pointer" : "cursor-default"} ${objectFit === "contain" ? "object-contain" : "object-cover"}`
-              }`}
+                }`}
             />
             {/* Subtle overlay */}
             <div className="absolute inset-0 z-20 bg-black/5 pointer-events-none" />
           </motion.div>
         </AnimatePresence>
 
-      {/* Navigation Arrows */}
-      {images.length > 1 && (
-        <>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              prevSlide()
-            }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/60 backdrop-blur-md shadow-md text-cath-red-800 transition-all duration-300 hover:bg-white hover:scale-105 active:scale-95"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft size={24} strokeWidth={2.5} className="ml-[-2px]" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              nextSlide()
-            }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/60 backdrop-blur-md shadow-md text-cath-red-800 transition-all duration-300 hover:bg-white hover:scale-105 active:scale-95"
-            aria-label="Next slide"
-          >
-            <ChevronRight size={24} strokeWidth={2.5} className="mr-[-2px]" />
-          </button>
-        </>
-      )}
+        {/* Navigation Arrows */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                prevSlide()
+              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-10 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/60 backdrop-blur-md shadow-md text-cath-red-800 transition-all duration-300 hover:bg-white hover:scale-105 active:scale-95"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={24} strokeWidth={2.5} className="ml-[-2px]" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                nextSlide()
+              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-10 sm:hidden flex h-10 w-10 items-center justify-center rounded-full bg-white/60 backdrop-blur-md shadow-md text-cath-red-800 transition-all duration-300 hover:bg-white hover:scale-105 active:scale-95"
+              aria-label="Next slide"
+            >
+              <ChevronRight size={24} strokeWidth={2.5} className="mr-[-2px]" />
+            </button>
+          </>
+        )}
       </div>
 
       {/* Desktop Indicators (Under the slide, centered) */}
@@ -185,11 +176,10 @@ const Carousel = ({
                 e.stopPropagation()
                 goToSlide(index)
               }}
-              className={`transition-all duration-300 rounded-full ${
-                currentIndex === index
+              className={`transition-all duration-300 rounded-full ${currentIndex === index
                   ? "w-8 h-2.5 bg-cath-red-700"
                   : "w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400"
-              }`}
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

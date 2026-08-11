@@ -18,7 +18,7 @@ const CommentMoreMenu = ({ onEdit, onDelete }) => {
         </button>
       }
       content={(close) => (
-        <div className="rounded-lg border border-[#E5E5E5] bg-white shadow-lg p-1 flex flex-col gap-1 min-w-max">
+        <div className="rounded-lg border border-border bg-white shadow-lg p-1 flex flex-col gap-1 min-w-max">
           <button
             onClick={() => {
               close()

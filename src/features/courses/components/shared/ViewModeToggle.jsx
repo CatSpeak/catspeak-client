@@ -11,7 +11,7 @@ const ViewModeToggle = ({ value, onChange, className = "" }) => {
   ]
 
   return (
-    <div className={`flex bg-gray-50 p-0.5 rounded-lg border border-gray-100 ${className}`}>
+    <div className={`flex bg-gray-50 p-0.5 rounded-lg border border-border ${className}`}>
       {viewModes.map(({ value: mode, icon, label }) => (
         <button
           key={mode}

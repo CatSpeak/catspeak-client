@@ -125,7 +125,7 @@ const AccountHeader = ({ user, formData, t }) => {
   return (
     <div className="w-full relative mb-16">
       {/* Cover Photo Outer Container */}
-      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-[#e5e5e5]">
+      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-border">
         {/* Cover Photo Image */}
         <div className="relative w-full h-full">
           <img

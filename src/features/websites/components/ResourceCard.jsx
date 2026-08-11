@@ -37,7 +37,7 @@ const ResourceCard = ({ item, resolvePath }) => {
       className="group block focus:outline-none focus:ring-2 focus:ring-rose-500/30 rounded-xl h-full"
     >
       <FluentCard
-        className="relative h-full flex flex-col overflow-hidden border border-[#e5e5e5] bg-white group-hover:border-[var(--brand-color)] shadow-none transition-colors duration-300 !p-0 !min-h-0"
+        className="relative h-full flex flex-col overflow-hidden border border-border bg-white group-hover:border-[var(--brand-color)] shadow-none transition-colors duration-300 !p-0 !min-h-0"
         style={{ "--brand-color": brandColor }}
       >
         {/* Radial Ripple Fill Overlay originating from hover cursor position */}
@@ -71,7 +71,7 @@ const ResourceCard = ({ item, resolvePath }) => {
         >
           {/* Centered White Logo Box */}
           <div
-            className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200/60 group-hover:border-white/50 flex items-center justify-center p-3 transition-all duration-300 shrink-0"
+            className="w-20 h-20 rounded-2xl bg-white shadow-sm border border-border/60 group-hover:border-white/50 flex items-center justify-center p-3 transition-all duration-300 shrink-0"
             style={{
               boxShadow: `0 4px 16px 0 ${brandColor}18`,
             }}

@@ -133,7 +133,7 @@ const ImageUploadInput = ({
             className={`relative flex flex-col items-center justify-center text-center p-6 rounded-xl border-2 border-dashed aspect-video w-full max-sm:aspect-auto max-sm:flex-1 min-h-[240px] sm:min-h-[280px] cursor-pointer ${
               isDragging
                 ? "border-cath-red-700 bg-red-50/40 scale-[0.99]"
-                : "border-[#e5e5e5] bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300"
+                : "border-border bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300"
             }`}
           >
             <UploadCloud className="w-12 h-12 mb-4 text-gray-400" />
@@ -167,7 +167,7 @@ const ImageUploadInput = ({
             className={`relative rounded-xl overflow-hidden border aspect-video w-full max-sm:aspect-auto max-sm:flex-1 min-h-[240px] sm:min-h-[280px] bg-gray-900 ${
               isDragging
                 ? "border-cath-red-700 ring-2 ring-cath-red-700/20"
-                : "border-[#e5e5e5]"
+                : "border-border"
             }`}
           >
             {/* Blurred Backdrop Image */}
@@ -218,7 +218,7 @@ const ImageUploadInput = ({
           className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border-2 border-dashed ${
             isDragging
               ? "border-cath-red-700 bg-red-50/40 scale-[0.99]"
-              : "border-[#e5e5e5] bg-gray-50/50 hover:bg-gray-50 hover:border-gray-300"
+              : "border-border bg-gray-50/50 hover:bg-gray-50 hover:border-gray-300"
           }`}
         >
           <div className="flex items-center gap-3">
@@ -250,11 +250,11 @@ const ImageUploadInput = ({
           className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 rounded-xl border ${
             isDragging
               ? "border-cath-red-700 bg-red-50/30 ring-2 ring-cath-red-700/20"
-              : "border-[#e5e5e5] bg-gray-50"
+              : "border-border bg-gray-50"
           }`}
         >
           {/* Local Image Preview */}
-          <div className="relative w-36 h-20 shrink-0 rounded-lg overflow-hidden border border-[#e5e5e5] bg-gray-900 flex items-center justify-center">
+          <div className="relative w-36 h-20 shrink-0 rounded-lg overflow-hidden border border-border bg-gray-900 flex items-center justify-center">
             <img
               src={previewUrl}
               alt="Uploaded Preview"

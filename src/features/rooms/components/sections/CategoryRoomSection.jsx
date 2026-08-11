@@ -189,7 +189,7 @@ const CategoryRoomSection = ({
                 onClick={goPrev}
                 disabled={!canGoPrev || isFetching}
                 aria-label="Previous rooms"
-                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-[#F0F0F0] active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
               </button>
@@ -209,7 +209,7 @@ const CategoryRoomSection = ({
                 onClick={goNext}
                 disabled={!canGoNext || isFetching}
                 aria-label="Next rooms"
-                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-[#F0F0F0] active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
               </button>

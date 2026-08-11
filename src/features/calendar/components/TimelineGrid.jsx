@@ -12,7 +12,7 @@ const TimelineGrid = ({ hourHeight }) => {
           <div className="w-16 text-sm text-[#606060] font-semibold text-right pr-4 shrink-0 -mt-2.5">
             {i.toString().padStart(2, "0")}:00
           </div>
-          <div className="flex-1 border-t border-gray-200/60"></div>
+          <div className="flex-1 border-t border-border/60"></div>
         </div>
       ))}
     </>

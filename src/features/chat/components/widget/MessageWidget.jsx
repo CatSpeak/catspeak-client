@@ -275,7 +275,7 @@ const MessageWidget = () => {
             <Link
               to={activeConversationId ? `/chat/${activeConversationId}` : "/chat"}
               onClick={() => dispatch(closeWidget())}
-              className="h-12 flex items-center justify-center gap-2 border-t border-[#e5e5e5] px-4 text-sm text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
+              className="h-12 flex items-center justify-center gap-2 border-t border-border px-4 text-sm text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
             >
               <ExternalLink size={20} />
               See all in Chat
@@ -323,7 +323,7 @@ const MessageWidget = () => {
           }
           dispatch(toggleWidget())
         }}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-primaryBg hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
         aria-label="Tin nhắn"
       >
         <MessageCircle size={20} />

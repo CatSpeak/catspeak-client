@@ -176,7 +176,7 @@ const PublicClassDetailPage = () => {
           <div className="lg:col-span-8 flex flex-col gap-12">
             {/* About / Class Overview */}
             <section id="about" className="scroll-mt-24">
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
+              <div className="bg-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
                 <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mb-4">
                   {pc.overviewTitle || "Giới Thiệu Chi Tiết Về Lớp Học"}
                 </h2>
@@ -214,7 +214,7 @@ const PublicClassDetailPage = () => {
       </main>
 
       {/* Fixed Bottom CTA Bar (Mobile & Tablet) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200 p-4 shadow-2xl flex items-center justify-between gap-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-border p-4 shadow-2xl flex items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
             {c.tuition || pc.tuitionFeeFull || "Học phí trọn gói"}

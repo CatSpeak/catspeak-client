@@ -124,7 +124,7 @@ const DesktopCommunityDropdown = ({ navKey }) => {
                 <FluentAnimation
                   direction="down"
                   exit
-                  className="rounded-lg border border-[#E5E5E5] shadow-lg bg-white overflow-hidden"
+                  className="rounded-lg border border-border shadow-lg bg-white overflow-hidden"
                 >
                   <div className="flex flex-col gap-1 p-1 whitespace-nowrap">
                     {LANGUAGE_CONFIG.map((config) => {

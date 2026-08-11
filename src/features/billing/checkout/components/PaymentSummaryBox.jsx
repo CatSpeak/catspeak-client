@@ -39,7 +39,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
   const formattedTotal = `${new Intl.NumberFormat(language === "vi" ? "vi-VN" : "en-US").format(plan.price)}₫`; // VAT 0% makes total equal to price
 
   return (
-    <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm sticky top-24 space-y-6">
+    <div className="bg-white border border-border rounded-3xl p-6 shadow-sm sticky top-24 space-y-6">
       <h2 className="text-xl font-bold text-gray-900">
         {t.billing?.checkout?.paymentDetails || "Thông tin thanh toán"}
       </h2>
@@ -78,7 +78,7 @@ const PaymentSummaryBox = ({ t, language, plan, isProcessing, onSubmit }) => {
           <span className="text-gray-900">0₫</span>
         </div>
 
-        <hr className="border-gray-100 my-2" />
+        <hr className="border-border my-2" />
 
         <div className="flex justify-between items-baseline">
           <span className="text-sm font-bold text-gray-900">

@@ -115,7 +115,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
           <>
             <ListItem
               lines={1}
-              className="border-b border-[#E5E5E5] shrink-0"
+              className="border-b border-border shrink-0"
               leftContent={<Sparkles className="text-cath-red-700" />}
               rightContent={
                 <div onClick={(e) => e.stopPropagation()}>

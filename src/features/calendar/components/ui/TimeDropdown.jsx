@@ -123,8 +123,8 @@ const TimeDropdown = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`hover:bg-[#f0f0f0] flex items-center justify-center rounded-md px-4 h-12 outline-none bg-white min-w-[90px] transition-all border ${
-          isOpen ? "border-2" : "border-[#e5e5e5]"
+        className={`hover:bg-primaryBg flex items-center justify-center rounded-md px-4 h-12 outline-none bg-white min-w-[90px] transition-all border ${
+          isOpen ? "border-2" : "border-border"
         }`}
         style={isOpen ? { borderColor: color } : {}}
       >
@@ -164,7 +164,7 @@ const TimeDropdown = ({
                     <FluentAnimation
                       direction={portalCoords.flipUp ? "up" : "down"}
                       exit={true}
-                      className="pointer-events-auto w-full h-full flex flex-col bg-white border border-[#E5E5E5] rounded-2xl shadow-lg overflow-hidden"
+                      className="pointer-events-auto w-full h-full flex flex-col bg-white border border-border rounded-2xl shadow-lg overflow-hidden"
                     >
                       <div
                         ref={listRef}

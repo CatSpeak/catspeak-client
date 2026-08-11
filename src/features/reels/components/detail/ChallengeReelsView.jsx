@@ -76,7 +76,7 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
       {/* Header specific to selected challenge */}
       <div className="flex items-start sm:items-center justify-between mb-6 pb-2 gap-2">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-border">
             <img 
               src={selectedChallenge.bannerUrl || fallbackChallengeCard} 
               alt="" 
@@ -132,7 +132,7 @@ export default function ChallengeReelsView({ challengeId, selectedChallenge, cha
             )}
           </>
         ) : (
-          <div className="w-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+          <div className="w-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-border">
             <span className="text-3xl block mb-2">🎈</span>
             <p className="text-sm font-semibold text-gray-500">
               {t.catSpeak.reels.noReelsFound || "Không tìm thấy Thước phim nào."}

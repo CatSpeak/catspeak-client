@@ -18,6 +18,7 @@ import {
   Users,
   BarChart,
   CalendarDays,
+  Compass,
 } from "lucide-react"
 
 export const navSections = [
@@ -27,10 +28,10 @@ export const navSections = [
     items: [
       { key: "community", path: "/community", icon: Home },
       {
-        key: "messages",
-        label: "Chat",
-        path: "/chat",
-        icon: MessageCircle,
+        key: "exploreCourses",
+        label: "Explore Courses",
+        path: "/explore-courses",
+        icon: Compass,
       },
       {
         key: "learningResources",
@@ -90,14 +91,6 @@ export const navLinks = [
     ],
   },
   {
-    key: "messages",
-    label: "Chat",
-    path: "/chat",
-    icon: MessageCircle,
-    isPrivate: true,
-    showOnHorizontalBar: false,
-  },
-  {
     key: "workspace",
     hasDropdown: true,
     icon: Briefcase,
@@ -121,6 +114,13 @@ export const navLinks = [
     key: "horizontalBar",
     label: "Horizontal bar",
     isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  {
+    key: "exploreCourses",
+    label: "Explore Courses",
+    path: "/explore-courses",
+    icon: Compass,
     showOnHorizontalBar: false,
   },
   {

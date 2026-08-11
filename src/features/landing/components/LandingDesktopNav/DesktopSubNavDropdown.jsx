@@ -101,7 +101,7 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
               distance={12}
               duration={0.22}
               exit
-              className="rounded-xl border border-[#E5E5E5] shadow-xl bg-white overflow-hidden"
+              className="rounded-xl border border-border shadow-xl bg-white overflow-hidden"
             >
               <div className="flex flex-col gap-0.5 p-1.5">
                 {subItems

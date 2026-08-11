@@ -56,7 +56,7 @@ const ProfileHeader = ({ avatarImageUrl, onUpdateAvatarFile, username, t }) => {
               <button
                 onClick={handleEditClick}
                 disabled={isUploading}
-                className="absolute bottom-0 right-0 bg-white border border-gray-200 rounded-full p-1.5 shadow-sm text-gray-600 hover:text-[#990011] hover:bg-gray-50 transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute bottom-0 right-0 bg-white border border-border rounded-full p-1.5 shadow-sm text-gray-600 hover:text-[#990011] hover:bg-gray-50 transition-colors opacity-0 group-hover:opacity-100"
               >
                 <Pencil size={14} />
               </button>

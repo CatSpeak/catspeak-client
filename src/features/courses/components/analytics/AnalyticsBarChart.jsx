@@ -9,7 +9,7 @@ const AnalyticsBarChart = ({ rows = [], formatter = (val) => numberVi(val) }) =>
 
   if (rows.length === 0) {
     return (
-      <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-400">
+      <div className="flex min-h-[180px] items-center justify-center rounded-xl border border-dashed border-border text-sm text-gray-400">
         {noDataText}
       </div>
     )

@@ -183,7 +183,7 @@ const ExploreCoursesPage = () => {
       </div>
 
       {/* ─── Category Tabs ─── */}
-      <div className="border-b border-slate-200/80 pb-px">
+      <div className="border-b border-border/80 pb-px">
         <CourseTabs
           tabs={categoryTabs}
           activeTab={contentType}
@@ -195,7 +195,7 @@ const ExploreCoursesPage = () => {
       </div>
 
       {/* ─── Sleek E-Commerce Filter Bar ─── */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs flex flex-col gap-3.5">
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-border/80 shadow-xs flex flex-col gap-3.5">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full justify-between">
           {/* Search Input */}
           <div className="flex-1 min-w-0">
@@ -240,7 +240,7 @@ const ExploreCoursesPage = () => {
                 onClick={() => setShowPricePopover((prev) => !prev)}
                 className={`h-9 px-3.5 rounded-full border text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${hasPriceFilter || showPricePopover
                   ? "border-[#b20a1c] bg-rose-50 text-[#b20a1c] ring-2 ring-rose-100"
-                  : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
+                  : "border-border bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
                   }`}
               >
                 <Coins size={14} className={hasPriceFilter ? "text-[#b20a1c]" : "text-slate-500"} />
@@ -253,7 +253,7 @@ const ExploreCoursesPage = () => {
 
               {/* Price Popover Dropdown Card */}
               {showPricePopover && (
-                <div className="absolute right-0 top-11 z-50 w-80 bg-white border border-slate-200 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 animate-fadeIn">
+                <div className="absolute right-0 top-11 z-50 w-80 bg-white border border-border rounded-3xl p-5 shadow-2xl flex flex-col gap-4 animate-fadeIn">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                     <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
                       <Sparkles size={14} className="text-[#b20a1c]" /> Lọc Theo Học Phí
@@ -276,7 +276,7 @@ const ExploreCoursesPage = () => {
                         onClick={() => setPricePreset("", "")}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "" && maxPriceInput === ""
                           ? "bg-slate-950 text-white"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/60"
+                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
                         Tất cả giá
@@ -286,7 +286,7 @@ const ExploreCoursesPage = () => {
                         onClick={() => setPricePreset("0", "500000")}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "0" && maxPriceInput === "500000"
                           ? "bg-[#b20a1c] text-white"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/60"
+                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
                         Dưới 500.000 đ
@@ -296,7 +296,7 @@ const ExploreCoursesPage = () => {
                         onClick={() => setPricePreset("500000", "2000000")}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "500000" && maxPriceInput === "2000000"
                           ? "bg-[#b20a1c] text-white"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/60"
+                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
                         500k - 2 triệu
@@ -306,7 +306,7 @@ const ExploreCoursesPage = () => {
                         onClick={() => setPricePreset("2000000", "")}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold text-left transition-all ${minPriceInput === "2000000" && maxPriceInput === ""
                           ? "bg-[#b20a1c] text-white"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/60"
+                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
                         Trên 2 triệu
@@ -327,7 +327,7 @@ const ExploreCoursesPage = () => {
                           setMinPriceInput(e.target.value)
                           setCurrentPage(1)
                         }}
-                        className="w-full h-9 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white"
+                        className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white"
                       />
                       <span className="text-slate-400 font-bold text-xs">-</span>
                       <input
@@ -339,7 +339,7 @@ const ExploreCoursesPage = () => {
                           setMaxPriceInput(e.target.value)
                           setCurrentPage(1)
                         }}
-                        className="w-full h-9 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white"
+                        className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white"
                       />
                     </div>
                   </div>
@@ -427,7 +427,7 @@ const ExploreCoursesPage = () => {
           <div
             role="status"
             aria-live="polite"
-            className="flex min-h-[360px] items-center justify-center rounded-3xl border border-slate-200/80 bg-white p-6 shadow-xs"
+            className="flex min-h-[360px] items-center justify-center rounded-3xl border border-border/80 bg-white p-6 shadow-xs"
           >
             <LoadingSpinner />
             <span className="sr-only">
@@ -460,7 +460,7 @@ const ExploreCoursesPage = () => {
         ) : combinedCatalog.length === 0 ? (
           <div
             role="status"
-            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xs"
+            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 bg-white p-8 text-center shadow-xs"
           >
             <Compass size={52} aria-hidden="true" className="text-slate-300 stroke-[1.2]" />
             <h3 className="text-lg font-extrabold text-slate-800">

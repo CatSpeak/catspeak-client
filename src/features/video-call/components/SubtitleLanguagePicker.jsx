@@ -26,7 +26,7 @@ const SubtitleLanguagePicker = ({
   onClose,
   onBack,
   backLabel = "Back",
-  className = "w-full rounded-lg border border-[#E5E5E5] bg-white shadow-lg",
+  className = "w-full rounded-lg border border-border bg-white shadow-lg",
 }) => {
   const ref = useRef(null)
 
@@ -55,7 +55,7 @@ const SubtitleLanguagePicker = ({
           <p className="px-2 py-2 text-xs font-medium text-gray-500">{label}</p>
         ) : null}
         
-        {(onBack || label) && <div className="mb-1 border-t border-[#E5E5E5]"></div>}
+        {(onBack || label) && <div className="mb-1 border-t border-border"></div>}
         <div className="flex flex-col gap-1">
           {languages.map((lang) => (
             <button

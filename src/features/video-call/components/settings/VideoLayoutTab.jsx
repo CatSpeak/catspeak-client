@@ -40,7 +40,7 @@ const VideoLayoutTab = ({
             className={`p-1.5 border rounded-md transition-colors ${
               layoutMode === "auto"
                 ? "border-[#1A73E8] bg-[#E8F0FE]/50"
-                : "border-gray-200 group-hover:border-gray-300"
+                : "border-border group-hover:border-gray-300"
             }`}
           >
             <LayoutIconAuto />
@@ -65,7 +65,7 @@ const VideoLayoutTab = ({
             className={`p-1.5 border rounded-md transition-colors ${
               layoutMode === "grid"
                 ? "border-[#1A73E8] bg-[#E8F0FE]/50"
-                : "border-gray-200 group-hover:border-gray-300"
+                : "border-border group-hover:border-gray-300"
             }`}
           >
             <LayoutIconGrid />
@@ -90,7 +90,7 @@ const VideoLayoutTab = ({
             className={`p-1.5 border rounded-md transition-colors ${
               layoutMode === "spotlight"
                 ? "border-[#1A73E8] bg-[#E8F0FE]/50"
-                : "border-gray-200 group-hover:border-gray-300"
+                : "border-border group-hover:border-gray-300"
             }`}
           >
             <LayoutIconSpotlight />
@@ -115,7 +115,7 @@ const VideoLayoutTab = ({
             className={`p-1.5 border rounded-md transition-colors ${
               layoutMode === "sidebar"
                 ? "border-[#1A73E8] bg-[#E8F0FE]/50"
-                : "border-gray-200 group-hover:border-gray-300"
+                : "border-border group-hover:border-gray-300"
             }`}
           >
             <LayoutIconSidebar />
@@ -125,7 +125,7 @@ const VideoLayoutTab = ({
 
       {/* Tiles count */}
       <div
-        className={`flex flex-col mb-4 transition-opacity border-t border-[#E5E5E5] pt-4 ${
+        className={`flex flex-col mb-4 transition-opacity border-t border-border pt-4 ${
           layoutMode !== "grid" && layoutMode !== "auto"
             ? "opacity-50 pointer-events-none"
             : ""
@@ -160,7 +160,7 @@ const VideoLayoutTab = ({
       </div>
 
       {/* Hide empty tiles */}
-      <div className="flex items-center justify-between border-t border-[#E5E5E5] pt-4">
+      <div className="flex items-center justify-between border-t border-border pt-4">
         <span className="text-[15px] font-medium">
           {changeLayoutT.hideNonVideo || "Ẩn ô không có video"}
         </span>

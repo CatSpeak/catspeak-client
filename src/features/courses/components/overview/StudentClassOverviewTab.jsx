@@ -136,7 +136,7 @@ const StudentClassOverviewTab = ({
         </div>
 
         {/* Schedule & Information Details */}
-        <div className="bg-white rounded-3xl border border-gray-100 p-6 md:p-8 shadow-xs flex flex-col gap-6">
+        <div className="bg-white rounded-3xl border border-border p-6 md:p-8 shadow-xs flex flex-col gap-6">
           <h3 className="text-lg font-black text-gray-950 tracking-tight">
             {cd.classInformation || "Class Information"}
           </h3>
@@ -176,15 +176,15 @@ const StudentClassOverviewTab = ({
 
         {/* Teacher / Coach Information */}
         {instructorName && (
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col sm:flex-row gap-5 items-start sm:items-center">
             {instructorAvatar ? (
               <img
-                className="w-14 h-14 rounded-full object-cover border border-gray-100 shrink-0"
+                className="w-14 h-14 rounded-full object-cover border border-border shrink-0"
                 src={instructorAvatar}
                 alt=""
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center font-black text-gray-600">
+              <div className="w-14 h-14 rounded-full bg-gray-100 border border-border flex items-center justify-center font-black text-gray-600">
                 {instructorName.charAt(0).toLocaleUpperCase()}
               </div>
             )}
@@ -209,7 +209,7 @@ const StudentClassOverviewTab = ({
       {showRightColumn && (
         <div className="flex flex-col gap-8">
           {/* Next Live Session countdown */}
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
+          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
             <h3 className="text-lg font-black text-gray-950 tracking-tight">
               {upcomingSessionLabel}
             </h3>
@@ -221,7 +221,7 @@ const StudentClassOverviewTab = ({
                 />
 
                 <div className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2 border-b border-gray-100 pb-4 text-xs font-semibold text-gray-500">
+                  <div className="flex flex-col gap-2 border-b border-border pb-4 text-xs font-semibold text-gray-500">
                     <div className="flex items-center gap-2">
                       <Clock size={14} className="text-gray-400" />
                       <span>
@@ -272,7 +272,7 @@ const StudentClassOverviewTab = ({
           </div>
 
           {/* Attendance progress card */}
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col items-center text-center gap-4">
+          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col items-center text-center gap-4">
             <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider self-start">
               {c.student?.progress || "Study Progress"}
             </h3>

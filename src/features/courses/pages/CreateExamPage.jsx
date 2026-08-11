@@ -915,7 +915,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     if (isAnswered) {
       return "w-10 h-10 rounded-full flex items-center justify-center bg-red-50/70 border border-red-200 text-[#990011] font-extrabold hover:bg-red-50 cursor-pointer shadow-xs select-none"
     }
-    return "w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 border border-gray-150 text-gray-700 font-extrabold hover:bg-gray-100 cursor-pointer shadow-xs select-none"
+    return "w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 border border-border text-gray-700 font-extrabold hover:bg-gray-100 cursor-pointer shadow-xs select-none"
   }
 
   const isLocallyCreatedQuiz = Boolean(
@@ -1039,7 +1039,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
 
         {/* ─── Sub-header Row ─── */}
-        <div className="bg-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 shadow-xs shrink-0 select-none">
+        <div className="bg-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border shadow-xs shrink-0 select-none">
           <div className="flex flex-col gap-1.5">
             <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
               {title || p.unnamedExam}
@@ -1073,26 +1073,26 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {/* Left Area: Active Question card */}
           <div className="flex-1 flex flex-col gap-6">
             {questions.length === 0 ? (
-              <div className="bg-white rounded-3xl border border-gray-150 p-12 text-center text-gray-400 font-bold shadow-xs">
+              <div className="bg-white rounded-3xl border border-border p-12 text-center text-gray-400 font-bold shadow-xs">
                 {p.emptyQuestions}
               </div>
             ) : (
-              <div className="bg-white rounded-3xl border border-gray-150 p-6 md:p-8 flex flex-col gap-6 shadow-xs">
+              <div className="bg-white rounded-3xl border border-border p-6 md:p-8 flex flex-col gap-6 shadow-xs">
 
                 {/* Card Title & Score info */}
-                <div className="flex justify-between items-center border-b border-gray-100 pb-4 select-none">
+                <div className="flex justify-between items-center border-b border-border pb-4 select-none">
                   <h2 className="text-lg font-black text-[#990011] tracking-tight">
                     {(ce.questionNumber || "Question {{number}}")
                       .replace("{{number}}", previewCurrentIndex + 1)}
                   </h2>
-                  <span className="px-3.5 py-1.5 bg-gray-50 border border-gray-150 rounded-xl text-xs font-bold text-gray-500">
+                  <span className="px-3.5 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-bold text-gray-500">
                     {currentQuestion.score} {p.points}
                   </span>
                 </div>
 
                 {/* Question Image Media (Image on top) */}
                 {currentQuestion.mediaUrl && !currentQuestion.clearMedia && (
-                  <div className="rounded-2xl overflow-hidden border border-gray-150 bg-gray-50 flex items-center justify-center p-2">
+                  <div className="rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
                     <img
                       src={currentQuestion.mediaUrl}
                       alt={(ce.questionImageAlt || "Illustration for question {{number}}")
@@ -1132,7 +1132,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                           onClick={() => handleSelectOption(currentQuestion.id, optIdx)}
                           className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
                             ? "border-[#990011] bg-red-50/10"
-                            : "border-gray-200 bg-gray-50/50 hover:bg-gray-150/30"
+                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
                             }`}
                         >
                           <span aria-hidden="true" className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] bg-red-50/10" : "border-gray-300"
@@ -1167,7 +1167,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                           }}
                           className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
                             ? "border-[#990011] bg-red-50/10"
-                            : "border-gray-200 bg-gray-50/50 hover:bg-gray-150/30"
+                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
                             }`}
                         >
                           <span
@@ -1195,7 +1195,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                           onClick={() => handleSelectOption(currentQuestion.id, optIdx)}
                           className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
                             ? "border-[#990011] bg-red-50/10"
-                            : "border-gray-200 bg-gray-50/50 hover:bg-gray-150/30"
+                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
                             }`}
                         >
                           <span aria-hidden="true" className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] bg-red-50/10" : "border-gray-300"
@@ -1221,7 +1221,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       setPreviewAnswers((prev) => ({ ...prev, [currentQuestion.id]: val }))
                     }}
                     placeholder={ce.answerPlaceholder || "Enter answer here..."}
-                    className="w-full p-4 border border-gray-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011]"
+                    className="w-full p-4 border border-border rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011]"
                   />
                 ) : (
                   /* Essay Answer Area */
@@ -1233,7 +1233,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       setPreviewAnswers((prev) => ({ ...prev, [currentQuestion.id]: val }))
                     }}
                     placeholder={p.essayPlaceholder}
-                    className="w-full p-4 border border-gray-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] min-h-[140px] resize-y transition-all"
+                    className="w-full p-4 border border-border rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] min-h-[140px] resize-y transition-all"
                   />
                 )}
 
@@ -1243,8 +1243,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
           {/* Right Area: Questions Grid sidebar */}
           <div className="w-full lg:w-80 shrink-0 select-none">
-            <div className="bg-white rounded-3xl border border-gray-150 p-6 flex flex-col gap-5 shadow-xs">
-              <div className="flex items-center gap-2 text-gray-800 border-b border-gray-100 pb-3">
+            <div className="bg-white rounded-3xl border border-border p-6 flex flex-col gap-5 shadow-xs">
+              <div className="flex items-center gap-2 text-gray-800 border-b border-border pb-3">
                 <LayoutGrid size={18} className="text-[#990011]" />
                 <h3 className="text-sm font-black tracking-tight">{p.questionsList}</h3>
               </div>
@@ -1271,7 +1271,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               {/* Legend details */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-[10px] font-bold text-gray-500 pl-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-gray-50 border border-gray-150 flex items-center justify-center text-gray-700 text-[10px]" />
+                  <span className="w-5 h-5 rounded-full bg-gray-50 border border-border flex items-center justify-center text-gray-700 text-[10px]" />
                   <span>{p.unanswered}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1397,7 +1397,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         {/* ─── Main Form Panel (Left) ─── */}
         <div className="flex-1 flex flex-col gap-6 w-full">
           {/* Card: Base Info */}
-          <div className="bg-white border border-gray-150 rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
+          <div className="bg-white border border-border rounded-3xl p-6 flex flex-col gap-4 shadow-sm">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-gray-800">
                 {ce.examNameLabel || "Tên bài kiểm tra"} <span className="text-red-500">*</span>
@@ -1407,7 +1407,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 value={title}
                 onChange={(e) => setFormField("title", e.target.value)}
                 placeholder={ce.examNamePlaceholder || "Nhập tên bài kiểm tra (VD: Bài kiểm tra giữa kỳ)"}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm"
+                className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm"
                 required
               />
             </div>
@@ -1459,12 +1459,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 onDragEnd={handleDragEnd}
                 className={`relative bg-white border rounded-3xl overflow-hidden flex shadow-xs group transition-all duration-200 ${draggedIndex === idx
                   ? "opacity-40 border-dashed border-[#990011] scale-[0.99] bg-red-50/5"
-                  : "border-gray-150 border-solid"
+                  : "border-border border-solid"
                   }`}
               >
 
                 {/* Left drag-bar */}
-                <div className="w-12 bg-gray-50 border-r border-gray-100 flex flex-col items-center py-4 gap-1.5 select-none shrink-0">
+                <div className="w-12 bg-gray-50 border-r border-border flex flex-col items-center py-4 gap-1.5 select-none shrink-0">
                   <button
                     type="button"
                     onClick={() => handleMoveQuestion(idx, "up")}
@@ -1519,7 +1519,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                         <select
                           value={q.type}
                           onChange={(e) => handleQuestionTypeChange(idx, e.target.value)}
-                          className="pl-3 pr-8 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
+                          className="pl-3 pr-8 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
                         >
                           <option value="MultipleChoiceSingle">{ce.mcqSingleOption || "Trắc nghiệm (1 đáp án)"}</option>
                           <option value="MultipleChoiceMultiple">{ce.mcqMultipleOption || "Trắc nghiệm (Nhiều đáp án)"}</option>
@@ -1535,7 +1535,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     <div className="flex items-center gap-2 shrink-0">
                       {/* Media Image Upload Icon Button */}
                       <label
-                        className="p-1.5 border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
+                        className="p-1.5 border border-border bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
                         title={ce.uploadImage || "Upload image"}
                       >
                         <ImageIcon size={15} className="text-[#990011]" />
@@ -1555,7 +1555,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
                       {/* Audio Upload Icon Button */}
                       <label
-                        className="p-1.5 border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
+                        className="p-1.5 border border-border bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
                         title={ce.uploadAudio || "Upload audio"}
                       >
                         <MusicIcon size={15} className="text-[#990011]" />
@@ -1581,7 +1581,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                           step="0.1"
                           value={q.score}
                           onChange={(e) => handleScoreChange(idx, e.target.value)}
-                          className="w-16 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-center text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                          className="w-16 px-2 py-1.5 bg-gray-50 border border-border rounded-xl text-center text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                         />
                       </div>
                     </div>
@@ -1597,7 +1597,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     <>
                       {/* Image Media Preview (Image on top) */}
                       {q.mediaUrl && !q.clearMedia && (
-                        <div className="relative rounded-2xl overflow-hidden max-h-64 border border-gray-200 bg-gray-50 flex items-center justify-center p-2 group/img">
+                        <div className="relative rounded-2xl overflow-hidden max-h-64 border border-border bg-gray-50 flex items-center justify-center p-2 group/img">
                           <img
                             src={q.mediaUrl}
                             alt={(ce.questionImageAlt || "Illustration for question {{number}}")
@@ -1640,7 +1640,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                         value={q.content}
                         onChange={(e) => handleQuestionContentChange(idx, e.target.value)}
                         placeholder={ce.questionContentPlaceholder || "Enter question content..."}
-                        className="w-full p-3 border border-gray-150 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] resize-none h-18 transition-all"
+                        className="w-full p-3 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] resize-none h-18 transition-all"
                       />
 
                       {/* Type-Specific Options Area */}
@@ -1674,7 +1674,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                     .replace("{{letter}}", String.fromCharCode(65 + optIdx))}
                                   className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
                                     ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                                    : "border-gray-200 focus:ring-1 focus:ring-red-100 focus:border-gray-300"
+                                    : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
                                     }`}
                                 />
 
@@ -1727,7 +1727,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                     .replace("{{letter}}", String.fromCharCode(65 + optIdx))}
                                   className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
                                     ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                                    : "border-gray-200 focus:ring-1 focus:ring-red-100 focus:border-gray-300"
+                                    : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
                                     }`}
                                 />
                                 <button
@@ -1788,7 +1788,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             value={(q.correctAnswers || [""])[0] || ""}
                             onChange={(e) => handleFillInBlankAnswerChange(idx, e.target.value)}
                             placeholder={ce.fillBlankPlaceholder || "Enter the correct answer..."}
-                            className="w-full max-w-md px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                            className="w-full max-w-md px-3 py-2 border border-border rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                           />
                         </div>
                       ) : (
@@ -1802,17 +1802,17 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                               type="number"
                               value={q.maxWordCount || 500}
                               onChange={(e) => handleMaxWordCountChange(idx, e.target.value)}
-                              className="w-24 px-3 py-1.5 border border-gray-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                              className="w-24 px-3 py-1.5 border border-border rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                             />
                           </div>
-                          <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs text-gray-400 font-medium italic">
+                          <div className="bg-gray-50 border border-border rounded-2xl p-4 text-xs text-gray-400 font-medium italic">
                             {ce.essayResponseHelp || "Student essay response area."}
                           </div>
                         </div>
                       )}
 
                       {/* Skill Tag & Tip Text Row */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border">
                         {/* Skill Tag */}
                         <div className="flex flex-col gap-1">
                           <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
@@ -1830,7 +1830,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                               })
                             }}
                             placeholder={ce.skillTagPlaceholder || "e.g. Grammar, Vocabulary..."}
-                            className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                            className="w-full px-3 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                           />
                         </div>
 
@@ -1851,7 +1851,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                               })
                             }}
                             placeholder={ce.tipTextPlaceholder || "Hint for students..."}
-                            className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                            className="w-full px-3 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
                           />
                         </div>
                       </div>
@@ -1925,8 +1925,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
 
         {/* ─── Settings Panel (Right) ─── */}
-        <div className="w-full lg:w-[320px] bg-white border border-gray-150 rounded-3xl p-6 flex flex-col gap-5 shadow-sm shrink-0 lg:sticky lg:top-4">
-          <h2 className="text-lg font-black text-gray-900 border-b border-gray-100 pb-3">
+        <div className="w-full lg:w-[320px] bg-white border border-border rounded-3xl p-6 flex flex-col gap-5 shadow-sm shrink-0 lg:sticky lg:top-4">
+          <h2 className="text-lg font-black text-gray-900 border-b border-border pb-3">
             {ce.sidebarTitle || "Cấu hình bài kiểm tra"}
           </h2>
 
@@ -1940,7 +1940,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               min="1"
               value={duration}
               onChange={(e) => setFormField("duration", e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] font-bold"
+              className="w-full px-3 py-2 bg-gray-50 border border-border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] font-bold"
               placeholder={ce.minutesPlaceholder || "Minutes"}
             />
           </div>
@@ -1954,7 +1954,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               <select
                 value={maxAttempts}
                 onChange={(e) => setFormField("maxAttempts", Number(e.target.value))}
-                className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
+                className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
               >
                 {Number.isInteger(Number(maxAttempts))
                   && Number(maxAttempts) > 0
@@ -1991,7 +1991,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               max="100"
               value={passPercent}
               onChange={(e) => setFormField("passPercent", Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0)))}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011]"
+              className="w-full px-3 py-2 bg-gray-50 border border-border rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011]"
               placeholder="50"
             />
           </div>
@@ -2148,7 +2148,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 <select
                   value={scoreScale}
                   onChange={(e) => setFormField("scoreScale", e.target.value)}
-                  className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
+                  className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
                 >
                   <option value="scale10">{ce.scale10 || "Thang điểm 10"}</option>
                   <option value="scale100">{ce.scale100 || "Thang điểm 100"}</option>
@@ -2166,7 +2166,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 <select
                   value={resultRelease}
                   onChange={(e) => setFormField("resultRelease", e.target.value)}
-                  className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
+                  className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
                 >
                   <option value="manual">{ce.releaseManual || "Công bố thủ công"}</option>
                   <option value="automatic">{ce.releaseAutomatic || "Tự động công bố sau khi chấm"}</option>
@@ -2260,7 +2260,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       </form>
 
       {/* ─── Footer Buttons ─── */}
-      <div className="flex justify-between items-center py-4 border-t border-gray-150 mt-4">
+      <div className="flex justify-between items-center py-4 border-t border-border mt-4">
         <button
           type="button"
           onClick={handleCancel}
@@ -2275,7 +2275,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             type="button"
             disabled={isSubmitting}
             onClick={handlePreview}
-            className="p-2.5 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
+            className="p-2.5 border border-border hover:bg-gray-50 text-gray-600 rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
             title={ce.previewLabel || "Preview"}
           >
             <Eye size={18} />

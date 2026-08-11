@@ -124,7 +124,7 @@ const StoryInputBar = ({
           </div>
 
           {/* Display mode toggle */}
-          <div className="flex h-9 items-center rounded-full bg-[#f0f0f0] p-0.5">
+          <div className="flex h-9 items-center rounded-full bg-primaryBg p-0.5">
             <button
               type="button"
               onClick={() => onDisplayModeChange?.("grid")}

@@ -36,14 +36,14 @@ const GameSetupModal = ({ open, onClose }) => {
       open={open}
       onClose={onClose}
       title={t.rooms?.game?.setup?.title || "Start a game"}
-      className="bg-white text-slate-900 w-full max-w-2xl md:rounded-3xl overflow-hidden md:border border-gray-200 shadow-2xl"
-      headerClassName="flex items-center justify-between p-4 pl-6 border-b border-gray-100"
+      className="bg-white text-slate-900 w-full max-w-2xl md:rounded-3xl overflow-hidden md:border border-border shadow-2xl"
+      headerClassName="flex items-center justify-between p-4 pl-6 border-b border-border"
       fullScreenOnMobile={true}
     >
       <div className="py-5 px-6 text-slate-600 flex flex-col gap-5">
 
         {/* Read-only language chip + locked note */}
-        <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl">
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-gray-50 border border-border rounded-xl">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-xs uppercase tracking-wider text-slate-400 font-bold shrink-0">
               {t.rooms?.game?.setup?.selectLanguage || "Language"}
@@ -64,7 +64,7 @@ const GameSetupModal = ({ open, onClose }) => {
             onClick={() => setSelectedGame("picture_it")}
             className={`flex flex-col text-left p-4 rounded-2xl border-2 transition-all ${selectedGame === "picture_it"
                 ? "border-cath-red-600 bg-red-50"
-                : "border-gray-200 bg-white hover:border-gray-300"
+                : "border-border bg-white hover:border-gray-300"
               }`}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -84,7 +84,7 @@ const GameSetupModal = ({ open, onClose }) => {
             onClick={() => setSelectedGame("crack_it")}
             className={`flex flex-col text-left p-4 rounded-2xl border-2 transition-all ${selectedGame === "crack_it"
                 ? "border-cath-red-600 bg-red-50"
-                : "border-gray-200 bg-white hover:border-gray-300"
+                : "border-border bg-white hover:border-gray-300"
               }`}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -127,7 +127,7 @@ const GameSetupModal = ({ open, onClose }) => {
               <button
                 type="button"
                 onClick={toggle}
-                className="w-full flex items-center justify-between bg-white border border-gray-200 text-slate-800 rounded-xl px-4 h-12 outline-none hover:border-cath-red-400 transition-all shadow-sm font-medium"
+                className="w-full flex items-center justify-between bg-white border border-border text-slate-800 rounded-xl px-4 h-12 outline-none hover:border-cath-red-400 transition-all shadow-sm font-medium"
               >
                 <span className="truncate text-sm">{selectedOption?.label || t.rooms?.game?.setup?.levelMedium || "Medium"}</span>
                 <svg className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,7 +139,7 @@ const GameSetupModal = ({ open, onClose }) => {
         </div>
       </div>
 
-      <div className="flex gap-3 p-4 border-t border-gray-100 bg-gray-50">
+      <div className="flex gap-3 p-4 border-t border-border bg-gray-50">
         <button
           onClick={onClose}
           className="flex-1 py-3 px-4 rounded-xl font-bold bg-gray-200 hover:bg-gray-300 text-slate-700 transition-all"

@@ -19,7 +19,7 @@ const CourseSelectFilter = ({
       value={value}
       onChange={(val) => onChange(val)}
       disabled={disabled}
-      dropdownClassName="min-w-[170px] shadow-xl border border-slate-200/80 rounded-2xl p-1.5 z-50 bg-white"
+      dropdownClassName="min-w-[170px] shadow-xl border border-border/80 rounded-2xl p-1.5 z-50 bg-white"
       activeColor="#b20a1c"
       renderOption={(option, isSelected) => (
         <div
@@ -42,7 +42,7 @@ const CourseSelectFilter = ({
           title={title}
           className={`h-9 px-3.5 rounded-full border text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer shadow-2xs outline-none ${isOpen
               ? "border-[#b20a1c] bg-rose-50 text-[#b20a1c] ring-2 ring-rose-100"
-              : "border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
+              : "border-border bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
             } ${className}`}
         >
           {Icon && <Icon size={14} className={isOpen ? "text-[#b20a1c]" : "text-slate-400"} />}

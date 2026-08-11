@@ -653,7 +653,7 @@ const CreateClassPage = () => {
           type="button"
           onClick={() => navigate(-1)}
           disabled={isFormBusy}
-          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+          className="p-2.5 border border-border hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
           title={t.common?.back || "Quay lại"}
         >
           <ArrowLeft size={18} />
@@ -667,7 +667,7 @@ const CreateClassPage = () => {
       <form
         onSubmit={handleSubmit}
         aria-busy={isFormBusy}
-        className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6 flex-1"
+        className="bg-white rounded-2xl p-6 border border-border shadow-sm flex flex-col gap-6 flex-1"
       >
 
         <h2 className="text-lg font-bold text-gray-900 border-b border-gray-50 pb-2">
@@ -690,7 +690,7 @@ const CreateClassPage = () => {
                   value={courseId}
                   onChange={(e) => handleCourseChange(e.target.value)}
                   disabled={isEditMode || isRecoverMode || !!initialCourseId}
-                  className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                  className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                 >
                   <option value="">{cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}</option>
                   {isEditMode || isRecoverMode ? (
@@ -717,7 +717,7 @@ const CreateClassPage = () => {
                 }}
                 disabled={isRecoverMode}
                 placeholder={cc.placeholderClassName || "Enter class name"}
-                className={`w-full h-11 px-4 bg-white border ${errors.className ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                className={`w-full h-11 px-4 bg-white border ${errors.className ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
               />
             </div>
 
@@ -734,7 +734,7 @@ const CreateClassPage = () => {
                       clearError("selectedLanguage")
                     }}
                     disabled={isRecoverMode || !!initialCourseId || !!courseId}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
                     {languagesList.map((lang) => (
@@ -757,7 +757,7 @@ const CreateClassPage = () => {
                       clearError("level")
                     }}
                     disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
                     {levelsList.map((lvl) => {
@@ -834,7 +834,7 @@ const CreateClassPage = () => {
               {/* Number of Sessions */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.numberOfSessions} <span className="text-[#990011]">*</span></label>
-                <div className={`flex items-center bg-white border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
+                <div className={`flex items-center bg-white border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
                     onClick={() => setField("sessions", Math.max(1, (parseInt(sessions, 10) || 1) - 1))}
@@ -864,7 +864,7 @@ const CreateClassPage = () => {
               {/* Capacity */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.capacity} <span className="text-[#990011]">*</span></label>
-                <div className={`flex items-center bg-white border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
+                <div className={`flex items-center bg-white border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
                     onClick={() => setField("capacity", Math.max(1, (parseInt(capacity, 10) || 1) - 1))}
@@ -897,13 +897,13 @@ const CreateClassPage = () => {
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.teachingSchedule}</label>
 
               {/* Outer Gray Container */}
-              <div className={`bg-white rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"} flex flex-col gap-4`}>
+              <div className={`bg-white rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-border"} flex flex-col gap-4`}>
                 <span className="text-xs font-bold text-gray-500">
                   {cc.chooseDays || "Choose days of the week"}
                 </span>
 
                 {/* Weekdays selection grid inside */}
-                <div className="grid grid-cols-7 border border-gray-200 rounded-xl overflow-hidden text-center divide-x divide-gray-200 bg-white">
+                <div className="grid grid-cols-7 border border-border rounded-xl overflow-hidden text-center divide-x divide-gray-200 bg-white">
                   {DAYS_OF_WEEK.map((day) => {
                     const isChecked = checkedDays[day.key]
                     return (
@@ -941,7 +941,7 @@ const CreateClassPage = () => {
                     if (!isChecked) return null
 
                     return (
-                      <div key={day.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 first:pt-0 border-t border-gray-100 first:border-t-0">
+                      <div key={day.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 first:pt-0 border-t border-border first:border-t-0">
                         {/* Day badge & label */}
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-[#990011] text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
@@ -998,7 +998,7 @@ const CreateClassPage = () => {
                     handleThumbnailClick()
                   }
                 }}
-                className="group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-white hover:border-gray-300 hover:bg-gray-50/80 flex flex-col items-center justify-center text-center min-h-[150px] cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
+                className="group relative border border-dashed border-border rounded-2xl p-4 bg-white hover:border-gray-300 hover:bg-gray-50/80 flex flex-col items-center justify-center text-center min-h-[150px] cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
               >
                 <input
                   ref={fileInputRef}
@@ -1064,7 +1064,7 @@ const CreateClassPage = () => {
                     value={fee ? parseInt(fee).toLocaleString("vi-VN") : ""}
                     onChange={(e) => formatFeeInput(e.target.value)}
                     placeholder="850.000"
-                    className="w-full h-11 pl-4 pr-12 bg-white border border-gray-200 hover:border-gray-300 focus:border-[#990011] outline-none rounded-xl text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400"
+                    className="w-full h-11 pl-4 pr-12 bg-white border border-border hover:border-gray-300 focus:border-[#990011] outline-none rounded-xl text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-extrabold text-xs">VND</span>
                 </div>
@@ -1077,7 +1077,7 @@ const CreateClassPage = () => {
                     type="text"
                     value={amountReceived}
                     disabled
-                    className="w-full h-11 pl-4 pr-12 bg-[#F2F2F2]/40 border border-transparent rounded-xl text-sm font-extrabold text-gray-500 cursor-not-allowed"
+                    className="w-full h-11 pl-4 pr-12 bg-primaryBg/40 border border-transparent rounded-xl text-sm font-extrabold text-gray-500 cursor-not-allowed"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-450 font-extrabold text-xs">VND</span>
                 </div>
@@ -1085,7 +1085,7 @@ const CreateClassPage = () => {
             </div>
 
             {/* Platform Fee info message */}
-            <div className="flex gap-2 text-[10px] text-gray-400 font-bold items-start bg-gray-50/40 p-2.5 rounded-xl border border-gray-100">
+            <div className="flex gap-2 text-[10px] text-gray-400 font-bold items-start bg-gray-50/40 p-2.5 rounded-xl border border-border">
               <Info size={13} className="text-[#990011] flex-shrink-0 mt-0.5" />
               <span>{labelCommissionNote}</span>
             </div>
@@ -1104,7 +1104,7 @@ const CreateClassPage = () => {
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100 mt-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-border mt-auto">
           {/* Left Side: Fee detail */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D]">

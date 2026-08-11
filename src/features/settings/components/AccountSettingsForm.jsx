@@ -38,7 +38,7 @@ const AccountSettingsForm = ({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch">
-      <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-[#e5e5e5] rounded-xl shadow-sm !justify-start">
+      <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-border rounded-xl shadow-sm !justify-start">
       {/* 1. THÔNG TIN CÁ NHÂN */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
@@ -85,7 +85,7 @@ const AccountSettingsForm = ({
               disabled={!isEditingPersonal || isUpdating}
               placeholder={t.profile?.personalInfo?.enterUsername || "Nhập tên đăng nhập..."}
               error={errors?.username}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.username ? "border-red-500" : "border-gray-100"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.username ? "border-red-500" : "border-border"}`}
               containerClassName="!gap-0"
             />
           </div>
@@ -101,7 +101,7 @@ const AccountSettingsForm = ({
               disabled={!isEditingPersonal || isUpdating}
               placeholder={t.profile?.personalInfo?.enterNickname || "Nhập biệt danh..."}
               error={errors?.nickname}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.nickname ? "border-red-500" : "border-gray-100"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.nickname ? "border-red-500" : "border-border"}`}
               containerClassName="!gap-0"
             />
           </div>
@@ -126,7 +126,7 @@ const AccountSettingsForm = ({
                 onClick={toggle}
                 disabled={!isEditingPersonal || isUpdating}
                 className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${
-                  errors?.country ? "border-red-500" : "border-gray-100"
+                  errors?.country ? "border-red-500" : "border-border"
                 }`}
               >
                 <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400" : ""}`}>
@@ -153,7 +153,7 @@ const AccountSettingsForm = ({
               onChange({ target: { name: "dateOfBirth", value: formattedDate } })
             }}
             disabled={!isEditingPersonal || isUpdating}
-            className={`w-full flex ${errors?.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-gray-100"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 [&>button]:w-full [&>button]:justify-between`}
+            className={`w-full flex ${errors?.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 [&>button]:w-full [&>button]:justify-between`}
           />
         </div>
         </div>
@@ -169,7 +169,7 @@ const AccountSettingsForm = ({
             disabled={!isEditingPersonal || isUpdating}
             placeholder={t.profile?.personalInfo?.enterAddress || "Nhập địa chỉ của bạn..."}
             error={errors?.address}
-            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.address ? "border-red-500" : "border-gray-100"}`}
+            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.address ? "border-red-500" : "border-border"}`}
             containerClassName="!gap-0"
           />
         </div>
@@ -178,7 +178,7 @@ const AccountSettingsForm = ({
     </FluentCard>
 
       {/* 2. TÀI KHOẢN VÀ BẢO MẬT */}
-      <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-[#e5e5e5] rounded-xl shadow-sm !justify-start">
+      <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-border rounded-xl shadow-sm !justify-start">
         <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-900">
@@ -221,7 +221,7 @@ const AccountSettingsForm = ({
               name="accountType"
               value={formData.accountType || "User"}
               disabled={true}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 border-gray-100 text-gray-500 cursor-not-allowed`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 border-border text-gray-500 cursor-not-allowed`}
               containerClassName="!gap-0"
             />
           </div>
@@ -237,7 +237,7 @@ const AccountSettingsForm = ({
               disabled={!isEditingSecurity || isUpdating}
               placeholder={t.profile?.personalInfo?.enterEmail || "Nhập địa chỉ email..."}
               error={errors?.email}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.email ? "border-red-500" : "border-gray-100"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.email ? "border-red-500" : "border-border"}`}
               containerClassName="!gap-0"
             />
           </div>
@@ -263,7 +263,7 @@ const AccountSettingsForm = ({
                   disabled={!isEditingSecurity || isUpdating}
                   placeholder={t.profile?.personalInfo?.enterPhoneNumber || "Nhập số điện thoại..."}
                   error={errors?.phoneNumber}
-                  className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.phoneNumber ? "border-red-500" : "border-gray-100"}`}
+                  className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.phoneNumber ? "border-red-500" : "border-border"}`}
                   containerClassName="!gap-0"
                   leftContentWidthClass={plClass}
                   leftContent={
@@ -300,7 +300,7 @@ const AccountSettingsForm = ({
           </div>
         </div>
 
-        <div className="w-full p-6 border border-gray-200 rounded-xl mt-2">
+        <div className="w-full p-6 border border-border rounded-xl mt-2">
           <ChangePasswordSection t={t} />
         </div>
         </div>

@@ -5,7 +5,7 @@ const InstructorEmptyState = ({ onApply, t }) => {
   const ins = t.profile?.instructor || {}
 
   return (
-    <div className="flex flex-col items-center justify-center p-10 bg-white rounded-2xl shadow-sm border border-gray-100 text-center mt-4">
+    <div className="flex flex-col items-center justify-center p-10 bg-white rounded-2xl shadow-sm border border-border text-center mt-4">
       <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cath-red-700">
           <path d="M12 20h9"></path>

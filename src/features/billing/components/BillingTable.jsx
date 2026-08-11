@@ -103,7 +103,7 @@ const BillingTable = ({
             <button
               type="button"
               onClick={() => onReport && onReport(row)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-cath-red-700 hover:bg-red-50/60 transition-colors border border-gray-200"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-cath-red-700 hover:bg-red-50/60 transition-colors border border-border"
               title={actionsText.report || "Báo lỗi"}
             >
               <AlertCircle className="w-3.5 h-3.5 text-gray-500" />

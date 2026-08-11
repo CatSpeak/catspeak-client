@@ -40,11 +40,11 @@ export default function PastChallengeLeaderboardView({
   const restEntries = leaderboardEntries.slice(3)
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+    <div className="w-full bg-white rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-red-50/40 to-white">
+      <div className="p-4 sm:p-5 border-b border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-gradient-to-r from-red-50/40 to-white">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 shadow-sm border border-gray-100 bg-gray-100">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0 shadow-sm border border-border bg-gray-100">
             <img 
               src={selectedChallenge.bannerUrl || selectedChallenge.thumbnailUrl || selectedChallenge.coverUrl || fallbackChallengeCard} 
               alt={selectedChallenge.hashtag || selectedChallenge.name} 
@@ -82,13 +82,13 @@ export default function PastChallengeLeaderboardView({
 
       {isLoading ? (
         <div className="p-8 flex items-center justify-center">
-          <div className="animate-spin w-8 h-8 border-4 border-gray-200 border-t-cath-red-700 rounded-full"></div>
+          <div className="animate-spin w-8 h-8 border-4 border-border border-t-cath-red-700 rounded-full"></div>
         </div>
       ) : leaderboardEntries.length > 0 ? (
         <div className="flex flex-col flex-1">
           {/* Podium */}
           {top3.length > 0 && (
-            <div className="flex items-end justify-center px-4 pt-10 pb-6 gap-3 sm:gap-6 border-b border-gray-100 max-w-md mx-auto w-full">
+            <div className="flex items-end justify-center px-4 pt-10 pb-6 gap-3 sm:gap-6 border-b border-border max-w-md mx-auto w-full">
               <PodiumItem 
                 entry={top3[2]} 
                 rank={3} 
@@ -154,7 +154,7 @@ export default function PastChallengeLeaderboardView({
           </div>
 
           {/* Footer Info */}
-          <div className="p-4 sm:p-5 bg-gray-50 border-t border-gray-200 mt-auto flex items-start gap-2.5 text-gray-500">
+          <div className="p-4 sm:p-5 bg-gray-50 border-t border-border mt-auto flex items-start gap-2.5 text-gray-500">
             <Info size={16} className="shrink-0 mt-0.5" />
             <div className="flex flex-col text-[12px] sm:text-[13px] font-medium leading-relaxed">
               <span>{t?.catSpeak?.reels?.leaderboard?.dataFrozenAt || "Dữ liệu đã được đóng tại thời điểm kết thúc thử thách"} ({formatDate(selectedChallenge.endDate)}) 23:59</span>

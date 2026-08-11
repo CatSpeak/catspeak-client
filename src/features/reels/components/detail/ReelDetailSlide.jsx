@@ -150,7 +150,7 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
     <div className="w-full h-full flex items-center justify-center p-0 md:py-6 md:px-20 lg:py-8 lg:px-24 relative">
       <div
         ref={containerRef}
-        className={`flex flex-col md:flex-row w-full h-full md:max-h-[85vh] max-w-5xl bg-white md:rounded-2xl overflow-hidden relative shadow-lg border border-gray-100 ${isFullscreen ? "!max-w-none !rounded-none !border-none !max-h-none !h-screen fixed inset-0 z-[9999] !p-0" : ""}`}
+        className={`flex flex-col md:flex-row w-full h-full md:max-h-[85vh] max-w-5xl bg-white md:rounded-2xl overflow-hidden relative shadow-lg border border-border ${isFullscreen ? "!max-w-none !rounded-none !border-none !max-h-none !h-screen fixed inset-0 z-[9999] !p-0" : ""}`}
       >
         {/* Left area: dark background containing video */}
         <div className="relative shrink-0 h-[45vh] md:h-auto md:flex-1 lg:flex-[1.5] bg-[#111] flex flex-col justify-center min-w-0 group">
@@ -246,13 +246,13 @@ const ReelDetailSlide = React.memo(function ReelDetailSlide({
         </div>
 
         {/* Right panel: info + comments */}
-        <div className="flex flex-col w-full md:w-[340px] lg:w-[380px] shrink-0 h-auto md:h-full overflow-y-auto border-l-0 md:border-l border-gray-100">
+        <div className="flex flex-col w-full md:w-[340px] lg:w-[380px] shrink-0 h-auto md:h-full overflow-y-auto border-l-0 md:border-l border-border">
           {/* Top Header & Details (ReelCaption) */}
           <ReelCaption reel={reel} />
 
           {/* Comments List */}
-          <div className={`flex-1 overflow-y-auto px-4 bg-white border-b border-gray-100 ${showComments ? "block" : "hidden md:block"}`}>
-            <h3 className="text-[13px] font-semibold text-gray-500 py-3 sticky top-0 bg-white z-10 border-b border-gray-100 mb-3 flex justify-between items-center">
+          <div className={`flex-1 overflow-y-auto px-4 bg-white border-b border-border ${showComments ? "block" : "hidden md:block"}`}>
+            <h3 className="text-[13px] font-semibold text-gray-500 py-3 sticky top-0 bg-white z-10 border-b border-border mb-3 flex justify-between items-center">
               <span>{formatCompactNumber(reel.comments, language)} {t?.catSpeak?.reels?.detail?.commentsTotal || "comments in total"}</span>
               <button
                 className="md:hidden p-1 bg-gray-100 rounded-full cursor-pointer border-none"

@@ -106,7 +106,7 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
   return (
     <div className="flex h-full w-full flex-col bg-white">
       {/* Sidebar Panel Header */}
-      <div className="hidden md:flex items-center justify-between px-4 py-3 border-b border-[#E5E5E5] bg-white">
+      <div className="hidden md:flex items-center justify-between px-4 py-3 border-b border-border bg-white">
         <div className="flex items-center gap-2">
           <h3 className="text-black text-base font-semibold m-0">
             {isStarted ? "Phòng thảo luận" : "Phòng họp nhóm"}

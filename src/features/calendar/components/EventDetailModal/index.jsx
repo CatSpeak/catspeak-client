@@ -113,7 +113,7 @@ const EventDetailModal = ({ event, onClose }) => {
       open={!!event}
       onClose={onClose}
       showCloseButton={false}
-      className="flex flex-col p-0 !max-w-[700px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-[24px] overflow-visible max-[425px]:h-full"
+      className="flex flex-col p-0 !max-w-[700px] w-full bg-primaryBg rounded-none min-[426px]:rounded-[24px] overflow-visible max-[425px]:h-full"
       bodyClassName="flex-1 flex flex-col min-h-0"
     >
       <div className="relative flex flex-col w-full bg-white rounded-none min-[426px]:rounded-[24px] flex-1 min-h-0 min-[426px]:max-h-[90vh]">

@@ -37,7 +37,7 @@ const PlaylistReelList = ({ playlistId, formatNumber, navigate }) => {
   }
 
   return (
-    <div className="flex flex-col gap-1 pl-4 border-l-2 border-gray-100">
+    <div className="flex flex-col gap-1 pl-4 border-l-2 border-border">
       {reels.map((reel) => (
         <div
           key={reel.reelId}

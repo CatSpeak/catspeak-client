@@ -5,7 +5,7 @@ import Radio from "./inputs/Radio"
  * Shared reusable ListItem component.
  *
  * @param {boolean} hoverEffect - Choose whether to want list item hover effect. Default to false.
- * @param {string} hoverBgColor - The background color when hovered. Default to "bg-[#F2F2F2]".
+ * @param {string} hoverBgColor - The background color when hovered. Default to "bg-primaryBg".
  * @param {React.ReactNode} leftContent - Left content (Avatar, icons, or no left content).
  * @param {React.ReactNode} rightContent - Right content (Switch, icon, etc.).
  * @param {string|number|React.ReactNode} rightText - Text for right content (e.g. unassignedStudents.length).
@@ -46,11 +46,11 @@ const ListItem = ({
       rightContent
     )
 
-  const baseBgClass = selected ? "bg-[#F2F2F2] dark:bg-neutral-800" : ""
+  const baseBgClass = selected ? "bg-primaryBg dark:bg-neutral-800" : ""
 
   const defaultHoverClasses = selected
     ? "hover:bg-[#E6E6E6] group-hover:bg-[#E6E6E6] dark:hover:bg-neutral-700 dark:group-hover:bg-neutral-700"
-    : "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2] dark:hover:bg-neutral-800 dark:group-hover:bg-neutral-800"
+    : "hover:bg-primaryBg group-hover:bg-primaryBg dark:hover:bg-neutral-800 dark:group-hover:bg-neutral-800"
 
   const hoverClasses = hoverBgColor
     ? `hover:${hoverBgColor} group-hover:${hoverBgColor}`

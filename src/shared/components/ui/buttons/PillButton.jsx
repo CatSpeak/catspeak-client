@@ -26,7 +26,7 @@ const PillButton = ({
   const variantStyles = isOutline
     ? "bg-transparent group-hover:bg-primaryBg group-active:bg-[#e5e5e5]"
     : isSecondary
-      ? "bg-white border border-[#e5e5e5] text-black group-hover:bg-primaryBg group-active:bg-[#e0e0e0]"
+      ? "bg-white border border-border text-black group-hover:bg-primaryBg group-active:bg-[#e0e0e0]"
       : isSecondaryNoOutline
         ? "bg-transparent border border-transparent text-black group-hover:bg-[#E5E5E5] group-active:bg-[#e0e0e0]"
         : "bg-cath-red-700 border border-transparent text-white group-hover:brightness-90 group-active:brightness-75"

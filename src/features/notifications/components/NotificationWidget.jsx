@@ -7,6 +7,7 @@ import NotificationDropdown from "./NotificationDropdown"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useNotifications } from "../hooks/useNotifications"
 
@@ -35,25 +36,7 @@ const NotificationWidget = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
 
   useClickOutside(dropdownRef, () => setIsOpen(false), { enabled: isOpen && !isMobile })
-
-  useEffect(() => {
-    if (isOpen && isMobile) {
-      const originalOverflow = document.body.style.overflow
-      const originalPaddingRight = document.body.style.paddingRight
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth
-
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-      }
-      document.body.style.overflow = "hidden"
-
-      return () => {
-        document.body.style.overflow = originalOverflow
-        document.body.style.paddingRight = originalPaddingRight
-      }
-    }
-  }, [isOpen, isMobile])
+  useScrollLock(isOpen && isMobile)
 
   const toggleDropdown = () => {
     if (!isAuthenticated) {
@@ -100,7 +83,7 @@ const NotificationWidget = () => {
     <div className="relative flex items-center" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-primaryBg hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
         aria-label={t.header?.notifications || "Notifications"}
       >
         <Bell size={20} />

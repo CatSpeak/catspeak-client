@@ -44,7 +44,7 @@ const CalendarWeekView = ({
   return (
     <div className="w-full flex flex-col h-full min-h-0 max-h-[500px]">
       {/* Week Header */}
-      <div className="flex ml-16 border-b border-[#E5E5E5] pb-4">
+      <div className="flex ml-16 border-b border-border pb-4">
         {weekDates.map((dateObj, idx) => {
           const isToday = dateObj.dateStr === now.format('YYYY-MM-DD')
           return (

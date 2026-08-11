@@ -13,8 +13,8 @@ const HorizontalCard = ({
     "flex flex-row items-center justify-between gap-4 rounded-xl px-4 min-h-[80px] transition-all"
 
   const variantClasses = {
-    default: "border border-[#E5E5E5] bg-white",
-    glass: "border border-[#E5E5E5] bg-white/40 backdrop-blur-xl shadow-sm",
+    default: "border border-border bg-white",
+    glass: "border border-border bg-white/40 backdrop-blur-xl shadow-sm",
   }
 
   const interactionClasses = onClick
