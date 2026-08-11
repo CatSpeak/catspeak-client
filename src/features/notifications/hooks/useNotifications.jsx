@@ -46,7 +46,14 @@ export function useNotifications() {
     }
 
     let cancelled = false;
-    let unsubList, unsubCount;
+    let unsubList;
+    let unsubCount;
+
+    let subscribedUid = null;
+
+
+    let sessionReady = false;
+    let expectedUid = null;
 
     setNotifications([]);
     setUnreadCount(0);
@@ -55,12 +62,21 @@ export function useNotifications() {
     const cleanupSnapshots = () => {
       unsubList?.();
       unsubCount?.();
+
       unsubList = undefined;
       unsubCount = undefined;
+      subscribedUid = null;
     };
 
     const subscribeFor = (uid) => {
+      if (cancelled || !uid) return;
+
+      if (subscribedUid === uid && unsubList && unsubCount) {
+        return;
+      }
+
       cleanupSnapshots();
+      subscribedUid = uid;
 
       const notifRef = collection(firestore, "users", uid, "notifications");
 
@@ -68,14 +84,17 @@ export function useNotifications() {
         query(notifRef, orderBy("createdAt", "desc"), limit(20)),
         (snapshot) => {
           if (cancelled) return;
+
           const items = snapshot.docs.map((d) => {
             const raw = {
               id: d.id,
               ...d.data(),
               createdAt: d.data().createdAt?.toDate(),
             };
+
             return resolveNotification(raw, tRef.current);
           });
+
           setNotifications(items);
 
           if (isInitialLoad.current) {
@@ -85,13 +104,18 @@ export function useNotifications() {
 
           snapshot.docChanges().forEach((change) => {
             if (change.type !== "added") return;
+
             const data = change.doc.data();
             const resolved = resolveNotification(
-              { ...data, id: change.doc.id },
+              {
+                ...data,
+                id: change.doc.id,
+              },
               tRef.current,
             );
 
             const notifType = String(data?.type || "");
+
             if (notifType.toLowerCase().includes("friend")) {
               const meta = data?.metadata || {};
               const targetId =
@@ -103,6 +127,7 @@ export function useNotifications() {
                 meta.ResponderId ||
                 meta.accountId ||
                 meta.targetAccountId;
+
               dispatch(
                 friendshipApi.util.invalidateTags([
                   ...(targetId
@@ -155,9 +180,11 @@ export function useNotifications() {
                 <div
                   onClick={() => {
                     toast.dismiss(toastObj.id);
+
                     if (!resolved.isRead) {
                       updateDoc(change.doc.ref, { isRead: true });
                     }
+
                     if (resolved.resolvedUrl) {
                       window.location.href = resolved.resolvedUrl;
                     }
@@ -169,12 +196,14 @@ export function useNotifications() {
                       className={`mt-0.5 h-5 w-5 shrink-0 ${resolved.color}`}
                     />
                   )}
+
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900">
                       {resolved.resolvedTitle ||
                         tRef.current.header?.newNotificationTitle ||
                         "Thông báo mới"}
                     </p>
+
                     <p className="mt-0.5 text-xs text-gray-500">
                       {resolved.resolvedBody ||
                         tRef.current.header?.newNotificationBody ||
@@ -201,31 +230,47 @@ export function useNotifications() {
 
     const unsubAuth = onAuthStateChanged(firebaseAuth, (user) => {
       if (cancelled) return;
+
+
+      if (!sessionReady) return;
+
       if (!user) {
         cleanupSnapshots();
         return;
       }
-      if (!unsubList) {
-        subscribeFor(user.uid);
-      }
+
+      if (!expectedUid || user.uid !== expectedUid) return;
+
+      subscribeFor(user.uid);
     });
 
 
     (async () => {
       const user = await initFirebaseSession(token);
+
       if (cancelled) return;
-      if (user) {
-        subscribeFor(user.uid);
+
+      sessionReady = true;
+      expectedUid = user?.uid || null;
+
+      if (!user) {
+        cleanupSnapshots();
+        return;
       }
+
+      subscribeFor(user.uid);
     })();
 
     return () => {
       cancelled = true;
+      sessionReady = false;
+      expectedUid = null;
       isInitialLoad.current = true;
+
       unsubAuth();
       cleanupSnapshots();
     };
-  }, [token, dispatch]); // bỏ `t` khỏi deps — dùng tRef thay thế
+  }, [token, dispatch]);
 
   const markAsRead = async (notificationId) => {
     const user = firebaseAuth.currentUser;
