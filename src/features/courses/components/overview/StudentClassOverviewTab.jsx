@@ -68,10 +68,10 @@ const StudentClassOverviewTab = ({
       : null;
   const instructorName = String(
     instructor?.fullName ??
-    instructor?.name ??
-    classData.instructorName ??
-    classData.teacherName ??
-    "",
+      instructor?.name ??
+      classData.instructorName ??
+      classData.teacherName ??
+      "",
   ).trim();
   const instructorBio = String(
     instructor?.bio ?? instructor?.description ?? "",
@@ -80,20 +80,35 @@ const StudentClassOverviewTab = ({
     instructor?.avatarUrl ?? instructor?.avatar ?? "",
   ).trim();
   const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || "";
-  const nextSession =
-    classData.nextSession?.date &&
-      (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
-      ? classData.nextSession
-      : null;
-  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime;
-  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime;
+  const rawNs = classData.nextSession;
+  const nsIsoStart = rawNs?.startTime || rawNs?.rawStartTime || "";
+  const nsIsoEnd = rawNs?.endTime || rawNs?.rawEndTime || "";
+  const schedObj = Array.isArray(classData.schedule)
+    ? classData.schedule[0]
+    : classData.schedule || {};
+
+  const hasNextSession = Boolean(
+    rawNs && (rawNs.date || rawNs.startTime || rawNs.rawStartTime),
+  );
+  const nextSession = hasNextSession ? rawNs : null;
+
+  const sessionStartTime =
+    schedObj?.startTime ||
+    (typeof nsIsoStart === "string" && !nsIsoStart.includes("T")
+      ? nsIsoStart
+      : null) ||
+    nsIsoStart;
+  const sessionEndTime =
+    schedObj?.endTime ||
+    (typeof nsIsoEnd === "string" && !nsIsoEnd.includes("T")
+      ? nsIsoEnd
+      : null) ||
+    nsIsoEnd;
   const sessionDate =
-    nextSession?.date ||
-    (nextSession?.rawStartTime &&
-      (nextSession.rawStartTime.includes("T") ||
-        nextSession.rawStartTime.includes("-"))
-      ? nextSession.rawStartTime
-      : null);
+    rawNs?.date ||
+    (typeof nsIsoStart === "string" && nsIsoStart.includes("T")
+      ? nsIsoStart.split("T")[0]
+      : classData.startDate);
 
   const showRightColumn = isEnrolled;
 
@@ -112,16 +127,6 @@ const StudentClassOverviewTab = ({
             backgroundPosition: "center",
           }}
         >
-          {/* Share Button */}
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            title={cd.shareClass || "Share class"}
-            className="absolute top-4 right-4 z-20 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
-          >
-            {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
-          </button>
-
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
 
@@ -240,8 +245,8 @@ const StudentClassOverviewTab = ({
                         {scd.timeLabel || "Time"}:{" "}
                         {sessionStartTime
                           ? sessionEndTime
-                            ? `${formatScheduleTime(sessionStartTime, sessionDate)} - ${formatScheduleTime(sessionEndTime, sessionDate)}`
-                            : formatScheduleTime(sessionStartTime, sessionDate)
+                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
+                            : formatScheduleTime(sessionStartTime)
                           : ui.tba || "TBA"}
                       </span>
                     </div>
@@ -249,7 +254,7 @@ const StudentClassOverviewTab = ({
                       <Calendar size={14} className="text-gray-400" />
                       <span>
                         {scd.sessionDateLabel || "Session Date"}:{" "}
-                        {formatDateMonth(sessionDate, ui.tba, sessionStartTime)}
+                        {formatDateMonth(sessionDate, ui.tba)}
                       </span>
                     </div>
                   </div>
