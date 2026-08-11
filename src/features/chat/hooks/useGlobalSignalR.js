@@ -122,7 +122,7 @@ export const useGlobalSignalR = () => {
   }
 
   // Helper for real-time friend request response (accept / decline)
-  const handleFriendResponse = (data, isAccepted = true) => {
+  const handleFriendResponse = (data, isAccepted = null) => {
     const userObj =
       data?.user ||
       data?.responder ||
@@ -158,10 +158,15 @@ export const useGlobalSignalR = () => {
           : []),
         "Friendship",
         "Friend",
+        "Follower",
+        "Following",
         "FriendRequest",
         "Recommendation",
       ]),
     )
+
+    // If isAccepted is not a boolean, it's just a general friendship change / pending creation (don't show toast)
+    if (isAccepted === null || isAccepted === undefined) return
 
     // Show toast with i18n
     const acceptedText =
@@ -171,10 +176,13 @@ export const useGlobalSignalR = () => {
       tLanguage.profile?.social?.friendRequestDeclined ||
       "đã từ chối lời mời kết bạn của bạn"
 
-    if (isAccepted) {
-      toast.success(`${displayName} ${acceptedText}`)
-    } else {
+    const toastKey = `friend-response-${targetId || "unknown"}-${isAccepted ? "accept" : "decline"}`
+
+    if (isAccepted === true) {
+      toast.success(`${displayName} ${acceptedText}`, { id: toastKey })
+    } else if (isAccepted === false) {
       toast(`${displayName} ${declinedText}`, {
+        id: toastKey,
         icon: "ℹ️",
       })
     }
@@ -294,52 +302,119 @@ export const useGlobalSignalR = () => {
       ReadReceipt: handleReadReceipt,
 
       FriendStatusChange: (data) => {
-        if (
-          data &&
-          typeof data === "object" &&
-          (data.isFriend !== undefined ||
-            data.action !== undefined ||
-            data.friendshipStatus !== undefined ||
-            data.friendshipId !== undefined)
-        ) {
-          const isAccepted =
-            data.isFriend === true ||
-            data.action === "accept" ||
-            data.action === "accepted" ||
-            data.friendshipStatus === 2 ||
-            data.friendshipStatus === "Accepted"
-          handleFriendResponse(data, isAccepted)
-        } else {
+        if (!data || typeof data !== "object") {
           handleStatusUpdate(data)
+          return
+        }
+
+        // Check if it's presence online/offline status
+        if (
+          data.isOnline !== undefined ||
+          data.status === "online" ||
+          data.status === "offline"
+        ) {
+          handleStatusUpdate(data)
+          return
+        }
+
+        // Determine if it's an explicit accept or decline
+        const actionStr = String(data.action || data.status || "").toLowerCase()
+        const statusNum = Number(data.friendshipStatus)
+
+        const isAccepted =
+          data.isFriend === true ||
+          actionStr === "accept" ||
+          actionStr === "accepted" ||
+          statusNum === 2 ||
+          data.friendshipStatus === "Accepted"
+
+        const isDeclined =
+          actionStr === "decline" ||
+          actionStr === "declined" ||
+          actionStr === "reject" ||
+          actionStr === "rejected" ||
+          statusNum === 3 ||
+          data.friendshipStatus === "Declined" ||
+          data.friendshipStatus === "Rejected"
+
+        if (isAccepted) {
+          handleFriendResponse(data, true)
+        } else if (isDeclined) {
+          handleFriendResponse(data, false)
+        } else {
+          // If pending (status 1) or unspecified change, just refresh cache without showing decline toast
+          handleFriendResponse(data, null)
         }
       },
       FriendRequestAccepted: (data) => handleFriendResponse(data, true),
       FriendRequestDeclined: (data) => handleFriendResponse(data, false),
       FriendRequestRejected: (data) => handleFriendResponse(data, false),
       FriendRequestResponded: (data) => {
+        const actionStr = String(data?.action || data?.status || "").toLowerCase()
         const isAccepted =
-          data?.action === "accept" ||
-          data?.action === "accepted" ||
+          data?.isFriend === true ||
           data?.isAccepted === true ||
-          data?.status === "accepted" ||
-          data?.isFriend === true
-        handleFriendResponse(data, isAccepted)
+          actionStr === "accept" ||
+          actionStr === "accepted"
+        const isDeclined =
+          actionStr === "decline" ||
+          actionStr === "declined" ||
+          actionStr === "reject" ||
+          actionStr === "rejected"
+
+        if (isAccepted) {
+          handleFriendResponse(data, true)
+        } else if (isDeclined) {
+          handleFriendResponse(data, false)
+        } else {
+          handleFriendResponse(data, null)
+        }
       },
       FriendshipUpdated: (data) => {
+        const actionStr = String(data?.action || data?.status || "").toLowerCase()
+        const statusNum = Number(data?.friendshipStatus)
         const isAccepted =
           data?.isFriend === true ||
-          data?.action === "accept" ||
-          data?.status === "accepted" ||
-          data?.friendshipStatus === 2
-        handleFriendResponse(data, isAccepted)
+          actionStr === "accept" ||
+          actionStr === "accepted" ||
+          statusNum === 2
+        const isDeclined =
+          actionStr === "decline" ||
+          actionStr === "declined" ||
+          actionStr === "reject" ||
+          actionStr === "rejected" ||
+          statusNum === 3
+
+        if (isAccepted) {
+          handleFriendResponse(data, true)
+        } else if (isDeclined) {
+          handleFriendResponse(data, false)
+        } else {
+          handleFriendResponse(data, null)
+        }
       },
       FriendshipStatusChanged: (data) => {
+        const actionStr = String(data?.action || data?.status || "").toLowerCase()
+        const statusNum = Number(data?.friendshipStatus)
         const isAccepted =
           data?.isFriend === true ||
-          data?.action === "accept" ||
-          data?.status === "accepted" ||
-          data?.friendshipStatus === 2
-        handleFriendResponse(data, isAccepted)
+          actionStr === "accept" ||
+          actionStr === "accepted" ||
+          statusNum === 2
+        const isDeclined =
+          actionStr === "decline" ||
+          actionStr === "declined" ||
+          actionStr === "reject" ||
+          actionStr === "rejected" ||
+          statusNum === 3
+
+        if (isAccepted) {
+          handleFriendResponse(data, true)
+        } else if (isDeclined) {
+          handleFriendResponse(data, false)
+        } else {
+          handleFriendResponse(data, null)
+        }
       },
       UserStatusChanged: (data) => handleStatusUpdate(data),
       UserOnline: (data) => handleStatusUpdate(data, true),

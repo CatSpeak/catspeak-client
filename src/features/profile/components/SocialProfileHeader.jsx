@@ -32,6 +32,8 @@ const SocialProfileHeader = ({
   targetAccountId,
   isOwnProfile,
   onEditClick,
+  friendsCount = 0,
+  followersCount = 0,
 }) => {
   // Use avatarImageUrl as the primary avatar for the profile
   const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl;
@@ -47,7 +49,7 @@ const SocialProfileHeader = ({
     targetAccountId,
     {
       skip: isOwnProfile || !targetAccountId,
-      pollingInterval: 4000,
+      pollingInterval: 3000,
     },
   );
   const status =
@@ -66,6 +68,7 @@ const SocialProfileHeader = ({
 
   // Track previous connection status to detect real-time transition from Pending -> Accepted / Declined
   const prevStatusRef = useRef(null);
+  const userActionInitiatedRef = useRef(false);
 
   useEffect(() => {
     if (isOwnProfile || !status) return;
@@ -75,6 +78,7 @@ const SocialProfileHeader = ({
 
     if (!prev) return;
 
+    // Only detect if it was previously truly pending
     const wasPending =
       (prev?.friendshipStatus === 1 ||
         prev?.friendshipStatus === "Pending" ||
@@ -94,20 +98,33 @@ const SocialProfileHeader = ({
         status?.friendshipStatus === undefined ||
         status?.friendshipStatus === "None");
 
+    // If user A clicked "Hủy yêu cầu" or "Hủy kết bạn" themselves, DO NOT show "B đã từ chối" toast
+    if (userActionInitiatedRef.current || isDeletingFriendship || isSendingRequest) {
+      return;
+    }
+
     if (wasPending && isNowAccepted) {
       const toastKey = `friend-response-${targetAccountId}-accept`;
       toast.success(
         `${displayName} ${t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn"}`,
         { id: toastKey },
       );
-    } else if (wasPending && isNowDeclinedOrDeleted && !isDeletingFriendship) {
+    } else if (wasPending && isNowDeclinedOrDeleted) {
       const toastKey = `friend-response-${targetAccountId}-decline`;
       toast(
         `${displayName} ${t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn"}`,
         { id: toastKey, icon: "ℹ️" },
       );
     }
-  }, [status, isOwnProfile, displayName, t, isDeletingFriendship, targetAccountId]);
+  }, [
+    status,
+    isOwnProfile,
+    displayName,
+    t,
+    isDeletingFriendship,
+    isSendingRequest,
+    targetAccountId,
+  ]);
 
   const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
   const isFriendshipLoading = isSendingRequest || isDeletingFriendship;
@@ -197,10 +214,14 @@ const SocialProfileHeader = ({
 
   const handleFriendshipToggle = async () => {
     if (isFriendshipLoading) return;
+<<<<<<< Updated upstream
     const toastId = "friendship-action";
     toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
       id: toastId,
     });
+=======
+    userActionInitiatedRef.current = true;
+>>>>>>> Stashed changes
 
     try {
       if (isFriendOrPending) {
@@ -211,7 +232,11 @@ const SocialProfileHeader = ({
               ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
               : t.profile?.social?.cancelRequestSuccess ||
                   "Đã hủy yêu cầu kết bạn",
+<<<<<<< Updated upstream
             { id: toastId },
+=======
+            { id: "friendship-action" },
+>>>>>>> Stashed changes
           );
         }
       } else {
@@ -221,7 +246,11 @@ const SocialProfileHeader = ({
         await sendFriendRequest(targetAccountId).unwrap();
         toast.success(
           t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+<<<<<<< Updated upstream
           { id: toastId },
+=======
+          { id: "friendship-action" },
+>>>>>>> Stashed changes
         );
       }
     } catch (err) {
@@ -229,15 +258,27 @@ const SocialProfileHeader = ({
         toast.error(
           t.profile?.social?.requestPending ||
             "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+<<<<<<< Updated upstream
           { id: toastId },
+=======
+          { id: "friendship-action" },
+>>>>>>> Stashed changes
         );
       } else {
         toast.error(
           t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
+<<<<<<< Updated upstream
           { id: toastId },
+=======
+          { id: "friendship-action" },
+>>>>>>> Stashed changes
         );
       }
       console.error(err);
+    } finally {
+      setTimeout(() => {
+        userActionInitiatedRef.current = false;
+      }, 2000);
     }
   };
 
@@ -372,6 +413,17 @@ const SocialProfileHeader = ({
                   <span>{location}</span>
                 </div>
               )}
+              <div className="flex items-center gap-3 text-sm text-[#606060] mt-0.5 font-medium">
+                <span>
+                  <strong className="text-gray-900">{friendsCount}</strong>{" "}
+                  {t.profile?.tabs?.friends || "Bạn bè"}
+                </span>
+                <span>•</span>
+                <span>
+                  <strong className="text-gray-900">{followersCount}</strong>{" "}
+                  {t.profile?.friends?.subTabs?.followers || "Người theo dõi"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
