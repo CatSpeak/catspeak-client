@@ -121,6 +121,65 @@ export const useGlobalSignalR = () => {
     }
   }
 
+  // Helper for real-time friend request response (accept / decline)
+  const handleFriendResponse = (data, isAccepted = true) => {
+    const userObj =
+      data?.user ||
+      data?.responder ||
+      data?.addressee ||
+      data?.friend ||
+      data?.requester ||
+      data?.sender ||
+      (typeof data === "object" ? data : null)
+
+    const displayName =
+      userObj?.nickname ||
+      userObj?.username ||
+      userObj?.displayName ||
+      userObj?.name ||
+      "Người dùng"
+
+    const targetId =
+      userObj?.accountId ??
+      userObj?.userId ??
+      userObj?.id ??
+      data?.targetAccountId ??
+      data?.addresseeId ??
+      data?.requesterId
+
+    // Invalidate RTK Query cache tags so Profile button and Friends lists auto-update
+    dispatch(
+      friendshipApi.util.invalidateTags([
+        ...(targetId
+          ? [
+              { type: "Friendship", id: targetId },
+              { type: "Friend", id: `LIST-${targetId}` },
+            ]
+          : []),
+        "Friendship",
+        "Friend",
+        "FriendRequest",
+        "Recommendation",
+      ]),
+    )
+
+    // Show toast with i18n
+    const acceptedText =
+      tLanguage.profile?.social?.friendRequestAccepted ||
+      "đã chấp nhận lời mời kết bạn của bạn"
+    const declinedText =
+      tLanguage.profile?.social?.friendRequestDeclined ||
+      "đã từ chối lời mời kết bạn của bạn"
+
+    if (isAccepted) {
+      toast.success(`${displayName} ${acceptedText}`)
+    } else {
+      toast(`${displayName} ${declinedText}`, {
+        icon: "ℹ️",
+      })
+    }
+  }
+
   const handlers = useMemo(
     () => ({
       NewMessage: (...args) => {
@@ -234,7 +293,54 @@ export const useGlobalSignalR = () => {
       MessageRead: handleReadReceipt,
       ReadReceipt: handleReadReceipt,
 
-      FriendStatusChange: (data) => handleStatusUpdate(data),
+      FriendStatusChange: (data) => {
+        if (
+          data &&
+          typeof data === "object" &&
+          (data.isFriend !== undefined ||
+            data.action !== undefined ||
+            data.friendshipStatus !== undefined ||
+            data.friendshipId !== undefined)
+        ) {
+          const isAccepted =
+            data.isFriend === true ||
+            data.action === "accept" ||
+            data.action === "accepted" ||
+            data.friendshipStatus === 2 ||
+            data.friendshipStatus === "Accepted"
+          handleFriendResponse(data, isAccepted)
+        } else {
+          handleStatusUpdate(data)
+        }
+      },
+      FriendRequestAccepted: (data) => handleFriendResponse(data, true),
+      FriendRequestDeclined: (data) => handleFriendResponse(data, false),
+      FriendRequestRejected: (data) => handleFriendResponse(data, false),
+      FriendRequestResponded: (data) => {
+        const isAccepted =
+          data?.action === "accept" ||
+          data?.action === "accepted" ||
+          data?.isAccepted === true ||
+          data?.status === "accepted" ||
+          data?.isFriend === true
+        handleFriendResponse(data, isAccepted)
+      },
+      FriendshipUpdated: (data) => {
+        const isAccepted =
+          data?.isFriend === true ||
+          data?.action === "accept" ||
+          data?.status === "accepted" ||
+          data?.friendshipStatus === 2
+        handleFriendResponse(data, isAccepted)
+      },
+      FriendshipStatusChanged: (data) => {
+        const isAccepted =
+          data?.isFriend === true ||
+          data?.action === "accept" ||
+          data?.status === "accepted" ||
+          data?.friendshipStatus === 2
+        handleFriendResponse(data, isAccepted)
+      },
       UserStatusChanged: (data) => handleStatusUpdate(data),
       UserOnline: (data) => handleStatusUpdate(data, true),
       UserOffline: (data) => handleStatusUpdate(data, false),

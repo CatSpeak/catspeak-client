@@ -16,6 +16,8 @@ export default {
       followSuccess: "Đã theo dõi",
       unfollowSuccess: "Đã hủy theo dõi",
       friendRequestReceived: "đã gửi cho bạn một lời mời kết bạn",
+      friendRequestAccepted: "đã chấp nhận lời mời kết bạn của bạn",
+      friendRequestDeclined: "đã từ chối lời mời kết bạn của bạn",
     },
     personalInfo: {
       title: "Thông tin cá nhân",

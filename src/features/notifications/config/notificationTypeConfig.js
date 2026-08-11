@@ -1,4 +1,14 @@
-import { BookOpen, CalendarClock, PenSquare, CheckCircle2, RotateCw, Megaphone, Zap, UserPlus, UserCheck } from "lucide-react"
+import {
+  BookOpen,
+  CalendarClock,
+  PenSquare,
+  CheckCircle2,
+  RotateCw,
+  Megaphone,
+  Zap,
+  UserPlus,
+  UserCheck,
+} from "lucide-react";
 
 const replaceVars = (text, m) => {
   if (!text) return text;
@@ -6,9 +16,10 @@ const replaceVars = (text, m) => {
     .replace(/{className}/g, m.className || "Không rõ")
     .replace(/{assignmentName}/g, m.assignmentName || "Không rõ")
     .replace(/{quizName}/g, m.quizName || "Không rõ");
-}
+};
 
-const getLoc = (t) => t.courses?.notifications || t.courses?.lectureHall?.notifications;
+const getLoc = (t) =>
+  t.courses?.notifications || t.courses?.lectureHall?.notifications;
 
 export const NOTIFICATION_TYPES = {
   class_update: {
@@ -142,43 +153,102 @@ export const NOTIFICATION_TYPES = {
     resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
     resolveAvatarUrl: (m) => m.avatarUrl || null,
   },
-  friend_acceptance: {
-    icon: UserCheck,
-    color: "text-green-500",
+  friend_request_accepted: {
+    icon: CheckCircle2,
+    color: "text-emerald-500",
     resolveTitle: (m, t) =>
-      t.profile?.notifications?.friend_accepted?.title ||
-      "Đã chấp nhận kết bạn",
+      t.profile?.notifications?.friend_request_accepted?.title ||
+      "Lời mời kết bạn đã được chấp nhận",
     resolveBody: (m, t) => {
-      const name = m.userName || "Ai đó";
-      return (
-        t.profile?.notifications?.friend_accepted?.body?.replace(
-          "{responderName}",
-          name,
-        ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
-      );
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestAccepted ||
+        "đã chấp nhận lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
-    resolveAvatarUrl: (m) => m.avatarUrl || null,
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
+    },
   },
-  FriendAccepted: {
-    icon: UserCheck,
-    color: "text-green-500",
+  FriendRequestAccepted: {
+    icon: CheckCircle2,
+    color: "text-emerald-500",
     resolveTitle: (m, t) =>
-      t.profile?.notifications?.friend_accepted?.title ||
-      "Đã chấp nhận kết bạn",
+      t.profile?.notifications?.friend_request_accepted?.title ||
+      "Lời mời kết bạn đã được chấp nhận",
     resolveBody: (m, t) => {
-      const name = m.userName || "Ai đó";
-      return (
-        t.profile?.notifications?.friend_accepted?.body?.replace(
-          "{responderName}",
-          name,
-        ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
-      );
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestAccepted ||
+        "đã chấp nhận lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
-    resolveAvatarUrl: (m) => m.avatarUrl || null,
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
+    },
   },
-
+  friend_request_declined: {
+    icon: CalendarClock,
+    color: "text-gray-500",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_request_declined?.title ||
+      "Lời mời kết bạn bị từ chối",
+    resolveBody: (m, t) => {
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestDeclined ||
+        "đã từ chối lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
+    },
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
+    },
+  },
+  FriendRequestDeclined: {
+    icon: CalendarClock,
+    color: "text-gray-500",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_request_declined?.title ||
+      "Lời mời kết bạn bị từ chối",
+    resolveBody: (m, t) => {
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestDeclined ||
+        "đã từ chối lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
+    },
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
+    },
+  },
   new_post: {
     icon: Megaphone,
     color: "text-violet-500",
@@ -218,10 +288,16 @@ export const NOTIFICATION_TYPES = {
 
 export function resolveNotification(notif, t) {
   console.log(notif);
-  const cfg = NOTIFICATION_TYPES[notif.type]
-  if (!cfg) return { ...notif, resolvedTitle: notif.title, resolvedBody: notif.body, resolvedUrl: notif.actionUrl }
+  const cfg = NOTIFICATION_TYPES[notif.type];
+  if (!cfg)
+    return {
+      ...notif,
+      resolvedTitle: notif.title,
+      resolvedBody: notif.body,
+      resolvedUrl: notif.actionUrl,
+    };
 
-  const meta = notif.metadata || {}
+  const meta = notif.metadata || {};
   const resolvedTitle = cfg.resolveTitle(meta, t);
   const resolvedBody = cfg.resolveBody(meta, t);
   return {
@@ -231,9 +307,15 @@ export function resolveNotification(notif, t) {
     resolvedUrl: cfg.resolveUrl(meta) || notif.actionUrl,
     icon: cfg.icon,
     color: cfg.color,
-  }
+  };
 }
 
 export function getNotificationType(type) {
-  return NOTIFICATION_TYPES[type] || { icon: null, label: "", color: "text-blue-500" }
+  return (
+    NOTIFICATION_TYPES[type] || {
+      icon: null,
+      label: "",
+      color: "text-blue-500",
+    }
+  );
 }
