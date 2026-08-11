@@ -18,6 +18,7 @@ import {
   Users,
   BarChart,
   CalendarDays,
+  Folder,
 } from "lucide-react"
 
 export const navSections = [
@@ -69,6 +70,7 @@ export const navSections = [
       { key: "myClass", path: "/workspace/classes", icon: Users },
       // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+      { key: "teachingMaterial", path: "/workspace/teaching-material", icon: Folder, label: "Tài liệu giảng dạy" },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
       // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
@@ -113,6 +115,7 @@ export const navLinks = [
       { key: "myClass", path: "/workspace/classes", icon: Users },
       // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+      { key: "teachingMaterial", path: "/workspace/teaching-material", icon: Folder, label: "Tài liệu giảng dạy" },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
       // { key: "events", path: "/workspace/events", icon: Calendar },
     ],

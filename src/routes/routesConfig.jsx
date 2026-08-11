@@ -146,6 +146,9 @@ const WorkspaceRoomsPage = lazy(
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),
 );
+const TeachingMaterialPage = lazy(
+  () => import("@/features/materials/pages/TeachingMaterialPage"),
+);
 const StudentTakeQuizView = lazy(
   () => import("@/features/courses/components/grading/StudentTakeQuizView"),
 );
@@ -438,6 +441,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <WorkspaceCalendarPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "teaching-material",
+                element: (
+                  <LazyRoute>
+                    <TeachingMaterialPage />
                   </LazyRoute>
                 ),
               },
