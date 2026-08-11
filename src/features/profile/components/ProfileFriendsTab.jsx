@@ -3,6 +3,7 @@ import { MoreHorizontal, User, UserCheck, UserX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import useDebounce from "@/shared/hooks/useDebounce"
 import {
   useGetFriendsQuery,
   useGetFollowersQuery,
@@ -35,8 +36,14 @@ const ProfileFriendsTab = ({
   const { t } = useLanguage()
   const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [limit, setLimit] = useState(10)
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
+  const [recPage, setRecPage] = useState(1)
   const secondLastRecRef = useRef(null)
+
+  // Reset recommendation page when search keyword or sub-tab changes
+  useEffect(() => {
+    setRecPage(1)
+  }, [debouncedSearchQuery, activeSubTab])
 
   // Fetch all potential data
   const { data: friendsResponse, isLoading: loadingFriends } =
@@ -53,22 +60,32 @@ const ProfileFriendsTab = ({
     data: recResponse,
     isLoading: loadingRecs,
     isFetching: fetchingRecs,
-  } = useGetFriendRecommendationsQuery(searchQuery ? 9999 : limit)
+  } = useGetFriendRecommendationsQuery(
+    {
+      SearchKeyword: debouncedSearchQuery || undefined,
+      Page: recPage,
+      PageSize: 10,
+    },
+    { skip: !isOwnProfile },
+  )
 
   // Infinite scroll — observe second-to-last recommendation card
   useEffect(() => {
-    if (!secondLastRecRef.current) return
+    if (!secondLastRecRef.current || activeSubTab !== "find") return
+    const hasMore = recResponse?.hasMore !== false
+    if (!hasMore || fetchingRecs) return
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !fetchingRecs) {
-          setLimit((prev) => prev + 10)
+        if (entry.isIntersecting && !fetchingRecs && hasMore) {
+          setRecPage((prev) => prev + 1)
         }
       },
       { rootMargin: "200px" },
     )
     observer.observe(secondLastRecRef.current)
     return () => observer.disconnect()
-  }, [recResponse, fetchingRecs])
+  }, [recResponse, fetchingRecs, activeSubTab])
   const [respondFriendRequest] = useRespondFriendRequestMutation()
 
   const handleRespondRequest = (friendshipId, action, closePopover) => {
@@ -144,11 +161,12 @@ const ProfileFriendsTab = ({
       emptyMessage = t.profile?.friends?.empty?.noPending || "Không có yêu cầu kết nối nào."
     } else if (activeSubTab === "find") {
       list = getArray(recResponse)
-      isLoading = loadingRecs
+      isLoading = loadingRecs && recPage === 1
       emptyMessage = t.profile?.friends?.empty?.noRecommendations || "Không có gợi ý nào."
     }
 
-    if (searchQuery) {
+    // Only filter in FE for tabs that do not have backend search
+    if (searchQuery && activeSubTab !== "find") {
       list = list.filter(
         (user) =>
           user.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -188,7 +206,7 @@ const ProfileFriendsTab = ({
 
     const secondLastId =
       list[list.length - 2]?.accountId ?? list[list.length - 1]?.accountId
-    const hasMore = activeSubTab === "find" && !searchQuery && list.length >= limit
+    const hasMore = activeSubTab === "find" && (recResponse?.hasMore !== false)
 
     return (
       <>

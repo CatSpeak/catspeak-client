@@ -12,10 +12,17 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
   const location = useLocation()
   const { t } = useLanguage()
   const { data: recData, isLoading: isLoadingRecs } =
-    useGetFriendRecommendationsQuery(undefined, { skip: !isOwnProfile })
+    useGetFriendRecommendationsQuery(
+      { Page: 1, PageSize: 5 },
+      { skip: !isOwnProfile },
+    )
   if (!isOwnProfile) return null
 
-  const recommendations = Array.isArray(recData) ? recData : recData?.data || []
+  const recommendations = Array.isArray(recData?.data)
+    ? recData.data
+    : Array.isArray(recData)
+    ? recData
+    : []
 
   return (
     <div className="lg:col-span-1">

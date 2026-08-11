@@ -25,12 +25,94 @@ export const friendshipApi = socialApi.injectEndpoints({
       ],
     }),
     getFriendRecommendations: builder.query({
-      query: (limit = 10) => ({
-        url: `/friendships/recommendations`,
-        method: "GET",
-        params: { limit },
-      }),
+      query: (params = {}) => {
+        let page = 1
+        let pageSize = 10
+        let searchKeyword = ""
+
+        if (typeof params === "number") {
+          pageSize = params
+        } else if (params && typeof params === "object") {
+          page = params.Page ?? params.page ?? 1
+          pageSize = params.PageSize ?? params.pageSize ?? 10
+          searchKeyword = (params.SearchKeyword ?? params.searchKeyword ?? "").trim()
+        }
+
+        const queryParams = {
+          Page: page,
+          PageSize: pageSize,
+        }
+
+        if (searchKeyword) {
+          queryParams.SearchKeyword = searchKeyword
+        }
+
+        return {
+          url: `/friendships/recommendations`,
+          method: "GET",
+          params: queryParams,
+        }
+      },
       providesTags: ["Recommendation"],
+      serializeQueryArgs: ({ endpointName, queryArgs }) => {
+        let keyword = ""
+        let pageSize = 10
+        if (typeof queryArgs === "number") {
+          pageSize = queryArgs
+        } else if (queryArgs && typeof queryArgs === "object") {
+          keyword = (queryArgs.SearchKeyword ?? queryArgs.searchKeyword ?? "").trim()
+          pageSize = queryArgs.PageSize ?? queryArgs.pageSize ?? 10
+        }
+        return `${endpointName}_${keyword}_${pageSize}`
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        let page = 1
+        let pageSize = 10
+        if (typeof arg === "number") {
+          pageSize = arg
+        } else if (arg && typeof arg === "object") {
+          page = arg.Page ?? arg.page ?? 1
+          pageSize = arg.PageSize ?? arg.pageSize ?? 10
+        }
+
+        const incomingData = Array.isArray(newItems?.data)
+          ? newItems.data
+          : Array.isArray(newItems)
+          ? newItems
+          : []
+
+        if (page === 1) {
+          currentCache.data = incomingData
+          currentCache.page = newItems?.page ?? 1
+          currentCache.pageSize = newItems?.pageSize ?? pageSize
+        } else {
+          const currentList = Array.isArray(currentCache?.data) ? currentCache.data : []
+          const existingIds = new Set(currentList.map((u) => u.accountId))
+          const filtered = incomingData.filter((u) => !existingIds.has(u.accountId))
+          currentCache.data = [...currentList, ...filtered]
+          currentCache.page = newItems?.page ?? page
+          currentCache.pageSize = newItems?.pageSize ?? pageSize
+        }
+        currentCache.hasMore = incomingData.length >= pageSize
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        const getArgValues = (arg) => {
+          if (typeof arg === "number") return { page: 1, pageSize: arg, keyword: "" }
+          return {
+            page: arg?.Page ?? arg?.page ?? 1,
+            pageSize: arg?.PageSize ?? arg?.pageSize ?? 10,
+            keyword: (arg?.SearchKeyword ?? arg?.searchKeyword ?? "").trim(),
+          }
+        }
+        const curr = getArgValues(currentArg)
+        const prev = getArgValues(previousArg)
+
+        return (
+          curr.page !== prev.page ||
+          curr.keyword !== prev.keyword ||
+          curr.pageSize !== prev.pageSize
+        )
+      },
     }),
     followUser: builder.mutation({
       query: (targetAccountId) => ({
