@@ -164,7 +164,7 @@ export default {
   maxOccurrencesWarning:
     "系统仅支持每个重复活动系列最多创建 24 个活动。超出此限制的活动将不会被创建。",
   // New calendar UI
-  schedule: "时间表",
+  schedule: "活动日程",
   monthSchedule: "月度活动日程",
   upcoming: "即将举行",
   eventDayLegend: "活动日期",

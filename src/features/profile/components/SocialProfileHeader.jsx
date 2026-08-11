@@ -77,30 +77,30 @@ const SocialProfileHeader = ({
 
   const handleFollowToggle = async () => {
     if (isFollowLoading) return;
-    const toastId = "follow-action";
-    toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
-      id: toastId,
-    });
+    // const toastId = "follow-action";
+    // toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
+    //   id: toastId,
+    // });
 
     try {
       if (status?.isFollowing) {
         await unfollowUser(targetAccountId).unwrap();
-        toast.success(
-          t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi",
-          { id: toastId },
-        );
+        // toast.success(
+        //   t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi",
+        //   { id: toastId },
+        // );
       } else {
         await followUser(targetAccountId).unwrap();
-        toast.success(
-          t.profile?.social?.followSuccess || "Đã theo dõi",
-          { id: toastId },
-        );
+        // toast.success(
+        //   t.profile?.social?.followSuccess || "Đã theo dõi",
+        //   { id: toastId },
+        // );
       }
     } catch (error) {
-      toast.error(
-        t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
-        { id: toastId },
-      );
+      // toast.error(
+      //   t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
+      //   { id: toastId },
+      // );
       console.error(error);
     }
   };
@@ -113,21 +113,21 @@ const SocialProfileHeader = ({
     avatarData.append("file", file);
 
     try {
-      toast.loading(t.profile?.avatar?.updating || "Đang cập nhật...", {
-        id: "avatar-update",
-      });
+      // toast.loading(t.profile?.avatar?.updating || "Đang cập nhật...", {
+      //   id: "avatar-update",
+      // });
       await updateAvatar(avatarData).unwrap();
-      toast.success(
-        t.profile?.avatar?.updateSuccess || "Cập nhật ảnh đại diện thành công",
-        {
-          id: "avatar-update",
-        },
-      );
+      // toast.success(
+      //   t.profile?.avatar?.updateSuccess || "Cập nhật ảnh đại diện thành công",
+      //   {
+      //     id: "avatar-update",
+      //   },
+      // );
     } catch (error) {
-      toast.error(
-        t.profile?.avatar?.updateError || "Không thể cập nhật ảnh đại diện",
-        { id: "avatar-update" },
-      );
+      // toast.error(
+      //   t.profile?.avatar?.updateError || "Không thể cập nhật ảnh đại diện",
+      //   { id: "avatar-update" },
+      // );
       console.error(error);
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -141,45 +141,45 @@ const SocialProfileHeader = ({
 
   const handleFriendshipToggle = async () => {
     if (isFriendshipLoading) return;
-    const toastId = "friendship-action";
-    toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
-      id: toastId,
-    });
+    // const toastId = "friendship-action";
+    // toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
+    //   id: toastId,
+    // });
 
     try {
       if (isFriendOrPending) {
         if (status?.friendshipId) {
           await deleteFriendship(status.friendshipId).unwrap();
-          toast.success(
-            status?.isFriend
-              ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
-              : t.profile?.social?.cancelRequestSuccess ||
-                  "Đã hủy yêu cầu kết bạn",
-            { id: toastId },
-          );
+          // toast.success(
+          //   status?.isFriend
+          //     ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
+          //     : t.profile?.social?.cancelRequestSuccess ||
+          //         "Đã hủy yêu cầu kết bạn",
+          //   { id: toastId },
+          // );
         }
       } else {
         if (status?.friendshipId) {
           await deleteFriendship(status.friendshipId).unwrap();
         }
         await sendFriendRequest(targetAccountId).unwrap();
-        toast.success(
-          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-          { id: toastId },
-        );
+        // toast.success(
+        //   t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+        //   { id: toastId },
+        // );
       }
     } catch (err) {
       if (err?.status === 422) {
-        toast.error(
-          t.profile?.social?.requestPending ||
-            "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-          { id: toastId },
-        );
+        // toast.error(
+        //   t.profile?.social?.requestPending ||
+        //     "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+        //   { id: toastId },
+        // );
       } else {
-        toast.error(
-          t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
-          { id: toastId },
-        );
+        // toast.error(
+        //   t.profile?.social?.errorOccurred || "Có lỗi xảy ra",
+        //   { id: toastId },
+        // );
       }
       console.error(err);
     }
