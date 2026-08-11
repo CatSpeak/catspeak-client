@@ -2,19 +2,39 @@ import React from 'react';
 import Modal from '@/shared/components/ui/Modal';
 import { AlertTriangle, FolderMinus } from 'lucide-react';
 import { PillButton } from '@/shared/components/ui/buttons';
+import { useDeletePersonalMaterialMutation } from '@/store/api/materialApi';
+import toast from 'react-hot-toast';
 
-const DeleteFolderModal = ({ open, onClose, folderName, fileCount }) => {
+const DeleteFolderModal = ({ open, onClose, item }) => {
+  const [deleteMaterial, { isLoading }] = useDeletePersonalMaterialMutation();
+
+  if (!item) return null;
+
+  const handleDelete = async () => {
+    try {
+      await deleteMaterial(item.id).unwrap();
+      toast.success(`Đã xóa ${item.type === 'folder' ? 'thư mục' : 'tệp'} thành công`);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error('Có lỗi xảy ra khi xóa');
+    }
+  };
+
   const footer = (
     <div className="flex items-center justify-end gap-3">
       <PillButton
         onClick={onClose}
         variant="outline"
         roundedClass='rounded-xl'
+        disabled={isLoading}
       >
         Hủy
       </PillButton>
       <PillButton
         roundedClass='rounded-xl'
+        onClick={handleDelete}
+        loading={isLoading}
       >
         Xóa
       </PillButton>
@@ -39,15 +59,15 @@ const DeleteFolderModal = ({ open, onClose, folderName, fileCount }) => {
     >
       <div className="flex flex-col gap-4">
         <div className="text-base text-[#5B403E]">
-          Bạn có chắc muốn xóa <span className="font-bold text-[#1A1C1C]">"{folderName}"</span>?
+          Bạn có chắc muốn xóa <span className="font-bold text-[#1A1C1C]">"{item.name}"</span>?
           Hành động này không thể hoàn tác.
         </div>
 
-        {fileCount > 0 && (
+        {item.count > 0 && (
           <div className="bg-[#E8E8E8] border-[#E2E2E2] rounded-xl p-4 flex items-center gap-3">
             <FolderMinus className="w-5 h-5 text-[#5B403E]" strokeWidth={1.5} />
             <span className="text-[14px] text-[#5B403E]">
-              Toàn bộ <span className="font-bold text-[#1A1C1C]">{fileCount} file</span> bên trong sẽ bị xóa.
+              Toàn bộ <span className="font-bold text-[#1A1C1C]">{item.count} mục</span> bên trong sẽ bị xóa.
             </span>
           </div>
         )}

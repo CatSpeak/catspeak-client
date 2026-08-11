@@ -4,10 +4,80 @@ import { FileText, Search, X, Copy, Download, FolderInput, Trash2, Eye, ZoomIn }
 import Switch from '@/shared/components/ui/inputs/Switch';
 import TextInput from '@/shared/components/ui/inputs/TextInput';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
+import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
 
-const FileDetailModal = ({ open, onClose }) => {
-  const [isPublic, setIsPublic] = useState(true);
-  const [allowDownload, setAllowDownload] = useState(true);
+import dayjs from 'dayjs';
+import toast from 'react-hot-toast';
+
+const formatSize = (bytes) => {
+  if (bytes === 0) return '0 B';
+  if (!bytes) return '';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
+
+const FileDetailModal = ({ open, onClose, item, onDelete }) => {
+  const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
+  const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
+
+  const [updateSettings] = useUpdateMaterialSettingsMutation();
+  const [recordDownload] = useRecordMaterialDownloadMutation();
+
+  // Sync state when item changes
+  React.useEffect(() => {
+    if (item) {
+      setIsPublic(item.isPublic);
+      setAllowDownload(item.allowDownload);
+    }
+  }, [item]);
+
+  if (!item) return null;
+
+  const handleTogglePublic = async (checked) => {
+    setIsPublic(checked);
+    try {
+      await updateSettings({ id: item.id, isPublic: checked, allowDownload }).unwrap();
+      toast.success('Đã cập nhật trạng thái chia sẻ');
+    } catch {
+      setIsPublic(!checked); // revert
+      toast.error('Lỗi khi cập nhật trạng thái');
+    }
+  };
+
+  const handleToggleDownload = async (checked) => {
+    setAllowDownload(checked);
+    try {
+      await updateSettings({ id: item.id, isPublic, allowDownload: checked }).unwrap();
+      toast.success('Đã cập nhật quyền tải xuống');
+    } catch {
+      setAllowDownload(!checked); // revert
+      toast.error('Lỗi khi cập nhật quyền tải xuống');
+    }
+  };
+
+  const handleDownload = async () => {
+    if (item.fileUrl) {
+      recordDownload(item.id);
+      try {
+        const response = await fetch(item.fileUrl);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = item.fileName || item.name || 'download';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Download failed, falling back to new tab:', error);
+        window.open(item.fileUrl, '_blank');
+      }
+    }
+  };
 
   return (
     <Modal
@@ -26,7 +96,7 @@ const FileDetailModal = ({ open, onClose }) => {
             <div className="w-8 h-8 bg-[#E3BEBA]/50 rounded flex items-center justify-center text-[#6E0009]">
               <FileText className="w-5 h-5" />
             </div>
-            <span className="font-semibold text-[#1A1C1C] text-lg">Bài giảng Ngữ pháp Cơ bản - Bài 1.pdf</span>
+            <span className="font-semibold text-[#1A1C1C] text-lg">{item.fileName || item.name}</span>
           </div>
           <IconButton variant='ghost' className='cursor-pointer'>
             <ZoomIn className='text-[#5B403E]' />
@@ -56,15 +126,15 @@ const FileDetailModal = ({ open, onClose }) => {
             <div className="bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl p-4 flex flex-col gap-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-[#5B403E]">Loại:</span>
-                <span className="font-medium text-[#1A1C1C]">PDF</span>
+                <span className="font-medium text-[#1A1C1C]">{item.fileName?.split('.').pop().toUpperCase() || 'TỆP'}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-[#5B403E]">Kích thước:</span>
-                <span className="font-medium text-[#1A1C1C]">2.4MB</span>
+                <span className="font-medium text-[#1A1C1C]">{formatSize(item.fileSize || item.size || item.sizeBytes)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-[#5B403E]">Ngày tải lên:</span>
-                <span className="font-medium text-[#1A1C1C]">15/10/2023</span>
+                <span className="font-medium text-[#1A1C1C]">{item.uploadedAt || item.createdAt ? dayjs(item.uploadedAt || item.createdAt).format('DD/MM/YYYY') : 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -80,7 +150,7 @@ const FileDetailModal = ({ open, onClose }) => {
               </div>
               <Switch
                 checked={isPublic}
-                onChange={(e) => setIsPublic(e.target.checked)}
+                onChange={(e) => handleTogglePublic(e.target.checked)}
                 colorClass="peer-checked:bg-[#8e1115]"
               />
             </div>
@@ -90,7 +160,7 @@ const FileDetailModal = ({ open, onClose }) => {
               <div className="flex items-center gap-2">
                 <TextInput
                   readOnly
-                  value="https://catspeak.edu/doc/a1b2c3d4"
+                  value={item.fileUrl || "Không có liên kết"}
                   className="!h-10 text-sm bg-[#F9F9F9] border-[#E3BEBA] !rounded-xl"
                   containerClassName="flex-1"
                 />
@@ -98,7 +168,12 @@ const FileDetailModal = ({ open, onClose }) => {
                   variant="outline"
                   roundedClass="rounded-xl"
                   startIcon={<Copy className="w-4 h-4" />}
-                  onClick={() => navigator.clipboard.writeText("https://catspeak.edu/doc/a1b2c3d4")}
+                  onClick={() => {
+                    if (item.fileUrl) {
+                      navigator.clipboard.writeText(item.fileUrl);
+                      toast?.success?.('Đã sao chép liên kết') || alert('Đã sao chép liên kết');
+                    }
+                  }}
                 >
                   Sao chép
                 </PillButton>
@@ -116,7 +191,7 @@ const FileDetailModal = ({ open, onClose }) => {
             </div>
             <Switch
               checked={allowDownload}
-              onChange={(e) => setAllowDownload(e.target.checked)}
+              onChange={(e) => handleToggleDownload(e.target.checked)}
               colorClass="peer-checked:bg-[#8e1115]"
             />
           </div>
@@ -129,12 +204,12 @@ const FileDetailModal = ({ open, onClose }) => {
             <div className="flex gap-3">
               <div className="flex-1 bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl flex flex-col items-center justify-center p-3">
                 <Eye className="w-5 h-5 text-[#6E0009] mb-1" />
-                <span className="text-xl font-bold text-[#1A1C1C]">124</span>
+                <span className="text-xl font-bold text-[#1A1C1C]">{item.viewCount || 0}</span>
                 <span className="text-xs text-[#5B403E] font-medium mt-0.5">lượt xem</span>
               </div>
               <div className="flex-1 bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl flex flex-col items-center justify-center p-3">
                 <Download className="w-5 h-5 text-[#6E0009] mb-1" />
-                <span className="text-xl font-bold text-[#1A1C1C]">45</span>
+                <span className="text-xl font-bold text-[#1A1C1C]">{item.downloadCount || 0}</span>
                 <span className="text-xs text-[#5B403E] font-medium mt-0.5">lượt tải xuống</span>
               </div>
             </div>
@@ -147,6 +222,7 @@ const FileDetailModal = ({ open, onClose }) => {
                 startIcon={<Download className="w-4 h-4" />}
                 className="flex-1"
                 roundedClass="rounded-xl"
+                onClick={handleDownload}
               >
                 Tải xuống
               </PillButton>
@@ -167,6 +243,7 @@ const FileDetailModal = ({ open, onClose }) => {
               textColor="#BA1A1A"
               className="mt-1"
               roundedClass="rounded-xl"
+              onClick={onDelete}
             >
               Xóa
             </PillButton>

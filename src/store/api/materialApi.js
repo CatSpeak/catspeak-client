@@ -91,7 +91,7 @@ export const materialApi = baseApi.injectEndpoints({
         url: `/public/personal-materials/${id}/download`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "PersonalMaterials", id }],
+      invalidatesTags: (result, error, id) => [{ type: "PersonalMaterials", id }, "PersonalMaterials"],
     }),
   }),
   overrideExisting: false,

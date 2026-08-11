@@ -2,7 +2,7 @@ import React from 'react';
 import { MoreVertical, Star, Download, Share2, Edit2, FolderInput, StarOff, Settings, Trash2 } from 'lucide-react';
 import Dropdown from '@/shared/components/ui/Dropdown';
 
-const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, onClick, layout = 'grid' }) => {
+const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, onClick, onDelete, onDownload, layout = 'grid' }) => {
   const isList = layout === 'list';
 
   return (
@@ -39,6 +39,8 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
                 onChange={(val) => {
                   if (val === 'share' && onShare) onShare();
                   if (val === 'settings' && onDetails) onDetails();
+                  if (val === 'delete' && onDelete) onDelete();
+                  if (val === 'download' && onDownload) onDownload();
                 }}
                 options={[
                   { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
@@ -88,6 +90,8 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
                 onChange={(val) => {
                   if (val === 'share' && onShare) onShare();
                   if (val === 'settings' && onDetails) onDetails();
+                  if (val === 'delete' && onDelete) onDelete();
+                  if (val === 'download' && onDownload) onDownload();
                 }}
                 options={[
                   { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },

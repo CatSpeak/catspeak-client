@@ -4,10 +4,44 @@ import { FileText, Copy, Link as LinkIcon, Save, ChevronDown, FolderInput } from
 import Switch from '@/shared/components/ui/inputs/Switch';
 import { PillButton } from '@/shared/components/ui/buttons';
 import Dropdown from '@/shared/components/ui/Dropdown';
+import { useUpdateMaterialSettingsMutation } from '@/store/api/materialApi';
+import toast from 'react-hot-toast';
 
-const ShareMaterialModal = ({ open, onClose }) => {
-  const [isPublic, setIsPublic] = useState(true);
-  const [allowDownload, setAllowDownload] = useState(true);
+const formatSize = (bytes) => {
+  if (bytes === 0) return '0 B';
+  if (!bytes) return '';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
+
+const ShareMaterialModal = ({ open, onClose, item }) => {
+  const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
+  const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
+
+  const [updateSettings, { isLoading }] = useUpdateMaterialSettingsMutation();
+
+  // Sync state when item changes
+  React.useEffect(() => {
+    if (item) {
+      setIsPublic(item.isPublic);
+      setAllowDownload(item.allowDownload);
+    }
+  }, [item]);
+
+  if (!item) return null;
+
+  const handleSave = async () => {
+    try {
+      await updateSettings({ id: item.id, isPublic, allowDownload }).unwrap();
+      toast.success('Cập nhật cài đặt chia sẻ thành công');
+      onClose();
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi xảy ra khi cập nhật cài đặt');
+    }
+  };
 
   const footer = (
     <div className="flex items-center justify-end gap-3">
@@ -20,8 +54,11 @@ const ShareMaterialModal = ({ open, onClose }) => {
       </PillButton>
       <PillButton
         roundedClass='rounded-xl'
+        onClick={handleSave}
+        loading={isLoading}
+        startIcon={<Save className="w-4 h-4" />}
       >
-        <Save className="w-4 h-4" />
+
         Lưu thay đổi
       </PillButton>
     </div>
@@ -47,8 +84,8 @@ const ShareMaterialModal = ({ open, onClose }) => {
         <div className="bg-[#F3F3F3] border-[#E2E2E2] rounded-xl p-4 flex items-center gap-4">
           <FileText className="w-6 h-6 text-[#5B403E]" />
           <div className="flex flex-col">
-            <span className="text-base font-bold text-[#1A1C1C]">Bai_Giang_Cac_Thi_2023.pdf</span>
-            <span className="text-sm text-[#5B403E]">PDF • 4.2 MB</span>
+            <span className="text-base font-bold text-[#1A1C1C]">{item.fileName || item.name}</span>
+            <span className="text-sm text-[#5B403E]">{item.fileName?.split('.').pop().toUpperCase() || 'TỆP'} • {formatSize(item.fileSize || item.size || item.sizeBytes)}</span>
           </div>
         </div>
 
@@ -74,7 +111,7 @@ const ShareMaterialModal = ({ open, onClose }) => {
               <input
                 type="text"
                 readOnly
-                value="https://lumina.edu.vn/share/doc/vhn83x29m"
+                value={item.fileUrl || "Không có liên kết"}
                 className="w-full h-10 bg-[#F3F3F3] border border-[#E2E2E2] rounded-lg pl-9 pr-3 text-base text-[#1A1C1C] outline-none"
               />
             </div>
@@ -82,7 +119,12 @@ const ShareMaterialModal = ({ open, onClose }) => {
               startIcon={<Copy className="w-4 h-4" />}
               variant='outline'
               roundedClass='rounded-xl'
-              onClick={() => navigator.clipboard.writeText("https://lumina.edu.vn/share/doc/vhn83x29m")}
+              onClick={() => {
+                if (item.fileUrl) {
+                  navigator.clipboard.writeText(item.fileUrl);
+                  toast.success('Đã sao chép liên kết');
+                }
+              }}
             >Sao chép</PillButton>
           </div>
         </div>

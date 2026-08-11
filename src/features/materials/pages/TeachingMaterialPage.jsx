@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { LayoutGrid, List, ChevronDown, FolderPlus, Upload, ListFilter, TableProperties } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { LayoutGrid, ChevronDown, FolderPlus, Upload, ListFilter, TableProperties } from 'lucide-react';
 import FolderItem from '../components/teaching-material/FolderItem';
 import FileItem from '../components/teaching-material/FileItem';
 import EmptySearchState from '../components/teaching-material/EmptySearchState';
@@ -11,9 +11,10 @@ import FileDetailModal from '../components/teaching-material/FileDetailModal';
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
-import { useGetPersonalMaterialsQuery } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
+
 const TeachingMaterialPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("");
@@ -23,17 +24,29 @@ const TeachingMaterialPage = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
   const [isFileDetailOpen, setIsFileDetailOpen] = useState(false);
-  const [deletingFolder, setDeletingFolder] = useState({ name: "", count: 0 });
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [deletingItem, setDeletingItem] = useState({ id: null, name: "", count: 0, type: "folder" });
 
   const { data: materialsData, isLoading } = useGetPersonalMaterialsQuery({
     keyword: searchQuery,
     sortBy: sortBy,
   });
 
+  const [recordDownload] = useRecordMaterialDownloadMutation();
+
   const responseData = materialsData?.data || materialsData || {};
-  const folders = Array.isArray(responseData.folders) ? responseData.folders : [];
-  const files = Array.isArray(responseData.recentFiles) ? responseData.recentFiles : [];
-  const materials = [...folders, ...files];
+  const folders = useMemo(() => Array.isArray(responseData.folders) ? responseData.folders : [], [responseData.folders]);
+  const files = useMemo(() => Array.isArray(responseData.recentFiles) ? responseData.recentFiles : [], [responseData.recentFiles]);
+  const materials = useMemo(() => [...folders, ...files], [folders, files]);
+
+  useEffect(() => {
+    if (selectedItem) {
+      const updatedItem = materials.find(m => m.id === selectedItem.id);
+      if (updatedItem && (updatedItem.downloadCount !== selectedItem.downloadCount || updatedItem.viewCount !== selectedItem.viewCount || updatedItem.isPublic !== selectedItem.isPublic || updatedItem.allowDownload !== selectedItem.allowDownload)) {
+        setSelectedItem(updatedItem);
+      }
+    }
+  }, [materialsData, selectedItem, materials]);
 
   const formatSize = (bytes) => {
     if (bytes === 0) return '0 B';
@@ -181,7 +194,7 @@ const TeachingMaterialPage = () => {
                     totalItems={`${(folder.subFolderCount || 0) + (folder.materialCount || 0)} mục`}
                     status={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
                     onDelete={() => {
-                      setDeletingFolder({ name: folder.name, count: (folder.subFolderCount || 0) + (folder.materialCount || 0) });
+                      setDeletingItem({ id: folder.id, name: folder.name, count: (folder.subFolderCount || 0) + (folder.materialCount || 0), type: 'folder' });
                       setIsDeleteFolderOpen(true);
                     }}
                   />
@@ -198,16 +211,50 @@ const TeachingMaterialPage = () => {
                 {files.map(file => (
                   <FileItem
                     key={file.id}
-                    title={file.name}
+                    title={file.fileName || file.name}
                     size={formatSize(file.fileSize || file.size || file.sizeBytes)}
                     date={file.updatedAt ? dayjs(file.updatedAt).format('DD/MM/YYYY') : ''}
                     isPublic={file.isPublic}
                     isStarred={file.isStarred}
                     type={file.fileType || 'file'}
                     layout={viewLayout}
-                    onShare={() => setIsShareModalOpen(true)}
-                    onDetails={() => setIsFileDetailOpen(true)}
-                    onClick={() => setIsFileDetailOpen(true)}
+                    onShare={() => {
+                      setSelectedItem(file);
+                      setIsShareModalOpen(true);
+                    }}
+                    onDetails={() => {
+                      setSelectedItem(file);
+                      setIsFileDetailOpen(true);
+                    }}
+                    onClick={() => {
+                      setSelectedItem(file);
+                      setIsFileDetailOpen(true);
+                    }}
+                    onDelete={() => {
+                      setDeletingItem({ id: file.id, name: file.fileName || file.name, count: 0, type: 'file' });
+                      setIsDeleteFolderOpen(true);
+                    }}
+                    onDownload={async () => {
+                      if (file.fileUrl) {
+                        recordDownload(file.id);
+                        try {
+                          const response = await fetch(file.fileUrl);
+                          if (!response.ok) throw new Error('Network response was not ok');
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.download = file.fileName || file.name || 'download';
+                          document.body.appendChild(link);
+                          link.click();
+                          link.remove();
+                          window.URL.revokeObjectURL(url);
+                        } catch (error) {
+                          console.error('Download failed, falling back to new tab:', error);
+                          window.open(file.fileUrl, '_blank');
+                        }
+                      }
+                    }}
                   />
                 ))}
               </div>
@@ -234,16 +281,22 @@ const TeachingMaterialPage = () => {
       <ShareMaterialModal
         open={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
+        item={selectedItem}
       />
       <DeleteFolderModal
         open={isDeleteFolderOpen}
         onClose={() => setIsDeleteFolderOpen(false)}
-        folderName={deletingFolder.name}
-        fileCount={deletingFolder.count}
+        item={deletingItem}
       />
       <FileDetailModal
         open={isFileDetailOpen}
         onClose={() => setIsFileDetailOpen(false)}
+        item={selectedItem}
+        onDelete={() => {
+          setIsFileDetailOpen(false);
+          setDeletingItem({ id: selectedItem.id, name: selectedItem.fileName || selectedItem.name, count: 0, type: 'file' });
+          setIsDeleteFolderOpen(true);
+        }}
       />
     </div>
   );
