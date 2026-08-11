@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react"
-import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users, Layers, Share2, Check } from "lucide-react"
+import React, { useMemo } from "react"
+import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users, Layers } from "lucide-react"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
@@ -8,7 +8,6 @@ import { useGetTeacherClassTeachingTasksCombinedQuery } from "@/store/api/course
 import { mapTeachingTask } from "../../utils/courseTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
-import { copyShareLink } from "@/shared/utils/shareUtils"
 import CourseStatusPill from "../CourseStatusPill"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
@@ -38,7 +37,7 @@ const ClassOverviewTab = ({
   onViewTasks,
   cd = {}
 }) => {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const { formatDateMonth, formatDate, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
@@ -63,12 +62,17 @@ const ClassOverviewTab = ({
     : null
   const progressText = `${completed ?? "—"} / ${total || "—"}`
   const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl)
-  const nextSession = classData.nextSession?.date && (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
-    ? classData.nextSession
-    : null
-  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime
-  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime
-  const sessionDate = nextSession?.date || (nextSession?.rawStartTime && (nextSession.rawStartTime.includes('T') || nextSession.rawStartTime.includes('-')) ? nextSession.rawStartTime : null)
+  const rawNs = classData.nextSession
+  const nsIsoStart = rawNs?.startTime || rawNs?.rawStartTime || ""
+  const nsIsoEnd = rawNs?.endTime || rawNs?.rawEndTime || ""
+  const schedObj = Array.isArray(classData.schedule) ? classData.schedule[0] : (classData.schedule || {})
+
+  const hasNextSession = Boolean(rawNs && (rawNs.date || rawNs.startTime || rawNs.rawStartTime))
+  const nextSession = hasNextSession ? rawNs : null
+
+  const sessionStartTime = schedObj?.startTime || (typeof nsIsoStart === "string" && !nsIsoStart.includes("T") ? nsIsoStart : null) || nsIsoStart
+  const sessionEndTime = schedObj?.endTime || (typeof nsIsoEnd === "string" && !nsIsoEnd.includes("T") ? nsIsoEnd : null) || nsIsoEnd
+  const sessionDate = rawNs?.date || (typeof nsIsoStart === "string" && nsIsoStart.includes("T") ? nsIsoStart.split("T")[0] : classData.startDate)
   const studentCountValue = Number(classData.studentCount ?? classData.enrolledStudents)
   const studentCount = Number.isFinite(studentCountValue)
     ? Math.max(0, Math.floor(studentCountValue))
@@ -118,18 +122,6 @@ const ClassOverviewTab = ({
   const isArchivedClass = normalizedStatus === "ARCHIVED"
   const isCompletedClass = normalizedStatus === "COMPLETED"
 
-  const [linkCopied, setLinkCopied] = useState(false)
-  const handleCopyLink = async () => {
-    const ok = await copyShareLink({
-      successMessage: cd.linkCopied || "Link copied!",
-      errorMessage: cd.linkCopyFailed || "Failed to copy link",
-    })
-    if (ok) {
-      setLinkCopied(true)
-      setTimeout(() => setLinkCopied(false), 2000)
-    }
-  }
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* LEFT COLUMN: Visual Banner, Information Details, and Circular Progress */}
@@ -144,16 +136,6 @@ const ClassOverviewTab = ({
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15" />
           </div>
-
-          {/* Share / Copy Link Button */}
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            title={cd.shareClass || "Share class"}
-            className="absolute top-4 right-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
-          >
-            {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
-          </button>
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
             <div className="flex flex-col gap-2 max-w-xl">
@@ -439,15 +421,15 @@ const ClassOverviewTab = ({
                       <span>
                         {sessionStartTime
                           ? sessionEndTime
-                            ? `${formatScheduleTime(sessionStartTime, sessionDate)} - ${formatScheduleTime(sessionEndTime, sessionDate)}`
-                            : formatScheduleTime(sessionStartTime, sessionDate)
+                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
+                            : formatScheduleTime(sessionStartTime)
                           : ui.tba || "TBA"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-gray-400" />
                       <span>
-                        {formatDateMonth(sessionDate, ui.tba, sessionStartTime)}
+                        {formatDateMonth(sessionDate, ui.tba)}
                       </span>
                     </div>
                   </div>

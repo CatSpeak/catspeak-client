@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -49,7 +49,7 @@ export const useCreateCustomRoomForm = (open = true) => {
 
   const isQuotaFull = customRoomsData?.canCreateCustomRoom === false
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       name: "",
       topics: [],
@@ -62,15 +62,13 @@ export const useCreateCustomRoomForm = (open = true) => {
     setThumbnailFile(null)
     setNameError("")
     setPasswordError("")
-  }
+  }, [])
 
   useEffect(() => {
     if (!open) {
-      queueMicrotask(() => {
-        resetForm()
-      })
+      resetForm()
     }
-  }, [open])
+  }, [open, resetForm])
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))

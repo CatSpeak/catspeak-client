@@ -7,7 +7,7 @@ import {
   useGetTeacherCourseTeachingTasksCombinedQuery,
   useDeleteCourseMutation,
 } from "@/store/api/coursesApi"
-import { Pencil, Trash2, Share2, Check } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import { useTimezone } from "@/shared/hooks/useTimezone"
@@ -22,12 +22,11 @@ import ClassCard from "../components/ClassCard"
 import CourseInfoCard from "../components/CourseInfoCard"
 import TeachingTasksSection from "../components/assignments/TeachingTasksSection"
 import UpcomingSessionCard from "../components/sessions/UpcomingSessionCard"
-import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
   const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
@@ -38,18 +37,6 @@ const CourseDetailPage = () => {
   const menuRef = useRef(null)
 
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
-  const [linkCopied, setLinkCopied] = useState(false)
-
-  const handleCopyLink = async () => {
-    const ok = await copyShareLink({
-      successMessage: c.courseDetail?.linkCopied || "Link copied!",
-      errorMessage: c.courseDetail?.linkCopyFailed || "Failed to copy link",
-    })
-    if (ok) {
-      setLinkCopied(true)
-      setTimeout(() => setLinkCopied(false), 2000)
-    }
-  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -283,16 +270,6 @@ const CourseDetailPage = () => {
               {/* Dark overlay for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
             </div>
-
-            {/* Share / Copy Link Button */}
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              title={c.courseDetail?.shareCourse || "Share course"}
-              className="absolute top-4 right-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
-            >
-              {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
-            </button>
 
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
               {/* Course Title */}

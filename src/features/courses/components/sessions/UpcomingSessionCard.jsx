@@ -17,7 +17,7 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const { formatDateMonth, formatScheduleTime } = useTimezone();
   const ui = t.courses?.workspaceUi || {};
 
@@ -61,7 +61,7 @@ const UpcomingSessionCard = ({
                     ns?.rawStartTime ||
                     ns?.date ||
                     (typeof ns?.startTime === "string" &&
-                      (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
                       ? ns.startTime
                       : null) ||
                     nextClass?.date ||
@@ -71,23 +71,20 @@ const UpcomingSessionCard = ({
                       ? rawIsoDate.split("T")[0]
                       : null;
                   const sessionStartTime =
-                    ns?.startTime ||
-                    ns?.rawStartTime ||
                     schedObj?.startTime ||
+                    (typeof ns?.startTime === "string" && !ns.startTime.includes("T") ? ns.startTime : null) ||
+                    ns?.startTime ||
                     nextClass?.startTime;
                   const sessionEndTime =
-                    ns?.endTime ||
-                    ns?.rawEndTime ||
                     schedObj?.endTime ||
+                    (typeof ns?.endTime === "string" && !ns.endTime.includes("T") ? ns.endTime : null) ||
+                    ns?.endTime ||
                     nextClass?.endTime;
 
                   if (!sessionStartTime) return ui.tba || "TBA";
-                  const startFormatted = formatScheduleTime(
-                    sessionStartTime,
-                    sessionDate,
-                  );
+                  const startFormatted = formatScheduleTime(sessionStartTime);
                   const endFormatted = sessionEndTime
-                    ? formatScheduleTime(sessionEndTime, sessionDate)
+                    ? formatScheduleTime(sessionEndTime)
                     : "";
                   return endFormatted
                     ? `${startFormatted} - ${endFormatted}`
@@ -107,7 +104,7 @@ const UpcomingSessionCard = ({
                     ns?.rawStartTime ||
                     ns?.date ||
                     (typeof ns?.startTime === "string" &&
-                      (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
                       ? ns.startTime
                       : null) ||
                     nextClass?.date ||
@@ -116,13 +113,8 @@ const UpcomingSessionCard = ({
                     typeof rawIsoDate === "string"
                       ? rawIsoDate.split("T")[0]
                       : null;
-                  const sessionStartTime =
-                    schedObj?.startTime ||
-                    ns?.startTime ||
-                    ns?.rawStartTime ||
-                    nextClass?.startTime;
 
-                  return formatDateMonth(sessionDate, ui.tba, sessionStartTime);
+                  return formatDateMonth(sessionDate, ui.tba);
                 })()}
               </span>
             </div>

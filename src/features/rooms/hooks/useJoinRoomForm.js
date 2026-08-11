@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 const getLanguageName = (langCode) => {
@@ -31,10 +31,10 @@ export const useJoinRoomForm = () => {
     }
   }
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setTopics([])
     setSelectedLevel("")
-  }
+  }, [])
 
   const submitJoin = (onSuccess) => {
     if (!selectedLanguage) return

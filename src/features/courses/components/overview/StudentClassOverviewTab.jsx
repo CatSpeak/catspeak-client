@@ -1,13 +1,12 @@
-import React, { useState } from "react"
-import { Calendar, Clock, Share2, Check } from "lucide-react"
-import CountdownTicker from "../CountdownTicker"
-import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
-import { copyShareLink } from "@/shared/utils/shareUtils"
-import { useTimezone } from "@/shared/hooks/useTimezone"
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
-import "react-circular-progressbar/dist/styles.css"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { getLocalizedLanguageName } from "../../data/courseFormOptions"
+import React from "react";
+import { Calendar, Clock } from "lucide-react";
+import CountdownTicker from "../CountdownTicker";
+import { getSafeMediaUrl } from "../../utils/courseUtils";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { getLocalizedLanguageName } from "../../data/courseFormOptions";
 
 const StudentClassOverviewTab = ({
   classData,
@@ -18,77 +17,81 @@ const StudentClassOverviewTab = ({
   noUpcomingLabel,
   onJoinRoom,
 }) => {
-  const { t } = useLanguage()
-  const { formatDateMonth, formatScheduleTime } = useTimezone()
-  const c = t.courses || {}
-  const cd = c.classDetail || {}
-  const scd = c.studentCourseDetail || {}
-  const ui = c.workspaceUi || {}
-
-  const [linkCopied, setLinkCopied] = useState(false)
-  const handleCopyLink = async () => {
-    const ok = await copyShareLink({
-      successMessage: cd.linkCopied || "Link copied!",
-      errorMessage: cd.linkCopyFailed || "Failed to copy link",
-    })
-    if (ok) {
-      setLinkCopied(true)
-      setTimeout(() => setLinkCopied(false), 2000)
-    }
-  }
+  const { language, t } = useLanguage();
+  const { formatDateMonth, formatScheduleTime } = useTimezone();
+  const c = t.courses || {};
+  const cd = c.classDetail || {};
+  const scd = c.studentCourseDetail || {};
+  const ui = c.workspaceUi || {};
 
   const completedValue = classData.progress
     ? classData.progress.completedSessions
-    : classData.completedSessions
+    : classData.completedSessions;
   const totalValue = classData.progress
     ? classData.progress.totalSessions
-    : classData.totalSessions
+    : classData.totalSessions;
   const completedSessions =
     completedValue != null && Number.isFinite(Number(completedValue))
       ? Math.max(0, Number(completedValue))
-      : null
+      : null;
   const totalSessions =
     Number.isFinite(Number(totalValue)) && Number(totalValue) > 0
       ? Number(totalValue)
-      : 0
+      : 0;
   const progressPercent =
     totalSessions > 0 && completedSessions !== null
       ? Math.min(100, Math.round((completedSessions / totalSessions) * 100))
-      : null
-  const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl)
+      : null;
+  const thumbnailUrl = getSafeMediaUrl(classData.thumbnailUrl);
   const instructor =
     classData.instructor && typeof classData.instructor === "object"
       ? classData.instructor
-      : null
+      : null;
   const instructorName = String(
     instructor?.fullName ??
       instructor?.name ??
       classData.instructorName ??
       classData.teacherName ??
       "",
-  ).trim()
+  ).trim();
   const instructorBio = String(
     instructor?.bio ?? instructor?.description ?? "",
-  ).trim()
+  ).trim();
   const instructorAvatarCandidate = String(
     instructor?.avatarUrl ?? instructor?.avatar ?? "",
-  ).trim()
-  const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || ""
-  const nextSession =
-    classData.nextSession?.date &&
-    (classData.nextSession?.startTime || classData.nextSession?.rawStartTime)
-      ? classData.nextSession
-      : null
-  const sessionStartTime = nextSession?.startTime || nextSession?.rawStartTime
-  const sessionEndTime = nextSession?.endTime || nextSession?.rawEndTime
-  const sessionDate =
-    nextSession?.date ||
-    (nextSession?.rawStartTime &&
-    (nextSession.rawStartTime.includes("T") || nextSession.rawStartTime.includes("-"))
-      ? nextSession.rawStartTime
-      : null)
+  ).trim();
+  const instructorAvatar = getSafeMediaUrl(instructorAvatarCandidate) || "";
+  const rawNs = classData.nextSession;
+  const nsIsoStart = rawNs?.startTime || rawNs?.rawStartTime || "";
+  const nsIsoEnd = rawNs?.endTime || rawNs?.rawEndTime || "";
+  const schedObj = Array.isArray(classData.schedule)
+    ? classData.schedule[0]
+    : classData.schedule || {};
 
-  const showRightColumn = isEnrolled
+  const hasNextSession = Boolean(
+    rawNs && (rawNs.date || rawNs.startTime || rawNs.rawStartTime),
+  );
+  const nextSession = hasNextSession ? rawNs : null;
+
+  const sessionStartTime =
+    schedObj?.startTime ||
+    (typeof nsIsoStart === "string" && !nsIsoStart.includes("T")
+      ? nsIsoStart
+      : null) ||
+    nsIsoStart;
+  const sessionEndTime =
+    schedObj?.endTime ||
+    (typeof nsIsoEnd === "string" && !nsIsoEnd.includes("T")
+      ? nsIsoEnd
+      : null) ||
+    nsIsoEnd;
+  const sessionDate =
+    rawNs?.date ||
+    (typeof nsIsoStart === "string" && nsIsoStart.includes("T")
+      ? nsIsoStart.split("T")[0]
+      : classData.startDate);
+
+  const showRightColumn = isEnrolled;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -105,16 +108,6 @@ const StudentClassOverviewTab = ({
             backgroundPosition: "center",
           }}
         >
-          {/* Share Button */}
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            title={cd.shareClass || "Share class"}
-            className="absolute top-4 right-4 z-20 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
-          >
-            {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
-          </button>
-
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
 
@@ -228,8 +221,8 @@ const StudentClassOverviewTab = ({
                         {scd.timeLabel || "Time"}:{" "}
                         {sessionStartTime
                           ? sessionEndTime
-                            ? `${formatScheduleTime(sessionStartTime, sessionDate)} - ${formatScheduleTime(sessionEndTime, sessionDate)}`
-                            : formatScheduleTime(sessionStartTime, sessionDate)
+                            ? `${formatScheduleTime(sessionStartTime)} - ${formatScheduleTime(sessionEndTime)}`
+                            : formatScheduleTime(sessionStartTime)
                           : ui.tba || "TBA"}
                       </span>
                     </div>
@@ -237,7 +230,7 @@ const StudentClassOverviewTab = ({
                       <Calendar size={14} className="text-gray-400" />
                       <span>
                         {scd.sessionDateLabel || "Session Date"}:{" "}
-                        {formatDateMonth(sessionDate, ui.tba, sessionStartTime)}
+                        {formatDateMonth(sessionDate, ui.tba)}
                       </span>
                     </div>
                   </div>
@@ -305,7 +298,7 @@ const StudentClassOverviewTab = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default StudentClassOverviewTab
+export default StudentClassOverviewTab;
