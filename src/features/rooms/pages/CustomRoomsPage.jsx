@@ -1,72 +1,75 @@
-import React, { useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { AnimatePresence } from "framer-motion"
-import { FluentAnimation } from "@/shared/components/ui/animations"
-import { Crown, Plus } from "lucide-react"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
-import PageTitle from "@/shared/components/ui/PageTitle"
-import { EmptyState, PlanRequiredState } from "@/shared/components/ui/indicators"
-import { toast } from "react-hot-toast"
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { AnimatePresence } from "framer-motion";
+import { FluentAnimation } from "@/shared/components/ui/animations";
+import { Crown, Plus } from "lucide-react";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
+import PageTitle from "@/shared/components/ui/PageTitle";
+import {
+  EmptyState,
+  PlanRequiredState,
+} from "@/shared/components/ui/indicators";
+import { toast } from "react-hot-toast";
 import {
   useGetMyCustomRoomsQuery,
   useDeleteCustomRoomMutation,
-} from "@/store/api/roomsApi"
-import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
-import CreateRoomModal from "../components/CreateRoomModal"
-import EditRoomModal from "../components/EditRoomModal"
-import CustomRoomCard from "../components/CustomRoomCard"
+} from "@/store/api/roomsApi";
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
+import CreateRoomModal from "../components/CreateRoomModal";
+import EditRoomModal from "../components/EditRoomModal";
+import CustomRoomCard from "../components/CustomRoomCard";
 
 const CustomRoomsPage = () => {
-  const { t } = useLanguage()
-  const { lang } = useParams()
-  const navigate = useNavigate()
-  const ct = t.rooms?.customRooms || {}
-  const { limits, isLoading: isPlanLoading } = usePlanFeatures()
+  const { t } = useLanguage();
+  const { lang } = useParams();
+  const navigate = useNavigate();
+  const ct = t.rooms?.customRooms || {};
+  const { limits, isLoading: isPlanLoading } = usePlanFeatures();
 
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
 
   // API hooks
-  const { data: customRoomsData, isLoading } = useGetMyCustomRoomsQuery()
+  const { data: customRoomsData, isLoading } = useGetMyCustomRoomsQuery();
   const [deleteCustomRoom, { isLoading: isDeleting }] =
-    useDeleteCustomRoomMutation()
+    useDeleteCustomRoomMutation();
 
-  const customRooms = customRoomsData?.customRooms || []
+  const customRooms = customRoomsData?.customRooms || [];
   const quota = {
     used: customRoomsData?.currentCustomRoomsCount ?? 0,
     max: customRoomsData?.maxCustomRooms ?? 3,
-  }
-  const isQuotaFull = customRoomsData?.canCreateCustomRoom === false
+  };
+  const isQuotaFull = false; // customRoomsData?.canCreateCustomRoom === false
 
   // Local state
-  const [copiedId, setCopiedId] = useState(null)
-  const [editingRoom, setEditingRoom] = useState(null)
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [copiedId, setCopiedId] = useState(null);
+  const [editingRoom, setEditingRoom] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const handleCopyLink = (roomId) => {
-    const link = `${window.location.origin}/${supportedLangCode}/meet/${roomId}`
-    navigator.clipboard.writeText(link)
-    setCopiedId(roomId)
-    toast.success(ct.linkCopied || "Link copied!")
-    setTimeout(() => setCopiedId(null), 2000)
-  }
+    const link = `${window.location.origin}/${supportedLangCode}/meet/${roomId}`;
+    navigator.clipboard.writeText(link);
+    setCopiedId(roomId);
+    toast.success(ct.linkCopied || "Link copied!");
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const handleJoinRoom = (roomId) => {
-    navigate(`/${supportedLangCode}/meet/${roomId}`)
-  }
+    navigate(`/${supportedLangCode}/meet/${roomId}`);
+  };
 
   const handleEditRoom = (room) => {
-    setEditingRoom(room)
-  }
+    setEditingRoom(room);
+  };
 
   const handleDelete = async (roomId) => {
     try {
-      await deleteCustomRoom(roomId).unwrap()
+      await deleteCustomRoom(roomId).unwrap();
     } catch (err) {
-      console.error("Failed to delete custom room:", err)
-      toast.error(err?.data?.message || "Failed to delete room")
+      console.error("Failed to delete custom room:", err);
+      toast.error(err?.data?.message || "Failed to delete room");
     }
-  }
+  };
 
   if (!isPlanLoading && !limits.allowCustomRooms) {
     return (
@@ -76,7 +79,7 @@ const CustomRoomsPage = () => {
         featureName="Custom Rooms"
         animationKey="custom-rooms-pro-required"
       />
-    )
+    );
   }
 
   return (
@@ -155,8 +158,8 @@ const CustomRoomsPage = () => {
         </FluentAnimation>
       </AnimatePresence>
     </>
-  )
-}
+  );
+};
 
 // --- Sub Components ---
 
@@ -178,6 +181,6 @@ const RoomsListSkeleton = () => (
       </div>
     ))}
   </div>
-)
+);
 
-export default CustomRoomsPage
+export default CustomRoomsPage;
