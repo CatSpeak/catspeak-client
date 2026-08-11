@@ -40,10 +40,28 @@ const ProfileFriendsTab = ({
   const [recPage, setRecPage] = useState(1)
   const secondLastRecRef = useRef(null)
 
-  // Reset recommendation page when search keyword or sub-tab changes
-  useEffect(() => {
+  const [prevDebouncedKeyword, setPrevDebouncedKeyword] = useState(debouncedSearchQuery)
+  const [prevSubTab, setPrevSubTab] = useState(activeSubTab)
+
+  // Synchronously reset page to 1 during render when keyword or tab changes to avoid querying old page with new keyword
+  if (prevDebouncedKeyword !== debouncedSearchQuery) {
+    setPrevDebouncedKeyword(debouncedSearchQuery)
     setRecPage(1)
-  }, [debouncedSearchQuery, activeSubTab])
+  }
+  if (prevSubTab !== activeSubTab) {
+    setPrevSubTab(activeSubTab)
+    setRecPage(1)
+  }
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val)
+    setRecPage(1)
+  }
+
+  const handleTabChange = (tab) => {
+    setActiveSubTab(tab)
+    setRecPage(1)
+  }
 
   // Fetch all potential data
   const { data: friendsResponse, isLoading: loadingFriends } =
@@ -303,7 +321,7 @@ const ProfileFriendsTab = ({
           {/* Search Bar */}
           <SearchInput
             value={searchQuery}
-            onChange={setSearchQuery}
+            onChange={handleSearchChange}
             placeholder={t.profile?.friends?.searchPlaceholder || "Tìm kiếm bạn bè..."}
             className="md:w-[360px]"
           />
@@ -313,7 +331,7 @@ const ProfileFriendsTab = ({
         <Tabs
           tabs={subTabs}
           activeTab={activeSubTab}
-          onChange={setActiveSubTab}
+          onChange={handleTabChange}
           fullWidth={false}
           className="border-none"
         />
