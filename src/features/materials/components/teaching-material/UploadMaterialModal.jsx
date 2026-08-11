@@ -4,25 +4,27 @@ import { UploadCloud, Upload } from 'lucide-react';
 import Switch from '@/shared/components/ui/inputs/Switch';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import UploadItem from './UploadItem';
+import { PillButton } from '@/shared/components/ui/buttons';
 
 const UploadMaterialModal = ({ open, onClose }) => {
   const [isPublic, setIsPublic] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState('current');
 
   const footer = (
-    <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-      <button
+    <div className="flex items-center justify-end gap-3 pt-4">
+      <PillButton
         onClick={onClose}
-        className="px-6 py-2.5 bg-white text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-50 transition-colors"
+        variant='outline'
+        roundedClass='rounded-xl'
       >
         Hủy
-      </button>
-      <button
-        className="flex items-center gap-2 px-6 py-2.5 bg-[#8e1115] text-white rounded-lg font-medium text-sm hover:bg-[#720e11] transition-colors"
+      </PillButton>
+      <PillButton
+        roundedClass='rounded-xl'
       >
         <Upload className="w-4 h-4" />
         Upload
-      </button>
+      </PillButton>
     </div>
   );
 
