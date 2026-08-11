@@ -20,7 +20,7 @@ const PricingPage = () => {
   const { data: plansResponse = [], isLoading: isPlansLoading } =
     useGetPlansQuery();
 
-  const userTier = profileResponse?.data?.tier?.toLowerCase();
+  const userTier = profileResponse?.tier?.toLowerCase();
 
   // Capture route state into a ref at mount so navigate() clearing history state
   // doesn't cause highlightPlan to become undefined mid-effect.

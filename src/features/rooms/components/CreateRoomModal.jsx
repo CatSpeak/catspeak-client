@@ -22,7 +22,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const { data: profileResponse } = useGetUserProfileQuery(undefined, {
     skip: !isAuthenticated,
   })
-  const userTier = profileResponse?.data?.tier?.toLowerCase()
+  const userTier = profileResponse?.tier?.toLowerCase()
   const isPro = userTier === "pro"
 
   const [mode, setMode] = useState(initialMode)
@@ -33,15 +33,16 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   // Group Room Form Hook
   const groupForm = useCreateRoomForm()
 
+  const { resetForm: resetGroupForm } = groupForm
+  const { resetForm: resetCustomForm } = customForm
+
   useEffect(() => {
     if (open) {
-      queueMicrotask(() => {
-        setMode(initialMode)
-        groupForm.resetForm()
-        customForm.resetForm()
-      })
+      setMode(initialMode)
+      resetGroupForm()
+      resetCustomForm()
     }
-  }, [open, initialMode, groupForm, customForm])
+  }, [open, initialMode, resetGroupForm, resetCustomForm])
 
   // Call interceptor
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =
