@@ -31,7 +31,7 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
               </div>
             </div>
 
-            <div className="shrink-0 flex items-center">
+            <div className="shrink-0 flex items-center" onClick={(e) => e.stopPropagation()}>
               <Dropdown
                 align="right"
                 dropdownClassName="w-56"
@@ -80,39 +80,41 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
               )}
             </div>
 
-            <Dropdown
-              align="left"
-              dropdownClassName="w-56"
-              maxHeightClass="max-h-[360px]"
-              onChange={(val) => {
-                if (val === 'share' && onShare) onShare();
-                if (val === 'settings' && onDetails) onDetails();
-              }}
-              options={[
-                { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
-                { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
-                { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
-                { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
-                { value: 'unfavorite', label: 'Bỏ yêu thích', icon: <StarOff className="w-4 h-4" /> },
-                { value: 'settings', label: 'Chi tiết và Cài đặt', icon: <Settings className="w-4 h-4" /> },
-                {
-                  value: 'delete',
-                  label: <span className="text-[#BA1A1A]">Xóa</span>,
-                  icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
-                },
-              ]}
-              trigger={(isOpen, selectedOption, toggleDropdown) => (
-                <button
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleDropdown();
-                  }}
-                >
-                  <MoreVertical className="w-5 h-5 text-gray-500" />
-                </button>
-              )}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <Dropdown
+                align="left"
+                dropdownClassName="w-56"
+                maxHeightClass="max-h-[360px]"
+                onChange={(val) => {
+                  if (val === 'share' && onShare) onShare();
+                  if (val === 'settings' && onDetails) onDetails();
+                }}
+                options={[
+                  { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
+                  { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
+                  { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
+                  { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
+                  { value: 'unfavorite', label: 'Bỏ yêu thích', icon: <StarOff className="w-4 h-4" /> },
+                  { value: 'settings', label: 'Chi tiết và Cài đặt', icon: <Settings className="w-4 h-4" /> },
+                  {
+                    value: 'delete',
+                    label: <span className="text-[#BA1A1A]">Xóa</span>,
+                    icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
+                  },
+                ]}
+                trigger={(isOpen, selectedOption, toggleDropdown) => (
+                  <button
+                    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleDropdown();
+                    }}
+                  >
+                    <MoreVertical className="w-5 h-5 text-gray-500" />
+                  </button>
+                )}
+              />
+            </div>
           </div>
 
           <div className='space-y-3'>

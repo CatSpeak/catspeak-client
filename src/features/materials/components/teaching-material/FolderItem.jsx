@@ -17,32 +17,34 @@ const FolderItem = ({ title, totalItems, status, onDelete }) => {
         </div>
       </div>
 
-      <Dropdown
-        align="right"
-        dropdownClassName="w-24"
-        onChange={(val) => {
-          if (val === 'delete' && onDelete) onDelete();
-        }}
-        options={[
-          { value: 'open', label: 'Mở' },
-          { value: 'rename', label: 'Đổi tên' },
-          {
-            value: 'delete',
-            label: <span className="text-cath-red-700">Xóa</span>
-          },
-        ]}
-        trigger={(isOpen, selectedOption, toggleDropdown) => (
-          <IconButton
-            variant='ghost'
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleDropdown();
-            }}
-          >
-            <MoreVertical className="!w-4 !h-4 text-[#5B403E]" />
-          </IconButton>
-        )}
-      />
+      <div onClick={(e) => e.stopPropagation()}>
+        <Dropdown
+          align="right"
+          dropdownClassName="w-24"
+          onChange={(val) => {
+            if (val === 'delete' && onDelete) onDelete();
+          }}
+          options={[
+            { value: 'open', label: 'Mở' },
+            { value: 'rename', label: 'Đổi tên' },
+            {
+              value: 'delete',
+              label: <span className="text-cath-red-700">Xóa</span>
+            },
+          ]}
+          trigger={(isOpen, selectedOption, toggleDropdown) => (
+            <IconButton
+              variant='ghost'
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleDropdown();
+              }}
+            >
+              <MoreVertical className="!w-4 !h-4 text-[#5B403E]" />
+            </IconButton>
+          )}
+        />
+      </div>
     </div>
 
   );

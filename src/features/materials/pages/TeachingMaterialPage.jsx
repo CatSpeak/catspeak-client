@@ -122,9 +122,9 @@ const TeachingMaterialPage = () => {
       {searchQuery ? (
         <div className="mt-4">
           <div className="mb-8">
-            <h2 className="text-[28px] font-bold text-gray-900 mb-2">Kết quả tìm kiếm</h2>
-            <p className="text-sm text-gray-500">
-              Tìm thấy 0 kết quả cho <span className="font-bold text-[#6b1e22]">"{searchQuery}"</span>
+            <h2 className="text-2xl font-semibold text-[#1A1C1C]">Kết quả tìm kiếm</h2>
+            <p className="text-base text-[#5B403E]">
+              Tìm thấy 0 kết quả cho <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
             </p>
           </div>
           <EmptySearchState
