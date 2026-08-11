@@ -61,6 +61,12 @@ export default {
     mainAvatarLabel: "主账号头像",
     changeMeetingAvatar: "更换会议头像",
     clickToChangeMeetingAvatar: "点击更换会议头像",
+    updatingCover: "正在更新封面...",
+    updateCoverSuccess: "封面更新成功",
+    updateCoverError: "无法更新封面",
+    editCover: "修改封面",
+    invalidImageFormat: "请选择有效的图片文件",
+    coverSizeLimit: "封面图片大小不能超过 5MB",
   },
   instructor: {
     title: "讲师",
@@ -98,9 +104,7 @@ export default {
     submit: "提交",
     edit: "编辑",
     addCredential: "添加证书",
-    selectLanguages: "选择语言",
     selectNationality: "选择国籍",
-    selectNativeLanguage: "选择母语",
     inputFieldPlaceholder: "输入字段",
     notAppliedTitle: "您尚未申请",
     notAppliedDescription:

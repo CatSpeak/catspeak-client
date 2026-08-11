@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import toast from "react-hot-toast"
 import { Camera, Users, Check } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
@@ -8,6 +8,9 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import {
   useUpdateAvatarMutation,
   useUpdateMeetingAvatarMutation,
+  useGetCurrentBackgroundQuery,
+  useUploadCustomBackgroundMutation,
+  useSetActiveBackgroundMutation,
 } from "@/store/api/userApi"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
@@ -24,11 +27,36 @@ const AccountHeader = ({ user, formData, t }) => {
   const [isMeetingAvatarModalOpen, setIsMeetingAvatarModalOpen] =
     useState(false)
   const [meetingAvatarUrlInput, setMeetingAvatarUrlInput] = useState("")
+  const [coverImageUrl, setCoverImageUrl] = useState(null)
 
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation()
   const [updateMeetingAvatar, { isLoading: isUpdatingMeetingAvatar }] =
     useUpdateMeetingAvatarMutation()
+
+  const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
+    useGetCurrentBackgroundQuery()
+  const fetchedCoverUrl =
+    currentBackgroundResponse?.data?.activeBackgroundUrl
+
+  const [uploadCustomBackground, { isLoading: isUploadingCover }] =
+    useUploadCustomBackgroundMutation()
+  const [setActiveBackground, { isLoading: isSettingActiveBackground }] =
+    useSetActiveBackgroundMutation()
+
+  const isCoverUpdating = isUploadingCover || isSettingActiveBackground
+
+  const displayCoverUrl =
+    coverImageUrl || fetchedCoverUrl || backgroundAccount
+
+  // Clean up object URL when coverImageUrl changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(coverImageUrl)
+      }
+    }
+  }, [coverImageUrl])
 
   // Optional: khi user đang trong call, đồng bộ avatar mới xuống LiveKit metadata ngay lập tức
   let localParticipant = null
@@ -40,6 +68,7 @@ const AccountHeader = ({ user, formData, t }) => {
   }
 
   const fileInputRef = useRef(null)
+  const coverInputRef = useRef(null)
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0]
@@ -68,6 +97,78 @@ const AccountHeader = ({ user, formData, t }) => {
       console.error(error)
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = ""
+    }
+  }
+
+  const handleCoverChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // File validation: check image type
+    if (!file.type.startsWith("image/")) {
+      toast.error(
+        t.profile?.personalInfo?.invalidImageFormat ||
+          "Vui lòng chọn tệp hình ảnh hợp lệ",
+      )
+      if (coverInputRef.current) coverInputRef.current.value = ""
+      return
+    }
+
+    // File validation: check file size (max 5MB)
+    const maxSizeBytes = 5 * 1024 * 1024
+    if (file.size > maxSizeBytes) {
+      toast.error(
+        t.profile?.personalInfo?.coverSizeLimit ||
+          "Kích thước ảnh bìa không được vượt quá 5MB",
+      )
+      if (coverInputRef.current) coverInputRef.current.value = ""
+      return
+    }
+
+    // Optimistic UI preview
+    if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(coverImageUrl)
+    }
+    const objectUrl = URL.createObjectURL(file)
+    setCoverImageUrl(objectUrl)
+
+    const bgFormData = new FormData()
+    bgFormData.append("file", file)
+
+    try {
+      toast.loading(
+        t.profile?.personalInfo?.updatingCover || "Đang cập nhật hình nền...",
+        { id: "cover-update" },
+      )
+
+      const uploadRes = await uploadCustomBackground(bgFormData).unwrap()
+      const uploadedUrl =
+        uploadRes?.data?.customUploadedBackgroundUrl ||
+        uploadRes?.data?.backgroundUrl ||
+        (typeof uploadRes?.data === "string" ? uploadRes.data : null) ||
+        uploadRes?.customUploadedBackgroundUrl ||
+        (typeof uploadRes === "string" ? uploadRes : null)
+
+      if (uploadedUrl && typeof uploadedUrl === "string") {
+        await setActiveBackground({ backgroundUrl: uploadedUrl }).unwrap()
+      }
+
+      toast.success(
+        t.profile?.personalInfo?.updateCoverSuccess ||
+          "Cập nhật ảnh bìa thành công",
+        { id: "cover-update" },
+      )
+    } catch {
+      // Rollback preview on error
+      setCoverImageUrl(null)
+      URL.revokeObjectURL(objectUrl)
+      toast.error(
+        t.profile?.personalInfo?.updateCoverError ||
+          "Không thể cập nhật ảnh bìa",
+        { id: "cover-update" },
+      )
+    } finally {
+      if (coverInputRef.current) coverInputRef.current.value = ""
     }
   }
 
@@ -125,17 +226,41 @@ const AccountHeader = ({ user, formData, t }) => {
   return (
     <div className="w-full relative mb-16">
       {/* Cover Photo Outer Container */}
-      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-[#e5e5e5]">
+      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-[#e5e5e5] group/cover">
         {/* Cover Photo Image */}
         <div className="relative w-full h-full">
-          <img
-            src={backgroundAccount}
-            alt="Cover"
-            className="w-full h-full object-cover"
-          />
+          {isBackgroundLoading ? (
+            <div className="w-full h-full bg-gray-200 animate-pulse" />
+          ) : (
+            <img
+              src={displayCoverUrl}
+              alt="Cover"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null
+                e.target.src = backgroundAccount
+              }}
+            />
+          )}
+
+          {/* Hover Overlay */}
+          <div
+            onClick={() => {
+              if (coverInputRef.current && !isCoverUpdating) {
+                coverInputRef.current.click()
+              }
+            }}
+            className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer z-10"
+          >
+            {isCoverUpdating ? (
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Camera className="w-8 h-8 text-white" />
+            )}
+          </div>
         </div>
 
-        {/* Meeting Avatar Badge on Top-Right of Cover Photo (Outside group/cover) */}
+        {/* Meeting Avatar Badge on Top-Right of Cover Photo (Outside group/cover click) */}
         <div
           onClick={(e) => {
             e.stopPropagation()
@@ -152,7 +277,7 @@ const AccountHeader = ({ user, formData, t }) => {
               alt={displayName}
               name={displayName}
               className="w-full h-full text-white text-base"
-              style={{ border: 'none' }}
+              style={{ border: "none" }}
             />
             <div
               className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
@@ -223,6 +348,30 @@ const AccountHeader = ({ user, formData, t }) => {
           className="hidden"
           accept="image/*"
           onChange={handleAvatarChange}
+        />
+      </div>
+
+      {/* Edit Cover Photo Button at Bottom-Right */}
+      <div className="absolute -bottom-10 right-4 sm:right-8 z-20">
+        <PillButton
+          variant="secondary"
+          onClick={() => {
+            if (coverInputRef.current && !isCoverUpdating) {
+              coverInputRef.current.click()
+            }
+          }}
+          loading={isCoverUpdating}
+          startIcon={<Camera size={18} />}
+          className="shadow-sm"
+        >
+          {t.profile?.personalInfo?.editCover || "Sửa ảnh bìa"}
+        </PillButton>
+        <input
+          type="file"
+          ref={coverInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleCoverChange}
         />
       </div>
 
