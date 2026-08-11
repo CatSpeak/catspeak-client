@@ -37,7 +37,17 @@ const AccountHeader = ({ user, formData, t }) => {
 
   const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
     useGetCurrentBackgroundQuery();
-  const fetchedCoverUrl = currentBackgroundResponse?.data?.activeBackgroundUrl;
+  const fetchedCoverUrl =
+    currentBackgroundResponse?.data?.activeBackgroundUrl ||
+    currentBackgroundResponse?.activeBackgroundUrl ||
+    currentBackgroundResponse?.data?.customUploadedBackgroundUrl ||
+    currentBackgroundResponse?.customUploadedBackgroundUrl ||
+    (typeof currentBackgroundResponse?.data === "string"
+      ? currentBackgroundResponse.data
+      : null) ||
+    (typeof currentBackgroundResponse === "string"
+      ? currentBackgroundResponse
+      : null);
 
   const [getCurrentBackground] = useLazyGetCurrentBackgroundQuery();
   const [uploadCustomBackground, { isLoading: isUploadingCover }] =
@@ -149,7 +159,9 @@ const AccountHeader = ({ user, formData, t }) => {
 
       if (!uploadedUrl) {
         const currentRes = await getCurrentBackground().unwrap();
-        uploadedUrl = currentRes?.data?.customUploadedBackgroundUrl;
+        uploadedUrl =
+          currentRes?.data?.customUploadedBackgroundUrl ||
+          currentRes?.customUploadedBackgroundUrl;
       }
 
       if (uploadedUrl && typeof uploadedUrl === "string") {

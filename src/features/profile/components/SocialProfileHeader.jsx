@@ -69,8 +69,16 @@ const SocialProfileHeader = ({
       skip: !isOwnProfile,
     });
   const fetchedCoverUrl = isOwnProfile
-    ? currentBackgroundResponse?.activeBackgroundUrl ??
-      currentBackgroundResponse?.data?.activeBackgroundUrl
+    ? currentBackgroundResponse?.data?.activeBackgroundUrl ||
+      currentBackgroundResponse?.activeBackgroundUrl ||
+      currentBackgroundResponse?.data?.customUploadedBackgroundUrl ||
+      currentBackgroundResponse?.customUploadedBackgroundUrl ||
+      (typeof currentBackgroundResponse?.data === "string"
+        ? currentBackgroundResponse.data
+        : null) ||
+      (typeof currentBackgroundResponse === "string"
+        ? currentBackgroundResponse
+        : null)
     : null;
 
   const fileInputRef = useRef(null);
