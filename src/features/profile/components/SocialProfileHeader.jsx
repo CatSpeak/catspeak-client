@@ -1,9 +1,8 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
   Edit2,
-  BadgeCheck,
   UserPlus,
   Check,
   UserMinus,
@@ -65,72 +64,20 @@ const SocialProfileHeader = ({
   const [deleteFriendship, { isLoading: isDeletingFriendship }] =
     useDeleteFriendshipMutation();
 
-  // Track previous connection status to detect real-time transition from Pending -> Accepted / Declined
-  const prevStatusRef = useRef(null);
-  const userActionInitiatedRef = useRef(false);
+  const [isFriendCooldown, setIsFriendCooldown] = useState(false);
+  const cooldownTimeoutRef = useRef(null);
 
   useEffect(() => {
-    if (isOwnProfile || !status) return;
-
-    const prev = prevStatusRef.current;
-    prevStatusRef.current = status;
-
-    if (!prev) return;
-
-    // Only detect if it was previously truly pending
-    const wasPending =
-      (prev?.friendshipStatus === 1 ||
-        prev?.friendshipStatus === "Pending" ||
-        (!prev?.isFriend && Boolean(prev?.friendshipId))) &&
-      !prev?.isFriend;
-
-    const isNowAccepted =
-      status?.isFriend === true ||
-      status?.friendshipStatus === 2 ||
-      status?.friendshipStatus === "Accepted";
-
-    const isNowDeclinedOrDeleted =
-      !status?.isFriend &&
-      !status?.friendshipId &&
-      (status?.friendshipStatus === 0 ||
-        status?.friendshipStatus === null ||
-        status?.friendshipStatus === undefined ||
-        status?.friendshipStatus === "None");
-
-    // If user A clicked "Hủy yêu cầu" or "Hủy kết bạn" themselves, DO NOT show "B đã từ chối" toast
-    if (
-      userActionInitiatedRef.current ||
-      isDeletingFriendship ||
-      isSendingRequest
-    ) {
-      return;
-    }
-
-    if (wasPending && isNowAccepted) {
-      const toastKey = `friend-response-${targetAccountId}-accept`;
-      toast.success(
-        `${displayName} ${t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn"}`,
-        { id: toastKey },
-      );
-    } else if (wasPending && isNowDeclinedOrDeleted) {
-      const toastKey = `friend-response-${targetAccountId}-decline`;
-      toast(
-        `${displayName} ${t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn"}`,
-        { id: toastKey, icon: "ℹ️" },
-      );
-    }
-  }, [
-    status,
-    isOwnProfile,
-    displayName,
-    t,
-    isDeletingFriendship,
-    isSendingRequest,
-    targetAccountId,
-  ]);
+    return () => {
+      if (cooldownTimeoutRef.current) {
+        clearTimeout(cooldownTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
   const isFriendshipLoading = isSendingRequest || isDeletingFriendship;
+  const isFriendshipDisabled = isFriendshipLoading || isFriendCooldown;
 
   const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
     useGetCurrentBackgroundQuery(undefined, {
@@ -190,8 +137,16 @@ const SocialProfileHeader = ({
     status?.friendshipStatus === "Pending";
 
   const handleFriendshipToggle = async () => {
-    if (isFriendshipLoading) return;
-    userActionInitiatedRef.current = true;
+    if (isFriendshipDisabled) return;
+
+    // Start 3-second cooldown immediately upon clicking
+    setIsFriendCooldown(true);
+    if (cooldownTimeoutRef.current) {
+      clearTimeout(cooldownTimeoutRef.current);
+    }
+    cooldownTimeoutRef.current = setTimeout(() => {
+      setIsFriendCooldown(false);
+    }, 3000);
 
     try {
       if (isFriendOrPending) {
@@ -228,10 +183,6 @@ const SocialProfileHeader = ({
         });
       }
       console.error(err);
-    } finally {
-      setTimeout(() => {
-        userActionInitiatedRef.current = false;
-      }, 2000);
     }
   };
 
@@ -280,9 +231,9 @@ const SocialProfileHeader = ({
           startIcon: friendshipIcon,
           label: friendshipLabel,
           onClick: handleFriendshipToggle,
-          disabled: isFriendshipLoading,
+          disabled: isFriendshipDisabled,
           loading: isFriendshipLoading,
-          className: isFriendshipLoading ? "cursor-not-allowed" : "",
+          className: isFriendshipDisabled ? "cursor-not-allowed" : "",
         },
       ];
 
