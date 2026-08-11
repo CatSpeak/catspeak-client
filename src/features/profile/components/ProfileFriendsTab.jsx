@@ -129,13 +129,6 @@ const ProfileFriendsTab = ({
     closePopover()
     respondFriendRequest({ friendshipId, action })
       .unwrap()
-      .then(() => {
-        toast.success(
-          action === "accept"
-            ? t.profile?.friends?.actions?.acceptSuccess || "Đã chấp nhận kết bạn!"
-            : t.profile?.friends?.actions?.declineSuccess || "Đã từ chối kết bạn",
-        )
-      })
       .catch(() => toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra"))
   }
 

@@ -164,28 +164,6 @@ export const useGlobalSignalR = () => {
         "Recommendation",
       ]),
     )
-
-    // If isAccepted is not a boolean, it's just a general friendship change / pending creation (don't show toast)
-    if (isAccepted === null || isAccepted === undefined) return
-
-    // Show toast with i18n
-    const acceptedText =
-      tLanguage.profile?.social?.friendRequestAccepted ||
-      "đã chấp nhận lời mời kết bạn của bạn"
-    const declinedText =
-      tLanguage.profile?.social?.friendRequestDeclined ||
-      "đã từ chối lời mời kết bạn của bạn"
-
-    const toastKey = `friend-response-${targetId || "unknown"}-${isAccepted ? "accept" : "decline"}`
-
-    if (isAccepted === true) {
-      toast.success(`${displayName} ${acceptedText}`, { id: toastKey })
-    } else if (isAccepted === false) {
-      toast(`${displayName} ${declinedText}`, {
-        id: toastKey,
-        icon: "ℹ️",
-      })
-    }
   }
 
   const handlers = useMemo(
@@ -487,13 +465,6 @@ export const useGlobalSignalR = () => {
                 handleRemoveToast(t.id)
                 try {
                   await respondFriendRequest({ friendshipId, action }).unwrap()
-                  toast.success(
-                    action === "accept"
-                      ? tLanguage.profile?.friends?.actions?.acceptSuccess ||
-                          "Đã chấp nhận kết bạn!"
-                      : tLanguage.profile?.friends?.actions?.declineSuccess ||
-                          "Đã từ chối kết bạn",
-                  )
                 } catch (err) {
                   toast.error(
                     tLanguage.profile?.friends?.actions?.error ||
