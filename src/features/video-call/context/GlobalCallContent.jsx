@@ -572,7 +572,7 @@ const GlobalCallContent = ({
         }
 
         if (data.action === "REQUEST_ROOM_SETTINGS_SYNC") {
-          if (isHost && localParticipant) {
+          if (isHost && localParticipant && lkRoom?.state === ConnectionState.Connected) {
             try {
               const syncPayload = new TextEncoder().encode(
                 JSON.stringify({
@@ -585,7 +585,7 @@ const GlobalCallContent = ({
                   targetIdentity: participant?.identity,
                 })
               )
-              localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true })
+              localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true }).catch(() => {})
             } catch (err) {
               console.error("Error responding to REQUEST_ROOM_SETTINGS_SYNC:", err)
             }
@@ -636,7 +636,7 @@ const GlobalCallContent = ({
 
     const handleParticipantJoined = (participant) => {
       const isHost = isRoomHost(roomData, user?.accountId)
-      if (isHost && localParticipant) {
+      if (isHost && localParticipant && lkRoom?.state === ConnectionState.Connected) {
         try {
           const syncPayload = new TextEncoder().encode(
             JSON.stringify({
@@ -649,7 +649,7 @@ const GlobalCallContent = ({
               targetIdentity: participant.identity,
             })
           )
-          localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true })
+          localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true }).catch(() => {})
         } catch (err) {
           console.error("Error syncing room settings to new participant:", err)
         }
@@ -677,12 +677,12 @@ const GlobalCallContent = ({
     }
 
     // Request settings sync from Host on join if not Host
-    if (localParticipant && !isRoomHost(roomData, user?.accountId)) {
+    if (lkRoom?.state === ConnectionState.Connected && localParticipant && !isRoomHost(roomData, user?.accountId)) {
       try {
         const reqPayload = new TextEncoder().encode(
           JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" })
         )
-        localParticipant.publishData(reqPayload, { topic: "moderation", reliable: true })
+        localParticipant.publishData(reqPayload, { topic: "moderation", reliable: true }).catch(() => {})
       } catch (e) {
         // ignore
       }

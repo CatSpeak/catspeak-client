@@ -210,6 +210,10 @@ export default {
     replyingTo: "Replying to",
     reply: "Reply",
     aiSuggestion: "Suggestions from AI",
+    mentionHeader: "Room participants",
+    mentionHint: "↑↓ navigate, Enter select",
+    mentionNotFound: "No matching participants found",
+    mentionAllDesc: "Everyone in the room",
   },
   sessionActions: {
     connect11: "Connect 1:1",

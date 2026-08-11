@@ -182,6 +182,10 @@ export default {
     replyingTo: "回复",
     reply: "回复",
     aiSuggestion: "来自AI的建议",
+    mentionHeader: "房间成员",
+    mentionHint: "↑↓ 移动，Enter 选择",
+    mentionNotFound: "未找到相关成员",
+    mentionAllDesc: "房间内的所有人",
   },
   sessionActions: {
     connect11: "连接 1:1",

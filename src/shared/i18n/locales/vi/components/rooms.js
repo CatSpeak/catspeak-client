@@ -185,6 +185,10 @@ export default {
     replyingTo: "Đang trả lời",
     reply: "Trả lời",
     aiSuggestion: "Gợi ý từ AI",
+    mentionHeader: "Thành viên trong phòng",
+    mentionHint: "↑↓ di chuyển, Enter chọn",
+    mentionNotFound: "Không tìm thấy thành viên phù hợp",
+    mentionAllDesc: "Tất cả thành viên trong phòng",
   },
   sessionActions: {
     connect11: "Kết nối 1:1",
