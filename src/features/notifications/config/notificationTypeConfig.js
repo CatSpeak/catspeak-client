@@ -177,6 +177,26 @@ export const NOTIFICATION_TYPES = {
       return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
     },
   },
+
+  friend_acceptance: {
+    icon: UserCheck,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_accepted?.title ||
+      "Đã chấp nhận kết bạn",
+    resolveBody: (m, t) => {
+      const name = m.userName || "Ai đó";
+      return (
+        t.profile?.notifications?.friend_accepted?.body?.replace(
+          "{responderName}",
+          name,
+        ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
+      );
+    },
+    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
+    resolveAvatarUrl: (m) => m.avatarUrl || null,
+  },
+
   friend_accepted: {
     icon: UserCheck,
     color: "text-green-500",
@@ -195,6 +215,7 @@ export const NOTIFICATION_TYPES = {
     resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
     resolveAvatarUrl: (m) => m.avatarUrl || null,
   },
+
   FriendAccepted: {
     icon: UserCheck,
     color: "text-green-500",
