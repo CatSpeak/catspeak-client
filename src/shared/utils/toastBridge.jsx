@@ -131,26 +131,31 @@ const customToast = (message, opts = {}) => {
   )
 }
 
+/** Show a success toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
 customToast.success = (message, opts) => {
   const options = typeof opts === "object" ? opts : { description: opts }
   return customToast(message, { ...options, type: "success" })
 }
 
+/** Show an error toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
 customToast.error = (message, opts) => {
   const options = typeof opts === "object" ? opts : { description: opts }
   return customToast(message, { ...options, type: "error" })
 }
 
+/** Show an info toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
 customToast.info = (message, opts) => {
   const options = typeof opts === "object" ? opts : { description: opts }
   return customToast(message, { ...options, type: "info" })
 }
 
+/** Show a warning toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
 customToast.warning = (message, opts) => {
   const options = typeof opts === "object" ? opts : { description: opts }
   return customToast(message, { ...options, type: "warning" })
 }
 
+/** Show a loading toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
 customToast.loading = (message, opts) => {
   const options = typeof opts === "object" ? opts : { description: opts }
   return customToast(message, { ...options, type: "loading" })
@@ -158,6 +163,7 @@ customToast.loading = (message, opts) => {
 
 customToast.dismiss = sonnerToast.dismiss
 
+/** Show an async promise toast notification (loading -> success/error). See docs/TOAST_GUIDELINES.md for usage details. */
 customToast.promise = (promise, msgs = {}, opts = {}) => {
   const loadingMsg =
     typeof msgs.loading === "string" ? msgs.loading : "Loading..."
