@@ -29,6 +29,7 @@ import {
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker } from "@/shared/components/ui/inputs"
+import TimeDropdown from "@/features/calendar/components/ui/TimeDropdown"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
@@ -57,7 +58,7 @@ const DAYS_OF_WEEK = [
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
-  const { userTimeZone } = useTimezone()
+  const { userTimeZone, toIsoInZone } = useTimezone()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -200,8 +201,11 @@ const CreateClassPage = () => {
     selectedLanguage,
     level,
     admissionStart,
+    admissionStartHours,
     admissionEnd,
+    admissionEndHours,
     startDate,
+    startDateHours,
     sessions,
     capacity,
     description,
@@ -411,9 +415,9 @@ const CreateClassPage = () => {
         levels: payloadLevels,
         description,
         totalSessions: sessionCount,
-        enrollmentStart: admissionStart ? formatToLocalISO(admissionStart) : "",
-        enrollmentEnd: admissionEnd ? formatToLocalISO(admissionEnd) : "",
-        startDate: startDate ? formatToLocalISO(startDate) : "",
+        enrollmentStart: toIsoInZone(admissionStart, admissionStartHours || "00:00"),
+        enrollmentEnd: toIsoInZone(admissionEnd, admissionEndHours || "00:00"),
+        startDate: toIsoInZone(startDate, startDateHours || "00:00"),
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
@@ -792,16 +796,21 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Admission Period & Start Date Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.admissionPeriod} <span className="text-[#990011]">*</span></label>
-                <div className="flex items-center gap-1.5">
+            {/* Admission Period & Start Date — grid 3 cols so StartDate aligns under Từ */}
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-x-2 gap-y-4">
+
+              {/* Col 1: Từ */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.admissionPeriod} <span className="text-[#990011]">*</span>
+                </label>
+                <div className="flex items-center gap-2">
                   <div className="flex-1">
                     <DatePicker
                       value={admissionStart}
                       onChange={(date) => {
                         setField("admissionStart", date ? toLocalDateString(date) : "")
+                        if (date && !admissionStartHours) setField("admissionStartHours", "07:00")
                         clearError("admissionStart")
                       }}
                       mode="date"
@@ -811,12 +820,26 @@ const CreateClassPage = () => {
                       className={`w-full ${errors.admissionStart ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                     />
                   </div>
-                  <span className="text-gray-300 text-xs font-bold">-</span>
+                  <TimeDropdown
+                    value={admissionStartHours}
+                    color="#990011"
+                    onChange={(hhmm) => setField("admissionStartHours", hhmm)}
+                  />
+                </div>
+              </div>
+
+              {/* Col 2: separator */}
+              <span className="text-gray-300 text-base font-light self-end mb-3 select-none">–</span>
+
+              {/* Col 3: Đến */}
+              <div className="flex flex-col gap-1 self-end">
+                <div className="flex items-center gap-2">
                   <div className="flex-1">
                     <DatePicker
                       value={admissionEnd}
                       onChange={(date) => {
                         setField("admissionEnd", date ? toLocalDateString(date) : "")
+                        if (date && !admissionEndHours) setField("admissionEndHours", "07:00")
                         clearError("admissionEnd")
                       }}
                       mode="date"
@@ -826,25 +849,46 @@ const CreateClassPage = () => {
                       className={`w-full ${errors.admissionEnd ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
                     />
                   </div>
+                  <TimeDropdown
+                    value={admissionEndHours}
+                    color="#990011"
+                    onChange={(hhmm) => setField("admissionEndHours", hhmm)}
+                  />
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 md:col-span-1">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.startDate} <span className="text-[#990011]">*</span></label>
-                <DatePicker
-                  value={startDate}
-                  onChange={(date) => {
-                    setField("startDate", date ? toLocalDateString(date) : "")
-                    clearError("startDate")
-                  }}
-                  mode="date"
-                  color="#990011"
-                  placeholder="dd/MM/yyyy"
-                  minDate={isEditMode ? null : tomorrow}
-                  className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                />
+              {/* Row 2, Col 1: Ngày bắt đầu — same width as Từ above */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.startDate} <span className="text-[#990011]">*</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <DatePicker
+                      value={startDate}
+                      onChange={(date) => {
+                        setField("startDate", date ? toLocalDateString(date) : "")
+                        if (date && !startDateHours) setField("startDateHours", "07:00")
+                        clearError("startDate")
+                      }}
+                      mode="date"
+                      color="#990011"
+                      placeholder="dd/MM/yyyy"
+                      minDate={isEditMode ? null : tomorrow}
+                      className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
+                    />
+                  </div>
+                  <TimeDropdown
+                    value={startDateHours}
+                    color="#990011"
+                    onChange={(hhmm) => setField("startDateHours", hhmm)}
+                  />
+                </div>
               </div>
+
             </div>
+
+
 
             {/* Number of Sessions & Capacity Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

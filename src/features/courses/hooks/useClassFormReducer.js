@@ -41,8 +41,11 @@ const createInitialState = (initialCourseId) => ({
   selectedLanguage: "English",
   level: "A1",
   admissionStart: "",
+  admissionStartHours: "",
   admissionEnd: "",
+  admissionEndHours: "",
   startDate: "",
+  startDateHours: "",
   sessions: 24,
   capacity: 6,
   description: "",
@@ -133,7 +136,16 @@ function classFormReducer(state, action) {
       return createInitialState(action.initialCourseId)
 
     case "HYDRATE_FROM_CLASS": {
-      const { cls, userTimeZone } = action
+      const {
+        cls,
+        userTimeZone,
+        admissionStart,
+        admissionStartHours,
+        admissionEnd,
+        admissionEndHours,
+        startDate,
+        startDateHours,
+      } = action
       const { checkedDays, timeSlots } = parseScheduleFromApi(cls, userTimeZone)
       return {
         ...state,
@@ -141,9 +153,12 @@ function classFormReducer(state, action) {
         className: cls.name || cls.title || "",
         selectedLanguage: cls.language || "",
         level: cls.levels?.[0] || "",
-        admissionStart: formatToYYYYMMDD(cls.enrollmentStart),
-        admissionEnd: formatToYYYYMMDD(cls.enrollmentEnd),
-        startDate: formatToYYYYMMDD(cls.startDate),
+        admissionStart,
+        admissionStartHours,
+        admissionEnd,
+        admissionEndHours,
+        startDate,
+        startDateHours,
         sessions: cls.totalSessions ?? "",
         capacity: cls.slots ?? "",
         description: cls.description || "",
@@ -260,7 +275,7 @@ export function useClassFormReducer({
   onFormInstanceChange,
   toastError,
 }) {
-  const { userTimeZone } = useTimezone()
+  const { userTimeZone, getZoneDateStr, formatTime } = useTimezone()
   const [state, dispatch] = useReducer(
     classFormReducer,
     initialCourseId,
@@ -444,7 +459,17 @@ export function useClassFormReducer({
       hydratedDetailsKeyRef.current = formInstanceKey
       thumbnailReaderRef.current?.abort()
       thumbnailReaderRef.current = null
-      dispatch({ type: "HYDRATE_FROM_CLASS", cls, userTimeZone })
+      dispatch({
+        type: "HYDRATE_FROM_CLASS",
+        cls,
+        userTimeZone,
+        admissionStart: getZoneDateStr(cls.enrollmentStart),
+        admissionStartHours: cls.enrollmentStart ? formatTime(cls.enrollmentStart) : "",
+        admissionEnd: getZoneDateStr(cls.enrollmentEnd),
+        admissionEndHours: cls.enrollmentEnd ? formatTime(cls.enrollmentEnd) : "",
+        startDate: getZoneDateStr(cls.startDate),
+        startDateHours: cls.startDate ? formatTime(cls.startDate) : "",
+      })
     }
   }, [
     classDetailResponse,
