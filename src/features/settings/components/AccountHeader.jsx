@@ -9,6 +9,7 @@ import {
   useUpdateAvatarMutation,
   useUpdateMeetingAvatarMutation,
   useGetCurrentBackgroundQuery,
+  useLazyGetCurrentBackgroundQuery,
   useUploadCustomBackgroundMutation,
   useSetActiveBackgroundMutation,
 } from "@/store/api/userApi";
@@ -38,6 +39,7 @@ const AccountHeader = ({ user, formData, t }) => {
     useGetCurrentBackgroundQuery();
   const fetchedCoverUrl = currentBackgroundResponse?.data?.activeBackgroundUrl;
 
+  const [getCurrentBackground] = useLazyGetCurrentBackgroundQuery();
   const [uploadCustomBackground, { isLoading: isUploadingCover }] =
     useUploadCustomBackgroundMutation();
   const [setActiveBackground, { isLoading: isSettingActiveBackground }] =
@@ -133,17 +135,22 @@ const AccountHeader = ({ user, formData, t }) => {
 
     try {
       toast.loading(
-        t.profile?.personalInfo?.updatingCover || "Đang cập nhật hình nền...",
+        t.profile?.personalInfo?.updatingCover || "Đang cập nhật ảnh bìa...",
         { id: "cover-update" },
       );
 
       const uploadRes = await uploadCustomBackground(bgFormData).unwrap();
-      const uploadedUrl =
+      let uploadedUrl =
         uploadRes?.data?.customUploadedBackgroundUrl ||
         uploadRes?.data?.backgroundUrl ||
         (typeof uploadRes?.data === "string" ? uploadRes.data : null) ||
         uploadRes?.customUploadedBackgroundUrl ||
         (typeof uploadRes === "string" ? uploadRes : null);
+
+      if (!uploadedUrl) {
+        const currentRes = await getCurrentBackground().unwrap();
+        uploadedUrl = currentRes?.data?.customUploadedBackgroundUrl;
+      }
 
       if (uploadedUrl && typeof uploadedUrl === "string") {
         await setActiveBackground({ backgroundUrl: uploadedUrl }).unwrap();
@@ -255,6 +262,15 @@ const AccountHeader = ({ user, formData, t }) => {
             )}
           </div>
         </div>
+
+        {/* Hidden File Input for Cover Upload */}
+        <input
+          type="file"
+          ref={coverInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleCoverChange}
+        />
 
         {/* Meeting Avatar Badge on Top-Right of Cover Photo (Outside group/cover click) */}
         <div
