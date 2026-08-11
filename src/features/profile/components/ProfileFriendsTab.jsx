@@ -76,24 +76,20 @@ const ProfileFriendsTab = ({
   const { data: friendsResponse, isLoading: loadingFriends } =
     useGetFriendsQuery(targetAccountId, {
       skip: !targetAccountId,
-      pollingInterval: 4000,
     })
   const { data: followersResponse, isLoading: loadingFollowers } =
     useGetFollowersQuery(targetAccountId, {
       skip: !targetAccountId,
-      pollingInterval: 10000,
     })
   const { data: followingResponse, isLoading: loadingFollowing } =
     useGetFollowingQuery(targetAccountId, {
       skip: !targetAccountId,
-      pollingInterval: 10000,
     })
 
   // Only fetch pending requests if viewing own profile
   const { data: pendingResponse, isLoading: loadingPending } =
     useGetPendingFriendRequestsQuery(undefined, {
       skip: !isOwnProfile,
-      pollingInterval: 4000,
     })
   const {
     data: recResponse,
