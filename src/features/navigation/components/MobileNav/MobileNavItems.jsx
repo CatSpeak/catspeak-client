@@ -8,6 +8,7 @@ import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useAuth } from "@/features/auth"
 import ListItem from "@/shared/components/ui/ListItem"
 import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
+import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
 
 const NavIcon = ({ img, icon: Icon, color, size = 24 }) => {
   const [imgError, setImgError] = useState(false)
@@ -156,6 +157,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         </div>
 
         <div className="p-3 pb-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 mt-auto border-t border-border shrink-0">
+          <MobileLanguageSwitcher />
           {footerLinks.map((item) => {
             const label = t.nav?.[item.key] || item.label || item.key
             const IconComponent = item.icon || Settings
