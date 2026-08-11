@@ -22,7 +22,7 @@ export async function initFirebaseSession(internalJwt) {
     }
 
     const data = await res.json();
-    const { firebaseToken } = data;
+    const { firebaseToken } = data.data;
 
     if (!firebaseToken) {
       failedToken = internalJwt;
