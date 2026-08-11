@@ -33,8 +33,8 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   // Group Room Form Hook
   const groupForm = useCreateRoomForm()
 
-  const { resetForm: resetGroupForm } = groupForm
   const { resetForm: resetCustomForm } = customForm
+  const { resetForm: resetGroupForm } = groupForm
 
   useEffect(() => {
     if (open) {

@@ -58,7 +58,7 @@ const DAYS_OF_WEEK = [
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
-  const { userTimeZone, toIsoInZone } = useTimezone()
+  const { userTimeZone, toIsoInZone, convertTimeToUtc, getShiftedDayToUtc } = useTimezone()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -375,11 +375,16 @@ const CreateClassPage = () => {
       saturday: "SAT",
       sunday: "SUN"
     }
-    const schedule = checkedDaysList.map(k => ({
-      dayOfWeek: daysCodeMap[k],
-      startTime: timeSlots[k].start,
-      endTime: timeSlots[k].end
-    }))
+    const schedule = checkedDaysList.map(k => {
+      const rawDay = daysCodeMap[k]
+      const localStart = timeSlots[k].start
+      const localEnd = timeSlots[k].end
+      return {
+        dayOfWeek: getShiftedDayToUtc(rawDay, localStart),
+        startTime: convertTimeToUtc(localStart),
+        endTime: convertTimeToUtc(localEnd)
+      }
+    })
 
     submitGuardRef.current = true
     const submittedFormKey = formInstanceKey

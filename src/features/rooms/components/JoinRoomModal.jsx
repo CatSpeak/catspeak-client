@@ -31,7 +31,7 @@ const JoinRoomModal = ({ open, onCancel }) => {
 
   useEffect(() => {
     if (open) {
-      queueMicrotask(() => resetForm())
+      resetForm()
     }
   }, [open, resetForm])
 

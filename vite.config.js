@@ -103,6 +103,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "react-hot-toast": path.resolve(__dirname, "./src/shared/utils/toastBridge.jsx"),
         "@layouts": path.resolve(__dirname, "./src/layouts"),
 
         "@routes": path.resolve(__dirname, "./src/routes"),
