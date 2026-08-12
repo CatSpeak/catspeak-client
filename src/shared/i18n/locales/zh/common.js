@@ -174,5 +174,9 @@ export default {
       title: "新挑战！",
       body: '新挑战："{challengeTitle}" 等着您！',
     },
+    instructor_profile_approved: {
+      title: "教师资料已通过审核",
+      body: "您现在可以切换到教师账户。",
+    },
   },
 };

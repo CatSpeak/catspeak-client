@@ -172,5 +172,9 @@ export default {
       title: "New Challenge!",
       body: 'New challenge: "{challengeTitle}" is waiting for you!',
     },
+    instructor_profile_approved: {
+      title: "Instructor Profile Approved",
+      body: "You can now switch to your Teacher account.",
+    },
   },
 };
