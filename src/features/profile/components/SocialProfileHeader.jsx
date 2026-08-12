@@ -127,7 +127,7 @@ const SocialProfileHeader = ({
               status?.isFriend
                 ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
                 : t.profile?.social?.cancelRequestSuccess ||
-                    "Đã hủy yêu cầu kết bạn",
+                "Đã hủy yêu cầu kết bạn",
             ),
           )
           .catch(() =>
@@ -147,12 +147,12 @@ const SocialProfileHeader = ({
             if (err?.status === 422) {
               toast.error(
                 t.profile?.social?.requestPending ||
-                  "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+                "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
               );
             } else {
               toast.error(
                 t.profile?.social?.requestError ||
-                  "Không thể gửi yêu cầu kết bạn",
+                "Không thể gửi yêu cầu kết bạn",
               );
             }
           });
@@ -190,33 +190,33 @@ const SocialProfileHeader = ({
   const actionButtons = isOwnProfile
     ? onEditClick
       ? [
-          {
-            key: "edit",
-            variant: "outline",
-            startIcon: <Edit2 />,
-            label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
-            onClick: onEditClick,
-          },
-        ]
+        {
+          key: "edit",
+          variant: "outline",
+          startIcon: <Edit2 />,
+          label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
+          onClick: onEditClick,
+        },
+      ]
       : []
     : [
-        {
-          key: "follow",
-          variant: status?.isFollowing ? "secondary" : "primary",
-          startIcon: status?.isFollowing ? <Check /> : <UserPlus />,
-          label: status?.isFollowing
-            ? t.profile?.social?.following || "Đang theo dõi"
-            : t.profile?.social?.follow || "Theo dõi",
-          onClick: handleFollowToggle,
-        },
-        {
-          key: "friendship",
-          variant: friendshipVariant,
-          startIcon: friendshipIcon,
-          label: friendshipLabel,
-          onClick: handleFriendshipToggle,
-        },
-      ];
+      {
+        key: "follow",
+        variant: status?.isFollowing ? "secondary" : "primary",
+        startIcon: status?.isFollowing ? <Check /> : <UserPlus />,
+        label: status?.isFollowing
+          ? t.profile?.social?.following || "Đang theo dõi"
+          : t.profile?.social?.follow || "Theo dõi",
+        onClick: handleFollowToggle,
+      },
+      {
+        key: "friendship",
+        variant: friendshipVariant,
+        startIcon: friendshipIcon,
+        label: friendshipLabel,
+        onClick: handleFriendshipToggle,
+      },
+    ];
 
   return (
     <div className="w-full bg-white border border-border rounded-xl overflow-hidden mb-6">
@@ -284,7 +284,7 @@ const SocialProfileHeader = ({
                     image={fileToCrop}
                     isOpen={isCropModalOpen}
                     cropPreset="avatar"
-                    title={t.profile?.avatar?.cropTitle || "Cắt ảnh đại diện"}
+                    title={t.profile?.avatar?.cropTitle || t.imageCrop?.title || "Cắt ảnh đại diện"}
                     onClose={() => {
                       setIsCropModalOpen(false);
                       setFileToCrop(null);

@@ -36,20 +36,20 @@ const PillButton = ({
 
   const variantCustomStyle = isOutline
     ? {
-        color: colors.primaryRed,
-        borderColor: colors.primaryRed,
-        borderWidth: "1.5px",
-        borderStyle: "solid",
-      }
+      color: colors.primaryRed,
+      borderColor: colors.primaryRed,
+      borderWidth: "1.5px",
+      borderStyle: "solid",
+    }
     : {}
 
   const customStyle = !isActuallyDisabled
     ? {
-        ...variantCustomStyle,
-        ...(bgColor ? { backgroundColor: bgColor } : {}),
-        ...(textColor ? { color: textColor } : {}),
-        ...(borderColor ? { borderColor: borderColor } : {}),
-      }
+      ...variantCustomStyle,
+      ...(bgColor ? { backgroundColor: bgColor } : {}),
+      ...(textColor ? { color: textColor } : {}),
+      ...(borderColor ? { borderColor: borderColor } : {}),
+    }
     : {}
 
   const renderIcon = (icon) => {

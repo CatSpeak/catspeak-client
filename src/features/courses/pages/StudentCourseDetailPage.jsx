@@ -258,6 +258,9 @@ const StudentCourseDetailPage = () => {
                   const isExpanded = !!expandedClassIds[cls.id]
                   const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
+                  const remainingSlots = cls.remainingSlots != null
+                    ? Number(cls.remainingSlots)
+                    : (totalSlots != null && enrolledSeats != null ? Math.max(0, Number(totalSlots) - Number(enrolledSeats)) : null)
                   const tuitionLabel = cls.tuitionFee == null
                     ? ui.tba || "TBA"
                     : formatCurrencyVND(cls.tuitionFee)
@@ -401,9 +404,9 @@ const StudentCourseDetailPage = () => {
                             <div className="bg-white rounded-xl p-3 border border-border flex items-start gap-2.5">
                               <Users size={18} className="text-[#990011] shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.enrolledSlots || "Enrolled Slots"}</span>
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.remainingSlots || "Remaining Slots"}</span>
                                 <span className="text-gray-950 font-black text-sm">
-                                  {enrolledSeats ?? "0"} / {totalSlots ?? "N/A"}
+                                  {remainingSlots ?? "N/A"} / {totalSlots ?? "N/A"}
                                 </span>
                               </div>
                             </div>

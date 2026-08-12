@@ -16,6 +16,7 @@ import {
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import useScrollLock from "@/shared/hooks/useScrollLock"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const CROP_PRESETS = {
@@ -77,11 +78,16 @@ const ImageCropModal = ({
   cropPreset = "avatar",
   aspect: aspectOverride,
   allowedAspects,
-  title = "Crop Image",
+  title,
   outputType = "image/jpeg",
   outputQuality = 0.92,
 }) => {
+  const { t } = useLanguage()
+  const cropT = t.imageCrop || {}
+  const modalTitle = title && title !== "Crop Image" ? title : (cropT.title || "Crop Image")
+
   useScrollLock(isOpen && !!image)
+
 
   const originalFile =
     image instanceof File || image instanceof Blob ? image : null
@@ -251,12 +257,14 @@ const ImageCropModal = ({
             retryErr,
           )
           setLoadError(
+            cropT.loadErrorBlocked ||
             "This image couldn't be loaded. It may be unavailable or blocked by the source server.",
           )
         }
         retryImg.src = imageUrl
       } else {
         setLoadError(
+          cropT.loadErrorUnsupported ||
           "This image couldn't be loaded. It may be unavailable or in an unsupported format.",
         )
       }
@@ -600,14 +608,19 @@ const ImageCropModal = ({
               </div>
               <div>
                 <h3 className="text-base font-bold text-gray-900 leading-tight">
-                  {title}
+                  {modalTitle}
                 </h3>
                 <p className="text-xs text-gray-500">
-                  Drag image to move, drag corners to resize crop area, or zoom.
+                  {cropT.subtitle ||
+                    "Drag image to move, drag corners to resize crop area, or zoom."}
                 </p>
               </div>
             </div>
-            <IconButton onClick={onClose} title="Close" variant="ghost">
+            <IconButton
+              onClick={onClose}
+              title={cropT.close || "Close"}
+              variant="ghost"
+            >
               <X size={20} />
             </IconButton>
           </div>
@@ -619,6 +632,8 @@ const ImageCropModal = ({
                 const isSelected =
                   selectedPresetKey === item.key ||
                   activeAspect === item.aspect
+                const localizedLabel =
+                  cropT.presets?.[item.key] || item.label
                 return (
                   <button
                     key={item.key}
@@ -633,7 +648,7 @@ const ImageCropModal = ({
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
-                    {item.label}
+                    {localizedLabel}
                   </button>
                 )
               })}
@@ -717,7 +732,7 @@ const ImageCropModal = ({
                 <div
                   onPointerDown={handleResizePointerDown}
                   className="absolute -top-3 -left-3 w-7 h-7 flex items-center justify-center cursor-nwse-resize group pointer-events-auto z-20"
-                  title="Drag to resize crop area"
+                  title={cropT.resizeAreaHint || "Drag to resize crop area"}
                 >
                   <div className="w-3.5 h-3.5 border-2 border-white bg-cath-red-700 rounded-full shadow-md transition-transform group-hover:scale-125 group-active:scale-90" />
                 </div>
@@ -725,7 +740,7 @@ const ImageCropModal = ({
                 <div
                   onPointerDown={handleResizePointerDown}
                   className="absolute -top-3 -right-3 w-7 h-7 flex items-center justify-center cursor-nesw-resize group pointer-events-auto z-20"
-                  title="Drag to resize crop area"
+                  title={cropT.resizeAreaHint || "Drag to resize crop area"}
                 >
                   <div className="w-3.5 h-3.5 border-2 border-white bg-cath-red-700 rounded-full shadow-md transition-transform group-hover:scale-125 group-active:scale-90" />
                 </div>
@@ -733,7 +748,7 @@ const ImageCropModal = ({
                 <div
                   onPointerDown={handleResizePointerDown}
                   className="absolute -bottom-3 -left-3 w-7 h-7 flex items-center justify-center cursor-nesw-resize group pointer-events-auto z-20"
-                  title="Drag to resize crop area"
+                  title={cropT.resizeAreaHint || "Drag to resize crop area"}
                 >
                   <div className="w-3.5 h-3.5 border-2 border-white bg-cath-red-700 rounded-full shadow-md transition-transform group-hover:scale-125 group-active:scale-90" />
                 </div>
@@ -741,7 +756,7 @@ const ImageCropModal = ({
                 <div
                   onPointerDown={handleResizePointerDown}
                   className="absolute -bottom-3 -right-3 w-7 h-7 flex items-center justify-center cursor-nwse-resize group pointer-events-auto z-20"
-                  title="Drag to resize crop area"
+                  title={cropT.resizeAreaHint || "Drag to resize crop area"}
                 >
                   <div className="w-3.5 h-3.5 border-2 border-white bg-cath-red-700 rounded-full shadow-md transition-transform group-hover:scale-125 group-active:scale-90" />
                 </div>
@@ -773,7 +788,7 @@ const ImageCropModal = ({
             <div className="flex items-center gap-1 shrink-0">
               <IconButton
                 onClick={handleRotate}
-                title="Rotate 90°"
+                title={cropT.rotate || "Rotate 90°"}
                 variant="ghost"
                 className="h-9 w-9 text-gray-700 hover:bg-gray-200"
               >
@@ -781,18 +796,16 @@ const ImageCropModal = ({
               </IconButton>
               <IconButton
                 onClick={handleFlipH}
-                title="Flip Horizontal"
+                title={cropT.flipHorizontal || "Flip Horizontal"}
                 variant="ghost"
                 className={`h-9 w-9 ${flipH ? "text-cath-red-700 bg-red-50" : "text-gray-700 hover:bg-gray-200"
                   }`}
               >
                 <FlipHorizontal size={17} />
               </IconButton>
-              {/* FIX #3: flipV state existed but had no control — added here,
-                  mirroring the flipH button exactly. */}
               <IconButton
                 onClick={handleFlipV}
-                title="Flip Vertical"
+                title={cropT.flipVertical || "Flip Vertical"}
                 variant="ghost"
                 className={`h-9 w-9 ${flipV ? "text-cath-red-700 bg-red-50" : "text-gray-700 hover:bg-gray-200"
                   }`}
@@ -801,7 +814,7 @@ const ImageCropModal = ({
               </IconButton>
               <IconButton
                 onClick={handleReset}
-                title="Reset Transformations & Crop Size"
+                title={cropT.reset || "Reset Transformations & Crop Size"}
                 variant="ghost"
                 className="h-9 w-9 text-gray-700 hover:bg-gray-200"
               >
@@ -816,19 +829,17 @@ const ImageCropModal = ({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="px-5"
             >
-              Cancel
+              {cropT.cancel || "Cancel"}
             </PillButton>
             <PillButton
               type="button"
               variant="primary"
               onClick={handleApplyCrop}
               startIcon={<Check size={16} />}
-              className="px-6 bg-cath-red-700 hover:bg-cath-red-800 text-white"
               disabled={!imageObj || !!loadError}
             >
-              Apply Crop
+              {cropT.applyCrop || "Apply Crop"}
             </PillButton>
           </div>
         </motion.div>

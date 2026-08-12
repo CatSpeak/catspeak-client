@@ -67,13 +67,13 @@ const AccountHeader = ({ user, formData, t }) => {
       await updateAvatar(avatarData).unwrap()
       toast.success(
         t.profile?.personalInfo?.updateAvatarSuccess ||
-          "Cập nhật ảnh đại diện thành công",
+        "Cập nhật ảnh đại diện thành công",
         { id: "avatar-update" },
       )
     } catch (error) {
       toast.error(
         t.profile?.personalInfo?.updateAvatarError ||
-          "Không thể cập nhật ảnh đại diện",
+        "Không thể cập nhật ảnh đại diện",
         { id: "avatar-update" },
       )
       console.error(error)
@@ -103,7 +103,7 @@ const AccountHeader = ({ user, formData, t }) => {
     try {
       toast.loading(
         t.profile?.personalInfo?.updatingMeetingAvatar ||
-          "Đang cập nhật ảnh đại diện phòng họp...",
+        "Đang cập nhật ảnh đại diện phòng họp...",
         { id: "meeting-avatar-update" },
       )
 
@@ -117,7 +117,7 @@ const AccountHeader = ({ user, formData, t }) => {
 
       toast.success(
         t.profile?.personalInfo?.updateMeetingAvatarSuccess ||
-          "Cập nhật ảnh đại diện phòng họp thành công",
+        "Cập nhật ảnh đại diện phòng họp thành công",
         { id: "meeting-avatar-update" },
       )
       setIsMeetingAvatarModalOpen(false)
@@ -125,7 +125,7 @@ const AccountHeader = ({ user, formData, t }) => {
       console.error(err)
       toast.error(
         t.profile?.personalInfo?.updateMeetingAvatarError ||
-          "Không thể cập nhật ảnh đại diện phòng họp",
+        "Không thể cập nhật ảnh đại diện phòng họp",
         { id: "meeting-avatar-update" },
       )
     }
@@ -164,11 +164,10 @@ const AccountHeader = ({ user, formData, t }) => {
               style={{ border: 'none' }}
             />
             <div
-              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
-                isUpdatingMeetingAvatar
-                  ? "opacity-100"
-                  : "opacity-0 group-hover/meeting:opacity-100"
-              }`}
+              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${isUpdatingMeetingAvatar
+                ? "opacity-100"
+                : "opacity-0 group-hover/meeting:opacity-100"
+                }`}
             >
               {isUpdatingMeetingAvatar ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -189,7 +188,7 @@ const AccountHeader = ({ user, formData, t }) => {
               {isUpdatingMeetingAvatar
                 ? t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật..."
                 : t.profile?.personalInfo?.clickToChangeMeetingAvatar ||
-                  "Bấm để đổi ảnh phòng họp"}
+                "Bấm để đổi ảnh phòng họp"}
             </span>
           </div>
         </div>
@@ -213,11 +212,10 @@ const AccountHeader = ({ user, formData, t }) => {
             className="w-[100px] h-[100px] md:w-[120px] md:h-[120px] bg-cath-red-700 text-white text-4xl"
           />
           <div
-            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
-              isUpdatingAvatar
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
-            }`}
+            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isUpdatingAvatar
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100"
+              }`}
           >
             {isUpdatingAvatar ? (
               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -241,7 +239,7 @@ const AccountHeader = ({ user, formData, t }) => {
           image={fileToCrop}
           isOpen={isCropModalOpen}
           cropPreset="avatar"
-          title={t.profile?.personalInfo?.cropAvatarTitle || "Cắt ảnh đại diện"}
+          title={t.profile?.personalInfo?.cropAvatarTitle || t.imageCrop?.title || "Cắt ảnh đại diện"}
           onClose={() => {
             setIsCropModalOpen(false)
             setFileToCrop(null)
