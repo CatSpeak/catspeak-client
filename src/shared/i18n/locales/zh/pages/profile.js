@@ -116,6 +116,10 @@ export default {
     statusPendingDesc: "您的申请正在审核中。我们会在做出决定后通知您。",
     statusApproved: "申请已通过",
     statusApprovedDesc: "恭喜！您的讲师申请已获批准。",
+    switchToTeacherTitle: "申请已通过",
+    switchToTeacherDesc: "您的讲师申请已获批准。请切换到教师账户以管理教学内容。",
+    switchToTeacherAccount: "切换到教师账户",
+    switching: "切换中...",
     statusRejected: "申请被拒绝",
     statusRejectedDesc: "很遗憾，您的申请暂未通过。",
     statusRequestEdit: "需要修改",
@@ -136,6 +140,18 @@ export default {
     formInvalid: "提交前请填写所有必填字段。",
     credentialSizeLimit: "每份证书必须小于 {max}MB（当前 {actual}MB）。",
     videoSizeLimit: "视频必须小于 {max}MB（当前 {actual}MB）。",
+  },
+  friends: {
+    teacher: "教师",
+    member: "成员",
+    subTabs: {
+      teachers: "教师",
+      members: "成员",
+    },
+    empty: {
+      noTeachers: "暂无教师。",
+      noMembers: "暂无成员。",
+    },
   },
   notifications: {
     friend_request: {

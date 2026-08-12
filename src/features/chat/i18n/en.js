@@ -43,6 +43,7 @@ export default {
       inviteFriends: "Invite friends to this group",
       removeTitle: "Remove from group",
       student: "Student",
+      teacher: "Teacher",
     },
     actions: {
       reply: "Reply",
