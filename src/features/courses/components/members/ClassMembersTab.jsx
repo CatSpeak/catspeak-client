@@ -1,10 +1,11 @@
 import { useMemo } from "react"
-
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { RequestButton } from "@/shared/components/ui/buttons"
 import { getSafeMediaUrl } from "../../utils/courseUtils"
 
 const getPersonId = (person) => (
-  person?.studentId ?? person?.userId ?? person?.id
+  person?.accountId ?? person?.studentId ?? person?.userId ?? person?.id
 )
 
 const getPersonName = (person) => {
@@ -38,6 +39,7 @@ const getAttendanceStyle = (attendance) => {
 }
 
 const ClassMembersTab = ({ classData, isStudent }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
   const c = t.courses || {}
   const cd = c.classDetail || {}
@@ -96,6 +98,12 @@ const ClassMembersTab = ({ classData, isStudent }) => {
     teacher?.avatarUrl ?? teacher?.avatar,
   )
 
+  const handleProfileNavigate = (personId) => {
+    if (personId) {
+      navigate(`/profile/${personId}`)
+    }
+  }
+
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
       <section className="flex flex-col gap-3">
@@ -104,8 +112,11 @@ const ClassMembersTab = ({ classData, isStudent }) => {
         </h3>
 
         {teacherName ? (
-          <div className="flex items-center gap-3 p-3.5 bg-gray-50/50 rounded-xl border border-gray-50">
-            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden text-gray-700 font-black text-sm flex items-center justify-center shadow-xs">
+          <div
+            className={`flex items-center gap-3 p-3.5 bg-gray-50/50 rounded-xl border border-gray-50 ${teacher?.id ? "cursor-pointer group hover:bg-gray-100/60 transition" : ""}`}
+            onClick={() => teacher?.id && handleProfileNavigate(teacher.id)}
+          >
+            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden text-gray-700 font-black text-sm flex items-center justify-center shadow-xs group-hover:ring-2 group-hover:ring-cath-red-400 transition">
               {teacherAvatar ? (
                 <img
                   className="w-full h-full object-cover"
@@ -115,7 +126,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
               ) : getInitials(teacherName)}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-extrabold text-gray-800">{teacherName}</span>
+              <span className="text-sm font-extrabold text-gray-800 group-hover:text-cath-red-600 transition">{teacherName}</span>
               <span className="text-[10px] text-gray-400 font-bold">
                 {cd.leadInstructorLabel || "Lead Instructor"}
               </span>
@@ -161,14 +172,19 @@ const ClassMembersTab = ({ classData, isStudent }) => {
                   key={id ?? `${name}-${index}`}
                   className="flex items-center justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 shrink-0 rounded-full bg-gray-200 text-gray-700 font-black text-xs flex items-center justify-center shadow-xs overflow-hidden">
+                  <div
+                    className={`flex items-center gap-3 min-w-0 ${id ? "cursor-pointer group" : ""}`}
+                    onClick={() => handleProfileNavigate(id)}
+                  >
+                    <div className="w-9 h-9 shrink-0 rounded-full bg-gray-200 text-gray-700 font-black text-xs flex items-center justify-center shadow-xs overflow-hidden group-hover:ring-2 group-hover:ring-cath-red-400 transition">
                       {avatar ? (
                         <img className="w-full h-full object-cover" src={avatar} alt="" />
                       ) : getInitials(name)}
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-extrabold text-gray-800 truncate">{name}</span>
+                      <span className="text-xs font-extrabold text-gray-800 truncate group-hover:text-cath-red-600 transition">
+                        {name}
+                      </span>
                       {detailParts.length > 0 && (
                         <span className="text-[10px] text-gray-450 font-semibold truncate">
                           {detailParts.join(" • ")}
@@ -177,15 +193,25 @@ const ClassMembersTab = ({ classData, isStudent }) => {
                     </div>
                   </div>
 
-                  {["PRESENT", "ABSENT_EXCUSED", "ABSENT_UNEXCUSED"].includes(attendance) && (
-                    <span className={`shrink-0 text-[10px] font-black px-2.5 py-1.5 rounded-lg border ${getAttendanceStyle(attendance)}`}>
-                      {attendance === "PRESENT"
-                        ? (cd.present || "Present")
-                        : attendance === "ABSENT_EXCUSED"
-                          ? (cd.absentExcused || "Absent (Excused)")
-                          : (cd.absentUnexcused || "Absent (Unexcused)")}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {["PRESENT", "ABSENT_EXCUSED", "ABSENT_UNEXCUSED"].includes(attendance) && (
+                      <span className={`shrink-0 text-[10px] font-black px-2.5 py-1.5 rounded-lg border ${getAttendanceStyle(attendance)}`}>
+                        {attendance === "PRESENT"
+                          ? (cd.present || "Present")
+                          : attendance === "ABSENT_EXCUSED"
+                            ? (cd.absentExcused || "Absent (Excused)")
+                            : (cd.absentUnexcused || "Absent (Unexcused)")}
+                      </span>
+                    )}
+
+                    {id && (
+                      <RequestButton
+                        id={id}
+                        relationship={student?.relationship || student}
+                        size="sm"
+                      />
+                    )}
+                  </div>
                 </div>
               )
             })}
