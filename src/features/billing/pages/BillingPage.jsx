@@ -8,6 +8,7 @@ import { Pagination } from "@/shared/components/ui/navigation";
 import BillingFilters from "../components/BillingFilters";
 import BillingTable from "../components/BillingTable";
 import ReportIssueModal from "../invoices/components/ReportIssueModal";
+import RequestRefundModal from "@/features/refunds/components/RequestRefundModal";
 import PageTitle from "@/shared/components/ui/PageTitle";
 
 const ITEMS_PER_PAGE = 5;
@@ -36,6 +37,7 @@ const BillingPage = () => {
 
   // State for modals & actions
   const [reportTargetPaymentId, setReportTargetPaymentId] = useState(null);
+  const [refundTargetInvoice, setRefundTargetInvoice] = useState(null);
   const [repayingId, setRepayingId] = useState(null);
 
   // Filters
@@ -98,6 +100,10 @@ const BillingPage = () => {
     setReportTargetPaymentId(invoice.paymentId || invoice.orderCode);
   };
 
+  const handleRefund = (invoice) => {
+    setRefundTargetInvoice(invoice);
+  };
+
   const handleRepay = async (invoice) => {
     try {
       setRepayingId(invoice.paymentId);
@@ -151,6 +157,7 @@ const BillingPage = () => {
           statusMap={STATUS_MAP}
           onReport={handleReport}
           onRepay={handleRepay}
+          onRefund={handleRefund}
           repayingId={repayingId}
           t={t}
         />
@@ -171,6 +178,16 @@ const BillingPage = () => {
           isOpen={Boolean(reportTargetPaymentId)}
           paymentId={reportTargetPaymentId}
           onClose={() => setReportTargetPaymentId(null)}
+        />
+      )}
+
+      {/* Request Refund Modal */}
+      {Boolean(refundTargetInvoice) && (
+        <RequestRefundModal
+          isOpen={Boolean(refundTargetInvoice)}
+          paymentId={refundTargetInvoice?.paymentId}
+          orderCode={refundTargetInvoice?.orderCode}
+          onClose={() => setRefundTargetInvoice(null)}
         />
       )}
     </div>

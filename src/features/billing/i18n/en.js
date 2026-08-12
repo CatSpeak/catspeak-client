@@ -96,6 +96,7 @@ export default {
       actions: {
         report: "Report",
         repay: "Repay",
+        refund: "Refund",
       },
       statuses: {
         success: "Success",

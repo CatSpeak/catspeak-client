@@ -1,6 +1,6 @@
 import React from "react"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import { RotateCcw, AlertCircle, Loader2 } from "lucide-react"
+import { RotateCcw, AlertCircle, Loader2, Undo2 } from "lucide-react"
 
 const BillingMobileCard = ({
   invoice,
@@ -11,9 +11,11 @@ const BillingMobileCard = ({
   formatAmount,
   onReport,
   onRepay,
+  onRefund,
   repayingId,
 }) => {
   const isPending = invoice.status === 3 || invoice.status === "3" || String(invoice.status).toLowerCase() === "pending"
+  const isSuccess = invoice.status === 1 || invoice.status === "1" || String(invoice.status).toLowerCase() === "success"
   const isRepayingThis = repayingId === invoice.paymentId
 
   return (
@@ -63,6 +65,18 @@ const BillingMobileCard = ({
               <RotateCcw className="w-4 h-4" />
             )}
             <span>{actionsText.repay || "Thanh toán lại"}</span>
+          </button>
+        )}
+
+        {isSuccess && (
+          <button
+            type="button"
+            onClick={() => onRefund && onRefund(invoice)}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors border border-amber-200 shadow-sm active:scale-[0.98]"
+            title={actionsText.refund || "Hoàn tiền"}
+          >
+            <Undo2 className="w-4 h-4 text-amber-700" />
+            <span>{actionsText.refund || "Hoàn tiền"}</span>
           </button>
         )}
 

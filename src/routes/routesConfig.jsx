@@ -79,6 +79,7 @@ const WorkspaceEventsPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceEventsPage"),
 );
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"));
+const RefundHistoryPage = lazy(() => import("@/features/refunds/pages/RefundHistoryPage.jsx"));
 const MyLearningPage = lazy(
   () => import("@/features/courses/pages/MyLearningPage"),
 );
@@ -825,6 +826,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <PaymentResultPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "refunds",
+                element: (
+                  <LazyRoute>
+                    <RefundHistoryPage />
                   </LazyRoute>
                 ),
               },

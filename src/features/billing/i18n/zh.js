@@ -96,6 +96,7 @@ export default {
       actions: {
         report: "报告问题",
         repay: "重新付款",
+        refund: "退款",
       },
       statuses: {
         success: "成功",

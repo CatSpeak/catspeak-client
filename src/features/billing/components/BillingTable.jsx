@@ -2,13 +2,14 @@ import React from "react";
 import DataTable from "@/shared/components/ui/DataTable";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import BillingMobileCard from "./BillingMobileCard";
-import { RotateCcw, AlertCircle, Loader2 } from "lucide-react";
+import { RotateCcw, AlertCircle, Loader2, Undo2 } from "lucide-react";
 
 const BillingTable = ({
   invoices,
   statusMap,
   onReport,
   onRepay,
+  onRefund,
   repayingId,
   t,
 }) => {
@@ -80,6 +81,10 @@ const BillingTable = ({
           row.status === 3 ||
           row.status === "3" ||
           String(row.status).toLowerCase() === "pending";
+        const isSuccess =
+          row.status === 1 ||
+          row.status === "1" ||
+          String(row.status).toLowerCase() === "success";
         const isRepayingThis = repayingId === row.paymentId;
 
         return (
@@ -97,6 +102,18 @@ const BillingTable = ({
                   <RotateCcw className="w-3.5 h-3.5" />
                 )}
                 <span>{actionsText.repay || "Thanh toán lại"}</span>
+              </button>
+            )}
+
+            {isSuccess && (
+              <button
+                type="button"
+                onClick={() => onRefund && onRefund(row)}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors border border-amber-200"
+                title={actionsText.refund || "Hoàn tiền"}
+              >
+                <Undo2 className="w-3.5 h-3.5 text-amber-700" />
+                <span>{actionsText.refund || "Hoàn tiền"}</span>
               </button>
             )}
 
@@ -140,6 +157,7 @@ const BillingTable = ({
             formatAmount={formatAmount}
             onReport={onReport}
             onRepay={onRepay}
+            onRefund={onRefund}
             repayingId={repayingId}
           />
         );
