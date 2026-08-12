@@ -109,7 +109,7 @@ const DesktopSidebar = () => {
   const { pathname } = useLocation()
   const { t } = useLanguage()
   const { isAuthenticated, user } = useAuth()
-  const { isStudent } = useRoleOverride()
+  const { isStudent, isTeacher } = useRoleOverride()
   const { resolvePath, currentLang } = useActiveLink()
   const {
     isDesktopExpanded,
@@ -394,25 +394,25 @@ const DesktopSidebar = () => {
                           )
                         })
                       : (currentSectionData?.items || [])
-                        .filter((item) => {
-                          if (item.hideInSidebar) return false
-                          if (item.lang && item.lang !== currentLang)
-                            return false
-                          if (item.isPrivate && !isAuthenticated) return false
+.filter((item) => {
+                      if (item.hideInSidebar) return false
+                      if (item.lang && item.lang !== currentLang)
+                        return false
+                      if (item.isPrivate && !isAuthenticated) return false
 
-                          const teacherTabs = [
-                            "dashboard",
-                            "myCourses",
-                            "myClass",
-                            "analytics",
-                            "schedule",
-                            "teachingTasks",
-                          ]
-                          if (teacherTabs.includes(item.key) && isStudent)
-                            return false
+                      const teacherTabs = [
+                        "dashboard",
+                        "myCourses",
+                        "myClass",
+                        "analytics",
+                        "schedule",
+                        "teachingTasks",
+                      ]
+                      if (teacherTabs.includes(item.key) && !isTeacher)
+                        return false
 
-                          return true
-                        })
+                      return true
+                    })
                         .map((item) => {
                           const label =
                             t.nav?.[item.key] || item.label || item.key

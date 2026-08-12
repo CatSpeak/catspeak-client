@@ -23,7 +23,7 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
   const navigate = useNavigate()
   const { checkIsActive, resolvePath, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
-  const { isStudent } = useRoleOverride()
+  const { isTeacher } = useRoleOverride()
   const isActive = checkIsActive(item)
 
   // Gate: show dropdown & allow navigation only when authenticated (if requiresAuth)
@@ -109,8 +109,8 @@ const DesktopSubNavDropdown = ({ item, onRequestLogin }) => {
                     if (sub.lang && sub.lang !== currentLang) return false
                     if (sub.isPrivate && !isAuthenticated) return false
 
-                    const teacherTabs = ["myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
-                    if (teacherTabs.includes(sub.key) && isStudent) return false
+                    const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+                    if (teacherTabs.includes(sub.key) && !isTeacher) return false
 
                     return true
                   })

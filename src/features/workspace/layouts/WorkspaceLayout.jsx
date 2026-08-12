@@ -1,34 +1,38 @@
 import React from "react"
-import { Outlet, useLocation, useNavigate } from "react-router-dom"
-import { useEffect } from "react"
+import { Outlet, useLocation } from "react-router-dom"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { PageNotFound } from "@/shared/pages"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
+
+const TEACHER_ONLY_PREFIXES = [
+  "/workspace/dashboard",
+  "/workspace/courses",
+  "/workspace/classes",
+  "/workspace/analytics",
+  "/workspace/teaching-tasks",
+  "/workspace/schedule",
+]
 
 const WorkspaceLayout = () => {
-  const { isStudent, isRoleResolved, isLoading } = useRoleOverride()
+  const { isTeacher, isRoleResolved, isLoading } = useRoleOverride()
   const location = useLocation()
-  const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!isRoleResolved || isLoading) return;
+  const isTeacherOnlyPath = TEACHER_ONLY_PREFIXES.some((prefix) =>
+    location.pathname.startsWith(prefix),
+  )
 
-    const path = location.pathname;
-
-    if (isStudent) {
-      if (path.startsWith('/workspace/courses/class/')) {
-        navigate(path.replace('/workspace/courses/class/', '/workspace/learning/class/') + location.search, { replace: true });
-        return;
-      }
-      if (path.startsWith('/workspace/courses/details/')) {
-        navigate(path.replace('/workspace/courses/details/', '/workspace/learning/details/') + location.search, { replace: true });
-        return;
-      }
-      // Teacher-only routes fallback
-      const teacherRoutes = ["/workspace/courses", "/workspace/classes", "/workspace/schedule", "/workspace/teaching-tasks", "/workspace/analytics"]
-      if (teacherRoutes.some(route => path.includes(route))) {
-        navigate("/workspace/learning", { replace: true })
-      }
+  if (isTeacherOnlyPath) {
+    if (isLoading || !isRoleResolved) {
+      return (
+        <div className="flex min-h-[240px] items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      )
     }
-  }, [isStudent, isRoleResolved, isLoading, location.pathname, location.search, navigate])
+    if (!isTeacher) {
+      return <PageNotFound />
+    }
+  }
 
   return (
     <div className="flex-1 h-full overflow-y-auto flex flex-col bg-primaryBg relative">
