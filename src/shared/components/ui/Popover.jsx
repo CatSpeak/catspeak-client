@@ -11,6 +11,7 @@ const Popover = ({
   triggerClassName = "",
   animationDirection,
   onOpenChange,
+  offset = 4,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -111,8 +112,8 @@ const Popover = ({
       className="absolute z-[9999]"
       style={{
         top: actualPlacement.startsWith("top")
-          ? `${coords.topEdge - 8}px`
-          : `${coords.bottomEdge + 8}px`,
+          ? `${coords.topEdge - offset}px`
+          : `${coords.bottomEdge + offset}px`,
         left: actualPlacement.endsWith("right")
           ? `${coords.rightEdge}px`
           : `${coords.left}px`,
@@ -123,7 +124,7 @@ const Popover = ({
         {isOpen && (
           <FluentAnimation
             direction={actualPlacement.startsWith("top") ? "up" : "down"}
-            distance={10}
+            distance={6}
             exit={true}
           >
             <div ref={popoverRef} onClick={(e) => e.stopPropagation()}>

@@ -377,52 +377,92 @@ const RequestButton = ({
       ? "!h-8 [&>div]:!h-7 [&>div]:px-2.5 [&>div]:text-xs [&>div_span]:w-3.5 [&>div_span]:h-3.5"
       : ""
 
-  // Case: B received a friend request from A -> Display Popover dropdown "<EllipsisVertical /> Hành động"
+  // Case: B received a friend request from A
+  // - Mobile (< sm): Display Popover dropdown "<EllipsisVertical /> Hành động"
+  // - Desktop (>= sm): Display 2 separate buttons "Chấp nhận" and "Từ chối"
   if (isIncomingRequest) {
     const actionLabel =
       t.profile?.friends?.actions?.actions ||
       t.profile?.friends?.actions?.title ||
       t.common?.actions ||
       "Hành động"
+    const acceptLabel = t.profile?.friends?.actions?.accept || "Chấp nhận"
+    const declineLabel = t.profile?.friends?.actions?.decline || "Từ chối"
 
     return (
-      <Popover
-        placement="bottom-right"
-        className={className}
-        trigger={
+      <>
+        {/* Mobile View: Popover Dropdown */}
+        <div className={`flex sm:hidden items-center ${className}`}>
+          <Popover
+            placement="bottom-right"
+            offset={2}
+            className="w-full"
+            triggerClassName="w-full flex items-center justify-center"
+            trigger={
+              <PillButton
+                {...props}
+                variant="outline"
+                startIcon={<EllipsisVertical size={16} />}
+                disabled={isFriendshipDisabled}
+                loading={isRespondingLoading}
+                className={`w-full ${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
+              >
+                {actionLabel}
+              </PillButton>
+            }
+            content={(close) => (
+              <MenuList>
+                <MenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleAccept(e, close)
+                  }}
+                  icon={<Check size={16} />}
+                  label={acceptLabel}
+                />
+                <MenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDecline(e, close)
+                  }}
+                  icon={<X size={16} />}
+                  label={declineLabel}
+                  className="text-red-600"
+                />
+              </MenuList>
+            )}
+          />
+        </div>
+
+        {/* Desktop / Larger Screens: 2 Separate Buttons */}
+        <div
+          className={`hidden sm:inline-flex items-center gap-2 shrink-0 ${className}`}
+        >
           <PillButton
-            variant="outline"
-            startIcon={<EllipsisVertical size={16} />}
-            disabled={isFriendshipDisabled}
-            loading={isRespondingLoading}
-            className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
             {...props}
+            variant="primary"
+            startIcon={<Check size={16} />}
+            onClick={(e) => handleAccept(e)}
+            disabled={isFriendshipDisabled}
+            loading={respondingAction === "accept"}
+            className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
           >
-            {actionLabel}
+            {acceptLabel}
           </PillButton>
-        }
-        content={(close) => (
-          <MenuList>
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation()
-                handleAccept(e, close)
-              }}
-              icon={<Check size={16} />}
-              label={t.profile?.friends?.actions?.accept || "Chấp nhận"}
-            />
-            <MenuItem
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDecline(e, close)
-              }}
-              icon={<X size={16} />}
-              label={t.profile?.friends?.actions?.decline || "Từ chối"}
-              className="text-red-600"
-            />
-          </MenuList>
-        )}
-      />
+
+          <PillButton
+            {...props}
+            variant="secondary"
+            startIcon={<X size={16} />}
+            onClick={(e) => handleDecline(e)}
+            disabled={isFriendshipDisabled}
+            loading={respondingAction === "decline"}
+            className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
+          >
+            {declineLabel}
+          </PillButton>
+        </div>
+      </>
     )
   }
 
