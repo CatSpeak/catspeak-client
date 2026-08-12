@@ -117,7 +117,6 @@ subItems: [
     label: "Explore Courses",
     path: "/explore-courses",
     icon: Compass,
-    showOnHorizontalBar: false,
   },
   {
     key: "learningResources",
@@ -125,7 +124,6 @@ subItems: [
     path: "/resources",
     icon: Globe,
     isPrivate: true,
-    showOnHorizontalBar: false,
   },
 ]
 
