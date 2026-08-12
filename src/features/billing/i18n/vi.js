@@ -96,6 +96,7 @@ export default {
       actions: {
         report: "Báo lỗi",
         repay: "Thanh toán lại",
+        refund: "Hoàn tiền",
       },
       statuses: {
         success: "Thành công",

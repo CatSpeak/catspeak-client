@@ -33,7 +33,9 @@ const DataTable = ({
   // Empty state
   if (data.length === 0) {
     return (
-      <div className={`flex flex-col items-center justify-center py-20 flex-1 ${className}`}>
+      <div
+        className={`flex flex-col items-center justify-center py-20 flex-1 ${className}`}
+      >
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
           {emptyIcon || <FileText className="w-8 h-8 text-gray-400" />}
         </div>
@@ -46,7 +48,10 @@ const DataTable = ({
   return (
     <>
       {/* Desktop table — hidden on mobile */}
-      <FluentCard padding="!p-0" className={`overflow-hidden flex-1 hidden md:block !border-border !rounded-2xl ${className}`}>
+      <FluentCard
+        padding="!p-0"
+        className={`overflow-hidden flex-1 hidden md:block shadow-none !border-border !rounded-xl ${className}`}
+      >
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-red-50/50 text-cath-red-800 border-b border-red-100">
@@ -57,7 +62,9 @@ const DataTable = ({
                 >
                   <span
                     className="block whitespace-normal break-words line-clamp-2 text-ellipsis overflow-hidden"
-                    title={typeof col.label === "string" ? col.label : undefined}
+                    title={
+                      typeof col.label === "string" ? col.label : undefined
+                    }
                   >
                     {col.label}
                   </span>

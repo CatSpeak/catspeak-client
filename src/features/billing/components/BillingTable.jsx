@@ -1,27 +1,38 @@
-import React from "react";
-import DataTable from "@/shared/components/ui/DataTable";
-import { useTimezone } from "@/shared/hooks/useTimezone";
-import BillingMobileCard from "./BillingMobileCard";
-import { RotateCcw, AlertCircle, Loader2 } from "lucide-react";
+import React from "react"
+import DataTable from "@/shared/components/ui/DataTable"
+import Popover from "@/shared/components/ui/Popover"
+import MenuItem from "@/shared/components/ui/MenuItem"
+import MenuList from "@/shared/components/ui/MenuList"
+import { IconButton } from "@/shared/components/ui/buttons"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import BillingMobileCard from "./BillingMobileCard"
+import {
+  RotateCcw,
+  AlertCircle,
+  Loader2,
+  Undo2,
+  MoreVertical,
+} from "lucide-react"
 
 const BillingTable = ({
   invoices,
   statusMap,
   onReport,
   onRepay,
+  onRefund,
   repayingId,
   t,
 }) => {
-  const { formatDateTime } = useTimezone();
-  const hist = t.billing?.history || {};
-  const cols = hist.columns || {};
-  const actionsText = hist.actions || {};
+  const { formatDateTime } = useTimezone()
+  const hist = t.billing?.history || {}
+  const cols = hist.columns || {}
+  const actionsText = hist.actions || {}
 
   const formatAmount = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
-    }).format(amount);
+    }).format(amount)
 
   const columns = [
     {
@@ -60,60 +71,91 @@ const BillingTable = ({
         const statusInfo = statusMap[row.status] || {
           label: "Unknown",
           styles: "bg-gray-100 text-gray-700",
-        };
+        }
         return (
           <span
             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusInfo.styles}`}
           >
             {statusInfo.label}
           </span>
-        );
+        )
       },
     },
     {
       key: "actions",
       label: cols.actions || "Actions",
-      headerClassName: "!py-2.5 !px-4 w-[15%]",
-      className: "!py-2.5 !px-4 w-[15%] whitespace-nowrap",
+      headerClassName: "!py-2.5 !px-4 w-[10%] text-right",
+      className: "!py-2.5 !px-4 w-[10%] whitespace-nowrap text-right",
       render: (row) => {
         const isPending =
           row.status === 3 ||
           row.status === "3" ||
-          String(row.status).toLowerCase() === "pending";
-        const isRepayingThis = repayingId === row.paymentId;
+          String(row.status).toLowerCase() === "pending"
+        const isSuccess =
+          row.status === 1 ||
+          row.status === "1" ||
+          String(row.status).toLowerCase() === "success"
+        const isRepayingThis = repayingId === row.paymentId
 
         return (
-          <div className="flex items-center justify-end gap-2">
-            {isPending && (
-              <button
-                type="button"
-                onClick={() => onRepay && onRepay(row)}
-                disabled={isRepayingThis}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-cath-red-700 hover:bg-cath-red-800 transition-colors disabled:opacity-50"
-              >
-                {isRepayingThis ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <RotateCcw className="w-3.5 h-3.5" />
-                )}
-                <span>{actionsText.repay || "Thanh toán lại"}</span>
-              </button>
-            )}
+          <div className="flex items-center justify-end">
+            <Popover
+              placement="bottom-right"
+              trigger={
+                <IconButton size="xs" variant="ghost" title="Thao tác">
+                  <MoreVertical />
+                </IconButton>
+              }
+              content={(close) => (
+                <MenuList className="!border-border shadow-lg min-w-[150px]">
+                  {isPending && (
+                    <MenuItem
+                      label={actionsText.repay || "Thanh toán lại"}
+                      icon={
+                        isRepayingThis ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-cath-red-700" />
+                        ) : (
+                          <RotateCcw className="w-4 h-4 text-cath-red-700" />
+                        )
+                      }
+                      hoverBg="hover:bg-red-50"
+                      className="font-semibold text-cath-red-700"
+                      onClick={() => {
+                        close()
+                        onRepay && onRepay(row)
+                      }}
+                    />
+                  )}
 
-            <button
-              type="button"
-              onClick={() => onReport && onReport(row)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-cath-red-700 hover:bg-red-50/60 transition-colors border border-border"
-              title={actionsText.report || "Báo lỗi"}
-            >
-              <AlertCircle className="w-3.5 h-3.5 text-gray-500" />
-              <span>{actionsText.report || "Báo lỗi"}</span>
-            </button>
+                  {isSuccess && (
+                    <MenuItem
+                      label={actionsText.refund || "Hoàn tiền"}
+                      icon={<Undo2 className="w-4 h-4 text-amber-700" />}
+                      hoverBg="hover:bg-amber-50"
+                      className="font-medium text-amber-900"
+                      onClick={() => {
+                        close()
+                        onRefund && onRefund(row)
+                      }}
+                    />
+                  )}
+
+                  <MenuItem
+                    label={actionsText.report || "Báo lỗi"}
+                    icon={<AlertCircle className="w-4 h-4 text-gray-500" />}
+                    onClick={() => {
+                      close()
+                      onReport && onReport(row)
+                    }}
+                  />
+                </MenuList>
+              )}
+            />
           </div>
-        );
+        )
       },
     },
-  ];
+  ]
 
   return (
     <DataTable
@@ -129,7 +171,7 @@ const BillingTable = ({
         const statusInfo = statusMap[invoice.status] || {
           label: "Unknown",
           styles: "bg-gray-100 text-gray-700",
-        };
+        }
         return (
           <BillingMobileCard
             invoice={invoice}
@@ -140,12 +182,13 @@ const BillingTable = ({
             formatAmount={formatAmount}
             onReport={onReport}
             onRepay={onRepay}
+            onRefund={onRefund}
             repayingId={repayingId}
           />
-        );
+        )
       }}
     />
-  );
-};
+  )
+}
 
-export default BillingTable;
+export default BillingTable
