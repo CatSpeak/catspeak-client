@@ -1,10 +1,26 @@
 import React from "react"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import DatePicker from "@/shared/components/ui/inputs/DatePicker"
+import {
+  CUSTOM_PERIOD_VALUE,
+  COMPARE_LAST_YEAR_VALUE,
+  COMPARE_PREVIOUS_VALUE,
+} from "../../data/analyticsData"
 
 const ALL_COURSES_VALUE = "__all_courses__"
 const ALL_CLASSES_VALUE = "__all_classes__"
 const UNASSIGNED_VALUE = "__unassigned__"
+
+const toDateString = (date) => {
+  if (!date) return ""
+  if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date
+  const d = date instanceof Date ? date : new Date(date)
+  if (isNaN(d.getTime())) return ""
+  const m = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${d.getFullYear()}-${m}-${day}`
+}
 
 const AnalyticsFilterBar = ({
   filterMeta,
@@ -20,12 +36,17 @@ const AnalyticsFilterBar = ({
   setCourse,
   className,
   setClassName,
+  customStartDate,
+  setCustomStartDate,
+  customEndDate,
+  setCustomEndDate,
   onExport,
   isExporting = false,
 }) => {
   const { t } = useLanguage()
   const filterT = t.courses?.analytics?.filters || {}
   const meta = filterMeta?.[group] || filterMeta?.month
+  const isCustom = period === CUSTOM_PERIOD_VALUE
 
   const courseList = courses
     .map((item) => ({
@@ -40,6 +61,22 @@ const AnalyticsFilterBar = ({
     const newMeta = filterMeta?.[newGroup] || filterMeta?.month
     setPeriod(newMeta.periods[0].value)
     setCompare(newMeta.comparisons[0].value)
+    setCustomStartDate("")
+    setCustomEndDate("")
+  }
+
+  const handlePeriodChange = (e) => {
+    const newPeriod = e.target.value
+    setPeriod(newPeriod)
+    if (newPeriod !== CUSTOM_PERIOD_VALUE) {
+      setCompare((meta.comparisons[0] || {}).value || "")
+      setCustomStartDate("")
+      setCustomEndDate("")
+    }
+  }
+
+  const handleCompareChange = (e) => {
+    setCompare(e.target.value)
   }
 
   const handleCourseChange = (e) => {
@@ -51,6 +88,7 @@ const AnalyticsFilterBar = ({
   const allCoursesLabel = filterT.allCourses || "Tất cả khóa học"
   const allClassesLabel = filterT.allClasses || "Tất cả lớp học"
   const unassignedLabel = filterT.unassigned || "Không thuộc khóa"
+  const lastYearLabel = filterT.samePeriodLastYear || "Cùng kỳ năm trước"
 
   const getClassOptions = () => {
     if (course === ALL_COURSES_VALUE) {
@@ -89,11 +127,27 @@ const AnalyticsFilterBar = ({
     year: filterT.byYear || "Theo năm",
   }
 
-  const handleExportClick = () => {
-    if (onExport) {
-      onExport()
-    }
-  }
+  const periodOptions = period === "alltime"
+    ? [{ value: "alltime", label: filterT.allTime || "Toàn bộ thời gian" }]
+    : [
+        ...meta.periods,
+        { value: CUSTOM_PERIOD_VALUE, label: filterT.custom || "Tùy chỉnh" },
+      ]
+
+  const compareOptions = isCustom
+    ? [
+        { value: "", label: filterT.noComparison || "Không so sánh" },
+        { value: COMPARE_PREVIOUS_VALUE, label: filterT.previousPeriod || "Kỳ liền trước" },
+        { value: COMPARE_LAST_YEAR_VALUE, label: lastYearLabel },
+      ]
+    : [
+        { value: "", label: filterT.noComparison || "Không so sánh" },
+        ...meta.comparisons,
+        { value: COMPARE_LAST_YEAR_VALUE, label: lastYearLabel },
+      ]
+
+  const selectClass =
+    "h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
 
   return (
     <section className="bg-white border border-[#e6e7ea] border-t-0 rounded-b-2xl p-3.5 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 items-end shadow-sm">
@@ -104,7 +158,7 @@ const AnalyticsFilterBar = ({
           id="select-group"
           value={group}
           onChange={handleGroupChange}
-          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className={selectClass}
         >
           {Object.keys(filterMeta || {}).map((key) => (
             <option key={key} value={key}>
@@ -120,10 +174,10 @@ const AnalyticsFilterBar = ({
         <select
           id="select-period"
           value={period}
-          onChange={(e) => setPeriod(e.target.value)}
-          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          onChange={handlePeriodChange}
+          className={selectClass}
         >
-          {meta.periods.map((item) => (
+          {periodOptions.map((item) => (
             <option key={item.value} value={item.value}>
               {item.label}
             </option>
@@ -131,16 +185,31 @@ const AnalyticsFilterBar = ({
         </select>
       </div>
 
+      {/* Custom range (only when period === custom) */}
+      {isCustom && (
+        <>
+          <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
+            <label>{filterT.fromDate || "Từ ngày"}</label>
+            <DatePicker value={customStartDate} onChange={(d) => setCustomStartDate(toDateString(d))} />
+          </div>
+          <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
+            <label>{filterT.toDate || "Đến ngày"}</label>
+            <DatePicker value={customEndDate} onChange={(d) => setCustomEndDate(toDateString(d))} />
+          </div>
+        </>
+      )}
+
       {/* Compare selection */}
       <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
         <label htmlFor="select-compare">{filterT.compareTo || "So sánh với"}</label>
         <select
           id="select-compare"
           value={compare}
-          onChange={(e) => setCompare(e.target.value)}
-          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          onChange={handleCompareChange}
+          disabled={period === "alltime"}
+          className={selectClass}
         >
-          {meta.comparisons.map((item) => (
+          {compareOptions.map((item) => (
             <option key={item.value} value={item.value}>
               {item.label}
             </option>
@@ -155,7 +224,7 @@ const AnalyticsFilterBar = ({
           id="select-course"
           value={course}
           onChange={handleCourseChange}
-          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className={selectClass}
         >
           <option value={ALL_COURSES_VALUE}>{allCoursesLabel}</option>
           {courseList.map((item) => (
@@ -174,7 +243,7 @@ const AnalyticsFilterBar = ({
           id="select-class"
           value={className}
           onChange={(e) => setClassName(e.target.value)}
-          className="h-10 border border-border rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+          className={selectClass}
         >
           {getClassOptions().map((item) => (
             <option key={item.value} value={item.value}>
@@ -188,11 +257,11 @@ const AnalyticsFilterBar = ({
       <button
         type="button"
         disabled={isExporting}
-        onClick={handleExportClick}
+        onClick={() => onExport && onExport()}
         className="h-10 border border-[#990011] text-[#990011] hover:bg-[#990011]/5 bg-white font-bold rounded-xl flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
       >
         <Download size={18} />
-        {isExporting ? "Đang xuất..." : (filterT.exportReport || "Xuất báo cáo")}
+        {isExporting ? (filterT.exporting || "Đang xuất...") : (filterT.exportReport || "Xuất báo cáo")}
       </button>
     </section>
   )

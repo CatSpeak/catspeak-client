@@ -189,6 +189,186 @@ export const getAnalyticsFilterMeta = (language, now = new Date()) => {
   }
 }
 
+// ── BR-DASH-40: dashboard → analytics scope resolution (shared auto-bucket rule) ──
+
+export const CUSTOM_PERIOD_VALUE = "custom"
+export const COMPARE_LAST_YEAR_VALUE = "__lastYear__"
+export const COMPARE_PREVIOUS_VALUE = "__previous__"
+
+const parseDateKey = (value) => {
+  const s = String(value || "")
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s)
+  if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  const iso = new Date(s)
+  return isNaN(iso.getTime()) ? null : iso
+}
+
+const diffDays = (a, b) => Math.round((b - a) / 86400000)
+
+/** Mirrors the backend trend-bucket rule: ≤31 days → day, ≤180 days → week, else month. */
+export const getGroupForRange = (startDate, endDate) => {
+  const start = parseDateKey(startDate)
+  const end = parseDateKey(endDate)
+  if (!start || !end) return "month"
+  const days = diffDays(start, end) + 1
+  if (days <= 31) return "day"
+  if (days <= 180) return "week"
+  return "month"
+}
+
+/**
+ * If [startDate, endDate] is exactly one of the preset vocabulary ranges
+ * (month / quarter / year / five-year), returns the matching identifier; else null.
+ * Identifiers share the analytics vocabulary: "YYYY-MM" (day), "YYYY-Qn" (week),
+ * "YYYY" (month), "YYYY-YYYY" (year).
+ */
+const periodCovering = (group, startDate, endDate) => {
+  const start = parseDateKey(startDate)
+  const end = parseDateKey(endDate)
+  if (!start || !end) return null
+  const startKey = toDateKey(start)
+  const endKey = toDateKey(end)
+  switch (group) {
+    case "day": {
+      const lastDay = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate()
+      if (start.getDate() === 1 && end.getDate() === lastDay) return toMonthKey(start)
+      return null
+    }
+    case "week": {
+      const quarterStart = new Date(start.getFullYear(), Math.floor(start.getMonth() / 3) * 3, 1)
+      const quarterEnd = new Date(quarterStart.getFullYear(), quarterStart.getMonth() + 3, 0)
+      if (startKey === toDateKey(quarterStart) && endKey === toDateKey(quarterEnd)) return toQuarterKey(start)
+      return null
+    }
+    case "month":
+      if (start.getMonth() === 0 && start.getDate() === 1 && end.getMonth() === 11 && end.getDate() === 31) {
+        return String(start.getFullYear())
+      }
+      return null
+    case "year": {
+      if (
+        start.getMonth() === 0 && start.getDate() === 1 &&
+        end.getMonth() === 11 && end.getDate() === 31 &&
+        end.getFullYear() === start.getFullYear() + 4
+      ) {
+        return `${start.getFullYear()}-${end.getFullYear()}`
+      }
+      return null
+    }
+    default:
+      return null
+  }
+}
+
+/** The immediately preceding identifier of the same unit for a period identifier. */
+const previousPeriodKey = (group, period) => {
+  if (group === "day") {
+    const date = parseMonth(period)
+    return toMonthKey(new Date(date.getFullYear(), date.getMonth() - 1, 1))
+  }
+  if (group === "week") {
+    const date = parseQuarter(period)
+    return toQuarterKey(new Date(date.getFullYear(), date.getMonth() - 3, 1))
+  }
+  if (group === "month") return String(parseYear(period, new Date().getFullYear()) - 1)
+  if (group === "year") {
+    const [start, end] = String(period).split("-").map(Number)
+    return `${start - 5}-${end - 5}`
+  }
+  return ""
+}
+
+const matchesRange = (group, period, startDate, endDate) => {
+  if (!startDate || !endDate) return false
+  const range = getAnalyticsDateRange(group, period)
+  return range.startDate === startDate && range.endDate === endDate
+}
+
+/**
+ * Computes a comparison range for custom dates.
+ * "previous" = same length immediately before; "lastYear" = same calendar range one year ago.
+ */
+export const computeCustomCompareRange = (mode, startDate, endDate) => {
+  const start = parseDateKey(startDate)
+  const end = parseDateKey(endDate)
+  if (!start || !end) return {}
+  if (mode === "previous") {
+    const days = diffDays(start, end) + 1
+    return {
+      customCompareStartDate: toDateKey(new Date(start.getFullYear(), start.getMonth(), start.getDate() - days)),
+      customCompareEndDate: toDateKey(new Date(end.getFullYear(), end.getMonth(), end.getDate() - days)),
+    }
+  }
+  if (mode === "lastYear") {
+    return {
+      customCompareStartDate: toDateKey(new Date(start.getFullYear() - 1, start.getMonth(), start.getDate())),
+      customCompareEndDate: toDateKey(new Date(end.getFullYear() - 1, end.getMonth(), end.getDate())),
+    }
+  }
+  return {}
+}
+
+/**
+ * Maps the Dashboard's resolved dates (+ compare dates) to an Analytics filter scope:
+ * keeps the exact range, auto-selects the GroupBy via the shared auto-bucket rule, and
+ * uses a preset identifier when the range matches the vocabulary, else the "Tùy chỉnh" option.
+ * Returns null when no dates are present (keep local defaults).
+ */
+export const resolveAnalyticsScope = ({ startDate, endDate, compareStartDate, compareEndDate } = {}) => {
+  const parsedStart = parseDateKey(startDate)
+  const parsedEnd = parseDateKey(endDate)
+  if (!parsedStart || !parsedEnd) return null
+  startDate = toDateKey(parsedStart)
+  endDate = toDateKey(parsedEnd)
+  if (compareStartDate) compareStartDate = toDateKey(parseDateKey(compareStartDate))
+  if (compareEndDate) compareEndDate = toDateKey(parseDateKey(compareEndDate))
+
+  const group = getGroupForRange(startDate, endDate)
+  const period = periodCovering(group, startDate, endDate)
+  const hasCompare = !!(compareStartDate && compareEndDate)
+
+  if (period) {
+    const previousKey = previousPeriodKey(group, period)
+    let compare = ""
+    if (hasCompare) {
+      if (matchesRange(group, previousKey, compareStartDate, compareEndDate)) compare = previousKey
+      else {
+        const lastYear = computeCustomCompareRange("lastYear", startDate, endDate)
+        if (lastYear.customCompareStartDate === compareStartDate && lastYear.customCompareEndDate === compareEndDate) {
+          compare = COMPARE_LAST_YEAR_VALUE
+        }
+      }
+    }
+    return {
+      group,
+      period,
+      compare,
+      customStartDate: "",
+      customEndDate: "",
+    }
+  }
+
+  let compare = ""
+  if (hasCompare) {
+    const previous = computeCustomCompareRange("previous", startDate, endDate)
+    if (previous.customCompareStartDate === compareStartDate && previous.customCompareEndDate === compareEndDate) {
+      compare = COMPARE_PREVIOUS_VALUE
+    } else {
+      const lastYear = computeCustomCompareRange("lastYear", startDate, endDate)
+      if (lastYear.customCompareStartDate === compareStartDate && lastYear.customCompareEndDate === compareEndDate) {
+        compare = COMPARE_LAST_YEAR_VALUE
+      }
+    }
+  }
+  return {
+    group,
+    period: CUSTOM_PERIOD_VALUE,
+    compare,
+    customStartDate: startDate,
+    customEndDate: endDate,
+  }
+}
+
 export const getAnalyticsDateRange = (group, value, fallbackDate = new Date()) => {
   switch (group) {
     case "day":
@@ -210,19 +390,39 @@ export const buildAnalyticsQueryParams = ({
   compare,
   courseId,
   classId,
+  customStartDate,
+  customEndDate,
 }) => {
-  const selectedRange = getAnalyticsDateRange(group, period)
-  const comparisonRange = getAnalyticsDateRange(group, compare)
+  const isCustom = period === CUSTOM_PERIOD_VALUE
+  const isAllTime = period === "alltime"
+  const groupBy = group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month"
+  const range = isCustom
+    ? { startDate: customStartDate, endDate: customEndDate }
+    : isAllTime
+      ? null
+      : getAnalyticsDateRange(group, period)
 
-  return {
-    groupBy: group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month",
-    startDate: selectedRange.startDate,
-    endDate: selectedRange.endDate,
-    compareStartDate: comparisonRange.startDate,
-    compareEndDate: comparisonRange.endDate,
+  const params = {
+    groupBy,
+    period: isCustom ? CUSTOM_PERIOD_VALUE : period,
     courseId,
     classId,
   }
+
+  if (compare && !isAllTime && compare !== COMPARE_LAST_YEAR_VALUE && compare !== COMPARE_PREVIOUS_VALUE) {
+    params.compare = compare
+  } else if (compare === COMPARE_LAST_YEAR_VALUE || compare === COMPARE_PREVIOUS_VALUE) {
+    const compareRange = computeCustomCompareRange(compare === COMPARE_LAST_YEAR_VALUE ? "lastYear" : "previous", range.startDate, range.endDate)
+    if (compareRange.customCompareStartDate) params.compareCustomStartDate = compareRange.customCompareStartDate
+    if (compareRange.customCompareEndDate) params.compareCustomEndDate = compareRange.customCompareEndDate
+  }
+
+  if (isCustom) {
+    if (customStartDate) params.customStartDate = customStartDate
+    if (customEndDate) params.customEndDate = customEndDate
+  }
+
+  return params
 }
 
 export const getDrillDownSelection = ({ group, period, index }) => {

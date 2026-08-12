@@ -95,7 +95,7 @@ const DesktopSidebar = () => {
   const { pathname } = useLocation()
   const { t } = useLanguage()
   const { isAuthenticated, user } = useAuth()
-  const { isStudent } = useRoleOverride()
+  const { isStudent, isTeacher } = useRoleOverride()
   const { resolvePath, currentLang } = useActiveLink()
   const {
     isDesktopExpanded,
@@ -196,6 +196,7 @@ const DesktopSidebar = () => {
           {mainDockItems
             .filter((item) => {
               const teacherTabs = [
+                "dashboard",
                 "myCourses",
                 "myClass",
                 "analytics",
@@ -384,13 +385,14 @@ const DesktopSidebar = () => {
                         if (item.isPrivate && !isAuthenticated) return false
 
                         const teacherTabs = [
+                          "dashboard",
                           "myCourses",
                           "myClass",
                           "analytics",
                           "schedule",
                           "teachingTasks",
                         ]
-                        if (teacherTabs.includes(item.key) && isStudent)
+                        if (teacherTabs.includes(item.key) && !isTeacher)
                           return false
 
                         return true

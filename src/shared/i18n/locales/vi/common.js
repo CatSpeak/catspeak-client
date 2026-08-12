@@ -49,6 +49,7 @@ export default {
     calendar: "Lịch",
     events: "Sự kiện",
     analytics: "Thống kê",
+    dashboard: "Bảng điều khiển",
     cart: "Giỏ hàng",
     courses: "Khóa học",
     allCourses: "Các khóa học",

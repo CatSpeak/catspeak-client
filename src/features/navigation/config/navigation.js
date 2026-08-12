@@ -57,7 +57,7 @@ export const navSections = [
     labelKey: "workspace",
     defaultLabel: "My Workspace",
     maxInitial: 5,
-    items: [
+items: [
       { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
@@ -65,10 +65,10 @@ export const navSections = [
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "workspaceReels", path: "/workspace/reels", icon: Film },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
       // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
-      // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
 ]
@@ -92,7 +92,7 @@ export const navLinks = [
     hasDropdown: true,
     icon: Briefcase,
     requiresAuth: true,
-    subItems: [
+subItems: [
       { key: "profile", path: "/workspace/profile", icon: User },
       { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
       { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
@@ -100,10 +100,10 @@ export const navLinks = [
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+      { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
       // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
-      // { key: "events", path: "/workspace/events", icon: Calendar },
     ],
   },
   {

@@ -49,6 +49,7 @@ export default {
     calendar: "日历",
     events: "活动",
     analytics: "数据分析",
+    dashboard: "仪表盘",
     cart: "购物车",
     courses: "课程",
     allCourses: "所有课程",

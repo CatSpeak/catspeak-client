@@ -49,6 +49,7 @@ export default {
     calendar: "Calendar",
     events: "Events",
     analytics: "Analytics",
+    dashboard: "Dashboard",
     cart: "Cart",
     courses: "Courses",
     allCourses: "All Courses",
