@@ -41,6 +41,7 @@ export default {
     },
     friends: {
       title: "Bạn bè",
+      teacher: "Giảng viên",
       member: "Thành viên",
       searchPlaceholder: "Tìm kiếm bạn bè...",
       subTabs: {

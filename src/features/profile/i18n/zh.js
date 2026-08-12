@@ -41,6 +41,7 @@ export default {
     },
     friends: {
       title: "好友",
+      teacher: "教师",
       member: "成员",
       searchPlaceholder: "搜索好友...",
       subTabs: {
