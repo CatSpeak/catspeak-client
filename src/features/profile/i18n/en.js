@@ -41,6 +41,7 @@ export default {
     },
     friends: {
       title: "Friends",
+      teacher: "Teacher",
       member: "Member",
       searchPlaceholder: "Search friends...",
       subTabs: {
@@ -59,6 +60,7 @@ export default {
         noRecommendations: "No suggestions.",
       },
       actions: {
+        actions: "Actions",
         accept: "Accept",
         decline: "Decline",
         acceptSuccess: "Friend request accepted!",

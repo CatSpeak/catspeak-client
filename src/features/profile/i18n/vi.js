@@ -41,6 +41,7 @@ export default {
     },
     friends: {
       title: "Bạn bè",
+      teacher: "Giảng viên",
       member: "Thành viên",
       searchPlaceholder: "Tìm kiếm bạn bè...",
       subTabs: {
@@ -59,6 +60,7 @@ export default {
         noRecommendations: "Không có gợi ý nào.",
       },
       actions: {
+        actions: "Hành động",
         accept: "Chấp nhận",
         decline: "Từ chối",
         acceptSuccess: "Đã chấp nhận kết bạn!",

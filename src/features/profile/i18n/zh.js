@@ -41,6 +41,7 @@ export default {
     },
     friends: {
       title: "好友",
+      teacher: "教师",
       member: "成员",
       searchPlaceholder: "搜索好友...",
       subTabs: {
@@ -59,6 +60,7 @@ export default {
         noRecommendations: "暂无推荐。",
       },
       actions: {
+        actions: "操作",
         accept: "接受",
         decline: "拒绝",
         acceptSuccess: "已接受好友请求！",

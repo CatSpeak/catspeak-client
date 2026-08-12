@@ -342,7 +342,9 @@ const ProfileFriendsTab = ({
                     {user.nickname || user.username}
                   </h3>
                   <p className="text-sm text-[#606060]">
-                    {user.level || t.profile?.friends?.member || "Member"}
+                    {(user.IsTeacher || user.isTeacher || user.isteacher)
+                      ? t.profile?.friends?.teacher || "Giảng viên"
+                      : t.profile?.friends?.member || "Thành viên"}
                   </p>
                 </HorizontalCard>
               </div>
