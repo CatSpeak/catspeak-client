@@ -185,7 +185,9 @@ const NewChatModal = ({ open, onClose, onConversationCreated }) => {
                     >
                       <p>{friend.nickname || friend.username}</p>
                       <p className="text-sm text-[#606060]">
-                        {friend.level || t?.chat?.userPanel?.student || "Student"}
+                        {friend.isTeacher
+                          ? (t?.chat?.userPanel?.teacher || "Giáo viên")
+                          : (friend.level || t?.chat?.userPanel?.student || "Student")}
                       </p>
                     </ListItem>
                   )

@@ -43,6 +43,7 @@ export default {
       inviteFriends: "邀请好友加入此群",
       removeTitle: "从群组中移除",
       student: "学员",
+      teacher: "教师",
     },
     actions: {
       reply: "回复",
