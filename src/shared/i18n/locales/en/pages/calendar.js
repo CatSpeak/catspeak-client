@@ -167,7 +167,7 @@ export default {
   maxOccurrencesWarning:
     "The system supports creating a maximum of 24 sessions per recurring event series. Sessions exceeding this limit will not be created.",
   // New calendar UI
-  schedule: "Schedule",
+  schedule: "Event schedule",
   monthSchedule: "Event schedule for month",
   upcoming: "Upcoming",
   eventDayLegend: "Event date",

@@ -120,53 +120,18 @@ const SocialProfileHeader = ({
   const handleFriendshipToggle = () => {
     if (isFriendOrPending) {
       if (status?.friendshipId) {
-        deleteFriendship(status.friendshipId)
-          .unwrap()
-          .then(() =>
-            toast.success(
-              status?.isFriend
-                ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
-                : t.profile?.social?.cancelRequestSuccess ||
-                "Đã hủy yêu cầu kết bạn",
-            ),
-          )
-          .catch(() =>
-            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra"),
-          );
+        deleteFriendship(status.friendshipId).unwrap().catch(() => {});
       }
     } else {
       const performSend = () => {
-        sendFriendRequest(targetAccountId)
-          .unwrap()
-          .then(() =>
-            toast.success(
-              t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-            ),
-          )
-          .catch((err) => {
-            if (err?.status === 422) {
-              toast.error(
-                t.profile?.social?.requestPending ||
-                "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-              );
-            } else {
-              toast.error(
-                t.profile?.social?.requestError ||
-                "Không thể gửi yêu cầu kết bạn",
-              );
-            }
-          });
+        sendFriendRequest(targetAccountId).unwrap().catch(() => {});
       };
 
       if (status?.friendshipId) {
         deleteFriendship(status.friendshipId)
           .unwrap()
-          .then(() => {
-            performSend();
-          })
-          .catch(() => {
-            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra");
-          });
+          .then(() => performSend())
+          .catch(() => {});
       } else {
         performSend();
       }

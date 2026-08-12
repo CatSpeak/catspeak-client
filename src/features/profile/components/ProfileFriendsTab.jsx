@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react"
 import { MoreHorizontal, User, UserCheck, UserX } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetFriendsQuery,
@@ -73,16 +72,7 @@ const ProfileFriendsTab = ({
 
   const handleRespondRequest = (friendshipId, action, closePopover) => {
     closePopover()
-    respondFriendRequest({ friendshipId, action })
-      .unwrap()
-      .then(() => {
-        toast.success(
-          action === "accept"
-            ? t.profile?.friends?.actions?.acceptSuccess || "Đã chấp nhận kết bạn!"
-            : t.profile?.friends?.actions?.declineSuccess || "Đã từ chối kết bạn",
-        )
-      })
-      .catch(() => toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra"))
+    respondFriendRequest({ friendshipId, action }).unwrap().catch(() => {})
   }
 
   const getArray = (res) => (Array.isArray(res) ? res : res?.data || [])
