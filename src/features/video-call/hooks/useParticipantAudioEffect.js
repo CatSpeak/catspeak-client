@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   getRoomSetting,
   ROOM_SETTING_KEYS,
@@ -44,10 +44,33 @@ export const playGlobalSound = (name) => {
 };
 export const useParticipantAudioEffect = (participants, roomId = null) => {
   const prevParticipantsRef = useRef(participants)
+  const isInitialMountRef = useRef(true)
+  const [isSoundEnabled, setIsSoundEnabled] = useState(() => {
+    return getRoomSetting(roomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND)
+  })
+
+  useEffect(() => {
+    const handleSoundChange = () => {
+      setIsSoundEnabled(getRoomSetting(roomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND))
+    }
+    handleSoundChange()
+    window.addEventListener("catspeak_join_leave_sound_changed", handleSoundChange)
+    return () => {
+      window.removeEventListener("catspeak_join_leave_sound_changed", handleSoundChange)
+    }
+  }, [roomId])
 
   useEffect(() => {
     const prevParticipants = prevParticipantsRef.current
     const currentParticipants = participants
+
+    if (isInitialMountRef.current) {
+      if (currentParticipants.length > 0) {
+        isInitialMountRef.current = false
+      }
+      prevParticipantsRef.current = currentParticipants
+      return
+    }
 
     // Check for newly joined participants
     const newlyJoined = currentParticipants.filter(
@@ -63,11 +86,6 @@ export const useParticipantAudioEffect = (participants, roomId = null) => {
         ),
     )
 
-    const isSoundEnabled = getRoomSetting(
-      roomId,
-      ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND
-    )
-
     if (isSoundEnabled) {
       if (newlyJoined.length > 0) {
         // Play join audio
@@ -79,5 +97,5 @@ export const useParticipantAudioEffect = (participants, roomId = null) => {
     }
 
     prevParticipantsRef.current = currentParticipants
-  }, [participants])
+  }, [participants, isSoundEnabled])
 }

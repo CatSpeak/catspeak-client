@@ -315,15 +315,13 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
                 ? "bg-transparent p-0 text-3xl md:text-4xl leading-relaxed select-text border-0 shadow-none min-h-0 min-w-0"
                 : `max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words transition-all ${isMe
                   ? "bg-[#990011] text-white"
-                  : isMentionedMe
-                    ? "bg-amber-100/90 text-amber-950 border-2 border-amber-400 shadow-sm"
-                    : msg.status === "error"
-                      ? "bg-red-100 text-red-900 border border-red-200"
-                      : isSystem
-                        ? "bg-orange-100 text-orange-900"
-                        : isAi
-                          ? "bg-amber-50 text-amber-900"
-                          : "bg-[#F0F0F0] text-black"
+                  : msg.status === "error"
+                    ? "bg-red-100 text-red-900 border border-red-200"
+                    : isSystem
+                      ? "bg-orange-100 text-orange-900"
+                      : isAi
+                        ? "bg-amber-50 text-amber-900"
+                        : "bg-[#F0F0F0] text-black"
                   }`
             }
           >

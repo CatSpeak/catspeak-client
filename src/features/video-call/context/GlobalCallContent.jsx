@@ -416,7 +416,7 @@ const GlobalCallContent = ({
   )
 
   // ── Join/Leave Audio ──
-  useParticipantAudioEffect(participants)
+  useParticipantAudioEffect(participants, currentRoomId)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
@@ -656,6 +656,12 @@ const GlobalCallContent = ({
       }
 
       try {
+        const isSoundEnabled = getRoomSetting(
+          currentRoomId,
+          ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
+        )
+        if (!isSoundEnabled) return
+
         const AudioContext = window.AudioContext || window.webkitAudioContext
         if (!AudioContext) return
         const ctx = new AudioContext()
