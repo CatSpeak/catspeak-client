@@ -18,7 +18,7 @@ const formatSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
-const FileDetailModal = ({ open, onClose, item, onDelete }) => {
+const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
   const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
   const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
 
@@ -233,6 +233,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete }) => {
                 roundedClass="rounded-xl"
                 textColor="#5B403E"
                 borderColor="#E3BEBA"
+                onClick={onMove}
               >
                 Di chuyển
               </PillButton>

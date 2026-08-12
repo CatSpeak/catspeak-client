@@ -573,11 +573,17 @@ const TeachingMaterialPage = () => {
       <FileDetailModal
         open={isFileDetailOpen}
         onClose={() => setIsFileDetailOpen(false)}
-        file={selectedItem}
+        item={selectedItem}
         onDelete={() => {
           setIsFileDetailOpen(false);
           setDeletingItem({ id: selectedItem.id, name: selectedItem.fileName || selectedItem.name, count: 0, type: 'file' });
           setIsDeleteFolderOpen(true);
+        }}
+        onMove={() => {
+          setIsFileDetailOpen(false);
+          setTimeout(() => {
+            setIsMoveModalOpen(true);
+          }, 300);
         }}
       />
 
