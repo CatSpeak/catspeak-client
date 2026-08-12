@@ -570,6 +570,8 @@ export default {
   noLimit: "No limit",
   copySuccess: "Link copied",
   copyLinkTooltip: "Copy link",
+  expiredBadge: "Expired",
+  roomExpiredToast: "This room has expired!",
   callEnded: {
     titleExpired: "This session has expired",
     titleLeft: "You left the meeting",
@@ -578,7 +580,7 @@ export default {
     descLeft: "You can safely close this window or return to the home screen.",
     rejoin: "Rejoin",
     returnHome: "Return to home",
-    expiredToast: "The session has ended",
+    expiredToast: "The call has ended due to room duration limit",
   },
   breakoutRooms: {
     mainRoom: "Main Room",

@@ -239,6 +239,18 @@ export const calculateEndDate = (startDate, durationMinutes) => {
 };
 
 /**
+ * Check if a room is expired (past its scheduled duration)
+ */
+export const isRoomExpired = (room) => {
+  if (!room) return false;
+  if (room.duration === null || room.duration === undefined) return false;
+  const startDate = ensureDate(room.createDate || room.createdAt);
+  if (!startDate) return false;
+  const endDate = calculateEndDate(startDate, room.duration);
+  return Date.now() > endDate.getTime();
+};
+
+/**
  * Format a date as YYYY-MM-DD in the specified TimeZone
  */
 export const getDateKeyInTz = (date, userTimeZone = null) => {
