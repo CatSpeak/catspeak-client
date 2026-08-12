@@ -4,10 +4,13 @@ import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
 import Checkbox from '@/shared/components/ui/inputs/Checkbox';
 
+import FilePreview from '@/shared/components/ui/FilePreview';
+
 const FileItem = ({
   title,
   size,
   date,
+  fileUrl,
   isPublic,
   isBookmarked,
   onShare,
@@ -90,7 +93,10 @@ const FileItem = ({
       {isList ? (
         // List Layout 
         <>
-          <div className="relative w-12 h-12 rounded-lg bg-[#F3F3F3] mr-4 shrink-0 flex items-center justify-center">
+          <div className="relative w-12 h-12 mr-4 shrink-0">
+            <div className="w-full h-full rounded-lg bg-[#F3F3F3] flex items-center justify-center overflow-hidden">
+              <FilePreview url={fileUrl} fileName={title} isThumbnail={true} />
+            </div>
             <div
               className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
               onClick={(e) => {
@@ -236,7 +242,8 @@ const FileItem = ({
           </div>
 
           <div className='space-y-3'>
-            <div className={`h-32 rounded-xl flex items-center justify-center bg-[#F3F3F3]`}>
+            <div className={`h-32 rounded-xl flex items-center justify-center overflow-hidden bg-[#F3F3F3]`}>
+              <FilePreview url={fileUrl} fileName={title} isThumbnail={true} />
             </div>
 
             <div>

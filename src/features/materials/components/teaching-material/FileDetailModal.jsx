@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import Modal from '@/shared/components/ui/Modal';
-import { FileText, Search, X, Copy, Download, FolderInput, Trash2, Eye, ZoomIn } from 'lucide-react';
+import { FileText, X, Copy, Download, FolderInput, Trash2, Eye, Info, ChevronLeft } from 'lucide-react';
 import Switch from '@/shared/components/ui/inputs/Switch';
 import TextInput from '@/shared/components/ui/inputs/TextInput';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
+import FilePreview from '@/shared/components/ui/FilePreview';
 
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
@@ -21,6 +22,7 @@ const formatSize = (bytes) => {
 const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
   const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
   const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
+  const [showMobileDetails, setShowMobileDetails] = useState(false);
 
   const [updateSettings] = useUpdateMaterialSettingsMutation();
   const [recordDownload] = useRecordMaterialDownloadMutation();
@@ -89,7 +91,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
       bodyClassName="p-0 flex flex-col md:flex-row h-full overflow-hidden"
     >
       {/* Left Column - Preview */}
-      <div className="h-[40vh] md:h-auto md:flex-1 flex flex-col bg-white shrink-0 md:shrink">
+      <div className={`${showMobileDetails ? 'hidden md:flex' : 'flex'} h-full md:h-auto md:flex-1 flex-col bg-white shrink-0 md:shrink min-w-0`}>
         {/* Header Left */}
         <div className="h-[56px] md:h-[64px] px-4 border-b border-[#E3BEBA] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 overflow-hidden">
@@ -99,8 +101,8 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
             <span className="font-semibold text-[#1A1C1C] text-base md:text-lg truncate">{item.fileName || item.name}</span>
           </div>
           <div className="flex items-center gap-1 shrink-0 ml-2">
-            <IconButton variant='ghost' className='cursor-pointer'>
-              <ZoomIn className='text-[#5B403E] w-5 h-5' />
+            <IconButton variant='ghost' onClick={() => setShowMobileDetails(true)} className="md:hidden">
+              <Info className="w-5 h-5 text-[#1A1C1C]" />
             </IconButton>
             <IconButton variant='ghost' onClick={onClose} className="md:hidden">
               <X className="w-5 h-5 text-[#1A1C1C]" />
@@ -108,16 +110,21 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
           </div>
         </div>
 
-        <div className="flex-1 bg-gray-100 flex items-center justify-center">
-          <span className="text-gray-500">Preview placeholder</span>
+        <div className="flex-1 bg-gray-100 flex items-center justify-center overflow-hidden min-h-0">
+          <FilePreview url={item.fileUrl} fileName={item.fileName || item.name} />
         </div>
       </div>
 
       {/* Right Column - Details & Settings */}
-      <div className="flex-1 md:flex-none w-full md:w-[32%] flex flex-col border-t md:border-t-0 md:border-l border-[#E3BEBA] bg-white overflow-hidden">
+      <div className={`${showMobileDetails ? 'flex' : 'hidden md:flex'} flex-1 md:flex-none w-full md:w-[32%] flex-col border-t md:border-t-0 md:border-l border-[#E3BEBA] bg-white overflow-hidden`}>
         {/* Header Right */}
         <div className="h-[56px] md:h-[64px] px-4 md:px-6 border-b border-[#E3BEBA] flex items-center justify-between shrink-0">
-          <span className="font-semibold text-[#1A1C1C] text-base md:text-lg">Chi tiết & Cài đặt</span>
+          <div className="flex items-center gap-2">
+            <IconButton variant='ghost' onClick={() => setShowMobileDetails(false)} className="md:hidden -ml-2">
+              <ChevronLeft className="w-5 h-5 text-[#1A1C1C]" />
+            </IconButton>
+            <span className="font-semibold text-[#1A1C1C] text-base md:text-lg">Chi tiết & Cài đặt</span>
+          </div>
           <IconButton variant='ghost' onClick={onClose} className="hidden md:flex">
             <X className="w-5 h-5" />
           </IconButton>

@@ -486,6 +486,7 @@ const TeachingMaterialPage = () => {
                     isPublic={file.isPublic}
                     isBookmarked={file.isBookmarked}
                     type={file.fileType || 'file'}
+                    fileUrl={file.fileUrl}
                     layout={viewLayout}
                     isSelected={selectedItems.some(i => i.id === file.id && i._type === 'file')}
                     isSelectionMode={selectedItems.length > 0}
