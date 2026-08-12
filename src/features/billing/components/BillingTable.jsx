@@ -63,7 +63,7 @@ const BillingTable = ({
       className: "!py-2.5 !px-4 w-[15%]",
       render: (row) => {
         const statusInfo = statusMap[row.status] || {
-          label: "Unknown",
+          label: hist.statuses?.unknown || "Unknown",
           styles: "bg-gray-100 text-gray-700",
         };
         return (
@@ -96,7 +96,7 @@ const BillingTable = ({
             <Popover
               placement="bottom-right"
               trigger={
-                <IconButton size="xs" variant="ghost" title="Thao tác">
+                <IconButton size="xs" variant="ghost" title={actionsText.title || "Thao tác"}>
                   <MoreVertical />
                 </IconButton>
               }

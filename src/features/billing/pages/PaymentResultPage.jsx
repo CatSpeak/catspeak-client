@@ -62,7 +62,7 @@ const PaymentResultPage = () => {
           {t.billing.result.successSubtitle}
           {orderCode && (
             <span className="block mt-2 font-mono text-xs">
-              Order Code: #{orderCode}
+              {t.billing?.history?.columns?.orderCode || "Order Code"}: #{orderCode}
             </span>
           )}
         </p>

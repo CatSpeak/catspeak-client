@@ -80,7 +80,9 @@ export default {
       dateFilterMonth: "近 30 天",
       statusFilterAll: "所有状态",
       statusFilterSuccess: "成功",
+      statusFilterFailed: "失败",
       statusFilterPending: "待处理",
+      statusFilterRefunded: "已退款",
       statusFilterCancelled: "已取消",
       noResults: "未找到结果",
       noResultsHint: "请尝试更改筛选条件或搜索关键词。",
@@ -100,7 +102,9 @@ export default {
       },
       statuses: {
         success: "成功",
+        failed: "失败",
         pending: "待处理",
+        refunded: "已退款",
         cancelled: "已取消",
       }
     },

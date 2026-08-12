@@ -19,33 +19,23 @@ export default function RefundHistoryTable({ refunds = [], t }) {
     {
       key: "createDate",
       label: cols.date || "Date",
-      headerClassName: "w-[18%]",
-      className: "w-[18%]",
+      headerClassName: "w-[22%]",
+      className: "w-[22%]",
       render: (row) => formatDateTime(row.createDate || row.createdAt),
     },
     {
       key: "paymentId",
       label: cols.paymentId || "Payment ID",
-      headerClassName: "!py-2.5 !px-4 w-[14%]",
-      className: "!py-2.5 !px-4 w-[14%] font-medium text-gray-800",
+      headerClassName: "!py-2.5 !px-4 w-[16%]",
+      className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800",
       render: (row) => `#${row.paymentId || row.refundId}`,
     },
     {
       key: "amountVnd",
       label: cols.amount || "Amount",
-      headerClassName: "!py-2.5 !px-4 w-[16%]",
-      className: "!py-2.5 !px-4 w-[16%] font-medium text-gray-800",
+      headerClassName: "!py-2.5 !px-4 w-[18%]",
+      className: "!py-2.5 !px-4 w-[18%] font-medium text-gray-800",
       render: (row) => formatAmount(row.amountVnd || row.amount),
-    },
-    {
-      key: "bankInfo",
-      label: cols.bankInfo || "Bank Info",
-      headerClassName: "!py-2.5 !px-4 w-[22%]",
-      className: "!py-2.5 !px-4 w-[22%] text-xs font-mono text-gray-600 truncate max-w-[180px]",
-      render: (row) =>
-        row.accountNumber
-          ? `${row.accountNumber} (${row.accountHolderName || "N/A"})`
-          : "—",
     },
     {
       key: "status",
@@ -57,9 +47,9 @@ export default function RefundHistoryTable({ refunds = [], t }) {
     {
       key: "reason",
       label: cols.reason || "Reason",
-      headerClassName: "!py-2.5 !px-4 w-[14%]",
-      className: "!py-2.5 !px-4 w-[14%] text-xs text-gray-500 italic truncate max-w-[150px]",
-      render: (row) => row.reason || "—",
+      headerClassName: "!py-2.5 !px-4 w-[28%]",
+      className: "!py-2.5 !px-4 w-[28%] text-xs text-gray-600 truncate max-w-[280px]",
+      render: (row) => row.message || row.reason || "—",
     },
   ]
 

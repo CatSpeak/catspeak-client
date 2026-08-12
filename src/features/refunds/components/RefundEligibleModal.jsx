@@ -62,7 +62,9 @@ export default function RefundEligibleModal({
           <div className="bg-gray-50 border border-gray-200/70 rounded-2xl p-4 space-y-2.5 text-xs text-gray-600">
             {orderCode && (
               <div className="flex justify-between items-center">
-                <span className="text-gray-500">Mã đơn hàng</span>
+                <span className="text-gray-500">
+                  {refundT.columns?.orderCode || "Mã đơn hàng"}
+                </span>
                 <span className="font-mono font-medium text-gray-800">
                   #{orderCode}
                 </span>

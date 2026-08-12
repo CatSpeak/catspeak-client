@@ -24,7 +24,9 @@ export default function RefundIneligibleModal({ isOpen, onClose, reason }) {
           {refundT.ineligibleTitle || "Không đủ điều kiện hoàn tiền"}
         </h3>
         <p className="text-sm text-gray-500 mb-5 max-w-sm leading-relaxed">
-          {reason || "Giao dịch đã quá hạn áp dụng chính sách hoàn tiền."}
+          {reason ||
+            refundT.defaultIneligibleReason ||
+            "Giao dịch đã quá hạn áp dụng chính sách hoàn tiền."}
         </p>
         <PillButton variant="secondary" onClick={onClose} className="w-full">
           {refundT.btnClose || "Đóng"}

@@ -1,6 +1,6 @@
 export default {
   refunds: {
-    title: "Lịch sử Hoàn tiền",
+    title: "Lịch sử hoàn tiền",
     subtitle: "Theo dõi trạng thái và yêu cầu hoàn tiền cho các giao dịch của bạn.",
     requestRefundTitle: "Yêu cầu hoàn tiền",
     requestRefundSubtitle: "Gửi yêu cầu hoàn tiền cho đơn hàng #{{orderCode}}",
@@ -35,8 +35,16 @@ export default {
     btnBack: "Quay lại",
     btnDone: "Hoàn tất",
     btnRequestRefund: "Yêu cầu hoàn tiền",
+    btnRefresh: "Làm mới",
 
     // Errors & Success
+    checkEligibilityError: "Không thể kiểm tra điều kiện hoàn tiền. Vui lòng thử lại sau.",
+    defaultIneligibleReason: "Giao dịch đã quá hạn áp dụng chính sách hoàn tiền.",
+    btnRetry: "Thử lại",
+    btnChangeBank: "Thay đổi",
+    loadingBanks: "Đang tải danh sách ngân hàng...",
+    noBanksFound: "Không tìm thấy ngân hàng.",
+
     errorNoBank: "Vui lòng chọn ngân hàng.",
     errorNoAccount: "Vui lòng nhập số tài khoản.",
     errorNoHolder: "Vui lòng nhập tên chủ tài khoản.",
@@ -54,11 +62,11 @@ export default {
 
     columns: {
       date: "Ngày tạo",
-      paymentId: "Mã Giao Dịch",
-      amount: "Số Tiền Hoàn",
-      status: "Trạng Thái",
-      reason: "Lý Do",
-      bankInfo: "Ngân Hàng Nhận",
+      paymentId: "Mã giao dịch",
+      amount: "Số tiền hoàn",
+      status: "Trạng thái",
+      reason: "Lý do",
+      bankInfo: "Ngân hàng nhận",
     },
   },
 }

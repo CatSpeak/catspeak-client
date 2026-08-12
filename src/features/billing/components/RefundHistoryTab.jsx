@@ -12,7 +12,7 @@ import { PillButton } from "@/shared/components/ui/buttons"
 
 const ITEMS_PER_PAGE = 5
 
-export default function RefundHistoryTab({ onRefreshRef }) {
+export default function RefundHistoryTab() {
   const { t } = useLanguage()
   const refundT = t.refunds || {}
 
@@ -49,7 +49,8 @@ export default function RefundHistoryTab({ onRefreshRef }) {
         !searchQuery ||
         item.paymentId?.toString().toLowerCase().includes(searchStr) ||
         item.refundId?.toString().toLowerCase().includes(searchStr) ||
-        item.reason?.toLowerCase().includes(searchStr)
+        item.reason?.toLowerCase().includes(searchStr) ||
+        item.message?.toLowerCase().includes(searchStr)
 
       const matchesStatus =
         statusFilter === "all" || item.status?.toString() === statusFilter
@@ -92,9 +93,9 @@ export default function RefundHistoryTab({ onRefreshRef }) {
           <div className="w-full sm:w-auto">
             <Dropdown
               options={statusOptions}
-              value={statusOptions.find((opt) => opt.value === statusFilter)}
-              onChange={(opt) => {
-                setStatusFilter(opt?.value || "all")
+              value={statusFilter}
+              onChange={(val) => {
+                setStatusFilter(val || "all")
                 setCurrentPage(1)
               }}
               placeholder={refundT.filterStatusAll || "Tất cả trạng thái"}
@@ -111,7 +112,7 @@ export default function RefundHistoryTab({ onRefreshRef }) {
           startIcon={<RefreshCw />}
           className="shrink-0 self-start sm:self-auto"
         >
-          Làm mới
+          {refundT.btnRefresh || "Làm mới"}
         </PillButton>
       </div>
 
