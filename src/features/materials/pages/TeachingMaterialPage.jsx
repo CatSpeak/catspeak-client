@@ -283,14 +283,14 @@ const TeachingMaterialPage = () => {
           },
           {
             label: t.materials.title,
-            onClick: folderId ? () => navigate("/workspace/teaching-material") : undefined
+            onClick: folderId ? () => navigate("/workspace/materials") : undefined
           },
           ...(folderPath ? folderPath.map(folder => ({
             label: folder.folderName || t.materials.folder,
-            onClick: () => navigate(`/workspace/teaching-material/${folder.folderId}`)
+            onClick: () => navigate(`/workspace/materials/${folder.folderId}`)
           })) : (folderId ? [{
             label: folderDetail?.folderName || folderDetail?.title || t.materials.folder,
-            onClick: () => navigate(`/workspace/teaching-material/${folderId}`)
+            onClick: () => navigate(`/workspace/materials/${folderId}`)
           }] : []))
         ]}
       />
@@ -445,7 +445,7 @@ const TeachingMaterialPage = () => {
                     isSelected={selectedItems.some(i => (i.id || i.folderId) === (folder.id || folder.folderId) && i._type === 'folder')}
                     isSelectionMode={selectedItems.length > 0}
                     onToggleSelect={() => handleToggleSelect(folder, 'folder')}
-                    onClick={() => navigate(`/workspace/teaching-material/${folder.id || folder.folderId}`)}
+                    onClick={() => navigate(`/workspace/materials/${folder.id || folder.folderId}`)}
                     onMove={() => {
                       setSelectedItem(folder);
                       setIsMoveModalOpen(true);

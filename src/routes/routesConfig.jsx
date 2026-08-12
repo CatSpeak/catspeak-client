@@ -445,7 +445,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "teaching-material",
+                path: "materials",
                 element: (
                   <LazyRoute>
                     <TeachingMaterialPage />
@@ -453,7 +453,7 @@ const routesConfig = [
                 ),
               },
               {
-                path: "teaching-material/:folderId",
+                path: "materials/:folderId",
                 element: (
                   <LazyRoute>
                     <TeachingMaterialPage />

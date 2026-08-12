@@ -271,7 +271,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                     updatedAt={folder.updatedAt}
                     isPublic={folder.isPublic}
                     isOwnProfile={isOwnProfile}
-                    onClick={() => navigate(`/workspace/teaching-material/${folder.id}`)}
+                    onClick={() => navigate(`/workspace/materials/${folder.id}`)}
                   />
                 ))}
               </div>

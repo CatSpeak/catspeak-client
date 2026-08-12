@@ -58,6 +58,7 @@ export default {
     schedule: "日程安排",
     teachingTasks: "教学任务",
     myLearning: "我的学习",
+    manageMaterials: "资料管理",
     exploreCourses: "探索课程",
     messages: "消息",
     settings: "设置",
