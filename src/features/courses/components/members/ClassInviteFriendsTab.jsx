@@ -4,6 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useGetFriendsQuery } from "@/store/api/social/friendshipApi"
+import { useInviteToClassMutation } from "@/store/api/coursesApi"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { getSafeMediaUrl } from "../../utils/courseUtils"
@@ -29,6 +30,8 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}
   const currentUserId = authUser?.accountId || profile?.accountId || profile?.id
+
+  const [inviteToClass] = useInviteToClassMutation()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [invitedIds, setInvitedIds] = useState(() => new Set())
@@ -107,13 +110,25 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
 
   const handleInviteFriend = useCallback(async (friend) => {
     const friendId = String(friend?.accountId ?? friend?.id ?? "")
+    const email = (friend?.email || "").trim()
+    const classId = classData?.id || classData?.classId
+
     if (!friendId || invitedIds.has(friendId) || invitingIds.has(friendId)) return
+
+    if (!classId) {
+      toast.error("Không tìm thấy thông tin lớp học!")
+      return
+    }
+
+    if (!email) {
+      toast.error(cd.noEmailToInvite || "Bạn bè này chưa có email để nhận lời mời!")
+      return
+    }
 
     setInvitingIds((prev) => new Set(prev).add(friendId))
 
     try {
-      // Simulate sending invitation (or hook to backend invitation API if available)
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await inviteToClass({ classId, emails: [email] }).unwrap()
 
       setInvitedIds((prev) => new Set(prev).add(friendId))
       const friendName = friend.username || friend.name || "bạn bè"
@@ -121,8 +136,14 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
         ? cd.toastInviteSuccess.replace("{{name}}", friendName)
         : `Đã gửi lời mời tham gia lớp học cho ${friendName}!`
       toast.success(successMessage)
-    } catch {
-      toast.error(cd.toastInviteFailed || "Không thể gửi lời mời. Vui lòng thử lại!")
+    } catch (err) {
+      const errorMsg =
+        err?.data?.message ||
+        err?.data?.title ||
+        err?.message ||
+        cd.toastInviteFailed ||
+        "Không thể gửi lời mời. Vui lòng thử lại!"
+      toast.error(errorMsg)
     } finally {
       setInvitingIds((prev) => {
         const next = new Set(prev)
@@ -130,7 +151,7 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
         return next
       })
     }
-  }, [invitedIds, invitingIds, cd])
+  }, [invitedIds, invitingIds, cd, classData, inviteToClass])
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
