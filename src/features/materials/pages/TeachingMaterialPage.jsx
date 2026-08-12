@@ -254,9 +254,13 @@ const TeachingMaterialPage = () => {
 
   useEffect(() => {
     if (selectedItem) {
-      const updatedItem = materials.find(m => m.id === selectedItem.id);
+      const isFolder = !selectedItem.fileName && !selectedItem.fileUrl;
+      const updatedItem = materials.find(m => {
+        const mIsFolder = !m.fileName && !m.fileUrl;
+        return m.id === selectedItem.id && mIsFolder === isFolder;
+      });
       if (updatedItem && (updatedItem.downloadCount !== selectedItem.downloadCount || updatedItem.viewCount !== selectedItem.viewCount || updatedItem.isPublic !== selectedItem.isPublic || updatedItem.allowDownload !== selectedItem.allowDownload)) {
-        setSelectedItem(updatedItem);
+        setSelectedItem({ ...updatedItem, type: selectedItem.type || updatedItem.type });
       }
     }
   }, [materialsData, selectedItem, materials]);
@@ -273,6 +277,7 @@ const TeachingMaterialPage = () => {
   return (
     <div className=" bg-[#f3f3f3] min-h-screen">
       <Breadcrumb
+        className='mb-4 flex-wrap'
         items={[
           {
             label: "Trang chủ",
@@ -315,7 +320,7 @@ const TeachingMaterialPage = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-col md:flex-row gap-4">
         <div className="flex items-center gap-4 flex-1">
           <SearchInput
             value={searchQuery}
@@ -440,6 +445,7 @@ const TeachingMaterialPage = () => {
                     totalItems={`${(folder.subFolderCount || 0) + (folder.materialCount || 0)} mục`}
                     updatedAt={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
                     isSelected={selectedItems.some(i => (i.id || i.folderId) === (folder.id || folder.folderId) && i._type === 'folder')}
+                    isSelectionMode={selectedItems.length > 0}
                     onToggleSelect={() => handleToggleSelect(folder, 'folder')}
                     onClick={() => navigate(`/workspace/teaching-material/${folder.id || folder.folderId}`)}
                     onMove={() => {
@@ -470,7 +476,7 @@ const TeachingMaterialPage = () => {
           {files.length > 0 && (
             <div className='space-y-4'>
               <h2 className="text-2xl font-semibold text-[#1A1C1C]">{searchQuery ? 'Tệp' : 'Tệp gần đây'}</h2>
-              <div className={viewLayout === 'grid' ? "grid grid-cols-1 lg:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+              <div className={viewLayout === 'grid' ? "grid grid-cols-2 lg:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
                 {files.map(file => (
                   <FileItem
                     key={file.id}
@@ -482,6 +488,7 @@ const TeachingMaterialPage = () => {
                     type={file.fileType || 'file'}
                     layout={viewLayout}
                     isSelected={selectedItems.some(i => i.id === file.id && i._type === 'file')}
+                    isSelectionMode={selectedItems.length > 0}
                     onToggleSelect={() => handleToggleSelect(file, 'file')}
                     onShare={() => {
                       setSelectedItem(file);
@@ -547,11 +554,13 @@ const TeachingMaterialPage = () => {
       <CreateFolderModal
         open={isCreateFolderOpen}
         onClose={() => setIsCreateFolderOpen(false)}
+        currentFolderId={folderId || ''}
       />
 
       <UploadMaterialModal
         open={isUploadMaterialOpen}
         onClose={() => setIsUploadMaterialOpen(false)}
+        currentFolderId={folderId || ''}
       />
 
       <ShareMaterialModal

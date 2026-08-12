@@ -3,7 +3,6 @@ import Modal from '@/shared/components/ui/Modal';
 import { FileText, Copy, Link as LinkIcon, Save, ChevronDown, FolderInput } from 'lucide-react';
 import Switch from '@/shared/components/ui/inputs/Switch';
 import { PillButton } from '@/shared/components/ui/buttons';
-import Dropdown from '@/shared/components/ui/Dropdown';
 import { useUpdateMaterialSettingsMutation, useUpdateFolderSettingsMutation } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
 
@@ -24,15 +23,15 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
   const [updateFolderSettings, { isLoading: isUpdatingFolder }] = useUpdateFolderSettingsMutation();
   const isLoading = isUpdatingMaterial || isUpdatingFolder;
 
-  const isFolder = item && (item.type === 'folder' || item._type === 'folder' || (!item.fileName && !item.fileUrl));
+  const isFolder = item && (!item.fileName && !item.fileUrl);
 
   // Sync state when item changes
-  React.useEffect(() => {
-    if (item) {
-      setIsPublic(item.isPublic);
-      setAllowDownload(item.allowDownload);
-    }
-  }, [item]);
+  const [prevItem, setPrevItem] = useState(item);
+  if (item !== prevItem) {
+    setPrevItem(item);
+    setIsPublic(item?.isPublic ?? true);
+    setAllowDownload(item?.allowDownload ?? true);
+  }
 
   if (!item) return null;
 
@@ -93,7 +92,9 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
           <FileText className="w-6 h-6 text-[#5B403E]" />
           <div className="flex flex-col">
             <span className="text-base font-bold text-[#1A1C1C]">{item.fileName || item.name}</span>
-            <span className="text-sm text-[#5B403E]">{item.fileName?.split('.').pop().toUpperCase() || 'TỆP'} • {formatSize(item.fileSize || item.size || item.sizeBytes)}</span>
+            <span className="text-sm text-[#5B403E]">
+              {item?.fileName ? item.fileName?.split('.').pop().toUpperCase() || '' + ' • ' + formatSize(item.fileSize || item.size || item.sizeBytes) : null}
+            </span>
           </div>
         </div>
 
@@ -155,7 +156,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
         )}
 
         {/* Advanced Options */}
-        <Dropdown
+        {/* <Dropdown
           align="left"
           dropdownClassName="w-full"
           roundedClass='rounded-xl'
@@ -165,7 +166,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
             { value: '2', label: 'Tài liệu tham khảo' },
           ]}
           triggerClassName="h-[42px] border-[#fde9eb] bg-[#fffafb] w-full text-[13px] hover:bg-[#fff5f5]"
-        />
+        /> */}
 
       </div>
     </Modal>

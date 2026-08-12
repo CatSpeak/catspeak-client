@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { MoreVertical, Star, Download, Share2, Edit2, FolderInput, StarOff, Settings, Trash2 } from 'lucide-react';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
@@ -20,24 +20,79 @@ const FileItem = ({
   onBookmark,
   layout = 'grid',
   isSelected,
+  isSelectionMode,
   onToggleSelect
 }) => {
   const isList = layout === 'list';
 
+  const timerRef = useRef(null);
+  const isLongPressRef = useRef(false);
+
+  const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.button !== undefined) return;
+    isLongPressRef.current = false;
+    timerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      if (!isSelectionMode && onToggleSelect) {
+        if (window.navigator && window.navigator.vibrate) {
+          window.navigator.vibrate(50);
+        }
+        onToggleSelect();
+      }
+    }, 500);
+  };
+
+  const handlePointerUp = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handlePointerLeave = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const handleClick = (e) => {
+    if (isLongPressRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    if (isSelectionMode) {
+      e.preventDefault();
+      e.stopPropagation();
+      onToggleSelect && onToggleSelect();
+    } else {
+      onClick && onClick(e);
+    }
+  };
+
   return (
     <div
-      className={`group relative border rounded-xl p-4 flex ${isList ? 'flex-row items-center w-full' : 'flex-col w-[264px]'} cursor-pointer transition-all ${isSelected
+      className={`group relative border rounded-xl p-4 flex ${isList ? 'flex-row items-center w-full' : 'flex-col md:w-[264px]'} cursor-pointer transition-all select-none ${isSelected
         ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
         : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
         }`}
-      onClick={onClick}
+      onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerLeave}
+      onContextMenu={(e) => {
+        if (isLongPressRef.current || isSelectionMode) {
+          e.preventDefault();
+        }
+      }}
     >
       {isList ? (
         // List Layout 
         <>
           <div className="relative w-12 h-12 rounded-lg bg-[#F3F3F3] mr-4 shrink-0 flex items-center justify-center">
             <div
-              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect && onToggleSelect();
@@ -112,9 +167,9 @@ const FileItem = ({
       ) : (
         // Grid Layout
         <>
-          <div className="flex justify-between items-start mb-2 relative">
+          <div className="flex justify-between items-center mb-2 relative">
             <div
-              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect && onToggleSelect();
@@ -186,7 +241,7 @@ const FileItem = ({
 
             <div>
               <h3 className="font-semibold text-[#1A1C1C] text-base truncate" title={title}>{title}</h3>
-              <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex items-start gap-2 mt-1.5 flex-col md:flex-row md:items-center">
                 <p className="text-xs text-[#5B403E]">{size} • {date}</p>
                 {isPublic && (
                   <span className="text-[10px] px-2.5 py-0.5 bg-[#FFDDAF] text-[#281800] rounded-full font-semibold">

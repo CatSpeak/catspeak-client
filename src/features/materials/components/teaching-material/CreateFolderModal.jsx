@@ -9,7 +9,7 @@ import { useGetFolderTreeQuery, useCreateFolderMutation } from '@/store/api/mate
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import toast from 'react-hot-toast';
 
-const CreateFolderModal = ({ open, onClose }) => {
+const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
   const [folderName, setFolderName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedIds, setExpandedIds] = useState([]);
@@ -18,14 +18,45 @@ const CreateFolderModal = ({ open, onClose }) => {
   const { data: treeData, isLoading: isFetchingTree } = useGetFolderTreeQuery(undefined, { skip: !open });
   const [createFolder, { isLoading: isCreating }] = useCreateFolderMutation();
 
-  const [prevOpen, setPrevOpen] = useState(open);
-  if (open !== prevOpen) {
-    setPrevOpen(open);
-    if (!open) {
+  const [prevProps, setPrevProps] = useState({ open: null, currentFolderId: null, treeData: null });
+
+  if (open !== prevProps.open || currentFolderId !== prevProps.currentFolderId || treeData !== prevProps.treeData) {
+    const wasOpen = prevProps.open;
+    setPrevProps({ open, currentFolderId, treeData });
+
+    if (wasOpen && !open) {
       setFolderName("");
       setSearchQuery("");
       setExpandedIds([]);
       setSelectedFolder(null);
+    } else if (open && currentFolderId && treeData) {
+      const rawFolders = treeData?.data || treeData || [];
+      let foundNode = null;
+      let path = [];
+
+      const findNode = (nodes, targetId, currentPath = []) => {
+        for (const node of nodes) {
+          const isMatch = String(node.folderId) === String(targetId) || String(node.id) === String(targetId);
+          const pathWithCurrent = [...currentPath, node.folderId || node.id];
+
+          if (isMatch) {
+            foundNode = node;
+            path = currentPath;
+            return true;
+          }
+          if (node.subFolders && node.subFolders.length > 0) {
+            if (findNode(node.subFolders, targetId, pathWithCurrent)) return true;
+          }
+        }
+        return false;
+      };
+
+      findNode(rawFolders, currentFolderId);
+
+      if (foundNode) {
+        setSelectedFolder(foundNode);
+        setExpandedIds(prev => Array.from(new Set([...prev, ...path])));
+      }
     }
   }
 

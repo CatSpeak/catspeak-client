@@ -81,7 +81,7 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
       open={open}
       onClose={onClose}
       title="Đổi tên"
-      bodyClassName="px-4 sm:px-6"
+      bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       footer={footer}
     >
       <div className="space-y-6">

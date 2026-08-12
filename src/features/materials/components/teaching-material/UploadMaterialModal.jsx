@@ -29,9 +29,17 @@ const getFileFingerprint = (file) => {
   return `${file.name}-${file.size}-${file.lastModified}`;
 };
 
-const UploadMaterialModal = ({ open, onClose }) => {
+const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
   const [isPublic, setIsPublic] = useState(true);
-  const [selectedFolder, setSelectedFolder] = useState('');
+  const [selectedFolder, setSelectedFolder] = useState(currentFolderId || '');
+
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
+    if (open) {
+      setSelectedFolder(currentFolderId || '');
+    }
+  }
 
   const [uploadFiles, setUploadFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);

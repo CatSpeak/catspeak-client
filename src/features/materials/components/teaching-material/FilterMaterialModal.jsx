@@ -68,7 +68,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
       title="Bộ lọc tìm kiếm"
       footer={footer}
       className="md:max-w-[400px]"
-      bodyClassName="px-4 md:px-6 overflow-visible"
+      bodyClassName="px-4 md:px-6 flex-1 overflow-y-auto"
     >
       <div className="flex flex-col gap-6">
         {/* Option 1: Thư mục */}
