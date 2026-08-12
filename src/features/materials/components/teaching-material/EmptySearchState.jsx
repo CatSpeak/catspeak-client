@@ -10,8 +10,14 @@ const EmptySearchState = ({ searchQuery, onClearFilters }) => {
       </h3>
 
       <p className="text-center text-base text-[#5B403E] max-w-lg mb-8 leading-relaxed">
-        Chúng tôi không thể tìm thấy kết quả nào cho <span className="font-semibold text-[#6E0009]">"{searchQuery}"</span>.
-        Hãy thử tìm kiếm với từ khóa khác hoặc kiểm tra lại chính tả
+        {searchQuery ? (
+          <>
+            Chúng tôi không thể tìm thấy kết quả nào cho <span className="font-semibold text-[#6E0009]">"{searchQuery}"</span>.<br />
+            Hãy thử tìm kiếm với từ khóa khác hoặc kiểm tra lại chính tả
+          </>
+        ) : (
+          "Chúng tôi không thể tìm thấy tài liệu nào phù hợp với bộ lọc hiện tại. Hãy thử thay đổi bộ lọc."
+        )}
       </p>
 
       {/* Action Button */}

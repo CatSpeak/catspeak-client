@@ -54,7 +54,7 @@ const TeachingMaterialPage = () => {
   const folderDetail = folderDetailRes?.data || folderDetailRes;
 
   const { data: treeData } = useGetFolderTreeQuery();
-  const rawFoldersTree = treeData?.data || treeData || [];
+  const rawFoldersTree = useMemo(() => treeData?.data || treeData || [], [treeData]);
 
   const getFolderPath = (nodes, targetId, currentPath = []) => {
     for (const node of nodes) {
@@ -81,8 +81,61 @@ const TeachingMaterialPage = () => {
 
   const responseData = materialsData?.data || materialsData || {};
   const folders = useMemo(() => {
-    let rawFolders = Array.isArray(responseData.folders) ? [...responseData.folders] : [];
     if (filterMode === 'fileType') return [];
+
+    let rawFolders = [];
+    if (filterMode === 'folder') {
+      const metaMap = {};
+      if (Array.isArray(responseData.folders)) {
+        responseData.folders.forEach(f => {
+          metaMap[f.id] = f;
+        });
+      }
+
+      const flattenFolders = (nodes) => {
+        let flat = [];
+        for (const node of nodes) {
+          const id = node.folderId || node.id;
+          const meta = metaMap[id];
+          flat.push({
+            ...node,
+            id,
+            name: node.folderName || node.name,
+            subFolderCount: meta?.subFolderCount || node.subFolderCount,
+            materialCount: meta?.materialCount || node.materialCount,
+            updatedAt: meta?.updatedAt || node.updatedAt
+          });
+          const children = node.subFolders || node.children || [];
+          if (children.length > 0) {
+            flat = flat.concat(flattenFolders(children));
+          }
+        }
+        return flat;
+      };
+
+      if (folderId) {
+        const findNode = (nodes, targetId) => {
+          for (const node of nodes) {
+            if (String(node.folderId) === String(targetId) || String(node.id) === String(targetId)) return node;
+            const children = node.subFolders || node.children || [];
+            const found = findNode(children, targetId);
+            if (found) return found;
+          }
+          return null;
+        };
+        const targetNode = findNode(rawFoldersTree, folderId);
+        rawFolders = flattenFolders(targetNode?.subFolders || targetNode?.children || []);
+      } else {
+        rawFolders = flattenFolders(rawFoldersTree);
+      }
+
+      if (searchQuery.trim()) {
+        const lowerQuery = searchQuery.toLowerCase();
+        rawFolders = rawFolders.filter(f => (f.name || '').toLowerCase().includes(lowerQuery));
+      }
+    } else {
+      rawFolders = Array.isArray(responseData.folders) ? [...responseData.folders] : [];
+    }
 
     rawFolders.sort((a, b) => {
       const nameA = a.name || '';
@@ -102,7 +155,7 @@ const TeachingMaterialPage = () => {
     });
 
     return rawFolders;
-  }, [responseData.folders, filterMode, sortBy]);
+  }, [responseData.folders, filterMode, sortBy, folderId, rawFoldersTree, searchQuery]);
 
   const files = useMemo(() => {
     let rawFiles = Array.isArray(responseData.recentFiles) ? [...responseData.recentFiles] : [];
@@ -289,14 +342,16 @@ const TeachingMaterialPage = () => {
           <LoadingSpinner />
           <span className="text-[#5B403E]">Đang tải dữ liệu...</span>
         </div>
-      ) : searchQuery && materials.length === 0 ? (
+      ) : (searchQuery || filterMode) && materials.length === 0 ? (
         <div className="mt-4">
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-[#1A1C1C]">Kết quả tìm kiếm</h2>
-            <p className="text-base text-[#5B403E]">
-              Tìm thấy 0 kết quả cho <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
-            </p>
-          </div>
+          {searchQuery && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">Kết quả tìm kiếm</h2>
+              <p className="text-base text-[#5B403E]">
+                Tìm thấy 0 kết quả cho <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
+              </p>
+            </div>
+          )}
           <EmptySearchState
             searchQuery={searchQuery}
             onClearFilters={() => {
@@ -305,6 +360,10 @@ const TeachingMaterialPage = () => {
               setFilterFileType(null);
             }}
           />
+        </div>
+      ) : materials.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <p className="text-[#5B403E]">Thư mục trống</p>
         </div>
       ) : (
         <>
@@ -327,7 +386,7 @@ const TeachingMaterialPage = () => {
                     key={folder.id || folder.folderId}
                     title={folder.name || folder.folderName}
                     totalItems={`${(folder.subFolderCount || 0) + (folder.materialCount || 0)} mục`}
-                    status={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
+                    updatedAt={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
                     onClick={() => navigate(`/workspace/teaching-material/${folder.id || folder.folderId}`)}
                     onDelete={() => {
                       setDeletingItem({ id: folder.id, name: folder.name, count: (folder.subFolderCount || 0) + (folder.materialCount || 0), type: 'folder' });
