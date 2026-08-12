@@ -96,8 +96,6 @@ const SocialProfileHeader = ({
       user?.backgroundUrl ||
       null;
 
-  const fileInputRef = useRef(null);
-
   const handleFollowToggle = async () => {
     if (isFollowLoading) return;
     const toastId = "follow-action";
@@ -119,101 +117,6 @@ const SocialProfileHeader = ({
         id: toastId,
       });
       console.error(err);
-    }
-  };
-
-  const handleAvatarSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileToCrop(file);
-    setIsCropModalOpen(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleCropComplete = async (croppedFile) => {
-    if (!croppedFile) return;
-
-    const avatarData = new FormData();
-    avatarData.append("file", croppedFile);
-
-    try {
-      toast.loading(t.profile?.avatar?.updating || "Đang cập nhật...", {
-        id: "avatar-update",
-      });
-      await updateAvatar(avatarData).unwrap();
-      toast.success(
-        t.profile?.avatar?.updateSuccess || "Cập nhật ảnh đại diện thành công",
-        {
-          id: "avatar-update",
-        },
-      );
-    } catch (error) {
-      toast.error(
-        t.profile?.avatar?.updateError || "Không thể cập nhật ảnh đại diện",
-        { id: "avatar-update" },
-      );
-      console.error(error);
-    }
-  };
-
-  const isFriendOrPending =
-    status?.isFriend ||
-    status?.friendshipStatus === 1 ||
-    status?.friendshipStatus === "Pending";
-
-  const handleFriendshipToggle = () => {
-    if (isFriendOrPending) {
-      if (status?.friendshipId) {
-        deleteFriendship(status.friendshipId)
-          .unwrap()
-          .then(() =>
-            toast.success(
-              status?.isFriend
-                ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
-                : t.profile?.social?.cancelRequestSuccess ||
-                    "Đã hủy yêu cầu kết bạn",
-            ),
-          )
-          .catch(() =>
-            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra"),
-          );
-      }
-    } else {
-      const performSend = () => {
-        sendFriendRequest(targetAccountId)
-          .unwrap()
-          .then(() =>
-            toast.success(
-              t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-            ),
-          )
-          .catch((err) => {
-            if (err?.status === 422) {
-              toast.error(
-                t.profile?.social?.requestPending ||
-                  "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-              );
-            } else {
-              toast.error(
-                t.profile?.social?.requestError ||
-                  "Không thể gửi yêu cầu kết bạn",
-              );
-            }
-          });
-      };
-
-      if (status?.friendshipId) {
-        deleteFriendship(status.friendshipId)
-          .unwrap()
-          .then(() => {
-            performSend();
-          })
-          .catch(() => {
-            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra");
-          });
-      } else {
-        performSend();
-      }
     }
   };
 
