@@ -44,7 +44,7 @@ const NavIcon = ({ img, icon: Icon, color, size = 24 }) => {
 
 const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false }) => {
   const { t } = useLanguage()
-  const { isStudent } = useRoleOverride()
+  const { isTeacher } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
@@ -89,7 +89,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
               if (isHorizontal && item.showOnHorizontalBar === false) return false
               if (item.isPrivate && !isAuthenticated) return false
               const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
-              if (teacherTabs.includes(item.key) && isStudent) return false
+              if (teacherTabs.includes(item.key) && !isTeacher) return false
               return true
             })
             .map((item) => {
@@ -217,7 +217,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
           {(activeDrilldownItem?.subItems || [])
             .filter((sub) => {
               const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
-              if (teacherTabs.includes(sub.key) && isStudent) return false
+              if (teacherTabs.includes(sub.key) && !isTeacher) return false
               if (sub.lang && sub.lang !== currentLang) return false
               if (isHorizontal && sub.showOnHorizontalBar === false) return false
               if (sub.isPrivate && !isAuthenticated) return false
