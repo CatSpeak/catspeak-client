@@ -1,4 +1,4 @@
-import { baseApi } from "./baseApi"
+import { baseApi } from "./baseApi";
 
 export const materialApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -99,6 +99,25 @@ export const materialApi = baseApi.injectEndpoints({
       ],
     }),
 
+    // Toggle material share link
+    toggleMaterialShare: builder.mutation({
+      query: ({ materialId, isPublic }) => ({
+        url: `/personal-materials/share/${materialId}/toggle`,
+        method: "POST",
+        body: { isPublic },
+      }),
+      invalidatesTags: (result, error, { materialId }) => [
+        { type: "PersonalMaterials", id: materialId },
+        "PersonalMaterials",
+      ],
+    }),
+
+    // Get material by share token
+    getMaterialByShareToken: builder.query({
+      query: (shareToken) => `/personal-materials/share/${shareToken}`,
+      providesTags: ["PersonalMaterials"],
+    }),
+
     // Bookmark a personal folder
     bookmarkFolder: builder.mutation({
       query: (id) => ({
@@ -177,7 +196,6 @@ export const materialApi = baseApi.injectEndpoints({
       invalidatesTags: ["PersonalMaterials"],
     }),
 
-
     // PUBLIC PERSONAL MATERIALS
 
     //  Get details of a specific public material by ID
@@ -192,7 +210,9 @@ export const materialApi = baseApi.injectEndpoints({
         url: `/public/personal-materials/${id}/view`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "PersonalMaterials", id }],
+      invalidatesTags: (result, error, id) => [
+        { type: "PersonalMaterials", id },
+      ],
     }),
 
     //  Record a download for a public material
@@ -201,11 +221,14 @@ export const materialApi = baseApi.injectEndpoints({
         url: `/public/personal-materials/${id}/download`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "PersonalMaterials", id }, "PersonalMaterials"],
+      invalidatesTags: (result, error, id) => [
+        { type: "PersonalMaterials", id },
+        "PersonalMaterials",
+      ],
     }),
   }),
   overrideExisting: false,
-})
+});
 
 export const {
   useGetPersonalMaterialsQuery,
@@ -229,4 +252,6 @@ export const {
   useMoveFolderMutation,
   useMoveMaterialsBulkMutation,
   useDeleteMaterialsBulkMutation,
-} = materialApi
+  useToggleMaterialShareMutation,
+  useGetMaterialByShareTokenQuery,
+} = materialApi;
