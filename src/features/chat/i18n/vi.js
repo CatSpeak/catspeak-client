@@ -43,6 +43,7 @@ export default {
       inviteFriends: "Mời bạn bè vào nhóm này",
       removeTitle: "Xóa khỏi nhóm",
       student: "Học viên",
+      teacher: "Giáo viên",
     },
     actions: {
       reply: "Trả lời",

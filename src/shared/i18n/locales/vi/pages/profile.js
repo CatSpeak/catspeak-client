@@ -116,6 +116,11 @@ export default {
     statusApproved: "Đã được duyệt",
     statusApprovedDesc:
       "Chúc mừng! Đơn đăng ký giảng viên của bạn đã được phê duyệt.",
+    switchToTeacherTitle: "Hồ sơ đã được duyệt",
+    switchToTeacherDesc:
+      "Hồ sơ Giảng viên của bạn đã được phê duyệt. Chuyển sang tài khoản giáo viên để quản lý nội dung giảng dạy.",
+    switchToTeacherAccount: "Chuyển sang tài khoản giáo viên",
+    switching: "Đang chuyển...",
     statusRejected: "Đã bị từ chối",
     statusRejectedDesc:
       "Rất tiếc, đơn đăng ký của bạn chưa được chấp nhận lần này.",
@@ -141,6 +146,18 @@ export default {
     formInvalid: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi gửi.",
     credentialSizeLimit: "Mỗi chứng chỉ phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
     videoSizeLimit: "Video phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
+  },
+  friends: {
+    teacher: "Giáo viên",
+    member: "Thành viên",
+    subTabs: {
+      teachers: "Giáo viên",
+      members: "Thành viên",
+    },
+    empty: {
+      noTeachers: "Chưa có giáo viên nào.",
+      noMembers: "Chưa có thành viên nào.",
+    },
   },
   notifications: {
     friend_request: {

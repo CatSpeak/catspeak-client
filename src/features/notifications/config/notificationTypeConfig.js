@@ -1,4 +1,4 @@
-import { BookOpen, CalendarClock, PenSquare, CheckCircle2, RotateCw, Megaphone, Zap } from "lucide-react"
+import { BookOpen, CalendarClock, PenSquare, CheckCircle2, RotateCw, Megaphone, Zap, GraduationCap } from "lucide-react"
 
 const replaceVars = (text, m) => {
   if (!text) return text;
@@ -140,6 +140,17 @@ export const NOTIFICATION_TYPES = {
         ? `/${lang}/cat-speak/reels?challenge=${m.challengeId}`
         : `/${lang}/cat-speak/reels`
     },
+  },
+  instructor_profile_approved: {
+    icon: GraduationCap,
+    color: "text-emerald-500",
+    resolveTitle: (m, t) =>
+      t.notifications?.instructor_profile_approved?.title ||
+      "Hồ sơ Giảng viên đã được phê duyệt",
+    resolveBody: (m, t) =>
+      t.notifications?.instructor_profile_approved?.body ||
+      "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
+    resolveUrl: () => "/setting/instructor",
   },
 }
 

@@ -173,5 +173,9 @@ export default {
       title: "Thử thách mới!",
       body: 'Thử thách mới: "{challengeTitle}" đang chờ bạn!',
     },
+    instructor_profile_approved: {
+      title: "Hồ sơ Giảng viên đã được phê duyệt",
+      body: "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
+    },
   },
 };
