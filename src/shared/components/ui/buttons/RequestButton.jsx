@@ -7,6 +7,7 @@ import PillButton from "./PillButton"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import {
+  useGetPendingFriendRequestsQuery,
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
   useRespondFriendRequestMutation,
@@ -40,7 +41,47 @@ const RequestButton = ({
   const isSelf =
     Boolean(targetId) &&
     Boolean(currentUserId) &&
-    Number(targetId) === Number(currentUserId)
+    (Number(targetId) === Number(currentUserId) ||
+      String(targetId) === String(currentUserId))
+
+  // Fetch pending friend requests for current user (same flow as ProfileFriendsTab)
+  const { data: pendingRequestsResponse } = useGetPendingFriendRequestsQuery(
+    undefined,
+    {
+      skip: !currentUserId,
+      pollingInterval: 4000,
+    }
+  )
+
+  const pendingRequests = useMemo(() => {
+    if (Array.isArray(pendingRequestsResponse)) return pendingRequestsResponse
+    if (Array.isArray(pendingRequestsResponse?.data))
+      return pendingRequestsResponse.data
+    return []
+  }, [pendingRequestsResponse])
+
+  // Check if target user has sent a pending friend request to the current user
+  const incomingRequestFromQuery = useMemo(() => {
+    if (!targetId || !pendingRequests.length) return null
+    return (
+      pendingRequests.find((req) => {
+        const senderId =
+          req?.requester?.accountId ??
+          req?.requester?.id ??
+          req?.requester?.userId ??
+          req?.requester?.studentId ??
+          req?.requesterId ??
+          req?.senderId ??
+          req?.sender?.accountId ??
+          req?.sender?.id
+        return (
+          senderId != null &&
+          (Number(senderId) === Number(targetId) ||
+            String(senderId) === String(targetId))
+        )
+      }) || null
+    )
+  }, [targetId, pendingRequests])
 
   // External relationship object/props normalization
   const externalStatus = useMemo(() => {
@@ -121,10 +162,19 @@ const RequestButton = ({
   const isFriendshipDisabled =
     disabled || isFriendshipLoading || isRespondingLoading
 
+  // Active friendship ID for responding / deleting
+  const effectiveFriendshipId =
+    incomingRequestFromQuery?.friendshipId ??
+    incomingRequestFromQuery?.id ??
+    effectiveStatus?.friendshipId
+
   // Relationship state determination
-  const isFriend = Boolean(effectiveStatus?.isFriend)
+  const isFriend = Boolean(
+    !incomingRequestFromQuery && effectiveStatus?.isFriend
+  )
   const isPending = Boolean(
-    effectiveStatus?.friendshipStatus === 1 ||
+    Boolean(incomingRequestFromQuery) ||
+      effectiveStatus?.friendshipStatus === 1 ||
       effectiveStatus?.friendshipStatus === "Pending" ||
       effectiveStatus?.friendshipStatus === "PENDING" ||
       effectiveStatus?.isPendingRequest
@@ -133,18 +183,22 @@ const RequestButton = ({
   // Incoming request: Target user sent request to Current user (Current user is the Addressee)
   const isIncomingRequest = Boolean(
     !isFriend &&
-      isPending &&
-      (effectiveStatus?.isReceived ||
-        effectiveStatus?.isIncoming ||
-        effectiveStatus?.isAddressee ||
-        effectiveStatus?.isPendingRequest ||
-        effectiveStatus?.isRequester === false ||
-        (effectiveStatus?.requesterId &&
-          targetId &&
-          Number(effectiveStatus.requesterId) === Number(targetId)) ||
-        (effectiveStatus?.addresseeId &&
-          currentUserId &&
-          Number(effectiveStatus.addresseeId) === Number(currentUserId)))
+      (Boolean(incomingRequestFromQuery) ||
+        (isPending &&
+          (effectiveStatus?.isReceived ||
+            effectiveStatus?.isIncoming ||
+            effectiveStatus?.isAddressee ||
+            effectiveStatus?.isPendingRequest ||
+            effectiveStatus?.isRequester === false ||
+            (effectiveStatus?.requesterId &&
+              targetId &&
+              (Number(effectiveStatus.requesterId) === Number(targetId) ||
+                String(effectiveStatus.requesterId) === String(targetId))) ||
+            (effectiveStatus?.addresseeId &&
+              currentUserId &&
+              (Number(effectiveStatus.addresseeId) === Number(currentUserId) ||
+                String(effectiveStatus.addresseeId) ===
+                  String(currentUserId))))))
   )
 
   // Outgoing pending request: Current user sent request to Target user
@@ -158,7 +212,7 @@ const RequestButton = ({
 
     try {
       if (isFriend || isOutgoingPending) {
-        const fId = effectiveStatus?.friendshipId
+        const fId = effectiveFriendshipId
         if (fId) {
           await deleteFriendship(fId).unwrap()
           setLocalStatus({
@@ -185,8 +239,8 @@ const RequestButton = ({
           })
         }
       } else {
-        if (effectiveStatus?.friendshipId) {
-          await deleteFriendship(effectiveStatus.friendshipId).unwrap()
+        if (effectiveFriendshipId) {
+          await deleteFriendship(effectiveFriendshipId).unwrap()
         }
         const res = await sendFriendRequest(targetId).unwrap()
         const newFriendshipId =
@@ -229,20 +283,21 @@ const RequestButton = ({
     if (e && typeof e.stopPropagation === "function") {
       e.stopPropagation()
     }
-    if (isFriendshipDisabled || !effectiveStatus?.friendshipId) return
+    const fId = effectiveFriendshipId
+    if (isFriendshipDisabled || !fId) return
 
     setRespondingAction("accept")
 
     try {
       await respondFriendRequest({
-        friendshipId: effectiveStatus.friendshipId,
+        friendshipId: fId,
         action: "accept",
       }).unwrap()
 
       setLocalStatus({
         isFriend: true,
         friendshipStatus: "Accepted",
-        friendshipId: effectiveStatus.friendshipId,
+        friendshipId: fId,
         isRequester: null,
         isAddressee: null,
       })
@@ -270,13 +325,14 @@ const RequestButton = ({
     if (e && typeof e.stopPropagation === "function") {
       e.stopPropagation()
     }
-    if (isFriendshipDisabled || !effectiveStatus?.friendshipId) return
+    const fId = effectiveFriendshipId
+    if (isFriendshipDisabled || !fId) return
 
     setRespondingAction("decline")
 
     try {
       await respondFriendRequest({
-        friendshipId: effectiveStatus.friendshipId,
+        friendshipId: fId,
         action: "decline",
       }).unwrap()
 
