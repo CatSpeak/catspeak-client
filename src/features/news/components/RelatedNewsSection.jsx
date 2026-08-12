@@ -64,7 +64,7 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
           {[1, 2, 3, 4].map((index) => (
             <div
               key={index}
-              className="flex flex-col bg-gray-100 rounded-2xl animate-pulse h-[280px]"
+              className="flex flex-col bg-gray-100 rounded-2xl animate-pulse h-[350px]"
             />
           ))}
         </div>
