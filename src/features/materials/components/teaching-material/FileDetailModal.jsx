@@ -6,6 +6,7 @@ import TextInput from '@/shared/components/ui/inputs/TextInput';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
 import FilePreview from '@/shared/components/ui/FilePreview';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 import dayjs from 'dayjs';
 import toast from 'react-hot-toast';
@@ -20,6 +21,7 @@ const formatSize = (bytes) => {
 };
 
 const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
+  const { t } = useLanguage();
   const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
   const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
@@ -41,10 +43,10 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
     setIsPublic(checked);
     try {
       await updateSettings({ id: item.id, isPublic: checked, allowDownload }).unwrap();
-      toast.success('Đã cập nhật trạng thái chia sẻ');
+      toast.success(t.materials.updateShareStatusSuccess);
     } catch {
       setIsPublic(!checked); // revert
-      toast.error('Lỗi khi cập nhật trạng thái');
+      toast.error(t.materials.updateShareStatusError);
     }
   };
 
@@ -52,10 +54,10 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
     setAllowDownload(checked);
     try {
       await updateSettings({ id: item.id, isPublic, allowDownload: checked }).unwrap();
-      toast.success('Đã cập nhật quyền tải xuống');
+      toast.success(t.materials.updateDownloadPermSuccess);
     } catch {
       setAllowDownload(!checked); // revert
-      toast.error('Lỗi khi cập nhật quyền tải xuống');
+      toast.error(t.materials.updateDownloadPermError);
     }
   };
 
@@ -123,7 +125,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
             <IconButton variant='ghost' onClick={() => setShowMobileDetails(false)} className="md:hidden -ml-2">
               <ChevronLeft className="w-5 h-5 text-[#1A1C1C]" />
             </IconButton>
-            <span className="font-semibold text-[#1A1C1C] text-base md:text-lg">Chi tiết & Cài đặt</span>
+            <span className="font-semibold text-[#1A1C1C] text-base md:text-lg">{t.materials.detailsAndSettingsHeader}</span>
           </div>
           <IconButton variant='ghost' onClick={onClose} className="hidden md:flex">
             <X className="w-5 h-5" />
@@ -134,18 +136,18 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
         <div className="flex-1 overflow-y-auto p-4 md:p-5 flex flex-col gap-5 md:gap-6">
           {/* Info Box */}
           <div>
-            <h4 className="text-base md:text-lg font-bold text-[#1A1C1C] mb-2">Thông tin tệp</h4>
+            <h4 className="text-base md:text-lg font-bold text-[#1A1C1C] mb-2">{t.materials.fileInfo}</h4>
             <div className="bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl p-4 flex flex-col gap-3">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#5B403E]">Loại:</span>
-                <span className="font-medium text-[#1A1C1C]">{item.fileName?.split('.').pop().toUpperCase() || 'TỆP'}</span>
+                <span className="text-[#5B403E]">{t.materials.type}</span>
+                <span className="font-medium text-[#1A1C1C]">{item.fileName?.split('.').pop().toUpperCase() || t.materials.file}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#5B403E]">Kích thước:</span>
+                <span className="text-[#5B403E]">{t.materials.size}</span>
                 <span className="font-medium text-[#1A1C1C]">{formatSize(item.fileSize || item.size || item.sizeBytes)}</span>
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-[#5B403E]">Ngày tải lên:</span>
+                <span className="text-[#5B403E]">{t.materials.uploadDate}</span>
                 <span className="font-medium text-[#1A1C1C]">{item.uploadedAt || item.createdAt ? dayjs(item.uploadedAt || item.createdAt).format('DD/MM/YYYY') : 'N/A'}</span>
               </div>
             </div>
@@ -157,8 +159,8 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex flex-col pr-2">
-                <span className="text-base md:text-lg font-bold text-[#1A1C1C]">Chia sẻ công khai</span>
-                <span className="text-xs md:text-sm text-[#5B403E]">Bất kỳ ai có liên kết đều có thể xem</span>
+                <span className="text-base md:text-lg font-bold text-[#1A1C1C]">{t.materials.publicShare}</span>
+                <span className="text-xs md:text-sm text-[#5B403E]">{t.materials.publicShareDesc}</span>
               </div>
               <Switch
                 checked={isPublic}
@@ -168,11 +170,11 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
             </div>
 
             <div className="mb-1">
-              <span className="text-xs md:text-sm text-[#5B403E] mb-1 block font-medium">Liên kết chia sẻ</span>
+              <span className="text-xs md:text-sm text-[#5B403E] mb-1 block font-medium">{t.materials.shareLink}</span>
               <div className="flex items-center gap-2">
                 <TextInput
                   readOnly
-                  value={item.fileUrl || "Không có liên kết"}
+                  value={item.fileUrl || t.materials.noLink}
                   className="!h-10 text-xs md:text-sm bg-[#F9F9F9] border-[#E3BEBA] !rounded-xl"
                   containerClassName="flex-1"
                 />
@@ -184,11 +186,11 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
                   onClick={() => {
                     if (item.fileUrl) {
                       navigator.clipboard.writeText(item.fileUrl);
-                      toast?.success?.('Đã sao chép liên kết') || alert('Đã sao chép liên kết');
+                      toast?.success?.(t.materials.copiedLink) || alert(t.materials.copiedLink);
                     }
                   }}
                 >
-                  Sao chép
+                  {t.materials.copy}
                 </PillButton>
               </div>
             </div>
@@ -199,8 +201,8 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
           {/* Download Toggle */}
           <div className="flex items-center justify-between">
             <div className="flex flex-col pr-2">
-              <span className="text-base md:text-lg font-bold text-[#1A1C1C]">Cho phép tải xuống</span>
-              <span className="text-xs md:text-sm text-[#5B403E] mt-0.5">Người xem có thể lưu bản sao</span>
+              <span className="text-base md:text-lg font-bold text-[#1A1C1C]">{t.materials.allowDownload}</span>
+              <span className="text-xs md:text-sm text-[#5B403E] mt-0.5">{t.materials.allowDownloadDescShort}</span>
             </div>
             <Switch
               checked={allowDownload}
@@ -213,17 +215,17 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
 
           {/* Stats */}
           <div>
-            <h4 className="text-base md:text-lg font-bold text-[#5B403E] mb-2">Thống kê</h4>
+            <h4 className="text-base md:text-lg font-bold text-[#5B403E] mb-2">{t.materials.statistics}</h4>
             <div className="flex gap-3">
               <div className="flex-1 bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl flex flex-col items-center justify-center p-2.5 md:p-3">
                 <Eye className="w-4 h-4 md:w-5 md:h-5 text-[#6E0009] mb-1" />
                 <span className="text-lg md:text-xl font-bold text-[#1A1C1C]">{item.viewCount || 0}</span>
-                <span className="text-[11px] md:text-xs text-[#5B403E] font-medium mt-0.5">lượt xem</span>
+                <span className="text-[11px] md:text-xs text-[#5B403E] font-medium mt-0.5">{t.materials.views}</span>
               </div>
               <div className="flex-1 bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl flex flex-col items-center justify-center p-2.5 md:p-3">
                 <Download className="w-4 h-4 md:w-5 md:h-5 text-[#6E0009] mb-1" />
                 <span className="text-lg md:text-xl font-bold text-[#1A1C1C]">{item.downloadCount || 0}</span>
-                <span className="text-[11px] md:text-xs text-[#5B403E] font-medium mt-0.5">lượt tải xuống</span>
+                <span className="text-[11px] md:text-xs text-[#5B403E] font-medium mt-0.5">{t.materials.downloads}</span>
               </div>
             </div>
           </div>
@@ -237,7 +239,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
                 roundedClass="rounded-xl"
                 onClick={handleDownload}
               >
-                Tải xuống
+                {t.materials.download}
               </PillButton>
               <PillButton
                 startIcon={<FolderInput className="w-3.5 h-3.5 md:w-4 md:h-4" />}
@@ -248,7 +250,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
                 borderColor="#E3BEBA"
                 onClick={onMove}
               >
-                Di chuyển
+                {t.materials.move}
               </PillButton>
             </div>
             <PillButton
@@ -259,7 +261,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
               roundedClass="rounded-xl"
               onClick={onDelete}
             >
-              Xóa
+              {t.materials.delete}
             </PillButton>
           </div>
 

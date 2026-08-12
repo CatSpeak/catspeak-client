@@ -1,6 +1,7 @@
 import React from 'react';
 import { FcFolder } from 'react-icons/fc';
 import { Star } from 'lucide-react';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const ProfileFolderItem = ({
   title,
@@ -10,6 +11,7 @@ const ProfileFolderItem = ({
   isBookmarked,
   onClick
 }) => {
+  const { t } = useLanguage();
   return (
     <div
       onClick={onClick}
@@ -25,7 +27,7 @@ const ProfileFolderItem = ({
               <h3 className="font-semibold text-[#1A1C1C] text-[15px] line-clamp-2 pr-4">{title}</h3>
               {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F]" />}
             </div>
-            <p className="text-xs text-[#5B403E] mt-1">{totalItems} tài liệu • Cập nhật {updatedAt}</p>
+            <p className="text-xs text-[#5B403E] mt-1">{t.materials.itemsUpdatedInfo.replace('{{count}}', totalItems).replace('{{date}}', updatedAt)}</p>
           </div>
         </div>
       </div>
@@ -33,11 +35,11 @@ const ProfileFolderItem = ({
       <div className="mt-3">
         {isPublic ? (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#E6F4EA] text-[#137333]">
-            Công khai
+            {t.materials.public}
           </span>
         ) : (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F1F3F4] text-[#5F6368]">
-            Riêng tư
+            {t.materials.private}
           </span>
         )}
       </div>

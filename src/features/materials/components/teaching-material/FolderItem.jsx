@@ -4,6 +4,7 @@ import { FcFolder } from 'react-icons/fc';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
 import Checkbox from '@/shared/components/ui/inputs/Checkbox';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const FolderItem = ({
   title,
@@ -19,6 +20,7 @@ const FolderItem = ({
   isSelected,
   isSelectionMode,
   onToggleSelect }) => {
+  const { t } = useLanguage();
 
   const timerRef = useRef(null);
   const isLongPressRef = useRef(false);
@@ -125,14 +127,14 @@ const FolderItem = ({
             if (val === 'delete' && onDelete) onDelete();
           }}
           options={[
-            { value: 'open', label: 'Mở', icon: <FolderOpen className="w-4 h-4" /> },
-            { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
-            { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
-            { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
-            { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích', icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
+            { value: 'open', label: t.materials.open, icon: <FolderOpen className="w-4 h-4" /> },
+            { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
+            { value: 'rename', label: t.materials.rename, icon: <Edit2 className="w-4 h-4" /> },
+            { value: 'move', label: t.materials.move, icon: <FolderInput className="w-4 h-4" /> },
+            { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? t.materials.unfavorite : t.materials.addToFavorites, icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
             {
               value: 'delete',
-              label: <span className="text-[#BA1A1A]">Xóa</span>,
+              label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>,
               icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
             },
           ]}

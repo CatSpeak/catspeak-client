@@ -6,8 +6,10 @@ import { PillButton } from '@/shared/components/ui/buttons';
 
 import { useRenameMaterialMutation, useRenameFolderMutation } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const RenameMaterialModal = ({ open, onClose, item }) => {
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [renameMaterial, { isLoading: isRenamingMaterial }] = useRenameMaterialMutation();
   const [renameFolder, { isLoading: isRenamingFolder }] = useRenameFolderMutation();
@@ -45,11 +47,11 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
           fileName: name.trim(),
         }).unwrap();
       }
-      toast.success('Đổi tên thành công');
+      toast.success(t.materials.renameSuccess);
       onClose();
     } catch (error) {
       console.error("Failed to rename", error);
-      toast.error('Đổi tên thất bại');
+      toast.error(t.materials.renameError);
     }
   };
 
@@ -62,7 +64,7 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
         variant='outline'
         roundedClass='rounded-xl'
       >
-        Hủy
+        {t.materials.cancel}
       </PillButton>
       <PillButton
         startIcon={<Edit2 className="w-4 h-4" />}
@@ -71,7 +73,7 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
         loading={isRenaming}
         disabled={!name.trim() || name.trim() === currentName}
       >
-        Lưu thay đổi
+        {t.materials.saveChanges}
       </PillButton>
     </div>
   );
@@ -80,7 +82,7 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title="Đổi tên"
+      title={t.materials.rename}
       bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       footer={footer}
     >
@@ -89,7 +91,7 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           labelClassName="font-bold text-base"
-          placeholder="Nhập tên mới..."
+          placeholder={t.materials.enterNewName}
           className="!h-12 rounded-xl"
         />
       </div>

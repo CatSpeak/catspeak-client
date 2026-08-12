@@ -1,8 +1,10 @@
 import React from 'react';
 import { IconButton } from '@/shared/components/ui/buttons';
 import { X, Download, Trash2, FolderInput } from 'lucide-react';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDownload }) => {
+  const { t } = useLanguage();
   if (selectedCount === 0) return null;
 
   return (
@@ -16,7 +18,7 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
             <X className="w-5 h-5 text-[#1A1C1C]" />
           </IconButton>
           <span className="text-base font-medium text-[#1A1C1C] px-2 mr-2 whitespace-nowrap">
-            đã chọn {selectedCount} mục
+            {t.materials.selectedItemsCount.replace('{{count}}', selectedCount)}
           </span>
         </div>
 
@@ -24,7 +26,7 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
           {onDownload && (
             <IconButton variant="ghost"
               onClick={onDownload}
-              title="Tải xuống"
+              title={t.materials.download}
             >
               <Download className="w-5 h-5 text-[#1A1C1C]" />
             </IconButton>
@@ -33,7 +35,7 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
           <IconButton
             variant="ghost"
             onClick={onMove}
-            title="Di chuyển"
+            title={t.materials.move}
           >
             <FolderInput className="w-5 h-5 text-[#1A1C1C]" />
           </IconButton>
@@ -42,7 +44,7 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
             <IconButton
               variant="ghost"
               onClick={onDelete}
-              title="Xóa"
+              title={t.materials.delete}
             >
               <Trash2 className="w-5 h-5 text-[#1A1C1C]" />
             </IconButton>

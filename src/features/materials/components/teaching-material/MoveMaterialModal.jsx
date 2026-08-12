@@ -7,8 +7,10 @@ import { PillButton } from '@/shared/components/ui/buttons';
 import { useGetFolderTreeQuery, useMoveMaterialMutation, useMoveFolderMutation, useMoveMaterialsBulkMutation } from '@/store/api/materialApi';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolderId }) => {
+  const { t } = useLanguage();
   const [expandedIds, setExpandedIds] = useState([]);
   const [selectedFolder, setSelectedFolder] = useState(null);
 
@@ -70,7 +72,7 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
 
   const currentLocation = useMemo(() => {
     const item = items[0];
-    if (!item || !treeData) return "Thư mục gốc";
+    if (!item || !treeData) return t.materials.rootFolder;
     const rawTree = treeData?.data || treeData || [];
     const targetId = item.id || item.folderId;
 
@@ -79,18 +81,18 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
     if (ownPath) {
       if (ownPath.length > 1) {
         const parentPath = ownPath.slice(0, -1);
-        return "Thư mục gốc / " + parentPath.map(p => p.folderName).join(' / ');
+        return t.materials.rootFolder + " / " + parentPath.map(p => p.folderName).join(' / ');
       }
-      return "Thư mục gốc";
+      return t.materials.rootFolder;
     } else {
-      if (!item.folderId) return "Thư mục gốc";
+      if (!item.folderId) return t.materials.rootFolder;
       const parentPath = getFolderPath(rawTree, item.folderId);
       if (parentPath) {
-        return "Thư mục gốc / " + parentPath.map(p => p.folderName).join(' / ');
+        return t.materials.rootFolder + " / " + parentPath.map(p => p.folderName).join(' / ');
       }
-      return "Thư mục gốc";
+      return t.materials.rootFolder;
     }
-  }, [treeData, items, getFolderPath]);
+  }, [treeData, items, getFolderPath, t]);
 
   // Hide selected folders from the tree
   const folders = useMemo(() => {
@@ -152,11 +154,11 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
           targetFolderId: selectedFolder ? selectedFolder.folderId : null,
         }).unwrap();
       }
-      toast.success('Di chuyển tài liệu thành công');
+      toast.success(t.materials.moveSuccess);
       onSuccess ? onSuccess() : onClose();
     } catch (error) {
       console.error("Failed to move material", error);
-      toast.error('Di chuyển tài liệu thất bại');
+      toast.error(t.materials.moveError);
     }
   };
 
@@ -166,9 +168,9 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
       const foldersCount = items.filter(i => i._type === 'folder' || (i.folderId && !i.fileName)).length;
       const filesCount = items.filter(i => i._type === 'file' || i.fileName).length;
       const parts = [];
-      if (foldersCount > 0) parts.push(`${foldersCount} thư mục`);
-      if (filesCount > 0) parts.push(`${filesCount} tệp`);
-      return parts.join(' và ');
+      if (foldersCount > 0) parts.push(t.materials.folderCountUnit.replace('{{count}}', foldersCount));
+      if (filesCount > 0) parts.push(t.materials.fileCountUnit.replace('{{count}}', filesCount));
+      return parts.join(t.materials.and);
     })();
 
   const footer = (
@@ -178,7 +180,7 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
         variant='outline'
         roundedClass='rounded-xl'
       >
-        Hủy
+        {t.materials.cancel}
       </PillButton>
       <PillButton
         startIcon={<ArrowRightToLine className="w-4 h-4" />}
@@ -188,7 +190,7 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
         loading={isMoving}
         disabled={String(selectedFolder ? selectedFolder.folderId : null) === String(currentParentFolderId)}
       >
-        Di chuyển vào đây
+        {t.materials.moveToHere}
       </PillButton>
     </div>
   );
@@ -197,17 +199,22 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
     <Modal
       open={open}
       onClose={onClose}
-      title="Di chuyển tài liệu"
+      title={t.materials.moveMaterial}
       bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       footer={footer}
     >
       <div className="space-y-4">
         <div className="space-y-1">
           <p className="text-[#5B403E] text-sm">
-            Chọn thư mục đích để di chuyển <span className="font-semibold text-[#1A1C1C]">"{currentName}"</span>.
+            {t.materials.selectDestination.split('"{{name}}"').map((part, index, array) => (
+              <React.Fragment key={index}>
+                {part}
+                {index < array.length - 1 && <span className="font-semibold text-[#1A1C1C]">"{currentName}"</span>}
+              </React.Fragment>
+            ))}
           </p>
           <p className="text-[#5B403E] text-sm">
-            Vị trí hiện tại: <span className="font-medium text-[#1A1C1C]">{currentLocation}</span>
+            {t.materials.currentLocationLabel} <span className="font-medium text-[#1A1C1C]">{currentLocation}</span>
           </p>
         </div>
 
@@ -215,20 +222,20 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
           {isFetchingTree ? (
             <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
               <LoadingSpinner />
-              <span>Đang tải danh sách thư mục...</span>
+              <span>{t.materials.loadingFolderTree}</span>
             </div>
           ) : folders.length === 0 ? (
             <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
               <FolderOpen className="w-8 h-8" />
-              <span>Chưa có thư mục nào</span>
+              <span>{t.materials.noFolders}</span>
             </div>
           ) : (
             <div className="flex flex-col gap-1">
               <FolderNode
-                folder={{ folderId: null, folderName: "Thư mục gốc" }}
+                folder={{ folderId: null, folderName: t.materials.rootFolder }}
                 level={0}
                 selectedId={selectedFolder?.folderId}
-                onSelect={() => setSelectedFolder({ folderId: null, folderName: "Thư mục gốc" })}
+                onSelect={() => setSelectedFolder({ folderId: null, folderName: t.materials.rootFolder })}
                 expandedIds={expandedIds}
                 toggleExpand={toggleExpand}
                 disabledIds={[currentParentFolderId]}

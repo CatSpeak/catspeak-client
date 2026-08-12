@@ -2,8 +2,10 @@ import React from 'react';
 import { ChevronDown, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { FcFolder } from 'react-icons/fc';
 import { IconButton } from '@/shared/components/ui/buttons';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const FolderNode = ({ folder, level, selectedId, onSelect, expandedIds, toggleExpand, disabledIds = [] }) => {
+  const { t } = useLanguage();
   const hasChildren = folder.subFolders && folder.subFolders.length > 0;
   const isExpanded = expandedIds.some(id => String(id) === String(folder.folderId));
   const isSelected = String(selectedId) === String(folder.folderId);
@@ -42,7 +44,7 @@ const FolderNode = ({ folder, level, selectedId, onSelect, expandedIds, toggleEx
 
           <FcFolder className="w-5 h-5" />
           <span className={`text-base truncate flex-1 ${isDisabled ? 'text-[#1A1C1C]' : isSelected ? 'font-bold text-[#6E0009]' : 'text-[#1A1C1C]'}`}>
-            {folder.folderName} {isDisabled && <span className="text-xs text-gray-500 font-normal ml-2">(Vị trí hiện tại)</span>}
+            {folder.folderName} {isDisabled && <span className="text-xs text-gray-500 font-normal ml-2">{t.materials.currentLocation}</span>}
           </span>
         </div>
 

@@ -5,6 +5,7 @@ import Switch from '@/shared/components/ui/inputs/Switch';
 import { PillButton } from '@/shared/components/ui/buttons';
 import { useUpdateMaterialSettingsMutation, useUpdateFolderSettingsMutation } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const formatSize = (bytes) => {
   if (bytes === 0) return '0 B';
@@ -16,6 +17,7 @@ const formatSize = (bytes) => {
 };
 
 const ShareMaterialModal = ({ open, onClose, item }) => {
+  const { t } = useLanguage();
   const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
   const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
 
@@ -42,11 +44,11 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
       } else {
         await updateMaterialSettings({ id: item.id, isPublic, allowDownload }).unwrap();
       }
-      toast.success('Cập nhật cài đặt chia sẻ thành công');
+      toast.success(t.materials.updateShareSettingsSuccess);
       onClose();
     } catch (error) {
       console.error(error);
-      toast.error('Có lỗi xảy ra khi cập nhật cài đặt');
+      toast.error(t.materials.updateShareSettingsError);
     }
   };
 
@@ -57,7 +59,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
         variant='outline'
         roundedClass='rounded-xl'
       >
-        Đóng
+        {t.materials.close}
       </PillButton>
       <PillButton
         roundedClass='rounded-xl'
@@ -66,7 +68,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
         startIcon={<Save className="w-4 h-4" />}
       >
 
-        Lưu thay đổi
+        {t.materials.saveChanges}
       </PillButton>
     </div>
   );
@@ -78,7 +80,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
       title={
         <div className="flex items-center gap-2 text-gray-800">
           <FolderInput className="w-5 h-5 text-[#8e1115]" strokeWidth={2.5} />
-          <span className="text-[20px] font-bold">Chia sẻ tài liệu</span>
+          <span className="text-[20px] font-bold">{t.materials.shareMaterial}</span>
         </div>
       }
       className="md:max-w-xl w-full"
@@ -102,8 +104,8 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-base font-bold text-[#1A1C1C]">Bật chia sẻ công khai</span>
-              <span className="text-sm text-[#5B403E]">Bất kỳ ai có liên kết đều có thể xem</span>
+              <span className="text-base font-bold text-[#1A1C1C]">{t.materials.enablePublicShare}</span>
+              <span className="text-sm text-[#5B403E]">{t.materials.publicShareDesc}</span>
             </div>
             <Switch
               checked={isPublic}
@@ -120,7 +122,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
               <input
                 type="text"
                 readOnly
-                value={item.fileUrl || "Không có liên kết"}
+                value={item.fileUrl || t.materials.noLink}
                 className="w-full h-10 bg-[#F3F3F3] border border-[#E2E2E2] rounded-lg pl-9 pr-3 text-base text-[#1A1C1C] outline-none"
               />
             </div>
@@ -131,10 +133,10 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
               onClick={() => {
                 if (item.fileUrl) {
                   navigator.clipboard.writeText(item.fileUrl);
-                  toast.success('Đã sao chép liên kết');
+                  toast.success(t.materials.copiedLink);
                 }
               }}
-            >Sao chép</PillButton>
+            >{t.materials.copy}</PillButton>
           </div>
         </div>
 
@@ -144,8 +146,8 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
         {!isFolder && (
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-base font-bold text-[#1A1C1C]">Cho phép tải xuống</span>
-              <span className="text-sm text-[#5B403E]">Người xem có thể tải bản sao về máy</span>
+              <span className="text-base font-bold text-[#1A1C1C]">{t.materials.allowDownload}</span>
+              <span className="text-sm text-[#5B403E]">{t.materials.allowDownloadDesc}</span>
             </div>
             <Switch
               checked={allowDownload}

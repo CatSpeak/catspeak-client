@@ -2,6 +2,7 @@ import React from 'react';
 import { X, FileText, Image, Video, File, Check } from 'lucide-react';
 import ProgressBar from '@/shared/components/ui/ProgressBar';
 import { IconButton } from '@/shared/components/ui/buttons';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const getFileIcon = (type) => {
   switch (type) {
@@ -36,6 +37,7 @@ const UploadItem = ({
   type,
   onCancel
 }) => {
+  const { t } = useLanguage();
   // status: 'reading' | 'ready' | 'uploading' | 'success' | 'error'
 
   return (
@@ -63,7 +65,7 @@ const UploadItem = ({
             </div>
             <div className="flex items-center gap-1 text-green-600 shrink-0">
               <Check className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium">Sẵn sàng</span>
+              <span className="text-xs font-medium">{t.materials.ready}</span>
             </div>
           </div>
         ) : status === 'uploading' ? (
@@ -82,15 +84,15 @@ const UploadItem = ({
               <span className="text-sm font-semibold text-[#1A1C1C] truncate">{name}</span>
               <span className="text-xs text-green-600 mt-0.5">{formatSize(sizeBytes)}</span>
             </div>
-            <span className="text-xs text-green-600 font-medium shrink-0">Hoàn tất</span>
+            <span className="text-xs text-green-600 font-medium shrink-0">{t.materials.complete}</span>
           </div>
         ) : status === 'error' ? (
           <div className="flex justify-between items-center gap-3">
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-semibold text-[#1A1C1C] truncate">{name}</span>
-              <span className="text-xs text-red-500 mt-0.5">Lỗi khi tải lên</span>
+              <span className="text-xs text-red-500 mt-0.5">{t.materials.uploadErrorStatus}</span>
             </div>
-            <span className="text-xs text-red-500 font-medium shrink-0">Thất bại</span>
+            <span className="text-xs text-red-500 font-medium shrink-0">{t.materials.failed}</span>
           </div>
         ) : null}
       </div>

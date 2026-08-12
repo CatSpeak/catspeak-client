@@ -21,15 +21,11 @@ import dayjs from 'dayjs';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import { Breadcrumb } from '@/shared/components/ui/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useLanguage } from '@/shared/context/LanguageContext';
 import toast from 'react-hot-toast';
 
-const SORT_OPTIONS = [
-  { value: 'name', label: 'Tên' },
-  { value: 'recent', label: 'Gần đây nhất' },
-  { value: 'updated_size', label: 'Ngày cập nhật, kích thước' }
-];
-
 const TeachingMaterialPage = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { folderId } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,14 +98,14 @@ const TeachingMaterialPage = () => {
     try {
       if (type === 'folder') {
         await bookmarkFolder(item.folderId || item.id).unwrap();
-        toast.success(item.isBookmarked ? 'Đã bỏ yêu thích thư mục' : 'Đã thêm thư mục vào yêu thích');
+        toast.success(item.isBookmarked ? t.materials.unbookmarkFolderSuccess : t.materials.bookmarkFolderSuccess);
       } else {
         await bookmarkMaterial(item.id).unwrap();
-        toast.success(item.isBookmarked ? 'Đã bỏ yêu thích tệp' : 'Đã thêm tệp vào yêu thích');
+        toast.success(item.isBookmarked ? t.materials.unbookmarkFileSuccess : t.materials.bookmarkFileSuccess);
       }
     } catch (error) {
       console.error(error);
-      toast.error('Có lỗi xảy ra khi thực hiện yêu thích');
+      toast.error(t.materials.bookmarkError);
     }
   };
 
@@ -282,18 +278,18 @@ const TeachingMaterialPage = () => {
         className='mb-4 flex-wrap'
         items={[
           {
-            label: "Trang chủ",
+            label: t.materials.home,
             onClick: () => navigate("/")
           },
           {
-            label: 'Quản lý tài liệu',
+            label: t.materials.title,
             onClick: folderId ? () => navigate("/workspace/teaching-material") : undefined
           },
           ...(folderPath ? folderPath.map(folder => ({
-            label: folder.folderName || 'Thư mục',
+            label: folder.folderName || t.materials.folder,
             onClick: () => navigate(`/workspace/teaching-material/${folder.folderId}`)
           })) : (folderId ? [{
-            label: folderDetail?.folderName || folderDetail?.folderName || folderDetail?.title || 'Thư mục',
+            label: folderDetail?.folderName || folderDetail?.title || t.materials.folder,
             onClick: () => navigate(`/workspace/teaching-material/${folderId}`)
           }] : []))
         ]}
@@ -309,7 +305,7 @@ const TeachingMaterialPage = () => {
           startIcon={<FolderPlus className="w-4 h-4" />}
           onClick={() => setIsCreateFolderOpen(true)}
         >
-          Tạo thư mục mới
+          {t.materials.createFolder}
         </PillButton>
         <PillButton
           roundedClass='rounded-xl'
@@ -317,7 +313,7 @@ const TeachingMaterialPage = () => {
           startIcon={<Upload className="w-4 h-4" />}
           onClick={() => setIsUploadMaterialOpen(true)}
         >
-          Tải lên tài liệu
+          {t.materials.uploadMaterial}
         </PillButton>
       </div>
 
@@ -327,7 +323,7 @@ const TeachingMaterialPage = () => {
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Tìm khóa học, tài liệu, bài giảng..."
+            placeholder={t.materials.searchPlaceholder}
             className="w-full max-w-[448px] !h-10 !rounded-xl border-[#E3BEBA] flex-row-reverse"
             inputClassName="text-base !pl-0"
             buttonClassName="w-4 h-4"
@@ -342,7 +338,7 @@ const TeachingMaterialPage = () => {
             startIcon={<ListFilter className="w-4 h-4" />}
             onClick={() => setIsFilterModalOpen(true)}
           >
-            Bộ lọc {filterMode ? `(1)` : ''}
+            {t.materials.filter} {filterMode ? `(1)` : ''}
           </PillButton>
         </div>
 
@@ -370,12 +366,12 @@ const TeachingMaterialPage = () => {
             value={sortBy}
             onChange={setSortBy}
             options={[
-              { value: 'name_asc', label: 'Tên (A-Z)' },
-              { value: 'name_desc', label: 'Tên (Z-A)' },
-              { value: 'newest', label: 'Ngày cập nhật (Gần nhất)' },
-              { value: 'oldest', label: 'Ngày cập nhật (Cũ nhất)' },
-              { value: 'size_asc', label: 'Kích thước (Tăng dần)' },
-              { value: 'size_desc', label: 'Kích thước (Nhỏ dần)' },
+              { value: 'name_asc', label: t.materials.sortOptions.nameAsc },
+              { value: 'name_desc', label: t.materials.sortOptions.nameDesc },
+              { value: 'newest', label: t.materials.sortOptions.newest },
+              { value: 'oldest', label: t.materials.sortOptions.oldest },
+              { value: 'size_asc', label: t.materials.sortOptions.sizeAsc },
+              { value: 'size_desc', label: t.materials.sortOptions.sizeDesc },
             ]}
             align="right"
             dropdownClassName="w-58"
@@ -389,7 +385,7 @@ const TeachingMaterialPage = () => {
                 className='!h-10'
                 endIcon={<ChevronDown className={`w-4 h-4 text-[#5B403E] transition-transform ${isOpen ? 'rotate-180' : ''}`} />}
               >
-                {selectedOption ? selectedOption.label : 'Sắp xếp theo'}
+                {selectedOption ? selectedOption.label : t.materials.sortBy}
               </PillButton>
             )}
           />
@@ -399,15 +395,15 @@ const TeachingMaterialPage = () => {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <LoadingSpinner />
-          <span className="text-[#5B403E]">Đang tải dữ liệu...</span>
+          <span className="text-[#5B403E]">{t.materials.loading}</span>
         </div>
       ) : (searchQuery || filterMode) && materials.length === 0 ? (
         <div className="mt-4">
           {searchQuery && (
             <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">Kết quả tìm kiếm</h2>
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">{t.materials.searchResults}</h2>
               <p className="text-base text-[#5B403E]">
-                Tìm thấy 0 kết quả cho <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
+                {t.materials.zeroResults} <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
               </p>
             </div>
           )}
@@ -422,15 +418,15 @@ const TeachingMaterialPage = () => {
         </div>
       ) : materials.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <p className="text-[#5B403E]">Thư mục trống</p>
+          <p className="text-[#5B403E]">{t.materials.emptyFolder}</p>
         </div>
       ) : (
         <>
           {searchQuery && materials.length > 0 && (
             <div className="mb-8 mt-4">
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">Kết quả tìm kiếm</h2>
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">{t.materials.searchResults}</h2>
               <p className="text-base text-[#5B403E]">
-                Tìm thấy {materials.length} kết quả cho <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
+                {t.materials.foundResults.replace('{{count}}', materials.length)} <span className="font-bold text-[#6E0009]">"{searchQuery}"</span>
               </p>
             </div>
           )}
@@ -438,14 +434,14 @@ const TeachingMaterialPage = () => {
           {/* Folders Section */}
           {folders.length > 0 && (
             <div className='space-y-4 mb-6'>
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">Thư mục</h2>
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">{t.materials.folders}</h2>
               <div className={viewLayout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-3"}>
                 {folders.map(folder => (
                   <FolderItem
                     key={folder.id || folder.folderId}
                     title={folder.name || folder.folderName}
-                    totalItems={`${(folder.subFolderCount || 0) + (folder.materialCount || 0)} mục`}
-                    updatedAt={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
+                    totalItems={t.materials.itemsCount.replace('{{count}}', (folder.subFolderCount || 0) + (folder.materialCount || 0))}
+                    updatedAt={folder.updatedAt ? t.materials.updated.replace('{{date}}', dayjs(folder.updatedAt).format('DD/MM/YYYY')) : ''}
                     isSelected={selectedItems.some(i => (i.id || i.folderId) === (folder.id || folder.folderId) && i._type === 'folder')}
                     isSelectionMode={selectedItems.length > 0}
                     onToggleSelect={() => handleToggleSelect(folder, 'folder')}
@@ -477,7 +473,7 @@ const TeachingMaterialPage = () => {
           {/* Recent Files Section */}
           {files.length > 0 && (
             <div className='space-y-4'>
-              <h2 className="text-2xl font-semibold text-[#1A1C1C]">{searchQuery ? 'Tệp' : 'Tệp gần đây'}</h2>
+              <h2 className="text-2xl font-semibold text-[#1A1C1C]">{searchQuery ? t.materials.files : t.materials.recentFiles}</h2>
               <div className={viewLayout === 'grid' ? "grid grid-cols-2 lg:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
                 {files.map(file => (
                   <FileItem
@@ -503,7 +499,7 @@ const TeachingMaterialPage = () => {
                     }}
                     onClick={() => {
                       if (selectedItems.length > 0) {
-                        toggleSelection(file);
+                        handleToggleSelect(file, 'file');
                       } else {
                         setSelectedItem(file);
                         setIsFilePreviewOpen(true);
@@ -552,7 +548,7 @@ const TeachingMaterialPage = () => {
           {!isLoading && materials.length === 0 && !searchQuery && (
             <div className="flex flex-col items-center justify-center py-20 text-[#5B403E] opacity-70">
               <FolderPlus className="w-12 h-12 mb-4 text-[#E3BEBA]" />
-              <p>Chưa có thư mục hoặc tài liệu nào.</p>
+              <p>{t.materials.emptyState}</p>
             </div>
           )}
         </>
@@ -654,7 +650,7 @@ const TeachingMaterialPage = () => {
           } else {
             setDeletingItem({
               id: 'bulk',
-              name: `${selectedItems.length} mục đã chọn`,
+              name: t.materials.selectedItemsCount.replace('{{count}}', selectedItems.length),
               count: 0,
               type: 'bulk',
               items: selectedItems
@@ -665,7 +661,7 @@ const TeachingMaterialPage = () => {
         onDownload={() => {
           const filesToDownload = selectedItems.filter(item => item._type === 'file' && item.fileUrl);
           if (filesToDownload.length === 0) {
-            toast.error('Không có tệp nào để tải xuống');
+            toast.error(t.materials.noFilesToDownload);
             return;
           }
 
@@ -689,7 +685,7 @@ const TeachingMaterialPage = () => {
             }
           });
 
-          toast.success(`Đang tải xuống ${filesToDownload.length} tệp`);
+          toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length));
           setSelectedItems([]);
         }}
         onMove={() => {

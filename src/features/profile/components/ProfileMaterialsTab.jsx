@@ -19,6 +19,7 @@ import MoveMaterialModal from '../../materials/components/teaching-material/Move
 import RenameMaterialModal from '../../materials/components/teaching-material/RenameMaterialModal';
 import BulkActionBar from '../../materials/components/teaching-material/BulkActionBar';
 import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const formatSize = (bytes) => {
   if (bytes === 0 || !bytes) return '0 B';
@@ -37,6 +38,7 @@ const MOCK_FOLDERS = []; // Fallback for guest
 const MOCK_FILES = [];
 
 const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [viewLayout, setViewLayout] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,7 +82,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         const meta = metaMap[id] || {};
         flat.push({
           id,
-          name: node.folderName || node.name || 'Thư mục không tên',
+          name: node.folderName || node.name || t.materials.untitledFolder,
           itemsCount: meta.materialCount || node.materialCount || 0,
           updatedAt: formatDate(meta.updatedAt || node.updatedAt),
           isPublic: meta.isPublic !== undefined ? meta.isPublic : false
@@ -99,10 +101,10 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const baseFiles = useMemo(() => {
     if (!isOwnProfile) return MOCK_FILES;
     let rawFiles = Array.isArray(responseData.materials) ? responseData.materials.map(file => ({ ...file, id: file.materialId || file.id })) : [];
-    
+
     return rawFiles.map(file => ({
       id: file.id,
-      name: file.fileName || file.name || 'Tệp không tên',
+      name: file.fileName || file.name || t.materials.untitledFile,
       size: formatSize(file.fileSize || file.size || file.sizeBytes),
       date: formatDate(file.updatedAt),
       isPublic: file.isPublic !== undefined ? file.isPublic : false,
@@ -126,9 +128,9 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   }, [materialsData, selectedItem, materials]);
 
   const filterTabs = [
-    { id: 'all', label: `Tất cả (${baseFolders.length + baseFiles.length})` },
-    { id: 'public', label: `Công khai (${baseFolders.filter(f => f.isPublic).length + baseFiles.filter(f => f.isPublic).length})` },
-    { id: 'private', label: `Riêng tư (${baseFolders.filter(f => !f.isPublic).length + baseFiles.filter(f => !f.isPublic).length})` },
+    { id: 'all', label: t.materials.allTab.replace('{{count}}', baseFolders.length + baseFiles.length) },
+    { id: 'public', label: t.materials.publicTab.replace('{{count}}', baseFolders.filter(f => f.isPublic).length + baseFiles.filter(f => f.isPublic).length) },
+    { id: 'private', label: t.materials.privateTab.replace('{{count}}', baseFolders.filter(f => !f.isPublic).length + baseFiles.filter(f => !f.isPublic).length) },
   ];
 
   const filteredFolders = useMemo(() => {
@@ -196,7 +198,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       <div className="p-4 sm:p-6 bg-white overflow-visible rounded-2xl border border-[#E3BEBA]">
         <div className="flex flex-col gap-4">
           <h2 className="text-xl font-bold text-[#1A1C1C]">
-            {isOwnProfile ? "Quản lý và chia sẻ tài liệu của bạn." : `Tài liệu chia sẻ (${baseFolders.length + baseFiles.length})`}
+            {isOwnProfile ? t.materials.manageAndShare : t.materials.sharedMaterials.replace('{{count}}', baseFolders.length + baseFiles.length)}
           </h2>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -215,12 +217,12 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
               <div className="flex-1" />
             )}
 
-            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+            <div className="flex flex-row items-center gap-3 shrink-0">
               <div className="w-full sm:w-64 relative">
                 <TextInput
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm tài liệu..."
+                  placeholder={t.materials.searchMaterialsPlaceholder}
                   className="!h-10 pl-10 bg-[#F9F9F9] border-none rounded-xl text-sm"
                   icon={Search}
                 />
@@ -251,15 +253,15 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       {(filteredFolders.length === 0 && filteredFiles.length === 0) ? (
         <FluentCard className="p-12 flex flex-col items-center justify-center">
           <EmptyState
-            message="Không tìm thấy tài liệu nào."
-            description={searchQuery ? "Thử tìm kiếm với từ khóa khác" : ""}
+            message={t.materials.noMaterialsFound}
+            description={searchQuery ? t.materials.tryDifferentSearch : ""}
           />
         </FluentCard>
       ) : (
         <div className="flex flex-col gap-6">
           {filteredFolders.length > 0 && (
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-[#1A1C1C]">Thư mục ({filteredFolders.length})</h3>
+              <h3 className="text-xl font-semibold mb-4 text-[#1A1C1C]">{t.materials.folderCountLabel.replace('{{count}}', filteredFolders.length)}</h3>
               <div className={`grid gap-4 ${viewLayout === 'grid' ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
                 {filteredFolders.map(folder => (
                   <ProfileFolderItem
@@ -278,7 +280,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
 
           {filteredFiles.length > 0 && (
             <div>
-              <h3 className="text-xl font-semibold mb-4 text-[#1A1C1C]">Tệp ({filteredFiles.length})</h3>
+              <h3 className="text-xl font-semibold mb-4 text-[#1A1C1C]">{t.materials.fileCountLabel.replace('{{count}}', filteredFiles.length)}</h3>
               <div className={`grid gap-4 ${viewLayout === 'grid' ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1'}`}>
                 {filteredFiles.map(file => {
                   const isSelected = selectedItems.some(item => item.id === file.id && !isFolder(item));
@@ -409,7 +411,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
               } else {
                 setDeletingItem({
                   id: 'bulk',
-                  name: `${selectedItems.length} mục đã chọn`,
+                  name: t.materials.selectedItemsCountLabel.replace('{{count}}', selectedItems.length),
                   count: 0,
                   type: 'bulk',
                   items: selectedItems
@@ -420,12 +422,12 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
             onDownload={() => {
               const filesToDownload = selectedItems.filter(item => !isFolder(item) && item.fileUrl);
               if (filesToDownload.length === 0) {
-                toast.error('Không có tệp nào để tải xuống');
+                toast.error(t.materials.noFilesToDownload);
                 return;
               }
 
               filesToDownload.forEach(file => handleDownloadFile(file));
-              toast.success(`Đang tải xuống ${filesToDownload.length} tệp`);
+              toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length));
               setSelectedItems([]);
             }}
             onMove={() => {

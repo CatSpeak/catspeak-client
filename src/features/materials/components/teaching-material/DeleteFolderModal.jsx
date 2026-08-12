@@ -4,8 +4,10 @@ import { AlertTriangle, FolderMinus } from 'lucide-react';
 import { PillButton } from '@/shared/components/ui/buttons';
 import { useDeletePersonalMaterialMutation, useDeleteMaterialsBulkMutation, useDeleteFolderMutation } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
+  const { t } = useLanguage();
   const [deleteMaterial, { isLoading: isDeletingSingle }] = useDeletePersonalMaterialMutation();
   const [deleteFolder, { isLoading: isDeletingFolder }] = useDeleteFolderMutation();
   const [deleteMaterialsBulk, { isLoading: isDeletingBulk }] = useDeleteMaterialsBulkMutation();
@@ -20,7 +22,7 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
         const materialIds = item.items.filter(i => i._type === 'file' || i.fileName).map(i => i.id);
         
         await deleteMaterialsBulk({ folderIds, materialIds }).unwrap();
-        toast.success(`Đã xóa ${item.items.length} mục thành công`);
+        toast.success(t.materials.deletedMultipleSuccess.replace('{{count}}', item.items.length));
       } else {
         const isFolder = item.type === 'folder' || item._type === 'folder' || (!item.fileName && !item.fileUrl);
         
@@ -29,13 +31,13 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
         } else {
           await deleteMaterial(item.id).unwrap();
         }
-        toast.success(`Đã xóa ${isFolder ? 'thư mục' : 'tệp'} thành công`);
+        toast.success(isFolder ? t.materials.deletedFolderSuccess : t.materials.deletedFileSuccess);
       }
       if (onSuccess) onSuccess();
       else onClose();
     } catch (err) {
       console.error(err);
-      toast.error('Có lỗi xảy ra khi xóa');
+      toast.error(t.materials.deleteError);
     }
   };
 
@@ -47,14 +49,14 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
         roundedClass='rounded-xl'
         disabled={isLoading}
       >
-        Hủy
+        {t.materials.cancel}
       </PillButton>
       <PillButton
         roundedClass='rounded-xl'
         onClick={handleDelete}
         loading={isLoading}
       >
-        Xóa
+        {t.materials.delete}
       </PillButton>
     </div>
   );
@@ -68,7 +70,7 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
           <div className="w-10 h-10 bg-[#FFDAD6] rounded-full flex items-center justify-center shrink-0">
             <AlertTriangle className="w-5 h-5 text-[#BA1A1A]" />
           </div>
-          <span className="text-[20px] font-bold text-gray-800">Xác nhận xóa</span>
+          <span className="text-[20px] font-bold text-gray-800">{t.materials.confirmDelete}</span>
         </div>
       }
       className="md:max-w-[420px] w-full"
@@ -77,15 +79,24 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
     >
       <div className="flex flex-col gap-4">
         <div className="text-base text-[#5B403E]">
-          Bạn có chắc muốn xóa <span className="font-bold text-[#1A1C1C]">"{item.name}"</span>?
-          Hành động này không thể hoàn tác.
+          {t.materials.deleteConfirmMessage.split('"{{name}}"').map((part, index, array) => (
+            <React.Fragment key={index}>
+              {part}
+              {index < array.length - 1 && <span className="font-bold text-[#1A1C1C]">"{item.name}"</span>}
+            </React.Fragment>
+          ))}
         </div>
 
         {item.count > 0 && (
           <div className="bg-[#E8E8E8] border-[#E2E2E2] rounded-xl p-4 flex items-center gap-3">
             <FolderMinus className="w-5 h-5 text-[#5B403E]" strokeWidth={1.5} />
             <span className="text-[14px] text-[#5B403E]">
-              Toàn bộ <span className="font-bold text-[#1A1C1C]">{item.count} mục</span> bên trong sẽ bị xóa.
+              {t.materials.deleteFolderWarning.split('{{count}}').map((part, index, array) => (
+                <React.Fragment key={index}>
+                  {part}
+                  {index < array.length - 1 && <span className="font-bold text-[#1A1C1C]">{item.count}</span>}
+                </React.Fragment>
+              ))}
             </span>
           </div>
         )}

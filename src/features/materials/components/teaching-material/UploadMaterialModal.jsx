@@ -8,6 +8,7 @@ import UploadItem from './UploadItem';
 import { PillButton } from '@/shared/components/ui/buttons';
 import toast from 'react-hot-toast';
 import { useUploadMaterialMutation, useGetFolderTreeQuery } from '@/store/api/materialApi';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const ALLOWED_EXTENSIONS = ['pdf', 'docx', 'xlsx', 'pptx', 'jpg', 'png', 'jpeg'];
@@ -30,6 +31,7 @@ const getFileFingerprint = (file) => {
 };
 
 const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
+  const { t } = useLanguage();
   const [isPublic, setIsPublic] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState(currentFolderId || '');
 
@@ -61,7 +63,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
   traverse(rawFolders);
 
   const folderOptions = [
-    { value: '', label: 'Thư mục gốc (Mặc định)' },
+    { value: '', label: t.materials.rootFolderDefault },
     ...folders
   ];
 
@@ -102,9 +104,9 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
       if (existingFingerprints.has(fingerprint)) {
         hasDuplicate = true;
       } else if (file.size > MAX_FILE_SIZE) {
-        toast.error(`File "${file.name}" vượt quá 50MB`);
+        toast.error(t.materials.fileExceedsSizeLimit.replace('{{name}}', file.name));
       } else if (!ALLOWED_EXTENSIONS.includes(ext)) {
-        toast.error(`File "${file.name}" có định dạng không hỗ trợ`);
+        toast.error(t.materials.fileUnsupportedFormat.replace('{{name}}', file.name));
       } else {
         validFiles.push(file);
         existingFingerprints.add(fingerprint);
@@ -112,13 +114,13 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
     }
 
     if (hasDuplicate) {
-      toast.error("Một số file đã được chọn và bị bỏ qua");
+      toast.error(t.materials.someFilesSkipped);
     }
 
     if (validFiles.length > 0) {
       const remaining = 5 - uploadFiles.length;
       if (validFiles.length > remaining) {
-        toast.error("Chỉ được chọn tối đa 5 file cùng lúc");
+        toast.error(t.materials.maxFilesExceeded);
       }
       const filesToAdd = validFiles.slice(0, remaining);
       const toAdd = filesToAdd.map(file => ({
@@ -148,7 +150,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
 
         reader.onerror = () => {
           setUploadFiles(prev => prev.map(f => f.id === fileId ? { ...f, status: 'error', progress: 0 } : f));
-          toast.error(`Không thể đọc file "${file.name}"`);
+          toast.error(t.materials.cannotReadFile.replace('{{name}}', file.name));
         };
 
         reader.readAsArrayBuffer(file);
@@ -165,7 +167,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
   const handleUpload = async () => {
     const pendingFiles = uploadFiles.filter(f => f.status === 'ready' || f.status === 'error');
     if (pendingFiles.length === 0) {
-      toast.error("Không có file hợp lệ nào cần tải lên");
+      toast.error(t.materials.noValidFilesToUpload);
       return;
     }
 
@@ -196,7 +198,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
           ? { ...f, status: 'success', progress: 100 }
           : f
       ));
-      toast.success(`Đã tải lên ${pendingFiles.length} file thành công`);
+      toast.success(t.materials.uploadSuccessCount.replace('{{count}}', pendingFiles.length));
       handleClose();
     } catch (err) {
       console.error(err);
@@ -205,7 +207,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
           ? { ...f, status: 'error', progress: 0 }
           : f
       ));
-      toast.error(`Lỗi khi tải lên file`);
+      toast.error(t.materials.uploadError);
     }
 
     setIsBusy(false);
@@ -226,7 +228,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
         variant='outline'
         roundedClass='rounded-xl'
       >
-        Hủy
+        {t.materials.cancel}
       </PillButton>
       <PillButton
         roundedClass='rounded-xl'
@@ -235,7 +237,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
         disabled={uploadFiles.filter(f => f.status === 'ready' || f.status === 'error').length === 0}
         startIcon={<Upload className="w-4 h-4" />}
       >
-        Upload
+        {t.materials.upload}
       </PillButton>
     </div>
   );
@@ -244,7 +246,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
     <Modal
       open={open}
       onClose={handleClose}
-      title={"Tải lên tài liệu"}
+      title={t.materials.uploadMaterialTitle}
       className="md:max-w-xl w-full"
       footer={footer}
     >
@@ -271,20 +273,20 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
             <UploadCloud className="w-7 h-7" strokeWidth={2.5} />
           </div>
           <p className="text-[15px] text-gray-800 font-bold mb-1">
-            Kéo thả file hoặc <span className="text-[#8e1115] hover:underline">Chọn tệp</span>
+            {t.materials.dragDropFileOr}<span className="text-[#8e1115] hover:underline">{t.materials.selectFile}</span>
           </p>
           <p className="text-[13px] text-gray-500 mb-1">
-            Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG.
+            {t.materials.supportedFormats}
           </p>
           <p className="text-[13px] text-gray-500">
-            Dung lượng tối đa: 50MB/file. Tối đa 5 file.
+            {t.materials.uploadLimits}
           </p>
         </div>
 
         {/* Uploading list */}
         {uploadFiles.length > 0 && (
           <div>
-            <h4 className="text-base font-semibold text-[#1A1C1C] mb-3">Danh sách tải lên ({uploadFiles.length}/5)</h4>
+            <h4 className="text-base font-semibold text-[#1A1C1C] mb-3">{t.materials.uploadListTitle.replace('{{count}}', uploadFiles.length)}</h4>
             <div className="flex flex-col gap-4">
               {uploadFiles.map(fileObj => (
                 <UploadItem
@@ -305,7 +307,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
         <div className="border-t border-gray-100 pt-4 flex flex-col gap-4">
           {/* Folder select */}
           <div>
-            <label className="block text-base font-bold text-[#1A1C1C] mb-2">Lưu vào thư mục</label>
+            <label className="block text-base font-bold text-[#1A1C1C] mb-2">{t.materials.saveToFolder}</label>
             <Dropdown
               className='border-[#E3BEBA] bg-[#F9F9F9]'
               roundedClass='rounded-xl'
@@ -324,7 +326,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
               onChange={(e) => setIsPublic(e.target.checked)}
               colorClass="peer-checked:bg-[#8e1115]"
             />
-            <span className="text-sm text-[#1A1C1C]">Chia sẻ công khai ngay sau khi upload</span>
+            <span className="text-sm text-[#1A1C1C]">{t.materials.publicShareOnUpload}</span>
           </div>
         </div>
       </div>

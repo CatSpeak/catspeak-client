@@ -3,6 +3,7 @@ import { MoreVertical, Star, Download, Share2, Edit2, FolderInput, StarOff, Sett
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
 import Checkbox from '@/shared/components/ui/inputs/Checkbox';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 import FilePreview from '@/shared/components/ui/FilePreview';
 
@@ -26,6 +27,7 @@ const FileItem = ({
   isSelectionMode,
   onToggleSelect
 }) => {
+  const { t } = useLanguage();
   const isList = layout === 'list';
 
   const timerRef = useRef(null);
@@ -121,7 +123,7 @@ const FileItem = ({
                 <p className="text-xs text-[#5B403E]">{size} • {date}</p>
                 {isPublic && (
                   <span className="text-[10px] px-2.5 py-0.5 bg-[#FFDDAF] text-[#281800] rounded-full font-semibold">
-                    Công khai
+                    {t.materials.public}
                   </span>
                 )}
               </div>
@@ -142,15 +144,15 @@ const FileItem = ({
                   if ((val === 'bookmark' || val === 'unfavorite') && onBookmark) onBookmark();
                 }}
                 options={[
-                  { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
-                  { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
-                  { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
-                  { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
-                  { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích', icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
-                  { value: 'settings', label: 'Chi tiết và Cài đặt', icon: <Settings className="w-4 h-4" /> },
+                  { value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> },
+                  { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
+                  { value: 'rename', label: t.materials.rename, icon: <Edit2 className="w-4 h-4" /> },
+                  { value: 'move', label: t.materials.move, icon: <FolderInput className="w-4 h-4" /> },
+                  { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? t.materials.unfavorite : t.materials.addToFavorites, icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
+                  { value: 'settings', label: t.materials.detailsAndSettings, icon: <Settings className="w-4 h-4" /> },
                   {
                     value: 'delete',
-                    label: <span className="text-[#BA1A1A]">Xóa</span>,
+                    label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>,
                     icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
                   },
                 ]}
@@ -213,15 +215,15 @@ const FileItem = ({
                   if ((val === 'bookmark' || val === 'unfavorite') && onBookmark) onBookmark();
                 }}
                 options={[
-                  { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
-                  { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
-                  { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
-                  { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
-                  { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích', icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
-                  { value: 'settings', label: 'Chi tiết và Cài đặt', icon: <Settings className="w-4 h-4" /> },
+                  { value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> },
+                  { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
+                  { value: 'rename', label: t.materials.rename, icon: <Edit2 className="w-4 h-4" /> },
+                  { value: 'move', label: t.materials.move, icon: <FolderInput className="w-4 h-4" /> },
+                  { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? t.materials.unfavorite : t.materials.addToFavorites, icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
+                  { value: 'settings', label: t.materials.detailsAndSettings, icon: <Settings className="w-4 h-4" /> },
                   {
                     value: 'delete',
-                    label: <span className="text-[#BA1A1A]">Xóa</span>,
+                    label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>,
                     icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" />
                   },
                 ]}
@@ -252,7 +254,7 @@ const FileItem = ({
                 <p className="text-xs text-[#5B403E]">{size} • {date}</p>
                 {isPublic && (
                   <span className="text-[10px] px-2.5 py-0.5 bg-[#FFDDAF] text-[#281800] rounded-full font-semibold">
-                    Công khai
+                    {t.materials.public}
                   </span>
                 )}
               </div>

@@ -3,15 +3,17 @@ import Modal from '@/shared/components/ui/Modal';
 import { PillButton } from '@/shared/components/ui/buttons';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { ChevronDown } from 'lucide-react';
-
-const FILE_TYPES = [
-  { value: 'word', label: 'Word' },
-  { value: 'excel', label: 'Excel' },
-  { value: 'powerpoint', label: 'Powerpoint' },
-  { value: 'image', label: 'Hình ảnh' }
-];
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
+  const { t } = useLanguage();
+  const FILE_TYPES = [
+    { value: 'word', label: 'Word' },
+    { value: 'excel', label: 'Excel' },
+    { value: 'powerpoint', label: 'Powerpoint' },
+    { value: 'image', label: t.materials.imageFilter }
+  ];
+
   const [filterMode, setFilterMode] = useState(currentFilters?.filterMode || 'folder');
   const [filterFileType, setFilterFileType] = useState(currentFilters?.filterFileType || 'word');
   const [prevOpen, setPrevOpen] = useState(open);
@@ -48,14 +50,14 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
         textColor="#6E0009"
         roundedClass="rounded-xl"
       >
-        Xóa bộ lọc
+        {t.materials.clearFilters}
       </PillButton>
       <div className="flex items-center gap-3">
         <PillButton onClick={onClose} variant="outline" roundedClass="rounded-xl">
-          Hủy
+          {t.materials.cancel}
         </PillButton>
         <PillButton onClick={handleApply} roundedClass="rounded-xl">
-          Áp dụng
+          {t.materials.apply}
         </PillButton>
       </div>
     </div>
@@ -65,7 +67,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title="Bộ lọc tìm kiếm"
+      title={t.materials.searchFilterTitle}
       footer={footer}
       className="md:max-w-[400px]"
       bodyClassName="px-4 md:px-6 flex-1 overflow-y-auto"
@@ -80,7 +82,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
             checked={filterMode === 'folder'}
             onChange={() => setFilterMode('folder')}
           />
-          <span className="text-[#1A1C1C] text-base font-medium">Thư mục</span>
+          <span className="text-[#1A1C1C] text-base font-medium">{t.materials.folderFilter}</span>
         </label>
 
         {/* Option 2: Loại file */}
@@ -93,7 +95,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
               checked={filterMode === 'fileType'}
               onChange={() => setFilterMode('fileType')}
             />
-            <span className="text-[#1A1C1C] text-base font-medium">Loại file</span>
+            <span className="text-[#1A1C1C] text-base font-medium">{t.materials.fileTypeFilter}</span>
           </label>
 
           {/* Dropdown for file type */}
@@ -120,7 +122,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
             checked={filterMode === 'bookmark'}
             onChange={() => setFilterMode('bookmark')}
           />
-          <span className="text-[#1A1C1C] text-base font-medium">Đã yêu thích</span>
+          <span className="text-[#1A1C1C] text-base font-medium">{t.materials.bookmarkedFilter}</span>
         </label>
       </div>
     </Modal>

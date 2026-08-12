@@ -8,8 +8,10 @@ import { PillButton } from '@/shared/components/ui/buttons';
 import { useGetFolderTreeQuery, useCreateFolderMutation } from '@/store/api/materialApi';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
+  const { t } = useLanguage();
   const [folderName, setFolderName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedIds, setExpandedIds] = useState([]);
@@ -99,12 +101,12 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
         name: folderName.trim(),
         parentId: selectedFolder?.folderId,
       }).unwrap();
-      toast.success('Tạo thư mục thành công');
+      toast.success(t.materials.createFolderSuccess);
       setFolderName("");
       onClose();
     } catch (error) {
       console.error("Failed to create folder", error);
-      toast.error('Tạo thư mục thất bại');
+      toast.error(t.materials.createFolderError);
     }
   };
 
@@ -115,7 +117,7 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
         variant='outline'
         roundedClass='rounded-xl'
       >
-        Hủy
+        {t.materials.cancel}
       </PillButton>
       <PillButton
         startIcon={<FolderPlus />}
@@ -124,7 +126,7 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
         loading={isCreating}
         disabled={!folderName.trim()}
       >
-        Tạo thư mục
+        {t.materials.createFolder}
       </PillButton>
     </div>
   );
@@ -133,7 +135,7 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
     <Modal
       open={open}
       onClose={onClose}
-      title="Tạo thư mục mới"
+      title={t.materials.createFolder}
       bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       footer={footer}
     >
@@ -141,19 +143,19 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
         <TextInput
           value={folderName}
           onChange={(e) => setFolderName(e.target.value)}
-          label={"Tên thư mục"}
+          label={t.materials.folderName}
           labelClassName="font-bold text-base"
-          placeholder="Nhập tên thư mục"
+          placeholder={t.materials.enterFolderName}
           className="!h-12 rounded-xl"
         />
         <div>
           <TextInput
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            label={"Vị trí"}
+            label={t.materials.location}
             labelClassName="font-bold text-base"
             icon={Search}
-            placeholder="Tìm thư mục..."
+            placeholder={t.materials.searchFolder}
             className='!h-12 rounded-xl'
           />
 
@@ -161,12 +163,12 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
             {isFetchingTree ? (
               <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
                 <LoadingSpinner />
-                <span>Đang tải danh sách thư mục...</span>
+                <span>{t.materials.loadingFolderList}</span>
               </div>
             ) : folders.length === 0 ? (
               <div className="flex flex-col items-center justify-center flex-1 text-sm text-[#5B403E] gap-2 opacity-70">
                 <FolderOpen className="w-8 h-8" />
-                <span>Chưa có thư mục nào</span>
+                <span>{t.materials.noFolders}</span>
               </div>
             ) : (
               <div className="flex flex-col gap-1">
@@ -187,8 +189,8 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
 
           <p className="text-sm text-[#5B403E] mt-2">
             {selectedFolder
-              ? `Thư mục mới sẽ được tạo bên trong "${selectedFolder.folderName}".`
-              : 'Thư mục mới sẽ được tạo ở thư mục gốc.'}
+              ? t.materials.createInFolder.replace('{{folder}}', selectedFolder.folderName)
+              : t.materials.createInRootFolder}
           </p>
         </div>
       </div>

@@ -4,6 +4,7 @@ import FilePreview from '@/shared/components/ui/FilePreview';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
 import Checkbox from '@/shared/components/ui/inputs/Checkbox';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 const ProfileFileItem = ({
   title,
@@ -26,6 +27,7 @@ const ProfileFileItem = ({
   isSelectionMode,
   onToggleSelect
 }) => {
+  const { t } = useLanguage();
   const timerRef = useRef(null);
   const isLongPressRef = useRef(false);
 
@@ -89,17 +91,17 @@ const ProfileFileItem = ({
       options={
         isOwnProfile
           ? [
-            { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
-            { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
-            { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
-            { value: 'edit', label: 'Chỉnh sửa', icon: <Settings className="w-4 h-4" /> },
-            { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
-            { value: 'delete', label: <span className="text-[#BA1A1A]">Xóa</span>, icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" /> },
+            { value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> },
+            { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
+            { value: 'rename', label: t.materials.rename, icon: <Edit2 className="w-4 h-4" /> },
+            { value: 'edit', label: t.materials.edit, icon: <Settings className="w-4 h-4" /> },
+            { value: 'move', label: t.materials.move, icon: <FolderInput className="w-4 h-4" /> },
+            { value: 'delete', label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>, icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" /> },
           ]
           : [
-            { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
-            { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
-            { value: 'bookmark', label: 'Lưu', icon: <Bookmark className="w-4 h-4" /> }
+            { value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> },
+            { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
+            { value: 'bookmark', label: t.materials.bookmark, icon: <Bookmark className="w-4 h-4" /> }
           ]
       }
       trigger={(isOpen, selectedOption, toggleDropdown) => (
@@ -165,9 +167,9 @@ const ProfileFileItem = ({
               <div className="flex items-center gap-2">
                 <p className="text-xs text-[#5B403E]">{size} • {date}</p>
                 {isPublic ? (
-                  <span className="text-[10px] px-2 py-0.5 bg-[#E6F4EA] text-[#137333] rounded-full font-semibold">Công khai</span>
+                  <span className="text-[10px] px-2 py-0.5 bg-[#E6F4EA] text-[#137333] rounded-full font-semibold">{t.materials.public}</span>
                 ) : (
-                  <span className="text-[10px] px-2 py-0.5 bg-[#F1F3F4] text-[#5F6368] rounded-full font-semibold">Riêng tư</span>
+                  <span className="text-[10px] px-2 py-0.5 bg-[#F1F3F4] text-[#5F6368] rounded-full font-semibold">{t.materials.private}</span>
                 )}
               </div>
             </div>
@@ -215,11 +217,11 @@ const ProfileFileItem = ({
               <div className="mt-2">
                 {isPublic ? (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#E6F4EA] text-[#137333]">
-                    Công khai
+                    {t.materials.public}
                   </span>
                 ) : (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#F1F3F4] text-[#5F6368]">
-                    Riêng tư
+                    {t.materials.private}
                   </span>
                 )}
               </div>
