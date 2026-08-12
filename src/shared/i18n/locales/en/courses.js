@@ -448,6 +448,16 @@ export default {
     toastRouting: "Routing to virtual classroom...",
     createPost: "Create Classwork",
     cancelClass: "Cancel Class",
+    inviteFriends: "Invite Friends",
+    inviteToClass: "Invite to join this class",
+    invited: "Invited",
+    noFriendsToInvite: "No friends available to invite",
+    noFriendsToInviteDesc: "All your friends are already in this class or you don't have any friends yet.",
+    noFriendsFound: "No friends found",
+    noFriendsFoundDesc: "Please try searching with a different keyword.",
+    toastInviteSuccess: "Class invitation sent to {{name}}!",
+    toastInviteFailed: "Failed to send invitation. Please try again!",
+    searchFriends: "Search friends...",
     leadInstructor: "LEAD INSTRUCTOR",
     leadInstructorLabel: "Lead Instructor",
     message: "Message",
@@ -751,7 +761,7 @@ export default {
     enrolled: "Enrolled",
     tuitionFee: "Tuition Fee",
     enroll: "Enroll",
-    remainingSlots: "Remaining Slots",
+    enrolledSlots: "Enrolled Slots",
     sessionCount: "Session Count",
     sessionsText: "Sessions",
     enrollmentPeriod: "Registration Period",
@@ -1619,6 +1629,8 @@ export default {
       writeCommentPlaceholder: "Write a comment...",
       writeReplyPlaceholder: "Write a reply...",
       send: "Send",
+      cancel: "Cancel",
+      sendComment: "Send comment",
       locked: "Comments are locked for this post",
       toastCommentSuccess: "Comment posted",
       toastReplySuccess: "Reply posted",
@@ -1865,6 +1877,10 @@ export default {
       quiz_regraded: {
         title: "Class {className}",
         body: "Your {quizName} has been regraded."
+      },
+      class_invite: {
+        title: "Class Invitation",
+        body: "{teacherName} has invited you to join the class \"{className}\""
       }
     }
   },
@@ -1873,7 +1889,6 @@ export default {
     notFoundTitle: "Class details not found",
     notFoundDesc: "The class may have been deleted or the URL is invalid. Please return to explore courses.",
     exploreOtherBtn: "Explore Other Classes",
-    back: "Back",
     overviewTitle: "Detailed Class Overview",
     defaultDescription: "This class offers a highly interactive learning environment, combining core theory with practical communication activities tailored for real-world scenarios.",
     tuitionFeeFull: "All-inclusive tuition fee",
@@ -1893,7 +1908,7 @@ export default {
     curriculumSub: "Structured training curriculum",
     flexibleSchedule: "Flexible schedule",
     scheduleSub: "Flexible weekly schedule",
-    spotsLeft: "{{remaining}}/{{capacity}} slots",
+    spotsLeft: "{{remaining}}/{{capacity}} spots",
     spotsSub: "Allowed student enrollment capacity",
     instructorTitle: "Instructor Information",
     verifiedTeacher: "Verified Instructor by CatSpeak",

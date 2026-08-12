@@ -138,7 +138,7 @@ const AddMembersModal = ({
                   <p>{friend.nickname || friend.username}</p>
                   <p className="text-sm text-[#606060]">
                     {friend.isTeacher
-                      ? (t?.chat?.userPanel?.teacher || "Giáo viên")
+                      ? (t?.chat?.userPanel?.teacher || "Giảng viên")
                       : (friend.level || t?.chat?.userPanel?.student || "Student")}
                   </p>
                 </ListItem>

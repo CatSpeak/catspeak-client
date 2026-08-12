@@ -67,7 +67,7 @@ export default {
       {
         text: "Tôi đã thử nhiều app học tiếng Anh nhưng Cat Speak có cộng đồng tốt nhất. Được kết bạn với người bản xứ thật sự rất thú vị!",
         name: "Văn Đức",
-        role: "Giáo viên",
+        role: "Giảng viên",
       },
       {
         text: "Ứng dụng giúp mình tự tin hơn khi giao tiếp. Lộ trình học cá nhân hóa theo nhu cầu từng người rất hiệu quả.",

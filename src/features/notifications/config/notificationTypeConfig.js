@@ -1,16 +1,54 @@
-import { BookOpen, CalendarClock, PenSquare, CheckCircle2, RotateCw, Megaphone, Zap, UserPlus, UserCheck, GraduationCap } from "lucide-react"
+import {
+  BookOpen,
+  CalendarClock,
+  PenSquare,
+  CheckCircle2,
+  RotateCw,
+  Megaphone,
+  Zap,
+  UserPlus,
+  UserCheck,
+} from "lucide-react";
 
 const replaceVars = (text, m) => {
   if (!text) return text;
   return text
     .replace(/{className}/g, m.className || "Không rõ")
     .replace(/{assignmentName}/g, m.assignmentName || "Không rõ")
-    .replace(/{quizName}/g, m.quizName || "Không rõ");
-}
+    .replace(/{quizName}/g, m.quizName || "Không rõ")
+    .replace(/{teacherName}/g, m.teacherName || m.inviterName || "Giảng viên");
+};
 
-const getLoc = (t) => t.courses?.notifications || t.courses?.lectureHall?.notifications;
+const getLoc = (t) =>
+  t.courses?.notifications || t.courses?.lectureHall?.notifications;
 
 export const NOTIFICATION_TYPES = {
+  class_invite: {
+    icon: UserPlus,
+    color: "text-indigo-500",
+    resolveTitle: (m, t) =>
+      replaceVars(getLoc(t)?.class_invite?.title || "Lời mời tham gia lớp học", m),
+    resolveBody: (m, t) =>
+      replaceVars(
+        getLoc(t)?.class_invite?.body ||
+          "{teacherName} đã mời bạn tham gia lớp học {className}",
+        m,
+      ),
+    resolveUrl: (m) => `/explore-courses/class/${m.classId}`,
+  },
+  ClassInvite: {
+    icon: UserPlus,
+    color: "text-indigo-500",
+    resolveTitle: (m, t) =>
+      replaceVars(getLoc(t)?.class_invite?.title || "Lời mời tham gia lớp học", m),
+    resolveBody: (m, t) =>
+      replaceVars(
+        getLoc(t)?.class_invite?.body ||
+          "{teacherName} đã mời bạn tham gia lớp học {className}",
+        m,
+      ),
+    resolveUrl: (m) => `/workspace/learning/class/${m.classId}`,
+  },
   class_update: {
     icon: BookOpen,
     color: "text-blue-500",
@@ -145,53 +183,136 @@ export const NOTIFICATION_TYPES = {
   friend_request_accepted: {
     icon: CheckCircle2,
     color: "text-emerald-500",
-    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_accepted?.title || "Lời mời kết bạn đã được chấp nhận",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_request_accepted?.title ||
+      "Lời mời kết bạn đã được chấp nhận",
     resolveBody: (m, t) => {
-      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
-      const suffix = t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn";
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestAccepted ||
+        "đã chấp nhận lời mời kết bạn của bạn";
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
     },
   },
-  FriendRequestAccepted: {
-    icon: CheckCircle2,
-    color: "text-emerald-500",
-    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_accepted?.title || "Lời mời kết bạn đã được chấp nhận",
+
+  friend_acceptance: {
+    icon: UserCheck,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_accepted?.title ||
+      "Đã chấp nhận kết bạn",
     resolveBody: (m, t) => {
-      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
-      const suffix = t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn";
+      const name = m.userName || "Ai đó";
+      return (
+        t.profile?.notifications?.friend_accepted?.body?.replace(
+          "{responderName}",
+          name,
+        ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
+      );
+    },
+    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
+    resolveAvatarUrl: (m) => m.avatarUrl || null,
+  },
+
+  friend_accepted: {
+    icon: UserCheck,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_accepted?.title ||
+      "Đã chấp nhận kết bạn",
+    resolveBody: (m, t) => {
+      const name = m.userName || "Ai đó";
+      return (
+        t.profile?.notifications?.friend_accepted?.body?.replace(
+          "{responderName}",
+          name,
+        ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
+      );
+    },
+    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
+    resolveAvatarUrl: (m) => m.avatarUrl || null,
+  },
+
+  FriendAccepted: {
+    icon: UserCheck,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_request_accepted?.title ||
+      "Lời mời kết bạn đã được chấp nhận",
+    resolveBody: (m, t) => {
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestAccepted ||
+        "đã chấp nhận lời mời kết bạn của bạn";
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
     },
   },
   friend_request_declined: {
     icon: CalendarClock,
     color: "text-gray-500",
-    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_declined?.title || "Lời mời kết bạn bị từ chối",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_request_declined?.title ||
+      "Lời mời kết bạn bị từ chối",
     resolveBody: (m, t) => {
-      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
-      const suffix = t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn";
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestDeclined ||
+        "đã từ chối lời mời kết bạn của bạn";
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
     },
   },
   FriendRequestDeclined: {
     icon: CalendarClock,
     color: "text-gray-500",
-    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_declined?.title || "Lời mời kết bạn bị từ chối",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_request_declined?.title ||
+      "Lời mời kết bạn bị từ chối",
     resolveBody: (m, t) => {
-      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
-      const suffix = t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn";
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestDeclined ||
+        "đã từ chối lời mời kết bạn của bạn";
       return `${name} ${suffix}`;
     },
     resolveUrl: (m) => {
-      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`;
     },
   },
   new_post: {
@@ -229,25 +350,20 @@ export const NOTIFICATION_TYPES = {
         : `/${lang}/cat-speak/reels`;
     },
   },
-  instructor_profile_approved: {
-    icon: GraduationCap,
-    color: "text-emerald-500",
-    resolveTitle: (m, t) =>
-      t.notifications?.instructor_profile_approved?.title ||
-      "Hồ sơ Giảng viên đã được phê duyệt",
-    resolveBody: (m, t) =>
-      t.notifications?.instructor_profile_approved?.body ||
-      "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
-    resolveUrl: () => "/setting/instructor",
-  },
-}
+};
 
 export function resolveNotification(notif, t) {
   console.log(notif);
-  const cfg = NOTIFICATION_TYPES[notif.type]
-  if (!cfg) return { ...notif, resolvedTitle: notif.title, resolvedBody: notif.body, resolvedUrl: notif.actionUrl }
+  const cfg = NOTIFICATION_TYPES[notif.type];
+  if (!cfg)
+    return {
+      ...notif,
+      resolvedTitle: notif.title,
+      resolvedBody: notif.body,
+      resolvedUrl: notif.actionUrl,
+    };
 
-  const meta = notif.metadata || {}
+  const meta = notif.metadata || {};
   const resolvedTitle = cfg.resolveTitle(meta, t);
   const resolvedBody = cfg.resolveBody(meta, t);
   return {
@@ -257,9 +373,15 @@ export function resolveNotification(notif, t) {
     resolvedUrl: cfg.resolveUrl(meta) || notif.actionUrl,
     icon: cfg.icon,
     color: cfg.color,
-  }
+  };
 }
 
 export function getNotificationType(type) {
-  return NOTIFICATION_TYPES[type] || { icon: null, label: "", color: "text-blue-500" }
+  return (
+    NOTIFICATION_TYPES[type] || {
+      icon: null,
+      label: "",
+      color: "text-blue-500",
+    }
+  );
 }
