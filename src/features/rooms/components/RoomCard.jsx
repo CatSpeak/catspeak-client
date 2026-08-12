@@ -7,7 +7,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import { useAuth } from "@/features/auth";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
-import { calculateEndDate } from "@/shared/utils/dateUtils";
+import { calculateEndDate, isRoomExpired } from "@/shared/utils/dateUtils";
 import toast from "react-hot-toast";
 import { useToggleBookmarkRoomMutation } from "@/store/api/roomsApi";
 import RoomFullModal from "./RoomFullModal";
@@ -59,6 +59,8 @@ const RoomCard = ({ room }) => {
     !isUnlimitedParticipants &&
     (room.currentParticipantCount || 0) >= room.maxParticipants;
 
+  const isExpired = isRoomExpired(room);
+
   const isPrivate = room.privacy === "Private" || room.isPrivate;
   const hasPassword =
     room.hasPassword || room.isPasswordProtected || !!room.password;
@@ -67,6 +69,13 @@ const RoomCard = ({ room }) => {
 
   const handleJoinRoom = (e) => {
     e.stopPropagation();
+
+    if (isExpired) {
+      toast.error(
+        t?.rooms?.callEnded?.expiredToast || "Phòng này đã hết thời hạn sử dụng!"
+      );
+      return;
+    }
 
     // If user is not authenticated, open login modal instead of navigating
     if (!isAuthenticated) {
@@ -97,6 +106,14 @@ const RoomCard = ({ room }) => {
   const [showCopied, setShowCopied] = useState(false);
 
   const handleRoomClick = (e) => {
+    if (isExpired) {
+      e.stopPropagation();
+      toast.error(
+        t?.rooms?.callEnded?.expiredToast || "Phòng này đã hết thời hạn sử dụng!"
+      );
+      return;
+    }
+
     if (isRoomFull) {
       e.stopPropagation();
       setShowFullModal(true);
@@ -180,7 +197,15 @@ const RoomCard = ({ room }) => {
           />
 
           {/* Top Left: Badges */}
-          <div className="absolute left-2 top-2 max-w-[55%] flex items-center gap-1.5 z-10 p-1">
+          <div className="absolute left-2 top-2 max-w-[65%] flex items-center gap-1.5 z-10 p-1">
+            {isExpired && (
+              <div
+                className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-2.5 bg-[#580009] text-white border border-white/25 text-[11px] sm:text-xs font-bold rounded-md shadow-sm cursor-default"
+                title={t?.rooms?.expiredBadge || "Đã hết hạn"}
+              >
+                {t?.rooms?.expiredBadge || "Đã hết hạn"}
+              </div>
+            )}
             {room.requiredLevel && (
               <div
                 className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate cursor-default"

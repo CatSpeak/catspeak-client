@@ -583,6 +583,8 @@ export default {
   noLimit: "无限制",
   copySuccess: "链接已复制",
   copyLinkTooltip: "复制链接",
+  expiredBadge: "已过期",
+  roomExpiredToast: "该房间已过期！",
   callEnded: {
     titleExpired: "此会话已过期",
     titleLeft: "您已离开会议",
@@ -590,6 +592,7 @@ export default {
     descLeft: "您可以安全地关闭此窗口或返回主屏幕。",
     rejoin: "重新加入",
     returnHome: "返回主页",
+    expiredToast: "由于房间时长已满，通话已结束",
   },
   breakoutRooms: {
     mainRoom: "主房间",

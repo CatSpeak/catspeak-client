@@ -65,7 +65,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   )
 
   // Fallback: If SignalR event was missed (e.g. tab backgrounded / network drop),
-  // trigger the closing warning modal locally when local remaining time is <= 60s.
+  // trigger the closing warning modal locally when local remaining time is <= 300s (5 minutes).
   useEffect(() => {
     if (closingTargetMs !== null) return
 
@@ -77,7 +77,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
       const endMs = new Date(createDate).getTime() + duration * 60 * 1000
       const remainingSeconds = (endMs - Date.now()) / 1000
 
-      if (remainingSeconds > 0 && remainingSeconds <= 60) {
+      if (remainingSeconds > 0 && remainingSeconds <= 300) {
         console.info(
           "[RoomLifecycle] Local warning fallback triggered:",
           Math.round(remainingSeconds),
@@ -101,12 +101,17 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
         Math.ceil((closingTargetMs - Date.now()) / 1000),
       )
       setClosingRemainingSeconds(remaining)
+
+      if (remaining <= 0 && lkRoom) {
+        console.info("[RoomLifecycle] Room time expired (00:00), disconnecting room...")
+        lkRoom.disconnect()
+      }
     }
 
     updateRemaining()
     const intervalId = setInterval(updateRemaining, 1000)
     return () => clearInterval(intervalId)
-  }, [closingTargetMs])
+  }, [closingTargetMs, lkRoom])
 
   const handleJoinBreakoutRoom = useCallback(
     (subSessionId, roomName, token) => {
@@ -236,13 +241,14 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
 
     const handleDisconnected = () => {
       dispatch(leaveCall())
+      dispatch(roomsApi.util.invalidateTags(["Rooms"]))
       const navigateFn = getNavigate()
       const locationObj = getLocation()
       if (locationObj && locationObj.pathname.includes("/meet/")) {
         navigateFn(getCommunityPath(language), { replace: true })
-        if (closingRemainingSeconds !== null) {
+        if (closingRemainingSeconds !== null && closingRemainingSeconds <= 0) {
           toast.error(
-            t?.rooms?.callEnded?.expiredToast ?? 'The session has ended',
+            t?.rooms?.callEnded?.expiredToast ?? "Cuộc gọi đã kết thúc do hết thời lượng phòng",
           )
         }
       }
