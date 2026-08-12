@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
@@ -9,7 +9,6 @@ import {
   Camera,
 } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
-import ImageCropModal from "@/shared/components/ui/ImageCropModal";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import RequestButton from "@/shared/components/ui/buttons/RequestButton";
 import {

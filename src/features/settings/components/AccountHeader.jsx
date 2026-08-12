@@ -3,7 +3,6 @@ import toast from "react-hot-toast";
 import { Camera, Users, Check } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import Modal from "@/shared/components/ui/Modal";
-import ImageCropModal from "@/shared/components/ui/ImageCropModal";
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
@@ -54,7 +53,14 @@ const AccountHeader = ({ user, formData, t }) => {
       : null) ||
     (typeof currentBackgroundResponse === "string"
       ? currentBackgroundResponse
-      : null);
+      : null) ||
+    formData?.virtualBackgroundUrl ||
+    user?.virtualBackgroundUrl ||
+    formData?.activeBackgroundUrl ||
+    user?.activeBackgroundUrl ||
+    formData?.backgroundUrl ||
+    user?.backgroundUrl ||
+    null;
 
   // Optional: khi user đang trong call, đồng bộ avatar mới xuống LiveKit metadata ngay lập tức
   let localParticipant = null;
@@ -139,7 +145,11 @@ const AccountHeader = ({ user, formData, t }) => {
           {/* Hover Overlay */}
           <div
             onClick={triggerCoverUpload}
-            className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer z-10"
+            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity cursor-pointer z-10 ${
+              isCoverUpdating
+                ? "opacity-100"
+                : "opacity-0 group-hover/cover:opacity-100"
+            }`}
           >
             {isCoverUpdating ? (
               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -210,7 +220,7 @@ const AccountHeader = ({ user, formData, t }) => {
       </div>
 
       {/* Main Profile Avatar floating over Cover (Original Bottom-Left Position) */}
-      <div className="absolute -bottom-12 left-8 sm:left-12 z-20 group w-fit bg-white rounded-full p-1 shadow-sm">
+      <div className="absolute -bottom-12 left-8 sm:left-12 z-20 group/avatar w-fit bg-white rounded-full p-1 shadow-sm">
         <div
           className="relative rounded-full overflow-hidden cursor-pointer"
           onClick={triggerAvatarUpload}
@@ -226,7 +236,7 @@ const AccountHeader = ({ user, formData, t }) => {
             className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
               isUpdatingAvatar
                 ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
+                : "opacity-0 group-hover/avatar:opacity-100"
             }`}
           >
             {isUpdatingAvatar ? (
@@ -241,28 +251,9 @@ const AccountHeader = ({ user, formData, t }) => {
           ref={fileInputRef}
           className="hidden"
           accept="image/*"
-          onChange={handleAvatarSelect}
+          onChange={handleAvatarChange}
         />
       </div>
-
-      {/* Image Crop Modal for Profile Avatar */}
-      {isCropModalOpen && fileToCrop && (
-        <ImageCropModal
-          image={fileToCrop}
-          isOpen={isCropModalOpen}
-          cropPreset="avatar"
-          title={t.profile?.personalInfo?.cropAvatarTitle || "Cắt ảnh đại diện"}
-          onClose={() => {
-            setIsCropModalOpen(false)
-            setFileToCrop(null)
-          }}
-          onCropComplete={(croppedFile) => {
-            handleCropComplete(croppedFile)
-            setIsCropModalOpen(false)
-            setFileToCrop(null)
-          }}
-        />
-      )}
 
       {/* Meeting Avatar URL Modal */}
       <Modal
