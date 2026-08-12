@@ -34,7 +34,7 @@ export const NOTIFICATION_TYPES = {
           "{teacherName} đã mời bạn tham gia lớp học {className}",
         m,
       ),
-    resolveUrl: (m) => `/workspace/learning/class/${m.classId}`,
+    resolveUrl: (m) => `/explore-courses/class/${m.classId}`,
   },
   ClassInvite: {
     icon: UserPlus,
