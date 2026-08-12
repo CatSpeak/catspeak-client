@@ -59,6 +59,7 @@ export default {
         noRecommendations: "No suggestions.",
       },
       actions: {
+        actions: "Actions",
         accept: "Accept",
         decline: "Decline",
         acceptSuccess: "Friend request accepted!",

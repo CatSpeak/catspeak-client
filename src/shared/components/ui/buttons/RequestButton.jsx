@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from "react"
 import toast from "react-hot-toast"
-import { UserPlus, UserMinus, Check, X } from "lucide-react"
+import { UserPlus, UserMinus, Check, X, EllipsisVertical } from "lucide-react"
 import PillButton from "./PillButton"
+import Popover from "@/shared/components/ui/Popover"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import {
@@ -279,10 +281,11 @@ const RequestButton = ({
     }
   }
 
-  const handleAccept = async (e) => {
+  const handleAccept = async (e, closePopover) => {
     if (e && typeof e.stopPropagation === "function") {
       e.stopPropagation()
     }
+    closePopover?.()
     const fId = effectiveFriendshipId
     if (isFriendshipDisabled || !fId) return
 
@@ -321,10 +324,11 @@ const RequestButton = ({
     }
   }
 
-  const handleDecline = async (e) => {
+  const handleDecline = async (e, closePopover) => {
     if (e && typeof e.stopPropagation === "function") {
       e.stopPropagation()
     }
+    closePopover?.()
     const fId = effectiveFriendshipId
     if (isFriendshipDisabled || !fId) return
 
@@ -373,34 +377,52 @@ const RequestButton = ({
       ? "!h-8 [&>div]:!h-7 [&>div]:px-2.5 [&>div]:text-xs [&>div_span]:w-3.5 [&>div_span]:h-3.5"
       : ""
 
-  // Case: B received a friend request from A -> Display "Chấp nhận" and "Từ chối" buttons
+  // Case: B received a friend request from A -> Display Popover dropdown "<EllipsisVertical /> Hành động"
   if (isIncomingRequest) {
-    return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        <PillButton
-          variant="primary"
-          startIcon={<Check />}
-          onClick={handleAccept}
-          disabled={isFriendshipDisabled}
-          loading={respondingAction === "accept"}
-          className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
-          {...props}
-        >
-          {t.profile?.friends?.actions?.accept || "Chấp nhận"}
-        </PillButton>
+    const actionLabel =
+      t.profile?.friends?.actions?.actions ||
+      t.profile?.friends?.actions?.title ||
+      t.common?.actions ||
+      "Hành động"
 
-        <PillButton
-          variant="secondary"
-          startIcon={<X />}
-          onClick={handleDecline}
-          disabled={isFriendshipDisabled}
-          loading={respondingAction === "decline"}
-          className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
-          {...props}
-        >
-          {t.profile?.friends?.actions?.decline || "Từ chối"}
-        </PillButton>
-      </div>
+    return (
+      <Popover
+        placement="bottom-right"
+        className={className}
+        trigger={
+          <PillButton
+            variant="outline"
+            startIcon={<EllipsisVertical size={16} />}
+            disabled={isFriendshipDisabled}
+            loading={isRespondingLoading}
+            className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
+            {...props}
+          >
+            {actionLabel}
+          </PillButton>
+        }
+        content={(close) => (
+          <MenuList>
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                handleAccept(e, close)
+              }}
+              icon={<Check size={16} />}
+              label={t.profile?.friends?.actions?.accept || "Chấp nhận"}
+            />
+            <MenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                handleDecline(e, close)
+              }}
+              icon={<X size={16} />}
+              label={t.profile?.friends?.actions?.decline || "Từ chối"}
+              className="text-red-600"
+            />
+          </MenuList>
+        )}
+      />
     )
   }
 
