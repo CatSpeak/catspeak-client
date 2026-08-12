@@ -762,7 +762,7 @@ export default {
     tuitionFee: "学费",
     goToWorkspace: "前往学习空间 →",
     enroll: "立即报名",
-    enrolledSlots: "已报名名额",
+    remainingSlots: "剩余名额",
     sessionCount: "课时总数",
     sessionsText: "课时",
     virtualClassroom: "虚拟教室",

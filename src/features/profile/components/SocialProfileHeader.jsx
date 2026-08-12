@@ -118,7 +118,6 @@ const SocialProfileHeader = ({
       console.error(err);
     }
   };
-
   return (
     <div className="w-full bg-white border border-border rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}

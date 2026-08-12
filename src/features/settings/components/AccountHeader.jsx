@@ -94,7 +94,7 @@ const AccountHeader = ({ user, formData, t }) => {
     try {
       toast.loading(
         t.profile?.personalInfo?.updatingMeetingAvatar ||
-          "Đang cập nhật ảnh đại diện phòng họp...",
+        "Đang cập nhật ảnh đại diện phòng họp...",
         { id: "meeting-avatar-update" },
       );
 
@@ -108,7 +108,7 @@ const AccountHeader = ({ user, formData, t }) => {
 
       toast.success(
         t.profile?.personalInfo?.updateMeetingAvatarSuccess ||
-          "Cập nhật ảnh đại diện phòng họp thành công",
+        "Cập nhật ảnh đại diện phòng họp thành công",
         { id: "meeting-avatar-update" },
       );
       setIsMeetingAvatarModalOpen(false);
@@ -116,7 +116,7 @@ const AccountHeader = ({ user, formData, t }) => {
       console.error(err);
       toast.error(
         t.profile?.personalInfo?.updateMeetingAvatarError ||
-          "Không thể cập nhật ảnh đại diện phòng họp",
+        "Không thể cập nhật ảnh đại diện phòng họp",
         { id: "meeting-avatar-update" },
       );
     }
@@ -188,11 +188,10 @@ const AccountHeader = ({ user, formData, t }) => {
               style={{ border: "none" }}
             />
             <div
-              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
-                isUpdatingMeetingAvatar
-                  ? "opacity-100"
-                  : "opacity-0 group-hover/meeting:opacity-100"
-              }`}
+              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${isUpdatingMeetingAvatar
+                ? "opacity-100"
+                : "opacity-0 group-hover/meeting:opacity-100"
+                }`}
             >
               {isUpdatingMeetingAvatar ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -213,7 +212,7 @@ const AccountHeader = ({ user, formData, t }) => {
               {isUpdatingMeetingAvatar
                 ? t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật..."
                 : t.profile?.personalInfo?.clickToChangeMeetingAvatar ||
-                  "Bấm để đổi ảnh phòng họp"}
+                "Bấm để đổi ảnh phòng họp"}
             </span>
           </div>
         </div>
@@ -254,6 +253,7 @@ const AccountHeader = ({ user, formData, t }) => {
           onChange={handleAvatarChange}
         />
       </div>
+
 
       {/* Meeting Avatar URL Modal */}
       <Modal

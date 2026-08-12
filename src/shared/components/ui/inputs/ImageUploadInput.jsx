@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import ImageCropModal from "@/shared/components/ui/ImageCropModal"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const formatFileSize = (bytes) => {
   if (!bytes || bytes === 0) return "0 B"
@@ -34,6 +35,30 @@ const ImageUploadInput = ({
   cropTitle = "Crop Image",
   className = "",
 }) => {
+  const { t } = useLanguage()
+  const uploadT = t.imageCrop?.upload || {}
+
+  const finalUploadText =
+    uploadText !== "Upload Image" ? uploadText : (uploadT.uploadImage || "Upload Image")
+  const finalDragDropText =
+    dragDropText !== "Drag & drop image here"
+      ? dragDropText
+      : (uploadT.dragDrop || "Drag & drop image here")
+  const finalHintText =
+    hintText !== "PNG, JPG, WEBP up to 5MB"
+      ? hintText
+      : uploadT.hint
+        ? uploadT.hint.replace("{{maxSize}}", maxSizeMB)
+        : `PNG, JPG, WEBP up to ${maxSizeMB}MB`
+  const finalChangeText =
+    changeText !== "Change" ? changeText : (uploadT.change || "Change")
+  const finalRemoveText =
+    removeText !== "Remove" ? removeText : (uploadT.remove || "Remove")
+  const finalCropText =
+    cropText !== "Crop" ? cropText : (uploadT.crop || "Crop")
+  const finalCropTitle =
+    cropTitle !== "Crop Image" ? cropTitle : (t.imageCrop?.title || "Crop Image")
+
   const [prevValue, setPrevValue] = useState(value)
   const [objectUrl, setObjectUrl] = useState(() =>
     value instanceof File ? URL.createObjectURL(value) : null,
@@ -77,9 +102,12 @@ const ImageUploadInput = ({
     const maxSizeBytes = maxSizeMB * 1024 * 1024
     if (file.size > maxSizeBytes) {
       const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1)
-      toast.error(
-        `File size (${fileSizeMB} MB) exceeds the ${maxSizeMB} MB limit.`,
-      )
+      const errorMsg = uploadT.sizeExceeded
+        ? uploadT.sizeExceeded
+          .replace("{{fileSize}}", fileSizeMB)
+          .replace("{{maxSize}}", maxSizeMB)
+        : `File size (${fileSizeMB} MB) exceeds the ${maxSizeMB} MB limit.`
+      toast.error(errorMsg)
       return
     }
 
@@ -179,10 +207,10 @@ const ImageUploadInput = ({
             <UploadCloud className="w-12 h-12 mb-4 text-gray-400" />
 
             <p className="text-lg font-semibold text-gray-800 mb-1">
-              {dragDropText}
+              {finalDragDropText}
             </p>
             <p className="text-sm text-[#606060] max-w-[360px] mb-4">
-              {hintText}
+              {finalHintText}
             </p>
 
             <PillButton
@@ -195,7 +223,7 @@ const ImageUploadInput = ({
               disabled={disabled}
               startIcon={<Upload size={16} />}
             >
-              {uploadText}
+              {finalUploadText}
             </PillButton>
           </div>
         ) : (
@@ -218,10 +246,10 @@ const ImageUploadInput = ({
             {/* Main Preview Image */}
             <img
               src={previewUrl}
-              alt="Uploaded Preview"
+              alt={uploadT.uploadedImage || "Uploaded Preview"}
               onClick={() => setIsFullscreen(true)}
               className="relative z-10 w-full h-full object-contain cursor-zoom-in hover:opacity-95 transition-opacity"
-              title="Click to view full image"
+              title={uploadT.clickToViewFull || "Click to view full image"}
             />
 
             {/* Bottom Actions Overlay */}
@@ -234,7 +262,7 @@ const ImageUploadInput = ({
                   disabled={disabled}
                   startIcon={<Crop size={15} />}
                 >
-                  {cropText}
+                  {finalCropText}
                 </PillButton>
               )}
               <PillButton
@@ -244,7 +272,7 @@ const ImageUploadInput = ({
                 disabled={disabled}
                 startIcon={<Upload size={15} />}
               >
-                {changeText}
+                {finalChangeText}
               </PillButton>
               <PillButton
                 type="button"
@@ -253,7 +281,7 @@ const ImageUploadInput = ({
                 disabled={disabled}
                 startIcon={<Trash2 size={15} />}
               >
-                {removeText}
+                {finalRemoveText}
               </PillButton>
             </div>
           </div>
@@ -274,9 +302,9 @@ const ImageUploadInput = ({
               <UploadCloud className="w-8 h-8 text-gray-400 shrink-0" />
               <div className="flex flex-col text-left">
                 <span className="text-sm font-semibold text-gray-800">
-                  {dragDropText}
+                  {finalDragDropText}
                 </span>
-                <span className="text-xs text-[#606060]">{hintText}</span>
+                <span className="text-xs text-[#606060]">{finalHintText}</span>
               </div>
             </div>
 
@@ -287,7 +315,7 @@ const ImageUploadInput = ({
               disabled={disabled}
               startIcon={<Upload size={16} />}
             >
-              {uploadText}
+              {finalUploadText}
             </PillButton>
           </div>
         ) : (
@@ -305,10 +333,10 @@ const ImageUploadInput = ({
             <div className="relative w-36 h-20 shrink-0 rounded-lg overflow-hidden border border-border bg-gray-900 flex items-center justify-center">
               <img
                 src={previewUrl}
-                alt="Uploaded Preview"
+                alt={uploadT.uploadedImage || "Uploaded Preview"}
                 onClick={() => setIsFullscreen(true)}
                 className="w-full h-full object-cover cursor-zoom-in hover:opacity-95 transition-opacity"
-                title="Click to view full image"
+                title={uploadT.clickToViewFull || "Click to view full image"}
               />
             </div>
 
@@ -316,7 +344,7 @@ const ImageUploadInput = ({
             <div className="flex flex-1 flex-col justify-between gap-2 overflow-hidden w-full">
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-medium truncate">
-                  {value instanceof File ? value.name : "Uploaded Image"}
+                  {value instanceof File ? value.name : (uploadT.uploadedImage || "Uploaded Image")}
                 </span>
                 {value instanceof File && (
                   <span className="text-xs text-gray-500">
@@ -334,7 +362,7 @@ const ImageUploadInput = ({
                     disabled={disabled}
                     startIcon={<Crop size={14} />}
                   >
-                    {cropText}
+                    {finalCropText}
                   </PillButton>
                 )}
                 <PillButton
@@ -344,7 +372,7 @@ const ImageUploadInput = ({
                   disabled={disabled}
                   startIcon={<Upload size={14} />}
                 >
-                  {changeText}
+                  {finalChangeText}
                 </PillButton>
                 <PillButton
                   type="button"
@@ -353,7 +381,7 @@ const ImageUploadInput = ({
                   disabled={disabled}
                   startIcon={<Trash2 size={14} />}
                 >
-                  {removeText}
+                  {finalRemoveText}
                 </PillButton>
               </div>
             </div>
@@ -381,7 +409,7 @@ const ImageUploadInput = ({
           cropPreset={cropPreset}
           aspect={cropAspect}
           allowedAspects={allowedAspects}
-          title={cropTitle}
+          title={finalCropTitle}
         />
       )}
     </div>

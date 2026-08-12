@@ -761,7 +761,7 @@ export default {
     enrolled: "Đã đăng ký",
     tuitionFee: "Học phí",
     enroll: "Đăng ký",
-    enrolledSlots: "Chỗ đã đăng ký",
+    remainingSlots: "Chỗ còn lại",
     sessionCount: "Số buổi học",
     sessionsText: "Buổi",
     enrollmentPeriod: "Thời gian đăng ký",
