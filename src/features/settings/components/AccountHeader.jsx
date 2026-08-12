@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { Camera, Users, Check } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import Modal from "@/shared/components/ui/Modal";
+import ImageCropModal from "@/shared/components/ui/ImageCropModal";
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
@@ -30,8 +31,8 @@ const AccountHeader = ({ user, formData, t }) => {
   const [meetingAvatarUrlInput, setMeetingAvatarUrlInput] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState(null);
 
-  const [fileToCrop, setFileToCrop] = useState(null)
-  const [isCropModalOpen, setIsCropModalOpen] = useState(false)
+  const [fileToCrop, setFileToCrop] = useState(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation();
@@ -81,33 +82,62 @@ const AccountHeader = ({ user, formData, t }) => {
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
 
-  const handleAvatarChange = async (e) => {
+  const handleAvatarSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // File validation: check image type
+    if (!file.type.startsWith("image/")) {
+      toast.error(
+        t.profile?.personalInfo?.invalidImageFormat ||
+          "Vui lòng chọn tệp hình ảnh hợp lệ",
+      );
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setFileToCrop(file);
+    setIsCropModalOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropComplete = async (croppedFile) => {
+    if (!croppedFile) return;
+
     const avatarData = new FormData();
-    avatarData.append("file", file);
+    avatarData.append("file", croppedFile);
 
     try {
       toast.loading(
         t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật...",
         { id: "avatar-update" },
       );
-      await updateAvatar(avatarData).unwrap();
+      const res = await updateAvatar(avatarData).unwrap();
+
+      const newAvatarUrl =
+        res?.data?.avatarImageUrl || res?.avatarImageUrl || res?.data;
+      if (
+        localParticipant &&
+        newAvatarUrl &&
+        typeof newAvatarUrl === "string"
+      ) {
+        await safeSetLiveKitMetadata(localParticipant, {
+          avatarImageUrl: newAvatarUrl,
+        });
+      }
+
       toast.success(
         t.profile?.personalInfo?.updateAvatarSuccess ||
-        "Cập nhật ảnh đại diện thành công",
+          "Cập nhật ảnh đại diện thành công",
         { id: "avatar-update" },
       );
     } catch (error) {
       toast.error(
         t.profile?.personalInfo?.updateAvatarError ||
-        "Không thể cập nhật ảnh đại diện",
+          "Không thể cập nhật ảnh đại diện",
         { id: "avatar-update" },
       );
       console.error(error);
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
