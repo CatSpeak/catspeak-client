@@ -6,6 +6,7 @@ import {
   UserPlus,
   Check,
   AtSign,
+  Camera,
 } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import ImageCropModal from "@/shared/components/ui/ImageCropModal";
@@ -17,6 +18,7 @@ import {
   useUnfollowUserMutation,
 } from "../../../store/api/social/friendshipApi";
 import { useGetCurrentBackgroundQuery } from "@/store/api/userApi";
+import { useProfileMediaUpload } from "@/shared/hooks/useProfileMediaUpload";
 import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
 
 const SocialProfileHeader = ({
@@ -38,10 +40,20 @@ const SocialProfileHeader = ({
   const location =
     formData?.location || user?.location || formData?.address || user?.address;
 
-  const [fileToCrop, setFileToCrop] = useState(null);
-  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  // Profile media upload hook (avatar & cover)
+  const {
+    coverImageUrl,
+    fileInputRef,
+    coverInputRef,
+    isUpdatingAvatar,
+    isCoverUpdating,
+    handleAvatarChange,
+    handleCoverChange,
+    triggerAvatarUpload,
+    triggerCoverUpload,
+  } = useProfileMediaUpload({ t });
 
-  // API Hooks
+  // API Hooks for social status
   const { data: statusResponse } = useGetConnectionStatusQuery(
     targetAccountId,
     {
@@ -208,12 +220,16 @@ const SocialProfileHeader = ({
   return (
     <div className="w-full bg-white border border-border rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}
-      <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group overflow-hidden">
+      <div
+        className={`w-full h-48 md:h-[280px] bg-gray-200 relative overflow-hidden ${
+          isOwnProfile ? "group/cover" : ""
+        }`}
+      >
         {isBackgroundLoading ? (
           <div className="w-full h-full bg-gray-300 animate-pulse"></div>
         ) : (
           <img
-            src={fetchedCoverUrl || backgroundAccount}
+            src={coverImageUrl || fetchedCoverUrl || backgroundAccount}
             alt="Cover fallback"
             className="w-full h-full object-cover"
             onError={(e) => {
@@ -222,13 +238,51 @@ const SocialProfileHeader = ({
             }}
           />
         )}
+
+        {/* Hover Overlay for Cover */}
+        {isOwnProfile && (
+          <div
+            onClick={triggerCoverUpload}
+            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity cursor-pointer z-10 ${
+              isCoverUpdating
+                ? "opacity-100"
+                : "opacity-0 group-hover/cover:opacity-100"
+            }`}
+          >
+            {isCoverUpdating ? (
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Camera className="w-8 h-8 text-white" />
+            )}
+          </div>
+        )}
+
+        {/* Hidden File Input for Cover Upload */}
+        {isOwnProfile && (
+          <input
+            type="file"
+            ref={coverInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleCoverChange}
+          />
+        )}
       </div>
 
       <div className="p-4 sm:p-6 relative border-b border-border flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Avatar floating above the bottom border of the cover photo */}
-          <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full w-fit">
-            <div className="relative rounded-full overflow-hidden">
+          <div
+            className={`-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full w-fit ${
+              isOwnProfile ? "group/avatar" : ""
+            }`}
+          >
+            <div
+              className={`relative rounded-full overflow-hidden ${
+                isOwnProfile ? "cursor-pointer" : ""
+              }`}
+              onClick={isOwnProfile ? triggerAvatarUpload : undefined}
+            >
               <Avatar
                 size={133}
                 src={displayAvatarUrl}
@@ -236,34 +290,30 @@ const SocialProfileHeader = ({
                 name={displayName}
                 className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
               />
+              {isOwnProfile && (
+                <div
+                  className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
+                    isUpdatingAvatar
+                      ? "opacity-100"
+                      : "opacity-0 group-hover/avatar:opacity-100"
+                  }`}
+                >
+                  {isUpdatingAvatar ? (
+                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-8 h-8 text-white" />
+                  )}
+                </div>
+              )}
             </div>
             {isOwnProfile && (
-              <>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleAvatarSelect}
-                />
-                {isCropModalOpen && fileToCrop && (
-                  <ImageCropModal
-                    image={fileToCrop}
-                    isOpen={isCropModalOpen}
-                    cropPreset="avatar"
-                    title={t.profile?.avatar?.cropTitle || "Cắt ảnh đại diện"}
-                    onClose={() => {
-                      setIsCropModalOpen(false);
-                      setFileToCrop(null);
-                    }}
-                    onCropComplete={(croppedFile) => {
-                      handleCropComplete(croppedFile);
-                      setIsCropModalOpen(false);
-                      setFileToCrop(null);
-                    }}
-                  />
-                )}
-              </>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleAvatarChange}
+              />
             )}
           </div>
           {/* Text Info */}
