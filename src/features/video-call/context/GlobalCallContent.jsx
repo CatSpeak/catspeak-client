@@ -26,6 +26,7 @@ import {
   useParticipantList,
   parseMetadata,
 } from "@/features/video-call/hooks/useParticipantList"
+import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
@@ -37,6 +38,11 @@ import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.j
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
+import {
+  getRoomSetting,
+  setRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
@@ -58,6 +64,7 @@ const GlobalCallContent = ({
   const { t, language } = useLanguage()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
+  const currentRoomId = callInfo?.roomId || roomData?.id
   const isAISession = callInfo?.isAISession ?? false
 
   // ── UI state ──
@@ -389,6 +396,8 @@ const GlobalCallContent = ({
     startedByAccountId,
     setStartedByAccountId,
     sessionId,
+    roomId: currentRoomId,
+    isHost: isRoomHost(roomData, user?.accountId),
   })
 
   const subtitleControls = useSubtitleControls({
@@ -407,7 +416,7 @@ const GlobalCallContent = ({
   )
 
   // ── Join/Leave Audio ──
-  useParticipantAudioEffect(participants)
+  useParticipantAudioEffect(participants, currentRoomId)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
@@ -494,18 +503,130 @@ const GlobalCallContent = ({
           (data.targetIdentity != null &&
             String(data.targetIdentity) === localIdent)
 
+        const pl = t.rooms?.videoCall?.participantList || {}
+        const isHost = isRoomHost(roomData, user?.accountId)
+
+        if (data.action === "MUTE_ALL" && !isHost) {
+          if (localParticipant) {
+            localParticipant.setMicrophoneEnabled(false)
+            toast.error(pl.hostMutedAll || "Host đã tắt tiếng tất cả mọi người trong phòng.")
+          }
+          return
+        }
+
+        if (data.action === "LOWER_ALL_HANDS") {
+          if (localParticipant) {
+            safeSetLiveKitMetadata(localParticipant, { handRaised: false, handRaisedAt: 0 })
+          }
+          actions.setIsHandRaised?.(false)
+          toast.info(pl.hostLoweredAllHands || "Host đã hạ tất cả các tay xuống.")
+          return
+        }
+
+        if (data.action === "TOGGLE_JOIN_SOUND") {
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
+            data.enabled
+          )
+          window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
+          toast.info(
+            data.enabled
+              ? (pl.hostEnabledJoinSound || "Host đã BẬT âm thanh khi có người vào/ra phòng.")
+              : (pl.hostDisabledJoinSound || "Host đã TẮT âm thanh khi có người vào/ra phòng.")
+          )
+          return
+        }
+
+        if (data.action === "TOGGLE_MEMBER_RECORDING") {
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.MEMBER_RECORDING,
+            data.allowed
+          )
+          window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
+          toast.info(
+            data.allowed
+              ? (pl.hostAllowedRecording || "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
+              : (pl.hostDisabledRecording || "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
+          )
+          if (!isHost && !data.allowed && isRecording) {
+            recordingState.handleToggleRecording?.()
+          }
+          return
+        }
+
+        if (data.action === "TOGGLE_MEMBER_PRIVATE_AI") {
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
+            data.allowed
+          )
+          window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
+          toast.info(
+            data.allowed
+              ? (pl.hostAllowedPrivateAi || "Host đã CHO PHÉP thành viên sử dụng AI Chat riêng tư.")
+              : (pl.hostDisabledPrivateAi || "Host đã TẮT quyền sử dụng AI Chat riêng tư đối với thành viên.")
+          )
+          return
+        }
+
+        if (data.action === "REQUEST_ROOM_SETTINGS_SYNC") {
+          if (isHost && localParticipant && lkRoom?.state === ConnectionState.Connected) {
+            try {
+              const syncPayload = new TextEncoder().encode(
+                JSON.stringify({
+                  action: "SYNC_ROOM_SETTINGS",
+                  settings: {
+                    joinLeaveSound: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
+                    memberRecording: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING),
+                    memberPrivateAi: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI),
+                  },
+                  targetIdentity: participant?.identity,
+                })
+              )
+              localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true }).catch(() => {})
+            } catch (err) {
+              console.error("Error responding to REQUEST_ROOM_SETTINGS_SYNC:", err)
+            }
+          }
+          return
+        }
+
+        if (data.action === "SYNC_ROOM_SETTINGS") {
+          const isTargetMe = !data.targetIdentity || String(data.targetIdentity) === String(localParticipant?.identity)
+          if (isTargetMe && data.settings) {
+            if (data.settings.joinLeaveSound !== undefined) {
+              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND, data.settings.joinLeaveSound)
+              window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
+            }
+            if (data.settings.memberRecording !== undefined) {
+              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING, data.settings.memberRecording)
+              window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
+            }
+            if (data.settings.memberPrivateAi !== undefined) {
+              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI, data.settings.memberPrivateAi)
+              window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
+            }
+          }
+          return
+        }
+
         if (!isTarget) return
 
         if (data.action === "KICK_PARTICIPANT") {
-          toast.error("Bạn đã bị Host mời ra khỏi phòng.", { duration: 5000 })
+          toast.error(pl.kickedByHost || "Bạn đã bị Host mời ra khỏi phòng.", { duration: 5000 })
           actions.handleLeaveSession()
         } else if (data.action === "MUTE_PARTICIPANT") {
           if (data.trackKind === "audio" && localParticipant) {
             localParticipant.setMicrophoneEnabled(false)
-            toast.error("Host đã tắt mic của bạn.")
+            toast.error(pl.hostMutedMic || "Host đã tắt mic của bạn.")
           } else if (data.trackKind === "video" && localParticipant) {
             localParticipant.setCameraEnabled(false)
-            toast.error("Host đã tắt camera của bạn.")
+            toast.error(pl.hostMutedCam || "Host đã tắt camera của bạn.")
+          } else if ((data.trackKind === "screen" || data.trackKind === "screen_share") && localParticipant) {
+            localParticipant.setScreenShareEnabled(false)
+            toast.error(pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn.")
           }
         }
       } catch (err) {
@@ -513,11 +634,73 @@ const GlobalCallContent = ({
       }
     }
 
+    const handleParticipantJoined = (participant) => {
+      const isHost = isRoomHost(roomData, user?.accountId)
+      if (isHost && localParticipant && lkRoom?.state === ConnectionState.Connected) {
+        try {
+          const syncPayload = new TextEncoder().encode(
+            JSON.stringify({
+              action: "SYNC_ROOM_SETTINGS",
+              settings: {
+                joinLeaveSound: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
+                memberRecording: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING),
+                memberPrivateAi: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI),
+              },
+              targetIdentity: participant.identity,
+            })
+          )
+          localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true }).catch(() => {})
+        } catch (err) {
+          console.error("Error syncing room settings to new participant:", err)
+        }
+      }
+
+      try {
+        const isSoundEnabled = getRoomSetting(
+          currentRoomId,
+          ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
+        )
+        if (!isSoundEnabled) return
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext
+        if (!AudioContext) return
+        const ctx = new AudioContext()
+        const now = ctx.currentTime
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = "sine"
+        osc.frequency.setValueAtTime(523.25, now)
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15)
+        gain.gain.setValueAtTime(0.15, now)
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(now)
+        osc.stop(now + 0.3)
+      } catch (e) {
+        // autoplay restriction fallback
+      }
+    }
+
+    // Request settings sync from Host on join if not Host
+    if (lkRoom?.state === ConnectionState.Connected && localParticipant && !isRoomHost(roomData, user?.accountId)) {
+      try {
+        const reqPayload = new TextEncoder().encode(
+          JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" })
+        )
+        localParticipant.publishData(reqPayload, { topic: "moderation", reliable: true }).catch(() => {})
+      } catch (e) {
+        // ignore
+      }
+    }
+
     lkRoom.on(RoomEvent.DataReceived, handleModerationData)
+    lkRoom.on(RoomEvent.ParticipantConnected, handleParticipantJoined)
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
+      lkRoom.off(RoomEvent.ParticipantConnected, handleParticipantJoined)
     }
-  }, [lkRoom, localParticipant, user?.accountId, actions])
+  }, [lkRoom, localParticipant, user?.accountId, roomData, actions])
 
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId

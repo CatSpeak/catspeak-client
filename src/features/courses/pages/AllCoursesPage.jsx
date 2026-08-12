@@ -115,7 +115,7 @@ const AllCoursesPage = () => {
         tabs={tabs}
         activeTab={activeTab}
         onChange={handleTabChange}
-        className="gap-6 border-b border-gray-100 pb-px"
+        className="gap-6 border-b border-border pb-px"
       />
 
       {error && data !== undefined && (
@@ -151,7 +151,7 @@ const AllCoursesPage = () => {
           />
         </div>
       ) : (
-        <div className="text-center py-12 text-sm text-gray-400 font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+        <div className="text-center py-12 text-sm text-gray-400 font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-border">
           {ac.noResults || "No courses found."}
         </div>
       )}

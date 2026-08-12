@@ -1,7 +1,6 @@
 import React, { useEffect } from "react"
 import { Link, useLocation } from "react-router-dom"
-// eslint-disable-next-line no-unused-vars
-import { LayoutGroup, motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { useSelector } from "react-redux"
 import { LandingPageIcon } from "@/features/landing/assets"
 import { useSidebar } from "@/shared/context/SidebarContext"
@@ -22,11 +21,6 @@ import {
   Briefcase,
   Globe,
   Settings,
-  MessageCircle,
-  GraduationCap,
-  Users,
-  Calendar,
-  BarChart,
   Compass,
 } from "lucide-react"
 import DesktopNavItem from "./DesktopNavItem"
@@ -35,18 +29,11 @@ import ListItem from "@/shared/components/ui/ListItem"
 // Primary Dock Navigation Items
 const mainDockItems = [
   { key: "community", icon: Home, path: "/community", hasSublinks: false },
-  { key: "exploreCourses", icon: Compass, path: "/explore-courses", hasSublinks: false },
   {
     key: "catSpeak",
     icon: Globe,
     path: "/cat-speak/global-news",
     hasSublinks: true,
-  },
-  {
-    key: "messages",
-    icon: MessageCircle,
-    path: "/chat",
-    hasSublinks: false,
   },
   {
     key: "workspace",
@@ -57,6 +44,7 @@ const mainDockItems = [
 ]
 
 const secondaryDockItems = [
+  { key: "exploreCourses", icon: Compass, path: "/explore-courses", hasSublinks: false },
   {
     key: "learningResources",
     icon: LayoutDashboard,
@@ -88,19 +76,17 @@ const listContainerVariants = {
     opacity: 1,
     transition: {
       staggerChildren: 0.02,
-      delayChildren: 0.1,
+      delayChildren: 0.01,
     },
   },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 6 },
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    y: 0,
     transition: {
-      duration: 0.14,
-      ease: [0.16, 1, 0.3, 1],
+      duration: 0.1,
     },
   },
 }
@@ -109,7 +95,7 @@ const DesktopSidebar = () => {
   const { pathname } = useLocation()
   const { t } = useLanguage()
   const { isAuthenticated, user } = useAuth()
-  const { isStudent } = useRoleOverride()
+  const { isStudent, isTeacher } = useRoleOverride()
   const { resolvePath, currentLang } = useActiveLink()
   const {
     isDesktopExpanded,
@@ -210,6 +196,7 @@ const DesktopSidebar = () => {
           {mainDockItems
             .filter((item) => {
               const teacherTabs = [
+                "dashboard",
                 "myCourses",
                 "myClass",
                 "analytics",
@@ -235,7 +222,7 @@ const DesktopSidebar = () => {
                       : "text-white/80 hover:text-white hover:bg-white/15"
                       }`}
                   >
-                    <Icon />
+                    <Icon strokeWidth={2} />
                     {item.key === "messages" && unreadChatCount > 0 && (
                       <span className="absolute -top-1 -right-1 z-20 flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-md border-2 border-cath-red-700">
                         {unreadChatCount > 99 ? "99+" : unreadChatCount}
@@ -270,7 +257,7 @@ const DesktopSidebar = () => {
                     : "text-white/80 hover:text-white hover:bg-white/15"
                     }`}
                 >
-                  <Icon />
+                  <Icon strokeWidth={2} />
                 </Link>
 
                 {/* Tooltip on Hover */}
@@ -309,7 +296,7 @@ const DesktopSidebar = () => {
                     : "text-white/80 hover:text-white hover:bg-white/15"
                     }`}
                 >
-                  <Icon />
+                  <Icon strokeWidth={2} />
                 </Link>
 
                 {/* Tooltip on Hover */}
@@ -355,94 +342,91 @@ const DesktopSidebar = () => {
                   variants={listContainerVariants}
                   initial="hidden"
                   animate="visible"
-                  exit={{ opacity: 0, y: -4, transition: { duration: 0.07 } }}
+                  exit={{ opacity: 0, transition: { duration: 0.05 } }}
                   className="flex-1 overflow-y-auto flex flex-col gap-1"
                 >
-                  <LayoutGroup id={`secondaryNav-${currentSectionKey}`}>
-                    {isSettingsPage
-                      ? settingNavLinks
-                        .filter((item) => {
-                          if (item.hideInSidebar) return false
-                          if (item.lang && item.lang !== currentLang)
-                            return false
-                          if (item.isPrivate && !isAuthenticated) return false
-                          return true
-                        })
-                        .map((item) => {
-                          const label =
-                            t.nav?.[item.key] || item.label || item.key
-                          return (
-                            <motion.div
-                              layout
-                              key={item.key}
-                              variants={itemVariants}
-                              initial="hidden"
-                              animate="visible"
-                              className="w-full"
-                            >
-                              <DesktopNavItem
-                                to={resolvePath(item.path)}
-                                icon={item.icon}
-                                label={label}
-                                color={item.color}
-                                img={item.img}
-                                isDocked={false}
-                                sectionId={currentSectionKey}
-                              />
-                            </motion.div>
-                          )
-                        })
-                      : (currentSectionData?.items || [])
-                        .filter((item) => {
-                          if (item.hideInSidebar) return false
-                          if (item.lang && item.lang !== currentLang)
-                            return false
-                          if (item.isPrivate && !isAuthenticated) return false
+                  {isSettingsPage
+                    ? settingNavLinks
+                      .filter((item) => {
+                        if (item.hideInSidebar) return false
+                        if (item.lang && item.lang !== currentLang)
+                          return false
+                        if (item.isPrivate && !isAuthenticated) return false
+                        return true
+                      })
+                      .map((item) => {
+                        const label =
+                          t.nav?.[item.key] || item.label || item.key
+                        return (
+                          <motion.div
+                            key={item.key}
+                            variants={itemVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="w-full"
+                          >
+                            <DesktopNavItem
+                              to={resolvePath(item.path)}
+                              icon={item.icon}
+                              label={label}
+                              color={item.color}
+                              img={item.img}
+                              isDocked={false}
+                              sectionId={currentSectionKey}
+                            />
+                          </motion.div>
+                        )
+                      })
+                    : (currentSectionData?.items || [])
+                      .filter((item) => {
+                        if (item.hideInSidebar) return false
+                        if (item.lang && item.lang !== currentLang)
+                          return false
+                        if (item.isPrivate && !isAuthenticated) return false
 
-                          const teacherTabs = [
-                            "myCourses",
-                            "myClass",
-                            "analytics",
-                            "schedule",
-                            "teachingTasks",
-                          ]
-                          if (teacherTabs.includes(item.key) && isStudent)
-                            return false
+                        const teacherTabs = [
+                          "dashboard",
+                          "myCourses",
+                          "myClass",
+                          "analytics",
+                          "schedule",
+                          "teachingTasks",
+                        ]
+                        if (teacherTabs.includes(item.key) && !isTeacher)
+                          return false
 
-                          return true
-                        })
-                        .map((item) => {
-                          const label =
-                            t.nav?.[item.key] || item.label || item.key
-                          let itemPath = item.path
-                          if (item.key === "profile" && user) {
-                            itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
-                          }
-                          return (
-                            <motion.div
-                              layout
-                              key={item.key}
-                              variants={itemVariants}
-                              initial="hidden"
-                              animate="visible"
-                              className="w-full"
-                            >
-                              {item.key === "myCourses" && (
-                                <div className="my-1.5 mx-3 border-t border-black" />
-                              )}
-                              <DesktopNavItem
-                                to={resolvePath(itemPath)}
-                                icon={item.icon}
-                                label={label}
-                                color={item.color}
-                                img={item.img}
-                                isDocked={false}
-                                sectionId={currentSectionKey}
-                              />
-                            </motion.div>
-                          )
-                        })}
-                  </LayoutGroup>
+                        return true
+                      })
+                      .map((item) => {
+                        const label =
+                          t.nav?.[item.key] || item.label || item.key
+                        let itemPath = item.path
+                        if (item.key === "profile" && user) {
+                          itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
+                        }
+                        return (
+                          <motion.div
+                            key={item.key}
+                            variants={itemVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="w-full"
+                          >
+                            {item.key === "myCourses" && (
+                              <div className="my-1.5 mx-3 border-t border-black" />
+                            )}
+                            <DesktopNavItem
+                              to={resolvePath(itemPath)}
+                              icon={item.icon}
+                              label={label}
+                              color={item.color}
+                              img={item.img}
+                              isDocked={false}
+                              sectionId={currentSectionKey}
+                            />
+                          </motion.div>
+                        )
+                      })}
                 </motion.div>
               </AnimatePresence>
             </div>

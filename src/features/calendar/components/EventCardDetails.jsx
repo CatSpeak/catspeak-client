@@ -90,7 +90,7 @@ const EventCardDetails = ({ event, onClose, onActionComplete }) => {
   }
 
   return (
-    <div className="flex flex-col border-t border-gray-200">
+    <div className="flex flex-col border-t border-border">
       <div className="max-h-[500px] overflow-y-auto">
         <EventDetailBody
           ev={ev}
@@ -107,7 +107,7 @@ const EventCardDetails = ({ event, onClose, onActionComplete }) => {
       </div>
 
       {!(!occurrenceId && ev?.isRecurringGroup) && (
-        <div className="shrink-0 bg-white rounded-b-2xl border-t border-gray-100">
+        <div className="shrink-0 bg-white rounded-b-2xl border-t border-border">
           <EventDetailFooter
             eventId={actualEventId || eventId}
             event={ev}

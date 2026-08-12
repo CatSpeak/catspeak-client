@@ -21,6 +21,7 @@ import {
   buildAnalyticsQueryParams,
   getAnalyticsFilterMeta,
   getDrillDownSelection,
+  resolveAnalyticsScope,
 } from "../data/analyticsData"
 
 const WorkspaceAnalyticsPage = () => {
@@ -68,11 +69,39 @@ const WorkspaceAnalyticsPage = () => {
     setSearchParams(nextParams, { replace: true })
   }
 
-  const [group, setGroup] = useState("month")
-  const [period, setPeriod] = useState(() => filterMeta.month.periods[0].value)
-  const [compare, setCompare] = useState(() => filterMeta.month.comparisons[0].value)
-  const [courseFilter, setCourseFilter] = useState("__all_courses__")
-  const [classFilter, setClassFilter] = useState("__all_classes__")
+  // BR-DASH-40: when arriving from the Dashboard (URL carries resolved dates + course/class),
+  // honour the exact range and auto-select the GroupBy via the shared auto-bucket rule.
+  const [incomingScope] = useState(() => {
+    const sp = new URLSearchParams(window.location.search)
+    const scope = resolveAnalyticsScope({
+      startDate: sp.get("startDate") || undefined,
+      endDate: sp.get("endDate") || undefined,
+      compareStartDate: sp.get("compareStartDate") || undefined,
+      compareEndDate: sp.get("compareEndDate") || undefined,
+    })
+    // BR-DASH-11: the Dashboard's "Toàn bộ thời gian" preset has no resolved dates;
+    // forward it as an all-time analytics scope instead of silently defaulting to this month.
+    if (!scope && (sp.get("p") === "all" || sp.get("period") === "alltime")) {
+      return { group: "month", period: "alltime", compare: "", customStartDate: "", customEndDate: "" }
+    }
+    return scope
+  })
+
+  const [group, setGroup] = useState(() => incomingScope?.group || "month")
+  const [period, setPeriod] = useState(() => incomingScope?.period || filterMeta.month.periods[0].value)
+  const [compare, setCompare] = useState(
+    () => (incomingScope ? incomingScope.compare : filterMeta.month.comparisons[0].value),
+  )
+  const [courseFilter, setCourseFilter] = useState(() => {
+    const courseId = new URLSearchParams(window.location.search).get("courseId")
+    return courseId ? String(courseId) : "__all_courses__"
+  })
+  const [classFilter, setClassFilter] = useState(() => {
+    const classId = new URLSearchParams(window.location.search).get("classId")
+    return classId ? String(classId) : "__all_classes__"
+  })
+  const [customStartDate, setCustomStartDate] = useState(() => incomingScope?.customStartDate || "")
+  const [customEndDate, setCustomEndDate] = useState(() => incomingScope?.customEndDate || "")
 
   // RTK Query hooks for course/class mapping and exports
   const { data: coursesResponse } = useGetAllCoursesQuery({ pageSize: 500 })
@@ -98,6 +127,8 @@ const WorkspaceAnalyticsPage = () => {
     compare,
     courseId: selectedCourseObj ? parseInt(selectedCourseObj.id, 10) : undefined,
     classId: selectedClassObj ? parseInt(selectedClassObj.id, 10) : undefined,
+    customStartDate,
+    customEndDate,
   })
 
   // Drill-down from month trend to day trend
@@ -168,7 +199,7 @@ const WorkspaceAnalyticsPage = () => {
       {/* Main Analytics Container */}
       <div className="w-full flex flex-col">
         {/* Navigation Tabs Bar */}
-        <div className="flex gap-2 border-b border-gray-200 bg-white rounded-t-2xl px-3 pt-2 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-2 border-b border-border bg-white rounded-t-2xl px-3 pt-2 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {tabsList.map((tab) => {
             const isActive = activeTab === tab.key
             return (
@@ -205,6 +236,10 @@ const WorkspaceAnalyticsPage = () => {
           setCourse={setCourseFilter}
           className={classFilter}
           setClassName={setClassFilter}
+          customStartDate={customStartDate}
+          setCustomStartDate={setCustomStartDate}
+          customEndDate={customEndDate}
+          setCustomEndDate={setCustomEndDate}
           onExport={handleExport}
           isExporting={isExporting}
         />

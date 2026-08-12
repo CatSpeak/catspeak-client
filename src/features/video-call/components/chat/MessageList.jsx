@@ -42,7 +42,7 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
       {showScrollBottom && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#606060] shadow-md border border-[#E5E5E5] hover:bg-gray-50 hover:text-[#990011] transition-colors"
+          className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#606060] shadow-md border border-border hover:bg-gray-50 hover:text-[#990011] transition-colors"
         >
           <ArrowDown size={16} />
         </button>

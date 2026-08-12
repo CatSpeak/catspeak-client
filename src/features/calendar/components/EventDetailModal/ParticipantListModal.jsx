@@ -35,7 +35,7 @@ const ParticipantListModal = ({ open, onClose, occurrenceId }) => {
           <X size={18} strokeWidth={4} />
         </button>
 
-        <div className="p-6 border-b border-gray-100 shrink-0 flex flex-col gap-1">
+        <div className="p-6 border-b border-border shrink-0 flex flex-col gap-1">
           <div className="flex items-start justify-between">
             <h3 className="text-xl font-bold text-gray-800">
               {t.calendar?.participantList || "Danh sách người đăng ký"}

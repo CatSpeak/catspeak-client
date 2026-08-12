@@ -19,8 +19,8 @@ const RegistrationsModal = memo(function RegistrationsModal({
     <Modal
       open={!!occurrenceId}
       onClose={onClose}
-      className="w-[90vw] sm:w-full max-w-md rounded-2xl bg-white shadow-xl min-[426px]:border min-[426px]:border-gray-100 flex flex-col overflow-hidden max-h-[70vh] sm:max-h-[80vh]"
-      headerClassName="flex items-center justify-between px-5 py-4 border-b border-gray-100"
+      className="w-[90vw] sm:w-full max-w-md rounded-2xl bg-white shadow-xl min-[426px]:border min-[426px]:border-border flex flex-col overflow-hidden max-h-[70vh] sm:max-h-[80vh]"
+      headerClassName="flex items-center justify-between px-5 py-4 border-b border-border"
       bodyClassName="overflow-y-auto flex-1 p-5 min-h-[200px]"
       title={
         <div className="min-w-0">

@@ -153,7 +153,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
   }, [isOpen, onClose, showMenu])
 
   const menuContent = (
-    <div className={`w-48 bg-white rounded-xl py-2 z-50 shadow-xl border border-gray-100 text-gray-800 font-medium animate-in fade-in zoom-in-95 duration-100 ${isMobile ? 'w-full' : 'absolute top-10 right-0'}`} role="menu">
+    <div className={`w-48 bg-white rounded-xl py-2 z-50 shadow-xl border border-border text-gray-800 font-medium animate-in fade-in zoom-in-95 duration-100 ${isMobile ? 'w-full' : 'absolute top-10 right-0'}`} role="menu">
       {MENU_ITEMS_KEYS.map((item) => (
         <button
           key={item.key}
@@ -180,7 +180,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header handle */}
-            <div className="flex items-center justify-center pt-3 pb-2 border-b border-gray-100">
+            <div className="flex items-center justify-center pt-3 pb-2 border-b border-border">
               <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
             </div>
             

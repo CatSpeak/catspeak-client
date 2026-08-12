@@ -61,6 +61,12 @@ export default {
     mainAvatarLabel: "主账号头像",
     changeMeetingAvatar: "更换会议头像",
     clickToChangeMeetingAvatar: "点击更换会议头像",
+    updatingCover: "正在更新封面...",
+    updateCoverSuccess: "封面更新成功",
+    updateCoverError: "无法更新封面",
+    editCover: "修改封面",
+    invalidImageFormat: "请选择有效的图片文件",
+    coverSizeLimit: "封面图片大小不能超过 5MB",
   },
   instructor: {
     title: "讲师",
@@ -98,9 +104,7 @@ export default {
     submit: "提交",
     edit: "编辑",
     addCredential: "添加证书",
-    selectLanguages: "选择语言",
     selectNationality: "选择国籍",
-    selectNativeLanguage: "选择母语",
     inputFieldPlaceholder: "输入字段",
     notAppliedTitle: "您尚未申请",
     notAppliedDescription:
@@ -112,6 +116,10 @@ export default {
     statusPendingDesc: "您的申请正在审核中。我们会在做出决定后通知您。",
     statusApproved: "申请已通过",
     statusApprovedDesc: "恭喜！您的讲师申请已获批准。",
+    switchToTeacherTitle: "申请已通过",
+    switchToTeacherDesc: "您的讲师申请已获批准。请切换到教师账户以管理教学内容。",
+    switchToTeacherAccount: "切换到教师账户",
+    switching: "切换中...",
     statusRejected: "申请被拒绝",
     statusRejectedDesc: "很遗憾，您的申请暂未通过。",
     statusRequestEdit: "需要修改",
@@ -132,6 +140,18 @@ export default {
     formInvalid: "提交前请填写所有必填字段。",
     credentialSizeLimit: "每份证书必须小于 {max}MB（当前 {actual}MB）。",
     videoSizeLimit: "视频必须小于 {max}MB（当前 {actual}MB）。",
+  },
+  friends: {
+    teacher: "教师",
+    member: "成员",
+    subTabs: {
+      teachers: "教师",
+      members: "成员",
+    },
+    empty: {
+      noTeachers: "暂无教师。",
+      noMembers: "暂无成员。",
+    },
   },
   notifications: {
     friend_request: {

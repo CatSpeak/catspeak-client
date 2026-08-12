@@ -64,7 +64,7 @@ const LanguageSwitcher = ({ className = "" }) => {
             <FluentAnimation
               direction="down"
               exit
-              className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
+              className="overflow-hidden rounded-2xl border border-border bg-white shadow-lg"
             >
               <div
                 className="p-2 flex flex-col gap-1"
@@ -96,7 +96,7 @@ const LanguageSwitcher = ({ className = "" }) => {
                           className="absolute inset-0 rounded-xl bg-gray-500/5 pointer-events-none"
                         />
                       )}
-                      <span className="flex h-7 w-7 shrink-0 overflow-hidden rounded-full border border-gray-100">
+                      <span className="flex h-7 w-7 shrink-0 overflow-hidden rounded-full border border-border">
                         <img
                           src={flag}
                           alt=""
@@ -110,7 +110,7 @@ const LanguageSwitcher = ({ className = "" }) => {
                         {label}
                       </span>
                       {disabled ? (
-                        <span className="shrink-0 ml-auto rounded-full border border-gray-200 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">
+                        <span className="shrink-0 ml-auto rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">
                           {soonLabel || t.header?.soon || "Soon"}
                         </span>
                       ) : isActive ? (
@@ -118,7 +118,7 @@ const LanguageSwitcher = ({ className = "" }) => {
                           <div className="h-2 w-2 rounded-full bg-cath-red-800" />
                         </div>
                       ) : (
-                        <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-gray-200" />
+                        <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-border" />
                       )}
                     </button>
                   );

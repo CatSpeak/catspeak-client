@@ -87,7 +87,7 @@ const VideoPreview = ({
       <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
         <button
           onClick={onToggleMic}
-          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
             micOn
               ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
               : "bg-white hover:bg-[#E5E5E5]"
@@ -98,7 +98,7 @@ const VideoPreview = ({
 
         <button
           onClick={onToggleCam}
-          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
+          className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
             cameraOn
               ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
               : "bg-white hover:bg-[#E5E5E5]"
@@ -112,7 +112,7 @@ const VideoPreview = ({
           title={
             t?.rooms?.waitingScreen?.changeBackground || "Change Background"
           }
-          className={`border border-[#e5e5e5] flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
+          className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
           <Image />
         </button>
@@ -120,7 +120,7 @@ const VideoPreview = ({
         <button
           onClick={onOpenSettings}
           title={t?.rooms?.waitingScreen?.deviceSettings || "Device Settings"}
-          className={`border border-[#e5e5e5] flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
+          className={`border border-border flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
           <Settings />
         </button>

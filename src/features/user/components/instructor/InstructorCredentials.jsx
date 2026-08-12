@@ -31,14 +31,14 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
       <div className="flex flex-col gap-3 mt-2">
         {(!formData.credentials || formData.credentials.length === 0) && (
           <div className="flex flex-col gap-1 w-full max-w-[320px]">
-            <div className={`flex flex-col items-center justify-center w-full h-[72px] bg-white border-2 border-dashed rounded-xl ${errors.credentials ? "border-red-500 bg-red-50/10" : "border-gray-200"} text-gray-400`}>
+            <div className={`flex flex-col items-center justify-center w-full h-[72px] bg-white border-2 border-dashed rounded-xl ${errors.credentials ? "border-red-500 bg-red-50/10" : "border-border"} text-gray-400`}>
               <span className={`text-[13px] ${errors.credentials ? "text-red-500" : "text-gray-400"}`}>{ins.noCredentials || "Chưa có chứng chỉ"}</span>
             </div>
             {errors.credentials && <p className="text-xs text-red-500">{errors.credentials}</p>}
           </div>
         )}
         {formData.credentials && formData.credentials.map((cred, idx) => (
-          <div key={idx} className="relative flex items-center gap-3 w-full sm:w-[320px] p-3 bg-white border border-gray-200 rounded-xl group hover:border-red-200 transition-colors shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div key={idx} className="relative flex items-center gap-3 w-full sm:w-[320px] p-3 bg-white border border-border rounded-xl group hover:border-red-200 transition-colors shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
             <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 text-gray-500 group-hover:bg-red-50 group-hover:text-red-500 transition-colors">
               <FileText className="w-5 h-5" />
             </div>

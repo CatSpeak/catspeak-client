@@ -116,7 +116,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
           <div
             onClick={() => handleSelect(null)}
             className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 block ${
-              selectedUrl === null ? "border-cath-red-700" : "border-[#e5e5e5]"
+              selectedUrl === null ? "border-cath-red-700" : "border-border"
             } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
           >
             <div className="absolute inset-0 flex items-center justify-center">
@@ -134,7 +134,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
           {/* Upload Option */}
           <label
             className={`relative w-full cursor-pointer rounded-lg border border-dashed aspect-video overflow-hidden transition-all duration-200 block bg-gray-50 hover:bg-gray-100 ${
-              isUploading ? "border-[#e5e5e5]" : "border-[#e5e5e5]"
+              isUploading ? "border-border" : "border-border"
             }`}
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -167,7 +167,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
               className={`relative  w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
                 selectedUrl === customUploadedUrl
                   ? "border-cath-red-700"
-                  : "border-[#e5e5e5]"
+                  : "border-border"
               } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
             >
               <div className="absolute inset-0">
@@ -199,7 +199,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
                 className={`relative  w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
                   selectedUrl === url
                     ? "border-cath-red-700"
-                    : "border-[#e5e5e5]"
+                    : "border-border"
                 } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
               >
                 <div className="absolute inset-0">

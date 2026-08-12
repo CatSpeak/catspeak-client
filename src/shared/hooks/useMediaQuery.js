@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useSyncExternalStore, useCallback } from "react"
 
 /**
  * Custom hook to detect if the current viewport matches a CSS media query.
@@ -6,35 +6,36 @@ import { useState, useEffect } from "react"
  * @returns {boolean} True if the media query matches, false otherwise.
  */
 export function useMediaQuery(query) {
-  const [matches, setMatches] = useState(false)
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const media = window.matchMedia(query)
-    // Set initial value
-    setMatches(media.matches)
-
-    // Listener for changes
-    const listener = (event) => setMatches(event.matches)
-    
-    // Fallback for older browsers
-    if (media.addEventListener) {
-      media.addEventListener("change", listener)
-    } else {
-      media.addListener(listener)
-    }
-
-    return () => {
-      if (media.removeEventListener) {
-        media.removeEventListener("change", listener)
+  const subscribe = useCallback(
+    (callback) => {
+      if (typeof window === "undefined") return () => {}
+      const media = window.matchMedia(query)
+      if (media.addEventListener) {
+        media.addEventListener("change", callback)
       } else {
-        media.removeListener(listener)
+        media.addListener(callback)
       }
-    }
-  }, [query])
+      return () => {
+        if (media.removeEventListener) {
+          media.removeEventListener("change", callback)
+        } else {
+          media.removeListener(callback)
+        }
+      }
+    },
+    [query],
+  )
 
-  return matches
+  const getSnapshot = () => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia(query).matches
+    }
+    return false
+  }
+
+  const getServerSnapshot = () => false
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }
 
 export default useMediaQuery

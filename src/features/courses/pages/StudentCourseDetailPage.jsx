@@ -164,7 +164,7 @@ const StudentCourseDetailPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* ─── 1. Course Header Block inside Left Column ─── */}
-          <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-5 relative">
+          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5 relative">
             {/* Share Button */}
             <button
               type="button"
@@ -192,7 +192,7 @@ const StudentCourseDetailPage = () => {
                 <img
                   src={thumbnailUrl || defaultCourseThumbnail}
                   alt={rawCourse.title || ""}
-                  className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-gray-150 shadow-2xs block"
+                  className="w-full h-52 sm:h-60 object-cover rounded-2xl border border-border shadow-2xs block"
                   loading="lazy"
                   decoding="async"
                 />
@@ -201,14 +201,14 @@ const StudentCourseDetailPage = () => {
           </div>
 
           {/* ─── 2. Overview Specifications 6-Grid ─── */}
-          <div className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-6">
+          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6">
             <h2 className="text-xl font-black text-gray-950 tracking-tight flex items-center gap-2">
               <BookOpen size={20} className="text-[#990011]" />
               <span>{c.student?.overview || "Overview"}</span>
             </h2>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
+              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-border">
                 <Radio size={18} className="text-[#990011] shrink-0 mt-0.5" />
                 <div className="flex flex-col">
                   <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.liveGroupClass || "Live Group Class"}</span>
@@ -216,7 +216,7 @@ const StudentCourseDetailPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
+              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-border">
                 <Calendar size={18} className="text-blue-600 shrink-0 mt-0.5" />
                 <div className="flex flex-col">
                   <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.totalClasses || "Total Classes"}</span>
@@ -224,7 +224,7 @@ const StudentCourseDetailPage = () => {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
+              <div className="flex items-start gap-3 p-3.5 bg-gray-50/80 rounded-2xl border border-border">
                 <Globe size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                 <div className="flex flex-col">
                   <span className="text-[12px] text-gray-400 font-bold uppercase">{c.student?.languageLabel || "Language"}</span>
@@ -235,7 +235,7 @@ const StudentCourseDetailPage = () => {
           </div>
 
           {/* ─── 4. Available Classes ─── */}
-          <div id="schedule-section" className="bg-white rounded-3xl border border-gray-150 p-6 shadow-xs flex flex-col gap-6 scroll-mt-6">
+          <div id="schedule-section" className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6 scroll-mt-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h2 className="text-xl font-black text-gray-950 tracking-tight flex items-center gap-2">
@@ -247,7 +247,7 @@ const StudentCourseDetailPage = () => {
             </div>
 
             {classes.length === 0 ? (
-              <div className="bg-gray-50 rounded-2xl border border-gray-150 p-10 text-center text-gray-400 font-bold flex flex-col items-center justify-center">
+              <div className="bg-gray-50 rounded-2xl border border-border p-10 text-center text-gray-400 font-bold flex flex-col items-center justify-center">
                 <span className="text-gray-800 text-base mb-1">{c.student?.noClassesTitle || "No Classes Available Yet"}</span>
                 <span className="text-sm font-semibold max-w-[280px]">{c.student?.noClassesDesc || "New class sessions will be scheduled soon. Please check back later."}</span>
               </div>
@@ -258,6 +258,9 @@ const StudentCourseDetailPage = () => {
                   const isExpanded = !!expandedClassIds[cls.id]
                   const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
+                  const remainingSlots = cls.remainingSlots != null
+                    ? Number(cls.remainingSlots)
+                    : (totalSlots != null && enrolledSeats != null ? Math.max(0, Number(totalSlots) - Number(enrolledSeats)) : null)
                   const tuitionLabel = cls.tuitionFee == null
                     ? ui.tba || "TBA"
                     : formatCurrencyVND(cls.tuitionFee)
@@ -271,7 +274,7 @@ const StudentCourseDetailPage = () => {
                         ? "border-green-300 ring-2 ring-green-50/60"
                         : isExpanded
                           ? "border-[#990011]/30 shadow-md ring-2 ring-red-50/40"
-                          : "border-gray-200 hover:border-gray-300 hover:shadow-2xs"
+                          : "border-border hover:border-gray-300 hover:shadow-2xs"
                         }`}
                     >
                       {/* Accordion Header */}
@@ -287,7 +290,7 @@ const StudentCourseDetailPage = () => {
                                 : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                               navigate(classPath)
                             }}
-                            className="w-28 h-16 sm:w-36 sm:h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 cursor-pointer group/thumb relative shadow-2xs"
+                            className="w-28 h-16 sm:w-36 sm:h-20 rounded-xl overflow-hidden bg-slate-100 border border-border shrink-0 cursor-pointer group/thumb relative shadow-2xs"
                             title="Xem chi tiết lớp học"
                           >
                             <img
@@ -357,7 +360,7 @@ const StudentCourseDetailPage = () => {
                           </div>
                         </div>
 
-                        <div className="flex sm:flex-col justify-between items-center sm:items-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-150 shrink-0">
+                        <div className="flex sm:flex-col justify-between items-center sm:items-end gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-border shrink-0">
                           <div className="flex flex-col sm:items-end">
                             <span className="text-[12px] text-gray-400 font-bold uppercase tracking-wider">{c.student?.tuitionFee || "Tuition Fee"}</span>
                             <span className="text-gray-950 font-black text-base">{tuitionLabel}</span>
@@ -396,19 +399,19 @@ const StudentCourseDetailPage = () => {
 
                       {/* Collapsible Panel */}
                       {isExpanded && (
-                        <div id={`class-details-${cls.id}`} className="bg-gray-50/70 border-t border-gray-150 p-5 flex flex-col gap-4 text-sm animate-fadeIn">
+                        <div id={`class-details-${cls.id}`} className="bg-gray-50/70 border-t border-border p-5 flex flex-col gap-4 text-sm animate-fadeIn">
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
+                            <div className="bg-white rounded-xl p-3 border border-border flex items-start gap-2.5">
                               <Users size={18} className="text-[#990011] shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.enrolledSlots || "Enrolled Slots"}</span>
+                                <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.remainingSlots || "Remaining Slots"}</span>
                                 <span className="text-gray-950 font-black text-sm">
-                                  {enrolledSeats ?? "0"} / {totalSlots ?? "N/A"}
+                                  {remainingSlots ?? "N/A"} / {totalSlots ?? "N/A"}
                                 </span>
                               </div>
                             </div>
 
-                            <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
+                            <div className="bg-white rounded-xl p-3 border border-border flex items-start gap-2.5">
                               <GraduationCap size={18} className="text-amber-600 shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.levelLabel || "Trình độ"}</span>
@@ -418,7 +421,7 @@ const StudentCourseDetailPage = () => {
                               </div>
                             </div>
 
-                            <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
+                            <div className="bg-white rounded-xl p-3 border border-border flex items-start gap-2.5">
                               <Calendar size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5 min-w-0">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">
@@ -436,7 +439,7 @@ const StudentCourseDetailPage = () => {
                               </div>
                             </div>
 
-                            <div className="bg-white rounded-xl p-3 border border-gray-150 flex items-start gap-2.5">
+                            <div className="bg-white rounded-xl p-3 border border-border flex items-start gap-2.5">
                               <Video size={18} className="text-blue-600 shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-0.5 min-w-0">
                                 <span className="text-gray-400 font-bold text-[12px] uppercase">{c.student?.virtualClassroom || "Virtual Classroom"}</span>
@@ -450,7 +453,7 @@ const StudentCourseDetailPage = () => {
                               <span className="font-bold text-gray-700 text-[11px]">{c.student?.weeklySchedule || "Weekly Schedule:"}</span>
                               <div className="flex flex-wrap gap-2">
                                 {cls.rawSchedule.map((s, idx) => (
-                                  <span key={idx} className="bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-lg text-sm font-semibold">
+                                  <span key={idx} className="bg-white border border-border text-gray-700 px-3 py-1 rounded-lg text-sm font-semibold">
                                     <strong className="text-gray-950">
                                       {formatScheduleDays(
                                         [s.dayOfWeek],
@@ -467,7 +470,7 @@ const StudentCourseDetailPage = () => {
                           )}
 
                           {/* Always-Visible Class Description */}
-                          <div className="bg-white rounded-xl p-3.5 border border-gray-150 flex flex-col gap-1">
+                          <div className="bg-white rounded-xl p-3.5 border border-border flex flex-col gap-1">
                             <span className="font-bold text-gray-950 text-sm flex items-center gap-1">
                               <FileText size={13} className="text-[#990011]" />
                               <span>{c.student?.description || "Description"}</span>
@@ -490,8 +493,8 @@ const StudentCourseDetailPage = () => {
 
         <div className="lg:col-span-1 flex flex-col gap-6 lg:sticky lg:top-6">
           {/* ─── MEET THE TEACHER CARD (Right Sidebar Column) ─── */}
-          <div className="bg-white rounded-3xl border border-gray-150 p-6 flex flex-col gap-5">
-            <h2 className="text-lg font-black text-gray-950 tracking-tight flex items-center gap-2 border-b border-gray-100 pb-3">
+          <div className="bg-white rounded-3xl border border-border p-6 flex flex-col gap-5">
+            <h2 className="text-lg font-black text-gray-950 tracking-tight flex items-center gap-2 border-b border-border pb-3">
               <User size={18} className="text-[#990011]" />
               <span>{c.student?.meetInstructor || "Meet the Instructor"}</span>
             </h2>
@@ -499,7 +502,7 @@ const StudentCourseDetailPage = () => {
             <div className="flex items-center gap-3.5">
               {teacherAvatarUrl ? (
                 <img
-                  className="w-14 h-14 rounded-full object-cover border border-gray-200 shadow-2xs shrink-0"
+                  className="w-14 h-14 rounded-full object-cover border border-border shadow-2xs shrink-0"
                   src={teacherAvatarUrl}
                   alt={teacher.name || ""}
                   loading="lazy"
@@ -541,7 +544,7 @@ const StudentCourseDetailPage = () => {
                   }
                 }}
                 disabled={!teacher.accountId && !teacher.id}
-                className="flex-1 h-10 border border-gray-200 hover:bg-gray-50 text-gray-800 text-sm font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+                className="flex-1 h-10 border border-border hover:bg-gray-50 text-gray-800 text-sm font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs"
               >
                 <User size={14} />
                 <span>{c.student?.profile || "Profile"}</span>
@@ -551,7 +554,7 @@ const StudentCourseDetailPage = () => {
                 type="button"
                 disabled
                 title={scd.contactUnavailable || "Contact is not available yet."}
-                className="flex-1 h-10 border border-gray-200 text-gray-400 text-sm font-black rounded-full flex items-center justify-center gap-1.5 shadow-2xs cursor-not-allowed"
+                className="flex-1 h-10 border border-border text-gray-400 text-sm font-black rounded-full flex items-center justify-center gap-1.5 shadow-2xs cursor-not-allowed"
               >
                 <Mail size={14} />
                 <span>{c.student?.contactInstructor || "Contact Instructor"}</span>

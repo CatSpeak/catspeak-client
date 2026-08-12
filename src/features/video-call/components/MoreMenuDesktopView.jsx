@@ -95,7 +95,7 @@ const MoreMenuDesktopView = ({
         label={t.rooms?.game?.crackIt?.gameHistory || "Game History"}
       />
 
-      <div className="border-t border-[#E5E5E5] my-[2px]"></div>
+      <div className="border-t border-border my-[2px]"></div>
 
       <MenuItem
         onClick={() => {
@@ -166,7 +166,7 @@ const MoreMenuDesktopView = ({
             <ProgressBar
               progress={usagePercent}
               heightClass="h-1.5"
-              trackColorClass="bg-[#F2F2F2]"
+              trackColorClass="bg-primaryBg"
               colorClass={
                 isDanger
                   ? "bg-red-500 animate-pulse"
@@ -208,7 +208,7 @@ const MoreMenuDesktopView = ({
         }
       />
 
-      <div className="border-t border-[#E5E5E5] my-[2px]"></div>
+      <div className="border-t border-border my-[2px]"></div>
 
       <MenuItem
         onClick={() => {

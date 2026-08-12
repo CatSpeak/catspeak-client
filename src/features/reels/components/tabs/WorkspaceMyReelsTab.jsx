@@ -80,7 +80,7 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
           {[1, 2, 3].map((item) => (
             <div
               key={item}
-              className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm animate-pulse sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-lg border border-border bg-white p-4 shadow-sm animate-pulse sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex items-center gap-3">
                 <div className="w-16 h-16 bg-gray-200 rounded flex-shrink-0" />
@@ -97,7 +97,7 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
       ) : error && page === 1 ? (
         <ErrorMessage message={error?.data?.message || "Failed to load reels. Please try again."} />
       ) : reels.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50">
           <Film size={48} className="text-gray-300 mb-3" />
           <h3 className="font-bold text-gray-700 mb-1">{ws?.noReels || "No reels uploaded yet"}</h3>
           <p className="text-sm text-gray-400 mb-4 text-center max-w-sm">

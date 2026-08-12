@@ -34,7 +34,7 @@ const getAttendanceStyle = (attendance) => {
   if (attendance === "ABSENT_UNEXCUSED") {
     return "bg-red-50 text-red-700 border-red-200"
   }
-  return "bg-gray-50 text-gray-600 border-gray-200"
+  return "bg-gray-50 text-gray-600 border-border"
 }
 
 const ClassMembersTab = ({ classData, isStudent }) => {
@@ -97,7 +97,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
   )
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
+    <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6">
       <section className="flex flex-col gap-3">
         <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-1.5">
           {cd.leadInstructor || "LEAD INSTRUCTOR"}
@@ -122,7 +122,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-gray-200 p-5 text-center text-xs font-bold text-gray-400">
+          <div className="rounded-xl border border-dashed border-border p-5 text-center text-xs font-bold text-gray-400">
             {classWorkspace.noInstructor || "Instructor information is not available."}
           </div>
         )}

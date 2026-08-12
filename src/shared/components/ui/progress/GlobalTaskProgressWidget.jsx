@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/shared/context/LanguageContext";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle,
@@ -76,11 +77,13 @@ const getTaskStatusText = (task, displayProgress, t) => {
 
 const TaskItem = ({ task, onRemove }) => {
   const { t } = useLanguage();
+  const [prevProgress, setPrevProgress] = useState(task.progress);
   const [displayProgress, setDisplayProgress] = useState(task.progress);
 
-  useEffect(() => {
+  if (task.progress !== prevProgress) {
+    setPrevProgress(task.progress);
     setDisplayProgress(task.progress);
-  }, [task.progress]);
+  }
 
   const isSuccess = task.status === "SUCCESS";
   const isError = task.status === "ERROR";
@@ -145,13 +148,13 @@ export const GlobalTaskProgressWidget = () => {
   const visibleTasks = tasks ? tasks.filter((t) => !t.isHidden) : [];
 
   // Auto re-show when a new task is added after the user dismissed the widget.
-  useEffect(() => {
+  if (visibleTasks.length !== lastTaskCount) {
     if (visibleTasks.length > lastTaskCount) {
       setIsDismissed(false);
       setIsMinimized(false);
     }
     setLastTaskCount(visibleTasks.length);
-  }, [visibleTasks.length, lastTaskCount]);
+  }
 
   // If user is not logged in, dismissed, or there are no visible tasks, don't show the widget
   if (!token || isDismissed || visibleTasks.length === 0) return null;
@@ -162,10 +165,10 @@ export const GlobalTaskProgressWidget = () => {
         initial={{ opacity: 0, y: 50, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 50, scale: 0.9 }}
-        className="fixed z-[9999] bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 w-auto sm:w-80 rounded-xl shadow-2xl border border-gray-100 backdrop-blur-xl bg-white/90 overflow-hidden flex flex-col"
+        className="fixed z-[9999] bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 w-auto sm:w-80 rounded-xl shadow-2xl border border-border backdrop-blur-xl bg-white/90 overflow-hidden flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100">
+        <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-border">
           <div
             onClick={() => setIsMinimized(!isMinimized)}
             className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"

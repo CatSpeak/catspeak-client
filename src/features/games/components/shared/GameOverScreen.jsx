@@ -23,7 +23,7 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 12 }}
             transition={{ duration: 0.4, ease: [0.175, 0.885, 0.32, 1.275] }}
-            className="relative z-10 bg-white p-6 md:p-8 rounded-[2rem] shadow-2xl max-w-lg w-full text-center border border-gray-100 mx-4 flex flex-col max-h-[85vh]"
+            className="relative z-10 bg-white p-6 md:p-8 rounded-[2rem] shadow-2xl max-w-lg w-full text-center border border-border mx-4 flex flex-col max-h-[85vh]"
           >
             <div className="flex flex-col items-center gap-1 text-center mt-2 mb-6">
               <motion.div
@@ -42,7 +42,7 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
 
             {finalResults?.final_scores && (
               <>
-                <h3 className="text-base md:text-xl font-bold text-slate-800 mb-4 flex items-center justify-center gap-2 shrink-0 border-b border-gray-100 pb-3">
+                <h3 className="text-base md:text-xl font-bold text-slate-800 mb-4 flex items-center justify-center gap-2 shrink-0 border-b border-border pb-3">
                   {t.rooms?.game?.crackIt?.finalLeaderboard || "Bảng Xếp Hạng Chung Cuộc"}
                 </h3>
 
@@ -61,7 +61,7 @@ const GameOverScreen = ({ gameState, finalResults, t: propT, getPlayerName, exit
                           transition={{ duration: 0.35, delay: 0.2 + index * 0.05 }}
                           className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${isWinner
                             ? "bg-yellow-50 border-yellow-400 shadow-[0_0_15px_rgba(250,204,21,0.2)]"
-                            : "bg-gray-50 border-gray-100"
+                            : "bg-gray-50 border-border"
                             }`}
                         >
                           <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">

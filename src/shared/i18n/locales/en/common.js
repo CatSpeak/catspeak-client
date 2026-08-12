@@ -49,6 +49,7 @@ export default {
     calendar: "Calendar",
     events: "Events",
     analytics: "Analytics",
+    dashboard: "Dashboard",
     cart: "Cart",
     courses: "Courses",
     allCourses: "All Courses",
@@ -171,6 +172,10 @@ export default {
     new_challenge: {
       title: "New Challenge!",
       body: 'New challenge: "{challengeTitle}" is waiting for you!',
+    },
+    instructor_profile_approved: {
+      title: "Instructor Profile Approved",
+      body: "You can now switch to your Teacher account.",
     },
   },
 };

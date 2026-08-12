@@ -22,7 +22,7 @@ const RecipientInfoBox = ({
           <select
             value={bank}
             disabled
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 cursor-not-allowed font-medium"
+            className="w-full bg-gray-50 border border-border rounded-xl px-4 py-3 text-sm text-gray-700 cursor-not-allowed font-medium"
           >
             <option value="Vietcombank">Vietcombank</option>
           </select>
@@ -36,7 +36,7 @@ const RecipientInfoBox = ({
             type="text"
             value={accountNo}
             disabled
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 cursor-not-allowed font-medium"
+            className="w-full bg-gray-50 border border-border rounded-xl px-4 py-3 text-sm text-gray-700 cursor-not-allowed font-medium"
           />
         </div>
 
@@ -48,7 +48,7 @@ const RecipientInfoBox = ({
             type="text"
             value={accountOwner}
             disabled
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 cursor-not-allowed font-medium"
+            className="w-full bg-gray-50 border border-border rounded-xl px-4 py-3 text-sm text-gray-700 cursor-not-allowed font-medium"
           />
         </div>
 
@@ -60,7 +60,7 @@ const RecipientInfoBox = ({
             type="text"
             value={memo}
             onChange={(e) => onMemoChange(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-cath-red-700/20 focus:border-cath-red-700 font-medium"
+            className="w-full bg-gray-50 border border-border rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-cath-red-700/20 focus:border-cath-red-700 font-medium"
           />
         </div>
       </div>

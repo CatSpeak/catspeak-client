@@ -31,7 +31,7 @@ const CreateEventModal = ({ onClose, editEvent }) => {
       open
       onClose={onClose}
       showCloseButton={false}
-      className="flex flex-col p-0 !max-w-[900px] w-full bg-[#F2F2F2] rounded-none min-[426px]:rounded-xl overflow-visible max-[425px]:h-full"
+      className="flex flex-col p-0 !max-w-[900px] w-full bg-primaryBg rounded-none min-[426px]:rounded-xl overflow-visible max-[425px]:h-full"
       bodyClassName="flex-1 flex flex-col min-h-0"
     >
       <form

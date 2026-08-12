@@ -6,7 +6,7 @@ import { Check, TrendingUp, Star, SlidersHorizontal } from "lucide-react"
 import { useParticipants, useIsSpeaking } from "@livekit/components-react"
 // eslint-disable-next-line no-unused-vars
 import { motion, animate, AnimatePresence } from "framer-motion"
-import { ParticipantVolumePopover } from "@/features/video-call/components/ParticipantVolumePopover"
+import { ParticipantActionPopover } from "@/features/video-call/components/ParticipantActionPopover"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 
@@ -324,14 +324,14 @@ const GameSidebar = ({
     >
       {/* LEADERBOARD CARD */}
       <div
-        className={`flex-1 bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col min-h-0 ${
+        className={`flex-1 bg-white rounded-2xl overflow-hidden shadow-sm border border-border flex flex-col min-h-0 ${
           embedded ? "py-2 px-1.5" : "py-4 px-2 md:py-6 md:px-3"
         }`}
       >
         <div className={`shrink-0 ${embedded ? "px-1.5" : "px-2 md:px-3"}`}>
           {!hideTitle && (
             <div
-              className={`flex items-center justify-between gap-2 border-b border-gray-200 ${
+              className={`flex items-center justify-between gap-2 border-b border-border ${
                 embedded ? "mb-2.5 pb-2" : "mb-6 pb-4"
               }`}
             >
@@ -385,7 +385,7 @@ const GameSidebar = ({
                   className="w-full"
                 >
                   {participant && !player.isYou && !player.hasLeft ? (
-                    <ParticipantVolumePopover participant={participant}>
+                    <ParticipantActionPopover participant={participant}>
                       <div
                         className={`group flex items-center gap-2 md:gap-3 border-b border-transparent last:border-0 w-full h-full cursor-pointer transition-colors border-b-gray-100 hover:border-transparent relative rounded-xl ${
                           embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
@@ -394,15 +394,15 @@ const GameSidebar = ({
                         {innerContent}
                         <div className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center pointer-events-none">
                           <div className="w-4 h-8 bg-gradient-to-r from-transparent to-[#F2F2F2]"></div>
-                          <div className="bg-[#F2F2F2] h-8 flex items-center text-gray-500 pr-1">
+                          <div className="bg-primaryBg h-8 flex items-center text-gray-500 pr-1">
                             <SlidersHorizontal size={18} />
                           </div>
                         </div>
                       </div>
-                    </ParticipantVolumePopover>
+                    </ParticipantActionPopover>
                   ) : (
                     <div
-                      className={`flex items-center gap-2 md:gap-3 border-b border-gray-100 last:border-0 w-full h-full relative rounded-xl ${
+                      className={`flex items-center gap-2 md:gap-3 border-b border-border last:border-0 w-full h-full relative rounded-xl ${
                         embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
                       }`}
                     >

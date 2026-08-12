@@ -92,7 +92,7 @@ const CreateRoomFormFields = ({
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <span>{t.rooms?.createRoom?.privateRoom || "Private Room"}</span>
-              <div className="flex items-center justify-between gap-4 w-full rounded-xl border border-[#e5e5e5] px-4 min-h-[56px] bg-white transition-all duration-200">
+              <div className="flex items-center justify-between gap-4 w-full rounded-xl border border-border px-4 min-h-[56px] bg-white transition-all duration-200">
                 <span className="flex-1">
                   {formData.isPrivate
                     ? ct.privateHint ||
@@ -150,7 +150,7 @@ const CreateRoomFormFields = ({
                       className={`flex items-center justify-center py-2 rounded-xl font-bold text-sm transition-all border ${
                         isSelected
                           ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700 shadow-sm"
-                          : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                          : "bg-white border-border text-gray-700 hover:border-gray-300"
                       }`}
                     >
                       {num}

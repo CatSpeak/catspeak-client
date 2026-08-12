@@ -70,9 +70,9 @@ const WorkspaceRoomFilterModal = ({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full h-full max-h-full sm:h-auto sm:max-h-[85vh] sm:max-w-[560px] bg-white sm:rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full h-full max-h-full sm:h-auto sm:max-h-[85vh] sm:max-w-[560px] bg-white sm:rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#FFF0F2] text-cath-red-700">
               <SlidersHorizontal size={18} strokeWidth={2.5} />
@@ -114,7 +114,7 @@ const WorkspaceRoomFilterModal = ({
                     className={`flex items-center justify-center px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-all border ${
                       isSelected
                         ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700"
-                        : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
+                        : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                     }`}
                   >
                     {level.label}
@@ -147,7 +147,7 @@ const WorkspaceRoomFilterModal = ({
                     className={`flex items-center justify-center px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-all border ${
                       isSelected
                         ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700"
-                        : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
+                        : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                     }`}
                   >
                     {t.rooms?.filters?.topics?.[topic.toLowerCase()] || topic}
@@ -159,7 +159,7 @@ const WorkspaceRoomFilterModal = ({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 items-center justify-between p-4 sm:p-5 border-t border-gray-100 bg-gray-50/80 shrink-0">
+        <div className="flex gap-3 items-center justify-between p-4 sm:p-5 border-t border-border bg-gray-50/80 shrink-0">
           <button
             type="button"
             onClick={handleClear}

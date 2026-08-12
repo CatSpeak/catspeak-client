@@ -9,6 +9,10 @@ import { setPiP } from "@/store/slices/videoCallSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
+import {
+  getRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 
 /**
  * useRecording — manages recording state for a video call session.
@@ -48,7 +52,21 @@ export function useRecording(lkRoom = null, syncState = {}) {
       return
     }
 
-    if (isTogglingRecording) return // debounce double-click
+    const currentRoomId = syncState?.roomId || lkRoom?.name
+    const isHost = syncState?.isHost
+    const isMemberRecordingAllowed = getRoomSetting(
+      currentRoomId,
+      ROOM_SETTING_KEYS.MEMBER_RECORDING
+    )
+
+    if (!isRecording && !isHost && !isMemberRecordingAllowed) {
+      toast.error(
+        t.rooms?.videoCall?.recordingDisabledByHost ||
+          "Host đã tắt quyền ghi hình phòng họp đối với thành viên."
+      )
+      return
+    }
+
     setIsTogglingRecording(true)
 
     try {

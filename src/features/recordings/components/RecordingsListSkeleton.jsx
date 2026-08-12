@@ -5,7 +5,7 @@ const RecordingsListSkeleton = () => (
     {[1, 2, 3].map((i) => (
       <div
         key={i}
-        className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm animate-pulse sm:flex-row sm:items-center sm:justify-between"
+        className="flex flex-col gap-3 rounded-xl border border-border bg-white p-4 shadow-sm animate-pulse sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="flex flex-1 flex-col gap-2">
           <div className="flex items-center gap-2.5">

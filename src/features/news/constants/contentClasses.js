@@ -3,7 +3,7 @@ export const CONTENT_CLASSES = [
   "text-[15px] sm:text-[16px] leading-[1.65] text-slate-800",
 
   // Inline formatting
-  "[&_strong]:font-semibold [&_b]:font-semibold",
+  "[&_strong]:font-bold [&_b]:font-bold [&_strong]:text-slate-900 [&_b]:text-slate-900 [&_strong]:[-webkit-text-stroke:0.2px_currentColor] [&_b]:[-webkit-text-stroke:0.2px_currentColor]",
   "[&_em]:italic [&_i]:italic",
   "[&_u]:underline [&_s]:line-through",
 
@@ -32,7 +32,7 @@ export const CONTENT_CLASSES = [
   "[&_pre_code]:bg-transparent [&_pre_code]:text-inherit [&_pre_code]:p-0",
 
   // Horizontal rule
-  "[&_hr]:border-t [&_hr]:border-gray-200 [&_hr]:my-5",
+  "[&_hr]:border-t [&_hr]:border-border [&_hr]:my-5",
 
   // Images
   "[&_img]:inline-block [&_img]:max-w-full [&_img]:h-auto [&_img]:py-2 [&_img]:rounded-lg",

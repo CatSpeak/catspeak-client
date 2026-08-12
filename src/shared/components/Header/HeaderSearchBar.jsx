@@ -43,7 +43,7 @@ const HeaderSearchBar = () => {
     <>
       {/* Mobile Search Button */}
       <button 
-        className="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-[#F0F0F0] hover:bg-gray-200 text-gray-700 transition-colors shrink-0"
+        className="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 transition-colors shrink-0"
         onClick={() => setIsExpanded(true)}
       >
         <Search size={20} strokeWidth={2} />
@@ -76,7 +76,7 @@ const HeaderSearchBar = () => {
               }
             }}
             placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
-            className="w-full h-10 pl-11 pr-4 bg-[#F0F0F0] border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[16px] md:text-[14px] outline-none transition-all placeholder-gray-500"
+            className="w-full h-10 pl-11 pr-4 bg-primaryBg border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[16px] md:text-[14px] outline-none transition-all placeholder-gray-500"
           />
         </div>
         

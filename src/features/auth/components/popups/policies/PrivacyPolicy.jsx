@@ -10,7 +10,7 @@ const PrivacyPolicy = () => {
       <p className="leading-relaxed italic">{policy.intro}</p>
 
       {/* Section 1 */}
-      <div className="pt-6 border-t border-[#E5E5E5]">
+      <div className="pt-6 border-t border-border">
         <h3 className="font-bold text-[#8f0d15] mb-2">
           {policy.section1.title}
         </h3>

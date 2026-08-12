@@ -7,7 +7,7 @@ const BillingTableRow = ({
   formatAmount,
 }) => {
   return (
-    <tr className="border-b border-gray-100 last:border-0 hover:bg-gray-50/80 transition-colors">
+    <tr className="border-b border-border last:border-0 hover:bg-gray-50/80 transition-colors">
       <td className="py-4 px-6 text-sm text-gray-600">
         {formatDate(invoice.createDate)}
       </td>

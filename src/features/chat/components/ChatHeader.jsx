@@ -57,7 +57,7 @@ const ChatHeader = ({
       : formatRelative(lastSeenTime);
 
   return (
-    <div className="flex items-center justify-between px-4 h-[72px] border-b border-[#E5E5E5] shrink-0">
+    <div className="flex items-center justify-between px-4 h-[72px] border-b border-border shrink-0">
       <div className="flex items-center gap-4 min-w-0">
         {/* Back button — visible on mobile only */}
         <IconButton

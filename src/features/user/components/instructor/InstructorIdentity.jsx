@@ -11,7 +11,7 @@ const InstructorIdentity = ({ formData, onEdit, readOnly = false, errors = {}, t
         <div
         onClick={() => !readOnly && onEdit(fieldName)}
         className={`relative flex flex-col items-center justify-center w-full aspect-[4/3] bg-white rounded-2xl overflow-hidden group ${
-          fileData ? "border border-solid border-gray-200 shadow-sm" : `border-2 border-dashed ${errorText ? "border-red-500 bg-red-50/10" : "border-gray-300"}`
+          fileData ? "border border-solid border-border shadow-sm" : `border-2 border-dashed ${errorText ? "border-red-500 bg-red-50/10" : "border-gray-300"}`
         } ${!readOnly ? "cursor-pointer hover:border-red-300 hover:bg-red-50/10 transition-colors" : ""}`}
       >
         {fileData ? (

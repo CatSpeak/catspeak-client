@@ -45,7 +45,7 @@ const CreatePostTypeModal = ({ open, onClose, onSelect }) => {
                 onSelect(opt.id)
                 onClose()
               }}
-              className="flex items-start gap-4 p-4 text-left border border-gray-150 rounded-2xl bg-white hover:bg-red-50/20 hover:border-red-200 transition-all duration-200 group active:scale-[0.99] shadow-xs"
+              className="flex items-start gap-4 p-4 text-left border border-border rounded-2xl bg-white hover:bg-red-50/20 hover:border-red-200 transition-all duration-200 group active:scale-[0.99] shadow-xs"
             >
               <div className={`p-3 rounded-xl ${opt.bgColor} ${opt.color} group-hover:scale-105 transition-transform`}>
                 <Icon size={24} />

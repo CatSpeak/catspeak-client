@@ -141,7 +141,7 @@ const CheckoutPage = () => {
         {/* Left Columns (Form details) */}
         <div className="lg:col-span-2 space-y-8">
           {/* Transfer Info Section */}
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-6">
+          <div className="bg-white border border-border rounded-3xl p-6 shadow-sm space-y-6">
             <h2 className="text-xl font-bold text-gray-900">
               {t.billing?.checkout?.transferInfo || "Thông tin chuyển khoản"}
             </h2>
@@ -153,7 +153,7 @@ const CheckoutPage = () => {
               onMemoChange={setMemo}
             />
 
-            <hr className="border-gray-100" />
+            <hr className="border-border" />
 
             {/* Buyer details */}
             <BuyerInfoBox

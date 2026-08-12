@@ -647,7 +647,7 @@ const CreateEventPage = () => {
             </h2>
 
             {/* Preview card */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#E5E5E5]">
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-border">
               <div className="flex items-start gap-3">
                 {/* Preview image */}
                 <div
@@ -713,7 +713,7 @@ const CreateEventPage = () => {
                     )}
                   </h2>
                 </div>
-                <div className="bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
                   {drafts.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                       <BookmarkCheck size={32} className="mb-2 opacity-30" />

@@ -11,7 +11,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
   const { formatDateTime } = useTimezone()
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200" >
+    <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden transition-all duration-200" >
       <div
         className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
         onClick={() => onToggle(match.id)}
@@ -71,7 +71,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
 
       {/* Expanded Leaderboard */}
       {isExpanded && (
-        <div className="border-t border-gray-100 bg-white p-4">
+        <div className="border-t border-border bg-white p-4">
           <h4 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
             {t.rooms?.game?.crackIt?.leaderboard || "Bảng xếp hạng"}
           </h4>
@@ -85,7 +85,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                     key={item.player.userId}
                     className={`flex items-center justify-between p-3 rounded-xl ${idx === 0
                         ? "bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200/50"
-                        : "bg-white border border-gray-100"
+                        : "bg-white border border-border"
                       }`}
                   >
                     <div className="flex items-center gap-3">

@@ -99,14 +99,14 @@ const ContactSection = ({ isMobile = false }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 containerClassName="flex-1"
-                className={`text-black ${isMobile ? "shadow-md bg-white border border-gray-100 rounded-full px-6 py-2" : ""}`}
+                className={`text-black ${isMobile ? "shadow-md bg-white border border-border rounded-full px-6 py-2" : ""}`}
               />
               <TextInput
                 placeholder={footerText.namePlaceholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 containerClassName="flex-1"
-                className={`text-black ${isMobile ? "shadow-md bg-white border border-gray-100 rounded-full px-6 py-2" : ""}`}
+                className={`text-black ${isMobile ? "shadow-md bg-white border border-border rounded-full px-6 py-2" : ""}`}
               />
             </div>
             <div className="flex items-center relative gap-5">
@@ -115,7 +115,7 @@ const ContactSection = ({ isMobile = false }) => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 containerClassName="flex-1"
-                className={`pr-12 text-black ${isMobile ? "shadow-md bg-white border border-gray-100 rounded-full px-6 py-2" : ""}`}
+                className={`pr-12 text-black ${isMobile ? "shadow-md bg-white border border-border rounded-full px-6 py-2" : ""}`}
               />
 
               <button

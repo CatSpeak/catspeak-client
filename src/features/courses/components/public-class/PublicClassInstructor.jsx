@@ -21,7 +21,7 @@ const PublicClassInstructor = ({ classData }) => {
         {pc.instructorTitle || "Thông Tin Giảng Viên Chuyên Trách"}
       </h2>
 
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
+      <div className="bg-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           {/* Avatar */}
           <div className="shrink-0">

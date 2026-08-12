@@ -1,146 +1,298 @@
-import React, { useRef, useState } from "react"
-import toast from "react-hot-toast"
-import { Camera, Users, Check } from "lucide-react"
-import Avatar from "@/shared/components/ui/Avatar"
-import Modal from "@/shared/components/ui/Modal"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+import React, { useRef, useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import { Camera, Users, Check } from "lucide-react";
+import Avatar from "@/shared/components/ui/Avatar";
+import Modal from "@/shared/components/ui/Modal";
+import TextInput from "@/shared/components/ui/inputs/TextInput";
+import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
   useUpdateAvatarMutation,
   useUpdateMeetingAvatarMutation,
-} from "@/store/api/userApi"
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
-import backgroundAccount from "@/shared/assets/backgrounds/background-account.png"
+  useGetCurrentBackgroundQuery,
+  useLazyGetCurrentBackgroundQuery,
+  useUploadCustomBackgroundMutation,
+  useSetActiveBackgroundMutation,
+} from "@/store/api/userApi";
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
+import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils";
+import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
 
 const AccountHeader = ({ user, formData, t }) => {
-  const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl
+  const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl;
   const displayMeetingAvatarUrl =
-    formData?.meetingAvatarUrl || user?.meetingAvatarUrl || displayAvatarUrl
-  const nickname = formData?.nickname || user?.nickname
-  const username = formData?.username || user?.username
-  const displayName = nickname || username || "User"
+    formData?.meetingAvatarUrl || user?.meetingAvatarUrl || displayAvatarUrl;
+  const nickname = formData?.nickname || user?.nickname;
+  const username = formData?.username || user?.username;
+  const displayName = nickname || username || "User";
 
   const [isMeetingAvatarModalOpen, setIsMeetingAvatarModalOpen] =
-    useState(false)
-  const [meetingAvatarUrlInput, setMeetingAvatarUrlInput] = useState("")
+    useState(false);
+  const [meetingAvatarUrlInput, setMeetingAvatarUrlInput] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState(null);
+
+  const [fileToCrop, setFileToCrop] = useState(null)
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false)
 
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
-    useUpdateAvatarMutation()
+    useUpdateAvatarMutation();
   const [updateMeetingAvatar, { isLoading: isUpdatingMeetingAvatar }] =
-    useUpdateMeetingAvatarMutation()
+    useUpdateMeetingAvatarMutation();
+
+  const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
+    useGetCurrentBackgroundQuery();
+  const fetchedCoverUrl =
+    currentBackgroundResponse?.data?.activeBackgroundUrl ||
+    currentBackgroundResponse?.activeBackgroundUrl ||
+    currentBackgroundResponse?.data?.customUploadedBackgroundUrl ||
+    currentBackgroundResponse?.customUploadedBackgroundUrl ||
+    (typeof currentBackgroundResponse?.data === "string"
+      ? currentBackgroundResponse.data
+      : null) ||
+    (typeof currentBackgroundResponse === "string"
+      ? currentBackgroundResponse
+      : null);
+
+  const [getCurrentBackground] = useLazyGetCurrentBackgroundQuery();
+  const [uploadCustomBackground, { isLoading: isUploadingCover }] =
+    useUploadCustomBackgroundMutation();
+  const [setActiveBackground, { isLoading: isSettingActiveBackground }] =
+    useSetActiveBackgroundMutation();
+
+  const isCoverUpdating = isUploadingCover || isSettingActiveBackground;
+
+  // Clean up object URL when coverImageUrl changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(coverImageUrl);
+      }
+    };
+  }, [coverImageUrl]);
 
   // Optional: khi user đang trong call, đồng bộ avatar mới xuống LiveKit metadata ngay lập tức
-  let localParticipant = null
+  let localParticipant = null;
   try {
-    const callCtx = useGlobalVideoCall()
-    localParticipant = callCtx?.localParticipant ?? null
+    const callCtx = useGlobalVideoCall();
+    localParticipant = callCtx?.localParticipant ?? null;
   } catch {
-    localParticipant = null
+    localParticipant = null;
   }
 
-  const fileInputRef = useRef(null)
+  const fileInputRef = useRef(null);
+  const coverInputRef = useRef(null);
 
   const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const avatarData = new FormData()
-    avatarData.append("file", file)
+    const avatarData = new FormData();
+    avatarData.append("file", file);
 
     try {
       toast.loading(
         t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật...",
         { id: "avatar-update" },
-      )
-      await updateAvatar(avatarData).unwrap()
+      );
+      await updateAvatar(avatarData).unwrap();
       toast.success(
         t.profile?.personalInfo?.updateAvatarSuccess ||
-          "Cập nhật ảnh đại diện thành công",
+        "Cập nhật ảnh đại diện thành công",
         { id: "avatar-update" },
-      )
+      );
     } catch (error) {
       toast.error(
         t.profile?.personalInfo?.updateAvatarError ||
-          "Không thể cập nhật ảnh đại diện",
+        "Không thể cập nhật ảnh đại diện",
         { id: "avatar-update" },
-      )
-      console.error(error)
+      );
+      console.error(error);
     } finally {
-      if (fileInputRef.current) fileInputRef.current.value = ""
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
-  }
+  };
+
+  const handleCoverChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // File validation: check image type
+    if (!file.type.startsWith("image/")) {
+      toast.error(
+        t.profile?.personalInfo?.invalidImageFormat ||
+          "Vui lòng chọn tệp hình ảnh hợp lệ",
+      );
+      if (coverInputRef.current) coverInputRef.current.value = "";
+      return;
+    }
+
+    // File validation: check file size (max 5MB)
+    const maxSizeBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      toast.error(
+        t.profile?.personalInfo?.coverSizeLimit ||
+          "Kích thước ảnh bìa không được vượt quá 5MB",
+      );
+      if (coverInputRef.current) coverInputRef.current.value = "";
+      return;
+    }
+
+    // Optimistic UI preview
+    if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(coverImageUrl);
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setCoverImageUrl(objectUrl);
+
+    const bgFormData = new FormData();
+    bgFormData.append("file", file);
+
+    try {
+      toast.loading(
+        t.profile?.personalInfo?.updatingCover || "Đang cập nhật ảnh bìa...",
+        { id: "cover-update" },
+      );
+
+      const uploadRes = await uploadCustomBackground(bgFormData).unwrap();
+      let uploadedUrl =
+        uploadRes?.data?.customUploadedBackgroundUrl ||
+        uploadRes?.data?.backgroundUrl ||
+        (typeof uploadRes?.data === "string" ? uploadRes.data : null) ||
+        uploadRes?.customUploadedBackgroundUrl ||
+        (typeof uploadRes === "string" ? uploadRes : null);
+
+      if (!uploadedUrl) {
+        const currentRes = await getCurrentBackground().unwrap();
+        uploadedUrl =
+          currentRes?.data?.customUploadedBackgroundUrl ||
+          currentRes?.customUploadedBackgroundUrl;
+      }
+
+      if (uploadedUrl && typeof uploadedUrl === "string") {
+        await setActiveBackground({ backgroundUrl: uploadedUrl }).unwrap();
+      }
+
+      toast.success(
+        t.profile?.personalInfo?.updateCoverSuccess ||
+          "Cập nhật ảnh bìa thành công",
+        { id: "cover-update" },
+      );
+    } catch {
+      // Rollback preview on error
+      setCoverImageUrl(null);
+      URL.revokeObjectURL(objectUrl);
+      toast.error(
+        t.profile?.personalInfo?.updateCoverError ||
+          "Không thể cập nhật ảnh bìa",
+        { id: "cover-update" },
+      );
+    } finally {
+      if (coverInputRef.current) coverInputRef.current.value = "";
+    }
+  };
 
   const handleOpenMeetingAvatarModal = () => {
-    setMeetingAvatarUrlInput(displayMeetingAvatarUrl || "")
-    setIsMeetingAvatarModalOpen(true)
-  }
+    setMeetingAvatarUrlInput(displayMeetingAvatarUrl || "");
+    setIsMeetingAvatarModalOpen(true);
+  };
 
   const handleSaveMeetingAvatarUrl = async () => {
-    const trimmed = (meetingAvatarUrlInput || "").trim()
+    const trimmed = (meetingAvatarUrlInput || "").trim();
 
     if (trimmed.startsWith("data:")) {
       toast.error(
         "Vui lòng nhập đường dẫn URL (http/https), không sử dụng chuỗi base64.",
-      )
-      return
+      );
+      return;
     }
 
     if (trimmed && !/^https?:\/\//i.test(trimmed)) {
-      toast.error("Đường dẫn ảnh phải bắt đầu bằng http:// hoặc https://")
-      return
+      toast.error("Đường dẫn ảnh phải bắt đầu bằng http:// hoặc https://");
+      return;
     }
 
     try {
       toast.loading(
         t.profile?.personalInfo?.updatingMeetingAvatar ||
-          "Đang cập nhật ảnh đại diện phòng họp...",
+        "Đang cập nhật ảnh đại diện phòng họp...",
         { id: "meeting-avatar-update" },
-      )
+      );
 
-      await updateMeetingAvatar({ meetingAvatarUrl: trimmed }).unwrap()
+      await updateMeetingAvatar({ meetingAvatarUrl: trimmed }).unwrap();
 
       if (localParticipant) {
         await safeSetLiveKitMetadata(localParticipant, {
           avatarImageUrl: trimmed,
-        })
+        });
       }
 
       toast.success(
         t.profile?.personalInfo?.updateMeetingAvatarSuccess ||
-          "Cập nhật ảnh đại diện phòng họp thành công",
+        "Cập nhật ảnh đại diện phòng họp thành công",
         { id: "meeting-avatar-update" },
-      )
-      setIsMeetingAvatarModalOpen(false)
+      );
+      setIsMeetingAvatarModalOpen(false);
     } catch (err) {
-      console.error(err)
+      console.error(err);
       toast.error(
         t.profile?.personalInfo?.updateMeetingAvatarError ||
-          "Không thể cập nhật ảnh đại diện phòng họp",
+        "Không thể cập nhật ảnh đại diện phòng họp",
         { id: "meeting-avatar-update" },
-      )
+      );
     }
-  }
+  };
 
   return (
     <div className="w-full relative mb-16">
       {/* Cover Photo Outer Container */}
-      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-[#e5e5e5]">
+      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-[#e5e5e5] group/cover">
         {/* Cover Photo Image */}
         <div className="relative w-full h-full">
-          <img
-            src={backgroundAccount}
-            alt="Cover"
-            className="w-full h-full object-cover"
-          />
+          {isBackgroundLoading ? (
+            <div className="w-full h-full bg-gray-300 animate-pulse" />
+          ) : (
+            <img
+              src={coverImageUrl || fetchedCoverUrl || backgroundAccount}
+              alt="Cover"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = backgroundAccount;
+              }}
+            />
+          )}
+
+          {/* Hover Overlay */}
+          <div
+            onClick={() => {
+              if (coverInputRef.current && !isCoverUpdating) {
+                coverInputRef.current.click();
+              }
+            }}
+            className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer z-10"
+          >
+            {isCoverUpdating ? (
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Camera className="w-8 h-8 text-white" />
+            )}
+          </div>
         </div>
 
-        {/* Meeting Avatar Badge on Top-Right of Cover Photo (Outside group/cover) */}
+        {/* Hidden File Input for Cover Upload */}
+        <input
+          type="file"
+          ref={coverInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleCoverChange}
+        />
+
+        {/* Meeting Avatar Badge on Top-Right of Cover Photo (Outside group/cover click) */}
         <div
           onClick={(e) => {
-            e.stopPropagation()
+            e.stopPropagation();
             if (!isUpdatingMeetingAvatar) {
-              handleOpenMeetingAvatarModal()
+              handleOpenMeetingAvatarModal();
             }
           }}
           className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 bg-black/65 backdrop-blur-md border border-white/30 rounded-2xl px-3 py-2 flex items-center gap-3 shadow-lg hover:bg-black/80 transition-all cursor-pointer group/meeting"
@@ -152,14 +304,13 @@ const AccountHeader = ({ user, formData, t }) => {
               alt={displayName}
               name={displayName}
               className="w-full h-full text-white text-base"
-              style={{ border: 'none' }}
+              style={{ border: "none" }}
             />
             <div
-              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
-                isUpdatingMeetingAvatar
-                  ? "opacity-100"
-                  : "opacity-0 group-hover/meeting:opacity-100"
-              }`}
+              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${isUpdatingMeetingAvatar
+                ? "opacity-100"
+                : "opacity-0 group-hover/meeting:opacity-100"
+                }`}
             >
               {isUpdatingMeetingAvatar ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -180,7 +331,7 @@ const AccountHeader = ({ user, formData, t }) => {
               {isUpdatingMeetingAvatar
                 ? t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật..."
                 : t.profile?.personalInfo?.clickToChangeMeetingAvatar ||
-                  "Bấm để đổi ảnh phòng họp"}
+                "Bấm để đổi ảnh phòng họp"}
             </span>
           </div>
         </div>
@@ -192,7 +343,7 @@ const AccountHeader = ({ user, formData, t }) => {
           className="relative rounded-full overflow-hidden cursor-pointer"
           onClick={() => {
             if (fileInputRef.current && !isUpdatingAvatar) {
-              fileInputRef.current.click()
+              fileInputRef.current.click();
             }
           }}
         >
@@ -204,11 +355,10 @@ const AccountHeader = ({ user, formData, t }) => {
             className="w-[100px] h-[100px] md:w-[120px] md:h-[120px] bg-cath-red-700 text-white text-4xl"
           />
           <div
-            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
-              isUpdatingAvatar
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
-            }`}
+            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isUpdatingAvatar
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100"
+              }`}
           >
             {isUpdatingAvatar ? (
               <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -222,9 +372,28 @@ const AccountHeader = ({ user, formData, t }) => {
           ref={fileInputRef}
           className="hidden"
           accept="image/*"
-          onChange={handleAvatarChange}
+          onChange={handleAvatarSelect}
         />
       </div>
+
+      {/* Image Crop Modal for Profile Avatar */}
+      {isCropModalOpen && fileToCrop && (
+        <ImageCropModal
+          image={fileToCrop}
+          isOpen={isCropModalOpen}
+          cropPreset="avatar"
+          title={t.profile?.personalInfo?.cropAvatarTitle || t.imageCrop?.title || "Cắt ảnh đại diện"}
+          onClose={() => {
+            setIsCropModalOpen(false)
+            setFileToCrop(null)
+          }}
+          onCropComplete={(croppedFile) => {
+            handleCropComplete(croppedFile)
+            setIsCropModalOpen(false)
+            setFileToCrop(null)
+          }}
+        />
+      )}
 
       {/* Meeting Avatar URL Modal */}
       <Modal
@@ -278,7 +447,7 @@ const AccountHeader = ({ user, formData, t }) => {
         </div>
       </Modal>
     </div>
-  )
-}
+  );
+};
 
-export default AccountHeader
+export default AccountHeader;

@@ -113,7 +113,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
     `inline-flex h-10 items-center rounded-full px-4 text-sm border transition-colors ${
       active
         ? "bg-cath-red-700 border-cath-red-700 text-white hover:bg-cath-red-800 hover:border-cath-red-800"
-        : "border-[#C6C6C6] hover:bg-[#F2F2F2]"
+        : "border-[#C6C6C6] hover:bg-primaryBg"
     }`
 
   return (

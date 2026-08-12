@@ -27,7 +27,9 @@ const MemberProfileView = ({ member }) => {
       <h2 className="mt-3 font-semibold text-center">{member.username}</h2>
 
       <p className="mt-4 text-sm text-[#606060] text-center">
-        {t?.chat?.userPanel?.level || "Level"}: {member.level || t?.chat?.userPanel?.student || "Student"}
+        {member.isTeacher
+          ? (t?.chat?.userPanel?.teacher || "Giáo viên")
+          : (`${t?.chat?.userPanel?.level || "Level"}: ${member.level || t?.chat?.userPanel?.student || "Student"}`)}
       </p>
 
       <div className="w-full mt-6">

@@ -22,7 +22,7 @@ const PublicClassOutcomes = () => {
 
   return (
     <div id="outcomes" className="scroll-mt-24">
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-border">
         <div className="flex items-center gap-2 mb-4">
           <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
             Những Gì Bạn Sẽ Đạt Được
@@ -41,7 +41,7 @@ const PublicClassOutcomes = () => {
         </div>
 
         {/* Skill tags */}
-        <div className="pt-4 border-t border-slate-200/60">
+        <div className="pt-4 border-t border-border/60">
           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
             Các kỹ năng chính rèn luyện trong lớp
           </h4>
@@ -49,7 +49,7 @@ const PublicClassOutcomes = () => {
             {skills.map((skill, i) => (
               <span
                 key={i}
-                className="bg-white border border-slate-200 hover:border-rose-300 text-slate-800 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-2xs transition-colors"
+                className="bg-white border border-border hover:border-rose-300 text-slate-800 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-2xs transition-colors"
               >
                 + {skill}
               </span>

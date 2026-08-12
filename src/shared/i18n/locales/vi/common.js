@@ -49,6 +49,7 @@ export default {
     calendar: "Lịch",
     events: "Sự kiện",
     analytics: "Thống kê",
+    dashboard: "Bảng điều khiển",
     cart: "Giỏ hàng",
     courses: "Khóa học",
     allCourses: "Các khóa học",
@@ -171,6 +172,10 @@ export default {
     new_challenge: {
       title: "Thử thách mới!",
       body: 'Thử thách mới: "{challengeTitle}" đang chờ bạn!',
+    },
+    instructor_profile_approved: {
+      title: "Hồ sơ Giảng viên đã được phê duyệt",
+      body: "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
     },
   },
 };

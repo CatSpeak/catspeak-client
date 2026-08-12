@@ -45,7 +45,7 @@ export function CmsCarousel({ images }) {
   if (total === 0) return null
   if (total === 1) {
     return (
-      <div className="my-6 rounded-xl overflow-hidden bg-gray-50 border border-gray-200">
+      <div className="my-6 rounded-xl overflow-hidden bg-gray-50 border border-border">
         <img
           src={images[0].src}
           alt={images[0].alt}
@@ -57,7 +57,7 @@ export function CmsCarousel({ images }) {
 
   return (
     <div
-      className="relative my-6 rounded-xl overflow-hidden bg-gray-50 border border-gray-200 focus:outline-none"
+      className="relative my-6 rounded-xl overflow-hidden bg-gray-50 border border-border focus:outline-none"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft") goTo(current - 1)

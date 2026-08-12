@@ -128,7 +128,7 @@ const TablePagination = ({ currentPage, totalPages, totalCount, limit, onPageCha
               onClick={() => onPageChange(p)}
               className={`w-7 h-7 rounded-full border text-xs font-bold transition-all flex items-center justify-center ${isActive
                 ? "bg-[#990011] border-[#990011] text-white"
-                : "border-gray-200 text-gray-600 hover:border-gray-400 hover:text-gray-900 bg-white"
+                : "border-border text-gray-600 hover:border-gray-400 hover:text-gray-900 bg-white"
                 }`}
             >
               {displayNum}
@@ -143,7 +143,7 @@ const TablePagination = ({ currentPage, totalPages, totalCount, limit, onPageCha
           onClick={() => onPageChange(normalizedCurrentPage + 1)}
           disabled={isNextDisabled}
           className={`w-7 h-7 rounded-full border flex items-center justify-center transition-all ${isNextDisabled
-            ? "bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed"
+            ? "bg-gray-50 border-border text-gray-300 cursor-not-allowed"
             : "border-[#990011] hover:bg-red-50 text-[#990011] bg-white"
             }`}
         >

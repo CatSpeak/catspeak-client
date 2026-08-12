@@ -22,7 +22,7 @@ const RecurrenceIntervalRow = ({ intervalUnit, value, onChange, disabled }) => {
         value={value}
         onChange={(e) => onChange(Math.max(1, Number(e.target.value)))}
         disabled={disabled}
-        className={`w-14 text-center border border-gray-200 rounded-[5px] text-black text-base outline-none py-0.5 shadow-sm ${disabled ? "opacity-60 cursor-not-allowed bg-gray-50" : ""}`}
+        className={`w-14 text-center border border-border rounded-[5px] text-black text-base outline-none py-0.5 shadow-sm ${disabled ? "opacity-60 cursor-not-allowed bg-gray-50" : ""}`}
       />
       <span
         className="text-base font-medium"

@@ -167,7 +167,7 @@ const ClassOverviewTab = ({
                   </button>
 
                   {showActionsDropdown && (
-                    <div role="menu" className="absolute right-0 mt-2 w-48 bg-white border border-gray-150 rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700">
+                    <div role="menu" className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-2xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 text-gray-700">
                       {!isArchivedClass ? (
                         <>
                           <button
@@ -222,7 +222,7 @@ const ClassOverviewTab = ({
         </div>
 
         {/* Opening Fee Card */}
-        <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex items-center justify-between">
+        <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#15803D] flex items-center justify-center font-black text-lg">
               $
@@ -245,7 +245,7 @@ const ClassOverviewTab = ({
         </div>
 
         {/* Information Card Grid */}
-        <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
+        <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center">
@@ -324,7 +324,7 @@ const ClassOverviewTab = ({
             </div>
           </div>
 
-          <div className="flex items-start gap-3 border-t border-gray-100 pt-6">
+          <div className="flex items-start gap-3 border-t border-border pt-6">
             <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
               <AlignLeft size={18} />
             </div>
@@ -340,7 +340,7 @@ const ClassOverviewTab = ({
         </div>
 
         {/* Teaching Progress Circular Chart */}
-        <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
+        <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
           <h3 className="text-xl font-black text-gray-950 tracking-tight">
             {cd.teachingProgress || "Teaching Progress"}
           </h3>
@@ -385,7 +385,7 @@ const ClassOverviewTab = ({
       {showRightColumn && (
         <div className="flex flex-col gap-4">
           {/* Upcoming Session */}
-          <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
+          <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
             <h3 className="text-lg font-black text-gray-950 tracking-tight">
               {upcomingSessionLabel}
             </h3>

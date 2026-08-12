@@ -60,11 +60,11 @@ const AssignmentSubmissionsTable = ({
   onSelectStudent,
 }) => (
   <>
-    <div className="border border-gray-150 rounded-2xl overflow-hidden shadow-2xs">
+    <div className="border border-border rounded-2xl overflow-hidden shadow-2xs">
       <div className="overflow-x-auto">
         <table className="min-w-[650px] w-full border-collapse text-left text-xs font-semibold text-gray-500">
           <thead>
-            <tr className="border-b border-gray-150 bg-gray-50 text-gray-700 font-extrabold uppercase tracking-wider">
+            <tr className="border-b border-border bg-gray-50 text-gray-700 font-extrabold uppercase tracking-wider">
               <th className="p-4 pl-6">{translations.thStudent}</th>
               <th className="p-4">{translations.thStatus}</th>
               <th className="p-4">{translations.thSubmittedTime}</th>
@@ -88,10 +88,10 @@ const AssignmentSubmissionsTable = ({
                         <img
                           src={student.avatar}
                           alt={student.name}
-                          className="w-10 h-10 rounded-full object-cover border border-gray-100 shadow-2xs"
+                          className="w-10 h-10 rounded-full object-cover border border-border shadow-2xs"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 text-xs font-extrabold uppercase shadow-2xs font-sans">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 border border-border flex items-center justify-center text-gray-500 text-xs font-extrabold uppercase shadow-2xs font-sans">
                           {getStudentInitials(
                             student.name,
                             translations.studentInitials,
@@ -127,7 +127,7 @@ const AssignmentSubmissionsTable = ({
                     <button
                       type="button"
                       onClick={() => onSelectStudent(student)}
-                      className="h-8 px-4 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-lg flex items-center gap-1.5 justify-center transition-colors shadow-2xs mx-auto"
+                      className="h-8 px-4 bg-white border border-border hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-lg flex items-center gap-1.5 justify-center transition-colors shadow-2xs mx-auto"
                     >
                       <Eye size={12} className="text-gray-400" />
                       <span>{translations.btnView}</span>
@@ -149,7 +149,7 @@ const AssignmentSubmissionsTable = ({
           type="button"
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+          className="w-8 h-8 border border-border rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
           aria-label={translations.previousPage}
         >
           <ChevronLeft size={14} />
@@ -171,7 +171,7 @@ const AssignmentSubmissionsTable = ({
               onClick={() => onPageChange(page)}
               className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${isActive
                 ? "bg-[#990011] text-white shadow-2xs border border-[#990011]"
-                : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                : "border border-border text-gray-600 hover:bg-gray-50"
                 }`}
               aria-current={isActive ? "page" : undefined}
             >
@@ -184,7 +184,7 @@ const AssignmentSubmissionsTable = ({
           type="button"
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+          className="w-8 h-8 border border-border rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
           aria-label={translations.nextPage}
         >
           <ChevronRight size={14} />

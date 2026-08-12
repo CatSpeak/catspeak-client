@@ -97,7 +97,7 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group flex flex-col bg-white border border-[#e5e5e5] rounded-xl cursor-pointer"
+      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer"
     >
       {/* ── Image area ───────────────────────────────────────────── */}
       <div className="relative flex-1 min-h-0 rounded-t-xl">
@@ -145,7 +145,7 @@ const NewsCard = ({ news }) => {
 
       {/* ── Action bar ────────────────────────────────────────────── */}
       <div
-        className="grid grid-cols-3 border-t border-[#e5e5e5] rounded-b-xl"
+        className="grid grid-cols-3 border-t border-border rounded-b-xl"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <div

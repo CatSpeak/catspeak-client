@@ -101,7 +101,7 @@ const GroupDetailsForm = ({
       </div>
 
       {/* Footer Actions */}
-      <div className="border-t border-[#E5E5E5] flex justify-end gap-2 p-4 shrink-0">
+      <div className="border-t border-border flex justify-end gap-2 p-4 shrink-0">
         <PillButton onClick={onBack} variant="secondary-no-outline">
           {t?.chat?.modals?.back || "Back"}
         </PillButton>

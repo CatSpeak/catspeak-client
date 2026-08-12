@@ -45,7 +45,7 @@ const RecordingButton = ({
         <span
           className={`relative inline-flex items-center justify-center rounded-full transition-colors shadow-sm overflow-hidden [&>svg]:!w-6 [&>svg]:!h-6 ${
             isTogglingRecording
-              ? "w-10 h-10 cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black"
+              ? "w-10 h-10 cursor-not-allowed opacity-70 bg-primaryBg text-black"
               : isRecording
                 ? "bg-red-600 hover:bg-red-700 text-white px-4 h-10"
                 : "w-10 h-10 bg-[#F5F5F5] md:bg-transparent hover:bg-[#D9D9D9] text-black"
@@ -75,7 +75,7 @@ const RecordingButton = ({
       {/* Hover Popover (Storage Details) */}
       {isRecording && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none w-[360px]">
-          <div className="bg-white border border-[#e5e5e5] rounded-xl p-4 shadow-xl flex flex-col gap-1">
+          <div className="bg-white border border-border rounded-xl p-4 shadow-xl flex flex-col gap-1">
             <div className="flex items-center justify-between">
               <span>Storage</span>
 
@@ -88,7 +88,7 @@ const RecordingButton = ({
               <ProgressBar
                 progress={usagePercent}
                 heightClass="h-2"
-                trackColorClass="bg-[#F2F2F2]"
+                trackColorClass="bg-primaryBg"
                 colorClass={progressColor}
               />
             </div>

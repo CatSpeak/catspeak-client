@@ -76,7 +76,7 @@ const BasicInfoSection = ({
                 <button
                   type="button"
                   onClick={toggleDropdown}
-                  className="flex items-center justify-between border border-[#e5e5e5] rounded-2xl px-4 h-12 w-full bg-white text-base hover:bg-[#f0f0f0]"
+                  className="flex items-center justify-between border border-border rounded-2xl px-4 h-12 w-full bg-white text-base hover:bg-primaryBg"
                 >
                   <div className="flex items-center gap-2 truncate mr-2">
                     {selectedOption?.icon}

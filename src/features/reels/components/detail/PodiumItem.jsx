@@ -31,7 +31,7 @@ export default function PodiumItem({ entry, rank, onClick }) {
             name={username || handle}
             src={entry.reel?.avatarUrl}
             accountId={entry.reel?.accountId}
-            className={`border-2 ${isRank1 ? "border-[#F59E0B]" : "border-gray-200"} shadow-sm`}
+            className={`border-2 ${isRank1 ? "border-[#F59E0B]" : "border-border"} shadow-sm`}
           />
         </div>
         <span className="font-bold text-gray-900 text-[12px] sm:text-[13px] text-center leading-tight mb-0.5 break-words max-w-[100px]">{username}</span>

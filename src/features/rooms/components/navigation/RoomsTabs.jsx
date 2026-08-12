@@ -12,7 +12,7 @@ const RoomsTabs = ({ tab, setTab }) => {
   ]
 
   return (
-    <div className="flex items-center sm:gap-8 mb-6 border-b border-[#e5e5e5]">
+    <div className="flex items-center sm:gap-8 mb-6 border-b border-border">
       {tabs.map((tItem) => {
         const isSelected = tab === tItem.value
         return (

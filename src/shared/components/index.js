@@ -7,3 +7,4 @@ export { default as GuestGuard } from "./guards/GuestGuard"
 
 // Common
 export { default as LanguageSwitcher } from "./ui/LanguageSwitcher"
+export { default as ImageCropModal, CROP_PRESETS } from "./ui/ImageCropModal"

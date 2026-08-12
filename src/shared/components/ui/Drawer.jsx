@@ -10,8 +10,8 @@ const Drawer = ({
   const baseClasses = `flex flex-col justify-center ${padding}`
 
   const variantClasses = {
-    default: "border border-[#E5E5E5] bg-white",
-    glass: "border border-[#E5E5E5] bg-white/40 backdrop-blur-xl shadow-sm",
+    default: "border border-border bg-white",
+    glass: "border border-border bg-white/40 backdrop-blur-xl shadow-sm",
   }
 
   return (

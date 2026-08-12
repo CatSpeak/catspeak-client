@@ -51,7 +51,7 @@ const GroupMemberSelector = ({
                 onClick={() => onToggleFriend(friend.accountId)}
                 hoverEffect={true}
                 className="overflow-hidden cursor-pointer shrink-0"
-                contentClassName={`rounded-xl ${isChecked ? "bg-[#F2F2F2]" : ""}`}
+                contentClassName={`rounded-xl ${isChecked ? "bg-primaryBg" : ""}`}
                 lines={2}
                 leftContent={
                   <Avatar
@@ -71,7 +71,9 @@ const GroupMemberSelector = ({
               >
                 <p>{friend.nickname || friend.username}</p>
                 <p className="text-sm text-[#606060]">
-                  {friend.level || t?.chat?.userPanel?.student || "Student"}
+                  {friend.isTeacher
+                    ? (t?.chat?.userPanel?.teacher || "Giáo viên")
+                    : (friend.level || t?.chat?.userPanel?.student || "Student")}
                 </p>
               </ListItem>
             )
@@ -80,7 +82,7 @@ const GroupMemberSelector = ({
       </div>
 
       {/* Footer Actions */}
-      <div className="border-t border-[#E5E5E5] flex justify-end gap-2 p-4">
+      <div className="border-t border-border flex justify-end gap-2 p-4">
         <PillButton onClick={onClose} variant="secondary-no-outline">
           {t?.chat?.modals?.cancel || "Cancel"}
         </PillButton>

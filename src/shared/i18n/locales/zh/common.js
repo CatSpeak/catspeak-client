@@ -49,6 +49,7 @@ export default {
     calendar: "日历",
     events: "活动",
     analytics: "数据分析",
+    dashboard: "仪表盘",
     cart: "购物车",
     courses: "课程",
     allCourses: "所有课程",
@@ -173,6 +174,10 @@ export default {
     new_challenge: {
       title: "新挑战！",
       body: '新挑战："{challengeTitle}" 等着您！',
+    },
+    instructor_profile_approved: {
+      title: "教师资料已通过审核",
+      body: "您现在可以切换到教师账户。",
     },
   },
 };

@@ -73,8 +73,8 @@ const ClassCard = ({
       className={`bg-white border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group ${isClassEnrolled
         ? "border-emerald-400 ring-2 ring-emerald-50"
         : isLocked
-          ? "border-slate-200 opacity-60 cursor-not-allowed"
-          : "border-slate-200 cursor-pointer hover:border-[#b20a1c]/30"
+          ? "border-border opacity-60 cursor-not-allowed"
+          : "border-border cursor-pointer hover:border-[#b20a1c]/30"
         }`}
     >
       {/* Thumbnail Area */}

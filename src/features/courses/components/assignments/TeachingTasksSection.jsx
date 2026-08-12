@@ -28,7 +28,7 @@ const TeachingTasksSection = ({
   const resolvedEmptyLabel = emptyLabel || grading.noTeachingTasks
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-4 h-fit">
+    <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-4 h-fit">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-black text-gray-950 tracking-tight">
           {resolvedTeachingTasksLabel}
@@ -46,11 +46,11 @@ const TeachingTasksSection = ({
 
       <div className="flex flex-col gap-2 flex-1">
         {isLoading ? (
-          <div className="rounded-2xl border border-gray-100 p-6 text-center text-xs font-bold text-gray-400 animate-pulse">
+          <div className="rounded-2xl border border-border p-6 text-center text-xs font-bold text-gray-400 animate-pulse">
             {grading.loadingTasks}
           </div>
         ) : resolvedTasks.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm font-bold text-gray-400">
+          <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm font-bold text-gray-400">
             {resolvedEmptyLabel}
           </div>
         ) : (

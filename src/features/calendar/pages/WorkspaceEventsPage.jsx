@@ -152,7 +152,7 @@ const WorkspaceEventsContent = ({ userId }) => {
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="bg-white rounded-2xl p-4 border border-[#e5e5e5] shadow-sm animate-pulse"
+              className="bg-white rounded-2xl p-4 border border-border shadow-sm animate-pulse"
             >
               <div className="flex items-start gap-3">
                 <div className="w-14 h-14 rounded-full bg-gray-200 shrink-0" />
@@ -178,7 +178,7 @@ const WorkspaceEventsContent = ({ userId }) => {
         />
       ) : events.length === 0 ? (
         /* Empty state */
-        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50">
           <Calendar size={48} className="text-gray-300 mb-3" />
           <h3 className="font-bold text-gray-700 mb-1">
             {cal.workspaceNoEvents || "No events created yet"}

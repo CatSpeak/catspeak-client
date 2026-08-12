@@ -133,7 +133,7 @@ const DayScheduleEventDetail = ({
         </div>
 
         {/* Footer actions */}
-        <div className="shrink-0 bg-white lg:rounded-b-2xl border-t border-[#E5E5E5] lg:border-t-0 z-10 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+        <div className="shrink-0 bg-white lg:rounded-b-2xl border-t border-border lg:border-t-0 z-10 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
           <EventDetailFooter
             eventId={ev.eventId || ev.id}
             event={ev}

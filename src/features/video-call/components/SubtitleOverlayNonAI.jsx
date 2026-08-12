@@ -62,9 +62,9 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
 
   return (
     <div className="w-full shrink-0 flex flex-col items-center mt-1 z-20 relative">
-      <div className="w-full flex flex-col h-40 bg-white rounded-xl border border-[#e5e5e5] overflow-hidden group/subtitles relative">
+      <div className="w-full flex flex-col h-40 bg-white rounded-xl border border-border overflow-hidden group/subtitles relative">
         {/* Header bar with Language switcher and Close button - absolute UI overlay on hover */}
-        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-[#e5e5e5]/80 px-4 h-[56px] opacity-0 group-hover/subtitles:opacity-100 pointer-events-none group-hover/subtitles:pointer-events-auto transition-all duration-200 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 px-4 h-[56px] opacity-0 group-hover/subtitles:opacity-100 pointer-events-none group-hover/subtitles:pointer-events-auto transition-all duration-200 bg-white/90 backdrop-blur-sm shadow-sm">
           <span className="font-semibold">
             {t.rooms?.videoCall?.subtitles || "Subtitles"}
           </span>
@@ -120,7 +120,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                 className="rounded-xl overflow-hidden"
                 contentClassName={`rounded-xl ${
                   subtitleSelectedLanguage === lang
-                    ? "bg-[#f2f2f2] font-semibold text-[#d40018]"
+                    ? "bg-primaryBg font-semibold text-[#d40018]"
                     : ""
                 }`}
                 leftContent={

@@ -105,7 +105,7 @@ const DesktopNavSection = ({
               />
             }
             className="rounded-2xl cursor-pointer select-none"
-            contentClassName="rounded-2xl hover:bg-[#F2F2F2] text-gray-700 font-medium transition-colors px-4"
+            contentClassName="rounded-2xl hover:bg-primaryBg text-gray-700 font-medium transition-colors px-4"
           >
             <span className="text-sm whitespace-nowrap truncate">
               {isExpanded ? t.showLess || "Show less" : t.seeMore || "See more"}

@@ -25,7 +25,7 @@ const SharedLayout = ({
 
       {/* Desktop Sidebar */}
       {sidebar && (
-        <aside className="hidden lg:block w-80 shrink-0 overflow-y-auto border-r border-[#e5e5e5] !bg-white/40 !backdrop-blur-xl sticky top-[70px] self-start h-[calc(100vh-70px)] z-20">
+        <aside className="hidden lg:block w-80 shrink-0 overflow-y-auto border-r border-border !bg-white/40 !backdrop-blur-xl sticky top-[70px] self-start h-[calc(100vh-70px)] z-20">
           {sidebar}
         </aside>
       )}

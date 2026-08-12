@@ -41,7 +41,7 @@ const ChangePasswordSection = ({ t }) => {
     return (
       <div className="flex flex-col gap-3">
         <span className="text-sm font-semibold text-gray-800">{t.profile?.personalInfo?.password || "Mật khẩu"}</span>
-        <div className="w-full h-11 rounded-xl border border-gray-100 bg-gray-50/50 text-gray-500 cursor-not-allowed px-3 flex items-center text-lg tracking-widest">
+        <div className="w-full h-11 rounded-xl border border-border bg-gray-50/50 text-gray-500 cursor-not-allowed px-3 flex items-center text-lg tracking-widest">
           ***********
         </div>
         <div className="flex justify-end gap-3 mt-1 max-[425px]:w-full">
@@ -70,7 +70,7 @@ const ChangePasswordSection = ({ t }) => {
           placeholder={
             t.profile?.personalInfo?.currentPassword || "Current password"
           }
-          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-gray-100"
+          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-border"
         />
 
         <PasswordInput
@@ -88,7 +88,7 @@ const ChangePasswordSection = ({ t }) => {
             t.profile?.personalInfo?.newPasswordLengthValid ||
             "Độ dài mật khẩu hợp lệ"
           }
-          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-gray-100"
+          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-border"
         />
 
         <PasswordInput
@@ -106,7 +106,7 @@ const ChangePasswordSection = ({ t }) => {
           validMessage={
             t.profile?.personalInfo?.passwordsMatch || "Mật khẩu xác nhận khớp"
           }
-          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-gray-100"
+          className="!h-11 !rounded-xl bg-gray-50/50 !text-sm border-border"
         />
 
         {error && <p className="text-sm text-red-600 px-1">{error}</p>}

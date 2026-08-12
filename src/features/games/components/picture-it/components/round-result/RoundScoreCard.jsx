@@ -47,7 +47,7 @@ const RoundScoreCard = ({ describer, roundScore }) => {
     >
       <FluentCard variant="glass" className="gap-6 h-full min-w-[230px]">
         {/* Describer identity */}
-        <div className="flex flex-col items-center gap-2 pb-3 border-b border-[#E5E5E5]">
+        <div className="flex flex-col items-center gap-2 pb-3 border-b border-border">
           <Avatar
             size={56}
             src={describer?.avatar ? getImageUrl(describer.avatar) : null}

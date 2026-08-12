@@ -119,10 +119,10 @@ const AssignmentGradingWorkspace = ({
   return (
     <div
       aria-busy={isMutating}
-      className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-115px)] bg-gray-150 border border-gray-200 rounded-3xl overflow-hidden shadow-sm text-gray-800 animate-fade-in"
+      className="flex flex-col md:flex-row h-auto md:h-[calc(100vh-115px)] bg-gray-150 border border-border rounded-3xl overflow-hidden shadow-sm text-gray-800 animate-fade-in"
     >
       <div className="flex-1 flex flex-col bg-gray-100/50 min-h-[450px] md:min-h-0">
-        <div className="h-14 bg-white border-b border-gray-200 px-6 flex items-center justify-between text-xs font-bold text-gray-500 shadow-2xs select-none">
+        <div className="h-14 bg-white border-b border-border px-6 flex items-center justify-between text-xs font-bold text-gray-500 shadow-2xs select-none">
           <div className="flex items-center gap-2">
             <FileText size={16} className="text-[#990011]" />
             <span className="font-extrabold text-gray-800 tracking-tight">{submissionHeader}</span>
@@ -169,7 +169,7 @@ const AssignmentGradingWorkspace = ({
 
         <div className="flex-1 p-6 md:p-8 flex justify-center items-start overflow-y-visible md:overflow-y-auto bg-gray-200/40">
           {!isSubmitted ? (
-            <div className="w-full max-w-[620px] bg-white rounded-2xl shadow-sm border border-gray-150 p-12 text-center flex flex-col items-center justify-center gap-3">
+            <div className="w-full max-w-[620px] bg-white rounded-2xl shadow-sm border border-border p-12 text-center flex flex-col items-center justify-center gap-3">
               <X size={44} className="text-red-500 bg-red-50 p-2 rounded-full" />
               <h4 className="text-base font-extrabold text-gray-900">
                 {cg.modalNotSubmittedMsg}
@@ -177,10 +177,10 @@ const AssignmentGradingWorkspace = ({
             </div>
           ) : (
             <div
-              className="w-full max-w-[620px] bg-white rounded-lg shadow-md border border-gray-200 p-8 md:p-10 flex flex-col gap-6 text-[#2e2e2e] leading-relaxed transition-transform duration-200"
+              className="w-full max-w-[620px] bg-white rounded-lg shadow-md border border-border p-8 md:p-10 flex flex-col gap-6 text-[#2e2e2e] leading-relaxed transition-transform duration-200"
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "top center" }}
             >
-              <div className="border-b border-gray-100 pb-5">
+              <div className="border-b border-border pb-5">
                 <h3 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
                   {safeAssignmentTitle}
                 </h3>
@@ -201,7 +201,7 @@ const AssignmentGradingWorkspace = ({
                 />
 
                 {submissionFiles.length > 0 && (
-                  <div className="mt-4 border-t border-gray-150 pt-4 flex flex-col gap-3">
+                  <div className="mt-4 border-t border-border pt-4 flex flex-col gap-3">
                     <span className="text-sm font-black text-gray-900">
                       {cg.submittedFilesHeader}
                     </span>
@@ -216,7 +216,7 @@ const AssignmentGradingWorkspace = ({
                         return (
                           <div
                             key={`${safeUrl || displayName}-${index}`}
-                            className="flex items-center justify-between p-3 bg-gray-50 border border-gray-150 rounded-xl hover:bg-gray-100/50 transition-colors"
+                            className="flex items-center justify-between p-3 bg-gray-50 border border-border rounded-xl hover:bg-gray-100/50 transition-colors"
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <FileText size={18} className={getFileIconColorClass(displayName)} />
@@ -250,23 +250,23 @@ const AssignmentGradingWorkspace = ({
         </div>
       </div>
 
-      <div className="w-full md:w-[350px] lg:w-[380px] bg-white flex flex-col justify-between border-t md:border-t-0 md:border-l border-gray-200 min-h-0 md:h-full">
+      <div className="w-full md:w-[350px] lg:w-[380px] bg-white flex flex-col justify-between border-t md:border-t-0 md:border-l border-border min-h-0 md:h-full">
         <div className="p-6 flex flex-col gap-6 overflow-y-visible md:overflow-y-auto">
           <h2 className="text-lg font-black text-gray-950 tracking-tight">
             {cg.gradingAndComment}
           </h2>
 
-          <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 flex items-center gap-3">
+          <div className="bg-gray-50 border border-border rounded-2xl p-4 flex items-center gap-3">
             {safeAvatarUrl && !hasAvatarError ? (
               <img
                 src={safeAvatarUrl}
                 alt={studentName}
                 referrerPolicy="no-referrer"
                 onError={() => setHasAvatarError(true)}
-                className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-2xs"
+                className="w-12 h-12 rounded-full object-cover border border-border shadow-2xs"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 text-sm font-extrabold uppercase shadow-2xs font-sans">
+              <div className="w-12 h-12 rounded-full bg-gray-100 border border-border flex items-center justify-center text-gray-500 text-sm font-extrabold uppercase shadow-2xs font-sans">
                 {studentInitials}
               </div>
             )}
@@ -288,7 +288,7 @@ const AssignmentGradingWorkspace = ({
               {scoreInputLabel}
             </label>
             {!isSubmitted ? (
-              <div className="text-xs font-bold text-gray-400 italic bg-gray-50 border border-dashed border-gray-200 rounded-xl p-4">
+              <div className="text-xs font-bold text-gray-400 italic bg-gray-50 border border-dashed border-border rounded-xl p-4">
                 {cg.modalNotSubmittedMsg}
               </div>
             ) : (
@@ -296,7 +296,7 @@ const AssignmentGradingWorkspace = ({
                 <div
                   className={`flex items-center gap-3 bg-white border rounded-xl px-4 py-2.5 shadow-2xs transition-all ${isScoreInvalid
                     ? "border-red-500 text-red-600 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-red-500"
-                    : "border-gray-200 focus-within:ring-2 focus-within:ring-red-100 focus-within:border-[#990011]"
+                    : "border-border focus-within:ring-2 focus-within:ring-red-100 focus-within:border-[#990011]"
                     }`}
                 >
                   <input
@@ -346,13 +346,13 @@ const AssignmentGradingWorkspace = ({
                 onChange={(event) => setFeedback(event.target.value)}
                 placeholder={cg.modalFeedbackPlaceholder}
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-750 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] shadow-2xs resize-none leading-relaxed disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full px-4 py-3 border border-border rounded-2xl text-xs font-semibold text-gray-750 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] shadow-2xs resize-none leading-relaxed disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
           )}
         </div>
 
-        <div className="p-6 border-t border-gray-200 flex flex-col gap-3 bg-gray-50/50">
+        <div className="p-6 border-t border-border flex flex-col gap-3 bg-gray-50/50">
           {studentStatus === "graded" && (
             <button
               type="button"
@@ -372,7 +372,7 @@ const AssignmentGradingWorkspace = ({
                 if (!isMutating) onBack()
               }}
               disabled={isMutating}
-              className="flex-1 py-3 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl text-center transition-colors shadow-2xs uppercase tracking-wider disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-1 py-3 border border-border bg-white hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl text-center transition-colors shadow-2xs uppercase tracking-wider disabled:cursor-not-allowed disabled:opacity-50"
             >
               {cg.btnBack}
             </button>

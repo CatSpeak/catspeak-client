@@ -18,7 +18,7 @@ const getLocale = (lang) => {
 const PlaylistAvatar = ({ covers }) => {
   if (!covers || covers.length === 0) {
     return (
-      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shrink-0 border border-gray-100 overflow-hidden">
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shrink-0 border border-border overflow-hidden">
         <ListPlus size={24} className="text-red-600 scale-75 md:scale-100" />
       </div>
     )
@@ -26,7 +26,7 @@ const PlaylistAvatar = ({ covers }) => {
 
   if (covers.length === 1) {
     return (
-      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100">
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-border">
         <img src={covers[0]} className="w-full h-full object-cover" alt="" />
       </div>
     )
@@ -34,7 +34,7 @@ const PlaylistAvatar = ({ covers }) => {
 
   if (covers.length === 2) {
     return (
-      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-border flex">
         <div className="w-1/2 h-full border-r border-white/50">
           <img src={covers[0]} className="w-full h-full object-cover" alt="" />
         </div>
@@ -47,7 +47,7 @@ const PlaylistAvatar = ({ covers }) => {
 
   if (covers.length === 3) {
     return (
-      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex">
+      <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-border flex">
         <div className="w-1/2 h-full border-r border-white/50">
           <img src={covers[0]} className="w-full h-full object-cover" alt="" />
         </div>
@@ -64,7 +64,7 @@ const PlaylistAvatar = ({ covers }) => {
   }
 
   return (
-    <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-gray-100 flex flex-wrap">
+    <div className="w-16 h-16 md:w-12 md:h-12 rounded-lg shrink-0 overflow-hidden border border-border flex flex-wrap">
       <div className="w-1/2 h-1/2 border-r border-b border-white/50">
         <img src={covers[0]} className="w-full h-full object-cover" alt="" />
       </div>
@@ -138,7 +138,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
   }
 
   return (
-    <div className="border border-gray-200 rounded-xl bg-white shadow-sm overflow-hidden mb-2 group/row">
+    <div className="border border-border rounded-xl bg-white shadow-sm overflow-hidden mb-2 group/row">
       <div
         onClick={() => !isEditing && setExpandedPlaylistId(isExpanded ? null : playlist.playlistId)}
         className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors text-left cursor-pointer"
@@ -173,7 +173,7 @@ const PlaylistRow = ({ playlist, expandedPlaylistId, setExpandedPlaylistId, ws, 
       </div>
 
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+        <div className="px-4 pb-4 border-t border-border pt-3">
           <PlaylistReelList
             playlistId={playlist.playlistId}
             formatNumber={formatNumber}
@@ -270,7 +270,7 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
     return (
       <div className="flex flex-col gap-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm animate-pulse">
+          <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-white p-4 shadow-sm animate-pulse">
             <div className="w-12 h-12 bg-gray-200 rounded-lg" />
             <div className="space-y-2 flex-1">
               <div className="h-4 bg-gray-200 rounded w-40" />
@@ -285,7 +285,7 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
   return (
     <>
       {!playlists || playlists.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
+        <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50">
           <ListPlus size={48} className="text-gray-300 mb-3" />
           <h3 className="font-bold text-gray-700 mb-1">{ws?.noPlaylists || "No playlists yet"}</h3>
           <p className="text-sm text-gray-400 mb-4 text-center max-w-sm">
@@ -325,7 +325,7 @@ const WorkspacePlaylistsTab = ({ formatNumber, formatDate: propFormatDate, navig
               ref={inputRef}
               type="text"
               placeholder={t?.catSpeak?.reels?.detail?.playlistModal?.placeholder || "Enter playlist name..."}
-              className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-cath-red-500 focus:ring-0"
+              className="flex-1 px-4 py-2.5 bg-white border border-border rounded-xl text-sm outline-none focus:border-cath-red-500 focus:ring-0"
               value={newPlaylistName}
               onChange={(e) => setNewPlaylistName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}

@@ -12,6 +12,12 @@ export default {
       requestSent: "已发送好友申请",
       requestPending: "好友申请已存在或正在处理中",
       requestError: "无法发送好友申请",
+      processing: "处理中...",
+      followSuccess: "已关注",
+      unfollowSuccess: "已取消关注",
+      friendRequestReceived: "向您发送了好友申请",
+      friendRequestAccepted: "已接受您的好友申请",
+      friendRequestDeclined: "已拒绝您的好友申请",
     },
     personalInfo: {
       title: "个人信息",

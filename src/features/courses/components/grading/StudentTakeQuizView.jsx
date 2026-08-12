@@ -816,7 +816,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             <button
               type="button"
               onClick={handleBack}
-              className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold"
+              className="px-4 py-2 border border-border rounded-xl text-sm font-bold"
             >
               {sq.back}
             </button>
@@ -838,7 +838,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div
-          className="max-w-lg w-full bg-white border border-gray-200 rounded-2xl p-6 text-center"
+          className="max-w-lg w-full bg-white border border-border rounded-2xl p-6 text-center"
           role="alert"
         >
           <h1 className="text-lg font-black text-gray-900">
@@ -861,10 +861,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     return (
       <div className="min-h-screen bg-gray-50 overflow-y-auto p-4 flex flex-col items-center justify-center font-sans">
         {/* Main Info & Confirmation Card */}
-        <div className="max-w-3xl w-full bg-white rounded-3xl border border-gray-150 p-6 md:p-10 shadow-lg flex flex-col gap-6">
+        <div className="max-w-3xl w-full bg-white rounded-3xl border border-border p-6 md:p-10 shadow-lg flex flex-col gap-6">
 
           {/* Header & Badges */}
-          <div className="flex flex-col gap-2 border-b border-gray-100 pb-5">
+          <div className="flex flex-col gap-2 border-b border-border pb-5">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="bg-red-50 text-[#990011] border border-red-100 text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
                 <Timer size={12} />
@@ -875,7 +875,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                   ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                   : quizStatus === "upcoming"
                     ? "bg-amber-50 text-amber-700 border-amber-100"
-                    : "bg-gray-100 text-gray-600 border-gray-200"
+                    : "bg-gray-100 text-gray-600 border-border"
                   }`}
               >
                 {quizStatusLabel}
@@ -887,7 +887,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           </div>
 
           {/* Details Overview Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/70 border border-gray-150 p-4 rounded-2xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50/70 border border-border p-4 rounded-2xl">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">
                 {sq.timeLimit}
@@ -947,7 +947,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-wide">
                 {sq.instructions}
               </h3>
-              <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-700 leading-relaxed">
+              <div className="bg-gray-50 border border-border rounded-2xl p-4 text-xs font-semibold text-gray-700 leading-relaxed">
                 <RenderHTML html={quiz.description} />
               </div>
             </div>
@@ -974,7 +974,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           </div>
 
           {/* Confirmation Question & Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-border">
             <span className="text-sm font-black text-gray-900 text-center sm:text-left">
               {recordStatus === "InProgress" || recordStatus === "inprogress"
                 ? sq.resumeAttemptPrompt
@@ -997,7 +997,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex-1 sm:flex-none px-4 py-3 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-2xl transition-all cursor-pointer"
+                className="flex-1 sm:flex-none px-4 py-3 border border-border hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-2xl transition-all cursor-pointer"
               >
                 {sq.cancel}
               </button>
@@ -1076,7 +1076,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               <button
                 type="button"
                 onClick={handleBack}
-                className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold"
+                className="px-4 py-2 border border-border rounded-xl text-sm font-bold"
               >
                 {sq.back}
               </button>
@@ -1165,7 +1165,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           )}
 
           {/* ─── Top Result Header Banner Card ─── */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative shadow-xs overflow-hidden">
+          <div className="bg-white rounded-2xl border border-border p-6 md:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative shadow-xs overflow-hidden">
             {/* Left Edge Accent Bar */}
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#990011] rounded-l-2xl" />
 
@@ -1237,7 +1237,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
           {/* ─── Question Details Section Header ─── */}
           <div className="flex flex-col gap-1 mt-2">
-            <h2 className="text-base font-extrabold text-gray-900 pb-2 border-b border-gray-200">
+            <h2 className="text-base font-extrabold text-gray-900 pb-2 border-b border-border">
               {sq.questionDetails}
             </h2>
           </div>
@@ -1245,7 +1245,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           {/* ─── Question Cards List ─── */}
           <div className="flex flex-col gap-5">
             {resultQuestions.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-sm font-semibold text-gray-500">
+              <div className="bg-white rounded-2xl border border-border p-8 text-center text-sm font-semibold text-gray-500">
                 {sq.questionDetailsUnavailable}
               </div>
             ) : resultQuestions.map((q, qIdx) => {
@@ -1300,7 +1300,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
               return (
                 <div
                   key={q.questionId || q.id || qIdx}
-                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs"
+                  className="bg-white rounded-2xl border border-border overflow-hidden shadow-xs"
                 >
                   {/* Card Header Bar */}
                   <div
@@ -1355,7 +1355,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
                   {/* Question Image Media (Image below content, small scale, un-cropped) */}
                   {getQuestionImageUrl(q) && (
-                    <div className="mx-5 mt-2 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
+                    <div className="mx-5 mt-2 rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
                       <img
                         src={getQuestionImageUrl(q)}
                         alt={interpolate(sq.questionIllustration, { number: qIdx + 1 })}
@@ -1390,7 +1390,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                           correctAnswers.some((ans) => String(ans).trim() === optTextStr)
                         )
 
-                        let optionStyle = "border-gray-200 bg-white text-gray-700 font-semibold"
+                        let optionStyle = "border-border bg-white text-gray-700 font-semibold"
                         let circleStyle = "border-gray-300"
                         let rightIcon = null
 
@@ -1468,12 +1468,12 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                       </span>
                       <div
                         className={`p-4 border rounded-xl text-xs md:text-sm flex items-center justify-between gap-3 ${q.type === "Essay"
-                          ? "bg-gray-50 border-gray-200 text-gray-800 font-semibold"
+                          ? "bg-gray-50 border-border text-gray-800 font-semibold"
                           : isCorrect
                             ? "border-2 border-emerald-500 bg-emerald-50/20 text-emerald-950 font-bold"
                             : isWrong
                               ? "border-2 border-red-500 bg-red-50/20 text-red-950 font-bold"
-                              : "bg-gray-50 border-gray-200 text-gray-800 font-semibold"
+                              : "bg-gray-50 border-border text-gray-800 font-semibold"
                           }`}
                       >
                         <span>
@@ -1543,7 +1543,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         </div>
 
         {/* ─── Bottom Sticky Action Bar ─── */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3.5 flex justify-end items-center gap-3 z-40 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-border px-6 py-3.5 flex justify-end items-center gap-3 z-40 shadow-lg">
           <button
             type="button"
             onClick={handleBack}
@@ -1572,7 +1572,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
     <div className="min-h-screen bg-[#f8f9fa] flex flex-col overflow-hidden font-sans text-gray-850">
 
       {/* ─── TOP HEADER (Full Width) ─── */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3.5 flex items-center justify-between shadow-2xs shrink-0 select-none">
+      <div className="bg-white border-b border-border px-6 py-3.5 flex items-center justify-between shadow-2xs shrink-0 select-none">
 
         {/* Header Left: Title + Online/Status Pill */}
         <div className="flex items-center gap-4">
@@ -1621,7 +1621,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
           {/* TIMER BOX (Prominently placed on RIGHT SIDE of header) */}
           <div className={`px-4 py-2 border rounded-full flex items-center gap-2 font-black tracking-wider text-base md:text-lg shadow-2xs transition-all ${isLowTime
             ? "bg-red-50 text-red-650 border-red-200 animate-pulse"
-            : "bg-gray-50 text-gray-900 border-gray-200"
+            : "bg-gray-50 text-gray-900 border-border"
             }`}>
             <Timer size={20} className={isLowTime ? "text-red-650" : "text-[#990011]"} />
             <span>{Number.isFinite(timeRemaining) ? formatTimer(timeRemaining) : "--:--"}</span>
@@ -1655,21 +1655,21 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         {/* ─── LEFT COLUMN: Active Question Card ─── */}
         <div className="flex-1 flex flex-col gap-6">
           {questions.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-gray-150 p-12 text-center text-gray-400 font-bold shadow-xs">
+            <div className="bg-white rounded-3xl border border-border p-12 text-center text-gray-400 font-bold shadow-xs">
               {sq.noQuestions}
             </div>
           ) : (
-            <div className="bg-white rounded-3xl border border-gray-150 p-6 md:p-8 flex flex-col gap-6 shadow-xs relative">
+            <div className="bg-white rounded-3xl border border-border p-6 md:p-8 flex flex-col gap-6 shadow-xs relative">
 
               {/* Question Header: Number + Skill Tag Badge */}
-              <div className="flex justify-between items-center border-b border-gray-100 pb-4 select-none">
+              <div className="flex justify-between items-center border-b border-border pb-4 select-none">
                 <h2 className="text-xl md:text-2xl font-black text-gray-950 tracking-tight">
                   {interpolate(sq.questionNumber, { number: currentIndex + 1 })}
                 </h2>
 
                 <div className="flex items-center gap-2">
                   {currentQuestion?.skillTag && (
-                    <span className="px-3 py-1 bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 flex items-center gap-1">
+                    <span className="px-3 py-1 bg-gray-100 border border-border rounded-xl text-xs font-bold text-gray-700 flex items-center gap-1">
                       <span>🧠 {currentQuestion.skillTag}</span>
                     </span>
                   )}
@@ -1683,7 +1683,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                     onClick={() => toggleMarkForReview(currentQuestion?.id)}
                     className={`w-9 h-9 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${markedQuestions[currentQuestion?.id]
                       ? "border-red-500 bg-red-50 text-red-500 shadow-2xs"
-                      : "border-gray-200 text-gray-400 hover:text-red-500 hover:bg-red-50/50"
+                      : "border-border text-gray-400 hover:text-red-500 hover:bg-red-50/50"
                       }`}
                     title={
                       markedQuestions[currentQuestion?.id]
@@ -1712,7 +1712,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
               {/* Question Image Media (Image below content, small scale, un-cropped) */}
               {getQuestionImageUrl(currentQuestion) && (
-                <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
+                <div className="rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
                   <img
                     src={getQuestionImageUrl(currentQuestion)}
                     alt={interpolate(sq.questionIllustration, { number: currentIndex + 1 })}
@@ -1756,7 +1756,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             aria-pressed={isSelected}
                             className={`w-full text-left flex items-center gap-4 p-4 md:p-5 border rounded-2xl cursor-pointer select-none transition-all active:scale-[0.99] ${isSelected
                               ? "border-[#990011] bg-red-50/10 shadow-xs"
-                              : "border-gray-200 bg-white hover:bg-gray-50/80"
+                              : "border-border bg-white hover:bg-gray-50/80"
                               }`}
                           >
                             <div className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] bg-red-50/10" : "border-gray-300"
@@ -1787,7 +1787,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             aria-pressed={isSelected}
                             className={`w-full text-left flex items-center gap-4 p-4 md:p-5 border rounded-2xl cursor-pointer select-none transition-all active:scale-[0.99] ${isSelected
                               ? "border-[#990011] bg-red-50/10 shadow-xs"
-                              : "border-gray-200 bg-white hover:bg-gray-50/80"
+                              : "border-border bg-white hover:bg-gray-50/80"
                               }`}
                           >
                             <span
@@ -1826,7 +1826,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                             aria-pressed={isSelected}
                             className={`w-full text-left flex items-center gap-4 p-4 md:p-5 border rounded-2xl cursor-pointer select-none transition-all active:scale-[0.99] ${isSelected
                               ? "border-[#990011] bg-red-50/10 shadow-xs"
-                              : "border-gray-200 bg-white hover:bg-gray-50/80"
+                              : "border-border bg-white hover:bg-gray-50/80"
                               }`}
                           >
                             <div className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected ? "border-[#990011] bg-red-50/10" : "border-gray-300"
@@ -1857,7 +1857,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                         value={userAnswers[currentQuestion.id] || ""}
                         onChange={(e) => handleTextAnswerChange(currentQuestion.id, e.target.value)}
                         placeholder={sq.answerPlaceholder}
-                        className="w-full p-4 border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
+                        className="w-full p-4 border border-border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
                       />
                     </div>
                   )}
@@ -1903,7 +1903,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                           }
                         }}
                         placeholder={sq.essayPlaceholder}
-                        className="w-full p-4 border border-gray-200 rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] min-h-[180px] resize-y transition-all"
+                        className="w-full p-4 border border-border rounded-2xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] min-h-[180px] resize-y transition-all"
                       />
                     </div>
                   )}
@@ -1917,10 +1917,10 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
 
         {/* ─── RIGHT COLUMN: Questions List Grid (PLACED ON RIGHT SIDE AS REQUESTED) ─── */}
         <div className="w-full lg:w-80 shrink-0 select-none">
-          <div className="bg-white rounded-3xl border border-gray-150 p-5 md:p-6 flex flex-col gap-4 shadow-xs">
+          <div className="bg-white rounded-3xl border border-border p-5 md:p-6 flex flex-col gap-4 shadow-xs">
 
             {/* Sidebar Title */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-sm font-black text-gray-900 tracking-tight">
                 {sq.questionsList}
               </h3>
@@ -1930,7 +1930,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
             </div>
 
             {/* Legend Indicators */}
-            <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex-wrap gap-1">
+            <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-border flex-wrap gap-1">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-gray-300 inline-block" />
                 <span>{sq.done}</span>
@@ -1956,7 +1956,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 const isAnswered = isQuestionAnswered(q)
                 const isMarked = Boolean(markedQuestions[q.id])
 
-                let btnStyle = "bg-white border border-gray-200 text-gray-700 font-bold hover:bg-gray-100"
+                let btnStyle = "bg-white border border-border text-gray-700 font-bold hover:bg-gray-100"
                 if (isCurrent) {
                   btnStyle = "bg-[#990011] text-white font-extrabold shadow-xs border-[#990011]"
                 } else if (isAnswered) {
@@ -1995,7 +1995,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
       </div>
 
       {/* ─── BOTTOM FOOTER NAVIGATION BAR ─── */}
-      <div className="bg-white border-t border-gray-200 px-6 py-3.5 flex items-center justify-between shadow-xs shrink-0 select-none">
+      <div className="bg-white border-t border-border px-6 py-3.5 flex items-center justify-between shadow-xs shrink-0 select-none">
 
         {/* Left: Previous Question */}
         <button
@@ -2041,7 +2041,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
         >
           <div
             ref={submitDialogRef}
-            className="bg-white rounded-3xl border border-gray-150 p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-5 text-center animate-in fade-in zoom-in-95 duration-150"
+            className="bg-white rounded-3xl border border-border p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-5 text-center animate-in fade-in zoom-in-95 duration-150"
             role="dialog"
             aria-modal="true"
             aria-labelledby="quiz-submit-title"
@@ -2098,7 +2098,7 @@ const StudentTakeQuizView = ({ classId: propsClassId, quizId: propsQuizId, onBac
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => setShowSubmitConfirmModal(false)}
-                className="flex-1 py-3 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
+                className="flex-1 py-3 border border-border hover:bg-gray-50 text-gray-700 font-extrabold text-xs rounded-xl transition-all cursor-pointer disabled:opacity-50"
               >
                 {sq.cancelContinue}
               </button>

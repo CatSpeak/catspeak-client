@@ -3,6 +3,7 @@ import { Globe, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, UK } from "@/shared/assets/icons/flags"
 import Dropdown from "@/shared/components/ui/Dropdown"
+import ListItem from "@/shared/components/ui/ListItem"
 
 const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
@@ -17,7 +18,7 @@ const MobileLanguageSwitcher = () => {
     setLanguage(key)
   }
 
-  const options = LANGUAGES.map(l => ({ ...l, value: l.key }))
+  const options = LANGUAGES.map((l) => ({ ...l, value: l.key }))
 
   return (
     <div className="relative w-full">
@@ -27,25 +28,31 @@ const MobileLanguageSwitcher = () => {
         onChange={handleLanguageSelect}
         dropdownClassName="!min-w-full w-full p-2"
         trigger={(isOpen, selectedOption, toggle) => (
-          <button 
-            className={`relative flex items-center shrink-0 h-11 px-4 gap-3 rounded-lg transition-all duration-300 group overflow-hidden w-full ${isOpen ? "bg-gray-100" : "hover:bg-gray-100"}`}
+          <ListItem
+            lines={1}
             onClick={toggle}
-            title={t.header?.language || "Ngôn ngữ"}
+            leftContent={<Globe size={24} strokeWidth={1.5} className="shrink-0" />}
+            rightContent={
+              <ChevronDown
+                size={24}
+                strokeWidth={1.5}
+                className={`shrink-0 transition-transform duration-200 text-gray-500 ${isOpen ? "rotate-180" : ""
+                  }`}
+              />
+            }
+            className="rounded-xl transition-all duration-200 w-full"
+            contentClassName={`rounded-xl transition-all duration-200 px-4 ${isOpen ? "bg-primaryBg" : "hover:bg-primaryBg"
+              }`}
           >
-            <Globe size={20} className="shrink-0" />
-            <span className="text-sm font-medium text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate">{t.header?.language || "Ngôn ngữ"}</span>
-            
-            <ChevronDown 
-              size={18} 
-              className={`shrink-0 transition-transform duration-200 text-gray-500 ${isOpen ? "rotate-180" : ""}`}
-            />
-          </button>
+            <span className="whitespace-nowrap transition-all duration-300 truncate min-w-[180px] flex-1 text-left font-normal text-base">
+              {t.header?.language || "Ngôn ngữ"}
+            </span>
+          </ListItem>
         )}
         renderOption={(option, isSelected) => (
           <div
-            className={`flex items-center gap-3 w-full p-2.5 rounded-xl transition-colors ${
-              isSelected ? "bg-gray-50/80" : "hover:bg-gray-50"
-            }`}
+            className={`flex items-center gap-3 w-full p-2.5 rounded-xl transition-colors ${isSelected ? "bg-gray-50/80" : "hover:bg-gray-50"
+              }`}
           >
             <span className="flex h-8 w-8 shrink-0 overflow-hidden rounded-full shadow-sm">
               <img
@@ -55,13 +62,18 @@ const MobileLanguageSwitcher = () => {
                 draggable={false}
               />
             </span>
-            <span className={`text-[15px] flex-1 text-left ${isSelected ? "text-cath-red-800 font-medium" : "text-gray-700"}`}>
+            <span
+              className={`text-[15px] flex-1 text-left ${isSelected ? "text-cath-red-800 font-medium" : "text-gray-700"
+                }`}
+            >
               {option.label}
             </span>
-            
+
             {/* Radio Button */}
             <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-cath-red-800 ml-auto">
-              {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-cath-red-800" />}
+              {isSelected && (
+                <div className="h-2.5 w-2.5 rounded-full bg-cath-red-800" />
+              )}
             </div>
           </div>
         )}
@@ -71,3 +83,4 @@ const MobileLanguageSwitcher = () => {
 }
 
 export default MobileLanguageSwitcher
+

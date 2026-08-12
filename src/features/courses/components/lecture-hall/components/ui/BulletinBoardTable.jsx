@@ -5,19 +5,19 @@ import { IconButton } from "@/shared/components/ui/buttons"
 
 const BulletinBoardTable = ({ posts, dict, language, isStudent, onRowClick, onAction }) => {
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm">
+    <div className="w-full overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
       <table className="w-full border-collapse text-left text-xs font-semibold text-[#5B403C]">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50/50 text-gray-700 font-extrabold uppercase tracking-wider">
-            <th className="p-4 border-r border-gray-200 w-[50px] text-center"></th>
-            <th className="p-4 border-r border-gray-200 min-w-[250px]">{dict.bulletinBoard?.topic || "Topic"}</th>
-            <th className="p-4 border-r border-gray-200 w-[200px]">{dict.bulletinBoard?.creator || "Creator"}</th>
-            <th className="p-4 border-r border-gray-200 w-[150px]">{dict.bulletinBoard?.createdAt || "Created at"}</th>
-            <th className="p-4 border-r border-gray-200 w-[100px] text-center">{dict.bulletinBoard?.replies || "Replies"}</th>
+          <tr className="border-b border-border bg-gray-50/50 text-gray-700 font-extrabold uppercase tracking-wider">
+            <th className="p-4 border-r border-border w-[50px] text-center"></th>
+            <th className="p-4 border-r border-border min-w-[250px]">{dict.bulletinBoard?.topic || "Topic"}</th>
+            <th className="p-4 border-r border-border w-[200px]">{dict.bulletinBoard?.creator || "Creator"}</th>
+            <th className="p-4 border-r border-border w-[150px]">{dict.bulletinBoard?.createdAt || "Created at"}</th>
+            <th className="p-4 border-r border-border w-[100px] text-center">{dict.bulletinBoard?.replies || "Replies"}</th>
             {!isStudent && (
               <>
-                <th className="p-4 border-r border-gray-200 w-[140px]">{language === 'vi' ? "Bình luận" : "Comments"}</th>
-                <th className="p-4 border-r border-gray-200 w-[130px]">{dict.bulletinBoard?.status || "Status"}</th>
+                <th className="p-4 border-r border-border w-[140px]">{language === 'vi' ? "Bình luận" : "Comments"}</th>
+                <th className="p-4 border-r border-border w-[130px]">{dict.bulletinBoard?.status || "Status"}</th>
                 <th className="p-4 w-[60px] text-center"></th>
               </>
             )}
@@ -31,7 +31,7 @@ const BulletinBoardTable = ({ posts, dict, language, isStudent, onRowClick, onAc
               className="hover:bg-gray-50/60 cursor-pointer transition-colors"
             >
               {/* Pin cell */}
-              <td className="p-4 border-r border-gray-200 text-center">
+              <td className="p-4 border-r border-border text-center">
                 {post.isPinned && (
                   <Pin
                     size={16}
@@ -42,24 +42,24 @@ const BulletinBoardTable = ({ posts, dict, language, isStudent, onRowClick, onAc
               </td>
 
               {/* Title cell */}
-              <td className="p-4 border-r border-gray-200">
+              <td className="p-4 border-r border-border">
                 <span className="font-bold text-sm text-[#A00000] hover:underline hover:text-[#750000] transition-colors line-clamp-2">
                   {post.title}
                 </span>
               </td>
 
               {/* Author cell */}
-              <td className="p-4 border-r border-gray-200 text-sm font-normal">
+              <td className="p-4 border-r border-border text-sm font-normal">
                 {post.author}
               </td>
 
               {/* Date cell */}
-              <td className="p-4 border-r border-gray-200 text-sm font-normal text-gray-600">
+              <td className="p-4 border-r border-border text-sm font-normal text-gray-600">
                 {post.date}
               </td>
 
               {/* Replies cell */}
-              <td className="p-4 border-r border-gray-200 text-center">
+              <td className="p-4 border-r border-border text-center">
                 <span className="inline-flex items-center justify-center bg-[#E7E8E9] text-[#191C1D] font-bold text-xs h-6 px-2.5 py-1 rounded-md">
                   {post.replies}
                 </span>
@@ -69,7 +69,7 @@ const BulletinBoardTable = ({ posts, dict, language, isStudent, onRowClick, onAc
               {!isStudent && (
                 <>
                   {/* Allow Reply */}
-                  <td className="p-4 border-r border-gray-200">
+                  <td className="p-4 border-r border-border">
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0 ${post.allowReply ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
                       <span className={`font-medium ${post.allowReply ? 'text-[#750000]' : 'text-[#5B403C]'}`}>
@@ -81,7 +81,7 @@ const BulletinBoardTable = ({ posts, dict, language, isStudent, onRowClick, onAc
                   </td>
 
                   {/* Status */}
-                  <td className="p-4 border-r border-gray-200">
+                  <td className="p-4 border-r border-border">
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0 ${post.status === dict.bulletinBoard?.visibility?.visible ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
                       <span className={`font-medium ${post.status === dict.bulletinBoard?.visibility?.visible ? 'text-[#750000]' : 'text-[#5B403C]'}`}>

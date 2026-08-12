@@ -93,7 +93,7 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
             </IconButton>
           }
           content={(close) => (
-            <div className="w-48 bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden py-1">
+            <div className="w-48 bg-white border border-border rounded-xl shadow-lg overflow-hidden py-1">
               <button
                 onClick={() => {
                   onEdit()

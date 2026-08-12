@@ -59,13 +59,21 @@ const WebsitePage = () => {
   }
 
   if (error || !website) {
-    return <EmptyState message={t.websites?.detail?.error?.notFound || t.website?.error?.notFound || "No website found"} />;
+    return (
+      <EmptyState
+        message={
+          t.websites?.detail?.error?.notFound ||
+          t.website?.error?.notFound ||
+          "No website found"
+        }
+      />
+    );
   }
 
   return (
     <div className="relative h-[calc(100dvh-64px)] w-full px-4 lg:h-full flex flex-col gap-2 pb-4">
       {/* Top Header Bar with Back Button */}
-      <div className="flex items-center justify-between bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm shrink-0">
+      <div className="flex items-center justify-between bg-white px-4 py-2 rounded-xl border border-border shadow-sm shrink-0">
         <Link
           to={resolvePath("/resources")}
           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-cath-red-700 transition-colors"
@@ -81,14 +89,16 @@ const WebsitePage = () => {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
           >
-            <span>{t.websites?.detail?.openExternally || "Open externally"}</span>
+            <span>
+              {t.websites?.detail?.openExternally || "Open externally"}
+            </span>
             <ExternalLink size={13} />
           </a>
         )}
       </div>
 
       {/* Container chứa iframe */}
-      <div className="relative flex-1 w-full overflow-hidden rounded-xl border-2 border-slate-200/80 shadow-md">
+      <div className="relative flex-1 w-full overflow-hidden rounded-xl border-2 border-border/80 shadow-md">
         {/* Overlay loading / button */}
         {(isIframeLoading || showOverlay) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/80">
@@ -96,13 +106,17 @@ const WebsitePage = () => {
               hasTimedOut ? (
                 <div className="flex flex-col items-center gap-4 text-center px-4">
                   <p className="text-lg font-medium text-white">
-                    {t.websites?.detail?.error?.timeout || t.website?.error?.timeout || "Loading taking longer than expected..."}
+                    {t.websites?.detail?.error?.timeout ||
+                      t.website?.error?.timeout ||
+                      "Loading taking longer than expected..."}
                   </p>
                   <button
                     onClick={handleReload}
                     className="rounded-lg bg-white px-6 py-2.5 font-medium text-slate-800 shadow-md transition-colors hover:bg-red-100 active:bg-red-200"
                   >
-                    {t.websites?.detail?.error?.reload || t.website?.error?.reload || "Reload"}
+                    {t.websites?.detail?.error?.reload ||
+                      t.website?.error?.reload ||
+                      "Reload"}
                   </button>
                 </div>
               ) : (
@@ -125,7 +139,20 @@ const WebsitePage = () => {
           src={website.url}
           title={website.label || id}
           className="h-full w-full border-0"
-          allow="fullscreen"
+          allow="
+            microphone;
+            camera;
+            fullscreen;
+            autoplay;
+            clipboard-read;
+            clipboard-write;
+            geolocation;
+            accelerometer;
+            gyroscope;
+            magnetometer;
+            payment;
+            display-capture
+          "
           allowFullScreen
           onLoad={() => {
             setIsIframeLoading(false);

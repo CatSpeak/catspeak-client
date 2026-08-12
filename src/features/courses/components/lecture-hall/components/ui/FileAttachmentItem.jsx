@@ -11,7 +11,7 @@ const FileAttachmentItem = ({ file, onRemove, variant = "default" }) => {
   return (
     <div
       className={`border flex items-center justify-between ${isModal
-        ? "border-gray-200 bg-stone-50/60 rounded-2xl p-4"
+        ? "border-border bg-stone-50/60 rounded-2xl p-4"
         : "border-[#E2E2E2] bg-white rounded-xl px-4 py-3"
         }`}
     >

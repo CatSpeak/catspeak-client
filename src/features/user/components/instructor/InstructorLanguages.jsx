@@ -36,7 +36,7 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
     <div ref={ref} className="relative">
       <div
         onClick={() => !disabled && setIsOpen((prev) => !prev)}
-        className="flex flex-wrap items-center gap-2 min-h-[44px] py-2 w-full bg-gray-50/50 border border-gray-100 rounded-xl px-3 cursor-pointer text-sm transition-colors hover:border-gray-300"
+        className="flex flex-wrap items-center gap-2 min-h-[44px] py-2 w-full bg-gray-50/50 border border-border rounded-xl px-3 cursor-pointer text-sm transition-colors hover:border-gray-300"
       >
         {selected.length === 0 && (
           <span className="text-gray-400">{options.length ? placeholder : ""}</span>
@@ -64,7 +64,7 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
       </div>
 
       {isOpen && (
-        <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-52 overflow-y-auto">
+        <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-border rounded-xl shadow-lg max-h-52 overflow-y-auto">
           {options.map((lang) => {
             const isSelected = selectedLanguages.includes(lang)
             return (
@@ -151,7 +151,7 @@ const InstructorLanguages = ({
                             type="button"
                             onClick={toggle}
                             disabled={readOnly}
-                            className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${(errors.languagesTeachLevel || errors.languagesTeach) && !item.level ? "border-red-500" : "border-gray-100"}`}
+                            className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${(errors.languagesTeachLevel || errors.languagesTeach) && !item.level ? "border-red-500" : "border-border"}`}
                           >
                             <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
                               {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
@@ -191,7 +191,7 @@ const InstructorLanguages = ({
                 type="button"
                 onClick={toggle}
                 disabled={readOnly}
-                className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.nativeLanguage ? "border-red-500" : "border-gray-100"}`}
+                className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.nativeLanguage ? "border-red-500" : "border-border"}`}
               >
                 <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
                   {selectedOption ? selectedOption.label : (ins.selectNativeLanguage || "Chọn ngôn ngữ mẹ đẻ")}

@@ -58,10 +58,10 @@ export default function ForYouTab({ onReelClick, onUploadClick, searchQuery = ""
             {t.catSpeak.reels.shareKnowledge || "Chia sẻ kiến thức và luyện tập nhập vai cùng cộng đồng Cat Speak."}
           </p>
           <div className="flex flex-wrap items-center gap-2.5 mt-auto">
-            <span className="text-[12px] md:text-[13px] font-medium text-textColor bg-white px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-gray-200">
+            <span className="text-[12px] md:text-[13px] font-medium text-textColor bg-white px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border">
               {t.catSpeak.reels.formatLimit || "Định dạng MP4, MOV"}
             </span>
-            <span className="text-[12px] md:text-[13px] font-medium text-textColor bg-white px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-gray-200">
+            <span className="text-[12px] md:text-[13px] font-medium text-textColor bg-white px-3.5 md:px-4 py-1.5 rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.02)] border border-border">
               {t.catSpeak.reels.sizeLimit || "Tối đa 5 phút, 150MB"}
             </span>
           </div>

@@ -248,10 +248,10 @@ const Dropdown = ({
                   <FluentAnimation
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
-                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-2 origin-bottom" : "top-full mt-2"} flex flex-col pointer-events-auto shadow-lg border border-[#E5E5E5] rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                    className={`absolute ${portalCoords.flipUp ? "bottom-full mb-2 origin-bottom" : "top-full mt-2"} flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
                   >
                     {enableSearch && (
-                      <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-gray-100">
+                      <div className="px-3 py-2 shrink-0 bg-white z-10 border-b border-border">
                         <div className="relative">
                           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search size={14} className="text-gray-400" />
@@ -259,7 +259,7 @@ const Dropdown = ({
                           <input
                             ref={searchInputRef}
                             type="text"
-                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-cath-red-700"
+                            className="w-full pl-9 pr-3 py-1.5 text-sm border border-border rounded-md focus:outline-none focus:border-cath-red-700"
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}

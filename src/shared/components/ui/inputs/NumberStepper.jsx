@@ -43,7 +43,7 @@ const NumberStepper = ({
 
   return (
     <div
-      className={`h-14 flex items-center gap-1 border border-[#e5e5e5] rounded-xl bg-white transition-colors hover:border-[#8e0000] focus-within:border-[#8e0000] ${className}`}
+      className={`h-14 flex items-center gap-1 border border-border rounded-xl bg-white transition-colors hover:border-[#8e0000] focus-within:border-[#8e0000] ${className}`}
     >
       <button
         type="button"
@@ -51,7 +51,7 @@ const NumberStepper = ({
         disabled={value <= min}
         className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full text-[#606060] group disabled:opacity-30 outline-none"
       >
-        <div className="w-10 h-10 flex items-center justify-center rounded-full group-hover:bg-[#F2F2F2] transition group-disabled:group-hover:bg-transparent">
+        <div className="w-10 h-10 flex items-center justify-center rounded-full group-hover:bg-primaryBg transition group-disabled:group-hover:bg-transparent">
           <Minus />
         </div>
       </button>
@@ -70,7 +70,7 @@ const NumberStepper = ({
         disabled={value >= max}
         className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full text-[#606060] group disabled:opacity-30 outline-none"
       >
-        <div className="w-10 h-10 flex items-center justify-center rounded-full group-hover:bg-[#F2F2F2] transition group-disabled:group-hover:bg-transparent">
+        <div className="w-10 h-10 flex items-center justify-center rounded-full group-hover:bg-primaryBg transition group-disabled:group-hover:bg-transparent">
           <Plus />
         </div>
       </button>

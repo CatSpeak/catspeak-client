@@ -73,7 +73,7 @@ const WebViewBlockScreen = ({ appName }) => {
         </p>
 
         {/* URL display box */}
-        <div className="w-full max-w-md h-[56px] px-4 mb-6 bg-[#F8F9FA] border border-[#e5e5e5] rounded-xl flex items-center overflow-hidden text-left">
+        <div className="w-full max-w-md h-[56px] px-4 mb-6 bg-[#F8F9FA] border border-border rounded-xl flex items-center overflow-hidden text-left">
           <span className="whitespace-nowrap block overflow-hidden text-ellipsis select-all w-full">
             {currentUrl}
           </span>
@@ -103,7 +103,7 @@ const WebViewBlockScreen = ({ appName }) => {
         </div>
 
         {/* Steps */}
-        <div className="w-full max-w-md pt-4 sm:pt-6 border-t border-[#e5e5e5] text-left">
+        <div className="w-full max-w-md pt-4 sm:pt-6 border-t border-border text-left">
           <p className="font-semibold mb-2">
             {wb.instruction || "How to open:"}
           </p>

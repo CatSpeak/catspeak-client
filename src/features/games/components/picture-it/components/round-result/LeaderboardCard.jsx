@@ -29,7 +29,7 @@ const LeaderboardCard = ({ leaderboard = [] }) => {
     >
       <FluentCard className="h-full gap-3 py-4">
         {/* Header */}
-        <div className="flex items-center gap-2 px-3 pb-2 border-b border-[#E5E5E5]">
+        <div className="flex items-center gap-2 px-3 pb-2 border-b border-border">
           <div className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0 bg-cath-red-700/10">
             <Trophy size={14} className="text-cath-red-700" />
           </div>

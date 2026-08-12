@@ -5,7 +5,7 @@ import Radio from "./inputs/Radio"
  * Shared reusable ListItem component.
  *
  * @param {boolean} hoverEffect - Choose whether to want list item hover effect. Default to false.
- * @param {string} hoverBgColor - The background color when hovered. Default to "bg-[#F2F2F2]".
+ * @param {string} hoverBgColor - The background color when hovered. Default to "bg-primaryBg".
  * @param {React.ReactNode} leftContent - Left content (Avatar, icons, or no left content).
  * @param {React.ReactNode} rightContent - Right content (Switch, icon, etc.).
  * @param {string|number|React.ReactNode} rightText - Text for right content (e.g. unassignedStudents.length).
@@ -36,8 +36,9 @@ const ListItem = ({
     1: "h-14",
     2: "h-[72px]",
     3: "h-[88px]",
+    auto: "min-h-[56px] py-3 h-auto",
   }
-  const heightClass = linesClasses[lines] || "h-14"
+  const heightClass = linesClasses[lines] || (lines === "auto" ? "min-h-[56px] py-3 h-auto" : "h-14")
 
   const effectiveRightContent =
     variant === "radio" ? (
@@ -46,11 +47,11 @@ const ListItem = ({
       rightContent
     )
 
-  const baseBgClass = selected ? "bg-[#F2F2F2] dark:bg-neutral-800" : ""
+  const baseBgClass = selected ? "bg-primaryBg dark:bg-neutral-800" : ""
 
   const defaultHoverClasses = selected
     ? "hover:bg-[#E6E6E6] group-hover:bg-[#E6E6E6] dark:hover:bg-neutral-700 dark:group-hover:bg-neutral-700"
-    : "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2] dark:hover:bg-neutral-800 dark:group-hover:bg-neutral-800"
+    : "hover:bg-primaryBg group-hover:bg-primaryBg dark:hover:bg-neutral-800 dark:group-hover:bg-neutral-800"
 
   const hoverClasses = hoverBgColor
     ? `hover:${hoverBgColor} group-hover:${hoverBgColor}`
@@ -69,7 +70,7 @@ const ListItem = ({
           hoverEffect || selected ? hoverClasses : ""
         } ${contentClassName}`}
       >
-        <div className="flex items-center gap-4 overflow-hidden flex-1">
+        <div className="flex items-center gap-4 min-w-0 flex-1 my-auto">
           {leftContent && (
             <div className="shrink-0 flex items-center justify-center [&_svg]:w-6 [&_svg]:h-6 [&_img]:w-[56px] [&_img]:h-[56px] [&_img]:object-contain">
               {leftContent}

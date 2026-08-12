@@ -472,7 +472,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         <div className="flex items-center justify-center py-2 shrink-0">
           <div className="w-10 h-1.5 bg-gray-300 rounded-full" />
         </div>
-        <div className="flex items-center justify-between px-4 pb-3 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between px-4 pb-3 border-b border-border shrink-0">
           <h3 className="text-[15px] font-bold text-gray-800">
             {formatCompactNumber(reel.comments, language)}{" "}
             {t?.catSpeak?.reels?.detail?.commentsTotal || "bình luận"}
@@ -510,7 +510,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         </div>
 
         {/* Fake Comment Input (Triggers Modal) */}
-        <div className="bg-white border-t border-gray-100 p-3 pb-safe shrink-0 w-full shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-[60] mt-auto">
+        <div className="bg-white border-t border-border p-3 pb-safe shrink-0 w-full shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-[60] mt-auto">
           <div onClick={handleOpenInput} className="flex items-center gap-3">
             <Avatar
               size={36}
@@ -539,7 +539,7 @@ const ReelDetailSlideMobile = React.memo(function ReelDetailSlideMobile({
         onClick={() => setIsInputModalOpen(false)}
       />
       <div
-        className={`fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-2 pb-safe z-[100] shadow-[0_-10px_20px_rgba(0,0,0,0.08)] flex items-center gap-3 transition-transform duration-200 ${isInputModalOpen ? "translate-y-0" : "translate-y-[150%]"}`}
+        className={`fixed bottom-0 left-0 w-full bg-white border-t border-border p-2 pb-safe z-[100] shadow-[0_-10px_20px_rgba(0,0,0,0.08)] flex items-center gap-3 transition-transform duration-200 ${isInputModalOpen ? "translate-y-0" : "translate-y-[150%]"}`}
       >
         <Avatar
           size={36}

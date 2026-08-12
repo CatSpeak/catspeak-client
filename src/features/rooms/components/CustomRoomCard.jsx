@@ -96,7 +96,7 @@ const CustomRoomCard = ({
         className="h-full w-full"
         containerClassName="h-full w-full"
       >
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-[#e5e5e5]">
+        <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-border">
           {/* Blurred Background Image */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"

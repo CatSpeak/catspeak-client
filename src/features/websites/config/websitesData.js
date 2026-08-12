@@ -74,15 +74,6 @@ export const websites = [
         description:
           "Free standardized English test with instant score report aligned to CEFR levels.",
       },
-      {
-        key: "duolingo-english-test-practice",
-        label: "Duolingo English Test",
-        path: "/resources/duolingo-english-test-practice",
-        img: "https://dy8n3onijof8f.cloudfront.net/static/images/testcenter/favicon-juicy.png",
-        color: "#5acc02",
-        description:
-          "Official practice portal for the digital Duolingo English proficiency test.",
-      },
     ],
   },
   {
@@ -244,15 +235,6 @@ export const websites = [
         color: "#edba1f",
         description:
           "AI-powered pronunciation scoring and speaking practice assistant.",
-      },
-      {
-        key: "youglish",
-        label: "YouGlish",
-        path: "/resources/youglish",
-        img: "/website-icons/younglish.png",
-        color: "#d12121",
-        description:
-          "Search YouTube clips to hear real native speakers pronounce any word or phrase.",
       },
       {
         key: "howtopronounce",
