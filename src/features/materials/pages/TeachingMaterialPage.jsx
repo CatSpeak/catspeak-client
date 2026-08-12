@@ -15,7 +15,7 @@ import BulkActionBar from '../components/teaching-material/BulkActionBar';
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
-import { useGetPersonalMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery, useBookmarkFolderMutation, useBookmarkMaterialMutation } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useGetBookmarkedMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery, useBookmarkFolderMutation, useBookmarkMaterialMutation } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import { Breadcrumb } from '@/shared/components/ui/navigation';
@@ -51,11 +51,19 @@ const TeachingMaterialPage = () => {
   const [filterMode, setFilterMode] = useState(null); // 'folder' | 'fileType' | null
   const [filterFileType, setFilterFileType] = useState(null);
 
-  const { data: materialsData, isLoading } = useGetPersonalMaterialsQuery({
+  const { data: regularMaterialsData, isLoading: isRegularLoading } = useGetPersonalMaterialsQuery({
     folderId,
     keyword: searchQuery,
     sortBy: sortBy,
-  });
+  }, { skip: filterMode === 'bookmark' && !folderId });
+
+  const { data: bookmarkedMaterialsData, isLoading: isBookmarkLoading } = useGetBookmarkedMaterialsQuery({
+    keyword: searchQuery,
+    sortBy: sortBy,
+  }, { skip: filterMode !== 'bookmark' || !!folderId });
+
+  const materialsData = (filterMode === 'bookmark' && !folderId) ? bookmarkedMaterialsData : regularMaterialsData;
+  const isLoading = (filterMode === 'bookmark' && !folderId) ? isBookmarkLoading : isRegularLoading;
 
   const { data: folderDetailRes } = useGetPersonalMaterialByIdQuery(folderId, { skip: !folderId });
   const folderDetail = folderDetailRes?.data || folderDetailRes;
@@ -170,7 +178,11 @@ const TeachingMaterialPage = () => {
         rawFolders = rawFolders.filter(f => (f.name || '').toLowerCase().includes(lowerQuery));
       }
     } else {
-      rawFolders = Array.isArray(responseData.folders) ? [...responseData.folders] : [];
+      rawFolders = Array.isArray(responseData.folders) ? responseData.folders.map(f => ({ ...f, id: f.folderId || f.id })) : [];
+    }
+
+    if (filterMode === 'bookmark' && folderId) {
+      rawFolders = rawFolders.filter(f => f.isBookmarked);
     }
 
     rawFolders.sort((a, b) => {
@@ -194,7 +206,7 @@ const TeachingMaterialPage = () => {
   }, [responseData.folders, filterMode, sortBy, folderId, rawFoldersTree, searchQuery]);
 
   const files = useMemo(() => {
-    let rawFiles = Array.isArray(responseData.recentFiles) ? [...responseData.recentFiles] : [];
+    let rawFiles = Array.isArray(responseData.materials) ? responseData.materials.map(file => ({ ...file, id: file.materialId || file.id })) : [];
     if (filterMode === 'folder') return [];
 
     if (filterMode === 'fileType' && filterFileType) {
@@ -211,6 +223,10 @@ const TeachingMaterialPage = () => {
         const ext = extMatch ? extMatch[1].toLowerCase() : '';
         return typeMap[filterFileType]?.includes(ext);
       });
+    }
+
+    if (filterMode === 'bookmark' && folderId) {
+      rawFiles = rawFiles.filter(f => f.isBookmarked);
     }
 
     rawFiles.sort((a, b) => {
@@ -233,7 +249,7 @@ const TeachingMaterialPage = () => {
     });
 
     return rawFiles;
-  }, [responseData.recentFiles, filterMode, filterFileType, sortBy]);
+  }, [responseData.materials, filterMode, filterFileType, sortBy, folderId]);
   const materials = useMemo(() => [...folders, ...files], [folders, files]);
 
   useEffect(() => {

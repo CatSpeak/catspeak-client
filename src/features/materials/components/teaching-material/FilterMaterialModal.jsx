@@ -110,6 +110,18 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
             </div>
           )}
         </div>
+
+        {/* Option 3: Đã lưu (Bookmark) */}
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="radio"
+            name="filterMode"
+            className="w-4 h-4 text-[#6E0009] focus:ring-[#6E0009] cursor-pointer"
+            checked={filterMode === 'bookmark'}
+            onChange={() => setFilterMode('bookmark')}
+          />
+          <span className="text-[#1A1C1C] text-base font-medium">Đã yêu thích</span>
+        </label>
       </div>
     </Modal>
   );

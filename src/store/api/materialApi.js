@@ -13,6 +13,15 @@ export const materialApi = baseApi.injectEndpoints({
       providesTags: ["PersonalMaterials"],
     }),
 
+    // Get a list of bookmarked materials
+    getBookmarkedMaterials: builder.query({
+      query: ({ keyword, sortBy, sortOrder } = {}) => ({
+        url: "/personal-materials/bookmarks",
+        params: { keyword, sortBy, sortOrder },
+      }),
+      providesTags: ["PersonalMaterials"],
+    }),
+
     //  Create a new folder
     createFolder: builder.mutation({
       query: ({ name, parentId }) => ({
@@ -200,6 +209,7 @@ export const materialApi = baseApi.injectEndpoints({
 
 export const {
   useGetPersonalMaterialsQuery,
+  useGetBookmarkedMaterialsQuery,
   useCreateFolderMutation,
   useGetFolderTreeQuery,
   useUploadMaterialMutation,
