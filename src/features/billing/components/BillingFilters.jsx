@@ -22,7 +22,9 @@ const BillingFilters = ({
   const statusOptions = [
     { value: "all", label: hist.statusFilterAll || "All statuses" },
     { value: "1", label: hist.statusFilterSuccess || "Success" },
+    { value: "2", label: hist.statusFilterFailed || "Failed" },
     { value: "3", label: hist.statusFilterPending || "Pending" },
+    { value: "4", label: hist.statusFilterRefunded || "Refunded" },
     { value: "0", label: hist.statusFilterCancelled || "Cancelled" },
   ]
 

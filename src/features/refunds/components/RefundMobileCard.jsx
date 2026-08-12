@@ -4,7 +4,7 @@ import RefundStatusBadge from "./RefundStatusBadge"
 
 export default function RefundMobileCard({ refund, cols, formatDate, formatAmount, t }) {
   return (
-    <FluentCard padding="!p-4" className="!bg-gray-50/30 hover:!bg-gray-50 transition-colors shadow-none !border-gray-100">
+    <FluentCard padding="p-4">
       {/* Top row: payment id + status badge */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-800">
@@ -35,10 +35,10 @@ export default function RefundMobileCard({ refund, cols, formatDate, formatAmoun
         )}
       </div>
 
-      {/* Reason */}
-      {refund.reason && (
+      {/* Reason / Message */}
+      {(refund.message || refund.reason) && (
         <div className="pt-2 border-t border-gray-100 text-xs text-gray-600 italic">
-          "{refund.reason}"
+          "{refund.message || refund.reason}"
         </div>
       )}
     </FluentCard>

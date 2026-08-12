@@ -25,9 +25,17 @@ export default function PaymentHistoryTab() {
       label: hist.statuses?.success || "Success",
       styles: "bg-[#E5F7ED] text-green-700",
     },
+    2: {
+      label: hist.statuses?.failed || "Failed",
+      styles: "bg-[#FDE8E8] text-red-700",
+    },
     3: {
       label: hist.statuses?.pending || "Pending",
       styles: "bg-[#FFFBEA] text-yellow-700",
+    },
+    4: {
+      label: hist.statuses?.refunded || "Refunded",
+      styles: "bg-[#EBF5FF] text-blue-700",
     },
     0: {
       label: hist.statuses?.cancelled || "Cancelled",

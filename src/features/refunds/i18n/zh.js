@@ -35,8 +35,16 @@ export default {
     btnBack: "返回",
     btnDone: "完成",
     btnRequestRefund: "申请退款",
+    btnRefresh: "刷新",
 
     // Errors & Success
+    checkEligibilityError: "无法检查退款资格。请稍后再试。",
+    defaultIneligibleReason: "交易已超过可申请退款的期限。",
+    btnRetry: "重试",
+    btnChangeBank: "更改",
+    loadingBanks: "正在加载银行列表...",
+    noBanksFound: "未找到银行。",
+
     errorNoBank: "请选择银行。",
     errorNoAccount: "请输入账号。",
     errorNoHolder: "请输入开户人姓名。",

@@ -1,8 +1,8 @@
 export default {
   refunds: {
-    title: "Refund History",
+    title: "Refund history",
     subtitle: "Track the status and manage refund requests for your payments.",
-    requestRefundTitle: "Request Refund",
+    requestRefundTitle: "Request refund",
     requestRefundSubtitle: "Submit a refund request for order #{{orderCode}}",
     
     // Statuses
@@ -13,52 +13,60 @@ export default {
     
     // Modal steps
     checkingEligibility: "Checking refund eligibility...",
-    ineligibleTitle: "Not Eligible for Refund",
-    eligibleTitle: "Eligible for Refund",
-    maxRefundAmount: "Maximum Refund Amount",
-    paymentType: "Payment Type",
+    ineligibleTitle: "Not eligible for refund",
+    eligibleTitle: "Eligible for refund",
+    maxRefundAmount: "Maximum refund amount",
+    paymentType: "Payment type",
 
     // Form fields
-    selectBank: "Select Receiving Bank",
+    selectBank: "Select receiving bank",
     searchBankPlaceholder: "Search bank...",
-    accountNumber: "Account Number",
+    accountNumber: "Account number",
     accountNumberPlaceholder: "Enter account number...",
-    accountHolderName: "Account Holder Name",
-    accountHolderPlaceholder: "Enter account holder name (UPPERCASE)...",
-    reasonLabel: "Reason for Refund",
+    accountHolderName: "Account holder name",
+    accountHolderPlaceholder: "Enter account holder name (uppercase)...",
+    reasonLabel: "Reason for refund",
     reasonPlaceholder: "Please explain why you are requesting a refund...",
 
     // Actions & Buttons
-    btnCheckEligibility: "Check Eligibility",
-    btnSubmitRequest: "Submit Refund Request",
+    btnCheckEligibility: "Check eligibility",
+    btnSubmitRequest: "Submit refund request",
     btnCancel: "Cancel",
     btnBack: "Back",
     btnDone: "Done",
-    btnRequestRefund: "Request Refund",
+    btnRequestRefund: "Request refund",
+    btnRefresh: "Refresh",
 
     // Errors & Success
+    checkEligibilityError: "Unable to check refund eligibility. Please try again later.",
+    defaultIneligibleReason: "Transaction has passed the allowable refund window.",
+    btnRetry: "Retry",
+    btnChangeBank: "Change",
+    loadingBanks: "Loading banks...",
+    noBanksFound: "No banks found.",
+
     errorNoBank: "Please select a bank.",
     errorNoAccount: "Please enter your account number.",
     errorNoHolder: "Please enter the account holder name.",
     errorNoReason: "Please enter a reason for the refund.",
     errorSubmitFailed: "Failed to submit refund request. Please try again.",
     
-    successTitle: "Refund Request Submitted Successfully!",
-    successSubtitle: "Your request is awaiting admin approval. You can track its status in your Refund History.",
+    successTitle: "Refund request submitted successfully!",
+    successSubtitle: "Your request is awaiting admin approval. You can track its status in your refund history.",
 
     // Table / History page
     noHistoryTitle: "No refund requests found",
     noHistorySubtitle: "When you request a refund for a payment, its status will appear here.",
     searchPlaceholder: "Enter order code or ID...",
-    filterStatusAll: "All Statuses",
+    filterStatusAll: "All statuses",
 
     columns: {
       date: "Date",
       paymentId: "Payment ID",
-      amount: "Refund Amount",
+      amount: "Refund amount",
       status: "Status",
       reason: "Reason",
-      bankInfo: "Receiving Bank",
+      bankInfo: "Receiving bank",
     },
   },
 }

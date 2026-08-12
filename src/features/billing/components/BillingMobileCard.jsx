@@ -35,10 +35,7 @@ const BillingMobileCard = ({
   const isRepayingThis = repayingId === invoice.paymentId
 
   return (
-    <FluentCard
-      padding="!p-4"
-      className="!bg-gray-50/30 hover:!bg-gray-50 transition-colors shadow-none !border-border"
-    >
+    <FluentCard padding="p-4">
       {/* Top row: order code + status */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-800">
@@ -80,7 +77,11 @@ const BillingMobileCard = ({
         <Popover
           placement="bottom-right"
           trigger={
-            <IconButton size="xs" variant="ghost" title="Tùy chọn">
+            <IconButton
+              size="xs"
+              variant="ghost"
+              title={actionsText.title || "Tùy chọn"}
+            >
               <MoreVertical />
             </IconButton>
           }

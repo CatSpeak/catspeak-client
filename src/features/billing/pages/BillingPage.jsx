@@ -17,7 +17,7 @@ const BillingPage = () => {
 
   const navTabs = [
     { id: "payments", label: hist.title || "Lịch sử thanh toán" },
-    { id: "refunds", label: refundT.title || "Lịch sử Hoàn tiền" },
+    { id: "refunds", label: refundT.title || "Lịch sử hoàn tiền" },
   ]
 
   return (
@@ -27,7 +27,7 @@ const BillingPage = () => {
         <PageTitle>
           {activeTab === "payments"
             ? hist.title || "Lịch sử thanh toán"
-            : refundT.title || "Lịch sử Hoàn tiền"}
+            : refundT.title || "Lịch sử hoàn tiền"}
         </PageTitle>
       </div>
 

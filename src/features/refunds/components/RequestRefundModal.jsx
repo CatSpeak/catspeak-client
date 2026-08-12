@@ -198,10 +198,11 @@ export default function RequestRefundModal({
             <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-3">
               <AlertCircle className="w-10 h-10 text-rose-600 mx-auto" />
               <p className="text-sm text-rose-700 font-medium">
-                Không thể kiểm tra điều kiện hoàn tiền. Vui lòng thử lại sau.
+                {refundT.checkEligibilityError ||
+                  "Không thể kiểm tra điều kiện hoàn tiền. Vui lòng thử lại sau."}
               </p>
               <PillButton variant="secondary" onClick={refetchEligibility}>
-                Thử lại
+                {refundT.btnRetry || "Thử lại"}
               </PillButton>
             </div>
           )}
@@ -267,7 +268,7 @@ export default function RequestRefundModal({
                   }}
                   className="text-xs text-cath-red-700 hover:underline font-semibold"
                 >
-                  Thay đổi
+                  {refundT.btnChangeBank || "Thay đổi"}
                 </button>
               </div>
             ) : (
@@ -289,11 +290,11 @@ export default function RequestRefundModal({
                     {isLoadingBanks ? (
                       <div className="p-4 text-center text-xs text-gray-400">
                         <Loader2 className="w-4 h-4 animate-spin inline mr-1" />
-                        Đang tải danh sách ngân hàng...
+                        {refundT.loadingBanks || "Đang tải danh sách ngân hàng..."}
                       </div>
                     ) : banks.length === 0 ? (
                       <div className="p-4 text-center text-xs text-gray-400">
-                        Không tìm thấy ngân hàng.
+                        {refundT.noBanksFound || "Không tìm thấy ngân hàng."}
                       </div>
                     ) : (
                       banks.map((bank) => (
