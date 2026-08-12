@@ -448,6 +448,16 @@ export default {
     toastRouting: "Đang định tuyến đến phòng học...",
     createPost: "Tạo hoạt động",
     cancelClass: "Hủy lớp học",
+    inviteFriends: "Mời bạn bè",
+    inviteToClass: "Mời tham gia lớp",
+    invited: "Đã gửi lời mời",
+    noFriendsToInvite: "Không có bạn bè nào để mời",
+    noFriendsToInviteDesc: "Tất cả bạn bè của bạn đã tham gia lớp học này hoặc bạn chưa có bạn bè trong danh sách.",
+    noFriendsFound: "Không tìm thấy bạn bè phù hợp",
+    noFriendsFoundDesc: "Vui lòng thử tìm kiếm với từ khóa khác.",
+    toastInviteSuccess: "Đã gửi lời mời tham gia lớp học cho {{name}}!",
+    toastInviteFailed: "Không thể gửi lời mời. Vui lòng thử lại!",
+    searchFriends: "Tìm kiếm bạn bè...",
     leadInstructor: "GIẢNG VIÊN CHÍNH",
     leadInstructorLabel: "Giảng viên chính",
     message: "Nhắn tin",
@@ -1867,6 +1877,10 @@ export default {
       quiz_regraded: {
         title: "Lớp {className}",
         body: "{quizName} của bạn đã được chấm lại."
+      },
+      class_invite: {
+        title: "Lời mời vào lớp học",
+        body: "{teacherName} đã mời bạn tham gia lớp học \"{className}\""
       }
     }
   },

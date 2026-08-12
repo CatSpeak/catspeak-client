@@ -448,6 +448,16 @@ export default {
     toastRouting: "正在路由到虚拟教室...",
     createPost: "创建课堂作业",
     cancelClass: "取消班级",
+    inviteFriends: "邀请好友",
+    inviteToClass: "邀请加入班级",
+    invited: "已邀请",
+    noFriendsToInvite: "没有可邀请的好友",
+    noFriendsToInviteDesc: "您的所有好友都已加入该班级，或您暂无好友。",
+    noFriendsFound: "未找到匹配的好友",
+    noFriendsFoundDesc: "请尝试使用其他关键词搜索。",
+    toastInviteSuccess: "已向 {{name}} 发送班级邀请！",
+    toastInviteFailed: "发送邀请失败，请重试！",
+    searchFriends: "搜索好友...",
     leadInstructor: "主讲教师",
     leadInstructorLabel: "主讲教师",
     message: "发消息",
@@ -1864,6 +1874,10 @@ export default {
       quiz_regraded: {
         title: "班级 {className}",
         body: "您的 {quizName} 已重新评分。"
+      },
+      class_invite: {
+        title: "班级邀请",
+        body: "{teacherName} 已邀请您加入班级 \"{className}\""
       }
     }
   },

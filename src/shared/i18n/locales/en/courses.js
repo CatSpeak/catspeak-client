@@ -448,6 +448,16 @@ export default {
     toastRouting: "Routing to virtual classroom...",
     createPost: "Create Classwork",
     cancelClass: "Cancel Class",
+    inviteFriends: "Invite Friends",
+    inviteToClass: "Invite to join this class",
+    invited: "Invited",
+    noFriendsToInvite: "No friends available to invite",
+    noFriendsToInviteDesc: "All your friends are already in this class or you don't have any friends yet.",
+    noFriendsFound: "No friends found",
+    noFriendsFoundDesc: "Please try searching with a different keyword.",
+    toastInviteSuccess: "Class invitation sent to {{name}}!",
+    toastInviteFailed: "Failed to send invitation. Please try again!",
+    searchFriends: "Search friends...",
     leadInstructor: "LEAD INSTRUCTOR",
     leadInstructorLabel: "Lead Instructor",
     message: "Message",
@@ -1867,6 +1877,10 @@ export default {
       quiz_regraded: {
         title: "Class {className}",
         body: "Your {quizName} has been regraded."
+      },
+      class_invite: {
+        title: "Class Invitation",
+        body: "{teacherName} has invited you to join the class \"{className}\""
       }
     }
   },
