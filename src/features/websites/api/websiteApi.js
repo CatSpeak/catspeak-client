@@ -56,11 +56,6 @@ const resources = [
     lang: "en",
     url: "https://www.efset.org/",
   },
-  {
-    id: "duolingo-english-test-practice",
-    lang: "en",
-    url: "https://englishtest.duolingo.com/",
-  },
   // 2. Nền tảng học tổng hợp miễn phí
   {
     id: "fluentez",
@@ -138,11 +133,6 @@ const resources = [
     id: "eztalking-ai",
     lang: "en",
     url: "https://app.eztalking.vn/",
-  },
-  {
-    id: "youglish",
-    lang: "en",
-    url: "https://youglish.com/",
   },
   {
     id: "howtopronounce",
