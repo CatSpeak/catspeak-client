@@ -3,19 +3,23 @@ import { ChevronDown, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { FcFolder } from 'react-icons/fc';
 import { IconButton } from '@/shared/components/ui/buttons';
 
-const FolderNode = ({ folder, level, selectedId, onSelect, expandedIds, toggleExpand }) => {
+const FolderNode = ({ folder, level, selectedId, onSelect, expandedIds, toggleExpand, disabledIds = [] }) => {
   const hasChildren = folder.subFolders && folder.subFolders.length > 0;
-  const isExpanded = expandedIds.includes(folder.folderId);
-  const isSelected = selectedId === folder.folderId;
-
-
+  const isExpanded = expandedIds.some(id => String(id) === String(folder.folderId));
+  const isSelected = String(selectedId) === String(folder.folderId);
+  const isDisabled = disabledIds.some(id => String(id) === String(folder.folderId));
 
   return (
     <div className="flex flex-col">
       <div
-        className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${isSelected ? 'bg-[#FFDAD6]/20 border border-[#FFDAD6]' : 'hover:bg-gray-50 border border-transparent'}`}
+        className={`flex items-center justify-between p-3 rounded-xl transition-colors ${isDisabled
+            ? 'opacity-50 cursor-not-allowed bg-gray-50'
+            : isSelected
+              ? 'bg-[#FFDAD6]/20 border border-[#FFDAD6] cursor-pointer'
+              : 'hover:bg-gray-50 border border-transparent cursor-pointer'
+          }`}
         style={{ marginLeft: level > 0 ? `${level * 20}px` : '0px' }}
-        onClick={() => onSelect(isSelected ? null : folder)}
+        onClick={() => !isDisabled && onSelect(isSelected ? null : folder)}
       >
         <div className="flex items-center gap-2">
           <IconButton
@@ -37,8 +41,8 @@ const FolderNode = ({ folder, level, selectedId, onSelect, expandedIds, toggleEx
           </IconButton>
 
           <FcFolder className="w-5 h-5" />
-          <span className={`text-base truncate flex-1 ${isSelected ? 'font-bold text-[#6E0009]' : 'text-[#1A1C1C]'}`}>
-            {folder.folderName}
+          <span className={`text-base truncate flex-1 ${isDisabled ? 'text-[#1A1C1C]' : isSelected ? 'font-bold text-[#6E0009]' : 'text-[#1A1C1C]'}`}>
+            {folder.folderName} {isDisabled && <span className="text-xs text-gray-500 font-normal ml-2">(Vị trí hiện tại)</span>}
           </span>
         </div>
 
@@ -57,6 +61,7 @@ const FolderNode = ({ folder, level, selectedId, onSelect, expandedIds, toggleEx
                 onSelect={onSelect}
                 expandedIds={expandedIds}
                 toggleExpand={toggleExpand}
+                disabledIds={disabledIds}
               />
             ))}
           </div>

@@ -1,17 +1,54 @@
 import React from 'react';
-import { MoreVertical, FolderOpen, Share2, Edit2, FolderInput, Trash2 } from 'lucide-react';
+import { MoreVertical, FolderOpen, Share2, Edit2, FolderInput, Trash2, Star, StarOff } from 'lucide-react';
 import { FcFolder } from 'react-icons/fc';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
+import Checkbox from '@/shared/components/ui/inputs/Checkbox';
 
-const FolderItem = ({ title, totalItems, updatedAt, onDelete, onClick, onShare, onRename, onMove }) => {
+const FolderItem = ({
+  title,
+  totalItems,
+  updatedAt,
+  isBookmarked,
+  onDelete,
+  onClick,
+  onShare,
+  onRename,
+  onMove,
+  onBookmark,
+  isSelected,
+  onToggleSelect }) => {
 
   return (
-    <div onClick={onClick} className="border border-[#E3BEBA] rounded-xl p-3 flex items-center justify-between bg-[#F9F9F9] cursor-pointer hover:shadow-faq-card hover:border-[#6E0009] hover:bg-[#FFDAD6]">
+    <div
+      onClick={onClick}
+      className={`relative group border rounded-xl p-3 flex items-center justify-between cursor-pointer transition-all ${isSelected
+        ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
+        : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
+        }`}
+    >
       <div className="flex items-center gap-3 flex-1">
-        <FcFolder className="text-4xl" />
+        <div className="relative">
+          <FcFolder className="text-4xl" />
+          <div
+            className={`absolute -top-1 -left-1 bg-white rounded flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelect && onToggleSelect();
+            }}
+          >
+            <Checkbox
+              checked={isSelected}
+              readOnly
+              className="w-4 h-4 pointer-events-none"
+            />
+          </div>
+        </div>
         <div>
-          <h3 className="font-semibold text-[#1A1C1C] text-base">{title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-[#1A1C1C] text-base">{title}</h3>
+            {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F]" />}
+          </div>
           <p className="text-sm text-[#5B403E]">
             {totalItems} {updatedAt ? `• ${updatedAt}` : ''}
           </p>
@@ -29,6 +66,7 @@ const FolderItem = ({ title, totalItems, updatedAt, onDelete, onClick, onShare, 
             if (val === 'share' && onShare) onShare();
             if (val === 'rename' && onRename) onRename();
             if (val === 'move' && onMove) onMove();
+            if ((val === 'bookmark' || val === 'unfavorite') && onBookmark) onBookmark();
             if (val === 'delete' && onDelete) onDelete();
           }}
           options={[
@@ -36,6 +74,7 @@ const FolderItem = ({ title, totalItems, updatedAt, onDelete, onClick, onShare, 
             { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
             { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
             { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
+            { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích', icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
             {
               value: 'delete',
               label: <span className="text-[#BA1A1A]">Xóa</span>,

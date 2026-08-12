@@ -4,7 +4,7 @@ import { FileText, Copy, Link as LinkIcon, Save, ChevronDown, FolderInput } from
 import Switch from '@/shared/components/ui/inputs/Switch';
 import { PillButton } from '@/shared/components/ui/buttons';
 import Dropdown from '@/shared/components/ui/Dropdown';
-import { useUpdateMaterialSettingsMutation } from '@/store/api/materialApi';
+import { useUpdateMaterialSettingsMutation, useUpdateFolderSettingsMutation } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
 
 const formatSize = (bytes) => {
@@ -20,7 +20,11 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
   const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
   const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
 
-  const [updateSettings, { isLoading }] = useUpdateMaterialSettingsMutation();
+  const [updateMaterialSettings, { isLoading: isUpdatingMaterial }] = useUpdateMaterialSettingsMutation();
+  const [updateFolderSettings, { isLoading: isUpdatingFolder }] = useUpdateFolderSettingsMutation();
+  const isLoading = isUpdatingMaterial || isUpdatingFolder;
+
+  const isFolder = item && (item.type === 'folder' || item._type === 'folder' || (!item.fileName && !item.fileUrl));
 
   // Sync state when item changes
   React.useEffect(() => {
@@ -34,7 +38,11 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
 
   const handleSave = async () => {
     try {
-      await updateSettings({ id: item.id, isPublic, allowDownload }).unwrap();
+      if (isFolder) {
+        await updateFolderSettings({ id: item.id || item.folderId, isPublic }).unwrap();
+      } else {
+        await updateMaterialSettings({ id: item.id, isPublic, allowDownload }).unwrap();
+      }
       toast.success('Cập nhật cài đặt chia sẻ thành công');
       onClose();
     } catch (error) {
@@ -131,18 +139,20 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
 
         <div className="h-px bg-[#E2E2E2] w-full" />
 
-        {/* Allow Download Toggle */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-base font-bold text-[#1A1C1C]">Cho phép tải xuống</span>
-            <span className="text-sm text-[#5B403E]">Người xem có thể tải bản sao về máy</span>
+        {/* Allow Download Toggle (only for files) */}
+        {!isFolder && (
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-[#1A1C1C]">Cho phép tải xuống</span>
+              <span className="text-sm text-[#5B403E]">Người xem có thể tải bản sao về máy</span>
+            </div>
+            <Switch
+              checked={allowDownload}
+              onChange={(e) => setAllowDownload(e.target.checked)}
+              colorClass="peer-checked:bg-[#8e1115]"
+            />
           </div>
-          <Switch
-            checked={allowDownload}
-            onChange={(e) => setAllowDownload(e.target.checked)}
-            colorClass="peer-checked:bg-[#8e1115]"
-          />
-        </div>
+        )}
 
         {/* Advanced Options */}
         <Dropdown

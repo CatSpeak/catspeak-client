@@ -9,14 +9,18 @@ import ShareMaterialModal from '../components/teaching-material/ShareMaterialMod
 import DeleteFolderModal from '../components/teaching-material/DeleteFolderModal';
 import FileDetailModal from '../components/teaching-material/FileDetailModal';
 import FilterMaterialModal from '../components/teaching-material/FilterMaterialModal';
+import MoveMaterialModal from '../components/teaching-material/MoveMaterialModal';
+import RenameMaterialModal from '../components/teaching-material/RenameMaterialModal';
+import BulkActionBar from '../components/teaching-material/BulkActionBar';
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
-import { useGetPersonalMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery, useBookmarkFolderMutation, useBookmarkMaterialMutation } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import { Breadcrumb } from '@/shared/components/ui/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const SORT_OPTIONS = [
   { value: 'name', label: 'Tên' },
@@ -36,8 +40,11 @@ const TeachingMaterialPage = () => {
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
   const [isFileDetailOpen, setIsFileDetailOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
   const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
   const [deletingItem, setDeletingItem] = useState({ id: null, name: "", count: 0, type: "folder" });
 
   // Filter States
@@ -78,6 +85,35 @@ const TeachingMaterialPage = () => {
   const folderPath = folderId ? getFolderPath(rawFoldersTree, folderId) : null;
 
   const [recordDownload] = useRecordMaterialDownloadMutation();
+  const [bookmarkFolder] = useBookmarkFolderMutation();
+  const [bookmarkMaterial] = useBookmarkMaterialMutation();
+
+  const handleBookmark = async (item, type) => {
+    try {
+      if (type === 'folder') {
+        await bookmarkFolder(item.folderId || item.id).unwrap();
+        toast.success(item.isBookmarked ? 'Đã bỏ yêu thích thư mục' : 'Đã thêm thư mục vào yêu thích');
+      } else {
+        await bookmarkMaterial(item.id).unwrap();
+        toast.success(item.isBookmarked ? 'Đã bỏ yêu thích tệp' : 'Đã thêm tệp vào yêu thích');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi xảy ra khi thực hiện yêu thích');
+    }
+  };
+
+  const handleToggleSelect = (item, type) => {
+    setSelectedItems(prev => {
+      const id = item.id || item.folderId;
+      const exists = prev.find(i => (i.id || i.folderId) === id && i._type === type);
+      if (exists) {
+        return prev.filter(i => !((i.id || i.folderId) === id && i._type === type));
+      } else {
+        return [...prev, { ...item, _type: type }];
+      }
+    });
+  };
 
   const responseData = materialsData?.data || materialsData || {};
   const folders = useMemo(() => {
@@ -387,11 +423,27 @@ const TeachingMaterialPage = () => {
                     title={folder.name || folder.folderName}
                     totalItems={`${(folder.subFolderCount || 0) + (folder.materialCount || 0)} mục`}
                     updatedAt={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
+                    isSelected={selectedItems.some(i => (i.id || i.folderId) === (folder.id || folder.folderId) && i._type === 'folder')}
+                    onToggleSelect={() => handleToggleSelect(folder, 'folder')}
                     onClick={() => navigate(`/workspace/teaching-material/${folder.id || folder.folderId}`)}
+                    onMove={() => {
+                      setSelectedItem(folder);
+                      setIsMoveModalOpen(true);
+                    }}
+                    onRename={() => {
+                      setSelectedItem(folder);
+                      setIsRenameModalOpen(true);
+                    }}
                     onDelete={() => {
                       setDeletingItem({ id: folder.id, name: folder.name, count: (folder.subFolderCount || 0) + (folder.materialCount || 0), type: 'folder' });
                       setIsDeleteFolderOpen(true);
                     }}
+                    onShare={() => {
+                      setSelectedItem({ ...folder, type: 'folder' });
+                      setIsShareModalOpen(true);
+                    }}
+                    isBookmarked={folder.isBookmarked}
+                    onBookmark={() => handleBookmark(folder, 'folder')}
                   />
                 ))}
               </div>
@@ -410,9 +462,11 @@ const TeachingMaterialPage = () => {
                     size={formatSize(file.fileSize || file.size || file.sizeBytes)}
                     date={file.updatedAt ? dayjs(file.updatedAt).format('DD/MM/YYYY') : ''}
                     isPublic={file.isPublic}
-                    isStarred={file.isStarred}
+                    isBookmarked={file.isBookmarked}
                     type={file.fileType || 'file'}
                     layout={viewLayout}
+                    isSelected={selectedItems.some(i => i.id === file.id && i._type === 'file')}
+                    onToggleSelect={() => handleToggleSelect(file, 'file')}
                     onShare={() => {
                       setSelectedItem(file);
                       setIsShareModalOpen(true);
@@ -425,10 +479,19 @@ const TeachingMaterialPage = () => {
                       setSelectedItem(file);
                       setIsFileDetailOpen(true);
                     }}
+                    onMove={() => {
+                      setSelectedItem(file);
+                      setIsMoveModalOpen(true);
+                    }}
+                    onRename={() => {
+                      setSelectedItem(file);
+                      setIsRenameModalOpen(true);
+                    }}
                     onDelete={() => {
                       setDeletingItem({ id: file.id, name: file.fileName || file.name, count: 0, type: 'file' });
                       setIsDeleteFolderOpen(true);
                     }}
+                    onBookmark={() => handleBookmark(file, 'file')}
                     onDownload={async () => {
                       if (file.fileUrl) {
                         recordDownload(file.id);
@@ -485,6 +548,10 @@ const TeachingMaterialPage = () => {
         open={isDeleteFolderOpen}
         onClose={() => setIsDeleteFolderOpen(false)}
         item={deletingItem}
+        onSuccess={() => {
+          setSelectedItems([]);
+          setIsDeleteFolderOpen(false);
+        }}
       />
 
       <FileDetailModal
@@ -498,6 +565,27 @@ const TeachingMaterialPage = () => {
         }}
       />
 
+      <MoveMaterialModal
+        open={isMoveModalOpen}
+        onClose={() => {
+          setIsMoveModalOpen(false);
+          setSelectedItem(null);
+        }}
+        items={selectedItems.length > 0 && !selectedItem ? selectedItems : (selectedItem ? [{ ...selectedItem, _type: selectedItem.fileName ? 'file' : 'folder' }] : [])}
+        currentFolderId={folderId || null}
+        onSuccess={() => {
+          setSelectedItems([]);
+          setIsMoveModalOpen(false);
+          setSelectedItem(null);
+        }}
+      />
+
+      <RenameMaterialModal
+        open={isRenameModalOpen}
+        onClose={() => setIsRenameModalOpen(false)}
+        item={selectedItem}
+      />
+
       <FilterMaterialModal
         open={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
@@ -505,6 +593,64 @@ const TeachingMaterialPage = () => {
         onApply={(filters) => {
           setFilterMode(filters.filterMode);
           setFilterFileType(filters.filterFileType);
+        }}
+      />
+
+      <BulkActionBar
+        selectedCount={selectedItems.length}
+        onClearSelection={() => setSelectedItems([])}
+        onDelete={() => {
+          if (selectedItems.length === 1) {
+            setDeletingItem({
+              id: selectedItems[0].id || selectedItems[0].folderId,
+              name: selectedItems[0].fileName || selectedItems[0].folderName || selectedItems[0].name,
+              count: selectedItems[0]._type === 'folder' ? ((selectedItems[0].subFolderCount || 0) + (selectedItems[0].materialCount || 0)) : 0,
+              type: selectedItems[0]._type
+            });
+          } else {
+            setDeletingItem({
+              id: 'bulk',
+              name: `${selectedItems.length} mục đã chọn`,
+              count: 0,
+              type: 'bulk',
+              items: selectedItems
+            });
+          }
+          setIsDeleteFolderOpen(true);
+        }}
+        onDownload={() => {
+          const filesToDownload = selectedItems.filter(item => item._type === 'file' && item.fileUrl);
+          if (filesToDownload.length === 0) {
+            toast.error('Không có tệp nào để tải xuống');
+            return;
+          }
+
+          filesToDownload.forEach(async (file) => {
+            recordDownload(file.id);
+            try {
+              const response = await fetch(file.fileUrl);
+              if (!response.ok) throw new Error('Network response was not ok');
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = file.fileName || file.name || 'download';
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              window.URL.revokeObjectURL(url);
+            } catch (error) {
+              console.error('Download failed, falling back to new tab:', error);
+              window.open(file.fileUrl, '_blank');
+            }
+          });
+
+          toast.success(`Đang tải xuống ${filesToDownload.length} tệp`);
+          setSelectedItems([]);
+        }}
+        onMove={() => {
+          setSelectedItem(null);
+          setIsMoveModalOpen(true);
         }}
       />
     </div>

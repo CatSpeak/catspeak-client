@@ -225,8 +225,8 @@ const UploadMaterialModal = ({ open, onClose }) => {
         onClick={handleUpload}
         loading={isBusy}
         disabled={uploadFiles.filter(f => f.status === 'ready' || f.status === 'error').length === 0}
+        startIcon={<Upload className="w-4 h-4" />}
       >
-        <Upload className="w-4 h-4" />
         Upload
       </PillButton>
     </div>

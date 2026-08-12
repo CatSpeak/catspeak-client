@@ -2,19 +2,37 @@ import React from 'react';
 import Modal from '@/shared/components/ui/Modal';
 import { AlertTriangle, FolderMinus } from 'lucide-react';
 import { PillButton } from '@/shared/components/ui/buttons';
-import { useDeletePersonalMaterialMutation } from '@/store/api/materialApi';
+import { useDeletePersonalMaterialMutation, useDeleteMaterialsBulkMutation, useDeleteFolderMutation } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
 
-const DeleteFolderModal = ({ open, onClose, item }) => {
-  const [deleteMaterial, { isLoading }] = useDeletePersonalMaterialMutation();
+const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
+  const [deleteMaterial, { isLoading: isDeletingSingle }] = useDeletePersonalMaterialMutation();
+  const [deleteFolder, { isLoading: isDeletingFolder }] = useDeleteFolderMutation();
+  const [deleteMaterialsBulk, { isLoading: isDeletingBulk }] = useDeleteMaterialsBulkMutation();
+  const isLoading = isDeletingSingle || isDeletingBulk || isDeletingFolder;
 
   if (!item) return null;
 
   const handleDelete = async () => {
     try {
-      await deleteMaterial(item.id).unwrap();
-      toast.success(`Đã xóa ${item.type === 'folder' ? 'thư mục' : 'tệp'} thành công`);
-      onClose();
+      if (item.type === 'bulk' && item.items) {
+        const folderIds = item.items.filter(i => i._type === 'folder' || (i.folderId && !i.fileName)).map(i => i.id || i.folderId);
+        const materialIds = item.items.filter(i => i._type === 'file' || i.fileName).map(i => i.id);
+        
+        await deleteMaterialsBulk({ folderIds, materialIds }).unwrap();
+        toast.success(`Đã xóa ${item.items.length} mục thành công`);
+      } else {
+        const isFolder = item.type === 'folder' || item._type === 'folder' || (!item.fileName && !item.fileUrl);
+        
+        if (isFolder) {
+          await deleteFolder(item.id || item.folderId).unwrap();
+        } else {
+          await deleteMaterial(item.id).unwrap();
+        }
+        toast.success(`Đã xóa ${isFolder ? 'thư mục' : 'tệp'} thành công`);
+      }
+      if (onSuccess) onSuccess();
+      else onClose();
     } catch (err) {
       console.error(err);
       toast.error('Có lỗi xảy ra khi xóa');

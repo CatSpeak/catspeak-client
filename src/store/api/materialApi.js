@@ -46,7 +46,7 @@ export const materialApi = baseApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "PersonalMaterials", id }],
     }),
 
-    //  Delete a personal material or folder
+    //  Delete a personal material (file)
     deletePersonalMaterial: builder.mutation({
       query: (id) => ({
         url: `/personal-materials/${id}`,
@@ -55,7 +55,16 @@ export const materialApi = baseApi.injectEndpoints({
       invalidatesTags: ["PersonalMaterials"],
     }),
 
-    //  Update settings of an existing personal material or folder
+    // Delete a personal folder
+    deleteFolder: builder.mutation({
+      query: (id) => ({
+        url: `/personal-materials/folders/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    //  Update settings of an existing personal material (file)
     updateMaterialSettings: builder.mutation({
       query: ({ id, isPublic, allowDownload }) => ({
         url: `/personal-materials/${id}/settings`,
@@ -67,6 +76,98 @@ export const materialApi = baseApi.injectEndpoints({
         "PersonalMaterials",
       ],
     }),
+
+    // Update settings of a personal folder
+    updateFolderSettings: builder.mutation({
+      query: ({ id, isPublic }) => ({
+        url: `/personal-materials/folders/${id}/settings`,
+        method: "PUT",
+        body: { isPublic },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "PersonalMaterials", id },
+        "PersonalMaterials",
+      ],
+    }),
+
+    // Bookmark a personal folder
+    bookmarkFolder: builder.mutation({
+      query: (id) => ({
+        url: `/personal-materials/folders/${id}/bookmark`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    // Rename a folder
+    renameFolder: builder.mutation({
+      query: ({ id, name }) => ({
+        url: `/personal-materials/folders/${id}/rename`,
+        method: "PUT",
+        body: { name },
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    // Bookmark a personal material (file)
+    bookmarkMaterial: builder.mutation({
+      query: (id) => ({
+        url: `/personal-materials/${id}/bookmark`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    // Rename a personal material (file)
+    renameMaterial: builder.mutation({
+      query: ({ id, fileName }) => ({
+        url: `/personal-materials/${id}/rename`,
+        method: "PUT",
+        body: { fileName: fileName },
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    //  Move a personal material
+    moveMaterial: builder.mutation({
+      query: ({ id, targetFolderId }) => ({
+        url: `/personal-materials/${id}/move`,
+        method: "PUT",
+        body: { targetFolderId },
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    // Move a personal folder
+    moveFolder: builder.mutation({
+      query: ({ id, targetFolderId }) => ({
+        url: `/personal-materials/folders/${id}/move`,
+        method: "PUT",
+        body: { targetFolderId },
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    // Bulk move materials and folders
+    moveMaterialsBulk: builder.mutation({
+      query: ({ folderIds, materialIds, targetFolderId }) => ({
+        url: `/personal-materials/bulk/move`,
+        method: "POST",
+        body: { folderIds, materialIds, targetFolderId },
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    // Bulk delete materials and folders
+    deleteMaterialsBulk: builder.mutation({
+      query: ({ folderIds, materialIds }) => ({
+        url: `/personal-materials/bulk/delete`,
+        method: "POST",
+        body: { folderIds, materialIds },
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
 
     // PUBLIC PERSONAL MATERIALS
 
@@ -104,8 +205,18 @@ export const {
   useUploadMaterialMutation,
   useGetPersonalMaterialByIdQuery,
   useDeletePersonalMaterialMutation,
+  useDeleteFolderMutation,
   useUpdateMaterialSettingsMutation,
+  useUpdateFolderSettingsMutation,
+  useBookmarkMaterialMutation,
+  useBookmarkFolderMutation,
   useGetPublicMaterialByIdQuery,
   useRecordMaterialViewMutation,
   useRecordMaterialDownloadMutation,
+  useRenameMaterialMutation,
+  useRenameFolderMutation,
+  useMoveMaterialMutation,
+  useMoveFolderMutation,
+  useMoveMaterialsBulkMutation,
+  useDeleteMaterialsBulkMutation,
 } = materialApi

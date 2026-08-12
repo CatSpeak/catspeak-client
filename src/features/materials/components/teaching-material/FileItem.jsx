@@ -2,25 +2,59 @@ import React from 'react';
 import { MoreVertical, Star, Download, Share2, Edit2, FolderInput, StarOff, Settings, Trash2 } from 'lucide-react';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
+import Checkbox from '@/shared/components/ui/inputs/Checkbox';
 
-const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, onClick, onDelete, onDownload, layout = 'grid' }) => {
+const FileItem = ({
+  title,
+  size,
+  date,
+  isPublic,
+  isBookmarked,
+  onShare,
+  onDetails,
+  onClick,
+  onDelete,
+  onDownload,
+  onRename,
+  onMove,
+  onBookmark,
+  layout = 'grid',
+  isSelected,
+  onToggleSelect
+}) => {
   const isList = layout === 'list';
 
   return (
     <div
-      className={`border rounded-xl p-4 flex ${isList ? 'flex-row items-center w-full' : 'flex-col w-[264px]'} bg-[#F9F9F9] border-[#E3BEBA] cursor-pointer hover:shadow-faq-card hover:border-[#6E0009] hover:bg-[#FFDAD6] transition-all`}
+      className={`group relative border rounded-xl p-4 flex ${isList ? 'flex-row items-center w-full' : 'flex-col w-[264px]'} cursor-pointer transition-all ${isSelected
+        ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
+        : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
+        }`}
       onClick={onClick}
     >
       {isList ? (
         // List Layout 
         <>
-          <div className="w-12 h-12 rounded-lg bg-[#F3F3F3] mr-4 shrink-0 flex items-center justify-center">
+          <div className="relative w-12 h-12 rounded-lg bg-[#F3F3F3] mr-4 shrink-0 flex items-center justify-center">
+            <div
+              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSelect && onToggleSelect();
+              }}
+            >
+              <Checkbox
+                checked={isSelected}
+                readOnly
+                className="w-4 h-4 pointer-events-none"
+              />
+            </div>
           </div>
           <div className="flex-1 flex items-center justify-between min-w-0">
             <div className="flex flex-col truncate pr-4">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-[#1A1C1C] text-base truncate" title={title}>{title}</h3>
-                {isStarred && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />}
+                {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />}
               </div>
               <div className="flex items-center gap-2">
                 <p className="text-xs text-[#5B403E]">{size} • {date}</p>
@@ -42,13 +76,16 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
                   if (val === 'settings' && onDetails) onDetails();
                   if (val === 'delete' && onDelete) onDelete();
                   if (val === 'download' && onDownload) onDownload();
+                  if (val === 'rename' && onRename) onRename();
+                  if (val === 'move' && onMove) onMove();
+                  if ((val === 'bookmark' || val === 'unfavorite') && onBookmark) onBookmark();
                 }}
                 options={[
                   { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
                   { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
                   { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
                   { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
-                  { value: 'unfavorite', label: 'Bỏ yêu thích', icon: <StarOff className="w-4 h-4" /> },
+                  { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích', icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
                   { value: 'settings', label: 'Chi tiết và Cài đặt', icon: <Settings className="w-4 h-4" /> },
                   {
                     value: 'delete',
@@ -75,13 +112,29 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
       ) : (
         // Grid Layout
         <>
-          <div className="flex justify-between items-start mb-2">
-            <div className="pt-1">
-              {isStarred ? (
-                <Star className="w-5 h-5 text-[#FF9C4F] fill-[#FF9C4F]" />
-              ) : (
-                <div className="w-5 h-5"></div>
-              )}
+          <div className="flex justify-between items-start mb-2 relative">
+            <div
+              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSelect && onToggleSelect();
+              }}
+            >
+              <Checkbox
+                checked={isSelected}
+                readOnly
+                className="w-4 h-4 pointer-events-none"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <div className="shrink-0 pt-1">
+                {isBookmarked ? (
+                  <Star className="w-5 h-5 text-[#FF9C4F] fill-[#FF9C4F]" />
+                ) : (
+                  <div className="w-5 h-5"></div>
+                )}
+              </div>
             </div>
 
             <div onClick={(e) => e.stopPropagation()}>
@@ -94,13 +147,16 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
                   if (val === 'settings' && onDetails) onDetails();
                   if (val === 'delete' && onDelete) onDelete();
                   if (val === 'download' && onDownload) onDownload();
+                  if (val === 'rename' && onRename) onRename();
+                  if (val === 'move' && onMove) onMove();
+                  if ((val === 'bookmark' || val === 'unfavorite') && onBookmark) onBookmark();
                 }}
                 options={[
                   { value: 'download', label: 'Tải xuống', icon: <Download className="w-4 h-4" /> },
                   { value: 'share', label: 'Chia sẻ', icon: <Share2 className="w-4 h-4" /> },
                   { value: 'rename', label: 'Đổi tên', icon: <Edit2 className="w-4 h-4" /> },
                   { value: 'move', label: 'Di chuyển', icon: <FolderInput className="w-4 h-4" /> },
-                  { value: 'unfavorite', label: 'Bỏ yêu thích', icon: <StarOff className="w-4 h-4" /> },
+                  { value: isBookmarked ? 'unfavorite' : 'bookmark', label: isBookmarked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích', icon: isBookmarked ? <StarOff className="w-4 h-4" /> : <Star className="w-4 h-4" /> },
                   { value: 'settings', label: 'Chi tiết và Cài đặt', icon: <Settings className="w-4 h-4" /> },
                   {
                     value: 'delete',
