@@ -49,20 +49,28 @@ const RelatedNewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group flex flex-col bg-white border border-gray-200/80 rounded-2xl overflow-hidden cursor-pointer shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-full h-auto"
+      className="group flex flex-col bg-white border border-gray-200/80 rounded-2xl overflow-hidden cursor-pointer shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 w-full h-[330px]"
     >
-      {/* Media / Thumbnail area (natural auto height) */}
-      <div className="relative w-full overflow-hidden bg-gray-100 shrink-0">
+      {/* Media / Thumbnail area (16:9 fixed ratio + blurred background fill) */}
+      <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-[#e5e5e5]">
         {firstMediaUrl ? (
-          <img
-            src={firstMediaUrl}
-            alt={news.title}
-            className="w-full h-auto block object-cover rounded-t-2xl"
-            loading="lazy"
-          />
+          <>
+            {/* Blurred Background Image */}
+            <div
+              className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
+              style={{ backgroundImage: `url(${firstMediaUrl})` }}
+            />
+            {/* Main Image */}
+            <img
+              src={firstMediaUrl}
+              alt={news.title}
+              className="relative z-10 h-full w-full object-contain"
+              loading="lazy"
+            />
+          </>
         ) : (
           <div
-            className="w-full min-h-[160px] flex items-center justify-center p-4 text-center rounded-t-2xl"
+            className="w-full h-full flex items-center justify-center p-4 text-center"
             style={{ backgroundColor: fallbackColor }}
           >
             <span className="text-white/40 font-bold text-xl select-none leading-tight">
@@ -73,26 +81,28 @@ const RelatedNewsCard = ({ news }) => {
 
         {/* Category tag badge */}
         {news.category && (
-          <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
+          <div className="absolute top-3 left-3 z-20 bg-black/60 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
             {news.category}
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex flex-col p-4 gap-2 flex-1">
-        <h3 className="font-bold text-base text-gray-900 group-hover:text-cath-red-700 transition-colors line-clamp-2 leading-snug">
-          {news.title}
-        </h3>
+      <div className="flex flex-col p-4 gap-2 flex-1 justify-between min-h-0">
+        <div className="flex flex-col gap-2 min-h-0 overflow-hidden">
+          <h3 className="font-bold text-base text-gray-900 group-hover:text-cath-red-700 transition-colors line-clamp-2 leading-snug">
+            {news.title}
+          </h3>
 
-        {news.excerpt && (
-          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
-            {news.excerpt}
-          </p>
-        )}
+          {news.excerpt && (
+            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+              {news.excerpt}
+            </p>
+          )}
+        </div>
 
         {/* Footer Meta */}
-        <div className="mt-2 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 gap-2">
+        <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 gap-2 mt-auto shrink-0">
           {/* Author */}
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <Avatar
