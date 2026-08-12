@@ -19,9 +19,13 @@ import ClassDetailTabs from "../components/ClassDetailTabs"
 import ClassOverviewTab from "../components/overview/ClassOverviewTab"
 import CreatePostTypeModal from "../components/CreatePostTypeModal"
 
+import { useAuth } from "@/features/auth"
+import { useRoleOverride } from "../components/RoleSwitcher"
+
 const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
+const ClassInviteFriendsTab = lazy(() => import("../components/members/ClassInviteFriendsTab"))
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
@@ -43,13 +47,16 @@ const ClassDetailPage = () => {
   const cd = c.classDetail || {}
   const ui = c.workspaceUi || {}
 
+  const { user } = useAuth()
+  const { isTeacher } = useRoleOverride()
+
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
   const quizId = searchParams.get("quizId")
   const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
   const urlTab = searchParams.get("tab")
-  const VALID_TABS = ["overview", "members", "lecture-hall", "feed", "grading"]
+  const VALID_TABS = ["overview", "members", "lecture-hall", "feed", "grading", "invite-friends"]
   const initialTab = (urlTab && VALID_TABS.includes(urlTab)) ? urlTab : "overview"
   const activeTab = hasGradingDeepLink ? "grading" : initialTab
 
@@ -134,11 +141,23 @@ const ClassDetailPage = () => {
     }
   }
 
+  const isClassTeacher = Boolean(
+    isTeacher
+    || user?.isTeacher
+    || (user?.accountId && [
+      classData?.teacherId,
+      classData?.instructorId,
+      classData?.teacher?.id,
+      classData?.teacher?.accountId,
+    ].some((tid) => tid != null && String(tid) === String(user.accountId)))
+  )
+
   const tabs = [
     { value: "overview", label: cd.overview || "Overview" },
     { value: "members", label: cd.members || "Members" },
     { value: "lecture-hall", label: cd.lectureHall || "Lecture Hall" },
     { value: "grading", label: cd.grading || "Grading" },
+    ...(isClassTeacher ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }] : []),
   ]
 
   const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
@@ -298,6 +317,13 @@ const ClassDetailPage = () => {
             id={id}
             isStudent={false}
             language={language}
+            cd={cd}
+          />
+        )}
+
+        {activeTab === "invite-friends" && isClassTeacher && (
+          <ClassInviteFriendsTab
+            classData={classData}
             cd={cd}
           />
         )}

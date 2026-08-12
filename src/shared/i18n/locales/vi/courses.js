@@ -448,6 +448,16 @@ export default {
     toastRouting: "Đang định tuyến đến phòng học...",
     createPost: "Tạo hoạt động",
     cancelClass: "Hủy lớp học",
+    inviteFriends: "Mời bạn bè",
+    inviteToClass: "Mời tham gia lớp",
+    invited: "Đã gửi lời mời",
+    noFriendsToInvite: "Không có bạn bè nào để mời",
+    noFriendsToInviteDesc: "Tất cả bạn bè của bạn đã tham gia lớp học này hoặc bạn chưa có bạn bè trong danh sách.",
+    noFriendsFound: "Không tìm thấy bạn bè phù hợp",
+    noFriendsFoundDesc: "Vui lòng thử tìm kiếm với từ khóa khác.",
+    toastInviteSuccess: "Đã gửi lời mời tham gia lớp học cho {{name}}!",
+    toastInviteFailed: "Không thể gửi lời mời. Vui lòng thử lại!",
+    searchFriends: "Tìm kiếm bạn bè...",
     leadInstructor: "GIẢNG VIÊN CHÍNH",
     leadInstructorLabel: "Giảng viên chính",
     message: "Nhắn tin",
@@ -751,7 +761,7 @@ export default {
     enrolled: "Đã đăng ký",
     tuitionFee: "Học phí",
     enroll: "Đăng ký",
-    remainingSlots: "Chỗ còn lại",
+    enrolledSlots: "Chỗ đã đăng ký",
     sessionCount: "Số buổi học",
     sessionsText: "Buổi",
     enrollmentPeriod: "Thời gian đăng ký",
@@ -1619,6 +1629,8 @@ export default {
       writeCommentPlaceholder: "Viết bình luận...",
       writeReplyPlaceholder: "Viết phản hồi...",
       send: "Gửi",
+      cancel: "Hủy",
+      sendComment: "Gửi bình luận",
       locked: "Bài viết đã khóa bình luận",
       toastCommentSuccess: "Đã gửi bình luận",
       toastReplySuccess: "Đã phản hồi bình luận",
@@ -1865,6 +1877,10 @@ export default {
       quiz_regraded: {
         title: "Lớp {className}",
         body: "{quizName} của bạn đã được chấm lại."
+      },
+      class_invite: {
+        title: "Lời mời vào lớp học",
+        body: "{teacherName} đã mời bạn tham gia lớp học \"{className}\""
       }
     }
   },
@@ -1873,8 +1889,7 @@ export default {
     notFoundTitle: "Không tìm thấy thông tin lớp học",
     notFoundDesc: "Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm.",
     exploreOtherBtn: "Khám Phá Các Lớp Học Khác",
-    back: "Quay lại",
-    overviewTitle: "Giới Thiệu Về Lớp Học",
+    overviewTitle: "Giới Thiệu Chi Tiết Về Lớp Học",
     defaultDescription: "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc.",
     tuitionFeeFull: "Học phí trọn gói",
     tbaFee: "Chưa xác định",

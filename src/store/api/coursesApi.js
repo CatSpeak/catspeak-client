@@ -1217,6 +1217,22 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // 14. Invite to Class
+    inviteToClass: builder.mutation({
+      query: ({ classId, emails, email }) => {
+        const resolvedEmails = Array.isArray(emails)
+          ? emails
+          : (email ? [email] : (emails ? [emails] : []))
+        return {
+          url: `/teacher/classes/${encodePathSegment(classId)}/invite`,
+          method: "POST",
+          body: {
+            emails: resolvedEmails,
+          },
+        }
+      },
+    }),
+
     // 16. Get Teacher Assignments
     getTeacherAssignments: builder.query({
       query: ({ classId, status, search, onlyUnassigned }) => ({
@@ -2697,6 +2713,7 @@ export const {
   useGetCommissionQuery,
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
+  useInviteToClassMutation,
   useGetCurriculumByClassQuery,
   useGetStudentCurriculumByClassQuery,
   useCreateCurriculumSectionMutation,
