@@ -6,10 +6,10 @@ export default {
     requestRefundSubtitle: "Gửi yêu cầu hoàn tiền cho đơn hàng #{{orderCode}}",
     
     // Statuses
-    statusPending: "Chờ Admin xử lý",
-    statusApproved: "Đã duyệt & Thành công",
-    statusRejected: "Admin từ chối",
-    statusFailed: "Lỗi chuyển khoản",
+    statusPending: "Chờ xử lý",
+    statusApproved: "Đã duyệt",
+    statusRejected: "Từ chối",
+    statusFailed: "Thất bại",
     
     // Modal steps
     checkingEligibility: "Đang kiểm tra điều kiện hoàn tiền...",

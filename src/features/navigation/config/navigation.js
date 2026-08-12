@@ -18,7 +18,6 @@ import {
   Users,
   BarChart,
   CalendarDays,
-  Undo2,
 } from "lucide-react"
 
 export const navSections = [
@@ -139,7 +138,6 @@ export const settingNavLinks = [
   { key: "pricing", path: "/pricing", icon: CreditCard },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "billing", path: "/billing", icon: CreditCard },
-  { key: "refunds", path: "/refunds", icon: Undo2 },
   { key: "systemConfig", path: "/setting/system", icon: Settings },
 ]
 

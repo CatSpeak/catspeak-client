@@ -831,11 +831,7 @@ const routesConfig = [
               },
               {
                 path: "refunds",
-                element: (
-                  <LazyRoute>
-                    <RefundHistoryPage />
-                  </LazyRoute>
-                ),
+                element: <Navigate to="/billing?tab=refunds" replace />,
               },
               { path: "*", element: <PageNotFound /> },
             ],

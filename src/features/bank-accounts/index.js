@@ -25,3 +25,5 @@ export { default as BankAccountCard } from "./components/BankAccountCard"
 export { default as AddBankAccountModal } from "./components/AddBankAccountModal"
 export { default as BankCardBackground } from "./components/BankCardBackground"
 export { default as BankListSkeleton } from "./components/BankListSkeleton"
+export { default as BankAccountCardSkeleton } from "./components/BankAccountCardSkeleton"
+

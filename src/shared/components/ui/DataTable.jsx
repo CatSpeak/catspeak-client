@@ -46,7 +46,7 @@ const DataTable = ({
   return (
     <>
       {/* Desktop table — hidden on mobile */}
-      <FluentCard padding="!p-0" className={`overflow-hidden flex-1 hidden md:block !border-gray-200 !rounded-2xl ${className}`}>
+      <FluentCard padding="!p-0" className={`overflow-hidden flex-1 hidden md:block shadow-none !border-border !rounded-xl ${className}`}>
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-red-50/50 text-cath-red-800 border-b border-red-100">
@@ -69,7 +69,7 @@ const DataTable = ({
             {data.map((row, index) => (
               <tr
                 key={rowKey ? rowKey(row, index) : index}
-                className={`border-b border-gray-100 last:border-0 transition-colors ${
+                className={`border-b border-border last:border-0 transition-colors ${
                   striped
                     ? "odd:bg-white even:bg-gray-50/60 hover:bg-gray-100/70"
                     : "hover:bg-gray-50/80"

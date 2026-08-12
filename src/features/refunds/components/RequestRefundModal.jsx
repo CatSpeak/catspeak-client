@@ -5,19 +5,18 @@ import TextInput from "@/shared/components/ui/inputs/TextInput"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetBanksQuery } from "@/features/bank-accounts/api/instructorBankAccountsApi"
+import RefundIneligibleModal from "./RefundIneligibleModal"
+import RefundEligibleModal from "./RefundEligibleModal"
+import RefundSuccessModal from "./RefundSuccessModal"
 import {
   useCheckRefundEligibilityQuery,
   useRequestRefundMutation,
 } from "../api/refundsApi"
 import {
-  CheckCircle2,
   AlertCircle,
   Loader2,
   Building2,
-  DollarSign,
   ArrowLeft,
-  ChevronRight,
-  ShieldCheck,
 } from "lucide-react"
 
 export default function RequestRefundModal({
@@ -101,9 +100,7 @@ export default function RequestRefundModal({
       return
     }
     if (!accountHolderName.trim()) {
-      setFormError(
-        refundT.errorNoHolder || "Vui lòng nhập tên chủ tài khoản.",
-      )
+      setFormError(refundT.errorNoHolder || "Vui lòng nhập tên chủ tài khoản.")
       return
     }
     if (!reason.trim()) {
@@ -134,31 +131,70 @@ export default function RequestRefundModal({
 
   const isEligible = eligibility?.isEligible === true
 
+  // Dedicated Ineligible Status Modal
+  if (
+    isOpen &&
+    step === "eligibility" &&
+    !isCheckingEligibility &&
+    !isEligibilityError &&
+    !isEligible
+  ) {
+    return (
+      <RefundIneligibleModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        reason={eligibility?.reason}
+      />
+    )
+  }
+
+  // Dedicated Eligible Summary Modal
+  if (
+    isOpen &&
+    step === "eligibility" &&
+    !isCheckingEligibility &&
+    !isEligibilityError &&
+    isEligible
+  ) {
+    return (
+      <RefundEligibleModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        onContinue={() => setStep("form")}
+        eligibility={eligibility}
+        orderCode={orderCode}
+      />
+    )
+  }
+
+  // Dedicated Success Modal
+  if (isOpen && step === "success") {
+    return <RefundSuccessModal isOpen={isOpen} onClose={handleClose} />
+  }
+
   return (
     <Modal
       open={isOpen}
       onClose={handleClose}
       title={
-        step === "success"
-          ? ""
-          : (refundT.requestRefundTitle || "Yêu cầu hoàn tiền") +
-            (orderCode ? ` #${orderCode}` : "")
+        (refundT.requestRefundTitle || "Yêu cầu hoàn tiền") +
+        (orderCode ? ` #${orderCode}` : "")
       }
       showCloseButton={!isSubmitting}
       className="max-w-lg"
     >
-      {/* ── STEP 1: Eligibility Check / Loading ── */}
+      {/* ── STEP 1: Loading & Query Error check ── */}
       {step === "eligibility" && (
         <div className="pb-4 space-y-5">
           {isCheckingEligibility ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex flex-col items-center justify-center py-8 text-center">
               <Loader2 className="w-10 h-10 text-cath-red-700 animate-spin mb-3" />
               <p className="text-sm font-medium text-gray-600">
                 {refundT.checkingEligibility ||
                   "Đang kiểm tra điều kiện hoàn tiền..."}
               </p>
             </div>
-          ) : isEligibilityError ? (
+          ) : (
             <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-3">
               <AlertCircle className="w-10 h-10 text-rose-600 mx-auto" />
               <p className="text-sm text-rose-700 font-medium">
@@ -167,80 +203,6 @@ export default function RequestRefundModal({
               <PillButton variant="secondary" onClick={refetchEligibility}>
                 Thử lại
               </PillButton>
-            </div>
-          ) : !isEligible ? (
-            <div className="space-y-4">
-              <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-2">
-                <div className="flex items-center gap-2 text-rose-700 font-bold text-base">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <span>
-                    {refundT.ineligibleTitle || "Không đủ điều kiện hoàn tiền"}
-                  </span>
-                </div>
-                <p className="text-sm text-rose-600">
-                  {eligibility?.reason ||
-                    "Giao dịch đã quá hạn áp dụng chính sách hoàn tiền."}
-                </p>
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <PillButton variant="secondary" onClick={handleClose}>
-                  {refundT.btnCancel || "Đóng"}
-                </PillButton>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Eligible Info Banner */}
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold text-base">
-                  <ShieldCheck className="w-5 h-5 flex-shrink-0 text-emerald-600" />
-                  <span>
-                    {refundT.eligibleTitle || "Đủ điều kiện hoàn tiền"}
-                  </span>
-                </div>
-                <p className="text-xs text-emerald-700">
-                  {eligibility?.reason ||
-                    "Giao dịch đủ điều kiện hoàn tiền (Trong vòng 7 ngày)"}
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-emerald-200/60 text-xs">
-                  <div>
-                    <span className="text-emerald-700 block">
-                      {refundT.maxRefundAmount || "Số tiền hoàn tối đa"}
-                    </span>
-                    <span className="font-bold text-emerald-900 text-sm">
-                      {formatAmount(eligibility?.maxRefundAmount)}
-                    </span>
-                  </div>
-                  {eligibility?.paymentType && (
-                    <div>
-                      <span className="text-emerald-700 block">
-                        {refundT.paymentType || "Loại giao dịch"}
-                      </span>
-                      <span className="font-semibold text-emerald-900">
-                        {eligibility.paymentType}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-2 flex gap-3">
-                <PillButton
-                  variant="secondary"
-                  className="flex-1"
-                  onClick={handleClose}
-                >
-                  {refundT.btnCancel || "Hủy"}
-                </PillButton>
-                <PillButton
-                  className="flex-1"
-                  onClick={() => setStep("form")}
-                >
-                  {refundT.btnSubmitRequest || "Tiếp tục nhập thông tin"}
-                </PillButton>
-              </div>
             </div>
           )}
         </div>
@@ -400,7 +362,9 @@ export default function RequestRefundModal({
                 "Nhập tên chủ tài khoản (viết hoa)..."
               }
               value={accountHolderName}
-              onChange={(e) => setAccountHolderName(e.target.value.toUpperCase())}
+              onChange={(e) =>
+                setAccountHolderName(e.target.value.toUpperCase())
+              }
               disabled={isSubmitting}
             />
           </div>
@@ -441,34 +405,11 @@ export default function RequestRefundModal({
             >
               {refundT.btnCancel || "Hủy"}
             </PillButton>
-            <PillButton
-              type="submit"
-              className="flex-1"
-              loading={isSubmitting}
-            >
+            <PillButton type="submit" className="flex-1" loading={isSubmitting}>
               {refundT.btnSubmitRequest || "Gửi yêu cầu"}
             </PillButton>
           </div>
         </form>
-      )}
-
-      {/* ── STEP 3: Success Screen ── */}
-      {step === "success" && (
-        <div className="flex flex-col items-center justify-center py-6 text-center">
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 animate-in zoom-in-75">
-            <CheckCircle2 size={36} />
-          </div>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">
-            {refundT.successTitle || "Gửi yêu cầu hoàn tiền thành công!"}
-          </h3>
-          <p className="text-sm text-gray-500 mb-6 max-w-sm">
-            {refundT.successSubtitle ||
-              "Vui lòng chờ Admin phê duyệt. Bạn có thể theo dõi tiến độ trong Lịch sử hoàn tiền."}
-          </p>
-          <PillButton onClick={handleClose} className="w-full max-w-xs">
-            {refundT.btnDone || "Hoàn tất"}
-          </PillButton>
-        </div>
       )}
     </Modal>
   )

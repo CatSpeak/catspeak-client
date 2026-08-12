@@ -6,10 +6,10 @@ export default {
     requestRefundSubtitle: "为订单 #{{orderCode}} 提交退款申请",
     
     // Statuses
-    statusPending: "等待管理员审核",
-    statusApproved: "已批准并转账成功",
-    statusRejected: "管理员已拒绝",
-    statusFailed: "银行转账失败",
+    statusPending: "等待审核",
+    statusApproved: "已批准",
+    statusRejected: "已拒绝",
+    statusFailed: "失败",
     
     // Modal steps
     checkingEligibility: "正在检查退款资格...",

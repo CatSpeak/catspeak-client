@@ -6,10 +6,10 @@ export default {
     requestRefundSubtitle: "Submit a refund request for order #{{orderCode}}",
     
     // Statuses
-    statusPending: "Pending Admin Approval",
-    statusApproved: "Approved & Transferred",
-    statusRejected: "Rejected by Admin",
-    statusFailed: "Transfer Failed",
+    statusPending: "Pending",
+    statusApproved: "Approved",
+    statusRejected: "Rejected",
+    statusFailed: "Failed",
     
     // Modal steps
     checkingEligibility: "Checking refund eligibility...",

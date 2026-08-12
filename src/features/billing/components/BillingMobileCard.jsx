@@ -1,6 +1,10 @@
 import React from "react"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import { RotateCcw, AlertCircle, Loader2, Undo2 } from "lucide-react"
+import Popover from "@/shared/components/ui/Popover"
+import MenuItem from "@/shared/components/ui/MenuItem"
+import MenuList from "@/shared/components/ui/MenuList"
+import { IconButton } from "@/shared/components/ui/buttons"
+import { RotateCcw, AlertCircle, Loader2, Undo2, MoreVertical } from "lucide-react"
 
 const BillingMobileCard = ({
   invoice,
@@ -19,7 +23,7 @@ const BillingMobileCard = ({
   const isRepayingThis = repayingId === invoice.paymentId
 
   return (
-    <FluentCard padding="!p-4" className="!bg-gray-50/30 hover:!bg-gray-50 transition-colors shadow-none !border-gray-100">
+    <FluentCard padding="!p-4" className="!bg-gray-50/30 hover:!bg-gray-50 transition-colors shadow-none !border-border">
       {/* Top row: order code + status */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-semibold text-gray-800">
@@ -51,44 +55,59 @@ const BillingMobileCard = ({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2.5 pt-3 mt-1 border-t border-gray-100">
-        {isPending && (
-          <button
-            type="button"
-            onClick={() => onRepay && onRepay(invoice)}
-            disabled={isRepayingThis}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-cath-red-700 hover:bg-cath-red-800 transition-colors disabled:opacity-50 shadow-sm active:scale-[0.98]"
-          >
-            {isRepayingThis ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <RotateCcw className="w-4 h-4" />
-            )}
-            <span>{actionsText.repay || "Thanh toán lại"}</span>
-          </button>
-        )}
+      <div className="flex items-center justify-end pt-3 mt-1 border-t border-border">
+        <Popover
+          placement="bottom-right"
+          trigger={
+            <IconButton size="xs" variant="ghost" title="Tùy chọn">
+              <MoreVertical />
+            </IconButton>
+          }
+          content={(close) => (
+            <MenuList className="!border-border shadow-lg min-w-[150px]">
+              {isPending && (
+                <MenuItem
+                  label={actionsText.repay || "Thanh toán lại"}
+                  icon={
+                    isRepayingThis ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-cath-red-700" />
+                    ) : (
+                      <RotateCcw className="w-4 h-4 text-cath-red-700" />
+                    )
+                  }
+                  hoverBg="hover:bg-red-50"
+                  className="font-semibold text-cath-red-700"
+                  onClick={() => {
+                    close()
+                    onRepay && onRepay(invoice)
+                  }}
+                />
+              )}
 
-        {isSuccess && (
-          <button
-            type="button"
-            onClick={() => onRefund && onRefund(invoice)}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors border border-amber-200 shadow-sm active:scale-[0.98]"
-            title={actionsText.refund || "Hoàn tiền"}
-          >
-            <Undo2 className="w-4 h-4 text-amber-700" />
-            <span>{actionsText.refund || "Hoàn tiền"}</span>
-          </button>
-        )}
+              {isSuccess && (
+                <MenuItem
+                  label={actionsText.refund || "Hoàn tiền"}
+                  icon={<Undo2 className="w-4 h-4 text-amber-700" />}
+                  hoverBg="hover:bg-amber-50"
+                  className="font-medium text-amber-900"
+                  onClick={() => {
+                    close()
+                    onRefund && onRefund(invoice)
+                  }}
+                />
+              )}
 
-        <button
-          type="button"
-          onClick={() => onReport && onReport(invoice)}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 hover:text-cath-red-700 bg-gray-50 hover:bg-red-50/60 transition-colors border border-gray-200 shadow-sm active:scale-[0.98]"
-          title={actionsText.report || "Báo lỗi"}
-        >
-          <AlertCircle className="w-4 h-4 text-gray-500" />
-          <span>{actionsText.report || "Báo lỗi"}</span>
-        </button>
+              <MenuItem
+                label={actionsText.report || "Báo lỗi"}
+                icon={<AlertCircle className="w-4 h-4 text-gray-500" />}
+                onClick={() => {
+                  close()
+                  onReport && onReport(invoice)
+                }}
+              />
+            </MenuList>
+          )}
+        />
       </div>
     </FluentCard>
   )
