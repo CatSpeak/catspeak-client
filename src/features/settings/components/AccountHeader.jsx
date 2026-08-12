@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Camera, Users, Check } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
@@ -6,15 +6,12 @@ import Modal from "@/shared/components/ui/Modal";
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
-  useUpdateAvatarMutation,
   useUpdateMeetingAvatarMutation,
   useGetCurrentBackgroundQuery,
-  useLazyGetCurrentBackgroundQuery,
-  useUploadCustomBackgroundMutation,
-  useSetActiveBackgroundMutation,
 } from "@/store/api/userApi";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils";
+import { useProfileMediaUpload } from "@/shared/hooks/useProfileMediaUpload";
 import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
 
 const AccountHeader = ({ user, formData, t }) => {
@@ -28,10 +25,19 @@ const AccountHeader = ({ user, formData, t }) => {
   const [isMeetingAvatarModalOpen, setIsMeetingAvatarModalOpen] =
     useState(false);
   const [meetingAvatarUrlInput, setMeetingAvatarUrlInput] = useState("");
-  const [coverImageUrl, setCoverImageUrl] = useState(null);
 
-  const [updateAvatar, { isLoading: isUpdatingAvatar }] =
-    useUpdateAvatarMutation();
+  const {
+    coverImageUrl,
+    fileInputRef,
+    coverInputRef,
+    isUpdatingAvatar,
+    isCoverUpdating,
+    handleAvatarChange,
+    handleCoverChange,
+    triggerAvatarUpload,
+    triggerCoverUpload,
+  } = useProfileMediaUpload({ t });
+
   const [updateMeetingAvatar, { isLoading: isUpdatingMeetingAvatar }] =
     useUpdateMeetingAvatarMutation();
 
@@ -49,23 +55,6 @@ const AccountHeader = ({ user, formData, t }) => {
       ? currentBackgroundResponse
       : null);
 
-  const [getCurrentBackground] = useLazyGetCurrentBackgroundQuery();
-  const [uploadCustomBackground, { isLoading: isUploadingCover }] =
-    useUploadCustomBackgroundMutation();
-  const [setActiveBackground, { isLoading: isSettingActiveBackground }] =
-    useSetActiveBackgroundMutation();
-
-  const isCoverUpdating = isUploadingCover || isSettingActiveBackground;
-
-  // Clean up object URL when coverImageUrl changes or component unmounts
-  useEffect(() => {
-    return () => {
-      if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(coverImageUrl);
-      }
-    };
-  }, [coverImageUrl]);
-
   // Optional: khi user đang trong call, đồng bộ avatar mới xuống LiveKit metadata ngay lập tức
   let localParticipant = null;
   try {
@@ -74,118 +63,6 @@ const AccountHeader = ({ user, formData, t }) => {
   } catch {
     localParticipant = null;
   }
-
-  const fileInputRef = useRef(null);
-  const coverInputRef = useRef(null);
-
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const avatarData = new FormData();
-    avatarData.append("file", file);
-
-    try {
-      toast.loading(
-        t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật...",
-        { id: "avatar-update" },
-      );
-      await updateAvatar(avatarData).unwrap();
-      toast.success(
-        t.profile?.personalInfo?.updateAvatarSuccess ||
-          "Cập nhật ảnh đại diện thành công",
-        { id: "avatar-update" },
-      );
-    } catch (error) {
-      toast.error(
-        t.profile?.personalInfo?.updateAvatarError ||
-          "Không thể cập nhật ảnh đại diện",
-        { id: "avatar-update" },
-      );
-      console.error(error);
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const handleCoverChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // File validation: check image type
-    if (!file.type.startsWith("image/")) {
-      toast.error(
-        t.profile?.personalInfo?.invalidImageFormat ||
-          "Vui lòng chọn tệp hình ảnh hợp lệ",
-      );
-      if (coverInputRef.current) coverInputRef.current.value = "";
-      return;
-    }
-
-    // File validation: check file size (max 5MB)
-    const maxSizeBytes = 5 * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      toast.error(
-        t.profile?.personalInfo?.coverSizeLimit ||
-          "Kích thước ảnh bìa không được vượt quá 5MB",
-      );
-      if (coverInputRef.current) coverInputRef.current.value = "";
-      return;
-    }
-
-    // Optimistic UI preview
-    if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(coverImageUrl);
-    }
-    const objectUrl = URL.createObjectURL(file);
-    setCoverImageUrl(objectUrl);
-
-    const bgFormData = new FormData();
-    bgFormData.append("file", file);
-
-    try {
-      toast.loading(
-        t.profile?.personalInfo?.updatingCover || "Đang cập nhật ảnh bìa...",
-        { id: "cover-update" },
-      );
-
-      const uploadRes = await uploadCustomBackground(bgFormData).unwrap();
-      let uploadedUrl =
-        uploadRes?.data?.customUploadedBackgroundUrl ||
-        uploadRes?.data?.backgroundUrl ||
-        (typeof uploadRes?.data === "string" ? uploadRes.data : null) ||
-        uploadRes?.customUploadedBackgroundUrl ||
-        (typeof uploadRes === "string" ? uploadRes : null);
-
-      if (!uploadedUrl) {
-        const currentRes = await getCurrentBackground().unwrap();
-        uploadedUrl =
-          currentRes?.data?.customUploadedBackgroundUrl ||
-          currentRes?.customUploadedBackgroundUrl;
-      }
-
-      if (uploadedUrl && typeof uploadedUrl === "string") {
-        await setActiveBackground({ backgroundUrl: uploadedUrl }).unwrap();
-      }
-
-      toast.success(
-        t.profile?.personalInfo?.updateCoverSuccess ||
-          "Cập nhật ảnh bìa thành công",
-        { id: "cover-update" },
-      );
-    } catch {
-      // Rollback preview on error
-      setCoverImageUrl(null);
-      URL.revokeObjectURL(objectUrl);
-      toast.error(
-        t.profile?.personalInfo?.updateCoverError ||
-          "Không thể cập nhật ảnh bìa",
-        { id: "cover-update" },
-      );
-    } finally {
-      if (coverInputRef.current) coverInputRef.current.value = "";
-    }
-  };
 
   const handleOpenMeetingAvatarModal = () => {
     setMeetingAvatarUrlInput(displayMeetingAvatarUrl || "");
@@ -260,11 +137,7 @@ const AccountHeader = ({ user, formData, t }) => {
 
           {/* Hover Overlay */}
           <div
-            onClick={() => {
-              if (coverInputRef.current && !isCoverUpdating) {
-                coverInputRef.current.click();
-              }
-            }}
+            onClick={triggerCoverUpload}
             className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer z-10"
           >
             {isCoverUpdating ? (
@@ -339,11 +212,7 @@ const AccountHeader = ({ user, formData, t }) => {
       <div className="absolute -bottom-12 left-8 sm:left-12 z-20 group w-fit bg-white rounded-full p-1 shadow-sm">
         <div
           className="relative rounded-full overflow-hidden cursor-pointer"
-          onClick={() => {
-            if (fileInputRef.current && !isUpdatingAvatar) {
-              fileInputRef.current.click();
-            }
-          }}
+          onClick={triggerAvatarUpload}
         >
           <Avatar
             size={120}

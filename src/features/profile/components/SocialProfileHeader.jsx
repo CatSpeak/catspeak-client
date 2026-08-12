@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
@@ -16,13 +16,8 @@ import {
   useFollowUserMutation,
   useUnfollowUserMutation,
 } from "../../../store/api/social/friendshipApi";
-import {
-  useUpdateAvatarMutation,
-  useGetCurrentBackgroundQuery,
-  useLazyGetCurrentBackgroundQuery,
-  useUploadCustomBackgroundMutation,
-  useSetActiveBackgroundMutation,
-} from "@/store/api/userApi";
+import { useGetCurrentBackgroundQuery } from "@/store/api/userApi";
+import { useProfileMediaUpload } from "@/shared/hooks/useProfileMediaUpload";
 import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
 
 const SocialProfileHeader = ({
@@ -49,30 +44,20 @@ const SocialProfileHeader = ({
   const location =
     formData?.location || user?.location || formData?.address || user?.address;
 
-  const [coverImageUrl, setCoverImageUrl] = useState(null);
-  const fileInputRef = useRef(null);
-  const coverInputRef = useRef(null);
+  // Profile media upload hook (avatar & cover)
+  const {
+    coverImageUrl,
+    fileInputRef,
+    coverInputRef,
+    isUpdatingAvatar,
+    isCoverUpdating,
+    handleAvatarChange,
+    handleCoverChange,
+    triggerAvatarUpload,
+    triggerCoverUpload,
+  } = useProfileMediaUpload({ t });
 
-  const [updateAvatar, { isLoading: isUpdatingAvatar }] =
-    useUpdateAvatarMutation();
-  const [getCurrentBackground] = useLazyGetCurrentBackgroundQuery();
-  const [uploadCustomBackground, { isLoading: isUploadingCover }] =
-    useUploadCustomBackgroundMutation();
-  const [setActiveBackground, { isLoading: isSettingActiveBackground }] =
-    useSetActiveBackgroundMutation();
-
-  const isCoverUpdating = isUploadingCover || isSettingActiveBackground;
-
-  // Clean up object URL when coverImageUrl changes or component unmounts
-  useEffect(() => {
-    return () => {
-      if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(coverImageUrl);
-      }
-    };
-  }, [coverImageUrl]);
-
-  // API Hooks
+  // API Hooks for social status
   const { data: statusResponse } = useGetConnectionStatusQuery(
     targetAccountId,
     {
@@ -114,115 +99,6 @@ const SocialProfileHeader = ({
       formData?.backgroundUrl ||
       user?.backgroundUrl ||
       null;
-
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const avatarData = new FormData();
-    avatarData.append("file", file);
-
-    try {
-      toast.loading(
-        t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật...",
-        { id: "avatar-update" },
-      );
-      await updateAvatar(avatarData).unwrap();
-      toast.success(
-        t.profile?.personalInfo?.updateAvatarSuccess ||
-          "Cập nhật ảnh đại diện thành công",
-        { id: "avatar-update" },
-      );
-    } catch (error) {
-      toast.error(
-        t.profile?.personalInfo?.updateAvatarError ||
-          "Không thể cập nhật ảnh đại diện",
-        { id: "avatar-update" },
-      );
-      console.error(error);
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  };
-
-  const handleCoverChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // File validation: check image type
-    if (!file.type.startsWith("image/")) {
-      toast.error(
-        t.profile?.personalInfo?.invalidImageFormat ||
-          "Vui lòng chọn tệp hình ảnh hợp lệ",
-      );
-      if (coverInputRef.current) coverInputRef.current.value = "";
-      return;
-    }
-
-    // File validation: check file size (max 5MB)
-    const maxSizeBytes = 5 * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      toast.error(
-        t.profile?.personalInfo?.coverSizeLimit ||
-          "Kích thước ảnh bìa không được vượt quá 5MB",
-      );
-      if (coverInputRef.current) coverInputRef.current.value = "";
-      return;
-    }
-
-    // Optimistic UI preview
-    if (coverImageUrl && coverImageUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(coverImageUrl);
-    }
-    const objectUrl = URL.createObjectURL(file);
-    setCoverImageUrl(objectUrl);
-
-    const bgFormData = new FormData();
-    bgFormData.append("file", file);
-
-    try {
-      toast.loading(
-        t.profile?.personalInfo?.updatingCover || "Đang cập nhật ảnh bìa...",
-        { id: "cover-update" },
-      );
-
-      const uploadRes = await uploadCustomBackground(bgFormData).unwrap();
-      let uploadedUrl =
-        uploadRes?.data?.customUploadedBackgroundUrl ||
-        uploadRes?.data?.backgroundUrl ||
-        (typeof uploadRes?.data === "string" ? uploadRes.data : null) ||
-        uploadRes?.customUploadedBackgroundUrl ||
-        (typeof uploadRes === "string" ? uploadRes : null);
-
-      if (!uploadedUrl) {
-        const currentRes = await getCurrentBackground().unwrap();
-        uploadedUrl =
-          currentRes?.data?.customUploadedBackgroundUrl ||
-          currentRes?.customUploadedBackgroundUrl;
-      }
-
-      if (uploadedUrl && typeof uploadedUrl === "string") {
-        await setActiveBackground({ backgroundUrl: uploadedUrl }).unwrap();
-      }
-
-      toast.success(
-        t.profile?.personalInfo?.updateCoverSuccess ||
-          "Cập nhật ảnh bìa thành công",
-        { id: "cover-update" },
-      );
-    } catch {
-      // Rollback preview on error
-      setCoverImageUrl(null);
-      URL.revokeObjectURL(objectUrl);
-      toast.error(
-        t.profile?.personalInfo?.updateCoverError ||
-          "Không thể cập nhật ảnh bìa",
-        { id: "cover-update" },
-      );
-    } finally {
-      if (coverInputRef.current) coverInputRef.current.value = "";
-    }
-  };
 
   const handleFollowToggle = async () => {
     if (isFollowLoading) return;
@@ -273,11 +149,7 @@ const SocialProfileHeader = ({
         {/* Hover Overlay for Cover */}
         {isOwnProfile && (
           <div
-            onClick={() => {
-              if (coverInputRef.current && !isCoverUpdating) {
-                coverInputRef.current.click();
-              }
-            }}
+            onClick={triggerCoverUpload}
             className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity cursor-pointer z-10 ${
               isCoverUpdating
                 ? "opacity-100"
@@ -317,11 +189,7 @@ const SocialProfileHeader = ({
               className={`relative rounded-full overflow-hidden ${
                 isOwnProfile ? "cursor-pointer" : ""
               }`}
-              onClick={() => {
-                if (isOwnProfile && fileInputRef.current && !isUpdatingAvatar) {
-                  fileInputRef.current.click();
-                }
-              }}
+              onClick={isOwnProfile ? triggerAvatarUpload : undefined}
             >
               <Avatar
                 size={133}
