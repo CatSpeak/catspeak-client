@@ -320,11 +320,11 @@ const ClassMembersTab = ({ classData, isStudent }) => {
         )}
       </section>
 
-      {!isStudent && students.length === 0 && (
+      {/* {!isStudent && students.length === 0 && (
         <p className="text-center text-[11px] font-semibold text-gray-400">
           {classWorkspace.rosterUnavailable || "Tính năng quản lý danh sách học viên hiện chưa khả dụng."}
         </p>
-      )}
+      )} */}
     </div>
   )
 }

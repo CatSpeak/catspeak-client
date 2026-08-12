@@ -15,13 +15,40 @@ const replaceVars = (text, m) => {
   return text
     .replace(/{className}/g, m.className || "Không rõ")
     .replace(/{assignmentName}/g, m.assignmentName || "Không rõ")
-    .replace(/{quizName}/g, m.quizName || "Không rõ");
+    .replace(/{quizName}/g, m.quizName || "Không rõ")
+    .replace(/{teacherName}/g, m.teacherName || m.inviterName || "Giảng viên");
 };
 
 const getLoc = (t) =>
   t.courses?.notifications || t.courses?.lectureHall?.notifications;
 
 export const NOTIFICATION_TYPES = {
+  class_invite: {
+    icon: UserPlus,
+    color: "text-indigo-500",
+    resolveTitle: (m, t) =>
+      replaceVars(getLoc(t)?.class_invite?.title || "Lời mời tham gia lớp học", m),
+    resolveBody: (m, t) =>
+      replaceVars(
+        getLoc(t)?.class_invite?.body ||
+          "{teacherName} đã mời bạn tham gia lớp học {className}",
+        m,
+      ),
+    resolveUrl: (m) => `/workspace/learning/class/${m.classId}`,
+  },
+  ClassInvite: {
+    icon: UserPlus,
+    color: "text-indigo-500",
+    resolveTitle: (m, t) =>
+      replaceVars(getLoc(t)?.class_invite?.title || "Lời mời tham gia lớp học", m),
+    resolveBody: (m, t) =>
+      replaceVars(
+        getLoc(t)?.class_invite?.body ||
+          "{teacherName} đã mời bạn tham gia lớp học {className}",
+        m,
+      ),
+    resolveUrl: (m) => `/workspace/learning/class/${m.classId}`,
+  },
   class_update: {
     icon: BookOpen,
     color: "text-blue-500",
