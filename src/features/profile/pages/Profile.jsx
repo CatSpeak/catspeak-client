@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -39,9 +39,9 @@ const Profile = () => {
   useEffect(() => {
     if (!urlAccountId && user?.accountId) {
       const isWorkspace = location.pathname.startsWith("/workspace")
-      navigate(`${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}`, { replace: true })
+      navigate(`${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}${location.search}`, { replace: true })
     }
-  }, [urlAccountId, user, navigate, location.pathname])
+  }, [urlAccountId, user, navigate, location.pathname, location.search])
 
   // Fetch private profile if own profile, otherwise skip
   const { data: privateProfileData, isLoading: loadingPrivate } =
@@ -75,8 +75,19 @@ const Profile = () => {
     ? pendingResponse.length
     : pendingResponse?.data?.length || 0
 
-  const [activeTab, setActiveTab] = useState("home")
+  const [searchParams] = useSearchParams()
+  const currentToken = searchParams.get("sharedMaterialToken")
+
+  const [activeTab, setActiveTab] = useState(currentToken ? "documents" : "home")
   const [friendsSubTab, setFriendsSubTab] = useState(null)
+
+  const [prevToken, setPrevToken] = useState(currentToken)
+  if (currentToken !== prevToken) {
+    setPrevToken(currentToken)
+    if (currentToken) {
+      setActiveTab("documents")
+    }
+  }
 
   const stateHooks = useProfileState(profileData)
   const mutationHooks = useProfileMutations(t, profileData, stateHooks)

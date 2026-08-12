@@ -474,7 +474,7 @@ const TeachingMaterialPage = () => {
           {files.length > 0 && (
             <div className='space-y-4'>
               <h2 className="text-2xl font-semibold text-[#1A1C1C]">{searchQuery ? t.materials.files : t.materials.recentFiles}</h2>
-              <div className={viewLayout === 'grid' ? "grid grid-cols-2 lg:grid-cols-4 gap-4" : "flex flex-col gap-3"}>
+              <div className={viewLayout === 'grid' ? "grid grid-cols-2 lg:grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-7" : "flex flex-col gap-3"}>
                 {files.map(file => (
                   <FileItem
                     key={file.id}

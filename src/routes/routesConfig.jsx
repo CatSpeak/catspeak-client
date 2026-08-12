@@ -149,6 +149,9 @@ const CreateExamPage = lazy(
 const TeachingMaterialPage = lazy(
   () => import("@/features/materials/pages/TeachingMaterialPage"),
 );
+const SharedMaterialRedirectPage = lazy(
+  () => import("@/features/materials/pages/SharedMaterialRedirectPage"),
+);
 const StudentTakeQuizView = lazy(
   () => import("@/features/courses/components/grading/StudentTakeQuizView"),
 );
@@ -175,6 +178,14 @@ const routesConfig = [
           {
             path: "verify-email",
             element: <VerifyEmailPage />,
+          },
+          {
+            path: "shared-material/:token",
+            element: (
+              <LazyRoute>
+                <SharedMaterialRedirectPage />
+              </LazyRoute>
+            ),
           },
           {
             path: "checkout",

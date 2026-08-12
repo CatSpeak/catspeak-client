@@ -18,7 +18,6 @@ import {
 } from "@/store/api/materialApi";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { useEffect } from "react";
 
 const formatSize = (bytes) => {
   if (bytes === 0) return "0 B";
@@ -51,38 +50,32 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
     });
 
   const materialDetail = materialDetailRes?.data || materialDetailRes;
-  const [shareLink, setShareLink] = useState("");
+
+  const [localToken, setLocalToken] = useState(null);
+  const [prevMaterialDetail, setPrevMaterialDetail] = useState(null);
+
+  if (materialDetail !== prevMaterialDetail) {
+    setPrevMaterialDetail(materialDetail);
+    if (materialDetail?.shareToken) {
+      setLocalToken(materialDetail.shareToken);
+    } else if (materialDetail?.publicShareUrl) {
+      const parts = materialDetail.publicShareUrl.split("/").filter(Boolean);
+      const token = parts.pop();
+      setLocalToken(token || null);
+    } else {
+      setLocalToken(null);
+    }
+  }
+
+  const shareLink = (localToken && isPublic)
+    ? `${window.location.origin}/shared-material/${localToken}`
+    : "";
 
   const isLoading =
     isUpdatingMaterial ||
     isUpdatingFolder ||
     isTogglingShare ||
     isDetailLoading;
-
-  useEffect(() => {
-    // If we have a direct shareToken (in case API is updated)
-    if (materialDetail?.shareToken) {
-      setShareLink(
-        isPublic
-          ? `${window.location.origin}/shared-material/${materialDetail.shareToken}`
-          : "",
-      );
-      return;
-    }
-
-    if (materialDetail?.publicShareUrl) {
-      // Safely extract token from URL, handling trailing slashes or full URLs
-      const parts = materialDetail.publicShareUrl.split("/").filter(Boolean);
-      const token = parts.pop();
-      if (token && isPublic) {
-        setShareLink(`${window.location.origin}/shared-material/${token}`);
-      } else {
-        setShareLink("");
-      }
-    } else {
-      setShareLink("");
-    }
-  }, [materialDetail, isPublic]);
 
   // Sync state when item changes
   const [prevItem, setPrevItem] = useState(item);
@@ -118,14 +111,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
         // 3. Lấy token từ BE
         const responseData = toggleRes?.data || toggleRes;
 
-        if (responseData?.shareToken && isPublic) {
-          // 4. FE tự tạo URL
-          const frontendShareUrl = `${window.location.origin}/shared-material/${responseData.shareToken}`;
-
-          setShareLink(frontendShareUrl);
-        } else {
-          setShareLink("");
-        }
+        setLocalToken(responseData?.shareToken || null);
       }
 
       toast.success(t.materials.updateShareSettingsSuccess);
@@ -178,9 +164,9 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
             <span className="text-sm text-[#5B403E]">
               {item?.fileName
                 ? item.fileName?.split(".").pop().toUpperCase() ||
-                  "" +
-                    " • " +
-                    formatSize(item.fileSize || item.size || item.sizeBytes)
+                "" +
+                " • " +
+                formatSize(item.fileSize || item.size || item.sizeBytes)
                 : null}
             </span>
           </div>
@@ -216,11 +202,11 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
                   isFolder
                     ? t.materials.noLink
                     : shareLink ||
-                      (isDetailLoading
-                        ? t.materials.loading
-                        : isPublic
-                          ? "Vui lòng lưu để tạo liên kết"
-                          : t.materials.noLink)
+                    (isDetailLoading
+                      ? t.materials.loading
+                      : isPublic
+                        ? "Vui lòng lưu để tạo liên kết"
+                        : t.materials.noLink)
                 }
                 className="w-full h-10 bg-[#F3F3F3] border border-[#E2E2E2] rounded-lg pl-9 pr-3 text-base text-[#1A1C1C] outline-none"
               />

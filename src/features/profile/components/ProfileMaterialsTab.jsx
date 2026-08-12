@@ -7,9 +7,9 @@ import Tabs from '@/shared/components/ui/navigation/Tabs';
 import ProfileFolderItem from './ProfileFolderItem';
 import ProfileFileItem from './ProfileFileItem';
 import { EmptyState, LoadingSpinner } from '@/shared/components/ui/indicators';
-import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation, useGetMaterialByShareTokenQuery } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import ShareMaterialModal from '../../materials/components/teaching-material/ShareMaterialModal';
@@ -40,6 +40,7 @@ const MOCK_FILES = [];
 const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [viewLayout, setViewLayout] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilterTab, setActiveFilterTab] = useState('all');
@@ -56,6 +57,35 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [deletingItem, setDeletingItem] = useState({ id: null, name: "", count: 0, type: "folder" });
+
+  const sharedMaterialToken = searchParams.get("sharedMaterialToken");
+  const { data: sharedMaterialData, isError, error } = useGetMaterialByShareTokenQuery(sharedMaterialToken, {
+    skip: !sharedMaterialToken
+  });
+
+  useEffect(() => {
+    if (sharedMaterialToken && isError) {
+      toast.error(error?.data?.message || t.materials?.materialNotFound || "Tài liệu không tồn tại hoặc không được chia sẻ công khai");
+      searchParams.delete("sharedMaterialToken");
+      setSearchParams(searchParams, { replace: true });
+      navigate('/workspace/materials', { replace: true });
+      return;
+    }
+
+    if (sharedMaterialToken && sharedMaterialData) {
+      const data = sharedMaterialData.data || sharedMaterialData;
+      setSelectedItem({
+        ...data,
+        fileUrl: data.fileUrl || data.previewUrl,
+        fileName: data.fileName || data.name
+      });
+      setIsFilePreviewOpen(true);
+
+      // Clean up the URL to prevent reopening the modal on tab switch
+      searchParams.delete("sharedMaterialToken");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [sharedMaterialToken, sharedMaterialData, isError, error, searchParams, setSearchParams, navigate, t]);
 
   // Fetch API for owner
   const { data: materialsData, isLoading: isLoadingMaterials } = useGetPersonalMaterialsQuery(undefined, { skip: !isOwnProfile });
@@ -96,7 +126,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
     };
     rawFolders = flattenFolders(rawFoldersTree);
     return rawFolders;
-  }, [responseData.folders, rawFoldersTree, isOwnProfile]);
+  }, [responseData.folders, rawFoldersTree, isOwnProfile, t.materials.untitledFolder]);
 
   const baseFiles = useMemo(() => {
     if (!isOwnProfile) return MOCK_FILES;
@@ -111,7 +141,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       fileUrl: file.fileUrl,
       ...file
     }));
-  }, [responseData.materials, isOwnProfile]);
+  }, [responseData.materials, isOwnProfile, t.materials.untitledFile]);
 
   const materials = useMemo(() => [...baseFolders, ...baseFiles], [baseFolders, baseFiles]);
 
