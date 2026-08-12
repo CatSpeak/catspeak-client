@@ -1,21 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
   Edit2,
   UserPlus,
   Check,
-  UserMinus,
   AtSign,
 } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
+import RequestButton from "@/shared/components/ui/buttons/RequestButton";
 import {
   useGetConnectionStatusQuery,
   useFollowUserMutation,
   useUnfollowUserMutation,
-  useSendFriendRequestMutation,
-  useDeleteFriendshipMutation,
 } from "../../../store/api/social/friendshipApi";
 import { useGetCurrentBackgroundQuery } from "@/store/api/userApi";
 import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
@@ -59,25 +57,8 @@ const SocialProfileHeader = ({
     useFollowUserMutation();
   const [unfollowUser, { isLoading: isUnfollowingLoading }] =
     useUnfollowUserMutation();
-  const [sendFriendRequest, { isLoading: isSendingRequest }] =
-    useSendFriendRequestMutation();
-  const [deleteFriendship, { isLoading: isDeletingFriendship }] =
-    useDeleteFriendshipMutation();
-
-  const [isFriendCooldown, setIsFriendCooldown] = useState(false);
-  const cooldownTimeoutRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (cooldownTimeoutRef.current) {
-        clearTimeout(cooldownTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
-  const isFriendshipLoading = isSendingRequest || isDeletingFriendship;
-  const isFriendshipDisabled = isFriendshipLoading || isFriendCooldown;
 
   const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
     useGetCurrentBackgroundQuery(undefined, {
@@ -106,10 +87,7 @@ const SocialProfileHeader = ({
 
   const handleFollowToggle = async () => {
     if (isFollowLoading) return;
-    // const toastId = "follow-action";
-    // toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
-    //   id: toastId,
-    // });
+    const toastId = "follow-action";
 
     try {
       if (status?.isFollowing) {
@@ -130,112 +108,6 @@ const SocialProfileHeader = ({
       console.error(error);
     }
   };
-
-  const isFriendOrPending =
-    status?.isFriend ||
-    status?.friendshipStatus === 1 ||
-    status?.friendshipStatus === "Pending";
-
-  const handleFriendshipToggle = async () => {
-    if (isFriendshipDisabled) return;
-
-    // Start 3-second cooldown immediately upon clicking
-    setIsFriendCooldown(true);
-    if (cooldownTimeoutRef.current) {
-      clearTimeout(cooldownTimeoutRef.current);
-    }
-    cooldownTimeoutRef.current = setTimeout(() => {
-      setIsFriendCooldown(false);
-    }, 3000);
-
-    try {
-      if (isFriendOrPending) {
-        if (status?.friendshipId) {
-          await deleteFriendship(status.friendshipId).unwrap();
-          toast.success(
-            status?.isFriend
-              ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
-              : t.profile?.social?.cancelRequestSuccess ||
-                  "Đã hủy yêu cầu kết bạn",
-            { id: "friendship-action" },
-          );
-        }
-      } else {
-        if (status?.friendshipId) {
-          await deleteFriendship(status.friendshipId).unwrap();
-        }
-        await sendFriendRequest(targetAccountId).unwrap();
-        toast.success(
-          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-          { id: "friendship-action" },
-        );
-      }
-    } catch (err) {
-      if (err?.status === 422) {
-        toast.error(
-          t.profile?.social?.requestPending ||
-            "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-          { id: "friendship-action" },
-        );
-      } else {
-        toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
-          id: "friendship-action",
-        });
-      }
-      console.error(err);
-    }
-  };
-
-  const friendshipVariant = status?.isFriend
-    ? "outline"
-    : isFriendOrPending
-      ? "secondary"
-      : "outline";
-
-  const friendshipIcon = isFriendOrPending ? <UserMinus /> : <UserPlus />;
-
-  const friendshipLabel = status?.isFriend
-    ? t.profile?.social?.unfriend || "Hủy kết bạn"
-    : isFriendOrPending
-      ? t.profile?.social?.cancelRequest || "Hủy yêu cầu"
-      : t.profile?.social?.addFriend || "Kết bạn";
-
-  const actionButtons = isOwnProfile
-    ? onEditClick
-      ? [
-          {
-            key: "edit",
-            variant: "outline",
-            startIcon: <Edit2 />,
-            label: t.profile?.personalInfo?.edit || "Chỉnh sửa",
-            onClick: onEditClick,
-          },
-        ]
-      : []
-    : [
-        {
-          key: "follow",
-          variant: status?.isFollowing ? "secondary" : "primary",
-          startIcon: status?.isFollowing ? <Check /> : <UserPlus />,
-          label: status?.isFollowing
-            ? t.profile?.social?.following || "Đang theo dõi"
-            : t.profile?.social?.follow || "Theo dõi",
-          onClick: handleFollowToggle,
-          disabled: isFollowLoading,
-          loading: isFollowLoading,
-          className: isFollowLoading ? "cursor-not-allowed" : "",
-        },
-        {
-          key: "friendship",
-          variant: friendshipVariant,
-          startIcon: friendshipIcon,
-          label: friendshipLabel,
-          onClick: handleFriendshipToggle,
-          disabled: isFriendshipDisabled,
-          loading: isFriendshipLoading,
-          className: isFriendshipDisabled ? "cursor-not-allowed" : "",
-        },
-      ];
 
   return (
     <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
@@ -306,29 +178,39 @@ const SocialProfileHeader = ({
 
         {/* Right side: Actions */}
         <div className="ml-auto flex flex-wrap justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start">
-          {actionButtons.map(
-            ({
-              key,
-              variant,
-              startIcon,
-              label,
-              onClick,
-              disabled,
-              loading,
-              className: btnClass,
-            }) => (
+          {isOwnProfile ? (
+            onEditClick && (
               <PillButton
-                key={key}
-                variant={variant}
-                onClick={onClick}
-                startIcon={startIcon}
-                disabled={disabled}
-                loading={loading}
-                className={`max-[425px]:flex-1 ${btnClass || ""}`}
+                variant="outline"
+                startIcon={<Edit2 />}
+                onClick={onEditClick}
+                className="max-[425px]:flex-1"
               >
-                {label}
+                {t.profile?.personalInfo?.edit || "Chỉnh sửa"}
               </PillButton>
-            ),
+            )
+          ) : (
+            <>
+              <PillButton
+                variant={status?.isFollowing ? "secondary" : "primary"}
+                startIcon={status?.isFollowing ? <Check /> : <UserPlus />}
+                onClick={handleFollowToggle}
+                disabled={isFollowLoading}
+                loading={isFollowLoading}
+                className={`max-[425px]:flex-1 ${isFollowLoading ? "cursor-not-allowed" : ""}`}
+              >
+                {status?.isFollowing
+                  ? t.profile?.social?.following || "Đang theo dõi"
+                  : t.profile?.social?.follow || "Theo dõi"}
+              </PillButton>
+
+              <RequestButton
+                id={targetAccountId}
+                relationship={status}
+                t={t}
+                className="max-[425px]:flex-1"
+              />
+            </>
           )}
         </div>
       </div>

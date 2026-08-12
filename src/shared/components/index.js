@@ -1,5 +1,6 @@
 // UI
 export { default as LiquidGlassButton } from "./ui/buttons/LiquidGlassButton"
+export { default as RequestButton } from "./ui/buttons/RequestButton"
 
 // Guards
 export { default as AuthGuard } from "./guards/AuthGuard"
