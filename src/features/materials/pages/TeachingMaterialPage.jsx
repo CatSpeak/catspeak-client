@@ -12,9 +12,11 @@ import FilterMaterialModal from '../components/teaching-material/FilterMaterialM
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
-import { useGetPersonalMaterialsQuery, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
+import { Breadcrumb } from '@/shared/components/ui/navigation';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const SORT_OPTIONS = [
   { value: 'name', label: 'Tên' },
@@ -23,6 +25,8 @@ const SORT_OPTIONS = [
 ];
 
 const TeachingMaterialPage = () => {
+  const navigate = useNavigate();
+  const { folderId } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("name_asc");
   const [viewLayout, setViewLayout] = useState("grid");
@@ -41,9 +45,37 @@ const TeachingMaterialPage = () => {
   const [filterFileType, setFilterFileType] = useState(null);
 
   const { data: materialsData, isLoading } = useGetPersonalMaterialsQuery({
+    folderId,
     keyword: searchQuery,
     sortBy: sortBy,
   });
+
+  const { data: folderDetailRes } = useGetPersonalMaterialByIdQuery(folderId, { skip: !folderId });
+  const folderDetail = folderDetailRes?.data || folderDetailRes;
+
+  const { data: treeData } = useGetFolderTreeQuery();
+  const rawFoldersTree = treeData?.data || treeData || [];
+
+  const getFolderPath = (nodes, targetId, currentPath = []) => {
+    for (const node of nodes) {
+      const isMatch = String(node.folderId) === String(targetId) || String(node.id) === String(targetId);
+      const pathWithCurrent = [...currentPath, { folderId: node.folderId || node.id, folderName: node.folderName }];
+
+      if (isMatch) return pathWithCurrent;
+
+      if (node.subFolders && node.subFolders.length > 0) {
+        const found = getFolderPath(node.subFolders, targetId, pathWithCurrent);
+        if (found) return found;
+      }
+      if (node.children && node.children.length > 0) {
+        const found = getFolderPath(node.children, targetId, pathWithCurrent);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const folderPath = folderId ? getFolderPath(rawFoldersTree, folderId) : null;
 
   const [recordDownload] = useRecordMaterialDownloadMutation();
 
@@ -135,6 +167,25 @@ const TeachingMaterialPage = () => {
 
   return (
     <div className=" bg-[#f3f3f3] min-h-screen">
+      <Breadcrumb
+        items={[
+          {
+            label: "Trang chủ",
+            onClick: () => navigate("/")
+          },
+          {
+            label: 'Quản lý tài liệu',
+            onClick: folderId ? () => navigate("/workspace/teaching-material") : undefined
+          },
+          ...(folderPath ? folderPath.map(folder => ({
+            label: folder.folderName || 'Thư mục',
+            onClick: () => navigate(`/workspace/teaching-material/${folder.folderId}`)
+          })) : (folderId ? [{
+            label: folderDetail?.folderName || folderDetail?.folderName || folderDetail?.title || 'Thư mục',
+            onClick: () => navigate(`/workspace/teaching-material/${folderId}`)
+          }] : []))
+        ]}
+      />
 
       {/* Header actions */}
       <div className="flex justify-end gap-3 mb-4">
@@ -273,10 +324,11 @@ const TeachingMaterialPage = () => {
               <div className={viewLayout === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" : "flex flex-col gap-3"}>
                 {folders.map(folder => (
                   <FolderItem
-                    key={folder.id}
-                    title={folder.name}
+                    key={folder.id || folder.folderId}
+                    title={folder.name || folder.folderName}
                     totalItems={`${(folder.subFolderCount || 0) + (folder.materialCount || 0)} mục`}
                     status={folder.updatedAt ? `Cập nhật ${dayjs(folder.updatedAt).format('DD/MM/YYYY')}` : ''}
+                    onClick={() => navigate(`/workspace/teaching-material/${folder.id || folder.folderId}`)}
                     onDelete={() => {
                       setDeletingItem({ id: folder.id, name: folder.name, count: (folder.subFolderCount || 0) + (folder.materialCount || 0), type: 'folder' });
                       setIsDeleteFolderOpen(true);

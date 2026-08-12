@@ -453,6 +453,14 @@ const routesConfig = [
                 ),
               },
               {
+                path: "teaching-material/:folderId",
+                element: (
+                  <LazyRoute>
+                    <TeachingMaterialPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "schedule",
                 element: (
                   <LazyRoute>

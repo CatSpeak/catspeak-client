@@ -4,10 +4,10 @@ import { FcFolder } from 'react-icons/fc';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
 
-const FolderItem = ({ title, totalItems, status, onDelete }) => {
+const FolderItem = ({ title, totalItems, status, onDelete, onClick }) => {
 
   return (
-    <div className="border border-[#E3BEBA] rounded-xl p-3 flex items-center justify-between bg-[#F9F9F9] cursor-pointer hover:shadow-faq-card hover:border-[#6E0009] hover:bg-[#FFDAD6]">
+    <div onClick={onClick} className="border border-[#E3BEBA] rounded-xl p-3 flex items-center justify-between bg-[#F9F9F9] cursor-pointer hover:shadow-faq-card hover:border-[#6E0009] hover:bg-[#FFDAD6]">
       <div className="flex items-center gap-3 flex-1">
         <FcFolder className="text-4xl" />
         <div>
@@ -22,6 +22,7 @@ const FolderItem = ({ title, totalItems, status, onDelete }) => {
           align="right"
           dropdownClassName="w-24"
           onChange={(val) => {
+            if (val === 'open' && onClick) onClick();
             if (val === 'delete' && onDelete) onDelete();
           }}
           options={[
