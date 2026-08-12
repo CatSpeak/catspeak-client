@@ -62,10 +62,10 @@ const BannedListTab = () => {
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-sm font-semibold text-neutral-800">
-              {pl.noBannedMembersTitle || "Không có thành viên nào bị cấm"}
+              {pl.noBannedMembersTitle || "Chưa có thành viên nào bị cấm"}
             </span>
             <span className="text-xs text-neutral-500 max-w-sm">
-              {pl.noBannedMembers || "Hiện tại chưa có người dùng nào trong danh sách cấm của phòng."}
+              {pl.noBannedMembersDesc || "Các thành viên bị Host mời ra khỏi phòng và cấm truy cập lại sẽ hiển thị tại đây."}
             </span>
           </div>
         </div>

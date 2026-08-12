@@ -239,9 +239,7 @@ export const FormattedText = ({ text, isOwn = false, currentUserName = "", class
             part.name.toLowerCase() === currentUserName.toLowerCase()
           )
 
-          const mentionStyle = isMe
-            ? "inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold bg-amber-200 text-amber-950 border border-amber-300 shadow-2xs mx-0.5"
-            : isOwn
+          const mentionStyle = isOwn
             ? "inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold bg-white/25 text-white border border-white/50 mx-0.5"
             : "inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold bg-[#990011] text-white mx-0.5"
 
