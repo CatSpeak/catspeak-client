@@ -129,7 +129,7 @@ const SocialProfileHeader = ({
       </div>
 
       {/* Profile Info Area */}
-      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap gap-4">
+      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Avatar floating above the bottom border of the cover photo */}
           <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full w-fit">
@@ -177,7 +177,7 @@ const SocialProfileHeader = ({
         </div>
 
         {/* Right side: Actions */}
-        <div className="ml-auto flex flex-wrap justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start">
+        <div className="ml-auto flex items-center justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-nowrap">
           {isOwnProfile ? (
             onEditClick && (
               <PillButton
