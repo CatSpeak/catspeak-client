@@ -32,20 +32,21 @@ const CreateFolderModal = ({ open, onClose }) => {
   // Filter folders based on search query
   const folders = useMemo(() => {
     const rawFolders = treeData?.data || treeData || [];
+    console.log(rawFolders);
 
     if (!searchQuery.trim()) return rawFolders;
 
     const lowerQuery = searchQuery.toLowerCase();
     const filterTree = (nodes) => {
       return nodes.reduce((acc, node) => {
-        const isMatch = node.name.toLowerCase().includes(lowerQuery);
+        const isMatch = (node.folderName || "").toLowerCase().includes(lowerQuery);
         let filteredChildren = [];
-        if (node.children) {
-          filteredChildren = filterTree(node.children);
+        if (node.subFolders) {
+          filteredChildren = filterTree(node.subFolders);
         }
 
         if (isMatch || filteredChildren.length > 0) {
-          acc.push({ ...node, children: filteredChildren });
+          acc.push({ ...node, subFolders: filteredChildren });
         }
         return acc;
       }, []);
@@ -65,7 +66,7 @@ const CreateFolderModal = ({ open, onClose }) => {
     try {
       await createFolder({
         name: folderName.trim(),
-        parentId: selectedFolder?.id,
+        parentId: selectedFolder?.folderId,
       }).unwrap();
       toast.success('Tạo thư mục thành công');
       setFolderName("");
@@ -140,10 +141,10 @@ const CreateFolderModal = ({ open, onClose }) => {
               <div className="flex flex-col gap-1">
                 {folders.map(folder => (
                   <FolderNode
-                    key={folder.id}
+                    key={folder.folderId}
                     folder={folder}
                     level={0}
-                    selectedId={selectedFolder?.id}
+                    selectedId={selectedFolder?.folderId}
                     onSelect={setSelectedFolder}
                     expandedIds={expandedIds}
                     toggleExpand={toggleExpand}
@@ -155,7 +156,7 @@ const CreateFolderModal = ({ open, onClose }) => {
 
           <p className="text-sm text-[#5B403E] mt-2">
             {selectedFolder
-              ? `Thư mục mới sẽ được tạo bên trong "${selectedFolder.name}".`
+              ? `Thư mục mới sẽ được tạo bên trong "${selectedFolder.folderName}".`
               : 'Thư mục mới sẽ được tạo ở thư mục gốc.'}
           </p>
         </div>

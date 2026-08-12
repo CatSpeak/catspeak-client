@@ -1,6 +1,7 @@
 import React from 'react';
 import { MoreVertical, Star, Download, Share2, Edit2, FolderInput, StarOff, Settings, Trash2 } from 'lucide-react';
 import Dropdown from '@/shared/components/ui/Dropdown';
+import { IconButton } from '@/shared/components/ui/buttons';
 
 const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, onClick, onDelete, onDownload, layout = 'grid' }) => {
   const isList = layout === 'list';
@@ -56,15 +57,16 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
                   },
                 ]}
                 trigger={(isOpen, selectedOption, toggleDropdown) => (
-                  <button
-                    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  <IconButton
+                    variant="iconOnly"
+                    className='w-4 h-4'
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleDropdown();
                     }}
                   >
-                    <MoreVertical className="w-5 h-5 text-gray-500" />
-                  </button>
+                    <MoreVertical className="w-4 h-4 hover:text-[#6E0009]" />
+                  </IconButton>
                 )}
               />
             </div>
@@ -107,15 +109,16 @@ const FileItem = ({ title, size, date, isPublic, isStarred, onShare, onDetails, 
                   },
                 ]}
                 trigger={(isOpen, selectedOption, toggleDropdown) => (
-                  <button
-                    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  <IconButton
+                    variant="iconOnly"
+                    className='w-4 h-4'
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleDropdown();
                     }}
                   >
-                    <MoreVertical className="w-5 h-5 text-gray-500" />
-                  </button>
+                    <MoreVertical className="w-4 h-4 hover:text-[#6E0009]" />
+                  </IconButton>
                 )}
               />
             </div>

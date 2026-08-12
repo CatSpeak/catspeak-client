@@ -34,13 +34,14 @@ const FolderItem = ({ title, totalItems, status, onDelete }) => {
           ]}
           trigger={(isOpen, selectedOption, toggleDropdown) => (
             <IconButton
-              variant='ghost'
+              variant="iconOnly"
+              className='w-4 h-4'
               onClick={(e) => {
                 e.stopPropagation();
                 toggleDropdown();
               }}
             >
-              <MoreVertical className="!w-4 !h-4 text-[#5B403E]" />
+              <MoreVertical className="w-4 h-4 hover:text-[#6E0009]" />
             </IconButton>
           )}
         />

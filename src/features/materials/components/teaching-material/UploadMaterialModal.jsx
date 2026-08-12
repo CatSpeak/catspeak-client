@@ -45,8 +45,8 @@ const UploadMaterialModal = ({ open, onClose }) => {
   const folders = [];
   const traverse = (nodes, level = 0) => {
     nodes.forEach(node => {
-      folders.push({ value: node.id, label: `${'\u00A0\u00A0'.repeat(level * 2)}${node.name}` });
-      if (node.children) traverse(node.children, level + 1);
+      folders.push({ value: node.folderId, label: `${'\u00A0\u00A0'.repeat(level * 2)}${node.folderName}` });
+      if (node.subFolders) traverse(node.subFolders, level + 1);
     });
   };
   const rawFolders = treeData?.data || treeData || [];
@@ -305,7 +305,7 @@ const UploadMaterialModal = ({ open, onClose }) => {
               value={selectedFolder}
               onChange={setSelectedFolder}
               options={folderOptions}
-              triggerClassName="h-[42px] border-[#fde9eb] bg-[#fffafb] w-full text-[13px] hover:bg-[#fff5f5]"
+              triggerClassName="h-[42px] border-[#fde9eb] w-full"
             />
           </div>
 

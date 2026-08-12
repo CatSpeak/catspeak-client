@@ -8,6 +8,7 @@ import UploadMaterialModal from '../components/teaching-material/UploadMaterialM
 import ShareMaterialModal from '../components/teaching-material/ShareMaterialModal';
 import DeleteFolderModal from '../components/teaching-material/DeleteFolderModal';
 import FileDetailModal from '../components/teaching-material/FileDetailModal';
+import FilterMaterialModal from '../components/teaching-material/FilterMaterialModal';
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
@@ -15,17 +16,29 @@ import { useGetPersonalMaterialsQuery, useRecordMaterialDownloadMutation } from 
 import dayjs from 'dayjs';
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 
+const SORT_OPTIONS = [
+  { value: 'name', label: 'Tên' },
+  { value: 'recent', label: 'Gần đây nhất' },
+  { value: 'updated_size', label: 'Ngày cập nhật, kích thước' }
+];
+
 const TeachingMaterialPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("");
+  const [sortBy, setSortBy] = useState("name_asc");
   const [viewLayout, setViewLayout] = useState("grid");
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
   const [isUploadMaterialOpen, setIsUploadMaterialOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
   const [isFileDetailOpen, setIsFileDetailOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
   const [selectedItem, setSelectedItem] = useState(null);
   const [deletingItem, setDeletingItem] = useState({ id: null, name: "", count: 0, type: "folder" });
+
+  // Filter States
+  const [filterMode, setFilterMode] = useState(null); // 'folder' | 'fileType' | null
+  const [filterFileType, setFilterFileType] = useState(null);
 
   const { data: materialsData, isLoading } = useGetPersonalMaterialsQuery({
     keyword: searchQuery,
@@ -35,8 +48,71 @@ const TeachingMaterialPage = () => {
   const [recordDownload] = useRecordMaterialDownloadMutation();
 
   const responseData = materialsData?.data || materialsData || {};
-  const folders = useMemo(() => Array.isArray(responseData.folders) ? responseData.folders : [], [responseData.folders]);
-  const files = useMemo(() => Array.isArray(responseData.recentFiles) ? responseData.recentFiles : [], [responseData.recentFiles]);
+  const folders = useMemo(() => {
+    let rawFolders = Array.isArray(responseData.folders) ? [...responseData.folders] : [];
+    if (filterMode === 'fileType') return [];
+
+    rawFolders.sort((a, b) => {
+      const nameA = a.name || '';
+      const nameB = b.name || '';
+      const dateA = new Date(a.updatedAt || 0).getTime();
+      const dateB = new Date(b.updatedAt || 0).getTime();
+
+      switch (sortBy) {
+        case 'name_asc': return nameA.localeCompare(nameB);
+        case 'name_desc': return nameB.localeCompare(nameA);
+        case 'newest': return dateB - dateA;
+        case 'oldest': return dateA - dateB;
+        case 'size_asc': return dateA - dateB;
+        case 'size_desc': return dateB - dateA;
+        default: return 0;
+      }
+    });
+
+    return rawFolders;
+  }, [responseData.folders, filterMode, sortBy]);
+
+  const files = useMemo(() => {
+    let rawFiles = Array.isArray(responseData.recentFiles) ? [...responseData.recentFiles] : [];
+    if (filterMode === 'folder') return [];
+
+    if (filterMode === 'fileType' && filterFileType) {
+      const typeMap = {
+        word: ['doc', 'docx'],
+        excel: ['xls', 'xlsx', 'csv'],
+        powerpoint: ['ppt', 'pptx'],
+        image: ['png', 'jpg']
+      };
+
+      rawFiles = rawFiles.filter(file => {
+        const name = file.fileName || file.name || '';
+        const extMatch = name.match(/\.([^.]+)$/);
+        const ext = extMatch ? extMatch[1].toLowerCase() : '';
+        return typeMap[filterFileType]?.includes(ext);
+      });
+    }
+
+    rawFiles.sort((a, b) => {
+      const nameA = a.fileName || a.name || '';
+      const nameB = b.fileName || b.name || '';
+      const dateA = new Date(a.updatedAt || 0).getTime();
+      const dateB = new Date(b.updatedAt || 0).getTime();
+      const sizeA = a.fileSize || a.size || a.sizeBytes || 0;
+      const sizeB = b.fileSize || b.size || b.sizeBytes || 0;
+
+      switch (sortBy) {
+        case 'name_asc': return nameA.localeCompare(nameB);
+        case 'name_desc': return nameB.localeCompare(nameA);
+        case 'newest': return dateB - dateA;
+        case 'oldest': return dateA - dateB;
+        case 'size_asc': return sizeA - sizeB;
+        case 'size_desc': return sizeB - sizeA;
+        default: return 0;
+      }
+    });
+
+    return rawFiles;
+  }, [responseData.recentFiles, filterMode, filterFileType, sortBy]);
   const materials = useMemo(() => [...folders, ...files], [folders, files]);
 
   useEffect(() => {
@@ -94,14 +170,16 @@ const TeachingMaterialPage = () => {
             buttonClassName="w-4 h-4"
           />
           <PillButton
-            variant='outline'
+            variant={filterMode ? 'solid' : 'outline'}
             roundedClass='rounded-xl'
-            borderColor='#E3BEBA'
-            textColor="#5B403E"
+            borderColor={filterMode ? 'transparent' : '#E3BEBA'}
+            bgColor={filterMode ? '#6E0009' : undefined}
+            textColor={filterMode ? 'white' : '#5B403E'}
             className='!h-10'
             startIcon={<ListFilter className="w-4 h-4" />}
+            onClick={() => setIsFilterModalOpen(true)}
           >
-            Bộ lọc
+            Bộ lọc {filterMode ? `(1)` : ''}
           </PillButton>
         </div>
 
@@ -129,13 +207,15 @@ const TeachingMaterialPage = () => {
             value={sortBy}
             onChange={setSortBy}
             options={[
-              { value: 'newest', label: 'Mới nhất' },
-              { value: 'oldest', label: 'Cũ nhất' },
-              { value: 'name_asc', label: 'Tên A-Z' },
-              { value: 'name_desc', label: 'Tên Z-A' },
+              { value: 'name_asc', label: 'Tên (A-Z)' },
+              { value: 'name_desc', label: 'Tên (Z-A)' },
+              { value: 'newest', label: 'Ngày cập nhật (Gần nhất)' },
+              { value: 'oldest', label: 'Ngày cập nhật (Cũ nhất)' },
+              { value: 'size_asc', label: 'Kích thước (Tăng dần)' },
+              { value: 'size_desc', label: 'Kích thước (Nhỏ dần)' },
             ]}
             align="right"
-            dropdownClassName="w-40"
+            dropdownClassName="w-58"
             trigger={(isOpen, selectedOption, toggle) => (
               <PillButton
                 onClick={toggle}
@@ -168,7 +248,11 @@ const TeachingMaterialPage = () => {
           </div>
           <EmptySearchState
             searchQuery={searchQuery}
-            onClearFilters={() => setSearchQuery('')}
+            onClearFilters={() => {
+              setSearchQuery('');
+              setFilterMode(null);
+              setFilterFileType(null);
+            }}
           />
         </div>
       ) : (
@@ -274,28 +358,42 @@ const TeachingMaterialPage = () => {
         open={isCreateFolderOpen}
         onClose={() => setIsCreateFolderOpen(false)}
       />
+
       <UploadMaterialModal
         open={isUploadMaterialOpen}
         onClose={() => setIsUploadMaterialOpen(false)}
       />
+
       <ShareMaterialModal
         open={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         item={selectedItem}
       />
+
       <DeleteFolderModal
         open={isDeleteFolderOpen}
         onClose={() => setIsDeleteFolderOpen(false)}
         item={deletingItem}
       />
+
       <FileDetailModal
         open={isFileDetailOpen}
         onClose={() => setIsFileDetailOpen(false)}
-        item={selectedItem}
+        file={selectedItem}
         onDelete={() => {
           setIsFileDetailOpen(false);
           setDeletingItem({ id: selectedItem.id, name: selectedItem.fileName || selectedItem.name, count: 0, type: 'file' });
           setIsDeleteFolderOpen(true);
+        }}
+      />
+
+      <FilterMaterialModal
+        open={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        currentFilters={{ filterMode, filterFileType }}
+        onApply={(filters) => {
+          setFilterMode(filters.filterMode);
+          setFilterFileType(filters.filterFileType);
         }}
       />
     </div>
