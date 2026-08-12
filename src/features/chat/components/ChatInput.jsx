@@ -228,12 +228,11 @@ const ChatInput = ({
                     <Smile />
                   </IconButton>
                 }
-                content={(close) => (
+                content={() => (
                   <EmojiPickerWrapper
                     onSelect={(emoji) => {
                       insertEmoji(emoji, textareaRef, value, onChange)
                       addRecent(emoji)
-                      if (typeof close === "function") close()
                     }}
                   />
                 )}

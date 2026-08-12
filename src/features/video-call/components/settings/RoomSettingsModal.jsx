@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react"
-import { Mic, Settings } from "lucide-react"
+import { Mic, Settings, UserX } from "lucide-react"
 import { motion, LayoutGroup } from "framer-motion"
 import Modal from "@/shared/components/ui/Modal"
 import ListItem from "@/shared/components/ui/ListItem"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import AudioVideoTab from "./AudioVideoTab"
 import GeneralSettingsTab from "./GeneralSettingsTab"
+import BannedListTab from "./BannedListTab"
 
 const RoomSettingsModal = ({
   open,
@@ -17,9 +19,18 @@ const RoomSettingsModal = ({
 }) => {
   const { t } = useLanguage()
   const waitingT = t?.rooms?.waitingScreen || {}
+  const pl = t?.rooms?.videoCall?.participantList || {}
 
-  const { deviceSelection, receiveSystemMsgs, setReceiveSystemMsgs } =
-    useGlobalVideoCall()
+  const {
+    room,
+    user,
+    isHost: isHostFromContext,
+    deviceSelection,
+    receiveSystemMsgs,
+    setReceiveSystemMsgs,
+  } = useGlobalVideoCall()
+
+  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   const [activeTab, setActiveTab] = useState(initialTab)
 
@@ -32,21 +43,30 @@ const RoomSettingsModal = ({
   const tabs = [
     {
       id: "audio-video",
-      label: waitingT.deviceSettings || "Audio & Video",
+      label: waitingT.deviceSettingsTab || "Cài đặt thiết bị",
       icon: Mic,
     },
     {
       id: "general",
-      label: "General",
+      label: waitingT.generalTab || "Chung",
       icon: Settings,
     },
+    ...(isHost
+      ? [
+          {
+            id: "banned",
+            label: waitingT.bannedListTab || pl.bannedListTitle || "Danh sách bị cấm",
+            icon: UserX,
+          },
+        ]
+      : []),
   ]
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={waitingT.deviceSettings || "Cài đặt phòng họp"}
+      title={waitingT.deviceSettings || "Cài đặt"}
       className="md:max-w-[920px] w-full flex flex-col h-full md:!h-[560px] max-h-none md:max-h-[80vh]"
       headerClassName="flex items-center justify-between p-4 sm:p-6 border-b border-border shrink-0"
       bodyClassName="p-0 flex-1 overflow-hidden flex flex-col min-h-0"
@@ -123,6 +143,8 @@ const RoomSettingsModal = ({
               setReceiveSystemMsgs={setReceiveSystemMsgs}
             />
           )}
+
+          {activeTab === "banned" && isHost && <BannedListTab />}
         </div>
       </div>
     </Modal>

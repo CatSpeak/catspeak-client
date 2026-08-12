@@ -365,28 +365,29 @@ const VideoCallRoomContent = () => {
                   </button>
                 )}
 
-                <div className="flex-1 overflow-y-auto bg-white min-h-0">
-                  {showParticipants && <ParticipantList hideTitle />}
-                  {showVirtualBackground && <BackgroundsAndEffectsPanel />}
-                  {showAvatarPicker && <AvatarUrlPicker />}
-                  {showTroubleshoot && <TroubleshootPanel hideTitle />}
-                  {showBreakout && isBreakoutSupported(room?.roomType) && (
-                    <BreakoutSidebarPanel
-                      sessionId={parentSessionId}
-                      onClose={() => setActiveSidePanel(null)}
-                    />
-                  )}
-                  {showChat && (
-                    <ChatBox
-                      messages={messages}
-                      currentUser={user}
-                      onSendMessage={handleSendMessage}
-                      isConnected={isConnected}
-                      className="h-full w-full rounded-t-[24px]"
-                      hideTitle
-                    />
-                  )}
-                </div>
+                {showChat ? (
+                  <ChatBox
+                    messages={messages}
+                    currentUser={user}
+                    onSendMessage={handleSendMessage}
+                    isConnected={isConnected}
+                    className="flex-1 min-h-0 w-full rounded-t-[24px]"
+                    hideTitle
+                  />
+                ) : (
+                  <div className="flex-1 overflow-y-auto bg-white min-h-0">
+                    {showParticipants && <ParticipantList hideTitle />}
+                    {showVirtualBackground && <BackgroundsAndEffectsPanel />}
+                    {showAvatarPicker && <AvatarUrlPicker />}
+                    {showTroubleshoot && <TroubleshootPanel hideTitle />}
+                    {showBreakout && isBreakoutSupported(room?.roomType) && (
+                      <BreakoutSidebarPanel
+                        sessionId={parentSessionId}
+                        onClose={() => setActiveSidePanel(null)}
+                      />
+                    )}
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           </div>

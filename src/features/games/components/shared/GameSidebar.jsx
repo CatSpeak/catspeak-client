@@ -6,7 +6,7 @@ import { Check, TrendingUp, Star, SlidersHorizontal } from "lucide-react"
 import { useParticipants, useIsSpeaking } from "@livekit/components-react"
 // eslint-disable-next-line no-unused-vars
 import { motion, animate, AnimatePresence } from "framer-motion"
-import { ParticipantVolumePopover } from "@/features/video-call/components/ParticipantVolumePopover"
+import { ParticipantActionPopover } from "@/features/video-call/components/ParticipantActionPopover"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 
@@ -385,7 +385,7 @@ const GameSidebar = ({
                   className="w-full"
                 >
                   {participant && !player.isYou && !player.hasLeft ? (
-                    <ParticipantVolumePopover participant={participant}>
+                    <ParticipantActionPopover participant={participant}>
                       <div
                         className={`group flex items-center gap-2 md:gap-3 border-b border-transparent last:border-0 w-full h-full cursor-pointer transition-colors border-b-gray-100 hover:border-transparent relative rounded-xl ${
                           embedded ? "py-2.5 px-2" : "py-3 px-3 md:px-4"
@@ -399,7 +399,7 @@ const GameSidebar = ({
                           </div>
                         </div>
                       </div>
-                    </ParticipantVolumePopover>
+                    </ParticipantActionPopover>
                   ) : (
                     <div
                       className={`flex items-center gap-2 md:gap-3 border-b border-border last:border-0 w-full h-full relative rounded-xl ${

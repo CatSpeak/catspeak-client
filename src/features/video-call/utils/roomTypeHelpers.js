@@ -49,10 +49,7 @@ export const isRoomHost = (room, userOrAccountId) => {
       ? userOrAccountId?.accountId
       : userOrAccountId;
   if (targetId == null) return false;
-  return (
-    isClassOrCustom(room?.roomType) &&
-    String(room.creatorId) === String(targetId)
-  );
+  return String(room.creatorId) === String(targetId);
 };
 
 

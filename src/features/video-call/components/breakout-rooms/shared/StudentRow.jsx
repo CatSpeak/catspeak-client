@@ -5,7 +5,7 @@ import Popover from "@/shared/components/ui/Popover"
 import ListItem from "@/shared/components/ui/ListItem"
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from "@/store/slices/authSlice"
-import { ParticipantVolumeSlider } from "../../ParticipantVolumePopover"
+import { ParticipantVolumeSlider } from "../../ParticipantActionPopover"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const StudentRow = ({

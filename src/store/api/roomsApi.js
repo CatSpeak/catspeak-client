@@ -270,6 +270,9 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "BannedParticipants", id },
+      ],
     }),
 
     // Mute audio/video track of a participant
@@ -280,6 +283,24 @@ export const roomsApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+
+    // Get list of banned participants for a room
+    getBannedParticipants: builder.query({
+      query: (id) => `/rooms/${id}/moderation/banned-participants`,
+      providesTags: (result, error, id) => [{ type: "BannedParticipants", id }],
+    }),
+
+    // Unban a participant from rejoining a room
+    unbanParticipant: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/moderation/unban`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "BannedParticipants", id }],
+    }),
+
+
 
     // Invite user to a room
     inviteToRoom: builder.mutation({
@@ -392,6 +413,8 @@ export const {
   // Host Moderation
   useKickParticipantMutation,
   useMuteParticipantMutation,
+  useGetBannedParticipantsQuery,
+  useUnbanParticipantMutation,
   useInviteToRoomMutation,
   // My Rooms & Bookmarks & Advanced Room Creation
   useGetMyRoomsQuery,

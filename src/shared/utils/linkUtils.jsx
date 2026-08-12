@@ -147,18 +147,22 @@ export const findUrlsInText = (text) => {
   return results
 }
 
+export const MENTION_REGEX = /@([a-zA-Z0-9_\-À-ỹ]+)/gi
+
 /**
- * React Component to render text with clickable URLs.
+ * React Component to render text with clickable URLs and styled @mentions.
  */
-export const FormattedText = ({ text, isOwn = false, className = "" }) => {
+export const FormattedText = ({ text, isOwn = false, currentUserName = "", className = "" }) => {
   if (!text) return null
+
+  // Combined regex matcher for links & mentions
+  const combinedRegex = /(https?:\/\/[^\s<]+|(?:www\.)[^\s<]+)|@([a-zA-Z0-9_\-À-ỹ]+)/gi
 
   const parts = []
   let lastIndex = 0
-  const regex = new RegExp(URL_REGEX)
   let match
 
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = combinedRegex.exec(text)) !== null) {
     const matchIndex = match.index
     const fullMatch = match[0]
 
@@ -169,21 +173,31 @@ export const FormattedText = ({ text, isOwn = false, className = "" }) => {
       })
     }
 
-    const { cleanedUrl, trailing } = cleanUrl(fullMatch)
-    const href = cleanedUrl.startsWith("http://") || cleanedUrl.startsWith("https://")
-      ? cleanedUrl
-      : `https://${cleanedUrl}`
+    if (match[1]) {
+      // URL match
+      const { cleanedUrl, trailing } = cleanUrl(fullMatch)
+      const href = cleanedUrl.startsWith("http://") || cleanedUrl.startsWith("https://")
+        ? cleanedUrl
+        : `https://${cleanedUrl}`
 
-    parts.push({
-      type: "link",
-      content: cleanedUrl,
-      href,
-    })
-
-    if (trailing) {
       parts.push({
-        type: "text",
-        content: trailing,
+        type: "link",
+        content: cleanedUrl,
+        href,
+      })
+
+      if (trailing) {
+        parts.push({
+          type: "text",
+          content: trailing,
+        })
+      }
+    } else if (match[2]) {
+      // @mention match
+      parts.push({
+        type: "mention",
+        content: fullMatch,
+        name: match[2],
       })
     }
 
@@ -219,6 +233,23 @@ export const FormattedText = ({ text, isOwn = false, className = "" }) => {
             </a>
           )
         }
+
+        if (part.type === "mention") {
+          const isMe = currentUserName && (
+            part.name.toLowerCase() === currentUserName.toLowerCase()
+          )
+
+          const mentionStyle = isOwn
+            ? "inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold bg-white/25 text-white border border-white/50 mx-0.5"
+            : "inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold bg-[#990011] text-white mx-0.5"
+
+          return (
+            <span key={index} className={mentionStyle}>
+              {part.content}
+            </span>
+          )
+        }
+
         return <React.Fragment key={index}>{part.content}</React.Fragment>
       })}
     </span>
