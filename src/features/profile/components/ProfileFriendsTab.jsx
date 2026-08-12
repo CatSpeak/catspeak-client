@@ -366,7 +366,7 @@ const ProfileFriendsTab = ({
     <div className="w-full flex flex-col gap-3 min-h-[500px]">
       {/* Top Header Card containing Tabs and Search */}
       <FluentCard padding="p-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e5e5e5] p-4 sm:p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border p-4 sm:p-6">
           <h2 className="text-xl font-bold">
             {t.profile?.friends?.title || "Bạn bè"}
           </h2>

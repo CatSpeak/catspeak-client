@@ -292,7 +292,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
           {/* ─── LEFT COLUMN: Main Form ─── */}
-          <div className="lg:col-span-2 flex flex-col gap-6 bg-white border border-gray-150 rounded-3xl p-6 shadow-xs">
+          <div className="lg:col-span-2 flex flex-col gap-6 bg-white border border-border rounded-3xl p-6 shadow-xs">
 
             {/* 1. Tên bài nộp */}
             <div className="flex flex-col gap-2">
@@ -304,7 +304,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 value={title}
                 onChange={(e) => setField("title", e.target.value)}
                 placeholder={ca.assignmentNamePlaceholder || "Nhập tên bài nộp (VD: Bài kiểm tra giữa kỳ)"}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm"
+                className="w-full px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all text-sm"
               />
             </div>
 
@@ -390,7 +390,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                     return (
                       <div
                         key={fileId}
-                        className="bg-gray-50 border border-gray-150 rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 transition-colors"
+                        className="bg-gray-50 border border-border rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 bg-red-50 border border-red-100 rounded-lg flex items-center justify-center text-red-500">
@@ -423,7 +423,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                   {attachedFiles.map((file) => (
                     <div
                       key={file.id}
-                      className="bg-gray-50 border border-gray-150 rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 transition-colors"
+                      className="bg-gray-50 border border-border rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-gray-100/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 bg-red-50 border border-red-100 rounded-lg flex items-center justify-center text-red-500">
@@ -486,7 +486,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
             </div>
 
             {/* 5. Cho phép nộp muộn */}
-            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex justify-between items-center shadow-xs">
+            <div className="bg-gray-50 border border-border rounded-2xl p-4 flex justify-between items-center shadow-xs">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-extrabold text-gray-850">{ca.allowLateSubmission || "Cho phép nộp muộn"}</span>
                 <span className="text-[11px] text-gray-400 font-semibold">
@@ -514,7 +514,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
           </div>
 
           {/* ─── RIGHT COLUMN: Configuration Sidebar ─── */}
-          <div className="flex flex-col gap-6 bg-white border border-gray-150 rounded-3xl p-6 shadow-xs">
+          <div className="flex flex-col gap-6 bg-white border border-border rounded-3xl p-6 shadow-xs">
 
             {/* Sidebar Title */}
             <div>
@@ -586,7 +586,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                       addFileType(val)
                     }
                   }}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
+                  className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
                 >
                   <option value="all">{ca.allFormats || "Tất cả định dạng"}</option>
                   <option value="PDF">PDF</option>
@@ -631,7 +631,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 max={5}
                 value={maxFiles}
                 onChange={(e) => setField("maxFiles", clampMaxFiles(e.target.value))}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 shadow-xs"
+                className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 shadow-xs"
               />
             </div>
 
@@ -663,7 +663,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 <select
                   value={gradeScale}
                   onChange={(e) => setField("gradeScale", e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
+                  className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
                 >
                   <option value="scale10">{ca.scale10 || "Thang điểm 10"}</option>
                   <option value="scale100">{ca.scale100 || "Thang điểm 100"}</option>
@@ -679,7 +679,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
                 <select
                   value={resultRelease}
                   onChange={(e) => setField("resultRelease", e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
+                  className="w-full px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#990011] focus:border-[#990011] text-xs font-semibold text-gray-700 appearance-none bg-white cursor-pointer"
                 >
                   <option value="manual">{ca.releaseManual || "Công bố thủ công"}</option>
                   <option value="automatic">{ca.releaseAutomatic || "Tự động công bố sau khi chấm"}</option>
@@ -779,7 +779,7 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
         </div>
 
         {/* ─── Footer Buttons ─── */}
-        <div className="flex justify-between items-center py-4 border-t border-gray-150 mt-4">
+        <div className="flex justify-between items-center py-4 border-t border-border mt-4">
           <button
             type="button"
             onClick={handleCancel}

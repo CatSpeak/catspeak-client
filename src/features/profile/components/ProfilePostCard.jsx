@@ -146,7 +146,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full h-full flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors p-4 text-center border border-gray-100"
+                    className="w-full h-full flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors p-4 text-center border border-border"
                   >
                     <FileText className="w-10 h-10 text-blue-500 mb-2 shrink-0" />
                     <span className="text-sm font-semibold text-gray-700 truncate w-full px-2">

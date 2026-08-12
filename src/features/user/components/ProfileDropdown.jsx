@@ -197,7 +197,7 @@ const ProfileDropdown = () => {
         </div>
       )}
 
-      <div className="border-t border-[#e5e5e5]" />
+      <div className="border-t border-border" />
 
       <div className="flex flex-col gap-1 p-1">
         <button onClick={handleSettingsClick} className={menuItemClass}>
@@ -272,7 +272,7 @@ const ProfileDropdown = () => {
             exit={true}
             className="absolute right-0 top-full z-[1200] mt-2 w-64"
           >
-            <div className="flex flex-col bg-white overflow-hidden rounded-lg border border-[#e5e5e5] shadow-lg focus:outline-none">
+            <div className="flex flex-col bg-white overflow-hidden rounded-lg border border-border shadow-lg focus:outline-none">
               {dropdownContent}
             </div>
           </FluentAnimation>

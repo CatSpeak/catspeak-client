@@ -16,7 +16,7 @@ const CourseInfoCard = ({
     || "No description provided."
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
+    <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
         {/* Ngôn ngữ */}
@@ -34,7 +34,7 @@ const CourseInfoCard = ({
       </div>
 
       {/* Mô tả */}
-      <div className="flex items-start gap-3 border-t border-gray-100 pt-6">
+      <div className="flex items-start gap-3 border-t border-border pt-6">
         <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3F4F6] text-[#4B5563] flex items-center justify-center">
           <AlignLeft size={18} />
         </div>

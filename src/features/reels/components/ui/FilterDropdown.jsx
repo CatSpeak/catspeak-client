@@ -11,7 +11,7 @@ export default function FilterDropdown({ options, value, onChange, align = "righ
       value={value}
       onChange={onChange}
       align={align}
-      dropdownClassName="min-w-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 rounded-2xl mt-1.5 p-1.5 z-50 bg-white"
+      dropdownClassName="min-w-[150px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-border rounded-2xl mt-1.5 p-1.5 z-50 bg-white"
       activeColor="#A20F27"
       renderOption={(option, isSelected) => (
         <div
@@ -43,7 +43,7 @@ export default function FilterDropdown({ options, value, onChange, align = "righ
           className={`flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[13px] sm:text-[14px] font-semibold transition-all duration-200 outline-none cursor-pointer border ${
             isOpen
               ? "border-gray-300 bg-gray-50 text-gray-900 shadow-inner"
-              : "border-gray-200 text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 shadow-sm"
+              : "border-border text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 shadow-sm"
           }`}
         >
           <span>{selectedOptionObj?.label || defaultLabel}</span>

@@ -36,11 +36,11 @@ export default function PastChallengeCard({ challenge, isSelected, onSelectChall
       className={`group flex flex-col sm:flex-row items-start sm:items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer ${
         isSelected 
           ? "border-cath-red-700 bg-[#FFF9F9] shadow-sm" 
-          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+          : "border-border bg-white hover:border-gray-300 hover:shadow-sm"
       }`}
     >
       {/* Thumbnail */}
-      <div className="relative w-full sm:w-28 sm:h-28 h-36 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
+      <div className="relative w-full sm:w-28 sm:h-28 h-36 rounded-xl overflow-hidden shrink-0 bg-gray-100 border border-border">
         <img 
           src={getImageUrl(challenge.bannerUrl || challenge.thumbnailUrl || challenge.coverUrl) || fallbackChallengeCard} 
           alt={challenge.hashtag || challenge.name} 
@@ -77,7 +77,7 @@ export default function PastChallengeCard({ challenge, isSelected, onSelectChall
         </div>
 
         {/* Footer Row: Winner & Button */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-gray-100/80 mt-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border/80 mt-1">
           {/* Winner info */}
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0">

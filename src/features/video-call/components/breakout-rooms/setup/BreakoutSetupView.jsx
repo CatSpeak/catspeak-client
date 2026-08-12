@@ -153,7 +153,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
         onDragLeave={handleDragLeaveScroll}
         className="flex-1 overflow-y-auto"
       >
-        <div className="border-b border-[#e5e5e5]">
+        <div className="border-b border-border">
           <BreakoutSetupControls
             roomCount={roomCount}
             setRoomCount={setRoomCount}
@@ -166,7 +166,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
           />
         </div>
 
-        <div className="border-b border-[#e5e5e5]">
+        <div className="border-b border-border">
           <BreakoutSettingsArea
             allowChangeRoom={allowChangeRoom}
             setAllowChangeRoom={setAllowChangeRoom}
@@ -189,7 +189,7 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
       </div>
 
       {/* Footer actions */}
-      <div className="p-4 border-t border-[#e5e5e5] bg-white shrink-0">
+      <div className="p-4 border-t border-border bg-white shrink-0">
         <PillButton
           onClick={handleStartBreakout}
           disabled={isSaving || isStarting}

@@ -27,7 +27,7 @@ const EditChoiceModal = ({ open, onClose, onSelect, headerColor }) => {
         <div className="flex flex-col gap-3">
           <button
             onClick={() => onSelect("occurrence")}
-            className="bg-[#F2F2F2] hover:bg-[#E5E5E5] text-gray-800 font-semibold h-10 px-4 rounded-lg transition-colors border"
+            className="bg-primaryBg hover:bg-[#E5E5E5] text-gray-800 font-semibold h-10 px-4 rounded-lg transition-colors border"
           >
             {cal.editThisOccurrence}
           </button>

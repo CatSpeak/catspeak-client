@@ -52,9 +52,9 @@ const WorkspaceRoomSortModal = ({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full h-full max-h-full sm:h-auto sm:max-h-[85vh] sm:max-w-[480px] bg-white sm:rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full h-full max-h-full sm:h-auto sm:max-h-[85vh] sm:max-w-[480px] bg-white sm:rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#FFF0F2] text-cath-red-700">
               <ArrowUpDown size={18} strokeWidth={2.5} />
@@ -82,7 +82,7 @@ const WorkspaceRoomSortModal = ({
               <select
                 value={localField}
                 onChange={(e) => setLocalField(e.target.value)}
-                className="w-full h-12 pl-4 pr-10 rounded-xl border border-gray-200 bg-white text-gray-800 font-medium appearance-none focus:outline-none focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 transition-colors text-sm cursor-pointer"
+                className="w-full h-12 pl-4 pr-10 rounded-xl border border-border bg-white text-gray-800 font-medium appearance-none focus:outline-none focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 transition-colors text-sm cursor-pointer"
               >
                 {fieldOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -108,7 +108,7 @@ const WorkspaceRoomSortModal = ({
                 className={`flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold border transition-all ${
                   localOrder === "asc"
                     ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700"
-                    : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
+                    : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                 }`}
               >
                 <ArrowUp size={16} />
@@ -121,7 +121,7 @@ const WorkspaceRoomSortModal = ({
                 className={`flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold border transition-all ${
                   localOrder === "desc"
                     ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700"
-                    : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
+                    : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                 }`}
               >
                 <ArrowDown size={16} />
@@ -132,7 +132,7 @@ const WorkspaceRoomSortModal = ({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 items-center justify-between p-4 sm:p-5 border-t border-gray-100 bg-gray-50/80 shrink-0">
+        <div className="flex gap-3 items-center justify-between p-4 sm:p-5 border-t border-border bg-gray-50/80 shrink-0">
           <button
             type="button"
             onClick={handleReset}

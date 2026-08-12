@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
@@ -8,6 +8,7 @@ import {
   AtSign,
 } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
+import ImageCropModal from "@/shared/components/ui/ImageCropModal";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import RequestButton from "@/shared/components/ui/buttons/RequestButton";
 import {
@@ -32,15 +33,13 @@ const SocialProfileHeader = ({
   const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl;
   const username = formData?.username || user?.username;
   const nickname = formData?.nickname || user?.nickname;
-  const displayName = username || nickname || "(?)";
-  const handle =
-    nickname && nickname !== displayName
-      ? nickname.startsWith("@")
-        ? nickname.slice(1)
-        : nickname
-      : null;
+  const displayName = nickname || username || "User";
+  const handle = nickname ? username : null;
   const location =
     formData?.location || user?.location || formData?.address || user?.address;
+
+  const [fileToCrop, setFileToCrop] = useState(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   // API Hooks
   const { data: statusResponse } = useGetConnectionStatusQuery(
@@ -85,6 +84,8 @@ const SocialProfileHeader = ({
       user?.backgroundUrl ||
       null;
 
+  const fileInputRef = useRef(null);
+
   const handleFollowToggle = async () => {
     if (isFollowLoading) return;
     const toastId = "follow-action";
@@ -101,16 +102,111 @@ const SocialProfileHeader = ({
           id: toastId,
         });
       }
-    } catch (error) {
-      toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
+    } catch (err) {
+      toast.error(t.profile?.social?.actionFailed || "Thao tác thất bại", {
         id: toastId,
       });
+      console.error(err);
+    }
+  };
+
+  const handleAvatarSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileToCrop(file);
+    setIsCropModalOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropComplete = async (croppedFile) => {
+    if (!croppedFile) return;
+
+    const avatarData = new FormData();
+    avatarData.append("file", croppedFile);
+
+    try {
+      toast.loading(t.profile?.avatar?.updating || "Đang cập nhật...", {
+        id: "avatar-update",
+      });
+      await updateAvatar(avatarData).unwrap();
+      toast.success(
+        t.profile?.avatar?.updateSuccess || "Cập nhật ảnh đại diện thành công",
+        {
+          id: "avatar-update",
+        },
+      );
+    } catch (error) {
+      toast.error(
+        t.profile?.avatar?.updateError || "Không thể cập nhật ảnh đại diện",
+        { id: "avatar-update" },
+      );
       console.error(error);
     }
   };
 
+  const isFriendOrPending =
+    status?.isFriend ||
+    status?.friendshipStatus === 1 ||
+    status?.friendshipStatus === "Pending";
+
+  const handleFriendshipToggle = () => {
+    if (isFriendOrPending) {
+      if (status?.friendshipId) {
+        deleteFriendship(status.friendshipId)
+          .unwrap()
+          .then(() =>
+            toast.success(
+              status?.isFriend
+                ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
+                : t.profile?.social?.cancelRequestSuccess ||
+                    "Đã hủy yêu cầu kết bạn",
+            ),
+          )
+          .catch(() =>
+            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra"),
+          );
+      }
+    } else {
+      const performSend = () => {
+        sendFriendRequest(targetAccountId)
+          .unwrap()
+          .then(() =>
+            toast.success(
+              t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+            ),
+          )
+          .catch((err) => {
+            if (err?.status === 422) {
+              toast.error(
+                t.profile?.social?.requestPending ||
+                  "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+              );
+            } else {
+              toast.error(
+                t.profile?.social?.requestError ||
+                  "Không thể gửi yêu cầu kết bạn",
+              );
+            }
+          });
+      };
+
+      if (status?.friendshipId) {
+        deleteFriendship(status.friendshipId)
+          .unwrap()
+          .then(() => {
+            performSend();
+          })
+          .catch(() => {
+            toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra");
+          });
+      } else {
+        performSend();
+      }
+    }
+  };
+
   return (
-    <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
+    <div className="w-full bg-white border border-border rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}
       <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group overflow-hidden">
         {isBackgroundLoading ? (
@@ -128,8 +224,7 @@ const SocialProfileHeader = ({
         )}
       </div>
 
-      {/* Profile Info Area */}
-      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
+      <div className="p-4 sm:p-6 relative border-b border-border flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
         <div className="flex-1 min-w-0">
           {/* Avatar floating above the bottom border of the cover photo */}
           <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full w-fit">
@@ -142,6 +237,34 @@ const SocialProfileHeader = ({
                 className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
               />
             </div>
+            {isOwnProfile && (
+              <>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarSelect}
+                />
+                {isCropModalOpen && fileToCrop && (
+                  <ImageCropModal
+                    image={fileToCrop}
+                    isOpen={isCropModalOpen}
+                    cropPreset="avatar"
+                    title={t.profile?.avatar?.cropTitle || "Cắt ảnh đại diện"}
+                    onClose={() => {
+                      setIsCropModalOpen(false);
+                      setFileToCrop(null);
+                    }}
+                    onCropComplete={(croppedFile) => {
+                      handleCropComplete(croppedFile);
+                      setIsCropModalOpen(false);
+                      setFileToCrop(null);
+                    }}
+                  />
+                )}
+              </>
+            )}
           </div>
           {/* Text Info */}
           <div className="flex flex-col items-start gap-1">

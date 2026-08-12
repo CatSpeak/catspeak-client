@@ -253,7 +253,7 @@ const VideoCallRoomContent = () => {
               className="hidden lg:flex flex-col overflow-hidden relative"
               style={{ width: 360 }}
             >
-              <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+              <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
@@ -296,7 +296,7 @@ const VideoCallRoomContent = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white shadow-2xl flex flex-col border-l border-[#E5E5E5] overflow-hidden"
+              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white shadow-2xl flex flex-col border-l border-border overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {showParticipants && <ParticipantList />}
@@ -353,7 +353,7 @@ const VideoCallRoomContent = () => {
                 {!showChat && (
                   <button
                     type="button"
-                    className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50 shrink-0"
+                    className="text-black flex w-full items-center gap-2 border-b border-border px-4 py-3 text-left hover:bg-gray-50 shrink-0"
                     onClick={() => setActiveSidePanel(null)}
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">

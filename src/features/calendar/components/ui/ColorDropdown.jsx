@@ -29,7 +29,7 @@ const ColorDropdown = ({ value, onChange }) => {
     label: cal.colorsList?.[color.value] || color.name,
     icon: (
       <div
-        className={`w-5 h-5 rounded-full shrink-0 border border-gray-200 ${
+        className={`w-5 h-5 rounded-full shrink-0 border border-border ${
           selectedColor === color.value ? "ring-2 ring-offset-1 ring-gray-400" : ""
         }`}
         style={{ backgroundColor: color.value }}

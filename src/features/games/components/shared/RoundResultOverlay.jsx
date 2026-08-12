@@ -66,7 +66,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
 
             {/* Bảng xếp hạng thu nhỏ của Round */}
             {roundResults?.cumulative_scores && (
-              <div className="w-full bg-gray-50/50 rounded-2xl p-4 md:p-6 border border-gray-200/60 shadow-inner flex flex-col min-h-0 max-h-[40vh]">
+              <div className="w-full bg-gray-50/50 rounded-2xl p-4 md:p-6 border border-border/60 shadow-inner flex flex-col min-h-0 max-h-[40vh]">
                 <h3 className="text-lg font-bold mb-4 text-center text-slate-700 shrink-0">
                   {t.rooms?.game?.crackIt?.roundLeaderboard || "Thành tích ván này"}
                 </h3>
@@ -78,7 +78,7 @@ const RoundResultOverlay = ({ gameState, roundResults, currentRound, t: propT, g
                       const delta = roundResults.scores_delta?.[id] || 0
                       const player = getPlayerName(id)
                       return (
-                        <div key={id} className="flex items-center gap-2 md:gap-4 bg-white shadow-sm border border-gray-100 px-3 md:px-4 py-3 rounded-xl min-w-0">
+                        <div key={id} className="flex items-center gap-2 md:gap-4 bg-white shadow-sm border border-border px-3 md:px-4 py-3 rounded-xl min-w-0">
                           <div className="w-6 h-6 md:w-7 md:h-7 shrink-0 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs md:text-sm text-slate-500">
                             #{index + 1}
                           </div>

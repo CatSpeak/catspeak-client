@@ -243,7 +243,7 @@ const ParticipantList = ({ hideTitle }) => {
       {!hideTitle && (
         <ListItem
           lines={1}
-          className="border-b border-[#E5E5E5] shrink-0"
+          className="border-b border-border shrink-0"
         >
           <div className="flex items-center justify-between">
             <span className="font-semibold">
@@ -298,7 +298,7 @@ const ParticipantList = ({ hideTitle }) => {
         )}
 
         {raisedHandParticipants.length > 0 && otherParticipants.length > 0 && (
-          <div className="my-2 mx-1 border-t border-[#E5E5E5]" />
+          <div className="my-2 mx-1 border-t border-border" />
         )}
 
         {otherParticipants.length > 0 && (

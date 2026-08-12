@@ -26,7 +26,7 @@ export default function ChallengeCard({
       className={`group relative flex flex-col w-full h-full rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer ${
         isSelected
           ? "border-cath-red-700 bg-[#fff5f5] shadow-md"
-          : "border-gray-200 bg-white hover:border-cath-red-700 hover:bg-[#fff5f5] hover:shadow-md"
+          : "border-border bg-white hover:border-cath-red-700 hover:bg-[#fff5f5] hover:shadow-md"
       }`}
     >
       {/* Thumbnail Container */}

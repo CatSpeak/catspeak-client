@@ -51,7 +51,7 @@ const CalendarWeekView = ({
     <div className="w-full h-full min-h-0 max-h-[500px] overflow-x-auto scrollbar-app">
       <div className="min-w-[600px] md:min-w-0 flex flex-col h-full">
         {/* Week Header */}
-        <div className="flex ml-16 border-b border-[#E5E5E5] pb-4">
+        <div className="flex ml-16 border-b border-border pb-4">
           {weekDates.map((dateObj, idx) => {
             const isToday = dateObj.dateStr === now.format('YYYY-MM-DD')
             return (
@@ -59,8 +59,7 @@ const CalendarWeekView = ({
                 key={idx}
                 className="flex-1 flex flex-col items-center gap-1 py-2"
               >
-                <div className={`w-full h-12 flex items-center justify-center rounded-full text-sm font-semibold tracking-wider transition-all 
-                ${isToday ? 'text-white bg-[#990011]' : 'text-[#1A1A1A]'}`}>
+                <div className={`w-full h-12 flex items-center justify-center rounded-full text-sm font-semibold tracking-wider transition-all ${isToday ? 'text-white bg-[#990011]' : 'text-[#1A1A1A]'}`}>
                   {DAY_LABELS[idx]}
                 </div>
                 <div className="text-lg font-medium text-gray-600">

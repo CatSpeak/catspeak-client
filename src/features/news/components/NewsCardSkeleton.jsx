@@ -18,7 +18,7 @@ const NewsCardSkeleton = ({ index = 0 }) => {
   const titleWidth = index % 2 === 0 ? "w-3/4" : "w-5/6"
 
   return (
-    <div className="flex flex-col bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+    <div className="flex flex-col bg-white rounded-xl shadow-sm overflow-hidden border border-border">
       <Skeleton className={`w-full ${aspectClass} rounded-t-xl`} />
       <div className="flex flex-col gap-2.5 p-3">
         <Skeleton className={`h-5 ${titleWidth} rounded`} />

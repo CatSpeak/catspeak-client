@@ -45,7 +45,7 @@ const MoreMenuMobileSettingsView = ({
         onClick={() => setShowMobileSettings(false)}
         hoverEffect={true}
         leftContent={<ChevronLeft size={24} />}
-        className="border-b border-[#e5e5e5] font-semibold"
+        className="border-b border-border font-semibold"
       >
         {t?.rooms?.videoCall?.backBtn || "Back"}
       </ListItem>

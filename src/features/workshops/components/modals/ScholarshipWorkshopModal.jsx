@@ -28,7 +28,7 @@ const ScholarshipWorkshopModal = ({ open, onClose, t }) => {
       onClose={onClose}
       title={workshop.title}
       className="w-full max-w-xl sm:max-w-2xl md:max-w-3xl flex flex-col max-sm:h-[100dvh] max-sm:max-h-screen sm:max-h-[90vh] max-sm:rounded-none max-sm:border-0"
-      headerClassName="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100"
+      headerClassName="flex items-center justify-between p-4 sm:p-6 border-b border-border"
       bodyClassName={`p-4 sm:p-6 flex-1 overflow-y-auto ${scrollbarClasses}`}
       footer={
         <div className="w-full sm:px-2">
@@ -98,9 +98,9 @@ const ScholarshipWorkshopModal = ({ open, onClose, t }) => {
           </div>
 
           {/* Info Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-medium bg-gray-50/80 p-5 rounded-xl border border-gray-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-medium bg-gray-50/80 p-5 rounded-xl border border-border">
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm border border-gray-100 shrink-0">
+              <div className="p-2 bg-white rounded-lg shadow-sm border border-border shrink-0">
                 <Clock className="w-5 h-5 text-[#990011]" />
               </div>
               <div className="space-y-0.5">
@@ -109,7 +109,7 @@ const ScholarshipWorkshopModal = ({ open, onClose, t }) => {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm border border-gray-100 shrink-0">
+              <div className="p-2 bg-white rounded-lg shadow-sm border border-border shrink-0">
                 <Monitor className="w-5 h-5 text-[#990011]" />
               </div>
               <div className="space-y-0.5">
@@ -147,7 +147,7 @@ const ScholarshipWorkshopModal = ({ open, onClose, t }) => {
                   href={workshop.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-colors group"
+                  className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-blue-200 hover:bg-blue-50/30 transition-colors group"
                 >
                   <div className="p-2.5 bg-gray-50 rounded-full group-hover:bg-blue-100/50 transition-colors">
                     <Globe className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
@@ -162,7 +162,7 @@ const ScholarshipWorkshopModal = ({ open, onClose, t }) => {
                 href={workshop.zaloLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-[#0068ff]/20 hover:bg-[#0068ff]/5 transition-colors group"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-[#0068ff]/20 hover:bg-[#0068ff]/5 transition-colors group"
               >
                 <div className="p-2.5 bg-gray-50 rounded-full group-hover:bg-[#0068ff]/10 transition-colors">
                   <MessageCircle className="w-5 h-5 text-gray-600 group-hover:text-[#0068ff]" />
@@ -174,7 +174,7 @@ const ScholarshipWorkshopModal = ({ open, onClose, t }) => {
 
               <a
                 href={`mailto:${workshop.email}`}
-                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 hover:border-red-200 hover:bg-red-50/30 transition-colors group sm:col-span-2 lg:col-span-1"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-red-200 hover:bg-red-50/30 transition-colors group sm:col-span-2 lg:col-span-1"
               >
                 <div className="p-2.5 bg-gray-50 rounded-full group-hover:bg-red-100/50 transition-colors">
                   <Mail className="w-5 h-5 text-gray-600 group-hover:text-[#990011]" />
@@ -186,14 +186,14 @@ const ScholarshipWorkshopModal = ({ open, onClose, t }) => {
             </div>
           </div>
 
-          <div className="pt-4 pb-2 border-t border-gray-100">
+          <div className="pt-4 pb-2 border-t border-border">
             <p className="font-bold text-gray-800 text-center text-lg italic">
               {workshop.closing}
             </p>
           </div>
 
           {/* Hashtags */}
-          <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100">
+          <div className="bg-gray-50/80 rounded-xl p-4 border border-border">
             <p className="text-sm font-medium leading-relaxed text-gray-500 text-center">
               {workshop.hashtags}
             </p>

@@ -121,7 +121,7 @@ const BillingPage = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-cath-red-700 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-border border-t-cath-red-700 rounded-full animate-spin" />
       </div>
     );
   }

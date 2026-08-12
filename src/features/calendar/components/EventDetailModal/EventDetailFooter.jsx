@@ -225,7 +225,7 @@ const EventDetailFooter = ({
                     className={`transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 ${
                       isPast
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-[#F2F2F2] hover:bg-[#D9D9D9] text-[#111111]"
+                        : "bg-primaryBg hover:bg-[#D9D9D9] text-[#111111]"
                     }`}
                   >
                     <Pencil />
@@ -233,7 +233,7 @@ const EventDetailFooter = ({
 
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
+                    className="bg-primaryBg hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 text-[#111111]"
                   >
                     <Trash2 />
                   </button>

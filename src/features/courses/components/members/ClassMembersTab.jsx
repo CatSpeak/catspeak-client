@@ -74,7 +74,7 @@ const getRoleBadge = (role, cd = {}) => {
   }
   return {
     label: role,
-    className: "bg-gray-100 text-gray-700 border-gray-200",
+    className: "bg-gray-50 text-gray-600 border-border",
   }
 }
 
@@ -163,7 +163,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
+    <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6">
       {/* ─── LEAD INSTRUCTOR SECTION ─── */}
       <section className="flex flex-col gap-3">
         <h3 className="text-xs font-extrabold text-gray-400 uppercase tracking-widest border-b border-gray-50 pb-1.5 flex items-center gap-2">
@@ -216,7 +216,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-gray-200 p-5 text-center text-xs font-bold text-gray-400">
+          <div className="rounded-2xl border border-dashed border-border p-5 text-center text-xs font-bold text-gray-400">
             {classWorkspace.noInstructor || "Chưa có thông tin giảng viên."}
           </div>
         )}

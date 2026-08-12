@@ -116,7 +116,7 @@ const GeneralSettingsTab = ({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-[#e5e5e5] flex flex-col divide-y divide-[#e5e5e5]">
+    <div className="bg-white rounded-xl border border-border flex flex-col divide-y divide-border">
       <ListItem
         lines="auto"
         rightContent={

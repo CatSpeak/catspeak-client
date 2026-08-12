@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from "react"
-import { Home, Settings, ChevronRight, ChevronLeft, Globe } from "lucide-react"
+import { Settings, ChevronRight, ChevronLeft, Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "../DesktopNav/DesktopNavItem"
 import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useAuth } from "@/features/auth"
-import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
+import ListItem from "@/shared/components/ui/ListItem"
 import MobileCommunitySwitcher from "./MobileCommunitySwitcher"
+import MobileLanguageSwitcher from "./MobileLanguageSwitcher"
 
-const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
+const NavIcon = ({ img, icon: Icon, color, size = 24 }) => {
   const [imgError, setImgError] = useState(false)
+  const [prevImg, setPrevImg] = useState(img)
 
-  useEffect(() => {
+  if (prevImg !== img) {
+    setPrevImg(img)
     setImgError(false)
-  }, [img])
+  }
 
   const IconComponent = Icon || Globe
 
@@ -24,7 +27,7 @@ const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
         src={img}
         alt=""
         onError={() => setImgError(true)}
-        className="w-5 h-5 object-contain shrink-0 rounded-sm"
+        className="w-6 h-6 object-contain shrink-0 rounded-sm"
       />
     )
   }
@@ -32,6 +35,7 @@ const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
   return (
     <IconComponent
       size={size}
+      strokeWidth={1.5}
       className="shrink-0"
       style={color ? { color } : undefined}
     />
@@ -40,7 +44,7 @@ const NavIcon = ({ img, icon: Icon, color, size = 20 }) => {
 
 const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false }) => {
   const { t } = useLanguage()
-  const { isStudent, isTeacher } = useRoleOverride()
+  const { isStudent } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
@@ -51,26 +55,20 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
   const isSettings = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")
 
   useEffect(() => {
+    const activeLinks = isSettings ? settingNavLinks : navLinks
+    const activeItem = activeLinks.find(
+      (item) =>
+        item.hasDropdown && item.subItems?.length > 0 && checkIsActive(item),
+    )
     if (isMobileOpen) {
-      const activeLinks = isSettings ? settingNavLinks : navLinks
-      const activeItem = activeLinks.find(
-        (item) =>
-          item.hasDropdown && item.subItems?.length > 0 && checkIsActive(item),
-      )
       setActiveDrilldownItem(activeItem || null)
     } else {
       const timer = setTimeout(() => {
-        const activeLinks = isSettings ? settingNavLinks : navLinks
-        const activeItem = activeLinks.find(
-          (item) =>
-            item.hasDropdown &&
-            item.subItems?.length > 0 &&
-            checkIsActive(item),
-        )
         setActiveDrilldownItem(activeItem || null)
       }, 300)
       return () => clearTimeout(timer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobileOpen, pathname])
 
   return (
@@ -83,7 +81,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
           <MobileCommunitySwitcher />
         </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-1 scrollbar-none">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 pb-6 flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {(isSettings ? settingNavLinks : navLinks)
             .filter((item) => {
               if (item.hideInSidebar) return false
@@ -112,28 +110,35 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                 item.subItems.length > 0
               ) {
                 return (
-                  <button
+                  <ListItem
                     key={item.key}
                     onClick={() => setActiveDrilldownItem(item)}
-                    className="relative flex items-center shrink-0 h-11 px-4 gap-3 rounded-lg transition-all duration-300 group overflow-hidden w-full hover:bg-gray-100"
+                    leftContent={
+                      <NavIcon
+                        img={item.img}
+                        icon={IconComponent}
+                        color={item.color}
+                        size={24}
+                      />
+                    }
+                    rightContent={
+                      <ChevronRight
+                        size={24}
+                        strokeWidth={1.5}
+                        className="shrink-0 text-gray-500"
+                      />
+                    }
+                    className="rounded-xl transition-all duration-200 w-full"
+                    contentClassName="rounded-xl transition-all duration-200 px-4 hover:bg-primaryBg"
                     title={label}
                   >
-                    <NavIcon
-                      img={item.img}
-                      icon={IconComponent}
-                      color={item.color}
-                    />
                     <span
-                      className="text-sm font-medium text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
+                      className="text-base font-normal text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate"
                       style={item.color ? { color: item.color } : undefined}
                     >
                       {label}
                     </span>
-                    <ChevronRight
-                      size={18}
-                      className="shrink-0 text-gray-500 ml-auto"
-                    />
-                  </button>
+                  </ListItem>
                 )
               }
 
@@ -151,9 +156,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
             })}
         </div>
 
-        <div className="p-3 flex flex-col gap-1 mt-auto border-t border-border shrink-0">
+        <div className="p-3 pb-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 mt-auto border-t border-border shrink-0">
           <MobileLanguageSwitcher />
-
           {footerLinks.map((item) => {
             const label = t.nav?.[item.key] || item.label || item.key
             const IconComponent = item.icon || Settings
@@ -181,7 +185,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         <div className="flex items-center px-3 shrink-0">
           <button
             onClick={() => setActiveDrilldownItem(null)}
-            className="relative flex items-center justify-center w-full px-1 h-12 hover:bg-[#F2F2F2] rounded-lg transition-colors"
+            className="relative flex items-center justify-center w-full px-1 h-12 hover:bg-primaryBg rounded-lg transition-colors"
             title={
               activeDrilldownItem
                 ? t.nav?.[activeDrilldownItem.key] ||
@@ -190,7 +194,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
                 : undefined
             }
           >
-            <ChevronLeft size={20} className="absolute left-1" />
+            <ChevronLeft size={20} strokeWidth={1.5} className="absolute left-1" />
             {activeDrilldownItem && (
               <span
                 className="font-semibold truncate max-w-[80%]"
@@ -209,7 +213,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         </div>
 
         {/* Drilldown Links */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 flex flex-col gap-1 scrollbar-none">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 pb-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {(activeDrilldownItem?.subItems || [])
             .filter((sub) => {
               const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]

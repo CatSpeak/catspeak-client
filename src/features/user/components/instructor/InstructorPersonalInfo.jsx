@@ -55,7 +55,7 @@ const InstructorPersonalInfo = ({
               type="button"
               disabled={isSavingSection}
               onClick={onCancelSectionEdit}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 border border-gray-200 rounded-lg transition cursor-pointer disabled:opacity-50"
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50"
             >
               {ins.cancel || "Hủy"}
             </button>
@@ -86,7 +86,7 @@ const InstructorPersonalInfo = ({
               onChange={onChange}
               placeholder={ins.inputFieldPlaceholder || "Input field"}
               disabled={effectiveReadOnly}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.fullName ? "border-red-500" : "border-gray-100"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.fullName ? "border-red-500" : "border-border"}`}
               containerClassName="!gap-0"
             />
             {errors.fullName && <p className="text-xs text-red-500">{errors.fullName}</p>}
@@ -103,7 +103,7 @@ const InstructorPersonalInfo = ({
               onChange={onChange}
               placeholder={ins.inputFieldPlaceholder || "Input field"}
               disabled={effectiveReadOnly}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.email ? "border-red-500" : "border-gray-100"}`}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.email ? "border-red-500" : "border-border"}`}
               containerClassName="!gap-0"
             />
             {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
@@ -131,7 +131,7 @@ const InstructorPersonalInfo = ({
                   onChange={onChange}
                   placeholder={ins.inputFieldPlaceholder || "Input field"}
                   disabled={effectiveReadOnly}
-                  className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.phoneNumber ? "border-red-500" : "border-gray-100"}`}
+                  className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.phoneNumber ? "border-red-500" : "border-border"}`}
                   containerClassName="!gap-0"
                   leftContentWidthClass={plClass}
                   leftContent={
@@ -185,7 +185,7 @@ const InstructorPersonalInfo = ({
                   type="button"
                   onClick={toggle}
                   disabled={effectiveReadOnly}
-                  className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.nationality ? "border-red-500" : "border-gray-100"}`}
+                  className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${errors.nationality ? "border-red-500" : "border-border"}`}
                 >
                   <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400" : ""}`}>
                     {selectedOption?.icon}
@@ -211,7 +211,7 @@ const InstructorPersonalInfo = ({
             onChange={onChange}
             placeholder={ins.inputFieldPlaceholder || "Input field"}
             disabled={effectiveReadOnly}
-            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.address ? "border-red-500" : "border-gray-100"}`}
+            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.address ? "border-red-500" : "border-border"}`}
             containerClassName="!gap-0"
           />
           {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -22,24 +23,7 @@ const MessageModal = ({ isOpen, children }) => {
   const isMobile = useIsMobile(425)
 
   // Lock body scroll when fullscreen on mobile
-  useEffect(() => {
-    if (isOpen && isMobile) {
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth
-      const originalOverflow = document.body.style.overflow
-      const originalPaddingRight = document.body.style.paddingRight
-
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-      }
-      document.body.style.overflow = "hidden"
-
-      return () => {
-        document.body.style.overflow = originalOverflow
-        document.body.style.paddingRight = originalPaddingRight
-      }
-    }
-  }, [isOpen, isMobile])
+  useScrollLock(isOpen && isMobile)
 
   // Mobile: fullscreen portal (same pattern as Modal.jsx)
   if (isMobile) {
@@ -85,7 +69,7 @@ const MessageModal = ({ isOpen, children }) => {
           direction="down"
           distance={12}
           exit={true}
-          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-lg border border-[#e5e5e5] bg-white shadow-lg "
+          className="absolute right-0 top-full mt-2 z-[1200] flex h-[480px] w-[360px] max-w-[90vw] flex-col overflow-hidden rounded-lg border border-border bg-white shadow-lg "
         >
           {children}
         </FluentAnimation>

@@ -44,7 +44,7 @@ const BillingFilters = ({
           value={dateFilter}
           onChange={(val) => onDateFilterChange(val)}
           placeholder={hist.dateFilterAll || "All time"}
-          triggerClassName="!h-11 !rounded-full !border-[#e5e5e5] w-full sm:!min-w-[140px] text-sm"
+          triggerClassName="!h-11 !rounded-full !border-border w-full sm:!min-w-[140px] text-sm"
           dropdownClassName="min-w-[160px]"
         />
       </div>
@@ -55,7 +55,7 @@ const BillingFilters = ({
           value={statusFilter}
           onChange={(val) => onStatusFilterChange(val)}
           placeholder={hist.statusFilterAll || "All statuses"}
-          triggerClassName="!h-11 !rounded-full !border-[#e5e5e5] w-full sm:!min-w-[160px] text-sm"
+          triggerClassName="!h-11 !rounded-full !border-border w-full sm:!min-w-[160px] text-sm"
           dropdownClassName="min-w-[180px]"
         />
       </div>

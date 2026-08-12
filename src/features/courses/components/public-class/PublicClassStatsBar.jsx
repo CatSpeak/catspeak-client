@@ -59,12 +59,12 @@ const PublicClassStatsBar = ({ classData }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
       <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-8 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((item, index) => {
+        {stats.map((item) => {
           const Icon = item.icon
           return (
             <div
               key={item.id}
-              className={`flex flex-col gap-1.5 ${index > 0 ? "pt-4 sm:pt-0" : ""}`}
+              className={`flex flex-col gap-1.5`}
             >
               <div className="flex items-center gap-2">
                 <Icon size={18} className={item.iconColor || "text-[#b20a1c]"} />

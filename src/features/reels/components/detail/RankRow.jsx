@@ -39,7 +39,7 @@ export default function RankRow({ rank, username, handle, score, coverUrl, onCli
         <span className="font-bold text-[14px] flex items-center gap-1.5">
           {formatScore(score)} <Heart size={14} className="text-cath-red-700 fill-cath-red-700" />
         </span>
-        <div className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-gray-200 bg-gray-100">
+        <div className="w-16 h-10 rounded-lg overflow-hidden relative shrink-0 shadow-sm border border-border bg-gray-100">
           {coverUrl && <img src={coverUrl} alt="" className="w-full h-full object-cover" />}
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
             <Play size={16} className="text-white fill-white" />

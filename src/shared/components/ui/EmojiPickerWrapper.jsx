@@ -28,7 +28,7 @@ const EmojiPickerWrapper = ({
 
   return (
     <div
-      className="catspeak-emoji-picker-container shadow-lg border border-[#E5E5E5] rounded-xl overflow-hidden bg-white [&_.epr-preview]:!hidden [&_.epr-footer]:!hidden"
+      className="catspeak-emoji-picker-container shadow-lg border border-border rounded-xl overflow-hidden bg-white [&_.epr-preview]:!hidden [&_.epr-footer]:!hidden"
       style={{
         width,
         height,

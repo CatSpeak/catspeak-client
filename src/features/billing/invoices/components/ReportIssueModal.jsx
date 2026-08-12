@@ -69,7 +69,7 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
             </label>
             <textarea
               id="explanation"
-              className="w-full border border-[#E5E5E5] rounded-xl p-3 outline-none focus:border-[#333] transition-colors resize-none h-32"
+              className="w-full border border-border rounded-xl p-3 outline-none focus:border-[#333] transition-colors resize-none h-32"
               placeholder={t.billing.reportIssueModal.explanationPlaceholder}
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
@@ -81,7 +81,7 @@ const ReportIssueModal = ({ isOpen, onClose, paymentId }) => {
             <label className="block text-sm font-semibold mb-2">
               {t.billing.reportIssueModal.proofImageLabel}
             </label>
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-[#E5E5E5] border-dashed rounded-xl cursor-pointer hover:bg-[#fafafa] transition-colors relative">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-border border-dashed rounded-xl cursor-pointer hover:bg-[#fafafa] transition-colors relative">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <UploadCloud className="w-8 h-8 text-[#7A7574] mb-2" />
                 <p className="text-sm text-[#7A7574]">

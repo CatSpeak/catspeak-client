@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { Camera, Users, Check } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import Modal from "@/shared/components/ui/Modal";
+import ImageCropModal from "@/shared/components/ui/ImageCropModal";
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
@@ -29,6 +30,9 @@ const AccountHeader = ({ user, formData, t }) => {
     useState(false);
   const [meetingAvatarUrlInput, setMeetingAvatarUrlInput] = useState("");
   const [coverImageUrl, setCoverImageUrl] = useState(null);
+
+  const [fileToCrop, setFileToCrop] = useState(null)
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false)
 
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation();
@@ -78,12 +82,19 @@ const AccountHeader = ({ user, formData, t }) => {
   const fileInputRef = useRef(null);
   const coverInputRef = useRef(null);
 
-  const handleAvatarChange = async (e) => {
+  const handleAvatarSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setFileToCrop(file);
+    setIsCropModalOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropComplete = async (croppedFile) => {
+    if (!croppedFile) return;
 
     const avatarData = new FormData();
-    avatarData.append("file", file);
+    avatarData.append("file", croppedFile);
 
     try {
       toast.loading(
@@ -103,8 +114,6 @@ const AccountHeader = ({ user, formData, t }) => {
         { id: "avatar-update" },
       );
       console.error(error);
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -241,7 +250,7 @@ const AccountHeader = ({ user, formData, t }) => {
   return (
     <div className="w-full relative mb-16">
       {/* Cover Photo Outer Container */}
-      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-[#e5e5e5] group/cover">
+      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-border group/cover">
         {/* Cover Photo Image */}
         <div className="relative w-full h-full">
           {isBackgroundLoading ? (
@@ -371,9 +380,28 @@ const AccountHeader = ({ user, formData, t }) => {
           ref={fileInputRef}
           className="hidden"
           accept="image/*"
-          onChange={handleAvatarChange}
+          onChange={handleAvatarSelect}
         />
       </div>
+
+      {/* Image Crop Modal for Profile Avatar */}
+      {isCropModalOpen && fileToCrop && (
+        <ImageCropModal
+          image={fileToCrop}
+          isOpen={isCropModalOpen}
+          cropPreset="avatar"
+          title={t.profile?.personalInfo?.cropAvatarTitle || "Cắt ảnh đại diện"}
+          onClose={() => {
+            setIsCropModalOpen(false)
+            setFileToCrop(null)
+          }}
+          onCropComplete={(croppedFile) => {
+            handleCropComplete(croppedFile)
+            setIsCropModalOpen(false)
+            setFileToCrop(null)
+          }}
+        />
+      )}
 
       {/* Meeting Avatar URL Modal */}
       <Modal

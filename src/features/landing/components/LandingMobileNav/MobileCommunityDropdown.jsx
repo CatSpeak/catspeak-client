@@ -80,8 +80,8 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
           onClick={handleNavigateClick}
           className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors ${
             isActive || communityOpen
-              ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
-              : "hover:bg-[#F2F2F2]"
+              ? "bg-primaryBg text-cath-red-700 hover:bg-[#E6E6E6]"
+              : "hover:bg-primaryBg"
           }`}
         >
           <span>{displayLabel}</span>
@@ -93,7 +93,7 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
             e.stopPropagation();
             setCommunityOpen((prev) => !prev);
           }}
-          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-[#F2F2F2] ${
+          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-primaryBg ${
             isActive || communityOpen ? "text-cath-red-700" : ""
           }`}
         >

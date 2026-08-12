@@ -174,7 +174,7 @@ export const DetailsInputStep = () => {
           {showDescriptionSuggestions && (
             <div
               role="listbox"
-              className="absolute left-0 right-0 top-full z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl"
+              className="absolute left-0 right-0 top-full z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-border bg-white py-1 shadow-xl"
             >
               {isFetchingDescriptionSuggestions ? (
                 <div className="flex items-center gap-2 px-3 py-3 text-sm text-gray-500">
@@ -214,7 +214,7 @@ export const DetailsInputStep = () => {
                 className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all duration-200 ${
                   isSelected
                     ? "border-cath-red-700 bg-red-50/40 text-cath-red-700 shadow-sm font-medium scale-[1.01]"
-                    : "border-gray-200 hover:border-gray-300 text-gray-600 hover:bg-gray-50/50"
+                    : "border-border hover:border-gray-300 text-gray-600 hover:bg-gray-50/50"
                 }`}
               >
                 <IconComponent
@@ -235,7 +235,7 @@ export const DetailsInputStep = () => {
       </div>
 
       {/* Cover selection layout */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+      <div className="flex flex-col gap-2 pt-2 border-t border-border">
         <div className="flex items-center justify-between">
           <label className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
             <Image size={15} className="text-gray-500" />
@@ -259,9 +259,9 @@ export const DetailsInputStep = () => {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 border border-gray-200/60 rounded-2xl mt-1.5 animate-fadeIn">
+        <div className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 border border-border/60 rounded-2xl mt-1.5 animate-fadeIn">
           {/* Video Player Container (always mounted, hidden if coverType !== 'frame') */}
-          <div className={`relative aspect-[9/16] h-[160px] sm:h-[180px] rounded-xl overflow-hidden bg-black border border-gray-200/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0 ${coverType !== "frame" ? "absolute -left-[9999px] w-[1px] h-[1px] opacity-0 pointer-events-none" : ""
+          <div className={`relative aspect-[9/16] h-[160px] sm:h-[180px] rounded-xl overflow-hidden bg-black border border-border/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0 ${coverType !== "frame" ? "absolute -left-[9999px] w-[1px] h-[1px] opacity-0 pointer-events-none" : ""
             }`}>
             <video
               ref={videoRef}
@@ -317,14 +317,14 @@ export const DetailsInputStep = () => {
                 </span>
 
                 {isExtractingFilmstrip ? (
-                  <div className="flex items-center justify-center h-14 bg-white border border-gray-150 rounded-xl gap-2 shadow-sm">
+                  <div className="flex items-center justify-center h-14 bg-white border border-border rounded-xl gap-2 shadow-sm">
                     <div className="w-3.5 h-3.5 border-2 border-cath-red-700 border-t-transparent rounded-full animate-spin" />
                     <span className="text-[10px] text-gray-400 font-bold">
                       {t?.catSpeak?.reels?.createModal?.extractingKeyframes || "Extracting keyframes..."}
                     </span>
                   </div>
                 ) : filmstripFrames.length > 0 ? (
-                  <div className="grid grid-cols-6 gap-1 bg-white p-1 border border-gray-150 rounded-xl shadow-sm">
+                  <div className="grid grid-cols-6 gap-1 bg-white p-1 border border-border rounded-xl shadow-sm">
                     {filmstripFrames.map((frame, index) => (
                       <button
                         key={index}
@@ -350,7 +350,7 @@ export const DetailsInputStep = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-14 bg-white border border-gray-150 rounded-xl shadow-sm">
+                  <div className="flex items-center justify-center h-14 bg-white border border-border rounded-xl shadow-sm">
                     <span className="text-[10px] text-gray-400 font-bold">
                       {t?.catSpeak?.reels?.createModal?.noFrames || "No frames available"}
                     </span>
@@ -365,7 +365,7 @@ export const DetailsInputStep = () => {
           ) : (
             /* Custom Image Selection Controls */
             <div className="flex-1 flex flex-col sm:flex-row gap-4 items-center w-full">
-              <div className="relative w-[84px] h-[120px] rounded-xl overflow-hidden bg-gray-100 border border-gray-200/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0">
+              <div className="relative w-[84px] h-[120px] rounded-xl overflow-hidden bg-gray-100 border border-border/80 shadow-sm shrink-0 flex items-center justify-center mx-auto sm:mx-0">
                 {coverPreviewUrl ? (
                   <img
                     src={coverPreviewUrl}

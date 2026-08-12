@@ -15,10 +15,10 @@ const MobileLanguageItem = ({
       onClick={disabled ? undefined : () => onSelect(code)}
       className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors ${
         disabled
-          ? "cursor-default hover:bg-[#F2F2F2]"
+          ? "cursor-default hover:bg-primaryBg"
           : isActive
-            ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
-            : "hover:bg-[#F2F2F2]"
+            ? "bg-primaryBg text-cath-red-700 hover:bg-[#E6E6E6]"
+            : "hover:bg-primaryBg"
       }`}
     >
       <div className="flex-shrink-0 min-w-[32px]">

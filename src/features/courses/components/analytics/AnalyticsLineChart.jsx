@@ -61,7 +61,7 @@ const AnalyticsLineChart = ({
 
   if (chartData.length === 0) {
     return (
-      <div className="w-full h-[250px] flex items-center justify-center rounded-xl border border-dashed border-gray-200 text-sm text-gray-400">
+      <div className="w-full h-[250px] flex items-center justify-center rounded-xl border border-dashed border-border text-sm text-gray-400">
         {secT.noData || "No analytics data for this period."}
       </div>
     )

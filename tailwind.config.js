@@ -46,6 +46,7 @@ export default {
         primaryText: "#868CA0",
         text555: "#555",
         secondary: "#606060",
+        dusk: "#1a1a2e",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

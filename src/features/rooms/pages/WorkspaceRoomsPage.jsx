@@ -308,7 +308,7 @@ const WorkspaceRoomsContent = () => {
             className="w-full"
           >
             {/* Top Bar: Tabs & Create Room Button */}
-            <div className="flex justify-between items-center border-b border-gray-200 mb-4">
+            <div className="flex justify-between items-center border-b border-border mb-4">
               <Tabs
                 tabs={tabs}
                 activeTab={activeTab}
@@ -339,7 +339,7 @@ const WorkspaceRoomsContent = () => {
                   placeholder={
                     t.rooms?.searchPlaceholder || "Tìm kiếm theo tên phòng..."
                   }
-                  className="h-12 border-[#e5e5e5]"
+                  className="h-12 border-border"
                 />
               </div>
 
@@ -349,7 +349,7 @@ const WorkspaceRoomsContent = () => {
                 <button
                   type="button"
                   onClick={() => setIsFilterOpen(true)}
-                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-[#F0F0F0] hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
+                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
                   title={t.rooms?.filters?.title || "Bộ lọc"}
                 >
                   <SlidersHorizontal size={18} strokeWidth={2} />
@@ -367,7 +367,7 @@ const WorkspaceRoomsContent = () => {
                 <button
                   type="button"
                   onClick={() => setIsSortOpen(true)}
-                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-[#F0F0F0] hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
+                  className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
                   title={t.rooms?.sortTitle || "Sắp xếp"}
                 >
                   <ArrowUpDown size={18} strokeWidth={2} />
@@ -404,7 +404,7 @@ const WorkspaceRoomsContent = () => {
               <RoomsListSkeleton />
             ) : filteredAndSortedRooms.length === 0 ? (
               /* Empty state matching WorkspaceMyReelsTab.jsx style */
-              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-gray-200 rounded-2xl bg-gray-50/50 my-4">
+              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 my-4">
                 {activeTab === "created" ? (
                   <Crown size={48} className="text-gray-300 mb-3" />
                 ) : (
@@ -483,7 +483,7 @@ const RoomsListSkeleton = () => (
     {Array.from({ length: 8 }).map((_, i) => (
       <div
         key={i}
-        className="rounded-2xl border border-[#e5e5e5] bg-white overflow-hidden animate-pulse flex flex-col"
+        className="rounded-2xl border border-border bg-white overflow-hidden animate-pulse flex flex-col"
       >
         <div className="aspect-video w-full bg-gray-200" />
         <div className="p-4 flex flex-col gap-3 flex-1 justify-between">

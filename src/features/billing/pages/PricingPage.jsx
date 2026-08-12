@@ -5,7 +5,6 @@ import { useGetUserProfileQuery } from "@/store/api/userApi";
 import { useGetPlansQuery } from "@/store/api/plansApi";
 import { useAuth } from "@/features/auth";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { Breadcrumb } from "@/shared/components/ui/navigation";
 import { getGridClasses } from "../utils/planUtils";
 import { History } from "lucide-react";
 import PageTitle from "@/shared/components/ui/PageTitle";
@@ -13,7 +12,7 @@ import PageTitle from "@/shared/components/ui/PageTitle";
 const PricingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
   const { data: profileResponse, isLoading: isProfileLoading } =
     useGetUserProfileQuery(undefined, { skip: !isAuthenticated });
@@ -82,27 +81,17 @@ const PricingPage = () => {
       description: plan.description,
       features: plan.subscriptionFeatures
         ? plan.subscriptionFeatures.map((f) => ({
-            id: f.id,
-            name: f.featureName,
-            limitValue: f.limitValue,
-            valueType: f.valueType?.toLowerCase(),
-            code: f.featureCode,
-          }))
+          id: f.id,
+          name: f.featureName,
+          limitValue: f.limitValue,
+          valueType: f.valueType?.toLowerCase(),
+          code: f.featureCode,
+        }))
         : [],
       applicableRole: plan.applicableRole?.toLowerCase(),
       iconUrl: plan.iconUrl,
       brandColor: plan.brandColor,
     }));
-
-  const breadcrumbItems = [
-    {
-      label: t.nav?.home || "Home",
-      onClick: () => navigate(`/${language}/community`),
-    },
-    {
-      label: t.billing.pricing.title,
-    },
-  ];
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-70px)]">
@@ -136,7 +125,7 @@ const PricingPage = () => {
           {[1, 2].map((i) => (
             <div
               key={i}
-              className="border border-gray-200 bg-white p-6 rounded-3xl shadow-sm animate-pulse space-y-6"
+              className="border border-border bg-white p-6 rounded-3xl shadow-sm animate-pulse space-y-6"
             >
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-2xl" />

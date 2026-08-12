@@ -33,7 +33,7 @@ const InteractiveCard = ({ children, onClick, className = "", innerClassName = "
 
       {/* Front */}
       <div
-        className={`relative rounded-2xl bg-white flex flex-col overflow-hidden border border-[#e5e5e5] shadow-sm group-hover/card:shadow-none will-change-transform translate-y-[0px] transition-all duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] group-hover/card:-translate-y-[6px] group-hover/card:duration-[250ms] group-hover/card:ease-[cubic-bezier(.3,.7,.4,1.5)] ${innerClassName}`}
+        className={`relative rounded-2xl bg-white flex flex-col overflow-hidden border border-border shadow-sm group-hover/card:shadow-none will-change-transform translate-y-[0px] transition-all duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] group-hover/card:-translate-y-[6px] group-hover/card:duration-[250ms] group-hover/card:ease-[cubic-bezier(.3,.7,.4,1.5)] ${innerClassName}`}
         style={
           isPressed
             ? { transform: "translateY(-2px)", transitionDuration: "34ms" }

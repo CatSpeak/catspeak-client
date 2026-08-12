@@ -88,10 +88,10 @@ const RoomFilterModal = ({ open, onClose }) => {
       />
       
       {/* Modal Content */}
-      <div className="relative w-full h-full max-h-full rounded-none sm:h-auto sm:max-h-[85vh] sm:max-w-[640px] bg-white sm:rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative w-full h-full max-h-full rounded-none sm:h-auto sm:max-h-[85vh] sm:max-w-[640px] bg-white sm:rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white shrink-0">
+        <div className="flex items-center justify-between p-5 border-b border-border bg-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#FFF0F2] text-cath-red-700">
               <SlidersHorizontal size={18} strokeWidth={2.5} />
@@ -131,7 +131,7 @@ const RoomFilterModal = ({ open, onClose }) => {
                     className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-[14px] font-semibold transition-all duration-200 border ${
                       isSelected 
                         ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700" 
-                        : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
+                        : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                     }`}
                   >
                     {level.labelKey ? t.rooms?.filters?.levels?.[level.labelKey] || level.label : level.label}
@@ -163,7 +163,7 @@ const RoomFilterModal = ({ open, onClose }) => {
                     className={`flex items-center justify-center px-4 py-2.5 rounded-xl text-[14px] font-semibold transition-all duration-200 border ${
                       isSelected 
                         ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700" 
-                        : "bg-white border-gray-200 text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
+                        : "bg-white border-border text-gray-600 hover:border-cath-red-700 hover:text-cath-red-700"
                     }`}
                   >
                     {t.rooms?.filters?.topics?.[topic.toLowerCase()] || topic}
@@ -175,7 +175,7 @@ const RoomFilterModal = ({ open, onClose }) => {
 
         </div>
 
-        <div className="flex gap-3 sm:gap-0 items-center sm:justify-between p-4 sm:p-5 border-t border-gray-100 bg-gray-50/80 shrink-0 mt-auto">
+        <div className="flex gap-3 sm:gap-0 items-center sm:justify-between p-4 sm:p-5 border-t border-border bg-gray-50/80 shrink-0 mt-auto">
           <button 
             onClick={handleClear}
             className="flex-1 sm:flex-none flex items-center justify-center px-4 py-3.5 sm:py-2.5 text-[15px] sm:text-[14px] font-bold text-gray-700 bg-gray-200/70 sm:bg-transparent sm:text-gray-500 hover:text-cath-red-700 hover:bg-[#FFF0F2] rounded-xl transition-all"

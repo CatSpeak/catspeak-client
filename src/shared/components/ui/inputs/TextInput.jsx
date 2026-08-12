@@ -45,7 +45,7 @@ const TextInput = ({
         ? "rounded-xl"
         : variant === "rounded-2xl"
           ? "rounded-2xl"
-          : "rounded-3xl"
+          : "rounded-2xl"
 
   const iconPadding = Icon ? "!pl-10" : ""
   const rightIconPadding = RightIcon ? "!pr-12" : ""
@@ -57,7 +57,7 @@ const TextInput = ({
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
   const heightClass = multiline ? "min-h-[56px] px-4" : "h-[56px] px-4"
-  const finalClassName = `w-full border border-[#e5e5e5] outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-[#e5e5e5] disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {

@@ -199,7 +199,7 @@ const WorkspaceAnalyticsPage = () => {
       {/* Main Analytics Container */}
       <div className="w-full flex flex-col">
         {/* Navigation Tabs Bar */}
-        <div className="flex gap-2 border-b border-gray-200 bg-white rounded-t-2xl px-3 pt-2 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-2 border-b border-border bg-white rounded-t-2xl px-3 pt-2 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {tabsList.map((tab) => {
             const isActive = activeTab === tab.key
             return (

@@ -56,7 +56,7 @@ const CalendarTab = ({
   return (
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-[#E5E5E5]">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-border">
         <div className="flex items-center gap-0 md:gap-2">
           <IconButton
             onClick={onPrev}
@@ -131,7 +131,7 @@ const CalendarTab = ({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-[#E5E5E5]">
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-border">
         {LEGEND.map((item) => (
           <div key={item.type} className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full" style={{ backgroundColor: item.color }} />

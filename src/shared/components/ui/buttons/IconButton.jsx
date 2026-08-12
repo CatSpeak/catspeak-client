@@ -26,7 +26,7 @@ const IconButton = ({
 
   const variantClasses = {
     primary: "bg-[#990011] group-hover/icon:bg-[#80000e] text-white",
-    filled: "bg-[#F2F2F2] group-hover/icon:bg-[#C2C2C2]",
+    filled: "bg-primaryBg group-hover/icon:bg-[#C2C2C2]",
     ghost: "bg-transparent group-hover/icon:bg-[#CCCCCC]",
     iconOnly:
       "bg-transparent text-white/60 group-hover/icon:text-white transition-colors duration-150",

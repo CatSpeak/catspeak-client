@@ -18,7 +18,7 @@ const UpcomingSessionsPanel = ({
   const { t } = useLanguage()
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xs flex flex-col gap-5 h-full">
+    <div className="bg-white rounded-3xl p-6 border border-border shadow-xs flex flex-col gap-5 h-full">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
@@ -50,7 +50,7 @@ const UpcomingSessionsPanel = ({
               key={item.id}
               type="button"
               onClick={() => onOpenSession(item)}
-              className="text-left bg-[#FCFCFC] border border-gray-150 rounded-2xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 hover:shadow-xs transition-all duration-300 cursor-pointer"
+              className="text-left bg-[#FCFCFC] border border-border rounded-2xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 hover:shadow-xs transition-all duration-300 cursor-pointer"
             >
               <div className="flex flex-col gap-2.5">
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -79,7 +79,7 @@ const UpcomingSessionsPanel = ({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
+              <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-border">
                 <div className="flex items-center gap-1.5">
                   <span className="inline-flex items-center gap-1 text-[11px] font-bold text-gray-400 font-sans">
                     <Users size={11} />

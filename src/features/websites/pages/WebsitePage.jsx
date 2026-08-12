@@ -73,7 +73,7 @@ const WebsitePage = () => {
   return (
     <div className="relative h-[calc(100dvh-64px)] w-full px-4 lg:h-full flex flex-col gap-2 pb-4">
       {/* Top Header Bar with Back Button */}
-      <div className="flex items-center justify-between bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm shrink-0">
+      <div className="flex items-center justify-between bg-white px-4 py-2 rounded-xl border border-border shadow-sm shrink-0">
         <Link
           to={resolvePath("/resources")}
           className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-cath-red-700 transition-colors"
@@ -98,7 +98,7 @@ const WebsitePage = () => {
       </div>
 
       {/* Container chứa iframe */}
-      <div className="relative flex-1 w-full overflow-hidden rounded-xl border-2 border-slate-200/80 shadow-md">
+      <div className="relative flex-1 w-full overflow-hidden rounded-xl border-2 border-border/80 shadow-md">
         {/* Overlay loading / button */}
         {(isIframeLoading || showOverlay) && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-800/80">

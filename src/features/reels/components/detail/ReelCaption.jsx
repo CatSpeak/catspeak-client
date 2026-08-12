@@ -26,7 +26,7 @@ const ReelCaption = React.memo(({ reel, isMobile = false }) => {
 
   return (
     <div
-      className={`shrink-0 ${isMobile ? "p-3" : "p-4 border-b border-gray-200"}`}
+      className={`shrink-0 ${isMobile ? "p-3" : "p-4 border-b border-border"}`}
     >
       <div
         className={`flex items-center justify-between ${isMobile ? "mb-3" : "mb-4"}`}

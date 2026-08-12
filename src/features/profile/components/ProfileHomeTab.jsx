@@ -88,7 +88,7 @@ const ProfileHomeTab = ({
                 />
                 <button
                   onClick={handleOpenEditorEmpty}
-                  className="flex-1 h-10 pl-5 text-left text-gray-500 bg-transparent border border-[#e5e5e5] hover:border-cath-red-700 rounded-full outline-none cursor-pointer text-sm transition-colors"
+                  className="flex-1 h-10 pl-5 text-left text-gray-500 bg-transparent border border-border hover:border-cath-red-700 rounded-full outline-none cursor-pointer text-sm transition-colors"
                 >
                   {t.profile?.home?.whatOnYourMind || "Bạn đang nghĩ gì?"}
                 </button>

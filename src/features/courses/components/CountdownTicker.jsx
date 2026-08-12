@@ -62,7 +62,7 @@ const CountdownTicker = ({ targetDate }) => {
   }
 
   return (
-    <div className="flex justify-around items-center text-center py-3 border-b border-gray-100 select-none">
+    <div className="flex justify-around items-center text-center py-3 border-b border-border select-none">
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.days}</span>
         <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">

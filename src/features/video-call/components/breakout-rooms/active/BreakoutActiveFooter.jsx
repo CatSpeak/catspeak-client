@@ -24,7 +24,7 @@ const BreakoutActiveFooter = ({
   }
 
   return (
-    <div className="p-4 border-t border-[#e5e5e5] flex flex-col shrink-0">
+    <div className="p-4 border-t border-border flex flex-col shrink-0">
       <PillButton
         onClick={() => setIsModalOpen(true)}
         variant="secondary"

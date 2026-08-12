@@ -179,7 +179,7 @@ const StudentJoinModal = ({
               </p>
 
               {/* Class summary card */}
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 w-full text-left my-6 flex flex-col gap-2.5 text-xs text-gray-600 font-semibold">
+              <div className="bg-gray-50 rounded-2xl p-4 border border-border w-full text-left my-6 flex flex-col gap-2.5 text-xs text-gray-600 font-semibold">
                 <p className="font-extrabold text-gray-900 text-sm truncate">{course.title}</p>
                 <div className="flex items-center gap-2">
                   <Calendar size={13} className="text-gray-400" />
@@ -220,12 +220,12 @@ const StudentJoinModal = ({
               </p>
 
               {/* Fee info */}
-              <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100 my-5 flex flex-col gap-2">
+              <div className="w-full bg-gray-50 rounded-2xl p-4 border border-border my-5 flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs font-bold">
                   <span className="text-gray-400">{sc.classBatch}</span>
                   <span className="text-gray-800 text-right truncate max-w-[200px]">{selectedClass.title}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs font-bold border-t border-gray-200/50 pt-2 mt-1">
+                <div className="flex justify-between items-center text-xs font-bold border-t border-border/50 pt-2 mt-1">
                   <span className="text-gray-400 uppercase">{sc.tuition}</span>
                   <span className="text-[#b20a1c] font-black text-sm">{tuitionLabel}</span>
                 </div>

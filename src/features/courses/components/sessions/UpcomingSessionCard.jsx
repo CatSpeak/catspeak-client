@@ -22,7 +22,7 @@ const UpcomingSessionCard = ({
   const ui = t.courses?.workspaceUi || {};
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
+    <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
       <h3 className="text-lg font-black text-gray-950 tracking-tight">
         {upcomingSessionLabel}
       </h3>
@@ -139,7 +139,7 @@ const UpcomingSessionCard = ({
           </div>
         </div>
       ) : (
-        <div className="bg-[#FCFCFC] border border-gray-150 rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
+        <div className="bg-[#FCFCFC] border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
           <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
             <Calendar size={18} />
           </div>

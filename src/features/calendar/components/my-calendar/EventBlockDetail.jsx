@@ -46,11 +46,11 @@ const EventBlockDetail = ({ event, open, onClose }) => {
     return (
       <div>
         {['registered-event', 'my-event'].includes(event.eventType) && event.thumbnailUrl ? (
-          <div className="w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center overflow-hidden border border-gray-100 mt-2 shrink-0">
+          <div className="w-full h-44 bg-[#F8F9FA] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
             <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-full h-44 bg-[#F8F9FA] text-[#7B7979] rounded-2xl flex items-center justify-center overflow-hidden border border-gray-100 mt-2 shrink-0">
+          <div className="w-full h-44 bg-[#F8F9FA] text-[#7B7979] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
             No Image
           </div>
         )}
@@ -82,21 +82,21 @@ const EventBlockDetail = ({ event, open, onClose }) => {
         }
 
         return (
-          <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
+          <div className="p-4 border-t border-border flex items-center justify-center gap-3 bg-white shrink-0">
             <PillButton bgColor={isPast ? "#d1d5db" : undefined}>
               {statusLabel}
             </PillButton>
             <SharePopover
               eventId={event.id || event._id}
               occurrenceId={event.occurrenceId}
-              className="!bg-transparent border border-gray-200 !text-[#1A1A1A] !w-11 !h-11 hover:!bg-gray-50"
+              className="!bg-transparent border border-border !text-[#1A1A1A] !w-11 !h-11 hover:!bg-gray-50"
             />
           </div>
         )
       }
       case "teaching-schedule": case "student-schedule":
         return (
-          <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-3 bg-white shrink-0">
+          <div className="p-4 border-t border-border flex items-center justify-center gap-3 bg-white shrink-0">
             <PillButton
               variant='outline'
               onClick={() => navigate(`/${language || 'vi'}/meet/class-${event?.classId}`)}
@@ -123,7 +123,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
     >
       {/* Header section with event specific color background */}
       <div
-        className="p-6 border-b border-[#E5E5E5] shrink-0"
+        className="p-6 border-b border-border shrink-0"
           style={{ backgroundColor: style.background }}
         >
           <div className="flex items-center gap-2 mb-2">

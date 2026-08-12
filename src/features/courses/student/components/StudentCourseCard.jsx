@@ -77,11 +77,11 @@ const StudentCourseCard = ({
     return (
       <div
         onClick={onViewDetails}
-        className="bg-white rounded-3xl border border-slate-200 hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+        className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
       >
         <div className="flex items-center gap-5 flex-1 min-w-0">
           {/* Thumbnail */}
-          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-sm border border-slate-200 group-hover:scale-[1.02] transition-transform duration-300">
+          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-sm border border-border group-hover:scale-[1.02] transition-transform duration-300">
             {thumbnailUrl ? (
               <img
                 src={thumbnailUrl}
@@ -123,7 +123,7 @@ const StudentCourseCard = ({
                 <BookOpen size={10} />
                 {sc.courseBadge || "Khóa học"}
               </span>
-              <span className="bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-slate-200">
+              <span className="bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-border">
                 {getLocalizedLanguageName(course.language, t)}
               </span>
               {openClassCount != null && openClassCount > 0 && (
@@ -190,7 +190,7 @@ const StudentCourseCard = ({
   return (
     <div
       onClick={onViewDetails}
-      className="bg-white rounded-3xl border border-slate-200 hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
+      className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
     >
       {/* Thumbnail Area */}
       <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">

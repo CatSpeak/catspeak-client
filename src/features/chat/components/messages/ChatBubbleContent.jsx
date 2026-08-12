@@ -74,7 +74,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
       : `${
           isOwn
             ? "rounded-2xl bg-[#990011] text-white"
-            : "rounded-2xl bg-[#F2F2F2]"
+            : "rounded-2xl bg-primaryBg"
         } px-4 py-3 min-h-[40px] min-w-[60px] inline-block max-w-full`
 
   return (
@@ -107,7 +107,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
           {textContent && (
             <div
               className={`w-full ${
-                isOwn ? "bg-[#990011] text-white" : "bg-[#F2F2F2] text-gray-900"
+                isOwn ? "bg-[#990011] text-white" : "bg-primaryBg text-gray-900"
               } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText
@@ -147,7 +147,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
               className={`w-full ${
                 isOwn
                   ? "bg-[#990011] text-white"
-                  : "bg-[#F2F2F2] text-gray-900 shadow-xs"
+                  : "bg-primaryBg text-gray-900 shadow-xs"
               } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText

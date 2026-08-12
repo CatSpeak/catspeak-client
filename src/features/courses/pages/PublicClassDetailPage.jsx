@@ -36,6 +36,14 @@ const PublicClassDetailPage = () => {
 
   const isWorkspace = location.pathname.startsWith("/workspace")
 
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1)
+    } else {
+      navigate(isWorkspace ? "/workspace/explore-courses" : "/explore-courses")
+    }
+  }
+
   // Fetch Class Detail
   const {
     currentData: classResponse,
@@ -122,9 +130,9 @@ const PublicClassDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-[70vh] flex flex-col justify-center items-center gap-4 bg-slate-50">
+      <div className="min-h-[90vh] flex flex-col justify-center items-center gap-2">
         <LoadingSpinner className="w-10 h-10 text-[#b20a1c]" />
-        <p className="text-sm font-semibold text-slate-500 animate-pulse">
+        <p className="text-sm font-semibold text-slate-500">
           {pc.loading || "Đang tải thông tin lớp học..."}
         </p>
       </div>
@@ -145,7 +153,7 @@ const PublicClassDetailPage = () => {
         </p>
         <button
           type="button"
-          onClick={() => navigate(isWorkspace ? "/workspace/explore-courses" : "/explore-courses")}
+          onClick={handleBack}
           className="mt-2 bg-[#b20a1c] hover:bg-[#960817] text-white font-extrabold px-6 py-3 rounded-2xl shadow-md transition-colors text-sm"
         >
           {pc.exploreOtherBtn || "Khám Phá Các Lớp Học Khác"}
@@ -164,6 +172,7 @@ const PublicClassDetailPage = () => {
         isEnrolling={isEnrolling}
         isUpcoming={isUpcoming}
         onEnroll={handleEnrollAction}
+        onBack={handleBack}
       />
 
       {/* Overlapping Quick Stats Card */}
@@ -176,9 +185,9 @@ const PublicClassDetailPage = () => {
           <div className="lg:col-span-8 flex flex-col gap-12">
             {/* About / Class Overview */}
             <section id="about" className="scroll-mt-24">
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
+              <div className="bg-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
                 <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mb-4">
-                  {pc.overviewTitle || "Giới Thiệu Chi Tiết Về Lớp Học"}
+                  {pc.overviewTitle || "Giới Thiệu Về Lớp Học"}
                 </h2>
                 {classData.description ? (
                   <RenderHTML
@@ -214,7 +223,7 @@ const PublicClassDetailPage = () => {
       </main>
 
       {/* Fixed Bottom CTA Bar (Mobile & Tablet) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200 p-4 shadow-2xl flex items-center justify-between gap-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-border p-4 shadow-2xl flex items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">
             {c.tuition || pc.tuitionFeeFull || "Học phí trọn gói"}

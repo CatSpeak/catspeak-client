@@ -457,7 +457,7 @@ const ChatInput = ({
   const isInputDisabled = !isConnected || (isAiInput && isAiBlocked)
 
   return (
-    <div className="p-3 bg-white flex flex-col gap-2 relative shrink-0 border-t border-[#E5E5E5]">
+    <div className="p-3 bg-white flex flex-col gap-2 relative shrink-0 border-t border-border">
       {/* Mention Autocomplete Popover */}
       {mentionState.isOpen && (
         <MentionPopover
@@ -466,7 +466,6 @@ const ChatInput = ({
           onSelect={handleSelectMention}
         />
       )}
-
       {/* Replying banner */}
       {replyTarget && (
         <RepliedMessage
@@ -486,7 +485,7 @@ const ChatInput = ({
         } ${
           isAiInput
             ? "border-red-200 bg-gradient-to-r from-red-50/40 via-white to-red-50/20 shadow-sm"
-            : "border-[#E5E5E5] bg-gray-50/60"
+            : "border-border bg-gray-50/60"
         }`}
       >
         {/* Left AI Switch Control */}

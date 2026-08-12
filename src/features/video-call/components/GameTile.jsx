@@ -46,7 +46,7 @@ const GameTile = ({ isMain = true, onClick }) => {
   if (isMain) {
     return (
       <div
-        className="relative h-full w-full bg-neutral-900 flex items-center justify-center overflow-hidden rounded-2xl border border-[#E5E5E5]"
+        className="relative h-full w-full bg-neutral-900 flex items-center justify-center overflow-hidden rounded-2xl border border-border"
       >
         {/* Game overlay (mode main) */}
         <div className="absolute inset-0">
@@ -60,7 +60,7 @@ const GameTile = ({ isMain = true, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="relative h-full w-full bg-neutral-900 overflow-hidden rounded-2xl border border-[#E5E5E5] cursor-pointer hover:border-cath-red-400 transition-colors group"
+      className="relative h-full w-full bg-neutral-900 overflow-hidden rounded-2xl border border-border cursor-pointer hover:border-cath-red-400 transition-colors group"
       title={`${labelText} — click to expand`}
     >
       {showImagePreview ? (

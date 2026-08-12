@@ -97,7 +97,7 @@ export default function ReelReportModal({ reel, onClose }) {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl p-3 text-[14px] focus:outline-none focus:border-cath-red-500 transition-colors"
+            className="w-full border border-border rounded-xl p-3 text-[14px] focus:outline-none focus:border-cath-red-500 transition-colors"
             rows={3}
             placeholder={lang.placeholder || "Provide more context to help us understand..."}
           />

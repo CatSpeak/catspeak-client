@@ -22,7 +22,7 @@ import FluentCard from "@/shared/components/ui/FluentCard";
 import { Skeleton } from "@/shared/components/ui/indicators";
 
 const NewsDetailSkeleton = () => (
-  <div className="w-full min-h-screen bg-[#f4f5f8] py-4 px-3 sm:px-5 md:py-6">
+  <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
     <div className="mx-auto max-w-7xl">
       <div className="grid grid-cols-1 items-start gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">
         {/* Left Column: Article Content Skeleton */}
@@ -51,7 +51,7 @@ const NewsDetailSkeleton = () => (
             rounded="rounded-2xl"
             className="shadow-sm border-[#e5e7eb] flex flex-col gap-4"
           >
-            <div className="flex flex-col gap-2 pb-3 border-b border-gray-100">
+            <div className="flex flex-col gap-2 pb-3 border-b border-border">
               <Skeleton className="h-7 w-4/5" />
               <Skeleton className="h-5 w-3/5" />
               <div className="flex items-center gap-2 mt-1">
@@ -67,7 +67,7 @@ const NewsDetailSkeleton = () => (
               <Skeleton className="h-4 w-[98%]" />
               <Skeleton className="h-4 w-[75%]" />
 
-              <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
                 <div className="flex items-center gap-2">
                   <Skeleton className="h-8 w-20 rounded-full" />
                   <Skeleton className="h-8 w-20 rounded-full" />
@@ -205,7 +205,7 @@ const NewsDetailPage = () => {
 
   if (error || !newsItem || newsItem.privacy !== "Public") {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center bg-[#f4f5f8] px-4">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center bg-primaryBg px-4">
         <h5 className="mb-4 text-2xl font-bold">{t.news?.error?.notFound}</h5>
         <button
           onClick={() => navigate(`/${lang}/cat-speak/news`)}
@@ -231,7 +231,7 @@ const NewsDetailPage = () => {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#f4f5f8] py-4 px-3 sm:px-5 md:py-6">
+    <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
       <div className="mx-auto max-w-7xl flex flex-col gap-5">
         {/* ── Two-column layout ─────────────────────────────────── */}
         <div className="grid grid-cols-1 items-start gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">

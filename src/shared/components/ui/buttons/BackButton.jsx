@@ -13,7 +13,7 @@ import { ArrowLeft } from "lucide-react"
  */
 const BackButton = ({ to, onClick, children, className = "" }) => {
   const base =
-    "group flex items-center gap-2 h-12 px-4 rounded-full w-fit text-gray-600 hover:text-gray-900 border border-[#e5e5e5] hover:bg-[#f2f2f2] transition-colors font-medium"
+    "group flex items-center gap-2 h-12 px-4 rounded-full w-fit text-gray-600 hover:text-gray-900 border border-border hover:bg-primaryBg transition-colors font-medium"
 
   if (to) {
     return (

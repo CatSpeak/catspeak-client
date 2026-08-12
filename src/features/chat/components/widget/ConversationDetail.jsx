@@ -148,7 +148,7 @@ const ConversationDetail = ({
       </div>
 
       {/* ── Chat Input ─────────────────────────────────── */}
-      <div className="border-t border-[#e5e5e5]">
+      <div className="border-t border-border">
         <ChatInput
           value={input}
           onChange={(val) => {

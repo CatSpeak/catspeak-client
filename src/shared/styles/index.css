@@ -6,7 +6,7 @@
 
 /* CSS Variables */
 :root {
-  --font-primary: "Nunito", "Noto Sans", sans-serif;
+  --font-primary: "Nunito", "Noto Sans SC", "Noto Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
   --cath-red-50: #100002;
@@ -88,6 +88,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Perfectly balanced bold styling (especially for CJK / Chinese text) */
+strong,
+b {
+  font-weight: 700;
+  -webkit-text-stroke: 0.2px currentColor;
+  color: #0f172a;
+}
+
 #root {
   width: 100%;
   min-height: 100vh;
@@ -96,6 +104,44 @@ body {
 /* Smooth scrolling and prevent layout shift */
 html {
   scroll-behavior: smooth;
+}
+
+/* Custom Global Scrollbar matching CatSpeak theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cath-red-700) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--cath-red-700) 0%, var(--cath-primary) 100%);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--cath-red-900) 0%, var(--cath-red-700) 100%);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--cath-red-500);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Hide all default browser password reveal and clear icons */
@@ -121,6 +167,7 @@ input[type="password"]::-webkit-reveal {
 
 /* Tailwind Scrollbar utilities */
 @layer utilities {
+
   /* Standard thin scrollbar (used in sidebar, lists, etc.) */
   .scrollbar-app {
     scrollbar-width: thin;
@@ -161,12 +208,42 @@ input[type="password"]::-webkit-reveal {
     border-radius: 9999px;
   }
 
+  .scrollbar-app-hover:hover::-webkit-scrollbar-thumb {
+    background-color: #990011;
+  }
+
+  .scrollbar-app-hover:hover::-webkit-scrollbar-track {
+    background: #e5e7eb;
+  }
+
+  /* Transparent track variant (modals, overlays) */
+  .scrollbar-app-transparent {
+    scrollbar-width: thin;
+    scrollbar-color: #990011 transparent;
+  }
+
+  .scrollbar-app-transparent::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-app-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-app-transparent::-webkit-scrollbar-thumb {
+    background-color: #990011;
+    border-radius: 9999px;
+  }
+
   /* Completely hidden scrollbar */
+  .scrollbar-hidden,
   .scrollbar-none {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
 
+  .scrollbar-hidden::-webkit-scrollbar,
   .scrollbar-none::-webkit-scrollbar {
     display: none;
     width: 0;
@@ -187,4 +264,33 @@ input[type="password"]::-webkit-reveal {
 /* Sonner outer toast wrapper styling */
 [data-sonner-toast] {
   border-radius: 12px;
+}
+
+/* Shaky animation for inputs with error */
+@keyframes shake {
+
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translateX(-6px);
+  }
+
+  40%,
+  60% {
+    transform: translateX(6px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }

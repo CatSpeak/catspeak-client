@@ -95,12 +95,12 @@ const GameHistoryModal = ({ open, onClose, roomName }) => {
       open={open}
       onClose={onClose}
       title={t.rooms?.game?.crackIt?.historyTitle || "Lịch sử thi đấu"}
-      className="bg-white text-slate-900 max-w-[625px] w-[100vw] md:rounded-3xl overflow-hidden md:border border-gray-200 md:shadow-2xl max-h-[100vh] md:max-h-[85vh] flex flex-col"
-      headerClassName="flex items-center justify-between p-4 pl-6 border-b border-gray-100 shrink-0"
+      className="bg-white text-slate-900 max-w-[625px] w-[100vw] md:rounded-3xl overflow-hidden md:border border-border md:shadow-2xl max-h-[100vh] md:max-h-[85vh] flex flex-col"
+      headerClassName="flex items-center justify-between p-4 pl-6 border-b border-border shrink-0"
       fullScreenOnMobile={true}
     >
       {/* Date range filter */}
-      <div className="px-4 md:px-6 py-3 border-b border-gray-100 bg-slate-50/60">
+      <div className="px-4 md:px-6 py-3 border-b border-border bg-slate-50/60">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex flex-col gap-1 flex-1 min-w-[140px]">
             <label className="text-xs font-medium text-slate-600">
@@ -156,13 +156,13 @@ const GameHistoryModal = ({ open, onClose, roomName }) => {
       </div>
 
       {/* Pagination + close */}
-      <div className="border-t border-gray-100 bg-white shrink-0">
+      <div className="border-t border-border bg-white shrink-0">
         {total > 0 && totalPages > 1 && (
           <div className="flex items-center justify-between px-4 md:px-6 py-3 text-sm">
             <button
               onClick={handlePrevPage}
               disabled={page <= 1 || isFetching}
-              className="flex items-center gap-1 h-9 px-3 rounded-lg border border-gray-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 h-9 px-3 rounded-lg border border-border text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               {t.rooms?.pagination?.prev || "Trước"}
@@ -178,7 +178,7 @@ const GameHistoryModal = ({ open, onClose, roomName }) => {
             <button
               onClick={handleNextPage}
               disabled={page >= totalPages || isFetching}
-              className="flex items-center gap-1 h-9 px-3 rounded-lg border border-gray-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 h-9 px-3 rounded-lg border border-border text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {t.rooms?.pagination?.next || "Sau"}
               <ChevronRight className="w-4 h-4" />
@@ -186,7 +186,7 @@ const GameHistoryModal = ({ open, onClose, roomName }) => {
           </div>
         )}
 
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-border">
           <button
             onClick={onClose}
             className="w-full py-3 px-4 rounded-xl font-bold bg-cath-red-500 hover:bg-cath-red-600 text-white transition-all shadow-sm shadow-cath-red-500/30"

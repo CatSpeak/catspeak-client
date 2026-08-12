@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { NavLink } from "react-router-dom"
 import { Globe } from "lucide-react"
 import { motion } from "framer-motion"
@@ -17,10 +17,12 @@ const DesktopNavItem = ({
   sectionId = "default",
 }) => {
   const [imgError, setImgError] = useState(false)
+  const [prevImg, setPrevImg] = useState(img)
 
-  useEffect(() => {
+  if (prevImg !== img) {
+    setPrevImg(img)
     setImgError(false)
-  }, [img])
+  }
 
   const IconComponent = Icon || Globe
 
@@ -33,7 +35,7 @@ const DesktopNavItem = ({
         className="w-6 h-6 object-contain rounded-sm"
       />
     ) : (
-      <IconComponent style={color ? { color } : undefined} />
+      <IconComponent strokeWidth={1.5} style={color ? { color } : undefined} />
     )
 
   return (
@@ -58,27 +60,23 @@ const DesktopNavItem = ({
               leftContent={leftIcon}
               rightContent={rightContent}
               rightText={rightText}
-              className={`rounded-xl transition-all duration-200 ${
-                isDocked ? "justify-center" : ""
-              }`}
-              contentClassName={`rounded-xl transition-all duration-200 ${
-                isDocked ? "px-0 justify-center" : "px-4"
-              } ${
-                isActive
+              className={`rounded-xl transition-all duration-200 ${isDocked ? "justify-center" : ""
+                }`}
+              contentClassName={`rounded-xl transition-all duration-200 ${isDocked ? "px-0 justify-center" : "px-4"
+                } ${isActive
                   ? isDocked
                     ? "text-cath-red-700"
-                    : "bg-[#F2F2F2] hover:bg-[#E6E6E6]"
+                    : "bg-primaryBg hover:bg-[#E6E6E6]"
                   : isDocked
                     ? "text-white hover:bg-white/20"
-                    : "hover:bg-[#F2F2F2]"
-              }`}
+                    : "hover:bg-primaryBg"
+                }`}
             >
               <span
-                className={`whitespace-nowrap transition-all duration-300 truncate relative z-10 ${
-                  isDocked
-                    ? "opacity-0 w-0 pointer-events-none hidden"
-                    : "opacity-100 min-w-[180px] flex-1"
-                }`}
+                className={`whitespace-nowrap transition-all duration-300 truncate relative z-10 ${isDocked
+                  ? "opacity-0 w-0 pointer-events-none hidden"
+                  : "opacity-100 min-w-0 flex-1"
+                  }`}
                 style={color ? { color } : undefined}
               >
                 {label}

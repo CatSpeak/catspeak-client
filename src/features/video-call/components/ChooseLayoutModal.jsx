@@ -91,7 +91,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
                 {changeLayoutT.auto || "Tự động (linh động)"} <Sparkles size={16} className="text-[#3C4043]" />
               </span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "auto" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "auto" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
               <LayoutIconAuto />
             </div>
           </label>
@@ -108,7 +108,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
               />
               <span className="text-[15px]">{changeLayoutT.grid || "Lưới"}</span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "grid" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "grid" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
               <LayoutIconGrid />
             </div>
           </label>
@@ -125,7 +125,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
               />
               <span className="text-[15px]">{changeLayoutT.spotlight || "Tiêu điểm"}</span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "spotlight" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "spotlight" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
               <LayoutIconSpotlight />
             </div>
           </label>
@@ -142,7 +142,7 @@ const ChooseLayoutModal = ({ open, onClose }) => {
               />
               <span className="text-[15px]">{changeLayoutT.sidebar || "Thanh bên"}</span>
             </div>
-            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "sidebar" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-gray-200 group-hover:border-gray-300"}`}>
+            <div className={`p-1.5 border rounded-md transition-colors ${layoutMode === "sidebar" ? "border-[#1A73E8] bg-[#E8F0FE]/50" : "border-border group-hover:border-gray-300"}`}>
               <LayoutIconSidebar />
             </div>
           </label>

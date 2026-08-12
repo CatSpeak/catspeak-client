@@ -27,8 +27,8 @@ const RecurrenceDays = ({ eventColor = "#B91264", value = [], onChange, disabled
             type="button"
             onClick={() => { if (!disabled) toggleDay(i) }}
             disabled={disabled}
-            className={`border border-[#e5e5e5] w-12 h-12 rounded-full text flex items-center justify-center transition-colors duration-200 ${
-              isSelected ? "text-white" : disabled ? "" : "hover:bg-[#f0f0f0]"
+            className={`border border-border w-12 h-12 rounded-full text flex items-center justify-center transition-colors duration-200 ${
+              isSelected ? "text-white" : disabled ? "" : "hover:bg-primaryBg"
             } ${disabled ? "opacity-60 cursor-not-allowed" : ""}`}
             style={isSelected ? { backgroundColor: eventColor } : {}}
           >

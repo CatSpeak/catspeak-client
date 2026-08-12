@@ -83,8 +83,8 @@ const ResetPasswordPage = () => {
                 onClick={!card.disabled ? card.action : undefined}
                 className={`group flex h-full flex-col justify-between overflow-hidden rounded-[2rem] border-2 p-8 transition-colors duration-300 ${
                   card.disabled
-                    ? "cursor-not-allowed border-gray-100 opacity-60 bg-white"
-                    : "cursor-pointer border-gray-200 bg-white hover:border-cath-red-700"
+                    ? "cursor-not-allowed border-border opacity-60 bg-white"
+                    : "cursor-pointer border-border bg-white hover:border-cath-red-700"
                 }`}
               >
                 <div>

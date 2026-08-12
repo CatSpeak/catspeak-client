@@ -18,11 +18,11 @@ const ControlButton = ({
   className = "",
   innerClassName = "",
   activeClassOverride = "bg-cath-red-600 hover:bg-cath-red-700 text-white",
-  inactiveClassOverride = "bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black",
+  inactiveClassOverride = "bg-primaryBg hover:bg-[#E6E6E6] text-black",
   children, // For custom content overlays, like ping animations
 }) => {
   const innerStateClass = isLoading
-    ? "cursor-not-allowed opacity-70 bg-[#F2F2F2] text-black"
+    ? "cursor-not-allowed opacity-70 bg-primaryBg text-black"
     : isActive
       ? activeClassOverride
       : inactiveClassOverride

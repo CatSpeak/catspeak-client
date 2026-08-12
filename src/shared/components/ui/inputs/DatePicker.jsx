@@ -354,7 +354,7 @@ const DatePicker = ({
           if (!disabled) setIsOpen(!isOpen);
         }}
         disabled={disabled}
-        className={`hover:bg-[#f0f0f0] flex items-center justify-between border border-[#e5e5e5] rounded-md whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none w-full ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "hover:bg-gray-50"}`}
+        className={`hover:bg-primaryBg flex items-center justify-between border border-border rounded-md whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none w-full ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "hover:bg-gray-50"}`}
       >
         <span className={!date && (!value || mode !== "time") ? "text-[#7A7574] font-normal" : ""}>
           {date || (mode === "time" && value)
@@ -400,13 +400,13 @@ const DatePicker = ({
                       <FluentAnimation
                         direction={portalCoords.flipUp ? "up" : "down"}
                         exit={true}
-                        className="bg-white/95 backdrop-blur-md border border-[#E5E5E5] rounded-2xl shadow-xl p-4 flex flex-col gap-3"
+                        className="bg-white/95 backdrop-blur-md border border-border rounded-2xl shadow-xl p-4 flex flex-col gap-3"
                       >
                         {/* TIME-ONLY MODE - APPLE WHEEL SCROLL UI */}
                         {mode === "time" ? (
                           <div className="flex flex-col gap-3">
                             {/* Header */}
-                            <div className="flex items-center justify-between border-b border-gray-150 pb-2">
+                            <div className="flex items-center justify-between border-b border-border pb-2">
                               <span className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
                                 <Clock size={16} className="text-gray-500" />
                                 {language === "en" ? "Select Time" : language === "zh" ? "选择时间" : "Chọn Giờ"}
@@ -433,7 +433,7 @@ const DatePicker = ({
                               {/* Wheel Tumbler */}
                               <div className="relative flex items-center justify-center h-[200px] select-none bg-gray-50/50 rounded-xl overflow-hidden touch-pan-y">
                                 {/* Center highlight row banner */}
-                                <div className="absolute top-1/2 -translate-y-1/2 left-3 right-3 h-10 bg-white border-y border-gray-200 shadow-2xs rounded-lg pointer-events-none" />
+                                <div className="absolute top-1/2 -translate-y-1/2 left-3 right-3 h-10 bg-white border-y border-border shadow-2xs rounded-lg pointer-events-none" />
 
                                 <div className="flex items-center justify-center w-full z-10 px-4 h-[200px]">
                                   {/* Hours Wheel */}
@@ -559,7 +559,7 @@ const DatePicker = ({
                                   {weekDays.map((day) => (
                                     <div
                                       key={day}
-                                      className="text-center text-[12px] font-bold text-gray-400 pb-1 border-b border-gray-100"
+                                      className="text-center text-[12px] font-bold text-gray-400 pb-1 border-b border-border"
                                     >
                                       {day}
                                     </div>
@@ -633,7 +633,7 @@ const DatePicker = ({
 
                             {/* INLINE TIME PICKER IN DATETIME MODE */}
                             {mode === "datetime" && viewMode === "day" && (
-                              <div className="mt-2 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                              <div className="mt-2 pt-3 border-t border-border flex items-center justify-between gap-2">
                                 <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
                                   <Clock size={14} className="text-gray-400" />
                                   {language === "en" ? "Time:" : "Giờ:"}
@@ -642,7 +642,7 @@ const DatePicker = ({
                                   <select
                                     value={tempHour}
                                     onChange={(e) => handleSelectHourItem(Number(e.target.value))}
-                                    className="h-8 px-2 bg-gray-50 border border-gray-200 rounded text-xs font-bold text-gray-800 outline-none focus:border-[var(--focus-color)]"
+                                    className="h-8 px-2 bg-gray-50 border border-border rounded text-xs font-bold text-gray-800 outline-none focus:border-[var(--focus-color)]"
                                     style={{ "--focus-color": color }}
                                   >
                                     {hoursList.map((h) => (
@@ -655,7 +655,7 @@ const DatePicker = ({
                                   <select
                                     value={tempMinute}
                                     onChange={(e) => handleSelectMinuteItem(Number(e.target.value))}
-                                    className="h-8 px-2 bg-gray-50 border border-gray-200 rounded text-xs font-bold text-gray-800 outline-none focus:border-[var(--focus-color)]"
+                                    className="h-8 px-2 bg-gray-50 border border-border rounded text-xs font-bold text-gray-800 outline-none focus:border-[var(--focus-color)]"
                                     style={{ "--focus-color": color }}
                                   >
                                     {minutesList.map((m) => (

@@ -315,7 +315,7 @@ const CourseDetailPage = () => {
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     <button
                       type="button"
                       onClick={() => {
@@ -328,7 +328,7 @@ const CourseDetailPage = () => {
                       <span>{c.courseDetail?.editCourse || c.createCourse?.updateCourse || "Chỉnh sửa khóa học"}</span>
                     </button>
 
-                    <div className="my-1 border-t border-gray-100" />
+                    <div className="my-1 border-t border-border" />
 
                     <button
                       type="button"
@@ -392,7 +392,7 @@ const CourseDetailPage = () => {
                 })
               ) : (
                 /* Empty state card */
-                <div className="bg-[#FCFCFC] border border-gray-150 rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[220px] col-span-2">
+                <div className="bg-[#FCFCFC] border border-border rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[220px] col-span-2">
                   <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
                     <Pencil size={24} className="stroke-[1.5]" />
                   </div>

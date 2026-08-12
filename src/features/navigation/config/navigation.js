@@ -12,10 +12,8 @@ import {
   Film,
   Mail,
   BookOpen,
-  MessageCircle,
   DoorOpen,
   Globe,
-  Users,
   BarChart,
   CalendarDays,
   Compass,
@@ -28,10 +26,10 @@ export const navSections = [
     items: [
       { key: "community", path: "/community", icon: Home },
       {
-        key: "messages",
-        label: "Chat",
-        path: "/chat",
-        icon: MessageCircle,
+        key: "exploreCourses",
+        label: "Explore Courses",
+        path: "/explore-courses",
+        icon: Compass,
       },
       {
         key: "learningResources",
@@ -68,7 +66,6 @@ export const navSections = [
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "workspaceReels", path: "/workspace/reels", icon: Film },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-      { key: "myClass", path: "/workspace/classes", icon: Users },
       // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
@@ -80,18 +77,6 @@ export const navSections = [
 export const navLinks = [
   { key: "community", path: "/community", hasDropdown: true, icon: Home },
   {
-    key: "exploreCourses",
-    label: "Explore Courses",
-    path: "/explore-courses",
-    icon: Compass,
-  },
-  {
-    key: "learningResources",
-    label: "Learning Resources",
-    path: "/resources",
-    icon: Globe,
-  },
-  {
     key: "catSpeak",
     hasDropdown: true,
     icon: LayoutDashboard,
@@ -102,14 +87,6 @@ export const navLinks = [
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
     ],
-  },
-  {
-    key: "messages",
-    label: "Chat",
-    path: "/chat",
-    icon: MessageCircle,
-    isPrivate: true,
-    showOnHorizontalBar: false,
   },
   {
     key: "workspace",
@@ -125,7 +102,6 @@ export const navLinks = [
       { key: "recordings", path: "/workspace/recordings", icon: Mic },
       { key: "reels", path: "/workspace/reels", icon: Film },
       { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-      { key: "myClass", path: "/workspace/classes", icon: Users },
       // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
       { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
       { key: "analytics", path: "/workspace/analytics", icon: BarChart },
@@ -137,6 +113,19 @@ export const navLinks = [
     label: "Horizontal bar",
     isHorizontalBar: true,
     showOnHorizontalBar: false,
+  },
+  {
+    key: "exploreCourses",
+    label: "Explore Courses",
+    path: "/explore-courses",
+    icon: Compass,
+  },
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: Globe,
+    isPrivate: true,
   },
 ]
 

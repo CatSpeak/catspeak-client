@@ -21,7 +21,7 @@ const HeaderFilter = () => {
   return (
     <>
       <button 
-        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#F0F0F0] hover:bg-gray-200 text-gray-700 transition-colors shrink-0"
+        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 transition-colors shrink-0"
         onClick={() => setIsFilterOpen(true)}
       >
         <SlidersHorizontal size={20} strokeWidth={2} />
