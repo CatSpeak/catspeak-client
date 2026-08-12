@@ -1807,6 +1807,7 @@ export default {
     notFoundTitle: "Class details not found",
     notFoundDesc: "The class may have been deleted or the URL is invalid. Please return to explore courses.",
     exploreOtherBtn: "Explore Other Classes",
+    back: "Back",
     overviewTitle: "Detailed Class Overview",
     defaultDescription: "This class offers a highly interactive learning environment, combining core theory with practical communication activities tailored for real-world scenarios.",
     tuitionFeeFull: "All-inclusive tuition fee",

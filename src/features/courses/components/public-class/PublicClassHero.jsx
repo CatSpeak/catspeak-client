@@ -1,5 +1,5 @@
 import React from "react"
-import { ShieldCheck, Share2 } from "lucide-react"
+import { ShieldCheck, Share2, ArrowLeft } from "lucide-react"
 import { getSafeMediaUrl, defaultCourseThumbnail } from "../../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -9,6 +9,7 @@ const PublicClassHero = ({
   isEnrolling,
   isUpcoming,
   onEnroll,
+  onBack,
 }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
@@ -20,7 +21,7 @@ const PublicClassHero = ({
   const bgThumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl) || defaultCourseThumbnail
 
   return (
-    <section className="relative bg-slate-950 text-white overflow-hidden min-h-[480px] sm:min-h-[560px] lg:min-h-[620px] flex flex-col justify-end pt-16 pb-16 sm:pb-20 border-b border-slate-800">
+    <section className="relative bg-slate-950 text-white overflow-hidden min-h-[480px] sm:min-h-[560px] lg:min-h-[620px] flex flex-col justify-between pt-6 pb-16 sm:pb-20 border-b border-slate-800">
       {/* Full-Vibrancy Thumbnail Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-85 transition-all duration-700"
@@ -31,7 +32,21 @@ const PublicClassHero = ({
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+      {/* Top Bar with Return Back Button */}
+      {onBack && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-4 pb-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 backdrop-blur-md text-sm font-semibold transition-all duration-200 group cursor-pointer shadow-md hover:shadow-lg"
+          >
+            <ArrowLeft size={18} className="transition-transform duration-200 text-slate-300" />
+            <span>{pc.back || t.common?.back || "Quay lại"}</span>
+          </button>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-6">
         <div className="max-w-4xl flex flex-col gap-5">
           {/* Top Tags */}
           <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold">

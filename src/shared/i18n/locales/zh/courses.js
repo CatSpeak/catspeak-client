@@ -1804,6 +1804,7 @@ export default {
     notFoundTitle: "未找到班级信息",
     notFoundDesc: "班级可能已删除或链接无效。请返回探索课程列表以了解更多。",
     exploreOtherBtn: "探索其他班级",
+    back: "返回",
     overviewTitle: "班级详细介绍",
     defaultDescription: "本班级提供高度互动的学习环境，结合核心理论与贴近实际工作场景的口语沟通实操。",
     tuitionFeeFull: "打包全包学费",

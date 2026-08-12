@@ -7,6 +7,7 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { getLocalizedLanguageName } from "../../data/courseFormOptions";
+import { defaultCourseThumbnail } from "../../utils/courseUtils"
 
 const StudentClassOverviewTab = ({
   classData,
@@ -17,7 +18,7 @@ const StudentClassOverviewTab = ({
   noUpcomingLabel,
   onJoinRoom,
 }) => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { formatDateMonth, formatScheduleTime } = useTimezone();
   const c = t.courses || {};
   const cd = c.classDetail || {};
@@ -49,10 +50,10 @@ const StudentClassOverviewTab = ({
       : null;
   const instructorName = String(
     instructor?.fullName ??
-      instructor?.name ??
-      classData.instructorName ??
-      classData.teacherName ??
-      "",
+    instructor?.name ??
+    classData.instructorName ??
+    classData.teacherName ??
+    "",
   ).trim();
   const instructorBio = String(
     instructor?.bio ?? instructor?.description ?? "",
@@ -157,9 +158,9 @@ const StudentClassOverviewTab = ({
                   {formatDateMonth(classData.startDate, ui.tba)}
                   {totalSessions > 0
                     ? ` • ${(ui.sessionsCount || "{{count}} sessions").replace(
-                        "{{count}}",
-                        String(totalSessions),
-                      )}`
+                      "{{count}}",
+                      String(totalSessions),
+                    )}`
                     : ""}
                 </span>
               </div>

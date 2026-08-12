@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "@/shared/context/LanguageContext";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle,
@@ -76,11 +77,13 @@ const getTaskStatusText = (task, displayProgress, t) => {
 
 const TaskItem = ({ task, onRemove }) => {
   const { t } = useLanguage();
+  const [prevProgress, setPrevProgress] = useState(task.progress);
   const [displayProgress, setDisplayProgress] = useState(task.progress);
 
-  useEffect(() => {
+  if (task.progress !== prevProgress) {
+    setPrevProgress(task.progress);
     setDisplayProgress(task.progress);
-  }, [task.progress]);
+  }
 
   const isSuccess = task.status === "SUCCESS";
   const isError = task.status === "ERROR";
@@ -145,13 +148,13 @@ export const GlobalTaskProgressWidget = () => {
   const visibleTasks = tasks ? tasks.filter((t) => !t.isHidden) : [];
 
   // Auto re-show when a new task is added after the user dismissed the widget.
-  useEffect(() => {
+  if (visibleTasks.length !== lastTaskCount) {
     if (visibleTasks.length > lastTaskCount) {
       setIsDismissed(false);
       setIsMinimized(false);
     }
     setLastTaskCount(visibleTasks.length);
-  }, [visibleTasks.length, lastTaskCount]);
+  }
 
   // If user is not logged in, dismissed, or there are no visible tasks, don't show the widget
   if (!token || isDismissed || visibleTasks.length === 0) return null;

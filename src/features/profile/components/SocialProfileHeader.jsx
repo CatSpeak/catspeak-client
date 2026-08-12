@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
@@ -11,6 +11,7 @@ import {
   AtSign,
 } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
+import ImageCropModal from "@/shared/components/ui/ImageCropModal";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
   useGetConnectionStatusQuery,
@@ -39,8 +40,10 @@ const SocialProfileHeader = ({
   const username = formData?.username || user?.username;
   const displayName = nickname || username || "Lorem Ipsum";
   const handle = nickname ? username : null;
-  const bio = "Bio description"; // Mocked for now
   const location = formData?.location || user?.location;
+
+  const [fileToCrop, setFileToCrop] = useState(null);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   // API Hooks
   const { data: statusResponse } = useGetConnectionStatusQuery(
@@ -75,12 +78,19 @@ const SocialProfileHeader = ({
     }
   };
 
-  const handleAvatarChange = async (e) => {
+  const handleAvatarSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setFileToCrop(file);
+    setIsCropModalOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropComplete = async (croppedFile) => {
+    if (!croppedFile) return;
 
     const avatarData = new FormData();
-    avatarData.append("file", file);
+    avatarData.append("file", croppedFile);
 
     try {
       toast.loading(t.profile?.avatar?.updating || "Đang cập nhật...", {
@@ -99,8 +109,6 @@ const SocialProfileHeader = ({
         { id: "avatar-update" },
       );
       console.error(error);
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -263,13 +271,32 @@ const SocialProfileHeader = ({
               )}
             </div>
             {isOwnProfile && (
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleAvatarChange}
-              />
+              <>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarSelect}
+                />
+                {isCropModalOpen && fileToCrop && (
+                  <ImageCropModal
+                    image={fileToCrop}
+                    isOpen={isCropModalOpen}
+                    cropPreset="avatar"
+                    title={t.profile?.avatar?.cropTitle || "Cắt ảnh đại diện"}
+                    onClose={() => {
+                      setIsCropModalOpen(false);
+                      setFileToCrop(null);
+                    }}
+                    onCropComplete={(croppedFile) => {
+                      handleCropComplete(croppedFile);
+                      setIsCropModalOpen(false);
+                      setFileToCrop(null);
+                    }}
+                  />
+                )}
+              </>
             )}
           </div>
           {/* Text Info */}
