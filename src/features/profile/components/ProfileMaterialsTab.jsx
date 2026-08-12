@@ -1,0 +1,442 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, LayoutGrid, TableProperties } from 'lucide-react';
+import FluentCard from '@/shared/components/ui/FluentCard';
+import TextInput from '@/shared/components/ui/inputs/TextInput';
+import { IconButton } from '@/shared/components/ui/buttons';
+import Tabs from '@/shared/components/ui/navigation/Tabs';
+import ProfileFolderItem from './ProfileFolderItem';
+import ProfileFileItem from './ProfileFileItem';
+import { EmptyState, LoadingSpinner } from '@/shared/components/ui/indicators';
+import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
+import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+
+import ShareMaterialModal from '../../materials/components/teaching-material/ShareMaterialModal';
+import DeleteFolderModal from '../../materials/components/teaching-material/DeleteFolderModal';
+import FileDetailModal from '../../materials/components/teaching-material/FileDetailModal';
+import MoveMaterialModal from '../../materials/components/teaching-material/MoveMaterialModal';
+import RenameMaterialModal from '../../materials/components/teaching-material/RenameMaterialModal';
+import BulkActionBar from '../../materials/components/teaching-material/BulkActionBar';
+import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
+
+const formatSize = (bytes) => {
+  if (bytes === 0 || !bytes) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  return dayjs(dateString).format('DD/MM/YYYY');
+};
+
+const MOCK_FOLDERS = []; // Fallback for guest
+const MOCK_FILES = [];
+
+const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
+  const navigate = useNavigate();
+  const [viewLayout, setViewLayout] = useState('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilterTab, setActiveFilterTab] = useState('all');
+
+  // Modals state
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
+  const [isFileDetailOpen, setIsFileDetailOpen] = useState(false);
+  const [isFilePreviewOpen, setIsFilePreviewOpen] = useState(false);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+
+  // Selection state
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [deletingItem, setDeletingItem] = useState({ id: null, name: "", count: 0, type: "folder" });
+
+  // Fetch API for owner
+  const { data: materialsData, isLoading: isLoadingMaterials } = useGetPersonalMaterialsQuery(undefined, { skip: !isOwnProfile });
+  const { data: treeData, isLoading: isLoadingTree } = useGetFolderTreeQuery(undefined, { skip: !isOwnProfile });
+  const [recordDownload] = useRecordMaterialDownloadMutation();
+
+  const rawFoldersTree = useMemo(() => treeData?.data || treeData || [], [treeData]);
+  const responseData = materialsData?.data || materialsData || {};
+
+  const baseFolders = useMemo(() => {
+    if (!isOwnProfile) return MOCK_FOLDERS;
+    let rawFolders = [];
+    const metaMap = {};
+    if (Array.isArray(responseData.folders)) {
+      responseData.folders.forEach(f => {
+        metaMap[f.id] = f;
+      });
+    }
+
+    const flattenFolders = (nodes) => {
+      let flat = [];
+      for (const node of nodes) {
+        const id = node.folderId || node.id;
+        const meta = metaMap[id] || {};
+        flat.push({
+          id,
+          name: node.folderName || node.name || 'Thư mục không tên',
+          itemsCount: meta.materialCount || node.materialCount || 0,
+          updatedAt: formatDate(meta.updatedAt || node.updatedAt),
+          isPublic: meta.isPublic !== undefined ? meta.isPublic : false
+        });
+        const children = node.subFolders || node.children || [];
+        if (children.length > 0) {
+          flat = flat.concat(flattenFolders(children));
+        }
+      }
+      return flat;
+    };
+    rawFolders = flattenFolders(rawFoldersTree);
+    return rawFolders;
+  }, [responseData.folders, rawFoldersTree, isOwnProfile]);
+
+  const baseFiles = useMemo(() => {
+    if (!isOwnProfile) return MOCK_FILES;
+    let rawFiles = Array.isArray(responseData.materials) ? responseData.materials.map(file => ({ ...file, id: file.materialId || file.id })) : [];
+    
+    return rawFiles.map(file => ({
+      id: file.id,
+      name: file.fileName || file.name || 'Tệp không tên',
+      size: formatSize(file.fileSize || file.size || file.sizeBytes),
+      date: formatDate(file.updatedAt),
+      isPublic: file.isPublic !== undefined ? file.isPublic : false,
+      fileUrl: file.fileUrl,
+      ...file
+    }));
+  }, [responseData.materials, isOwnProfile]);
+
+  const materials = useMemo(() => [...baseFolders, ...baseFiles], [baseFolders, baseFiles]);
+
+  const isFolder = (item) => !item.fileName && !item.fileUrl;
+
+  useEffect(() => {
+    if (selectedItem) {
+      const selectedIsFolder = isFolder(selectedItem);
+      const updatedItem = materials.find(m => m.id === selectedItem.id && isFolder(m) === selectedIsFolder);
+      if (updatedItem && (updatedItem.downloadCount !== selectedItem.downloadCount || updatedItem.viewCount !== selectedItem.viewCount || updatedItem.isPublic !== selectedItem.isPublic || updatedItem.allowDownload !== selectedItem.allowDownload)) {
+        setSelectedItem({ ...updatedItem, type: selectedItem.type || updatedItem.type });
+      }
+    }
+  }, [materialsData, selectedItem, materials]);
+
+  const filterTabs = [
+    { id: 'all', label: `Tất cả (${baseFolders.length + baseFiles.length})` },
+    { id: 'public', label: `Công khai (${baseFolders.filter(f => f.isPublic).length + baseFiles.filter(f => f.isPublic).length})` },
+    { id: 'private', label: `Riêng tư (${baseFolders.filter(f => !f.isPublic).length + baseFiles.filter(f => !f.isPublic).length})` },
+  ];
+
+  const filteredFolders = useMemo(() => {
+    return baseFolders.filter(folder => {
+      const matchSearch = folder.name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!isOwnProfile) return matchSearch;
+      if (activeFilterTab === 'public') return matchSearch && folder.isPublic;
+      if (activeFilterTab === 'private') return matchSearch && !folder.isPublic;
+      return matchSearch;
+    });
+  }, [baseFolders, searchQuery, activeFilterTab, isOwnProfile]);
+
+  const filteredFiles = useMemo(() => {
+    return baseFiles.filter(file => {
+      const matchSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!isOwnProfile) return matchSearch;
+      if (activeFilterTab === 'public') return matchSearch && file.isPublic;
+      if (activeFilterTab === 'private') return matchSearch && !file.isPublic;
+      return matchSearch;
+    });
+  }, [baseFiles, searchQuery, activeFilterTab, isOwnProfile]);
+
+  const toggleSelection = (item) => {
+    setSelectedItems(prev => {
+      const isSelected = prev.some(i => i.id === item.id && isFolder(i) === isFolder(item));
+      if (isSelected) {
+        return prev.filter(i => !(i.id === item.id && isFolder(i) === isFolder(item)));
+      } else {
+        return [...prev, item];
+      }
+    });
+  };
+
+  const handleDownloadFile = async (file) => {
+    if (!file.fileUrl) return;
+    recordDownload(file.id);
+    try {
+      const response = await fetch(file.fileUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.name || 'download';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+      window.open(file.fileUrl, '_blank');
+    }
+  };
+
+  if (isOwnProfile && (isLoadingMaterials || isLoadingTree)) {
+    return (
+      <div className="w-full flex items-center justify-center min-h-[500px]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full flex flex-col gap-6 min-h-[500px]">
+      <div className="p-4 sm:p-6 bg-white overflow-visible rounded-2xl border border-[#E3BEBA]">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-xl font-bold text-[#1A1C1C]">
+            {isOwnProfile ? "Quản lý và chia sẻ tài liệu của bạn." : `Tài liệu chia sẻ (${baseFolders.length + baseFiles.length})`}
+          </h2>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {isOwnProfile ? (
+              <div className="w-full md:w-auto overflow-x-auto scrollbar-hidden">
+                <Tabs
+                  tabs={filterTabs}
+                  activeTab={activeFilterTab}
+                  onChange={setActiveFilterTab}
+                  fullWidth={false}
+                  className="whitespace-nowrap min-w-max border-none"
+                  tabClassName="!px-1 !mr-6"
+                />
+              </div>
+            ) : (
+              <div className="flex-1" />
+            )}
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <div className="w-full sm:w-64 relative">
+                <TextInput
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Tìm kiếm tài liệu..."
+                  className="!h-10 pl-10 bg-[#F9F9F9] border-none rounded-xl text-sm"
+                  icon={Search}
+                />
+              </div>
+              <div className="flex items-center bg-[#F3F3F3] border border-[#E3BEBA] rounded-xl p-1 max-h-10 cursor-pointer shrink-0 self-end sm:self-auto">
+                <IconButton
+                  variant="iconOnly"
+                  size="sm"
+                  className={`!rounded-[8px] h-[30px] hover:bg-[#E3BEBA] transition-colors ${viewLayout === 'grid' ? 'bg-[#F9F9F9] shadow-sm' : ''}`}
+                  onClick={() => setViewLayout('grid')}
+                >
+                  <LayoutGrid className={`w-4 h-4 ${viewLayout === 'grid' ? 'text-[#6E0009]' : 'text-[#5B403E]'}`} />
+                </IconButton>
+                <IconButton
+                  variant="iconOnly"
+                  size="sm"
+                  className={`!rounded-[8px] h-[30px] hover:bg-[#E3BEBA] transition-colors ${viewLayout === 'list' ? 'bg-[#F9F9F9] shadow-sm' : ''}`}
+                  onClick={() => setViewLayout('list')}
+                >
+                  <TableProperties className={`w-4 h-4 ${viewLayout === 'list' ? 'text-[#6E0009]' : 'text-[#5B403E]'}`} />
+                </IconButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {(filteredFolders.length === 0 && filteredFiles.length === 0) ? (
+        <FluentCard className="p-12 flex flex-col items-center justify-center">
+          <EmptyState
+            message="Không tìm thấy tài liệu nào."
+            description={searchQuery ? "Thử tìm kiếm với từ khóa khác" : ""}
+          />
+        </FluentCard>
+      ) : (
+        <div className="flex flex-col gap-6">
+          {filteredFolders.length > 0 && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-[#1A1C1C]">Thư mục ({filteredFolders.length})</h3>
+              <div className={`grid gap-4 ${viewLayout === 'grid' ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                {filteredFolders.map(folder => (
+                  <ProfileFolderItem
+                    key={folder.id}
+                    title={folder.name}
+                    totalItems={folder.itemsCount}
+                    updatedAt={folder.updatedAt}
+                    isPublic={folder.isPublic}
+                    isOwnProfile={isOwnProfile}
+                    onClick={() => navigate(`/workspace/teaching-material/${folder.id}`)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {filteredFiles.length > 0 && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-[#1A1C1C]">Tệp ({filteredFiles.length})</h3>
+              <div className={`grid gap-4 ${viewLayout === 'grid' ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1'}`}>
+                {filteredFiles.map(file => {
+                  const isSelected = selectedItems.some(item => item.id === file.id && !isFolder(item));
+                  return (
+                    <ProfileFileItem
+                      key={file.id}
+                      title={file.name}
+                      size={file.size}
+                      date={file.date}
+                      isPublic={file.isPublic}
+                      fileUrl={file.fileUrl}
+                      isOwnProfile={isOwnProfile}
+                      isList={viewLayout === 'list'}
+                      isSelected={isSelected}
+                      isSelectionMode={selectedItems.length > 0}
+                      onToggleSelect={() => toggleSelection(file)}
+                      onClick={() => {
+                        if (selectedItems.length > 0) {
+                          toggleSelection(file);
+                        } else {
+                          setSelectedItem(file);
+                          setIsFilePreviewOpen(true);
+                        }
+                      }}
+                      onShare={() => {
+                        setSelectedItem(file);
+                        setIsShareModalOpen(true);
+                      }}
+                      onRename={() => {
+                        setSelectedItem(file);
+                        setIsRenameModalOpen(true);
+                      }}
+                      onDelete={() => {
+                        setDeletingItem({ id: file.id, name: file.name, count: 0, type: 'file' });
+                        setIsDeleteFolderOpen(true);
+                      }}
+                      onMove={() => {
+                        setSelectedItem(file);
+                        setIsMoveModalOpen(true);
+                      }}
+                      onEdit={() => {
+                        setSelectedItem(file);
+                        setIsFileDetailOpen(true);
+                      }}
+                      onDownload={() => handleDownloadFile(file)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {isOwnProfile && (
+        <>
+          <ShareMaterialModal
+            open={isShareModalOpen}
+            onClose={() => setIsShareModalOpen(false)}
+            item={selectedItem}
+          />
+
+          <DeleteFolderModal
+            open={isDeleteFolderOpen}
+            onClose={() => setIsDeleteFolderOpen(false)}
+            item={deletingItem}
+            onSuccess={() => {
+              setSelectedItems([]);
+              setIsDeleteFolderOpen(false);
+            }}
+          />
+
+          <FileDetailModal
+            open={isFileDetailOpen}
+            onClose={() => setIsFileDetailOpen(false)}
+            item={selectedItem}
+            onDelete={() => {
+              setIsFileDetailOpen(false);
+              setDeletingItem({ id: selectedItem.id, name: selectedItem.name, count: 0, type: 'file' });
+              setIsDeleteFolderOpen(true);
+            }}
+            onMove={() => {
+              setIsFileDetailOpen(false);
+              setTimeout(() => {
+                setIsMoveModalOpen(true);
+              }, 300);
+            }}
+          />
+
+          <FilePreviewModal
+            open={isFilePreviewOpen}
+            onClose={() => setIsFilePreviewOpen(false)}
+            item={selectedItem}
+          />
+
+          <MoveMaterialModal
+            open={isMoveModalOpen}
+            onClose={() => {
+              setIsMoveModalOpen(false);
+              setSelectedItem(null);
+            }}
+            items={selectedItems.length > 0 && !selectedItem ? selectedItems : (selectedItem ? [selectedItem] : [])}
+            currentFolderId={null}
+            onSuccess={() => {
+              setSelectedItems([]);
+              setIsMoveModalOpen(false);
+              setSelectedItem(null);
+            }}
+          />
+
+          <RenameMaterialModal
+            open={isRenameModalOpen}
+            onClose={() => setIsRenameModalOpen(false)}
+            item={selectedItem}
+          />
+
+          <BulkActionBar
+            selectedCount={selectedItems.length}
+            onClearSelection={() => setSelectedItems([])}
+            onDelete={() => {
+              if (selectedItems.length === 1) {
+                setDeletingItem({
+                  id: selectedItems[0].id,
+                  name: selectedItems[0].name,
+                  count: 0,
+                  type: isFolder(selectedItems[0]) ? 'folder' : 'file'
+                });
+              } else {
+                setDeletingItem({
+                  id: 'bulk',
+                  name: `${selectedItems.length} mục đã chọn`,
+                  count: 0,
+                  type: 'bulk',
+                  items: selectedItems
+                });
+              }
+              setIsDeleteFolderOpen(true);
+            }}
+            onDownload={() => {
+              const filesToDownload = selectedItems.filter(item => !isFolder(item) && item.fileUrl);
+              if (filesToDownload.length === 0) {
+                toast.error('Không có tệp nào để tải xuống');
+                return;
+              }
+
+              filesToDownload.forEach(file => handleDownloadFile(file));
+              toast.success(`Đang tải xuống ${filesToDownload.length} tệp`);
+              setSelectedItems([]);
+            }}
+            onMove={() => {
+              setSelectedItem(null);
+              setIsMoveModalOpen(true);
+            }}
+          />
+        </>
+      )}
+    </div>
+  );
+};
+
+export default ProfileMaterialsTab;

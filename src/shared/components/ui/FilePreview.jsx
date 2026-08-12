@@ -2,7 +2,18 @@ import React from 'react';
 import { FileText, Image as ImageIcon, Film, Music, FileSpreadsheet, FileIcon } from 'lucide-react';
 
 const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => {
-  const extension = fileName ? fileName.split('.').pop().toLowerCase() : '';
+  const getExtension = () => {
+    if (fileName && fileName.includes('.')) {
+      return fileName.split('.').pop().toLowerCase();
+    }
+    if (url && url.includes('.')) {
+      const cleanUrl = url.split('?')[0];
+      return cleanUrl.split('.').pop().toLowerCase();
+    }
+    return '';
+  };
+
+  const extension = getExtension();
 
   const isImage = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(extension);
   const isVideo = ['mp4', 'webm', 'ogg'].includes(extension);

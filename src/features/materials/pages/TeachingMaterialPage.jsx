@@ -12,6 +12,7 @@ import FilterMaterialModal from '../components/teaching-material/FilterMaterialM
 import MoveMaterialModal from '../components/teaching-material/MoveMaterialModal';
 import RenameMaterialModal from '../components/teaching-material/RenameMaterialModal';
 import BulkActionBar from '../components/teaching-material/BulkActionBar';
+import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
@@ -39,6 +40,7 @@ const TeachingMaterialPage = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
   const [isFileDetailOpen, setIsFileDetailOpen] = useState(false);
+  const [isFilePreviewOpen, setIsFilePreviewOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -500,8 +502,12 @@ const TeachingMaterialPage = () => {
                       setIsFileDetailOpen(true);
                     }}
                     onClick={() => {
-                      setSelectedItem(file);
-                      setIsFileDetailOpen(true);
+                      if (selectedItems.length > 0) {
+                        toggleSelection(file);
+                      } else {
+                        setSelectedItem(file);
+                        setIsFilePreviewOpen(true);
+                      }
                     }}
                     onMove={() => {
                       setSelectedItem(file);
@@ -595,6 +601,12 @@ const TeachingMaterialPage = () => {
             setIsMoveModalOpen(true);
           }, 300);
         }}
+      />
+
+      <FilePreviewModal
+        open={isFilePreviewOpen}
+        onClose={() => setIsFilePreviewOpen(false)}
+        item={selectedItem}
       />
 
       <MoveMaterialModal

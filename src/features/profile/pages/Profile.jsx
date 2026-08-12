@@ -19,7 +19,7 @@ import Tabs from "@/shared/components/ui/navigation/Tabs"
 import ProfileHomeTab from "../components/ProfileHomeTab"
 import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
-import ProfileDocumentsTab from "../components/ProfileDocumentsTab"
+import ProfileMaterialsTab from "../components/ProfileMaterialsTab"
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
 import CompletedClass from "../components/CompletedClass"
 
@@ -122,7 +122,7 @@ const Profile = () => {
   ]
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-primaryBg">
+    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg">
       <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Top Header Section */}
         <SocialProfileHeader
@@ -168,7 +168,7 @@ const Profile = () => {
             />
           )}
           {activeTab === "documents" && (
-            <ProfileDocumentsTab
+            <ProfileMaterialsTab
               targetAccountId={targetAccountId}
               isOwnProfile={isOwnProfile}
             />
