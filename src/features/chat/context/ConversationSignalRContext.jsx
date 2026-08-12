@@ -30,6 +30,12 @@ const HUB_EVENTS = [
   "UserOnline",
   "UserOffline",
   "NewFriendRequest",
+  "FriendRequestAccepted",
+  "FriendRequestDeclined",
+  "FriendRequestRejected",
+  "FriendRequestResponded",
+  "FriendshipUpdated",
+  "FriendshipStatusChanged",
   "ChatUpdated",
 ]
 

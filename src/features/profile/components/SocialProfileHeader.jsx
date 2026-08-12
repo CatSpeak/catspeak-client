@@ -1,13 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   MapPin,
   Edit2,
-  BadgeCheck,
   UserPlus,
   Check,
   UserMinus,
-  Camera,
   AtSign,
 } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
@@ -20,10 +18,7 @@ import {
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
 } from "../../../store/api/social/friendshipApi";
-import {
-  useUpdateAvatarMutation,
-  useGetCurrentBackgroundQuery,
-} from "@/store/api/userApi";
+import { useGetCurrentBackgroundQuery } from "@/store/api/userApi";
 import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
 
 const SocialProfileHeader = ({
@@ -33,14 +28,22 @@ const SocialProfileHeader = ({
   targetAccountId,
   isOwnProfile,
   onEditClick,
+  friendsCount = 0,
+  followersCount = 0,
 }) => {
   // Use avatarImageUrl as the primary avatar for the profile
   const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl;
-  const nickname = formData?.nickname || user?.nickname;
   const username = formData?.username || user?.username;
-  const displayName = nickname || username || "Lorem Ipsum";
-  const handle = nickname ? username : null;
-  const location = formData?.location || user?.location;
+  const nickname = formData?.nickname || user?.nickname;
+  const displayName = username || nickname || "(?)";
+  const handle =
+    nickname && nickname !== displayName
+      ? nickname.startsWith("@")
+        ? nickname.slice(1)
+        : nickname
+      : null;
+  const location =
+    formData?.location || user?.location || formData?.address || user?.address;
 
   const [fileToCrop, setFileToCrop] = useState(null);
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
@@ -48,66 +51,86 @@ const SocialProfileHeader = ({
   // API Hooks
   const { data: statusResponse } = useGetConnectionStatusQuery(
     targetAccountId,
-    { skip: isOwnProfile || !targetAccountId },
+    {
+      skip: isOwnProfile || !targetAccountId,
+      pollingInterval: 3000,
+    },
   );
   const status =
     statusResponse?.data !== undefined ? statusResponse.data : statusResponse;
 
-  const [followUser] = useFollowUserMutation();
-  const [unfollowUser] = useUnfollowUserMutation();
-  const [sendFriendRequest] = useSendFriendRequestMutation();
-  const [deleteFriendship] = useDeleteFriendshipMutation();
-  const [updateAvatar, { isLoading: isUpdatingAvatar }] =
-    useUpdateAvatarMutation();
+  const [followUser, { isLoading: isFollowingLoading }] =
+    useFollowUserMutation();
+  const [unfollowUser, { isLoading: isUnfollowingLoading }] =
+    useUnfollowUserMutation();
+  const [sendFriendRequest, { isLoading: isSendingRequest }] =
+    useSendFriendRequestMutation();
+  const [deleteFriendship, { isLoading: isDeletingFriendship }] =
+    useDeleteFriendshipMutation();
+
+  const [isFriendCooldown, setIsFriendCooldown] = useState(false);
+  const cooldownTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimeoutRef.current) {
+        clearTimeout(cooldownTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
+  const isFriendshipLoading = isSendingRequest || isDeletingFriendship;
+  const isFriendshipDisabled = isFriendshipLoading || isFriendCooldown;
 
   const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
     useGetCurrentBackgroundQuery(undefined, {
       skip: !isOwnProfile,
     });
   const fetchedCoverUrl = isOwnProfile
-    ? currentBackgroundResponse?.data?.activeBackgroundUrl
-    : null;
+    ? currentBackgroundResponse?.data?.activeBackgroundUrl ||
+      currentBackgroundResponse?.activeBackgroundUrl ||
+      currentBackgroundResponse?.data?.customUploadedBackgroundUrl ||
+      currentBackgroundResponse?.customUploadedBackgroundUrl ||
+      (typeof currentBackgroundResponse?.data === "string"
+        ? currentBackgroundResponse.data
+        : null) ||
+      (typeof currentBackgroundResponse === "string"
+        ? currentBackgroundResponse
+        : null) ||
+      formData?.virtualBackgroundUrl ||
+      user?.virtualBackgroundUrl
+    : formData?.virtualBackgroundUrl ||
+      user?.virtualBackgroundUrl ||
+      formData?.activeBackgroundUrl ||
+      user?.activeBackgroundUrl ||
+      formData?.backgroundUrl ||
+      user?.backgroundUrl ||
+      null;
 
-  const fileInputRef = useRef(null);
-
-  const handleFollowToggle = () => {
-    if (status?.isFollowing) {
-      unfollowUser(targetAccountId);
-    } else {
-      followUser(targetAccountId);
-    }
-  };
-
-  const handleAvatarSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileToCrop(file);
-    setIsCropModalOpen(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const handleCropComplete = async (croppedFile) => {
-    if (!croppedFile) return;
-
-    const avatarData = new FormData();
-    avatarData.append("file", croppedFile);
+  const handleFollowToggle = async () => {
+    if (isFollowLoading) return;
+    const toastId = "follow-action";
+    toast.loading(t.profile?.social?.processing || "Đang xử lý...", {
+      id: toastId,
+    });
 
     try {
-      toast.loading(t.profile?.avatar?.updating || "Đang cập nhật...", {
-        id: "avatar-update",
-      });
-      await updateAvatar(avatarData).unwrap();
-      toast.success(
-        t.profile?.avatar?.updateSuccess || "Cập nhật ảnh đại diện thành công",
-        {
-          id: "avatar-update",
-        },
-      );
+      if (status?.isFollowing) {
+        await unfollowUser(targetAccountId).unwrap();
+        toast.success(t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi", {
+          id: toastId,
+        });
+      } else {
+        await followUser(targetAccountId).unwrap();
+        toast.success(t.profile?.social?.followSuccess || "Đã theo dõi", {
+          id: toastId,
+        });
+      }
     } catch (error) {
-      toast.error(
-        t.profile?.avatar?.updateError || "Không thể cập nhật ảnh đại diện",
-        { id: "avatar-update" },
-      );
+      toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
+        id: toastId,
+      });
       console.error(error);
     }
   };
@@ -117,24 +140,53 @@ const SocialProfileHeader = ({
     status?.friendshipStatus === 1 ||
     status?.friendshipStatus === "Pending";
 
-  const handleFriendshipToggle = () => {
-    if (isFriendOrPending) {
-      if (status?.friendshipId) {
-        deleteFriendship(status.friendshipId).unwrap().catch(() => {});
-      }
-    } else {
-      const performSend = () => {
-        sendFriendRequest(targetAccountId).unwrap().catch(() => {});
-      };
+  const handleFriendshipToggle = async () => {
+    if (isFriendshipDisabled) return;
 
-      if (status?.friendshipId) {
-        deleteFriendship(status.friendshipId)
-          .unwrap()
-          .then(() => performSend())
-          .catch(() => {});
+    // Start 3-second cooldown immediately upon clicking
+    setIsFriendCooldown(true);
+    if (cooldownTimeoutRef.current) {
+      clearTimeout(cooldownTimeoutRef.current);
+    }
+    cooldownTimeoutRef.current = setTimeout(() => {
+      setIsFriendCooldown(false);
+    }, 3000);
+
+    try {
+      if (isFriendOrPending) {
+        if (status?.friendshipId) {
+          await deleteFriendship(status.friendshipId).unwrap();
+          toast.success(
+            status?.isFriend
+              ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
+              : t.profile?.social?.cancelRequestSuccess ||
+                  "Đã hủy yêu cầu kết bạn",
+            { id: "friendship-action" },
+          );
+        }
       } else {
-        performSend();
+        if (status?.friendshipId) {
+          await deleteFriendship(status.friendshipId).unwrap();
+        }
+        await sendFriendRequest(targetAccountId).unwrap();
+        toast.success(
+          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+          { id: "friendship-action" },
+        );
       }
+    } catch (err) {
+      if (err?.status === 422) {
+        toast.error(
+          t.profile?.social?.requestPending ||
+            "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
+          { id: "friendship-action" },
+        );
+      } else {
+        toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
+          id: "friendship-action",
+        });
+      }
+      console.error(err);
     }
   };
 
@@ -165,23 +217,29 @@ const SocialProfileHeader = ({
       ]
       : []
     : [
-      {
-        key: "follow",
-        variant: status?.isFollowing ? "secondary" : "primary",
-        startIcon: status?.isFollowing ? <Check /> : <UserPlus />,
-        label: status?.isFollowing
-          ? t.profile?.social?.following || "Đang theo dõi"
-          : t.profile?.social?.follow || "Theo dõi",
-        onClick: handleFollowToggle,
-      },
-      {
-        key: "friendship",
-        variant: friendshipVariant,
-        startIcon: friendshipIcon,
-        label: friendshipLabel,
-        onClick: handleFriendshipToggle,
-      },
-    ];
+        {
+          key: "follow",
+          variant: status?.isFollowing ? "secondary" : "primary",
+          startIcon: status?.isFollowing ? <Check /> : <UserPlus />,
+          label: status?.isFollowing
+            ? t.profile?.social?.following || "Đang theo dõi"
+            : t.profile?.social?.follow || "Theo dõi",
+          onClick: handleFollowToggle,
+          disabled: isFollowLoading,
+          loading: isFollowLoading,
+          className: isFollowLoading ? "cursor-not-allowed" : "",
+        },
+        {
+          key: "friendship",
+          variant: friendshipVariant,
+          startIcon: friendshipIcon,
+          label: friendshipLabel,
+          onClick: handleFriendshipToggle,
+          disabled: isFriendshipDisabled,
+          loading: isFriendshipLoading,
+          className: isFriendshipDisabled ? "cursor-not-allowed" : "",
+        },
+      ];
 
   return (
     <div className="w-full bg-white border border-border rounded-xl overflow-hidden mb-6">
@@ -205,17 +263,9 @@ const SocialProfileHeader = ({
       {/* Profile Info Area */}
       <div className="p-4 sm:p-6 relative border-b border-border flex flex-wrap gap-4">
         <div className="flex-1 min-w-0">
-          {" "}
           {/* Avatar floating above the bottom border of the cover photo */}
-          <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full group  w-fit">
-            <div
-              className={`relative rounded-full overflow-hidden ${isOwnProfile ? "cursor-pointer" : ""}`}
-              onClick={() => {
-                if (isOwnProfile && fileInputRef.current && !isUpdatingAvatar) {
-                  fileInputRef.current.click();
-                }
-              }}
-            >
+          <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full w-fit">
+            <div className="relative rounded-full overflow-hidden">
               <Avatar
                 size={133}
                 src={displayAvatarUrl}
@@ -223,46 +273,7 @@ const SocialProfileHeader = ({
                 name={displayName}
                 className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
               />
-              {isOwnProfile && (
-                <div
-                  className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isUpdatingAvatar ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-                >
-                  {isUpdatingAvatar ? (
-                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    <Camera className="w-8 h-8 text-white" />
-                  )}
-                </div>
-              )}
             </div>
-            {isOwnProfile && (
-              <>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleAvatarSelect}
-                />
-                {isCropModalOpen && fileToCrop && (
-                  <ImageCropModal
-                    image={fileToCrop}
-                    isOpen={isCropModalOpen}
-                    cropPreset="avatar"
-                    title={t.profile?.avatar?.cropTitle || t.imageCrop?.title || "Cắt ảnh đại diện"}
-                    onClose={() => {
-                      setIsCropModalOpen(false);
-                      setFileToCrop(null);
-                    }}
-                    onCropComplete={(croppedFile) => {
-                      handleCropComplete(croppedFile);
-                      setIsCropModalOpen(false);
-                      setFileToCrop(null);
-                    }}
-                  />
-                )}
-              </>
-            )}
           </div>
           {/* Text Info */}
           <div className="flex flex-col items-start gap-1">
@@ -282,24 +293,47 @@ const SocialProfileHeader = ({
                   <span>{location}</span>
                 </div>
               )}
+              <div className="flex items-center gap-3 text-sm text-[#606060] mt-0.5 font-medium">
+                <span>
+                  <strong className="text-gray-900">{friendsCount}</strong>{" "}
+                  {t.profile?.tabs?.friends || "Bạn bè"}
+                </span>
+                <span>•</span>
+                <span>
+                  <strong className="text-gray-900">{followersCount}</strong>{" "}
+                  {t.profile?.friends?.subTabs?.followers || "Người theo dõi"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right side: Actions */}
         <div className="ml-auto flex flex-wrap justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start">
-          {" "}
-          {actionButtons.map(({ key, variant, startIcon, label, onClick }) => (
-            <PillButton
-              key={key}
-              variant={variant}
-              onClick={onClick}
-              startIcon={startIcon}
-              className="max-[425px]:flex-1 "
-            >
-              {label}
-            </PillButton>
-          ))}
+          {actionButtons.map(
+            ({
+              key,
+              variant,
+              startIcon,
+              label,
+              onClick,
+              disabled,
+              loading,
+              className: btnClass,
+            }) => (
+              <PillButton
+                key={key}
+                variant={variant}
+                onClick={onClick}
+                startIcon={startIcon}
+                disabled={disabled}
+                loading={loading}
+                className={`max-[425px]:flex-1 ${btnClass || ""}`}
+              >
+                {label}
+              </PillButton>
+            ),
+          )}
         </div>
       </div>
     </div>

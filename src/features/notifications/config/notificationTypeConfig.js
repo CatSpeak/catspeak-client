@@ -142,44 +142,58 @@ export const NOTIFICATION_TYPES = {
     resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
     resolveAvatarUrl: (m) => m.avatarUrl || null,
   },
-  friend_acceptance: {
-    icon: UserCheck,
-    color: "text-green-500",
-    resolveTitle: (m, t) =>
-      t.profile?.notifications?.friend_accepted?.title ||
-      "Đã chấp nhận kết bạn.",
+  friend_request_accepted: {
+    icon: CheckCircle2,
+    color: "text-emerald-500",
+    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_accepted?.title || "Lời mời kết bạn đã được chấp nhận",
     resolveBody: (m, t) => {
-      const name = m.userName || "Ai đó";
-      return (
-        t.profile?.notifications?.friend_accepted?.body?.replace(
-          "{responderName}",
-          name,
-        ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
-      );
+      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
+      const suffix = t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
-    resolveAvatarUrl: (m) => m.avatarUrl || null,
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`
+    },
   },
-  
-  FriendAccepted: {
-    icon: UserCheck,
-    color: "text-green-500",
-    resolveTitle: (m, t) =>
-      t.profile?.notifications?.friend_accepted?.title ||
-      "Đã chấp nhận kết bạn",
+  FriendRequestAccepted: {
+    icon: CheckCircle2,
+    color: "text-emerald-500",
+    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_accepted?.title || "Lời mời kết bạn đã được chấp nhận",
     resolveBody: (m, t) => {
-      const name = m.userName || "Ai đó";
-      return (
-        t.profile?.notifications?.friend_accepted?.body?.replace(
-          "{responderName}",
-          name,
-        ) || `${name} đã chấp nhận lời mời kết bạn của bạn.`
-      );
+      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
+      const suffix = t.profile?.social?.friendRequestAccepted || "đã chấp nhận lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
     },
-    resolveUrl: (m) => (m.userid ? `/profile/${m.userid}?tab=friends` : null),
-    resolveAvatarUrl: (m) => m.avatarUrl || null,
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`
+    },
   },
-
+  friend_request_declined: {
+    icon: CalendarClock,
+    color: "text-gray-500",
+    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_declined?.title || "Lời mời kết bạn bị từ chối",
+    resolveBody: (m, t) => {
+      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
+      const suffix = t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
+    },
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`
+    },
+  },
+  FriendRequestDeclined: {
+    icon: CalendarClock,
+    color: "text-gray-500",
+    resolveTitle: (m, t) => t.profile?.notifications?.friend_request_declined?.title || "Lời mời kết bạn bị từ chối",
+    resolveBody: (m, t) => {
+      const name = m.userName || m.responderName || m.ResponderName || m.senderName || m.SenderName || m.name || "Ai đó";
+      const suffix = t.profile?.social?.friendRequestDeclined || "đã từ chối lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
+    },
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}`
+    },
+  },
   new_post: {
     icon: Megaphone,
     color: "text-violet-500",

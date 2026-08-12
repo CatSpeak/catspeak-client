@@ -2,6 +2,7 @@ export default {
   profile: "个人信息",
   personalPage: "个人主页",
   settings: "设置",
+  generalInfo: "编辑资料",
   logout: "登出",
   soon: "敬请期待",
   language: "语言",
