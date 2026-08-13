@@ -662,7 +662,9 @@ const TeachingMaterialPage = () => {
         }}
         onDownload={() => {
           const filesToDownload = selectedItems.filter(item => item._type === 'file' && item.fileUrl);
-          if (filesToDownload.length === 0) {
+          const foldersToDownload = selectedItems.filter(item => item._type === 'folder');
+          
+          if (filesToDownload.length === 0 && foldersToDownload.length === 0) {
             toast.error(t.materials.noFilesToDownload);
             return;
           }
@@ -687,7 +689,11 @@ const TeachingMaterialPage = () => {
             }
           });
 
-          toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length));
+          foldersToDownload.forEach(folder => {
+            downloadFolderAsZip(folder, false, null, t, true);
+          });
+
+          toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length + foldersToDownload.length));
           setSelectedItems([]);
         }}
         onMove={() => {

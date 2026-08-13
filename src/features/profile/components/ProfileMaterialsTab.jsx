@@ -513,13 +513,17 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
             }}
             onDownload={() => {
               const filesToDownload = selectedItems.filter(item => !isFolder(item) && item.fileUrl);
-              if (filesToDownload.length === 0) {
+              const foldersToDownload = selectedItems.filter(item => isFolder(item));
+
+              if (filesToDownload.length === 0 && foldersToDownload.length === 0) {
                 toast.error(t.materials.noFilesToDownload);
                 return;
               }
 
               filesToDownload.forEach(file => handleDownloadFile(file));
-              toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length));
+              foldersToDownload.forEach(folder => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t, true));
+
+              toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length + foldersToDownload.length));
               setSelectedItems([]);
             }}
             onMove={() => {

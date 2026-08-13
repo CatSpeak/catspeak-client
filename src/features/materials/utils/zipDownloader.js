@@ -4,8 +4,8 @@ import { store } from '@/store';
 import { materialApi } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
 
-export const downloadFolderAsZip = async (folder, isPublicProfile = false, targetAccountId = null, t) => {
-  const toastId = toast.loading(t?.materials?.downloadingFolder || 'Đang chuẩn bị tải xuống...');
+export const downloadFolderAsZip = async (folder, isPublicProfile = false, targetAccountId = null, t, silent = false) => {
+  const toastId = !silent ? toast.loading(t?.materials?.downloadingFolder || 'Đang chuẩn bị tải xuống...') : null;
 
   try {
     let allFolders = [];
@@ -142,7 +142,7 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
     const zipContent = await zip.generateAsync({ type: 'blob' });
     saveAs(zipContent, `${folder.name || folder.folderName || 'Folder'}.zip`);
 
-    toast.success(t?.materials?.downloadSuccess || 'Tải xuống thành công', { id: toastId });
+    if (!silent) toast.success(t?.materials?.downloadSuccess || 'Tải xuống thành công', { id: toastId });
   } catch (error) {
     console.error('Zip download failed:', error);
     toast.error(t?.materials?.actionFailed || 'Tải xuống thất bại', { id: toastId });
