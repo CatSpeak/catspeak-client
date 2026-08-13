@@ -133,6 +133,8 @@ export default {
       },
       deleteConfirm: "Bạn có chắc muốn xóa bài viết này?",
       document: "Tài liệu",
+      seeMore: "Xem thêm",
+      showLess: "Thu gọn",
     },
   },
 }
