@@ -24,7 +24,7 @@ import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import { Breadcrumb } from '@/shared/components/ui/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext';
-import { downloadFolderAsZip } from '@/features/materials/utils/zipDownloader';
+import { downloadFolderAsZip, downloadMultipleItemsAsZip } from '@/features/materials/utils/zipDownloader';
 import toast from 'react-hot-toast';
 import { formatSize } from '../utils/materialUtils';
 
@@ -684,6 +684,12 @@ const TeachingMaterialPage = () => {
             return;
           }
 
+          if (selectedItems.length >= 2 || foldersToDownload.length >= 1) {
+            downloadMultipleItemsAsZip(selectedItems, false, null, t, false);
+            setSelectedItems([]);
+            return;
+          }
+
           filesToDownload.forEach(async (file) => {
             recordDownload(file.id);
             try {
@@ -704,11 +710,7 @@ const TeachingMaterialPage = () => {
             }
           });
 
-          foldersToDownload.forEach(folder => {
-            downloadFolderAsZip(folder, false, null, t, true);
-          });
-
-          toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length + foldersToDownload.length));
+          toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length));
           setSelectedItems([]);
         }}
         onMove={() => {
