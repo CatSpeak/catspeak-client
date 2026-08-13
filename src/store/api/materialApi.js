@@ -53,7 +53,6 @@ export const materialApi = baseApi.injectEndpoints({
         url: "/personal-materials/upload",
         method: "POST",
         body: formData,
-        formData: true,
       }),
       invalidatesTags: ["PersonalMaterials"],
     }),

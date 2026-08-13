@@ -1,5 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { flushSync } from 'react-dom';
 import Modal from '@/shared/components/ui/Modal';
 import { UploadCloud, Upload } from 'lucide-react';
 import Switch from '@/shared/components/ui/inputs/Switch';
@@ -7,8 +6,10 @@ import Dropdown from '@/shared/components/ui/Dropdown';
 import UploadItem from './UploadItem';
 import { PillButton } from '@/shared/components/ui/buttons';
 import toast from 'react-hot-toast';
-import { useUploadMaterialMutation, useGetFolderTreeQuery } from '@/store/api/materialApi';
+import { useGetFolderTreeQuery, materialApi } from '@/store/api/materialApi';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import { useGlobalTask } from '@/shared/hooks/useGlobalTask';
+import { useDispatch } from 'react-redux';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const ALLOWED_EXTENSIONS = ['pdf', 'docx', 'xlsx', 'pptx', 'jpg', 'png', 'jpeg'];
@@ -49,7 +50,11 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
   const fileInputRef = useRef(null);
 
   const { data: treeData } = useGetFolderTreeQuery(undefined, { skip: !open });
-  const [uploadMaterial] = useUploadMaterialMutation();
+  const dispatch = useDispatch();
+  const { startTask, tasks } = useGlobalTask();
+  const [currentTaskId, setCurrentTaskId] = useState(null);
+  const [uploadingFilesIds, setUploadingFilesIds] = useState([]);
+  const currentTask = tasks.find(t => t.id === currentTaskId);
 
   // Extract flat folders for dropdown
   const folders = [];
@@ -173,14 +178,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
 
     setIsBusy(true);
 
-    // Mark all pending files as uploading
-    flushSync(() => {
-      setUploadFiles(prev => prev.map(f =>
-        pendingFiles.some(p => p.id === f.id)
-          ? { ...f, status: 'uploading', progress: 30 }
-          : f
-      ));
-    });
+    setIsBusy(true);
 
     const formData = new FormData();
     pendingFiles.forEach(fileObj => {
@@ -191,26 +189,27 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
       formData.append('folderId', selectedFolder);
     }
 
-    try {
-      await uploadMaterial(formData).unwrap();
-      setUploadFiles(prev => prev.map(f =>
-        pendingFiles.some(p => p.id === f.id)
-          ? { ...f, status: 'success', progress: 100 }
-          : f
-      ));
-      toast.success(t.materials.uploadSuccessCount.replace('{{count}}', pendingFiles.length));
-      handleClose();
-    } catch (err) {
-      console.error(err);
-      setUploadFiles(prev => prev.map(f =>
-        pendingFiles.some(p => p.id === f.id)
-          ? { ...f, status: 'error', progress: 0 }
-          : f
-      ));
-      toast.error(t.materials.uploadError);
-    }
+    const pendingIds = pendingFiles.map(f => f.id);
+    setUploadingFilesIds(pendingIds);
 
-    setIsBusy(false);
+    const taskId = await startTask({
+      title: t.materials.uploadMaterialTitle,
+      url: "/personal-materials/upload",
+      data: formData,
+      isUploadTask: true,
+      isHidden: true,
+      onSuccess: () => {
+        dispatch(materialApi.util.invalidateTags(["PersonalMaterials"]));
+        toast.success(t.materials.uploadSuccessCount.replace('{{count}}', pendingFiles.length));
+        handleClose();
+      },
+      onError: () => {
+        setIsBusy(false);
+        toast.error(t.materials.uploadError);
+      }
+    });
+
+    setCurrentTaskId(taskId);
   };
 
   const handleClose = () => {
@@ -218,6 +217,8 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
     setSelectedFolder('');
     setIsPublic(true);
     setIsBusy(false);
+    setCurrentTaskId(null);
+    setUploadingFilesIds([]);
     onClose();
   };
 
@@ -288,18 +289,26 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
           <div>
             <h4 className="text-base font-semibold text-[#1A1C1C] mb-3">{t.materials.uploadListTitle.replace('{{count}}', uploadFiles.length)}</h4>
             <div className="flex flex-col gap-4">
-              {uploadFiles.map(fileObj => (
-                <UploadItem
-                  key={fileObj.id}
-                  name={fileObj.file.name}
-                  sizeBytes={fileObj.file.size}
-                  uploadedBytes={fileObj.progress === 100 ? fileObj.file.size : fileObj.file.size * (fileObj.progress / 100)}
-                  progress={fileObj.progress}
-                  status={fileObj.status}
-                  type={getMappedType(getExtension(fileObj.file.name))}
-                  onCancel={() => handleRemoveFile(fileObj.id)}
-                />
-              ))}
+              {uploadFiles.map(fileObj => {
+                const isUploadingThis = uploadingFilesIds.includes(fileObj.id) && currentTask;
+                const progress = isUploadingThis ? currentTask.progress : fileObj.progress;
+                const status = isUploadingThis
+                  ? (currentTask.status === 'ERROR' ? 'error' : currentTask.status === 'SUCCESS' ? 'success' : 'uploading')
+                  : fileObj.status;
+
+                return (
+                  <UploadItem
+                    key={fileObj.id}
+                    name={fileObj.file.name}
+                    sizeBytes={fileObj.file.size}
+                    uploadedBytes={progress === 100 ? fileObj.file.size : fileObj.file.size * (progress / 100)}
+                    progress={progress}
+                    status={status}
+                    type={getMappedType(getExtension(fileObj.file.name))}
+                    onCancel={() => handleRemoveFile(fileObj.id)}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
