@@ -88,6 +88,7 @@ export default {
     renameSuccess: "Successfully renamed",
     renameError: "Failed to rename",
     saveChanges: "Save changes",
+    saveAndCreateLink: "Save and create link",
     enterNewName: "Enter new name...",
     shareMaterial: "Share material",
     updateShareSettingsSuccess: "Successfully updated share settings",

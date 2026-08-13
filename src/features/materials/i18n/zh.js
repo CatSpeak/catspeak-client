@@ -88,6 +88,7 @@ export default {
     renameSuccess: "重命名成功",
     renameError: "重命名失败",
     saveChanges: "保存更改",
+    saveAndCreateLink: "保存并生成链接",
     enterNewName: "输入新名称...",
     shareMaterial: "分享资料",
     updateShareSettingsSuccess: "成功更新分享设置",

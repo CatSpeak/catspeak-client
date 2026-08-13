@@ -34,7 +34,7 @@ const FileItem = ({
 
   return (
     <div
-      className={`group relative border rounded-xl p-4 flex ${isList ? 'flex-row items-center w-full' : 'flex-col md:w-[264px]'} cursor-pointer transition-all select-none ${isSelected
+      className={`group relative border rounded-xl p-4 flex w-full ${isList ? 'flex-row items-center' : 'flex-col'} cursor-pointer transition-all select-none ${isSelected
         ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
         : 'bg-[#F9F9F9] border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
         }`}

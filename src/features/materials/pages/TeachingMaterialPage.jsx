@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { LayoutGrid, ChevronDown, FolderPlus, Upload, ListFilter, TableProperties } from 'lucide-react';
+import { LayoutGrid, ChevronDown, FolderPlus, Upload, ListFilter, TableProperties, Search } from 'lucide-react';
 import FolderItem from '../components/teaching-material/FolderItem';
 import FileItem from '../components/teaching-material/FileItem';
 import EmptySearchState from '../components/teaching-material/EmptySearchState';
@@ -13,7 +13,7 @@ import MoveMaterialModal from '../components/teaching-material/MoveMaterialModal
 import RenameMaterialModal from '../components/teaching-material/RenameMaterialModal';
 import BulkActionBar from '../components/teaching-material/BulkActionBar';
 import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
-import SearchInput from '@/shared/components/ui/inputs/SearchInput';
+import TextInput from '@/shared/components/ui/inputs/TextInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useContextMenu } from '@/shared/hooks/useContextMenu';
@@ -329,13 +329,13 @@ const TeachingMaterialPage = () => {
       {/* Search and Filters */}
       <div className="flex items-center justify-between mb-4 flex-col md:flex-row gap-4">
         <div className="flex items-center gap-4 flex-1">
-          <SearchInput
+          <TextInput
             value={searchQuery}
-            onChange={setSearchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.materials.searchPlaceholder}
-            className="w-full max-w-[448px] !h-10 !rounded-xl border-[#E3BEBA] flex-row-reverse"
-            inputClassName="text-base !pl-0"
-            buttonClassName="w-4 h-4"
+            containerClassName="w-full max-w-[448px]"
+            className="!h-10 !rounded-xl border-[#E3BEBA]"
+            icon={Search}
           />
           <PillButton
             variant={filterMode ? 'solid' : 'outline'}

@@ -88,6 +88,7 @@ export default {
     renameSuccess: "Đổi tên thành công",
     renameError: "Đổi tên thất bại",
     saveChanges: "Lưu thay đổi",
+    saveAndCreateLink: "Lưu và tạo liên kết",
     enterNewName: "Nhập tên mới...",
     shareMaterial: "Chia sẻ tài liệu",
     updateShareSettingsSuccess: "Cập nhật cài đặt chia sẻ thành công",
