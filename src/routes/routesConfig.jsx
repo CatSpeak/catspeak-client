@@ -32,7 +32,7 @@ import LanguageLayout from "./LanguageLayout";
 import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
 import { Navigate } from "react-router-dom";
-import { AuthGuard } from "@/shared/components";
+import { AuthGuard, RoleGuard } from "@/shared/components";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
@@ -415,17 +415,21 @@ const routesConfig = [
               {
                 path: "courses",
                 element: (
-                  <LazyRoute>
-                    <MyCoursesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <MyCoursesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "classes",
                 element: (
-                  <LazyRoute>
-                    <MyClassesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <MyClassesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
@@ -439,89 +443,111 @@ const routesConfig = [
               {
                 path: "teaching-tasks",
                 element: (
-                  <LazyRoute>
-                    <WorkspaceCalendarPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <WorkspaceCalendarPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "schedule",
                 element: (
-                  <LazyRoute>
-                    <SchedulePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <SchedulePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "analytics",
                 element: (
-                  <LazyRoute>
-                    <WorkspaceAnalyticsPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <WorkspaceAnalyticsPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "dashboard",
                 element: (
-                  <LazyRoute>
-                    <WorkspaceDashboardPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <WorkspaceDashboardPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/all",
                 element: (
-                  <LazyRoute>
-                    <AllCoursesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <AllCoursesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "classes/all-classes",
                 element: (
-                  <LazyRoute>
-                    <AllClassesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <AllClassesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/create",
                 element: (
-                  <LazyRoute>
-                    <CreateCoursePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateCoursePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/edit/:id",
                 element: (
-                  <LazyRoute>
-                    <CreateCoursePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateCoursePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "classes/create-class",
                 element: (
-                  <LazyRoute>
-                    <CreateClassPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateClassPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/edit-class/:id",
                 element: (
-                  <LazyRoute>
-                    <CreateClassPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateClassPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/schedule",
                 element: (
-                  <LazyRoute>
-                    <SchedulePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <SchedulePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {

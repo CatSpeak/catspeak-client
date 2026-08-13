@@ -23,6 +23,8 @@ const DesktopCommunityDropdown = ({ navKey }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
 
+  const [overrideCommunity, setOverrideCommunity] = useState(null)
+
   // ---- Supported codes (dynamic, scalable) ----
   const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), [])
 
@@ -33,8 +35,8 @@ const DesktopCommunityDropdown = ({ navKey }) => {
       return lang
     }
 
-    return localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY
-  }, [lang, supportedCodes])
+    return overrideCommunity || localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY
+  }, [lang, supportedCodes, overrideCommunity])
 
   // ---- Derive label (no state needed) ----
   const selectedLabel = useMemo(() => {
@@ -70,13 +72,14 @@ const DesktopCommunityDropdown = ({ navKey }) => {
     setIsOpen(false)
 
     const isInsideEcosystem =
+      supportedCodes.includes(lang) ||
       location.pathname === `/${currentCommunity}` ||
       location.pathname.startsWith(`/${currentCommunity}/`)
 
     if (isInsideEcosystem) {
       window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
     } else {
-      window.location.href = `/${newCode}/community`
+      window.location.reload()
     }
   }
 

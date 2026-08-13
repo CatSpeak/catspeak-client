@@ -57,19 +57,32 @@ export const navSections = [
     labelKey: "workspace",
     defaultLabel: "My Workspace",
     maxInitial: 5,
-items: [
-      { key: "profile", path: "/workspace/profile", icon: User },
-      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
-      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
-      { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
-      { key: "recordings", path: "/workspace/recordings", icon: Mic },
-      { key: "workspaceReels", path: "/workspace/reels", icon: Film },
-      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-      { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
-      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
-      { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
-      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+    groups: [
+      {
+        key: "teaching",
+        roles: ["Teacher"],
+        items: [
+          { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
+          { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+          { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+          { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+        ],
+      },
+      {
+        key: "general",
+        items: [
+          { key: "profile", path: "/workspace/profile", icon: User },
+          { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
+          { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
+          { key: "recordings", path: "/workspace/recordings", icon: Mic },
+          { key: "workspaceReels", path: "/workspace/reels", icon: Film },
+        ],
+      },
     ],
+    get items() {
+      return this.groups.flatMap((g) => g.items)
+    },
   },
 ]
 
@@ -92,19 +105,32 @@ export const navLinks = [
     hasDropdown: true,
     icon: Briefcase,
     requiresAuth: true,
-subItems: [
-      { key: "profile", path: "/workspace/profile", icon: User },
-      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
-      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
-      { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
-      { key: "recordings", path: "/workspace/recordings", icon: Mic },
-      { key: "reels", path: "/workspace/reels", icon: Film },
-      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-      { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
-      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
-      { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
-      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+    groups: [
+      {
+        key: "teaching",
+        roles: ["Teacher"],
+        items: [
+          { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
+          { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+          { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+          { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+        ],
+      },
+      {
+        key: "general",
+        items: [
+          { key: "profile", path: "/workspace/profile", icon: User },
+          { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
+          { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
+          { key: "recordings", path: "/workspace/recordings", icon: Mic },
+          { key: "reels", path: "/workspace/reels", icon: Film },
+        ],
+      },
     ],
+    get subItems() {
+      return this.groups.flatMap((g) => g.items)
+    },
   },
   {
     key: "horizontalBar",

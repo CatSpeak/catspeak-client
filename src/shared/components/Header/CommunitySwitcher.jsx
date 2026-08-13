@@ -40,7 +40,17 @@ const CommunitySwitcher = () => {
     if (newCode === currentCommunity) { setIsOpen(false); return }
     localStorage.setItem("communityLanguage", newCode)
     setIsOpen(false)
-    window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+
+    const isInsideEcosystem =
+      supportedCodes.includes(lang) ||
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`)
+
+    if (isInsideEcosystem) {
+      window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+    } else {
+      window.location.reload()
+    }
   }
 
   return (

@@ -18,6 +18,7 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
   const isActive = useActiveLink(navKey);
 
   const [communityOpen, setCommunityOpen] = useState(false);
+  const [overrideCommunity, setOverrideCommunity] = useState(null);
 
   // ---- Supported codes (scalable) ----
   const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), []);
@@ -29,8 +30,8 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
       return lang;
     }
 
-    return localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY;
-  }, [lang, supportedCodes]);
+    return overrideCommunity || localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY;
+  }, [lang, supportedCodes, overrideCommunity]);
 
   // ---- Display label ----
   const displayLabel = useMemo(() => {
@@ -60,13 +61,14 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
     setCommunityOpen(false);
 
     const isInsideEcosystem =
+      supportedCodes.includes(lang) ||
       location.pathname === `/${currentCommunity}` ||
       location.pathname.startsWith(`/${currentCommunity}/`);
 
     if (isInsideEcosystem) {
       window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode);
     } else {
-      window.location.href = `/${newCode}/community`;
+      window.location.reload();
     }
 
     onClose?.();
