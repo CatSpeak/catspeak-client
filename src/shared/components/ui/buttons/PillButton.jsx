@@ -20,36 +20,39 @@ const PillButton = ({
   const isSecondary = variant === "secondary"
   const isSecondaryNoOutline = variant === "secondary-no-outline"
   const isOutline = variant === "outline"
+  const isSnackbar = variant === "snackbar"
   const isActuallyDisabled = disabled || loading
 
   // Default variant styles applied to inner div
-  const variantStyles = isOutline
-    ? "bg-transparent group-hover:bg-primaryBg group-active:bg-[#e5e5e5]"
-    : isSecondary
-      ? "bg-white border border-border text-black group-hover:bg-primaryBg group-active:bg-[#e0e0e0]"
-      : isSecondaryNoOutline
-        ? "bg-transparent border border-transparent text-black group-hover:bg-[#E5E5E5] group-active:bg-[#e0e0e0]"
-        : "bg-cath-red-700 border border-transparent text-white group-hover:brightness-90 group-active:brightness-75"
+  const variantStyles = isSnackbar
+    ? "bg-transparent border-none text-[#FF6B6B] group-hover:text-[#FF9999] hover:text-[#FF9999] hover:bg-transparent active:bg-transparent p-0 h-auto font-semibold cursor-pointer transition-colors duration-150"
+    : isOutline
+      ? "bg-transparent group-hover:bg-primaryBg group-active:bg-[#e5e5e5]"
+      : isSecondary
+        ? "bg-white border border-[#e5e5e5] text-black group-hover:bg-primaryBg group-active:bg-[#e0e0e0]"
+        : isSecondaryNoOutline
+          ? "bg-transparent border border-transparent text-black group-hover:bg-[#E5E5E5] group-active:bg-[#e0e0e0]"
+          : "bg-cath-red-700 border border-transparent text-white group-hover:brightness-90 group-active:brightness-75"
 
   const disabledStyles =
     "group-disabled:bg-[#BFBFBF] group-disabled:text-white group-disabled:brightness-100 group-disabled:border-transparent group-disabled:cursor-not-allowed cursor-pointer"
 
   const variantCustomStyle = isOutline
     ? {
-      color: colors.primaryRed,
-      borderColor: colors.primaryRed,
-      borderWidth: "1.5px",
-      borderStyle: "solid",
-    }
+        color: colors.primaryRed,
+        borderColor: colors.primaryRed,
+        borderWidth: "1.5px",
+        borderStyle: "solid",
+      }
     : {}
 
   const customStyle = !isActuallyDisabled
     ? {
-      ...variantCustomStyle,
-      ...(bgColor ? { backgroundColor: bgColor } : {}),
-      ...(textColor ? { color: textColor } : {}),
-      ...(borderColor ? { borderColor: borderColor } : {}),
-    }
+        ...variantCustomStyle,
+        ...(bgColor ? { backgroundColor: bgColor } : {}),
+        ...(textColor ? { color: textColor } : {}),
+        ...(borderColor ? { borderColor: borderColor } : {}),
+      }
     : {}
 
   const renderIcon = (icon) => {

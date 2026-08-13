@@ -18,6 +18,7 @@ const SessionActionButtons = ({
   return (
     <div className="relative mt-5">
       <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mt-2">
+
         {badges.map((b) => {
           const Icon = b.icon
           const isOneOnOne = b.id === "connect_1_1"
