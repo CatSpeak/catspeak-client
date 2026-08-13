@@ -220,16 +220,6 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
     actionsFor: c.actionsForCourse || "Actions for {{title}}",
   }
 
-  const handleShare = async (item) => {
-    const courseId = item.id || item._id
-    const shareUrl = `${window.location.origin}/explore-courses/details/${courseId}`
-    await copyShareLink({
-      url: shareUrl,
-      successMessage: c.courseDetail?.linkCopied || "Link copied!",
-      errorMessage: c.courseDetail?.linkCopyFailed || "Failed to copy link",
-    })
-  }
-
   const classCardLabels = {
     editCourse: c.editClass || "Edit Class",
     deleteCourse: c.createClass?.deleteClass || "Delete Class",
