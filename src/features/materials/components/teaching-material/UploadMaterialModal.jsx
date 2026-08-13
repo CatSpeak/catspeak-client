@@ -195,7 +195,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
     const taskId = await startTask({
       title: t.materials.uploadMaterialTitle,
       url: "/personal-materials/upload",
-      baseUrlOverride: "/api",
+      baseUrlOverride: import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api",
       data: formData,
       isUploadTask: true,
       isHidden: true,
