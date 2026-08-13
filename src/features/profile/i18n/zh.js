@@ -60,7 +60,7 @@ export default {
         noRecommendations: "暂无推荐。",
       },
       actions: {
-        actions: "操作",
+        actionButton: "操作",
         accept: "接受",
         decline: "拒绝",
         acceptSuccess: "已接受好友请求！",

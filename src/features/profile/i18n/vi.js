@@ -60,7 +60,7 @@ export default {
         noRecommendations: "Không có gợi ý nào.",
       },
       actions: {
-        actions: "Hành động",
+        actionButton: "Hành động",
         accept: "Chấp nhận",
         decline: "Từ chối",
         acceptSuccess: "Đã chấp nhận kết bạn!",

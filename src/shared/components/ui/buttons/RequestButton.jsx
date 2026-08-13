@@ -118,8 +118,8 @@ const RequestButton = ({
     } catch (error) {
       toast.error(
         t.profile?.social?.requestError ||
-          t.profile?.social?.errorOccurred ||
-          "Không thể gửi yêu cầu kết bạn",
+        t.profile?.social?.errorOccurred ||
+        "Không thể gửi yêu cầu kết bạn",
         { id: toastId },
       );
       console.error(error);
