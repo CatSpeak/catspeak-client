@@ -1,22 +1,16 @@
-import React from "react";
-import toast from "react-hot-toast";
-import {
-  MapPin,
-  Edit2,
-  UserPlus,
-  Check,
-  AtSign,
-} from "lucide-react";
-import Avatar from "@/shared/components/ui/Avatar";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
-import RequestButton from "@/shared/components/ui/buttons/RequestButton";
+import React from "react"
+import toast from "react-hot-toast"
+import { MapPin, Edit2, UserPlus, Check, AtSign } from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import RequestButton from "@/shared/components/ui/buttons/RequestButton"
 import {
   useGetConnectionStatusQuery,
   useFollowUserMutation,
   useUnfollowUserMutation,
-} from "../../../store/api/social/friendshipApi";
-import { useGetCurrentBackgroundQuery } from "@/store/api/userApi";
-import backgroundAccount from "@/shared/assets/backgrounds/background-account.png";
+} from "../../../store/api/social/friendshipApi"
+import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
+import backgroundAccount from "@/shared/assets/backgrounds/background-account.png"
 
 const SocialProfileHeader = ({
   user,
@@ -29,18 +23,18 @@ const SocialProfileHeader = ({
   followersCount = 0,
 }) => {
   // Use avatarImageUrl as the primary avatar for the profile
-  const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl;
-  const username = formData?.username || user?.username;
-  const nickname = formData?.nickname || user?.nickname;
-  const displayName = username || nickname || "(?)";
+  const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl
+  const username = formData?.username || user?.username
+  const nickname = formData?.nickname || user?.nickname
+  const displayName = username || nickname || "(?)"
   const handle =
     nickname && nickname !== displayName
       ? nickname.startsWith("@")
         ? nickname.slice(1)
         : nickname
-      : null;
+      : null
   const location =
-    formData?.location || user?.location || formData?.address || user?.address;
+    formData?.location || user?.location || formData?.address || user?.address
 
   // API Hooks
   const { data: statusResponse } = useGetConnectionStatusQuery(
@@ -49,65 +43,49 @@ const SocialProfileHeader = ({
       skip: isOwnProfile || !targetAccountId,
       pollingInterval: 3000,
     },
-  );
+  )
   const status =
-    statusResponse?.data !== undefined ? statusResponse.data : statusResponse;
+    statusResponse?.data !== undefined ? statusResponse.data : statusResponse
 
   const [followUser, { isLoading: isFollowingLoading }] =
-    useFollowUserMutation();
+    useFollowUserMutation()
   const [unfollowUser, { isLoading: isUnfollowingLoading }] =
-    useUnfollowUserMutation();
+    useUnfollowUserMutation()
 
-  const isFollowLoading = isFollowingLoading || isUnfollowingLoading;
+  const isFollowLoading = isFollowingLoading || isUnfollowingLoading
 
   const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
     useGetCurrentBackgroundQuery(undefined, {
       skip: !isOwnProfile,
-    });
+    })
   const fetchedCoverUrl = isOwnProfile
-    ? currentBackgroundResponse?.data?.activeBackgroundUrl ||
-      currentBackgroundResponse?.activeBackgroundUrl ||
-      currentBackgroundResponse?.data?.customUploadedBackgroundUrl ||
-      currentBackgroundResponse?.customUploadedBackgroundUrl ||
-      (typeof currentBackgroundResponse?.data === "string"
-        ? currentBackgroundResponse.data
-        : null) ||
-      (typeof currentBackgroundResponse === "string"
-        ? currentBackgroundResponse
-        : null) ||
-      formData?.virtualBackgroundUrl ||
-      user?.virtualBackgroundUrl
-    : formData?.virtualBackgroundUrl ||
-      user?.virtualBackgroundUrl ||
-      formData?.activeBackgroundUrl ||
-      user?.activeBackgroundUrl ||
-      formData?.backgroundUrl ||
-      user?.backgroundUrl ||
-      null;
+    ? (currentBackgroundResponse?.activeBackgroundUrl ??
+      currentBackgroundResponse?.data?.activeBackgroundUrl)
+    : null
 
   const handleFollowToggle = async () => {
-    if (isFollowLoading) return;
-    const toastId = "follow-action";
+    if (isFollowLoading) return
+    const toastId = "follow-action"
 
     try {
       if (status?.isFollowing) {
-        await unfollowUser(targetAccountId).unwrap();
+        await unfollowUser(targetAccountId).unwrap()
         toast.success(t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi", {
           id: toastId,
-        });
+        })
       } else {
-        await followUser(targetAccountId).unwrap();
+        await followUser(targetAccountId).unwrap()
         toast.success(t.profile?.social?.followSuccess || "Đã theo dõi", {
           id: toastId,
-        });
+        })
       }
     } catch (error) {
       toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
         id: toastId,
-      });
-      console.error(error);
+      })
+      console.error(error)
     }
-  };
+  }
 
   return (
     <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
@@ -121,8 +99,8 @@ const SocialProfileHeader = ({
             alt="Cover fallback"
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.target.onerror = null; // prevent infinite loop
-              e.target.src = backgroundAccount;
+              e.target.onerror = null // prevent infinite loop
+              e.target.src = backgroundAccount
             }}
           />
         )}
@@ -215,7 +193,7 @@ const SocialProfileHeader = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SocialProfileHeader;
+export default SocialProfileHeader

@@ -72,7 +72,8 @@ export const useCombinedProcessor = () => {
   const attachingRef = useRef(false)
 
   const { data: bgData } = useGetCurrentBackgroundQuery()
-  const activeBackgroundUrl = bgData?.data?.activeBackgroundUrl ?? null
+  const activeBackgroundUrl =
+    bgData?.activeBackgroundUrl ?? bgData?.data?.activeBackgroundUrl ?? null
 
   // ── Diagnostic status for on-screen indicators ────────────────────────────
   const [processorStatus, setProcessorStatus] = useState(

@@ -16,14 +16,13 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
   // Fetch sample backgrounds
   const { data: samplesResponse, isLoading: isSamplesLoading } =
     useGetSampleBackgroundsQuery()
-  const samples = samplesResponse?.data || samplesResponse || []
+  const samples = Array.isArray(samplesResponse) ? samplesResponse : []
 
   // Fetch current active background
   const { data: currentBackgroundResponse } = useGetCurrentBackgroundQuery()
-  const activeUrl =
-    currentBackgroundResponse?.data?.activeBackgroundUrl || null
+  const activeUrl = currentBackgroundResponse?.activeBackgroundUrl ?? null
   const customUploadedUrl =
-    currentBackgroundResponse?.data?.customUploadedBackgroundUrl || null
+    currentBackgroundResponse?.customUploadedBackgroundUrl ?? null
 
   const [selectedUrl, setSelectedUrl] = useState(activeUrl)
   const [isUploading, setIsUploading] = useState(false)
@@ -74,11 +73,11 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
       await uploadCustom(formData).unwrap()
 
       const res = await getCurrent().unwrap()
-      const uploadedUrl = res?.data?.customUploadedBackgroundUrl || null
+      const uploadedUrl = res?.customUploadedBackgroundUrl ?? null
 
       if (uploadedUrl) {
         // Ensure it's active
-        if (res?.data?.activeBackgroundUrl !== uploadedUrl) {
+        if (res?.activeBackgroundUrl !== uploadedUrl) {
           await setActive({ backgroundUrl: uploadedUrl }).unwrap()
         }
         setSelectedUrl(uploadedUrl)
