@@ -398,6 +398,8 @@ export default {
     language: "LANGUAGE",
     level: "LEVEL",
     weeklySchedule: "WEEKLY SCHEDULE",
+    totalSessions: "TOTAL SESSIONS",
+    sessionsCountLabel: "sessions",
     schedulePeriod: "SCHEDULE PERIOD",
     enrollmentPeriod: "ENROLLMENT PERIOD",
     teachingProgress: "TEACHING PROGRESS",
@@ -640,7 +642,12 @@ export default {
     deleteClass: "Delete Class",
     confirmDeleteClassMsg: "Are you sure you want to delete this class? This action cannot be undone.",
     deleteConfirmButton: "Delete",
-    saveChanges: "Save Changes"
+    saveChanges: "Save Changes",
+    requireMinAttendanceLabel: "Minimum Attendance Requirement",
+    minAttendanceRateLabel: "Minimum Attendance Rate",
+    requireAttendanceTypeLabel: "Attendance Calculation Type",
+    includeLateAttendanceOption: "Include late attendance",
+    excludeLateAttendanceOption: "Exclude late attendance"
   },
   allCourses: {
     title: "All Courses",

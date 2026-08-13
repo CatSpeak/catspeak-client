@@ -398,6 +398,8 @@ export default {
     language: "Ngôn ngữ",
     level: "Trình độ",
     weeklySchedule: "Lịch học hàng tuần",
+    totalSessions: "Số buổi học",
+    sessionsCountLabel: "buổi",
     schedulePeriod: "Thời gian học",
     enrollmentPeriod: "Hạn đăng ký",
     teachingProgress: "Tiến độ giảng dạy",
@@ -640,7 +642,12 @@ export default {
     deleteClass: "Xóa lớp học",
     confirmDeleteClassMsg: "Bạn có chắc chắn muốn xóa lớp học này? Hành động này không thể hoàn tác.",
     deleteConfirmButton: "Xóa",
-    saveChanges: "Lưu thay đổi"
+    saveChanges: "Lưu thay đổi",
+    requireMinAttendanceLabel: "Yêu cầu tỷ lệ tham dự tối thiểu",
+    minAttendanceRateLabel: "Tỷ lệ tham dự tối thiểu",
+    requireAttendanceTypeLabel: "Yêu cầu Lần tham dự",
+    includeLateAttendanceOption: "Tính cả lần tham dự muộn",
+    excludeLateAttendanceOption: "Không tính lần tham dự muộn"
   },
   allCourses: {
     title: "Toàn bộ khóa học",

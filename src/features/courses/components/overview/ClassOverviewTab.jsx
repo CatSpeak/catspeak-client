@@ -272,8 +272,9 @@ const ClassOverviewTab = ({
         {/* Information Card Grid */}
         <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* 1. Language - Blue */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center">
                 <Globe size={18} />
               </div>
               <div className="flex flex-col">
@@ -284,20 +285,52 @@ const ClassOverviewTab = ({
               </div>
             </div>
 
+            {/* 2. Level - Red */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFE4E6] text-[#990011] flex items-center justify-center">
                 <GraduationCap size={18} />
               </div>
               <div className="flex flex-col">
                 <span className="text-sm text-gray-400 font-bold">{cd.level || "Level"}</span>
-                <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-black text-white bg-[#EAB308] rounded-full w-fit">
+                <span className="inline-flex mt-1 items-center justify-center px-3 py-0.5 text-xs font-black text-white bg-[#990011] rounded-full w-fit">
                   {classData.levels?.join(", ") || "—"}
                 </span>
               </div>
             </div>
 
+            {/* 3. Total Sessions - Emerald Green */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#15803D] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#E8F8F0] text-[#059669] flex items-center justify-center">
+                <Layers size={18} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-400 font-bold">
+                  {cd.totalSessions || "Số buổi học"}
+                </span>
+                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                  {total > 0
+                    ? `${total} ${cd.sessionsCountLabel || "buổi"}`
+                    : (classData.totalSessions ? `${classData.totalSessions} ${cd.sessionsCountLabel || "buổi"}` : "—")}
+                </span>
+              </div>
+            </div>
+
+            {/* 4. Class Size - Amber/Yellow */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center">
+                <Users size={18} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm text-gray-400 font-bold">{cd.classSize || "Class Size"}</span>
+                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
+                  {classData.slots ?? "—"} {cd.studentsLabel || "students"}
+                </span>
+              </div>
+            </div>
+
+            {/* 5. Admission Period - Purple */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#F3E8FF] text-[#7C3AED] flex items-center justify-center">
                 <Calendar size={18} />
               </div>
               <div className="flex flex-col">
@@ -310,34 +343,9 @@ const ClassOverviewTab = ({
               </div>
             </div>
 
-            {/* <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFE4E6] text-[#E11D48] flex items-center justify-center">
-                <Calendar size={18} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">{cd.schedulePeriod || "Period"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
-                  {classData.startDate && classData.endDate
-                    ? `${formatDate(classData.startDate)} - ${formatDate(classData.endDate)}`
-                    : ui.tba || "TBA"}
-                </span>
-              </div>
-            </div> */}
-
+            {/* 6. Weekly Schedule - Orange */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#EFF6FF] text-[#3B82F6] flex items-center justify-center">
-                <Users size={18} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">{cd.classSize || "Class Size"}</span>
-                <span className="text-gray-900 font-extrabold text-sm mt-0.5">
-                  {classData.slots ?? "—"} {cd.studentsLabel || "students"}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FEF3C7] text-[#D97706] flex items-center justify-center">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-[#FFEDD5] text-[#EA580C] flex items-center justify-center">
                 <Clock size={18} />
               </div>
               <div className="flex flex-col">

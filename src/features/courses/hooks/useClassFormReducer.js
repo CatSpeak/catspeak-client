@@ -50,6 +50,9 @@ const createInitialState = (initialCourseId) => ({
   capacity: 6,
   description: "",
   fee: "850000",
+  requireMinAttendance: true,
+  minAttendanceRate: 80,
+  includeLateAttendance: true,
   thumbnailFile: null,
   thumbnailPreview: "",
   checkedDays: createDefaultCheckedDays(),
@@ -163,6 +166,9 @@ function classFormReducer(state, action) {
         capacity: cls.slots ?? "",
         description: cls.description || "",
         fee: cls.tuitionFee?.toString() || "",
+        requireMinAttendance: cls.requireMinAttendance ?? true,
+        minAttendanceRate: cls.minAttendanceRate ?? 80,
+        includeLateAttendance: cls.includeLateAttendance ?? true,
         thumbnailFile: null,
         thumbnailPreview: cls.thumbnailUrl
           ? (getSafeMediaUrl(cls.thumbnailUrl) || "")

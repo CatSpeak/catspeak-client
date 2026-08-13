@@ -398,6 +398,8 @@ export default {
     language: "语言",
     level: "级别",
     weeklySchedule: "每周课表",
+    totalSessions: "总课时",
+    sessionsCountLabel: "课时",
     schedulePeriod: "授课周期",
     enrollmentPeriod: "招生周期",
     teachingProgress: "教学进度",
@@ -640,7 +642,12 @@ export default {
     deleteClass: "删除班级",
     confirmDeleteClassMsg: "您确定要删除该班级吗？此操作无法撤销。",
     deleteConfirmButton: "删除",
-    saveChanges: "保存修改"
+    saveChanges: "保存修改",
+    requireMinAttendanceLabel: "最低出勤率要求",
+    minAttendanceRateLabel: "最低出勤率",
+    requireAttendanceTypeLabel: "出勤次数计算",
+    includeLateAttendanceOption: "计入迟到次数",
+    excludeLateAttendanceOption: "不计入迟到次数"
   },
   allCourses: {
     title: "全部课程",
