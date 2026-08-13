@@ -121,11 +121,10 @@ const ProfileFileItem = ({
 
   return (
     <div
-      className={`group relative border rounded-xl p-4 flex ${isList ? 'flex-row items-center w-full' : 'flex-col md:w-[264px]'} cursor-pointer transition-all select-none ${
-        isSelected
+      className={`group relative border rounded-xl p-4 flex ${isList ? 'flex-row items-center w-full' : 'flex-col md:w-[264px]'} cursor-pointer transition-all select-none ${isSelected
           ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
           : 'bg-white border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
-      }`}
+        }`}
       onClick={handleClick}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
@@ -143,9 +142,8 @@ const ProfileFileItem = ({
               <FilePreview url={fileUrl} fileName={title} isThumbnail={true} />
             </div>
             <div
-              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${
-                isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-              }`}
+              className={`absolute -top-2 -left-2 bg-white rounded flex items-center justify-center transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect && onToggleSelect();
@@ -162,7 +160,6 @@ const ProfileFileItem = ({
             <div className="flex flex-col truncate pr-4">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-semibold text-[#1A1C1C] text-base truncate" title={title}>{title}</h3>
-                {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />}
               </div>
               <div className="flex items-center gap-2">
                 <p className="text-xs text-[#5B403E]">{size} • {date}</p>
@@ -182,9 +179,8 @@ const ProfileFileItem = ({
         <>
           <div className="flex justify-between items-center mb-2 relative">
             <div
-              className={`transition-opacity z-10 ${
-                isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-              }`}
+              className={`transition-opacity z-10 ${isSelected || isSelectionMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleSelect && onToggleSelect();
@@ -209,7 +205,7 @@ const ProfileFileItem = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-[#1A1C1C] text-base truncate" title={title}>{title}</h3>
-                {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />}
+                {isOwnProfile && isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F] shrink-0" />}
               </div>
               <div className="flex items-start gap-2 mt-1.5 flex-col md:flex-row md:items-center">
                 <p className="text-xs text-[#5B403E]">{size} • {date}</p>

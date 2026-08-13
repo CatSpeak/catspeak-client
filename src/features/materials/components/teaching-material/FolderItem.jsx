@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { MoreVertical, FolderOpen, Share2, Edit2, FolderInput, Trash2, Star, StarOff } from 'lucide-react';
+import { Star, MoreVertical, Share2, Edit2, FolderInput, Trash2, FolderOpen, StarOff, Download } from 'lucide-react';
 import { FcFolder } from 'react-icons/fc';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
@@ -17,6 +17,7 @@ const FolderItem = ({
   onRename,
   onMove,
   onBookmark,
+  onDownload,
   isSelected,
   isSelectionMode,
   onToggleSelect }) => {
@@ -119,7 +120,7 @@ const FolderItem = ({
           dropdownClassName="w-56"
           maxHeightClass="max-h-[360px]"
           onChange={(val) => {
-            if (val === 'open' && onClick) onClick();
+            if (val === 'download' && onDownload) onDownload();
             if (val === 'share' && onShare) onShare();
             if (val === 'rename' && onRename) onRename();
             if (val === 'move' && onMove) onMove();
@@ -127,7 +128,7 @@ const FolderItem = ({
             if (val === 'delete' && onDelete) onDelete();
           }}
           options={[
-            { value: 'open', label: t.materials.open, icon: <FolderOpen className="w-4 h-4" /> },
+            { value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> },
             { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
             { value: 'rename', label: t.materials.rename, icon: <Edit2 className="w-4 h-4" /> },
             { value: 'move', label: t.materials.move, icon: <FolderInput className="w-4 h-4" /> },

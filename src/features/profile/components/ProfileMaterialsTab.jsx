@@ -7,7 +7,7 @@ import Tabs from '@/shared/components/ui/navigation/Tabs';
 import ProfileFolderItem from './ProfileFolderItem';
 import ProfileFileItem from './ProfileFileItem';
 import { EmptyState, LoadingSpinner } from '@/shared/components/ui/indicators';
-import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation, useGetMaterialByShareTokenQuery } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation, useGetMaterialByShareTokenQuery, useGetFolderByShareTokenQuery, useGetPublicMaterialsByUserIdQuery } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -20,6 +20,7 @@ import RenameMaterialModal from '../../materials/components/teaching-material/Re
 import BulkActionBar from '../../materials/components/teaching-material/BulkActionBar';
 import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import { downloadFolderAsZip } from '@/features/materials/utils/zipDownloader';
 
 const formatSize = (bytes) => {
   if (bytes === 0 || !bytes) return '0 B';
@@ -59,21 +60,27 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const [deletingItem, setDeletingItem] = useState({ id: null, name: "", count: 0, type: "folder" });
 
   const sharedMaterialToken = searchParams.get("sharedMaterialToken");
-  const { data: sharedMaterialData, isError, error } = useGetMaterialByShareTokenQuery(sharedMaterialToken, {
+  const { data: sharedMaterialData, isError: isMaterialError, error: materialError, isFetching: isMaterialFetching } = useGetMaterialByShareTokenQuery(sharedMaterialToken, {
+    skip: !sharedMaterialToken
+  });
+  const { data: sharedFolderData, isError: isFolderError, error: folderError, isFetching: isFolderFetching } = useGetFolderByShareTokenQuery(sharedMaterialToken, {
     skip: !sharedMaterialToken
   });
 
   useEffect(() => {
-    if (sharedMaterialToken && isError) {
-      toast.error(error?.data?.message || t.materials?.materialNotFound || "Tài liệu không tồn tại hoặc không được chia sẻ công khai");
+    const isFetchingShared = isMaterialFetching || isFolderFetching;
+
+    if (sharedMaterialToken && !isFetchingShared && isMaterialError && isFolderError) {
+      const errorMsg = materialError?.data?.message || folderError?.data?.message || t.materials?.materialNotFound || "Tài liệu/Thư mục không tồn tại hoặc không được chia sẻ công khai";
+      toast.error(errorMsg);
       searchParams.delete("sharedMaterialToken");
       setSearchParams(searchParams, { replace: true });
       navigate('/workspace/materials', { replace: true });
       return;
     }
 
-    if (sharedMaterialToken && sharedMaterialData) {
-      const data = sharedMaterialData.data || sharedMaterialData;
+    if (sharedMaterialToken && (sharedMaterialData || sharedFolderData)) {
+      const data = sharedMaterialData?.data || sharedMaterialData || sharedFolderData?.data || sharedFolderData;
       setSelectedItem({
         ...data,
         fileUrl: data.fileUrl || data.previewUrl,
@@ -85,51 +92,73 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       searchParams.delete("sharedMaterialToken");
       setSearchParams(searchParams, { replace: true });
     }
-  }, [sharedMaterialToken, sharedMaterialData, isError, error, searchParams, setSearchParams, navigate, t]);
+  }, [sharedMaterialToken, sharedMaterialData, sharedFolderData, isMaterialError, isFolderError, isMaterialFetching, isFolderFetching, materialError, folderError, searchParams, setSearchParams, navigate, t]);
 
   // Fetch API for owner
   const { data: materialsData, isLoading: isLoadingMaterials } = useGetPersonalMaterialsQuery(undefined, { skip: !isOwnProfile });
   const { data: treeData, isLoading: isLoadingTree } = useGetFolderTreeQuery(undefined, { skip: !isOwnProfile });
+
+  // Fetch API for guest
+  const { data: publicMaterialsData, isLoading: isLoadingPublicMaterials } = useGetPublicMaterialsByUserIdQuery(
+    { targetAccountId },
+    { skip: isOwnProfile || !targetAccountId }
+  );
+
   const [recordDownload] = useRecordMaterialDownloadMutation();
 
   const rawFoldersTree = useMemo(() => treeData?.data || treeData || [], [treeData]);
-  const responseData = materialsData?.data || materialsData || {};
+  const responseData = isOwnProfile
+    ? (materialsData?.data || materialsData || {})
+    : (publicMaterialsData?.data || publicMaterialsData || {});
 
   const baseFolders = useMemo(() => {
-    if (!isOwnProfile) return MOCK_FOLDERS;
-    let rawFolders = [];
-    const metaMap = {};
-    if (Array.isArray(responseData.folders)) {
-      responseData.folders.forEach(f => {
-        metaMap[f.id] = f;
-      });
-    }
-
-    const flattenFolders = (nodes) => {
-      let flat = [];
-      for (const node of nodes) {
-        const id = node.folderId || node.id;
-        const meta = metaMap[id] || {};
-        flat.push({
-          id,
-          name: node.folderName || node.name || t.materials.untitledFolder,
-          itemsCount: meta.materialCount || node.materialCount || 0,
-          updatedAt: formatDate(meta.updatedAt || node.updatedAt),
-          isPublic: meta.isPublic !== undefined ? meta.isPublic : false
+    if (isOwnProfile) {
+      const metaMap = {};
+      if (Array.isArray(responseData.folders)) {
+        responseData.folders.forEach(f => {
+          metaMap[f.id] = f;
         });
-        const children = node.subFolders || node.children || [];
-        if (children.length > 0) {
-          flat = flat.concat(flattenFolders(children));
-        }
       }
-      return flat;
-    };
-    rawFolders = flattenFolders(rawFoldersTree);
-    return rawFolders;
+
+      const flattenFolders = (nodes) => {
+        let flat = [];
+        for (const node of nodes) {
+          const id = node.folderId || node.id;
+          const meta = metaMap[id] || {};
+          flat.push({
+            id,
+            name: node.folderName || node.name || t.materials.untitledFolder,
+            itemsCount: meta.materialCount || node.materialCount || 0,
+            updatedAt: formatDate(meta.updatedAt || node.updatedAt),
+            isPublic: meta.isPublic !== undefined ? meta.isPublic : false,
+            publicShareUrl: meta.publicShareUrl || node.publicShareUrl,
+            shareToken: meta.shareToken || node.shareToken,
+            isBookmarked: meta.isBookmarked || node.isBookmarked || false,
+          });
+          const children = node.subFolders || node.children || [];
+          if (children.length > 0) {
+            flat = flat.concat(flattenFolders(children));
+          }
+        }
+        return flat;
+      };
+      return flattenFolders(rawFoldersTree);
+    } else {
+      const folders = Array.isArray(responseData.folders) ? responseData.folders : [];
+      return folders.map(f => ({
+        id: f.id || f.folderId,
+        name: f.name || f.folderName || t.materials.untitledFolder,
+        itemsCount: f.materialCount || f.itemsCount || 0,
+        updatedAt: formatDate(f.updatedAt),
+        isPublic: f.isPublic !== undefined ? f.isPublic : false,
+        publicShareUrl: f.publicShareUrl,
+        shareToken: f.shareToken,
+        isBookmarked: f.isBookmarked || false,
+      }));
+    }
   }, [responseData.folders, rawFoldersTree, isOwnProfile, t.materials.untitledFolder]);
 
   const baseFiles = useMemo(() => {
-    if (!isOwnProfile) return MOCK_FILES;
     let rawFiles = Array.isArray(responseData.materials) ? responseData.materials.map(file => ({ ...file, id: file.materialId || file.id })) : [];
 
     return rawFiles.map(file => ({
@@ -141,7 +170,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       fileUrl: file.fileUrl,
       ...file
     }));
-  }, [responseData.materials, isOwnProfile, t.materials.untitledFile]);
+  }, [responseData.materials, t.materials.untitledFile]);
 
   const materials = useMemo(() => [...baseFolders, ...baseFiles], [baseFolders, baseFiles]);
 
@@ -215,7 +244,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
     }
   };
 
-  if (isOwnProfile && (isLoadingMaterials || isLoadingTree)) {
+  if ((isOwnProfile && (isLoadingMaterials || isLoadingTree)) || (!isOwnProfile && isLoadingPublicMaterials)) {
     return (
       <div className="w-full flex items-center justify-center min-h-[500px]">
         <LoadingSpinner />
@@ -227,9 +256,11 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
     <div className="w-full flex flex-col gap-6 min-h-[500px]">
       <div className="p-4 sm:p-6 bg-white overflow-visible rounded-2xl border border-[#E3BEBA]">
         <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-bold text-[#1A1C1C]">
-            {isOwnProfile ? t.materials.manageAndShare : t.materials.sharedMaterials.replace('{{count}}', baseFolders.length + baseFiles.length)}
-          </h2>
+          {isOwnProfile && (
+            <h2 className="text-xl font-bold text-[#1A1C1C]">
+              {t.materials.manageAndShare}
+            </h2>
+          )}
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             {isOwnProfile ? (
@@ -244,7 +275,9 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                 />
               </div>
             ) : (
-              <div className="flex-1" />
+              <h2 className="text-xl font-bold text-[#1A1C1C]">
+                {t.materials.sharedMaterials.replace('{{count}}', baseFolders.length + baseFiles.length)}
+              </h2>
             )}
 
             <div className="flex flex-row items-center gap-3 shrink-0">
@@ -293,17 +326,47 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-[#1A1C1C]">{t.materials.folderCountLabel.replace('{{count}}', filteredFolders.length)}</h3>
               <div className={`grid gap-4 ${viewLayout === 'grid' ? 'grid-cols-1 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                {filteredFolders.map(folder => (
-                  <ProfileFolderItem
-                    key={folder.id}
-                    title={folder.name}
-                    totalItems={folder.itemsCount}
-                    updatedAt={folder.updatedAt}
-                    isPublic={folder.isPublic}
-                    isOwnProfile={isOwnProfile}
-                    onClick={() => navigate(`/workspace/materials/${folder.id}`)}
-                  />
-                ))}
+                {filteredFolders.map(folder => {
+                  const isSelected = selectedItems.some(item => item.id === folder.id && isFolder(item));
+                  return (
+                    <ProfileFolderItem
+                      key={folder.id}
+                      title={folder.name}
+                      totalItems={folder.itemsCount}
+                      updatedAt={folder.updatedAt}
+                      isPublic={folder.isPublic}
+                      isBookmarked={folder.isBookmarked}
+                      isOwnProfile={isOwnProfile}
+                      isSelected={isSelected}
+                      isSelectionMode={selectedItems.length > 0}
+                      onToggleSelect={() => toggleSelection(folder)}
+                      onClick={() => {
+                        if (selectedItems.length > 0) {
+                          toggleSelection(folder);
+                        } else {
+                          navigate(`/workspace/materials/${folder.id}`);
+                        }
+                      }}
+                      onDownload={() => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t)}
+                      onShare={() => {
+                        setSelectedItem(folder);
+                        setIsShareModalOpen(true);
+                      }}
+                      onRename={() => {
+                        setSelectedItem(folder);
+                        setIsRenameModalOpen(true);
+                      }}
+                      onDelete={() => {
+                        setDeletingItem({ id: folder.id, name: folder.name, count: folder.itemsCount, type: 'folder' });
+                        setIsDeleteFolderOpen(true);
+                      }}
+                      onMove={() => {
+                        setSelectedItem(folder);
+                        setIsMoveModalOpen(true);
+                      }}
+                    />
+                  );
+                })}
               </div>
             </div>
           )}

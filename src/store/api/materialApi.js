@@ -13,6 +13,15 @@ export const materialApi = baseApi.injectEndpoints({
       providesTags: ["PersonalMaterials"],
     }),
 
+    // Get a list of public materials of a user
+    getPublicMaterialsByUserId: builder.query({
+      query: ({ targetAccountId, folderId, keyword, sortBy, sortOrder }) => ({
+        url: `/personal-materials/public/users/${targetAccountId}`,
+        params: { folderId, keyword, sortBy, sortOrder },
+      }),
+      providesTags: ["PersonalMaterials"],
+    }),
+
     // Get a list of bookmarked materials
     getBookmarkedMaterials: builder.query({
       query: ({ keyword, sortBy, sortOrder } = {}) => ({
@@ -115,6 +124,25 @@ export const materialApi = baseApi.injectEndpoints({
     // Get material by share token
     getMaterialByShareToken: builder.query({
       query: (shareToken) => `/personal-materials/share/${shareToken}`,
+      providesTags: ["PersonalMaterials"],
+    }),
+
+    // Toggle folder share link
+    toggleFolderShare: builder.mutation({
+      query: ({ folderId, isPublic }) => ({
+        url: `/personal-materials/folders/share/${folderId}/toggle`,
+        method: "POST",
+        body: { isPublic },
+      }),
+      invalidatesTags: (result, error, { folderId }) => [
+        { type: "PersonalMaterials", id: folderId },
+        "PersonalMaterials",
+      ],
+    }),
+
+    // Get folder by share token
+    getFolderByShareToken: builder.query({
+      query: (shareToken) => `/personal-materials/folders/share/${shareToken}`,
       providesTags: ["PersonalMaterials"],
     }),
 
@@ -254,4 +282,7 @@ export const {
   useDeleteMaterialsBulkMutation,
   useToggleMaterialShareMutation,
   useGetMaterialByShareTokenQuery,
+  useToggleFolderShareMutation,
+  useGetFolderByShareTokenQuery,
+  useGetPublicMaterialsByUserIdQuery,
 } = materialApi;

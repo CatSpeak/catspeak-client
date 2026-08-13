@@ -15,6 +15,7 @@ import {
   useUpdateFolderSettingsMutation,
   useGetPersonalMaterialByIdQuery,
   useToggleMaterialShareMutation,
+  useToggleFolderShareMutation,
 } from "@/store/api/materialApi";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -41,6 +42,8 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
     useUpdateFolderSettingsMutation();
   const [toggleMaterialShare, { isLoading: isTogglingShare }] =
     useToggleMaterialShareMutation();
+  const [toggleFolderShare, { isLoading: isTogglingFolderShare }] =
+    useToggleFolderShareMutation();
 
   const isFolder = item && !item.fileName && !item.fileUrl;
 
@@ -53,18 +56,25 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
 
   const [localToken, setLocalToken] = useState(null);
   const [prevMaterialDetail, setPrevMaterialDetail] = useState(null);
+  const [prevFolderItem, setPrevFolderItem] = useState(null);
 
-  if (materialDetail !== prevMaterialDetail) {
-    setPrevMaterialDetail(materialDetail);
-    if (materialDetail?.shareToken) {
-      setLocalToken(materialDetail.shareToken);
-    } else if (materialDetail?.publicShareUrl) {
-      const parts = materialDetail.publicShareUrl.split("/").filter(Boolean);
-      const token = parts.pop();
-      setLocalToken(token || null);
-    } else {
-      setLocalToken(null);
+  const extractToken = (source) => {
+    if (source?.shareToken) return source.shareToken;
+    if (source?.publicShareUrl) {
+      const parts = source.publicShareUrl.split("/").filter(Boolean);
+      return parts.pop() || null;
     }
+    return null;
+  };
+
+  if (!isFolder && materialDetail !== prevMaterialDetail) {
+    setPrevMaterialDetail(materialDetail);
+    setLocalToken(extractToken(materialDetail));
+  }
+
+  if (isFolder && item !== prevFolderItem) {
+    setPrevFolderItem(item);
+    setLocalToken(extractToken(item));
   }
 
   const shareLink = (localToken && isPublic)
@@ -75,6 +85,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
     isUpdatingMaterial ||
     isUpdatingFolder ||
     isTogglingShare ||
+    isTogglingFolderShare ||
     isDetailLoading;
 
   // Sync state when item changes
@@ -90,10 +101,18 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
   const handleSave = async () => {
     try {
       if (isFolder) {
+        const toggleRes = await toggleFolderShare({
+          folderId: item.id || item.folderId,
+          isPublic,
+        }).unwrap();
+
         await updateFolderSettings({
           id: item.id || item.folderId,
           isPublic,
         }).unwrap();
+
+        const responseData = toggleRes?.data || toggleRes;
+        setLocalToken(responseData?.shareToken || null);
       } else {
         // 1. Toggle share + generate/delete token
         const toggleRes = await toggleMaterialShare({

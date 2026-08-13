@@ -22,6 +22,7 @@ import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import { Breadcrumb } from '@/shared/components/ui/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import { downloadFolderAsZip } from '@/features/materials/utils/zipDownloader';
 import toast from 'react-hot-toast';
 
 const TeachingMaterialPage = () => {
@@ -446,6 +447,7 @@ const TeachingMaterialPage = () => {
                     isSelectionMode={selectedItems.length > 0}
                     onToggleSelect={() => handleToggleSelect(folder, 'folder')}
                     onClick={() => navigate(`/workspace/materials/${folder.id || folder.folderId}`)}
+                    onDownload={() => downloadFolderAsZip(folder, false, null, t)}
                     onMove={() => {
                       setSelectedItem(folder);
                       setIsMoveModalOpen(true);
