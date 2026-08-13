@@ -228,14 +228,14 @@ export const materialApi = baseApi.injectEndpoints({
 
     //  Get details of a specific public material by ID
     getPublicMaterialById: builder.query({
-      query: (id) => `/public/personal-materials/${id}`,
+      query: (id) => `/personal-materials/public/${id}`,
       providesTags: (result, error, id) => [{ type: "PersonalMaterials", id }],
     }),
 
     //  Record a view for a public material
     recordMaterialView: builder.mutation({
       query: (id) => ({
-        url: `/public/personal-materials/${id}/view`,
+        url: `/personal-materials/public/${id}/view`,
         method: "POST",
       }),
       invalidatesTags: (result, error, id) => [
@@ -246,7 +246,7 @@ export const materialApi = baseApi.injectEndpoints({
     //  Record a download for a public material
     recordMaterialDownload: builder.mutation({
       query: (id) => ({
-        url: `/public/personal-materials/${id}/download`,
+        url: `/personal-materials/public/${id}/download`,
         method: "POST",
       }),
       invalidatesTags: (result, error, id) => [

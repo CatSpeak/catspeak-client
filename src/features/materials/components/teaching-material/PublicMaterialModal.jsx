@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from '@/shared/components/ui/Modal';
 import {
   FileText, X, Download, Eye, Info, ChevronLeft, Folder,
@@ -8,7 +8,7 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import FilePreview from '@/shared/components/ui/FilePreview';
 import { useLanguage } from '@/shared/context/LanguageContext';
 import FileDetailModal from './FileDetailModal';
-import { useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
+import { useRecordMaterialDownloadMutation, useRecordMaterialViewMutation } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
 
 const formatSize = (bytes) => {
@@ -24,6 +24,13 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
   const { t } = useLanguage();
   const [showMobileDetails, setShowMobileDetails] = useState(false);
   const [recordDownload] = useRecordMaterialDownloadMutation();
+  const [recordView] = useRecordMaterialViewMutation();
+
+  useEffect(() => {
+    if (open && item?.id && !isOwner) {
+      recordView(item.id).catch(err => console.error("Failed to record view", err));
+    }
+  }, [open, item?.id, isOwner, recordView]);
 
   // If the user is the owner, fallback to FileDetailModal for full edit permissions
   if (isOwner) {

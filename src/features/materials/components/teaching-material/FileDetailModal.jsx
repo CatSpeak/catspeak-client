@@ -4,7 +4,7 @@ import { FileText, X, Copy, Download, FolderInput, Trash2, Eye, Info, ChevronLef
 import Switch from '@/shared/components/ui/inputs/Switch';
 import TextInput from '@/shared/components/ui/inputs/TextInput';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
-import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation, useGenerateMaterialShareTokenMutation } from '@/store/api/materialApi';
+import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation, useGenerateMaterialShareTokenMutation, useRecordMaterialViewMutation } from '@/store/api/materialApi';
 import FilePreview from '@/shared/components/ui/FilePreview';
 import { useLanguage } from '@/shared/context/LanguageContext';
 
@@ -31,6 +31,13 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
   const [generateMaterialShareToken] = useGenerateMaterialShareTokenMutation();
 
   const [localToken, setLocalToken] = useState(item?.shareToken || null);
+  const [recordView] = useRecordMaterialViewMutation();
+
+  React.useEffect(() => {
+    if (open && item?.id) {
+      recordView(item.id).catch(err => console.error("Failed to record view", err));
+    }
+  }, [open, item?.id, recordView]);
 
   // Sync state when item changes
   React.useEffect(() => {

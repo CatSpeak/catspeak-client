@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Modal from '@/shared/components/ui/Modal';
 import FilePreview from '@/shared/components/ui/FilePreview';
+import { useRecordMaterialViewMutation } from '@/store/api/materialApi';
 
 const FilePreviewModal = ({ open, onClose, item }) => {
+  const [recordView] = useRecordMaterialViewMutation();
+
+  useEffect(() => {
+    if (open && item?.id) {
+      recordView(item.id).catch(err => console.error("Failed to record view", err));
+    }
+  }, [open, item?.id, recordView]);
+
   if (!item) return null;
 
   return (

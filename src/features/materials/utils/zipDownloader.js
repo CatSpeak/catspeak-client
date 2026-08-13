@@ -130,10 +130,8 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
 
         zip.file(fullPath, blob);
 
-        // If it's a public file, record download
-        if (isPublicProfile) {
-          store.dispatch(materialApi.endpoints.recordMaterialDownload.initiate(file.materialId || file.id));
-        }
+        // Record download for each file
+        store.dispatch(materialApi.endpoints.recordMaterialDownload.initiate(file.materialId || file.id));
       } catch (err) {
         console.error('Failed to download file:', file.fileName, err);
       }
