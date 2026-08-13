@@ -61,17 +61,19 @@ const CalendarTab = ({
           <IconButton
             onClick={onPrev}
             variant="ghost"
-            innerClassName="!text-[#990011]"
+            innerClassName="!text-[#990011] !w-8 !h-8"
+            className='!w-10 !h-10'
           >
             <ChevronLeft />
           </IconButton>
-          <span className="text-xl font-semibold text-[#1A1A1A] min-w-[150px] text-center">
+          <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[100px] md:min-w-[150px] text-center">
             {localizedMonth}
           </span>
           <IconButton
             onClick={onNext}
             variant="ghost"
-            innerClassName="!text-[#990011]"
+            innerClassName="!text-[#990011] !w-8 !h-8"
+            className='!w-10 !h-10'
           >
             <ChevronRight />
           </IconButton>

@@ -1,5 +1,5 @@
-import React from "react"
-import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar } from "lucide-react"
+import React, { useState } from "react"
+import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar, Share2, Check } from "lucide-react"
 import {
   getCourseGradientAndIcon,
   formatCurrencyVND,
@@ -16,6 +16,7 @@ const StudentCourseCard = ({
   viewMode = "grid",
   onViewDetails,
   onJoin,
+  onShare,
   t: propsT,
   index
 }) => {
@@ -58,6 +59,8 @@ const StudentCourseCard = ({
   const remainingSlots = course.remainingSlots != null ? Number(course.remainingSlots) : null
   const minEnrollmentEnd = course.minEnrollmentEnd || course.enrollmentEnd
 
+  const [linkCopied, setLinkCopied] = useState(false)
+
   const handleCardAction = (e) => {
     e.stopPropagation()
     if (isEnrolled) {
@@ -91,6 +94,25 @@ const StudentCourseCard = ({
               <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
                 <Icon size={28} className="stroke-[1.5] text-white" />
               </div>
+            )}
+            {onShare && (
+              <button
+                type="button"
+                onClick={async (event) => {
+                  event.stopPropagation()
+                  try {
+                    await onShare(course)
+                    setLinkCopied(true)
+                    setTimeout(() => setLinkCopied(false), 2000)
+                  } catch (e) {
+                    console.error("Share failed", e)
+                  }
+                }}
+                className="absolute top-1.5 right-1.5 z-10 h-6 w-6 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+                title={sc.shareCourse || "Share"}
+              >
+                {linkCopied ? <Check size={10} /> : <Share2 size={10} />}
+              </button>
             )}
           </div>
 
@@ -180,6 +202,25 @@ const StudentCourseCard = ({
           decoding="async"
         />
       </div>
+      {onShare && (
+        <button
+          type="button"
+          onClick={async (event) => {
+            event.stopPropagation()
+            try {
+              await onShare(course)
+              setLinkCopied(true)
+              setTimeout(() => setLinkCopied(false), 2000)
+            } catch (e) {
+              console.error("Share failed", e)
+            }
+          }}
+          className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+          title={sc.shareCourse || "Share"}
+        >
+          {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
+        </button>
+      )}
 
       {/* Content Details */}
       <div className="p-5 flex flex-col flex-1 justify-between gap-5">

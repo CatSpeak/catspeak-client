@@ -1,4 +1,5 @@
 export default {
+  searchClass: "Search for a class...",
   generalCalendar: "General Calendar",
   personalCalendar: "Personal Calendar",
   studentSchedule: "Study Schedule",

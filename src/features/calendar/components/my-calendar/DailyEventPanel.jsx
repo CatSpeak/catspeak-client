@@ -6,7 +6,7 @@ import EventCardDetail from './EventCardDetail'
 import EventFilter from './EventFilter'
 import { useLanguage } from '@/shared/context/LanguageContext'
 
-const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onApplyFilter }) => {
+const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onApplyFilter, onShareEvent }) => {
   const { t } = useLanguage()
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterOpenCount, setFilterOpenCount] = useState(0)
@@ -27,7 +27,7 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
   if (selectedEvent) {
     return (
       <div className="flex flex-col min-h-0 w-full border bg-white rounded-xl h-full flex-1">
-        <EventCardDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} />
+        <EventCardDetail event={selectedEvent} onBack={() => setSelectedEvent(null)} onShareEvent={onShareEvent} />
       </div>
     )
   }

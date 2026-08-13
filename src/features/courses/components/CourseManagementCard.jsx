@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react"
-import { BookOpen, Calendar, Clock, Layers, MoreVertical, PenSquare, Tag, Trash2, Users } from "lucide-react"
+import { BookOpen, Calendar, Check, Clock, Layers, MoreVertical, PenSquare, Share2, Tag, Trash2, Users } from "lucide-react"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import CourseStatusPill from "./CourseStatusPill"
 import CourseThumbnail from "./CourseThumbnail"
@@ -76,9 +76,11 @@ const CourseManagementCard = ({
   onOpen,
   onEdit,
   onDelete,
+  onShare,
 }) => {
   const isCourse = type === "course"
   const isGrid = viewMode === "grid"
+  const [linkCopied, setLinkCopied] = useState(false)
 
   return (
     <div
@@ -92,8 +94,27 @@ const CourseManagementCard = ({
       >
         {isGrid && (
           <>
+            {onShare && (
+              <button
+                type="button"
+                onClick={async (event) => {
+                  event.stopPropagation()
+                  try {
+                    await onShare(item)
+                    setLinkCopied(true)
+                    setTimeout(() => setLinkCopied(false), 2000)
+                  } catch (e) {
+                    console.error("Share failed", e)
+                  }
+                }}
+                className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+                title={labels.share || "Share"}
+              >
+                {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
+              </button>
+            )}
             {item.status && (
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-3 left-3">
                 <CourseStatusPill status={item.status} />
               </div>
             )}

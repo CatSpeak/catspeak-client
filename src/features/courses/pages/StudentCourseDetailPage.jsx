@@ -51,7 +51,9 @@ const StudentCourseDetailPage = () => {
   const [linkCopied, setLinkCopied] = useState(false)
 
   const handleCopyLink = async () => {
+    const shareUrl = `${window.location.origin}/explore-courses/details/${id}`
     const ok = await copyShareLink({
+      url: shareUrl,
       successMessage: scd.linkCopied || "Link copied!",
       errorMessage: scd.linkCopyFailed || "Failed to copy link",
     })
