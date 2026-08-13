@@ -42,7 +42,11 @@ const NavIcon = ({ img, icon: Icon, color, size = 24 }) => {
   )
 }
 
-const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false }) => {
+const MobileNavItems = ({
+  isMobileOpen,
+  setIsMobileOpen,
+  isHorizontal = false,
+}) => {
   const { t } = useLanguage()
   const { isTeacher } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
@@ -51,15 +55,41 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
   const { user } = useAuth()
   const userId = user?.accountId || user?.id || ""
 
-  // Sync drilldown state when drawer opens or when navigating
-  const isSettings = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing") || pathname.startsWith("/refunds")
+  const settingNavItem = {
+    key: "settings",
+    labelKey: "settings",
+    defaultLabel: "Settings",
+    icon: Settings,
+    hasDropdown: true,
+    subItems: settingNavLinks,
+  }
+
+  const isSettings =
+    pathname.startsWith("/setting") ||
+    pathname.startsWith("/pricing") ||
+    pathname.startsWith("/billing") ||
+    pathname.startsWith("/refunds")
 
   useEffect(() => {
-    const activeLinks = isSettings ? settingNavLinks : navLinks
-    const activeItem = activeLinks.find(
+    if (isSettings) {
+      if (isMobileOpen) {
+        setActiveDrilldownItem(settingNavItem)
+      } else {
+        const timer = setTimeout(() => {
+          setActiveDrilldownItem(settingNavItem)
+        }, 300)
+        return () => clearTimeout(timer)
+      }
+      return
+    }
+
+    const activeItem = navLinks.find(
       (item) =>
-        item.hasDropdown && item.subItems?.length > 0 && checkIsActive(item),
+        item.hasDropdown &&
+        (item.subItems?.length > 0 || item.groups?.length > 0) &&
+        checkIsActive(item),
     )
+
     if (isMobileOpen) {
       setActiveDrilldownItem(activeItem || null)
     } else {
@@ -70,6 +100,48 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobileOpen, pathname])
+
+  const getVisibleGroupsForDrilldown = (item) => {
+    if (!item) return []
+
+    const isSubVisible = (sub) => {
+      if (sub.lang && sub.lang !== currentLang) return false
+      if (isHorizontal && sub.showOnHorizontalBar === false) return false
+      if (sub.isPrivate && !isAuthenticated) return false
+      return true
+    }
+
+    if (item.groups) {
+      return item.groups
+        .filter((group) => {
+          if (group.roles && group.roles.includes("Teacher") && !isTeacher) {
+            return false
+          }
+          return true
+        })
+        .map((group) => ({
+          ...group,
+          items: group.items.filter(isSubVisible),
+        }))
+        .filter((group) => group.items.length > 0)
+    }
+
+    const legacySubs = (item.subItems || []).filter((sub) => {
+      if (!isSubVisible(sub)) return false
+      const teacherTabs = [
+        "dashboard",
+        "myCourses",
+        "myClass",
+        "analytics",
+        "schedule",
+        "teachingTasks",
+      ]
+      if (teacherTabs.includes(sub.key) && !isTeacher) return false
+      return true
+    })
+
+    return legacySubs.length > 0 ? [{ key: "default", items: legacySubs }] : []
+  }
 
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col w-full h-full">
@@ -82,13 +154,21 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 pb-6 flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {(isSettings ? settingNavLinks : navLinks)
+          {navLinks
             .filter((item) => {
               if (item.hideInSidebar) return false
               if (item.lang && item.lang !== currentLang) return false
-              if (isHorizontal && item.showOnHorizontalBar === false) return false
+              if (isHorizontal && item.showOnHorizontalBar === false)
+                return false
               if (item.isPrivate && !isAuthenticated) return false
-              const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
+              const teacherTabs = [
+                "dashboard",
+                "myCourses",
+                "myClass",
+                "analytics",
+                "schedule",
+                "teachingTasks",
+              ]
               if (teacherTabs.includes(item.key) && !isTeacher) return false
               return true
             })
@@ -106,8 +186,8 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
 
               if (
                 item.hasDropdown &&
-                item.subItems &&
-                item.subItems.length > 0
+                ((item.subItems && item.subItems.length > 0) ||
+                  (item.groups && item.groups.length > 0))
               ) {
                 return (
                   <ListItem
@@ -162,6 +242,37 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
             const label = t.nav?.[item.key] || item.label || item.key
             const IconComponent = item.icon || Settings
 
+            if (item.key === "settings") {
+              return (
+                <ListItem
+                  key={item.key}
+                  onClick={() => setActiveDrilldownItem(settingNavItem)}
+                  leftContent={
+                    <NavIcon
+                      img={item.img}
+                      icon={IconComponent}
+                      color={item.color}
+                      size={24}
+                    />
+                  }
+                  rightContent={
+                    <ChevronRight
+                      size={24}
+                      strokeWidth={1.5}
+                      className="shrink-0 text-gray-500"
+                    />
+                  }
+                  className="rounded-xl transition-all duration-200 w-full"
+                  contentClassName="rounded-xl transition-all duration-200 px-4 hover:bg-primaryBg"
+                  title={label}
+                >
+                  <span className="text-base font-normal text-left whitespace-nowrap transition-all duration-300 min-w-0 flex-1 truncate">
+                    {label}
+                  </span>
+                </ListItem>
+              )
+            }
+
             return (
               <DesktopNavItem
                 key={item.key}
@@ -189,12 +300,16 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
             title={
               activeDrilldownItem
                 ? t.nav?.[activeDrilldownItem.key] ||
-                activeDrilldownItem.label ||
-                activeDrilldownItem.key
+                  activeDrilldownItem.label ||
+                  activeDrilldownItem.key
                 : undefined
             }
           >
-            <ChevronLeft size={20} strokeWidth={1.5} className="absolute left-1" />
+            <ChevronLeft
+              size={20}
+              strokeWidth={1.5}
+              className="absolute left-1"
+            />
             {activeDrilldownItem && (
               <span
                 className="font-semibold truncate max-w-[80%]"
@@ -214,39 +329,36 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
 
         {/* Drilldown Links */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden py-3 px-3 pb-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          {(activeDrilldownItem?.subItems || [])
-            .filter((sub) => {
-              const teacherTabs = ["dashboard", "myCourses", "myClass", "analytics", "schedule", "teachingTasks"]
-              if (teacherTabs.includes(sub.key) && !isTeacher) return false
-              if (sub.lang && sub.lang !== currentLang) return false
-              if (isHorizontal && sub.showOnHorizontalBar === false) return false
-              if (sub.isPrivate && !isAuthenticated) return false
-              return true
-            })
-            .map((sub) => {
-              const subLabel = t.nav?.[sub.key] || sub.key || sub.label
-              const SubIconComponent = sub.icon || Globe
-              let subPath = sub.path
-              if (sub.key === "profile" && userId) {
-                subPath = `/workspace/profile/${userId}`
-              }
+          {getVisibleGroupsForDrilldown(activeDrilldownItem).map(
+            (group, groupIdx) => (
+              <React.Fragment key={group.key}>
+                {groupIdx > 0 && (
+                  <div className="my-1 mx-3 h-px bg-border shrink-0" />
+                )}
+                {group.items.map((sub) => {
+                  const subLabel = t.nav?.[sub.key] || sub.key || sub.label
+                  const SubIconComponent = sub.icon || Globe
+                  let subPath = sub.path
+                  if (sub.key === "profile" && userId) {
+                    subPath = `/workspace/profile/${userId}`
+                  }
 
-              return (
-                <div key={sub.key} className="w-full">
-                  {sub.key === "myCourses" && (
-                    <div className="my-1.5 mx-3 border-t border-black" />
-                  )}
-                  <DesktopNavItem
-                    to={resolvePath(subPath)}
-                    icon={SubIconComponent}
-                    label={subLabel}
-                    color={sub.color}
-                    img={sub.img}
-                    onClick={() => setIsMobileOpen?.(false)}
-                  />
-                </div>
-              )
-            })}
+                  return (
+                    <div key={sub.key} className="w-full">
+                      <DesktopNavItem
+                        to={resolvePath(subPath)}
+                        icon={SubIconComponent}
+                        label={subLabel}
+                        color={sub.color}
+                        img={sub.img}
+                        onClick={() => setIsMobileOpen?.(false)}
+                      />
+                    </div>
+                  )
+                })}
+              </React.Fragment>
+            ),
+          )}
         </div>
       </div>
     </div>

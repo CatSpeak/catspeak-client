@@ -1,7 +1,7 @@
-import React, { useMemo } from "react"
+import React, { useState, useMemo } from "react"
 import { Users, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useParams, useLocation } from "react-router-dom"
+import { useParams, useLocation, useNavigate } from "react-router-dom"
 import { LANGUAGE_CONFIG } from "@/features/navigation"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import ListItem from "@/shared/components/ui/ListItem"
@@ -14,6 +14,8 @@ const MobileCommunitySwitcher = () => {
   const { t } = useLanguage()
   const { lang } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
+  const [overrideCommunity, setOverrideCommunity] = useState(null)
 
   const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), [])
 
@@ -21,15 +23,25 @@ const MobileCommunitySwitcher = () => {
     if (supportedCodes.includes(lang)) {
       return lang
     }
-    return localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY
-  }, [lang, supportedCodes])
+    return overrideCommunity || localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY
+  }, [lang, supportedCodes, overrideCommunity])
 
   const handleCommunitySelect = (newCode) => {
     if (newCode === currentCommunity) {
       return
     }
     localStorage.setItem("communityLanguage", newCode)
-    window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+
+    const isInsideEcosystem =
+      supportedCodes.includes(lang) ||
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`)
+
+    if (isInsideEcosystem) {
+      window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+    } else {
+      window.location.reload()
+    }
   }
 
   const options = LANGUAGE_CONFIG
