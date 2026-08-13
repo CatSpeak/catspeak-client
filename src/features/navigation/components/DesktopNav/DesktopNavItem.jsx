@@ -75,7 +75,7 @@ const DesktopNavItem = ({
               <span
                 className={`whitespace-nowrap transition-all duration-300 truncate relative z-10 ${isDocked
                   ? "opacity-0 w-0 pointer-events-none hidden"
-                  : "opacity-100 min-w-[180px] flex-1"
+                  : "opacity-100 min-w-0 flex-1"
                   }`}
                 style={color ? { color } : undefined}
               >

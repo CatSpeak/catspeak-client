@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import useScrollLock from "@/shared/hooks/useScrollLock";
-import useClickOutside from "@/shared/hooks/useClickOutside";
-import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import React, { useState, useRef, useEffect } from "react"
+import useScrollLock from "@/shared/hooks/useScrollLock"
+import useClickOutside from "@/shared/hooks/useClickOutside"
+import { createPortal } from "react-dom"
+import { useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
 import {
   Settings,
   LogOut,
@@ -13,107 +13,103 @@ import {
   CreditCard,
   GraduationCap,
   BookOpen,
-} from "lucide-react";
-import Avatar from "@/shared/components/ui/Avatar";
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  useGetProfileQuery,
-  useAuth,
-  useLogoutMutation,
-} from "@/features/auth";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
-import { useGetUserProfileQuery } from "@/store/api/userApi";
-import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
+} from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { AnimatePresence, motion } from "framer-motion"
+import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
     () => window.innerWidth <= breakpoint,
-  );
+  )
 
   useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`);
-    const handler = (e) => setIsMobile(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, [breakpoint]);
+    const mql = window.matchMedia(`(max-width: ${breakpoint}px)`)
+    const handler = (e) => setIsMobile(e.matches)
+    mql.addEventListener("change", handler)
+    return () => mql.removeEventListener("change", handler)
+  }, [breakpoint])
 
-  return isMobile;
-};
+  return isMobile
+}
 
 const ProfileDropdown = () => {
-  const { t } = useLanguage();
-  const navigate = useNavigate();
-  const { user: authUser, isAuthenticated } = useAuth();
-  const [logoutApi] = useLogoutMutation();
+  const { t } = useLanguage()
+  const navigate = useNavigate()
+  const { user: authUser, isAuthenticated } = useAuth()
+  const [logoutApi] = useLogoutMutation()
   const { data: userData, isLoading } = useGetProfileQuery(undefined, {
     skip: !isAuthenticated,
-  });
+  })
   const { data: detailedProfile } = useGetUserProfileQuery(undefined, {
     skip: !isAuthenticated,
-  });
+  })
   const { isTeacherProfile, isTeacher, isStudent, switchRole } =
-    useRoleOverride();
-  const [isOpen, setIsOpen] = useState(false);
-  const [showLogoutWarning, setShowLogoutWarning] = useState(false);
-  const menuRef = useRef(null);
-  const isMobile = useIsMobile(425);
-  const { isInCall } = useSelector((state) => state.videoCall);
+    useRoleOverride()
+  const [isOpen, setIsOpen] = useState(false)
+  const [showLogoutWarning, setShowLogoutWarning] = useState(false)
+  const menuRef = useRef(null)
+  const isMobile = useIsMobile(425)
+  const { isInCall } = useSelector((state) => state.videoCall)
 
   const user = {
     ...(userData?.data ?? userData ?? authUser ?? {}),
     ...(detailedProfile?.data ?? detailedProfile ?? {}),
-  };
+  }
 
   const handleToggleMenu = () => {
-    setIsOpen((prev) => !prev);
-  };
+    setIsOpen((prev) => !prev)
+  }
 
   const handleCloseMenu = () => {
-    setIsOpen(false);
-  };
+    setIsOpen(false)
+  }
 
   const handleLogout = () => {
     if (isInCall) {
-      setShowLogoutWarning(true);
+      setShowLogoutWarning(true)
     } else {
-      executeLogout();
+      executeLogout()
     }
-  };
+  }
 
   const executeLogout = () => {
-    setShowLogoutWarning(false);
-    logoutApi();
-    handleCloseMenu();
-    navigate("/");
-  };
+    setShowLogoutWarning(false)
+    logoutApi()
+    handleCloseMenu()
+    navigate("/")
+  }
 
   const handleProfileClick = () => {
-    handleCloseMenu();
-    navigate("/profile");
-  };
+    handleCloseMenu()
+    navigate("/profile")
+  }
 
   const handleSettingsClick = () => {
-    handleCloseMenu();
-    navigate("/setting");
-  };
+    handleCloseMenu()
+    navigate("/setting")
+  }
 
   // Click outside to close (desktop only)
-  useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile });
+  useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile })
 
   // Lock body scroll when fullscreen on mobile
-  useScrollLock(isOpen && isMobile);
+  useScrollLock(isOpen && isMobile)
 
   const getInitials = (name) => {
-    return name ? name.charAt(0).toUpperCase() : "U";
-  };
+    return name ? name.charAt(0).toUpperCase() : "U"
+  }
 
   const menuItemClass =
-    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm hover:bg-[#F6F6F6]";
+    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm hover:bg-[#F6F6F6]"
 
   const menuItemDisabledClass =
-    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-[#7A7574] cursor-not-allowed";
+    "flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm text-[#7A7574] cursor-not-allowed"
 
   const dropdownContent = (
     <>
@@ -165,11 +161,11 @@ const ProfileDropdown = () => {
           </p>
           <button
             onClick={async () => {
-              const success = await switchRole("Student");
+              const success = await switchRole("Student")
               if (success) {
-                handleCloseMenu();
-                navigate("/");
-                window.location.reload();
+                handleCloseMenu()
+                navigate("/")
+                window.location.reload()
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isStudent ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
@@ -179,11 +175,11 @@ const ProfileDropdown = () => {
           </button>
           <button
             onClick={async () => {
-              const success = await switchRole("Teacher");
+              const success = await switchRole("Teacher")
               if (success) {
-                handleCloseMenu();
-                navigate("/");
-                window.location.reload();
+                handleCloseMenu()
+                navigate("/")
+                window.location.reload()
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isTeacher ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
@@ -208,7 +204,7 @@ const ProfileDropdown = () => {
         </button>
       </div>
     </>
-  );
+  )
 
   // Mobile: fullscreen portal
   const mobileDropdown = createPortal(
@@ -235,7 +231,7 @@ const ProfileDropdown = () => {
       )}
     </AnimatePresence>,
     document.body,
-  );
+  )
 
   return (
     <div className="relative" ref={menuRef}>
@@ -293,7 +289,7 @@ const ProfileDropdown = () => {
         confirmVariant="destructive"
       />
     </div>
-  );
-};
+  )
+}
 
-export default ProfileDropdown;
+export default ProfileDropdown
