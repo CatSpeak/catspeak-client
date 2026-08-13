@@ -909,6 +909,15 @@ export default {
     retry: "Thử lại"
   },
   createExam: {
+    importExcelHowToTitle: "Hướng dẫn tạo câu hỏi bằng file Excel",
+    importExcelTip1: "Mỗi dòng là một câu hỏi. Để trống dòng nào thì dòng đó bị bỏ qua.",
+    importExcelTip2: "Cột Question Text: nội dung câu hỏi (bắt buộc, không được để trống).",
+    importExcelTip3: "Cột Question Type: chọn đúng 1 trong 5 loại: MultipleChoiceSingle (trắc nghiệm 1 đáp án), MultipleChoiceMultiple (nhiều đáp án), TrueFalse (đúng/sai), FillInBlank (điền khuyết), Essay (tự luận).",
+    importExcelTip4: 'Cột Option 1-5: mỗi ô là 1 lựa chọn. Trắc nghiệm cần ít nhất 2 lựa chọn; Đúng/Sai điền "Đúng" và "Sai" vào 2 ô đầu; câu Điền khuyết / Tự luận để trống.',
+    importExcelTip5: "Cột Correct Answer: Trắc nghiệm & Đúng/Sai nhập SỐ THỨ TỰ của đáp án đúng (1 = Option 1, 3 = Option 3, nhiều đáp án ngăn cách bằng dấu phẩy, ví dụ: 1, 3, 5). Câu Điền khuyết nhập đáp án chính xác (ví dụ: 100). Câu Tự luận để trống.",
+    importExcelTip6: "Cột Image Link (tùy chọn): dán link ảnh công khai, hệ thống tự tải về. Link nội bộ/không truy cập được sẽ bị bỏ qua nhưng vẫn import câu hỏi bình thường.",
+    importExcelTip7: "Điểm câu hỏi mặc định 5, tất cả câu hỏi đều được đặt bắt buộc trả lời.",
+    close: "Đóng",
     toastTemplateDownloaded: "Tải file mẫu thành công!",
     toastTemplateDownloadFailed: "Tải file mẫu thất bại.",
     toastMultipleFilesSelected: "Chỉ hỗ trợ tải lên 1 file mỗi lần. Hệ thống đã chọn file đầu tiên.",

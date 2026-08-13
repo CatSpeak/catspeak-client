@@ -906,6 +906,15 @@ export default {
     retry: "重试"
   },
   createExam: {
+    importExcelHowToTitle: "如何通过 Excel 文件创建题目",
+    importExcelTip1: "每行是一道题目。留空的行将被忽略。",
+    importExcelTip2: "Question Text 列：题目的内容（必填，不能为空）。",
+    importExcelTip3: "Question Type 列：请选择5种类型之一：MultipleChoiceSingle, MultipleChoiceMultiple, TrueFalse, FillInBlank, Essay。",
+    importExcelTip4: 'Option 1-5 列：每个单元格是一个选项。单选/多选题需要至少2个选项；判断题请在前两格填写“True”和“False”；填空题/简答题请留空。',
+    importExcelTip5: "Correct Answer 列：单选/多选及判断题请填写正确答案的选项编号（1 = 选项1，3 = 选项3，多个答案用逗号分隔，如：1, 3, 5）。填空题请输入确切答案（如：100）。简答题留空。",
+    importExcelTip6: "Image Link 列（选填）：粘贴公开的图片链接，系统将自动下载。私有/无法访问的链接将被忽略，但题目仍会正常导入。",
+    importExcelTip7: "题目默认分数为5分，所有题目默认设为必答。",
+    close: "关闭",
     toastTemplateDownloaded: "模板下载成功！",
     toastTemplateDownloadFailed: "模板下载失败。",
     toastMultipleFilesSelected: "每次仅支持上传1个文件。系统已选择第一个文件。",

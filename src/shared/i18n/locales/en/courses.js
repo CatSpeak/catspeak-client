@@ -909,6 +909,15 @@ export default {
     retry: "Try again"
   },
   createExam: {
+    importExcelHowToTitle: "How to create questions via Excel file",
+    importExcelTip1: "Each row is one question. Empty rows will be ignored.",
+    importExcelTip2: "Question Text column: The content of the question (required, cannot be empty).",
+    importExcelTip3: "Question Type column: Select exactly 1 of the 5 types: MultipleChoiceSingle, MultipleChoiceMultiple, TrueFalse, FillInBlank, Essay.",
+    importExcelTip4: 'Option 1-5 columns: Each cell is an option. MCQs require at least 2 options; For True/False, enter "True" and "False" in the first 2 cells; leave blank for FillInBlank / Essay.',
+    importExcelTip5: "Correct Answer column: For MCQs & True/False, enter the OPTION NUMBER of the correct answer (1 = Option 1, 3 = Option 3, separate multiple answers with commas, e.g., 1, 3, 5). For FillInBlank, enter the exact text (e.g., 100). Leave blank for Essay.",
+    importExcelTip6: "Image Link column (optional): Paste a public image URL, the system will download it. Private/inaccessible links will be ignored, but the question will still be imported.",
+    importExcelTip7: "Default question score is 5, and all questions are set as required.",
+    close: "Close",
     toastTemplateDownloaded: "Template downloaded successfully!",
     toastTemplateDownloadFailed: "Failed to download template.",
     toastMultipleFilesSelected: "Only 1 file supported at a time. The first file was selected.",
