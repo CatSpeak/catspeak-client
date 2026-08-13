@@ -307,7 +307,7 @@ const CategoryRoomSection = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className={`grid ${gridCols} gap-3 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
+            className={`grid ${gridCols} gap-4 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
           >
             {isLoading || (displayRooms.length === 0 && isFetching)
               ? Array.from({ length: itemsPerPage }).map((_, idx) => (

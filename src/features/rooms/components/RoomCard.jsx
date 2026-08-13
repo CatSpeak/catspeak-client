@@ -17,58 +17,58 @@ import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon";
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
 
 const RoomCard = ({ room }) => {
-  const { t } = useLanguage();
-  const { formatTime } = useTimezone();
-  const { isAuthenticated } = useAuth();
-  const { openAuthModal } = useAuthModal();
-  const navigate = useNavigate();
-  const { lang } = useParams();
+  const { t } = useLanguage()
+  const { formatTime } = useTimezone()
+  const { isAuthenticated } = useAuth()
+  const { openAuthModal } = useAuthModal()
+  const navigate = useNavigate()
+  const { lang } = useParams()
 
-  const [toggleBookmark] = useToggleBookmarkRoomMutation();
+  const [toggleBookmark] = useToggleBookmarkRoomMutation()
   const [isBookmarked, setIsBookmarked] = useState(
     Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
-  );
+  )
 
   useEffect(() => {
     queueMicrotask(() => {
       setIsBookmarked(
         Boolean(room.isBookmarked ?? room.isBookmark ?? room.bookmarked),
-      );
-    });
-  }, [room.isBookmarked, room.isBookmark, room.bookmarked]);
+      )
+    })
+  }, [room.isBookmarked, room.isBookmark, room.bookmarked])
 
   const currentLang =
     lang ||
     (typeof window !== "undefined"
       ? localStorage.getItem("communityLanguage")
       : null) ||
-    "en";
-  const fallbackThumbnail = currentLang === "zh" ? ZHThumbnail : ENThumbnail;
-  const [imageError, setImageError] = useState(false);
+    "en"
+  const fallbackThumbnail = currentLang === "zh" ? ZHThumbnail : ENThumbnail
+  const [imageError, setImageError] = useState(false)
   const displayThumbnail =
-    imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl;
+    imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl
 
-  const translatedName = room.name;
+  const translatedName = room.name
   const isUnlimitedParticipants =
     room.maxParticipants === null ||
     room.maxParticipants === undefined ||
     room.maxParticipants >= 2147483647 ||
-    room.maxParticipants <= 0;
+    room.maxParticipants <= 0
 
   const isRoomFull =
     !isUnlimitedParticipants &&
-    (room.currentParticipantCount || 0) >= room.maxParticipants;
+    (room.currentParticipantCount || 0) >= room.maxParticipants
 
   const isExpired = isRoomExpired(room);
 
   const isPrivate = room.privacy === "Private" || room.isPrivate;
   const hasPassword =
-    room.hasPassword || room.isPasswordProtected || !!room.password;
+    room.hasPassword || room.isPasswordProtected || !!room.password
 
-  const roomId = room.roomId || room.id;
+  const roomId = room.roomId || room.id
 
   const handleJoinRoom = (e) => {
-    e.stopPropagation();
+    e.stopPropagation()
 
     if (isExpired) {
       toast.error(
@@ -79,31 +79,31 @@ const RoomCard = ({ room }) => {
 
     // If user is not authenticated, open login modal instead of navigating
     if (!isAuthenticated) {
-      openAuthModal("login");
-      return;
+      openAuthModal("login")
+      return
     }
 
     // If authenticated, navigate to the unified meet page
-    const communityLang = localStorage.getItem("communityLanguage") || "en";
-    navigate(`/${communityLang}/meet/${roomId}`);
-  };
+    const communityLang = localStorage.getItem("communityLanguage") || "en"
+    navigate(`/${communityLang}/meet/${roomId}`)
+  }
 
   // Date and time formatting using locale-aware utilities
   const createDate = room.createDate
     ? new Date(room.createDate)
     : room.createdAt
       ? new Date(room.createdAt)
-      : new Date();
+      : new Date()
 
-  const isInfiniteDuration = room.duration === null;
-  const durationMinutes = room.duration || 20; // fallback to 20 if not null
-  const endDate = calculateEndDate(createDate, durationMinutes);
+  const isInfiniteDuration = room.duration === null
+  const durationMinutes = room.duration || 20 // fallback to 20 if not null
+  const endDate = calculateEndDate(createDate, durationMinutes)
   const timeStr = isInfiniteDuration
     ? t.rooms.noLimit
-    : `${formatTime(createDate)} - ${formatTime(endDate)}`;
+    : `${formatTime(createDate)} - ${formatTime(endDate)}`
 
-  const [showFullModal, setShowFullModal] = useState(false);
-  const [showCopied, setShowCopied] = useState(false);
+  const [showFullModal, setShowFullModal] = useState(false)
+  const [showCopied, setShowCopied] = useState(false)
 
   const handleRoomClick = (e) => {
     if (isExpired) {
@@ -115,61 +115,60 @@ const RoomCard = ({ room }) => {
     }
 
     if (isRoomFull) {
-      e.stopPropagation();
-      setShowFullModal(true);
-      return;
+      e.stopPropagation()
+      setShowFullModal(true)
+      return
     }
 
-    handleJoinRoom(e);
-  };
+    handleJoinRoom(e)
+  }
 
   const handleBookmarkClick = async (e) => {
-    e.stopPropagation();
+    e.stopPropagation()
     if (!isAuthenticated) {
-      openAuthModal("login");
-      return;
+      openAuthModal("login")
+      return
     }
-    const targetRoomId = roomId;
-    if (!targetRoomId) return;
+    const targetRoomId = roomId
+    if (!targetRoomId) return
 
-    const prev = isBookmarked;
-    setIsBookmarked(!prev);
+    const prev = isBookmarked
+    setIsBookmarked(!prev)
     try {
-      const res = await toggleBookmark(targetRoomId).unwrap();
+      const res = await toggleBookmark(targetRoomId).unwrap()
       if (res?.data?.isBookmarked !== undefined) {
-        setIsBookmarked(res.data.isBookmarked);
+        setIsBookmarked(res.data.isBookmarked)
       }
       toast.success(
         res?.message ||
           (prev
             ? t.rooms?.unbookmarkSuccess || "Đã bỏ lưu phòng"
             : t.rooms?.bookmarkSuccess || "Đã lưu phòng thành công"),
-      );
+      )
     } catch (err) {
-      setIsBookmarked(prev);
+      setIsBookmarked(prev)
       toast.error(
         err?.data?.message ||
           (prev ? "Không thể bỏ lưu phòng" : "Không thể lưu phòng"),
-      );
+      )
     }
-  };
-
+  }
 
   const handleCopyLink = (e) => {
-    e.stopPropagation();
-    const communityLang = localStorage.getItem("communityLanguage") || "en";
-    const baseUrl = `${window.location.origin}/${communityLang}/meet/${roomId}`;
-    const link = getRoomShareUrl({ baseUrl, room });
+    e.stopPropagation()
+    const communityLang = localStorage.getItem("communityLanguage") || "en"
+    const baseUrl = `${window.location.origin}/${communityLang}/meet/${roomId}`
+    const link = getRoomShareUrl({ baseUrl, room })
     navigator.clipboard
       .writeText(link)
       .then(() => {
-        setShowCopied(true);
-        setTimeout(() => setShowCopied(false), 2000);
+        setShowCopied(true)
+        setTimeout(() => setShowCopied(false), 2000)
       })
       .catch(() => {
-        toast.error("Không thể sao chép liên kết", { position: "top-center" });
-      });
-  };
+        toast.error("Không thể sao chép liên kết", { position: "top-center" })
+      })
+  }
 
   return (
     <>
@@ -224,13 +223,13 @@ const RoomCard = ({ room }) => {
                 room.topic ||
                 (Array.isArray(room.topics) && room.topics.length > 0
                   ? room.topics[0]
-                  : undefined);
-              const { topicKey } = getTopicMeta(activeTopic);
+                  : undefined)
+              const { topicKey } = getTopicMeta(activeTopic)
               const topicLabel =
                 t?.rooms?.filters?.topics?.[topicKey] ||
                 activeTopic ||
                 t?.rooms?.filters?.topics?.other ||
-                "Khác";
+                "Khác"
               return (
                 <div
                   className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10 cursor-default"
@@ -238,7 +237,7 @@ const RoomCard = ({ room }) => {
                 >
                   {getTopicIcon(activeTopic)}
                 </div>
-              );
+              )
             })()}
           </div>
 
@@ -279,7 +278,6 @@ const RoomCard = ({ room }) => {
                     : "text-cath-red-800 fill-none"
                 }`}
               />
-
             </div>
           </div>
         </div>
@@ -327,7 +325,6 @@ const RoomCard = ({ room }) => {
         </div>
       </Animated3DCard>
 
-
       <RoomFullModal
         open={showFullModal}
         onClose={() => setShowFullModal(false)}
@@ -342,7 +339,7 @@ const RoomCard = ({ room }) => {
           document.body,
         )}
     </>
-  );
-};
+  )
+}
 
-export default RoomCard;
+export default RoomCard

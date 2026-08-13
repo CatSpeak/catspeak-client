@@ -268,6 +268,30 @@ export const NOTIFICATION_TYPES = {
       return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
     },
   },
+  FriendRequestAccepted: {
+    icon: CheckCircle2,
+    color: "text-emerald-500",
+    resolveTitle: (m, t) =>
+      t.profile?.notifications?.friend_request_accepted?.title ||
+      "Lời mời kết bạn đã được chấp nhận",
+    resolveBody: (m, t) => {
+      const name =
+        m.userName ||
+        m.responderName ||
+        m.ResponderName ||
+        m.senderName ||
+        m.SenderName ||
+        m.name ||
+        "Ai đó";
+      const suffix =
+        t.profile?.social?.friendRequestAccepted ||
+        "đã chấp nhận lời mời kết bạn của bạn";
+      return `${name} ${suffix}`;
+    },
+    resolveUrl: (m) => {
+      return `/profile/${m.userid || m.responderId || m.ResponderId || m.accountId || m.targetAccountId}?tab=friends`;
+    },
+  },
   friend_request_declined: {
     icon: CalendarClock,
     color: "text-gray-500",

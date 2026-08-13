@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { Camera, Users, Check } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import Modal from "@/shared/components/ui/Modal";
+import ImageCropModal from "@/shared/components/ui/ImageCropModal";
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import {
@@ -70,6 +71,7 @@ const AccountHeader = ({ user, formData, t }) => {
   } catch {
     localParticipant = null;
   }
+
 
   const handleOpenMeetingAvatarModal = () => {
     setMeetingAvatarUrlInput(displayMeetingAvatarUrl || "");

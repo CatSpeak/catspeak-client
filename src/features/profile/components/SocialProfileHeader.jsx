@@ -99,6 +99,7 @@ const SocialProfileHeader = ({
     if (isFollowLoading) return;
     const toastId = "follow-action";
 
+
     try {
       if (status?.isFollowing) {
         await unfollowUser(targetAccountId).unwrap();

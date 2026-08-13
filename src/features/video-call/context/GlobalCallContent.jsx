@@ -509,17 +509,25 @@ const GlobalCallContent = ({
         if (data.action === "MUTE_ALL" && !isHost) {
           if (localParticipant) {
             localParticipant.setMicrophoneEnabled(false)
-            toast.error(pl.hostMutedAll || "Host đã tắt tiếng tất cả mọi người trong phòng.")
+            toast.error(
+              pl.hostMutedAll ||
+                "Host đã tắt tiếng tất cả mọi người trong phòng.",
+            )
           }
           return
         }
 
         if (data.action === "LOWER_ALL_HANDS") {
           if (localParticipant) {
-            safeSetLiveKitMetadata(localParticipant, { handRaised: false, handRaisedAt: 0 })
+            safeSetLiveKitMetadata(localParticipant, {
+              handRaised: false,
+              handRaisedAt: 0,
+            })
           }
           actions.setIsHandRaised?.(false)
-          toast.info(pl.hostLoweredAllHands || "Host đã hạ tất cả các tay xuống.")
+          toast.info(
+            pl.hostLoweredAllHands || "Host đã hạ tất cả các tay xuống.",
+          )
           return
         }
 
@@ -527,13 +535,15 @@ const GlobalCallContent = ({
           setRoomSetting(
             currentRoomId,
             ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-            data.enabled
+            data.enabled,
           )
           window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
           toast.info(
             data.enabled
-              ? (pl.hostEnabledJoinSound || "Host đã BẬT âm thanh khi có người vào/ra phòng.")
-              : (pl.hostDisabledJoinSound || "Host đã TẮT âm thanh khi có người vào/ra phòng.")
+              ? pl.hostEnabledJoinSound ||
+                  "Host đã BẬT âm thanh khi có người vào/ra phòng."
+              : pl.hostDisabledJoinSound ||
+                  "Host đã TẮT âm thanh khi có người vào/ra phòng.",
           )
           return
         }
@@ -542,13 +552,17 @@ const GlobalCallContent = ({
           setRoomSetting(
             currentRoomId,
             ROOM_SETTING_KEYS.MEMBER_RECORDING,
-            data.allowed
+            data.allowed,
           )
-          window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
+          window.dispatchEvent(
+            new Event("catspeak_member_recording_allowed_changed"),
+          )
           toast.info(
             data.allowed
-              ? (pl.hostAllowedRecording || "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
-              : (pl.hostDisabledRecording || "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
+              ? pl.hostAllowedRecording ||
+                  "Host đã CHO PHÉP thành viên ghi hình cuộc họp."
+              : pl.hostDisabledRecording ||
+                  "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.",
           )
           if (!isHost && !data.allowed && isRecording) {
             recordingState.handleToggleRecording?.()
@@ -560,53 +574,98 @@ const GlobalCallContent = ({
           setRoomSetting(
             currentRoomId,
             ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-            data.allowed
+            data.allowed,
           )
-          window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
+          window.dispatchEvent(
+            new Event("catspeak_member_private_ai_allowed_changed"),
+          )
           toast.info(
             data.allowed
-              ? (pl.hostAllowedPrivateAi || "Host đã CHO PHÉP thành viên sử dụng AI Chat riêng tư.")
-              : (pl.hostDisabledPrivateAi || "Host đã TẮT quyền sử dụng AI Chat riêng tư đối với thành viên.")
+              ? pl.hostAllowedPrivateAi ||
+                  "Host đã CHO PHÉP thành viên sử dụng AI Chat riêng tư."
+              : pl.hostDisabledPrivateAi ||
+                  "Host đã TẮT quyền sử dụng AI Chat riêng tư đối với thành viên.",
           )
           return
         }
 
         if (data.action === "REQUEST_ROOM_SETTINGS_SYNC") {
-          if (isHost && localParticipant && lkRoom?.state === ConnectionState.Connected) {
+          if (
+            isHost &&
+            localParticipant &&
+            lkRoom?.state === ConnectionState.Connected
+          ) {
             try {
               const syncPayload = new TextEncoder().encode(
                 JSON.stringify({
                   action: "SYNC_ROOM_SETTINGS",
                   settings: {
-                    joinLeaveSound: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
-                    memberRecording: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING),
-                    memberPrivateAi: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI),
+                    joinLeaveSound: getRoomSetting(
+                      currentRoomId,
+                      ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
+                    ),
+                    memberRecording: getRoomSetting(
+                      currentRoomId,
+                      ROOM_SETTING_KEYS.MEMBER_RECORDING,
+                    ),
+                    memberPrivateAi: getRoomSetting(
+                      currentRoomId,
+                      ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
+                    ),
                   },
                   targetIdentity: participant?.identity,
-                })
+                }),
               )
-              localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true }).catch(() => {})
+              localParticipant
+                .publishData(syncPayload, {
+                  topic: "moderation",
+                  reliable: true,
+                })
+                .catch(() => {})
             } catch (err) {
-              console.error("Error responding to REQUEST_ROOM_SETTINGS_SYNC:", err)
+              console.error(
+                "Error responding to REQUEST_ROOM_SETTINGS_SYNC:",
+                err,
+              )
             }
           }
           return
         }
 
         if (data.action === "SYNC_ROOM_SETTINGS") {
-          const isTargetMe = !data.targetIdentity || String(data.targetIdentity) === String(localParticipant?.identity)
+          const isTargetMe =
+            !data.targetIdentity ||
+            String(data.targetIdentity) === String(localParticipant?.identity)
           if (isTargetMe && data.settings) {
             if (data.settings.joinLeaveSound !== undefined) {
-              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND, data.settings.joinLeaveSound)
-              window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
+              setRoomSetting(
+                currentRoomId,
+                ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
+                data.settings.joinLeaveSound,
+              )
+              window.dispatchEvent(
+                new Event("catspeak_join_leave_sound_changed"),
+              )
             }
             if (data.settings.memberRecording !== undefined) {
-              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING, data.settings.memberRecording)
-              window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
+              setRoomSetting(
+                currentRoomId,
+                ROOM_SETTING_KEYS.MEMBER_RECORDING,
+                data.settings.memberRecording,
+              )
+              window.dispatchEvent(
+                new Event("catspeak_member_recording_allowed_changed"),
+              )
             }
             if (data.settings.memberPrivateAi !== undefined) {
-              setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI, data.settings.memberPrivateAi)
-              window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
+              setRoomSetting(
+                currentRoomId,
+                ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
+                data.settings.memberPrivateAi,
+              )
+              window.dispatchEvent(
+                new Event("catspeak_member_private_ai_allowed_changed"),
+              )
             }
           }
           return
@@ -615,7 +674,9 @@ const GlobalCallContent = ({
         if (!isTarget) return
 
         if (data.action === "KICK_PARTICIPANT") {
-          toast.error(pl.kickedByHost || "Bạn đã bị Host mời ra khỏi phòng.", { duration: 5000 })
+          toast.error(pl.kickedByHost || "Bạn đã bị Host mời ra khỏi phòng.", {
+            duration: 5000,
+          })
           actions.handleLeaveSession()
         } else if (data.action === "MUTE_PARTICIPANT") {
           if (data.trackKind === "audio" && localParticipant) {
@@ -624,9 +685,15 @@ const GlobalCallContent = ({
           } else if (data.trackKind === "video" && localParticipant) {
             localParticipant.setCameraEnabled(false)
             toast.error(pl.hostMutedCam || "Host đã tắt camera của bạn.")
-          } else if ((data.trackKind === "screen" || data.trackKind === "screen_share") && localParticipant) {
+          } else if (
+            (data.trackKind === "screen" ||
+              data.trackKind === "screen_share") &&
+            localParticipant
+          ) {
             localParticipant.setScreenShareEnabled(false)
-            toast.error(pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn.")
+            toast.error(
+              pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn.",
+            )
           }
         }
       } catch (err) {
@@ -636,20 +703,35 @@ const GlobalCallContent = ({
 
     const handleParticipantJoined = (participant) => {
       const isHost = isRoomHost(roomData, user?.accountId)
-      if (isHost && localParticipant && lkRoom?.state === ConnectionState.Connected) {
+      if (
+        isHost &&
+        localParticipant &&
+        lkRoom?.state === ConnectionState.Connected
+      ) {
         try {
           const syncPayload = new TextEncoder().encode(
             JSON.stringify({
               action: "SYNC_ROOM_SETTINGS",
               settings: {
-                joinLeaveSound: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
-                memberRecording: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING),
-                memberPrivateAi: getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI),
+                joinLeaveSound: getRoomSetting(
+                  currentRoomId,
+                  ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
+                ),
+                memberRecording: getRoomSetting(
+                  currentRoomId,
+                  ROOM_SETTING_KEYS.MEMBER_RECORDING,
+                ),
+                memberPrivateAi: getRoomSetting(
+                  currentRoomId,
+                  ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
+                ),
               },
               targetIdentity: participant.identity,
-            })
+            }),
           )
-          localParticipant.publishData(syncPayload, { topic: "moderation", reliable: true }).catch(() => {})
+          localParticipant
+            .publishData(syncPayload, { topic: "moderation", reliable: true })
+            .catch(() => {})
         } catch (err) {
           console.error("Error syncing room settings to new participant:", err)
         }
@@ -683,12 +765,18 @@ const GlobalCallContent = ({
     }
 
     // Request settings sync from Host on join if not Host
-    if (lkRoom?.state === ConnectionState.Connected && localParticipant && !isRoomHost(roomData, user?.accountId)) {
+    if (
+      lkRoom?.state === ConnectionState.Connected &&
+      localParticipant &&
+      !isRoomHost(roomData, user?.accountId)
+    ) {
       try {
         const reqPayload = new TextEncoder().encode(
-          JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" })
+          JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" }),
         )
-        localParticipant.publishData(reqPayload, { topic: "moderation", reliable: true }).catch(() => {})
+        localParticipant
+          .publishData(reqPayload, { topic: "moderation", reliable: true })
+          .catch(() => {})
       } catch (e) {
         // ignore
       }

@@ -4,12 +4,12 @@ import { store } from "@store"
 import "@styles/app.css"
 import AppToaster from "@/shared/components/ui/AppToaster"
 
-import { ConversationSignalRProvider } from "@/features/chat/context/ConversationSignalRContext";
-import GlobalSignalRHandler from "@/features/chat/components/GlobalSignalRHandler";
-import ServerDownScreen from "@/shared/components/ServerDownScreen";
-import NavigationProgress from "@/shared/components/NavigationProgress";
-import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider";
-import PiPWidget from "@/features/video-call/components/pip/PiPWidget";
+import { ConversationSignalRProvider } from "@/features/chat/context/ConversationSignalRContext"
+import GlobalSignalRHandler from "@/features/chat/components/GlobalSignalRHandler"
+import ServerDownScreen from "@/shared/components/ServerDownScreen"
+import NavigationProgress from "@/shared/components/NavigationProgress"
+import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
+import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
@@ -48,7 +48,7 @@ function App() {
         </WebViewGuard>
       </LanguageProvider>
     </Provider>
-  );
+  )
 }
 
-export default App;
+export default App

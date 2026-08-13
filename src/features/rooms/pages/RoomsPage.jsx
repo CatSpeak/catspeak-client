@@ -229,29 +229,27 @@ const RoomsPage = () => {
           direction="up"
           className="w-full h-full flex flex-col"
         >
-          <div className="p-5 flex-1 min-w-0 pt-8 px-0">
-            <WorkshopCarousel
-              hideTitle={true}
-              leftContent={
-                <RoomsBannerContent
-                  sessionProps={{
-                    handleCreateOneOnOneSession: proceedCreateOneOnOne,
-                    handleCreateStudyGroupSession: proceedCreateStudyGroup,
-                    handleCreateAISession: () => actions.openAISettingsModal(),
-                    handleCreateCustomRoomSession: handleCreateCustomRoom,
-                    isCreatingOneOnOne: state.isCreatingOneOnOne,
-                    isCreatingStudyGroup: state.isCreatingStudyGroup,
-                    isCreatingAI: state.isCreatingAI,
-                    isCreatingCustom: state.isCreatingCustom,
-                    canUseAI: true,
-                  }}
-                />
-              }
-            />
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mb-6">
+              <RoomsBannerContent
+                sessionProps={{
+                  handleCreateOneOnOneSession: proceedCreateOneOnOne,
+                  handleCreateStudyGroupSession: proceedCreateStudyGroup,
+                  handleCreateAISession: () => actions.openAISettingsModal(),
+                  handleCreateCustomRoomSession: handleCreateCustomRoom,
+                  isCreatingOneOnOne: state.isCreatingOneOnOne,
+                  isCreatingStudyGroup: state.isCreatingStudyGroup,
+                  isCreatingAI: state.isCreatingAI,
+                  isCreatingCustom: state.isCreatingCustom,
+                  canUseAI: true,
+                }}
+              />
+              <WorkshopCarousel hideTitle={true} />
+            </div>
 
-            <div className="w-full flex flex-col pt-6 backdrop-blur-sm border-t border-white shadow-[0_-2px_2px_rgba(0,0,0,0.02)] shaw">
-              {/* Tabs */}
-              <RoomsTabs tab={tab} setTab={setTab} />
+            <div className="w-full flex flex-col">
+              {/* Tabs hidden temporarily to save vertical space */}
+              {/* <RoomsTabs tab={tab} setTab={setTab} /> */}
 
               <div className="w-full">
                 <AnimatePresence mode="wait">

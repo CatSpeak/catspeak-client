@@ -45,7 +45,8 @@ const RoomClosingWarningModal = ({ remainingSeconds, t }) => {
           <Clock size={32} />
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">
-          {t?.rooms?.videoCall?.roomClosingSubtitleStatic || "Phòng sẽ tự động kết thúc sau ít phút nữa"}
+          {t?.rooms?.videoCall?.roomClosingSubtitleStatic ||
+            "Phòng sẽ tự động kết thúc sau ít phút nữa"}
         </h3>
         <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
           {t?.rooms?.videoCall?.roomClosingDescription ||

@@ -32,7 +32,6 @@ export function useNotifications() {
   const { t } = useLanguage();
   const isInitialLoad = useRef(true);
 
-
   const tRef = useRef(t);
   useEffect(() => {
     tRef.current = t;
@@ -144,36 +143,6 @@ export function useNotifications() {
               );
             }
 
-            // // Invalidate RTK query cache if friendship notification
-            // const notifType = String(data?.type || "")
-            // if (
-            //   notifType.toLowerCase().includes("friend")
-            // ) {
-            //   const meta = data?.metadata || {}
-            //   const targetId =
-            //     meta.userId ||
-            //     meta.userid ||
-            //     meta.requesterId ||
-            //     meta.RequesterId ||
-            //     meta.responderId ||
-            //     meta.ResponderId ||
-            //     meta.accountId ||
-            //     meta.targetAccountId
-            //   dispatch(
-            //     friendshipApi.util.invalidateTags([
-            //       ...(targetId
-            //         ? [
-            //             { type: "Friendship", id: targetId },
-            //             { type: "Friend", id: `LIST-${targetId}` },
-            //           ]
-            //         : []),
-            //       "Friendship",
-            //       "Friend",
-            //       "FriendRequest",
-            //       "Recommendation",
-            //     ]),
-            //   )
-            // }
 
             toast.custom(
               (toastObj) => (

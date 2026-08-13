@@ -331,6 +331,7 @@ export default {
     noOneHere: "No one else is here yet.",
     isHere: "is here",
     loading: "Loading...",
+    loadingRoom: "Loading room...",
     roomNotFound: "Room not found",
     roomNotFoundSubtext:
       "The room you're looking for doesn't exist or has been closed. Why not explore other active rooms in the community?",

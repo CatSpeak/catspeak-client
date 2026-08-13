@@ -9,39 +9,42 @@ export const globalSounds = {
   ticking: new Audio("/sounds/ticking.mp3"),
   join: new Audio("/sounds/join.mp3"),
   leave: new Audio("/sounds/leave.mp3"),
-};
+}
 
 // Preload
-Object.values(globalSounds).forEach(audio => {
-  audio.preload = "auto";
-});
+Object.values(globalSounds).forEach((audio) => {
+  audio.preload = "auto"
+})
 
-let isUnlocked = false;
+let isUnlocked = false
 const unlockAudio = () => {
-  if (isUnlocked) return;
-  isUnlocked = true;
-  Object.values(globalSounds).forEach(audio => {
-    audio.play().then(() => {
-      audio.pause();
-      audio.currentTime = 0;
-    }).catch(() => {});
-  });
-  window.removeEventListener("touchstart", unlockAudio);
-  window.removeEventListener("click", unlockAudio);
-};
+  if (isUnlocked) return
+  isUnlocked = true
+  Object.values(globalSounds).forEach((audio) => {
+    audio
+      .play()
+      .then(() => {
+        audio.pause()
+        audio.currentTime = 0
+      })
+      .catch(() => {})
+  })
+  window.removeEventListener("touchstart", unlockAudio)
+  window.removeEventListener("click", unlockAudio)
+}
 
 if (typeof window !== "undefined") {
-  window.addEventListener("touchstart", unlockAudio);
-  window.addEventListener("click", unlockAudio);
+  window.addEventListener("touchstart", unlockAudio)
+  window.addEventListener("click", unlockAudio)
 }
 
 export const playGlobalSound = (name) => {
-  const audio = globalSounds[name];
+  const audio = globalSounds[name]
   if (audio) {
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
+    audio.currentTime = 0
+    audio.play().catch(() => {})
   }
-};
+}
 export const useParticipantAudioEffect = (participants, roomId = null) => {
   const prevParticipantsRef = useRef(participants)
   const isInitialMountRef = useRef(true)
@@ -51,12 +54,20 @@ export const useParticipantAudioEffect = (participants, roomId = null) => {
 
   useEffect(() => {
     const handleSoundChange = () => {
-      setIsSoundEnabled(getRoomSetting(roomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND))
+      setIsSoundEnabled(
+        getRoomSetting(roomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
+      )
     }
     handleSoundChange()
-    window.addEventListener("catspeak_join_leave_sound_changed", handleSoundChange)
+    window.addEventListener(
+      "catspeak_join_leave_sound_changed",
+      handleSoundChange,
+    )
     return () => {
-      window.removeEventListener("catspeak_join_leave_sound_changed", handleSoundChange)
+      window.removeEventListener(
+        "catspeak_join_leave_sound_changed",
+        handleSoundChange,
+      )
     }
   }, [roomId])
 

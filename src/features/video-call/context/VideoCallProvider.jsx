@@ -552,7 +552,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // Loading user data
   if (isLoadingUser) {
-    return <VideoCallLoading />
+    return <VideoCallLoading message={t?.rooms?.waitingScreen?.loadingRoom || "Loading room..."} />
   }
 
   // User not authenticated
@@ -575,7 +575,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     isLoadingRoomData ||
     (!isClassRoom && isRoomQuerySkipped)
   ) {
-    return <VideoCallLoading />
+    return <VideoCallLoading message={t?.rooms?.waitingScreen?.loadingRoom || "Loading room..."} />
   }
 
   // Room not found

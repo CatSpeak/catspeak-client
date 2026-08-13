@@ -307,6 +307,7 @@ export default {
     noOneHere: "Chưa có ai ở đây cả.",
     isHere: "đang ở đây",
     loading: "Đang tải...",
+    loadingRoom: "Đang tải phòng...",
     roomNotFound: "Không tìm thấy phòng",
     roomNotFoundSubtext:
       "Phòng bạn đang tìm không tồn tại hoặc đã bị đóng. Hãy khám phá những phòng khác đang diễn ra sôi nổi nhé!",

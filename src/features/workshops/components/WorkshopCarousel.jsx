@@ -17,7 +17,6 @@ import colors from "@/shared/utils/colors";
 const WorkshopCarousel = ({
   slides: propSlides = [],
   hideTitle = false,
-  leftContent,
 }) => {
   const { lang } = useParams();
   const { t } = useLanguage();
@@ -146,39 +145,20 @@ const WorkshopCarousel = ({
   );
 
   return (
-    <div
-      className={
-        leftContent
-          ? "pl-4 w-full relative overflow-visible pb-6 min-h-[320px] flex flex-col shadow-sm"
-          : "w-full"
-      }
-    >
+    <div className="w-full">
       {/* Header */}
-      {!leftContent && (
+      {!hideTitle && (
         <div className="relative z-10 flex w-full items-center justify-between mb-2">
-          {!hideTitle && (
-            <h2
-              className="text-xl font-bold"
-              style={{ color: colors?.headingColor || "#111827" }}
-            >
-              {t?.workshops?.title || "Workshops"}
-            </h2>
-          )}
+          <h2
+            className="text-xl font-bold"
+            style={{ color: colors?.headingColor || "#111827" }}
+          >
+            {t?.workshops?.title || "Workshops"}
+          </h2>
         </div>
       )}
 
-      {leftContent ? (
-        <div className="grid grid-cols-12 flex-1 min-h-[280px]">
-          {leftContent}
-          <div className="col-span-12 md:col-span-6 flex items-center justify-start p-6 md:p-8 md:pl-0 relative overflow-hidden group">
-            {carouselContent}
-          </div>
-        </div>
-      ) : (
-        <div className="w-full">
-          {carouselContent}
-        </div>
-      )}
+      <div className="w-full">{carouselContent}</div>
 
       <ChinaWorkshopModal
         open={modalType === "china"}
