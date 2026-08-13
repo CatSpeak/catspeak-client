@@ -1,25 +1,41 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  collection, query, where, orderBy, limit, onSnapshot,
-  updateDoc, doc, writeBatch, getDocs
-} from "firebase/firestore"
-import { onAuthStateChanged } from "firebase/auth"
-import { db as firestore, auth as firebaseAuth } from "@/shared/config/firebase"
-import { initFirebaseSession } from "@/shared/config/initFirebaseSession"
-import { useAuth } from "@/features/auth"
-import { useDispatch } from "react-redux"
-import { friendshipApi } from "@/store/api/social/friendshipApi"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import toast from "react-hot-toast"
-import { resolveNotification } from "../config/notificationTypeConfig"
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  onSnapshot,
+  updateDoc,
+  doc,
+  writeBatch,
+  getDocs,
+} from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  db as firestore,
+  auth as firebaseAuth,
+} from "@/shared/config/firebase";
+import { initFirebaseSession } from "@/shared/config/initFirebaseSession";
+import { useAuth } from "@/features/auth";
+import { useDispatch } from "react-redux";
+import { friendshipApi } from "@/store/api/social/friendshipApi";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import toast from "react-hot-toast";
+import { resolveNotification } from "../config/notificationTypeConfig";
 
 export function useNotifications() {
-  const dispatch = useDispatch()
-  const [notifications, setNotifications] = useState([])
-  const [unreadCount, setUnreadCount] = useState(0)
-  const { token } = useAuth()
-  const { t } = useLanguage()
-  const isInitialLoad = useRef(true)
+  const dispatch = useDispatch();
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const { token } = useAuth();
+  const { t } = useLanguage();
+  const isInitialLoad = useRef(true);
+
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   useEffect(() => {
     if (!token) {
@@ -33,7 +49,6 @@ export function useNotifications() {
     let unsubCount;
 
     let subscribedUid = null;
-
 
     let sessionReady = false;
     let expectedUid = null;
@@ -127,37 +142,6 @@ export function useNotifications() {
               );
             }
 
-            // Invalidate RTK query cache if friendship notification
-            // const notifType = String(data?.type || "")
-            if (
-              notifType.toLowerCase().includes("friend")
-            ) {
-              const meta = data?.metadata || {}
-              const targetId =
-                meta.userId ||
-                meta.userid ||
-                meta.requesterId ||
-                meta.RequesterId ||
-                meta.responderId ||
-                meta.ResponderId ||
-                meta.accountId ||
-                meta.targetAccountId
-              dispatch(
-                friendshipApi.util.invalidateTags([
-                  ...(targetId
-                    ? [
-                        { type: "Friendship", id: targetId },
-                        { type: "Friend", id: `LIST-${targetId}` },
-                      ]
-                    : []),
-                  "Friendship",
-                  "Friend",
-                  "FriendRequest",
-                  "Recommendation",
-                ]),
-              )
-            }
-
             toast.custom(
               (toastObj) => (
                 <div
@@ -212,7 +196,6 @@ export function useNotifications() {
 
     const unsubAuth = onAuthStateChanged(firebaseAuth, (user) => {
       if (cancelled) return;
-
 
       if (!sessionReady) return;
 
