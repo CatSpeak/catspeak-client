@@ -199,7 +199,7 @@ export const materialApi = baseApi.injectEndpoints({
       query: ({ id, targetFolderId }) => ({
         url: `/personal-materials/folders/${id}/move`,
         method: "PUT",
-        body: { targetFolderId },
+        body: { targetParentId: targetFolderId },
       }),
       invalidatesTags: ["PersonalMaterials"],
     }),

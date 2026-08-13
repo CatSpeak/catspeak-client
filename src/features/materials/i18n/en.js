@@ -21,6 +21,7 @@ export default {
     zeroResults: "Found 0 results for",
     foundResults: "Found {{count}} results for",
     emptyFolder: "Folder is empty",
+    uploadPrompt: "Right-click anywhere to start creating folders or uploading materials.",
     emptyState: "No folders or materials yet.",
     folders: "Folders",
     files: "Files",

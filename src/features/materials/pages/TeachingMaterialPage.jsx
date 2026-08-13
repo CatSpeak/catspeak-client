@@ -16,6 +16,8 @@ import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
 import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
+import { useContextMenu } from '@/shared/hooks/useContextMenu';
+import ContextMenu from '@/shared/components/ui/ContextMenu';
 import { useGetPersonalMaterialsQuery, useGetBookmarkedMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery, useBookmarkFolderMutation, useBookmarkMaterialMutation } from '@/store/api/materialApi';
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
@@ -43,6 +45,8 @@ const TeachingMaterialPage = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+
+  const { isOpen: isContextOpen, position: contextPosition, handleContextMenu, closeContextMenu } = useContextMenu();
 
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -268,7 +272,15 @@ const TeachingMaterialPage = () => {
 
 
   return (
-    <div className=" bg-[#f3f3f3] min-h-screen">
+    <div
+      className=" bg-[#f3f3f3] min-h-screen"
+      onContextMenu={(e) => {
+        if (e.target.closest('button, input, a, .group, [role="button"], .cursor-pointer')) {
+          return;
+        }
+        handleContextMenu(e);
+      }}
+    >
       <Breadcrumb
         className='mb-4 flex-wrap'
         items={[
@@ -291,6 +303,7 @@ const TeachingMaterialPage = () => {
       />
 
       {/* Header actions */}
+      {/* 
       <div className="flex justify-end gap-3 mb-4">
         <PillButton
           variant='outline'
@@ -310,7 +323,8 @@ const TeachingMaterialPage = () => {
         >
           {t.materials.uploadMaterial}
         </PillButton>
-      </div>
+      </div> 
+      */}
 
       {/* Search and Filters */}
       <div className="flex items-center justify-between mb-4 flex-col md:flex-row gap-4">
@@ -412,8 +426,12 @@ const TeachingMaterialPage = () => {
           />
         </div>
       ) : materials.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <p className="text-[#5B403E]">{t.materials.emptyFolder}</p>
+        <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-70">
+          <FolderPlus className="w-16 h-16 text-[#E3BEBA]" />
+          <p className="text-lg font-medium text-[#5B403E]">{t.materials.emptyFolder}</p>
+          <p className="text-[#5B403E] text-center max-w-md">
+            {t.materials.uploadPrompt}
+          </p>
         </div>
       ) : (
         <>
@@ -540,13 +558,6 @@ const TeachingMaterialPage = () => {
               </div>
             </div>
           )}
-
-          {!isLoading && materials.length === 0 && !searchQuery && (
-            <div className="flex flex-col items-center justify-center py-20 text-[#5B403E] opacity-70">
-              <FolderPlus className="w-12 h-12 mb-4 text-[#E3BEBA]" />
-              <p>{t.materials.emptyState}</p>
-            </div>
-          )}
         </>
       )}
 
@@ -622,6 +633,16 @@ const TeachingMaterialPage = () => {
         item={selectedItem}
       />
 
+      <ContextMenu
+        isOpen={isContextOpen}
+        position={contextPosition}
+        onClose={closeContextMenu}
+        options={[
+          { label: t.materials.createFolder, icon: <FolderPlus className="w-4 h-4" />, onClick: () => setIsCreateFolderOpen(true) },
+          { label: t.materials.uploadMaterial, icon: <Upload className="w-4 h-4" />, onClick: () => setIsUploadMaterialOpen(true) },
+        ]}
+      />
+
       <FilterMaterialModal
         open={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
@@ -657,7 +678,7 @@ const TeachingMaterialPage = () => {
         onDownload={() => {
           const filesToDownload = selectedItems.filter(item => item._type === 'file' && item.fileUrl);
           const foldersToDownload = selectedItems.filter(item => item._type === 'folder');
-          
+
           if (filesToDownload.length === 0 && foldersToDownload.length === 0) {
             toast.error(t.materials.noFilesToDownload);
             return;

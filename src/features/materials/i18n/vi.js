@@ -21,6 +21,7 @@ export default {
     zeroResults: "Tìm thấy 0 kết quả cho",
     foundResults: "Tìm thấy {{count}} kết quả cho",
     emptyFolder: "Thư mục trống",
+    uploadPrompt: "Nhấn chuột phải vào vùng trống để bắt đầu tạo thư mục hoặc tải lên tài liệu mới.",
     emptyState: "Chưa có thư mục hoặc tài liệu nào.",
     folders: "Thư mục",
     files: "Tệp",

@@ -21,6 +21,7 @@ export default {
     zeroResults: "找到 0 个结果：",
     foundResults: "找到 {{count}} 个结果：",
     emptyFolder: "文件夹为空",
+    uploadPrompt: "右键单击任意位置以开始创建文件夹或上传资料。",
     emptyState: "暂无文件夹或资料。",
     folders: "文件夹",
     files: "文件",
