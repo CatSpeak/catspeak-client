@@ -381,6 +381,9 @@ export default {
       receiveSystemMsgs: "Nhận thông báo tin nhắn hệ thống",
       receiveSystemMsgsDesc:
         "Hiển thị các thông báo tự động từ hệ thống trong khi cuộc họp đang diễn ra.",
+      showAiSuggestions: "Hiển thị tin nhắn Cat Speak gợi ý",
+      showAiSuggestionsDesc:
+        "Hiển thị các thông báo tin nhắn gợi ý tự động từ Trợ lý Cat Speak trong khung chat.",
       joinLeaveSound: "Âm thanh khi người dùng vào / ra phòng",
       joinLeaveSoundDesc:
         "Phát chuông thông báo âm thanh khi có thành viên mới vào hoặc rời khỏi cuộc họp.",

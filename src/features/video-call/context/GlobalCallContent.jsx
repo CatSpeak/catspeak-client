@@ -59,6 +59,8 @@ const GlobalCallContent = ({
   ContextProvider,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
+  showAiSuggestions,
+  setShowAiSuggestions,
   panelState,
 }) => {
   const { t, language } = useLanguage()
@@ -878,6 +880,8 @@ const GlobalCallContent = ({
     chatPrivateAi,
     receiveSystemMsgs,
     setReceiveSystemMsgs,
+    showAiSuggestions,
+    setShowAiSuggestions,
     updateAiInteraction,
     isCurrentUserPrompting,
     startNewThread,

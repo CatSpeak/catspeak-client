@@ -403,6 +403,9 @@ export default {
       receiveSystemMsgs: "Receive system notifications",
       receiveSystemMsgsDesc:
         "Display automatic system notifications during the meeting.",
+      showAiSuggestions: "Show Cat Speak suggestion messages",
+      showAiSuggestionsDesc:
+        "Display automatic suggestion messages from Cat Speak Assistant in the chat frame.",
       joinLeaveSound: "Join / leave sound alert",
       joinLeaveSoundDesc:
         "Play a sound notification when a participant joins or leaves the meeting.",
