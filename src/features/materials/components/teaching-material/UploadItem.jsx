@@ -3,6 +3,7 @@ import { X, FileText, Image, Video, File, Check } from 'lucide-react';
 import ProgressBar from '@/shared/components/ui/ProgressBar';
 import { IconButton } from '@/shared/components/ui/buttons';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import { formatSize } from '../../utils/materialUtils';
 
 const getFileIcon = (type) => {
   switch (type) {
@@ -17,16 +18,6 @@ const getFileIcon = (type) => {
   }
 };
 
-const formatSize = (bytes) => {
-  if (!bytes || bytes === 0) return '0 KB';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) {
-    const kb = bytes / 1024;
-    return `${kb.toFixed(1)} KB`;
-  }
-  const mb = bytes / (1024 * 1024);
-  return `${mb.toFixed(1)} MB`;
-};
 
 const UploadItem = ({
   name,

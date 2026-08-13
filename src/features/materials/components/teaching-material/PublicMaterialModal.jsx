@@ -11,15 +11,8 @@ import FileDetailModal from './FileDetailModal';
 import SaveSharedMaterialModal from './SaveSharedMaterialModal';
 import { useRecordMaterialDownloadMutation, useRecordMaterialViewMutation } from '@/store/api/materialApi';
 import { useTimezone } from "@/shared/hooks/useTimezone";
+import { formatSize } from "../../utils/materialUtils";
 
-const formatSize = (bytes) => {
-  if (bytes === 0) return '0 B';
-  if (!bytes) return '';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-};
 
 const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove }) => {
   const { t } = useLanguage();

@@ -23,14 +23,8 @@ import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
 import SaveSharedMaterialModal from '../../materials/components/teaching-material/SaveSharedMaterialModal';
 import { useLanguage } from '@/shared/context/LanguageContext';
 import { downloadFolderAsZip } from '@/features/materials/utils/zipDownloader';
+import { formatSize, isFolder, flattenFolders, downloadFile } from '../../materials/utils/materialUtils';
 
-const formatSize = (bytes) => {
-  if (bytes === 0 || !bytes) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-};
 
 
 
@@ -80,6 +74,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
 
     if (sharedMaterialToken && (sharedMaterialData || sharedFolderData)) {
       const data = sharedMaterialData?.data || sharedMaterialData || sharedFolderData?.data || sharedFolderData;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedItem({
         ...data,
         fileUrl: data.fileUrl || data.previewUrl,
@@ -118,18 +113,6 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
           metaMap[f.id] = f;
         });
       }
-
-      const flattenFolders = (nodes) => {
-        let flat = [];
-        for (const node of nodes) {
-          flat.push(node);
-          const children = node.subFolders || node.children || [];
-          if (children.length > 0) {
-            flat = flat.concat(flattenFolders(children));
-          }
-        }
-        return flat;
-      };
 
       const nodesToProcess = searchQuery.trim() ? flattenFolders(rawFoldersTree) : rawFoldersTree;
 
@@ -178,13 +161,13 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
 
   const materials = useMemo(() => [...baseFolders, ...baseFiles], [baseFolders, baseFiles]);
 
-  const isFolder = (item) => !item.fileName && !item.fileUrl;
 
   useEffect(() => {
     if (selectedItem) {
       const selectedIsFolder = isFolder(selectedItem);
       const updatedItem = materials.find(m => m.id === selectedItem.id && isFolder(m) === selectedIsFolder);
       if (updatedItem && (updatedItem.downloadCount !== selectedItem.downloadCount || updatedItem.viewCount !== selectedItem.viewCount || updatedItem.isPublic !== selectedItem.isPublic || updatedItem.allowDownload !== selectedItem.allowDownload)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelectedItem({ ...updatedItem, type: selectedItem.type || updatedItem.type });
       }
     }
@@ -227,26 +210,6 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
     });
   };
 
-  const handleDownloadFile = async (file) => {
-    if (!file.fileUrl) return;
-    recordDownload(file.id);
-    try {
-      const response = await fetch(file.fileUrl);
-      if (!response.ok) throw new Error('Network response was not ok');
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = file.name || 'download';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download failed:', error);
-      window.open(file.fileUrl, '_blank');
-    }
-  };
 
   if ((isOwnProfile && (isLoadingMaterials || isLoadingTree)) || (!isOwnProfile && isLoadingPublicMaterials)) {
     return (
@@ -347,7 +310,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                       onClick={() => {
                         if (selectedItems.length > 0) {
                           toggleSelection(folder);
-                        } else {
+                        } else if (isOwnProfile) {
                           navigate(`/workspace/materials/${folder.id}`);
                         }
                       }}
@@ -446,7 +409,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                         setSelectedItem(file);
                         setIsFileDetailOpen(true);
                       }}
-                      onDownload={() => handleDownloadFile(file)}
+                      onDownload={() => downloadFile(file, recordDownload)}
                       onBookmark={() => {
                         setSelectedItem(file);
                         setIsSaveSharedModalOpen(true);
@@ -553,7 +516,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                 return;
               }
 
-              filesToDownload.forEach(file => handleDownloadFile(file));
+              filesToDownload.forEach(file => downloadFile(file, recordDownload));
               foldersToDownload.forEach(folder => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t, true));
 
               toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length + foldersToDownload.length));

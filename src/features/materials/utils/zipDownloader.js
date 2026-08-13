@@ -3,6 +3,7 @@ import { saveAs } from 'file-saver';
 import { store } from '@/store';
 import { materialApi } from '@/store/api/materialApi';
 import toast from 'react-hot-toast';
+import { flattenFolders } from './materialUtils';
 
 export const downloadFolderAsZip = async (folder, isPublicProfile = false, targetAccountId = null, t, silent = false) => {
   const toastId = !silent ? toast.loading(t?.materials?.downloadingFolder || 'Đang chuẩn bị tải xuống...') : null;
@@ -25,19 +26,6 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
       ).unwrap();
       const rawTree = treeResult.data || treeResult || [];
 
-      const flattenFolders = (nodes, parentId = null) => {
-        let flat = [];
-        for (const node of nodes) {
-          const id = node.folderId || node.id;
-          const nodeWithParentId = { ...node, parentId: node.parentId || parentId };
-          flat.push(nodeWithParentId);
-          const children = node.subFolders || node.children || [];
-          if (children.length > 0) {
-            flat = flat.concat(flattenFolders(children, id));
-          }
-        }
-        return flat;
-      };
       allFolders = flattenFolders(rawTree);
     }
 

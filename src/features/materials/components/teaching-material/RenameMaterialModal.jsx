@@ -27,9 +27,6 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
     }
   }
 
-
-
-
   const handleRename = async () => {
     if (!name.trim() || !item) return;
     console.log(name);

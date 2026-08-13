@@ -24,6 +24,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext';
 import { downloadFolderAsZip } from '@/features/materials/utils/zipDownloader';
 import toast from 'react-hot-toast';
+import { formatSize } from '../utils/materialUtils';
 
 const TeachingMaterialPage = () => {
   const { t } = useLanguage();
@@ -265,14 +266,6 @@ const TeachingMaterialPage = () => {
     }
   }, [materialsData, selectedItem, materials]);
 
-  const formatSize = (bytes) => {
-    if (bytes === 0) return '0 B';
-    if (!bytes) return '';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-  };
 
   return (
     <div className=" bg-[#f3f3f3] min-h-screen">

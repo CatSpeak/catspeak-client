@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { MoreVertical, Download, Share2, Edit2, FolderInput, Trash2, Bookmark, Star, StarOff, Settings } from 'lucide-react';
 import FilePreview from '@/shared/components/ui/FilePreview';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton } from '@/shared/components/ui/buttons';
 import Checkbox from '@/shared/components/ui/inputs/Checkbox';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import useLongPress from '../../materials/hooks/useLongPress';
+
 
 const ProfileFileItem = ({
   title,
@@ -28,51 +30,7 @@ const ProfileFileItem = ({
   onToggleSelect
 }) => {
   const { t } = useLanguage();
-  const timerRef = useRef(null);
-  const isLongPressRef = useRef(false);
-
-  const handlePointerDown = (e) => {
-    if (e.button !== 0 && e.button !== undefined) return;
-    isLongPressRef.current = false;
-    timerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      if (!isSelectionMode && onToggleSelect) {
-        if (window.navigator && window.navigator.vibrate) {
-          window.navigator.vibrate(50);
-        }
-        onToggleSelect();
-      }
-    }, 500);
-  };
-
-  const handlePointerUp = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
-  const handlePointerLeave = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
-  const handleClick = (e) => {
-    if (isLongPressRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    if (isSelectionMode) {
-      e.preventDefault();
-      e.stopPropagation();
-      onToggleSelect && onToggleSelect();
-    } else {
-      onClick && onClick(e);
-    }
-  };
+  const { handlers } = useLongPress({ isSelectionMode, onToggleSelect, onClick });
 
   const renderDropdown = () => (
     <Dropdown
@@ -125,15 +83,7 @@ const ProfileFileItem = ({
           ? 'bg-[#FFDAD6] border-[#6E0009] shadow-faq-card'
           : 'bg-white border-[#E3BEBA] hover:bg-[#FFDAD6] hover:border-[#6E0009] hover:shadow-faq-card'
         }`}
-      onClick={handleClick}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerLeave={handlePointerLeave}
-      onContextMenu={(e) => {
-        if (isLongPressRef.current || isSelectionMode) {
-          e.preventDefault();
-        }
-      }}
+      {...handlers}
     >
       {isList ? (
         <>
