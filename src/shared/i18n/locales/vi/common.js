@@ -59,6 +59,7 @@ export default {
     schedule: "Lịch giảng dạy",
     teachingTasks: "Công việc giảng dạy",
     myLearning: "Góc học tập",
+    manageMaterials: "Quản lý tài liệu",
     exploreCourses: "Khám phá khóa học",
     messages: "Tin nhắn",
     settings: "Cài đặt",
