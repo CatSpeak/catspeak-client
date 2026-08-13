@@ -59,7 +59,7 @@ const normalizePath = (path) => {
 }
 
 const getActiveDockSection = (pathname) => {
-  if (pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")) return "settings"
+  if (pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing") || pathname.startsWith("/refunds")) return "settings"
   if (pathname.includes("/cat-speak")) return "catSpeak"
   if (pathname.includes("/workspace")) return "workspace"
   if (pathname.includes("/profile")) return "profile"
@@ -117,12 +117,12 @@ const DesktopSidebar = () => {
   )
   const unreadChatCount = totalUnreadCountServer || totalUnreadCountRedux || 0
 
-  const isSettingsPage = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")
+  const isSettingsPage = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing") || pathname.startsWith("/refunds")
 
   // Record last selected sublink on route change
   useEffect(() => {
     const cleanPath = normalizePath(pathname)
-    if (pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")) {
+    if (pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing") || pathname.startsWith("/refunds")) {
       setLastSublink("settings", cleanPath)
     } else if (pathname.includes("/cat-speak")) {
       setLastSublink("catSpeak", cleanPath)

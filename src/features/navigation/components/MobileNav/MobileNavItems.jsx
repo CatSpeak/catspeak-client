@@ -52,7 +52,7 @@ const MobileNavItems = ({ isMobileOpen, setIsMobileOpen, isHorizontal = false })
   const userId = user?.accountId || user?.id || ""
 
   // Sync drilldown state when drawer opens or when navigating
-  const isSettings = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing")
+  const isSettings = pathname.startsWith("/setting") || pathname.startsWith("/pricing") || pathname.startsWith("/billing") || pathname.startsWith("/refunds")
 
   useEffect(() => {
     const activeLinks = isSettings ? settingNavLinks : navLinks

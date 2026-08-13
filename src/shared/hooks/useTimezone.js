@@ -49,20 +49,13 @@ export const useTimezone = () => {
       locale,
     );
 
-  /** Format to date and time string e.g. "09/08/2026, 17:15" */
-  const formatDateTime = (date) =>
-    formatInTimeZone(
-      date,
-      userTimeZone,
-      {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      },
-      locale,
-    );
+  /** Format to date and time string e.g. "12/08/2026, 22:21" */
+  const formatDateTime = (date) => {
+    const d = formatDate(date);
+    if (!d) return "";
+    const t = formatTime(date);
+    return `${d}, ${t}`;
+  };
 
   /** Format relative time e.g. "Just now", "5m", "2h" */
   const formatRelative = (date) =>

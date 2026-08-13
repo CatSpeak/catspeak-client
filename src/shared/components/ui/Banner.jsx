@@ -57,9 +57,11 @@ const Banner = ({
       )}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         {title && (
-          <div className="font-semibold leading-none mb-1">{title}</div>
+          <div className={`font-semibold leading-none ${children ? "mb-1" : ""}`}>
+            {title}
+          </div>
         )}
-        <div className="leading-snug">{children}</div>
+        {children ? <div className="leading-snug">{children}</div> : null}
       </div>
       {action &&
         (action.to ? (

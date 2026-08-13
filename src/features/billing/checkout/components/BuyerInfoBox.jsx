@@ -19,7 +19,7 @@ const BuyerInfoBox = ({
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-            {t.billing?.checkout?.fullName || "—"}
+            {t.billing?.checkout?.fullName || "Họ và tên"}
           </label>
           <div className="relative">
             <input
@@ -38,7 +38,7 @@ const BuyerInfoBox = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-              {t.billing?.checkout?.email || "—"}
+              {t.billing?.checkout?.email || "Email"}
             </label>
             <div className="relative">
               <input
@@ -56,7 +56,7 @@ const BuyerInfoBox = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-              {t.billing?.checkout?.phone || "—"}
+              {t.billing?.checkout?.phone || "Số điện thoại"}
             </label>
             <div className="relative">
               <input
