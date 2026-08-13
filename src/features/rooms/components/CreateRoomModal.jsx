@@ -22,7 +22,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const { data: profileResponse } = useGetUserProfileQuery(undefined, {
     skip: !isAuthenticated,
   })
-  const userTier = profileResponse?.data?.tier?.toLowerCase()
+  const userTier = profileResponse?.tier?.toLowerCase()
   const isPro = userTier === "pro"
 
   const [mode, setMode] = useState(initialMode)
@@ -33,8 +33,8 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   // Group Room Form Hook
   const groupForm = useCreateRoomForm()
 
-  const { resetForm: resetCustomForm } = customForm
   const { resetForm: resetGroupForm } = groupForm
+  const { resetForm: resetCustomForm } = customForm
 
   useEffect(() => {
     if (open) {
@@ -73,7 +73,9 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const isCreating =
     mode === "custom" ? customForm.isCreating : groupForm.isCreating
   const isCreateDisabled =
-    isCreating || activeForm.isCreateDisabled || (mode === "custom" && customForm.isQuotaFull)
+    isCreating ||
+    activeForm.isCreateDisabled ||
+    (mode === "custom" && customForm.isQuotaFull)
 
   const handleCreateSubmit = () => {
     if (mode === "custom") {
@@ -140,7 +142,11 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
           handleTopicChange={activeForm.handleTopicChange}
           isQuotaFull={customForm.isQuotaFull}
           selectedLanguage={activeForm.selectedLanguage}
-          nameError={activeForm.nameError ? t.rooms?.createRoom?.nameRequired || activeForm.nameError : ""}
+          nameError={
+            activeForm.nameError
+              ? t.rooms?.createRoom?.nameRequired || activeForm.nameError
+              : ""
+          }
           passwordError={activeForm.passwordError}
           t={t}
         />
