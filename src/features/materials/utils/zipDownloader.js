@@ -25,25 +25,20 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
       ).unwrap();
       const rawTree = treeResult.data || treeResult || [];
 
-      const flattenFolders = (nodes) => {
+      const flattenFolders = (nodes, parentId = null) => {
         let flat = [];
         for (const node of nodes) {
-          flat.push(node);
+          const id = node.folderId || node.id;
+          const nodeWithParentId = { ...node, parentId: node.parentId || parentId };
+          flat.push(nodeWithParentId);
           const children = node.subFolders || node.children || [];
           if (children.length > 0) {
-            flat = flat.concat(flattenFolders(children));
+            flat = flat.concat(flattenFolders(children, id));
           }
         }
         return flat;
       };
       allFolders = flattenFolders(rawTree);
-
-      // Fetch all files
-      const materialsResult = await store.dispatch(
-        materialApi.endpoints.getPersonalMaterials.initiate()
-      ).unwrap();
-      const rawData = materialsResult.data || materialsResult || {};
-      allFiles = Array.isArray(rawData.materials) ? rawData.materials : (Array.isArray(rawData) ? rawData : []);
     }
 
     // Map folder parent-child relationships for quick lookup
@@ -64,10 +59,41 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
       return false;
     };
 
+    const targetFolderId = folder.id || folder.folderId;
+
+    if (!isPublicProfile) {
+      // Get all folder IDs that are descendants of the target folder
+      const descendantFolders = allFolders.filter(f => isDescendant(f.folderId || f.id, targetFolderId));
+
+      // Include the target folder itself if it's not in the descendants
+      if (!descendantFolders.find(f => String(f.folderId || f.id) === String(targetFolderId))) {
+        descendantFolders.push(folder);
+      }
+
+      // Fetch files for all these folders concurrently
+      const fetchPromises = descendantFolders.map(async (f) => {
+        const id = f.folderId || f.id;
+        try {
+          const res = await store.dispatch(
+            materialApi.endpoints.getPersonalMaterials.initiate({ folderId: id })
+          ).unwrap();
+          const rawData = res.data || res || {};
+          const files = Array.isArray(rawData.materials) ? rawData.materials : (Array.isArray(rawData) ? rawData : []);
+          return files;
+        } catch (e) {
+          console.error(`Failed to fetch materials for folder ${id}`, e);
+          return [];
+        }
+      });
+
+      const filesArrays = await Promise.all(fetchPromises);
+      allFiles = filesArrays.flat();
+    }
+
     // Find all files that belong to this folder or its subfolders
     const filesToDownload = allFiles.filter(file => {
       const parentFolderId = file.folderId;
-      return isDescendant(parentFolderId, folder.id || folder.folderId);
+      return isDescendant(parentFolderId, targetFolderId);
     });
 
     if (filesToDownload.length === 0) {
@@ -99,7 +125,7 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
         if (!response.ok) throw new Error('Network error');
         const blob = await response.blob();
 
-        const relativePath = getRelativePath(file.folderId, folder.id || folder.folderId);
+        const relativePath = getRelativePath(file.folderId, targetFolderId);
         const fullPath = relativePath ? `${relativePath}/${file.fileName || file.name}` : (file.fileName || file.name);
 
         zip.file(fullPath, blob);
