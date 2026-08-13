@@ -356,10 +356,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      toast.success("Tải file mẫu thành công!");
+      toast.success(ce.toastTemplateDownloaded || "Tải file mẫu thành công!");
     } catch (err) {
       console.error(err);
-      toast.error("Tải file mẫu thất bại.");
+      toast.error(ce.toastTemplateDownloadFailed || "Tải file mẫu thất bại.");
     }
   };
 
@@ -369,7 +369,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     const targetFile = files[0];
     if (files.length > 1) {
       toast.error(
-        "Chỉ hỗ trợ tải lên 1 file mỗi lần. Hệ thống đã chọn file đầu tiên.",
+        ce.toastMultipleFilesSelected || "Chỉ hỗ trợ tải lên 1 file mỗi lần. Hệ thống đã chọn file đầu tiên.",
       );
     }
 
@@ -381,7 +381,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       if (!title?.trim()) {
         // ← THÊM LẠI dòng này!
         setIsImportingMode(false);
-        toast.error("Vui lòng nhập tên bài kiểm tra trước khi import file.");
+        toast.error(ce.toastEnterTitleBeforeImport || "Vui lòng nhập tên bài kiểm tra trước khi import file.");
         return;
       }
       try {
@@ -389,7 +389,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         targetQuizId = persistedQuiz?.quizId;
       } catch (error) {
         setIsImportingMode(false);
-        toast.error("Không thể tự động tạo bài kiểm tra. Vui lòng thử lại.");
+        toast.error(ce.toastAutoCreateFailed || "Không thể tự động tạo bài kiểm tra. Vui lòng thử lại.");
         return;
       }
     }
@@ -398,7 +398,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     formData.append("file", file);
 
     try {
-      toast.loading("Đang trích xuất câu hỏi từ file...", {
+      toast.loading(ce.toastExtractingQuestions || "Đang trích xuất câu hỏi từ file...", {
         id: "import-toast",
       });
       const response = await importTeacherQuestionsPreview({
@@ -409,7 +409,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
       const parsedQuestions = response.questions || [];
       if (parsedQuestions.length === 0) {
-        toast.error("Không tìm thấy câu hỏi hợp lệ trong file.", {
+        toast.error(ce.toastNoValidQuestions || "Không tìm thấy câu hỏi hợp lệ trong file.", {
           id: "import-toast",
         });
         return;
@@ -465,7 +465,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         );
       }
       toast.success(
-        `Đã trích xuất ${localQuestions.length} câu hỏi thành công! Bạn có thể chỉnh sửa trước khi lưu.`,
+        (ce.toastExtractSuccess || "Đã trích xuất {{count}} câu hỏi thành công! Bạn có thể chỉnh sửa trước khi lưu.").replace("{{count}}", localQuestions.length),
         { id: "import-toast" },
       );
     } catch (err) {
@@ -475,7 +475,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       setIsImportingMode(false);
       console.error(err);
       toast.error(
-        err?.data?.error || err?.data?.message || "Trích xuất file thất bại.",
+        err?.data?.error || err?.data?.message || ce.toastExtractFailed || "Trích xuất file thất bại.",
         { id: "import-toast" },
       );
     }
@@ -491,7 +491,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
   const handleRemoveImportedFile = () => {
     setImportedFileName(null);
-    toast.success("Đã xóa file đã tải lên. Bạn có thể chọn file mới.");
+    toast.success(ce.toastFileRemoved || "Đã xóa file đã tải lên. Bạn có thể chọn file mới.");
   };
 
   // Question management handlers
@@ -1768,8 +1768,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       {importedFileName}
                     </h3>
                     <p className="text-xs text-green-700 mt-0.5">
-                      Đã trích xuất câu hỏi thành công — có thể chỉnh sửa trực
-                      tiếp bên dưới.
+                      {ce.extractedSuccessDesc || "Đã trích xuất câu hỏi thành công — có thể chỉnh sửa trực tiếp bên dưới."}
                     </p>
                   </div>
                 </div>
@@ -1792,7 +1791,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       <polyline points="17 8 12 3 7 8" />
                       <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    Upload lại
+                    {ce.reupload || "Upload lại"}
                   </button>
                 </div>
               </div>
@@ -1810,7 +1809,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   if (!files || files.length === 0) return;
                   if (files.length > 1) {
                     toast.error(
-                      "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng kéo thả 1 file duy nhất.",
+                      ce.uploadSingleFileOnlyDragDrop || "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng kéo thả 1 file duy nhất.",
                     );
                     return;
                   }
@@ -1839,10 +1838,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   </svg>
                 </div>
                 <h3 className="text-base font-extrabold text-gray-800">
-                  Nhập câu hỏi từ file Excel
+                  {ce.importFromExcel || "Nhập câu hỏi từ file Excel"}
                 </h3>
                 <p className="text-xs text-gray-500 max-w-sm mt-1">
-                  Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi.
+                  {ce.uploadExcelDesc || "Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi."}
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                   <label className="flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs">
@@ -1857,7 +1856,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                     >
                       <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                     </svg>
-                    Chọn tệp
+                    {ce.chooseFile || "Chọn tệp"}
                     <input
                       type="file"
                       accept=".xlsx"
@@ -1866,7 +1865,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       onChange={(e) => {
                         if (e.target.files?.length > 1) {
                           toast.error(
-                            "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng chọn lại 1 file duy nhất.",
+                            ce.uploadSingleFileOnlySelect || "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng chọn lại 1 file duy nhất.",
                           );
                           e.target.value = "";
                           return;
@@ -1897,13 +1896,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       <polyline points="7 10 12 15 17 10" />
                       <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
-                    Tải file mẫu
+                    {ce.downloadTemplate || "Tải file mẫu"}
                   </button>
                 </div>
                 <div className="text-[11px] text-gray-400 mt-3 leading-relaxed">
-                  Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB
+                  {ce.supportedFormat || "Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB"}
                   <br />
-                  hoặc kéo thả tệp vào đây
+                  {ce.orDragDrop || "hoặc kéo thả tệp vào đây"}
                 </div>
               </div>
             )}
