@@ -8,6 +8,7 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import FilePreview from '@/shared/components/ui/FilePreview';
 import { useLanguage } from '@/shared/context/LanguageContext';
 import FileDetailModal from './FileDetailModal';
+import SaveSharedMaterialModal from './SaveSharedMaterialModal';
 import { useRecordMaterialDownloadMutation, useRecordMaterialViewMutation } from '@/store/api/materialApi';
 import dayjs from 'dayjs';
 
@@ -23,6 +24,7 @@ const formatSize = (bytes) => {
 const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove }) => {
   const { t } = useLanguage();
   const [showMobileDetails, setShowMobileDetails] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [recordDownload] = useRecordMaterialDownloadMutation();
   const [recordView] = useRecordMaterialViewMutation();
 
@@ -75,8 +77,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
   };
 
   const handleSave = () => {
-    // Save functionality UI only for now
-    alert("Chức năng lưu đang được phát triển.");
+    setIsSaveModalOpen(true);
   };
 
   // Mock folder data for UI purpose
@@ -293,6 +294,15 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
 
         </div>
       </div>
+
+      <SaveSharedMaterialModal
+        open={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        item={item}
+        onSuccess={() => {
+          setIsSaveModalOpen(false);
+        }}
+      />
     </Modal>
   );
 };

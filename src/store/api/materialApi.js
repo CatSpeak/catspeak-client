@@ -243,6 +243,26 @@ export const materialApi = baseApi.injectEndpoints({
       ],
     }),
 
+    // Copy public materials to personal workspace
+    copyPublicMaterials: builder.mutation({
+      query: (data) => ({
+        url: `/personal-materials/public/materials/copy`,
+        method: "POST",
+        body: data, // { materialIds: [], targetFolderId: 0 }
+      }),
+      invalidatesTags: ["PersonalMaterials"],
+    }),
+
+    // Copy public folders to personal workspace
+    copyPublicFolders: builder.mutation({
+      query: (data) => ({
+        url: `/personal-materials/public/folders/copy`,
+        method: "POST",
+        body: data, // { folderIds: [], targetFolderId: 0 }
+      }),
+      invalidatesTags: ["PersonalMaterials", "FolderTree"],
+    }),
+
     //  Record a download for a public material
     recordMaterialDownload: builder.mutation({
       query: (id) => ({
@@ -274,6 +294,8 @@ export const {
   useGetPublicMaterialByIdQuery,
   useRecordMaterialViewMutation,
   useRecordMaterialDownloadMutation,
+  useCopyPublicMaterialsMutation,
+  useCopyPublicFoldersMutation,
   useRenameMaterialMutation,
   useRenameFolderMutation,
   useMoveMaterialMutation,

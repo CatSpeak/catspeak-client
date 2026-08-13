@@ -20,7 +20,8 @@ const ProfileFolderItem = ({
   onDownload,
   isSelected,
   isSelectionMode,
-  onToggleSelect
+  onToggleSelect,
+  onBookmark
 }) => {
   const { t } = useLanguage();
   const timerRef = useRef(null);
@@ -80,6 +81,7 @@ const ProfileFolderItem = ({
         if (val === 'rename' && onRename) onRename();
         if (val === 'move' && onMove) onMove();
         if (val === 'delete' && onDelete) onDelete();
+        if (val === 'bookmark' && onBookmark) onBookmark();
       }}
       options={
         isOwnProfile
@@ -97,6 +99,7 @@ const ProfileFolderItem = ({
           : [
             { value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> },
             { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
+            { value: 'bookmark', label: t.materials.bookmark, icon: <Bookmark className="w-4 h-4" /> }
           ]
       }
       trigger={(isOpen, selectedOption, toggleDropdown) => (

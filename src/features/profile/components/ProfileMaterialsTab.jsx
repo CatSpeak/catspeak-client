@@ -20,6 +20,7 @@ import MoveMaterialModal from '../../materials/components/teaching-material/Move
 import RenameMaterialModal from '../../materials/components/teaching-material/RenameMaterialModal';
 import BulkActionBar from '../../materials/components/teaching-material/BulkActionBar';
 import FilePreviewModal from '@/shared/components/ui/FilePreviewModal';
+import SaveSharedMaterialModal from '../../materials/components/teaching-material/SaveSharedMaterialModal';
 import { useLanguage } from '@/shared/context/LanguageContext';
 import { downloadFolderAsZip } from '@/features/materials/utils/zipDownloader';
 
@@ -52,6 +53,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const [isPublicMaterialModalOpen, setIsPublicMaterialModalOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isSaveSharedModalOpen, setIsSaveSharedModalOpen] = useState(false);
 
   // Selection state
   const [selectedItem, setSelectedItem] = useState(null);
@@ -363,6 +365,10 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                         setSelectedItem(folder);
                         setIsMoveModalOpen(true);
                       }}
+                      onBookmark={() => {
+                        setSelectedItem(folder);
+                        setIsSaveSharedModalOpen(true);
+                      }}
                     />
                   );
                 })}
@@ -418,6 +424,10 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                         setIsFileDetailOpen(true);
                       }}
                       onDownload={() => handleDownloadFile(file)}
+                      onBookmark={() => {
+                        setSelectedItem(file);
+                        setIsSaveSharedModalOpen(true);
+                      }}
                     />
                   );
                 })}
@@ -533,6 +543,15 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
           />
         </>
       )}
+
+      <SaveSharedMaterialModal
+        open={isSaveSharedModalOpen}
+        onClose={() => setIsSaveSharedModalOpen(false)}
+        item={selectedItem}
+        onSuccess={() => {
+          setIsSaveSharedModalOpen(false);
+        }}
+      />
 
       <PublicMaterialModal
         open={isPublicMaterialModalOpen}
