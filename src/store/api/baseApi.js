@@ -400,6 +400,7 @@ export const baseApi = createApi({
     "Analytics",
     "InstructorBankAccounts",
     "RefundHistory",
+    "PersonalMaterials",
   ],
   endpoints: () => ({}),
 })

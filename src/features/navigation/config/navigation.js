@@ -17,6 +17,7 @@ import {
   BarChart,
   CalendarDays,
   Compass,
+  Folder,
 } from "lucide-react"
 
 export const navSections = [
@@ -77,6 +78,7 @@ export const navSections = [
           { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
           { key: "recordings", path: "/workspace/recordings", icon: Mic },
           { key: "workspaceReels", path: "/workspace/reels", icon: Film },
+          { key: "manageMaterials", path: "/workspace/materials", icon: Folder },
         ],
       },
     ],
@@ -125,6 +127,7 @@ export const navLinks = [
           { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
           { key: "recordings", path: "/workspace/recordings", icon: Mic },
           { key: "reels", path: "/workspace/reels", icon: Film },
+          { key: "manageMaterials", path: "/workspace/materials", icon: Folder },
         ],
       },
     ],

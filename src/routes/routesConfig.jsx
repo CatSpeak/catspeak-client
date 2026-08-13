@@ -150,6 +150,12 @@ const WorkspaceRoomsPage = lazy(
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),
 );
+const TeachingMaterialPage = lazy(
+  () => import("@/features/materials/pages/TeachingMaterialPage"),
+);
+const SharedMaterialRedirectPage = lazy(
+  () => import("@/features/materials/pages/SharedMaterialRedirectPage"),
+);
 const StudentTakeQuizView = lazy(
   () => import("@/features/courses/components/grading/StudentTakeQuizView"),
 );
@@ -176,6 +182,14 @@ const routesConfig = [
           {
             path: "verify-email",
             element: <VerifyEmailPage />,
+          },
+          {
+            path: "shared-material/:token",
+            element: (
+              <LazyRoute>
+                <SharedMaterialRedirectPage />
+              </LazyRoute>
+            ),
           },
           {
             path: "checkout",
@@ -449,6 +463,22 @@ const routesConfig = [
                       <WorkspaceCalendarPage />
                     </LazyRoute>
                   </RoleGuard>
+                ),
+              },
+              {
+                path: "materials",
+                element: (
+                  <LazyRoute>
+                    <TeachingMaterialPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "materials/:folderId",
+                element: (
+                  <LazyRoute>
+                    <TeachingMaterialPage />
+                  </LazyRoute>
                 ),
               },
               {
