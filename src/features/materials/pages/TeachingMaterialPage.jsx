@@ -303,8 +303,8 @@ const TeachingMaterialPage = () => {
       />
 
       {/* Header actions */}
-      {/* 
-      <div className="flex justify-end gap-3 mb-4">
+
+      <div className="flex justify-end gap-3 mb-4 lg:hidden">
         <PillButton
           variant='outline'
           roundedClass='rounded-xl'
@@ -323,8 +323,8 @@ const TeachingMaterialPage = () => {
         >
           {t.materials.uploadMaterial}
         </PillButton>
-      </div> 
-      */}
+      </div>
+
 
       {/* Search and Filters */}
       <div className="flex items-center justify-between mb-4 flex-col md:flex-row gap-4">
