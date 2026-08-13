@@ -8,7 +8,7 @@ import ProfileFolderItem from './ProfileFolderItem';
 import ProfileFileItem from './ProfileFileItem';
 import { EmptyState, LoadingSpinner } from '@/shared/components/ui/indicators';
 import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation, useGetMaterialByShareTokenQuery, useGetFolderByShareTokenQuery, useGetPublicMaterialsByUserIdQuery } from '@/store/api/materialApi';
-import dayjs from 'dayjs';
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -32,14 +32,12 @@ const formatSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
-const formatDate = (dateString) => {
-  if (!dateString) return '';
-  return dayjs(dateString).format('DD/MM/YYYY');
-};
+
 
 const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { formatDate } = useTimezone();
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewLayout, setViewLayout] = useState('grid');
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,12 +94,12 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   }, [sharedMaterialToken, sharedMaterialData, sharedFolderData, isMaterialError, isFolderError, isMaterialFetching, isFolderFetching, materialError, folderError, searchParams, setSearchParams, navigate, t]);
 
   // Fetch API for owner
-  const { data: materialsData, isLoading: isLoadingMaterials } = useGetPersonalMaterialsQuery(undefined, { skip: !isOwnProfile });
+  const { data: materialsData, isLoading: isLoadingMaterials } = useGetPersonalMaterialsQuery({ keyword: searchQuery }, { skip: !isOwnProfile });
   const { data: treeData, isLoading: isLoadingTree } = useGetFolderTreeQuery(undefined, { skip: !isOwnProfile });
 
   // Fetch API for guest
   const { data: publicMaterialsData, isLoading: isLoadingPublicMaterials } = useGetPublicMaterialsByUserIdQuery(
-    { targetAccountId },
+    { targetAccountId, keyword: searchQuery },
     { skip: isOwnProfile || !targetAccountId }
   );
 
@@ -124,18 +122,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       const flattenFolders = (nodes) => {
         let flat = [];
         for (const node of nodes) {
-          const id = node.folderId || node.id;
-          const meta = metaMap[id] || {};
-          flat.push({
-            id,
-            name: node.folderName || node.name || t.materials.untitledFolder,
-            itemsCount: meta.materialCount || node.materialCount || 0,
-            updatedAt: formatDate(meta.updatedAt || node.updatedAt),
-            isPublic: meta.isPublic !== undefined ? meta.isPublic : false,
-            publicShareUrl: meta.publicShareUrl || node.publicShareUrl,
-            shareToken: meta.shareToken || node.shareToken,
-            isBookmarked: meta.isBookmarked || node.isBookmarked || false,
-          });
+          flat.push(node);
           const children = node.subFolders || node.children || [];
           if (children.length > 0) {
             flat = flat.concat(flattenFolders(children));
@@ -143,7 +130,23 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         }
         return flat;
       };
-      return flattenFolders(rawFoldersTree);
+
+      const nodesToProcess = searchQuery.trim() ? flattenFolders(rawFoldersTree) : rawFoldersTree;
+
+      return nodesToProcess.map(node => {
+        const id = node.folderId || node.id;
+        const meta = metaMap[id] || {};
+        return {
+          id,
+          name: node.folderName || node.name || t.materials.untitledFolder,
+          itemsCount: meta.materialCount || node.materialCount || 0,
+          updatedAt: formatDate(meta.updatedAt || node.updatedAt),
+          isPublic: meta.isPublic !== undefined ? meta.isPublic : false,
+          publicShareUrl: meta.publicShareUrl || node.publicShareUrl,
+          shareToken: meta.shareToken || node.shareToken,
+          isBookmarked: meta.isBookmarked || node.isBookmarked || false,
+        };
+      });
     } else {
       const folders = Array.isArray(responseData.folders) ? responseData.folders : [];
       return folders.map(f => ({
@@ -157,7 +160,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         isBookmarked: f.isBookmarked || false,
       }));
     }
-  }, [responseData.folders, rawFoldersTree, isOwnProfile, t.materials.untitledFolder]);
+  }, [responseData.folders, rawFoldersTree, isOwnProfile, t.materials.untitledFolder, formatDate, searchQuery]);
 
   const baseFiles = useMemo(() => {
     let rawFiles = Array.isArray(responseData.materials) ? responseData.materials.map(file => ({ ...file, id: file.materialId || file.id })) : [];
@@ -171,7 +174,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       fileUrl: file.fileUrl,
       ...file
     }));
-  }, [responseData.materials, t.materials.untitledFile]);
+  }, [responseData.materials, t.materials.untitledFile, formatDate]);
 
   const materials = useMemo(() => [...baseFolders, ...baseFiles], [baseFolders, baseFiles]);
 

@@ -17,7 +17,7 @@ import SearchInput from '@/shared/components/ui/inputs/SearchInput';
 import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useGetPersonalMaterialsQuery, useGetBookmarkedMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery, useBookmarkFolderMutation, useBookmarkMaterialMutation } from '@/store/api/materialApi';
-import dayjs from 'dayjs';
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import { Breadcrumb } from '@/shared/components/ui/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -27,6 +27,7 @@ import toast from 'react-hot-toast';
 
 const TeachingMaterialPage = () => {
   const { t } = useLanguage();
+  const { formatDate } = useTimezone();
   const navigate = useNavigate();
   const { folderId } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
@@ -442,7 +443,7 @@ const TeachingMaterialPage = () => {
                     key={folder.id || folder.folderId}
                     title={folder.name || folder.folderName}
                     totalItems={t.materials.itemsCount.replace('{{count}}', (folder.subFolderCount || 0) + (folder.materialCount || 0))}
-                    updatedAt={folder.updatedAt ? t.materials.updated.replace('{{date}}', dayjs(folder.updatedAt).format('DD/MM/YYYY')) : ''}
+                    updatedAt={folder.updatedAt ? t.materials.updated.replace('{{date}}', formatDate(folder.updatedAt)) : ''}
                     isSelected={selectedItems.some(i => (i.id || i.folderId) === (folder.id || folder.folderId) && i._type === 'folder')}
                     isSelectionMode={selectedItems.length > 0}
                     onToggleSelect={() => handleToggleSelect(folder, 'folder')}
@@ -482,7 +483,7 @@ const TeachingMaterialPage = () => {
                     key={file.id}
                     title={file.fileName || file.name}
                     size={formatSize(file.fileSize || file.size || file.sizeBytes)}
-                    date={file.updatedAt ? dayjs(file.updatedAt).format('DD/MM/YYYY') : ''}
+                    date={file.updatedAt ? formatDate(file.updatedAt) : ''}
                     isPublic={file.isPublic}
                     isBookmarked={file.isBookmarked}
                     type={file.fileType || 'file'}

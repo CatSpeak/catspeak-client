@@ -8,7 +8,7 @@ import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation, u
 import FilePreview from '@/shared/components/ui/FilePreview';
 import { useLanguage } from '@/shared/context/LanguageContext';
 
-import dayjs from 'dayjs';
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import toast from 'react-hot-toast';
 
 const formatSize = (bytes) => {
@@ -22,6 +22,7 @@ const formatSize = (bytes) => {
 
 const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
   const { t } = useLanguage();
+  const { formatDate } = useTimezone();
   const [isPublic, setIsPublic] = useState(item?.isPublic ?? true);
   const [allowDownload, setAllowDownload] = useState(item?.allowDownload ?? true);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
@@ -173,7 +174,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-[#5B403E]">{t.materials.uploadDate}</span>
-                <span className="font-medium text-[#1A1C1C]">{item.uploadedAt || item.createdAt ? dayjs(item.uploadedAt || item.createdAt).format('DD/MM/YYYY') : 'N/A'}</span>
+                <span className="font-medium text-[#1A1C1C]">{item.uploadedAt || item.createdAt ? formatDate(item.uploadedAt || item.createdAt) : 'N/A'}</span>
               </div>
             </div>
           </div>
