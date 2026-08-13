@@ -1,9 +1,11 @@
-import React from "react"
+import React, { useState } from "react"
 import { useSelector } from "react-redux"
 import toast from "react-hot-toast"
-import { UserPlus, UserCheck, Clock } from "lucide-react"
+import { UserPlus, UserCheck, Clock, UserX, EllipsisVertical } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PillButton from "./PillButton"
+import Popover from "@/shared/components/ui/Popover"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import {
   useGetConnectionStatusQuery,
   useSendFriendRequestMutation,
@@ -24,6 +26,7 @@ const RequestButton = ({
   const { t: contextT } = useLanguage()
   const t = propT || contextT || {}
   const currentUser = useSelector(selectCurrentUser)
+  const [loadingAction, setLoadingAction] = useState(null)
 
   const currentUserId =
     currentUser?.accountId ?? currentUser?.id ?? currentUser?.userId
@@ -31,15 +34,20 @@ const RequestButton = ({
   const isOwnAccount =
     currentUserId != null && targetId != null && Number(currentUserId) === targetId
 
-  const shouldSkipQuery =
-    !targetId ||
-    isOwnAccount ||
-    Boolean(
-      relationship &&
-        (relationship.isFriend !== undefined ||
-          relationship.friendshipStatus !== undefined ||
-          relationship.status !== undefined),
-    )
+  const hasExplicitRelationship = Boolean(
+    relationship &&
+      (relationship.isFriend !== undefined ||
+        relationship.friendshipStatus !== undefined ||
+        relationship.isFollowing !== undefined ||
+        relationship.isIncomingRequest !== undefined ||
+        relationship.isOutgoingRequest !== undefined ||
+        relationship.isReceiver !== undefined ||
+        relationship.isSender !== undefined ||
+        relationship.requesterId !== undefined ||
+        relationship.addresseeId !== undefined),
+  )
+
+  const shouldSkipQuery = !targetId || isOwnAccount || hasExplicitRelationship
 
   const { data: queriedStatusResponse, isLoading: isQueryLoading } =
     useGetConnectionStatusQuery(targetId, {
@@ -67,35 +75,76 @@ const RequestButton = ({
     rawStatus?.isFriend === true ||
       rawStatus?.friendshipStatus === 2 ||
       rawStatus?.friendshipStatus === "Accepted" ||
-      rawStatus?.status === "Accepted",
+      rawStatus?.status === "Accepted" ||
+      rawStatus?.status === 2,
   )
 
-  const isPendingOutgoing = Boolean(
+  const hasPendingStatus = Boolean(
     !isFriend &&
       (rawStatus?.isPending === true ||
-        rawStatus?.isRequested === true ||
-        rawStatus?.isOutgoingRequest === true ||
-        rawStatus?.isPendingRequest === true ||
-        (rawStatus?.status === "Pending" &&
-          (rawStatus?.isSender || !rawStatus?.isReceiver)) ||
         rawStatus?.friendshipStatus === 1 ||
-        rawStatus?.friendshipStatus === "Pending"),
+        rawStatus?.friendshipStatus === "Pending" ||
+        rawStatus?.status === "Pending" ||
+        rawStatus?.status === 1 ||
+        rawStatus?.isOutgoingRequest === true ||
+        rawStatus?.isIncomingRequest === true ||
+        rawStatus?.isRequested === true ||
+        rawStatus?.isPendingRequest === true ||
+        rawStatus?.isSender === true ||
+        rawStatus?.isReceiver === true),
   )
 
+  const requesterId =
+    rawStatus?.requesterId ??
+    rawStatus?.requester?.accountId ??
+    rawStatus?.requester?.id ??
+    rawStatus?.senderId ??
+    rawStatus?.sender?.accountId ??
+    rawStatus?.sender?.id
+
+  const addresseeId =
+    rawStatus?.addresseeId ??
+    rawStatus?.addressee?.accountId ??
+    rawStatus?.addressee?.id ??
+    rawStatus?.receiverId ??
+    rawStatus?.receiver?.accountId ??
+    rawStatus?.receiver?.id
+
+  // Incoming: Current user B received request from target user A (B viewing A)
   const isIncomingRequest = Boolean(
     !isFriend &&
-      !isPendingOutgoing &&
+      hasPendingStatus &&
       (rawStatus?.isIncomingRequest === true ||
-        (rawStatus?.status === "Pending" && rawStatus?.isReceiver === true)),
+        rawStatus?.isReceiver === true ||
+        rawStatus?.isReceived === true ||
+        rawStatus?.isPendingRequest === true ||
+        (requesterId != null && targetId != null && Number(requesterId) === targetId) ||
+        (addresseeId != null && currentUserId != null && Number(addresseeId) === Number(currentUserId))),
   )
 
-  const isActionLoading = isSending || isDeleting || isResponding
+  // Outgoing: Current user A sent request to target user B (A viewing B)
+  const isPendingOutgoing = Boolean(
+    !isFriend &&
+      hasPendingStatus &&
+      !isIncomingRequest &&
+      (rawStatus?.isOutgoingRequest === true ||
+        rawStatus?.isSender === true ||
+        rawStatus?.isRequested === true ||
+        rawStatus?.isSent === true ||
+        (requesterId != null && currentUserId != null && Number(requesterId) === Number(currentUserId)) ||
+        (addresseeId != null && targetId != null && Number(addresseeId) === targetId) ||
+        rawStatus?.isSender !== false),
+  )
+
+  const isActionLoading = isSending || isDeleting || isResponding || Boolean(loadingAction)
 
   const friendshipId =
-    rawStatus?.friendshipId ||
-    rawStatus?.id ||
-    relationship?.friendshipId ||
-    relationship?.id ||
+    rawStatus?.friendshipId ??
+    rawStatus?.friendRequestId ??
+    relationship?.friendshipId ??
+    relationship?.friendRequestId ??
+    rawStatus?.id ??
+    relationship?.id ??
     targetId
 
   const isSmall = size === "sm"
@@ -107,6 +156,7 @@ const RequestButton = ({
   const handleSendFriendRequest = async (e) => {
     e?.stopPropagation?.()
     if (isActionLoading || disabled) return
+    setLoadingAction("send")
     const toastId = "friend-request-action"
 
     try {
@@ -123,12 +173,15 @@ const RequestButton = ({
         { id: toastId },
       )
       console.error(error)
+    } finally {
+      setLoadingAction(null)
     }
   }
 
   const handleCancelFriendRequest = async (e) => {
     e?.stopPropagation?.()
     if (isActionLoading || disabled) return
+    setLoadingAction("cancel")
     const toastId = "friend-request-action"
 
     try {
@@ -144,12 +197,15 @@ const RequestButton = ({
         { id: toastId },
       )
       console.error(error)
+    } finally {
+      setLoadingAction(null)
     }
   }
 
   const handleAcceptFriendRequest = async (e) => {
     e?.stopPropagation?.()
     if (isActionLoading || disabled) return
+    setLoadingAction("accept")
     const toastId = "friend-request-action"
 
     try {
@@ -164,16 +220,50 @@ const RequestButton = ({
       )
     } catch (error) {
       toast.error(
-        t.profile?.friends?.actions?.error || "Có lỗi xảy ra",
+        t.profile?.friends?.actions?.error ||
+          t.profile?.social?.errorOccurred ||
+          "Có lỗi xảy ra",
         { id: toastId },
       )
       console.error(error)
+    } finally {
+      setLoadingAction(null)
+    }
+  }
+
+  const handleDeclineFriendRequest = async (e) => {
+    e?.stopPropagation?.()
+    if (isActionLoading || disabled) return
+    setLoadingAction("decline")
+    const toastId = "friend-request-action"
+
+    try {
+      await respondFriendRequest({
+        friendshipId,
+        action: "decline",
+      }).unwrap()
+      toast.success(
+        t.profile?.friends?.actions?.declineSuccess ||
+          "Đã từ chối kết bạn",
+        { id: toastId },
+      )
+    } catch (error) {
+      toast.error(
+        t.profile?.friends?.actions?.error ||
+          t.profile?.social?.errorOccurred ||
+          "Có lỗi xảy ra",
+        { id: toastId },
+      )
+      console.error(error)
+    } finally {
+      setLoadingAction(null)
     }
   }
 
   const handleUnfriend = async (e) => {
     e?.stopPropagation?.()
     if (isActionLoading || disabled) return
+    setLoadingAction("unfriend")
     const toastId = "friend-request-action"
 
     try {
@@ -188,6 +278,8 @@ const RequestButton = ({
         { id: toastId },
       )
       console.error(error)
+    } finally {
+      setLoadingAction(null)
     }
   }
 
@@ -198,7 +290,7 @@ const RequestButton = ({
         variant="secondary"
         startIcon={<UserCheck size={iconSize} className="text-cath-red-700" />}
         onClick={handleUnfriend}
-        loading={isActionLoading}
+        loading={loadingAction === "unfriend"}
         disabled={disabled || isActionLoading}
         className={`${buttonSizeClass} ${className}`}
         {...props}
@@ -208,14 +300,14 @@ const RequestButton = ({
     )
   }
 
-  // State: Sent request (Pending outgoing)
+  // State: Sent request (Pending outgoing - A viewing B)
   if (isPendingOutgoing) {
     return (
       <PillButton
         variant="secondary"
         startIcon={<Clock size={iconSize} />}
         onClick={handleCancelFriendRequest}
-        loading={isActionLoading}
+        loading={loadingAction === "cancel"}
         disabled={disabled || isActionLoading}
         className={`${buttonSizeClass} ${className}`}
         {...props}
@@ -225,20 +317,83 @@ const RequestButton = ({
     )
   }
 
-  // State: Received request (Pending incoming)
+  // State: Received request (Pending incoming - B viewing A)
   if (isIncomingRequest) {
+    const actionLabel =
+      t.profile?.friends?.actions?.actionButton ||
+      t.common?.actions ||
+      t.profile?.friends?.actions?.title ||
+      "Hành động"
+
     return (
-      <PillButton
-        variant="primary"
-        startIcon={<UserCheck size={iconSize} />}
-        onClick={handleAcceptFriendRequest}
-        loading={isActionLoading}
-        disabled={disabled || isActionLoading}
-        className={`${buttonSizeClass} ${className}`}
-        {...props}
-      >
-        {t.profile?.friends?.actions?.accept || "Chấp nhận"}
-      </PillButton>
+      <div className={`inline-flex items-center gap-2 shrink-0 ${className}`}>
+        {/* Large screens: 2 horizontal buttons side-by-side */}
+        <div className="hidden sm:inline-flex items-center gap-2 shrink-0">
+          <PillButton
+            variant="primary"
+            startIcon={<UserCheck size={iconSize} />}
+            onClick={handleAcceptFriendRequest}
+            loading={loadingAction === "accept"}
+            disabled={disabled || isActionLoading}
+            className={buttonSizeClass}
+            {...props}
+          >
+            {t.profile?.friends?.actions?.accept || "Chấp nhận"}
+          </PillButton>
+          <PillButton
+            variant="secondary"
+            startIcon={<UserX size={iconSize} className="text-red-600" />}
+            onClick={handleDeclineFriendRequest}
+            loading={loadingAction === "decline"}
+            disabled={disabled || isActionLoading}
+            className={buttonSizeClass}
+            {...props}
+          >
+            {t.profile?.friends?.actions?.decline || "Từ chối"}
+          </PillButton>
+        </div>
+
+        {/* Small screens: Single "<EllipsisVertical /> Hành động" button with Popover */}
+        <div className="inline-flex sm:hidden w-full">
+          <Popover
+            placement="bottom-right"
+            triggerClassName="w-full"
+            trigger={
+              <PillButton
+                variant="secondary"
+                startIcon={<EllipsisVertical size={iconSize} />}
+                loading={Boolean(loadingAction)}
+                disabled={disabled || isActionLoading}
+                className={`${buttonSizeClass} w-full`}
+                {...props}
+              >
+                {actionLabel}
+              </PillButton>
+            }
+            content={(close) => (
+              <MenuList className="min-w-[150px] shadow-lg border border-gray-100 py-1">
+                <MenuItem
+                  onClick={(e) => {
+                    close?.()
+                    handleAcceptFriendRequest(e)
+                  }}
+                  icon={<UserCheck size={16} className="text-cath-red-700" />}
+                  label={t.profile?.friends?.actions?.accept || "Chấp nhận"}
+                />
+                <MenuItem
+                  onClick={(e) => {
+                    close?.()
+                    handleDeclineFriendRequest(e)
+                  }}
+                  icon={<UserX size={16} className="text-red-600" />}
+                  label={t.profile?.friends?.actions?.decline || "Từ chối"}
+                  className="text-red-600 hover:text-red-700"
+                />
+              </MenuList>
+            )}
+          />
+        </div>
+      </div>
     )
   }
 
@@ -248,7 +403,7 @@ const RequestButton = ({
       variant="primary"
       startIcon={<UserPlus size={iconSize} />}
       onClick={handleSendFriendRequest}
-      loading={isActionLoading || (isQueryLoading && !relationship)}
+      loading={loadingAction === "send" || (isQueryLoading && !relationship)}
       disabled={disabled || isActionLoading}
       className={`${buttonSizeClass} ${className}`}
       {...props}
