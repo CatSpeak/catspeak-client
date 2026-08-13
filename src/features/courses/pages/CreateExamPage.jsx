@@ -184,7 +184,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isImportingMode, setIsImportingMode] = useState(false);
-
+  const importFileInputRef = useRef(null);
   const routeQuizId = params.quizId || searchParams.get("quizId");
   const [createdQuizId, setCreatedQuizId] = useState(null);
   const effectiveQuizId = routeQuizId || createdQuizId;
@@ -285,6 +285,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [draggableIndex, setDraggableIndex] = useState(null);
   const lastScrollTimeRef = useRef(0);
+  const [importedFileName, setImportedFileName] = useState(null);
 
   // Collapse state
   const [collapsedQuestions, setCollapsedQuestions] = useState({});
@@ -364,6 +365,15 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
   const handleImportFile = async (file) => {
     if (!file) return;
+    const files = file instanceof FileList ? Array.from(file) : [file];
+    const targetFile = files[0];
+    if (files.length > 1) {
+      toast.error(
+        "Chỉ hỗ trợ tải lên 1 file mỗi lần. Hệ thống đã chọn file đầu tiên.",
+      );
+    }
+
+    importFileInputRef.current = null;
 
     let targetQuizId = effectiveQuizId;
     if (!targetQuizId) {
@@ -440,6 +450,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       });
 
       setFormField("questions", (prev) => [...prev, ...localQuestions]);
+      setImportedFileName(file.name);
       setViewMode("edit");
       if (
         !routeQuizId &&
@@ -458,6 +469,9 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         { id: "import-toast" },
       );
     } catch (err) {
+      if (importFileInputRef.current) {
+        importFileInputRef.current.value = "";
+      }
       setIsImportingMode(false);
       console.error(err);
       toast.error(
@@ -465,6 +479,19 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         { id: "import-toast" },
       );
     }
+  };
+
+  const handleReUploadExcel = () => {
+    setImportedFileName(null);
+    // Mở hộp thoại chọn file ngay
+    if (importFileInputRef.current) {
+      importFileInputRef.current.click();
+    }
+  };
+
+  const handleRemoveImportedFile = () => {
+    setImportedFileName(null);
+    toast.success("Đã xóa file đã tải lên. Bạn có thể chọn file mới.");
   };
 
   // Question management handlers
@@ -1715,101 +1742,171 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
           {/* Questions Container */}
           <div className="flex flex-col gap-4">
-            <div
-              className="border-2 border-dashed border-red-200 bg-[#990011]/[0.02] rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] cursor-pointer"
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const files = e.dataTransfer.files;
-                if (files && files[0]) {
+            {importedFileName ? (
+              <div className="border-2 border-green-300 bg-green-50/50 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
+                    <svg
+                      className="w-7 h-7 text-green-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <polyline points="7 15 10.5 18.5 17 12" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <h3
+                      className="text-sm font-extrabold text-gray-800 truncate"
+                      title={importedFileName}
+                    >
+                      {importedFileName}
+                    </h3>
+                    <p className="text-xs text-green-700 mt-0.5">
+                      Đã trích xuất câu hỏi thành công — có thể chỉnh sửa trực
+                      tiếp bên dưới.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleReUploadExcel}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Upload lại
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="border-2 border-dashed border-red-200 bg-[#990011]/[0.02] rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] cursor-pointer"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const files = e.dataTransfer.files;
+                  if (!files || files.length === 0) return;
+                  if (files.length > 1) {
+                    toast.error(
+                      "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng kéo thả 1 file duy nhất.",
+                    );
+                    return;
+                  }
                   handleImportFile(files[0]);
-                }
-              }}
-            >
-              {/* File Icon */}
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-2">
-                <svg
-                  className="w-7 h-7 text-[#990011]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path
-                    d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
-                    fill="#990011"
-                    fillOpacity="0.1"
-                  />
-                  <polyline points="14 2 14 8 20 8" />
-                  <path d="M12 18v-6" />
-                  <polyline points="9 15 12 12 15 15" />
-                </svg>
-              </div>
-              <h3 className="text-base font-extrabold text-gray-800">
-                Nhập câu hỏi từ file Excel
-              </h3>
-              <p className="text-xs text-gray-500 max-w-sm mt-1">
-                Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                <label className="flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs">
+                }}
+              >
+                {/* File Icon */}
+                <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-2">
                   <svg
-                    className="w-4 h-4"
+                    className="w-7 h-7 text-[#990011]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.5"
+                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                    <path
+                      d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
+                      fill="#990011"
+                      fillOpacity="0.1"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <path d="M12 18v-6" />
+                    <polyline points="9 15 12 12 15 15" />
                   </svg>
-                  Chọn tệp
-                  <input
-                    type="file"
-                    accept=".xlsx"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        handleImportFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={handleDownloadTemplate}
-                  disabled={isDownloadingTemplate}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold border border-gray-300 rounded-xl transition-all shadow-xs disabled:opacity-55"
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                </div>
+                <h3 className="text-base font-extrabold text-gray-800">
+                  Nhập câu hỏi từ file Excel
+                </h3>
+                <p className="text-xs text-gray-500 max-w-sm mt-1">
+                  Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+                  <label className="flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs">
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                    </svg>
+                    Chọn tệp
+                    <input
+                      type="file"
+                      accept=".xlsx"
+                      className="hidden"
+                      ref={importFileInputRef}
+                      onChange={(e) => {
+                        if (e.target.files?.length > 1) {
+                          toast.error(
+                            "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng chọn lại 1 file duy nhất.",
+                          );
+                          e.target.value = "";
+                          return;
+                        }
+                        if (e.target.files?.[0]) {
+                          handleImportFile(e.target.files[0]);
+                          e.target.value = "";
+                        }
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    disabled={isDownloadingTemplate}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold border border-gray-300 rounded-xl transition-all shadow-xs disabled:opacity-55"
                   >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Tải file mẫu
-                </button>
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Tải file mẫu
+                  </button>
+                </div>
+                <div className="text-[11px] text-gray-400 mt-3 leading-relaxed">
+                  Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB
+                  <br />
+                  hoặc kéo thả tệp vào đây
+                </div>
               </div>
-              <div className="text-[11px] text-gray-400 mt-3 leading-relaxed">
-                Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB
-                <br />
-                hoặc kéo thả tệp vào đây
-              </div>
-            </div>
+            )}
 
             {questions.map((q, idx) => (
               <div
