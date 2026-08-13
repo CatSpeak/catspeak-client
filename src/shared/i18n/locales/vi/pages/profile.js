@@ -155,10 +155,10 @@ export default {
     videoSizeLimit: "Video phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
   },
   friends: {
-    teacher: "Giáo viên",
+    teacher: "Giảng viên",
     member: "Thành viên",
     subTabs: {
-      teachers: "Giáo viên",
+      teachers: "Giảng viên",
       members: "Thành viên",
     },
     empty: {

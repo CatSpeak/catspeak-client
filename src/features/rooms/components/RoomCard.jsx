@@ -60,6 +60,9 @@ const RoomCard = ({ room }) => {
     (room.currentParticipantCount || 0) >= room.maxParticipants
 
   const isExpired = isRoomExpired(room);
+  if (isExpired) {
+    return null;
+  }
 
   const isPrivate = room.privacy === "Private" || room.isPrivate;
   const hasPassword =

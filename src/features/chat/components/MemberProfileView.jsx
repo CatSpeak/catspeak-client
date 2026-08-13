@@ -28,7 +28,7 @@ const MemberProfileView = ({ member }) => {
 
       <p className="mt-4 text-sm text-[#606060] text-center">
         {member.isTeacher
-          ? (t?.chat?.userPanel?.teacher || "Giáo viên")
+          ? (t?.chat?.userPanel?.teacher || "Giảng viên")
           : (`${t?.chat?.userPanel?.level || "Level"}: ${member.level || t?.chat?.userPanel?.student || "Student"}`)}
       </p>
 

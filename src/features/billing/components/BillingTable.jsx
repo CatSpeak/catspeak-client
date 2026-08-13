@@ -102,7 +102,11 @@ const BillingTable = ({
             <Popover
               placement="bottom-right"
               trigger={
-                <IconButton size="xs" variant="ghost" title={actionsText.title || "Thao tác"}>
+                <IconButton
+                  size="xs"
+                  variant="ghost"
+                  title={actionsText.title || "Thao tác"}
+                >
                   <MoreVertical />
                 </IconButton>
               }

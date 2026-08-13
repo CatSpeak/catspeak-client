@@ -18,7 +18,6 @@ import {
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
 } from "@/store/api/coursesApi"
-import { isRoomExpired } from "@/shared/utils/dateUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   enterCall,
@@ -37,6 +36,7 @@ import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import PasswordScreen from "../components/PasswordScreen"
 import CallEndedScreen from "../components/CallEndedScreen"
 import VideoCallErrorBoundary from "@/shared/components/VideoCallErrorBoundary"
+import { isRoomExpired } from "@/shared/utils/dateUtils"
 
 /**
  * Phases:

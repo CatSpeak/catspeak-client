@@ -102,6 +102,18 @@ const ProfileDropdown = () => {
     navigate("/setting")
   }
 
+  const handleInstructorClick = () => {
+    setIsDesktopExpanded(true)
+    handleCloseMenu()
+    navigate("/setting/instructor")
+  }
+
+  const handleBillingClick = () => {
+    setIsDesktopExpanded(true)
+    handleCloseMenu()
+    navigate("/billing")
+  }
+
   // Click outside to close (desktop only)
   useClickOutside(menuRef, handleCloseMenu, { enabled: isOpen && !isMobile })
 

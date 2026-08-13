@@ -1,16 +1,9 @@
-import React from "react";
-import toast from "react-hot-toast";
-import {
-  MapPin,
-  Edit2,
-  UserPlus,
-  Check,
-  AtSign,
-  Camera,
-} from "lucide-react";
-import Avatar from "@/shared/components/ui/Avatar";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
-import RequestButton from "@/shared/components/ui/buttons/RequestButton";
+import React from "react"
+import toast from "react-hot-toast"
+import { MapPin, Edit2, UserPlus, Check, AtSign } from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import RequestButton from "@/shared/components/ui/buttons/RequestButton"
 import {
   useGetConnectionStatusQuery,
   useFollowUserMutation,
@@ -59,12 +52,12 @@ const SocialProfileHeader = ({
       skip: isOwnProfile || !targetAccountId,
       pollingInterval: 3000,
     },
-  );
+  )
   const status =
-    statusResponse?.data !== undefined ? statusResponse.data : statusResponse;
+    statusResponse?.data !== undefined ? statusResponse.data : statusResponse
 
   const [followUser, { isLoading: isFollowingLoading }] =
-    useFollowUserMutation();
+    useFollowUserMutation()
   const [unfollowUser, { isLoading: isUnfollowingLoading }] =
     useUnfollowUserMutation();
 
@@ -73,7 +66,7 @@ const SocialProfileHeader = ({
   const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
     useGetCurrentBackgroundQuery(undefined, {
       skip: !isOwnProfile,
-    });
+    })
   const fetchedCoverUrl = isOwnProfile
     ? currentBackgroundResponse?.data?.activeBackgroundUrl ||
       currentBackgroundResponse?.activeBackgroundUrl ||
@@ -102,15 +95,15 @@ const SocialProfileHeader = ({
 
     try {
       if (status?.isFollowing) {
-        await unfollowUser(targetAccountId).unwrap();
+        await unfollowUser(targetAccountId).unwrap()
         toast.success(t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi", {
           id: toastId,
-        });
+        })
       } else {
-        await followUser(targetAccountId).unwrap();
+        await followUser(targetAccountId).unwrap()
         toast.success(t.profile?.social?.followSuccess || "Đã theo dõi", {
           id: toastId,
-        });
+        })
       }
     } catch (err) {
       toast.error(t.profile?.social?.actionFailed || "Thao tác thất bại", {
@@ -120,7 +113,7 @@ const SocialProfileHeader = ({
     }
   };
   return (
-    <div className="w-full bg-white border border-border rounded-xl overflow-hidden mb-6">
+    <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
       {/* Cover Photo Area */}
       <div
         className={`w-full h-48 md:h-[280px] bg-gray-200 relative overflow-hidden ${
@@ -135,8 +128,8 @@ const SocialProfileHeader = ({
             alt="Cover fallback"
             className="w-full h-full object-cover"
             onError={(e) => {
-              e.target.onerror = null; // prevent infinite loop
-              e.target.src = backgroundAccount;
+              e.target.onerror = null // prevent infinite loop
+              e.target.src = backgroundAccount
             }}
           />
         )}
@@ -290,7 +283,7 @@ const SocialProfileHeader = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SocialProfileHeader;
+export default SocialProfileHeader

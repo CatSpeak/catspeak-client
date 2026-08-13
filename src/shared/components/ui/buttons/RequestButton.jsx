@@ -1,503 +1,255 @@
-// Nút yêu cầu kết bạn & xử lý quan hệ kết bạn
-
-import React, { useState, useMemo, useEffect } from "react"
-import toast from "react-hot-toast"
-import { UserPlus, UserMinus, Check, X, EllipsisVertical } from "lucide-react"
-import PillButton from "./PillButton"
-import Popover from "@/shared/components/ui/Popover"
-import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useAuth } from "@/features/auth"
+import React from "react";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+import { UserPlus, UserCheck, Clock } from "lucide-react";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import PillButton from "./PillButton";
 import {
-  useGetPendingFriendRequestsQuery,
+  useGetConnectionStatusQuery,
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
   useRespondFriendRequestMutation,
-} from "@/store/api/social/friendshipApi"
+} from "@/store/api/social/friendshipApi";
+import { selectCurrentUser } from "@/store/slices/authSlice";
 
 const RequestButton = ({
   id,
-  targetAccountId,
-  userId,
   relationship,
-  status,
-  isFriend: isFriendProp,
-  friendshipStatus: friendshipStatusProp,
-  friendshipId: friendshipIdProp,
-  size = "default", // "default" | "sm" | "compact"
+  size = "md",
+  t: propT,
   className = "",
-  t: customT,
   disabled = false,
-  onSuccess,
-  onError,
   ...props
 }) => {
-  const { user: currentUser } = useAuth()
-  const { t: langT } = useLanguage()
-  const t = customT || langT
+  const { t: contextT } = useLanguage();
+  const t = propT || contextT || {};
+  const currentUser = useSelector(selectCurrentUser);
 
-  const targetId = id ?? targetAccountId ?? userId
-  const currentUserId = currentUser?.accountId ?? currentUser?.id
+  const currentUserId =
+    currentUser?.accountId ?? currentUser?.id ?? currentUser?.userId;
+  const targetId = id != null ? Number(id) : null;
+  const isOwnAccount =
+    currentUserId != null &&
+    targetId != null &&
+    Number(currentUserId) === targetId;
 
-  // Check if viewing own profile or invalid ID
-  const isSelf =
-    Boolean(targetId) &&
-    Boolean(currentUserId) &&
-    (Number(targetId) === Number(currentUserId) ||
-      String(targetId) === String(currentUserId))
+  const shouldSkipQuery =
+    !targetId ||
+    isOwnAccount ||
+    Boolean(
+      relationship &&
+      (relationship.isFriend !== undefined ||
+        relationship.friendshipStatus !== undefined ||
+        relationship.status !== undefined),
+    );
 
-  // Fetch pending friend requests for current user (same flow as ProfileFriendsTab)
-  const { data: pendingRequestsResponse } = useGetPendingFriendRequestsQuery(
-    undefined,
-    {
-      skip: !currentUserId,
+  const { data: queriedStatusResponse, isLoading: isQueryLoading } =
+    useGetConnectionStatusQuery(targetId, {
+      skip: shouldSkipQuery,
       pollingInterval: 4000,
-    }
-  )
+    });
 
-  const pendingRequests = useMemo(() => {
-    if (Array.isArray(pendingRequestsResponse)) return pendingRequestsResponse
-    if (Array.isArray(pendingRequestsResponse?.data))
-      return pendingRequestsResponse.data
-    return []
-  }, [pendingRequestsResponse])
-
-  // Check if target user has sent a pending friend request to the current user
-  const incomingRequestFromQuery = useMemo(() => {
-    if (!targetId || !pendingRequests.length) return null
-    return (
-      pendingRequests.find((req) => {
-        const senderId =
-          req?.requester?.accountId ??
-          req?.requester?.id ??
-          req?.requester?.userId ??
-          req?.requester?.studentId ??
-          req?.requesterId ??
-          req?.senderId ??
-          req?.sender?.accountId ??
-          req?.sender?.id
-        return (
-          senderId != null &&
-          (Number(senderId) === Number(targetId) ||
-            String(senderId) === String(targetId))
-        )
-      }) || null
-    )
-  }, [targetId, pendingRequests])
-
-  // External relationship object/props normalization
-  const externalStatus = useMemo(() => {
-    const raw = relationship !== undefined ? relationship : status
-    if (raw && typeof raw === "object") {
-      return {
-        isFriend: raw.isFriend ?? raw.data?.isFriend ?? false,
-        friendshipStatus:
-          raw.friendshipStatus ?? raw.data?.friendshipStatus ?? null,
-        friendshipId: raw.friendshipId ?? raw.data?.friendshipId ?? null,
-        isRequester: raw.isRequester ?? raw.data?.isRequester,
-        isAddressee: raw.isAddressee ?? raw.data?.isAddressee,
-        requesterId:
-          raw.requesterId ??
-          raw.data?.requesterId ??
-          raw.senderId ??
-          raw.data?.senderId,
-        addresseeId:
-          raw.addresseeId ??
-          raw.data?.addresseeId ??
-          raw.receiverId ??
-          raw.data?.receiverId,
-        isReceived: raw.isReceived ?? raw.data?.isReceived,
-        isIncoming: raw.isIncoming ?? raw.data?.isIncoming,
-        isPendingRequest: raw.isPendingRequest ?? raw.data?.isPendingRequest,
-      }
-    }
-    return {
-      isFriend: isFriendProp ?? false,
-      friendshipStatus: friendshipStatusProp ?? null,
-      friendshipId: friendshipIdProp ?? null,
-      isRequester: props.isRequester,
-      isAddressee: props.isAddressee,
-      requesterId: props.requesterId ?? props.senderId,
-      addresseeId: props.addresseeId ?? props.receiverId,
-      isReceived: props.isReceived,
-      isIncoming: props.isIncoming,
-      isPendingRequest: props.isPendingRequest,
-    }
-  }, [
-    relationship,
-    status,
-    isFriendProp,
-    friendshipStatusProp,
-    friendshipIdProp,
-    props.isRequester,
-    props.isAddressee,
-    props.requesterId,
-    props.senderId,
-    props.addresseeId,
-    props.receiverId,
-    props.isReceived,
-    props.isIncoming,
-    props.isPendingRequest,
-  ])
-
-  // Internal state for optimistic updates / standalone usage
-  const [localStatus, setLocalStatus] = useState(externalStatus)
-
-  useEffect(() => {
-    setLocalStatus(externalStatus)
-  }, [externalStatus])
-
-  const effectiveStatus = localStatus || externalStatus
-
-  // API Mutations
-  const [sendFriendRequest, { isLoading: isSendingRequest }] =
-    useSendFriendRequestMutation()
-  const [deleteFriendship, { isLoading: isDeletingFriendship }] =
-    useDeleteFriendshipMutation()
+  const [sendFriendRequest, { isLoading: isSending }] =
+    useSendFriendRequestMutation();
+  const [deleteFriendship, { isLoading: isDeleting }] =
+    useDeleteFriendshipMutation();
   const [respondFriendRequest, { isLoading: isResponding }] =
-    useRespondFriendRequestMutation()
+    useRespondFriendRequestMutation();
 
-  const [respondingAction, setRespondingAction] = useState(null) // "accept" | "decline" | null
+  if (isOwnAccount || !targetId) {
+    return null;
+  }
 
-  const isFriendshipLoading = isSendingRequest || isDeletingFriendship
-  const isRespondingLoading = isResponding || Boolean(respondingAction)
-  const isFriendshipDisabled =
-    disabled || isFriendshipLoading || isRespondingLoading
+  const rawStatus =
+    queriedStatusResponse?.data !== undefined
+      ? queriedStatusResponse.data
+      : queriedStatusResponse || relationship || {};
 
-  // Active friendship ID for responding / deleting
-  const effectiveFriendshipId =
-    incomingRequestFromQuery?.friendshipId ??
-    incomingRequestFromQuery?.id ??
-    effectiveStatus?.friendshipId
-
-  // Relationship state determination
   const isFriend = Boolean(
-    !incomingRequestFromQuery && effectiveStatus?.isFriend
-  )
-  const isPending = Boolean(
-    Boolean(incomingRequestFromQuery) ||
-      effectiveStatus?.friendshipStatus === 1 ||
-      effectiveStatus?.friendshipStatus === "Pending" ||
-      effectiveStatus?.friendshipStatus === "PENDING" ||
-      effectiveStatus?.isPendingRequest
-  )
+    rawStatus?.isFriend === true ||
+    rawStatus?.friendshipStatus === 2 ||
+    rawStatus?.friendshipStatus === "Accepted" ||
+    rawStatus?.status === "Accepted",
+  );
 
-  // Incoming request: Target user sent request to Current user (Current user is the Addressee)
+  const isPendingOutgoing = Boolean(
+    !isFriend &&
+    (rawStatus?.isPending === true ||
+      rawStatus?.isRequested === true ||
+      rawStatus?.isOutgoingRequest === true ||
+      rawStatus?.isPendingRequest === true ||
+      (rawStatus?.status === "Pending" &&
+        (rawStatus?.isSender || !rawStatus?.isReceiver)) ||
+      rawStatus?.friendshipStatus === 1 ||
+      rawStatus?.friendshipStatus === "Pending"),
+  );
+
   const isIncomingRequest = Boolean(
     !isFriend &&
-      (Boolean(incomingRequestFromQuery) ||
-        (isPending &&
-          (effectiveStatus?.isReceived ||
-            effectiveStatus?.isIncoming ||
-            effectiveStatus?.isAddressee ||
-            effectiveStatus?.isPendingRequest ||
-            effectiveStatus?.isRequester === false ||
-            (effectiveStatus?.requesterId &&
-              targetId &&
-              (Number(effectiveStatus.requesterId) === Number(targetId) ||
-                String(effectiveStatus.requesterId) === String(targetId))) ||
-            (effectiveStatus?.addresseeId &&
-              currentUserId &&
-              (Number(effectiveStatus.addresseeId) === Number(currentUserId) ||
-                String(effectiveStatus.addresseeId) ===
-                  String(currentUserId))))))
-  )
+    !isPendingOutgoing &&
+    (rawStatus?.isIncomingRequest === true ||
+      (rawStatus?.status === "Pending" && rawStatus?.isReceiver === true)),
+  );
 
-  // Outgoing pending request: Current user sent request to Target user
-  const isOutgoingPending = !isFriend && isPending && !isIncomingRequest
+  const isActionLoading = isSending || isDeleting || isResponding;
 
-  const handleFriendshipToggle = async (e) => {
-    if (e && typeof e.stopPropagation === "function") {
-      e.stopPropagation()
-    }
-    if (isFriendshipDisabled || !targetId) return
+  const friendshipId =
+    rawStatus?.friendshipId ||
+    rawStatus?.id ||
+    relationship?.friendshipId ||
+    relationship?.id ||
+    targetId;
+
+  const isSmall = size === "sm";
+  const iconSize = isSmall ? 14 : 16;
+  const buttonSizeClass = isSmall ? "!h-8 !px-3 !text-xs !gap-1.5" : "";
+
+  const handleSendFriendRequest = async (e) => {
+    e?.stopPropagation?.();
+    if (isActionLoading || disabled) return;
+    const toastId = "friend-request-action";
 
     try {
-      if (isFriend || isOutgoingPending) {
-        const fId = effectiveFriendshipId
-        if (fId) {
-          await deleteFriendship(fId).unwrap()
-          setLocalStatus({
-            isFriend: false,
-            friendshipStatus: null,
-            friendshipId: null,
-            isRequester: null,
-            isAddressee: null,
-          })
-          toast.success(
-            isFriend
-              ? t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn"
-              : t.profile?.social?.cancelRequestSuccess ||
-                  "Đã hủy yêu cầu kết bạn",
-            { id: "friendship-action" }
-          )
-        } else {
-          setLocalStatus({
-            isFriend: false,
-            friendshipStatus: null,
-            friendshipId: null,
-            isRequester: null,
-            isAddressee: null,
-          })
-        }
-      } else {
-        if (effectiveFriendshipId) {
-          await deleteFriendship(effectiveFriendshipId).unwrap()
-        }
-        const res = await sendFriendRequest(targetId).unwrap()
-        const newFriendshipId =
-          res?.data?.friendshipId ?? res?.friendshipId ?? res?.id ?? null
-        setLocalStatus({
-          isFriend: false,
-          friendshipStatus: "Pending",
-          friendshipId: newFriendshipId,
-          isRequester: true,
-          isAddressee: false,
-        })
-        toast.success(
-          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
-          { id: "friendship-action" }
-        )
-      }
-      onSuccess?.()
-    } catch (err) {
-      if (err?.status === 422) {
-        toast.error(
-          t.profile?.social?.requestPending ||
-            "Yêu cầu kết bạn đã tồn tại hoặc đang chờ xử lý",
-          { id: "friendship-action" }
-        )
-        setLocalStatus((prev) => ({
-          ...prev,
-          friendshipStatus: "Pending",
-        }))
-      } else {
-        toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
-          id: "friendship-action",
-        })
-      }
-      console.error(err)
-      onError?.(err)
+      await sendFriendRequest(targetId).unwrap();
+      toast.success(
+        t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+        { id: toastId },
+      );
+    } catch (error) {
+      toast.error(
+        t.profile?.social?.requestError ||
+          t.profile?.social?.errorOccurred ||
+          "Không thể gửi yêu cầu kết bạn",
+        { id: toastId },
+      );
+      console.error(error);
     }
-  }
+  };
 
-  const handleAccept = async (e, closePopover) => {
-    if (e && typeof e.stopPropagation === "function") {
-      e.stopPropagation()
+  const handleCancelFriendRequest = async (e) => {
+    e?.stopPropagation?.();
+    if (isActionLoading || disabled) return;
+    const toastId = "friend-request-action";
+
+    try {
+      await deleteFriendship(friendshipId).unwrap();
+      toast.success(
+        t.profile?.social?.cancelRequestSuccess || "Đã hủy yêu cầu kết bạn",
+        { id: toastId },
+      );
+    } catch (error) {
+      toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
+        id: toastId,
+      });
+      console.error(error);
     }
-    closePopover?.()
-    const fId = effectiveFriendshipId
-    if (isFriendshipDisabled || !fId) return
+  };
 
-    setRespondingAction("accept")
+  const handleAcceptFriendRequest = async (e) => {
+    e?.stopPropagation?.();
+    if (isActionLoading || disabled) return;
+    const toastId = "friend-request-action";
 
     try {
       await respondFriendRequest({
-        friendshipId: fId,
+        friendshipId,
         action: "accept",
-      }).unwrap()
-
-      setLocalStatus({
-        isFriend: true,
-        friendshipStatus: "Accepted",
-        friendshipId: fId,
-        isRequester: null,
-        isAddressee: null,
-      })
-
+      }).unwrap();
       toast.success(
         t.profile?.friends?.actions?.acceptSuccess || "Đã chấp nhận kết bạn!",
-        { id: "friendship-action" }
-      )
-      onSuccess?.("accept")
-    } catch (err) {
-      toast.error(
-        t.profile?.friends?.actions?.error ||
-          t.profile?.social?.errorOccurred ||
-          "Có lỗi xảy ra",
-        { id: "friendship-action" }
-      )
-      console.error(err)
-      onError?.(err)
-    } finally {
-      setRespondingAction(null)
+        { id: toastId },
+      );
+    } catch (error) {
+      toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra", {
+        id: toastId,
+      });
+      console.error(error);
     }
-  }
+  };
 
-  const handleDecline = async (e, closePopover) => {
-    if (e && typeof e.stopPropagation === "function") {
-      e.stopPropagation()
-    }
-    closePopover?.()
-    const fId = effectiveFriendshipId
-    if (isFriendshipDisabled || !fId) return
-
-    setRespondingAction("decline")
+  const handleUnfriend = async (e) => {
+    e?.stopPropagation?.();
+    if (isActionLoading || disabled) return;
+    const toastId = "friend-request-action";
 
     try {
-      await respondFriendRequest({
-        friendshipId: fId,
-        action: "decline",
-      }).unwrap()
-
-      setLocalStatus({
-        isFriend: false,
-        friendshipStatus: null,
-        friendshipId: null,
-        isRequester: null,
-        isAddressee: null,
-      })
-
-      toast.success(
-        t.profile?.friends?.actions?.declineSuccess || "Đã từ chối kết bạn",
-        { id: "friendship-action" }
-      )
-      onSuccess?.("decline")
-    } catch (err) {
-      toast.error(
-        t.profile?.friends?.actions?.error ||
-          t.profile?.social?.errorOccurred ||
-          "Có lỗi xảy ra",
-        { id: "friendship-action" }
-      )
-      console.error(err)
-      onError?.(err)
-    } finally {
-      setRespondingAction(null)
+      await deleteFriendship(friendshipId).unwrap();
+      toast.success(t.profile?.social?.unfriendSuccess || "Đã hủy kết bạn", {
+        id: toastId,
+      });
+    } catch (error) {
+      toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
+        id: toastId,
+      });
+      console.error(error);
     }
-  }
+  };
 
-  // If user is viewing their own profile or invalid ID, do not render
-  if (isSelf || !targetId) {
-    return null
-  }
-
-  const sizeClasses =
-    size === "sm" || size === "compact"
-      ? "!h-8 [&>div]:!h-7 [&>div]:px-2.5 [&>div]:text-xs [&>div_span]:w-3.5 [&>div_span]:h-3.5"
-      : ""
-
-  // Case: B received a friend request from A
-  // - Mobile (< sm): Display Popover dropdown "<EllipsisVertical /> Hành động"
-  // - Desktop (>= sm): Display 2 separate buttons "Chấp nhận" and "Từ chối"
-  if (isIncomingRequest) {
-    const actionLabel =
-      t.profile?.friends?.actions?.actions ||
-      t.profile?.friends?.actions?.title ||
-      t.common?.actions ||
-      "Hành động"
-    const acceptLabel = t.profile?.friends?.actions?.accept || "Chấp nhận"
-    const declineLabel = t.profile?.friends?.actions?.decline || "Từ chối"
-
+  // State: Friend
+  if (isFriend) {
     return (
-      <>
-        {/* Mobile View: Popover Dropdown */}
-        <div className={`flex sm:hidden items-center ${className}`}>
-          <Popover
-            placement="bottom-right"
-            offset={2}
-            className="w-full"
-            triggerClassName="w-full flex items-center justify-center"
-            trigger={
-              <PillButton
-                {...props}
-                variant="outline"
-                startIcon={<EllipsisVertical size={16} />}
-                disabled={isFriendshipDisabled}
-                loading={isRespondingLoading}
-                className={`w-full ${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
-              >
-                {actionLabel}
-              </PillButton>
-            }
-            content={(close) => (
-              <MenuList>
-                <MenuItem
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleAccept(e, close)
-                  }}
-                  icon={<Check size={16} />}
-                  label={acceptLabel}
-                />
-                <MenuItem
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDecline(e, close)
-                  }}
-                  icon={<X size={16} />}
-                  label={declineLabel}
-                  className="text-red-600"
-                />
-              </MenuList>
-            )}
-          />
-        </div>
-
-        {/* Desktop / Larger Screens: 2 Separate Buttons */}
-        <div
-          className={`hidden sm:inline-flex items-center gap-2 shrink-0 ${className}`}
-        >
-          <PillButton
-            {...props}
-            variant="primary"
-            startIcon={<Check size={16} />}
-            onClick={(e) => handleAccept(e)}
-            disabled={isFriendshipDisabled}
-            loading={respondingAction === "accept"}
-            className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
-          >
-            {acceptLabel}
-          </PillButton>
-
-          <PillButton
-            {...props}
-            variant="secondary"
-            startIcon={<X size={16} />}
-            onClick={(e) => handleDecline(e)}
-            disabled={isFriendshipDisabled}
-            loading={respondingAction === "decline"}
-            className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""}`}
-          >
-            {declineLabel}
-          </PillButton>
-        </div>
-      </>
-    )
+      <PillButton
+        variant="secondary"
+        startIcon={<UserCheck size={iconSize} className="text-cath-red-700" />}
+        onClick={handleUnfriend}
+        loading={isActionLoading}
+        disabled={disabled || isActionLoading}
+        className={`${buttonSizeClass} ${className}`}
+        {...props}
+      >
+        {t.profile?.social?.unfriend || t.profile?.tabs?.friends || "Bạn bè"}
+      </PillButton>
+    );
   }
 
-  // Standard Cases: Friends ("Hủy kết bạn"), Outgoing Pending ("Hủy yêu cầu"), or Stranger ("Kết bạn")
-  const friendshipVariant = isFriend
-    ? "outline"
-    : isOutgoingPending
-    ? "secondary"
-    : "outline"
+  // State: Sent request (Pending outgoing)
+  if (isPendingOutgoing) {
+    return (
+      <PillButton
+        variant="secondary"
+        startIcon={<Clock size={iconSize} />}
+        onClick={handleCancelFriendRequest}
+        loading={isActionLoading}
+        disabled={disabled || isActionLoading}
+        className={`${buttonSizeClass} ${className}`}
+        {...props}
+      >
+        {t.profile?.social?.cancelRequest || "Hủy yêu cầu"}
+      </PillButton>
+    );
+  }
 
-  const friendshipIcon = isFriend || isOutgoingPending ? (
-    <UserMinus />
-  ) : (
-    <UserPlus />
-  )
+  // State: Received request (Pending incoming)
+  if (isIncomingRequest) {
+    return (
+      <PillButton
+        variant="primary"
+        startIcon={<UserCheck size={iconSize} />}
+        onClick={handleAcceptFriendRequest}
+        loading={isActionLoading}
+        disabled={disabled || isActionLoading}
+        className={`${buttonSizeClass} ${className}`}
+        {...props}
+      >
+        {t.profile?.friends?.actions?.accept || "Chấp nhận"}
+      </PillButton>
+    );
+  }
 
-  const friendshipLabel = isFriend
-    ? t.profile?.social?.unfriend || "Hủy kết bạn"
-    : isOutgoingPending
-    ? t.profile?.social?.cancelRequest || "Hủy yêu cầu"
-    : t.profile?.social?.addFriend || "Kết bạn"
-
+  // State: Not friends (Default)
   return (
     <PillButton
-      variant={friendshipVariant}
-      startIcon={friendshipIcon}
-      onClick={handleFriendshipToggle}
-      disabled={isFriendshipDisabled}
-      loading={isFriendshipLoading}
-      className={`${sizeClasses} ${isFriendshipDisabled ? "cursor-not-allowed" : ""} ${className}`}
+      variant="primary"
+      startIcon={<UserPlus size={iconSize} />}
+      onClick={handleSendFriendRequest}
+      loading={isActionLoading || (isQueryLoading && !relationship)}
+      disabled={disabled || isActionLoading}
+      className={`${buttonSizeClass} ${className}`}
       {...props}
     >
-      {friendshipLabel}
+      {t.profile?.social?.addFriend || "Kết bạn"}
     </PillButton>
-  )
-}
+  );
+};
 
-export default RequestButton
+export default RequestButton;

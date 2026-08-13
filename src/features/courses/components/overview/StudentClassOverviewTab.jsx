@@ -11,6 +11,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import { getLocalizedLanguageName } from "../../data/courseFormOptions";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 
+
 const StudentClassOverviewTab = ({
   classData,
   isEnrolled,
@@ -41,6 +42,8 @@ const StudentClassOverviewTab = ({
       setTimeout(() => setLinkCopied(false), 2000);
     }
   };
+
+
 
   const completedValue = classData.progress
     ? classData.progress.completedSessions
@@ -126,6 +129,16 @@ const StudentClassOverviewTab = ({
             backgroundPosition: "center",
           }}
         >
+          {/* Share Button */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title={cd.shareClass || "Share class"}
+            className="absolute top-4 right-4 z-20 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+          >
+            {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
+          </button>
+
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
 

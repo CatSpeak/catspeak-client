@@ -294,3 +294,9 @@ input[type="password"]::-webkit-reveal {
 .animate-shake {
   animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
+
+/* Sonner outer toast wrapper styling */
+[data-sonner-toast] {
+  border-radius: 12px;
+}
+

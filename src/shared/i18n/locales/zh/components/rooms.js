@@ -366,6 +366,9 @@ export default {
       receiveSystemMsgs: "接收系统消息通知",
       receiveSystemMsgsDesc:
         "在会议期间显示系统自动发出的通知消息。",
+      showAiSuggestions: "显示 Cat Speak 建议消息",
+      showAiSuggestionsDesc:
+        "在聊天框中自动显示来自 Cat Speak 助手的句型建议消息。",
       joinLeaveSound: "成员进出房间提示音",
       joinLeaveSoundDesc:
         "当有成员加入或离开会议时播放提示音。",

@@ -2,7 +2,6 @@ import React from 'react'
 import dayjs from 'dayjs'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 
-
 const CalendarMonthView = ({
   currentDate,
   selectedDate,
@@ -10,9 +9,9 @@ const CalendarMonthView = ({
   events
 }) => {
   const { userTimeZone, formatScheduleDays } = useTimezone()
-  
+
   // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
-  const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day => 
+  const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day =>
     formatScheduleDays([day])
   )
 

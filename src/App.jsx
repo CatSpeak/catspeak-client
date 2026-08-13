@@ -14,11 +14,13 @@ import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { LanguageProvider } from "@/shared/context/LanguageContext"
-import { ScrollToTopButton } from "@/shared/components/ui/buttons"
+// import { ScrollToTopButton } from "@/shared/components/ui/buttons";
 import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
+// import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
+
 import WebViewGuard from "@/shared/components/WebViewGuard"
 
 function App() {

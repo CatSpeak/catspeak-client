@@ -50,7 +50,6 @@ export function useNotifications() {
 
     let subscribedUid = null;
 
-
     let sessionReady = false;
     let expectedUid = null;
 
@@ -143,7 +142,6 @@ export function useNotifications() {
               );
             }
 
-
             toast.custom(
               (toastObj) => (
                 <div
@@ -199,7 +197,6 @@ export function useNotifications() {
 
     const unsubAuth = onAuthStateChanged(firebaseAuth, (user) => {
       if (cancelled) return;
-
 
       if (!sessionReady) return;
 

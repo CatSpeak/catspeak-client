@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react"
-import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users, Layers } from "lucide-react"
+import { Globe, GraduationCap, Calendar, Clock, AlignLeft, Pencil, Users, Layers, Share2, Check } from "lucide-react"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
@@ -8,11 +8,11 @@ import { useGetTeacherClassTeachingTasksCombinedQuery } from "@/store/api/course
 import { mapTeachingTask } from "../../utils/courseTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 import CourseStatusPill from "../CourseStatusPill"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { defaultCourseThumbnail, getSafeMediaUrl } from "../../utils/courseUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
-import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const ClassOverviewTab = ({
   classData,
@@ -38,7 +38,7 @@ const ClassOverviewTab = ({
   onViewTasks,
   cd = {}
 }) => {
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatDateMonth, formatDate, formatScheduleTime } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
@@ -151,6 +151,16 @@ const ClassOverviewTab = ({
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15" />
           </div>
+
+          {/* Share / Copy Link Button */}
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title={cd.shareClass || "Share class"}
+            className="absolute top-4 right-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+          >
+            {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
+          </button>
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
             <div className="flex flex-col gap-2 max-w-xl">

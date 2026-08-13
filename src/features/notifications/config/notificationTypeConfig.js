@@ -375,18 +375,7 @@ export const NOTIFICATION_TYPES = {
         : `/${lang}/cat-speak/reels`;
     },
   },
-  instructor_profile_approved: {
-    icon: GraduationCap,
-    color: "text-emerald-500",
-    resolveTitle: (m, t) =>
-      t.notifications?.instructor_profile_approved?.title ||
-      "Hồ sơ Giảng viên đã được phê duyệt",
-    resolveBody: (m, t) =>
-      t.notifications?.instructor_profile_approved?.body ||
-      "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
-    resolveUrl: () => "/setting/instructor",
-  },
-}
+};
 
 export function resolveNotification(notif, t) {
   console.log(notif);

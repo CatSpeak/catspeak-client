@@ -1,7 +1,7 @@
 import React, { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { RequestButton } from "@/shared/components/ui/buttons"
+import {RequestButton} from "@/shared/components/ui/buttons"
 import { getSafeMediaUrl } from "../../utils/courseUtils"
 import {
   CheckCircle2,

@@ -64,6 +64,7 @@ const MobileNavItems = ({
     subItems: settingNavLinks,
   }
 
+  // Sync drilldown state when drawer opens or when navigating
   const isSettings =
     pathname.startsWith("/setting") ||
     pathname.startsWith("/pricing") ||

@@ -102,4 +102,3 @@ const CommentInput = ({ onSubmit, placeholder }) => {
 }
 
 export default CommentInput
-

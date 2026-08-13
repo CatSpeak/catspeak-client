@@ -1,295 +1,258 @@
-import React, { useMemo, useState, useCallback } from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useState, useMemo } from "react"
+import { useSelector } from "react-redux"
+import { UserPlus, Search, Mail, Send, CheckCircle2, UserCheck, Users } from "lucide-react"
+import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useAuth } from "@/features/auth"
-import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { selectCurrentUser } from "@/store/slices/authSlice"
 import { useGetFriendsQuery } from "@/store/api/social/friendshipApi"
 import { useInviteToClassMutation } from "@/store/api/coursesApi"
+import Avatar from "@/shared/components/ui/Avatar"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { getSafeMediaUrl } from "../../utils/courseUtils"
-import {
-  UserPlus,
-  CheckCircle2,
-  Mail,
-  Search,
-  Users,
-} from "lucide-react"
-import toast from "react-hot-toast"
-
-const getInitials = (name) => {
-  const parts = String(name || "").trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return "—"
-  return parts.slice(0, 2).map((part) => part.charAt(0)).join("").toLocaleUpperCase()
-}
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import { LoadingSpinner, EmptyState } from "@/shared/components/ui/indicators"
+import FluentCard from "@/shared/components/ui/FluentCard"
 
 const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
-  const navigate = useNavigate()
   const { t } = useLanguage()
-  const { user: authUser } = useAuth()
-  const { data: profileResponse } = useGetUserProfileQuery()
-  const profile = profileResponse?.data || profileResponse || {}
-  const currentUserId = authUser?.accountId || profile?.accountId || profile?.id
+  const currentUser = useSelector(selectCurrentUser)
+  const currentAccountId =
+    currentUser?.accountId ?? currentUser?.id ?? currentUser?.userId
 
-  const [inviteToClass] = useInviteToClassMutation()
-
-  const [searchQuery, setSearchQuery] = useState("")
-  const [invitedIds, setInvitedIds] = useState(() => new Set())
-  const [invitingIds, setInvitingIds] = useState(() => new Set())
-
-  // Fetch friends of the current user
-  const {
-    data: friendsResponse,
-    isLoading: isFriendsLoading,
-    isFetching: isFriendsFetching,
-  } = useGetFriendsQuery(currentUserId, {
-    skip: !currentUserId,
-  })
-
-  // Collect all enrolled student/member IDs from classData to filter out
-  const enrolledStudentIds = useMemo(() => {
-    const candidates = [
+  const classId = classData?.id || classData?.classId
+  const existingMembers = useMemo(() => {
+    const list = [
       classData?.students,
       classData?.members,
       classData?.enrollments,
-    ].find(Array.isArray) ?? []
+    ].find(Array.isArray) || []
+    return new Set(
+      list.map((m) => String(m.id || m.accountId || m.studentId || m.userId)),
+    )
+  }, [classData])
 
-    const ids = new Set()
-    candidates.forEach((person) => {
-      const id = person?.accountId ?? person?.id ?? person?.studentId ?? person?.userId
-      if (id !== undefined && id !== null) {
-        ids.add(String(id))
-      }
-    })
+  const [searchQuery, setSearchQuery] = useState("")
+  const [emailInput, setEmailInput] = useState("")
+  const [invitedMap, setInvitedMap] = useState({})
 
-    const teacherId =
-      classData?.teacherId ??
-      classData?.instructorId ??
-      classData?.teacher?.id ??
-      classData?.teacher?.accountId
-    if (teacherId != null) {
-      ids.add(String(teacherId))
-    }
+  const { data: friendsResponse, isLoading: isLoadingFriends } =
+    useGetFriendsQuery(currentAccountId, { skip: !currentAccountId })
 
-    if (currentUserId) {
-      ids.add(String(currentUserId))
-    }
+  const [inviteToClass, { isLoading: isInviting }] = useInviteToClassMutation()
 
-    return ids
-  }, [classData, currentUserId])
-
-  // Filter out friends who are already in the class
-  const availableFriends = useMemo(() => {
-    const rawFriends = Array.isArray(friendsResponse)
+  const friendsList = useMemo(() => {
+    const raw = Array.isArray(friendsResponse)
       ? friendsResponse
       : friendsResponse?.data || []
-
-    return rawFriends.filter((friend) => {
-      const friendId = friend?.accountId ?? friend?.id
-      if (friendId === undefined || friendId === null) return false
-      return !enrolledStudentIds.has(String(friendId))
+    return raw.map((f) => {
+      const friendObj = f.friend || f.user || f
+      return {
+        ...friendObj,
+        friendshipId: f.friendshipId || f.id,
+        accountId: friendObj.accountId || friendObj.id || friendObj.userId,
+      }
     })
-  }, [friendsResponse, enrolledStudentIds])
+  }, [friendsResponse])
 
-  // Filter by search keyword
   const filteredFriends = useMemo(() => {
-    if (!searchQuery.trim()) return availableFriends
+    if (!searchQuery.trim()) return friendsList
     const query = searchQuery.toLowerCase().trim()
-    return availableFriends.filter((friend) => {
-      const name = (friend.username || friend.name || "").toLowerCase()
-      const email = (friend.email || "").toLowerCase()
+    return friendsList.filter((f) => {
+      const name = (f.name || f.nickname || f.username || "").toLowerCase()
+      const email = (f.email || "").toLowerCase()
       return name.includes(query) || email.includes(query)
     })
-  }, [availableFriends, searchQuery])
+  }, [friendsList, searchQuery])
 
-  const handleProfileNavigate = useCallback((personId) => {
-    if (personId) {
-      navigate(`/profile/${personId}`)
-    }
-  }, [navigate])
-
-  const handleInviteFriend = useCallback(async (friend) => {
-    const friendId = String(friend?.accountId ?? friend?.id ?? "")
-    const email = (friend?.email || "").trim()
-    const classId = classData?.id || classData?.classId
-
-    if (!friendId || invitedIds.has(friendId) || invitingIds.has(friendId)) return
-
-    if (!classId) {
-      toast.error("Không tìm thấy thông tin lớp học!")
-      return
-    }
+  const handleInviteFriend = async (friend) => {
+    const email = friend.email
+    const friendId = friend.accountId || friend.id
+    if (!classId) return
 
     if (!email) {
-      toast.error(cd.noEmailToInvite || "Bạn bè này chưa có email để nhận lời mời!")
+      toast.error(
+        t.courses?.inviteNoEmail ||
+          "Không tìm thấy email của bạn bè này để gửi lời mời.",
+      )
       return
     }
 
-    setInvitingIds((prev) => new Set(prev).add(friendId))
+    try {
+      await inviteToClass({
+        classId,
+        emails: [email],
+      }).unwrap()
+
+      setInvitedMap((prev) => ({ ...prev, [friendId]: true }))
+      toast.success(
+        t.courses?.inviteSuccess || `Đã gửi lời mời đến ${friend.nickname || friend.username || email}`,
+      )
+    } catch (err) {
+      toast.error(t.courses?.inviteError || "Có lỗi xảy ra khi gửi lời mời.")
+      console.error(err)
+    }
+  }
+
+  const handleInviteByEmail = async (e) => {
+    e?.preventDefault?.()
+    const trimmed = emailInput.trim()
+    if (!trimmed || !classId) return
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(trimmed)) {
+      toast.error("Vui lòng nhập địa chỉ email hợp lệ.")
+      return
+    }
 
     try {
-      await inviteToClass({ classId, emails: [email] }).unwrap()
+      await inviteToClass({
+        classId,
+        emails: [trimmed],
+      }).unwrap()
 
-      setInvitedIds((prev) => new Set(prev).add(friendId))
-      const friendName = friend.username || friend.name || "bạn bè"
-      const successMessage = cd.toastInviteSuccess
-        ? cd.toastInviteSuccess.replace("{{name}}", friendName)
-        : `Đã gửi lời mời tham gia lớp học cho ${friendName}!`
-      toast.success(successMessage)
+      setEmailInput("")
+      toast.success(t.courses?.inviteSuccess || `Đã gửi lời mời đến ${trimmed}`)
     } catch (err) {
-      const errorMsg =
-        err?.data?.message ||
-        err?.data?.title ||
-        err?.message ||
-        cd.toastInviteFailed ||
-        "Không thể gửi lời mời. Vui lòng thử lại!"
-      toast.error(errorMsg)
-    } finally {
-      setInvitingIds((prev) => {
-        const next = new Set(prev)
-        next.delete(friendId)
-        return next
-      })
+      toast.error(t.courses?.inviteError || "Có lỗi xảy ra khi gửi lời mời.")
+      console.error(err)
     }
-  }, [invitedIds, invitingIds, cd, classData, inviteToClass])
+  }
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-6">
-      {/* ─── SECTION HEADER & SEARCH ─── */}
-      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-50 pb-3">
-        <div className="flex items-center gap-2">
-          <Users size={16} className="text-gray-500" />
-          <h3 className="text-xs font-extrabold text-gray-500 uppercase tracking-widest">
-            {(cd.inviteFriends || "Mời bạn bè").toLocaleUpperCase()} ({availableFriends.length})
-          </h3>
-        </div>
+    <div className="flex flex-col gap-6">
+      {/* ─── EMAIL INVITATION SECTION ─── */}
+      <FluentCard className="p-6">
+        <div className="flex flex-col gap-4">
+          <div>
+            <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+              <Mail size={18} className="text-[#990011]" />
+              <span>{cd.inviteByEmail || "Mời bằng địa chỉ Email"}</span>
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">
+              {cd.inviteByEmailDesc ||
+                "Gửi lời mời trực tiếp đến học viên hoặc người quen qua email."}
+            </p>
+          </div>
 
-        {availableFriends.length > 0 && (
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+          <form onSubmit={handleInviteByEmail} className="flex gap-2 max-w-xl">
             <input
-              type="text"
-              placeholder={cd.searchFriends || "Tìm kiếm bạn bè..."}
+              type="email"
+              placeholder="example@gmail.com"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              className="flex-1 px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#990011] focus:ring-1 focus:ring-[#990011] outline-none transition"
+            />
+            <PillButton
+              type="submit"
+              variant="primary"
+              startIcon={<Send size={15} />}
+              loading={isInviting}
+              disabled={isInviting || !emailInput.trim()}
+            >
+              {cd.sendInvite || "Gửi lời mời"}
+            </PillButton>
+          </form>
+        </div>
+      </FluentCard>
+
+      {/* ─── FRIENDS LIST INVITATION SECTION ─── */}
+      <FluentCard className="p-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+            <div>
+              <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
+                <Users size={18} className="text-[#990011]" />
+                <span>{cd.inviteFriendsList || "Danh sách bạn bè"}</span>
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {cd.inviteFriendsListDesc || "Chọn từ danh sách bạn bè để mời tham gia lớp học."}
+              </p>
+            </div>
+
+            <SearchInput
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 text-xs bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-[#990011] focus:bg-white transition"
+              onChange={setSearchQuery}
+              placeholder={cd.searchFriends || "Tìm bạn bè..."}
+              className="sm:w-[260px]"
             />
           </div>
-        )}
-      </section>
 
-      {/* ─── CONTENT AREA ─── */}
-      {isFriendsLoading || (isFriendsFetching && !friendsResponse) ? (
-        <div className="py-12 flex justify-center items-center">
-          <LoadingSpinner className="h-6 w-6" />
-        </div>
-      ) : availableFriends.length === 0 ? (
-        <div className="text-center py-12 flex flex-col items-center justify-center gap-3 text-gray-400">
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-            <UserPlus size={24} />
-          </div>
-          <p className="text-sm font-bold text-gray-700">
-            {cd.noFriendsToInvite || "Không có bạn bè nào để mời"}
-          </p>
-          <p className="text-xs text-gray-400 max-w-sm text-center">
-            {cd.noFriendsToInviteDesc || "Tất cả bạn bè của bạn đã tham gia lớp học này hoặc bạn chưa có bạn bè trong danh sách."}
-          </p>
-        </div>
-      ) : filteredFriends.length === 0 ? (
-        <div className="text-center py-10 flex flex-col items-center justify-center gap-2 text-gray-400">
-          <Search size={24} className="text-gray-300" />
-          <p className="text-xs font-bold text-gray-600">
-            {cd.noFriendsFound || "Không tìm thấy bạn bè phù hợp"}
-          </p>
-          <p className="text-[11px] text-gray-400">
-            {cd.noFriendsFoundDesc || "Vui lòng thử tìm kiếm với từ khóa khác."}
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col divide-y divide-gray-100">
-          {filteredFriends.map((friend, index) => {
-            const id = friend.accountId || friend.id
-            const name = friend.username || friend.name || "User"
-            const avatar = getSafeMediaUrl(
-              friend.avatarImageUrl ||
-                friend.avatarUrl ||
-                friend.avatar ||
-                friend.virtualBackgroundUrl ||
-                friend.meetingAvatarUrl,
-            )
-            const isInvited = invitedIds.has(String(id))
-            const isInviting = invitingIds.has(String(id))
+          {isLoadingFriends ? (
+            <div className="py-12 flex justify-center">
+              <LoadingSpinner />
+            </div>
+          ) : filteredFriends.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              message={
+                searchQuery
+                  ? "Không tìm thấy bạn bè nào phù hợp."
+                  : "Bạn chưa có bạn bè nào trong danh sách."
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {filteredFriends.map((friend) => {
+                const friendId = friend.accountId || friend.id
+                const isAlreadyInClass =
+                  friendId != null && existingMembers.has(String(friendId))
+                const isInvited = Boolean(invitedMap[friendId])
+                const name =
+                  friend.nickname || friend.username || friend.name || "Bạn bè"
 
-            return (
-              <div
-                key={id ?? `${name}-${index}`}
-                className="flex items-center justify-between gap-4 py-3.5 first:pt-1 last:pb-1 flex-wrap sm:flex-nowrap"
-              >
-                {/* User Info */}
-                <div
-                  className={`flex items-center gap-3.5 min-w-0 ${id ? "cursor-pointer group" : ""}`}
-                  onClick={() => handleProfileNavigate(id)}
-                >
-                  <div className="w-10 h-10 shrink-0 rounded-full bg-gray-200 text-gray-700 font-black text-xs flex items-center justify-center shadow-xs overflow-hidden group-hover:ring-2 group-hover:ring-[#990011] transition">
-                    {avatar ? (
-                      <img className="w-full h-full object-cover" src={avatar} alt={name} />
-                    ) : (
-                      getInitials(name)
-                    )}
-                  </div>
-
-                  <div className="flex flex-col min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs sm:text-sm font-extrabold text-gray-900 truncate group-hover:text-[#990011] transition">
-                        {name}
-                      </span>
-                      {friend.roleName && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-gray-100 text-gray-700 border-gray-200">
-                          {friend.roleName}
+                return (
+                  <div
+                    key={friendId || friend.email}
+                    className="flex items-center justify-between gap-3 p-3.5 bg-gray-50/60 hover:bg-gray-100/70 rounded-2xl border border-gray-100 transition"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar
+                        size={40}
+                        src={friend.avatarImageUrl || friend.avatarUrl || friend.avatar}
+                        name={name}
+                        accountId={friendId}
+                      />
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-bold text-gray-900 truncate">
+                          {name}
                         </span>
-                      )}
-                      {friend.level && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border bg-blue-50 text-blue-700 border-blue-200">
-                          {friend.level}
-                        </span>
-                      )}
+                        {friend.email && (
+                          <span className="text-xs text-gray-500 truncate max-w-[200px]">
+                            {friend.email}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    {friend.email && (
-                      <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium mt-0.5">
-                        <Mail size={12} className="text-gray-400 shrink-0" />
-                        <span className="truncate max-w-[220px]">{friend.email}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Invite Action Button */}
-                <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
-                  <PillButton
-                    onClick={() => handleInviteFriend(friend)}
-                    disabled={isInvited || isInviting}
-                    loading={isInviting}
-                    variant={isInvited ? "secondary" : "outline"}
-                    startIcon={
-                      isInvited ? (
-                        <CheckCircle2 size={15} className="text-emerald-600" />
+                    <div className="shrink-0">
+                      {isAlreadyInClass ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-gray-400 bg-gray-100 px-3 py-1.5 rounded-full">
+                          <CheckCircle2 size={13} />
+                          <span>{cd.alreadyJoined || "Đã vào lớp"}</span>
+                        </span>
+                      ) : isInvited ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full">
+                          <UserCheck size={13} />
+                          <span>{cd.invited || "Đã mời"}</span>
+                        </span>
                       ) : (
-                        <UserPlus size={15} />
-                      )
-                    }
-                    className="h-9"
-                  >
-                    {isInvited
-                      ? (cd.invited || "Đã gửi lời mời")
-                      : (cd.inviteToClass || "Mời tham gia vào lớp này")}
-                  </PillButton>
-                </div>
-              </div>
-            )
-          })}
+                        <PillButton
+                          variant="secondary"
+                          startIcon={<UserPlus size={14} />}
+                          onClick={() => handleInviteFriend(friend)}
+                          disabled={isInviting}
+                          className="!h-8 !px-3 !text-xs"
+                        >
+                          {cd.invite || "Mời"}
+                        </PillButton>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </FluentCard>
     </div>
   )
 }

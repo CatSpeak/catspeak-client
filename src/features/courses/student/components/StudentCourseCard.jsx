@@ -221,6 +221,25 @@ const StudentCourseCard = ({
           </button>
         )}
       </div>
+      {onShare && (
+        <button
+          type="button"
+          onClick={async (event) => {
+            event.stopPropagation()
+            try {
+              await onShare(course)
+              setLinkCopied(true)
+              setTimeout(() => setLinkCopied(false), 2000)
+            } catch (e) {
+              console.error("Share failed", e)
+            }
+          }}
+          className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+          title={sc.shareCourse || "Share"}
+        >
+          {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
+        </button>
+      )}
 
       {/* Content Details */}
       <div className="p-5 flex flex-col flex-1 justify-between gap-5">

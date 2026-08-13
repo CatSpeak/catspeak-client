@@ -27,7 +27,8 @@ const SessionActionButtons = ({
 
           if (isAI) return null
 
-          const isActionable = isOneOnOne || isStudyGroup || isAI || isCustomRoom
+          const isActionable =
+            isOneOnOne || isStudyGroup || isAI || isCustomRoom
 
           const handleClick = () => {
             if (isOneOnOne) handleCreateOneOnOneSession()
