@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { Link, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSelector } from "react-redux"
@@ -158,6 +158,17 @@ const DesktopSidebar = () => {
   const currentHasSublinks =
     activeDockSection === "settings" ||
     Boolean(currentSectionData?.items?.length)
+
+  // Auto-expand secondary sidebar panel when switching into a section with sublinks
+  const prevSectionRef = useRef(null)
+  useEffect(() => {
+    if (prevSectionRef.current !== activeDockSection) {
+      prevSectionRef.current = activeDockSection
+      if (currentHasSublinks) {
+        setIsDesktopExpanded(true)
+      }
+    }
+  }, [activeDockSection, currentHasSublinks, setIsDesktopExpanded])
 
   const handleDockClick = (item, e) => {
     if (activeDockSection === item.key) {

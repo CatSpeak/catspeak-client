@@ -17,8 +17,13 @@ import {
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { AnimatePresence, motion } from "framer-motion"
-import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
+import {
+  useGetProfileQuery,
+  useAuth,
+  useLogoutMutation,
+} from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useSidebar } from "@/shared/context/SidebarContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
@@ -40,6 +45,7 @@ const useIsMobile = (breakpoint = 425) => {
 
 const ProfileDropdown = () => {
   const { t } = useLanguage()
+  const { setIsDesktopExpanded } = useSidebar()
   const navigate = useNavigate()
   const { user: authUser, isAuthenticated } = useAuth()
   const [logoutApi] = useLogoutMutation()
@@ -91,8 +97,21 @@ const ProfileDropdown = () => {
   }
 
   const handleSettingsClick = () => {
+    setIsDesktopExpanded(true)
     handleCloseMenu()
     navigate("/setting")
+  }
+
+  const handleInstructorClick = () => {
+    setIsDesktopExpanded(true)
+    handleCloseMenu()
+    navigate("/setting/instructor")
+  }
+
+  const handleBillingClick = () => {
+    setIsDesktopExpanded(true)
+    handleCloseMenu()
+    navigate("/billing")
   }
 
   // Click outside to close (desktop only)
