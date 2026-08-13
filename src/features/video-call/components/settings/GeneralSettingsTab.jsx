@@ -16,7 +16,15 @@ const GeneralSettingsTab = ({
 }) => {
   const { t } = useLanguage()
   const gt = t?.rooms?.videoCall?.general || {}
-  const { room, user, id: roomIdFromContext, isHost: isHostFromContext, lkRoom } = useVideoCallContext()
+  const {
+    room,
+    user,
+    id: roomIdFromContext,
+    isHost: isHostFromContext,
+    lkRoom,
+    showAiSuggestions,
+    setShowAiSuggestions,
+  } = useVideoCallContext()
   const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
@@ -133,6 +141,25 @@ const GeneralSettingsTab = ({
         <span className="text-sm text-[#606060]">
           {gt.receiveSystemMsgsDesc ||
             "Hiển thị các thông báo tự động từ hệ thống trong khi cuộc họp đang diễn ra."}
+        </span>
+      </ListItem>
+
+      <ListItem
+        lines="auto"
+        rightContent={
+          <Switch
+            checked={showAiSuggestions}
+            onChange={(e) => setShowAiSuggestions?.(e.target.checked)}
+            colorClass="peer-checked:bg-green-500"
+          />
+        }
+      >
+        <span>
+          {gt.showAiSuggestions || "Hiển thị tin nhắn Cat Speak gợi ý"}
+        </span>
+        <span className="text-sm text-[#606060]">
+          {gt.showAiSuggestionsDesc ||
+            "Hiển thị các thông báo tin nhắn gợi ý tự động từ Trợ lý Cat Speak trong khung chat."}
         </span>
       </ListItem>
 

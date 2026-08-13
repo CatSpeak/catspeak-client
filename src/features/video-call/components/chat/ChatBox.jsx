@@ -1,22 +1,14 @@
 import React, { useEffect } from "react"
-import { Settings, Sparkles } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import Popover from "@/shared/components/ui/Popover"
-import Switch from "@/shared/components/ui/inputs/Switch"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
-import ListItem from "@/shared/components/ui/ListItem"
-import IconButton from "@/shared/components/ui/buttons/IconButton"
-import MenuList from "@/shared/components/ui/MenuList"
 
 const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
   const { t } = useLanguage()
   const {
     aiMessages = [],
-    receiveSystemMsgs,
-    setReceiveSystemMsgs,
     setIsChatCollapsed,
     setIsAiCollapsed,
     unreadRoomChat,
@@ -38,38 +30,6 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
       setIsAiCollapsed(false)
     }
   }, [activeChatTab, setIsChatCollapsed, setIsAiCollapsed])
-
-  const settingsPopoverContent = (
-    <MenuList className="w-[320px]">
-      <ListItem
-        lines={1}
-        rightContent={
-          <Switch
-            checked={receiveSystemMsgs}
-            onChange={(e) => setReceiveSystemMsgs(e.target.checked)}
-            colorClass="peer-checked:bg-green-500"
-          />
-        }
-      >
-        <span className="text-sm font-medium text-black truncate">
-          {t.rooms?.chatBox?.showSystemMessages ||
-            "Show Cat Speak suggestion messages"}
-        </span>
-      </ListItem>
-    </MenuList>
-  )
-
-  const settingsPopover = (
-    <Popover
-      trigger={
-        <IconButton variant="ghost" aria-label="Settings">
-          <Settings />
-        </IconButton>
-      }
-      content={settingsPopoverContent}
-      placement="bottom-left"
-    />
-  )
 
   const roomLabel = t.rooms?.chatBox?.title || "Tin nhắn phòng"
   const aiLabel = t.rooms?.chatBox?.aiAssistant || "Trợ lý Cat Speak"
@@ -113,21 +73,6 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
         {/* AI Tab Content */}
         {activeChatTab === "ai" && (
           <>
-            <ListItem
-              lines={1}
-              className="border-b border-border shrink-0"
-              leftContent={<Sparkles className="text-cath-red-700" />}
-              rightContent={
-                <div onClick={(e) => e.stopPropagation()}>
-                  {settingsPopover}
-                </div>
-              }
-            >
-              <span className="font-semibold">
-                {t.rooms?.chatBox?.aiSuggestion || "Gợi ý từ AI"}
-              </span>
-            </ListItem>
-
             <MessageList
               messages={aiMessages}
               t={t}

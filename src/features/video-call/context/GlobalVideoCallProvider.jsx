@@ -128,9 +128,17 @@ const IdleCallContent = ({
   children,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
+  showAiSuggestions,
+  setShowAiSuggestions,
 }) => (
   <GlobalVideoCallContext.Provider
-    value={{ ...IDLE_VALUE, receiveSystemMsgs, setReceiveSystemMsgs }}
+    value={{
+      ...IDLE_VALUE,
+      receiveSystemMsgs,
+      setReceiveSystemMsgs,
+      showAiSuggestions,
+      setShowAiSuggestions,
+    }}
   >
     {children}
   </GlobalVideoCallContext.Provider>
@@ -154,6 +162,15 @@ export const GlobalVideoCallProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("receiveSystemMsgs", JSON.stringify(receiveSystemMsgs))
   }, [receiveSystemMsgs])
+
+  const [showAiSuggestions, setShowAiSuggestions] = useState(() => {
+    const saved = localStorage.getItem("showAiSuggestions")
+    return saved !== null ? JSON.parse(saved) : true
+  })
+
+  useEffect(() => {
+    localStorage.setItem("showAiSuggestions", JSON.stringify(showAiSuggestions))
+  }, [showAiSuggestions])
 
   // Cross-tab call state broadcast listener
   useEffect(() => {
@@ -179,6 +196,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
       <IdleCallContent
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        showAiSuggestions={showAiSuggestions}
+        setShowAiSuggestions={setShowAiSuggestions}
       >
         {children}
       </IdleCallContent>
@@ -215,6 +234,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
         ContextProvider={GlobalVideoCallContext.Provider}
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        showAiSuggestions={showAiSuggestions}
+        setShowAiSuggestions={setShowAiSuggestions}
         panelState={panelState}
       >
         {children}
