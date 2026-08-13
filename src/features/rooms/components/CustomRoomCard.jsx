@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 import {
   Users,
   Check,
@@ -8,13 +8,13 @@ import {
   Bookmark,
   Share,
   Lock,
-} from "lucide-react";
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon";
-import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png";
-import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png";
-import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
+} from "lucide-react"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon"
+import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
+import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
+import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 
 const CustomRoomCard = ({
   room,
@@ -28,34 +28,31 @@ const CustomRoomCard = ({
   isDeleting,
   ct: propsCt = {},
 }) => {
-  const { t } = useLanguage();
-  const customRooms = { ...(t.rooms?.customRooms || {}), ...propsCt };
-  const roomId = room.id || room.roomId;
-  const isCopied = copiedId === roomId;
-  const [imageError, setImageError] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { t } = useLanguage()
+  const customRooms = { ...(t.rooms?.customRooms || {}), ...propsCt }
+  const roomId = room.id || room.roomId
+  const isCopied = copiedId === roomId
+  const [imageError, setImageError] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   // Thumbnail fallback handling
   const fallbackThumbnail =
-    room.languageType === "Chinese" ? ZHThumbnail : ENThumbnail;
+    room.languageType === "Chinese" ? ZHThumbnail : ENThumbnail
   const displayThumbnail =
-    imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl;
+    imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl
 
   // Normalize topic
   const activeTopic =
     room.topic ||
     (Array.isArray(room.topics) && room.topics.length > 0
       ? room.topics[0]
-      : undefined);
+      : undefined)
 
   // Password check (supports privacy: 1, "Private", isPrivate, hasPassword)
   const isPrivate =
-    room.privacy === "Private" || room.isPrivate || room.privacy === 1;
+    room.privacy === "Private" || room.isPrivate || room.privacy === 1
   const hasPassword =
-    isPrivate ||
-    room.hasPassword ||
-    room.isPasswordProtected ||
-    !!room.password;
+    isPrivate || room.hasPassword || room.isPasswordProtected || !!room.password
 
   // Duration text (supports remainingTime, isUnlimited, duration)
   const durationText = room.remainingTime
@@ -64,26 +61,26 @@ const CustomRoomCard = ({
       ? customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
       : room.duration && room.duration > 0
         ? `${room.duration} ${t.rooms?.minutes || "phút"}`
-        : customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn";
+        : customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
 
   // Participant count calculation
   const participants = Array.isArray(room.currentParticipants)
     ? room.currentParticipants
-    : [];
-  const currentCount = room.currentParticipantCount ?? participants.length ?? 0;
+    : []
+  const currentCount = room.currentParticipantCount ?? participants.length ?? 0
   const maxParticipantsDisplay =
     room.maxParticipants && room.maxParticipants > 0
       ? room.maxParticipants
-      : null;
+      : null
 
   const deleteConfirmMessage = (
     customRooms.deleteConfirmMessage ||
     `Bạn có chắc chắn muốn xóa "${room.name}"? Hành động này không thể hoàn tác.`
-  ).replace("{{name}}", room.name || "");
+  ).replace("{{name}}", room.name || "")
 
   const handleCardClick = () => {
-    if (onJoin) onJoin(roomId);
-  };
+    if (onJoin) onJoin(roomId)
+  }
 
   return (
     <>
@@ -127,12 +124,12 @@ const CustomRoomCard = ({
             )}
             {activeTopic &&
               (() => {
-                const { topicKey } = getTopicMeta(activeTopic);
+                const { topicKey } = getTopicMeta(activeTopic)
                 const topicLabel =
                   t?.rooms?.filters?.topics?.[topicKey] ||
                   activeTopic ||
                   t?.rooms?.filters?.topics?.other ||
-                  "Khác";
+                  "Khác"
                 return (
                   <div
                     className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10 cursor-default"
@@ -140,7 +137,7 @@ const CustomRoomCard = ({
                   >
                     {getTopicIcon(activeTopic)}
                   </div>
-                );
+                )
               })()}
           </div>
 
@@ -161,8 +158,8 @@ const CustomRoomCard = ({
               <div
                 className="flex shrink-0 h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-300 shadow-sm cursor-pointer bg-cath-red-700/20 hover:bg-cath-red-700/30 ring-1 ring-cath-red-700/40"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  if (onToggleBookmark) onToggleBookmark(roomId);
+                  e.stopPropagation()
+                  if (onToggleBookmark) onToggleBookmark(roomId)
                 }}
                 title={t?.rooms?.unbookmark || "Bỏ lưu phòng"}
               >
@@ -178,8 +175,8 @@ const CustomRoomCard = ({
                   <button
                     type="button"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(room);
+                      e.stopPropagation()
+                      onEdit(room)
                     }}
                     className="flex shrink-0 h-7 w-7 items-center justify-center rounded-full hover:bg-white/30 text-white transition-colors"
                     title={customRooms.edit || "Chỉnh sửa"}
@@ -193,8 +190,8 @@ const CustomRoomCard = ({
                   <button
                     type="button"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      setIsDeleteModalOpen(true);
+                      e.stopPropagation()
+                      setIsDeleteModalOpen(true)
                     }}
                     className="flex shrink-0 h-7 w-7 items-center justify-center rounded-full hover:bg-red-600/80 text-white transition-colors"
                     title={customRooms.delete || "Xóa phòng"}
@@ -226,8 +223,8 @@ const CustomRoomCard = ({
             {onCopyLink && (
               <div
                 onClick={(e) => {
-                  e.stopPropagation();
-                  onCopyLink(roomId);
+                  e.stopPropagation()
+                  onCopyLink(roomId)
                 }}
                 title={
                   customRooms.copyLink ||
@@ -277,8 +274,8 @@ const CustomRoomCard = ({
         open={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={() => {
-          onDelete(roomId);
-          setIsDeleteModalOpen(false);
+          onDelete(roomId)
+          setIsDeleteModalOpen(false)
         }}
         title={
           customRooms.deleteConfirmTitle ||
@@ -291,7 +288,7 @@ const CustomRoomCard = ({
         confirmVariant="destructive"
       />
     </>
-  );
-};
+  )
+}
 
-export default CustomRoomCard;
+export default CustomRoomCard

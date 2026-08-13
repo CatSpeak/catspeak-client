@@ -16,8 +16,8 @@ const SessionActionButtons = ({
   const { t } = useLanguage()
 
   return (
-    <div className="relative mt-5">
-      <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mt-2">
+    <div className="relative mt-4">
+      <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-4 mt-2">
         {badges.map((b) => {
           const Icon = b.icon
           const isOneOnOne = b.id === "connect_1_1"
@@ -61,7 +61,7 @@ const SessionActionButtons = ({
                 disabled={!isActionable || isLoadingThis}
                 loading={isActionable && isLoadingThis}
                 className="w-full sm:w-auto sm:min-w-[140px]"
-                roundedClass="rounded-full"
+                roundedClass="rounded-xl"
               >
                 {label}
               </Button3D>
