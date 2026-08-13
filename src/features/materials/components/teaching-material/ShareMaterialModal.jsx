@@ -13,7 +13,6 @@ import { PillButton } from "@/shared/components/ui/buttons";
 import {
   useUpdateMaterialSettingsMutation,
   useUpdateFolderSettingsMutation,
-  useGetPersonalMaterialByIdQuery,
   useGenerateMaterialShareTokenMutation,
   useGenerateFolderShareTokenMutation,
 } from "@/store/api/materialApi";
@@ -47,13 +46,6 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
 
   const isFolder = item && !item.fileName && !item.fileUrl;
 
-  const { data: materialDetailRes, isLoading: isDetailLoading } =
-    useGetPersonalMaterialByIdQuery(item?.id, {
-      skip: !open || isFolder || !item?.id,
-    });
-
-  const materialDetail = materialDetailRes?.data || materialDetailRes;
-
   const extractToken = (source) => {
     if (source?.shareToken) return source.shareToken;
     if (source?.publicShareUrl) {
@@ -64,36 +56,24 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
   };
 
   const [localToken, setLocalToken] = useState(() => extractToken(item));
-  const [hasManuallySetToken, setHasManuallySetToken] = useState(false);
 
   React.useEffect(() => {
     if (open) {
       setIsPublic(item?.isPublic ?? true);
       setAllowDownload(item?.allowDownload ?? true);
       setLocalToken(extractToken(item));
-      setHasManuallySetToken(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, item?.id]);
-
-  React.useEffect(() => {
-    if (open && !isFolder && materialDetail && !hasManuallySetToken) {
-      setLocalToken(extractToken(materialDetail));
-    }
-  }, [open, isFolder, materialDetail, hasManuallySetToken]);
+  }, [open, item]);
 
   const shareLink = (localToken && isPublic)
-    ? (isFolder
-      ? `${window.location.origin}/shared-folder/${localToken}`
-      : `${window.location.origin}/shared-material/${localToken}`)
+    ? `${window.location.origin}/shared-material/${localToken}`
     : "";
 
   const isLoading =
     isUpdatingMaterial ||
     isUpdatingFolder ||
     isGeneratingShare ||
-    isGeneratingFolderShare ||
-    isDetailLoading;
+    isGeneratingFolderShare;
 
   if (!item) return null;
 
@@ -110,10 +90,8 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
           const res = await generateFolderShareToken(item.id || item.folderId).unwrap();
           const responseData = res?.data || res;
           setLocalToken(responseData?.shareToken || null);
-          setHasManuallySetToken(true);
         } else {
           setLocalToken(null);
-          setHasManuallySetToken(true);
         }
       } else {
         await updateMaterialSettings({
@@ -126,10 +104,8 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
           const res = await generateMaterialShareToken(item.id).unwrap();
           const responseData = res?.data || res;
           setLocalToken(responseData?.shareToken || null);
-          setHasManuallySetToken(true);
         } else {
           setLocalToken(null);
-          setHasManuallySetToken(true);
         }
       }
 
@@ -219,7 +195,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
                 readOnly
                 value={
                   shareLink ||
-                  (isDetailLoading
+                  (isLoading
                     ? t.materials.loading
                     : isPublic
                       ? "Vui lòng lưu để tạo liên kết"

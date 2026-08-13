@@ -10,7 +10,7 @@ import { useLanguage } from '@/shared/context/LanguageContext';
 import FileDetailModal from './FileDetailModal';
 import SaveSharedMaterialModal from './SaveSharedMaterialModal';
 import { useRecordMaterialDownloadMutation, useRecordMaterialViewMutation } from '@/store/api/materialApi';
-import dayjs from 'dayjs';
+import { useTimezone } from "@/shared/hooks/useTimezone";
 
 const formatSize = (bytes) => {
   if (bytes === 0) return '0 B';
@@ -27,6 +27,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [recordDownload] = useRecordMaterialDownloadMutation();
   const [recordView] = useRecordMaterialViewMutation();
+  const { formatDate } = useTimezone();
 
   useEffect(() => {
     if (open && item?.id && !isOwner) {
@@ -49,7 +50,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
 
   if (!item) return null;
 
-  const isFolder = item && !item.fileName && !item.fileUrl;
+  const isFolder = item && (item.type === 'folder' || item.isFolder || item.folders !== undefined || item.subFolderCount !== undefined || (!item.fileUrl && !item.contentType));
 
   const handleDownload = async () => {
     if (item.fileUrl) {
@@ -127,46 +128,55 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
               {/* Folder List UI */}
               <div className="bg-white rounded-xl border border-[#E3BEBA] shadow-sm overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-[#F9F9F9] border-b border-[#E3BEBA]">
-                      <th className="py-3 px-4 font-semibold text-sm text-[#5B403E]">{t.materials.name || "Tên"}</th>
-                      <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] hidden sm:table-cell">{t.materials.size || "Kích thước"}</th>
-                      <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] hidden sm:table-cell">{t.materials.uploadDate || "Ngày đăng"}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(item.children || mockFolderItems).map((child) => (
-                      <tr key={child.id} className="border-b border-[#E3BEBA]/50 hover:bg-[#FFF5F5] cursor-pointer transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            {child.type === 'folder' || child.isFolder ? (
-                              <Folder className="w-5 h-5 text-[#8e1115] fill-current" />
-                            ) : (
-                              <FileText className="w-5 h-5 text-[#5B403E]" />
-                            )}
-                            <span className="font-medium text-[#1A1C1C] truncate max-w-[200px] md:max-w-[300px]">
-                              {child.name || child.fileName}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-sm text-[#5B403E] hidden sm:table-cell">
-                          {child.type === 'folder' || child.isFolder ? '-' : formatSize(child.size || child.fileSize || 0)}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-[#5B403E] hidden sm:table-cell">
-                          {dayjs(child.date || child.createdAt).format('DD/MM/YYYY')}
-                        </td>
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-left border-collapse min-w-[500px]">
+                    <thead>
+                      <tr className="bg-[#F9F9F9] border-b border-[#E3BEBA]">
+                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.name || "Tên"}</th>
+                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.type || "Loại"}</th>
+                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.size || "Kích thước"}</th>
+                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.uploadDate || "Ngày đăng"}</th>
                       </tr>
-                    ))}
-                    {(!item.children && mockFolderItems.length === 0) && (
-                      <tr>
-                        <td colSpan={3} className="py-8 text-center text-[#5B403E]">
-                          Thư mục trống
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {((item.folders || item.subFolders || item.materials)
+                        ? [...(item.folders || item.subFolders || []).map(f => ({ ...f, isFolder: true, id: f.folderId || f.id, name: f.folderName || f.name })),
+                        ...(item.materials || []).map(m => ({ ...m, isFolder: false, id: m.materialId || m.id }))]
+                        : (item.children || mockFolderItems)).map((child) => (
+                          <tr key={child.id} className="border-b border-[#E3BEBA]/50 hover:bg-[#FFF5F5] cursor-pointer transition-colors">
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                {child.type === 'folder' || child.isFolder ? (
+                                  <Folder className="w-5 h-5 text-[#8e1115] fill-current shrink-0" />
+                                ) : (
+                                  <FileText className="w-5 h-5 text-[#5B403E] shrink-0" />
+                                )}
+                                <span className="font-medium text-[#1A1C1C] truncate max-w-[150px] sm:max-w-[200px] md:max-w-[300px]">
+                                  {child.name || child.fileName}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-sm text-[#5B403E] whitespace-nowrap">
+                              {child.type === 'folder' || child.isFolder ? (t.materials.folder || "Thư mục") : ((child.name || child.fileName)?.split('.').pop()?.toUpperCase() || (t.materials.file || "Tài liệu"))}
+                            </td>
+                            <td className="py-3 px-4 text-sm text-[#5B403E] whitespace-nowrap">
+                              {child.type === 'folder' || child.isFolder ? '-' : formatSize(child.size || child.fileSize || 0)}
+                            </td>
+                            <td className="py-3 px-4 text-sm text-[#5B403E] whitespace-nowrap">
+                              {formatDate(child.uploadedAt || child.createdAt)}
+                            </td>
+                          </tr>
+                        ))}
+                      {(!item.children && mockFolderItems.length === 0) && (
+                        <tr>
+                          <td colSpan={4} className="py-8 text-center text-[#5B403E]">
+                            Thư mục trống
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -240,7 +250,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
                   <span>Ngày chia sẻ</span>
                 </div>
                 <span className="font-medium text-[#1A1C1C]">
-                  {item.uploadedAt || item.createdAt ? dayjs(item.uploadedAt || item.createdAt).format('DD/MM/YYYY') : 'N/A'}
+                  {item.uploadedAt || item.createdAt ? formatDate(item.uploadedAt || item.createdAt) : 'N/A'}
                 </span>
               </div>
             </div>

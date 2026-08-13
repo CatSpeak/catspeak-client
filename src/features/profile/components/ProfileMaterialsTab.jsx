@@ -350,8 +350,18 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                       }}
                       onDownload={() => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t)}
                       onShare={() => {
-                        setSelectedItem(folder);
-                        setIsShareModalOpen(true);
+                        if (isOwnProfile) {
+                          setSelectedItem(folder);
+                          setIsShareModalOpen(true);
+                        } else {
+                          if (folder.shareToken) {
+                            const link = `${window.location.origin}/shared-material/${folder.shareToken}`;
+                            navigator.clipboard.writeText(link);
+                            toast.success(t.materials.linkCopied || "Đã sao chép liên kết");
+                          } else {
+                            toast.error("Không thể lấy liên kết chia sẻ");
+                          }
+                        }
                       }}
                       onRename={() => {
                         setSelectedItem(folder);
@@ -404,8 +414,18 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                         }
                       }}
                       onShare={() => {
-                        setSelectedItem(file);
-                        setIsShareModalOpen(true);
+                        if (isOwnProfile) {
+                          setSelectedItem(file);
+                          setIsShareModalOpen(true);
+                        } else {
+                          if (file.shareToken) {
+                            const link = `${window.location.origin}/shared-material/${file.shareToken}`;
+                            navigator.clipboard.writeText(link);
+                            toast.success(t.materials.linkCopied || "Đã sao chép liên kết");
+                          } else {
+                            toast.error("Không thể lấy liên kết chia sẻ");
+                          }
+                        }
                       }}
                       onRename={() => {
                         setSelectedItem(file);
