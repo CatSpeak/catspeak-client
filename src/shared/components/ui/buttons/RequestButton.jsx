@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { useSelector } from "react-redux"
 import toast from "react-hot-toast"
 import { UserPlus, UserCheck, Clock, UserX, EllipsisVertical } from "lucide-react"
@@ -8,6 +8,7 @@ import Popover from "@/shared/components/ui/Popover"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import {
   useGetConnectionStatusQuery,
+  useGetPendingFriendRequestsQuery,
   useSendFriendRequestMutation,
   useDeleteFriendshipMutation,
   useRespondFriendRequestMutation,
@@ -55,12 +56,26 @@ const RequestButton = ({
       pollingInterval: 4000,
     })
 
+  // Fetch incoming pending requests of current user to distinguish incoming vs outgoing
+  const { data: pendingRequestsResponse } = useGetPendingFriendRequestsQuery(
+    undefined,
+    {
+      skip: !currentUserId,
+    },
+  )
+
   const [sendFriendRequest, { isLoading: isSending }] =
     useSendFriendRequestMutation()
   const [deleteFriendship, { isLoading: isDeleting }] =
     useDeleteFriendshipMutation()
   const [respondFriendRequest, { isLoading: isResponding }] =
     useRespondFriendRequestMutation()
+
+  const pendingRequestsList = useMemo(() => {
+    return Array.isArray(pendingRequestsResponse)
+      ? pendingRequestsResponse
+      : pendingRequestsResponse?.data || []
+  }, [pendingRequestsResponse])
 
   if (isOwnAccount || !targetId) {
     return null
@@ -110,11 +125,29 @@ const RequestButton = ({
     rawStatus?.receiver?.accountId ??
     rawStatus?.receiver?.id
 
+  // Match target user in incoming pending requests list
+  const matchingPendingRequest = useMemo(() => {
+    if (!targetId || !pendingRequestsList.length) return null
+    return pendingRequestsList.find((req) => {
+      const rId =
+        req.requester?.accountId ??
+        req.requester?.id ??
+        req.requesterId ??
+        req.senderId
+      const fId = req.friendshipId ?? req.id
+      return (
+        (rId != null && Number(rId) === targetId) ||
+        (fId != null && rawStatus?.friendshipId != null && Number(fId) === Number(rawStatus.friendshipId))
+      )
+    })
+  }, [targetId, pendingRequestsList, rawStatus?.friendshipId])
+
   // Incoming: Current user B received request from target user A (B viewing A)
   const isIncomingRequest = Boolean(
     !isFriend &&
       hasPendingStatus &&
-      (rawStatus?.isIncomingRequest === true ||
+      (Boolean(matchingPendingRequest) ||
+        rawStatus?.isIncomingRequest === true ||
         rawStatus?.isReceiver === true ||
         rawStatus?.isReceived === true ||
         rawStatus?.isPendingRequest === true ||
@@ -127,18 +160,19 @@ const RequestButton = ({
     !isFriend &&
       hasPendingStatus &&
       !isIncomingRequest &&
-      (rawStatus?.isOutgoingRequest === true ||
+      (Boolean(!matchingPendingRequest) ||
+        rawStatus?.isOutgoingRequest === true ||
         rawStatus?.isSender === true ||
         rawStatus?.isRequested === true ||
         rawStatus?.isSent === true ||
         (requesterId != null && currentUserId != null && Number(requesterId) === Number(currentUserId)) ||
-        (addresseeId != null && targetId != null && Number(addresseeId) === targetId) ||
-        rawStatus?.isSender !== false),
+        (addresseeId != null && targetId != null && Number(addresseeId) === targetId)),
   )
 
   const isActionLoading = isSending || isDeleting || isResponding || Boolean(loadingAction)
 
   const friendshipId =
+    matchingPendingRequest?.friendshipId ??
     rawStatus?.friendshipId ??
     rawStatus?.friendRequestId ??
     relationship?.friendshipId ??
