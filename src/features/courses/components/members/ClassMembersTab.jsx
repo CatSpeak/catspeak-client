@@ -308,7 +308,7 @@ const ClassMembersTab = ({ classData, isStudent }) => {
                     {id && (
                       <RequestButton
                         id={id}
-                        relationship={student?.relationship || student}
+                        relationship={student?.relationship}
                         size="sm"
                       />
                     )}
