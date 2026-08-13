@@ -14,8 +14,8 @@ import {
   useUpdateMaterialSettingsMutation,
   useUpdateFolderSettingsMutation,
   useGetPersonalMaterialByIdQuery,
-  useToggleMaterialShareMutation,
-  useToggleFolderShareMutation,
+  useGenerateMaterialShareTokenMutation,
+  useGenerateFolderShareTokenMutation,
 } from "@/store/api/materialApi";
 import toast from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -40,10 +40,10 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
     useUpdateMaterialSettingsMutation();
   const [updateFolderSettings, { isLoading: isUpdatingFolder }] =
     useUpdateFolderSettingsMutation();
-  const [toggleMaterialShare, { isLoading: isTogglingShare }] =
-    useToggleMaterialShareMutation();
-  const [toggleFolderShare, { isLoading: isTogglingFolderShare }] =
-    useToggleFolderShareMutation();
+  const [generateMaterialShareToken, { isLoading: isGeneratingShare }] =
+    useGenerateMaterialShareTokenMutation();
+  const [generateFolderShareToken, { isLoading: isGeneratingFolderShare }] =
+    useGenerateFolderShareTokenMutation();
 
   const isFolder = item && !item.fileName && !item.fileUrl;
 
@@ -54,10 +54,6 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
 
   const materialDetail = materialDetailRes?.data || materialDetailRes;
 
-  const [localToken, setLocalToken] = useState(null);
-  const [prevMaterialDetail, setPrevMaterialDetail] = useState(null);
-  const [prevFolderItem, setPrevFolderItem] = useState(null);
-
   const extractToken = (source) => {
     if (source?.shareToken) return source.shareToken;
     if (source?.publicShareUrl) {
@@ -67,70 +63,74 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
     return null;
   };
 
-  if (!isFolder && materialDetail !== prevMaterialDetail) {
-    setPrevMaterialDetail(materialDetail);
-    setLocalToken(extractToken(materialDetail));
-  }
+  const [localToken, setLocalToken] = useState(() => extractToken(item));
+  const [hasManuallySetToken, setHasManuallySetToken] = useState(false);
 
-  if (isFolder && item !== prevFolderItem) {
-    setPrevFolderItem(item);
-    setLocalToken(extractToken(item));
-  }
+  React.useEffect(() => {
+    if (open) {
+      setIsPublic(item?.isPublic ?? true);
+      setAllowDownload(item?.allowDownload ?? true);
+      setLocalToken(extractToken(item));
+      setHasManuallySetToken(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, item?.id]);
+
+  React.useEffect(() => {
+    if (open && !isFolder && materialDetail && !hasManuallySetToken) {
+      setLocalToken(extractToken(materialDetail));
+    }
+  }, [open, isFolder, materialDetail, hasManuallySetToken]);
 
   const shareLink = (localToken && isPublic)
-    ? `${window.location.origin}/shared-material/${localToken}`
+    ? (isFolder
+      ? `${window.location.origin}/shared-folder/${localToken}`
+      : `${window.location.origin}/shared-material/${localToken}`)
     : "";
 
   const isLoading =
     isUpdatingMaterial ||
     isUpdatingFolder ||
-    isTogglingShare ||
-    isTogglingFolderShare ||
+    isGeneratingShare ||
+    isGeneratingFolderShare ||
     isDetailLoading;
-
-  // Sync state when item changes
-  const [prevItem, setPrevItem] = useState(item);
-  if (item !== prevItem) {
-    setPrevItem(item);
-    setIsPublic(item?.isPublic ?? true);
-    setAllowDownload(item?.allowDownload ?? true);
-  }
 
   if (!item) return null;
 
   const handleSave = async () => {
     try {
       if (isFolder) {
-        const toggleRes = await toggleFolderShare({
-          folderId: item.id || item.folderId,
-          isPublic,
-        }).unwrap();
-
         await updateFolderSettings({
           id: item.id || item.folderId,
           isPublic,
+          allowDownload,
         }).unwrap();
 
-        const responseData = toggleRes?.data || toggleRes;
-        setLocalToken(responseData?.shareToken || null);
+        if (isPublic) {
+          const res = await generateFolderShareToken(item.id || item.folderId).unwrap();
+          const responseData = res?.data || res;
+          setLocalToken(responseData?.shareToken || null);
+          setHasManuallySetToken(true);
+        } else {
+          setLocalToken(null);
+          setHasManuallySetToken(true);
+        }
       } else {
-        // 1. Toggle share + generate/delete token
-        const toggleRes = await toggleMaterialShare({
-          materialId: item.id,
-          isPublic,
-        }).unwrap();
-
-        // 2. Update download setting
         await updateMaterialSettings({
           id: item.id,
           isPublic,
           allowDownload,
         }).unwrap();
 
-        // 3. Lấy token từ BE
-        const responseData = toggleRes?.data || toggleRes;
-
-        setLocalToken(responseData?.shareToken || null);
+        if (isPublic) {
+          const res = await generateMaterialShareToken(item.id).unwrap();
+          const responseData = res?.data || res;
+          setLocalToken(responseData?.shareToken || null);
+          setHasManuallySetToken(true);
+        } else {
+          setLocalToken(null);
+          setHasManuallySetToken(true);
+        }
       }
 
       toast.success(t.materials.updateShareSettingsSuccess);
@@ -218,14 +218,12 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
                 type="text"
                 readOnly
                 value={
-                  isFolder
-                    ? t.materials.noLink
-                    : shareLink ||
-                    (isDetailLoading
-                      ? t.materials.loading
-                      : isPublic
-                        ? "Vui lòng lưu để tạo liên kết"
-                        : t.materials.noLink)
+                  shareLink ||
+                  (isDetailLoading
+                    ? t.materials.loading
+                    : isPublic
+                      ? "Vui lòng lưu để tạo liên kết"
+                      : t.materials.noLink)
                 }
                 className="w-full h-10 bg-[#F3F3F3] border border-[#E2E2E2] rounded-lg pl-9 pr-3 text-base text-[#1A1C1C] outline-none"
               />
@@ -235,9 +233,8 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
               variant="outline"
               roundedClass="rounded-xl"
               onClick={() => {
-                const linkToCopy = isFolder ? null : shareLink;
-                if (linkToCopy) {
-                  navigator.clipboard.writeText(linkToCopy);
+                if (shareLink) {
+                  navigator.clipboard.writeText(shareLink);
                   toast.success(t.materials.copiedLink);
                 }
               }}
@@ -249,24 +246,22 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
 
         <div className="h-px bg-[#E2E2E2] w-full" />
 
-        {/* Allow Download Toggle (only for files) */}
-        {!isFolder && (
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-base font-bold text-[#1A1C1C]">
-                {t.materials.allowDownload}
-              </span>
-              <span className="text-sm text-[#5B403E]">
-                {t.materials.allowDownloadDesc}
-              </span>
-            </div>
-            <Switch
-              checked={allowDownload}
-              onChange={(e) => setAllowDownload(e.target.checked)}
-              colorClass="peer-checked:bg-[#8e1115]"
-            />
+        {/* Allow Download Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-base font-bold text-[#1A1C1C]">
+              {t.materials.allowDownload}
+            </span>
+            <span className="text-sm text-[#5B403E]">
+              {t.materials.allowDownloadDesc}
+            </span>
           </div>
-        )}
+          <Switch
+            checked={allowDownload}
+            onChange={(e) => setAllowDownload(e.target.checked)}
+            colorClass="peer-checked:bg-[#8e1115]"
+          />
+        </div>
 
         {/* Advanced Options */}
         {/* <Dropdown

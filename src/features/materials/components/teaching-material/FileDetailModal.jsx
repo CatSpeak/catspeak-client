@@ -4,7 +4,7 @@ import { FileText, X, Copy, Download, FolderInput, Trash2, Eye, Info, ChevronLef
 import Switch from '@/shared/components/ui/inputs/Switch';
 import TextInput from '@/shared/components/ui/inputs/TextInput';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
-import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation } from '@/store/api/materialApi';
+import { useUpdateMaterialSettingsMutation, useRecordMaterialDownloadMutation, useGenerateMaterialShareTokenMutation } from '@/store/api/materialApi';
 import FilePreview from '@/shared/components/ui/FilePreview';
 import { useLanguage } from '@/shared/context/LanguageContext';
 
@@ -28,14 +28,23 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
 
   const [updateSettings] = useUpdateMaterialSettingsMutation();
   const [recordDownload] = useRecordMaterialDownloadMutation();
+  const [generateMaterialShareToken] = useGenerateMaterialShareTokenMutation();
+
+  const [localToken, setLocalToken] = useState(item?.shareToken || null);
 
   // Sync state when item changes
   React.useEffect(() => {
     if (item) {
       setIsPublic(item.isPublic);
       setAllowDownload(item.allowDownload);
+      setLocalToken(item.shareToken || null);
     }
-  }, [item]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item?.id]);
+
+  const shareLink = (localToken && isPublic)
+    ? `${window.location.origin}/shared-material/${localToken}`
+    : "";
 
   if (!item) return null;
 
@@ -43,6 +52,15 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
     setIsPublic(checked);
     try {
       await updateSettings({ id: item.id, isPublic: checked, allowDownload }).unwrap();
+
+      if (checked) {
+        const res = await generateMaterialShareToken(item.id).unwrap();
+        const responseData = res?.data || res;
+        setLocalToken(responseData?.shareToken || null);
+      } else {
+        setLocalToken(null);
+      }
+
       toast.success(t.materials.updateShareStatusSuccess);
     } catch {
       setIsPublic(!checked); // revert
@@ -174,7 +192,7 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
               <div className="flex items-center gap-2">
                 <TextInput
                   readOnly
-                  value={item.fileUrl || t.materials.noLink}
+                  value={shareLink || t.materials.noLink}
                   className="!h-10 text-xs md:text-sm bg-[#F9F9F9] border-[#E3BEBA] !rounded-xl"
                   containerClassName="flex-1"
                 />
@@ -184,8 +202,8 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
                   startIcon={<Copy className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                   className="!text-xs md:!text-sm px-3 md:px-4"
                   onClick={() => {
-                    if (item.fileUrl) {
-                      navigator.clipboard.writeText(item.fileUrl);
+                    if (shareLink) {
+                      navigator.clipboard.writeText(shareLink);
                       toast?.success?.(t.materials.copiedLink) || alert(t.materials.copiedLink);
                     }
                   }}

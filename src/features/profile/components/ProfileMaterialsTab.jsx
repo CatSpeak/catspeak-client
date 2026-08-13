@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 
 import ShareMaterialModal from '../../materials/components/teaching-material/ShareMaterialModal';
 import DeleteFolderModal from '../../materials/components/teaching-material/DeleteFolderModal';
+import PublicMaterialModal from '../../materials/components/teaching-material/PublicMaterialModal';
 import FileDetailModal from '../../materials/components/teaching-material/FileDetailModal';
 import MoveMaterialModal from '../../materials/components/teaching-material/MoveMaterialModal';
 import RenameMaterialModal from '../../materials/components/teaching-material/RenameMaterialModal';
@@ -35,9 +36,6 @@ const formatDate = (dateString) => {
   return dayjs(dateString).format('DD/MM/YYYY');
 };
 
-const MOCK_FOLDERS = []; // Fallback for guest
-const MOCK_FILES = [];
-
 const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -51,6 +49,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const [isDeleteFolderOpen, setIsDeleteFolderOpen] = useState(false);
   const [isFileDetailOpen, setIsFileDetailOpen] = useState(false);
   const [isFilePreviewOpen, setIsFilePreviewOpen] = useState(false);
+  const [isPublicMaterialModalOpen, setIsPublicMaterialModalOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
@@ -86,7 +85,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         fileUrl: data.fileUrl || data.previewUrl,
         fileName: data.fileName || data.name
       });
-      setIsFilePreviewOpen(true);
+      setIsPublicMaterialModalOpen(true);
 
       // Clean up the URL to prevent reopening the modal on tab switch
       searchParams.delete("sharedMaterialToken");
@@ -530,6 +529,17 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
           />
         </>
       )}
+
+      <PublicMaterialModal
+        open={isPublicMaterialModalOpen}
+        onClose={() => setIsPublicMaterialModalOpen(false)}
+        item={selectedItem}
+        isOwner={Boolean(
+          selectedItem &&
+          isOwnProfile &&
+          materials.some(m => String(m.id) === String(selectedItem.id) && isFolder(m) === isFolder(selectedItem))
+        )}
+      />
     </div>
   );
 };

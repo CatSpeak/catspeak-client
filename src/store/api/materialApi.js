@@ -97,10 +97,10 @@ export const materialApi = baseApi.injectEndpoints({
 
     // Update settings of a personal folder
     updateFolderSettings: builder.mutation({
-      query: ({ id, isPublic }) => ({
+      query: ({ id, isPublic, allowDownload }) => ({
         url: `/personal-materials/folders/${id}/settings`,
         method: "PUT",
-        body: { isPublic },
+        body: { isPublic, allowDownload },
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: "PersonalMaterials", id },
@@ -108,14 +108,14 @@ export const materialApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // Toggle material share link
-    toggleMaterialShare: builder.mutation({
-      query: ({ materialId, isPublic }) => ({
-        url: `/personal-materials/share/${materialId}/toggle`,
+    // Generate material share link
+    generateMaterialShareToken: builder.mutation({
+      query: (materialId) => ({
+        url: `/personal-materials/share/${materialId}`,
         method: "POST",
-        body: { isPublic },
+        body: {}, // empty body for expiresAt, maxUses
       }),
-      invalidatesTags: (result, error, { materialId }) => [
+      invalidatesTags: (result, error, materialId) => [
         { type: "PersonalMaterials", id: materialId },
         "PersonalMaterials",
       ],
@@ -127,14 +127,14 @@ export const materialApi = baseApi.injectEndpoints({
       providesTags: ["PersonalMaterials"],
     }),
 
-    // Toggle folder share link
-    toggleFolderShare: builder.mutation({
-      query: ({ folderId, isPublic }) => ({
-        url: `/personal-materials/folders/share/${folderId}/toggle`,
+    // Generate folder share link
+    generateFolderShareToken: builder.mutation({
+      query: (folderId) => ({
+        url: `/personal-materials/folders/share/${folderId}`,
         method: "POST",
-        body: { isPublic },
+        body: {},
       }),
-      invalidatesTags: (result, error, { folderId }) => [
+      invalidatesTags: (result, error, folderId) => [
         { type: "PersonalMaterials", id: folderId },
         "PersonalMaterials",
       ],
@@ -280,9 +280,9 @@ export const {
   useMoveFolderMutation,
   useMoveMaterialsBulkMutation,
   useDeleteMaterialsBulkMutation,
-  useToggleMaterialShareMutation,
+  useGenerateMaterialShareTokenMutation,
   useGetMaterialByShareTokenQuery,
-  useToggleFolderShareMutation,
+  useGenerateFolderShareTokenMutation,
   useGetFolderByShareTokenQuery,
   useGetPublicMaterialsByUserIdQuery,
 } = materialApi;
