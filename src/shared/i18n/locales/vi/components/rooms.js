@@ -604,6 +604,8 @@ export default {
   noLimit: "Không giới hạn",
   copySuccess: "Đã sao chép liên kết",
   copyLinkTooltip: "Sao chép liên kết",
+  expiredBadge: "Đã hết hạn",
+  roomExpiredToast: "Phòng này đã hết thời hạn sử dụng!",
   callEnded: {
     titleExpired: "Phiên này đã hết hạn",
     titleLeft: "Bạn đã rời khỏi cuộc họp",
@@ -613,7 +615,7 @@ export default {
       "Bạn có thể đóng cửa sổ này một cách an toàn hoặc quay lại màn hình chính.",
     rejoin: "Tham gia lại",
     returnHome: "Quay lại trang chủ",
-    expiredToast: "Phiên kết nối đã kết thúc",
+    expiredToast: "Cuộc gọi đã kết thúc do hết thời lượng phòng",
   },
   breakoutRooms: {
     mainRoom: "Phòng chính",

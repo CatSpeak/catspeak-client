@@ -36,6 +36,7 @@ import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import PasswordScreen from "../components/PasswordScreen"
 import CallEndedScreen from "../components/CallEndedScreen"
 import VideoCallErrorBoundary from "@/shared/components/VideoCallErrorBoundary"
+import { isRoomExpired } from "@/shared/utils/dateUtils"
 
 /**
  * Phases:
@@ -51,6 +52,30 @@ export const VideoCallProvider = ({ children }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { t, language } = useLanguage()
+
+  const { isAuthenticated, user } = useAuth()
+
+  // ── Room Expiration Check for Direct URL Access ──
+  const {
+    data: rawRoomData,
+    isLoading: isLoadingRoomDataCheck,
+  } = useGetRoomByIdQuery(roomId, {
+    skip: !roomId || !user,
+  })
+
+  const currentRoomObj = rawRoomData?.data || rawRoomData
+
+  useEffect(() => {
+    if (!currentRoomObj || isLoadingRoomDataCheck) return
+
+    if (isRoomExpired(currentRoomObj)) {
+      toast.error(
+        t?.rooms?.callEnded?.expiredToast || "Cuộc gọi đã kết thúc do hết thời lượng phòng"
+      )
+      const communityLang = localStorage.getItem("communityLanguage") || language || "en"
+      navigate(`/${communityLang}/community`, { replace: true })
+    }
+  }, [currentRoomObj, isLoadingRoomDataCheck, language, navigate, t])
 
   // Check if there's already an active global call for this room
   const { isInCall, callInfo } = useSelector((s) => s.videoCall)

@@ -18,6 +18,7 @@ const RoomClosingWarningModal = ({ remainingSeconds, t }) => {
       !isDismissed &&
       remainingSeconds !== null &&
       remainingSeconds > 0 &&
+      remainingSeconds <= 300 &&
       !audioPlayedRef.current
     ) {
       audioPlayedRef.current = true
@@ -28,23 +29,27 @@ const RoomClosingWarningModal = ({ remainingSeconds, t }) => {
 
   return (
     <Modal
-      open={!isDismissed && remainingSeconds !== null && remainingSeconds > 0}
+      open={
+        !isDismissed &&
+        remainingSeconds !== null &&
+        remainingSeconds > 0 &&
+        remainingSeconds <= 300
+      }
       onClose={() => setIsDismissed(true)}
-      title={t?.rooms?.videoCall?.roomClosingTitle || "Room Ending Soon"}
+      title={t?.rooms?.videoCall?.roomClosingTitle || "Phòng sắp hết giờ"}
       showCloseButton={true}
       className="max-w-md w-full"
     >
       <div className="flex flex-col items-center justify-center p-4 py-8 text-center">
-        <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
+        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4 border border-amber-200 shadow-sm animate-pulse">
           <Clock size={32} />
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">
-          {t?.rooms?.videoCall?.roomClosingSubtitleStatic ||
-            "This session will end soon."}
+          {t?.rooms?.videoCall?.roomClosingSubtitleStatic || "Phòng sẽ tự động kết thúc sau ít phút nữa"}
         </h3>
-        <p className="text-gray-500">
+        <p className="text-sm text-gray-500 max-w-xs leading-relaxed">
           {t?.rooms?.videoCall?.roomClosingDescription ||
-            "Please wrap up your conversation. The room will automatically close when the timer reaches zero."}
+            "Còn chưa đầy 5 phút nữa cuộc gọi sẽ tự động đóng. Vui lòng hoàn tất cuộc hội thoại của bạn."}
         </p>
       </div>
     </Modal>
