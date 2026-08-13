@@ -50,7 +50,7 @@ export const navSections = [
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
-      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
+      { key: "events", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
   {

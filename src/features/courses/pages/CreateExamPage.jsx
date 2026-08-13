@@ -21,6 +21,7 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
 import { DatePicker } from "@/shared/components/ui/inputs";
 import RenderHTML from "@/shared/components/ui/RenderHTML";
+import { IconButton } from "@/shared/components/ui/buttons";
 import {
   buildQuizPayload,
   buildQuizUpdatePayload,
@@ -32,6 +33,7 @@ import {
 } from "@/features/courses/utils/quizUtils";
 import { Editor } from "@tinymce/tinymce-react";
 import TeacherQuizDetailView from "@/features/courses/components/grading/TeacherQuizDetailView";
+import ImportExcelInstructionModal from "@/features/courses/components/grading/ImportExcelInstructionModal";
 import {
   Trash2,
   Copy,
@@ -48,6 +50,7 @@ import {
   Flag,
   Image as ImageIcon,
   Music as MusicIcon,
+  Info,
 } from "lucide-react";
 
 const VI_VALIDATION_MESSAGES = {
@@ -184,7 +187,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isImportingMode, setIsImportingMode] = useState(false);
-
+  const importFileInputRef = useRef(null);
   const routeQuizId = params.quizId || searchParams.get("quizId");
   const [createdQuizId, setCreatedQuizId] = useState(null);
   const effectiveQuizId = routeQuizId || createdQuizId;
@@ -193,6 +196,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     location.pathname.endsWith("/edit") || searchParams.get("mode") === "edit";
   const initialViewMode = isEditPath || !effectiveQuizId ? "edit" : "detail";
   const [viewMode, setViewMode] = useState(initialViewMode);
+  const [isExcelInstructionOpen, setIsExcelInstructionOpen] = useState(false);
 
   // Redirect legacy /create-exam?quizId=4 to clean route /quiz/4
   useEffect(() => {
@@ -285,6 +289,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [draggableIndex, setDraggableIndex] = useState(null);
   const lastScrollTimeRef = useRef(0);
+  const [importedFileName, setImportedFileName] = useState(null);
 
   // Collapse state
   const [collapsedQuestions, setCollapsedQuestions] = useState({});
@@ -355,15 +360,25 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      toast.success("Tải file mẫu thành công!");
+      toast.success(ce.toastTemplateDownloaded || "Tải file mẫu thành công!");
     } catch (err) {
       console.error(err);
-      toast.error("Tải file mẫu thất bại.");
+      toast.error(ce.toastTemplateDownloadFailed || "Tải file mẫu thất bại.");
     }
   };
 
   const handleImportFile = async (file) => {
     if (!file) return;
+    const files = file instanceof FileList ? Array.from(file) : [file];
+    const targetFile = files[0];
+    if (files.length > 1) {
+      toast.error(
+        ce.toastMultipleFilesSelected ||
+        "Chỉ hỗ trợ tải lên 1 file mỗi lần. Hệ thống đã chọn file đầu tiên.",
+      );
+    }
+
+    importFileInputRef.current = null;
 
     let targetQuizId = effectiveQuizId;
     if (!targetQuizId) {
@@ -371,7 +386,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       if (!title?.trim()) {
         // ← THÊM LẠI dòng này!
         setIsImportingMode(false);
-        toast.error("Vui lòng nhập tên bài kiểm tra trước khi import file.");
+        toast.error(
+          ce.toastEnterTitleBeforeImport ||
+          "Vui lòng nhập tên bài kiểm tra trước khi import file.",
+        );
         return;
       }
       try {
@@ -379,7 +397,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         targetQuizId = persistedQuiz?.quizId;
       } catch (error) {
         setIsImportingMode(false);
-        toast.error("Không thể tự động tạo bài kiểm tra. Vui lòng thử lại.");
+        toast.error(
+          ce.toastAutoCreateFailed ||
+          "Không thể tự động tạo bài kiểm tra. Vui lòng thử lại.",
+        );
         return;
       }
     }
@@ -388,9 +409,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     formData.append("file", file);
 
     try {
-      toast.loading("Đang trích xuất câu hỏi từ file...", {
-        id: "import-toast",
-      });
+      toast.loading(
+        ce.toastExtractingQuestions || "Đang trích xuất câu hỏi từ file...",
+        {
+          id: "import-toast",
+        },
+      );
       const response = await importTeacherQuestionsPreview({
         classId: id,
         quizId: targetQuizId,
@@ -399,9 +423,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
       const parsedQuestions = response.questions || [];
       if (parsedQuestions.length === 0) {
-        toast.error("Không tìm thấy câu hỏi hợp lệ trong file.", {
-          id: "import-toast",
-        });
+        toast.error(
+          ce.toastNoValidQuestions ||
+          "Không tìm thấy câu hỏi hợp lệ trong file.",
+          {
+            id: "import-toast",
+          },
+        );
         return;
       }
 
@@ -440,6 +468,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       });
 
       setFormField("questions", (prev) => [...prev, ...localQuestions]);
+      setImportedFileName(file.name);
       setViewMode("edit");
       if (
         !routeQuizId &&
@@ -454,17 +483,42 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         );
       }
       toast.success(
-        `Đã trích xuất ${localQuestions.length} câu hỏi thành công! Bạn có thể chỉnh sửa trước khi lưu.`,
+        (
+          ce.toastExtractSuccess ||
+          "Đã trích xuất {{count}} câu hỏi thành công! Bạn có thể chỉnh sửa trước khi lưu."
+        ).replace("{{count}}", localQuestions.length),
         { id: "import-toast" },
       );
     } catch (err) {
+      if (importFileInputRef.current) {
+        importFileInputRef.current.value = "";
+      }
       setIsImportingMode(false);
       console.error(err);
       toast.error(
-        err?.data?.error || err?.data?.message || "Trích xuất file thất bại.",
+        err?.data?.error ||
+        err?.data?.message ||
+        ce.toastExtractFailed ||
+        "Trích xuất file thất bại.",
         { id: "import-toast" },
       );
     }
+  };
+
+  const handleReUploadExcel = () => {
+    setImportedFileName(null);
+    // Mở hộp thoại chọn file ngay
+    if (importFileInputRef.current) {
+      importFileInputRef.current.click();
+    }
+  };
+
+  const handleRemoveImportedFile = () => {
+    setImportedFileName(null);
+    toast.success(
+      ce.toastFileRemoved ||
+      "Đã xóa file đã tải lên. Bạn có thể chọn file mới.",
+    );
   };
 
   // Question management handlers
@@ -581,11 +635,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              mediaFile: file,
-              mediaUrl: previewUrl,
-              clearMedia: false,
-            }
+            ...q,
+            mediaFile: file,
+            mediaUrl: previewUrl,
+            clearMedia: false,
+          }
           : q,
       ),
     );
@@ -603,11 +657,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              audioFile: file,
-              audioUrl: previewUrl,
-              clearAudio: false,
-            }
+            ...q,
+            audioFile: file,
+            audioUrl: previewUrl,
+            clearAudio: false,
+          }
           : q,
       ),
     );
@@ -619,11 +673,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              mediaFile: null,
-              mediaUrl: null,
-              clearMedia: true,
-            }
+            ...q,
+            mediaFile: null,
+            mediaUrl: null,
+            clearMedia: true,
+          }
           : q,
       ),
     );
@@ -634,11 +688,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       prev.map((q, i) =>
         i === index
           ? {
-              ...q,
-              audioFile: null,
-              audioUrl: null,
-              clearAudio: true,
-            }
+            ...q,
+            audioFile: null,
+            audioUrl: null,
+            clearAudio: true,
+          }
           : q,
       ),
     );
@@ -955,7 +1009,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             error,
             language,
             ce.errorPublish ||
-              "The quiz could not be published. Check its details and try again.",
+            "The quiz could not be published. Check its details and try again.",
           );
           toast.error(
             (
@@ -1125,10 +1179,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {hasMalformedQuizResponse
             ? ce.invalidResponse || "The quiz response was invalid."
             : getQuizErrorMessage(
-                quizDetailError,
-                language,
-                ce.loadFailed || "The quiz could not be loaded.",
-              )}
+              quizDetailError,
+              language,
+              ce.loadFailed || "The quiz could not be loaded.",
+            )}
         </p>
         <button
           type="button"
@@ -1290,7 +1344,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
                 {/* Options/Answers selection list */}
                 {currentQuestion.type === "MultipleChoiceSingle" ||
-                currentQuestion.type === "mcq" ? (
+                  currentQuestion.type === "mcq" ? (
                   <div className="flex flex-col gap-3">
                     {(currentQuestion.options || []).map((opt, optIdx) => {
                       const isSelected =
@@ -1303,19 +1357,17 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                           onClick={() =>
                             handleSelectOption(currentQuestion.id, optIdx)
                           }
-                          className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${
-                            isSelected
-                              ? "border-[#990011] bg-red-50/10"
-                              : "border-border bg-gray-50/50 hover:bg-gray-150/30"
-                          }`}
+                          className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
+                            ? "border-[#990011] bg-red-50/10"
+                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
+                            }`}
                         >
                           <span
                             aria-hidden="true"
-                            className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${
-                              isSelected
-                                ? "border-[#990011] bg-red-50/10"
-                                : "border-gray-300"
-                            }`}
+                            className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected
+                              ? "border-[#990011] bg-red-50/10"
+                              : "border-gray-300"
+                              }`}
                           >
                             {isSelected && (
                               <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
@@ -1350,11 +1402,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                               return { ...prev, [currentQuestion.id]: nextSel };
                             });
                           }}
-                          className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${
-                            isSelected
-                              ? "border-[#990011] bg-red-50/10"
-                              : "border-border bg-gray-50/50 hover:bg-gray-150/30"
-                          }`}
+                          className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
+                            ? "border-[#990011] bg-red-50/10"
+                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
+                            }`}
                         >
                           <span
                             aria-hidden="true"
@@ -1386,19 +1437,17 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                           onClick={() =>
                             handleSelectOption(currentQuestion.id, optIdx)
                           }
-                          className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${
-                            isSelected
-                              ? "border-[#990011] bg-red-50/10"
-                              : "border-border bg-gray-50/50 hover:bg-gray-150/30"
-                          }`}
+                          className={`flex w-full items-center gap-3 p-4 border rounded-2xl cursor-pointer select-none text-left transition-all active:scale-[0.99] ${isSelected
+                            ? "border-[#990011] bg-red-50/10"
+                            : "border-border bg-gray-50/50 hover:bg-gray-150/30"
+                            }`}
                         >
                           <span
                             aria-hidden="true"
-                            className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${
-                              isSelected
-                                ? "border-[#990011] bg-red-50/10"
-                                : "border-gray-300"
-                            }`}
+                            className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isSelected
+                              ? "border-[#990011] bg-red-50/10"
+                              : "border-gray-300"
+                              }`}
                           >
                             {isSelected && (
                               <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
@@ -1602,15 +1651,15 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           },
           ...(classData.courseId
             ? [
-                {
-                  label:
-                    t.courses?.student?.courseDetails || "Chi tiết khóa học",
-                  onClick: () =>
-                    navigate(
-                      `/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`,
-                    ),
-                },
-              ]
+              {
+                label:
+                  t.courses?.student?.courseDetails || "Chi tiết khóa học",
+                onClick: () =>
+                  navigate(
+                    `/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`,
+                  ),
+              },
+            ]
             : []),
           {
             label: t.courses?.student?.classDetails || "Chi tiết lớp học",
@@ -1695,7 +1744,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   // placeholder: ce.descriptionPlaceholder,
                   skin: "oxide",
                   setup: (editor) => {
-                    editor.on("focus", () => {});
+                    editor.on("focus", () => { });
                   },
                 }}
               />
@@ -1704,9 +1753,19 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
           {/* Heading: Questions list */}
           <div className="flex justify-between items-center px-2">
-            <h2 className="text-lg font-bold text-gray-800">
-              {ce.questionsList || "Danh sách câu hỏi"}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-800">
+                {ce.questionsList || "Danh sách câu hỏi"}
+              </h2>
+              <IconButton
+                variant="ghost"
+                size="xs"
+                onClick={() => setIsExcelInstructionOpen(true)}
+                title={ce.importExcelHowToTitle || "Cách điền file Excel"}
+              >
+                <Info className="w-5 h-5" />
+              </IconButton>
+            </div>
             <span className="text-sm font-semibold text-gray-500">
               {ce.totalScore || "Tổng điểm"}:{" "}
               <span className="text-[#990011] font-bold">{totalScoreVal}</span>
@@ -1715,101 +1774,176 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
           {/* Questions Container */}
           <div className="flex flex-col gap-4">
-            <div
-              className="border-2 border-dashed border-red-200 bg-[#990011]/[0.02] rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] cursor-pointer"
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const files = e.dataTransfer.files;
-                if (files && files[0]) {
+            {importedFileName ? (
+              <div className="border-2 border-green-300 bg-green-50/50 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shrink-0">
+                    <svg
+                      className="w-7 h-7 text-green-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <polyline points="7 15 10.5 18.5 17 12" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <h3
+                      className="text-sm font-extrabold text-gray-800 truncate"
+                      title={importedFileName}
+                    >
+                      {importedFileName}
+                    </h3>
+                    <p className="text-xs text-green-700 mt-0.5">
+                      {ce.extractedSuccessDesc ||
+                        "Đã trích xuất câu hỏi thành công — có thể chỉnh sửa trực tiếp bên dưới."}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleReUploadExcel}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                  >
+                    <svg
+                      className="w-3.5 h-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    {ce.reupload || "Upload lại"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="border-2 border-dashed border-red-200 bg-[#990011]/[0.02] rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] cursor-pointer"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const files = e.dataTransfer.files;
+                  if (!files || files.length === 0) return;
+                  if (files.length > 1) {
+                    toast.error(
+                      ce.uploadSingleFileOnlyDragDrop ||
+                      "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng kéo thả 1 file duy nhất.",
+                    );
+                    return;
+                  }
                   handleImportFile(files[0]);
-                }
-              }}
-            >
-              {/* File Icon */}
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-2">
-                <svg
-                  className="w-7 h-7 text-[#990011]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path
-                    d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
-                    fill="#990011"
-                    fillOpacity="0.1"
-                  />
-                  <polyline points="14 2 14 8 20 8" />
-                  <path d="M12 18v-6" />
-                  <polyline points="9 15 12 12 15 15" />
-                </svg>
-              </div>
-              <h3 className="text-base font-extrabold text-gray-800">
-                Nhập câu hỏi từ file Excel
-              </h3>
-              <p className="text-xs text-gray-500 max-w-sm mt-1">
-                Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                <label className="flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs">
+                }}
+              >
+                {/* File Icon */}
+                <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-2">
                   <svg
-                    className="w-4 h-4"
+                    className="w-7 h-7 text-[#990011]"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2.5"
+                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                    <path
+                      d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
+                      fill="#990011"
+                      fillOpacity="0.1"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                    <path d="M12 18v-6" />
+                    <polyline points="9 15 12 12 15 15" />
                   </svg>
-                  Chọn tệp
-                  <input
-                    type="file"
-                    accept=".xlsx"
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        handleImportFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={handleDownloadTemplate}
-                  disabled={isDownloadingTemplate}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold border border-gray-300 rounded-xl transition-all shadow-xs disabled:opacity-55"
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                </div>
+                <h3 className="text-base font-extrabold text-gray-800">
+                  {ce.importFromExcel || "Nhập câu hỏi từ file Excel"}
+                </h3>
+                <p className="text-xs text-gray-500 max-w-sm mt-1">
+                  {ce.uploadExcelDesc ||
+                    "Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi."}
+                </p>
+                {/* Modal trigger via Info icon instead */}
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+                  <label className="flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs">
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                    </svg>
+                    {ce.chooseFile || "Chọn tệp"}
+                    <input
+                      type="file"
+                      accept=".xlsx"
+                      className="hidden"
+                      ref={importFileInputRef}
+                      onChange={(e) => {
+                        if (e.target.files?.length > 1) {
+                          toast.error(
+                            ce.uploadSingleFileOnlySelect ||
+                            "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng chọn lại 1 file duy nhất.",
+                          );
+                          e.target.value = "";
+                          return;
+                        }
+                        if (e.target.files?.[0]) {
+                          handleImportFile(e.target.files[0]);
+                          e.target.value = "";
+                        }
+                      }}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    disabled={isDownloadingTemplate}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold border border-gray-300 rounded-xl transition-all shadow-xs disabled:opacity-55"
                   >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Tải file mẫu
-                </button>
+                    <svg
+                      className="w-4 h-4 text-gray-500"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    {ce.downloadTemplate || "Tải file mẫu"}
+                  </button>
+                </div>
+                <div className="text-[11px] text-gray-400 mt-3 leading-relaxed">
+                  {ce.supportedFormat ||
+                    "Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB"}
+                  <br />
+                  {ce.orDragDrop || "hoặc kéo thả tệp vào đây"}
+                </div>
               </div>
-              <div className="text-[11px] text-gray-400 mt-3 leading-relaxed">
-                Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB
-                <br />
-                hoặc kéo thả tệp vào đây
-              </div>
-            </div>
+            )}
 
             {questions.map((q, idx) => (
               <div
@@ -1818,11 +1952,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 onDragStart={(e) => handleDragStart(e, idx)}
                 onDragOver={(e) => handleDragOver(e, idx)}
                 onDragEnd={handleDragEnd}
-                className={`relative bg-white border rounded-3xl overflow-hidden flex shadow-xs group transition-all duration-200 ${
-                  draggedIndex === idx
-                    ? "opacity-40 border-dashed border-[#990011] scale-[0.99] bg-red-50/5"
-                    : "border-border border-solid"
-                }`}
+                className={`relative bg-white border rounded-3xl overflow-hidden flex shadow-xs group transition-all duration-200 ${draggedIndex === idx
+                  ? "opacity-40 border-dashed border-[#990011] scale-[0.99] bg-red-50/5"
+                  : "border-border border-solid"
+                  }`}
               >
                 {/* Left drag-bar */}
                 <div className="w-12 bg-gray-50 border-r border-border flex flex-col items-center py-4 gap-1.5 select-none shrink-0">
@@ -1984,7 +2117,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                       {q.content
                         ? q.content
                         : ce.noQuestionContentParenthetical ||
-                          "(No question content yet)"}
+                        "(No question content yet)"}
                     </div>
                   ) : (
                     /* Expanded full editor fields */
@@ -2070,11 +2203,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                   onClick={() =>
                                     handleSingleCorrectAnswer(idx, optIdx)
                                   }
-                                  className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${
-                                    isCorrect
-                                      ? "border-[#990011] bg-red-50/10"
-                                      : "border-gray-300 hover:border-gray-400"
-                                  }`}
+                                  className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isCorrect
+                                    ? "border-[#990011] bg-red-50/10"
+                                    : "border-gray-300 hover:border-gray-400"
+                                    }`}
                                 >
                                   {isCorrect && (
                                     <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
@@ -2098,11 +2230,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                     "{{letter}}",
                                     String.fromCharCode(65 + optIdx),
                                   )}
-                                  className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${
-                                    isCorrect
-                                      ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                                      : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
-                                  }`}
+                                  className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
+                                    ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                                    : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
+                                    }`}
                                 />
 
                                 {/* Remove option button */}
@@ -2177,11 +2308,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                                     "{{letter}}",
                                     String.fromCharCode(65 + optIdx),
                                   )}
-                                  className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${
-                                    isCorrect
-                                      ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                                      : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
-                                  }`}
+                                  className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
+                                    ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                                    : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
+                                    }`}
                                 />
                                 <button
                                   type="button"
@@ -2364,14 +2494,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                             type="button"
                             aria-label={ce.addOption || "Add option"}
                             onClick={() => handleRequiredToggle(idx)}
-                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                              q.required ? "bg-[#990011]" : "bg-gray-200"
-                            }`}
+                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${q.required ? "bg-[#990011]" : "bg-gray-200"
+                              }`}
                           >
                             <span
-                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                                q.required ? "translate-x-4" : "translate-x-0"
-                              }`}
+                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${q.required ? "translate-x-4" : "translate-x-0"
+                                }`}
                             />
                           </button>
                         </div>
@@ -2536,14 +2664,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 onClick={() =>
                   setFormField("allowLateSubmission", !allowLateSubmission)
                 }
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  allowLateSubmission ? "bg-[#990011]" : "bg-gray-200"
-                }`}
+                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowLateSubmission ? "bg-[#990011]" : "bg-gray-200"
+                  }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    allowLateSubmission ? "translate-x-3.5" : "translate-x-0"
-                  }`}
+                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${allowLateSubmission ? "translate-x-3.5" : "translate-x-0"
+                    }`}
                 />
               </button>
             </div>
@@ -2561,14 +2687,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 onClick={() =>
                   setFormField("shuffleQuestions", !shuffleQuestions)
                 }
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  shuffleQuestions ? "bg-[#990011]" : "bg-gray-200"
-                }`}
+                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${shuffleQuestions ? "bg-[#990011]" : "bg-gray-200"
+                  }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    shuffleQuestions ? "translate-x-3.5" : "translate-x-0"
-                  }`}
+                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${shuffleQuestions ? "translate-x-3.5" : "translate-x-0"
+                    }`}
                 />
               </button>
             </div>
@@ -2584,14 +2708,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 aria-checked={shuffleOptions}
                 aria-label={ce.shuffleOptions || "Shuffle answer options"}
                 onClick={() => setFormField("shuffleOptions", !shuffleOptions)}
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  shuffleOptions ? "bg-[#990011]" : "bg-gray-200"
-                }`}
+                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${shuffleOptions ? "bg-[#990011]" : "bg-gray-200"
+                  }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    shuffleOptions ? "translate-x-3.5" : "translate-x-0"
-                  }`}
+                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${shuffleOptions ? "translate-x-3.5" : "translate-x-0"
+                    }`}
                 />
               </button>
             </div>
@@ -2607,14 +2729,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 aria-checked={showAnswers}
                 aria-label={ce.showAnswers || "Show answers after submission"}
                 onClick={() => setFormField("showAnswers", !showAnswers)}
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  showAnswers ? "bg-[#990011]" : "bg-gray-200"
-                }`}
+                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${showAnswers ? "bg-[#990011]" : "bg-gray-200"
+                  }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    showAnswers ? "translate-x-3.5" : "translate-x-0"
-                  }`}
+                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showAnswers ? "translate-x-3.5" : "translate-x-0"
+                    }`}
                 />
               </button>
             </div>
@@ -2630,14 +2750,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 aria-checked={autoGrading}
                 aria-label={ce.autoGrading || "Enable automatic grading"}
                 onClick={() => setFormField("autoGrading", !autoGrading)}
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  autoGrading ? "bg-[#990011]" : "bg-gray-200"
-                }`}
+                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoGrading ? "bg-[#990011]" : "bg-gray-200"
+                  }`}
               >
                 <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    autoGrading ? "translate-x-3.5" : "translate-x-0"
-                  }`}
+                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${autoGrading ? "translate-x-3.5" : "translate-x-0"
+                    }`}
                 />
               </button>
             </div>
@@ -2717,11 +2835,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   className="flex items-center gap-3 cursor-pointer select-none text-left"
                 >
                   <span
-                    className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${
-                      publishStatus === "now"
-                        ? "border-[#990011]"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "now"
+                      ? "border-[#990011]"
+                      : "border-gray-300"
+                      }`}
                   >
                     {publishStatus === "now" && (
                       <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
@@ -2740,11 +2857,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   className="flex items-center gap-3 cursor-pointer select-none text-left"
                 >
                   <span
-                    className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${
-                      publishStatus === "draft"
-                        ? "border-[#990011]"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all ${publishStatus === "draft"
+                      ? "border-[#990011]"
+                      : "border-gray-300"
+                      }`}
                   >
                     {publishStatus === "draft" && (
                       <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
@@ -2776,14 +2892,12 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               aria-checked={postToFeed}
               aria-label={ce.postToFeed || "Post to class feed"}
               onClick={() => setFormField("postToFeed", !postToFeed)}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                postToFeed ? "bg-[#990011]" : "bg-gray-200"
-              }`}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${postToFeed ? "bg-[#990011]" : "bg-gray-200"
+                }`}
             >
               <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                  postToFeed ? "translate-x-4" : "translate-x-0"
-                }`}
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${postToFeed ? "translate-x-4" : "translate-x-0"
+                  }`}
               />
             </button>
           </div>
@@ -2843,6 +2957,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           </button>
         </div>
       </div>
+      <ImportExcelInstructionModal
+        open={isExcelInstructionOpen}
+        onClose={() => setIsExcelInstructionOpen(false)}
+        ce={ce}
+      />
     </div>
   );
 };
@@ -2869,16 +2988,16 @@ const CreateExamPage = () => {
 
   const rawClassData =
     detailResponse &&
-    typeof detailResponse === "object" &&
-    !Array.isArray(detailResponse) &&
-    "data" in detailResponse
+      typeof detailResponse === "object" &&
+      !Array.isArray(detailResponse) &&
+      "data" in detailResponse
       ? detailResponse.data
       : detailResponse;
   const classData =
     rawClassData &&
-    typeof rawClassData === "object" &&
-    !Array.isArray(rawClassData) &&
-    rawClassData.id
+      typeof rawClassData === "object" &&
+      !Array.isArray(rawClassData) &&
+      rawClassData.id
       ? rawClassData
       : null;
 
