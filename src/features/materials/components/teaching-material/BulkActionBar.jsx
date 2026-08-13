@@ -32,13 +32,15 @@ const BulkActionBar = ({ selectedCount, onClearSelection, onMove, onDelete, onDo
             </IconButton>
           )}
 
-          <IconButton
-            variant="ghost"
-            onClick={onMove}
-            title={t.materials.move}
-          >
-            <FolderInput className="w-5 h-5 text-[#1A1C1C]" />
-          </IconButton>
+          {onMove && (
+            <IconButton
+              variant="ghost"
+              onClick={onMove}
+              title={t.materials.move}
+            >
+              <FolderInput className="w-5 h-5 text-[#1A1C1C]" />
+            </IconButton>
+          )}
 
           {onDelete && (
             <IconButton

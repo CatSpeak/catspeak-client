@@ -191,7 +191,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
                   (isLoading
                     ? t.materials.loading
                     : isPublic
-                      ? "Vui lòng lưu để tạo liên kết"
+                      ? t.materials.saveToGenerateLink
                       : t.materials.noLink)
                 }
                 className="w-full h-10 bg-[#F3F3F3] border border-[#E2E2E2] rounded-lg pl-9 pr-3 text-base text-[#1A1C1C] outline-none"

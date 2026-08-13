@@ -12,6 +12,7 @@ import SaveSharedMaterialModal from './SaveSharedMaterialModal';
 import { useRecordMaterialDownloadMutation, useRecordMaterialViewMutation } from '@/store/api/materialApi';
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatSize } from "../../utils/materialUtils";
+import toast from 'react-hot-toast';
 
 
 const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove }) => {
@@ -66,7 +67,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
       }
     } else if (isFolder) {
       // Future: Download folder as zip
-      alert("Chức năng tải thư mục đang được phát triển.");
+      toast(t.materials.folderDownloadDev || "Chức năng tải thư mục đang được phát triển.");
     }
   };
 
@@ -125,9 +126,9 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
                   <table className="w-full text-left border-collapse min-w-[500px]">
                     <thead>
                       <tr className="bg-[#F9F9F9] border-b border-[#E3BEBA]">
-                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.name || "Tên"}</th>
-                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.type || "Loại"}</th>
-                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.size || "Kích thước"}</th>
+                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.nameColumn || "Tên"}</th>
+                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.typeColumn || "Loại"}</th>
+                        <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.sizeColumn || "Kích thước"}</th>
                         <th className="py-3 px-4 font-semibold text-sm text-[#5B403E] whitespace-nowrap">{t.materials.uploadDate || "Ngày đăng"}</th>
                       </tr>
                     </thead>
@@ -163,7 +164,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
                       {(!item.children && mockFolderItems.length === 0) && (
                         <tr>
                           <td colSpan={4} className="py-8 text-center text-[#5B403E]">
-                            Thư mục trống
+                            {t.materials.emptyFolder || "Thư mục trống"}
                           </td>
                         </tr>
                       )}
@@ -184,7 +185,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
             <IconButton variant='ghost' onClick={() => setShowMobileDetails(false)} className="md:hidden -ml-2">
               <ChevronLeft className="w-5 h-5 text-[#1A1C1C]" />
             </IconButton>
-            <span className="font-semibold text-[#1A1C1C] text-base md:text-lg">Thông tin chi tiết</span>
+            <span className="font-semibold text-[#1A1C1C] text-base md:text-lg">{t.materials.detailsInfo || "Thông tin chi tiết"}</span>
           </div>
           <IconButton variant='ghost' onClick={onClose} className="hidden md:flex">
             <X className="w-5 h-5" />
@@ -196,7 +197,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
 
           {/* Owner Info */}
           <div>
-            <h4 className="text-sm font-bold text-[#5B403E] mb-2 uppercase tracking-wide">Người chia sẻ</h4>
+            <h4 className="text-sm font-bold text-[#5B403E] mb-2 uppercase tracking-wide">{t.materials.sharedBy || "Người chia sẻ"}</h4>
             <div className="bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-[#E3BEBA]/50 flex items-center justify-center shrink-0">
                 {(item.owner?.avatarUrl || item.ownerAvatar) ? (
@@ -206,7 +207,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-[#1A1C1C] text-lg">{item.owner?.name || item.ownerName || item.author || "Người dùng ẩn danh"}</span>
+                <span className="font-bold text-[#1A1C1C] text-lg">{item.owner?.name || item.ownerName || item.author || t.materials.anonymousUser || "Người dùng ẩn danh"}</span>
               </div>
             </div>
           </div>
@@ -216,13 +217,13 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
           {/* File/Folder Info */}
           <div>
             <h4 className="text-sm font-bold text-[#5B403E] mb-2 uppercase tracking-wide">
-              Thông tin {isFolder ? 'thư mục' : 'tệp'}
+              {isFolder ? (t.materials.folderInfo || 'Thông tin thư mục') : (t.materials.fileInfo || 'Thông tin tệp')}
             </h4>
             <div className="bg-[#F9F9F9] border border-[#E3BEBA] rounded-xl p-4 flex flex-col gap-3">
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2 text-[#5B403E]">
                   <FileText className="w-4 h-4" />
-                  <span>{t.materials.type || "Loại"}</span>
+                  <span>{t.materials.typeColumn || "Loại"}</span>
                 </div>
                 <span className="font-medium text-[#1A1C1C]">
                   {isFolder ? 'Thư mục' : (item.fileName?.split('.').pop().toUpperCase() || item.fileType?.toUpperCase() || t.materials.file || 'Tệp')}
@@ -231,7 +232,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2 text-[#5B403E]">
                   <HardDrive className="w-4 h-4" />
-                  <span>{t.materials.size || "Kích thước"}</span>
+                  <span>{t.materials.sizeColumn || "Kích thước"}</span>
                 </div>
                 <span className="font-medium text-[#1A1C1C]">
                   {isFolder ? '-' : formatSize(item.fileSize || item.size || item.sizeBytes)}
@@ -240,7 +241,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2 text-[#5B403E]">
                   <Calendar className="w-4 h-4" />
-                  <span>Ngày chia sẻ</span>
+                  <span>{t.materials.shareDate || "Ngày chia sẻ"}</span>
                 </div>
                 <span className="font-medium text-[#1A1C1C]">
                   {item.uploadedAt || item.createdAt ? formatDate(item.uploadedAt || item.createdAt) : 'N/A'}
@@ -289,7 +290,7 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
                   borderColor="#E3BEBA"
                   onClick={handleSave}
                 >
-                  Lưu
+                  {t.materials.bookmark || "Lưu"}
                 </PillButton>
               </div>
             )}

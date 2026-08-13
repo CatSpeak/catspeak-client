@@ -91,6 +91,7 @@ export default {
     enablePublicShare: "Enable public share",
     publicShareDesc: "Anyone with the link can view",
     noLink: "No link",
+    saveToGenerateLink: "Please save to generate link",
     copy: "Copy",
     copiedLink: "Copied link",
     allowDownload: "Allow download",
@@ -156,6 +157,17 @@ export default {
     private: "Private",
     itemsUpdatedInfo: "{{count}} items • Updated {{date}}",
     bookmark: "Save",
-    edit: "Edit"
+    edit: "Edit",
+    materialNotFound: "Material/Folder not found or not shared publicly",
+    cannotGetShareLink: "Cannot get share link",
+    folderDownloadDev: "Folder download feature is under development.",
+    nameColumn: "Name",
+    typeColumn: "Type",
+    sizeColumn: "Size",
+    detailsInfo: "Details",
+    sharedBy: "Shared by",
+    anonymousUser: "Anonymous user",
+    folderInfo: "Folder Information",
+    shareDate: "Share date"
   }
 }

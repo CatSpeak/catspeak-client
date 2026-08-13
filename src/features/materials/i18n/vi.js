@@ -91,6 +91,7 @@ export default {
     enablePublicShare: "Bật chia sẻ công khai",
     publicShareDesc: "Bất kỳ ai có liên kết đều có thể xem",
     noLink: "Không có liên kết",
+    saveToGenerateLink: "Vui lòng lưu để tạo liên kết",
     copy: "Sao chép",
     copiedLink: "Đã sao chép liên kết",
     allowDownload: "Cho phép tải xuống",
@@ -156,6 +157,17 @@ export default {
     private: "Riêng tư",
     itemsUpdatedInfo: "{{count}} tài liệu • Cập nhật {{date}}",
     bookmark: "Lưu",
-    edit: "Chỉnh sửa"
+    edit: "Chỉnh sửa",
+    materialNotFound: "Tài liệu/Thư mục không tồn tại hoặc không được chia sẻ công khai",
+    cannotGetShareLink: "Không thể lấy liên kết chia sẻ",
+    folderDownloadDev: "Chức năng tải thư mục đang được phát triển.",
+    nameColumn: "Tên",
+    typeColumn: "Loại",
+    sizeColumn: "Kích thước",
+    detailsInfo: "Thông tin chi tiết",
+    sharedBy: "Người chia sẻ",
+    anonymousUser: "Người dùng ẩn danh",
+    folderInfo: "Thông tin thư mục",
+    shareDate: "Ngày chia sẻ"
   }
 }

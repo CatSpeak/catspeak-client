@@ -24,7 +24,7 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
         await deleteMaterialsBulk({ folderIds, materialIds }).unwrap();
         toast.success(t.materials.deletedMultipleSuccess.replace('{{count}}', item.items.length));
       } else {
-        const isFolder = item.type === 'folder' || item._type === 'folder' || (!item.fileName && !item.fileUrl);
+        const isFolder = item.type === 'folder' || item._type === 'folder' || (item.type !== 'file' && item._type !== 'file' && !item.fileName && !item.fileUrl);
         
         if (isFolder) {
           await deleteFolder(item.id || item.folderId).unwrap();

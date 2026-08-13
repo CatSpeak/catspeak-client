@@ -32,7 +32,7 @@ const getFileFingerprint = (file) => {
 
 const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
   const { t } = useLanguage();
-  const [isPublic, setIsPublic] = useState(true);
+  const [isPublic, setIsPublic] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState(currentFolderId || '');
 
   const [prevOpen, setPrevOpen] = useState(open);

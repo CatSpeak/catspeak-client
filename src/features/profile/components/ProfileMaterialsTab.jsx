@@ -64,7 +64,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
     const isFetchingShared = isMaterialFetching || isFolderFetching;
 
     if (sharedMaterialToken && !isFetchingShared && isMaterialError && isFolderError) {
-      const errorMsg = materialError?.data?.message || folderError?.data?.message || t.materials?.materialNotFound || "Tài liệu/Thư mục không tồn tại hoặc không được chia sẻ công khai";
+      const errorMsg = materialError?.data?.message || folderError?.data?.message || t.materials.materialNotFound;
       toast.error(errorMsg);
       searchParams.delete("sharedMaterialToken");
       setSearchParams(searchParams, { replace: true });
@@ -128,6 +128,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
           publicShareUrl: meta.publicShareUrl || node.publicShareUrl,
           shareToken: meta.shareToken || node.shareToken,
           isBookmarked: meta.isBookmarked || node.isBookmarked || false,
+          allowDownload: meta.allowDownload !== undefined ? meta.allowDownload : (node.allowDownload !== undefined ? node.allowDownload : true),
         };
       });
     } else {
@@ -141,6 +142,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         publicShareUrl: f.publicShareUrl,
         shareToken: f.shareToken,
         isBookmarked: f.isBookmarked || false,
+        allowDownload: f.allowDownload !== undefined ? f.allowDownload : true,
       }));
     }
   }, [responseData.folders, rawFoldersTree, isOwnProfile, t.materials.untitledFolder, formatDate, searchQuery]);
@@ -154,6 +156,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       size: formatSize(file.fileSize || file.size || file.sizeBytes),
       date: formatDate(file.updatedAt),
       isPublic: file.isPublic !== undefined ? file.isPublic : false,
+      allowDownload: file.allowDownload !== undefined ? file.allowDownload : true,
       fileUrl: file.fileUrl,
       ...file
     }));
@@ -304,6 +307,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                       isPublic={folder.isPublic}
                       isBookmarked={folder.isBookmarked}
                       isOwnProfile={isOwnProfile}
+                      allowDownload={folder.allowDownload}
                       isSelected={isSelected}
                       isSelectionMode={selectedItems.length > 0}
                       onToggleSelect={() => toggleSelection(folder)}
@@ -323,9 +327,9 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                           if (folder.shareToken) {
                             const link = `${window.location.origin}/shared-material/${folder.shareToken}`;
                             navigator.clipboard.writeText(link);
-                            toast.success(t.materials.linkCopied || "Đã sao chép liên kết");
+                            toast.success(t.materials.copiedLink);
                           } else {
-                            toast.error("Không thể lấy liên kết chia sẻ");
+                            toast.error(t.materials.cannotGetShareLink);
                           }
                         }
                       }}
@@ -367,6 +371,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                       isPublic={file.isPublic}
                       fileUrl={file.fileUrl}
                       isOwnProfile={isOwnProfile}
+                      allowDownload={file.allowDownload}
                       isList={viewLayout === 'list'}
                       isSelected={isSelected}
                       isSelectionMode={selectedItems.length > 0}
@@ -387,9 +392,9 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                           if (file.shareToken) {
                             const link = `${window.location.origin}/shared-material/${file.shareToken}`;
                             navigator.clipboard.writeText(link);
-                            toast.success(t.materials.linkCopied || "Đã sao chép liên kết");
+                            toast.success(t.materials.copiedLink);
                           } else {
-                            toast.error("Không thể lấy liên kết chia sẻ");
+                            toast.error(t.materials.cannotGetShareLink);
                           }
                         }
                       }}
@@ -458,12 +463,6 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
             }}
           />
 
-          <FilePreviewModal
-            open={isFilePreviewOpen}
-            onClose={() => setIsFilePreviewOpen(false)}
-            item={selectedItem}
-          />
-
           <MoveMaterialModal
             open={isMoveModalOpen}
             onClose={() => {
@@ -485,50 +484,57 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
             item={selectedItem}
           />
 
-          <BulkActionBar
-            selectedCount={selectedItems.length}
-            onClearSelection={() => setSelectedItems([])}
-            onDelete={() => {
-              if (selectedItems.length === 1) {
-                setDeletingItem({
-                  id: selectedItems[0].id,
-                  name: selectedItems[0].name,
-                  count: 0,
-                  type: isFolder(selectedItems[0]) ? 'folder' : 'file'
-                });
-              } else {
-                setDeletingItem({
-                  id: 'bulk',
-                  name: t.materials.selectedItemsCountLabel.replace('{{count}}', selectedItems.length),
-                  count: 0,
-                  type: 'bulk',
-                  items: selectedItems
-                });
-              }
-              setIsDeleteFolderOpen(true);
-            }}
-            onDownload={() => {
-              const filesToDownload = selectedItems.filter(item => !isFolder(item) && item.fileUrl);
-              const foldersToDownload = selectedItems.filter(item => isFolder(item));
-
-              if (filesToDownload.length === 0 && foldersToDownload.length === 0) {
-                toast.error(t.materials.noFilesToDownload);
-                return;
-              }
-
-              filesToDownload.forEach(file => downloadFile(file, recordDownload));
-              foldersToDownload.forEach(folder => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t, true));
-
-              toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length + foldersToDownload.length));
-              setSelectedItems([]);
-            }}
-            onMove={() => {
-              setSelectedItem(null);
-              setIsMoveModalOpen(true);
-            }}
-          />
         </>
       )}
+
+      <FilePreviewModal
+        open={isFilePreviewOpen}
+        onClose={() => setIsFilePreviewOpen(false)}
+        item={selectedItem}
+      />
+
+      <BulkActionBar
+        selectedCount={selectedItems.length}
+        onClearSelection={() => setSelectedItems([])}
+        onDelete={isOwnProfile ? () => {
+          if (selectedItems.length === 1) {
+            setDeletingItem({
+              id: selectedItems[0].id,
+              name: selectedItems[0].name,
+              count: 0,
+              type: isFolder(selectedItems[0]) ? 'folder' : 'file'
+            });
+          } else {
+            setDeletingItem({
+              id: 'bulk',
+              name: t.materials.selectedItemsCountLabel.replace('{{count}}', selectedItems.length),
+              count: 0,
+              type: 'bulk',
+              items: selectedItems
+            });
+          }
+          setIsDeleteFolderOpen(true);
+        } : undefined}
+        onDownload={() => {
+          const filesToDownload = selectedItems.filter(item => !isFolder(item) && item.fileUrl);
+          const foldersToDownload = selectedItems.filter(item => isFolder(item));
+
+          if (filesToDownload.length === 0 && foldersToDownload.length === 0) {
+            toast.error(t.materials.noFilesToDownload);
+            return;
+          }
+
+          filesToDownload.forEach(file => downloadFile(file, recordDownload));
+          foldersToDownload.forEach(folder => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t, true));
+
+          toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length + foldersToDownload.length));
+          setSelectedItems([]);
+        }}
+        onMove={isOwnProfile ? () => {
+          setSelectedItem(null);
+          setIsMoveModalOpen(true);
+        } : undefined}
+      />
 
       <SaveSharedMaterialModal
         open={isSaveSharedModalOpen}

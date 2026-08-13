@@ -27,7 +27,8 @@ const ProfileFileItem = ({
   onClick,
   isSelected,
   isSelectionMode,
-  onToggleSelect
+  onToggleSelect,
+  allowDownload
 }) => {
   const { t } = useLanguage();
   const { handlers } = useLongPress({ isSelectionMode, onToggleSelect, onClick });
@@ -57,9 +58,9 @@ const ProfileFileItem = ({
             { value: 'delete', label: <span className="text-[#BA1A1A]">{t.materials.delete}</span>, icon: <Trash2 className="w-4 h-4 text-[#BA1A1A]" /> },
           ]
           : [
-            { value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> },
+            ...(allowDownload !== false ? [{ value: 'download', label: t.materials.download, icon: <Download className="w-4 h-4" /> }] : []),
             { value: 'share', label: t.materials.share, icon: <Share2 className="w-4 h-4" /> },
-            { value: 'bookmark', label: t.materials.bookmark, icon: <Bookmark className="w-4 h-4" /> }
+            ...(allowDownload !== false ? [{ value: 'bookmark', label: t.materials.bookmark, icon: <Bookmark className="w-4 h-4" /> }] : [])
           ]
       }
       trigger={(isOpen, selectedOption, toggleDropdown) => (

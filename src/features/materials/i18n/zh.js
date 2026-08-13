@@ -91,6 +91,7 @@ export default {
     enablePublicShare: "开启公开分享",
     publicShareDesc: "任何拥有链接的人都可以查看",
     noLink: "没有链接",
+    saveToGenerateLink: "请保存以生成链接",
     copy: "复制",
     copiedLink: "已复制链接",
     allowDownload: "允许下载",
@@ -156,6 +157,17 @@ export default {
     private: "私密",
     itemsUpdatedInfo: "{{count}} 个项目 • 更新于 {{date}}",
     bookmark: "保存",
-    edit: "编辑"
+    edit: "编辑",
+    materialNotFound: "资料/文件夹不存在或未公开分享",
+    cannotGetShareLink: "无法获取分享链接",
+    folderDownloadDev: "文件夹下载功能正在开发中。",
+    nameColumn: "名称",
+    typeColumn: "类型",
+    sizeColumn: "大小",
+    detailsInfo: "详细信息",
+    sharedBy: "分享者",
+    anonymousUser: "匿名用户",
+    folderInfo: "文件夹信息",
+    shareDate: "分享日期"
   }
 }
