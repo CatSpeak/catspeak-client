@@ -302,6 +302,7 @@ export default {
     noOneHere: "还没其他人在这里。",
     isHere: "在这里",
     loading: "加载中...",
+    loadingRoom: "正在加载房间...",
     roomNotFound: "未找到房间",
     roomNotFoundSubtext:
       "您查找的房间不存在或已关闭。不如去看看社区里其他正在进行的房间吧？",

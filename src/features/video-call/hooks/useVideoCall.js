@@ -32,7 +32,6 @@ export const useVideoCall = (t) => {
     if (isTogglingMic) return
     setIsTogglingMic(true)
 
-    console.log("[useVideoCall] Toggling mic from", isMicrophoneEnabled, "to", !isMicrophoneEnabled)
     try {
       unlockAudioContext()
       if (room?.startAudio) {
@@ -41,7 +40,6 @@ export const useVideoCall = (t) => {
         )
       }
       await room.localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled)
-      console.log("[useVideoCall] Mic toggle success")
     } catch (err) {
       console.error("[useVideoCall] Mic toggle failed:", err?.name, err?.message, err)
       throw err
@@ -55,7 +53,6 @@ export const useVideoCall = (t) => {
     if (isTogglingCam) return
     setIsTogglingCam(true)
 
-    console.log("[useVideoCall] Toggling cam from", isCameraEnabled, "to", !isCameraEnabled)
     try {
       unlockAudioContext()
       if (room?.startAudio) {
@@ -64,7 +61,6 @@ export const useVideoCall = (t) => {
         )
       }
       await room.localParticipant.setCameraEnabled(!isCameraEnabled)
-      console.log("[useVideoCall] Cam toggle success")
     } catch (err) {
       console.error("[useVideoCall] Cam toggle failed:", err?.name, err?.message, err)
       throw err

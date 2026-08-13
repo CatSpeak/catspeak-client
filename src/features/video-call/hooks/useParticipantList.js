@@ -88,7 +88,7 @@ export const useParticipantList = (allParticipants, localParticipant) => {
       }
     }
 
-    // Sort: raised hands first (by time), recent speakers (descending timestamp), then local user, then others
+    // Sort: raised hands first (by time), then local user, then others
     list.sort((a, b) => {
       const metaA = parseMetadata(a.metadata)
       const metaB = parseMetadata(b.metadata)
@@ -105,15 +105,7 @@ export const useParticipantList = (allParticipants, localParticipant) => {
         return timeA - timeB // Ascending
       }
 
-      // Recent speaker sticky sorting (descending by lastSpokeAt)
-      const spokeA = lastSpokeRef.current.get(a.identity) || 0
-      const spokeB = lastSpokeRef.current.get(b.identity) || 0
-
-      if (spokeA !== spokeB) {
-        return spokeB - spokeA // Most recent speaker comes first
-      }
-
-      // Keep local user first if neither has spoken
+      // Keep local user first if neither has hand raised
       if (a.isLocal && !b.isLocal) return -1
       if (!a.isLocal && b.isLocal) return 1
 

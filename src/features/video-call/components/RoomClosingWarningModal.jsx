@@ -14,10 +14,15 @@ const RoomClosingWarningModal = ({ remainingSeconds, t }) => {
   }, [remainingSeconds])
 
   useEffect(() => {
-    if (!isDismissed && remainingSeconds !== null && remainingSeconds > 0 && !audioPlayedRef.current) {
+    if (
+      !isDismissed &&
+      remainingSeconds !== null &&
+      remainingSeconds > 0 &&
+      !audioPlayedRef.current
+    ) {
       audioPlayedRef.current = true
       const audio = new Audio("/sounds/warning-room-end.mp3")
-      audio.play().catch(e => console.error("Audio play failed:", e))
+      audio.play().catch((e) => console.error("Audio play failed:", e))
     }
   }, [isDismissed, remainingSeconds])
 
@@ -34,7 +39,8 @@ const RoomClosingWarningModal = ({ remainingSeconds, t }) => {
           <Clock size={32} />
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-2">
-          {t?.rooms?.videoCall?.roomClosingSubtitleStatic || "This session will end soon."}
+          {t?.rooms?.videoCall?.roomClosingSubtitleStatic ||
+            "This session will end soon."}
         </h3>
         <p className="text-gray-500">
           {t?.rooms?.videoCall?.roomClosingDescription ||

@@ -8,6 +8,7 @@ import { motion } from "framer-motion"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getProfilePath } from "@/shared/utils/navigation"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
@@ -163,15 +164,34 @@ const VideoTileInner = ({ participant, onClick }) => {
       )}
 
       {/* Bottom Controls Overlay */}
-      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none z-20">
+      <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 pointer-events-none z-20">
         {/* Status icons and Name */}
-        <div className="flex min-w-0 items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-white backdrop-blur-sm pointer-events-auto">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-1.5 rounded-full bg-black/40 px-2 py-1 sm:px-3 sm:py-2 text-white backdrop-blur-sm pointer-events-auto">
           <div className="flex flex-shrink-0 items-center gap-1">
-            {screenShareOn && <MonitorUp size={16} />}
-            {!micOn && <MicOff size={16} />}
-            {!webcamOn && <VideoOff size={16} />}
+            {screenShareOn && <MonitorUp size={14} className="sm:w-4 sm:h-4" />}
+            {!micOn && <MicOff size={14} className="sm:w-4 sm:h-4" />}
+            {!webcamOn && <VideoOff size={14} className="sm:w-4 sm:h-4" />}
           </div>
-          <div className="min-w-0 truncate font-medium text-sm">
+          <div
+            onClick={(e) => {
+              const accountId =
+                meta.accountId ||
+                (/^\d+$/.test(participant.identity) ? participant.identity : null)
+              if (accountId) {
+                e.stopPropagation()
+                window.open(
+                  getProfilePath(accountId),
+                  "_blank",
+                  "noopener,noreferrer",
+                )
+              }
+            }}
+            className={`min-w-0 truncate font-medium text-xs sm:text-sm ${
+              meta.accountId || /^\d+$/.test(participant.identity)
+                ? "cursor-pointer hover:underline"
+                : ""
+            }`}
+          >
             {displayName}{" "}
             {isLocal &&
               (t.rooms?.videoCall?.participantList?.youSuffix || "(You)")}

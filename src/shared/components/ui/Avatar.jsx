@@ -68,7 +68,7 @@ const Avatar = ({
     }
     if (accountId && !e.defaultPrevented) {
       e.stopPropagation()
-      navigate(getProfilePath(accountId))
+      window.open(getProfilePath(accountId), "_blank", "noopener,noreferrer")
     }
   }
 
