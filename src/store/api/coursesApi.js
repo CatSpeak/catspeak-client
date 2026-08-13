@@ -2321,6 +2321,14 @@ export const coursesApi = baseApi.injectEndpoints({
         getQuizContentInvalidationTags(classId, quizId),
     }),
 
+    importTeacherQuestionsPreview: builder.mutation({
+      query: ({ classId, quizId, formData }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/import-preview`,
+        method: "POST",
+        body: formData,
+      }),
+    }),
+
     getTeacherQuizGrading: builder.query({
       query: ({ classId, quizId }) => ({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/grading`,
@@ -2758,6 +2766,7 @@ export const {
   usePreviewTeacherQuizMutation,
   useDownloadQuizTemplateMutation,
   useImportTeacherQuestionsMutation,
+  useImportTeacherQuestionsPreviewMutation,
   useGetTeacherQuizGradingQuery,
   useGradeTeacherEssayMutation,
   useGetTeacherQuizStatsQuery,
