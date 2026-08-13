@@ -5,6 +5,7 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import SharePopover from '../EventDetailModal/SharePopover'
 
 const EventCardDetail = ({ event, onBack }) => {
   const navigate = useNavigate()
@@ -73,9 +74,11 @@ const EventCardDetail = ({ event, onBack }) => {
             <PillButton bgColor={isPast ? "#d1d5db" : undefined}>
               {statusLabel}
             </PillButton>
-            <IconButton variant="outline" innerClassName="!w-11 !h-11 rounded-full border-border text-[#1A1A1A]">
-              <Share2 size={18} />
-            </IconButton>
+            <SharePopover
+              eventId={event.id || event._id}
+              occurrenceId={event.occurrenceId}
+              className="!bg-transparent border border-border !text-[#1A1A1A] !w-11 !h-11 hover:!bg-gray-50"
+            />
           </div>
         )
       }

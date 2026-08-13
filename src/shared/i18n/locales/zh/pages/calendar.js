@@ -1,4 +1,5 @@
 export default {
+  searchClass: "搜索课程...",
   generalCalendar: "综合日历",
   personalCalendar: "个人日历",
   studentSchedule: "学习日程",

@@ -25,6 +25,7 @@ import {
   mapTeacherClassSummary,
 } from "../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const MyCoursesPage = ({ initialTab = "courses" }) => {
   const { t } = useLanguage()
@@ -213,6 +214,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
     manageDetails: c.manageDetails || "Manage Details",
     progress: c.progress || "Progress",
     courseLabel: c.course || "Course",
+    share: c.courseDetail?.shareCourse || c.share || "Share",
     classLabel: c.class || "Class",
     classCount: c.classCount || "{{count}} classes",
     actionsFor: c.actionsForCourse || "Actions for {{title}}",
@@ -225,10 +227,21 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
     manageDetails: c.manageDetails || "Manage Details",
     progress: c.progress || "Progress",
     courseLabel: c.course || "Course",
+    share: c.classDetail?.shareClass || c.share || "Share",
     classLabel: c.class || "Class",
     standaloneClass: c.createClass?.standaloneClass || "Lớp độc lập",
     classCount: c.classCount || "{{count}} classes",
     actionsFor: c.actionsForCourse || "Actions for {{title}}",
+  }
+
+  const handleShare = async (item) => {
+    const itemId = item.id || item._id
+    const shareUrl = isCoursesTab ? `${window.location.origin}/explore-courses/details/${itemId}` : `${window.location.origin}/explore-courses/class/${itemId}`
+    await copyShareLink({
+      url: shareUrl,
+      successMessage: c.courseDetail?.linkCopied || "Link copied!",
+      errorMessage: c.courseDetail?.linkCopyFailed || "Failed to copy link",
+    })
   }
 
   return (
@@ -391,6 +404,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
                       })
                     }
                   }}
+                  onShare={handleShare}
                 />
               ))}
             </div>

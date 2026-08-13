@@ -1,5 +1,5 @@
-import React from "react"
-import { Clock, Users, ShieldCheck, Calendar, ArrowRight, Settings } from "lucide-react"
+import React, { useState } from "react"
+import { Clock, Users, ShieldCheck, Calendar, ArrowRight, Settings, Share2, Check } from "lucide-react"
 import {
   formatCurrencyVND,
   getSafeMediaUrl,
@@ -16,9 +16,11 @@ const ClassCard = ({
   isLocked,
   onClick,
   onEnroll,
+  onShare,
   progressLabel,
 }) => {
   const { t } = useLanguage()
+  const [linkCopied, setLinkCopied] = useState(false)
   const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
@@ -88,7 +90,7 @@ const ClassCard = ({
         />
 
         {/* Top Badges */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
+        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5 z-10">
           {cls.language && (
             <span className="bg-slate-900/85 backdrop-blur-md text-white border border-slate-700/60 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
               {cls.language}
@@ -103,11 +105,31 @@ const ClassCard = ({
 
         {/* Teacher / Admin status pill */}
         {!isStudent && cls.status && (
-          <div className="absolute top-3 right-3 z-10">
-            <CourseStatusPill status={cls.status} t={t} />
-          </div>
+          // <div className="absolute top-3 right-3 z-10">
+          <CourseStatusPill status={cls.status} t={t} />
+          // </div>
         )}
       </div>
+
+      {onShare && (
+        <button
+          type="button"
+          onClick={async (event) => {
+            event.stopPropagation()
+            try {
+              await onShare(cls)
+              setLinkCopied(true)
+              setTimeout(() => setLinkCopied(false), 2000)
+            } catch (e) {
+              console.error("Share failed", e)
+            }
+          }}
+          className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+          title={c.classDetail?.shareClass || "Share"}
+        >
+          {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
+        </button>
+      )}
 
       {/* Class Details Content */}
       <div className="p-5 flex flex-col flex-1 justify-between gap-5">

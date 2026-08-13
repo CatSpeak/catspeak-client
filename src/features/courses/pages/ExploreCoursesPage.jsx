@@ -16,6 +16,7 @@ import ClassCard from "../components/ClassCard"
 import CourseTabs from "../components/CourseTabs"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { formatCurrencyVND } from "../utils/courseUtils"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const PAGE_SIZE = 20
 
@@ -145,6 +146,24 @@ const ExploreCoursesPage = () => {
     setMinPriceInput("")
     setMaxPriceInput("")
     setCurrentPage(1)
+  }
+
+  const handleShareCourse = async (item) => {
+    const shareUrl = `${window.location.origin}/explore-courses/details/${item.id || item._id}`
+    await copyShareLink({
+      url: shareUrl,
+      successMessage: c.courseDetail?.linkCopied || "Link copied!",
+      errorMessage: c.courseDetail?.linkCopyFailed || "Failed to copy link",
+    })
+  }
+
+  const handleShareClass = async (item) => {
+    const shareUrl = `${window.location.origin}/explore-courses/class/${item.id || item._id}`
+    await copyShareLink({
+      url: shareUrl,
+      successMessage: c.classDetail?.linkCopied || "Link copied!",
+      errorMessage: c.classDetail?.linkCopyFailed || "Failed to copy link",
+    })
   }
 
   const hasPriceFilter = minPriceInput !== "" || maxPriceInput !== ""
@@ -501,6 +520,7 @@ const ExploreCoursesPage = () => {
                       courseTitle={item.courseTitle}
                       onClick={() => handleOpenClassDetail(item)}
                       onEnroll={() => handleOpenClassDetail(item)}
+                      onShare={handleShareClass}
                     />
                   )
                 }
@@ -512,6 +532,7 @@ const ExploreCoursesPage = () => {
                     viewMode="grid"
                     onViewDetails={() => handleOpenCourseDetail(item)}
                     onJoin={() => handleOpenCourseDetail(item)}
+                    onShare={handleShareCourse}
                     t={t}
                     index={idx}
                   />
