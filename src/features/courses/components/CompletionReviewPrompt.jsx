@@ -9,12 +9,15 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 import Modal from "@/shared/components/ui/Modal"
 
 /**
- * Returns true once, when `isAuthenticated` transitions false→true (a real login).
+ * Returns true when the user is authenticated — either at mount (persisted
+ * session from a previous login) or after an in-session false→true transition.
  * The state update is scheduled outside the effect body to satisfy the
  * react-hooks/set-state-in-effect rule.
  */
 const useDidAuthenticate = (isAuthenticated) => {
-  const [justAuthenticated, setJustAuthenticated] = useState(false)
+  // ponytail: khởi tạo theo trạng thái mount — nếu đã đăng nhập sẵn (token trong
+  // localStorage) thì vẫn kích hoạt check, không phụ thuộc transition trong phiên.
+  const [justAuthenticated, setJustAuthenticated] = useState(isAuthenticated)
   const prevRef = useRef(isAuthenticated)
 
   useEffect(() => {
