@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Check, Clock, Share2 } from "lucide-react";
 import CountdownTicker from "../CountdownTicker";
 import { getSafeMediaUrl } from "../../utils/courseUtils";
 import { useTimezone } from "@/shared/hooks/useTimezone";
