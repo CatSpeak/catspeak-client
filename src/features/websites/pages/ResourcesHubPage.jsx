@@ -157,9 +157,9 @@ const ResourcesHubPage = () => {
                 t.websites?.search?.placeholder ||
                 "Search tools, platforms, or exams (e.g. Quizlet, HSK)..."
               }
-              className="w-full !bg-white/10 !backdrop-blur-sm !border-white/25 !text-white shadow-lg focus-within:!border-white/40 transition-colors duration-200"
-              inputClassName="placeholder:text-rose-100/70 text-white"
-              buttonClassName="group-hover:!bg-white/15 text-white"
+              className="w-full shadow-lg"
+              inputClassName="text-gray-500 placeholder:text-gray-400"
+              buttonClassName=""
               focusBorder={false}
             />
           </div>
