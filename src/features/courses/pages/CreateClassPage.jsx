@@ -211,8 +211,11 @@ const CreateClassPage = () => {
     capacity,
     description,
     fee,
+    requireMinimumAttendance = true,
     requireMinAttendance = true,
+    minimumAttendanceRate = 80,
     minAttendanceRate = 80,
+    lateAttendancePolicy = "CountLate",
     includeLateAttendance = true,
     thumbnailFile,
     thumbnailPreview,
@@ -430,9 +433,12 @@ const CreateClassPage = () => {
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
+        requireMinimumAttendance,
         requireMinAttendance,
-        minAttendanceRate: requireMinAttendance ? (parseInt(minAttendanceRate, 10) || 80) : null,
-        includeLateAttendance,
+        minimumAttendanceRate: requireMinimumAttendance ? (parseInt(minAttendanceRate, 10) || 80) : null,
+        minAttendanceRate: requireMinimumAttendance ? (parseInt(minAttendanceRate, 10) || 80) : null,
+        lateAttendancePolicy: lateAttendancePolicy || (includeLateAttendance ? "CountLate" : "IgnoreLate"),
+        includeLateAttendance: lateAttendancePolicy === "CountLate" || includeLateAttendance,
         thumbnailUrl: thumbnailFile || thumbnailPreview || "",
         timezone: activeTz,
         cancelUrl: (
@@ -968,32 +974,34 @@ const CreateClassPage = () => {
             </div>
 
             {/* Attendance Requirements Block */}
-            <div className="bg-white rounded-2xl p-4 border border-border flex flex-col md:flex-row gap-5 md:gap-8 items-stretch justify-between">
+            <div className={`bg-white rounded-2xl p-4 border border-border flex flex-col md:flex-row gap-5 md:gap-8 items-stretch justify-between ${isEditMode ? "opacity-75 bg-slate-50/50" : ""}`}>
               {/* Left Column: Minimum Attendance Rate */}
               <div className="flex-1 flex flex-col gap-3 justify-center">
                 {/* Header row */}
                 <div className="flex items-center gap-2">
                   <div
                     role="checkbox"
-                    tabIndex={0}
+                    tabIndex={isEditMode ? -1 : 0}
                     aria-checked={requireMinAttendance}
-                    onClick={() => setField("requireMinAttendance", !requireMinAttendance)}
+                    onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
+                      if (!isEditMode && (e.key === "Enter" || e.key === " ")) {
                         e.preventDefault()
                         setField("requireMinAttendance", !requireMinAttendance)
                       }
                     }}
-                    className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer transition-all ${requireMinAttendance
-                        ? "bg-[#990011] border-[#990011] text-white"
-                        : "bg-white border-gray-300 hover:border-gray-400"
+                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isEditMode
+                      ? "cursor-not-allowed opacity-60 bg-gray-100 border-gray-300 text-gray-500"
+                      : requireMinAttendance
+                        ? "bg-[#990011] border-[#990011] text-white cursor-pointer"
+                        : "bg-white border-gray-300 hover:border-gray-400 cursor-pointer"
                       }`}
                   >
                     {requireMinAttendance && <Check size={14} strokeWidth={3} />}
                   </div>
                   <span
-                    onClick={() => setField("requireMinAttendance", !requireMinAttendance)}
-                    className="font-bold text-sm text-gray-800 cursor-pointer select-none"
+                    onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
+                    className={`font-bold text-sm text-gray-800 select-none ${isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                   >
                     {cc.requireMinAttendanceLabel || "Yêu cầu tỷ lệ tham dự tối thiểu"}
                   </span>
@@ -1005,15 +1013,16 @@ const CreateClassPage = () => {
                   <span className="text-sm font-medium text-gray-700">
                     {cc.minAttendanceRateLabel || "Tỷ lệ tham dự tối thiểu"}
                   </span>
-                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-32 transition-all ${requireMinAttendance ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-32 transition-all ${(!isEditMode && requireMinAttendance) ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
                     }`}>
                     <input
                       type="number"
                       min="0"
                       max="100"
-                      disabled={!requireMinAttendance}
+                      disabled={isEditMode || !requireMinAttendance}
                       value={minAttendanceRate}
                       onChange={(e) => {
+                        if (isEditMode) return
                         const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0))
                         setField("minAttendanceRate", val)
                       }}
@@ -1042,14 +1051,18 @@ const CreateClassPage = () => {
                 {/* Radio options */}
                 <div className="flex flex-col gap-2.5 pt-1">
                   <label
-                    onClick={() => setField("includeLateAttendance", true)}
-                    className="flex items-center gap-2.5 cursor-pointer select-none group"
+                    onClick={() => {
+                      if (isEditMode) return
+                      setField("lateAttendancePolicy", "CountLate")
+                      setField("includeLateAttendance", true)
+                    }}
+                    className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                   >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${includeLateAttendance
-                        ? "border-[#990011] bg-white"
-                        : "border-gray-300 group-hover:border-gray-400 bg-white"
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "CountLate" || includeLateAttendance)
+                      ? "border-[#990011] bg-white"
+                      : "border-gray-300 group-hover:border-gray-400 bg-white"
                       }`}>
-                      {includeLateAttendance && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
+                      {(lateAttendancePolicy === "CountLate" || includeLateAttendance) && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
                     </div>
                     <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
                       {cc.includeLateAttendanceOption || "Tính cả lần tham dự muộn"}
@@ -1057,14 +1070,18 @@ const CreateClassPage = () => {
                   </label>
 
                   <label
-                    onClick={() => setField("includeLateAttendance", false)}
-                    className="flex items-center gap-2.5 cursor-pointer select-none group"
+                    onClick={() => {
+                      if (isEditMode) return
+                      setField("lateAttendancePolicy", "IgnoreLate")
+                      setField("includeLateAttendance", false)
+                    }}
+                    className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                   >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${!includeLateAttendance
-                        ? "border-[#990011] bg-white"
-                        : "border-gray-300 group-hover:border-gray-400 bg-white"
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance)
+                      ? "border-[#990011] bg-white"
+                      : "border-gray-300 group-hover:border-gray-400 bg-white"
                       }`}>
-                      {!includeLateAttendance && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
+                      {(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance) && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
                     </div>
                     <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
                       {cc.excludeLateAttendanceOption || "Không tính lần tham dự muộn"}
