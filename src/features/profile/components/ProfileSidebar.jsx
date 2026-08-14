@@ -7,6 +7,19 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useGetFriendRecommendationsQuery } from "../../../store/api/social/friendshipApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
+const getUserRoleLabel = (user, t) => {
+  const isTeacher =
+    user?.isTeacher === true ||
+    user?.isTeacher === 1 ||
+    user?.isTeacher === "true" ||
+    (typeof user?.level === "string" &&
+      user.level.trim().toLowerCase() === "expert")
+
+  return isTeacher
+    ? (t.profile?.friends?.teacher || "Giảng viên")
+    : (t.profile?.friends?.member || "Thành viên")
+}
+
 const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
   const navigate = useNavigate()
   const location = useLocation()
@@ -59,7 +72,7 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
                 </h3>
 
                 <p className="text-sm text-[#606060]">
-                  {user.level || t.profile?.friends?.member || "Member"}
+                  {getUserRoleLabel(user, t)}
                 </p>
               </HorizontalCard>
             ))

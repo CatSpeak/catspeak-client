@@ -35,6 +35,19 @@ const normalizeString = (str) => {
     .toLowerCase()
 }
 
+const getUserRoleLabel = (user, t) => {
+  const isTeacher =
+    user?.isTeacher === true ||
+    user?.isTeacher === 1 ||
+    user?.isTeacher === "true" ||
+    (typeof user?.level === "string" &&
+      user.level.trim().toLowerCase() === "expert")
+
+  return isTeacher
+    ? (t.profile?.friends?.teacher || "Giảng viên")
+    : (t.profile?.friends?.member || "Thành viên")
+}
+
 const ProfileFriendsTab = ({
   targetAccountId,
   isOwnProfile,
@@ -321,7 +334,7 @@ const ProfileFriendsTab = ({
                   <h3 className="font-semibold">
                     {user.nickname || user.username}
                   </h3>
-                  <p className="text-sm text-[#606060]">{user.level || t.profile?.friends?.member || "Member"}</p>
+                  <p className="text-sm text-[#606060]">{getUserRoleLabel(user, t)}</p>
                 </HorizontalCard>
               </div>
             )
