@@ -122,7 +122,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
         return {
           id,
           name: node.folderName || node.name || t.materials.untitledFolder,
-          itemsCount: meta.materialCount || node.materialCount || 0,
+          itemsCount: (meta.materialCount || node.materialCount || 0) + (meta.subFolderCount || node.subFolderCount || 0),
           updatedAt: formatDate(meta.updatedAt || node.updatedAt),
           isPublic: meta.isPublic !== undefined ? meta.isPublic : false,
           publicShareUrl: meta.publicShareUrl || node.publicShareUrl,
@@ -136,7 +136,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
       return folders.map(f => ({
         id: f.id || f.folderId,
         name: f.name || f.folderName || t.materials.untitledFolder,
-        itemsCount: f.materialCount || f.itemsCount || 0,
+        itemsCount: (f.materialCount || f.itemsCount || 0) + (f.subFolderCount || 0),
         updatedAt: formatDate(f.updatedAt),
         isPublic: f.isPublic !== undefined ? f.isPublic : false,
         publicShareUrl: f.publicShareUrl,
