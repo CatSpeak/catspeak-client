@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { useSelector } from "react-redux"
 import { Trophy, Share2, X, Calendar } from "lucide-react"
 import { selectIsAuthenticated } from "@/store/slices/authSlice"
 import { useGetPendingReviewQuery } from "@/store/api/reviewApi"
+import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import Modal from "@/shared/components/ui/Modal"
@@ -39,7 +39,6 @@ const CompletionReviewPrompt = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const justAuthenticated = useDidAuthenticate(isAuthenticated)
   const [dismissed, setDismissed] = useState(false)
-  const navigate = useNavigate()
   const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const popupT = t?.profile?.review?.popup || {}
@@ -58,7 +57,7 @@ const CompletionReviewPrompt = () => {
   const goReview = () => {
     if (!pending) return
     close()
-    navigate(`/workspace/learning/class/${pending.classId}/review`)
+    getNavigate()?.(`/workspace/learning/class/${pending.classId}/review`)
   }
 
   const formatDateStr = (value) => {
