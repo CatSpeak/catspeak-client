@@ -29,7 +29,7 @@ const SaveSharedMaterialModal = ({ open, onClose, onSuccess, item }) => {
     }
   }
 
-  const isItemFolder = item && !item.fileName && !item.fileUrl;
+  const isItemFolder = item && (item.type === 'folder' || item.isFolder || item.folders !== undefined || item.subFolderCount !== undefined || (!item.fileUrl && !item.contentType));
   const currentName = item?.fileName || item?.folderName || item?.name || "";
 
   const folders = useMemo(() => {
