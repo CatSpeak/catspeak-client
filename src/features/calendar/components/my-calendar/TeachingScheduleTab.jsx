@@ -16,7 +16,7 @@ import MenuItem from '@/shared/components/ui/MenuItem'
 
 const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const { t, language } = useLanguage()
-  const { formatDate, formatTime, formatScheduleTime, getZoneDateStr, toIsoInZone } = useTimezone()
+  const { formatDate, formatTime, formatScheduleTime, getZoneDateStr } = useTimezone()
   const navigate = useNavigate()
   const fromDate = currentDate.startOf('month').format('YYYY-MM-DD')
   const toDate = currentDate.endOf('month').format('YYYY-MM-DD')
@@ -47,7 +47,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   const filteredSessions = rawSessions.filter(s => {
     let matchDate = true
     if (filterDate) {
-      const isoStart = toIsoInZone(s.date || s.startTime, s.startTime) || s.date
+      const isoStart = s.rawStartTime || s.startTime || s.date
       if (!isoStart) matchDate = false
       else {
         const sDate = getZoneDateStr(isoStart)
@@ -83,7 +83,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       key: 'date',
       label: t.calendar?.day || 'Ngày',
       render: (row) => {
-        const isoStart = toIsoInZone(row.date || row.startTime, row.startTime) || row.date
+        const isoStart = row.rawStartTime || row.startTime || row.date
         return isoStart ? formatDate(isoStart) : '-'
       }
     },
@@ -91,8 +91,8 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       key: 'time',
       label: t.calendar?.timeLabel || 'Thời gian',
       render: (row) => {
-        const isoStart = toIsoInZone(row.date || row.startTime, row.startTime)
-        const isoEnd = toIsoInZone(row.date || row.endTime, row.endTime)
+        const isoStart = row.rawStartTime || row.startTime
+        const isoEnd = row.rawEndTime || row.endTime
         const startStr = isoStart ? formatTime(isoStart) : formatScheduleTime(row.startTime, row.date)
         const endStr = isoEnd ? formatTime(isoEnd) : formatScheduleTime(row.endTime, row.date)
         return startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
@@ -164,8 +164,8 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
   if (isLoading) return <LoadingSpinner className="py-20 flex justify-center w-full" />
 
   const renderMobileCard = (row) => {
-    const isoStart = toIsoInZone(row.date || row.startTime, row.startTime) || row.date
-    const isoEnd = toIsoInZone(row.date || row.endTime, row.endTime) || row.date
+    const isoStart = row.rawStartTime || row.startTime || row.date
+    const isoEnd = row.rawEndTime || row.endTime || row.date
     const startStr = isoStart ? formatTime(isoStart) : formatScheduleTime(row.startTime)
     const endStr = isoEnd ? formatTime(isoEnd) : formatScheduleTime(row.endTime)
     const timeText = startStr && endStr ? `${startStr} - ${endStr}` : startStr || '-'
