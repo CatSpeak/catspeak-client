@@ -7,7 +7,7 @@ import Tabs from '@/shared/components/ui/navigation/Tabs';
 import ProfileFolderItem from './ProfileFolderItem';
 import ProfileFileItem from './ProfileFileItem';
 import { EmptyState, LoadingSpinner } from '@/shared/components/ui/indicators';
-import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation, useGetMaterialByShareTokenQuery, useGetFolderByShareTokenQuery, useGetPublicMaterialsByUserIdQuery } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useGetFolderTreeQuery, useRecordMaterialDownloadMutation, useRecordFolderDownloadMutation, useGetMaterialByShareTokenQuery, useGetFolderByShareTokenQuery, useGetPublicMaterialsByUserIdQuery } from '@/store/api/materialApi';
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -99,6 +99,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   );
 
   const [recordDownload] = useRecordMaterialDownloadMutation();
+  const [recordFolderDownload] = useRecordFolderDownloadMutation();
 
   const rawFoldersTree = useMemo(() => treeData?.data || treeData || [], [treeData]);
   const responseData = isOwnProfile
@@ -318,7 +319,10 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
                           navigate(`/workspace/materials/${folder.id}`);
                         }
                       }}
-                      onDownload={() => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t)}
+                      onDownload={() => {
+                        recordFolderDownload(folder.id);
+                        downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t);
+                      }}
                       onShare={() => {
                         if (isOwnProfile) {
                           setSelectedItem(folder);
@@ -525,7 +529,10 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
           }
 
           filesToDownload.forEach(file => downloadFile(file, recordDownload));
-          foldersToDownload.forEach(folder => downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t, true));
+          foldersToDownload.forEach(folder => {
+            recordFolderDownload(folder.id);
+            downloadFolderAsZip(folder, !isOwnProfile, targetAccountId, t, true);
+          });
 
           toast.success(t.materials.downloadingFiles.replace('{{count}}', filesToDownload.length + foldersToDownload.length));
           setSelectedItems([]);

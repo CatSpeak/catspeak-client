@@ -33,14 +33,14 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
   const isFolder = item && (item.type === 'folder' || item.isFolder || item.folders !== undefined || item.subFolderCount !== undefined || (!item.fileUrl && !item.contentType));
 
   useEffect(() => {
-    if (open && item?.id && !isOwner) {
+    if (open && item?.id) {
       if (isFolder) {
-        recordFolderView(item.id).catch(err => console.error("Failed to record folder view", err));
+        recordFolderView(item.id);
       } else {
-        recordView(item.id).catch(err => console.error("Failed to record view", err));
+        recordView(item.id);
       }
     }
-  }, [open, item?.id, isOwner, recordView, recordFolderView, isFolder]);
+  }, [open, item?.id, recordView, recordFolderView, isFolder]);
 
   // If the user is the owner, fallback to FileDetailModal for full edit permissions
   if (isOwner) {
