@@ -42,6 +42,7 @@ export default {
     friends: {
       title: "好友",
       member: "成员",
+      teacher: "教师",
       searchPlaceholder: "搜索好友...",
       subTabs: {
         all: "所有好友",
