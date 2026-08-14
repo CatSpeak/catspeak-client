@@ -797,6 +797,25 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: ["StudentClasses"],
     }),
 
+    getStudentCompletedClasses: builder.query({
+      query: () => ({
+        url: "/student/classes/completed",
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        const items = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+            ? data.data
+            : []
+        return {
+          data: items.map((cls) => transformClass(cls)).filter(Boolean),
+        }
+      },
+      providesTags: ["StudentClasses"],
+    }),
+
     getExploreCourseDetail: builder.query({
       query: (id) => ({
         url: `/explore/courses/${encodePathSegment(id)}`,

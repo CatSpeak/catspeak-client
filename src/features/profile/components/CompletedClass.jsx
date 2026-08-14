@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Calendar, Clock, BookOpen, Compass } from 'lucide-react'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
-import { useGetStudentJoinedClassesQuery } from '@/store/api/coursesApi'
+import { useGetStudentCompletedClassesQuery } from '@/store/api/coursesApi'
 import EmptyCoursesState from '@/features/courses/components/EmptyCoursesState'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -33,16 +33,15 @@ const CompletedClass = ({ isOwnProfile }) => {
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 10
 
-  const { data: responseData, isLoading, isError } = useGetStudentJoinedClassesQuery(
-    { all: true },
+  const { data: responseData, isLoading, isError } = useGetStudentCompletedClassesQuery(
+    undefined,
     { skip: !isOwnProfile }
   )
 
   const classes = responseData?.data || []
 
-  // Filter classes based on searchQuery (only show COMPLETED classes)
+  // Filter classes based on searchQuery
   const filteredClasses = classes
-    .filter(cls => cls.status === "COMPLETED")
     .filter(cls => {
       if (!searchQuery) return true
       const title = cls.title || cls.name || ""
