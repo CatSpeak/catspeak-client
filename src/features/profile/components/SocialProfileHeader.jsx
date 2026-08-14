@@ -1,6 +1,6 @@
 import React from "react"
 import toast from "react-hot-toast"
-import { MapPin, Edit2, UserPlus, Check, AtSign } from "lucide-react"
+import { Camera, MapPin, Edit2, UserPlus, Check, AtSign } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import RequestButton from "@/shared/components/ui/buttons/RequestButton"
