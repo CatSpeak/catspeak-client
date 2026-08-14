@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, User, UserCheck, UserX } from "lucide-react";
-import Avatar from "@/shared/components/ui/Avatar";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import useDebounce from "@/shared/hooks/useDebounce";
+import React, { useState, useRef, useEffect } from "react"
+import { MoreHorizontal, User, UserCheck, UserX } from "lucide-react"
+import Avatar from "@/shared/components/ui/Avatar"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import useDebounce from "@/shared/hooks/useDebounce"
 import {
   useGetFriendsQuery,
   useGetFollowersQuery,
@@ -10,89 +10,102 @@ import {
   useGetPendingFriendRequestsQuery,
   useGetFriendRecommendationsQuery,
   useRespondFriendRequestMutation,
-} from "../../../store/api/social/friendshipApi";
-import { useNavigate, useLocation } from "react-router-dom";
-import FluentCard from "@/shared/components/ui/FluentCard";
-import HorizontalCard from "@/shared/components/ui/HorizontalCard";
-import Tabs from "@/shared/components/ui/navigation/Tabs";
-import SearchInput from "@/shared/components/ui/inputs/SearchInput";
+} from "../../../store/api/social/friendshipApi"
+import { useNavigate, useLocation } from "react-router-dom"
+import FluentCard from "@/shared/components/ui/FluentCard"
+import HorizontalCard from "@/shared/components/ui/HorizontalCard"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import {
   LoadingSpinner,
   Skeleton,
   EmptyState,
-} from "@/shared/components/ui/indicators";
-import Popover from "@/shared/components/ui/Popover";
-import { IconButton } from "@/shared/components/ui/buttons";
-import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem";
+} from "@/shared/components/ui/indicators"
+import Popover from "@/shared/components/ui/Popover"
+import { IconButton } from "@/shared/components/ui/buttons"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 
 // Helper to strip diacritics / accents and convert to lowercase for unicode-insensitive matching
 const normalizeString = (str) => {
-  if (!str || typeof str !== "string") return "";
+  if (!str || typeof str !== "string") return ""
   return str
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[đĐ]/g, "d")
-    .toLowerCase();
-};
+    .toLowerCase()
+}
+
+const getUserRoleLabel = (user, t) => {
+  const isTeacher =
+    user?.isTeacher === true ||
+    user?.isTeacher === 1 ||
+    user?.isTeacher === "true" ||
+    (typeof user?.level === "string" &&
+      user.level.trim().toLowerCase() === "expert")
+
+  return isTeacher
+    ? t.profile?.friends?.teacher || "Giảng viên"
+    : t.profile?.friends?.member || "Thành viên"
+}
 
 const ProfileFriendsTab = ({
   targetAccountId,
   isOwnProfile,
   defaultSubTab,
 }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { t } = useLanguage();
-  const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  const [recPage, setRecPage] = useState(1);
-  const secondLastRecRef = useRef(null);
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { t } = useLanguage()
+  const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
+  const [recPage, setRecPage] = useState(1)
+  const secondLastRecRef = useRef(null)
 
   const [prevDebouncedKeyword, setPrevDebouncedKeyword] =
-    useState(debouncedSearchQuery);
-  const [prevSubTab, setPrevSubTab] = useState(activeSubTab);
+    useState(debouncedSearchQuery)
+  const [prevSubTab, setPrevSubTab] = useState(activeSubTab)
 
   // Synchronously reset page to 1 during render when keyword or tab changes to avoid querying old page with new keyword
   if (prevDebouncedKeyword !== debouncedSearchQuery) {
-    setPrevDebouncedKeyword(debouncedSearchQuery);
-    setRecPage(1);
+    setPrevDebouncedKeyword(debouncedSearchQuery)
+    setRecPage(1)
   }
   if (prevSubTab !== activeSubTab) {
-    setPrevSubTab(activeSubTab);
-    setRecPage(1);
+    setPrevSubTab(activeSubTab)
+    setRecPage(1)
   }
 
   const handleSearchChange = (val) => {
-    setSearchQuery(val);
-    setRecPage(1);
-  };
+    setSearchQuery(val)
+    setRecPage(1)
+  }
 
   const handleTabChange = (tab) => {
-    setActiveSubTab(tab);
-    setRecPage(1);
-  };
+    setActiveSubTab(tab)
+    setRecPage(1)
+  }
 
   // Fetch all potential data
   const { data: friendsResponse, isLoading: loadingFriends } =
     useGetFriendsQuery(targetAccountId, {
       skip: !targetAccountId,
-    });
+    })
   const { data: followersResponse, isLoading: loadingFollowers } =
     useGetFollowersQuery(targetAccountId, {
       skip: !targetAccountId,
-    });
+    })
   const { data: followingResponse, isLoading: loadingFollowing } =
     useGetFollowingQuery(targetAccountId, {
       skip: !targetAccountId,
-    });
+    })
 
   // Only fetch pending requests if viewing own profile
   const { data: pendingResponse, isLoading: loadingPending } =
     useGetPendingFriendRequestsQuery(undefined, {
       skip: !isOwnProfile,
       pollingInterval: 4000,
-    });
+    })
   const {
     data: recResponse,
     isLoading: loadingRecs,
@@ -104,42 +117,42 @@ const ProfileFriendsTab = ({
       PageSize: 10,
     },
     { skip: !isOwnProfile },
-  );
+  )
 
   // Infinite scroll — observe second-to-last recommendation card
   useEffect(() => {
-    if (!secondLastRecRef.current || activeSubTab !== "find") return;
-    const hasMore = recResponse?.hasMore !== false;
-    if (!hasMore || fetchingRecs) return;
+    if (!secondLastRecRef.current || activeSubTab !== "find") return
+    const hasMore = recResponse?.hasMore !== false
+    if (!hasMore || fetchingRecs) return
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !fetchingRecs && hasMore) {
-          setRecPage((prev) => prev + 1);
+          setRecPage((prev) => prev + 1)
         }
       },
       { rootMargin: "200px" },
-    );
-    observer.observe(secondLastRecRef.current);
-    return () => observer.disconnect();
-  }, [recResponse, fetchingRecs, activeSubTab]);
-  const [respondFriendRequest] = useRespondFriendRequestMutation();
+    )
+    observer.observe(secondLastRecRef.current)
+    return () => observer.disconnect()
+  }, [recResponse, fetchingRecs, activeSubTab])
+  const [respondFriendRequest] = useRespondFriendRequestMutation()
 
   const handleRespondRequest = (friendshipId, action, closePopover) => {
-    closePopover();
+    closePopover()
     respondFriendRequest({ friendshipId, action })
       .unwrap()
       .catch(() =>
         toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra"),
-      );
-  };
+      )
+  }
 
-  const getArray = (res) => (Array.isArray(res) ? res : res?.data || []);
+  const getArray = (res) => (Array.isArray(res) ? res : res?.data || [])
 
-  const friends = getArray(friendsResponse);
-  const following = getArray(followingResponse);
-  const followers = getArray(followersResponse);
-  const pendingRequests = getArray(pendingResponse);
+  const friends = getArray(friendsResponse)
+  const following = getArray(followingResponse)
+  const followers = getArray(followersResponse)
+  const pendingRequests = getArray(pendingResponse)
 
   const subTabs = [
     {
@@ -154,7 +167,7 @@ const ProfileFriendsTab = ({
       id: "followers",
       label: `${t.profile?.friends?.subTabs?.followers || "Người theo dõi"} (${followers.length})`,
     },
-  ];
+  ]
 
   // Add "Pending Requests" only for own profile
   if (isOwnProfile) {
@@ -163,11 +176,11 @@ const ProfileFriendsTab = ({
       label: t.profile?.friends?.subTabs?.pending || "Yêu cầu kết nối",
       badge:
         pendingRequests.length > 0 ? pendingRequests.length.toString() : null,
-    });
+    })
     subTabs.push({
       id: "find",
       label: t.profile?.friends?.subTabs?.find || "Tìm bạn bè",
-    });
+    })
   }
 
   // Reset activeSubTab to 'all' if navigating to another user's profile while on a restricted tab
@@ -176,57 +189,57 @@ const ProfileFriendsTab = ({
       !isOwnProfile &&
       (activeSubTab === "pending" || activeSubTab === "find")
     ) {
-      setActiveSubTab("all");
+      setActiveSubTab("all")
     }
-  }, [isOwnProfile, activeSubTab]);
+  }, [isOwnProfile, activeSubTab])
 
   const renderGridList = () => {
-    let list = [];
-    let isLoading = false;
-    let emptyMessage = t.profile?.friends?.empty?.noData || "Không có dữ liệu";
+    let list = []
+    let isLoading = false
+    let emptyMessage = t.profile?.friends?.empty?.noData || "Không có dữ liệu"
 
     if (activeSubTab === "all") {
-      list = getArray(friendsResponse);
-      isLoading = loadingFriends;
+      list = getArray(friendsResponse)
+      isLoading = loadingFriends
       emptyMessage =
-        t.profile?.friends?.empty?.noFriends || "Chưa có bạn bè nào.";
+        t.profile?.friends?.empty?.noFriends || "Chưa có bạn bè nào."
     } else if (activeSubTab === "following") {
-      list = getArray(followingResponse);
-      isLoading = loadingFollowing;
+      list = getArray(followingResponse)
+      isLoading = loadingFollowing
       emptyMessage =
-        t.profile?.friends?.empty?.noFollowing || "Chưa theo dõi ai.";
+        t.profile?.friends?.empty?.noFollowing || "Chưa theo dõi ai."
     } else if (activeSubTab === "followers") {
-      list = getArray(followersResponse);
-      isLoading = loadingFollowers;
+      list = getArray(followersResponse)
+      isLoading = loadingFollowers
       emptyMessage =
-        t.profile?.friends?.empty?.noFollowers || "Chưa có người theo dõi.";
+        t.profile?.friends?.empty?.noFollowers || "Chưa có người theo dõi."
     } else if (activeSubTab === "pending") {
       list = pendingRequests.map((req) => ({
         ...req.requester,
         friendshipId: req.friendshipId,
         isPendingRequest: true,
-      }));
-      isLoading = loadingPending;
+      }))
+      isLoading = loadingPending
       emptyMessage =
-        t.profile?.friends?.empty?.noPending || "Không có yêu cầu kết nối nào.";
+        t.profile?.friends?.empty?.noPending || "Không có yêu cầu kết nối nào."
     } else if (activeSubTab === "find") {
-      list = getArray(recResponse);
-      isLoading = loadingRecs && recPage === 1;
+      list = getArray(recResponse)
+      isLoading = loadingRecs && recPage === 1
       emptyMessage =
-        t.profile?.friends?.empty?.noRecommendations || "Không có gợi ý nào.";
+        t.profile?.friends?.empty?.noRecommendations || "Không có gợi ý nào."
     }
 
     // Only filter in FE for tabs that do not have backend search (Unicode / diacritics insensitive)
     if (searchQuery && activeSubTab !== "find") {
-      const normalizedQuery = normalizeString(searchQuery);
+      const normalizedQuery = normalizeString(searchQuery)
       list = list.filter((user) => {
-        const normalizedUsername = normalizeString(user.username);
-        const normalizedNickname = normalizeString(user.nickname);
+        const normalizedUsername = normalizeString(user.username)
+        const normalizedNickname = normalizeString(user.nickname)
         return (
           normalizedUsername.includes(normalizedQuery) ||
           normalizedNickname.includes(normalizedQuery)
-        );
-      });
+        )
+      })
     }
 
     if (isLoading) {
@@ -248,7 +261,7 @@ const ProfileFriendsTab = ({
             </FluentCard>
           ))}
         </div>
-      );
+      )
     }
 
     if (list.length === 0) {
@@ -256,19 +269,19 @@ const ProfileFriendsTab = ({
         <FluentCard>
           <EmptyState message={emptyMessage} icon={User} />
         </FluentCard>
-      );
+      )
     }
 
     const secondLastId =
-      list[list.length - 2]?.accountId ?? list[list.length - 1]?.accountId;
-    const hasMore = activeSubTab === "find" && recResponse?.hasMore !== false;
+      list[list.length - 2]?.accountId ?? list[list.length - 1]?.accountId
+    const hasMore = activeSubTab === "find" && recResponse?.hasMore !== false
 
     return (
       <>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {list.map((user) => {
             const isSecondLast =
-              activeSubTab === "find" && user.accountId === secondLastId;
+              activeSubTab === "find" && user.accountId === secondLastId
             return (
               <div
                 key={user.accountId}
@@ -277,10 +290,10 @@ const ProfileFriendsTab = ({
                 <HorizontalCard
                   onClick={() => {
                     const isWorkspace =
-                      location.pathname.startsWith("/workspace");
+                      location.pathname.startsWith("/workspace")
                     navigate(
                       `${isWorkspace ? "/workspace" : ""}/profile/${user.accountId}`,
-                    );
+                    )
                   }}
                   leftContent={
                     <Avatar
@@ -303,12 +316,12 @@ const ProfileFriendsTab = ({
                           <MenuList>
                             <MenuItem
                               onClick={(e) => {
-                                e.stopPropagation();
+                                e.stopPropagation()
                                 handleRespondRequest(
                                   user.friendshipId,
                                   "accept",
                                   close,
-                                );
+                                )
                               }}
                               icon={<UserCheck />}
                               label={
@@ -318,12 +331,12 @@ const ProfileFriendsTab = ({
                             />
                             <MenuItem
                               onClick={(e) => {
-                                e.stopPropagation();
+                                e.stopPropagation()
                                 handleRespondRequest(
                                   user.friendshipId,
                                   "decline",
                                   close,
-                                );
+                                )
                               }}
                               icon={<UserX />}
                               label={
@@ -342,13 +355,11 @@ const ProfileFriendsTab = ({
                     {user.nickname || user.username}
                   </h3>
                   <p className="text-sm text-[#606060]">
-                    {(user.IsTeacher || user.isTeacher || user.isteacher)
-                      ? t.profile?.friends?.teacher || "Giảng viên"
-                      : t.profile?.friends?.member || "Thành viên"}
+                    {getUserRoleLabel(user, t)}
                   </p>
                 </HorizontalCard>
               </div>
-            );
+            )
           })}
         </div>
 
@@ -359,8 +370,8 @@ const ProfileFriendsTab = ({
           </div>
         )}
       </>
-    );
-  };
+    )
+  }
 
   return (
     <div className="w-full flex flex-col gap-3 min-h-[500px]">
@@ -394,7 +405,7 @@ const ProfileFriendsTab = ({
       {/* Grid Content */}
       <div className="w-full">{renderGridList()}</div>
     </div>
-  );
-};
+  )
+}
 
-export default ProfileFriendsTab;
+export default ProfileFriendsTab

@@ -43,6 +43,7 @@ export default {
       title: "Friends",
       teacher: "Teacher",
       member: "Member",
+      teacher: "Teacher",
       searchPlaceholder: "Search friends...",
       subTabs: {
         all: "All Friends",

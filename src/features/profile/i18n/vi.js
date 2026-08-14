@@ -43,6 +43,7 @@ export default {
       title: "Bạn bè",
       teacher: "Giảng viên",
       member: "Thành viên",
+      teacher: "Giảng viên",
       searchPlaceholder: "Tìm kiếm bạn bè...",
       subTabs: {
         all: "Tất cả bạn bè",
