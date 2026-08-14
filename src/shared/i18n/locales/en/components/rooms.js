@@ -470,6 +470,9 @@ export default {
       mute: "Mute",
       adjustVolume: "Adjust volume",
       options: "Options",
+      words: "words",
+      wpm: "WPM",
+      speakingTime: "Speaking time",
     },
     webviewBlock: {
       title: "Open in Browser",

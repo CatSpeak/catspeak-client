@@ -42,6 +42,7 @@ import {
   getNavigate,
   getLocation,
 } from "@/features/video-call/hooks/useNavigateRef"
+import { useSpeakingStats } from "@/features/video-call/hooks/useSpeakingStats"
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
@@ -614,6 +615,9 @@ const GlobalCallContent = ({
     t,
   })
 
+  // ── Realtime Speaking Statistics ──
+  const { statsMap: speakingStatsMap, roomTotalDuration } = useSpeakingStats(lkRoom)
+
   // ── Context value ──
   const value = {
     // Call lifecycle
@@ -637,6 +641,10 @@ const GlobalCallContent = ({
     lkRoom,
     lkRoomName: lkRoom?.name,
     sessionError: null,
+
+    // Speaking stats
+    speakingStatsMap,
+    roomTotalDuration,
 
     // User
     user,

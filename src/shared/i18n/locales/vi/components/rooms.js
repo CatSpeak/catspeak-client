@@ -448,6 +448,9 @@ export default {
       mute: "Tắt tiếng",
       adjustVolume: "Điều chỉnh âm lượng",
       options: "Tùy chọn",
+      words: "từ",
+      wpm: "WPM",
+      speakingTime: "Thời gian nói",
     },
     webviewBlock: {
       title: "Mở trong trình duyệt",

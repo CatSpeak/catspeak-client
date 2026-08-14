@@ -84,6 +84,8 @@ const IDLE_VALUE = {
   changeSubtitleLanguage: async () => {},
 
   lkRoomName: null,
+  speakingStatsMap: {},
+  roomTotalDuration: 0,
   unreadRoomChat: 0,
   unreadAiChat: 0,
   isChatCollapsed: false,

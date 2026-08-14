@@ -432,6 +432,9 @@ export default {
       mute: "静音",
       adjustVolume: "调整音量",
       options: "选项",
+      words: "词",
+      wpm: "WPM",
+      speakingTime: "发言时间",
     },
     webviewBlock: {
       title: "请在浏览器中打开",
