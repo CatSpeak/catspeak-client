@@ -17,7 +17,7 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyCalendarPage = () => {
   const { t } = useLanguage()
-  const { toIsoInZone, getZoneDateStr } = useTimezone()
+  const { getZoneDateStr } = useTimezone()
   const { isTeacher } = useRoleOverride()
   const navigate = useNavigate()
   const location = useLocation()
@@ -114,8 +114,8 @@ const MyCalendarPage = () => {
     // 1. (Teacher Schedule)
     if (teacherScheduleSessions?.data && Array.isArray(teacherScheduleSessions.data)) {
       teacherScheduleSessions.data.forEach((session, index) => {
-        const startDateTime = toIsoInZone(session.date || session.startTime, session.startTime) || session.startTime || dayjs().toISOString();
-        const endDateTime = toIsoInZone(session.date || session.endTime, session.endTime) || session.endTime || dayjs().toISOString();
+        const startDateTime = session.rawStartTime || session.startTime || dayjs().toISOString();
+        const endDateTime = session.rawEndTime || session.endTime || dayjs().toISOString();
 
         const newId = `teaching-${session.id || session.class?.id || `idx-${index}`}-${session.sessionNumber}`;
         if (!seenIds.has(newId)) {
@@ -140,8 +140,8 @@ const MyCalendarPage = () => {
     // 2. (Student Schedule)
     if (studentScheduleSessions?.data && Array.isArray(studentScheduleSessions.data)) {
       studentScheduleSessions.data.forEach((session, index) => {
-        const startDateTime = toIsoInZone(session.date || session.startTime, session.startTime) || session.startTime || dayjs().toISOString();
-        const endDateTime = toIsoInZone(session.date || session.endTime, session.endTime) || session.endTime || dayjs().toISOString();
+        const startDateTime = session.rawStartTime || session.startTime || dayjs().toISOString();
+        const endDateTime = session.rawEndTime || session.endTime || dayjs().toISOString();
 
         const newId = `student-${session.id || session.class?.id || `idx-${index}`}-${session.sessionNumber}`;
         if (!seenIds.has(newId)) {
@@ -176,7 +176,7 @@ const MyCalendarPage = () => {
     processEventsList(events, studentRegEventsList, 'registered-event', seenIds);
 
     return events;
-  }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents, t, toIsoInZone])
+  }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents, t])
 
   const filteredEvents = useMemo(() => {
     if (activeFilters.length === 0) return allEvents
