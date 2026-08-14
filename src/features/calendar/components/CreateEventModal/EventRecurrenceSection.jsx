@@ -169,7 +169,7 @@ const EventRecurrenceSection = ({
                       value={occurrenceCount}
                       onChange={(e) => onOccurrenceCountChange(e.target.value)}
                       disabled={isEditing || recurrenceEndType !== "COUNT"}
-                      variant="square"
+                      variant="semi-round"
                       color={eventColor}
                       className="text-center !px-2"
                       containerClassName="w-20"

@@ -28,8 +28,7 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
-import { DatePicker } from "@/shared/components/ui/inputs"
-import TimeDropdown from "@/features/calendar/components/ui/TimeDropdown"
+import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
@@ -147,6 +146,12 @@ const CreateClassPage = () => {
     () => (Array.isArray(coursesData?.data) ? coursesData.data : []),
     [coursesData],
   )
+  const today = useMemo(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
   const tomorrow = useMemo(() => {
     const d = new Date()
     d.setDate(d.getDate() + 1)
@@ -310,25 +315,26 @@ const CreateClassPage = () => {
 
     setErrors({})
 
-    const start = parseLocalDateString(startDate)
-    const enrollStart = parseLocalDateString(admissionStart)
-    const enrollEnd = parseLocalDateString(admissionEnd)
+    const start = parseLocalDateString(startDate, startDateHours || "00:00")
+    const enrollStart = parseLocalDateString(admissionStart, admissionStartHours || "00:00")
+    const enrollEnd = parseLocalDateString(admissionEnd, admissionEndHours || "00:00")
     if (!start || !enrollStart || !enrollEnd) {
       toast.error(cc.toastInvalidDates || "Enter valid enrollment and class dates.")
       return
     }
 
     if (!isEditMode) {
-      if (enrollStart && enrollStart < tomorrow) {
-        toast.error(cc.toastAdmissionStartPast || "Admission start date must be from tomorrow onwards!")
+      const now = new Date()
+      if (enrollStart && enrollStart <= now) {
+        toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
         return
       }
-      if (enrollEnd && enrollEnd < tomorrow) {
-        toast.error(cc.toastAdmissionEndPast || "Admission end date must be from tomorrow onwards!")
+      if (enrollEnd && enrollEnd <= now) {
+        toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
         return
       }
-      if (start && start < tomorrow) {
-        toast.error(cc.toastStartPast || "Start date must be from tomorrow onwards!")
+      if (start && start <= now) {
+        toast.error(cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!")
         return
       }
     }
@@ -340,6 +346,11 @@ const CreateClassPage = () => {
 
     if (enrollEnd && start && start < enrollEnd) {
       toast.error(cc.toastStartLater || "Start date must be later than or equal to enrollment end date!")
+      return
+    }
+
+    if (enrollEnd && start && start < enrollEnd) {
+      toast.error(cc.toastStartLater || "Ngày khai giảng phải bằng hoặc trễ hơn thời gian kết thúc tuyển sinh!")
       return
     }
 
@@ -529,17 +540,37 @@ const CreateClassPage = () => {
         )) ||
         (typeof errCode === "string" && (errCode.includes("SESSION_CONFLICT") || errCode.includes("SCHEDULE_CONFLICT")))
 
+      const isPayOSError =
+        errCode === "PAYOS_ERROR" ||
+        (typeof errMsg === "string" && (
+          errMsg.includes("Enrollment start must be in the future") ||
+          errMsg.includes("Enrollment end must be after enrollment start") ||
+          errMsg.includes("PAYOS_ERROR")
+        ))
+
       let displayMessage
-      if (isLanguageNotAllowed) {
+      if (isScheduleConflict) {
+        displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT") && !errMsg.includes("PAYOS_ERROR"))
+          ? errMsg
+          : (cc.toastScheduleConflictDefault || "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.")
+      } else if (isLanguageNotAllowed) {
         displayMessage = cc.languageNotAllowed || c.createCourse?.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
       } else if (isScheduleLocked) {
         displayMessage = cc.scheduleLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Teaching schedule cannot be changed for this class.")
       } else if (isLevelsLocked) {
         displayMessage = cc.levelsLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Class level cannot be changed for this class.")
-      } else if (isScheduleConflict) {
-        displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT"))
-          ? errMsg
-          : (cc.toastScheduleConflictDefault || "Schedule conflict detected with another class!")
+      } else if (isPayOSError) {
+        if (typeof errMsg === "string" && (errMsg.includes("Enrollment end must be after") || errMsg.includes("end date must be later"))) {
+          displayMessage = cc.toastAdmissionEndLater || "Enrollment end date must be later than enrollment start date!"
+        } else if (typeof errMsg === "string" && (errMsg.includes("Enrollment start must be in the future") || errMsg.includes("start must be in the future"))) {
+          displayMessage = cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!"
+        } else if (typeof errMsg === "string" && (errMsg.includes("Start date must be") || errMsg.includes("start date"))) {
+          displayMessage = cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!"
+        } else {
+          displayMessage = isEditMode
+            ? (cc.toastUpdateFail || "Failed to update class!")
+            : (cc.toastCreateFail || "Failed to create class!")
+        }
       } else if (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("Missing")) {
         displayMessage = errMsg
       } else {
@@ -801,96 +832,64 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Admission Period & Start Date — grid 3 cols so StartDate aligns under Từ */}
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-x-2 gap-y-4">
-
-              {/* Col 1: Từ */}
+            {/* Admission Period & Start Date — 3 inputs on 1 single row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              {/* Col 1: Thời hạn đăng ký (Từ) */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                  {cc.admissionPeriod} <span className="text-[#990011]">*</span>
+                  {cc.admissionPeriod || "Thời hạn đăng ký"}<span className="text-[#990011]">*</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <DatePicker
-                      value={admissionStart}
-                      onChange={(date) => {
-                        setField("admissionStart", date ? toLocalDateString(date) : "")
-                        if (date && !admissionStartHours) setField("admissionStartHours", "07:00")
-                        clearError("admissionStart")
-                      }}
-                      mode="date"
-                      color="#990011"
-                      placeholder="dd/MM/yyyy"
-                      minDate={isEditMode ? null : tomorrow}
-                      className={`w-full ${errors.admissionStart ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                    />
-                  </div>
-                  <TimeDropdown
-                    value={admissionStartHours}
-                    color="#990011"
-                    onChange={(hhmm) => setField("admissionStartHours", hhmm)}
-                  />
-                </div>
+                <DateTimePicker
+                  dateValue={admissionStart}
+                  timeValue={admissionStartHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("admissionStart", dateStr)
+                    setField("admissionStartHours", timeStr)
+                    clearError("admissionStart")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.admissionStart)}
+                  className="w-full"
+                />
               </div>
 
-              {/* Col 2: separator */}
-              <span className="text-gray-300 text-base font-light self-end mb-3 select-none">–</span>
-
-              {/* Col 3: Đến */}
-              <div className="flex flex-col gap-1 self-end">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <DatePicker
-                      value={admissionEnd}
-                      onChange={(date) => {
-                        setField("admissionEnd", date ? toLocalDateString(date) : "")
-                        if (date && !admissionEndHours) setField("admissionEndHours", "07:00")
-                        clearError("admissionEnd")
-                      }}
-                      mode="date"
-                      color="#990011"
-                      placeholder="dd/MM/yyyy"
-                      minDate={isEditMode ? null : tomorrow}
-                      className={`w-full ${errors.admissionEnd ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                    />
-                  </div>
-                  <TimeDropdown
-                    value={admissionEndHours}
-                    color="#990011"
-                    onChange={(hhmm) => setField("admissionEndHours", hhmm)}
-                  />
-                </div>
+              {/* Col 2: Thời hạn đăng ký (Đến) */}
+              <div className="flex flex-col gap-1">
+                <DateTimePicker
+                  dateValue={admissionEnd}
+                  timeValue={admissionEndHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("admissionEnd", dateStr)
+                    setField("admissionEndHours", timeStr)
+                    clearError("admissionEnd")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.admissionEnd)}
+                  className="w-full"
+                />
               </div>
 
-              {/* Row 2, Col 1: Ngày bắt đầu — same width as Từ above */}
+              {/* Col 3: Ngày bắt đầu */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                   {cc.startDate} <span className="text-[#990011]">*</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <DatePicker
-                      value={startDate}
-                      onChange={(date) => {
-                        setField("startDate", date ? toLocalDateString(date) : "")
-                        if (date && !startDateHours) setField("startDateHours", "07:00")
-                        clearError("startDate")
-                      }}
-                      mode="date"
-                      color="#990011"
-                      placeholder="dd/MM/yyyy"
-                      minDate={isEditMode ? null : tomorrow}
-                      className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                    />
-                  </div>
-                  <TimeDropdown
-                    value={startDateHours}
-                    color="#990011"
-                    onChange={(hhmm) => setField("startDateHours", hhmm)}
-                  />
-                </div>
+                <DateTimePicker
+                  dateValue={startDate}
+                  timeValue={startDateHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("startDate", dateStr)
+                    setField("startDateHours", timeStr)
+                    clearError("startDate")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.startDate)}
+                  className="w-full"
+                />
               </div>
-
             </div>
 
 

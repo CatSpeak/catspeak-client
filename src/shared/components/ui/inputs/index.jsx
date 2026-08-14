@@ -1,6 +1,7 @@
 export { default as Radio } from "./Radio"
 export { default as Checkbox } from "./Checkbox"
 export { default as DatePicker } from "./DatePicker"
+export { default as DateTimePicker } from "./DateTimePicker"
 export { default as NumberStepper } from "./NumberStepper"
 export { default as SearchInput } from "./SearchInput"
 export { default as Switch } from "./Switch"
