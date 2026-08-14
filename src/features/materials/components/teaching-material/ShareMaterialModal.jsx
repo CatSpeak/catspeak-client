@@ -120,8 +120,8 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
         loading={isLoading}
         startIcon={<Save className="w-4 h-4" />}
       >
-        {!item?.isPublic && isPublic 
-          ? (t.materials.saveAndCreateLink || "Lưu và tạo liên kết") 
+        {!item?.isPublic && isPublic
+          ? (t.materials.saveAndCreateLink || "Lưu và tạo liên kết")
           : t.materials.saveChanges}
       </PillButton>
     </div>
