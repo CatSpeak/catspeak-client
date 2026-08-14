@@ -159,6 +159,9 @@ const SharedMaterialRedirectPage = lazy(
 const StudentTakeQuizView = lazy(
   () => import("@/features/courses/components/grading/StudentTakeQuizView"),
 );
+const ReviewClassPage = lazy(
+  () => import("@/features/courses/pages/ReviewClassPage"),
+);
 
 const routesConfig = [
   {
@@ -714,6 +717,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <StudentClassDetailPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learning/class/:id/review",
+                element: (
+                  <LazyRoute>
+                    <ReviewClassPage />
                   </LazyRoute>
                 ),
               },

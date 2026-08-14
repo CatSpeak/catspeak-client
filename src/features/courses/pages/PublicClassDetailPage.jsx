@@ -19,6 +19,7 @@ import PublicClassStatsBar from "../components/public-class/PublicClassStatsBar"
 import PublicClassInstructor from "../components/public-class/PublicClassInstructor"
 // import PublicClassReviews from "../components/public-class/PublicClassReviews"
 import PublicClassSidebarCTA from "../components/public-class/PublicClassSidebarCTA"
+import ClassReviewSummary from "../components/public-class/ClassReviewSummary"
 // import PublicClassFAQ from "../components/public-class/PublicClassFAQ"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 
@@ -177,6 +178,13 @@ const PublicClassDetailPage = () => {
 
       {/* Overlapping Quick Stats Card */}
       <PublicClassStatsBar classData={classData} />
+
+      {/* Review summary strip */}
+      {id ? (
+        <div className="mx-auto mt-4 flex max-w-7xl items-center justify-center px-4">
+          <ClassReviewSummary classId={id} />
+        </div>
+      ) : null}
 
       {/* Main Content Layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
