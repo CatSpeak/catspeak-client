@@ -9,10 +9,15 @@ import FilePreview from '@/shared/components/ui/FilePreview';
 import { useLanguage } from '@/shared/context/LanguageContext';
 import FileDetailModal from './FileDetailModal';
 import SaveSharedMaterialModal from './SaveSharedMaterialModal';
-import { useRecordMaterialDownloadMutation, useRecordMaterialViewMutation } from '@/store/api/materialApi';
+import {
+  useRecordMaterialDownloadMutation,
+  useRecordMaterialViewMutation,
+  useRecordFolderViewMutation,
+  useRecordFolderDownloadMutation
+} from '@/store/api/materialApi';
+import { downloadFolderAsZip } from '../../utils/zipDownloader';
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatSize } from "../../utils/materialUtils";
-import toast from 'react-hot-toast';
 
 
 const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove }) => {
@@ -21,13 +26,21 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [recordDownload] = useRecordMaterialDownloadMutation();
   const [recordView] = useRecordMaterialViewMutation();
+  const [recordFolderView] = useRecordFolderViewMutation();
+  const [recordFolderDownload] = useRecordFolderDownloadMutation();
   const { formatDate } = useTimezone();
+
+  const isFolder = item && (item.type === 'folder' || item.isFolder || item.folders !== undefined || item.subFolderCount !== undefined || (!item.fileUrl && !item.contentType));
 
   useEffect(() => {
     if (open && item?.id && !isOwner) {
-      recordView(item.id).catch(err => console.error("Failed to record view", err));
+      if (isFolder) {
+        recordFolderView(item.id).catch(err => console.error("Failed to record folder view", err));
+      } else {
+        recordView(item.id).catch(err => console.error("Failed to record view", err));
+      }
     }
-  }, [open, item?.id, isOwner, recordView]);
+  }, [open, item?.id, isOwner, recordView, recordFolderView, isFolder]);
 
   // If the user is the owner, fallback to FileDetailModal for full edit permissions
   if (isOwner) {
@@ -43,8 +56,6 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
   }
 
   if (!item) return null;
-
-  const isFolder = item && (item.type === 'folder' || item.isFolder || item.folders !== undefined || item.subFolderCount !== undefined || (!item.fileUrl && !item.contentType));
 
   const handleDownload = async () => {
     if (item.fileUrl) {
@@ -66,8 +77,8 @@ const PublicMaterialModal = ({ open, onClose, item, isOwner, onDelete, onMove })
         window.open(item.fileUrl, '_blank');
       }
     } else if (isFolder) {
-      // Future: Download folder as zip
-      toast(t.materials.folderDownloadDev || "Chức năng tải thư mục đang được phát triển.");
+      recordFolderDownload(item.id);
+      await downloadFolderAsZip(item, true, item.ownerId || item.owner?.id, t, false);
     }
   };
 

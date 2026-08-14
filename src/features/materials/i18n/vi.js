@@ -161,7 +161,7 @@ export default {
     fileCountLabel: "Tệp ({{count}})",
     selectedItemsCountLabel: "{{count}} mục đã chọn",
     private: "Riêng tư",
-    itemsUpdatedInfo: "{{count}} tài liệu • Cập nhật {{date}}",
+    itemsUpdatedInfo: "{{count}} mục • Cập nhật {{date}}",
     bookmark: "Lưu",
     edit: "Chỉnh sửa",
     materialNotFound: "Tài liệu/Thư mục không tồn tại hoặc không được chia sẻ công khai",

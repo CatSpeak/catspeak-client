@@ -13,12 +13,31 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
     let allFiles = [];
 
     if (isPublicProfile) {
-      // Fetch public materials for the user
-      const result = await store.dispatch(
-        materialApi.endpoints.getPublicMaterialsByUserId.initiate({ targetAccountId })
-      ).unwrap();
-      allFolders = result.folders || [];
-      allFiles = result.materials || [];
+      const fetchPublicFolderRecursively = async (folderId) => {
+        try {
+          const res = await store.dispatch(
+            materialApi.endpoints.getPublicMaterialsByUserId.initiate({ targetAccountId, folderId })
+          ).unwrap();
+          
+          const rawData = res.data || res || {};
+          const subFolders = (rawData.folders || rawData.subFolders || []).map(f => ({ ...f, parentId: folderId }));
+          const files = (rawData.materials || []).map(f => ({ ...f, folderId: folderId }));
+          
+          allFiles = [...allFiles, ...files];
+          allFolders = [...allFolders, ...subFolders];
+          
+          for (const sub of subFolders) {
+            const subId = sub.id || sub.folderId;
+            if (subId) await fetchPublicFolderRecursively(subId);
+          }
+        } catch (e) {
+          console.error(`Failed to fetch public folder ${folderId}`, e);
+        }
+      };
+      
+      const targetFolderId = folder.id || folder.folderId;
+      allFolders.push(folder);
+      await fetchPublicFolderRecursively(targetFolderId);
     } else {
       // Fetch all folders
       const treeResult = await store.dispatch(
@@ -84,7 +103,12 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
       return isDescendant(parentFolderId, targetFolderId);
     });
 
-    if (filesToDownload.length === 0) {
+    // Find all folders that belong to this folder or its subfolders
+    const foldersToCreate = allFolders.filter(f => {
+      return isDescendant(f.folderId || f.id, targetFolderId);
+    });
+
+    if (filesToDownload.length === 0 && foldersToCreate.length === 0) {
       toast.error(t?.materials?.folderEmpty || 'Thư mục trống', { id: toastId });
       return;
     }
@@ -104,6 +128,14 @@ export const downloadFolderAsZip = async (folder, isPublicProfile = false, targe
     };
 
     const zip = new JSZip();
+
+    // Create empty folder structure
+    foldersToCreate.forEach(f => {
+      const relativePath = getRelativePath(f.folderId || f.id, targetFolderId);
+      if (relativePath) {
+        zip.folder(relativePath);
+      }
+    });
 
     // Download files and add to zip
     const downloadPromises = filesToDownload.map(async (file) => {
@@ -145,11 +177,36 @@ export const downloadMultipleItemsAsZip = async (items, isPublicProfile = false,
     let allFiles = [];
 
     if (isPublicProfile) {
-      const result = await store.dispatch(
-        materialApi.endpoints.getPublicMaterialsByUserId.initiate({ targetAccountId })
-      ).unwrap();
-      allFolders = result.folders || [];
-      allFiles = result.materials || [];
+      const fetchPublicFolderRecursively = async (folderId) => {
+        try {
+          const res = await store.dispatch(
+            materialApi.endpoints.getPublicMaterialsByUserId.initiate({ targetAccountId, folderId })
+          ).unwrap();
+          
+          const rawData = res.data || res || {};
+          const subFolders = (rawData.folders || rawData.subFolders || []).map(f => ({ ...f, parentId: folderId }));
+          const files = (rawData.materials || []).map(f => ({ ...f, folderId: folderId }));
+          
+          allFiles = [...allFiles, ...files];
+          allFolders = [...allFolders, ...subFolders];
+          
+          for (const sub of subFolders) {
+            const subId = sub.id || sub.folderId;
+            if (subId) await fetchPublicFolderRecursively(subId);
+          }
+        } catch (e) {
+          console.error(`Failed to fetch public folder ${folderId}`, e);
+        }
+      };
+
+      for (const item of items) {
+        if (item.type === 'folder' || item.isFolder || item._type === 'folder') {
+          allFolders.push(item);
+          await fetchPublicFolderRecursively(item.id || item.folderId);
+        } else {
+          allFiles.push(item);
+        }
+      }
     } else {
       const treeResult = await store.dispatch(
         materialApi.endpoints.getFolderTree.initiate()
@@ -257,11 +314,26 @@ export const downloadMultipleItemsAsZip = async (items, isPublicProfile = false,
       return path.join('/');
     };
 
+    if (downloadTasks.length === 0 && topLevelFolders.length === 0) {
+      toast.error(t?.materials?.folderEmpty || 'Không có tệp để tải xuống', { id: toastId });
+      return;
+    }
+
     topLevelFolders.forEach(targetFolder => {
-      const targetFolderId = targetFolder.id || targetFolder.folderId;
-      const targetFolderName = targetFolder.name || targetFolder.folderName || 'Folder';
+      const targetId = targetFolder.id || targetFolder.folderId;
+      const targetName = targetFolder.name || targetFolder.folderName || 'Folder';
       
-      const filesInThisFolder = allFiles.filter(file => isDescendant(file.folderId, targetFolderId));
+      // Create empty folder structure for this top-level folder
+      const descendants = allFolders.filter(f => isDescendant(f.folderId || f.id, targetId));
+      zip.folder(targetName); // Ensure root of this folder is created
+      descendants.forEach(f => {
+        const relativePath = getRelativePathForFolder(f.folderId || f.id, targetId, targetName);
+        if (relativePath) {
+          zip.folder(relativePath);
+        }
+      });
+
+      const filesInThisFolder = allFiles.filter(file => isDescendant(file.folderId, targetId));
 
       filesInThisFolder.forEach(file => {
         if (!file.fileUrl) return;
@@ -271,7 +343,7 @@ export const downloadMultipleItemsAsZip = async (items, isPublicProfile = false,
             if (!response.ok) throw new Error('Network error');
             const blob = await response.blob();
             
-            const relativePath = getRelativePathForFolder(file.folderId, targetFolderId, targetFolderName);
+            const relativePath = getRelativePathForFolder(file.folderId, targetId, targetName);
             const fullPath = relativePath ? `${relativePath}/${file.fileName || file.name}` : (file.fileName || file.name);
             
             zip.file(fullPath, blob);
