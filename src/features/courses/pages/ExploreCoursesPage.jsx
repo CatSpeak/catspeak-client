@@ -266,7 +266,7 @@ const ExploreCoursesPage = () => {
                 <span>
                   {hasPriceFilter
                     ? `${minPriceInput ? formatCurrencyVND(minPriceInput) : "0 đ"} - ${maxPriceInput ? formatCurrencyVND(maxPriceInput) : "∞"}`
-                    : "Khoảng giá"}
+                    : (sc.priceRange || "Khoảng giá")}
                 </span>
               </button>
 
@@ -275,7 +275,7 @@ const ExploreCoursesPage = () => {
                 <div className="absolute left-0 sm:left-auto sm:right-0 top-11 z-50 w-80 max-w-[calc(100vw-2rem)] bg-white border border-border/80 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 animate-fadeIn">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                     <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                      <Sparkles size={14} className="text-[#b20a1c]" /> Lọc Theo Học Phí
+                      <Sparkles size={14} className="text-[#b20a1c]" /> {sc.filterByPrice || "Lọc Theo Học Phí"}
                     </span>
                     <button
                       type="button"
@@ -289,7 +289,7 @@ const ExploreCoursesPage = () => {
 
                   {/* Presets */}
                   <div className="flex flex-col gap-2">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Gợi ý nhanh</span>
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{sc.quickPresets || "Gợi ý nhanh"}</span>
                     <div className="grid grid-cols-2 gap-1.5">
                       <button
                         type="button"
@@ -299,7 +299,7 @@ const ExploreCoursesPage = () => {
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
-                        Tất cả giá
+                        {sc.allPrices || "Tất cả giá"}
                       </button>
                       <button
                         type="button"
@@ -309,7 +309,7 @@ const ExploreCoursesPage = () => {
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
-                        Dưới 500.000 đ
+                        {sc.under500k || "Dưới 500.000 đ"}
                       </button>
                       <button
                         type="button"
@@ -319,7 +319,7 @@ const ExploreCoursesPage = () => {
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
-                        500k - 2 triệu
+                        {sc.range500kTo2M || "500k - 2 triệu"}
                       </button>
                       <button
                         type="button"
@@ -329,20 +329,20 @@ const ExploreCoursesPage = () => {
                           : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
                           }`}
                       >
-                        Trên 2 triệu
+                        {sc.above2M || "Trên 2 triệu"}
                       </button>
                     </div>
                   </div>
 
                   {/* Manual Inputs */}
                   <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Tùy chỉnh khoảng giá</span>
+                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{sc.customPriceRange || "Tùy chỉnh khoảng giá"}</span>
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1">
                         <input
                           type="number"
                           min="0"
-                          placeholder="Từ (VNĐ)"
+                          placeholder={sc.priceFrom || "Từ (VNĐ)"}
                           value={minPriceInput}
                           onChange={(e) => {
                             setMinPriceInput(e.target.value)
@@ -356,7 +356,7 @@ const ExploreCoursesPage = () => {
                         <input
                           type="number"
                           min="0"
-                          placeholder="Đến (VNĐ)"
+                          placeholder={sc.priceTo || "Đến (VNĐ)"}
                           value={maxPriceInput}
                           onChange={(e) => {
                             setMaxPriceInput(e.target.value)
@@ -376,7 +376,7 @@ const ExploreCoursesPage = () => {
                         onClick={() => setPricePreset("", "")}
                         className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
                       >
-                        Xóa lọc giá
+                        {sc.clearPriceFilter || "Xóa lọc giá"}
                       </button>
                     ) : (
                       <span />
@@ -386,7 +386,7 @@ const ExploreCoursesPage = () => {
                       onClick={() => setShowPricePopover(false)}
                       className="bg-[#b20a1c] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs hover:bg-[#960817] transition-all cursor-pointer"
                     >
-                      Áp dụng
+                      {sc.apply || "Áp dụng"}
                     </button>
                   </div>
                 </div>
@@ -398,39 +398,39 @@ const ExploreCoursesPage = () => {
         {/* ─── Active Filter Pills Bar ─── */}
         {hasActiveFilters && (
           <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-extrabold text-slate-400 uppercase text-[10px] tracking-wider mr-1">Bộ lọc đang áp dụng:</span>
+            <span className="font-extrabold text-slate-400 uppercase text-[10px] tracking-wider mr-1">{sc.activeFiltersLabel || "Bộ lọc đang áp dụng:"}</span>
 
             {searchQuery.trim() !== "" && (
               <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                Từ khóa: "{searchQuery.trim()}"
+                {sc.keywordPrefix || "Từ khóa:"} "{searchQuery.trim()}"
                 <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setSearchQuery("")} />
               </span>
             )}
 
             {contentType !== "all" && (
               <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                Loại: {contentType === "courses" ? "Khóa học" : "Lớp học"}
+                {sc.typePrefix || "Loại:"} {contentType === "courses" ? (sc.tabCourses || "Khóa học") : (sc.tabClasses || "Lớp học")}
                 <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setContentType("all")} />
               </span>
             )}
 
             {langFilter !== "all" && (
               <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                Ngôn ngữ: {langFilter.toUpperCase()}
+                {sc.languagePrefix || "Ngôn ngữ:"} {langFilter.toUpperCase()}
                 <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setLangFilter("all")} />
               </span>
             )}
 
             {sortOrder !== "default" && (
               <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                Sắp xếp: {sortOrder === "price_asc" ? "Giá tăng dần" : "Độ tương quan"}
+                {sc.sortPrefix || "Sắp xếp:"} {sortOrder === "price_asc" ? (sc.sortPriceAsc || "Giá thấp đến cao") : (sc.sortRelevance || "Độ tương quan")}
                 <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setSortOrder("default")} />
               </span>
             )}
 
             {hasPriceFilter && (
               <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                Giá: {minPriceInput ? formatCurrencyVND(minPriceInput) : "0 đ"} - {maxPriceInput ? formatCurrencyVND(maxPriceInput) : "∞"}
+                {sc.pricePrefix || "Giá:"} {minPriceInput ? formatCurrencyVND(minPriceInput) : "0 đ"} - {maxPriceInput ? formatCurrencyVND(maxPriceInput) : "∞"}
                 <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setPricePreset("", "")} />
               </span>
             )}
@@ -441,7 +441,7 @@ const ExploreCoursesPage = () => {
               className="text-slate-500 hover:text-[#b20a1c] font-extrabold text-xs flex items-center gap-1 ml-auto cursor-pointer transition-colors"
             >
               <RotateCcw size={12} />
-              <span>Xóa tất cả</span>
+              <span>{sc.clearAll || "Xóa tất cả"}</span>
             </button>
           </div>
         )}
