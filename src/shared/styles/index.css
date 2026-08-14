@@ -255,6 +255,7 @@ input[type="password"]::-webkit-reveal {
   * {
     border-color: hsl(var(--border));
   }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
@@ -300,3 +301,20 @@ input[type="password"]::-webkit-reveal {
   border-radius: 12px;
 }
 
+/* TinyMCE Editor Custom Styling */
+.tox.tox-tinymce {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 1rem;
+}
+
+.tox .tox-editor-header {
+  box-shadow: none !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow,
+.tox .tox-toolbar-overlord {
+  box-shadow: none !important;
+}

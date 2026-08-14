@@ -108,7 +108,7 @@ const StudentCourseCard = ({
                     console.error("Share failed", e)
                   }
                 }}
-                className="absolute top-1.5 right-1.5 z-10 h-6 w-6 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+                className="absolute top-1.5 right-1.5 z-10 h-6 w-6 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all duration-200 opacity-0 group-hover:opacity-100 active:scale-90 cursor-pointer"
                 title={sc.shareCourse || "Share"}
               >
                 {linkCopied ? <Check size={10} /> : <Share2 size={10} />}
@@ -190,7 +190,7 @@ const StudentCourseCard = ({
   return (
     <div
       onClick={onViewDetails}
-      className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
+      className="relative bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
     >
       {/* Thumbnail Area */}
       <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">
@@ -214,32 +214,13 @@ const StudentCourseCard = ({
                 console.error("Share failed", e)
               }
             }}
-            className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+            className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all duration-200 opacity-0 group-hover:opacity-100 active:scale-90 cursor-pointer"
             title={sc.shareCourse || "Share"}
           >
             {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
           </button>
         )}
       </div>
-      {onShare && (
-        <button
-          type="button"
-          onClick={async (event) => {
-            event.stopPropagation()
-            try {
-              await onShare(course)
-              setLinkCopied(true)
-              setTimeout(() => setLinkCopied(false), 2000)
-            } catch (e) {
-              console.error("Share failed", e)
-            }
-          }}
-          className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
-          title={sc.shareCourse || "Share"}
-        >
-          {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
-        </button>
-      )}
 
       {/* Content Details */}
       <div className="p-5 flex flex-col flex-1 justify-between gap-5">

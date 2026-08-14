@@ -109,7 +109,7 @@ const ClassCard = ({
     <div
       onClick={isLocked ? undefined : onClick}
       aria-disabled={isLocked || undefined}
-      className={`bg-white border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group ${
+      className={`relative bg-white border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group ${
         isClassEnrolled
           ? "border-emerald-400 ring-2 ring-emerald-50"
           : isLocked
@@ -147,31 +147,31 @@ const ClassCard = ({
 
         {/* Teacher / Admin status pill */}
         {!isStudent && cls.status && (
-          // <div className="absolute top-3 right-3 z-10">
-          <CourseStatusPill status={cls.status} t={t} />
-          // </div>
+          <div className={`absolute top-3 ${onShare ? "right-12" : "right-3"} z-10`}>
+            <CourseStatusPill status={cls.status} t={t} />
+          </div>
+        )}
+
+        {onShare && (
+          <button
+            type="button"
+            onClick={async (event) => {
+              event.stopPropagation()
+              try {
+                await onShare(cls)
+                setLinkCopied(true)
+                setTimeout(() => setLinkCopied(false), 2000)
+              } catch (e) {
+                console.error("Share failed", e)
+              }
+            }}
+            className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all duration-200 opacity-0 group-hover:opacity-100 active:scale-90 cursor-pointer"
+            title={c.classDetail?.shareClass || "Share"}
+          >
+            {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
+          </button>
         )}
       </div>
-
-      {onShare && (
-        <button
-          type="button"
-          onClick={async (event) => {
-            event.stopPropagation();
-            try {
-              await onShare(cls);
-              setLinkCopied(true);
-              setTimeout(() => setLinkCopied(false), 2000);
-            } catch (e) {
-              console.error("Share failed", e);
-            }
-          }}
-          className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
-          title={c.classDetail?.shareClass || "Share"}
-        >
-          {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
-        </button>
-      )}
 
       {/* Class Details Content */}
       <div className="p-5 flex flex-col flex-1 justify-between gap-5">
@@ -183,32 +183,36 @@ const ClassCard = ({
             {cls.name || cls.title}
           </h3>
 
-          {/* Instructor Profile */}
-          <div className="flex items-center gap-2.5 pt-1">
-            {teacherAvatar ? (
-              <img
-                src={teacherAvatar}
-                alt={teacherName}
-                className="w-7 h-7 rounded-full object-cover ring-2 ring-indigo-100 shadow-2xs"
-              />
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
-                {teacherName.charAt(0).toUpperCase()}
+          {/* Instructor Profile & Duration */}
+          <div className="flex items-center justify-between gap-2.5 pt-1">
+            <div className="flex items-center gap-2 min-w-0">
+              {teacherAvatar ? (
+                <img src={teacherAvatar} alt={teacherName} className="w-7 h-7 rounded-full object-cover ring-2 ring-slate-100 shrink-0" />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
+                  {teacherName.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none">
+                  {c.instructorLabel || "Giảng viên"}
+                </span>
+                <span className="text-xs font-bold text-slate-700 truncate mt-0.5" title={teacherName}>
+                  {teacherName}
+                </span>
+              </div>
+            </div>
+
+            {(cls.startDate || cls.endDate) && (
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 shrink-0">
+                <Clock size={12} className="text-gray-400 shrink-0" />
+                <span>
+                  {cls.startDate && cls.endDate
+                    ? `${formatDateMonth(cls.startDate, ui.tba, firstSchedule?.startTime)} - ${formatDateMonth(cls.endDate, ui.tba, firstSchedule?.startTime)}`
+                    : ui.tba}
+                </span>
               </div>
             )}
-            <div className="flex flex-col">
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none">
-                {c.instructorLabel || "Giảng viên"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Clock size={13} className="text-gray-400" />
-              <span>
-                {cls.startDate && cls.endDate
-                  ? `${formatDateMonth(cls.startDate, ui.tba, firstSchedule?.startTime)} - ${formatDateMonth(cls.endDate, ui.tba, firstSchedule?.startTime)}`
-                  : ui.tba}
-              </span>
-            </div>
           </div>
 
           {/* Schedule & Slot Info Grid */}
