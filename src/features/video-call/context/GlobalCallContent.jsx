@@ -616,7 +616,10 @@ const GlobalCallContent = ({
   })
 
   // ── Realtime Speaking Statistics ──
-  const { statsMap: speakingStatsMap, roomTotalDuration } = useSpeakingStats(lkRoom)
+  const { statsMap: speakingStatsMap, roomTotalDuration } = useSpeakingStats(
+    lkRoom,
+    activeSessionId,
+  )
 
   // ── Context value ──
   const value = {

@@ -261,6 +261,11 @@ export const roomsApi = baseApi.injectEndpoints({
         body: { email },
       }),
     }),
+
+    // Get real-time participant speaking stats for a session
+    getSpeakingStats: builder.query({
+      query: (sessionId) => `/rooms/session/${sessionId}/speaking-stats`,
+    }),
   }),
 })
 
@@ -291,5 +296,7 @@ export const {
   useKickParticipantMutation,
   useMuteParticipantMutation,
   useInviteToRoomMutation,
+  // Speaking Stats
+  useGetSpeakingStatsQuery,
 } = roomsApi
 
