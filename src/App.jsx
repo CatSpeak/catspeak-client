@@ -19,6 +19,7 @@ import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
+import CompletionReviewPrompt from "@/features/courses/components/CompletionReviewPrompt"
 // import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
 
 import WebViewGuard from "@/shared/components/WebViewGuard"
@@ -37,6 +38,7 @@ function App() {
                 <GlobalPresenceProvider>
                   <GlobalSignalRHandler />
                   <AppToaster />
+                  <CompletionReviewPrompt />
                   {/* <ScrollToTopButton /> */}
                   <AppRouter />
                   <PiPWidget />

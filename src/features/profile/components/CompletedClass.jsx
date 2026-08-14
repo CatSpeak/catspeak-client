@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, Clock, BookOpen, Compass } from 'lucide-react'
+import { Calendar, Clock, BookOpen, Compass, Star, CheckCircle2 } from 'lucide-react'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
-import { useGetStudentCompletedClassesQuery } from '@/store/api/coursesApi'
+import { useGetCompletedClassesQuery } from '@/store/api/reviewApi'
 import EmptyCoursesState from '@/features/courses/components/EmptyCoursesState'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -33,15 +33,15 @@ const CompletedClass = ({ isOwnProfile }) => {
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 10
 
-  const { data: responseData, isLoading, isError } = useGetStudentCompletedClassesQuery(
+  const { data: classes, isLoading, isError } = useGetCompletedClassesQuery(
     undefined,
     { skip: !isOwnProfile }
   )
 
-  const classes = responseData?.data || []
+  const allClasses = classes || []
 
   // Filter classes based on searchQuery
-  const filteredClasses = classes
+  const filteredClasses = allClasses
     .filter(cls => {
       if (!searchQuery) return true
       const title = cls.title || cls.name || ""
@@ -124,9 +124,9 @@ const CompletedClass = ({ isOwnProfile }) => {
               scheduleTime = `${cls.schedule[0].startTime} - ${cls.schedule[0].endTime}`
             }
 
-            const statusLabel = cls.status
-              ? cls.status.replace(/_/g, " ")
-              : UNKNOWN_VALUE
+            const statusLabel = cls.isReviewed
+              ? (cc.reviewedLabel || "Đã đánh giá")
+              : (cc.completedLabel || "Đã hoàn thành")
 
             const languageLabel = cls.language
               ? sc.languages?.[cls.language] || cls.language
@@ -181,6 +181,27 @@ const CompletedClass = ({ isOwnProfile }) => {
                       </span>
                     </div>
                   </div>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-stretch gap-2 md:items-end">
+                  {cls.isReviewed ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-3 py-2 text-xs font-bold text-green-700">
+                      <CheckCircle2 size={14} />
+                      {cc.reviewedLabel || "Đã đánh giá"}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/workspace/learning/class/${cls.id}/review`)
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#990011] px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-[#b20a1c]"
+                    >
+                      <Star size={14} />
+                      {cc.reviewNow || "Đánh giá ngay"}
+                    </button>
+                  )}
                 </div>
               </FluentCard>
             )
