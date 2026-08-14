@@ -56,7 +56,8 @@ const TextInput = ({
     : ""
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
-  const heightClass = multiline ? "min-h-[56px] px-4" : "h-[56px] px-4"
+  const hasCustomHeight = className.split(" ").some(c => c.startsWith("h-") || c.startsWith("!h-"))
+  const heightClass = multiline ? "min-h-[56px] px-4" : hasCustomHeight ? "" : "h-11 px-3.5"
   const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {

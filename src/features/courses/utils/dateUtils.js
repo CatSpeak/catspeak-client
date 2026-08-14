@@ -15,15 +15,27 @@ export const toLocalDateString = (date) => {
   return `${year}-${month}-${day}`
 }
 
-export const parseLocalDateString = (value) => {
+export const parseLocalDateString = (value, timeValue = "00:00") => {
   if (typeof value !== "string") return null
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  const cleanDate = value.split("T")[0]
+  const match = cleanDate.match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (!match) return null
 
   const year = Number(match[1])
   const month = Number(match[2])
   const day = Number(match[3])
-  const date = new Date(year, month - 1, day)
+
+  let hours = 0
+  let minutes = 0
+  if (typeof timeValue === "string") {
+    const timeMatch = timeValue.match(/^([01]\d|2[0-3]):([0-5]\d)$/)
+    if (timeMatch) {
+      hours = Number(timeMatch[1])
+      minutes = Number(timeMatch[2])
+    }
+  }
+
+  const date = new Date(year, month - 1, day, hours, minutes, 0, 0)
   if (
     date.getFullYear() !== year
     || date.getMonth() !== month - 1
