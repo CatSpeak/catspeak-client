@@ -18,6 +18,7 @@ import {
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
 } from "@/store/api/coursesApi"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   enterCall,
@@ -48,12 +49,11 @@ import { isRoomExpired } from "@/shared/utils/dateUtils"
  */
 export const VideoCallProvider = ({ children }) => {
   const { id: roomId, lang } = useParams()
-  const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { t, language } = useLanguage()
 
-  const { isAuthenticated, user } = useAuth()
+  const { user } = useAuth()
 
   // ── Room Expiration Check for Direct URL Access ──
   const {
@@ -138,9 +138,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     }
   }, [location.state?.callEnded, phase, fromQueue])
 
-  const [initMicOn, setInitMicOn] = useState(false)
-  const [initCamOn, setInitCamOn] = useState(false)
-
   const [showSwitchModal, setShowSwitchModal] = useState(false)
   const [pendingJoinArgs, setPendingJoinArgs] = useState(null)
 
@@ -150,6 +147,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     useVerifyJoinRoomMutation()
 
   const { isAuthenticated } = useAuth()
+  const { isTeacher: isRoleTeacher, isRoleResolved } = useRoleOverride()
 
   // --- User data ---
   const { data: userData, isLoading: isLoadingUser } = useGetUserProfileQuery(
@@ -161,7 +159,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const isClassRoom = roomId && roomId.startsWith("class-")
   const classId = isClassRoom ? roomId.replace("class-", "") : null
 
-  const isTeacher = user ? !!user.isTeacher : false
+  // Check active role override (student mode vs teacher mode).
+  const isTeacher = isRoleResolved
+    ? !!isRoleTeacher
+    : (user ? !!user.isTeacher : false)
 
   // --- Class room detail ---
   const {
@@ -212,6 +213,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         currentParticipantCount: classData.studentCount || 0,
         isClassRoom: true,
         classId: classId,
+        creatorId:
+          classData.teacherId ||
+          classData.instructorId ||
+          classData.teacher?.id ||
+          classData.teacher?.accountId,
       }
     }
     return rawRoom?.data || rawRoom
@@ -289,23 +295,23 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
     // Private room — check for URL pwd param or existing grant
     verifyTriggered.current = true
-    ;(async () => {
-      try {
-        const searchParams = new URLSearchParams(location.search)
-        const pwdParam = searchParams.get("pwd")
-        const payload = {
-          roomId: Number(roomId),
-          ...(pwdParam ? { password: pwdParam } : {}),
+      ; (async () => {
+        try {
+          const searchParams = new URLSearchParams(location.search)
+          const pwdParam = searchParams.get("pwd")
+          const payload = {
+            roomId: Number(roomId),
+            ...(pwdParam ? { password: pwdParam } : {}),
+          }
+          const result = await verifyJoinRoom(payload).unwrap()
+          if (result.authorized) {
+            setPhase("waiting")
+          }
+        } catch {
+          // 403 = no grant yet → show password screen
+          setPhase("password-required")
         }
-        const result = await verifyJoinRoom(payload).unwrap()
-        if (result.authorized) {
-          setPhase("waiting")
-        }
-      } catch {
-        // 403 = no grant yet → show password screen
-        setPhase("password-required")
-      }
-    })()
+      })()
   }, [room, user, isLoadingRoomData, isLoadingUser, fromQueue, roomId, location.search])
 
   // ── Handle password submission from PasswordScreen ──
@@ -322,7 +328,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       }
     } catch (err) {
       const status = err?.status
-      const message = err?.data?.message || err?.data
 
       if (status === 403) {
         // If the backend says unauthorized, it means the password was incorrect.
@@ -425,9 +430,6 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       cleanupMediaPreview()
       await new Promise((resolve) => setTimeout(resolve, 300))
 
-      setInitMicOn(micOn)
-      setInitCamOn(cameraOn)
-
       // Set phase to in-call
       setPhase("in-call")
 
@@ -467,8 +469,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         err?.status === 403 &&
         (typeof backendMessage === "string" &&
           (backendMessage.includes("cấm") ||
-           backendMessage.includes("banned") ||
-           backendMessage.includes("禁止")))
+            backendMessage.includes("banned") ||
+            backendMessage.includes("禁止")))
 
       let errorMsg = ""
       if (isBanned || (err?.status === 403 && !isClassRoom)) {
@@ -477,8 +479,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           (language === "en"
             ? "Your account has been banned from joining this room by the Host."
             : language === "zh"
-            ? "您的账号已被 Host 禁止加入此房间。"
-            : "Tài khoản của bạn đã bị cấm truy cập vào phòng này bởi Host.")
+              ? "您的账号已被 Host 禁止加入此房间。"
+              : "Tài khoản của bạn đã bị cấm truy cập vào phòng này bởi Host.")
       } else if (isClassRoom && err?.status) {
         const status = err.status
         const errorBody = err.data?.message || err.data
