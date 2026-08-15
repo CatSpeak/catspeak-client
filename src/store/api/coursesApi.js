@@ -56,7 +56,7 @@ const transformNextSession = (data) => {
       startLocal.getFullYear(),
       String(startLocal.getMonth() + 1).padStart(2, "0"),
       String(startLocal.getDate()).padStart(2, "0"),
-    ].join("-"),  
+    ].join("-"),
     startTime: formatTimeDigits(startLocal),
     endTime: hasValidEnd ? formatTimeDigits(endLocal) : "",
     isLive: data.class?.status === "LIVE" || data.status === "LIVE",
@@ -138,9 +138,9 @@ const transformCourse = (course) => {
   const teacher = transformPerson(course.teacher)
   const priceRange = isRecord(course.priceRange)
     ? {
-        min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
-        max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
-      }
+      min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
+      max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
+    }
     : null
 
   return {
@@ -249,18 +249,18 @@ const transformClass = (cls) => {
     schedule:
       normalizedScheduleEntries.length > 0
         ? {
-            days: normalizedScheduleEntries
-              .map((entry) => entry.dayOfWeek)
-              .filter(Boolean),
-            startTime: parseToLocalTimeStr(firstSchedule?.startTime),
-            endTime: parseToLocalTimeStr(firstSchedule?.endTime),
-          }
+          days: normalizedScheduleEntries
+            .map((entry) => entry.dayOfWeek)
+            .filter(Boolean),
+          startTime: parseToLocalTimeStr(firstSchedule?.startTime),
+          endTime: parseToLocalTimeStr(firstSchedule?.endTime),
+        }
         : isRecord(cls.nextSession)
           ? {
-              days: [],
-              startTime: nextSessionStart,
-              endTime: nextSessionEnd,
-            }
+            days: [],
+            startTime: nextSessionStart,
+            endTime: nextSessionEnd,
+          }
           : { days: [], startTime: "", endTime: "" },
     rawSchedule: normalizedScheduleEntries.map((entry) => ({
       dayOfWeek: entry.dayOfWeek,
@@ -308,9 +308,9 @@ const transformExploreItem = (item) => {
     priceRange:
       item.priceMin != null || item.priceMax != null
         ? {
-            min: toNullableNumber(item.priceMin, { nonNegative: true }),
-            max: toNullableNumber(item.priceMax, { nonNegative: true }),
-          }
+          min: toNullableNumber(item.priceMin, { nonNegative: true }),
+          max: toNullableNumber(item.priceMax, { nonNegative: true }),
+        }
         : null,
     openClassCount: toNullableNumber(item.openClassCount, {
       nonNegative: true,
@@ -323,9 +323,9 @@ const transformExploreItem = (item) => {
     createdAt: toText(item.createdAt),
     teacher: teacher
       ? {
-          ...teacher,
-          avatar: teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl,
-        }
+        ...teacher,
+        avatar: teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl,
+      }
       : null,
   }
 }
@@ -365,34 +365,34 @@ const transformPaginatedResponse = (response, itemTransformer) => {
   }
   const page = toPositiveInteger(
     responseRecord.pagination?.page ??
-      outerRecord.pagination?.page ??
-      responseRecord.page ??
-      outerRecord.page,
+    outerRecord.pagination?.page ??
+    responseRecord.page ??
+    outerRecord.page,
     1,
   )
   const pageSize = toPositiveInteger(
     responseRecord.pagination?.pageSize ??
-      outerRecord.pagination?.pageSize ??
-      responseRecord.pageSize ??
-      outerRecord.pageSize,
+    outerRecord.pagination?.pageSize ??
+    responseRecord.pageSize ??
+    outerRecord.pageSize,
     Math.max(1, rawItems.length || 10),
   )
   const totalItems = toNonNegativeInteger(
     responseRecord.pagination?.totalItems ??
-      outerRecord.pagination?.totalItems ??
-      responseRecord.pagination?.total ??
-      outerRecord.pagination?.total ??
-      responseRecord.totalCount ??
-      outerRecord.totalCount ??
-      responseRecord.total ??
-      outerRecord.total,
+    outerRecord.pagination?.totalItems ??
+    responseRecord.pagination?.total ??
+    outerRecord.pagination?.total ??
+    responseRecord.totalCount ??
+    outerRecord.totalCount ??
+    responseRecord.total ??
+    outerRecord.total,
     rawItems.length,
   )
   const totalPages = toPositiveInteger(
     responseRecord.pagination?.totalPages ??
-      outerRecord.pagination?.totalPages ??
-      responseRecord.totalPages ??
-      outerRecord.totalPages,
+    outerRecord.pagination?.totalPages ??
+    responseRecord.totalPages ??
+    outerRecord.totalPages,
     Math.max(1, Math.ceil(totalItems / pageSize)),
   )
 
@@ -575,6 +575,11 @@ const buildCreateClassFormData = (data) =>
     Schedule: getClassSchedule(data),
     CommissionPercent: parseNumberOrNull(data.commissionPercent),
     Status: data.status || null,
+    RequireMinimumAttendance: Boolean(data.requireMinimumAttendance ?? data.requireMinAttendance),
+    MinimumAttendanceRate: (data.requireMinimumAttendance ?? data.requireMinAttendance)
+      ? parseIntegerOrNull(data.minimumAttendanceRate ?? data.minAttendanceRate)
+      : null,
+    LateAttendancePolicy: data.lateAttendancePolicy ?? (data.includeLateAttendance === false ? "IgnoreLate" : "CountLate"),
   })
 
 const buildAnalyticsQueryParams = (params = {}) => {
@@ -811,17 +816,17 @@ export const coursesApi = baseApi.injectEndpoints({
         if (!transformedCourse) return null
         const transformedClasses = Array.isArray(data.classes)
           ? data.classes
-              .map((cls) => {
-                const transformedClass = transformClass(cls)
-                return transformedClass
-                  ? {
-                      ...transformedClass,
-                      isEnrolled: cls.isEnrolled === true,
-                      enrolledCount: cls.enrolledCount ?? null,
-                    }
-                  : null
-              })
-              .filter(Boolean)
+            .map((cls) => {
+              const transformedClass = transformClass(cls)
+              return transformedClass
+                ? {
+                  ...transformedClass,
+                  isEnrolled: cls.isEnrolled === true,
+                  enrolledCount: cls.enrolledCount ?? null,
+                }
+                : null
+            })
+            .filter(Boolean)
           : []
         const enrolledClass = transformedClasses.find((cls) => cls.isEnrolled)
         return {
@@ -875,17 +880,17 @@ export const coursesApi = baseApi.injectEndpoints({
         if (!transformedCourse) return null
         const transformedClasses = Array.isArray(data.classes)
           ? data.classes
-              .map((cls) => {
-                const transformedClass = transformClass(cls)
-                return transformedClass
-                  ? {
-                      ...transformedClass,
-                      isEnrolled: cls.isEnrolled === true,
-                      enrolledCount: cls.enrolledCount ?? null,
-                    }
-                  : null
-              })
-              .filter(Boolean)
+            .map((cls) => {
+              const transformedClass = transformClass(cls)
+              return transformedClass
+                ? {
+                  ...transformedClass,
+                  isEnrolled: cls.isEnrolled === true,
+                  enrolledCount: cls.enrolledCount ?? null,
+                }
+                : null
+            })
+            .filter(Boolean)
           : []
         const enrolledClass = transformedClasses.find((cls) => cls.isEnrolled)
         return {
@@ -1127,6 +1132,11 @@ export const coursesApi = baseApi.injectEndpoints({
           price: parseNumberOrNull(data.tuitionFee ?? data.price),
           description: data.description || "",
           timezone: data.timezone || "Asia/Ho_Chi_Minh",
+          requireMinimumAttendance: Boolean(data.requireMinimumAttendance ?? data.requireMinAttendance),
+          minimumAttendanceRate: (data.requireMinimumAttendance ?? data.requireMinAttendance)
+            ? parseIntegerOrNull(data.minimumAttendanceRate ?? data.minAttendanceRate)
+            : null,
+          lateAttendancePolicy: data.lateAttendancePolicy ?? (data.includeLateAttendance === false ? "IgnoreLate" : "CountLate"),
         }
         return {
           url: "/v1/Payments/checkout",
@@ -1165,11 +1175,11 @@ export const coursesApi = baseApi.injectEndpoints({
         ...((courseId ?? data?.courseId) == null
           ? []
           : [
-              {
-                type: "CourseDetail",
-                id: String(courseId ?? data.courseId),
-              },
-            ]),
+            {
+              type: "CourseDetail",
+              id: String(courseId ?? data.courseId),
+            },
+          ]),
         "Classes",
         "StudentClasses",
         "Schedule",
@@ -1513,9 +1523,9 @@ export const coursesApi = baseApi.injectEndpoints({
           date: parseToLocalDateStr(session.startTime),
           class: session.class
             ? {
-                ...session.class,
-                id: session.class.id?.toString() || "",
-              }
+              ...session.class,
+              id: session.class.id?.toString() || "",
+            }
             : null,
         }))
         return {
@@ -1550,9 +1560,9 @@ export const coursesApi = baseApi.injectEndpoints({
           date: parseToLocalDateStr(session.startTime),
           class: session.class
             ? {
-                ...session.class,
-                id: session.class.id?.toString() || "",
-              }
+              ...session.class,
+              id: session.class.id?.toString() || "",
+            }
             : null,
         }))
         return {

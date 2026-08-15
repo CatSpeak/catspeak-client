@@ -17,7 +17,8 @@ import {
   ChevronDown,
   Upload,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  Check,
 } from "lucide-react"
 
 import {
@@ -215,6 +216,12 @@ const CreateClassPage = () => {
     capacity,
     description,
     fee,
+    requireMinimumAttendance = true,
+    requireMinAttendance = true,
+    minimumAttendanceRate = 80,
+    minAttendanceRate = 80,
+    lateAttendancePolicy = "CountLate",
+    includeLateAttendance = true,
     thumbnailFile,
     thumbnailPreview,
     checkedDays,
@@ -437,6 +444,12 @@ const CreateClassPage = () => {
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
+        requireMinimumAttendance,
+        requireMinAttendance,
+        minimumAttendanceRate: requireMinimumAttendance ? (parseInt(minAttendanceRate, 10) || 80) : null,
+        minAttendanceRate: requireMinimumAttendance ? (parseInt(minAttendanceRate, 10) || 80) : null,
+        lateAttendancePolicy: lateAttendancePolicy || (includeLateAttendance ? "CountLate" : "IgnoreLate"),
+        includeLateAttendance: lateAttendancePolicy === "CountLate" || includeLateAttendance,
         thumbnailUrl: thumbnailFile || thumbnailPreview || "",
         timezone: activeTz,
         cancelUrl: (
@@ -832,63 +845,97 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Admission Period & Start Date — 3 inputs on 1 single row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              {/* Col 1: Thời hạn đăng ký (Từ) */}
-              <div className="flex flex-col gap-1">
+            {/* Admission Period & Start Date */}
+            <div className="flex flex-col gap-4">
+              {/* Admission Period */}
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                   {cc.admissionPeriod || "Thời hạn đăng ký"}<span className="text-[#990011]">*</span>
                 </label>
-                <DateTimePicker
-                  dateValue={admissionStart}
-                  timeValue={admissionStartHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("admissionStart", dateStr)
-                    setField("admissionStartHours", timeStr)
-                    clearError("admissionStart")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.admissionStart)}
-                  className="w-full"
-                />
+                <div className="flex flex-col lg:flex-row lg:items-center gap-2">
+                  {/* From Date & Time */}
+                  <div className="flex flex-1 items-center gap-2 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <DatePicker
+                        value={admissionStart}
+                        onChange={(date) => {
+                          setField("admissionStart", date ? toLocalDateString(date) : "")
+                          if (date && !admissionStartHours) setField("admissionStartHours", "07:00")
+                          clearError("admissionStart")
+                        }}
+                        mode="date"
+                        color="#990011"
+                        placeholder="dd/MM/yyyy"
+                        minDate={isEditMode ? null : tomorrow}
+                        className={`w-full ${errors.admissionStart ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
+                      />
+                    </div>
+                    <TimeDropdown
+                      value={admissionStartHours}
+                      color="#990011"
+                      onChange={(hhmm) => setField("admissionStartHours", hhmm)}
+                      className="shrink-0"
+                    />
+                  </div>
+
+                  {/* Separator / Dash */}
+                  <span className="hidden lg:inline-block text-gray-300 text-base font-light px-1 select-none">–</span>
+
+                  {/* To Date & Time */}
+                  <div className="flex flex-1 items-center gap-2 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <DatePicker
+                        value={admissionEnd}
+                        onChange={(date) => {
+                          setField("admissionEnd", date ? toLocalDateString(date) : "")
+                          if (date && !admissionEndHours) setField("admissionEndHours", "07:00")
+                          clearError("admissionEnd")
+                        }}
+                        mode="date"
+                        color="#990011"
+                        placeholder="dd/MM/yyyy"
+                        minDate={isEditMode ? null : tomorrow}
+                        className={`w-full ${errors.admissionEnd ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
+                      />
+                    </div>
+                    <TimeDropdown
+                      value={admissionEndHours}
+                      color="#990011"
+                      onChange={(hhmm) => setField("admissionEndHours", hhmm)}
+                      className="shrink-0"
+                    />
+                  </div>
+                </div>
               </div>
 
-              {/* Col 2: Thời hạn đăng ký (Đến) */}
-              <div className="flex flex-col gap-1">
-                <DateTimePicker
-                  dateValue={admissionEnd}
-                  timeValue={admissionEndHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("admissionEnd", dateStr)
-                    setField("admissionEndHours", timeStr)
-                    clearError("admissionEnd")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.admissionEnd)}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Col 3: Ngày bắt đầu */}
-              <div className="flex flex-col gap-1">
+              {/* Start Date */}
+              <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                   {cc.startDate} <span className="text-[#990011]">*</span>
                 </label>
-                <DateTimePicker
-                  dateValue={startDate}
-                  timeValue={startDateHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("startDate", dateStr)
-                    setField("startDateHours", timeStr)
-                    clearError("startDate")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.startDate)}
-                  className="w-full"
-                />
+                <div className="flex items-center gap-2 w-full lg:w-1/2 lg:pr-3 min-w-0">
+                  <div className="flex-1 min-w-0">
+                    <DatePicker
+                      value={startDate}
+                      onChange={(date) => {
+                        setField("startDate", date ? toLocalDateString(date) : "")
+                        if (date && !startDateHours) setField("startDateHours", "07:00")
+                        clearError("startDate")
+                      }}
+                      mode="date"
+                      color="#990011"
+                      placeholder="dd/MM/yyyy"
+                      minDate={isEditMode ? null : tomorrow}
+                      className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
+                    />
+                  </div>
+                  <TimeDropdown
+                    value={startDateHours}
+                    color="#990011"
+                    onChange={(hhmm) => setField("startDateHours", hhmm)}
+                    className="shrink-0"
+                  />
+                </div>
               </div>
             </div>
 
@@ -953,6 +1000,124 @@ const CreateClassPage = () => {
                   >
                     <Plus size={14} />
                   </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Attendance Requirements Block */}
+            <div className={`bg-white rounded-2xl p-4 border border-border flex flex-col md:flex-row gap-5 md:gap-8 items-stretch justify-between ${isEditMode ? "opacity-75 bg-slate-50/50" : ""}`}>
+              {/* Left Column: Minimum Attendance Rate */}
+              <div className="flex-1 flex flex-col gap-3 justify-center">
+                {/* Header row */}
+                <div className="flex items-center gap-2">
+                  <div
+                    role="checkbox"
+                    tabIndex={isEditMode ? -1 : 0}
+                    aria-checked={requireMinAttendance}
+                    onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
+                    onKeyDown={(e) => {
+                      if (!isEditMode && (e.key === "Enter" || e.key === " ")) {
+                        e.preventDefault()
+                        setField("requireMinAttendance", !requireMinAttendance)
+                      }
+                    }}
+                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isEditMode
+                      ? "cursor-not-allowed opacity-60 bg-gray-100 border-gray-300 text-gray-500"
+                      : requireMinAttendance
+                        ? "bg-[#990011] border-[#990011] text-white cursor-pointer"
+                        : "bg-white border-gray-300 hover:border-gray-400 cursor-pointer"
+                      }`}
+                  >
+                    {requireMinAttendance && <Check size={14} strokeWidth={3} />}
+                  </div>
+                  <span
+                    onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
+                    className={`font-bold text-sm text-gray-800 select-none ${isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                  >
+                    {cc.requireMinAttendanceLabel || "Yêu cầu tỷ lệ tham dự tối thiểu"}
+                  </span>
+                  <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
+                </div>
+
+                {/* Content row */}
+                <div className="flex items-center justify-between sm:justify-start gap-4 pt-1">
+                  <span className="text-sm font-medium text-gray-700">
+                    {cc.minAttendanceRateLabel || "Tỷ lệ tham dự tối thiểu"}
+                  </span>
+                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-32 transition-all ${(!isEditMode && requireMinAttendance) ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                    }`}>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      disabled={isEditMode || !requireMinAttendance}
+                      value={minAttendanceRate}
+                      onChange={(e) => {
+                        if (isEditMode) return
+                        const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0))
+                        setField("minAttendanceRate", val)
+                      }}
+                      className="w-full h-full px-3 text-center font-bold text-sm text-gray-800 outline-none bg-transparent disabled:cursor-not-allowed"
+                    />
+                    <div className="h-full bg-gray-50 border-l border-gray-200 px-3 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0 select-none">
+                      %
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vertical Divider for md screens */}
+              <div className="hidden md:block w-px bg-border self-stretch" />
+
+              {/* Right Column: Attendance Calculation Type */}
+              <div className="flex-1 flex flex-col gap-3 justify-center">
+                {/* Header row */}
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm text-gray-800">
+                    {cc.requireAttendanceTypeLabel || "Yêu cầu Lần tham dự"}
+                  </span>
+                  <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
+                </div>
+
+                {/* Radio options */}
+                <div className="flex flex-col gap-2.5 pt-1">
+                  <label
+                    onClick={() => {
+                      if (isEditMode) return
+                      setField("lateAttendancePolicy", "CountLate")
+                      setField("includeLateAttendance", true)
+                    }}
+                    className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "CountLate" || includeLateAttendance)
+                      ? "border-[#990011] bg-white"
+                      : "border-gray-300 group-hover:border-gray-400 bg-white"
+                      }`}>
+                      {(lateAttendancePolicy === "CountLate" || includeLateAttendance) && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
+                      {cc.includeLateAttendanceOption || "Tính cả lần tham dự muộn"}
+                    </span>
+                  </label>
+
+                  <label
+                    onClick={() => {
+                      if (isEditMode) return
+                      setField("lateAttendancePolicy", "IgnoreLate")
+                      setField("includeLateAttendance", false)
+                    }}
+                    className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance)
+                      ? "border-[#990011] bg-white"
+                      : "border-gray-300 group-hover:border-gray-400 bg-white"
+                      }`}>
+                      {(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance) && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
+                      {cc.excludeLateAttendanceOption || "Không tính lần tham dự muộn"}
+                    </span>
+                  </label>
                 </div>
               </div>
             </div>
