@@ -174,6 +174,14 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         started_at: payload.started_at,
       });
 
+      setGamePlayers((prev) => {
+        if (prev && prev.size > 0) return prev;
+        const validParticipants = participants
+          .filter((p) => !isObserverParticipant(p))
+          .map((p) => String(p.identity));
+        return new Set(validParticipants);
+      });
+
       if (gameType === "picture_it") {
         setPictureItState((prev) => ({
           ...prev,
@@ -215,6 +223,15 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         round: payload.round,
         total: payload.total,
       });
+
+      setGamePlayers((prev) => {
+        if (prev && prev.size > 0) return prev;
+        const validParticipants = participants
+          .filter((p) => !isObserverParticipant(p))
+          .map((p) => String(p.identity));
+        return new Set(validParticipants);
+      });
+
       setPictureItState((prev) => ({
         ...prev,
         describerId: payload.describer_id,
