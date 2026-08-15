@@ -48,13 +48,6 @@ const QualityTab = ({ group, queryParams = {} }) => {
       note: kpiT.vsPrevious || "so với kỳ trước",
     },
     {
-      label: kpiT.avgFillRate || "Tỷ lệ lấp đầy",
-      value: `${numberVi(overview.fillRate ?? 0, 1)}%`,
-      delta: "",
-      tone: "purple",
-      note: kpiT.vsPrevious || "so với kỳ trước",
-    },
-    {
       label: kpiT.conversionRate || "Tỷ lệ chuyển đổi đăng ký",
       value: `${numberVi(overview.conversionRate ?? 0, 1)}%`,
       delta: "",
