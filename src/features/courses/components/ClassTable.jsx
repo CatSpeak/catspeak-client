@@ -18,9 +18,8 @@ const ClassTable = ({ classes, t, onEdit }) => {
             <th className="p-4 border-r border-border w-[180px]">{c.belongsToCourse || "Thuộc khóa học"}</th>
             <th className="p-4 border-r border-border">{c.classInfo || "Thông tin lớp học"}</th>
             <th className="p-4 border-r border-border w-[130px]">{c.startDate || "Ngày mở"}</th>
-            <th className="p-4 border-r border-border w-[130px]">{c.endDate || "Ngày hết"}</th>
             <th className="p-4 border-r border-border w-[120px]">{c.price || "Giá cả"}</th>
-            <th className="p-4 w-[90px] text-center">{c.action || "Hành động"}</th>
+            <th className="p-4 w-[120px] text-center">{c.action || "Hành động"}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 text-gray-700">
@@ -49,7 +48,7 @@ const ClassTable = ({ classes, t, onEdit }) => {
 
               {/* Belongs to Course cell */}
               <td className="p-4 border-r border-border text-xs font-bold text-gray-700 min-w-[150px]">
-                {item.courseTitle || "—"}
+                {item.courseTitle || c.standaloneClass || "Lớp độc lập"}
               </td>
 
               {/* Class Info cell */}
@@ -97,11 +96,6 @@ const ClassTable = ({ classes, t, onEdit }) => {
               {/* Start Date */}
               <td className="p-4 border-r border-border text-sm font-extrabold text-gray-800">
                 {item.startDate}
-              </td>
-
-              {/* End Date */}
-              <td className="p-4 border-r border-border text-sm font-extrabold text-gray-800">
-                {item.endDate}
               </td>
 
               {/* Price */}

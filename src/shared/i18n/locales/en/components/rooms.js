@@ -313,7 +313,7 @@ export default {
     connectingStatus: "Connecting",
   },
   waitingScreen: {
-    backToCommunity: "Back to Community",
+    backToCommunity: "Back",
     readyToJoin: "Ready to join?",
     micOff: "Mic Off",
     joinNow: "Join now",

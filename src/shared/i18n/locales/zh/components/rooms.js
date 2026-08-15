@@ -284,7 +284,7 @@ export default {
     connectingStatus: "连接中",
   },
   waitingScreen: {
-    backToCommunity: "返回社区",
+    backToCommunity: "返回",
     readyToJoin: "准备好加入了吗？",
     micOff: "麦克风关闭",
     joinNow: "立即加入",
