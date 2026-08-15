@@ -302,13 +302,20 @@ export const roomsApi = baseApi.injectEndpoints({
 
 
 
-    // Invite user to a room
+    // Invite user(s) to a room
     inviteToRoom: builder.mutation({
-      query: ({ roomId, email }) => ({
-        url: `/rooms/${roomId}/invite`,
-        method: "POST",
-        body: { email },
-      }),
+      query: ({ roomId, accountIds, accountId }) => {
+        const resolvedAccountIds = Array.isArray(accountIds)
+          ? accountIds.map(Number).filter((id) => !isNaN(id) && id > 0)
+          : (accountId != null ? [Number(accountId)] : (accountIds != null ? [Number(accountIds)] : []))
+        return {
+          url: `/rooms/${roomId}/invite`,
+          method: "POST",
+          body: {
+            accountIds: resolvedAccountIds,
+          },
+        }
+      },
     }),
 
     // --- My Rooms, Bookmarks & Advanced Room Creation ---
