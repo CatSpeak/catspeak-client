@@ -17,12 +17,13 @@ export const parseMetadata = (metadata) => {
 const ENABLE_MOCK_PARTICIPANTS = false
 
 export const MOCK_PARTICIPANTS = ENABLE_MOCK_PARTICIPANTS
-  ? Array.from({ length: 4 }, (_, i) => ({
+  ? Array.from({ length: 100 }, (_, i) => ({
       identity: `mock-user-${i + 1}`,
       name: `Mock Participant ${i + 1}`,
       isLocal: false,
       isMicrophoneEnabled: i % 2 === 0,
-      isCameraEnabled: false,
+      isCameraEnabled: i < 10,
+      isMockCamera: i < 10,
       isScreenShareEnabled: false,
       metadata: "{}",
       getTrackPublication: () => null,

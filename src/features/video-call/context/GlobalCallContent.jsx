@@ -13,6 +13,7 @@ import { toast } from "react-hot-toast"
 import { Clock } from "lucide-react"
 
 import Modal from "@/shared/components/ui/Modal"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import { useVideoCallSignaling } from "@/features/video-call/hooks/useVideoCallSignaling"
 
@@ -389,7 +390,13 @@ const GlobalCallContent = ({
   }, [connectionState, isRecording, t])
 
   const videoCallState = useVideoCall(t)
-  const screenShareState = useScreenShare()
+  const isHostUser = isRoomHost(roomData, user?.accountId)
+  const screenShareState = useScreenShare({
+    roomData,
+    user,
+    isHost: isHostUser,
+    t,
+  })
   const recordingState = useRecording(lkRoom, {
     isRecording,
     setIsRecording,
@@ -939,6 +946,28 @@ const GlobalCallContent = ({
         open={showRoomSettings}
         onClose={() => setShowRoomSettings(false)}
         initialTab={activeSettingsTab}
+      />
+      <ConfirmationModal
+        open={screenShareState.showTakeoverModal}
+        onClose={() => screenShareState.setShowTakeoverModal(false)}
+        onConfirm={screenShareState.confirmTakeoverScreenShare}
+        title={
+          t.rooms?.videoCall?.screenShare?.takeoverTitle ||
+          "Chia sẻ màn hình thay thế?"
+        }
+        message={
+          typeof t.rooms?.videoCall?.screenShare?.takeoverMessage === "string"
+            ? t.rooms.videoCall.screenShare.takeoverMessage.replace(
+                "{{name}}",
+                screenShareState.presenterDisplayName,
+              )
+            : `${screenShareState.presenterDisplayName} đang chia sẻ màn hình. Bắt đầu chia sẻ màn hình mới sẽ dừng phần trình bày của ${screenShareState.presenterDisplayName}.`
+        }
+        confirmText={
+          t.rooms?.videoCall?.screenShare?.takeoverConfirm || "Chia sẻ thay thế"
+        }
+        confirmVariant="primary"
+        isPending={screenShareState.isTogglingScreenShare}
       />
     </ContextProvider>
   )

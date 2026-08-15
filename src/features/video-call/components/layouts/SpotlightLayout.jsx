@@ -102,7 +102,11 @@ const SpotlightLayout = ({
               "Unknown"
             }
             isLocal={item.data.participant?.isLocal}
-            onClick={() => handleTileClick({ type: "screen", trackRef: item.data })}
+            onClick={
+              isGameActive
+                ? undefined
+                : () => handleTileClick({ type: "screen", trackRef: item.data })
+            }
           />
         </div>
       )
@@ -112,7 +116,11 @@ const SpotlightLayout = ({
       <div key={item.key} className="relative h-full w-full min-h-0 min-w-0">
         <VideoTile
           participant={item.data}
-          onClick={() => handleTileClick({ type: "video", participant: item.data })}
+          onClick={
+            isGameActive
+              ? undefined
+              : () => handleTileClick({ type: "video", participant: item.data })
+          }
         />
       </div>
     )
@@ -172,4 +180,3 @@ const SpotlightLayout = ({
 }
 
 export default SpotlightLayout
-

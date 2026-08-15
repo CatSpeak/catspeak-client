@@ -390,6 +390,12 @@ export default {
       "Please wrap up your conversation. The room will automatically close when the timer reaches zero.",
     screenShareLabel: "{{name}}'s screen",
     screenShareLabelYou: "{{name}}'s screen (You)",
+    screenShare: {
+      takeoverTitle: "Share screen instead?",
+      takeoverConfirm: "Share instead",
+      takeoverMessage: "{{name}} is currently sharing their screen. Starting a new screen share will stop {{name}}'s presentation.",
+      hostProtected: "Host is currently presenting. Participants cannot overwrite host presentations.",
+    },
     moreOptions: "More options",
     subtitles: "Subtitles (CC)",
     reconnect: "Troubleshoot connection",
