@@ -313,6 +313,22 @@ export const getClassEnrollmentIssueLabel = (issue, studentText = {}) => {
   return labels[issue] || labels.unavailable || "Unavailable"
 }
 
+/**
+ * "Sắp đóng tuyển sinh" badge (SRS mục 1.2 STT5): true when the earliest enrollment
+ * deadline is within the given threshold (default 7 days).
+ * @param {string} minEnrollmentEnd - ISO date string
+ * @param {number} nowMs
+ * @param {number} thresholdDays
+ * @returns {boolean}
+ */
+export const isClosingSoon = (minEnrollmentEnd, nowMs = Date.now(), thresholdDays = 7) => {
+  if (!minEnrollmentEnd) return false
+  const endMs = new Date(minEnrollmentEnd).getTime()
+  if (!Number.isFinite(endMs)) return false
+  const thresholdMs = thresholdDays * 24 * 60 * 60 * 1000
+  return endMs > nowMs && endMs - nowMs <= thresholdMs
+}
+
 export const formatFileSize = (bytes) => {
   const value = Number(bytes)
   if (!Number.isFinite(value) || value <= 0) return "0 Bytes"

@@ -1,10 +1,11 @@
 import React, { useState } from "react"
-import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar, Share2, Check } from "lucide-react"
+import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar, Share2, Check, AlertTriangle } from "lucide-react"
 import {
   getCourseGradientAndIcon,
   formatCurrencyVND,
   getSafeMediaUrl,
   defaultCourseThumbnail,
+  isClosingSoon,
 } from "../../utils/courseUtils"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -60,6 +61,8 @@ const StudentCourseCard = ({
   const minEnrollmentEnd = course.minEnrollmentEnd || course.enrollmentEnd
 
   const [linkCopied, setLinkCopied] = useState(false)
+
+  const closingSoon = isClosingSoon(minEnrollmentEnd)
 
   const handleCardAction = (e) => {
     e.stopPropagation()
@@ -159,7 +162,12 @@ const StudentCourseCard = ({
                 <span>{studentCount} {sc.studentsUnit || "học viên"}</span>
               </div>
             )}
-            {remainingSlots != null && (
+            {closingSoon ? (
+              <div className="flex items-center gap-1 text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60">
+                <AlertTriangle size={12} />
+                <span>{sc.closingSoon || "Sắp đóng tuyển sinh"}</span>
+              </div>
+            ) : remainingSlots != null && (
               <div className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60">
                 <Clock size={12} />
                 <span>{sc.slotsRemaining ? sc.slotsRemaining.replace("{{count}}", remainingSlots) : `Còn ${remainingSlots} chỗ`}</span>
@@ -273,15 +281,22 @@ const StudentCourseCard = ({
                 </span>
               </div>
 
-              {/* 4. Registration Deadline */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Calendar size={13} className="text-amber-500 shrink-0" />
-                <span className="truncate text-slate-800">
-                  {minEnrollmentEnd
-                    ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateMonth(minEnrollmentEnd, ui.tba || "TBA")}`
-                    : (ui.tba || "TBA")}
-                </span>
-              </div>
+              {/* 4. Registration Deadline / Closing Soon */}
+              {closingSoon ? (
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <AlertTriangle size={13} className="text-rose-500 shrink-0" />
+                  <span className="truncate text-rose-700 font-black">{sc.closingSoon || "Sắp đóng tuyển sinh"}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Calendar size={13} className="text-amber-500 shrink-0" />
+                  <span className="truncate text-slate-800">
+                    {minEnrollmentEnd
+                      ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateMonth(minEnrollmentEnd, ui.tba || "TBA")}`
+                      : (ui.tba || "TBA")}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

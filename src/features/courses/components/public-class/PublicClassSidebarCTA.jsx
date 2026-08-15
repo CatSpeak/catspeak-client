@@ -1,6 +1,6 @@
 import React from "react"
 import { Check, Shield, BookOpen, Video, Award, MessageSquare, Share2 } from "lucide-react"
-import { formatCurrencyVND, getSafeMediaUrl, defaultCourseThumbnail } from "../../utils/courseUtils"
+import { formatCurrencyVND, getSafeMediaUrl, defaultCourseThumbnail, getClassEnrollmentIssue } from "../../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PublicClassSidebarCTA = ({
@@ -21,6 +21,8 @@ const PublicClassSidebarCTA = ({
     : formatCurrencyVND(tuitionValue)
 
   const thumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl) || defaultCourseThumbnail
+
+  const enrollmentIssue = isEnrolled ? null : getClassEnrollmentIssue({ classData })
 
   const highlights = [
     { icon: Video, text: pc.featLive || "Học trực tuyến tương tác trực tiếp" },
@@ -74,6 +76,22 @@ const PublicClassSidebarCTA = ({
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
+            </button>
+          ) : enrollmentIssue === "full" ? (
+            <button
+              type="button"
+              disabled
+              className="w-full bg-gray-100 text-gray-400 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+            >
+              {pc.classFull || "Đã đủ học viên"}
+            </button>
+          ) : enrollmentIssue === "closed" ? (
+            <button
+              type="button"
+              disabled
+              className="w-full bg-gray-100 text-gray-400 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+            >
+              {pc.enrollmentClosed || "Đã đóng đăng ký"}
             </button>
           ) : (
             <button

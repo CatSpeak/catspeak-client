@@ -9,6 +9,7 @@ const PublicClassHero = ({
   isEnrolled,
   isEnrolling,
   isUpcoming,
+  enrollmentIssue,
   onEnroll,
   onBack,
 }) => {
@@ -113,6 +114,22 @@ const PublicClassHero = ({
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-xl shadow-indigo-900/40 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base cursor-pointer"
               >
                 {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
+              </button>
+            ) : enrollmentIssue === "full" ? (
+              <button
+                type="button"
+                disabled
+                className="bg-slate-800 text-slate-400 font-extrabold px-8 py-3.5 rounded-2xl flex items-center gap-2 text-base cursor-not-allowed"
+              >
+                {pc.classFull || "Đã đủ học viên"}
+              </button>
+            ) : enrollmentIssue === "closed" ? (
+              <button
+                type="button"
+                disabled
+                className="bg-slate-800 text-slate-400 font-extrabold px-8 py-3.5 rounded-2xl flex items-center gap-2 text-base cursor-not-allowed"
+              >
+                {pc.enrollmentClosed || "Đã đóng đăng ký"}
               </button>
             ) : (
               <button
