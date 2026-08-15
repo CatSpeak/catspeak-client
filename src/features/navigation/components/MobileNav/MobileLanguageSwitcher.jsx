@@ -26,7 +26,7 @@ const MobileLanguageSwitcher = () => {
         options={options}
         value={language}
         onChange={handleLanguageSelect}
-        dropdownClassName="!min-w-full w-full p-2"
+        dropdownClassName="!min-w-full w-full"
         trigger={(isOpen, selectedOption, toggle) => (
           <ListItem
             lines={1}
@@ -58,7 +58,7 @@ const MobileLanguageSwitcher = () => {
               <img
                 src={option.flag}
                 alt={option.label}
-                className="block h-full w-full object-cover scale-[1.15]"
+                className="block h-full w-full object-cover"
                 draggable={false}
               />
             </span>
