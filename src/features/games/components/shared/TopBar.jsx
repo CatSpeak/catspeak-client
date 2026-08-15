@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react"
 import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { Gamepad2, Trophy } from "lucide-react"
+import { Gamepad2, Trophy, LogOut } from "lucide-react"
 import { playGlobalSound } from "@/features/video-call/hooks/useParticipantAudioEffect"
+import ExitConfirmModal from "./ExitConfirmModal"
 
 const TopBar = ({ onOpenMobileLeaderboard }) => {
-  const { currentRound, timer: initialTimer, gameState, gameType, pictureIt } = useGame()
+  const { currentRound, timer: initialTimer, gameState, gameType, pictureIt, isSpectator } = useGame()
   const { t } = useLanguage()
   const [timeLeft, setTimeLeft] = useState(0)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   useEffect(() => {
     setTimeLeft(initialTimer)
@@ -64,8 +66,16 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
       if (pictureIt?.ratingOpen) {
         setTimeLeft(pictureIt?.ratingCountdownSec || 0)
       } else if (describeStartTimeMs) {
+        const storageKey = `pic_it_describe_${describeStartTimeMs}`
+        let storedStart = sessionStorage.getItem(storageKey)
+        if (!storedStart) {
+          storedStart = Math.min(Date.now(), describeStartTimeMs).toString()
+          sessionStorage.setItem(storageKey, storedStart)
+        }
+        const startedAtMs = parseInt(storedStart, 10)
+
         const updateTimer = () => {
-          const elapsed = Math.floor((Date.now() - describeStartTimeMs) / 1000)
+          const elapsed = Math.floor((Date.now() - startedAtMs) / 1000)
           const remaining = Math.max(0, 30 - elapsed)
           setTimeLeft(remaining)
         }
@@ -79,41 +89,63 @@ const TopBar = ({ onOpenMobileLeaderboard }) => {
   const isLowTime = timeLeft <= 10
 
   return (
-    <div className="flex items-center justify-between gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white border-b border-slate-100 shrink-0">
-      <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-        <Gamepad2 className="text-cath-red-700 w-5 h-5 md:w-6 md:h-6 shrink-0" />
-        <h2 className="text-cath-red-700 font-bold text-sm md:text-base whitespace-nowrap uppercase tracking-tight truncate">
-          {gameName}
-        </h2>
+    <>
+      <div className="flex items-center justify-between gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white border-b border-slate-100 shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+          <Gamepad2 className="text-cath-red-700 w-5 h-5 md:w-6 md:h-6 shrink-0" />
+          <h2 className="text-cath-red-700 font-bold text-sm md:text-base whitespace-nowrap uppercase tracking-tight truncate">
+            {gameName}
+          </h2>
 
-        {currentRound && (
-          <div className="flex items-center gap-1 font-bold border border-cath-red-700/70 px-2.5 py-0.5 rounded-full text-xs md:text-sm whitespace-nowrap shrink-0">
-            <span className="text-slate-500 font-medium">{isPictureIt ? (topBar.round || 'Round') : (t.rooms?.game?.crackIt?.round || "Ván")}: </span>
-            <span className="font-semibold text-cath-red-700">{currentRound.round}/{currentRound.total}</span>
-          </div>
-        )}
+          {currentRound && (
+            <div className="flex items-center gap-1 font-bold border border-cath-red-700/70 px-2.5 py-0.5 rounded-full text-xs md:text-sm whitespace-nowrap shrink-0">
+              <span className="text-slate-500 font-medium">{isPictureIt ? (topBar.round || 'Round') : (t.rooms?.game?.crackIt?.round || "Ván")}: </span>
+              <span className="font-semibold text-cath-red-700">{currentRound.round}/{currentRound.total}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {currentRound && (
+            <div className={`text-lg md:text-2xl font-black tabular-nums ${isLowTime ? "text-cath-red-600" : "text-slate-800"}`}>
+              00:{timeLeft.toString().padStart(2, "0")}
+            </div>
+          )}
+
+          {/* Nút mở BXH — chỉ hiện khi parent truyền callback (mobile trong embedded) */}
+          {onOpenMobileLeaderboard && (
+            <button
+              onClick={onOpenMobileLeaderboard}
+              className="sm:hidden ml-1 p-1.5 rounded-lg bg-white text-cath-red-700 transition-colors border border-cath-red-200"
+              title="Bảng xếp hạng"
+              aria-label="Mở bảng xếp hạng"
+            >
+              <Trophy size={16} />
+            </button>
+          )}
+
+          {/* Nút Thoát game — chỉ hiện đối với người chơi chính (không hiện đối với Spectator) */}
+          {!isSpectator && (
+            <button
+              onClick={() => setShowExitConfirm(true)}
+              className="ml-1 md:ml-2 flex items-center gap-1.5 px-2.5 py-1 md:px-3 md:py-1.5 rounded-xl bg-red-50 hover:bg-red-100 active:scale-95 text-cath-red-700 font-bold text-xs transition-all border border-red-200 shrink-0 cursor-pointer shadow-2xs"
+              title={t.rooms?.game?.exitGame || "Thoát game"}
+              aria-label="Thoát game"
+            >
+              <LogOut size={15} className="shrink-0" />
+              <span className="hidden sm:inline">{t.rooms?.game?.exitGame || "Thoát"}</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
-        {currentRound && (
-          <div className={`text-lg md:text-2xl font-black tabular-nums ${isLowTime ? "text-cath-red-600" : "text-slate-800"}`}>
-            00:{timeLeft.toString().padStart(2, "0")}
-          </div>
-        )}
-
-        {/* Nút mở BXH — chỉ hiện khi parent truyền callback (mobile trong embedded) */}
-        {onOpenMobileLeaderboard && (
-          <button
-            onClick={onOpenMobileLeaderboard}
-            className="sm:hidden ml-1 p-1.5 rounded-lg bg-white text-cath-red-700 transition-colors border border-cath-red-200"
-            title="Bảng xếp hạng"
-            aria-label="Mở bảng xếp hạng"
-          >
-            <Trophy size={16} />
-          </button>
-        )}
-      </div>
-    </div>
+      {/* Modal xác nhận thoát trò chơi */}
+      <ExitConfirmModal
+        showExitConfirm={showExitConfirm}
+        setShowExitConfirm={setShowExitConfirm}
+      />
+    </>
   )
 }
+
 export default TopBar
