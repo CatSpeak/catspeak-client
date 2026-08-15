@@ -216,7 +216,7 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
   const handleClose = () => {
     setUploadFiles([]);
     setSelectedFolder('');
-    setIsPublic(true);
+    setIsPublic(false);
     setIsBusy(false);
     setCurrentTaskId(null);
     setUploadingFilesIds([]);
