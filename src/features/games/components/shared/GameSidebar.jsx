@@ -234,9 +234,7 @@ const GameSidebar = ({
 
   const isPictureIt = gameType === "picture_it" || gameType === "picture-it"
 
-  const allPlayerIds = new Set()
-
-  const addIfNotLeftOrObserver = (id) => {
+  const addIfNotObserver = (id) => {
     if (id == null) return
     const idStr = id.toString()
     if (leftPlayers && leftPlayers.has(idStr)) return
@@ -247,13 +245,15 @@ const GameSidebar = ({
     allPlayerIds.add(idStr)
   }
 
-  // Include original gamePlayers if set
   if (gamePlayers && gamePlayers.size > 0) {
-    gamePlayers.forEach(addIfNotLeftOrObserver)
-  } else if (isPictureIt && pictureIt?.leaderboard) {
-    pictureIt.leaderboard.forEach((p) => addIfNotLeftOrObserver(p?.id))
-  } else {
-    Object.keys(scores || {}).forEach(addIfNotLeftOrObserver)
+    gamePlayers.forEach(addIfNotObserver)
+  } else if (isPictureIt && pictureIt?.leaderboard?.length > 0) {
+    pictureIt.leaderboard.forEach((p) => addIfNotObserver(p?.id))
+  } else if (scores && Object.keys(scores).length > 0) {
+    Object.keys(scores).forEach(addIfNotObserver)
+  } else if (gameState === "idle") {
+    // Only show room participants when game is idle (before start)
+    participants.forEach((p) => addIfNotObserver(p.identity))
   }
 
   // Create an array of players
@@ -267,20 +267,23 @@ const GameSidebar = ({
 
       if (isPictureIt && pictureIt?.leaderboard) {
         const pData = pictureIt.leaderboard.find(
-          (p) => p.id.toString() === idStr,
+          (p) => p.id?.toString() === idStr,
         )
 
         if (pData && pData.name) {
           name = pData.name
         } else {
-          const p = participants.find((p) => p.identity === idStr)
-          name = p?.name || `Người chơi ${idStr}`
+          const p = participants.find((p) => String(p.identity) === idStr)
+          name =
+            p?.name ||
+            (playerNames && playerNames[idStr]) ||
+            `Người chơi ${idStr}`
         }
       } else {
-        if (playerNames[idStr]) {
+        if (playerNames && playerNames[idStr]) {
           name = playerNames[idStr]
         } else {
-          const p = participants.find((p) => p.identity === idStr)
+          const p = participants.find((p) => String(p.identity) === idStr)
           name =
             p?.name ||
             (t.rooms?.game?.crackIt?.playerX
