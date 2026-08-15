@@ -7,6 +7,7 @@ import assert from "node:assert/strict"
 import {
   getClassEnrollmentIssue,
   getSafeMediaUrl,
+  isClosingSoon,
 } from "./courseUtils.js"
 
 const openClass = {
@@ -93,4 +94,22 @@ test("safe media URLs reject executable schemes and embedded credentials", () =>
     getSafeMediaUrl("https://cdn.example.com/file.png"),
     "https://cdn.example.com/file.png",
   )
+})
+
+test("isClosingSoon flags deadlines within threshold and ignores past/far deadlines", () => {
+  const now = Date.parse("2026-07-25T00:00:00.000Z")
+  assert.equal(
+    isClosingSoon("2026-07-28T00:00:00.000Z", now), // 3 days out
+    true,
+  )
+  assert.equal(
+    isClosingSoon("2026-08-25T00:00:00.000Z", now), // 31 days out
+    false,
+  )
+  assert.equal(
+    isClosingSoon("2026-07-20T00:00:00.000Z", now), // past
+    false,
+  )
+  assert.equal(isClosingSoon(null, now), false)
+  assert.equal(isClosingSoon("not-a-date", now), false)
 })

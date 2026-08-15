@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Compass, RefreshCw, BookOpen, GraduationCap, ArrowUpDown, Globe, Coins, X, RotateCcw, Sparkles, ChevronDown } from "lucide-react"
+import { Compass, RefreshCw, BookOpen, GraduationCap, ArrowUpDown, Globe, Coins, X, RotateCcw, Sparkles, ChevronDown, Activity } from "lucide-react"
 
 import {
   useGetExploreCoursesQuery
@@ -11,6 +11,7 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import CourseSearchInput from "../components/CourseSearchInput"
 import CourseSelectFilter from "../components/CourseSelectFilter"
 import TablePagination from "../components/shared/TablePagination"
+import ViewModeToggle from "../components/shared/ViewModeToggle"
 import StudentCourseCard from "../student/components/StudentCourseCard"
 import ClassCard from "../components/ClassCard"
 import CourseTabs from "../components/CourseTabs"
@@ -30,7 +31,9 @@ const ExploreCoursesPage = () => {
   // Filter States
   const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
   const [langFilter, setLangFilter] = useState("all")
+  const [enrollmentStatus, setEnrollmentStatus] = useState("all") // "all" | "upcoming" | "open" | "closed"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
+  const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [minPriceInput, setMinPriceInput] = useState("")
   const [maxPriceInput, setMaxPriceInput] = useState("")
   const [showPricePopover, setShowPricePopover] = useState(false)
@@ -70,6 +73,13 @@ const ExploreCoursesPage = () => {
     { value: "relevance", label: sc.sortRelevance || "Độ tương quan" },
   ]
 
+  const enrollmentStatusOptions = [
+    { value: "all", label: sc.enrollmentStatusAll || "Tất cả trạng thái" },
+    { value: "open", label: sc.enrollmentStatusOpen || "Đang mở đăng ký" },
+    { value: "upcoming", label: sc.enrollmentStatusUpcoming || "Chưa mở đăng ký" },
+    { value: "closed", label: sc.enrollmentStatusClosed || "Đã đóng đăng ký" },
+  ]
+
   const categoryTabs = [
     { value: "all", label: sc.tabAllCatalog || "Tất cả", icon: Compass },
     { value: "courses", label: sc.tabCourses || "Khóa học", icon: BookOpen },
@@ -100,6 +110,7 @@ const ExploreCoursesPage = () => {
     minPrice: activeMinPrice,
     maxPrice: activeMaxPrice,
     type: contentType !== "all" ? contentType : undefined,
+    enrollmentStatus: enrollmentStatus !== "all" ? enrollmentStatus : undefined,
   })
 
   const combinedCatalog = useMemo(() => {
@@ -141,6 +152,7 @@ const ExploreCoursesPage = () => {
   const handleClearFilters = () => {
     setSearchQuery("")
     setLangFilter("all")
+    setEnrollmentStatus("all")
     setSortOrder("default")
     setPricePreset("", "")
     setContentType("all")
@@ -166,7 +178,7 @@ const ExploreCoursesPage = () => {
   }
 
   const hasPriceFilter = minPriceInput !== "" || maxPriceInput !== ""
-  const hasActiveFilters = searchQuery.trim() !== "" || langFilter !== "all" || contentType !== "all" || sortOrder !== "default" || hasPriceFilter
+  const hasActiveFilters = searchQuery.trim() !== "" || langFilter !== "all" || contentType !== "all" || sortOrder !== "default" || enrollmentStatus !== "all" || hasPriceFilter
 
   const setPricePreset = (minVal, maxVal) => {
     setMinPriceInput(minVal)
@@ -250,6 +262,20 @@ const ExploreCoursesPage = () => {
               options={sortOptions}
               icon={ArrowUpDown}
             />
+
+            {/* Enrollment Status Pill Selector */}
+            <CourseSelectFilter
+              value={enrollmentStatus}
+              onChange={(val) => {
+                setEnrollmentStatus(val)
+                setCurrentPage(1)
+              }}
+              options={enrollmentStatusOptions}
+              icon={Activity}
+            />
+
+            {/* View Mode Toggle */}
+            <ViewModeToggle value={viewMode} onChange={setViewMode} />
 
             {/* Price Popover Pill Button */}
             <div className="relative" ref={popoverRef}>
@@ -427,6 +453,13 @@ const ExploreCoursesPage = () => {
               </span>
             )}
 
+            {enrollmentStatus !== "all" && (
+              <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
+                {sc.enrollmentStatusPrefix || "Trạng thái:"} {enrollmentStatusOptions.find((o) => o.value === enrollmentStatus)?.label}
+                <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setEnrollmentStatus("all")} />
+              </span>
+            )}
+
             {hasPriceFilter && (
               <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
                 {sc.pricePrefix || "Giá:"} {minPriceInput ? formatCurrencyVND(minPriceInput) : "0 đ"} - {maxPriceInput ? formatCurrencyVND(maxPriceInput) : "∞"}
@@ -508,19 +541,27 @@ const ExploreCoursesPage = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className={viewMode === "list"
+              ? "flex flex-col gap-4"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"}>
               {combinedCatalog.map((item, idx) => {
                 if (item.isClassItem) {
                   return (
-                    <ClassCard
+                    <div
                       key={`cls-${item.id}`}
-                      cls={item}
-                      isStudent={true}
-                      courseTitle={item.courseTitle}
-                      onClick={() => handleOpenClassDetail(item)}
-                      onEnroll={() => handleOpenClassDetail(item)}
-                      onShare={handleShareClass}
-                    />
+                      className={viewMode === "list"
+                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                        : ""}
+                    >
+                      <ClassCard
+                        cls={item}
+                        isStudent={true}
+                        courseTitle={item.courseTitle}
+                        onClick={() => handleOpenClassDetail(item)}
+                        onEnroll={() => handleOpenClassDetail(item)}
+                        onShare={handleShareClass}
+                      />
+                    </div>
                   )
                 }
                 return (
@@ -528,7 +569,7 @@ const ExploreCoursesPage = () => {
                     key={`crs-${item.id}`}
                     course={item}
                     isEnrolled={false}
-                    viewMode="grid"
+                    viewMode={viewMode}
                     onViewDetails={() => handleOpenCourseDetail(item)}
                     onJoin={() => handleOpenCourseDetail(item)}
                     onShare={handleShareCourse}
