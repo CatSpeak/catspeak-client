@@ -241,29 +241,20 @@ const GameSidebar = ({
     const idStr = id.toString()
     if (leftPlayers && leftPlayers.has(idStr)) return
     if (spectatorIds && spectatorIds.has(idStr)) return
+    if (gamePlayers && gamePlayers.size > 0 && !gamePlayers.has(idStr)) return
     const p = participants.find((part) => String(part.identity) === idStr)
     if (p && isObserverParticipant(p)) return
     allPlayerIds.add(idStr)
   }
 
-  // Always include current user
-  if (currentUserId) addIfNotLeftOrObserver(currentUserId.toString())
-
   // Include original gamePlayers if set
   if (gamePlayers && gamePlayers.size > 0) {
     gamePlayers.forEach(addIfNotLeftOrObserver)
-  }
-
-  // Include all players in scores or pictureIt leaderboard
-  Object.keys(scores || {}).forEach(addIfNotLeftOrObserver)
-  if (isPictureIt && pictureIt?.leaderboard) {
+  } else if (isPictureIt && pictureIt?.leaderboard) {
     pictureIt.leaderboard.forEach((p) => addIfNotLeftOrObserver(p?.id))
+  } else {
+    Object.keys(scores || {}).forEach(addIfNotLeftOrObserver)
   }
-
-  // Always include all non-observer LiveKit participants in the room
-  participants.forEach((p) => {
-    if (p.identity) addIfNotLeftOrObserver(p.identity)
-  })
 
   // Create an array of players
   const players = Array.from(allPlayerIds)
