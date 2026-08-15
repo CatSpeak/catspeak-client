@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/features/auth";
 import { ChevronLeft, ChevronRight, UserCheck, ArrowRight, Sparkles } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
@@ -47,8 +49,10 @@ const mockTeachers = [
   },
 ];
 
-const LeadingTeamSection = () => {
+const LeadingTeamSection = ({ openAuthModal }) => {
   const { t } = useLanguage();
+  const { isAuthenticated, role } = useAuth();
+  const navigate = useNavigate();
   const scrollRef = useRef(null);
 
   const handleScroll = (direction) => {
@@ -56,6 +60,28 @@ const LeadingTeamSection = () => {
       const scrollAmount = direction === "left" ? -300 : 300;
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
+  };
+
+  const handleTeacherAction = () => {
+    if (!isAuthenticated) {
+      if (openAuthModal) {
+        openAuthModal("login");
+      } else {
+        navigate("/setting/instructor");
+      }
+      return;
+    }
+
+    // Authenticated user
+    if (role === "Teacher") {
+      navigate("/workspace/courses");
+    } else {
+      navigate("/setting/instructor");
+    }
+  };
+
+  const handleExploreCourses = () => {
+    navigate("/explore-courses");
   };
 
   return (
@@ -72,11 +98,11 @@ const LeadingTeamSection = () => {
         </div>
 
         {/* Carousel Container with navigation arrows */}
-        <div className="relative group px-4">
-          {/* Navigation buttons */}
+        <div className="relative group px-2 sm:px-4">
+          {/* Navigation buttons - natively and dynamically centered at 50% */}
           <button
             onClick={() => handleScroll("left")}
-            className="absolute -left-2 sm:left-0 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-700 shadow-md flex items-center justify-center hover:border-[#910B09] hover:text-[#910B09] hover:scale-105 transition-all"
+            className="absolute -left-2 sm:-left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-700 shadow-md flex items-center justify-center hover:border-[#910B09] hover:text-[#910B09] hover:scale-105 active:scale-95 transition-all"
             aria-label="Previous instructor"
           >
             <ChevronLeft size={22} />
@@ -84,7 +110,7 @@ const LeadingTeamSection = () => {
 
           <button
             onClick={() => handleScroll("right")}
-            className="absolute -right-2 sm:right-0 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-700 shadow-md flex items-center justify-center hover:border-[#910B09] hover:text-[#910B09] hover:scale-105 transition-all"
+            className="absolute -right-2 sm:-right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-700 shadow-md flex items-center justify-center hover:border-[#910B09] hover:text-[#910B09] hover:scale-105 active:scale-95 transition-all"
             aria-label="Next instructor"
           >
             <ChevronRight size={22} />
@@ -99,33 +125,39 @@ const LeadingTeamSection = () => {
             {mockTeachers.map((teacher) => (
               <div
                 key={teacher.id}
-                className="flex-shrink-0 w-[240px] sm:w-[260px] flex flex-col items-center group/card"
+                onClick={handleExploreCourses}
+                className="flex-shrink-0 w-[250px] sm:w-[270px] bg-white border border-gray-200/90 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col group/card cursor-pointer"
               >
-                {/* Image Placeholder Frame */}
-                <div className="relative w-full h-[280px] sm:h-[300px] rounded-3xl bg-gray-100 border border-gray-200/80 overflow-hidden flex flex-col items-center justify-center p-4 transition-all duration-300 group-hover/card:shadow-xl group-hover/card:-translate-y-1">
+                {/* Top Image / Avatar Showcase Frame */}
+                <div className="relative w-full h-[220px] sm:h-[240px] bg-gradient-to-b from-stone-50 via-slate-50 to-gray-100 border-b border-gray-100 flex flex-col items-center justify-center p-4 overflow-hidden">
                   {/* Subtle Grid / Pattern background */}
                   <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px]" />
                   
                   {/* Avatar Icon / Mock Graphic */}
-                  <div className="relative z-10 w-24 h-24 rounded-full bg-white shadow-inner border border-gray-200 flex items-center justify-center text-gray-400">
+                  <div className="relative z-10 w-24 h-24 rounded-full bg-white shadow-inner border border-gray-200 flex items-center justify-center text-gray-400 group-hover/card:scale-105 transition-transform duration-300">
                     <UserCheck size={44} className="text-gray-400" />
                   </div>
 
                   {/* Hover Pill Button */}
-                  <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100 transition-opacity flex items-center justify-center z-20">
-                    <span className="bg-white/90 text-gray-800 text-xs font-semibold px-4 py-2 rounded-full shadow-lg border border-white">
+                  <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px] opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
+                    <span className="bg-white/95 text-gray-800 text-xs font-semibold px-4 py-2 rounded-full shadow-lg border border-white">
                       Xem giảng viên
                     </span>
                   </div>
                 </div>
 
-                {/* Info below card */}
-                <div className="mt-4 text-center">
-                  <h3 className="text-lg font-bold text-gray-900 group-hover/card:text-[#910B09] transition-colors">
-                    {teacher.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    {teacher.role}
+                {/* Card Content Section */}
+                <div className="p-5 flex flex-col flex-1 justify-between text-center gap-2">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 group-hover/card:text-[#910B09] transition-colors">
+                      {teacher.name}
+                    </h3>
+                    <p className="text-xs font-semibold text-[#910B09] mt-0.5">
+                      {teacher.role}
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+                    {teacher.bio}
                   </p>
                 </div>
               </div>
@@ -150,9 +182,19 @@ const LeadingTeamSection = () => {
               </p>
             </div>
 
-            <button className="flex-shrink-0 bg-[#910B09] hover:bg-[#7a0907] text-white font-semibold text-sm sm:text-base px-7 py-3.5 rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-2 group/btn">
-              <span>Đăng ký trở thành Giảng viên</span>
-              <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+            <button
+              onClick={handleTeacherAction}
+              className="flex-shrink-0 bg-[#910B09] hover:bg-[#7a0907] text-white font-semibold text-sm sm:text-base px-7 py-3.5 rounded-full shadow-md hover:shadow-lg transition-all flex items-center gap-2 group/btn cursor-pointer"
+            >
+              <span>
+                {isAuthenticated && role === "Teacher"
+                  ? "Khu vực Giảng viên"
+                  : "Đăng ký trở thành Giảng viên"}
+              </span>
+              <ArrowRight
+                size={18}
+                className="group-hover/btn:translate-x-1 transition-transform"
+              />
             </button>
           </div>
         </div>

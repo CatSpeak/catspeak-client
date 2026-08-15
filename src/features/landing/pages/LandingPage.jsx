@@ -1,43 +1,39 @@
-import { useState } from "react";
-import {
-  LoginPopup,
-  RegisterPopup,
-  VerifyEmailOtpPopup,
-} from "@/features/auth";
-import HeroSection from "@/features/landing/components/HeroSection";
-import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection";
-import NewsSection from "@/features/landing/components/NewsSection";
-import ExploreEcosystemSection from "@/features/landing/components/ExploreEcosystemSection";
-import PartnerSection from "@/features/landing/components/PartnerSection";
-import ResponseSection from "@/features/landing/components/ResponseSection";
-import ValuesSection from "@/features/landing/components/ValuesSection";
-import AISection from "@/features/landing/components/AISection";
-import FAQSection from "@/features/landing/components/FAQSection";
+import { useState } from "react"
+import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
+import HeroSection from "@/features/landing/components/HeroSection"
+import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection"
+import NewsSection from "@/features/landing/components/NewsSection"
+import ExploreEcosystemSection from "@/features/landing/components/ExploreEcosystemSection"
+import PartnerSection from "@/features/landing/components/PartnerSection"
+import ResponseSection from "@/features/landing/components/ResponseSection"
+import ValuesSection from "@/features/landing/components/ValuesSection"
+import AISection from "@/features/landing/components/AISection"
+import FAQSection from "@/features/landing/components/FAQSection"
 
 const LandingPage = () => {
   const [authModal, setAuthModal] = useState({
     isOpen: false,
     mode: "login",
     email: "",
-  });
+  })
 
   const openAuthModal = (mode = "login", email = "") =>
     setAuthModal({
       isOpen: true,
       mode,
       email,
-    });
+    })
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
       ...prev,
       isOpen: false,
-    }));
+    }))
 
-  const switchAuthMode = (mode, email = "") => openAuthModal(mode, email);
+  const switchAuthMode = (mode, email = "") => openAuthModal(mode, email)
 
   const renderAuthPopup = () => {
-    if (!authModal.isOpen) return null;
+    if (!authModal.isOpen) return null
 
     if (authModal.mode === "register") {
       return (
@@ -47,7 +43,7 @@ const LandingPage = () => {
           onClose={closeAuthModal}
           onSwitchMode={switchAuthMode}
         />
-      );
+      )
     }
 
     if (authModal.mode === "verify-email") {
@@ -59,7 +55,7 @@ const LandingPage = () => {
           onClose={closeAuthModal}
           onSwitchMode={switchAuthMode}
         />
-      );
+      )
     }
 
     return (
@@ -69,8 +65,8 @@ const LandingPage = () => {
         onClose={closeAuthModal}
         onSwitchMode={switchAuthMode}
       />
-    );
-  };
+    )
+  }
 
   return (
     <div className="flex flex-col w-full max-w-screen-xl mx-auto overflow-hidden">
@@ -80,7 +76,7 @@ const LandingPage = () => {
       </div>
 
       {/* 2. Leading Team */}
-      <LeadingTeamSection />
+      <LeadingTeamSection openAuthModal={openAuthModal} />
 
       {/* 3. News */}
       <NewsSection />
@@ -106,7 +102,7 @@ const LandingPage = () => {
       {/* Auth Modal */}
       {renderAuthPopup()}
     </div>
-  );
-};
+  )
+}
 
-export default LandingPage;
+export default LandingPage

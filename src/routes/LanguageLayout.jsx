@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useParams, Navigate, Outlet } from "react-router-dom"
 import { useGlobalPresence } from "@/shared/context/GlobalPresenceContext"
 
-const SUPPORTED_LANGUAGES = ["en", "zh", "vi"]
+const SUPPORTED_LANGUAGES = ["zh", "en"]
 
 const LanguageLayout = () => {
   const { lang } = useParams()
@@ -14,9 +14,9 @@ const LanguageLayout = () => {
     }
   }, [lang, setPresenceLanguage])
 
-  // Validate language
+  // Validate language - always default to zh community if invalid or broken
   if (!SUPPORTED_LANGUAGES.includes(lang)) {
-    return <Navigate to="/en" replace />
+    return <Navigate to="/zh/community" replace />
   }
 
   // Pass language down via Outlet context

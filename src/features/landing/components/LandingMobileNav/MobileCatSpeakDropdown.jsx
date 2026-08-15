@@ -18,7 +18,12 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
   const location = useLocation();
   const isActive = useActiveLink(navKey);
 
-  const currentLang = lang || localStorage.getItem("communityLanguage") || "en";
+  const currentLang =
+    lang ||
+    (localStorage.getItem("communityLanguage") &&
+    localStorage.getItem("communityLanguage") !== "vi"
+      ? localStorage.getItem("communityLanguage")
+      : "zh");
 
   const isOnCatSpeak = location.pathname.includes("/cat-speak");
   const [open, setOpen] = useState(isOnCatSpeak);
