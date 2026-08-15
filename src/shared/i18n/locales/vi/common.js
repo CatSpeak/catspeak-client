@@ -133,6 +133,22 @@ export default {
     thankYou: "Cảm ơn bạn đã kiên nhẫn chờ đợi! ^^",
   },
   noOptionsFound: "Không tìm thấy lựa chọn nào",
+  loading: "Đang tải...",
+  search: "Tìm kiếm...",
+  selected: "Đã chọn",
+  inviteDropdown: {
+    loading: "Đang tải...",
+    noFriendsAvailable: "Không có bạn bè nào sẵn sàng để chọn",
+    noTeachersAvailable: "Không có giảng viên nào sẵn sàng để chọn",
+    noUsersAvailable: "Không có người dùng nào sẵn sàng để chọn",
+    selectFriends: "Chọn bạn bè...",
+    selectTeachers: "Chọn giảng viên...",
+    selectUsers: "Chọn người dùng...",
+    searchFriends: "Tìm kiếm bạn bè...",
+    searchTeachers: "Tìm kiếm giảng viên...",
+    searchUsers: "Tìm kiếm...",
+    teacherBadge: "Giảng viên",
+  },
   pagination: {
     page: "Trang",
     of: "trên",
@@ -179,4 +195,4 @@ export default {
       body: "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
     },
   },
-};
+}
