@@ -63,7 +63,7 @@ const WaitingScreen = ({
   return (
     <FullscreenOverlayShell
       backgroundImageUrl={room?.thumbnailUrl || meetingFallbackImage}
-      onBack={() => navigate(getCommunityPath(lang || language))}
+      onBack={() => navigate(-1)}
       backLabel={t.rooms.waitingScreen.backToCommunity}
       maxWidthClass="max-w-[520px] lg:max-w-6xl"
     >

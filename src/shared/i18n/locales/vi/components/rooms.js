@@ -289,7 +289,7 @@ export default {
     connectingStatus: "Đang kết nối",
   },
   waitingScreen: {
-    backToCommunity: "Quay lại Cộng đồng",
+    backToCommunity: "Quay lại",
     readyToJoin: "Sẵn sàng tham gia?",
     micOff: "Tắt mic",
     joinNow: "Tham gia ngay",
