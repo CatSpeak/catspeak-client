@@ -90,7 +90,7 @@ const MobileCommunitySwitcher = () => {
               <img
                 src={option.flag}
                 alt={option.label}
-                className="block h-full w-full object-cover scale-[1.15]"
+                className="block h-full w-full object-cover"
                 draggable={false}
               />
             </span>

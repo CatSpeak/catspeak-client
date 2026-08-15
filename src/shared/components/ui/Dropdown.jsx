@@ -179,9 +179,8 @@ const Dropdown = ({
       startIcon={selectedOption?.icon}
       endIcon={
         <ChevronDown
-          className={`shrink-0 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
         />
       }
       className={`w-full ${triggerClassName}`}
@@ -218,14 +217,14 @@ const Dropdown = ({
       {trigger
         ? typeof trigger === "function"
           ? trigger(
-              isOpen,
-              selectedOption,
-              () => !disabled && setIsOpen(!isOpen),
-            )
+            isOpen,
+            selectedOption,
+            () => !disabled && setIsOpen(!isOpen),
+          )
           : React.cloneElement(trigger, {
-              onClick: () => !disabled && setIsOpen(!isOpen),
-              disabled,
-            })
+            onClick: () => !disabled && setIsOpen(!isOpen),
+            disabled,
+          })
         : defaultTrigger}
 
       {typeof document !== "undefined" &&
@@ -282,7 +281,7 @@ const Dropdown = ({
                               key={optionKey}
                               type="button"
                               onClick={() => handleSelect(option)}
-                              className="group w-full flex items-center focus:outline-none px-1 h-12"
+                              className="group w-full flex items-center focus:outline-none h-12"
                             >
                               {renderOption(option, isSelected)}
                             </button>
