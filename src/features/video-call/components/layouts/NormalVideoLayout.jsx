@@ -94,7 +94,10 @@ const NormalVideoLayout = ({
     if (displayCount === 4) return "grid grid-cols-2 grid-rows-2"
     if (displayCount <= 6)
       return "grid grid-cols-2 sm:grid-cols-3 grid-rows-3 sm:grid-rows-2"
-    return "grid grid-cols-3 grid-rows-3"
+    if (displayCount <= 9) return "grid grid-cols-3 grid-rows-3"
+    if (displayCount <= 12)
+      return "grid grid-cols-3 sm:grid-cols-4 grid-rows-4 sm:grid-rows-3"
+    return "grid grid-cols-4 grid-rows-4"
   }
 
   return (
@@ -117,4 +120,3 @@ const NormalVideoLayout = ({
 }
 
 export default NormalVideoLayout
-

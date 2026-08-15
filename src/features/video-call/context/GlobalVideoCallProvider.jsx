@@ -219,7 +219,10 @@ export const GlobalVideoCallProvider = ({ children }) => {
       className="contents"
       options={{ publishDefaults: { simulcast: !isMobileDevice } }}
       onDisconnected={(reason) => {
-        console.error("[GlobalVideoCallProvider] LiveKitRoom onDisconnected:", reason)
+        console.error(
+          "[GlobalVideoCallProvider] LiveKitRoom onDisconnected:",
+          reason,
+        )
       }}
       onError={(err) => {
         console.error("[GlobalVideoCallProvider] LiveKitRoom onError:", {

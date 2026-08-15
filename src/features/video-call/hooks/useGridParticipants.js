@@ -36,15 +36,18 @@ export const useGridParticipants = (allItems = [], customMaxTiles) => {
   }, [])
 
   const maxCapacity = useMemo(() => {
-    if (typeof customMaxTiles === "number" && customMaxTiles > 0) {
-      if (windowWidth < 640) {
-        return Math.min(customMaxTiles, 3) // Mobile spotlight cap: 3 tiles max
-      }
-      return customMaxTiles
+    let screenLimit = 16 // Bigger desktop screens (>=1280px): 16 tiles (4x4)
+    if (windowWidth < 640) {
+      screenLimit = customMaxTiles === 3 ? 3 : 6 // Phone (<640px): 6 tiles (2x3)
+    } else if (windowWidth < 1280) {
+      screenLimit = 9 // Tablet & Small Laptop (640px-1280px): 9 tiles (3x3)
     }
-    if (windowWidth < 640) return 4 // Mobile grid default: 4 tiles max
-    if (windowWidth < 1024) return 6 // Tablet grid default: 6 tiles max
-    return 9 // Desktop grid default: 9 tiles max
+
+    if (typeof customMaxTiles === "number" && customMaxTiles > 0) {
+      return Math.min(customMaxTiles, screenLimit)
+    }
+
+    return screenLimit
   }, [windowWidth, customMaxTiles])
 
   // 2. Maintain a stable ordered list of keys
@@ -101,14 +104,14 @@ export const useGridParticipants = (allItems = [], customMaxTiles) => {
       const key = String(item.key)
 
       // Get speaking state (LiveKit participant isSpeaking property)
-      const isSpeaking =
-        item.type === "video" && item.data?.isSpeaking === true
+      const isSpeaking = item.type === "video" && item.data?.isSpeaking === true
 
       const wasSpeaking = prevSpeakingMapRef.current.get(key) === true
       prevSpeakingMapRef.current.set(key, isSpeaking)
 
       // Get hand raised state
-      const meta = item.type === "video" ? parseMetadata(item.data?.metadata) : {}
+      const meta =
+        item.type === "video" ? parseMetadata(item.data?.metadata) : {}
       const isHandRaised = meta.handRaised === true
       const wasHandRaised = prevHandRaisedMapRef.current.get(key) === true
       prevHandRaisedMapRef.current.set(key, isHandRaised)
