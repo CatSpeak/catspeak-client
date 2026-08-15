@@ -1,96 +1,98 @@
-import React, { useState, useEffect } from "react";
-import { Send, X } from "lucide-react";
-import Modal from "@/shared/components/ui/Modal";
-import InvititeDropdown from "@/shared/components/ui/InvititeDropdown";
-import Avatar from "@/shared/components/ui/Avatar";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import PillButton from "@/shared/components/ui/buttons/PillButton";
-import toast from "react-hot-toast";
-import { useInviteToRoomMutation } from "@/store/api/roomsApi";
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
+import React, { useState, useEffect } from "react"
+import { Send, X } from "lucide-react"
+import Modal from "@/shared/components/ui/Modal"
+import InvititeDropdown from "@/shared/components/ui/InvititeDropdown"
+import Avatar from "@/shared/components/ui/Avatar"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import toast from "react-hot-toast"
+import { useInviteToRoomMutation } from "@/store/api/roomsApi"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 const InviteParticipantModal = ({ open, onClose, roomId }) => {
-  const { t } = useLanguage();
-  const [selectedEmails, setSelectedEmails] = useState([]);
-  const [selectedUsers, setSelectedUsers] = useState({});
-  const [inviteToRoom, { isLoading: isInviting }] = useInviteToRoomMutation();
+  const { t } = useLanguage()
+  const [selectedEmails, setSelectedEmails] = useState([])
+  const [selectedUsers, setSelectedUsers] = useState({})
+  const [inviteToRoom, { isLoading: isInviting }] = useInviteToRoomMutation()
 
-  const { id: contextRoomId } = useGlobalVideoCall();
-  const effectiveRoomId = roomId || contextRoomId;
+  const { id: contextRoomId } = useGlobalVideoCall()
+  const effectiveRoomId = roomId || contextRoomId
 
   // Reset selected state when modal closes
   useEffect(() => {
     if (!open) {
-      setSelectedEmails([]);
-      setSelectedUsers({});
+      setSelectedEmails([])
+      setSelectedUsers({})
     }
-  }, [open]);
+  }, [open])
 
-  if (!open) return null;
+  if (!open) return null
 
   const handleSelectChange = (newValues, newOptions) => {
-    setSelectedEmails(newValues);
+    setSelectedEmails(newValues)
     if (newOptions && Array.isArray(newOptions)) {
-      const nextMap = { ...selectedUsers };
+      const nextMap = { ...selectedUsers }
       newOptions.forEach((opt) => {
         if (opt?.value) {
-          nextMap[opt.value] = opt.user || opt.friend || opt;
+          nextMap[opt.value] = opt.user || opt.friend || opt
         }
-      });
-      setSelectedUsers(nextMap);
+      })
+      setSelectedUsers(nextMap)
     }
-  };
+  }
 
   const handleRemoveSelected = (val) => {
-    setSelectedEmails((prev) => prev.filter((item) => item !== val));
-  };
+    setSelectedEmails((prev) => prev.filter((item) => item !== val))
+  }
 
   const handleInvite = async () => {
     if (selectedEmails.length === 0) {
       toast.error(
         t.rooms?.videoCall?.selectAtLeastOne ||
-          "Vui lòng chọn ít nhất một người bạn để mời"
-      );
-      return;
+          "Vui lòng chọn ít nhất một người bạn để mời",
+      )
+      return
     }
 
     if (!effectiveRoomId) {
-      toast.error(t.common?.errorOccurred || "Không tìm thấy thông tin phòng");
-      return;
+      toast.error(t.common?.errorOccurred || "Không tìm thấy thông tin phòng")
+      return
     }
 
     try {
       const invitePromises = selectedEmails.map((emailOrId) =>
-        inviteToRoom({ roomId: effectiveRoomId, email: emailOrId }).unwrap()
-      );
-      const results = await Promise.allSettled(invitePromises);
-      const successCount = results.filter((r) => r.status === "fulfilled").length;
-      const failedCount = results.filter((r) => r.status === "rejected").length;
+        inviteToRoom({ roomId: effectiveRoomId, email: emailOrId }).unwrap(),
+      )
+      const results = await Promise.allSettled(invitePromises)
+      const successCount = results.filter(
+        (r) => r.status === "fulfilled",
+      ).length
+      const failedCount = results.filter((r) => r.status === "rejected").length
 
       if (successCount > 0) {
         toast.success(
           failedCount === 0
             ? t.rooms?.notifications?.inviteSent || `Đã gửi lời mời thành công`
-            : `Đã gửi lời mời cho ${successCount} người (${failedCount} thất bại)`
-        );
-        setSelectedEmails([]);
-        setSelectedUsers({});
-        onClose();
+            : `Đã gửi lời mời cho ${successCount} người (${failedCount} thất bại)`,
+        )
+        setSelectedEmails([])
+        setSelectedUsers({})
+        onClose()
       } else {
-        const firstError = results.find((r) => r.status === "rejected")?.reason;
+        const firstError = results.find((r) => r.status === "rejected")?.reason
         toast.error(
           firstError?.data?.message ||
             t.common?.errorOccurred ||
-            "Gửi lời mời thất bại"
-        );
+            "Gửi lời mời thất bại",
+        )
       }
     } catch (err) {
-      console.error("Failed to send invite:", err);
+      console.error("Failed to send invite:", err)
       toast.error(
-        err?.data?.message || t.common?.errorOccurred || "Đã có lỗi xảy ra"
-      );
+        err?.data?.message || t.common?.errorOccurred || "Đã có lỗi xảy ra",
+      )
     }
-  };
+  }
 
   return (
     <Modal
@@ -128,10 +130,6 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
         </p>
 
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-medium text-gray-700">
-            {t.rooms?.videoCall?.selectFriends || "Danh sách bạn bè"}
-          </label>
-
           <InvititeDropdown
             mode="friends"
             value={selectedEmails}
@@ -143,8 +141,8 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
           {selectedEmails.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1 max-h-[100px] overflow-y-auto">
               {selectedEmails.map((val) => {
-                const user = selectedUsers[val];
-                const displayName = user?.username || user?.name || val;
+                const user = selectedUsers[val]
+                const displayName = user?.username || user?.name || val
                 return (
                   <span
                     key={val}
@@ -171,14 +169,14 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
                       <X size={12} />
                     </button>
                   </span>
-                );
+                )
               })}
             </div>
           )}
         </div>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default InviteParticipantModal;
+export default InviteParticipantModal
