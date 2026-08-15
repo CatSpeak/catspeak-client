@@ -550,22 +550,16 @@ const ExploreCoursesPage = () => {
                 if (item.isClassItem) {
                   const classLayout = resolveItemLayout(item, viewMode)
                   return (
-                    <div
+                    <ClassCard
                       key={`cls-${item.id}`}
-                      className={classLayout === "grid"
-                        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                        : ""}
-                    >
-                      <ClassCard
-                        cls={item}
-                        isStudent={true}
-                        courseTitle={item.courseTitle}
-                        viewMode={classLayout}
-                        onClick={() => handleOpenClassDetail(item)}
-                        onEnroll={() => handleOpenClassDetail(item)}
-                        onShare={handleShareClass}
-                      />
-                    </div>
+                      cls={item}
+                      isStudent={true}
+                      courseTitle={item.courseTitle}
+                      viewMode={classLayout}
+                      onClick={() => handleOpenClassDetail(item)}
+                      onEnroll={() => handleOpenClassDetail(item)}
+                      onShare={handleShareClass}
+                    />
                   )
                 }
                 return (
