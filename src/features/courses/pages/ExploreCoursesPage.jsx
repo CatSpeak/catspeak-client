@@ -17,6 +17,7 @@ import ClassCard from "../components/ClassCard"
 import CourseTabs from "../components/CourseTabs"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { formatCurrencyVND } from "../utils/courseUtils"
+import { resolveItemLayout } from "../utils/catalogLayout"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const PAGE_SIZE = 20
@@ -546,10 +547,11 @@ const ExploreCoursesPage = () => {
               : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"}>
               {combinedCatalog.map((item, idx) => {
                 if (item.isClassItem) {
+                  const classLayout = resolveItemLayout(item, viewMode)
                   return (
                     <div
                       key={`cls-${item.id}`}
-                      className={viewMode === "list"
+                      className={classLayout === "grid"
                         ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                         : ""}
                     >
@@ -557,6 +559,7 @@ const ExploreCoursesPage = () => {
                         cls={item}
                         isStudent={true}
                         courseTitle={item.courseTitle}
+                        viewMode={classLayout}
                         onClick={() => handleOpenClassDetail(item)}
                         onEnroll={() => handleOpenClassDetail(item)}
                         onShare={handleShareClass}

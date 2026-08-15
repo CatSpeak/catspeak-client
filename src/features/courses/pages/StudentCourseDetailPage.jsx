@@ -575,6 +575,25 @@ const StudentCourseDetailPage = () => {
                               </button>
                             )}
 
+                            {!isClassEnrolled && (
+                              <button
+                                type="button"
+                                disabled={classButton.disabled || enrollingClassId === cls.id}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleClassRegister(cls)
+                                }}
+                                className={`h-8 px-4 text-sm font-black rounded-full transition-all shadow-2xs ${classButton.key === "open"
+                                  ? "bg-[#b20a1c] hover:bg-[#960817] text-white active:scale-95 cursor-pointer"
+                                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                  }`}
+                              >
+                                {enrollingClassId === cls.id
+                                  ? (sc.processing || "Đang xử lý...")
+                                  : classButton.label}
+                              </button>
+                            )}
+
                             {/* Expand/Collapse Accordion Button with Primary Text Styling */}
                             <button
                               type="button"
