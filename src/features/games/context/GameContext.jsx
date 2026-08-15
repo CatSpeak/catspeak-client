@@ -18,6 +18,26 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 
 const GameContext = createContext();
 
+export const isObserverParticipant = (participant) => {
+  if (!participant) return false;
+  if (participant.metadata) {
+    try {
+      const meta = JSON.parse(participant.metadata);
+      if (
+        meta.isObserver === true ||
+        meta.role === "Observer" ||
+        meta.role === "spectator" ||
+        meta.isSpectator === true
+      ) {
+        return true;
+      }
+    } catch {
+      // Ignore parse error
+    }
+  }
+  return false;
+};
+
 const initialPictureItState = {
   describerId: null,
   describerOrder: [],
@@ -174,6 +194,14 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         started_at: payload.started_at,
       });
 
+      setGamePlayers((prev) => {
+        if (prev && prev.size > 0) return prev;
+        const validParticipants = participants
+          .filter((p) => !isObserverParticipant(p))
+          .map((p) => String(p.identity));
+        return new Set(validParticipants);
+      });
+
       if (gameType === "picture_it") {
         setPictureItState((prev) => ({
           ...prev,
@@ -215,6 +243,15 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
         round: payload.round,
         total: payload.total,
       });
+
+      setGamePlayers((prev) => {
+        if (prev && prev.size > 0) return prev;
+        const validParticipants = participants
+          .filter((p) => !isObserverParticipant(p))
+          .map((p) => String(p.identity));
+        return new Set(validParticipants);
+      });
+
       setPictureItState((prev) => ({
         ...prev,
         describerId: payload.describer_id,
@@ -670,6 +707,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       const playerCount = players.length;
 
       if (connection.isConnected && roomId) {
+        connection.send("JoinRoom", roomId || "general");
         if (type === "picture-it" || type === "picture_it") {
           connection.send("StartPictureItGame", {
             RoomId: roomId || "general",
@@ -686,6 +724,8 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
             player_count: playerCount,
           });
         }
+      } else if (!connection.isConnected) {
+        toast.error("Chưa kết nối tới máy chủ Game. Vui lòng thử lại sau giây lát!");
       }
     },
     [
@@ -722,7 +762,12 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     return () => window.removeEventListener("hostStartGame", handleHostStart);
   }, [startGame, gameState]);
 
-  // Lắng nghe event từ nút Leave call của room (sẽ thêm sau khi khai báo exitGame bên dưới).
+  // Auto-join room in SignalR GameHub when connected
+  useEffect(() => {
+    if (connection.isConnected && roomId) {
+      connection.send("JoinRoom", roomId);
+    }
+  }, [connection.isConnected, connection.send, roomId]);
 
   const effectiveIsSpectator = React.useMemo(() => {
     if (isSpectator) return true;
@@ -799,12 +844,31 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
 
   // General Exit
   const exitGame = useCallback(() => {
-    connection.send("PlayerLeaveGame", roomId || "general");
-
-    setGameState("idle");
-    setGameType(null);
-    resetGameStates();
-  }, [connection, roomId, resetGameStates]);
+    if (!effectiveIsSpectator) {
+      // Người chơi bấm thoát -> Gửi PlayerLeaveGame lên BE, đánh dấu leftPlayers & chuyển sang Spectator mode (xem tiếp)
+      connection.send("PlayerLeaveGame", roomId || "general");
+      if (currentUserId != null) {
+        setLeftPlayers((prev) => new Set(prev).add(currentUserId.toString()));
+      }
+      setIsSpectator(true);
+      toast.success(
+        t.rooms?.game?.becameSpectator ||
+          "Bạn đã rời ván đấu và chuyển sang chế độ quan sát."
+      );
+    } else {
+      // Người quan sát bấm thoát -> Tắt hoàn toàn overlay game FE
+      setGameState("idle");
+      setGameType(null);
+      resetGameStates();
+    }
+  }, [
+    connection,
+    roomId,
+    effectiveIsSpectator,
+    currentUserId,
+    resetGameStates,
+    t,
+  ]);
 
   // Lắng nghe event từ nút Leave call của room.
   // - Người chơi: gọi exitGame (gửi PlayerLeaveGame lên BE, reset state FE).
@@ -855,6 +919,7 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
     // Actions
     gamePlayers,
     isSpectator: effectiveIsSpectator,
+    effectiveIsSpectator,
     spectatorIds,
     startGame,
     exitGame,

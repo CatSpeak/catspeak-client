@@ -1,6 +1,6 @@
 import React from "react"
 import { X } from "lucide-react"
-import { useGame } from "@/features/games/context/GameContext"
+import { useGame, isObserverParticipant } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { Check, TrendingUp, Star, SlidersHorizontal } from "lucide-react"
 import { useParticipants, useIsSpeaking } from "@livekit/components-react"
@@ -192,25 +192,7 @@ const PlayerItemContent = ({
   )
 }
 
-const isObserverParticipant = (participant) => {
-  if (!participant) return false
-  if (participant.metadata) {
-    try {
-      const meta = JSON.parse(participant.metadata)
-      if (
-        meta.isObserver === true ||
-        meta.role === "Observer" ||
-        meta.role === "spectator" ||
-        meta.isSpectator === true
-      ) {
-        return true
-      }
-    } catch {
-      // Ignore parse error
-    }
-  }
-  return false
-}
+
 
 const GameSidebar = ({
   embedded = false,
@@ -236,34 +218,27 @@ const GameSidebar = ({
 
   const allPlayerIds = new Set()
 
-  const addIfNotLeftOrObserver = (id) => {
+  const addIfNotObserver = (id) => {
     if (id == null) return
     const idStr = id.toString()
     if (leftPlayers && leftPlayers.has(idStr)) return
     if (spectatorIds && spectatorIds.has(idStr)) return
+    if (gamePlayers && gamePlayers.size > 0 && !gamePlayers.has(idStr)) return
     const p = participants.find((part) => String(part.identity) === idStr)
     if (p && isObserverParticipant(p)) return
     allPlayerIds.add(idStr)
   }
 
-  // Always include current user
-  if (currentUserId) addIfNotLeftOrObserver(currentUserId.toString())
-
-  // Include original gamePlayers if set
   if (gamePlayers && gamePlayers.size > 0) {
-    gamePlayers.forEach(addIfNotLeftOrObserver)
+    gamePlayers.forEach(addIfNotObserver)
+  } else if (isPictureIt && pictureIt?.leaderboard?.length > 0) {
+    pictureIt.leaderboard.forEach((p) => addIfNotObserver(p?.id))
+  } else if (scores && Object.keys(scores).length > 0) {
+    Object.keys(scores).forEach(addIfNotObserver)
+  } else if (gameState === "idle") {
+    // Only show room participants when game is idle (before start)
+    participants.forEach((p) => addIfNotObserver(p.identity))
   }
-
-  // Include all players in scores or pictureIt leaderboard
-  Object.keys(scores || {}).forEach(addIfNotLeftOrObserver)
-  if (isPictureIt && pictureIt?.leaderboard) {
-    pictureIt.leaderboard.forEach((p) => addIfNotLeftOrObserver(p?.id))
-  }
-
-  // Always include all non-observer LiveKit participants in the room
-  participants.forEach((p) => {
-    if (p.identity) addIfNotLeftOrObserver(p.identity)
-  })
 
   // Create an array of players
   const players = Array.from(allPlayerIds)
@@ -276,20 +251,23 @@ const GameSidebar = ({
 
       if (isPictureIt && pictureIt?.leaderboard) {
         const pData = pictureIt.leaderboard.find(
-          (p) => p.id.toString() === idStr,
+          (p) => p.id?.toString() === idStr,
         )
 
         if (pData && pData.name) {
           name = pData.name
         } else {
-          const p = participants.find((p) => p.identity === idStr)
-          name = p?.name || `Người chơi ${idStr}`
+          const p = participants.find((p) => String(p.identity) === idStr)
+          name =
+            p?.name ||
+            (playerNames && playerNames[idStr]) ||
+            `Người chơi ${idStr}`
         }
       } else {
-        if (playerNames[idStr]) {
+        if (playerNames && playerNames[idStr]) {
           name = playerNames[idStr]
         } else {
-          const p = participants.find((p) => p.identity === idStr)
+          const p = participants.find((p) => String(p.identity) === idStr)
           name =
             p?.name ||
             (t.rooms?.game?.crackIt?.playerX

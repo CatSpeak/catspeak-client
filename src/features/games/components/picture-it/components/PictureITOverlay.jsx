@@ -83,8 +83,16 @@ const PictureITOverlay = ({ mode = "fullscreen", isMain = true }) => {
 
   useEffect(() => {
     if (!isDescribing || !isDescriber || !hasDescribeStarted || !describeStartTimeMs) return
+    const storageKey = `pic_it_describe_${describeStartTimeMs}`
+    let storedStart = sessionStorage.getItem(storageKey)
+    if (!storedStart) {
+      storedStart = Math.min(Date.now(), describeStartTimeMs).toString()
+      sessionStorage.setItem(storageKey, storedStart)
+    }
+    const startedAtMs = parseInt(storedStart, 10)
+
     const tick = () => {
-      const elapsed = Math.floor((Date.now() - describeStartTimeMs) / 1000)
+      const elapsed = Math.floor((Date.now() - startedAtMs) / 1000)
       const remaining = Math.max(0, 30 - elapsed)
       setDescribeCountdownSec(remaining)
       if (remaining <= 0) {
