@@ -133,6 +133,9 @@ export default {
     thankYou: "Thank you for your patience! ^^",
   },
   noOptionsFound: "No options found",
+  loading: "Loading...",
+  search: "Search...",
+  selected: "Selected",
   pagination: {
     page: "Page",
     of: "of",

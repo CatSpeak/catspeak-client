@@ -133,6 +133,9 @@ export default {
     thankYou: "Cảm ơn bạn đã kiên nhẫn chờ đợi! ^^",
   },
   noOptionsFound: "Không tìm thấy lựa chọn nào",
+  loading: "Đang tải...",
+  search: "Tìm kiếm...",
+  selected: "Đã chọn",
   pagination: {
     page: "Trang",
     of: "trên",

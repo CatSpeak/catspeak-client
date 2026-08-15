@@ -130,6 +130,9 @@ export default {
     thankYou: "感谢您的耐心等待！^^",
   },
   noOptionsFound: "未找到选项",
+  loading: "加载中...",
+  search: "搜索...",
+  selected: "已选择",
   pagination: {
     page: "第",
     of: "页，共",
