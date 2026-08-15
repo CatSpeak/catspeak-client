@@ -84,9 +84,9 @@ const NewsPage = ({ postType = "1" }) => {
 
     return (
       <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
-        <div className="flex flex-row w-full gap-4 items-start">
+        <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
           {skeletonCols.map((col, colIndex) => (
-            <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
+            <div key={colIndex} className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0">
               {col.map((itemIndex) => (
                 <NewsCardSkeleton key={itemIndex} index={itemIndex} />
               ))}
@@ -147,15 +147,16 @@ const NewsPage = ({ postType = "1" }) => {
   return (
     <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
       {/* Masonry Card Grid */}
-      <div className="flex flex-row w-full gap-4 items-start">
+      <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
         {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex flex-col flex-1 gap-4 min-w-0">
+          <div key={colIndex} className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0">
             {col.map((post) => {
               const isSecondLast = post.postId === secondLastPostId;
               return (
                 <div
                   ref={isSecondLast ? secondLastPostElementRef : null}
                   key={post.postId}
+                  className="w-full"
                 >
                   <NewsCard news={post} />
                 </div>
