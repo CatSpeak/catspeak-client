@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Compass, RefreshCw, BookOpen, GraduationCap, ArrowUpDown, Globe, Coins, X, RotateCcw, Sparkles, ChevronDown, Activity } from "lucide-react"
+import { Compass, RefreshCw, BookOpen, GraduationCap, ArrowUpDown, Coins, X, RotateCcw, Sparkles, ChevronDown, Activity } from "lucide-react"
 
 import {
   useGetExploreCoursesQuery
@@ -31,7 +31,6 @@ const ExploreCoursesPage = () => {
 
   // Filter States
   const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
-  const [langFilter, setLangFilter] = useState("all")
   const [enrollmentStatus, setEnrollmentStatus] = useState("all") // "all" | "upcoming" | "open" | "closed"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
@@ -60,13 +59,16 @@ const ExploreCoursesPage = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Filter Options (No Japanese or Korean)
-  const languageFilterOptions = [
-    { value: "all", label: sc.allLanguages || "Tất cả ngôn ngữ" },
-    { value: "en", label: sc.languages?.English || "Tiếng Anh (EN)" },
-    { value: "vi", label: sc.languages?.Vietnamese || "Tiếng Việt (VI)" },
-    { value: "zh", label: sc.languages?.Chinese || "Tiếng Trung (ZH)" },
-  ]
+  // Community language drives the catalog language filter (same source as Rooms).
+  // Only English and Chinese are supported — Vietnamese is intentionally excluded.
+  const communityLanguage = (() => {
+    const stored = typeof window !== "undefined"
+      ? localStorage.getItem("communityLanguage")
+      : null
+    if (stored === "zh") return "CHINESE"
+    if (stored === "en") return "ENGLISH"
+    return undefined
+  })()
 
   const sortOptions = [
     { value: "default", label: sc.sortDefault || "Mới nhất" },
@@ -105,7 +107,7 @@ const ExploreCoursesPage = () => {
   const exploreCatalogQuery = useGetExploreCoursesQuery({
     page: currentPage,
     pageSize: PAGE_SIZE,
-    language: langFilter !== "all" ? langFilter : undefined,
+    language: communityLanguage,
     search: debouncedSearchQuery.trim() || undefined,
     sort: sortOrder !== "default" ? sortOrder : undefined,
     minPrice: activeMinPrice,
@@ -152,7 +154,6 @@ const ExploreCoursesPage = () => {
 
   const handleClearFilters = () => {
     setSearchQuery("")
-    setLangFilter("all")
     setEnrollmentStatus("all")
     setSortOrder("default")
     setPricePreset("", "")
@@ -179,7 +180,7 @@ const ExploreCoursesPage = () => {
   }
 
   const hasPriceFilter = minPriceInput !== "" || maxPriceInput !== ""
-  const hasActiveFilters = searchQuery.trim() !== "" || langFilter !== "all" || contentType !== "all" || sortOrder !== "default" || enrollmentStatus !== "all" || hasPriceFilter
+  const hasActiveFilters = searchQuery.trim() !== "" || contentType !== "all" || sortOrder !== "default" || enrollmentStatus !== "all" || hasPriceFilter
 
   const setPricePreset = (minVal, maxVal) => {
     setMinPriceInput(minVal)
@@ -242,17 +243,6 @@ const ExploreCoursesPage = () => {
 
           {/* E-Commerce Uniform Height Pill Controls (h-9) */}
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Language Pill Selector */}
-            <CourseSelectFilter
-              value={langFilter}
-              onChange={(val) => {
-                setLangFilter(val)
-                setCurrentPage(1)
-              }}
-              options={languageFilterOptions}
-              icon={Globe}
-            />
-
             {/* Sort Order Pill Selector */}
             <CourseSelectFilter
               value={sortOrder}
@@ -437,13 +427,6 @@ const ExploreCoursesPage = () => {
               <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
                 {sc.typePrefix || "Loại:"} {contentType === "courses" ? (sc.tabCourses || "Khóa học") : (sc.tabClasses || "Lớp học")}
                 <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setContentType("all")} />
-              </span>
-            )}
-
-            {langFilter !== "all" && (
-              <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                {sc.languagePrefix || "Ngôn ngữ:"} {langFilter.toUpperCase()}
-                <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setLangFilter("all")} />
               </span>
             )}
 
