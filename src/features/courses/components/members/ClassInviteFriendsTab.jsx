@@ -11,6 +11,7 @@ import { PillButton } from "@/shared/components/ui/buttons"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import { LoadingSpinner, EmptyState } from "@/shared/components/ui/indicators"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import InvititeDropdown from "@/shared/components/ui/InvititeDropdown"
 
 const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
   const { t } = useLanguage()
@@ -31,7 +32,7 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
   }, [classData])
 
   const [searchQuery, setSearchQuery] = useState("")
-  const [emailInput, setEmailInput] = useState("")
+  const [selectedEmails, setSelectedEmails] = useState([])
   const [invitedMap, setInvitedMap] = useState({})
 
   const { data: friendsResponse, isLoading: isLoadingFriends } =
@@ -92,27 +93,34 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
     }
   }
 
-  const handleInviteByEmail = async (e) => {
+  const handleInviteSelected = async (e) => {
     e?.preventDefault?.()
-    const trimmed = emailInput.trim()
-    if (!trimmed || !classId) return
+    if (!classId) return
+    const emailsToSend = (
+      Array.isArray(selectedEmails) ? selectedEmails : [selectedEmails]
+    ).filter(Boolean)
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(trimmed)) {
-      toast.error("Vui lòng nhập địa chỉ email hợp lệ.")
+    if (emailsToSend.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một người dùng để gửi lời mời.")
       return
     }
 
     try {
       await inviteToClass({
         classId,
-        emails: [trimmed],
+        emails: emailsToSend,
       }).unwrap()
 
-      setEmailInput("")
-      toast.success(t.courses?.inviteSuccess || `Đã gửi lời mời đến ${trimmed}`)
+      setSelectedEmails([])
+      toast.success(
+        t.courses?.inviteSuccess || `Đã gửi lời mời thành công!`,
+      )
     } catch (err) {
-      toast.error(t.courses?.inviteError || "Có lỗi xảy ra khi gửi lời mời.")
+      toast.error(
+        err?.data?.message ||
+          t.courses?.inviteError ||
+          "Có lỗi xảy ra khi gửi lời mời.",
+      )
       console.error(err)
     }
   }
@@ -133,22 +141,29 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
             </p>
           </div>
 
-          <form onSubmit={handleInviteByEmail} className="flex gap-2 max-w-xl">
-            <input
-              type="email"
-              placeholder="example@gmail.com"
-              value={emailInput}
-              onChange={(e) => setEmailInput(e.target.value)}
-              className="flex-1 px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-[#990011] focus:ring-1 focus:ring-[#990011] outline-none transition"
-            />
+          <form
+            onSubmit={handleInviteSelected}
+            className="flex flex-col sm:flex-row gap-2 max-w-xl items-stretch sm:items-center"
+          >
+            <div className="flex-1">
+              <InvititeDropdown
+                mode="all"
+                value={selectedEmails}
+                onChange={(newValues) => setSelectedEmails(newValues)}
+                disabled={isInviting}
+                dropdownClassName="w-full min-w-[280px] shadow-xl rounded-2xl"
+              />
+            </div>
             <PillButton
               type="submit"
               variant="primary"
               startIcon={<Send size={15} />}
               loading={isInviting}
-              disabled={isInviting || !emailInput.trim()}
+              disabled={isInviting || selectedEmails.length === 0}
+              className="shrink-0"
             >
               {cd.sendInvite || "Gửi lời mời"}
+              {selectedEmails.length > 0 ? ` (${selectedEmails.length})` : ""}
             </PillButton>
           </form>
         </div>
