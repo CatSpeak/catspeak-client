@@ -136,6 +136,19 @@ export default {
   loading: "Loading...",
   search: "Search...",
   selected: "Selected",
+  inviteDropdown: {
+    loading: "Loading...",
+    noFriendsAvailable: "No friends available to select",
+    noTeachersAvailable: "No teachers available to select",
+    noUsersAvailable: "No users available to select",
+    selectFriends: "Select friends...",
+    selectTeachers: "Select teachers...",
+    selectUsers: "Select users...",
+    searchFriends: "Search friends...",
+    searchTeachers: "Search teachers...",
+    searchUsers: "Search...",
+    teacherBadge: "Teacher",
+  },
   pagination: {
     page: "Page",
     of: "of",
@@ -182,4 +195,4 @@ export default {
       body: "You can now switch to your Teacher account.",
     },
   },
-};
+}

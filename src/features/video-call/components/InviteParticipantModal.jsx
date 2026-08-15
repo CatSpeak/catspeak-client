@@ -1,101 +1,49 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Send, Check, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Send, X } from "lucide-react";
 import Modal from "@/shared/components/ui/Modal";
-import Dropdown from "@/shared/components/ui/Dropdown";
+import InvititeDropdown from "@/shared/components/ui/InvititeDropdown";
 import Avatar from "@/shared/components/ui/Avatar";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import toast from "react-hot-toast";
 import { useInviteToRoomMutation } from "@/store/api/roomsApi";
-import { useGetFriendsQuery } from "@/store/api/social/friendshipApi";
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider";
-import { parseMetadata } from "@/features/video-call/hooks/useParticipantList";
 
 const InviteParticipantModal = ({ open, onClose, roomId }) => {
   const { t } = useLanguage();
   const [selectedEmails, setSelectedEmails] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState({});
   const [inviteToRoom, { isLoading: isInviting }] = useInviteToRoomMutation();
 
-  // Get current user and active room participants from GlobalVideoCall context
-  const { participants = [], user, id: contextRoomId } = useGlobalVideoCall();
+  const { id: contextRoomId } = useGlobalVideoCall();
   const effectiveRoomId = roomId || contextRoomId;
-  const currentAccountId = user?.accountId;
-
-  // Fetch friends list of the current user
-  const { data: friendsResponse, isLoading: isFriendsLoading } =
-    useGetFriendsQuery(currentAccountId, {
-      skip: !currentAccountId || !open,
-    });
 
   // Reset selected state when modal closes
   useEffect(() => {
     if (!open) {
       setSelectedEmails([]);
+      setSelectedUsers({});
     }
   }, [open]);
 
-  // Normalize friends response array
-  const friendsList = useMemo(() => {
-    if (!friendsResponse) return [];
-    if (Array.isArray(friendsResponse)) return friendsResponse;
-    if (Array.isArray(friendsResponse.data)) return friendsResponse.data;
-    return [];
-  }, [friendsResponse]);
-
-  // Identify all active participants currently in the room (by accountId, email, username, identity)
-  const currentRoomMembers = useMemo(() => {
-    const accountIds = new Set();
-    const emails = new Set();
-    const usernames = new Set();
-
-    // Include the current logged-in user
-    if (user?.accountId) accountIds.add(String(user.accountId));
-    if (user?.email) emails.add(user.email.toLowerCase().trim());
-    if (user?.username) usernames.add(user.username.toLowerCase().trim());
-
-    // Include all active LiveKit participants
-    (participants || []).forEach((p) => {
-      if (p?.identity) accountIds.add(String(p.identity));
-      const meta = parseMetadata(p?.metadata);
-      if (meta?.accountId) accountIds.add(String(meta.accountId));
-      if (meta?.email) emails.add(String(meta.email).toLowerCase().trim());
-      if (meta?.username) usernames.add(String(meta.username).toLowerCase().trim());
-    });
-
-    return { accountIds, emails, usernames };
-  }, [participants, user]);
-
-  // Filter out friends who are ALREADY in the room
-  const availableFriends = useMemo(() => {
-    return friendsList.filter((friend) => {
-      if (!friend) return false;
-      const isIdInRoom =
-        friend.accountId !== undefined &&
-        friend.accountId !== null &&
-        currentRoomMembers.accountIds.has(String(friend.accountId));
-      const isEmailInRoom =
-        friend.email &&
-        currentRoomMembers.emails.has(friend.email.toLowerCase().trim());
-      const isUsernameInRoom =
-        friend.username &&
-        currentRoomMembers.usernames.has(friend.username.toLowerCase().trim());
-
-      return !isIdInRoom && !isEmailInRoom && !isUsernameInRoom;
-    });
-  }, [friendsList, currentRoomMembers]);
-
-  // Prepare Dropdown options with searchTerms, label, subtitle, and friend data
-  const dropdownOptions = useMemo(() => {
-    return availableFriends.map((friend) => ({
-      value: friend.email || String(friend.accountId),
-      label: friend.username || friend.email || "User",
-      subtitle: friend.email || "",
-      searchTerms: `${friend.username || ""} ${friend.email || ""}`,
-      friend,
-    }));
-  }, [availableFriends]);
-
   if (!open) return null;
+
+  const handleSelectChange = (newValues, newOptions) => {
+    setSelectedEmails(newValues);
+    if (newOptions && Array.isArray(newOptions)) {
+      const nextMap = { ...selectedUsers };
+      newOptions.forEach((opt) => {
+        if (opt?.value) {
+          nextMap[opt.value] = opt.user || opt.friend || opt;
+        }
+      });
+      setSelectedUsers(nextMap);
+    }
+  };
+
+  const handleRemoveSelected = (val) => {
+    setSelectedEmails((prev) => prev.filter((item) => item !== val));
+  };
 
   const handleInvite = async () => {
     if (selectedEmails.length === 0) {
@@ -126,6 +74,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
             : `Đã gửi lời mời cho ${successCount} người (${failedCount} thất bại)`
         );
         setSelectedEmails([]);
+        setSelectedUsers({});
         onClose();
       } else {
         const firstError = results.find((r) => r.status === "rejected")?.reason;
@@ -183,95 +132,40 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
             {t.rooms?.videoCall?.selectFriends || "Danh sách bạn bè"}
           </label>
 
-          <Dropdown
-            mode="multiple"
-            options={dropdownOptions}
+          <InvititeDropdown
+            mode="friends"
             value={selectedEmails}
-            onChange={(newValues) => setSelectedEmails(newValues)}
-            enableSearch={true}
-            loading={isFriendsLoading}
-            placeholder={
-              isFriendsLoading
-                ? t.common?.loading || "Đang tải danh sách bạn bè..."
-                : availableFriends.length === 0
-                ? "Không có bạn bè nào sẵn sàng để mời"
-                : "Chọn bạn bè..."
-            }
-            searchPlaceholder="Tìm kiếm theo tên hoặc email..."
-            disabled={isFriendsLoading || availableFriends.length === 0 || isInviting}
-            className="w-full"
-            dropdownClassName="w-full min-w-full shadow-xl rounded-2xl"
-            maxHeightClass="max-h-[280px]"
-            renderOption={(option, isSelected) => {
-              const friend = option.friend;
-              return (
-                <div
-                  className={`w-full px-3 py-2 flex items-center justify-between transition-colors rounded-xl text-left text-sm hover:bg-neutral-100 ${
-                    isSelected ? "bg-neutral-50" : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 overflow-hidden flex-1 min-w-0">
-                    <Avatar
-                      src={friend?.avatarImageUrl}
-                      name={friend?.username}
-                      size={32}
-                      clickable={false}
-                    />
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <span className="text-sm font-medium text-gray-900 truncate">
-                        {friend?.username}
-                      </span>
-                      {friend?.email && (
-                        <span className="text-xs text-gray-500 truncate">
-                          {friend.email}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center ml-2 shrink-0">
-                    <div
-                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
-                        isSelected
-                          ? "bg-[#990011] border-[#990011] text-white"
-                          : "border-gray-300 bg-white group-hover:border-gray-400"
-                      }`}
-                    >
-                      {isSelected && <Check size={12} strokeWidth={3} />}
-                    </div>
-                  </div>
-                </div>
-              );
-            }}
+            onChange={handleSelectChange}
+            disabled={isInviting}
           />
 
           {/* Selected Friends Tags */}
           {selectedEmails.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-1 max-h-[100px] overflow-y-auto">
               {selectedEmails.map((val) => {
-                const opt = dropdownOptions.find((o) => o.value === val);
-                const friend = opt?.friend;
+                const user = selectedUsers[val];
+                const displayName = user?.username || user?.name || val;
                 return (
                   <span
                     key={val}
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-[#990011] border border-red-100"
                   >
                     <Avatar
-                      src={friend?.avatarImageUrl}
-                      name={friend?.username || val}
+                      src={
+                        user?.avatarImageUrl ||
+                        user?.avatarUrl ||
+                        user?.meetingAvatarUrl
+                      }
+                      name={displayName}
                       size={16}
                       clickable={false}
                     />
                     <span className="max-w-[120px] truncate">
-                      {friend?.username || val}
+                      {displayName}
                     </span>
                     <button
                       type="button"
-                      onClick={() =>
-                        setSelectedEmails((prev) =>
-                          prev.filter((item) => item !== val)
-                        )
-                      }
+                      onClick={() => handleRemoveSelected(val)}
                       className="hover:text-red-900 transition-colors ml-0.5"
                     >
                       <X size={12} />
