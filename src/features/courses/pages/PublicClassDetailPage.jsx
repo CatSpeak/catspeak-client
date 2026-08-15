@@ -1,7 +1,7 @@
-import React, { useContext, useRef } from "react"
+import React, { useContext, useRef, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { Check } from "lucide-react"
+import { Check, AlertTriangle } from "lucide-react"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -34,6 +34,7 @@ const PublicClassDetailPage = () => {
   const { isAuthenticated } = useAuth()
   const authModalCtx = useContext(AuthModalContext)
   const enrollmentGuardRef = useRef(false)
+  const [conflictClasses, setConflictClasses] = useState(null)
 
   const isWorkspace = location.pathname.startsWith("/workspace")
 
@@ -70,7 +71,7 @@ const PublicClassDetailPage = () => {
   const tuitionValue = classData?.tuitionFee ?? classData?.price
 
   // Handle Enrollment Action
-  const handleEnrollAction = async () => {
+  const handleEnrollAction = async (confirmScheduleConflict = false) => {
     if (isEnrolled) {
       // Go to learning class view
       navigate(`/workspace/learning/class/${id}`)
@@ -79,6 +80,16 @@ const PublicClassDetailPage = () => {
 
     if (isUpcoming || enrollmentIssue === "upcoming") {
       toast.error(pc.upcomingNotice || getClassEnrollmentIssueMessage("upcoming", pc))
+      return
+    }
+
+    if (enrollmentIssue === "full") {
+      toast.error(pc.classFull || getClassEnrollmentIssueMessage("full", pc))
+      return
+    }
+
+    if (enrollmentIssue === "closed") {
+      toast.error(pc.enrollmentClosed || getClassEnrollmentIssueMessage("closed", pc))
       return
     }
 
@@ -103,7 +114,7 @@ const PublicClassDetailPage = () => {
 
     // Authenticated -> Enroll
     try {
-      const result = await enrollInCourse({ classId: id, courseId: classData?.courseId }).unwrap()
+      const result = await enrollInCourse({ classId: id, confirmScheduleConflict }).unwrap()
       const resultPayload = (
         result
         && typeof result === "object"
@@ -123,7 +134,17 @@ const PublicClassDetailPage = () => {
         refetch()
       }
     } catch (err) {
-      toast.error(err?.data?.message || "Đăng ký không thành công. Vui lòng thử lại sau.")
+      const status = err?.status ?? err?.originalStatus
+      const errorCode = err?.data?.errorCode || err?.data?.data?.errorCode
+      if (status === 409 || errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT") {
+        const message = err?.data?.message || err?.data?.data?.message || ""
+        const names = (message.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
+        setConflictClasses({
+          names: names ? names.split(", ").filter(Boolean) : [],
+        })
+        return
+      }
+      toast.error(err?.data?.message || err?.data?.data?.message || "Đăng ký không thành công. Vui lòng thử lại sau.")
     } finally {
       enrollmentGuardRef.current = false
     }
@@ -164,6 +185,7 @@ const PublicClassDetailPage = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 lg:pb-16">
       {/* Hero Section */}
       <PublicClassHero
@@ -172,6 +194,7 @@ const PublicClassDetailPage = () => {
         isEnrolled={isEnrolled}
         isEnrolling={isEnrolling}
         isUpcoming={isUpcoming}
+        enrollmentIssue={enrollmentIssue}
         onEnroll={handleEnrollAction}
         onBack={handleBack}
       />
@@ -241,34 +264,93 @@ const PublicClassDetailPage = () => {
           </span>
         </div>
 
-        {isEnrolled ? (
-          <button
-            type="button"
-            onClick={handleEnrollAction}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
-          >
-            <Check size={16} /> {c.enterClass || pc.enterClass || "Vào Lớp Học"}
-          </button>
-        ) : isUpcoming ? (
-          <button
-            type="button"
-            onClick={handleEnrollAction}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm cursor-pointer shadow-md"
-          >
-            {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleEnrollAction}
-            disabled={isEnrolling}
-            className="bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
-          >
-            {isEnrolling ? (pc.processing || "Đang xử lý...") : (c.enrollNow || pc.enrollNow || "Đăng Ký Ngay")}
-          </button>
-        )}
+          {isEnrolled ? (
+            <button
+              type="button"
+              onClick={handleEnrollAction}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
+            >
+              <Check size={16} /> {c.enterClass || pc.enterClass || "Vào Lớp Học"}
+            </button>
+          ) : isUpcoming ? (
+            <button
+              type="button"
+              onClick={handleEnrollAction}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm cursor-pointer shadow-md"
+            >
+              {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
+            </button>
+          ) : enrollmentIssue === "full" ? (
+            <button
+              type="button"
+              disabled
+              className="bg-gray-100 text-gray-400 font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm cursor-not-allowed"
+            >
+              {pc.classFull || "Đã đủ học viên"}
+            </button>
+          ) : enrollmentIssue === "closed" ? (
+            <button
+              type="button"
+              disabled
+              className="bg-gray-100 text-gray-400 font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm cursor-not-allowed"
+            >
+              {pc.enrollmentClosed || "Đã đóng đăng ký"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleEnrollAction}
+              disabled={isEnrolling}
+              className="bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
+            >
+              {isEnrolling ? (pc.processing || "Đang xử lý...") : (c.enrollNow || pc.enrollNow || "Đăng Ký Ngay")}
+            </button>
+          )}
       </div>
     </div>
+
+      {conflictClasses && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div role="alertdialog" aria-modal="true" className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle size={22} className="text-amber-500 shrink-0" />
+              <h2 className="text-lg font-black text-gray-950">{pc.scheduleConflictTitle || "Lịch học bị trùng"}</h2>
+            </div>
+            <p className="text-sm text-gray-600 font-medium leading-relaxed">
+              {pc.scheduleConflictDesc || "Lịch học của lớp này trùng với lớp bạn đang học:"}
+            </p>
+            {(conflictClasses.names || []).length > 0 && (
+              <ul className="flex flex-col gap-1.5">
+                {conflictClasses.names.map((name) => (
+                  <li key={name} className="text-sm font-bold text-[#b20a1c] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConflictClasses(null)}
+                className="h-10 px-4 rounded-full border border-border text-gray-700 text-sm font-black hover:bg-gray-50"
+              >
+                {pc.cancel || "Hủy"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConflictClasses(null)
+                  handleEnrollAction(true)
+                }}
+                className="h-10 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-black"
+              >
+                {pc.confirmEnroll || "Vẫn đăng ký"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

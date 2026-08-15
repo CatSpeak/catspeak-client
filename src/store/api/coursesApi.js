@@ -691,6 +691,11 @@ export const coursesApi = baseApi.injectEndpoints({
                   ? "class"
                   : String(params.type).toLowerCase()
               : undefined,
+          enrollmentStatus:
+            params?.enrollmentStatus &&
+            params.enrollmentStatus !== "all"
+              ? String(params.enrollmentStatus).toLowerCase()
+              : undefined,
         },
         extraOptions: { skipAuthHeader: true },
       }),
@@ -931,7 +936,7 @@ export const coursesApi = baseApi.injectEndpoints({
     }),
 
     enrollInCourse: builder.mutation({
-      async queryFn({ classId }, _queryApi, _extraOptions, baseQuery) {
+      async queryFn({ classId, confirmScheduleConflict }, _queryApi, _extraOptions, baseQuery) {
         const numericClassId = Number(classId)
 
         if (!Number.isSafeInteger(numericClassId) || numericClassId <= 0) {
@@ -950,6 +955,7 @@ export const coursesApi = baseApi.injectEndpoints({
             paymentType: "ClassEnrollment",
             classId: numericClassId,
             pendingClassData: "",
+            confirmScheduleConflict: confirmScheduleConflict === true,
             returnUrl:
               window.location.origin +
               `/workspace/learning/class/${encodePathSegment(numericClassId)}`,

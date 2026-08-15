@@ -1,22 +1,28 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useContext } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   useGetStudentCourseDetailQuery,
-  useGetExploreCourseDetailQuery
+  useGetExploreCourseDetailQuery,
+  useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
+import { useCreatePrivateConversationMutation } from "@/store/api/social/conversationsApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useAuth } from "@/features/auth"
+import AuthModalContext from "@/shared/context/AuthModalContext"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
   formatCurrencyVND,
   getSafeMediaUrl,
   defaultCourseThumbnail,
+  getClassEnrollmentIssue,
 } from "../utils/courseUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap, Share2, Check } from "lucide-react"
+import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap, Share2, Check, AlertTriangle } from "lucide-react"
 import useRoleOverride from "../components/RoleSwitcher"
 
 const StudentCourseDetailPage = () => {
@@ -27,7 +33,10 @@ const StudentCourseDetailPage = () => {
   const { formatDateMonth, formatScheduleTime, formatScheduleDays } = useTimezone()
   const c = t.courses || {}
   const scd = c.studentCourseDetail || {}
+  const sc = c.student || {}
   const ui = c.workspaceUi || {}
+  const { isAuthenticated } = useAuth()
+  const authModalCtx = useContext(AuthModalContext)
 
   const isExploreRoute = window.location.pathname.includes("/explore-courses")
   const isWorkspace = window.location.pathname.startsWith("/workspace")
@@ -49,6 +58,11 @@ const StudentCourseDetailPage = () => {
   // State
   const [expandedClassIds, setExpandedClassIds] = useState({})
   const [linkCopied, setLinkCopied] = useState(false)
+  const [conflictClasses, setConflictClasses] = useState(null)
+  const [enrollingClassId, setEnrollingClassId] = useState(null)
+
+  const [enrollInCourse] = useEnrollInCourseMutation()
+  const [createPrivateConversation] = useCreatePrivateConversationMutation()
 
   const handleCopyLink = async () => {
     const shareUrl = `${window.location.origin}/explore-courses/details/${id}`
@@ -61,6 +75,71 @@ const StudentCourseDetailPage = () => {
       setLinkCopied(true)
       setTimeout(() => setLinkCopied(false), 2000)
     }
+  }
+
+  const doEnroll = async (classId, courseId, confirmScheduleConflict = false) => {
+    setEnrollingClassId(classId)
+    try {
+      const result = await enrollInCourse({ classId, confirmScheduleConflict }).unwrap()
+      const resultPayload = (
+        result
+        && typeof result === "object"
+        && !Array.isArray(result)
+        && Object.prototype.hasOwnProperty.call(result, "data")
+      )
+        ? result.data
+        : result
+
+      if (resultPayload?.checkoutUrl) {
+        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
+        if (!checkoutUrl) throw new Error("Invalid checkout URL")
+        toast.success(sc.enrollRedirecting || "Đang chuyển hướng đến trang thanh toán...")
+        window.location.assign(checkoutUrl)
+      } else {
+        toast.success(sc.enrollSuccess || "Đăng ký lớp học thành công!")
+        refetch()
+      }
+    } catch (err) {
+      const status = err?.status ?? err?.originalStatus
+      const errorCode = err?.data?.errorCode || err?.data?.data?.errorCode
+      if (status === 409 || errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT") {
+        const message = err?.data?.message || err?.data?.data?.message || ""
+        const names = (message.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
+        setConflictClasses({
+          classId,
+          courseId,
+          names: names ? names.split(", ").filter(Boolean) : [],
+        })
+        return
+      }
+      toast.error(err?.data?.message || err?.data?.data?.message || sc.enrollError || "Đăng ký không thành công. Vui lòng thử lại sau.")
+    } finally {
+      setEnrollingClassId(null)
+    }
+  }
+
+  const handleClassRegister = (cls) => {
+    if (isAuthenticated) {
+      doEnroll(cls.id, cls.courseId || courseDetail?.id)
+    } else if (authModalCtx?.openAuthModal) {
+      authModalCtx.openAuthModal("login", window.location.pathname)
+    } else {
+      toast.error(sc.loginToEnroll || "Vui lòng đăng nhập để đăng ký lớp học.")
+    }
+  }
+
+  const getClassButton = (cls) => {
+    if (cls.enrolledInCourse) {
+      return { key: "in_course", label: sc.alreadyEnrolledInCourse || "Đã đăng ký khóa này", disabled: true }
+    }
+
+    const issue = getClassEnrollmentIssue({ classData: cls })
+    if (issue === "full") return { key: "full", label: sc.classFull || "Đã đủ học viên", disabled: true }
+    if (issue === "closed") return { key: "closed", label: sc.enrollmentClosed || "Đã đóng đăng ký", disabled: true }
+    if (issue === "upcoming") return { key: "upcoming", label: sc.upcomingStatus || "Chưa mở đăng ký", disabled: true }
+    if (issue === "unavailable") return { key: "unavailable", label: sc.enrollmentUnavailable || "Chưa mở đăng ký", disabled: true }
+
+    return { key: "open", label: sc.register || "Đăng ký", disabled: false }
   }
 
   const isRecord = (value) => (
@@ -258,6 +337,7 @@ const StudentCourseDetailPage = () => {
                 {classes.map((cls) => {
                   const isClassEnrolled = Boolean(cls.isEnrolled)
                   const isExpanded = !!expandedClassIds[cls.id]
+                  const classButton = getClassButton(cls)
                   const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
                   const remainingSlots = cls.remainingSlots != null
@@ -379,6 +459,25 @@ const StudentCourseDetailPage = () => {
                                 className="h-8 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-black rounded-full transition-all active:scale-95 shadow-2xs"
                               >
                                 {c.student?.goToWorkspace || "Go to Workspace →"}
+                              </button>
+                            )}
+
+                            {!isClassEnrolled && (
+                              <button
+                                type="button"
+                                disabled={classButton.disabled || enrollingClassId === cls.id}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleClassRegister(cls)
+                                }}
+                                className={`h-8 px-4 text-sm font-black rounded-full transition-all shadow-2xs ${classButton.key === "open"
+                                  ? "bg-[#b20a1c] hover:bg-[#960817] text-white active:scale-95 cursor-pointer"
+                                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                  }`}
+                              >
+                                {enrollingClassId === cls.id
+                                  ? (sc.processing || "Đang xử lý...")
+                                  : classButton.label}
                               </button>
                             )}
 
@@ -554,17 +653,79 @@ const StudentCourseDetailPage = () => {
 
               <button
                 type="button"
-                disabled
-                title={scd.contactUnavailable || "Contact is not available yet."}
-                className="flex-1 h-10 border border-border text-gray-400 text-sm font-black rounded-full flex items-center justify-center gap-1.5 shadow-2xs cursor-not-allowed"
+                onClick={async () => {
+                  if (!isAuthenticated) {
+                    if (authModalCtx?.openAuthModal) {
+                      authModalCtx.openAuthModal("login", window.location.pathname)
+                    }
+                    return
+                  }
+                  const teacherId = teacher.accountId || teacher.id
+                  if (!teacherId) return
+                  try {
+                    const conversation = await createPrivateConversation(teacherId).unwrap()
+                    const convId = conversation?.id ?? conversation?.conversationId ?? conversation?.data?.id
+                    if (convId) {
+                      navigate(`/chat/${encodeURIComponent(String(convId))}`)
+                    } else {
+                      toast.error(scd.chatOpenFailed || "Không thể mở hộp thoại.")
+                    }
+                  } catch {
+                    toast.error(scd.chatOpenFailed || "Không thể mở hộp thoại.")
+                  }
+                }}
+                disabled={!teacher.accountId && !teacher.id}
+                className="flex-1 h-10 border border-border hover:bg-gray-50 text-gray-800 text-sm font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs"
               >
                 <Mail size={14} />
-                <span>{c.student?.contactInstructor || "Contact Instructor"}</span>
+                <span>{c.student?.contactInstructor || "Nhắn tin"}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
+      {conflictClasses && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div role="alertdialog" aria-modal="true" className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle size={22} className="text-amber-500 shrink-0" />
+              <h2 className="text-lg font-black text-gray-950">{scd.scheduleConflictTitle || "Lịch học bị trùng"}</h2>
+            </div>
+            <p className="text-sm text-gray-600 font-medium leading-relaxed">
+              {scd.scheduleConflictDesc || "Lịch học của lớp này trùng với lớp bạn đang học:"}
+            </p>
+            {(conflictClasses.names || []).length > 0 && (
+              <ul className="flex flex-col gap-1.5">
+                {conflictClasses.names.map((name) => (
+                  <li key={name} className="text-sm font-bold text-[#b20a1c] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConflictClasses(null)}
+                className="h-10 px-4 rounded-full border border-border text-gray-700 text-sm font-black hover:bg-gray-50"
+              >
+                {scd.cancel || "Hủy"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = conflictClasses
+                  setConflictClasses(null)
+                  doEnroll(target.classId, target.courseId, true)
+                }}
+                className="h-10 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-black"
+              >
+                {scd.confirmEnroll || "Vẫn đăng ký"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
