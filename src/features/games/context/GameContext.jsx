@@ -18,6 +18,26 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 
 const GameContext = createContext();
 
+export const isObserverParticipant = (participant) => {
+  if (!participant) return false;
+  if (participant.metadata) {
+    try {
+      const meta = JSON.parse(participant.metadata);
+      if (
+        meta.isObserver === true ||
+        meta.role === "Observer" ||
+        meta.role === "spectator" ||
+        meta.isSpectator === true
+      ) {
+        return true;
+      }
+    } catch {
+      // Ignore parse error
+    }
+  }
+  return false;
+};
+
 const initialPictureItState = {
   describerId: null,
   describerOrder: [],
