@@ -71,7 +71,9 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
         accountIds: idsToSend,
       }).unwrap()
 
-      const results = res?.data?.results || []
+      const results =
+        res?.results || res?.data?.results || (Array.isArray(res) ? res : [])
+
       const invitedCount = results.filter((r) => r.status === "invited").length
       const alreadyInRoomCount = results.filter(
         (r) => r.status === "already_in_room",
@@ -85,8 +87,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
           const details = []
           if (alreadyInRoomCount > 0)
             details.push(`${alreadyInRoomCount} đã ở trong phòng`)
-          if (notFoundCount > 0)
-            details.push(`${notFoundCount} không tìm thấy`)
+          if (notFoundCount > 0) details.push(`${notFoundCount} không tìm thấy`)
           toast.success(
             `Đã gửi lời mời cho ${invitedCount} người (${details.join(", ")})`,
           )
@@ -161,7 +162,8 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
             <div className="flex flex-wrap gap-1.5 pt-1 max-h-[100px] overflow-y-auto">
               {selectedAccountIds.map((val) => {
                 const user = selectedUsers[val]
-                const displayName = user?.username || user?.name || `User #${val}`
+                const displayName =
+                  user?.username || user?.name || `User #${val}`
                 return (
                   <span
                     key={val}

@@ -1,6 +1,14 @@
 import React, { useState, useMemo } from "react"
 import { useSelector } from "react-redux"
-import { UserPlus, Search, Mail, Send, CheckCircle2, UserCheck, Users } from "lucide-react"
+import {
+  UserPlus,
+  Search,
+  Mail,
+  Send,
+  CheckCircle2,
+  UserCheck,
+  Users,
+} from "lucide-react"
 import toast from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { selectCurrentUser } from "@/store/slices/authSlice"
@@ -21,11 +29,10 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
 
   const classId = classData?.id || classData?.classId
   const existingMembers = useMemo(() => {
-    const list = [
-      classData?.students,
-      classData?.members,
-      classData?.enrollments,
-    ].find(Array.isArray) || []
+    const list =
+      [classData?.students, classData?.members, classData?.enrollments].find(
+        Array.isArray,
+      ) || []
     return new Set(
       list.map((m) => String(m.id || m.accountId || m.studentId || m.userId)),
     )
@@ -79,7 +86,8 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
         accountIds: [Number(friendId)],
       }).unwrap()
 
-      const results = res?.data?.results || []
+      const results =
+        res?.results || res?.data?.results || (Array.isArray(res) ? res : [])
       const itemRes = results.find(
         (r) => Number(r.accountId) === Number(friendId),
       )
@@ -101,9 +109,7 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
         toast.error("Không tìm thấy tài khoản học viên.")
       } else {
         setInvitedMap((prev) => ({ ...prev, [friendId]: true }))
-        toast.success(
-          t.courses?.inviteSuccess || "Đã gửi lời mời thành công",
-        )
+        toast.success(t.courses?.inviteSuccess || "Đã gửi lời mời thành công")
       }
     } catch (err) {
       toast.error(
@@ -167,8 +173,7 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
           const details = []
           if (alreadyEnrolledCount > 0)
             details.push(`${alreadyEnrolledCount} đã vào lớp`)
-          if (notFoundCount > 0)
-            details.push(`${notFoundCount} không tìm thấy`)
+          if (notFoundCount > 0) details.push(`${notFoundCount} không tìm thấy`)
           if (isTeacherCount > 0)
             details.push(`${isTeacherCount} là giảng viên`)
           toast.success(
@@ -257,7 +262,8 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
                 <span>{cd.inviteFriendsList || "Danh sách bạn bè"}</span>
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                {cd.inviteFriendsListDesc || "Chọn từ danh sách bạn bè để mời tham gia lớp học."}
+                {cd.inviteFriendsListDesc ||
+                  "Chọn từ danh sách bạn bè để mời tham gia lớp học."}
               </p>
             </div>
 
@@ -300,7 +306,11 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
                     <div className="flex items-center gap-3 min-w-0">
                       <Avatar
                         size={40}
-                        src={friend.avatarImageUrl || friend.avatarUrl || friend.avatar}
+                        src={
+                          friend.avatarImageUrl ||
+                          friend.avatarUrl ||
+                          friend.avatar
+                        }
                         name={name}
                         accountId={friendId}
                       />
