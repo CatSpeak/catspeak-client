@@ -234,6 +234,8 @@ const GameSidebar = ({
 
   const isPictureIt = gameType === "picture_it" || gameType === "picture-it"
 
+  const allPlayerIds = new Set()
+
   const addIfNotObserver = (id) => {
     if (id == null) return
     const idStr = id.toString()
