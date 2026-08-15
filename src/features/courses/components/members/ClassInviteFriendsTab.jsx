@@ -32,7 +32,7 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
   }, [classData])
 
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedEmails, setSelectedEmails] = useState([])
+  const [selectedAccountIds, setSelectedAccountIds] = useState([])
   const [invitedMap, setInvitedMap] = useState({})
 
   const { data: friendsResponse, isLoading: isLoadingFriends } =
@@ -65,30 +65,52 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
   }, [friendsList, searchQuery])
 
   const handleInviteFriend = async (friend) => {
-    const email = friend.email
     const friendId = friend.accountId || friend.id
     if (!classId) return
 
-    if (!email) {
-      toast.error(
-        t.courses?.inviteNoEmail ||
-          "Không tìm thấy email của bạn bè này để gửi lời mời.",
-      )
+    if (!friendId) {
+      toast.error("Không tìm thấy thông tin tài khoản để gửi lời mời.")
       return
     }
 
     try {
-      await inviteToClass({
+      const res = await inviteToClass({
         classId,
-        emails: [email],
+        accountIds: [Number(friendId)],
       }).unwrap()
 
-      setInvitedMap((prev) => ({ ...prev, [friendId]: true }))
-      toast.success(
-        t.courses?.inviteSuccess || `Đã gửi lời mời đến ${friend.nickname || friend.username || email}`,
+      const results = res?.data?.results || []
+      const itemRes = results.find(
+        (r) => Number(r.accountId) === Number(friendId),
       )
+      const status = itemRes?.status || "invited"
+
+      if (status === "invited") {
+        setInvitedMap((prev) => ({ ...prev, [friendId]: true }))
+        toast.success(
+          t.courses?.inviteSuccess ||
+            `Đã gửi lời mời đến ${
+              friend.nickname || friend.username || friend.name || "bạn bè"
+            }`,
+        )
+      } else if (status === "already_enrolled") {
+        toast.error("Học viên này đã ghi danh vào lớp học.")
+      } else if (status === "is_teacher") {
+        toast.error("Đây là tài khoản của giảng viên lớp học.")
+      } else if (status === "not_found") {
+        toast.error("Không tìm thấy tài khoản học viên.")
+      } else {
+        setInvitedMap((prev) => ({ ...prev, [friendId]: true }))
+        toast.success(
+          t.courses?.inviteSuccess || "Đã gửi lời mời thành công",
+        )
+      }
     } catch (err) {
-      toast.error(t.courses?.inviteError || "Có lỗi xảy ra khi gửi lời mời.")
+      toast.error(
+        err?.data?.message ||
+          t.courses?.inviteError ||
+          "Có lỗi xảy ra khi gửi lời mời.",
+      )
       console.error(err)
     }
   }
@@ -96,25 +118,74 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
   const handleInviteSelected = async (e) => {
     e?.preventDefault?.()
     if (!classId) return
-    const emailsToSend = (
-      Array.isArray(selectedEmails) ? selectedEmails : [selectedEmails]
-    ).filter(Boolean)
+    const idsToSend = (
+      Array.isArray(selectedAccountIds)
+        ? selectedAccountIds
+        : [selectedAccountIds]
+    )
+      .map(Number)
+      .filter((id) => !isNaN(id) && id > 0)
 
-    if (emailsToSend.length === 0) {
+    if (idsToSend.length === 0) {
       toast.error("Vui lòng chọn ít nhất một người dùng để gửi lời mời.")
       return
     }
 
     try {
-      await inviteToClass({
+      const res = await inviteToClass({
         classId,
-        emails: emailsToSend,
+        accountIds: idsToSend,
       }).unwrap()
 
-      setSelectedEmails([])
-      toast.success(
-        t.courses?.inviteSuccess || `Đã gửi lời mời thành công!`,
-      )
+      const results = res?.data?.results || []
+      const invitedCount = results.filter((r) => r.status === "invited").length
+      const alreadyEnrolledCount = results.filter(
+        (r) => r.status === "already_enrolled",
+      ).length
+      const notFoundCount = results.filter(
+        (r) => r.status === "not_found",
+      ).length
+      const isTeacherCount = results.filter(
+        (r) => r.status === "is_teacher",
+      ).length
+
+      const newInvited = {}
+      results.forEach((r) => {
+        if (r.status === "invited") {
+          newInvited[r.accountId] = true
+        }
+      })
+      setInvitedMap((prev) => ({ ...prev, ...newInvited }))
+      setSelectedAccountIds([])
+
+      if (invitedCount > 0) {
+        if (
+          alreadyEnrolledCount > 0 ||
+          notFoundCount > 0 ||
+          isTeacherCount > 0
+        ) {
+          const details = []
+          if (alreadyEnrolledCount > 0)
+            details.push(`${alreadyEnrolledCount} đã vào lớp`)
+          if (notFoundCount > 0)
+            details.push(`${notFoundCount} không tìm thấy`)
+          if (isTeacherCount > 0)
+            details.push(`${isTeacherCount} là giảng viên`)
+          toast.success(
+            `Đã gửi lời mời cho ${invitedCount} người (${details.join(", ")})`,
+          )
+        } else {
+          toast.success(
+            t.courses?.inviteSuccess || "Đã gửi lời mời thành công!",
+          )
+        }
+      } else if (alreadyEnrolledCount > 0) {
+        toast.error("Học viên đã chọn đều đã ghi danh vào lớp học.")
+      } else if (isTeacherCount > 0) {
+        toast.error("Không thể mời giảng viên của lớp.")
+      } else {
+        toast.error(res?.message || "Không thể gửi lời mời.")
+      }
     } catch (err) {
       toast.error(
         err?.data?.message ||
@@ -127,17 +198,22 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* ─── EMAIL INVITATION SECTION ─── */}
+      {/* ─── DIRECT INVITATION SECTION ─── */}
       <FluentCard className="p-6">
         <div className="flex flex-col gap-4">
           <div>
             <h3 className="text-base font-extrabold text-gray-900 flex items-center gap-2">
-              <Mail size={18} className="text-[#990011]" />
-              <span>{cd.inviteByEmail || "Mời bằng địa chỉ Email"}</span>
+              <UserPlus size={18} className="text-[#990011]" />
+              <span>
+                {cd.inviteDirect ||
+                  cd.inviteByEmail ||
+                  "Mời học viên / người dùng"}
+              </span>
             </h3>
             <p className="text-xs text-gray-500 mt-1">
-              {cd.inviteByEmailDesc ||
-                "Gửi lời mời trực tiếp đến học viên hoặc người quen qua email."}
+              {cd.inviteDirectDesc ||
+                cd.inviteByEmailDesc ||
+                "Tìm kiếm và gửi lời mời tham gia lớp học đến học viên hoặc người dùng."}
             </p>
           </div>
 
@@ -148,8 +224,8 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
             <div className="flex-1">
               <InvititeDropdown
                 mode="all"
-                value={selectedEmails}
-                onChange={(newValues) => setSelectedEmails(newValues)}
+                value={selectedAccountIds}
+                onChange={(newValues) => setSelectedAccountIds(newValues)}
                 disabled={isInviting}
                 dropdownClassName="w-full min-w-[280px] shadow-xl rounded-2xl"
               />
@@ -159,11 +235,13 @@ const ClassInviteFriendsTab = ({ classData, cd = {} }) => {
               variant="primary"
               startIcon={<Send size={15} />}
               loading={isInviting}
-              disabled={isInviting || selectedEmails.length === 0}
+              disabled={isInviting || selectedAccountIds.length === 0}
               className="shrink-0"
             >
               {cd.sendInvite || "Gửi lời mời"}
-              {selectedEmails.length > 0 ? ` (${selectedEmails.length})` : ""}
+              {selectedAccountIds.length > 0
+                ? ` (${selectedAccountIds.length})`
+                : ""}
             </PillButton>
           </form>
         </div>

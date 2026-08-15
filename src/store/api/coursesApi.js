@@ -1229,15 +1229,15 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // 14. Invite to Class
     inviteToClass: builder.mutation({
-      query: ({ classId, emails, email }) => {
-        const resolvedEmails = Array.isArray(emails)
-          ? emails
-          : (email ? [email] : (emails ? [emails] : []))
+      query: ({ classId, accountIds, accountId }) => {
+        const resolvedAccountIds = Array.isArray(accountIds)
+          ? accountIds.map(Number).filter((id) => !isNaN(id) && id > 0)
+          : (accountId != null ? [Number(accountId)] : (accountIds != null ? [Number(accountIds)] : []))
         return {
           url: `/teacher/classes/${encodePathSegment(classId)}/invite`,
           method: "POST",
           body: {
-            emails: resolvedEmails,
+            accountIds: resolvedAccountIds,
           },
         }
       },

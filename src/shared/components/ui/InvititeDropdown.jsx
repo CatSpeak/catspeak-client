@@ -93,14 +93,16 @@ const InvititeDropdown = ({
 
     return list.map((item) => {
       const userObj = item.friend || item.user || item
+      const rawId =
+        userObj.accountId ??
+        userObj.id ??
+        userObj.userId ??
+        item.accountId ??
+        item.id
+      const accountId = rawId != null ? Number(rawId) : undefined
       return {
         ...userObj,
-        accountId:
-          userObj.accountId ??
-          userObj.id ??
-          userObj.userId ??
-          item.accountId ??
-          item.id,
+        accountId,
         username: userObj.username || userObj.name || userObj.nickname,
         email: userObj.email,
         avatarImageUrl:
@@ -120,11 +122,31 @@ const InvititeDropdown = ({
         ? recResponse
         : []
 
-    if (activeMode === "teachers" || activeMode === "teacher") {
-      return raw.filter(isUserTeacher).slice(0, 5)
-    }
+    const list =
+      activeMode === "teachers" || activeMode === "teacher"
+        ? raw.filter(isUserTeacher).slice(0, 5)
+        : raw.slice(0, 5)
 
-    return raw.slice(0, 5)
+    return list.map((item) => {
+      const userObj = item.user || item.friend || item
+      const rawId =
+        userObj.accountId ??
+        userObj.id ??
+        userObj.userId ??
+        item.accountId ??
+        item.id
+      const accountId = rawId != null ? Number(rawId) : undefined
+      return {
+        ...userObj,
+        accountId,
+        username: userObj.username || userObj.name || userObj.nickname,
+        email: userObj.email,
+        avatarImageUrl:
+          userObj.avatarImageUrl ||
+          userObj.avatarUrl ||
+          userObj.meetingAvatarUrl,
+      }
+    })
   }, [recResponse, activeMode, isRecMode])
 
   const teacherLabel =
@@ -137,21 +159,46 @@ const InvititeDropdown = ({
     const sourceList =
       activeMode === "friends" ? friendsList : recommendationsList
 
-    return sourceList.map((user) => {
-      const isTeacher = isUserTeacher(user)
-      const displayName = user.username || user.name || user.email || "User"
-      const email = user.email || ""
+    return sourceList
+      .filter((user) => user && user.accountId != null)
+      .map((user) => {
+        const isTeacher = isUserTeacher(user)
+        const accountId = Number(user.accountId)
+        const displayName =
+          user.username ||
+          user.name ||
+          (user.email ? user.email.split("@")[0] : `User #${accountId}`)
+        const email = user.email || ""
 
-      return {
-        value: email || String(user.accountId),
-        label: displayName,
-        subtitle: email || (isTeacher ? teacherLabel : ""),
-        searchTerms: `${displayName} ${email} ${user.roleName || ""}`,
-        user,
-        friend: user, // compatibility with older code expecting friend object
-      }
-    })
+        return {
+          value: accountId,
+          label: displayName,
+          subtitle: email || (isTeacher ? teacherLabel : ""),
+          searchTerms: `${displayName} ${email} ${user.roleName || ""} ${accountId}`,
+          user: { ...user, accountId },
+          friend: { ...user, accountId }, // compatibility with older code expecting friend object
+        }
+      })
   }, [activeMode, friendsList, recommendationsList, teacherLabel])
+
+  // Normalize value prop to numbers if applicable
+  const normalizedValue = useMemo(() => {
+    if (value === undefined || value === null) return value
+    if (Array.isArray(value)) {
+      return value
+        .map((v) =>
+          typeof v === "object"
+            ? Number(v?.accountId ?? v?.id ?? v?.value)
+            : Number(v),
+        )
+        .filter((v) => !isNaN(v))
+    }
+    return typeof value === "object"
+      ? Number(value?.accountId ?? value?.id ?? value?.value)
+      : isNaN(Number(value))
+        ? value
+        : Number(value)
+  }, [value])
 
   const isLoading =
     activeMode === "friends" ? isFriendsLoading : isRecLoading || isRecFetching
@@ -187,14 +234,7 @@ const InvititeDropdown = ({
     if (activeMode === "teachers" || activeMode === "teacher")
       return t?.inviteDropdown.selectTeachers || "Chọn giảng viên..."
     return t?.inviteDropdown.selectUsers || "Chọn người dùng..."
-  }, [
-    placeholder,
-    isLoading,
-    dropdownOptions.length,
-    activeMode,
-    t?.inviteDropdown,
-    t,
-  ])
+  }, [placeholder, isLoading, dropdownOptions.length, activeMode, t])
 
   const resolvedSearchPlaceholder = useMemo(() => {
     if (searchPlaceholder) return searchPlaceholder
@@ -209,7 +249,7 @@ const InvititeDropdown = ({
         "Tìm kiếm bạn bè theo tên hoặc email..."
       )
     return t?.inviteDropdown.searchUsers || "Tìm kiếm theo tên hoặc email..."
-  }, [searchPlaceholder, activeMode, t?.inviteDropdown])
+  }, [searchPlaceholder, activeMode, t])
 
   // Default render option for rich user display
   const defaultRenderOption = (option, isSelected) => {
@@ -272,7 +312,7 @@ const InvititeDropdown = ({
     <Dropdown
       mode={dropdownMode}
       options={dropdownOptions}
-      value={value}
+      value={normalizedValue}
       onChange={onChange}
       enableSearch={true}
       handleSearch={isRecMode ? (query) => setSearchKeyword(query) : undefined}
