@@ -1,9 +1,11 @@
 import React, { useState, useRef } from "react"
-import { AnimatePresence , motion} from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, UK } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+
 /**
  * UI languages. Standard Vietnamese (`vi`) is fully enabled.
  * Nôm Vietnamese is not listed here — when you add it for development, use e.g.
@@ -39,24 +41,23 @@ const LanguageSwitcher = ({ className = "" }) => {
       className={`relative flex items-center justify-center ${className}`}
       ref={dropdownRef}
     >
-      <motion.button
+      <IconButton
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={displayLabel}
         title={displayLabel}
         onClick={handleToggle}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="inline-flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-transparent p-0 transition-colors hover:ring-4 hover:ring-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-800/40"
+        variant="transparent"
+        innerClassName="overflow-hidden rounded-full"
       >
         <img
           src={current.flag}
           alt=""
-          className="pointer-events-none block h-full w-full object-cover"
+          className="pointer-events-none block h-full w-full object-cover rounded-full"
           draggable={false}
         />
-      </motion.button>
+      </IconButton>
 
       <AnimatePresence>
         {open && (

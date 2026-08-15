@@ -5,12 +5,14 @@ import {
   VerifyEmailOtpPopup,
 } from "@/features/auth";
 import HeroSection from "@/features/landing/components/HeroSection";
-import LanguageBar from "@/features/landing/components/LanguageBar";
+import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection";
+import NewsSection from "@/features/landing/components/NewsSection";
+import ExploreEcosystemSection from "@/features/landing/components/ExploreEcosystemSection";
+import PartnerSection from "@/features/landing/components/PartnerSection";
+import ResponseSection from "@/features/landing/components/ResponseSection";
 import ValuesSection from "@/features/landing/components/ValuesSection";
 import AISection from "@/features/landing/components/AISection";
 import FAQSection from "@/features/landing/components/FAQSection";
-import ResponseSection from "@/features/landing/components/ResponseSection";
-import PartnerSection from "@/features/landing/components/PartnerSection";
 
 const LandingPage = () => {
   const [authModal, setAuthModal] = useState({
@@ -71,28 +73,34 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-screen-xl mx-auto">
-      <div className="relative w-full pt-4 mb-24">
-        {/* Main Hero Section */}
+    <div className="flex flex-col w-full max-w-screen-xl mx-auto overflow-hidden">
+      {/* 1. Hero + Numbers */}
+      <div className="relative w-full pt-4 mb-8 lg:mb-12">
         <HeroSection openAuthModal={openAuthModal} />
-
-        {/* Languages row that overlaps hero bottom - Absolute positioned outside */}
-        {/* <LanguageBar /> */}
       </div>
 
-      {/* Values Section - Hero1 */}
-      <ValuesSection />
+      {/* 2. Leading Team */}
+      <LeadingTeamSection />
 
-      {/* AI Technology Section */}
-      <AISection />
+      {/* 3. News */}
+      <NewsSection />
 
-      {/* Response / Testimonials Section */}
-      <ResponseSection />
+      {/* 4. Explore Ecosystem */}
+      <ExploreEcosystemSection />
 
-      {/* Partners Section */}
+      {/* 5. Partner */}
       <PartnerSection />
 
-      {/* FAQ Section */}
+      {/* 6. Response (Testimonials) */}
+      <ResponseSection />
+
+      {/* 7. Values */}
+      <ValuesSection />
+
+      {/* 8. AI Section */}
+      <AISection />
+
+      {/* 9. FAQ */}
       <FAQSection />
 
       {/* Auth Modal */}

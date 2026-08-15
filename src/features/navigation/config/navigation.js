@@ -89,7 +89,11 @@ export const navSections = [
 ]
 
 export const navLinks = [
-  { key: "community", path: "/community", hasDropdown: true, icon: Home },
+  {
+    key: "community",
+    path: "/community",
+    icon: Home,
+  },
   {
     key: "catSpeak",
     hasDropdown: true,
