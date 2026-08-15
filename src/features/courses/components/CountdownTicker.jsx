@@ -23,20 +23,31 @@ const CountdownTicker = ({ targetDate }) => {
       const remainingMs = countdownTargetMs - currentTime
       if (remainingMs <= 0) return
 
-      const millisecondsUntilMinuteChanges = remainingMs % 60000
+      const millisecondsUntilMinuteChanges = (remainingMs % 60000) || 60000
       timer = setTimeout(
         updateCountdown,
-        millisecondsUntilMinuteChanges > 0 ? millisecondsUntilMinuteChanges + 10 : 10
+        millisecondsUntilMinuteChanges + 50
       )
     }
 
     timer = setTimeout(updateCountdown, 0)
-    return () => clearTimeout(timer)
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setNowMs(Date.now())
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
   }, [countdownTargetMs])
 
   const minutesLeft = countdownTargetMs === null
     ? null
-    : Math.max(0, Math.floor((countdownTargetMs - nowMs) / 60000))
+    : Math.max(0, Math.ceil((countdownTargetMs - nowMs) / 60000))
 
   const countdownTime = useMemo(() => {
     if (minutesLeft === null) return null

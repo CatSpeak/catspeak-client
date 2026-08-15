@@ -23,10 +23,8 @@ const CourseTable = ({ courses, t, onDelete }) => {
           <tr className="border-b border-border bg-gray-50/50 text-gray-700 font-extrabold uppercase tracking-wider">
             <th className="p-4 border-r border-border w-[160px]">{c.coverImage || "Ảnh đại diện"}</th>
             <th className="p-4 border-r border-border">{c.courseInfo || "Thông tin khóa học"}</th>
-            <th className="p-4 border-r border-border w-[140px]">{c.startDate || "Ngày mở"}</th>
-            <th className="p-4 border-r border-border w-[140px]">{c.endDate || "Ngày hết"}</th>
-            <th className="p-4 border-r border-border w-[130px]">{c.price || "Giá cả"}</th>
-            <th className="p-4 w-[100px] text-center">{c.action || "Hành động"}</th>
+            <th className="p-4 border-r border-border w-[180px]">{c.startDate || "Ngày mở"}</th>
+            <th className="p-4 w-[120px] text-center">{c.action || "Hành động"}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 text-gray-700">
@@ -95,16 +93,6 @@ const CourseTable = ({ courses, t, onDelete }) => {
               {/* Start Date */}
               <td className="p-4 border-r border-border text-sm font-extrabold text-gray-800">
                 {item.startDate}
-              </td>
-
-              {/* End Date */}
-              <td className="p-4 border-r border-border text-sm font-extrabold text-gray-800">
-                {item.endDate}
-              </td>
-
-              {/* Price */}
-              <td className="p-4 border-r border-border text-sm font-extrabold text-gray-900">
-                {item.price}
               </td>
 
               {/* Actions */}
