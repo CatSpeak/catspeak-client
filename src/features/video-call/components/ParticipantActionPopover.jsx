@@ -33,8 +33,15 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
     }
   }, [participant])
 
-  const handleVolumeChange = (newVol) => {
-    const val = Array.isArray(newVol) ? newVol[0] : newVol
+  const handleVolumeChange = (eOrVal) => {
+    const val =
+      typeof eOrVal === "object" && eOrVal !== null && "target" in eOrVal
+        ? parseFloat(eOrVal.target.value)
+        : Array.isArray(eOrVal)
+        ? eOrVal[0]
+        : Number(eOrVal)
+
+    if (isNaN(val)) return
     setVolume(val)
     if (val > 0) setPrevVolume(val)
 
@@ -71,10 +78,11 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
         </button>
         <div className="flex-1 min-w-0">
           <Slider
-            value={[volume]}
+            value={volume}
             min={0}
             max={1}
             step={0.01}
+            onChange={handleVolumeChange}
             onValueChange={handleVolumeChange}
             aria-label={pl.adjustVolume}
           />
@@ -111,10 +119,11 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
         </button>
         <div className="flex-1">
           <Slider
-            value={[volume]}
+            value={volume}
             min={0}
             max={1}
             step={0.01}
+            onChange={handleVolumeChange}
             onValueChange={handleVolumeChange}
             aria-label={pl.adjustVolume}
           />

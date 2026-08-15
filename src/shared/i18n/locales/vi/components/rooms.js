@@ -368,6 +368,12 @@ export default {
       "Vui lòng kết thúc cuộc trò chuyện. Phòng sẽ tự động đóng khi thời gian kết thúc.",
     screenShareLabel: "Màn hình của {{name}}",
     screenShareLabelYou: "Màn hình của {{name}} (Bạn)",
+    screenShare: {
+      takeoverTitle: "Chia sẻ màn hình thay thế?",
+      takeoverConfirm: "Chia sẻ thay thế",
+      takeoverMessage: "{{name}} đang chia sẻ màn hình. Bắt đầu chia sẻ màn hình mới sẽ dừng phần trình bày của {{name}}.",
+      hostProtected: "Chủ phòng đang thuyết trình. Bạn không thể ghi đè màn hình của chủ phòng.",
+    },
     moreOptions: "Tùy chọn khác",
     subtitles: "Phụ đề (CC)",
     reconnect: "Khắc phục sự cố kết nối",

@@ -154,14 +154,28 @@ const ScreenShareTile = ({
         isFullscreen ? "" : "rounded-2xl border border-border"
       } ${!isHovered && isFullscreen ? "cursor-none" : onClick ? "cursor-pointer" : ""}`}
     >
-      <video
-        autoPlay
-        playsInline
-        muted
-        disablePictureInPicture
-        ref={videoRef}
-        className="h-full w-full object-contain"
-      />
+      {trackRef?.isMockScreen ? (
+        <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-neutral-950 via-slate-900 to-indigo-950 p-6 text-white text-center border border-white/10 select-none">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-600/30 flex items-center justify-center text-indigo-400 mb-3 border border-indigo-500/30 shadow-lg animate-pulse">
+            <MonitorUp size={32} />
+          </div>
+          <h3 className="font-semibold text-base text-neutral-200">
+            {labelText}
+          </h3>
+          <p className="text-xs text-neutral-400 mt-1 max-w-sm">
+            Màn hình trình chiếu demo (Mock Screen Share)
+          </p>
+        </div>
+      ) : (
+        <video
+          autoPlay
+          playsInline
+          muted
+          disablePictureInPicture
+          ref={videoRef}
+          className="h-full w-full object-contain"
+        />
+      )}
 
       {/* Control Overlay */}
       <div

@@ -60,15 +60,14 @@ const VideoGrid = () => {
     }
   }
 
-  // ── Khi Game đang chạy: Tự động dùng   để nhúng Game vào ô chính (trái) ──
+  // ── Khi Game đang chạy: Tự động dùng SpotlightLayout để nhúng Game vào ô chính (trái) ──
   if (isGameActive) {
-    const forcedSpotlight = spotlightItem || getDefaultSpotlightItem()
     return (
       <SpotlightLayout
-        spotlightItem={forcedSpotlight}
+        spotlightItem={{ type: "game" }}
         screenShareTracks={screenShareTracks}
         participants={filteredParticipants}
-        handleTileClick={handleSpotlightTileClick}
+        handleTileClick={() => {}}
         totalItems={totalItems}
       />
     )

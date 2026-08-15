@@ -55,6 +55,9 @@ export const useSpotlight = (screenShareTracks, participants) => {
 
   const handleTileClick = (item) => {
     if (!item) return
+    // When a game is active, keep the Game pinned as the primary spotlight item
+    if (isGameActive) return
+
     // Game tile: luôn spotlight game (toggle cũng giữ nguyên vì game là spot chính khi active)
     if (item.type === GAME_SPOTLIGHT_TYPE) {
       setSpotlightItem({ type: GAME_SPOTLIGHT_TYPE })

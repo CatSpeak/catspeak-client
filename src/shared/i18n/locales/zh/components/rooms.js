@@ -353,6 +353,12 @@ export default {
     roomClosingDescription: "请结束您的对话。计时器归零时房间将自动关闭。",
     screenShareLabel: "{{name}} 的屏幕",
     screenShareLabelYou: "{{name}} 的屏幕（你）",
+    screenShare: {
+      takeoverTitle: "替代屏幕共享？",
+      takeoverConfirm: "替代共享",
+      takeoverMessage: "{{name}} 正在共享屏幕。开始新的屏幕共享将停止 {{name}} 的演示。",
+      hostProtected: "主持人正在演示。与会者不能覆盖主持人的演示。",
+    },
     moreOptions: "更多选项",
     subtitles: "字幕 (CC)",
     reconnect: "重新连接",

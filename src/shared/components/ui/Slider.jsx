@@ -7,10 +7,21 @@ const Slider = ({
   max = 100,
   step = 1,
   onChange,
+  onValueChange,
   className = "",
   ...props
 }) => {
-  const percentage = ((value - min) / (max - min)) * 100
+  const numericValue = Array.isArray(value) ? (value[0] ?? min) : (value ?? min)
+  const percentage = ((numericValue - min) / (max - min)) * 100
+
+  const handleChange = (e) => {
+    if (typeof onChange === "function") {
+      onChange(e)
+    }
+    if (typeof onValueChange === "function") {
+      onValueChange(Number(e.target.value))
+    }
+  }
 
   return (
     <div className={`relative flex items-center w-full h-8 ${className}`}>
@@ -19,8 +30,8 @@ const Slider = ({
         min={min}
         max={max}
         step={step}
-        value={value}
-        onChange={onChange}
+        value={numericValue}
+        onChange={handleChange}
         className="absolute w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none z-10 bg-transparent
           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 
           [&::-webkit-slider-thumb]:bg-cath-red-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md

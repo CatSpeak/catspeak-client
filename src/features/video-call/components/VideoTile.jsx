@@ -77,7 +77,7 @@ const VideoTileInner = ({ participant, onClick }) => {
   // Get the camera track publication
   const cameraPub = participant.getTrackPublication(Track.Source.Camera)
   const cameraTrack = cameraPub?.track
-  const isVideoVisible = webcamOn && !!cameraTrack
+  const isVideoVisible = webcamOn && (!!cameraTrack || participant.isMockCamera)
 
   const videoRef = useRef(null)
 
@@ -112,16 +112,33 @@ const VideoTileInner = ({ participant, onClick }) => {
             : "border-2 border-solid border-transparent shadow-sm"
         }`}
       />
-      {/* Video element for camera track */}
-      <video
-        autoPlay
-        playsInline
-        muted={isLocal}
-        ref={videoRef}
-        className={`h-full w-full object-cover ${
-          isVideoVisible ? "block" : "hidden"
-        } ${isLocal ? "-scale-x-100" : ""}`}
-      />
+
+      {/* Video element for real camera track OR Mock Camera Preview */}
+      {isVideoVisible ? (
+        participant.isMockCamera && !cameraTrack ? (
+          <div className="relative h-full w-full bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 flex flex-col items-center justify-center p-4 select-none">
+            <Avatar
+              src={avatarUrl}
+              name={displayName}
+              size="lg"
+              theme={theme}
+            />
+            <span className="mt-2 text-[10px] font-semibold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/30 backdrop-blur-sm animate-pulse">
+              🎥 Camera (Mock)
+            </span>
+          </div>
+        ) : (
+          <video
+            autoPlay
+            playsInline
+            muted={isLocal}
+            ref={videoRef}
+            className={`h-full w-full object-cover ${
+              isVideoVisible ? "block" : "hidden"
+            } ${isLocal ? "-scale-x-100" : ""}`}
+          />
+        )
+      ) : null}
 
       {/* Avatar fallback when no video */}
       {!isVideoVisible && (
