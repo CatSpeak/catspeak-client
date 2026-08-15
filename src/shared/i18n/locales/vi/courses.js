@@ -262,6 +262,7 @@ export default {
       courseClass: "Khóa học & Lớp học",
       topFillRate: "Top 3 lớp theo tỷ lệ lấp đầy",
       quality: "Chất lượng giảng dạy",
+      ratingDistribution: "Phân bố đánh giá",
     },
   },
   workspaceRedirect: {

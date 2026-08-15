@@ -155,7 +155,7 @@ const WorkspaceDashboardPage = () => {
         const url = window.URL.createObjectURL(new Blob([blob]))
         const link = document.createElement("a")
         link.href = url
-        link.setAttribute("download", "catspeak-dashboard-report.xlsx")
+        link.setAttribute("download", "catspeak-dashboard-report.csv")
         document.body.appendChild(link)
         link.click()
         link.parentNode.removeChild(link)
@@ -374,11 +374,6 @@ const WorkspaceDashboardPage = () => {
       delta: "", tone: "green", note: "",
     },
     {
-      label: kpiT.avgFillRate || "Tỷ lệ lấp đầy",
-      value: quality.metrics?.fillRate == null ? na : `${numberVi(quality.metrics.fillRate, 1)}%`,
-      delta: "", tone: "purple", note: "",
-    },
-    {
       label: kpiT.conversionRate || "Tỷ lệ chuyển đổi đăng ký",
       value: quality.metrics?.conversionRate == null ? na : `${numberVi(quality.metrics.conversionRate, 1)}%`,
       delta: "", tone: "orange", note: "",
@@ -389,6 +384,8 @@ const WorkspaceDashboardPage = () => {
       delta: "", tone: "red", note: "",
     },
   ]
+  const qualityDistribution = quality.distribution || []
+  const hasReviews = quality.metrics?.averageRating != null
 
   const resolvedFilter = dashboard?.filter
   const viewingPeriod =
@@ -534,6 +531,27 @@ const WorkspaceDashboardPage = () => {
       {/* Chất lượng giảng dạy snapshot */}
       <SnapshotCard title={secT.quality || "Chất lượng giảng dạy"} onViewDetails={() => handleViewDetails("quality")} viewDetailsLabel={viewDetailsLabel}>
         <AnalyticsKpiGrid items={qualityMetrics} />
+        {hasReviews && qualityDistribution.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-sm font-bold text-gray-900 mb-3">{secT.ratingDistribution || "Phân bố đánh giá"}</h3>
+            <div className="flex flex-col gap-2.5">
+              {qualityDistribution.map((d) => (
+                <div key={d.stars} className="grid grid-cols-[36px_minmax(120px,1fr)_minmax(64px,auto)] gap-2.5 items-center text-xs">
+                  <span className="font-medium text-gray-800">{d.stars}★</span>
+                  <div className="h-2.5 rounded-md bg-[#f0f1f3] overflow-hidden w-full">
+                    <div
+                      className="h-full rounded-md bg-gradient-to-r from-[#e11d2e] to-[#f06a77]"
+                      style={{ width: `${Math.min(Math.max(d.percentage ?? 0, 0), 100)}%` }}
+                    />
+                  </div>
+                  <strong className="text-right font-semibold text-gray-900 tabular-nums">
+                    {numberVi(d.percentage ?? 0, 1)}%
+                  </strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </SnapshotCard>
     </div>
   )

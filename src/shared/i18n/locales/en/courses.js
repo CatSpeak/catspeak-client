@@ -262,6 +262,7 @@ export default {
       courseClass: "Courses & Classes",
       topFillRate: "Top 3 Classes by Fill Rate",
       quality: "Teaching Quality",
+      ratingDistribution: "Rating Distribution",
     },
   },
   workspaceRedirect: {

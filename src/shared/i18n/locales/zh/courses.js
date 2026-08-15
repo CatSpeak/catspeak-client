@@ -262,6 +262,7 @@ export default {
       courseClass: "课程与班级",
       topFillRate: "上座率 Top 3 班级",
       quality: "教学质量",
+      ratingDistribution: "评分分布",
     },
   },
   workspaceRedirect: {
