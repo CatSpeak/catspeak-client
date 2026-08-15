@@ -97,10 +97,10 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer"
+      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-hidden"
     >
       {/* ── Image area ───────────────────────────────────────────── */}
-      <div className="relative flex-1 min-h-0 rounded-t-xl">
+      <div className="relative w-full rounded-t-xl overflow-hidden">
         {hasMedia ? (
           <div className="w-full h-full rounded-t-xl rounded-b-none overflow-hidden">
             <Carousel
@@ -126,13 +126,15 @@ const NewsCard = ({ news }) => {
       </div>
 
       {/* ── Content ──────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-1 p-4">
-        <h3 className="font-bold line-clamp-2">{news.title}</h3>
+      <div className="flex flex-col gap-1.5 p-4 flex-1">
+        <h3 className="font-bold text-base text-foreground break-words leading-snug">
+          {news.title}
+        </h3>
         {news.excerpt && (
           <p className="text-sm text-[#4a4a4a] line-clamp-2">{news.excerpt}</p>
         )}
         {/* Inline dot-separated metadata row */}
-        <div className="flex items-center text-sm gap-1.5 text-[#606060]">
+        <div className="flex items-center text-sm gap-1.5 text-[#606060] mt-auto pt-1">
           <span>
             {news.viewCount || 0} {newsCard?.views || "views"}
           </span>
