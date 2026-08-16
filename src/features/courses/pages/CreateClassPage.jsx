@@ -30,6 +30,7 @@ import {
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
+import TimeDropdown from "@/features/calendar/components/ui/TimeDropdown"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {

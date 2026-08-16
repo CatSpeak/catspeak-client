@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Modal from "@/shared/components/ui/Modal";
 import {
   FileText,
@@ -49,12 +49,14 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
   };
 
   const [localToken, setLocalToken] = useState(() => extractToken(item));
+  const materialIsPublic = useRef(item?.isPublic ?? true);
 
   React.useEffect(() => {
     if (open) {
       setIsPublic(item?.isPublic ?? true);
       setAllowDownload(item?.allowDownload ?? true);
       setLocalToken(extractToken(item));
+      materialIsPublic.current = item?.isPublic ?? true;
     }
   }, [open, item]);
 
@@ -70,6 +72,48 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
 
   if (!item) return null;
 
+  const handleTogglePublic = async (e) => {
+    const checked = e.target.checked;
+    setIsPublic(checked);
+    if (checked) {
+      if (!materialIsPublic.current) {
+        try {
+          if (isFolder) {
+            await updateFolderSettings({
+              id: item.id || item.folderId,
+              isPublic: true,
+              allowDownload,
+            }).unwrap();
+            materialIsPublic.current = true;
+            if (!localToken) {
+              const res = await generateFolderShareToken(item.id || item.folderId).unwrap();
+              const responseData = res?.data || res;
+              setLocalToken(responseData?.shareToken || null);
+            }
+          } else {
+            await updateMaterialSettings({
+              id: item.id,
+              isPublic: true,
+              allowDownload,
+            }).unwrap();
+            materialIsPublic.current = true;
+            if (!localToken) {
+              const res = await generateMaterialShareToken(item.id).unwrap();
+              const responseData = res?.data || res;
+              setLocalToken(responseData?.shareToken || null);
+            }
+          }
+          toast.success(t.materials.updateShareSettingsSuccess);
+        } catch (error) {
+          console.error("Share error:", error);
+          toast.error(t.materials.updateShareSettingsError);
+          setIsPublic(false);
+          materialIsPublic.current = false;
+        }
+      }
+    }
+  };
+
   const handleSave = async () => {
     try {
       if (isFolder) {
@@ -78,11 +122,14 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
           isPublic,
           allowDownload,
         }).unwrap();
+        materialIsPublic.current = isPublic;
 
         if (isPublic) {
-          const res = await generateFolderShareToken(item.id || item.folderId).unwrap();
-          const responseData = res?.data || res;
-          setLocalToken(responseData?.shareToken || null);
+          if (!localToken) {
+            const res = await generateFolderShareToken(item.id || item.folderId).unwrap();
+            const responseData = res?.data || res;
+            setLocalToken(responseData?.shareToken || null);
+          }
         } else {
           setLocalToken(null);
         }
@@ -92,17 +139,21 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
           isPublic,
           allowDownload,
         }).unwrap();
+        materialIsPublic.current = isPublic;
 
         if (isPublic) {
-          const res = await generateMaterialShareToken(item.id).unwrap();
-          const responseData = res?.data || res;
-          setLocalToken(responseData?.shareToken || null);
+          if (!localToken) {
+            const res = await generateMaterialShareToken(item.id).unwrap();
+            const responseData = res?.data || res;
+            setLocalToken(responseData?.shareToken || null);
+          }
         } else {
           setLocalToken(null);
         }
       }
 
       toast.success(t.materials.updateShareSettingsSuccess);
+      onClose();
     } catch (error) {
       console.error("Share error:", error);
       toast.error(t.materials.updateShareSettingsError);
@@ -175,7 +226,7 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
             </div>
             <Switch
               checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
+              onChange={handleTogglePublic}
               colorClass="peer-checked:bg-[#990011]"
             />
           </div>

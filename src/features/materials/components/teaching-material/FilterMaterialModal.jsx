@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Modal from '@/shared/components/ui/Modal';
 import { PillButton } from '@/shared/components/ui/buttons';
 import Dropdown from '@/shared/components/ui/Dropdown';
-import { ChevronDown } from 'lucide-react';
 import { useLanguage } from '@/shared/context/LanguageContext';
 
 const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
@@ -11,6 +10,7 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
     { value: 'word', label: 'Word' },
     { value: 'excel', label: 'Excel' },
     { value: 'powerpoint', label: 'Powerpoint' },
+    { value: 'pdf', label: 'PDF' },
     { value: 'image', label: t.materials.imageFilter }
   ];
 

@@ -315,9 +315,8 @@ const Dropdown = ({
       }
       endIcon={
         <ChevronDown
-          className={`shrink-0 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
         />
       }
       className={`w-full ${triggerClassName}`}
@@ -339,19 +338,19 @@ const Dropdown = ({
       {trigger
         ? typeof trigger === "function"
           ? trigger(
-              isOpen,
-              isMultiple ? selectedOptionsList : selectedOption,
-              () => !disabled && setIsOpen(!isOpen),
-              {
-                isMultiple,
-                selectedValues,
-                selectedOptions: selectedOptionsList,
-              },
-            )
+            isOpen,
+            isMultiple ? selectedOptionsList : selectedOption,
+            () => !disabled && setIsOpen(!isOpen),
+            {
+              isMultiple,
+              selectedValues,
+              selectedOptions: selectedOptionsList,
+            },
+          )
           : React.cloneElement(trigger, {
-              onClick: () => !disabled && setIsOpen(!isOpen),
-              disabled,
-            })
+            onClick: () => !disabled && setIsOpen(!isOpen),
+            disabled,
+          })
         : defaultTrigger}
 
       {typeof document !== "undefined" &&
@@ -376,11 +375,10 @@ const Dropdown = ({
                   <FluentAnimation
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
-                    className={`absolute ${
-                      portalCoords.flipUp
+                    className={`absolute ${portalCoords.flipUp
                         ? "bottom-full mb-2 origin-bottom"
                         : "top-full mt-2"
-                    } flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                      } flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
                     data-dropdown-portal="true"
                   >
                     {isSearchActive && (
@@ -456,11 +454,10 @@ const Dropdown = ({
                                 isMultiple ? (
                                   <div className="flex items-center ml-2">
                                     <div
-                                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
-                                        isSelected
+                                      className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${isSelected
                                           ? "bg-[#990011] border-[#990011] text-white"
                                           : "border-gray-300 bg-white group-hover:border-gray-400"
-                                      }`}
+                                        }`}
                                     >
                                       {isSelected && (
                                         <Check size={12} strokeWidth={3} />

@@ -219,7 +219,8 @@ const TeachingMaterialPage = () => {
         word: ['doc', 'docx'],
         excel: ['xls', 'xlsx', 'csv'],
         powerpoint: ['ppt', 'pptx'],
-        image: ['png', 'jpg']
+        image: ['png', 'jpg', 'jpeg'],
+        pdf: ['pdf']
       };
 
       rawFiles = rawFiles.filter(file => {
