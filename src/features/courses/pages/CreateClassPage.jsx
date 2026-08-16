@@ -846,97 +846,63 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Admission Period & Start Date */}
-            <div className="flex flex-col gap-4">
-              {/* Admission Period */}
-              <div className="flex flex-col gap-1.5">
+            {/* Admission Period & Start Date — 3 inputs on 1 single row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              {/* Col 1: Thời hạn đăng ký (Từ) */}
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                   {cc.admissionPeriod || "Thời hạn đăng ký"}<span className="text-[#990011]">*</span>
                 </label>
-                <div className="flex flex-col lg:flex-row lg:items-center gap-2">
-                  {/* From Date & Time */}
-                  <div className="flex flex-1 items-center gap-2 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <DatePicker
-                        value={admissionStart}
-                        onChange={(date) => {
-                          setField("admissionStart", date ? toLocalDateString(date) : "")
-                          if (date && !admissionStartHours) setField("admissionStartHours", "07:00")
-                          clearError("admissionStart")
-                        }}
-                        mode="date"
-                        color="#990011"
-                        placeholder="dd/MM/yyyy"
-                        minDate={isEditMode ? null : tomorrow}
-                        className={`w-full ${errors.admissionStart ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                      />
-                    </div>
-                    <TimeDropdown
-                      value={admissionStartHours}
-                      color="#990011"
-                      onChange={(hhmm) => setField("admissionStartHours", hhmm)}
-                      className="shrink-0"
-                    />
-                  </div>
-
-                  {/* Separator / Dash */}
-                  <span className="hidden lg:inline-block text-gray-300 text-base font-light px-1 select-none">–</span>
-
-                  {/* To Date & Time */}
-                  <div className="flex flex-1 items-center gap-2 min-w-0">
-                    <div className="flex-1 min-w-0">
-                      <DatePicker
-                        value={admissionEnd}
-                        onChange={(date) => {
-                          setField("admissionEnd", date ? toLocalDateString(date) : "")
-                          if (date && !admissionEndHours) setField("admissionEndHours", "07:00")
-                          clearError("admissionEnd")
-                        }}
-                        mode="date"
-                        color="#990011"
-                        placeholder="dd/MM/yyyy"
-                        minDate={isEditMode ? null : tomorrow}
-                        className={`w-full ${errors.admissionEnd ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                      />
-                    </div>
-                    <TimeDropdown
-                      value={admissionEndHours}
-                      color="#990011"
-                      onChange={(hhmm) => setField("admissionEndHours", hhmm)}
-                      className="shrink-0"
-                    />
-                  </div>
-                </div>
+                <DateTimePicker
+                  dateValue={admissionStart}
+                  timeValue={admissionStartHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("admissionStart", dateStr)
+                    setField("admissionStartHours", timeStr)
+                    clearError("admissionStart")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.admissionStart)}
+                  className="w-full"
+                />
               </div>
 
-              {/* Start Date */}
-              <div className="flex flex-col gap-1.5">
+              {/* Col 2: Thời hạn đăng ký (Đến) */}
+              <div className="flex flex-col gap-1">
+                <DateTimePicker
+                  dateValue={admissionEnd}
+                  timeValue={admissionEndHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("admissionEnd", dateStr)
+                    setField("admissionEndHours", timeStr)
+                    clearError("admissionEnd")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.admissionEnd)}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Col 3: Ngày bắt đầu */}
+              <div className="flex flex-col gap-1">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                   {cc.startDate} <span className="text-[#990011]">*</span>
                 </label>
-                <div className="flex items-center gap-2 w-full lg:w-1/2 lg:pr-3 min-w-0">
-                  <div className="flex-1 min-w-0">
-                    <DatePicker
-                      value={startDate}
-                      onChange={(date) => {
-                        setField("startDate", date ? toLocalDateString(date) : "")
-                        if (date && !startDateHours) setField("startDateHours", "07:00")
-                        clearError("startDate")
-                      }}
-                      mode="date"
-                      color="#990011"
-                      placeholder="dd/MM/yyyy"
-                      minDate={isEditMode ? null : tomorrow}
-                      className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                    />
-                  </div>
-                  <TimeDropdown
-                    value={startDateHours}
-                    color="#990011"
-                    onChange={(hhmm) => setField("startDateHours", hhmm)}
-                    className="shrink-0"
-                  />
-                </div>
+                <DateTimePicker
+                  dateValue={startDate}
+                  timeValue={startDateHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("startDate", dateStr)
+                    setField("startDateHours", timeStr)
+                    clearError("startDate")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.startDate)}
+                  className="w-full"
+                />
               </div>
             </div>
 
