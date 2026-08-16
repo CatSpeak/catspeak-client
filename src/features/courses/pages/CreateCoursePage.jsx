@@ -19,10 +19,9 @@ import {
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { TextInput } from "@/shared/components/ui/inputs"
-import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
-import { COURSE_FORM_LANGUAGES, getInstructorFormLanguages } from "../data/courseFormOptions"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import { getInstructorFormLanguages } from "../data/courseFormOptions"
 import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
@@ -84,7 +83,6 @@ const CreateCoursePage = () => {
   const [avatarPreview, setAvatarPreview] = useState("")
   const [courseName, setCourseName] = useState("")
   const [selectedLanguage, setSelectedLanguage] = useState("")
-  const [level, setLevel] = useState("")
   const [description, setDescription] = useState("")
 
   const labelCourseAction = isEditMode
@@ -115,7 +113,6 @@ const CreateCoursePage = () => {
       setAvatarPreview("")
       setCourseName("")
       setSelectedLanguage("")
-      setLevel("")
       setDescription("")
     }
 
@@ -146,22 +143,10 @@ const CreateCoursePage = () => {
       const langName = matchedLang ? matchedLang.name : (course.language || "")
       setSelectedLanguage(langName)
 
-      const rawLevel = Array.isArray(course.levels) ? course.levels[0] : (course.levels || course.level || "")
-      setLevel(rawLevel || "")
-
       setDescription(course.description || "")
       setAvatarPreview(getSafeMediaUrl(course.thumbnailUrl) || "")
     }
   }, [courseDetailResponse, formInstanceKey, isEditMode, languagesList])
-
-  const selectedLanguageObj = languagesList.find(
-    (l) => (l.name || "").trim().toLowerCase() === (selectedLanguage || "").trim().toLowerCase()
-  )
-  const baseLevels = selectedLanguageObj?.levels || []
-  const levelsList = [...baseLevels]
-  if (level && !baseLevels.some((l) => (l.name || "").trim().toLowerCase() === level.trim().toLowerCase())) {
-    levelsList.unshift({ id: "current-level", name: level })
-  }
 
   // Handlers
   const handleAvatarClick = () => {
@@ -206,7 +191,6 @@ const CreateCoursePage = () => {
     setAvatarPreview("")
     setCourseName("")
     setSelectedLanguage("")
-    setLevel("")
     setDescription("")
     setErrors({})
   }
@@ -227,16 +211,10 @@ const CreateCoursePage = () => {
 
     const newErrors = {}
     if (!courseName.trim()) {
-      toast.error(cc.enterCourseNameToast || "Vui lòng điền tên khóa học!")
-      return
+      newErrors.courseName = true
     }
     if (!selectedLanguage) {
-      toast.error(cc.selectLanguageToast || "Vui lòng chọn ngôn ngữ!")
-      return
-    }
-    if (!level) {
-      toast.error(cc.selectLevelToast || "Vui lòng chọn trình độ!")
-      return
+      newErrors.selectedLanguage = true
     }
 
     const plainTextDesc = description ? description.replace(/<[^>]*>/g, " ").trim() : ""
@@ -250,9 +228,9 @@ const CreateCoursePage = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       if (newErrors.courseName) {
-        toast.error(cc.toastEnterCourseName || "Please enter course name!")
+        toast.error(cc.enterCourseNameToast || cc.toastEnterCourseName || "Vui lòng điền tên khóa học!")
       } else if (newErrors.selectedLanguage) {
-        toast.error(cc.toastSelectLanguage || "Please select a language!")
+        toast.error(cc.selectLanguageToast || cc.toastSelectLanguage || "Vui lòng chọn ngôn ngữ!")
       } else if (newErrors.description) {
         toast.error(cc.descriptionTooLong || "The description cannot exceed 150 words.")
       }
@@ -265,7 +243,7 @@ const CreateCoursePage = () => {
       const payload = {
         title: courseName.trim(),
         language: selectedLanguage,
-        levels: [level],
+        levels: [],
         description,
         thumbnailUrl: avatar || avatarPreview || "",
       }
@@ -289,9 +267,17 @@ const CreateCoursePage = () => {
         (typeof errMsg === "string" && (errMsg.includes("LANGUAGE_NOT_ALLOWED") || errMsg.toLowerCase().includes("language not allowed"))) ||
         (typeof errCode === "string" && errCode.includes("LANGUAGE_NOT_ALLOWED"))
 
+      const isValidationError =
+        errCode === "VALIDATION_ERROR" ||
+        errMsg === "VALIDATION_ERROR" ||
+        (typeof errMsg === "string" && errMsg.includes("VALIDATION_ERROR")) ||
+        errMsg === "One or more validation errors occurred."
+
       let displayMessage
       if (isLanguageNotAllowed) {
         displayMessage = cc.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
+      } else if (isValidationError) {
+        displayMessage = cc.validationErrorToast || "Thông tin khóa học chưa hợp lệ. Vui lòng kiểm tra lại thông tin đã nhập!"
       } else if (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("Missing")) {
         displayMessage = errMsg
       } else {
@@ -380,7 +366,7 @@ const CreateCoursePage = () => {
 
           {/* Left Column: Course Avatar / Thumbnail Card */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0 flex flex-col gap-2.5">
-            <label className="text-sm font-semibold text-gray-800">
+            <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
               {cc.avatarLabel || c.avatarLabel || "Ảnh đại diện khóa học"}
             </label>
 
@@ -456,90 +442,59 @@ const CreateCoursePage = () => {
 
             {/* Course Name */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-gray-800">
+              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                 {cc.courseNameLabel || c.courseNameLabel || "Tên khóa học"} <span className="text-[#990011]">*</span>
               </label>
-              <TextInput
-                placeholder={cc.courseNamePlaceholder || c.courseNamePlaceholder || "Nhập tên khóa học..."}
+              <input
+                type="text"
                 value={courseName}
-                onChange={(e) => setCourseName(e.target.value)}
-                variant="semi-round"
-                className="!h-11 !rounded-xl bg-gray-50/50 hover:bg-gray-100/50 border border-border text-sm font-medium text-gray-800"
-                containerClassName="!gap-0"
+                onChange={(e) => {
+                  setCourseName(e.target.value)
+                  clearError("courseName")
+                }}
+                placeholder={cc.courseNamePlaceholder || c.courseNamePlaceholder || "Nhập tên khóa học..."}
+                className={`w-full h-11 px-4 bg-white border ${errors.courseName ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400`}
               />
             </div>
 
-            {/* Language & Level Side-by-Side */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-800">
-                  {cc.languageLabel || c.languageLabel || "Ngôn ngữ"} <span className="text-[#990011]">*</span>
-                </label>
-                <Dropdown
-                  options={languagesList.map((lang) => ({
-                    value: lang.name,
-                    label: lang.name,
-                  }))}
-                  value={selectedLanguage}
-                  onChange={(val) => {
-                    setSelectedLanguage(val)
-                    setLevel("")
-                  }}
-                  placeholder={cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ"}
-                  dropdownClassName="w-full"
-                  trigger={(isOpen, selectedOption, toggle) => (
-                    <button
-                      type="button"
-                      onClick={toggle}
-                      className="w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border border-border text-gray-800 hover:bg-gray-100/50 cursor-pointer text-sm font-medium"
-                    >
-                      <span className={selectedLanguage ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
-                        {selectedLanguage || (cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ")}
-                      </span>
-                      <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                    </button>
-                  )}
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-gray-800">
-                  {cc.levelLabel || c.levelLabel || "Trình độ"} <span className="text-[#990011]">*</span>
-                </label>
-                <Dropdown
-                  options={levelsList.map((lvl) => ({
-                    value: lvl.name,
-                    label: lvl.name,
-                  }))}
-                  value={level}
-                  onChange={(val) => setLevel(val)}
-                  disabled={!selectedLanguage}
-                  placeholder={cc.levelPlaceholder || c.levelPlaceholder || "Chọn trình độ"}
-                  dropdownClassName="w-full"
-                  trigger={(isOpen, selectedOption, toggle) => (
-                    <button
-                      type="button"
-                      onClick={toggle}
-                      disabled={!selectedLanguage}
-                      className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition text-sm font-medium border ${!selectedLanguage
-                        ? "bg-gray-50/50 border-border text-gray-400 cursor-not-allowed opacity-60"
-                        : "bg-gray-50/50 border-border text-gray-800 hover:bg-gray-100/50 cursor-pointer"
-                        }`}
-                    >
-                      <span className={level ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
-                        {level || (cc.levelPlaceholder || c.levelPlaceholder || "Chọn trình độ")}
-                      </span>
-                      <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                    </button>
-                  )}
-                />
-              </div>
+            {/* Language */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                {cc.languageLabel || c.languageLabel || "Ngôn ngữ"} <span className="text-[#990011]">*</span>
+              </label>
+              <Dropdown
+                options={languagesList.map((lang) => ({
+                  value: lang.name,
+                  label: lang.name,
+                }))}
+                value={selectedLanguage}
+                onChange={(val) => {
+                  setSelectedLanguage(val)
+                  clearError("selectedLanguage")
+                }}
+                placeholder={cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ"}
+                dropdownClassName="w-full"
+                trigger={(isOpen, selectedOption, toggle) => (
+                  <button
+                    type="button"
+                    onClick={toggle}
+                    className={`w-full h-11 px-3.5 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-800 hover:bg-gray-100/50 cursor-pointer text-sm font-medium ${
+                      errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                    }`}
+                  >
+                    <span className={selectedLanguage ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
+                      {selectedLanguage || (cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ")}
+                    </span>
+                    <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                )}
+              />
             </div>
 
             {/* Description TinyMCE Editor */}
             <div className="flex flex-col gap-2 flex-1">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-semibold text-gray-800">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                   {cc.descriptionLabel || c.descriptionLabel || "Mô tả khóa học (tùy chọn)"}
                 </label>
                 <span className="text-xs text-gray-400 font-medium">
