@@ -7,7 +7,7 @@ export const COURSE_FORM_LANGUAGES = [
   {
     id: 2,
     name: "Chinese",
-    levels: ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6"].map((name, index) => ({ id: index + 1, name })),
+    levels: ["HSK 1", "HSK 2", "HSK 3", "HSK 4", "HSK 5", "HSK 6", "HSK 7", "HSK 8", "HSK 9"].map((name, index) => ({ id: index + 1, name })),
   },
   {
     id: 3,
@@ -133,11 +133,15 @@ export function getInstructorFormLanguages(profile) {
     return COURSE_FORM_LANGUAGES
   }
 
+  // Legacy registration UI stored "中文" instead of "Chinese" — normalize so the
+  // class form maps these teachers to the real Chinese language/level options.
+  const LANGUAGE_ALIASES = { 中文: "Chinese" }
+
   const result = []
   const addedIds = new Set()
 
   taughtLanguages.forEach((taughtLang, idx) => {
-    const normalizedTaught = taughtLang.trim().toLowerCase()
+    const normalizedTaught = (LANGUAGE_ALIASES[taughtLang.trim()] || taughtLang.trim()).toLowerCase()
     const matched = COURSE_FORM_LANGUAGES.find(
       (c) => (c.name || "").trim().toLowerCase() === normalizedTaught
     )
