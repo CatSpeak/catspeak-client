@@ -6,7 +6,7 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 
 const LANGUAGE_LEVELS = {
   "English": ["B2", "C1", "C2"],
-  "中文": ["HSK 4", "HSK 5", "HSK 6", "HSK 7", "HSK 8", "HSK 9"],
+  "Chinese": ["HSK 4", "HSK 5", "HSK 6", "HSK 7", "HSK 8", "HSK 9"],
 }
 const LANGUAGE_OPTIONS = Object.keys(LANGUAGE_LEVELS)
 
