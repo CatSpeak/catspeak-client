@@ -184,7 +184,6 @@ const ProfileDropdown = () => {
               if (success) {
                 handleCloseMenu()
                 navigate("/")
-                window.location.reload()
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isStudent ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
@@ -198,7 +197,6 @@ const ProfileDropdown = () => {
               if (success) {
                 handleCloseMenu()
                 navigate("/")
-                window.location.reload()
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isTeacher ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}

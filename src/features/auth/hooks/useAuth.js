@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux"
 import {
   selectCurrentUser,
   selectCurrentToken,
+  selectCurrentRefreshToken,
   selectIsAuthenticated,
   selectUserRole,
   selectAuthStatus,
@@ -16,6 +17,7 @@ export const useAuth = () => {
 
   const user = useSelector(selectCurrentUser)
   const token = useSelector(selectCurrentToken)
+  const refreshToken = useSelector(selectCurrentRefreshToken)
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const role = useSelector(selectUserRole)
   const status = useSelector(selectAuthStatus)
@@ -25,6 +27,7 @@ export const useAuth = () => {
     () => ({
       user,
       token,
+      refreshToken,
       isAuthenticated,
       role,
       status,
@@ -34,7 +37,7 @@ export const useAuth = () => {
         dispatch(baseApi.util.resetApiState())
       },
     }),
-    [user, token, isAuthenticated, role, status, dispatch],
+    [user, token, refreshToken, isAuthenticated, role, status, dispatch],
   )
 }
 
