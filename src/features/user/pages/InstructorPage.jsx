@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { CheckCircle, Loader2, GraduationCap } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetUserProfileQuery } from "@/store/api/userApi";
-import { useSwitchAccountTypeMutation } from "@/store/api/authApi";
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
 import { store } from "@/store";
 import {
   instructorApi,
@@ -141,26 +141,14 @@ const InstructorPage = () => {
   const userProfile = userProfileData?.data ?? userProfileData ?? {};
   const isTeacher = !!userProfile.isTeacher;
 
-  const [switchAccountType, { isLoading: isSwitchingAccount }] =
-    useSwitchAccountTypeMutation();
+  const { switchRole, isSwitching: isSwitchingAccount } = useRoleOverride();
 
   const handleSwitchToTeacherAccount = useCallback(async () => {
-    const currentRefreshToken = localStorage.getItem("refreshToken");
-    if (!currentRefreshToken) return;
-    try {
-      await switchAccountType({
-        accountTypeToSwitchTo: "Teacher",
-        refreshToken: currentRefreshToken,
-      }).unwrap();
+    const success = await switchRole("Teacher");
+    if (success) {
       navigate("/");
-      window.location.reload();
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        t.header?.switchRoleFail || "Chuyển vai trò thất bại!",
-      );
     }
-  }, [switchAccountType, t, navigate]);
+  }, [switchRole, navigate]);
 
   const [applyInstructor, { isLoading: isApplying }] =
     useApplyInstructorMutation();
