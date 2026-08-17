@@ -92,6 +92,9 @@ const PricingPage = lazy(
 const CheckoutPage = lazy(
   () => import("@/features/billing/pages/CheckoutPage.jsx"),
 );
+const CheckoutClassPage = lazy(
+  () => import("@/features/billing/pages/CheckoutClassPage.jsx"),
+);
 const MyCoursesPage = lazy(
   () => import("@/features/courses/pages/MyCoursesPage"),
 );
@@ -226,6 +229,16 @@ const routesConfig = [
               <LazyRoute>
                 <PublicClassDetailPage />
               </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/class/:id/checkout",
+            element: (
+              <AuthGuard>
+                <LazyRoute>
+                  <CheckoutClassPage />
+                </LazyRoute>
+              </AuthGuard>
             ),
           },
           {
@@ -428,6 +441,16 @@ const routesConfig = [
                   <LazyRoute>
                     <PublicClassDetailPage />
                   </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/class/:id/checkout",
+                element: (
+                  <AuthGuard>
+                    <LazyRoute>
+                      <CheckoutClassPage />
+                    </LazyRoute>
+                  </AuthGuard>
                 ),
               },
               {
