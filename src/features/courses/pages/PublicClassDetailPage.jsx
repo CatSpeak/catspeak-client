@@ -260,7 +260,11 @@ const PublicClassDetailPage = () => {
             {c.tuition || pc.tuitionFeeFull || "Học phí trọn gói"}
           </span>
           <span className="text-lg font-black text-slate-950">
-            {tuitionValue != null ? `${Number(tuitionValue).toLocaleString()} VNĐ` : (pc.tbaFee || "Chưa xác định")}
+            {tuitionValue != null
+              ? Number(tuitionValue) === 0
+                ? (c.student?.priceFree || "Miễn phí")
+                : `${Number(tuitionValue).toLocaleString()} VNĐ`
+              : (pc.tbaFee || "Chưa xác định")}
           </span>
         </div>
 

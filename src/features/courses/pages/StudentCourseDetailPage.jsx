@@ -340,14 +340,27 @@ const StudentCourseDetailPage = () => {
                   const classButton = getClassButton(cls)
                   const enrolledSeats = cls.studentCount ?? cls.enrolledStudents ?? null
                   const totalSlots = cls.slots ?? cls.capacity ?? null
-                  const remainingSlots = cls.remainingSlots != null
-                    ? Number(cls.remainingSlots)
-                    : (totalSlots != null && enrolledSeats != null ? Math.max(0, Number(totalSlots) - Number(enrolledSeats)) : null)
-                  const tuitionLabel = cls.tuitionFee == null
-                    ? ui.tba || "TBA"
-                    : formatCurrencyVND(cls.tuitionFee)
-                  const levelsText = Array.isArray(cls.levels) && cls.levels.length > 0 ? cls.levels.join(", ") : (cls.level || rawCourse?.level || "—")
-                  const classThumbnailUrl = getSafeMediaUrl(cls?.thumbnailUrl || cls?.thumbnail || rawCourse?.thumbnailUrl)
+                  const remainingSlots =
+                    cls.remainingSlots != null
+                      ? Number(cls.remainingSlots)
+                      : totalSlots != null && enrolledSeats != null
+                        ? Math.max(0, Number(totalSlots) - Number(enrolledSeats))
+                        : null
+                  const tuitionLabel =
+                    cls.tuitionFee == null
+                      ? ui.tba || "TBA"
+                      : Number(cls.tuitionFee) === 0
+                        ? sc.priceFree || "Miễn phí"
+                        : formatCurrencyVND(cls.tuitionFee)
+                  const levelsText =
+                    Array.isArray(cls.levels) && cls.levels.length > 0
+                      ? cls.levels.join(", ")
+                      : cls.level || rawCourse?.level || "—"
+                  const classThumbnailUrl = getSafeMediaUrl(
+                    cls?.thumbnailUrl ||
+                      cls?.thumbnail ||
+                      rawCourse?.thumbnailUrl,
+                  )
 
                   return (
                     <div

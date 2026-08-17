@@ -257,7 +257,9 @@ const ClassOverviewTab = ({
           <div className="flex items-center gap-1.5 text-xl font-black text-[#990011]">
             <span>
               {classData.tuitionFee !== undefined && classData.tuitionFee !== null
-                ? `${formatCurrency(classData.tuitionFee)} ${ui.currencyVnd || "VND"}`
+                ? Number(classData.tuitionFee) === 0
+                  ? (c.student?.priceFree || "Miễn phí")
+                  : `${formatCurrency(classData.tuitionFee)} ${ui.currencyVnd || "VND"}`
                 : "—"}
             </span>
             <span

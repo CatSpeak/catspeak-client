@@ -18,7 +18,9 @@ const PublicClassSidebarCTA = ({
   const tuitionValue = classData?.tuitionFee ?? classData?.price
   const tuitionLabel = tuitionValue == null
     ? (ui.tba || "TBA")
-    : formatCurrencyVND(tuitionValue)
+    : Number(tuitionValue) === 0
+      ? (c.student?.priceFree || "Miễn phí")
+      : formatCurrencyVND(tuitionValue)
 
   const thumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl) || defaultCourseThumbnail
 
