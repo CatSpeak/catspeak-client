@@ -34,10 +34,13 @@ const ClassCard = ({
   const teacherAvatar = getSafeMediaUrl(teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl)
 
   // Pricing
-  const tuitionValue = cls.price ?? cls.tuitionFee ?? cls.priceMin
-  const tuitionLabel = tuitionValue != null && Number.isFinite(Number(tuitionValue))
-    ? formatCurrencyVND(tuitionValue)
-    : ui.tba || "TBA"
+  const tuitionValue = cls.price ?? cls.tuitionFee ?? cls.priceMin;
+  const tuitionLabel =
+    tuitionValue != null && Number.isFinite(Number(tuitionValue))
+      ? Number(tuitionValue) === 0
+        ? c.student?.priceFree || "Miễn phí"
+        : formatCurrencyVND(tuitionValue)
+      : ui.tba || "TBA";
 
   // Counts & Slot Info
   const studentCount = cls.studentCount ?? cls.enrolledStudents ?? null
