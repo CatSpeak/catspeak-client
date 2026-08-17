@@ -53,7 +53,9 @@ const ClassCard = ({
   const tuitionValue = cls.price ?? cls.tuitionFee ?? cls.priceMin;
   const tuitionLabel =
     tuitionValue != null && Number.isFinite(Number(tuitionValue))
-      ? formatCurrencyVND(tuitionValue)
+      ? Number(tuitionValue) === 0
+        ? c.student?.priceFree || "Miễn phí"
+        : formatCurrencyVND(tuitionValue)
       : ui.tba || "TBA";
 
   // Counts & Slot Info

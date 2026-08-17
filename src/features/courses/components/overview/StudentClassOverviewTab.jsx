@@ -189,9 +189,11 @@ const StudentClassOverviewTab = ({
             </div>
             <div className="flex items-center gap-1.5 text-xl font-black text-[#990011]">
               <span>
-                {formatCurrency
-                  ? `${formatCurrency(classData.tuitionFee)} ${ui.currencyVnd || "VND"}`
-                  : `${classData.tuitionFee} VND`}
+                {Number(classData.tuitionFee) === 0
+                  ? (c.student?.priceFree || "Miễn phí")
+                  : formatCurrency
+                    ? `${formatCurrency(classData.tuitionFee)} ${ui.currencyVnd || "VND"}`
+                    : `${classData.tuitionFee} VND`}
               </span>
               <span
                 className="w-5 h-5 rounded-full border border-gray-300 text-gray-400 text-xs flex items-center justify-center cursor-help shrink-0 font-medium"

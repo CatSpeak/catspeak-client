@@ -106,7 +106,9 @@ const StudentJoinModal = ({
   const sc = t?.courses?.student || {}
   const tuitionLabel = selectedClass.tuitionFee == null
     ? sc.toBeAnnounced
-    : formatCurrencyVND(selectedClass.tuitionFee)
+    : Number(selectedClass.tuitionFee) === 0
+      ? (sc.priceFree || "Miễn phí")
+      : formatCurrencyVND(selectedClass.tuitionFee)
   const startFormatted = formatScheduleTime && selectedClass.schedule?.startTime
     ? formatScheduleTime(selectedClass.schedule.startTime, selectedClass.startDate)
     : selectedClass.schedule?.startTime

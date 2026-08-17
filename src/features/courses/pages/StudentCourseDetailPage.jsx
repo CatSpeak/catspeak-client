@@ -405,7 +405,9 @@ const StudentCourseDetailPage = () => {
                   const tuitionLabel =
                     cls.tuitionFee == null
                       ? ui.tba || "TBA"
-                      : formatCurrencyVND(cls.tuitionFee)
+                      : Number(cls.tuitionFee) === 0
+                        ? sc.priceFree || "Miễn phí"
+                        : formatCurrencyVND(cls.tuitionFee)
                   const levelsText =
                     Array.isArray(cls.levels) && cls.levels.length > 0
                       ? cls.levels.join(", ")
