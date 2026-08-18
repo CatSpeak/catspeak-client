@@ -3,7 +3,7 @@ import ClassInfoSection from '../checkout-class/components/ClassInfoSection'
 import LearnerSection from '../checkout-class/components/LearnerSection'
 import OrderSummary from '../checkout-class/components/OrderSummary'
 import VoucherModal from '../checkout-class/components/VoucherModal'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Breadcrumb } from '@/shared/components/ui/navigation'
 import { useGetVouchersForClassQuery } from '@/store/api/voucherApi'
 import { useGetExploreClassDetailQuery } from '@/store/api/coursesApi'
@@ -30,6 +30,7 @@ const CheckoutClassPage = () => {
   const { formatWeeklySchedule, formatDate } = useTimezone()
   const { t } = useLanguage()
   const tc = t.billing.checkoutClass
+  const navigate = useNavigate()
 
   const { data: profileResponse } = useGetProfileQuery()
   const currentUser = profileResponse?.data || profileResponse
@@ -245,13 +246,15 @@ const CheckoutClassPage = () => {
     <div className="min-h-screen bg-[#f3f3f3]">
       <div className="p-4 md:p-6 space-y-6">
 
-        <Breadcrumb items={[
-          { label: tc.breadcrumbHome },
-          { label: tc.breadcrumbExplore },
-          { label: tc.breadcrumbCourseDetail },
-          { label: tc.breadcrumbClassDetail },
-          { label: tc.breadcrumbCheckout }
-        ]} />
+        <Breadcrumb
+          className='flex-wrap'
+          items={[
+            { label: tc.breadcrumbHome, onClick: () => navigate('/') },
+            { label: tc.breadcrumbExplore, onClick: () => navigate('/explore-courses') },
+            // { label: tc.breadcrumbCourseDetail, onClick: () => navigate(`/explore-courses/details/${course.id}`) },
+            { label: tc.breadcrumbClassDetail, onClick: () => navigate(`/explore-courses/class/${classId}`) },
+            { label: tc.breadcrumbCheckout }
+          ]} />
 
         <h1 className="text-3xl font-bold text-[#1A1C1C]">{tc.pageTitle}</h1>
 
