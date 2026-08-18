@@ -107,7 +107,7 @@ const OrderSummary = ({
         roundedClass='rounded-xl'
         className='flex-1 w-full'
         bgColor={"#B20000"}
-        onClick={onCheckout}
+        onClick={() => onCheckout(false)}
         disabled={isProcessing}
         loading={isProcessing}
         loadingText={tc.processing}
