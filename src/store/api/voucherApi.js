@@ -7,10 +7,7 @@ export const voucherApi = baseApi.injectEndpoints({
       query: ({ classId, learnersCount = 1, orderAmount }) => {
         const params = new URLSearchParams()
         params.append("learnersCount", String(learnersCount))
-        if (orderAmount !== undefined && orderAmount !== null) {
-          params.append("orderAmount", String(orderAmount))
-        }
-        return `/api/vouchers/class/${classId}?${params.toString()}`
+        return `/vouchers/class/${classId}?${params.toString()}`
       },
       transformResponse: (response) => {
         // Normalize: response may already be unwrapped by baseApi

@@ -3,8 +3,7 @@ import VoucherSection from './VoucherSection'
 import { PillButton } from '@/shared/components/ui/buttons'
 
 const OrderSummary = ({
-  courseName,
-  classCode,
+  className,
   unitPrice,
   learnersCount,
   vouchers,
@@ -12,21 +11,26 @@ const OrderSummary = ({
   selectedVouchers,
   onToggleVoucher,
   onRemoveVoucher,
-  onOpenModal
+  onOpenModal,
+  onCheckout,
+  isProcessing
 }) => {
   const subtotal = unitPrice * learnersCount
 
   // Calculate total discount from selected vouchers
   const calculateDiscount = (voucher) => {
-    // In a real app, this logic would be more complex and likely handled by backend
-    if (voucher.discountType === 'Percentage') {
+    if (voucher.estimatedDiscountAmount) {
+      return voucher.estimatedDiscountAmount
+    }
+    const isPercentage = voucher.discountType?.toLowerCase() === 'percentage'
+    if (isPercentage) {
       const discount = (subtotal * voucher.discountValue) / 100
       if (voucher.maxDiscountAmount) {
         return Math.min(discount, voucher.maxDiscountAmount)
       }
       return discount
     }
-    return voucher.discountValue
+    return voucher.discountValue || 0
   }
 
   const discountDetails = selectedVouchers.map(v => ({
@@ -46,8 +50,8 @@ const OrderSummary = ({
       <h2 className="text-xl font-bold text-[#111827]">Tóm tắt đơn hàng</h2>
 
       <div className="space-y-1">
-        <h3 className="font-bold text-[#111827]">{courseName}</h3>
-        <p className="text-sm text-[#6B7280]">Lớp: {classCode}</p>
+        <h3 className="font-bold text-[#111827]">{className}</h3>
+        {/* <p className="text-sm text-[#6B7280]">Lớp: {classCode}</p> */}
       </div>
 
       <div className="space-y-4 text-sm">
@@ -78,7 +82,7 @@ const OrderSummary = ({
 
         <div className="flex justify-between text-gray-600">
           <span>Học phí</span>
-          <span>{formatCurrency(subtotal)}</span>
+          <span>{formatCurrency(totalPayment)}</span>
         </div>
       </div>
 
@@ -108,12 +112,14 @@ const OrderSummary = ({
       </div>
 
       <PillButton
-        onClick={() => { }}
+        fullWidth
         roundedClass='rounded-xl'
         className='flex-1 w-full'
         bgColor={"#B20000"}
+        onClick={onCheckout}
+        disabled={isProcessing}
       >
-        Xác nhận thanh toán
+        {isProcessing ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
       </PillButton>
     </div>
   )

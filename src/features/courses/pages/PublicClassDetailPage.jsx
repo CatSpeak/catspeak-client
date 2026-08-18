@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react"
+import React, { useContext } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { Check } from "lucide-react"
@@ -8,9 +8,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import {
   useGetExploreClassDetailQuery,
-  useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
-import { getSafeMediaUrl, getClassEnrollmentIssue, getClassEnrollmentIssueMessage } from "../utils/courseUtils"
+import { getClassEnrollmentIssue, getClassEnrollmentIssueMessage } from "../utils/courseUtils"
 
 import PublicClassHero from "../components/public-class/PublicClassHero"
 import PublicClassStatsBar from "../components/public-class/PublicClassStatsBar"
@@ -33,7 +32,6 @@ const PublicClassDetailPage = () => {
   const location = useLocation()
   const { isAuthenticated } = useAuth()
   const authModalCtx = useContext(AuthModalContext)
-  const enrollmentGuardRef = useRef(false)
 
   const isWorkspace = location.pathname.startsWith("/workspace")
 
@@ -53,8 +51,6 @@ const PublicClassDetailPage = () => {
     refetch
   } = useGetExploreClassDetailQuery(id, { skip: !id })
 
-  const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
-
   const classData = classResponse && typeof classResponse === "object" && !Array.isArray(classResponse) && classResponse.id
     ? classResponse
     : null
@@ -70,7 +66,7 @@ const PublicClassDetailPage = () => {
   const tuitionValue = classData?.tuitionFee ?? classData?.price
 
   // Handle Enrollment Action
-  const handleEnrollAction = async () => {
+  const handleEnrollAction = () => {
     if (isEnrolled) {
       // Go to learning class view
       navigate(`/workspace/learning/class/${id}`)
@@ -96,37 +92,9 @@ const PublicClassDetailPage = () => {
       return
     }
 
-    if (enrollmentGuardRef.current || isEnrolling) {
-      return
-    }
-    enrollmentGuardRef.current = true
-
-    // Authenticated -> Enroll
-    try {
-      const result = await enrollInCourse({ classId: id, courseId: classData?.courseId }).unwrap()
-      const resultPayload = (
-        result
-        && typeof result === "object"
-        && !Array.isArray(result)
-        && Object.prototype.hasOwnProperty.call(result, "data")
-      )
-        ? result.data
-        : result
-
-      if (resultPayload?.checkoutUrl) {
-        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
-        if (!checkoutUrl) throw new Error("Invalid checkout URL")
-        toast.success("Đang chuyển hướng đến trang thanh toán...")
-        window.location.assign(checkoutUrl)
-      } else {
-        toast.success("Đăng ký lớp học thành công!")
-        refetch()
-      }
-    } catch (err) {
-      toast.error(err?.data?.message || "Đăng ký không thành công. Vui lòng thử lại sau.")
-    } finally {
-      enrollmentGuardRef.current = false
-    }
+    // Authenticated -> Navigate to checkout page
+    const basePath = isWorkspace ? "/workspace" : ""
+    navigate(`${basePath}/explore-courses/class/${id}/checkout`)
   }
 
   if (isLoading) {
@@ -170,7 +138,6 @@ const PublicClassDetailPage = () => {
         classData={classData}
         courseTitle={courseTitle}
         isEnrolled={isEnrolled}
-        isEnrolling={isEnrolling}
         isUpcoming={isUpcoming}
         onEnroll={handleEnrollAction}
         onBack={handleBack}
@@ -222,7 +189,6 @@ const PublicClassDetailPage = () => {
             <PublicClassSidebarCTA
               classData={classData}
               isEnrolled={isEnrolled}
-              isEnrolling={isEnrolling}
               isUpcoming={isUpcoming}
               onEnroll={handleEnrollAction}
             />
@@ -261,10 +227,9 @@ const PublicClassDetailPage = () => {
           <button
             type="button"
             onClick={handleEnrollAction}
-            disabled={isEnrolling}
-            className="bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm"
+            className="bg-[#b20a1c] hover:bg-[#960817] text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 text-sm cursor-pointer shadow-md"
           >
-            {isEnrolling ? (pc.processing || "Đang xử lý...") : (c.enrollNow || pc.enrollNow || "Đăng Ký Ngay")}
+            {c.enrollNow || pc.enrollNow || "Đăng Ký Ngay"}
           </button>
         )}
       </div>

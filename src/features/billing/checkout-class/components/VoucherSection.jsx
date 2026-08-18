@@ -3,6 +3,7 @@ import { Tag, ChevronDown, Check, Search } from 'lucide-react'
 import TextInput from '@/shared/components/ui/inputs/TextInput'
 import Checkbox from '@/shared/components/ui/inputs/Checkbox'
 import Popover from '@/shared/components/ui/Popover'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
 const VoucherSection = ({
   vouchers, // from availableVouchers
@@ -12,6 +13,7 @@ const VoucherSection = ({
   onOpenModal
 }) => {
   const [search, setSearch] = useState('')
+  const { formatDate } = useTimezone()
 
   // The dropdown shows all available vouchers
   const validVouchers = vouchers || []
@@ -21,6 +23,9 @@ const VoucherSection = ({
     v.code.toLowerCase().includes(search.toLowerCase()) ||
     v.title.toLowerCase().includes(search.toLowerCase())
   )
+
+  console.log(vouchers);
+
 
   const handleToggle = (voucher) => {
     // If already selected, we can unselect
@@ -61,9 +66,9 @@ const VoucherSection = ({
                 />
               </div>
               <div>
-                <p className="font-bold text-sm text-[#111827]">{voucher.title}</p>
-                <p className="text-xs text-[#6B7280] mt-1">{voucher.description}</p>
-                <p className="text-xs text-[#6B7280] mt-1">HSD: {voucher.isNeverExpired ? 'Không thời hạn' : new Date(voucher.validTo).toLocaleDateString('vi-VN')}</p>
+                <p className="font-bold text-sm text-[#111827]">{voucher.code}</p>
+                <p className="text-xs text-[#6B7280] mt-1">{voucher.title}</p>
+                <p className="text-xs text-[#6B7280] mt-1">HSD: {voucher.isNeverExpired ? 'Không thời hạn' : formatDate(voucher.validTo)}</p>
               </div>
             </div>
           )
@@ -96,7 +101,7 @@ const VoucherSection = ({
               <span>Đã áp dụng {selectedVouchers.length} mã</span>
             </div>
             <Popover
-              placement="bottom-right"
+              placement="top-right"
               trigger={
                 <span className="text-[#B20000] text-sm font-semibold hover:underline">
                   Thay đổi
@@ -114,7 +119,7 @@ const VoucherSection = ({
                   <span className="text-[#6B7280]">({voucher.sponsorType === 'CatSpeak' ? 'CatSpeak' : 'Giáo viên'})</span>
                 </div>
                 <span className="text-[#111827]">
-                  - {voucher.discountType === 'Percentage' ? `${voucher.discountValue}%` : `${voucher.discountValue / 1000}k`}
+                  - {voucher.discountType?.toLowerCase() === 'percentage' ? `${voucher.discountValue}%` : `${voucher.discountValue / 1000}k`}
                 </span>
               </div>
             ))}

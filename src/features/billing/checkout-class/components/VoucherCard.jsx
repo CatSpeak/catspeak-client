@@ -1,8 +1,10 @@
 import React from 'react'
 import { CheckCircle2, AlertTriangle, XCircle, Clock, TriangleAlert } from 'lucide-react'
 import { PillButton } from '@/shared/components/ui/buttons'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
 const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher }) => {
+  const { formatDate } = useTimezone()
   let Icon = CheckCircle2
   let iconColor = 'text-[#16A34A]'
   let bgClass = 'bg-[#F0FDF4] border-[#BBF7D0]'
@@ -32,7 +34,7 @@ const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher })
             <p className="text-sm text-[#5B403E]">{voucher.description}</p>
             <div className='flex items-center gap-1'>
               <Clock size={12} color='#5B403E' />
-              <p className="text-xs font-bold text-[#5B403E]"> HSD: {voucher.isNeverExpired ? 'Không thời hạn' : new Date(voucher.validTo).toLocaleDateString('vi-VN')}</p>
+              <p className="text-xs font-bold text-[#5B403E]"> HSD: {voucher.isNeverExpired ? 'Không thời hạn' : formatDate(voucher.validTo)}</p>
             </div>
 
             {/* <div className='border-t border-[#E3BEBA] w-full' /> */}
