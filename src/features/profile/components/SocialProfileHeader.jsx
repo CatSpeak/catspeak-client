@@ -32,20 +32,7 @@ const SocialProfileHeader = ({
   const location =
     formData?.location || user?.location || formData?.address || user?.address
 
-  // Profile media upload hook (avatar & cover)
-  const {
-    coverImageUrl,
-    fileInputRef,
-    coverInputRef,
-    isUpdatingAvatar,
-    isCoverUpdating,
-    handleAvatarChange,
-    handleCoverChange,
-    triggerAvatarUpload,
-    triggerCoverUpload,
-  } = useProfileMediaUpload({ t })
-
-  // API Hooks for social status
+  // API Hooks
   const { data: statusResponse } = useGetConnectionStatusQuery(
     targetAccountId,
     {
@@ -79,11 +66,11 @@ const SocialProfileHeader = ({
           id: toastId,
         })
       }
-    } catch (err) {
-      toast.error(t.profile?.social?.actionFailed || "Thao tác thất bại", {
+    } catch (error) {
+      toast.error(t.profile?.social?.errorOccurred || "Có lỗi xảy ra", {
         id: toastId,
       })
-      console.error(err)
+      console.error(error)
     }
   }
 
