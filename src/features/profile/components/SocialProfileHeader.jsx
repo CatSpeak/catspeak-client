@@ -1,7 +1,6 @@
 import React from "react"
 import toast from "react-hot-toast"
-import { Camera, MapPin, Edit2, UserPlus, Check, AtSign } from "lucide-react"
-import Avatar from "@/shared/components/ui/Avatar"
+import { MapPin, Edit2, UserPlus, Check, AtSign } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import RequestButton from "@/shared/components/ui/buttons/RequestButton"
 import {
@@ -9,8 +8,7 @@ import {
   useFollowUserMutation,
   useUnfollowUserMutation,
 } from "../../../store/api/social/friendshipApi"
-import { useGetCurrentBackgroundQuery } from "@/store/api/userApi"
-import backgroundAccount from "@/shared/assets/backgrounds/background-account.png"
+import ProfileAvatarNCover from "@/shared/components/profile/ProfileAvatarNCover"
 
 const SocialProfileHeader = ({
   user,
@@ -22,8 +20,6 @@ const SocialProfileHeader = ({
   friendsCount = 0,
   followersCount = 0,
 }) => {
-  // Use avatarImageUrl as the primary avatar for the profile
-  const displayAvatarUrl = formData?.avatarImageUrl || user?.avatarImageUrl
   const username = formData?.username || user?.username
   const nickname = formData?.nickname || user?.nickname
   const displayName = username || nickname || "(?)"
@@ -54,15 +50,6 @@ const SocialProfileHeader = ({
 
   const isFollowLoading = isFollowingLoading || isUnfollowingLoading
 
-  const { data: currentBackgroundResponse, isLoading: isBackgroundLoading } =
-    useGetCurrentBackgroundQuery(undefined, {
-      skip: !isOwnProfile,
-    })
-  const fetchedCoverUrl = isOwnProfile
-    ? (currentBackgroundResponse?.activeBackgroundUrl ??
-      currentBackgroundResponse?.data?.activeBackgroundUrl)
-    : null
-
   const handleFollowToggle = async () => {
     if (isFollowLoading) return
     const toastId = "follow-action"
@@ -87,112 +74,87 @@ const SocialProfileHeader = ({
     }
   }
 
-  return (
-    <div className="w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6">
-      {/* Cover Photo Area */}
-      <div className="w-full h-48 md:h-[280px] bg-gray-200 relative group overflow-hidden">
-        {isBackgroundLoading ? (
-          <div className="w-full h-full bg-gray-300 animate-pulse"></div>
-        ) : (
-          <img
-            src={fetchedCoverUrl || backgroundAccount}
-            alt="Cover fallback"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.onerror = null // prevent infinite loop
-              e.target.src = backgroundAccount
-            }}
+  const actions = (
+    <>
+      {isOwnProfile ? (
+        onEditClick && (
+          <PillButton
+            variant="outline"
+            startIcon={<Edit2 />}
+            onClick={onEditClick}
+            className="max-[425px]:flex-1"
+          >
+            {t.profile?.personalInfo?.edit || "Chỉnh sửa"}
+          </PillButton>
+        )
+      ) : (
+        <>
+          <PillButton
+            variant={status?.isFollowing ? "secondary" : "primary"}
+            startIcon={status?.isFollowing ? <Check /> : <UserPlus />}
+            onClick={handleFollowToggle}
+            disabled={isFollowLoading}
+            loading={isFollowLoading}
+            className={`max-[425px]:flex-1 ${
+              isFollowLoading ? "cursor-not-allowed" : ""
+            }`}
+          >
+            {status?.isFollowing
+              ? t.profile?.social?.following || "Đang theo dõi"
+              : t.profile?.social?.follow || "Theo dõi"}
+          </PillButton>
+
+          <RequestButton
+            id={targetAccountId}
+            relationship={status}
+            t={t}
+            className="max-[425px]:flex-1"
           />
-        )}
-      </div>
+        </>
+      )}
+    </>
+  )
 
-      {/* Profile Info Area */}
-      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          {/* Avatar floating above the bottom border of the cover photo */}
-          <div className="-mt-24 md:-mt-28 mb-5 relative z-10 p-1 bg-white rounded-full w-fit">
-            <div className="relative rounded-full overflow-hidden">
-              <Avatar
-                size={133}
-                src={displayAvatarUrl}
-                alt={displayName}
-                name={displayName}
-                className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
-              />
+  return (
+    <ProfileAvatarNCover
+      user={user}
+      formData={formData}
+      t={t}
+      isOwnProfile={isOwnProfile}
+      actions={actions}
+    >
+      {/* Text Info */}
+      <div className="flex flex-col items-start gap-1">
+        <h1 className="text-2xl md:text-[28px] font-bold text-gray-900 truncate whitespace-nowrap overflow-hidden">
+          {displayName}
+        </h1>
+        <div className="flex flex-col gap-1">
+          {handle && (
+            <div className="flex items-center gap-2 text-sm text-[#606060]">
+              <AtSign size={16} />
+              <span>{handle}</span>
             </div>
-          </div>
-          {/* Text Info */}
-          <div className="flex flex-col items-start gap-1">
-            <h1 className="text-2xl md:text-[28px] font-bold text-gray-900 truncate whitespace-nowrap overflow-hidden">
-              {displayName}
-            </h1>
-            <div className="flex flex-col gap-1">
-              {handle && (
-                <div className="flex items-center gap-2 text-sm text-[#606060]">
-                  <AtSign size={16} />
-                  <span>{handle}</span>
-                </div>
-              )}
-              {location && (
-                <div className="flex items-center gap-2 text-sm text-[#606060]">
-                  <MapPin size={16} />
-                  <span>{location}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-3 text-sm text-[#606060] mt-0.5 font-medium">
-                <span>
-                  <strong className="text-gray-900">{friendsCount}</strong>{" "}
-                  {t.profile?.tabs?.friends || "Bạn bè"}
-                </span>
-                <span>•</span>
-                <span>
-                  <strong className="text-gray-900">{followersCount}</strong>{" "}
-                  {t.profile?.friends?.subTabs?.followers || "Người theo dõi"}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right side: Actions */}
-        <div className="ml-auto flex items-center justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-nowrap">
-          {isOwnProfile ? (
-            onEditClick && (
-              <PillButton
-                variant="outline"
-                startIcon={<Edit2 />}
-                onClick={onEditClick}
-                className="max-[425px]:flex-1"
-              >
-                {t.profile?.personalInfo?.edit || "Chỉnh sửa"}
-              </PillButton>
-            )
-          ) : (
-            <>
-              <PillButton
-                variant={status?.isFollowing ? "secondary" : "primary"}
-                startIcon={status?.isFollowing ? <Check /> : <UserPlus />}
-                onClick={handleFollowToggle}
-                disabled={isFollowLoading}
-                loading={isFollowLoading}
-                className={`max-[425px]:flex-1 ${isFollowLoading ? "cursor-not-allowed" : ""}`}
-              >
-                {status?.isFollowing
-                  ? t.profile?.social?.following || "Đang theo dõi"
-                  : t.profile?.social?.follow || "Theo dõi"}
-              </PillButton>
-
-              <RequestButton
-                id={targetAccountId}
-                relationship={status}
-                t={t}
-                className="max-[425px]:flex-1"
-              />
-            </>
           )}
+          {location && (
+            <div className="flex items-center gap-2 text-sm text-[#606060]">
+              <MapPin size={16} />
+              <span>{location}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-3 text-sm text-[#606060] mt-0.5 font-medium">
+            <span>
+              <strong className="text-gray-900">{friendsCount}</strong>{" "}
+              {t.profile?.tabs?.friends || "Bạn bè"}
+            </span>
+            <span>•</span>
+            <span>
+              <strong className="text-gray-900">{followersCount}</strong>{" "}
+              {t.profile?.friends?.subTabs?.followers || "Người theo dõi"}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </ProfileAvatarNCover>
   )
 }
 
