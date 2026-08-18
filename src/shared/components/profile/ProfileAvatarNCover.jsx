@@ -300,184 +300,169 @@ const ProfileAvatarNCover = ({
 
   const hasBottomContent = Boolean(children || actions);
 
-  return (
+  const renderCover = (hasFullBorder = false) => (
     <div
-      className={`w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6 ${className}`}
+      className={`w-full h-48 md:h-[280px] bg-gray-200 relative group/cover overflow-hidden ${
+        hasFullBorder ? "rounded-xl border border-[#e5e5e5]" : ""
+      } ${coverClassName}`}
     >
-      {/* Cover Photo Outer Container */}
-      <div
-        className={`w-full h-48 md:h-[280px] bg-gray-200 relative group/cover overflow-hidden ${coverClassName}`}
-      >
-        {/* Cover Photo Image */}
-        <div className="relative w-full h-full">
-          {isBackgroundLoading ? (
-            <div className="w-full h-full bg-gray-300 animate-pulse" />
-          ) : (
-            <img
-              src={coverImageUrl || fetchedCoverUrl || backgroundAccount}
-              alt="Cover"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = backgroundAccount;
-              }}
-            />
-          )}
-
-          {/* Hover Overlay (Only when isOwnProfile) */}
-          {isOwnProfile && (
-            <div
-              onClick={() => {
-                if (coverInputRef.current && !isCoverUpdating) {
-                  coverInputRef.current.click();
-                }
-              }}
-              className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer z-10"
-            >
-              {isCoverUpdating ? (
-                <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Camera className="w-8 h-8 text-white" />
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Hidden File Input for Cover Upload (Only when isOwnProfile) */}
-        {isOwnProfile && (
-          <input
-            type="file"
-            ref={coverInputRef}
-            className="hidden"
-            accept="image/*"
-            onChange={handleCoverChange}
+      {/* Cover Photo Image */}
+      <div className="relative w-full h-full">
+        {isBackgroundLoading ? (
+          <div className="w-full h-full bg-gray-300 animate-pulse" />
+        ) : (
+          <img
+            src={coverImageUrl || fetchedCoverUrl || backgroundAccount}
+            alt="Cover"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = backgroundAccount;
+            }}
           />
         )}
 
-        {/* Meeting Avatar Badge on Top-Right of Cover Photo (Only when isOwnProfile) */}
+        {/* Hover Overlay (Only when isOwnProfile) */}
         {isOwnProfile && (
           <div
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!isUpdatingMeetingAvatar) {
-                handleOpenMeetingAvatarModal();
+            onClick={() => {
+              if (coverInputRef.current && !isCoverUpdating) {
+                coverInputRef.current.click();
               }
             }}
-            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 bg-black/65 backdrop-blur-md border border-white/30 rounded-2xl px-3 py-2 flex items-center gap-3 shadow-lg hover:bg-black/80 transition-all cursor-pointer group/meeting"
+            className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/cover:opacity-100 transition-opacity cursor-pointer z-10"
           >
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/80 bg-cath-red-700 shadow-sm">
-              <Avatar
-                size={44}
-                src={displayMeetingAvatarUrl}
-                alt={displayName}
-                name={displayName}
-                className="w-full h-full text-white text-base"
-                style={{ border: "none" }}
-              />
-              <div
-                className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
-                  isUpdatingMeetingAvatar
-                    ? "opacity-100"
-                    : "opacity-0 group-hover/meeting:opacity-100"
-                }`}
-              >
-                {isUpdatingMeetingAvatar ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Camera className="w-4 h-4 text-white" />
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col text-left pr-1">
-              <div className="flex items-center gap-1.5 text-white font-bold text-xs whitespace-nowrap">
-                <Users size={13} className="text-amber-400 shrink-0" />
-                <span>
-                  {t.profile?.personalInfo?.meetingAvatarLabel ||
-                    "Ảnh phòng họp"}
-                </span>
-              </div>
-              <span className="text-[10px] text-gray-200 mt-0.5 group-hover/meeting:text-white transition-colors font-medium whitespace-nowrap">
-                {isUpdatingMeetingAvatar
-                  ? t.profile?.personalInfo?.updatingAvatar ||
-                    "Đang cập nhật..."
-                  : t.profile?.personalInfo?.clickToChangeMeetingAvatar ||
-                    "Bấm để đổi ảnh phòng họp"}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Main Profile Info / Avatar Area */}
-      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          {/* Avatar floating above the bottom border of the cover photo */}
-          <div
-            className={`-mt-24 md:-mt-28 ${
-              hasBottomContent ? "mb-5" : ""
-            } relative z-10 p-1 bg-white rounded-full w-fit shadow-sm`}
-          >
-            <div
-              className={`relative rounded-full overflow-hidden ${
-                isOwnProfile ? "cursor-pointer group/avatar" : ""
-              } ${avatarClassName}`}
-              onClick={() => {
-                if (
-                  isOwnProfile &&
-                  fileInputRef.current &&
-                  !isUpdatingAvatar
-                ) {
-                  fileInputRef.current.click();
-                }
-              }}
-            >
-              <Avatar
-                size={133}
-                src={displayAvatarUrl}
-                alt={displayName}
-                name={displayName}
-                className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
-              />
-              {isOwnProfile && (
-                <div
-                  className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
-                    isUpdatingAvatar
-                      ? "opacity-100"
-                      : "opacity-0 group-hover/avatar:opacity-100"
-                  }`}
-                >
-                  {isUpdatingAvatar ? (
-                    <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <Camera className="w-8 h-8 text-white" />
-                  )}
-                </div>
-              )}
-            </div>
-            {isOwnProfile && (
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleAvatarSelect}
-              />
+            {isCoverUpdating ? (
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Camera className="w-8 h-8 text-white" />
             )}
           </div>
-
-          {/* Children text info (displayName, handle, location, etc.) */}
-          {children}
-        </div>
-
-        {/* Right side Actions (Edit, Follow, Request buttons) */}
-        {actions && (
-          <div className="ml-auto flex items-center justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-nowrap">
-            {actions}
-          </div>
         )}
       </div>
 
+      {/* Hidden File Input for Cover Upload (Only when isOwnProfile) */}
+      {isOwnProfile && (
+        <input
+          type="file"
+          ref={coverInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleCoverChange}
+        />
+      )}
+
+      {/* Meeting Avatar Badge on Top-Right of Cover Photo (Only when isOwnProfile) */}
+      {isOwnProfile && (
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isUpdatingMeetingAvatar) {
+              handleOpenMeetingAvatarModal();
+            }
+          }}
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 bg-black/65 backdrop-blur-md border border-white/30 rounded-2xl px-3 py-2 flex items-center gap-3 shadow-lg hover:bg-black/80 transition-all cursor-pointer group/meeting"
+        >
+          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/80 bg-cath-red-700 shadow-sm">
+            <Avatar
+              size={44}
+              src={displayMeetingAvatarUrl}
+              alt={displayName}
+              name={displayName}
+              className="w-full h-full text-white text-base"
+              style={{ border: "none" }}
+            />
+            <div
+              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
+                isUpdatingMeetingAvatar
+                  ? "opacity-100"
+                  : "opacity-0 group-hover/meeting:opacity-100"
+              }`}
+            >
+              {isUpdatingMeetingAvatar ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4 text-white" />
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col text-left pr-1">
+            <div className="flex items-center gap-1.5 text-white font-bold text-xs whitespace-nowrap">
+              <Users size={13} className="text-amber-400 shrink-0" />
+              <span>
+                {t.profile?.personalInfo?.meetingAvatarLabel ||
+                  "Ảnh phòng họp"}
+              </span>
+            </div>
+            <span className="text-[10px] text-gray-200 mt-0.5 group-hover/meeting:text-white transition-colors font-medium whitespace-nowrap">
+              {isUpdatingMeetingAvatar
+                ? t.profile?.personalInfo?.updatingAvatar ||
+                  "Đang cập nhật..."
+                : t.profile?.personalInfo?.clickToChangeMeetingAvatar ||
+                  "Bấm để đổi ảnh phòng họp"}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderAvatar = (isFloating = false) => (
+    <div
+      className={`${
+        isFloating
+          ? "absolute -bottom-14 md:-bottom-16 left-6 sm:left-8 z-20 group"
+          : "-mt-24 md:-mt-28 mb-5 relative z-10"
+      } p-1 bg-white rounded-full w-fit shadow-sm`}
+    >
+      <div
+        className={`relative rounded-full overflow-hidden ${
+          isOwnProfile ? "cursor-pointer group/avatar" : ""
+        } ${avatarClassName}`}
+        onClick={() => {
+          if (isOwnProfile && fileInputRef.current && !isUpdatingAvatar) {
+            fileInputRef.current.click();
+          }
+        }}
+      >
+        <Avatar
+          size={133}
+          src={displayAvatarUrl}
+          alt={displayName}
+          name={displayName}
+          className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
+        />
+        {isOwnProfile && (
+          <div
+            className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${
+              isUpdatingAvatar
+                ? "opacity-100"
+                : "opacity-0 group-hover/avatar:opacity-100"
+            }`}
+          >
+            {isUpdatingAvatar ? (
+              <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Camera className="w-8 h-8 text-white" />
+            )}
+          </div>
+        )}
+      </div>
+      {isOwnProfile && (
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*"
+          onChange={handleAvatarSelect}
+        />
+      )}
+    </div>
+  );
+
+  const renderModals = () => (
+    <>
       {/* Image Crop Modal for Profile Avatar (Only when isOwnProfile) */}
       {isOwnProfile && isCropModalOpen && fileToCrop && (
         <ImageCropModal
@@ -556,6 +541,43 @@ const ProfileAvatarNCover = ({
           </div>
         </Modal>
       )}
+    </>
+  );
+
+  // Standalone mode (no children, no actions - used in AccountHeader)
+  if (!hasBottomContent) {
+    return (
+      <div className={`w-full relative mb-16 md:mb-20 ${className}`}>
+        {renderCover(true)}
+        {renderAvatar(true)}
+        {renderModals()}
+      </div>
+    );
+  }
+
+  // Card mode (has children / actions - used in SocialProfileHeader)
+  return (
+    <div
+      className={`w-full bg-white border border-[#e5e5e5] rounded-xl overflow-hidden mb-6 ${className}`}
+    >
+      {renderCover(false)}
+
+      {/* Main Profile Info / Avatar Area */}
+      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          {renderAvatar(false)}
+          {children}
+        </div>
+
+        {/* Right side Actions (Edit, Follow, Request buttons) */}
+        {actions && (
+          <div className="ml-auto flex items-center justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-nowrap">
+            {actions}
+          </div>
+        )}
+      </div>
+
+      {renderModals()}
     </div>
   );
 };
