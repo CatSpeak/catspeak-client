@@ -435,14 +435,8 @@ const StudentCourseDetailPage = () => {
                           <div
                             onClick={(e) => {
                               e.stopPropagation()
-                              const isWorkspace =
-                                window.location.pathname.startsWith(
-                                  "/workspace",
-                                )
                               const classPath = isClassEnrolled
-                                ? isWorkspace
-                                  ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`
-                                  : `/learning/class/${encodeURIComponent(String(cls.id))}`
+                                ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`
                                 : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                               navigate(classPath)
                             }}
@@ -463,14 +457,8 @@ const StudentCourseDetailPage = () => {
                               <h3
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  const isWorkspace =
-                                    window.location.pathname.startsWith(
-                                      "/workspace",
-                                    )
                                   const classPath = isClassEnrolled
-                                    ? isWorkspace
-                                      ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`
-                                      : `/learning/class/${encodeURIComponent(String(cls.id))}`
+                                    ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`
                                     : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                                   navigate(classPath)
                                 }}

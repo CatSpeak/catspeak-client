@@ -144,9 +144,8 @@ const ExploreCoursesPage = () => {
   const handleOpenClassDetail = (cls) => {
     if (!cls?.id) return
     const classId = encodeURIComponent(String(cls.id))
-    const isWorkspace = window.location.pathname.startsWith("/workspace")
     if (cls.isEnrolled) {
-      navigate(isWorkspace ? `/workspace/learning/class/${classId}` : `/learning/class/${classId}`)
+      navigate(`/workspace/learning/class/${classId}`)
     } else {
       navigate(`/explore-courses/class/${classId}`)
     }
