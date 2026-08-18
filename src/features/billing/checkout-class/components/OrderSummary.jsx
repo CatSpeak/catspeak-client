@@ -15,6 +15,7 @@ const OrderSummary = ({
   onOpenModal,
   onCheckout,
   isProcessing,
+  isVoucherLoading,
   t
 }) => {
   const tc = t.billing.checkoutClass
@@ -83,6 +84,7 @@ const OrderSummary = ({
         onToggleVoucher={onToggleVoucher}
         onRemoveVoucher={onRemoveVoucher}
         onOpenModal={onOpenModal}
+        isLoading={isVoucherLoading}
         t={t}
       />
 
@@ -105,7 +107,7 @@ const OrderSummary = ({
         roundedClass='rounded-xl'
         className='flex-1 w-full'
         bgColor={"#B20000"}
-        onClick={onCheckout}
+        onClick={() => onCheckout(false)}
         disabled={isProcessing}
         loading={isProcessing}
         loadingText={tc.processing}

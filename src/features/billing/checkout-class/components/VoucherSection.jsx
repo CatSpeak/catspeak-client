@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
-import { Tag, ChevronDown, Check, Search } from 'lucide-react'
+import { Tag, ChevronDown, Check, Search, Loader2 } from 'lucide-react'
 import TextInput from '@/shared/components/ui/inputs/TextInput'
 import Checkbox from '@/shared/components/ui/inputs/Checkbox'
 import Popover from '@/shared/components/ui/Popover'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { formatCurrency } from '../../utils/checkoutUtils'
+import { LoadingSpinner } from '@/shared/components/ui/indicators'
 
 const VoucherSection = ({
   vouchers, // from availableVouchers
@@ -12,6 +13,7 @@ const VoucherSection = ({
   selectedVouchers,
   onToggleVoucher,
   onOpenModal,
+  isLoading,
   t
 }) => {
   const tc = t.billing.checkoutClass
@@ -96,7 +98,10 @@ const VoucherSection = ({
   if (selectedVouchers.length > 0) {
     return (
       <div>
-        <h3 className="font-bold text-[#111827] mb-3">{tc.voucherCode}</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-[#111827]">{tc.voucherCode}</h3>
+          {isLoading && <Loader2 size={16} className="animate-spin text-[#B20000]" />}
+        </div>
         <div className="bg-[#E8F8F0] border border-[#A7E3C3] rounded-xl p-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 text-[#00A854] font-bold">
@@ -137,45 +142,51 @@ const VoucherSection = ({
     <div>
       <h3 className="font-bold text-[#111827] mb-3">{tc.voucherCode}</h3>
 
-      {/* Suggested Tags */}
-      {suggestedVouchers.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {suggestedVouchers.map(voucher => (
-            <button
-              key={voucher.id}
-              onClick={() => handleToggle(voucher)}
-              className="flex items-center gap-1 px-3 py-1.5 border border-[#A7E3C3] text-[#00A854] bg-[#E8F8F0] rounded-full text-xs font-semibold hover:bg-[#d1f0df] transition-colors"
-            >
-              <Tag size={12} />
-              {voucher.code}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {validVouchers.length > 0 ? (
-        <Popover
-          placement="top-right"
-          triggerClassName="w-full flex-1"
-          trigger={
-            <div className="w-full flex items-center justify-between p-3 border border-border rounded-xl text-sm bg-[#f3f3f3] hover:bg-[#e5e5e5] transition-colors">
-              <span className="flex items-center gap-2 text-[#B20000] font-semibold">
-                <Tag size={16} /> {tc.selectFromMyVouchers}
-              </span>
-              <ChevronDown size={16} />
-            </div>
-          }
-          content={renderDropdownContent}
-        />
+      {isLoading ? (
+        <LoadingSpinner />
       ) : (
-        <div className="p-4 border border-border rounded-xl text-center bg-[#f3f3f3]">
-          <p className="text-sm text-[#6B7280] mb-2">{tc.noVouchersForClass}</p>
-          <button
-            onClick={onOpenModal}
-            className="text-[#B20000] text-sm font-semibold hover:underline"
-          >
-            {tc.viewAllOffers}
-          </button>
+        <div>
+          {/* Suggested Tags */}
+          {suggestedVouchers.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {suggestedVouchers.map(voucher => (
+                <button
+                  key={voucher.id}
+                  onClick={() => handleToggle(voucher)}
+                  className="flex items-center gap-1 px-3 py-1.5 border border-[#A7E3C3] text-[#00A854] bg-[#E8F8F0] rounded-full text-xs font-semibold hover:bg-[#d1f0df] transition-colors"
+                >
+                  <Tag size={12} />
+                  {voucher.code}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {validVouchers.length > 0 ? (
+            <Popover
+              placement="top-right"
+              triggerClassName="w-full flex-1"
+              trigger={
+                <div className="w-full flex items-center justify-between p-3 border border-border rounded-xl text-sm bg-[#f3f3f3] hover:bg-[#e5e5e5] transition-colors">
+                  <span className="flex items-center gap-2 text-[#B20000] font-semibold">
+                    <Tag size={16} /> {tc.selectFromMyVouchers}
+                  </span>
+                  <ChevronDown size={16} />
+                </div>
+              }
+              content={renderDropdownContent}
+            />
+          ) : (
+            <div className="p-4 border border-border rounded-xl text-center bg-[#f3f3f3]">
+              <p className="text-sm text-[#6B7280] mb-2">{tc.noVouchersForClass}</p>
+              <button
+                onClick={onOpenModal}
+                className="text-[#B20000] text-sm font-semibold hover:underline"
+              >
+                {tc.viewAllOffers}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

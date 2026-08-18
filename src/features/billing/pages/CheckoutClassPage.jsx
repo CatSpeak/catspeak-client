@@ -4,6 +4,7 @@ import LearnerSection from '../checkout-class/components/LearnerSection'
 import OrderSummary from '../checkout-class/components/OrderSummary'
 import VoucherModal from '../checkout-class/components/VoucherModal'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { AlertTriangle } from 'lucide-react'
 import { Breadcrumb } from '@/shared/components/ui/navigation'
 import { useGetVouchersForClassQuery } from '@/store/api/voucherApi'
 import { useGetExploreClassDetailQuery } from '@/store/api/coursesApi'
@@ -70,6 +71,7 @@ const CheckoutClassPage = () => {
 
   const [selectedVouchers, setSelectedVouchers] = useState([])
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false)
+  const [conflictClasses, setConflictClasses] = useState(null)
 
   // Fetch Class Detail
   const { data: classDetail, isLoading: isLoadingClass, error: classError } = useGetExploreClassDetailQuery(classId, { skip: !classId })
@@ -92,6 +94,8 @@ const CheckoutClassPage = () => {
   // Fetch vouchers from API
   const {
     data: voucherData,
+    isLoading: isLoadingVouchers,
+    isFetching: isFetchingVouchers,
     refetch: refetchVouchers,
   } = useGetVouchersForClassQuery(
     {
@@ -173,7 +177,7 @@ const CheckoutClassPage = () => {
 
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation()
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (confirmScheduleConflict = false) => {
     try {
       const subtotal = classData.unitPrice * learners.length
       const expectedTotalDiscountVnd = selectedVouchers.reduce((sum, v) => sum + calculateVoucherDiscount(v, subtotal), 0)
@@ -184,7 +188,7 @@ const CheckoutClassPage = () => {
         voucherIds: selectedVouchers.map(v => Number(v.voucherId || v.id)),
         learnerAccountIds: learners.filter(l => !l.isPayer).map(l => Number(l.id)),
         expectedTotalDiscountVnd,
-        confirmScheduleConflict: false,
+        confirmScheduleConflict,
         pendingClassData: "",
         returnUrl: `${window.location.origin}/workspace/learning/class/${classId}`,
         cancelUrl: window.location.origin + window.location.pathname,
@@ -206,6 +210,18 @@ const CheckoutClassPage = () => {
         toast.success(tc.paymentSuccess)
       }
     } catch (error) {
+      const status = error?.status ?? error?.originalStatus
+      const errorCode = error?.data?.errorCode || error?.data?.data?.errorCode
+
+      if (status === 409 || errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT") {
+        const message = error?.data?.message || error?.data?.data?.message || ""
+        const names = (message.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
+        setConflictClasses({
+          names: names ? names.split(", ").filter(Boolean) : [],
+        })
+        return
+      }
+
       const errMsg = error?.data?.message || error?.error || tc.paymentError
 
       const voucherMatch = errMsg.match(/Voucher (.*?) không khả dụng/i)
@@ -287,6 +303,7 @@ const CheckoutClassPage = () => {
               onOpenModal={() => setIsVoucherModalOpen(true)}
               onCheckout={handleCheckout}
               isProcessing={isCheckoutLoading}
+              isVoucherLoading={isLoadingVouchers || isFetchingVouchers}
               t={t}
             />
           </div>
@@ -301,6 +318,48 @@ const CheckoutClassPage = () => {
         onToggleVoucher={handleToggleVoucher}
         t={t}
       />
+
+      {conflictClasses && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div role="alertdialog" aria-modal="true" className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle size={22} className="text-amber-500 shrink-0" />
+              <h2 className="text-lg font-black text-gray-950">{tc.scheduleConflictTitle || "Lịch học bị trùng"}</h2>
+            </div>
+            <p className="text-sm text-gray-600 font-medium leading-relaxed">
+              {tc.scheduleConflictDesc || "Lịch học của lớp này trùng với lớp bạn đang học:"}
+            </p>
+            {(conflictClasses.names || []).length > 0 && (
+              <ul className="flex flex-col gap-1.5">
+                {conflictClasses.names.map((name) => (
+                  <li key={name} className="text-sm font-bold text-[#b20a1c] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
+                    {name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setConflictClasses(null)}
+                className="h-10 px-4 rounded-full border border-border text-gray-700 text-sm font-black hover:bg-gray-50"
+              >
+                {tc.cancel || "Hủy"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConflictClasses(null)
+                  handleCheckout(true)
+                }}
+                className="h-10 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-black"
+              >
+                {tc.confirmEnroll || "Vẫn đăng ký"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
