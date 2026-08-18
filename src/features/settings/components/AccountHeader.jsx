@@ -272,9 +272,9 @@ const AccountHeader = ({ user, formData, t }) => {
   };
 
   return (
-    <div className="w-full relative mb-16">
+    <div className="w-full relative mb-16 md:mb-20">
       {/* Cover Photo Outer Container */}
-      <div className="w-full h-40 md:h-52 lg:h-64 rounded-[32px] overflow-hidden relative border border-[#e5e5e5] group/cover">
+      <div className="w-full h-48 md:h-[280px] bg-gray-200 rounded-xl overflow-hidden relative border border-[#e5e5e5] group/cover">
         {/* Cover Photo Image */}
         <div className="relative w-full h-full">
           {isBackgroundLoading ? (
@@ -368,7 +368,7 @@ const AccountHeader = ({ user, formData, t }) => {
       </div>
 
       {/* Main Profile Avatar floating over Cover (Original Bottom-Left Position) */}
-      <div className="absolute -bottom-12 left-8 sm:left-12 z-20 group w-fit bg-white rounded-full p-1 shadow-sm">
+      <div className="absolute -bottom-14 md:-bottom-16 left-6 sm:left-8 z-20 group w-fit bg-white rounded-full p-1 shadow-sm">
         <div
           className="relative rounded-full overflow-hidden cursor-pointer"
           onClick={() => {
@@ -378,11 +378,11 @@ const AccountHeader = ({ user, formData, t }) => {
           }}
         >
           <Avatar
-            size={120}
+            size={133}
             src={displayAvatarUrl}
             alt={displayName}
             name={displayName}
-            className="w-[100px] h-[100px] md:w-[120px] md:h-[120px] bg-cath-red-700 text-white text-4xl"
+            className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] bg-purple-100 text-purple-600 text-4xl"
           />
           <div
             className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isUpdatingAvatar
