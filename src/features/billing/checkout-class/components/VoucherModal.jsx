@@ -9,8 +9,10 @@ const VoucherModal = ({
   onClose,
   voucherData,
   selectedVouchers,
-  onToggleVoucher
+  onToggleVoucher,
+  t
 }) => {
+  const tc = t.billing.checkoutClass
   const [search, setSearch] = useState('')
 
   if (!isOpen) return null
@@ -38,12 +40,12 @@ const VoucherModal = ({
       open={isOpen}
       onClose={onClose}
       className="w-full max-w-2xl"
-      title={"Ưu đãi của tôi"}
+      title={tc.myOffers}
       headerClassName="p-4 border-b border-border flex justify-between items-center shrink-0"
       subHeader={
         <TextInput
           icon={Search}
-          placeholder="Tìm ưu đãi..."
+          placeholder={tc.searchOffers}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           containerClassName="w-full"
@@ -57,18 +59,18 @@ const VoucherModal = ({
           <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-[#1864AB]">
             <Tag size={24} />
           </div>
-          <h3 className="font-bold text-[#111827] mb-2">Hiện chưa có ưu đãi nào</h3>
+          <h3 className="font-bold text-[#111827] mb-2">{tc.noOffersTitle}</h3>
           <p className="text-sm text-[#6B7280] max-w-xs mx-auto">
-            Bạn chưa có mã giảm giá nào. Hãy quay lại sau hoặc liên hệ giáo viên để biết thêm chương trình ưu đãi.
+            {tc.noOffersDesc}
           </p>
         </div>
       ) : (
         <>
-          <VoucherCategoryList title="Có thể dùng" vouchers={validVouchers} category="valid" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} />
-          <VoucherCategoryList title="Không áp dụng cho lớp này" vouchers={invalidForClass} category="invalid_class" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} />
-          <VoucherCategoryList title="Không đủ điều kiện" vouchers={ineligible} category="ineligible" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} />
-          <VoucherCategoryList title="Hết hạn" vouchers={expired} category="expired" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} />
-          <VoucherCategoryList title="Hết lượt" vouchers={outOfUses} category="out_of_uses" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} />
+          <VoucherCategoryList title={tc.categoryValid} vouchers={validVouchers} category="valid" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
+          <VoucherCategoryList title={tc.categoryInvalidClass} vouchers={invalidForClass} category="invalid_class" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
+          <VoucherCategoryList title={tc.categoryIneligible} vouchers={ineligible} category="ineligible" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
+          <VoucherCategoryList title={tc.categoryExpired} vouchers={expired} category="expired" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
+          <VoucherCategoryList title={tc.categoryExhausted} vouchers={outOfUses} category="out_of_uses" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
         </>
       )}
     </Modal>

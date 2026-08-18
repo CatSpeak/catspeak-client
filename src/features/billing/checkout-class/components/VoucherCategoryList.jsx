@@ -2,7 +2,8 @@ import React from 'react'
 import { AlertTriangle, XCircle } from 'lucide-react'
 import VoucherCard from './VoucherCard'
 
-const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onToggleVoucher }) => {
+const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onToggleVoucher, t }) => {
+  const tc = t.billing.checkoutClass
   if (vouchers.length === 0) return null
 
   let headerColor = 'text-[#111827]'
@@ -13,7 +14,7 @@ const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onTo
     <div className="mb-6">
       <h4 className={`text-sm font-bold mb-3 uppercase flex items-center gap-2 ${headerColor}`}>
         {category === 'invalid_class' || category === 'ineligible' ? <AlertTriangle size={14} /> : category === 'expired' || category === 'out_of_uses' ? <XCircle size={14} /> : null}
-        {title} ({vouchers.length} mã)
+        {title} ({vouchers.length} {tc.voucherCountSuffix})
       </h4>
       <div className='space-y-4'>
         {vouchers.map(voucher => {
@@ -28,6 +29,7 @@ const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onTo
               isSelected={isSelected}
               canUse={canUse}
               onToggleVoucher={onToggleVoucher}
+              t={t}
             />
           )
         })}

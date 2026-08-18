@@ -10,9 +10,11 @@ import { useGetExploreClassDetailQuery } from '@/store/api/coursesApi'
 import { useCheckoutMutation, useLazyLookupLearnerQuery } from '@/store/api/paymentsApi'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { useGetProfileQuery } from '@/store/api/authApi'
+import { useLanguage } from '@/shared/context/LanguageContext'
 import { useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { defaultCourseThumbnail } from '@/features/courses/utils/courseUtils'
+import { calculateVoucherDiscount } from '../utils/checkoutUtils'
 
 const EMPTY_VOUCHER_DATA = {
   availableVouchers: [],
@@ -26,6 +28,8 @@ const EMPTY_VOUCHER_DATA = {
 const CheckoutClassPage = () => {
   const { id: classId } = useParams()
   const { formatWeeklySchedule, formatDate } = useTimezone()
+  const { t } = useLanguage()
+  const tc = t.billing.checkoutClass
 
   const { data: profileResponse } = useGetProfileQuery()
   const currentUser = profileResponse?.data || profileResponse
@@ -34,7 +38,7 @@ const CheckoutClassPage = () => {
     if (currentUser) {
       return [{
         id: currentUser.id || currentUser.accountId || 'user_1',
-        name: currentUser.fullName || currentUser.name || 'Bạn',
+        name: currentUser.fullName || currentUser.name || tc.fallbackName,
         avatarImageUrl: currentUser.avatarImageUrl || '',
         email: currentUser.email || '',
         isPayer: true
@@ -51,7 +55,7 @@ const CheckoutClassPage = () => {
           const newLearners = [...prev]
           newLearners[0] = {
             id: currentUser.id || currentUser.accountId || 'user_1',
-            name: currentUser.fullName || currentUser.name || 'Bạn',
+            name: currentUser.fullName || currentUser.name || tc.fallbackName,
             avatarImageUrl: currentUser.avatarImageUrl || '',
             email: currentUser.email || '',
             isPayer: true
@@ -61,7 +65,7 @@ const CheckoutClassPage = () => {
         return prev
       })
     }
-  }, [currentUser])
+  }, [currentUser, tc.fallbackName])
 
   const [selectedVouchers, setSelectedVouchers] = useState([])
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false)
@@ -71,13 +75,13 @@ const CheckoutClassPage = () => {
 
   const classData = classDetail ? {
     thumbnailUrl: classDetail.thumbnailUrl || defaultCourseThumbnail,
-    courseName: classDetail.courseName || "Lớp học độc lập",
+    courseName: classDetail.courseName || tc.fallbackCourseName,
     classCode: classDetail.name,
     className: classDetail.name,
     availableSlots: classDetail.remainingSlots,
     maxSlots: classDetail.capacity,
-    schedule: formatWeeklySchedule(classDetail, "Chưa có lịch"),
-    dateRange: `${classDetail.startDate ? formatDate(classDetail.startDate) : 'Đang cập nhật'} - ${classDetail.endDate ? formatDate(classDetail.endDate) : 'Đang cập nhật'}`,
+    schedule: formatWeeklySchedule(classDetail, tc.fallbackNoSchedule),
+    dateRange: `${classDetail.startDate ? formatDate(classDetail.startDate) : tc.fallbackUpdating} - ${classDetail.endDate ? formatDate(classDetail.endDate) : tc.fallbackUpdating}`,
     totalSessions: classDetail.totalSessions,
     teacher: classDetail.teacher?.name,
     tags: [classDetail.language, ...classDetail.levels].filter(Boolean),
@@ -130,7 +134,7 @@ const CheckoutClassPage = () => {
 
       // If backend returns success: false with HTTP 200, baseApi does not unwrap it
       if (response.success === false) {
-        return { success: false, message: response.message || "Không tìm thấy tài khoản với email này." }
+        return { success: false, message: response.message || tc.fallbackAccountNotFound }
       }
 
       // If success: true, baseApi unwraps it, so response IS the data object
@@ -145,10 +149,10 @@ const CheckoutClassPage = () => {
         setLearners([...learners, newLearner])
         return { success: true }
       } else {
-        return { success: false, message: "Không tìm thấy tài khoản với email này." }
+        return { success: false, message: tc.fallbackAccountNotFound }
       }
     } catch (error) {
-      return { success: false, message: error?.data?.message || "Không tìm thấy tài khoản với email này." }
+      return { success: false, message: error?.data?.message || tc.fallbackAccountNotFound }
     }
   }
 
@@ -171,17 +175,7 @@ const CheckoutClassPage = () => {
   const handleCheckout = async () => {
     try {
       const subtotal = classData.unitPrice * learners.length
-      const calculateDiscount = (voucher) => {
-        if (voucher.estimatedDiscountAmount) return voucher.estimatedDiscountAmount
-        const isPercentage = voucher.discountType?.toLowerCase() === 'percentage'
-        if (isPercentage) {
-          const discount = (subtotal * voucher.discountValue) / 100
-          if (voucher.maxDiscountAmount) return Math.min(discount, voucher.maxDiscountAmount)
-          return discount
-        }
-        return voucher.discountValue || 0
-      }
-      const expectedTotalDiscountVnd = selectedVouchers.reduce((sum, v) => sum + calculateDiscount(v), 0)
+      const expectedTotalDiscountVnd = selectedVouchers.reduce((sum, v) => sum + calculateVoucherDiscount(v, subtotal), 0)
 
       const result = await checkout({
         paymentType: "ClassEnrollment",
@@ -208,16 +202,16 @@ const CheckoutClassPage = () => {
       if (resultPayload?.checkoutUrl) {
         window.location.href = resultPayload.checkoutUrl
       } else {
-        toast.success("Thanh toán thành công!")
+        toast.success(tc.paymentSuccess)
       }
     } catch (error) {
-      const errMsg = error?.data?.message || error?.error || "Đã xảy ra lỗi khi thanh toán."
+      const errMsg = error?.data?.message || error?.error || tc.paymentError
 
       const voucherMatch = errMsg.match(/Voucher (.*?) không khả dụng/i)
       if (voucherMatch) {
         const voucherCode = voucherMatch[1]
         setSelectedVouchers(prev => prev.filter(v => v.code !== voucherCode))
-        toast.error(`Mã ${voucherCode} không còn khả dụng, đã tự động gỡ khỏi đơn hàng`)
+        toast.error(tc.voucherUnavailable.replace('{{code}}', voucherCode))
       } else if (errMsg.includes("Số tiền giảm giá của Voucher đã thay đổi")) {
         toast.error(errMsg)
         refetchVouchers()
@@ -239,9 +233,9 @@ const CheckoutClassPage = () => {
     return (
       <div className="min-h-screen bg-[#f3f3f3] flex items-center justify-center">
         <div className="text-center p-6 bg-white rounded-xl shadow">
-          <h2 className="text-xl font-bold text-[#B20000] mb-2">Không tìm thấy lớp học</h2>
-          <p className="text-gray-600 mb-4">Lớp học này có thể không tồn tại hoặc đã bị xóa.</p>
-          <Link to="/" className="text-[#1864AB] font-semibold hover:underline">Quay lại trang chủ</Link>
+          <h2 className="text-xl font-bold text-[#B20000] mb-2">{tc.classNotFound}</h2>
+          <p className="text-gray-600 mb-4">{tc.classNotFoundDesc}</p>
+          <Link to="/" className="text-[#1864AB] font-semibold hover:underline">{tc.backToHome}</Link>
         </div>
       </div>
     )
@@ -252,24 +246,25 @@ const CheckoutClassPage = () => {
       <div className="p-4 md:p-6 space-y-6">
 
         <Breadcrumb items={[
-          { label: 'Trang chủ' },
-          { label: 'Khám phá khóa học' },
-          { label: 'Chi tiết khóa học' },
-          { label: 'Chi tiết lớp học' },
-          { label: 'Thanh toán lớp học' }
+          { label: tc.breadcrumbHome },
+          { label: tc.breadcrumbExplore },
+          { label: tc.breadcrumbCourseDetail },
+          { label: tc.breadcrumbClassDetail },
+          { label: tc.breadcrumbCheckout }
         ]} />
 
-        <h1 className="text-3xl font-bold text-[#1A1C1C]">Thanh toán lớp học</h1>
+        <h1 className="text-3xl font-bold text-[#1A1C1C]">{tc.pageTitle}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            <ClassInfoSection classData={classData} />
+            <ClassInfoSection classData={classData} t={t} />
             <LearnerSection
               learners={learners}
               onAddLearner={handleAddLearner}
               onRemoveLearner={handleRemoveLearner}
               maxSlots={classData.availableSlots}
+              t={t}
             />
           </div>
 
@@ -289,6 +284,7 @@ const CheckoutClassPage = () => {
               onOpenModal={() => setIsVoucherModalOpen(true)}
               onCheckout={handleCheckout}
               isProcessing={isCheckoutLoading}
+              t={t}
             />
           </div>
         </div>
@@ -300,6 +296,7 @@ const CheckoutClassPage = () => {
         voucherData={resolvedVoucherData}
         selectedVouchers={selectedVouchers}
         onToggleVoucher={handleToggleVoucher}
+        t={t}
       />
     </div>
   )

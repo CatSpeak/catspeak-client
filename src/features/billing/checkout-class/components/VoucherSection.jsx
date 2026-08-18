@@ -4,14 +4,17 @@ import TextInput from '@/shared/components/ui/inputs/TextInput'
 import Checkbox from '@/shared/components/ui/inputs/Checkbox'
 import Popover from '@/shared/components/ui/Popover'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { formatCurrency } from '../../utils/checkoutUtils'
 
 const VoucherSection = ({
   vouchers, // from availableVouchers
   suggestedTags, // array of strings (codes)
   selectedVouchers,
   onToggleVoucher,
-  onOpenModal
+  onOpenModal,
+  t
 }) => {
+  const tc = t.billing.checkoutClass
   const [search, setSearch] = useState('')
   const { formatDate } = useTimezone()
 
@@ -23,9 +26,6 @@ const VoucherSection = ({
     v.code.toLowerCase().includes(search.toLowerCase()) ||
     v.title.toLowerCase().includes(search.toLowerCase())
   )
-
-  console.log(vouchers);
-
 
   const handleToggle = (voucher) => {
     // If already selected, we can unselect
@@ -42,7 +42,7 @@ const VoucherSection = ({
       <div className="p-3 border-b border-border">
         <TextInput
           icon={Search}
-          placeholder="Tìm mã..."
+          placeholder={tc.searchVoucher}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -69,9 +69,9 @@ const VoucherSection = ({
                 <p className="font-bold text-sm text-[#111827]">{voucher.code}</p>
                 <p className="text-xs text-[#6B7280] mt-1">{voucher.title}</p>
                 {voucher.maxDiscountAmount && voucher.discountType?.toLowerCase() === 'percentage' && (
-                  <p className="text-xs text-[#6B7280] mt-1">Tối đa: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(voucher.maxDiscountAmount)}</p>
+                  <p className="text-xs text-[#6B7280] mt-1">{tc.maxDiscount} {formatCurrency(voucher.maxDiscountAmount)}</p>
                 )}
-                <p className="text-xs text-[#6B7280] mt-1">HSD: {voucher.isNeverExpired ? 'Không thời hạn' : formatDate(voucher.validTo)}</p>
+                <p className="text-xs text-[#6B7280] mt-1">{tc.expiry} {voucher.isNeverExpired ? tc.neverExpires : formatDate(voucher.validTo)}</p>
               </div>
             </div>
           )
@@ -86,7 +86,7 @@ const VoucherSection = ({
           }}
           className="text-[#B20000] text-sm font-semibold hover:underline"
         >
-          Xem tất cả ưu đãi →
+          {tc.viewAllOffers}
         </button>
       </div>
     </div>
@@ -96,18 +96,18 @@ const VoucherSection = ({
   if (selectedVouchers.length > 0) {
     return (
       <div>
-        <h3 className="font-bold text-[#111827] mb-3">Mã giảm giá</h3>
+        <h3 className="font-bold text-[#111827] mb-3">{tc.voucherCode}</h3>
         <div className="bg-[#E8F8F0] border border-[#A7E3C3] rounded-xl p-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 text-[#00A854] font-bold">
               <Check size={18} />
-              <span>Đã áp dụng {selectedVouchers.length} mã</span>
+              <span>{tc.appliedCount.replace('{{count}}', selectedVouchers.length)}</span>
             </div>
             <Popover
               placement="top-right"
               trigger={
                 <span className="text-[#B20000] text-sm font-semibold hover:underline">
-                  Thay đổi
+                  {tc.change}
                 </span>
               }
               content={renderDropdownContent}
@@ -119,7 +119,7 @@ const VoucherSection = ({
               <div key={voucher.id} className="flex justify-between items-center text-sm">
                 <div>
                   <span className="font-bold text-[#111827] mr-2">{voucher.code}</span>
-                  <span className="text-[#6B7280]">({voucher.sponsorType === 'CatSpeak' ? 'CatSpeak' : 'Giáo viên'})</span>
+                  <span className="text-[#6B7280]">({voucher.sponsorType === 'CatSpeak' ? 'CatSpeak' : tc.sponsorInstructor})</span>
                 </div>
                 <span className="text-[#111827]">
                   - {voucher.discountType?.toLowerCase() === 'percentage' ? `${voucher.discountValue}%` : `${voucher.discountValue / 1000}k`}
@@ -135,7 +135,7 @@ const VoucherSection = ({
   // Default state: no vouchers selected
   return (
     <div>
-      <h3 className="font-bold text-[#111827] mb-3">Mã giảm giá</h3>
+      <h3 className="font-bold text-[#111827] mb-3">{tc.voucherCode}</h3>
 
       {/* Suggested Tags */}
       {suggestedVouchers.length > 0 && (
@@ -160,7 +160,7 @@ const VoucherSection = ({
           trigger={
             <div className="w-full flex items-center justify-between p-3 border border-border rounded-xl text-sm bg-[#f3f3f3] hover:bg-[#e5e5e5] transition-colors">
               <span className="flex items-center gap-2 text-[#B20000] font-semibold">
-                <Tag size={16} /> Chọn từ mã của tôi
+                <Tag size={16} /> {tc.selectFromMyVouchers}
               </span>
               <ChevronDown size={16} />
             </div>
@@ -169,12 +169,12 @@ const VoucherSection = ({
         />
       ) : (
         <div className="p-4 border border-border rounded-xl text-center bg-[#f3f3f3]">
-          <p className="text-sm text-[#6B7280] mb-2">Hiện không có mã giảm giá phù hợp với lớp học này</p>
+          <p className="text-sm text-[#6B7280] mb-2">{tc.noVouchersForClass}</p>
           <button
             onClick={onOpenModal}
             className="text-[#B20000] text-sm font-semibold hover:underline"
           >
-            Xem tất cả ưu đãi →
+            {tc.viewAllOffers}
           </button>
         </div>
       )}

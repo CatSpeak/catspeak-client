@@ -5,7 +5,8 @@ import { toast } from 'react-hot-toast'
 import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import Avatar from '@/shared/components/ui/Avatar'
 
-const LearnerSection = ({ learners, onAddLearner, onRemoveLearner }) => {
+const LearnerSection = ({ learners, onAddLearner, onRemoveLearner, t }) => {
+  const tc = t.billing.checkoutClass
   const [emailInput, setEmailInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -18,20 +19,20 @@ const LearnerSection = ({ learners, onAddLearner, onRemoveLearner }) => {
       if (res?.success) {
         setEmailInput('')
       } else {
-        toast.error(res?.message || 'Có lỗi xảy ra khi thêm người học')
+        toast.error(res?.message || tc.addLearnerError)
       }
     }
   }
 
   return (
     <div className="bg-white rounded-xl shadow-faq-card border border-border p-6 space-y-4">
-      <h2 className="text-xl font-bold text-[#111827]">Thêm người học</h2>
+      <h2 className="text-xl font-bold text-[#111827]">{tc.addLearner}</h2>
 
       <div className='flex items-start w-full gap-3'>
         <TextInput
           icon={Search}
           containerClassName='flex-1'
-          placeholder="Nhập email người học"
+          placeholder={tc.emailPlaceholder}
           value={emailInput}
           onChange={(e) => {
             setEmailInput(e.target.value)
@@ -43,10 +44,10 @@ const LearnerSection = ({ learners, onAddLearner, onRemoveLearner }) => {
           className='!min-w-24'
           onClick={handleAdd}
           loading={isLoading}
-          loadingText="Đang thêm"
+          loadingText={tc.adding}
           disabled={!emailInput.trim() || isLoading}
         >
-          Thêm
+          {tc.add}
         </PillButton>
       </div>
 
@@ -58,7 +59,7 @@ const LearnerSection = ({ learners, onAddLearner, onRemoveLearner }) => {
               <Avatar name={learner.name} size="md" src={learner?.avatarImageUrl} />
               <div>
                 <p className="text-base font-semibold text-[#111827]">
-                  {learner.name} {learner.isPayer && <span className="font-normal text-[#6B7280]">(Người thanh toán)</span>}
+                  {learner.name} {learner.isPayer && <span className="font-normal text-[#6B7280]">{tc.payer}</span>}
                 </p>
                 <p className="text-sm text-[#6B7280]">{learner.email}</p>
               </div>
@@ -78,7 +79,7 @@ const LearnerSection = ({ learners, onAddLearner, onRemoveLearner }) => {
         ))}
       </div>
 
-      <p className="font-semibold text-[#111827]">Tổng số người học: {learners.length}</p>
+      <p className="font-semibold text-[#111827]">{tc.totalLearners} {learners.length}</p>
     </div>
   )
 }

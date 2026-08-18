@@ -141,6 +141,96 @@ export default {
       successTitle: "报告已提交",
       successSubtitle: "我们已收到您的报告，并将调查此问题。",
       done: "完成"
+    },
+    checkoutClass: {
+      // Breadcrumb
+      breadcrumbHome: "首页",
+      breadcrumbExplore: "探索课程",
+      breadcrumbCourseDetail: "课程详情",
+      breadcrumbClassDetail: "班级详情",
+      breadcrumbCheckout: "班级结算",
+
+      // Page
+      pageTitle: "班级结算",
+      classNotFound: "未找到班级",
+      classNotFoundDesc: "该班级可能不存在或已被删除。",
+      backToHome: "返回首页",
+
+      // Fallback texts
+      fallbackName: "你",
+      fallbackCourseName: "独立班级",
+      fallbackNoSchedule: "暂无课表",
+      fallbackUpdating: "更新中",
+      fallbackAccountNotFound: "未找到使用此邮箱的账户。",
+      paymentSuccess: "支付成功！",
+      paymentError: "支付过程中发生错误。",
+      voucherUnavailable: "优惠码 {{code}} 已不可用，已自动从订单中移除",
+
+      // ClassInfoSection
+      classInfo: "班级信息",
+      slotsAvailable: "剩余 {{available}}/{{max}} 名额",
+      sessions: "节课",
+      instructor: "讲师：",
+
+      // LearnerSection
+      addLearner: "添加学员",
+      emailPlaceholder: "输入学员邮箱",
+      adding: "添加中",
+      add: "添加",
+      payer: "（付款人）",
+      totalLearners: "学员总数：",
+      addLearnerError: "添加学员时发生错误",
+
+      // OrderSummary
+      orderSummary: "订单摘要",
+      unitPrice: "单价",
+      perPerson: "/ 人",
+      learnerCount: "学员人数",
+      subtotal: "小计",
+      discount: "折扣",
+      maxDiscount: "最高：",
+      tuition: "学费",
+      totalPayment: "应付总额",
+      youSaved: "您节省了 {{amount}}!",
+      processing: "处理中...",
+      confirmPayment: "确认支付",
+
+      // VoucherSection
+      searchVoucher: "搜索优惠码...",
+      expiry: "有效期：",
+      neverExpires: "永久有效",
+      viewAllOffers: "查看所有优惠 →",
+      voucherCode: "优惠码",
+      appliedCount: "已使用 {{count}} 个优惠码",
+      change: "更改",
+      sponsorInstructor: "讲师",
+      selectFromMyVouchers: "从我的优惠券中选择",
+      noVouchersForClass: "该班级暂无可用优惠码",
+
+      // VoucherCard
+      sponsorInstructorBadge: "讲师",
+      maxDiscountLabel: "最高优惠：",
+      ineligible: "不符合条件",
+      applied: "已使用",
+      use: "使用",
+
+      // Ineligible reason patterns
+      reasonMinLearners: "订单中至少需要 {{count}} 名学员",
+      reasonMinOrder: "最低订单金额 {{minAmount}}（小计：{{currentAmount}}）",
+
+      // VoucherModal
+      myOffers: "我的优惠",
+      searchOffers: "搜索优惠...",
+      noOffersTitle: "暂无可用优惠",
+      noOffersDesc: "您还没有优惠码。请稍后再来或联系讲师了解优惠活动。",
+
+      // VoucherCategoryList
+      categoryValid: "可使用",
+      categoryInvalidClass: "不适用于此班级",
+      categoryIneligible: "不符合条件",
+      categoryExpired: "已过期",
+      categoryExhausted: "已用完",
+      voucherCountSuffix: "个",
     }
   }
 }
