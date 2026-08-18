@@ -1,5 +1,6 @@
 import React from 'react'
-import { Calendar, CalendarDays, Clock, User, Users } from 'lucide-react'
+import { CalendarDays, Clock, User } from 'lucide-react'
+import { defaultCourseThumbnail } from '@/features/courses/utils/courseUtils'
 
 const ClassInfoSection = ({ classData }) => {
   return (
@@ -8,7 +9,15 @@ const ClassInfoSection = ({ classData }) => {
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Placeholder for Class Image */}
-        <div className="w-full md:w-48 h-48 bg-[#d9d9d9] rounded-xl shrink-0"></div>
+        <div className="w-full md:w-48 h-48 bg-[#d9d9d9] rounded-xl shrink-0">
+          <img
+            src={classData.thumbnailUrl || defaultCourseThumbnail}
+            alt={classData.className}
+            width={192}
+            height={192}
+            className="w-full h-full object-cover rounded-xl"
+          />
+        </div>
 
         <div className="flex-1 space-y-4">
           <div>
@@ -40,7 +49,7 @@ const ClassInfoSection = ({ classData }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-2">
+          <div className="flex items-center gap-2">
             {classData.tags.map(tag => (
               <span key={tag} className="px-3 py-1 bg-[#F3F4F6] text-[#6B7280] text-xs rounded-full font-medium">
                 {tag}

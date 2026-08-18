@@ -75,7 +75,12 @@ const OrderSummary = ({
 
         {discountDetails.map(voucher => (
           <div key={voucher.id} className="flex justify-between text-[#00A854]">
-            <span>Giảm giá ({voucher.code})</span>
+            <div className="flex flex-col">
+              <span>Giảm giá ({voucher.code})</span>
+              {voucher.maxDiscountAmount && voucher.discountType?.toLowerCase() === 'percentage' && (
+                <span className="text-xs opacity-80">Tối đa: {formatCurrency(voucher.maxDiscountAmount)}</span>
+              )}
+            </div>
             <span>-{formatCurrency(voucher.discountAmount)}</span>
           </div>
         ))}
@@ -118,8 +123,10 @@ const OrderSummary = ({
         bgColor={"#B20000"}
         onClick={onCheckout}
         disabled={isProcessing}
+        loading={isProcessing}
+        loadingText='Đang xử lý...'
       >
-        {isProcessing ? 'Đang xử lý...' : 'Xác nhận thanh toán'}
+        Xác nhận thanh toán
       </PillButton>
     </div>
   )

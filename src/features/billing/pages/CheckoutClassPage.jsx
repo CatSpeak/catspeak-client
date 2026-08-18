@@ -4,16 +4,15 @@ import LearnerSection from '../checkout-class/components/LearnerSection'
 import OrderSummary from '../checkout-class/components/OrderSummary'
 import VoucherModal from '../checkout-class/components/VoucherModal'
 import { Link, useParams } from 'react-router-dom'
-import { MOCK_CLASS_DATA, MOCK_PAYER } from '../mock/voucher'
 import { Breadcrumb } from '@/shared/components/ui/navigation'
 import { useGetVouchersForClassQuery } from '@/store/api/voucherApi'
 import { useGetExploreClassDetailQuery } from '@/store/api/coursesApi'
 import { useCheckoutMutation, useLazyLookupLearnerQuery } from '@/store/api/paymentsApi'
 import { useTimezone } from '@/shared/hooks/useTimezone'
-import { useSelector } from 'react-redux'
-import { selectCurrentUser } from '@/store/slices/authSlice'
+import { useGetProfileQuery } from '@/store/api/authApi'
 import { useEffect } from 'react'
 import { toast } from 'react-hot-toast'
+import { defaultCourseThumbnail } from '@/features/courses/utils/courseUtils'
 
 const EMPTY_VOUCHER_DATA = {
   availableVouchers: [],
@@ -27,8 +26,9 @@ const EMPTY_VOUCHER_DATA = {
 const CheckoutClassPage = () => {
   const { id: classId } = useParams()
   const { formatWeeklySchedule, formatDate } = useTimezone()
-  const currentUser = useSelector(selectCurrentUser)
-  console.log("currentUser", currentUser)
+
+  const { data: profileResponse } = useGetProfileQuery()
+  const currentUser = profileResponse?.data || profileResponse
 
   const [learners, setLearners] = useState(() => {
     if (currentUser) {
@@ -40,13 +40,14 @@ const CheckoutClassPage = () => {
         isPayer: true
       }]
     }
-    return [MOCK_PAYER]
+    return []
   })
 
   useEffect(() => {
     if (currentUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLearners(prev => {
-        if (prev[0]?.id === MOCK_PAYER.id || !prev[0]?.email) {
+        if (prev.length === 0 || !prev[0]?.email) {
           const newLearners = [...prev]
           newLearners[0] = {
             id: currentUser.id || currentUser.accountId || 'user_1',
@@ -69,6 +70,7 @@ const CheckoutClassPage = () => {
   const { data: classDetail, isLoading: isLoadingClass, error: classError } = useGetExploreClassDetailQuery(classId, { skip: !classId })
 
   const classData = classDetail ? {
+    thumbnailUrl: classDetail.thumbnailUrl || defaultCourseThumbnail,
     courseName: classDetail.courseName || "Lớp học độc lập",
     classCode: classDetail.name,
     className: classDetail.name,
@@ -80,7 +82,7 @@ const CheckoutClassPage = () => {
     teacher: classDetail.teacher?.name,
     tags: [classDetail.language, ...classDetail.levels].filter(Boolean),
     unitPrice: classDetail.price
-  } : MOCK_CLASS_DATA
+  } : {}
 
   // Fetch vouchers from API
   const {
@@ -96,6 +98,22 @@ const CheckoutClassPage = () => {
 
   // Use API data if available, otherwise use empty defaults
   const resolvedVoucherData = voucherData || EMPTY_VOUCHER_DATA
+
+  useEffect(() => {
+    if (resolvedVoucherData.availableVouchers.length > 0 || selectedVouchers.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedVouchers(prev => {
+        const validSelected = prev.filter(selected =>
+          resolvedVoucherData.availableVouchers.some(available => available.id === selected.id)
+        )
+
+        return validSelected.map(selected =>
+          resolvedVoucherData.availableVouchers.find(available => available.id === selected.id) || selected
+        )
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolvedVoucherData.availableVouchers])
 
   const [lookupLearner] = useLazyLookupLearnerQuery()
 

@@ -32,6 +32,11 @@ const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher })
               </span>
             </div>
             <p className="text-sm text-[#5B403E]">{voucher.description}</p>
+            {voucher.maxDiscountAmount && voucher.discountType?.toLowerCase() === 'percentage' && (
+              <p className="text-xs text-[#5B403E]">
+                Giảm tối đa: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(voucher.maxDiscountAmount)}
+              </p>
+            )}
             <div className='flex items-center gap-1'>
               <Clock size={12} color='#5B403E' />
               <p className="text-xs font-bold text-[#5B403E]"> HSD: {voucher.isNeverExpired ? 'Không thời hạn' : formatDate(voucher.validTo)}</p>

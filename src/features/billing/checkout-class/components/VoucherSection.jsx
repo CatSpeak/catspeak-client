@@ -68,6 +68,9 @@ const VoucherSection = ({
               <div>
                 <p className="font-bold text-sm text-[#111827]">{voucher.code}</p>
                 <p className="text-xs text-[#6B7280] mt-1">{voucher.title}</p>
+                {voucher.maxDiscountAmount && voucher.discountType?.toLowerCase() === 'percentage' && (
+                  <p className="text-xs text-[#6B7280] mt-1">Tối đa: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(voucher.maxDiscountAmount)}</p>
+                )}
                 <p className="text-xs text-[#6B7280] mt-1">HSD: {voucher.isNeverExpired ? 'Không thời hạn' : formatDate(voucher.validTo)}</p>
               </div>
             </div>

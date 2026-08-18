@@ -37,7 +37,7 @@ const VoucherModal = ({
     <Modal
       open={isOpen}
       onClose={onClose}
-      className="w-full max-w-2xl max-h-[90vh]"
+      className="w-full max-w-2xl"
       title={"Ưu đãi của tôi"}
       headerClassName="p-4 border-b border-border flex justify-between items-center shrink-0"
       subHeader={
