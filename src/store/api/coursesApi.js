@@ -2717,6 +2717,7 @@ export const {
   useGetStudentAvailableCoursesQuery,
   useGetStudentAvailableClassesQuery,
   useGetStudentJoinedClassesQuery,
+  useGetStudentCompletedClassesQuery,
   useGetStudentCourseDetailQuery,
   useGetStudentClassDetailQuery,
   useEnrollInCourseMutation,
