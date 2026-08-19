@@ -8,7 +8,7 @@ const PublicClassStatsBar = ({ classData }) => {
   const { formatScheduleDays } = useTimezone()
   const pc = t.courses?.publicClass || {}
 
-  const totalSessions = classData?.totalSessions || classData?.sessionsCount || 24
+  const totalSessions = classData?.totalSessions || classData?.sessionsCount
   const sessionsTitle = (pc.sessionsCount || "{{count}} buổi học").replace("{{count}}", totalSessions)
 
   const defaultScheduleText = pc.flexibleSchedule || "Lịch linh hoạt"
