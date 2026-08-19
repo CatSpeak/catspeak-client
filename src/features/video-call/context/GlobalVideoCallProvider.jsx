@@ -86,6 +86,7 @@ const IDLE_VALUE = {
   lkRoomName: null,
   speakingStatsMap: {},
   roomTotalDuration: 0,
+  roomTotalStudentDuration: 0,
   unreadRoomChat: 0,
   unreadAiChat: 0,
   isChatCollapsed: false,

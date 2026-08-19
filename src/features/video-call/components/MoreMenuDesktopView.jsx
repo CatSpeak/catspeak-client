@@ -14,6 +14,7 @@ import {
   MonitorUp,
   Settings,
   RefreshCcw,
+  BarChart2,
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -33,6 +34,10 @@ const MoreMenuDesktopView = ({
   const {
     showParticipants,
     setShowParticipants,
+    showSpeakingTimeBalance,
+    setShowSpeakingTimeBalance,
+    showStudentSpeakingWidget,
+    setShowStudentSpeakingWidget,
     showVirtualBackground,
     setShowVirtualBackground,
     showAvatarPicker,
@@ -104,6 +109,22 @@ const MoreMenuDesktopView = ({
         }}
         icon={<Users size={20} />}
         label={t.rooms?.videoCall?.controls?.participants || "Participants"}
+      />
+
+      <MenuItem
+        onClick={() => {
+          if (isHost) {
+            setShowSpeakingTimeBalance(!showSpeakingTimeBalance)
+          } else {
+            setShowStudentSpeakingWidget(!showStudentSpeakingWidget)
+          }
+          setShowMoreMenu(false)
+        }}
+        icon={<BarChart2 size={20} />}
+        label={
+          t?.rooms?.videoCall?.controls?.speakingTimeBalance ||
+          "Speaking Time Balance"
+        }
       />
 
       {!isAISession &&

@@ -615,10 +615,28 @@ const GlobalCallContent = ({
     t,
   })
 
+  // ── Student Floating Speaking Widget ──
+  const [showStudentSpeakingWidget, setShowStudentSpeakingWidget] = useState(false)
+
   // ── Realtime Speaking Statistics ──
-  const { statsMap: speakingStatsMap, roomTotalDuration } = useSpeakingStats(
+  const {
+    statsMap: speakingStatsMap,
+    roomTotalDuration,
+    roomTotalStudentDuration,
+    roomTotalDurationMs,
+    roomTotalStudentDurationMs,
+    lastUpdated: speakingStatsLastUpdated,
+    isLoading: isSpeakingStatsLoading,
+    isFetching: isSpeakingStatsFetching,
+    isError: isSpeakingStatsError,
+    refetchStats: refetchSpeakingStats,
+  } = useSpeakingStats(
     lkRoom,
     activeSessionId,
+    {
+      enabled: panelState.showSpeakingTimeBalance || showStudentSpeakingWidget,
+      pollingInterval: 30000,
+    },
   )
 
   // ── Context value ──
@@ -648,6 +666,14 @@ const GlobalCallContent = ({
     // Speaking stats
     speakingStatsMap,
     roomTotalDuration,
+    roomTotalStudentDuration,
+    roomTotalDurationMs,
+    roomTotalStudentDurationMs,
+    speakingStatsLastUpdated,
+    isSpeakingStatsLoading,
+    isSpeakingStatsFetching,
+    isSpeakingStatsError,
+    refetchSpeakingStats,
 
     // User
     user,
@@ -673,6 +699,8 @@ const GlobalCallContent = ({
 
     // UI panels
     ...panelState,
+    showStudentSpeakingWidget,
+    setShowStudentSpeakingWidget,
     showTroubleshoot: panelState.showTroubleshoot,
     setShowTroubleshoot: panelState.setShowTroubleshoot,
     unreadRoomChat,

@@ -2,6 +2,8 @@
 export { default as ChatBox } from "./components/chat/ChatBox"
 export { default as ControlBar } from "./components/ControlBar"
 export { default as ParticipantList } from "./components/ParticipantList"
+export { default as SpeakingTimeBalancePanel } from "./components/SpeakingTimeBalancePanel"
+export { default as StudentSpeakingWidget } from "./components/StudentSpeakingWidget"
 export { default as VideoGrid } from "./components/VideoGrid"
 export { default as VideoTile } from "./components/VideoTile"
 export { default as ScreenShareTile } from "./components/ScreenShareTile"
@@ -19,6 +21,8 @@ export { useCallActions } from "./hooks/useCallActions"
 export { usePiPDrag } from "./hooks/usePiPDrag"
 export { usePiPUnread } from "./hooks/usePiPUnread"
 export { useRegisterNavigate, getNavigate, getLocation } from "./hooks/useNavigateRef"
+export { useSpeakingStats } from "./hooks/useSpeakingStats"
+export { useBreakoutSpeakingStats } from "./hooks/useBreakoutSpeakingStats"
 
 // Context
 export { GlobalVideoCallProvider, useGlobalVideoCall } from "./context/GlobalVideoCallProvider"

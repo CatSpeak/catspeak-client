@@ -27,6 +27,8 @@ import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
 import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
+import SpeakingTimeBalancePanel from "@/features/video-call/components/SpeakingTimeBalancePanel"
+import StudentSpeakingWidget from "@/features/video-call/components/StudentSpeakingWidget"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
@@ -45,6 +47,10 @@ const VideoCallRoomContent = () => {
     setShowChat,
     showParticipants,
     setShowParticipants,
+    showSpeakingTimeBalance,
+    setShowSpeakingTimeBalance,
+    showStudentSpeakingWidget,
+    setShowStudentSpeakingWidget,
     showVirtualBackground,
     setShowVirtualBackground,
     showAvatarPicker,
@@ -116,17 +122,19 @@ const VideoCallRoomContent = () => {
   const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
     ? t.rooms.videoCall.participantList.title
-    : showVirtualBackground
-      ? t.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"
-      : showAvatarPicker
-        ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
-        : showTroubleshoot
-          ? t.rooms?.videoCall?.reconnect || "Troubleshoot connection"
-          : showBreakout
-            ? isBreakoutActive
-              ? "Phòng thảo luận"
-              : "Phòng họp nhóm"
-            : t.rooms.chatBox.title
+    : showSpeakingTimeBalance
+      ? t.rooms?.videoCall?.speakingTimeBalance?.title || "Speaking Time Balance"
+      : showVirtualBackground
+        ? t.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"
+        : showAvatarPicker
+          ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
+          : showTroubleshoot
+            ? t.rooms?.videoCall?.reconnect || "Troubleshoot connection"
+            : showBreakout
+              ? isBreakoutActive
+                ? "Phòng thảo luận"
+                : "Phòng họp nhóm"
+              : t.rooms.chatBox.title
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -232,6 +240,17 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex flex-1 min-h-0 relative">
             <VideoGrid />
+
+            {/* Student Floating Speaking Time Balance Widget */}
+            <AnimatePresence>
+              {showStudentSpeakingWidget && !isHost && (
+                <div className="absolute right-4 bottom-4 z-30 pointer-events-auto">
+                  <StudentSpeakingWidget
+                    onClose={() => setShowStudentSpeakingWidget(false)}
+                  />
+                </div>
+              )}
+            </AnimatePresence>
           </div>
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
@@ -254,6 +273,11 @@ const VideoCallRoomContent = () => {
             >
               <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-[#E5E5E5] overflow-hidden">
                 {showParticipants && <ParticipantList />}
+                {showSpeakingTimeBalance && isHost && (
+                  <SpeakingTimeBalancePanel
+                    onClose={() => setActiveSidePanel(null)}
+                  />
+                )}
                 {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
                 {showTroubleshoot && <TroubleshootPanel />}
@@ -299,6 +323,11 @@ const VideoCallRoomContent = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {showParticipants && <ParticipantList />}
+              {showSpeakingTimeBalance && isHost && (
+                <SpeakingTimeBalancePanel
+                  onClose={() => setActiveSidePanel(null)}
+                />
+              )}
               {showVirtualBackground && <BackgroundsAndEffectsPanel />}
               {showAvatarPicker && <AvatarUrlPicker />}
               {showTroubleshoot && <TroubleshootPanel />}
@@ -366,6 +395,11 @@ const VideoCallRoomContent = () => {
 
                 <div className="flex-1 overflow-y-auto bg-white min-h-0">
                   {showParticipants && <ParticipantList hideTitle />}
+                  {showSpeakingTimeBalance && isHost && (
+                    <SpeakingTimeBalancePanel
+                      onClose={() => setActiveSidePanel(null)}
+                    />
+                  )}
                   {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                   {showAvatarPicker && <AvatarUrlPicker />}
                   {showTroubleshoot && <TroubleshootPanel hideTitle />}
