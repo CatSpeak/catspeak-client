@@ -46,7 +46,7 @@ const CompletedClass = ({ isOwnProfile }) => {
     isError,
   } = useGetStudentCompletedClassesQuery(undefined, { skip: !isOwnProfile })
 
-  const allClasses = classes || []
+  const classes = responseData?.data || []
 
   // Filter classes based on searchQuery
   const filteredClasses = classes.filter((cls) => {
@@ -113,18 +113,18 @@ const CompletedClass = ({ isOwnProfile }) => {
           message={
             searchQuery
               ? cc.noClassesFoundDesc ||
-                "Thử điều chỉnh từ khoá tìm kiếm của bạn."
+              "Thử điều chỉnh từ khoá tìm kiếm của bạn."
               : cc.noClassesDesc || "Bạn chưa hoàn thành bất kỳ lớp học nào."
           }
-          // action={!searchQuery ? (
-          //   <button
-          //     onClick={() => navigate('/explore-courses')}
-          //     className="bg-[#990011] hover:bg-[#b20a1c] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md hover:shadow-lg active:scale-95 flex items-center gap-2 mt-2"
-          //   >
-          //     <Compass size={16} />
-          //     <span>{cc.exploreMore || "Khám phá khoá học"}</span>
-          //   </button>
-          // ) : null}
+        // action={!searchQuery ? (
+        //   <button
+        //     onClick={() => navigate('/explore-courses')}
+        //     className="bg-[#990011] hover:bg-[#b20a1c] text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-md hover:shadow-lg active:scale-95 flex items-center gap-2 mt-2"
+        //   >
+        //     <Compass size={16} />
+        //     <span>{cc.exploreMore || "Khám phá khoá học"}</span>
+        //   </button>
+        // ) : null}
         />
       )
     }
