@@ -141,6 +141,101 @@ export default {
       successTitle: "Report submitted",
       successSubtitle: "We have received your report and will investigate the issue.",
       done: "Done"
+    },
+    checkoutClass: {
+      // Breadcrumb
+      breadcrumbHome: "Home",
+      breadcrumbExplore: "Explore courses",
+      breadcrumbCourseDetail: "Course details",
+      breadcrumbClassDetail: "Class details",
+      breadcrumbCheckout: "Class checkout",
+
+      // Page
+      pageTitle: "Class Checkout",
+      classNotFound: "Class not found",
+      classNotFoundDesc: "This class may not exist or has been removed.",
+      backToHome: "Back to home",
+
+      // Fallback texts
+      fallbackName: "You",
+      fallbackCourseName: "Standalone class",
+      fallbackNoSchedule: "No schedule yet",
+      fallbackUpdating: "Updating",
+      fallbackAccountNotFound: "No account found with this email.",
+      paymentSuccess: "Payment successful!",
+      paymentError: "An error occurred during payment.",
+      voucherUnavailable: "Code {{code}} is no longer available, automatically removed from the order",
+
+      // ClassInfoSection
+      classInfo: "Class information",
+      slotsAvailable: "{{available}}/{{max}} slots available",
+      sessions: "sessions",
+      instructor: "Instructor:",
+
+      // LearnerSection
+      addLearner: "Add learner",
+      emailPlaceholder: "Enter learner email",
+      adding: "Adding",
+      add: "Add",
+      payer: "(Payer)",
+      totalLearners: "Total learners:",
+      addLearnerError: "An error occurred while adding learner",
+
+      // OrderSummary
+      orderSummary: "Order summary",
+      unitPrice: "Unit price",
+      perPerson: "/ person",
+      learnerCount: "Number of learners",
+      subtotal: "Subtotal",
+      discount: "Discount",
+      maxDiscount: "Max:",
+      tuition: "Tuition",
+      totalPayment: "Total payment",
+      youSaved: "You saved {{amount}}!",
+      processing: "Processing...",
+      confirmPayment: "Confirm payment",
+      free: "Free",
+      scheduleConflictTitle: "Schedule Conflict",
+      scheduleConflictDesc: "The schedule of this class conflicts with a class you are currently enrolled in:",
+      confirmEnroll: "Enroll Anyway",
+      cancel: "Cancel",
+
+      // VoucherSection
+      searchVoucher: "Search code...",
+      expiry: "Exp:",
+      neverExpires: "Never expires",
+      viewAllOffers: "View all offers →",
+      voucherCode: "Voucher code",
+      appliedCount: "{{count}} code(s) applied",
+      change: "Change",
+      sponsorInstructor: "Instructor",
+      selectFromMyVouchers: "Select from my vouchers",
+      noVouchersForClass: "No vouchers available for this class",
+
+      // VoucherCard
+      sponsorInstructorBadge: "INSTRUCTOR",
+      maxDiscountLabel: "Max discount:",
+      ineligible: "Ineligible",
+      applied: "Applied",
+      use: "Use",
+
+      // Ineligible reason patterns
+      reasonMinLearners: "Requires at least {{count}} learners in the order",
+      reasonMinOrder: "Minimum order of {{minAmount}} (Subtotal: {{currentAmount}})",
+
+      // VoucherModal
+      myOffers: "My offers",
+      searchOffers: "Search offers...",
+      noOffersTitle: "No offers available",
+      noOffersDesc: "You don't have any voucher codes yet. Check back later or contact your instructor for promotions.",
+
+      // VoucherCategoryList
+      categoryValid: "Available",
+      categoryInvalidClass: "Not applicable for this class",
+      categoryIneligible: "Ineligible",
+      categoryExpired: "Expired",
+      categoryExhausted: "Out of uses",
+      voucherCountSuffix: "code(s)",
     }
   }
 }

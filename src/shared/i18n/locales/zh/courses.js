@@ -1943,6 +1943,14 @@ export default {
       class_invite: {
         title: "班级邀请",
         body: "{teacherName} 已邀请您加入班级 \"{className}\""
+      },
+      class_paid: {
+        title: "班级付款成功",
+        body: "您已成功支付班级 \"{className}\" 的费用。"
+      },
+      class_invited_paid: {
+        title: "班级费用已支付",
+        body: "{payerName} 已为班级 \"{className}\" 支付费用，您已正式加入该班级！"
       }
     }
   },

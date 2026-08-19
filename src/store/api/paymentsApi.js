@@ -38,6 +38,19 @@ export const paymentsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["PaymentHistory"],
     }),
+    lookupLearner: builder.query({
+      query: ({ email, classId, currentAccountIds }) => {
+        const params = new URLSearchParams()
+        if (email) params.append("email", email)
+        if (classId) params.append("classId", classId)
+        if (currentAccountIds?.length > 0) params.append("currentAccountIds", currentAccountIds.join(","))
+        
+        return {
+          url: `v1/Payments/checkout/lookup-learner?${params.toString()}`,
+          method: "GET",
+        }
+      },
+    }),
   }),
   overrideExisting: false,
 })
@@ -48,4 +61,6 @@ export const {
   useCancelPaymentMutation,
   useGetPaymentHistoryQuery,
   useReportPaymentIssueMutation,
+  useLookupLearnerQuery,
+  useLazyLookupLearnerQuery,
 } = paymentsApi

@@ -6,7 +6,7 @@ import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   useGetStudentCourseDetailQuery,
   useGetExploreCourseDetailQuery,
-  useEnrollInCourseMutation
+  // useEnrollInCourseMutation
 } from "@/store/api/coursesApi"
 import { useCreatePrivateConversationMutation } from "@/store/api/social/conversationsApi"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
@@ -61,7 +61,7 @@ const StudentCourseDetailPage = () => {
   const [conflictClasses, setConflictClasses] = useState(null)
   const [enrollingClassId, setEnrollingClassId] = useState(null)
 
-  const [enrollInCourse] = useEnrollInCourseMutation()
+  // const [enrollInCourse] = useEnrollInCourseMutation()
   const [createPrivateConversation] = useCreatePrivateConversationMutation()
 
   const handleCopyLink = async () => {
@@ -77,45 +77,48 @@ const StudentCourseDetailPage = () => {
     }
   }
 
-  const doEnroll = async (classId, courseId, confirmScheduleConflict = false) => {
+  // const doEnroll = async (classId, courseId, confirmScheduleConflict = false) => {
+  const doEnroll = async (classId) => {
     setEnrollingClassId(classId)
-    try {
-      const result = await enrollInCourse({ classId, confirmScheduleConflict }).unwrap()
-      const resultPayload = (
-        result
-        && typeof result === "object"
-        && !Array.isArray(result)
-        && Object.prototype.hasOwnProperty.call(result, "data")
-      )
-        ? result.data
-        : result
+    // try {
+    //   const result = await enrollInCourse({ classId, confirmScheduleConflict }).unwrap()
+    //   const resultPayload = (
+    //     result
+    //     && typeof result === "object"
+    //     && !Array.isArray(result)
+    //     && Object.prototype.hasOwnProperty.call(result, "data")
+    //   )
+    //     ? result.data
+    //     : result
 
-      if (resultPayload?.checkoutUrl) {
-        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
-        if (!checkoutUrl) throw new Error("Invalid checkout URL")
-        toast.success(sc.enrollRedirecting || "Đang chuyển hướng đến trang thanh toán...")
-        window.location.assign(checkoutUrl)
-      } else {
-        toast.success(sc.enrollSuccess || "Đăng ký lớp học thành công!")
-        refetch()
-      }
-    } catch (err) {
-      const status = err?.status ?? err?.originalStatus
-      const errorCode = err?.data?.errorCode || err?.data?.data?.errorCode
-      if (status === 409 || errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT") {
-        const message = err?.data?.message || err?.data?.data?.message || ""
-        const names = (message.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
-        setConflictClasses({
-          classId,
-          courseId,
-          names: names ? names.split(", ").filter(Boolean) : [],
-        })
-        return
-      }
-      toast.error(err?.data?.message || err?.data?.data?.message || sc.enrollError || "Đăng ký không thành công. Vui lòng thử lại sau.")
-    } finally {
-      setEnrollingClassId(null)
-    }
+    //   if (resultPayload?.checkoutUrl) {
+    //     const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
+    //     if (!checkoutUrl) throw new Error("Invalid checkout URL")
+    //     toast.success(sc.enrollRedirecting || "Đang chuyển hướng đến trang thanh toán...")
+    //     window.location.assign(checkoutUrl)
+    //   } else {
+    //     toast.success(sc.enrollSuccess || "Đăng ký lớp học thành công!")
+    //     refetch()
+    //   }
+    // } catch (err) {
+    //   const status = err?.status ?? err?.originalStatus
+    //   const errorCode = err?.data?.errorCode || err?.data?.data?.errorCode
+    //   if (status === 409 || errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT") {
+    //     const message = err?.data?.message || err?.data?.data?.message || ""
+    //     const names = (message.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
+    //     setConflictClasses({
+    //       classId,
+    //       courseId,
+    //       names: names ? names.split(", ").filter(Boolean) : [],
+    //     })
+    //     return
+    //   }
+    //   toast.error(err?.data?.message || err?.data?.data?.message || sc.enrollError || "Đăng ký không thành công. Vui lòng thử lại sau.")
+    // } finally {
+    //   setEnrollingClassId(null)
+    // }
+    const basePath = isWorkspace ? "/workspace" : ""
+    navigate(`${basePath}/explore-courses/class/${classId}/checkout`)
   }
 
   const handleClassRegister = (cls) => {
@@ -358,8 +361,8 @@ const StudentCourseDetailPage = () => {
                       : cls.level || rawCourse?.level || "—"
                   const classThumbnailUrl = getSafeMediaUrl(
                     cls?.thumbnailUrl ||
-                      cls?.thumbnail ||
-                      rawCourse?.thumbnailUrl,
+                    cls?.thumbnail ||
+                    rawCourse?.thumbnailUrl,
                   )
 
                   return (

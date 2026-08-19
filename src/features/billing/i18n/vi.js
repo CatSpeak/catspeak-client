@@ -141,6 +141,101 @@ export default {
       successTitle: "Đã gửi báo cáo",
       successSubtitle: "Chúng tôi đã nhận được báo cáo của bạn và sẽ tiến hành điều tra sự cố.",
       done: "Xong"
+    },
+    checkoutClass: {
+      // Breadcrumb
+      breadcrumbHome: "Trang chủ",
+      breadcrumbExplore: "Khám phá khóa học",
+      breadcrumbCourseDetail: "Chi tiết khóa học",
+      breadcrumbClassDetail: "Chi tiết lớp học",
+      breadcrumbCheckout: "Thanh toán lớp học",
+
+      // Page
+      pageTitle: "Thanh toán lớp học",
+      classNotFound: "Không tìm thấy lớp học",
+      classNotFoundDesc: "Lớp học này có thể không tồn tại hoặc đã bị xóa.",
+      backToHome: "Quay lại trang chủ",
+
+      // Fallback texts
+      fallbackName: "Bạn",
+      fallbackCourseName: "Lớp học độc lập",
+      fallbackNoSchedule: "Chưa có lịch",
+      fallbackUpdating: "Đang cập nhật",
+      fallbackAccountNotFound: "Không tìm thấy tài khoản với email này.",
+      paymentSuccess: "Thanh toán thành công!",
+      paymentError: "Đã xảy ra lỗi khi thanh toán.",
+      voucherUnavailable: "Mã {{code}} không còn khả dụng, đã tự động gỡ khỏi đơn hàng",
+
+      // ClassInfoSection
+      classInfo: "Thông tin lớp học",
+      slotsAvailable: "Còn trống {{available}}/{{max}}",
+      sessions: "buổi",
+      instructor: "Giảng viên:",
+
+      // LearnerSection
+      addLearner: "Thêm người học",
+      emailPlaceholder: "Nhập email người học",
+      adding: "Đang thêm",
+      add: "Thêm",
+      payer: "(Người thanh toán)",
+      totalLearners: "Tổng số người học:",
+      addLearnerError: "Có lỗi xảy ra khi thêm người học",
+
+      // OrderSummary
+      orderSummary: "Tóm tắt đơn hàng",
+      unitPrice: "Đơn giá",
+      perPerson: "/ người",
+      learnerCount: "Số người học",
+      subtotal: "Tạm tính",
+      discount: "Giảm giá",
+      maxDiscount: "Tối đa:",
+      tuition: "Học phí",
+      totalPayment: "Tổng thanh toán",
+      youSaved: "Bạn tiết kiệm được {{amount}}!",
+      processing: "Đang xử lý...",
+      confirmPayment: "Xác nhận thanh toán",
+      free: "Miễn phí",
+      scheduleConflictTitle: "Lịch học bị trùng",
+      scheduleConflictDesc: "Lịch học của lớp này trùng với lớp bạn đang học:",
+      confirmEnroll: "Vẫn đăng ký",
+      cancel: "Hủy",
+
+      // VoucherSection
+      searchVoucher: "Tìm mã...",
+      expiry: "HSD:",
+      neverExpires: "Không thời hạn",
+      viewAllOffers: "Xem tất cả ưu đãi →",
+      voucherCode: "Mã giảm giá",
+      appliedCount: "Đã áp dụng {{count}} mã",
+      change: "Thay đổi",
+      sponsorInstructor: "Giáo viên",
+      selectFromMyVouchers: "Chọn từ mã của tôi",
+      noVouchersForClass: "Hiện không có mã giảm giá phù hợp với lớp học này",
+
+      // VoucherCard
+      sponsorInstructorBadge: "GIÁO VIÊN",
+      maxDiscountLabel: "Giảm tối đa:",
+      ineligible: "Không đủ điều kiện",
+      applied: "Đã áp dụng",
+      use: "Sử dụng",
+
+      // Ineligible reason patterns
+      reasonMinLearners: "Yêu cầu tối thiểu {{count}} người học trong đơn hàng",
+      reasonMinOrder: "Đơn hàng tối thiểu từ {{minAmount}} (Tạm tính: {{currentAmount}})",
+
+      // VoucherModal
+      myOffers: "Ưu đãi của tôi",
+      searchOffers: "Tìm ưu đãi...",
+      noOffersTitle: "Hiện chưa có ưu đãi nào",
+      noOffersDesc: "Bạn chưa có mã giảm giá nào. Hãy quay lại sau hoặc liên hệ giáo viên để biết thêm chương trình ưu đãi.",
+
+      // VoucherCategoryList
+      categoryValid: "Có thể dùng",
+      categoryInvalidClass: "Không áp dụng cho lớp này",
+      categoryIneligible: "Không đủ điều kiện",
+      categoryExpired: "Hết hạn",
+      categoryExhausted: "Hết lượt",
+      voucherCountSuffix: "mã",
     }
   }
 }
