@@ -194,6 +194,11 @@ export default {
       youSaved: "Bạn tiết kiệm được {{amount}}!",
       processing: "Đang xử lý...",
       confirmPayment: "Xác nhận thanh toán",
+      free: "Miễn phí",
+      scheduleConflictTitle: "Lịch học bị trùng",
+      scheduleConflictDesc: "Lịch học của lớp này trùng với lớp bạn đang học:",
+      confirmEnroll: "Vẫn đăng ký",
+      cancel: "Hủy",
 
       // VoucherSection
       searchVoucher: "Tìm mã...",

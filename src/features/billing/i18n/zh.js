@@ -194,6 +194,11 @@ export default {
       youSaved: "您节省了 {{amount}}!",
       processing: "处理中...",
       confirmPayment: "确认支付",
+      free: "免费",
+      scheduleConflictTitle: "时间冲突",
+      scheduleConflictDesc: "此课程的时间与您当前注册的课程冲突：",
+      confirmEnroll: "继续注册",
+      cancel: "取消",
 
       // VoucherSection
       searchVoucher: "搜索优惠码...",

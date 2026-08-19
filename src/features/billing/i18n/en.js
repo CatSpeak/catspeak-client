@@ -194,6 +194,11 @@ export default {
       youSaved: "You saved {{amount}}!",
       processing: "Processing...",
       confirmPayment: "Confirm payment",
+      free: "Free",
+      scheduleConflictTitle: "Schedule Conflict",
+      scheduleConflictDesc: "The schedule of this class conflicts with a class you are currently enrolled in:",
+      confirmEnroll: "Enroll Anyway",
+      cancel: "Cancel",
 
       // VoucherSection
       searchVoucher: "Search code...",

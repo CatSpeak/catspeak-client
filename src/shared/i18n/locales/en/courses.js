@@ -1946,6 +1946,14 @@ export default {
       class_invite: {
         title: "Class Invitation",
         body: "{teacherName} has invited you to join the class \"{className}\""
+      },
+      class_paid: {
+        title: "Class Payment Successful",
+        body: "You have successfully paid for the class \"{className}\"."
+      },
+      class_invited_paid: {
+        title: "Class Has Been Paid",
+        body: "{payerName} has paid for the class \"{className}\" and you are now enrolled!"
       }
     }
   },

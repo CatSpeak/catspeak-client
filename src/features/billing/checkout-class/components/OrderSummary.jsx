@@ -41,7 +41,9 @@ const OrderSummary = ({
       <div className="space-y-4 text-sm">
         <div className="flex justify-between text-[#6B7280]">
           <span>{tc.unitPrice}</span>
-          <span className='text-[#111827]'>{formatCurrency(unitPrice)} {tc.perPerson}</span>
+          <span className='text-[#111827]'>
+            {unitPrice === 0 ? tc.free : `${formatCurrency(unitPrice)} ${tc.perPerson}`}
+          </span>
         </div>
         <div className="flex justify-between text-[#6B7280]">
           <span>{tc.learnerCount}</span>
@@ -54,7 +56,7 @@ const OrderSummary = ({
       <div className="space-y-4">
         <div className="flex justify-between font-bold text-[#111827]">
           <span>{tc.subtotal}</span>
-          <span>{formatCurrency(subtotal)}</span>
+          <span>{subtotal === 0 ? tc.free : formatCurrency(subtotal)}</span>
         </div>
 
         {discountDetails.map(voucher => (
@@ -71,7 +73,7 @@ const OrderSummary = ({
 
         <div className="flex justify-between text-gray-600">
           <span>{tc.tuition}</span>
-          <span>{formatCurrency(totalPayment)}</span>
+          <span>{totalPayment === 0 ? tc.free : formatCurrency(totalPayment)}</span>
         </div>
       </div>
 
@@ -93,7 +95,7 @@ const OrderSummary = ({
       <div>
         <div className="flex justify-between items-end mb-1">
           <span className="font-bold text-[#111827]">{tc.totalPayment}</span>
-          <span className="text-2xl font-bold text-[#B20000]">{formatCurrency(totalPayment)}</span>
+          <span className="text-2xl font-bold text-[#B20000]">{totalPayment === 0 ? tc.free : formatCurrency(totalPayment)}</span>
         </div>
         {totalDiscount > 0 && (
           <p className="text-right text-sm text-[#00A854]">

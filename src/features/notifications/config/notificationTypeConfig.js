@@ -17,7 +17,8 @@ const replaceVars = (text, m) => {
     .replace(/{className}/g, m.className || "Không rõ")
     .replace(/{assignmentName}/g, m.assignmentName || "Không rõ")
     .replace(/{quizName}/g, m.quizName || "Không rõ")
-    .replace(/{teacherName}/g, m.teacherName || m.inviterName || "Giảng viên");
+    .replace(/{teacherName}/g, m.teacherName || m.inviterName || "Giảng viên")
+    .replace(/{payerName}/g, m.payerName || "Ai đó");
 };
 
 const getLoc = (t) =>
@@ -127,6 +128,31 @@ export const NOTIFICATION_TYPES = {
     // resolveUrl: (m) => `/classes/${m.classId}/quizzes/${m.quizId}`,
     resolveUrl: (m) =>
       `/workspace/courses/class/${m.classId}/quiz/${m.quizId}/take`,
+  },
+  class_paid: {
+    icon: CheckCircle2,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      replaceVars(getLoc(t)?.class_paid?.title || "Thanh toán lớp học thành công", m),
+    resolveBody: (m, t) =>
+      replaceVars(
+        getLoc(t)?.class_paid?.body || "Bạn đã thanh toán thành công cho lớp học \"{className}\".",
+        m,
+      ),
+    resolveUrl: (m) => `/workspace/learning/class/${m.classId}`,
+  },
+  class_invited_paid: {
+    icon: CheckCircle2,
+    color: "text-blue-500",
+    resolveTitle: (m, t) =>
+      replaceVars(getLoc(t)?.class_invited_paid?.title || "Lớp học đã được thanh toán", m),
+    resolveBody: (m, t) =>
+      replaceVars(
+        getLoc(t)?.class_invited_paid?.body ||
+          "{payerName} đã thanh toán cho lớp học \"{className}\" và bạn đã ở trong lớp!",
+        m,
+      ),
+    resolveUrl: (m) => `/workspace/learning/class/${m.classId}`,
   },
   room_invite: {
     icon: CalendarClock,

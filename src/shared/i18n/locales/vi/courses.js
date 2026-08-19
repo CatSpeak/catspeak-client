@@ -1946,6 +1946,14 @@ export default {
       class_invite: {
         title: "Lời mời vào lớp học",
         body: "{teacherName} đã mời bạn tham gia lớp học \"{className}\""
+      },
+      class_paid: {
+        title: "Thanh toán lớp học thành công",
+        body: "Bạn đã thanh toán thành công cho lớp học \"{className}\"."
+      },
+      class_invited_paid: {
+        title: "Lớp học đã được thanh toán",
+        body: "{payerName} đã thanh toán cho lớp học \"{className}\" và bạn đã ở trong lớp!"
       }
     }
   },

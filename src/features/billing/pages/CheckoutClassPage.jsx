@@ -5,6 +5,7 @@ import OrderSummary from '../checkout-class/components/OrderSummary'
 import VoucherModal from '../checkout-class/components/VoucherModal'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AlertTriangle } from 'lucide-react'
+import ConfirmationModal from '@/shared/components/ui/ConfirmationModal'
 import { Breadcrumb } from '@/shared/components/ui/navigation'
 import { useGetVouchersForClassQuery } from '@/store/api/voucherApi'
 import { useGetExploreClassDetailQuery } from '@/store/api/coursesApi'
@@ -14,7 +15,7 @@ import { useGetProfileQuery } from '@/store/api/authApi'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useEffect } from 'react'
 import { toast } from 'react-hot-toast'
-import { defaultCourseThumbnail } from '@/features/courses/utils/courseUtils'
+import { defaultCourseThumbnail, getSafeMediaUrl } from '@/features/courses/utils/courseUtils'
 import { calculateVoucherDiscount } from '../utils/checkoutUtils'
 
 const EMPTY_VOUCHER_DATA = {
@@ -205,9 +206,13 @@ const CheckoutClassPage = () => {
         : result
 
       if (resultPayload?.checkoutUrl) {
-        window.location.href = resultPayload.checkoutUrl
+        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
+        if (!checkoutUrl) throw new Error("Invalid checkout URL")
+        toast.success(tc.redirecting || "Đang chuyển hướng đến trang thanh toán...")
+        window.location.assign(checkoutUrl)
       } else {
         toast.success(tc.paymentSuccess)
+        navigate(`/workspace/learning/class/${classId}`)
       }
     } catch (error) {
       const status = error?.status ?? error?.originalStatus
@@ -319,47 +324,38 @@ const CheckoutClassPage = () => {
         t={t}
       />
 
-      {conflictClasses && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div role="alertdialog" aria-modal="true" className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl flex flex-col gap-4">
-            <div className="flex items-center gap-2.5">
-              <AlertTriangle size={22} className="text-amber-500 shrink-0" />
-              <h2 className="text-lg font-black text-gray-950">{tc.scheduleConflictTitle || "Lịch học bị trùng"}</h2>
-            </div>
-            <p className="text-sm text-gray-600 font-medium leading-relaxed">
-              {tc.scheduleConflictDesc || "Lịch học của lớp này trùng với lớp bạn đang học:"}
-            </p>
-            {(conflictClasses.names || []).length > 0 && (
-              <ul className="flex flex-col gap-1.5">
-                {conflictClasses.names.map((name) => (
-                  <li key={name} className="text-sm font-bold text-[#b20a1c] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
-                    {name}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setConflictClasses(null)}
-                className="h-10 px-4 rounded-full border border-border text-gray-700 text-sm font-black hover:bg-gray-50"
-              >
-                {tc.cancel || "Hủy"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setConflictClasses(null)
-                  handleCheckout(true)
-                }}
-                className="h-10 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-black"
-              >
-                {tc.confirmEnroll || "Vẫn đăng ký"}
-              </button>
-            </div>
+      <ConfirmationModal
+        open={!!conflictClasses}
+        onClose={() => setConflictClasses(null)}
+        onConfirm={() => {
+          setConflictClasses(null)
+          handleCheckout(true)
+        }}
+        title={
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle size={22} className="text-amber-500 shrink-0" />
+            <span className="text-lg font-black text-gray-950">{tc.scheduleConflictTitle || "Lịch học bị trùng"}</span>
           </div>
+        }
+        cancelText={tc.cancel || "Hủy"}
+        confirmText={tc.confirmEnroll || "Vẫn đăng ký"}
+        confirmVariant="primary"
+      >
+        <div className="flex flex-col gap-4 mt-2">
+          <p className="text-sm text-gray-600 font-medium leading-relaxed">
+            {tc.scheduleConflictDesc || "Lịch học của lớp này trùng với lớp bạn đang học:"}
+          </p>
+          {(conflictClasses?.names || []).length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {conflictClasses.names.map((name) => (
+                <li key={name} className="text-sm font-bold text-[#b20a1c] bg-rose-50 border border-rose-100 rounded-xl px-3 py-2">
+                  {name}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-      )}
+      </ConfirmationModal>
     </div>
   )
 }
