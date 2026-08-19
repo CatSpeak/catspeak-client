@@ -15,7 +15,7 @@ import { useGetProfileQuery } from '@/store/api/authApi'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useEffect } from 'react'
 import { toast } from 'react-hot-toast'
-import { defaultCourseThumbnail, getSafeMediaUrl } from '@/features/courses/utils/courseUtils'
+import { defaultCourseThumbnail, getSafeMediaUrl, getClassEnrollmentIssue, getClassEnrollmentIssueMessage } from '@/features/courses/utils/courseUtils'
 import { calculateVoucherDiscount } from '../utils/checkoutUtils'
 
 const EMPTY_VOUCHER_DATA = {
@@ -32,6 +32,7 @@ const CheckoutClassPage = () => {
   const { formatWeeklySchedule, formatDate } = useTimezone()
   const { t } = useLanguage()
   const tc = t.billing.checkoutClass
+  const pc = t.courses?.publicClassDetail
   const navigate = useNavigate()
 
   const { data: profileResponse } = useGetProfileQuery()
@@ -91,6 +92,21 @@ const CheckoutClassPage = () => {
     tags: [classDetail.language, ...classDetail.levels].filter(Boolean),
     unitPrice: classDetail.price
   } : {}
+
+  useEffect(() => {
+    if (classDetail && !isLoadingClass) {
+      const enrollmentIssue = getClassEnrollmentIssue({ classData: classDetail })
+      const isUpcoming = enrollmentIssue === "upcoming" || String(classDetail.status || "").toUpperCase() === "UPCOMING"
+
+      if (enrollmentIssue || isUpcoming) {
+        toast.error(getClassEnrollmentIssueMessage(enrollmentIssue || "upcoming", pc))
+
+        const isWorkspace = window.location.pathname.startsWith("/workspace")
+        const basePath = isWorkspace ? "/workspace" : ""
+        navigate(`${basePath}/explore-courses/class/${classId}`, { replace: true })
+      }
+    }
+  }, [classDetail, isLoadingClass, navigate, classId, pc])
 
   // Fetch vouchers from API
   const {

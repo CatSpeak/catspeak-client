@@ -4,7 +4,7 @@ import { PillButton } from '@/shared/components/ui/buttons'
 import { formatCurrency, calculateVoucherDiscount } from '../../utils/checkoutUtils'
 
 const OrderSummary = ({
-  className,
+  // className,
   unitPrice,
   learnersCount,
   vouchers,
@@ -34,7 +34,7 @@ const OrderSummary = ({
       <h2 className="text-xl font-bold text-[#111827]">{tc.orderSummary}</h2>
 
       <div className="space-y-1">
-        <h3 className="font-bold text-[#111827]">{className}</h3>
+        {/* <h3 className="font-bold text-[#111827]">{className}</h3> */}
         {/* <p className="text-sm text-[#6B7280]">Lớp: {classCode}</p> */}
       </div>
 
@@ -77,18 +77,22 @@ const OrderSummary = ({
         </div>
       </div>
 
-      <div className='border-border border' />
+      {unitPrice !== 0 && (
+        <>
+          <div className='border-border border' />
 
-      <VoucherSection
-        vouchers={vouchers}
-        suggestedTags={suggestedTags}
-        selectedVouchers={selectedVouchers}
-        onToggleVoucher={onToggleVoucher}
-        onRemoveVoucher={onRemoveVoucher}
-        onOpenModal={onOpenModal}
-        isLoading={isVoucherLoading}
-        t={t}
-      />
+          <VoucherSection
+            vouchers={vouchers}
+            suggestedTags={suggestedTags}
+            selectedVouchers={selectedVouchers}
+            onToggleVoucher={onToggleVoucher}
+            onRemoveVoucher={onRemoveVoucher}
+            onOpenModal={onOpenModal}
+            isLoading={isVoucherLoading}
+            t={t}
+          />
+        </>
+      )}
 
       <div className='border-border border' />
 
