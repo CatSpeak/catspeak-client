@@ -1,0 +1,47 @@
+export default {
+  landing: {
+    leadingTeam: {
+      title: "Đội ngũ Dẫn dắt và Đồng hành",
+      subtitle: "Chất lượng cao",
+      viewInstructor: "Xem giảng viên",
+      defaultInstructor: "Giảng viên",
+      defaultRole: "Giảng viên CatSpeak",
+      prefixLanguage: "Giảng viên tiếng",
+      emptyText: "Chưa có danh sách giảng viên nổi bật.",
+      prevInstructor: "Giảng viên trước",
+      nextInstructor: "Giảng viên tiếp theo",
+      recruitment: {
+        title: "Bạn muốn trở thành một phần của Đội ngũ CatSpeak?",
+        description:
+          "Chia sẻ tri thức, kết nối cộng đồng toàn cầu và chủ động thời gian cùng nền tảng công nghệ hàng đầu.",
+        instructorArea: "Khu vực Giảng viên",
+        registerInstructor: "Đăng ký trở thành Giảng viên",
+      },
+      languages: {
+        en: "Anh",
+        vi: "Việt",
+        zh: "Trung",
+        ja: "Nhật",
+        ko: "Hàn",
+        fr: "Pháp",
+        de: "Đức",
+        es: "Tây Ban Nha",
+        ru: "Nga",
+        it: "Ý",
+        th: "Thái",
+        pt: "Bồ Đào Nha",
+      },
+    },
+    news: {
+      subtitle: "Theo dòng sự kiện",
+      titlePrefix: "Bản tin",
+      titleSuffix: "Cat Speak",
+      viewAll: "Xem chi tiết",
+      viewArticle: "Xem bài viết",
+      newBadge: "New",
+      emptyText: "Chưa có bài viết tin tức nào",
+      prevNews: "Tin tức trước",
+      nextNews: "Tin tức tiếp theo",
+    },
+  },
+}

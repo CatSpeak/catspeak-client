@@ -18,6 +18,11 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       proxy: {
+        "/api/v1/Instructors": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
         "/api/v1/instructor": {
           target: "https://instructor-staging-api.catspeak.com.vn",
           changeOrigin: true,

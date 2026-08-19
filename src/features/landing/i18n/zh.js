@@ -1,0 +1,47 @@
+export default {
+  landing: {
+    leadingTeam: {
+      title: "领航与同行导师团队",
+      subtitle: "高品质教学",
+      viewInstructor: "查看导师",
+      defaultInstructor: "导师",
+      defaultRole: "CatSpeak 导师",
+      prefixLanguage: "教学语言：",
+      emptyText: "暂无优秀导师列表。",
+      prevInstructor: "上一位导师",
+      nextInstructor: "下一位导师",
+      recruitment: {
+        title: "想要成为 CatSpeak 导师团队的一员吗？",
+        description:
+          "分享知识，连接全球社区，依托领先技术平台灵活自主掌控时间。",
+        instructorArea: "导师专区",
+        registerInstructor: "申请成为导师",
+      },
+      languages: {
+        en: "英语",
+        vi: "越南语",
+        zh: "中文",
+        ja: "日语",
+        ko: "韩语",
+        fr: "法语",
+        de: "德语",
+        es: "西班牙语",
+        ru: "俄语",
+        it: "意大利语",
+        th: "泰语",
+        pt: "葡萄牙语",
+      },
+    },
+    news: {
+      subtitle: "追踪时事动态",
+      titlePrefix: "资讯",
+      titleSuffix: "Cat Speak",
+      viewAll: "查看详情",
+      viewArticle: "阅读文章",
+      newBadge: "New",
+      emptyText: "暂无新闻动态",
+      prevNews: "上一条新闻",
+      nextNews: "下一条新闻",
+    },
+  },
+}

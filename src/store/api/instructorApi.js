@@ -87,6 +87,19 @@ export const instructorApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["InstructorProfile"],
     }),
+
+    getHonoredInstructors: builder.query({
+      query: (params) => {
+        const limit = typeof params === "number" ? params : params?.limit
+        return {
+          url: "/v1/Instructors/honored",
+          method: "GET",
+          params: limit ? { limit } : undefined,
+          extraOptions: { skipAuthHeader: true },
+        }
+      },
+      providesTags: ["HonoredInstructors"],
+    }),
   }),
 })
 
@@ -94,4 +107,5 @@ export const {
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
+  useGetHonoredInstructorsQuery,
 } = instructorApi
