@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import {
@@ -10,6 +10,8 @@ import {
 import { Check, Pencil, Share2, Trash2 } from "lucide-react"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import { Tabs } from "@/shared/components/ui/navigation"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   getSafeMediaUrl,
@@ -17,6 +19,8 @@ import {
 } from "../utils/courseUtils"
 import { mapTeachingTask } from "../utils/courseTransforms"
 import { ensureDate } from "@/shared/utils/dateUtils"
+import { useAuth } from "@/features/auth"
+import { useRoleOverride } from "../components/RoleSwitcher"
 
 import ClassCard from "../components/ClassCard"
 import CourseInfoCard from "../components/CourseInfoCard"
@@ -24,14 +28,20 @@ import TeachingTasksSection from "../components/assignments/TeachingTasksSection
 import UpcomingSessionCard from "../components/sessions/UpcomingSessionCard"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
+const VouchersTab = lazy(() => import("@/features/vouchers/components/VouchersTab"))
+
 const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const taskText = c.grading || {}
+
+  const { user } = useAuth()
+  const { isTeacher } = useRoleOverride()
 
   const [showMenu, setShowMenu] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -249,6 +259,32 @@ const CourseDetailPage = () => {
     }
     : null
 
+  const isCourseTeacher = Boolean(
+    isTeacher
+    || user?.isTeacher
+    || (user?.accountId && [
+      rawCourse?.teacherId,
+      rawCourse?.instructorId,
+      rawCourse?.teacher?.id,
+      rawCourse?.teacher?.accountId,
+    ].some((tid) => tid != null && String(tid) === String(user.accountId)))
+  )
+
+  const urlTab = searchParams.get("tab")
+  const VALID_COURSE_TABS = ["overview", "vouchers"]
+  const activeTab = (urlTab && VALID_COURSE_TABS.includes(urlTab)) ? urlTab : "overview"
+
+  const handleTabChange = (tab) => {
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.set("tab", tab)
+    setSearchParams(nextSearchParams)
+  }
+
+  const courseTabs = [
+    { value: "overview", label: c.courseDetail?.overview || "Tổng quan" },
+    ...(isCourseTeacher ? [{ value: "vouchers", label: "Ưu đãi" }] : []),
+  ]
+
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       {isFetching && (
@@ -271,8 +307,20 @@ const CourseDetailPage = () => {
         {c.student?.courseDetails || "Course Details"}
       </h1>
 
-      {/* ─── Grid Content (2 Columns) ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* ─── Navigation Tabs ─── */}
+      {isCourseTeacher && (
+        <Tabs
+          tabs={courseTabs}
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          fullWidth={false}
+          className="border-b border-border/80"
+        />
+      )}
+
+      {/* ─── Tab Content ─── */}
+      {activeTab === "overview" ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* LEFT COLUMN: Visual Banner, Information Card & Current Classes */}
         <div className="lg:col-span-2 flex flex-col gap-4">
@@ -448,6 +496,15 @@ const CourseDetailPage = () => {
           />
         </div>
       </div>
+    ) : (
+      <Suspense
+        fallback={
+          <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
+        }
+      >
+        <VouchersTab scope="course" courseId={id} />
+      </Suspense>
+    )}
 
       <ConfirmationModal
         open={showDeleteModal}

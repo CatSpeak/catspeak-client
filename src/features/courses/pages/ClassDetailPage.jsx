@@ -15,7 +15,7 @@ import { formatCurrency } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
-import ClassDetailTabs from "../components/ClassDetailTabs"
+import { Tabs } from "@/shared/components/ui/navigation"
 import ClassOverviewTab from "../components/overview/ClassOverviewTab"
 import CreatePostTypeModal from "../components/CreatePostTypeModal"
 
@@ -26,6 +26,7 @@ const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
 const ClassInviteFriendsTab = lazy(() => import("../components/members/ClassInviteFriendsTab"))
+const VouchersTab = lazy(() => import("@/features/vouchers/components/VouchersTab"))
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
@@ -56,7 +57,15 @@ const ClassDetailPage = () => {
   const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
   const urlTab = searchParams.get("tab")
-  const VALID_TABS = ["overview", "members", "lecture-hall", "feed", "grading", "invite-friends"]
+  const VALID_TABS = [
+    "overview",
+    "members",
+    "lecture-hall",
+    "feed",
+    "grading",
+    "invite-friends",
+    "vouchers",
+  ]
   const initialTab = (urlTab && VALID_TABS.includes(urlTab)) ? urlTab : "overview"
   const activeTab = hasGradingDeepLink ? "grading" : initialTab
 
@@ -158,6 +167,7 @@ const ClassDetailPage = () => {
     { value: "lecture-hall", label: cd.lectureHall || "Lecture Hall" },
     { value: "grading", label: cd.grading || "Grading" },
     ...(isClassTeacher ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }] : []),
+    ...(isClassTeacher ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }] : []),
   ]
 
   const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
@@ -255,10 +265,12 @@ const ClassDetailPage = () => {
           </div>
 
           {/* ─── Navigation Tabs ─── */}
-          <ClassDetailTabs
+          <Tabs
             tabs={tabs}
             activeTab={activeTab}
             onChange={handleTabChange}
+            fullWidth={false}
+            className="border-b border-border/80"
           />
         </>
       )}
@@ -325,6 +337,13 @@ const ClassDetailPage = () => {
           <ClassInviteFriendsTab
             classData={classData}
             cd={cd}
+          />
+        )}
+
+        {activeTab === "vouchers" && isClassTeacher && (
+          <VouchersTab
+            scope="class"
+            classId={id}
           />
         )}
       </Suspense>

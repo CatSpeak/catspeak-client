@@ -58,6 +58,7 @@ export default {
     myCalendar: "Lịch của tôi",
     schedule: "Lịch giảng dạy",
     teachingTasks: "Công việc giảng dạy",
+    vouchers: "Ưu đãi & Voucher",
     myLearning: "Góc học tập",
     manageMaterials: "Quản lý tài liệu",
     exploreCourses: "Khám phá khóa học",

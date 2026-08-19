@@ -29,6 +29,11 @@ const DataTable = ({
   renderMobileCard,
   className = "",
   striped = false,
+  headerRowClassName = "bg-red-50/50 text-cath-red-800 border-b border-red-100",
+  tbodyClassName = "bg-white",
+  rowClassName = "",
+  onRowClick,
+  tableClassName = "",
 }) => {
   // Empty state
   if (data.length === 0) {
@@ -52,13 +57,13 @@ const DataTable = ({
         padding="!p-0"
         className={`overflow-hidden flex-1 hidden md:block shadow-none !border-border !rounded-xl ${className}`}
       >
-        <table className="w-full text-left border-collapse">
+        <table className={`w-full text-left border-collapse ${tableClassName}`}>
           <thead>
-            <tr className="bg-red-50/50 text-cath-red-800 border-b border-red-100">
+            <tr className={headerRowClassName}>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`py-4 px-6 font-bold text-[13px] ${col.headerClassName || ""}`}
+                  className={`p-4 font-semibold ${col.headerClassName || ""}`}
                 >
                   <span
                     className="block whitespace-normal break-words line-clamp-2 text-ellipsis overflow-hidden"
@@ -72,26 +77,38 @@ const DataTable = ({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white">
-            {data.map((row, index) => (
-              <tr
-                key={rowKey ? rowKey(row, index) : index}
-                className={`border-b border-border last:border-0 transition-colors ${
-                  striped
-                    ? "odd:bg-white even:bg-gray-50/60 hover:bg-gray-100/70"
-                    : "hover:bg-gray-50/80"
-                }`}
-              >
-                {columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className={`py-4 px-6 text-sm ${col.className || "text-gray-600"}`}
-                  >
-                    {col.render ? col.render(row, index) : row[col.key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
+          <tbody className={tbodyClassName}>
+            {data.map((row, index) => {
+              const customRowClass =
+                typeof rowClassName === "function"
+                  ? rowClassName(row, index)
+                  : rowClassName
+
+              return (
+                <tr
+                  key={rowKey ? rowKey(row, index) : index}
+                  onClick={
+                    onRowClick ? () => onRowClick(row, index) : undefined
+                  }
+                  className={`border-b border-border last:border-0 transition-colors ${
+                    onRowClick ? "cursor-pointer" : ""
+                  } ${
+                    striped
+                      ? "odd:bg-white even:bg-gray-50/60 hover:bg-gray-100/70"
+                      : "hover:bg-gray-50/80"
+                  } ${customRowClass}`}
+                >
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={`px-4 py-1 ${col.className || ""}`}
+                    >
+                      {col.render ? col.render(row, index) : row[col.key]}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </FluentCard>

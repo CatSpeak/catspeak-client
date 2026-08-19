@@ -113,6 +113,12 @@ const WorkspaceAnalyticsPage = lazy(
 const WorkspaceDashboardPage = lazy(
   () => import("@/features/courses/components/WorkspaceDashboardPage"),
 );
+const CreateVoucherPage = lazy(
+  () => import("@/features/vouchers/pages/CreateVoucherPage"),
+);
+const VoucherDetailPage = lazy(
+  () => import("@/features/vouchers/pages/VoucherDetailPage"),
+);
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
 );
@@ -510,6 +516,46 @@ const routesConfig = [
                   <RoleGuard allowedRoles={["Teacher"]}>
                     <LazyRoute>
                       <WorkspaceDashboardPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/create",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateVoucherPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/edit/:id",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateVoucherPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/:id",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <VoucherDetailPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/detail/:id",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <VoucherDetailPage />
                     </LazyRoute>
                   </RoleGuard>
                 ),

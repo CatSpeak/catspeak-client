@@ -12,8 +12,8 @@ const FluentCard = ({
     `flex flex-col justify-center ${rounded} ${padding} min-h-[69px]`
 
   const variantClasses = {
-    default: "border border-border bg-white shadow-sm",
-    glass: "border border-border bg-white/40 backdrop-blur-xl shadow-sm",
+    default: "border border-border bg-white",
+    glass: "border border-border bg-white/40 backdrop-blur-xl",
   }
 
   return (

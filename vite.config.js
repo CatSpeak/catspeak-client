@@ -43,6 +43,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: true,
         },
+        "/api/vouchers": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
         "/api/v1/Payments": {
           target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
@@ -108,7 +113,10 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
-        "react-hot-toast": path.resolve(__dirname, "./src/shared/utils/toastBridge.jsx"),
+        "react-hot-toast": path.resolve(
+          __dirname,
+          "./src/shared/utils/toastBridge.jsx",
+        ),
         "@layouts": path.resolve(__dirname, "./src/layouts"),
 
         "@routes": path.resolve(__dirname, "./src/routes"),
