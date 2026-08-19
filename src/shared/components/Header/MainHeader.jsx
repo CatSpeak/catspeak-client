@@ -66,15 +66,17 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
             />
           </Link>
 
-          {/* Community Switcher Dropdown */}
-          <CommunitySwitcher />
+          {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
+          <div className="hidden lg:block">
+            <CommunitySwitcher />
+          </div>
 
           {/* Online User Count */}
           <OnlinePresence />
         </div>
 
         {/* Right Section: Search + Filter + Lang + User */}
-        <div className="flex items-center justify-end gap-3 shrink-0">
+        <div className="flex items-center justify-end gap-1 shrink-0">
           {/* Search */}
           <HeaderSearchBar />
 

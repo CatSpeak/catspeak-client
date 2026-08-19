@@ -6,8 +6,14 @@
  * @returns {string} e.g. "/en/community"
  */
 export const getCommunityPath = (language) => {
-  const lang = localStorage.getItem("communityLanguage") || language || "en"
-  return `/${lang}/community`
+  const saved = localStorage.getItem("communityLanguage")
+  const lang =
+    saved && saved !== "vi"
+      ? saved
+      : language && language !== "vi"
+      ? language
+      : "zh"
+  return `/${lang || "zh"}/community`
 }
 
 /**

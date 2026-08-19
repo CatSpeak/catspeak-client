@@ -36,7 +36,7 @@ export default {
   nav: {
     home: "Trang chủ",
     rooms: "Phòng",
-    community: "Trang chủ",
+    community: "Cộng đồng",
     learningResources: "Tài nguyên học tập",
     workspaceReels: "Reels cá nhân",
     catSpeak: "Cat Speak",

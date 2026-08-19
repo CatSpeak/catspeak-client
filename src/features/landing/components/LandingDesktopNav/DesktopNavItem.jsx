@@ -29,8 +29,7 @@ const DesktopNavItem = ({ navKey, path, color, img }) => {
   return (
     <NavLink
       to={href}
-      className="flex min-w-max h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 text-base font-bold tracking-wide transition-colors duration-200 no-underline hover:bg-gray-100/50
-        text-black hover:text-[#990011]"
+      className="flex min-w-max h-10 flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 text-sm font-medium transition-colors duration-200 no-underline hover:bg-[#E5E5E5] active:bg-[#e0e0e0] text-black hover:text-[#990011]"
       style={color ? { color } : undefined}
     >
       {img && !imgError ? (

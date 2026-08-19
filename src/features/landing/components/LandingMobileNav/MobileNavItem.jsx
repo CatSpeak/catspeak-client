@@ -10,7 +10,12 @@ const MobileNavItem = ({ navKey, onClose }) => {
 
   if (navKey === "cart" || navKey === "connect") return null;
 
-  const currentLang = lang || localStorage.getItem("communityLanguage") || "en";
+  const currentLang =
+    lang ||
+    (localStorage.getItem("communityLanguage") &&
+    localStorage.getItem("communityLanguage") !== "vi"
+      ? localStorage.getItem("communityLanguage")
+      : "zh");
 
   let href;
   if (navKey === "catSpeak") {

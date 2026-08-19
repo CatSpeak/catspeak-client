@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 import { AnimatePresence, motion } from "framer-motion"
 import {
   useGetProfileQuery,
@@ -257,9 +258,10 @@ const ProfileDropdown = () => {
           <Loader2 className="h-6 w-6 animate-spin text-[#7A7574]" />
         </div>
       ) : (
-        <button
+        <IconButton
           onClick={handleToggleMenu}
-          className={`flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition-colors hover:bg-[#E5E5E5] focus:outline-none ${isOpen ? "bg-[#E5E5E5]" : ""}`}
+          variant="filled"
+          innerClassName="overflow-hidden"
           aria-expanded={isOpen}
           aria-haspopup="true"
         >
@@ -269,7 +271,7 @@ const ProfileDropdown = () => {
             alt={user?.username || "User"}
             name={user?.nickname || user?.fullName || user?.username}
           />
-        </button>
+        </IconButton>
       )}
 
       {/* Desktop: dropdown */}

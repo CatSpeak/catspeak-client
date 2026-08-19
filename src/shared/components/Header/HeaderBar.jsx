@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Menu } from "lucide-react"
 import HeaderLogo from "./HeaderLogo"
-import DesktopNav from "@/features/navigation/components/DesktopNav/DesktopNav"
+import DesktopNav from "@/features/landing/components/LandingDesktopNav/DesktopNav"
 import MobileDrawer from "@/features/navigation/components/MobileNav/MobileDrawer"
 import HeaderUserControls from "./HeaderUserControls"
 import HeaderGuestControls from "./HeaderGuestControls"
@@ -40,7 +40,7 @@ const HeaderBar = ({ onGetStarted }) => {
 
         {/* Right Section: Controls */}
         <div className="flex min-w-0 flex-1 items-center justify-end">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <div className="hidden lg:block">
               <LanguageSwitcher />
             </div>

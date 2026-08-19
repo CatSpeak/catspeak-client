@@ -4,99 +4,109 @@ import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { VietNam, China, UK } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
+/**
+ * UI languages. Standard Vietnamese (`vi`) is fully enabled.
+ * Nôm Vietnamese is not listed here — when you add it for development, use e.g.
+ * `{ key: "viNom", label: "Tiếng Việt (Nôm)", flag: VietNam, disabled: true }`
+ * and omit or comment that entry for production builds.
+ */
 const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
   { key: "zh", label: "中文", flag: China },
   { key: "en", label: "English", flag: UK },
-];
+]
 
 const LanguageSwitcher = ({ className = "", align = "auto" }) => {
-  const { language, setLanguage, t } = useLanguage();
-  const [open, setOpen] = useState(false);
-  const [dropdownAlign, setDropdownAlign] = useState(align === "auto" ? "right" : align);
-  const dropdownRef = useRef(null);
+  const { language, setLanguage, t } = useLanguage()
+  const [open, setOpen] = useState(false)
+  const [dropdownAlign, setDropdownAlign] = useState(
+    align === "auto" ? "right" : align,
+  )
+  const dropdownRef = useRef(null)
 
-  useClickOutside(dropdownRef, () => setOpen(false));
+  useClickOutside(dropdownRef, () => setOpen(false))
 
   const updateAlignment = useCallback(() => {
     if (align !== "auto") {
-      setDropdownAlign(align);
-      return;
+      setDropdownAlign(align)
+      return
     }
     if (dropdownRef.current) {
-      const rect = dropdownRef.current.getBoundingClientRect();
-      const screenWidth = window.innerWidth;
-      const dropdownWidth = 220;
+      const rect = dropdownRef.current.getBoundingClientRect()
+      const screenWidth = window.innerWidth
+      const dropdownWidth = 220
 
       // Check if expanding to the left (right-0) would overflow the viewport's left edge
-      const wouldOverflowLeft = rect.right - dropdownWidth < 16;
+      const wouldOverflowLeft = rect.right - dropdownWidth < 16
       // Check if expanding to the right (left-0) would overflow the viewport's right edge
-      const wouldOverflowRight = rect.left + dropdownWidth > screenWidth - 16;
+      const wouldOverflowRight = rect.left + dropdownWidth > screenWidth - 16
 
       if (wouldOverflowLeft && !wouldOverflowRight) {
-        setDropdownAlign("left");
+        setDropdownAlign("left")
       } else if (wouldOverflowRight && !wouldOverflowLeft) {
-        setDropdownAlign("right");
+        setDropdownAlign("right")
       } else {
         // If center fits or if on a narrow mobile viewport
-        setDropdownAlign("center");
+        setDropdownAlign("center")
       }
     }
-  }, [align]);
+  }, [align])
 
   const handleToggle = () => {
     if (!open) {
-      updateAlignment();
+      updateAlignment()
     }
-    setOpen((prev) => !prev);
-  };
+    setOpen((prev) => !prev)
+  }
 
   useEffect(() => {
     if (open) {
-      updateAlignment();
-      window.addEventListener("resize", updateAlignment);
-      return () => window.removeEventListener("resize", updateAlignment);
+      updateAlignment()
+      window.addEventListener("resize", updateAlignment)
+      return () => window.removeEventListener("resize", updateAlignment)
     }
-  }, [open, updateAlignment]);
+  }, [open, updateAlignment])
 
   const handleLanguageSelect = (lang) => {
-    setLanguage(lang);
-    setOpen(false);
-  };
+    setLanguage(lang)
+    setOpen(false)
+  }
 
-  const current = LANGUAGES.find((l) => l.key === language) || LANGUAGES[0];
+  const current = LANGUAGES.find((l) => l.key === language) || LANGUAGES[0]
   const displayLabel =
-    t.header?.languages?.[language] || t.header?.languages?.en || current.label;
+    t.header?.languages?.[language] || t.header?.languages?.en || current.label
 
   const alignClass =
     dropdownAlign === "left"
       ? "left-0 right-auto"
       : dropdownAlign === "center"
         ? "left-1/2 -translate-x-1/2 right-auto"
-        : "right-0 left-auto";
+        : "right-0 left-auto"
 
   return (
     <div
       className={`relative flex items-center justify-center ${className}`}
       ref={dropdownRef}
     >
-      <motion.button
+      <IconButton
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={displayLabel}
         title={displayLabel}
         onClick={handleToggle}
-        className="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-0 bg-transparent p-0 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-800/40"
+        variant="transparent"
+        innerClassName="overflow-hidden rounded-full"
       >
         <img
           src={current.flag}
           alt=""
-          className="pointer-events-none block h-full w-full object-cover"
+          className="pointer-events-none block h-full w-full object-cover rounded-full"
           draggable={false}
         />
-      </motion.button>
+      </IconButton>
 
       <AnimatePresence>
         {open && (
@@ -114,7 +124,7 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
                 aria-label="Language"
               >
                 {LANGUAGES.map(({ key, label, flag, disabled, soonLabel }) => {
-                  const isActive = language === key;
+                  const isActive = language === key
 
                   return (
                     <button
@@ -124,12 +134,13 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
                       aria-selected={isActive}
                       disabled={disabled}
                       onClick={() => !disabled && handleLanguageSelect(key)}
-                      className={`relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${disabled
-                        ? "cursor-not-allowed text-gray-400"
-                        : isActive
-                          ? "text-cath-red-800 font-medium bg-gray-50/60"
-                          : "text-gray-700 hover:bg-gray-50"
-                        }`}
+                      className={`relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${
+                        disabled
+                          ? "cursor-not-allowed text-gray-400"
+                          : isActive
+                            ? "text-cath-red-800 font-medium bg-gray-50/60"
+                            : "text-gray-700 hover:bg-gray-50"
+                      }`}
                     >
                       {isActive && (
                         <motion.div
@@ -141,8 +152,9 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
                         <img
                           src={flag}
                           alt=""
-                          className={`block h-full w-full object-cover ${disabled ? "grayscale opacity-50" : ""
-                            }`}
+                          className={`block h-full w-full object-cover ${
+                            disabled ? "grayscale opacity-50" : ""
+                          }`}
                           draggable={false}
                         />
                       </span>
@@ -161,7 +173,7 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
                         <div className="ml-auto flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[2px] border-border" />
                       )}
                     </button>
-                  );
+                  )
                 })}
               </div>
             </FluentAnimation>
@@ -169,7 +181,7 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
         )}
       </AnimatePresence>
     </div>
-  );
-};
+  )
+}
 
-export default LanguageSwitcher;
+export default LanguageSwitcher

@@ -3,3 +3,12 @@ export { default as AISection } from "./components/AISection"
 export { default as FAQSection } from "./components/FAQSection"
 export { default as LanguageBar } from "./components/LanguageBar"
 export { default as ValuesSection } from "./components/ValuesSection"
+export { default as LeadingTeamSection } from "./components/LeadingTeamSection"
+export { default as InstructorCard } from "./components/InstructorCard"
+export { default as InstructorSkeletonCard } from "./components/InstructorSkeletonCard"
+export { default as NewsSection } from "./components/NewsSection"
+export { default as LandingNewsCard } from "./components/LandingNewsCard"
+export { default as LandingNewsSkeletonCard } from "./components/LandingNewsSkeletonCard"
+export { landingTranslations } from "./i18n"
+
+
