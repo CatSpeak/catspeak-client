@@ -11,7 +11,7 @@ const TextInput = ({
   placeholder,
   autoFocus = false,
   type = "text",
-  variant = "round",
+  variant = "rounded-xl",
   icon: Icon,
   rightIcon: RightIcon,
   color,
@@ -28,6 +28,7 @@ const TextInput = ({
   rightContentWidthClass = "!pr-12",
   multiline = false,
   floatingLabel = false,
+  required = false,
   ...props
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -41,11 +42,11 @@ const TextInput = ({
   const variantClasses =
     variant === "square"
       ? "rounded-md"
-      : variant === "rounded-xl" || variant === "semi-round"
-        ? "rounded-xl"
-        : variant === "rounded-2xl"
-          ? "rounded-2xl"
-          : "rounded-2xl"
+      : variant === "rounded-2xl" || variant === "round"
+        ? "rounded-2xl"
+        : variant === "rounded-lg"
+          ? "rounded-lg"
+          : "rounded-xl"
 
   const iconPadding = Icon ? "!pl-10" : ""
   const rightIconPadding = RightIcon ? "!pr-12" : ""
@@ -56,9 +57,15 @@ const TextInput = ({
     : ""
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
-  const hasCustomHeight = className.split(" ").some(c => c.startsWith("h-") || c.startsWith("!h-"))
-  const heightClass = multiline ? "min-h-[56px] px-4" : hasCustomHeight ? "" : "h-11 px-3.5"
-  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+  const hasCustomHeight = className
+    .split(" ")
+    .some((c) => c.startsWith("h-") || c.startsWith("!h-"))
+  const heightClass = multiline
+    ? "min-h-14 px-4 py-[15px]"
+    : hasCustomHeight
+      ? ""
+      : "h-14 px-4"
+  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {
@@ -70,7 +77,10 @@ const TextInput = ({
   return (
     <div className={`flex flex-col gap-1 ${containerClassName}`}>
       {label && !floatingLabel && (
-        <span className={`mb-1 ${labelClassName}`}>{label}</span>
+        <span className={`text-xs ${labelClassName}`}>
+          {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+        </span>
       )}
       <div className="relative">
         {leftContent && (
@@ -85,6 +95,7 @@ const TextInput = ({
           <textarea
             id={id}
             autoFocus={autoFocus}
+            required={required}
             style={{
               "--border-color": colors.border,
               "--placeholder-color": colors.subtext,
@@ -103,6 +114,7 @@ const TextInput = ({
             id={id}
             type={inputType}
             autoFocus={autoFocus}
+            required={required}
             style={{
               "--border-color": colors.border,
               "--placeholder-color": colors.subtext,
@@ -132,15 +144,11 @@ const TextInput = ({
             size="sm"
             className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 z-10"
           >
-            {React.isValidElement(RightIcon) ? (
-              RightIcon
-            ) : (
-              <RightIcon />
-            )}
+            {React.isValidElement(RightIcon) ? RightIcon : <RightIcon />}
           </IconButton>
         )}
         {rightContent && (
-          <div className="absolute right-1 top-1/2 -translate-y-1/2 z-10 flex items-center">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs">
             {rightContent}
           </div>
         )}
@@ -162,19 +170,19 @@ const TextInput = ({
             `}
           >
             {label}
+            {required && <span className="text-red-500 ml-0.5">*</span>}
           </label>
         )}
       </div>
       {(showCount && props.maxLength) || error || helperText ? (
-        <div className="flex justify-between items-start px-4 pt-1 w-full">
+        <div className="flex justify-between items-start px-4 w-full">
           <div className="flex-1">
             {error ? (
               <span className="text-xs text-red-500 block">{error}</span>
             ) : helperText ? (
               <span
                 className={`text-xs block ${
-                  helperTextClassName ||
-                  "text-[#7A7574] dark:text-neutral-400"
+                  helperTextClassName || "text-[#7A7574] dark:text-neutral-400"
                 }`}
               >
                 {helperText}

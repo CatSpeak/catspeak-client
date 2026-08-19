@@ -26,13 +26,14 @@ const Tabs = memo(
         className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${!fullWidth ? 'gap-0 sm:gap-6' : ''} ${className}`}
       >
         {tabs.map((tab) => {
+          const tabKey = tab.id ?? tab.value
           const Icon = tab.icon
-          const isActive = activeTab === tab.id
+          const isActive = activeTab === tabKey
 
           return (
             <button
-              key={tab.id}
-              onClick={() => onChange(tab.id)}
+              key={tabKey}
+              onClick={() => onChange(tabKey)}
               className={`h-12 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${
                 fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
               }`}

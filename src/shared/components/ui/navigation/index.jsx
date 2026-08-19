@@ -1,4 +1,7 @@
-export { default as Breadcrumb } from "./Breadcrumb";
-export { default as Pagination } from "./Pagination";
-export { default as SimplePagination } from "./SimplePagination";
-export { default as Tabs } from "./Tabs";
+export { default as Breadcrumb } from "./Breadcrumb"
+export { default as Pagination } from "./Pagination"
+export { default as SimplePagination } from "./SimplePagination"
+export { default as Tabs } from "./Tabs"
+export { default as StepWizardNav } from "./StepWizardNav"
+export { default as StepPills } from "./StepPills"
+export { default as StepProgress } from "../indicators/StepProgress"

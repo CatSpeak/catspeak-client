@@ -18,6 +18,7 @@ import {
   CalendarDays,
   Compass,
   Folder,
+  Ticket,
 } from "lucide-react"
 
 export const navSections = [

@@ -58,6 +58,7 @@ export default {
     myCalendar: "My Calendar",
     schedule: "Schedule",
     teachingTasks: "Teaching Tasks",
+    vouchers: "Vouchers & Discounts",
     myLearning: "My Learning",
     manageMaterials: "Manage Materials",
     exploreCourses: "Explore Courses",

@@ -349,12 +349,17 @@ const baseQueryWithReauth = createReauthBaseQuery(
     const isCoursesRoute =
       url &&
       (url.toLowerCase().startsWith("/teacher/") ||
+        url.toLowerCase().startsWith("teacher/") ||
         url.toLowerCase().startsWith("/student/") ||
+        url.toLowerCase().startsWith("student/") ||
         url.toLowerCase().startsWith("/explore/") ||
-        url.toLowerCase().startsWith("/personal-materials") ||
-        url.toLowerCase().startsWith("/vouchers/") ||
         url.toLowerCase().startsWith("/v1/instructor") ||
-        url.toLowerCase().startsWith("/v1/instructors"))
+        url.toLowerCase().startsWith("/v1/instructors") ||
+        url.toLowerCase().startsWith("explore/") ||
+        url.toLowerCase().startsWith("/personal-materials") ||
+        url.toLowerCase().startsWith("personal-materials") ||
+        url.toLowerCase().startsWith("/vouchers") ||
+        url.toLowerCase().startsWith("vouchers"))
     const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
     return activeQuery(args, api, extraOptions)
   },
@@ -407,6 +412,10 @@ export const baseApi = createApi({
     "RefundHistory",
     "PersonalMaterials",
     "Reviews",
+    "Vouchers",
+    "VoucherDetail",
+    "VoucherStats",
+    "VoucherUsages",
   ],
   endpoints: () => ({}),
 })

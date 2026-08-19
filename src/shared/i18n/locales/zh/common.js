@@ -58,6 +58,7 @@ export default {
     myCalendar: "我的日历",
     schedule: "日程安排",
     teachingTasks: "教学任务",
+    vouchers: "优惠券与活动",
     myLearning: "我的学习",
     manageMaterials: "资料管理",
     exploreCourses: "探索课程",
