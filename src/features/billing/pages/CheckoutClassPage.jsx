@@ -14,7 +14,7 @@ import { useGetProfileQuery } from '@/store/api/authApi'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useEffect } from 'react'
 import { toast } from 'react-hot-toast'
-import { defaultCourseThumbnail } from '@/features/courses/utils/courseUtils'
+import { defaultCourseThumbnail, getSafeMediaUrl } from '@/features/courses/utils/courseUtils'
 import { calculateVoucherDiscount } from '../utils/checkoutUtils'
 
 const EMPTY_VOUCHER_DATA = {
@@ -205,9 +205,13 @@ const CheckoutClassPage = () => {
         : result
 
       if (resultPayload?.checkoutUrl) {
-        window.location.href = resultPayload.checkoutUrl
+        const checkoutUrl = getSafeMediaUrl(resultPayload.checkoutUrl)
+        if (!checkoutUrl) throw new Error("Invalid checkout URL")
+        toast.success(tc.redirecting || "Đang chuyển hướng đến trang thanh toán...")
+        window.location.assign(checkoutUrl)
       } else {
         toast.success(tc.paymentSuccess)
+        navigate(`/workspace/learning/class/${classId}`)
       }
     } catch (error) {
       const status = error?.status ?? error?.originalStatus
