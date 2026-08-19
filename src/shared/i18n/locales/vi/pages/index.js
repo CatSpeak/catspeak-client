@@ -5,4 +5,5 @@ export { default as catSpeak } from "./catSpeak"
 export { default as profile } from "./profile"
 export { default as payment } from "./payment"
 export { default as calendar } from "./calendar"
+export { default as planUsage } from "./planUsage"
 
