@@ -194,6 +194,7 @@ export default {
       youSaved: "Bạn tiết kiệm được {{amount}}!",
       processing: "Đang xử lý...",
       confirmPayment: "Xác nhận thanh toán",
+      free: "Miễn phí",
 
       // VoucherSection
       searchVoucher: "Tìm mã...",

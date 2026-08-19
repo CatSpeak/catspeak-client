@@ -194,6 +194,7 @@ export default {
       youSaved: "You saved {{amount}}!",
       processing: "Processing...",
       confirmPayment: "Confirm payment",
+      free: "Free",
 
       // VoucherSection
       searchVoucher: "Search code...",

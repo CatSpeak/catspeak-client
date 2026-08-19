@@ -194,6 +194,7 @@ export default {
       youSaved: "您节省了 {{amount}}!",
       processing: "处理中...",
       confirmPayment: "确认支付",
+      free: "免费",
 
       // VoucherSection
       searchVoucher: "搜索优惠码...",
