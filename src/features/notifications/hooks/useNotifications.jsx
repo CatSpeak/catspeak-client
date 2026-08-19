@@ -30,7 +30,7 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const { token } = useAuth();
   const { t } = useLanguage();
-  const isInitialLoad = useRef(true);
+  const subscribeTime = useRef(null);
 
   const tRef = useRef(t);
   useEffect(() => {
@@ -55,7 +55,7 @@ export function useNotifications() {
 
     setNotifications([]);
     setUnreadCount(0);
-    isInitialLoad.current = true;
+    subscribeTime.current = null;
 
     const cleanupSnapshots = () => {
       unsubList?.();
@@ -75,6 +75,7 @@ export function useNotifications() {
 
       cleanupSnapshots();
       subscribedUid = uid;
+      subscribeTime.current = Date.now();
 
       const notifRef = collection(firestore, "users", uid, "notifications");
 
@@ -95,13 +96,13 @@ export function useNotifications() {
 
           setNotifications(items);
 
-          if (isInitialLoad.current) {
-            isInitialLoad.current = false;
-            return;
-          }
+          const cutoff = subscribeTime.current;
 
           snapshot.docChanges().forEach((change) => {
             if (change.type !== "added") return;
+
+            const createdAtMs = change.doc.data().createdAt?.toMillis?.() ?? 0;
+            if (cutoff && createdAtMs < cutoff) return;
 
             const data = change.doc.data();
             const resolved = resolveNotification(
@@ -229,7 +230,7 @@ export function useNotifications() {
       cancelled = true;
       sessionReady = false;
       expectedUid = null;
-      isInitialLoad.current = true;
+      subscribeTime.current = null;
 
       unsubAuth();
       cleanupSnapshots();
