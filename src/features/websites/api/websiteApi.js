@@ -1,18 +1,18 @@
-import { baseApi } from "@/store/api/baseApi";
+import { baseApi } from "@/store/api/baseApi"
 
 export const websiteApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Mock fetcher: looks up a single resource by lang and id instead of hitting a real endpoint
     getWebsiteById: builder.query({
       queryFn: (params) => {
-        const id = typeof params === "object" ? params?.id : params;
-        const lang = typeof params === "object" ? params?.lang : undefined;
+        const id = typeof params === "object" ? params?.id : params
+        const lang = typeof params === "object" ? params?.lang : undefined
 
         let website = lang
           ? resources.find((item) => item.id === id && item.lang === lang)
-          : null;
+          : null
         if (!website) {
-          website = resources.find((item) => item.id === id);
+          website = resources.find((item) => item.id === id)
         }
 
         if (!website) {
@@ -25,29 +25,29 @@ export const websiteApi = baseApi.injectEndpoints({
                   : `Website with id "${id}" not found`,
               },
             },
-          };
+          }
         }
 
-        return { data: website };
+        return { data: website }
       },
       providesTags: (result, error, params) => {
-        const id = typeof params === "object" ? params?.id : params;
-        const lang = typeof params === "object" ? params?.lang : undefined;
-        return [{ type: "Website", id: lang ? `${lang}-${id}` : id }];
+        const id = typeof params === "object" ? params?.id : params
+        const lang = typeof params === "object" ? params?.lang : undefined
+        return [{ type: "Website", id: lang ? `${lang}-${id}` : id }]
       },
     }),
 
     // Bonus: list resources
     getWebsites: builder.query({
       queryFn: () => {
-        return { data: resources };
+        return { data: resources }
       },
       providesTags: ["Website"],
     }),
   }),
-});
+})
 
-export const { useGetWebsiteByIdQuery, useGetWebsitesQuery } = websiteApi;
+export const { useGetWebsiteByIdQuery, useGetWebsitesQuery } = websiteApi
 
 const resources = [
   // 1. Test trình độ tiếng Anh miễn phí
@@ -66,6 +66,46 @@ const resources = [
     id: "questsme",
     lang: "en",
     url: "https://play.questsme.com/",
+  },
+  {
+    id: "eflnet",
+    lang: "en",
+    url: "https://www.eflnet.com/",
+  },
+  {
+    id: "agenda-web",
+    lang: "en",
+    url: "https://agendaweb.org/",
+  },
+  {
+    id: "free-daily-english",
+    lang: "en",
+    url: "https://www.freedailyenglish.com/",
+  },
+  {
+    id: "esl-tests",
+    lang: "en",
+    url: "https://www.esl-tests.com/",
+  },
+  {
+    id: "english-maven",
+    lang: "en",
+    url: "https://www.englishmaven.org/",
+  },
+  {
+    id: "talkdrill",
+    lang: "en",
+    url: "https://www.talkdrill.com/",
+  },
+  {
+    id: "englishpage",
+    lang: "en",
+    url: "https://www.englishpage.com/",
+  },
+  {
+    id: "learnenglishfeelgood",
+    lang: "en",
+    url: "https://www.learnenglishfeelgood.com/",
   },
   // 3. Luyện nghe
   {
@@ -97,6 +137,11 @@ const resources = [
     id: "dailydictation",
     lang: "en",
     url: "https://dailydictation.com/",
+  },
+  {
+    id: "levelupesl",
+    lang: "en",
+    url: "https://www.levelupesl.com/",
   },
 
   // 4. Luyện ngữ pháp
@@ -139,6 +184,11 @@ const resources = [
     lang: "en",
     url: "https://www.howtopronounce.com/",
   },
+  {
+    id: "shadola",
+    lang: "en",
+    url: "https://shadola.com/english",
+  },
 
   // 7. Đọc tin tức theo trình độ
   {
@@ -150,6 +200,16 @@ const resources = [
     id: "breaking-news-english",
     lang: "en",
     url: "https://breakingnewsenglish.com/",
+  },
+  {
+    id: "read-in-levels",
+    lang: "en",
+    url: "https://readinlevels.com/",
+  },
+  {
+    id: "newslish",
+    lang: "en",
+    url: "https://www.newslish.com/",
   },
 
   // 8. Luyện thi IELTS/TOEFL
@@ -355,4 +415,4 @@ const resources = [
     lang: "zh",
     url: "https://tiengtrungthuonghai.vn/",
   },
-];
+]

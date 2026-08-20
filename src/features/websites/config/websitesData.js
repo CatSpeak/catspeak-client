@@ -12,7 +12,7 @@ import {
   BookOpenText,
   Library,
   Languages,
-} from "lucide-react";
+} from "lucide-react"
 
 export const RESOURCE_CATEGORIES = {
   all: { labelEn: "All Resources", labelZh: "全部资源" },
@@ -56,7 +56,7 @@ export const RESOURCE_CATEGORIES = {
   },
   writing: { labelEn: "Hanzi Writing", labelZh: "汉字书写", icon: NotebookPen },
   kids: { labelEn: "For Kids", labelZh: "少儿学习", icon: Baby },
-};
+}
 
 export const websites = [
   {
@@ -99,6 +99,69 @@ export const websites = [
         color: "#f7ca14",
         description:
           "A journey to enhance knowledge about your favorite brands.",
+      },
+      {
+        key: "eflnet",
+        label: "Eflnet",
+        path: "/resources/eflnet",
+        color: "#c7420e",
+        description: "Free, focused practice for every part of your English.",
+      },
+      {
+        key: "agenda-web",
+        label: "Agenda Web",
+        path: "/resources/agenda-web",
+        description:
+          "English exercises online to practise grammar, vocabulary, verbs, listening, reading and phonetics. Interactive ESL activities and practice tests for all levels.",
+      },
+      {
+        key: "free-daily-english",
+        label: "Free Daily English",
+        path: "/resources/free-daily-english",
+        color: "#ba652d",
+        description:
+          "Get FREE daily English lessons for all CEFR levels (A1-B2). Master vocabulary, grammar, phrasal verbs & idioms with audio examples. Join thousands of learners improving daily. Start learning English for free now!",
+      },
+      {
+        key: "esl-tests",
+        label: "ESL Tests",
+        path: "/resources/esl-tests",
+        color: "#3aafba",
+        img: "https://www.esl-tests.com/logotip.svg",
+        description:
+          "Free English practice tests for every CEFR level — A1 to C2. Grammar, reading, listening and vocabulary. Find your exact level and start improving today. No sign-up.",
+      },
+      {
+        key: "english-maven",
+        label: "EnglishMaven",
+        path: "/resources/english-maven",
+        color: "#048cc7",
+        description:
+          "Take free online English lessons and exercises here. English Maven offers hundreds of English grammar and vocabulary lessons to help you study English online.",
+      },
+      {
+        key: "talkdrill",
+        label: "TalkDrill",
+        path: "/resources/talkdrill",
+        color: "#4d40e3",
+        img: "https://www.talkdrill.com/favicon.ico",
+        description: "Master English conversations Anytime, Anywhere.",
+      },
+      {
+        key: "englishpage",
+        label: "Englishpage",
+        path: "/resources/englishpage",
+        color: "#326699",
+        img: "https://www.englishpage.com/image/englishpage-logo.gif",
+        description: "Quality Resources for English Learners.",
+      },
+      {
+        key: "learnenglishfeelgood",
+        label: "Learn English Feel Good",
+        path: "/resources/learnenglishfeelgood",
+        color: "#006699",
+        img: "https://www.learnenglishfeelgood.com/favicon.png",
+        description: "Free ESL Grammar, Vocabulary & Listening Exercises.",
       },
     ],
   },
@@ -159,6 +222,14 @@ export const websites = [
         color: "#1d73bf",
         description:
           "Online dictation exercises for learners to improve English listening skills quickly. All levels from basic, intermediate to advanced. 100% Free.",
+      },
+      {
+        key: "levelupesl",
+        label: "LevelUpESL",
+        path: "/resources/levelupesl",
+        color: "#4f47e6",
+        img: "https://www.levelupesl.com/favicon.svg",
+        description: "Master English by Playing.",
       },
     ],
   },
@@ -245,6 +316,14 @@ export const websites = [
         description:
           "Audio pronunciation dictionary featuring global accents and audio recordings.",
       },
+      {
+        key: "shadola",
+        label: "Shadola",
+        path: "/resources/shadola",
+        img: "https://shadola.com/icon.svg",
+        color: "#6d5ef7",
+        description: "Master spoken English with the Shadowing technique.",
+      },
     ],
   },
   {
@@ -267,6 +346,22 @@ export const websites = [
         path: "/resources/breaking-news-english",
         description:
           "Free interactive lessons on current events with 7 levels of difficulty.",
+      },
+      {
+        key: "read-in-levels",
+        label: "Read in Levels",
+        path: "/resources/read-in-levels",
+        img: "https://readinlevels.com/favicon.ico?favicon.16c-1ygoukkmw.ico",
+        color: "#ffb833",
+        description: "One story a day, hand-adapted from A1 to C1.",
+      },
+      {
+        key: "newslish",
+        label: "Newslish",
+        path: "/resources/newslish",
+        img: "https://www.newslish.com/favicon.ico",
+        color: "#f7f5f0",
+        description: "Learn English with real news. 10 minutes a day.",
       },
     ],
   },
@@ -671,4 +766,4 @@ export const websites = [
       },
     ],
   },
-];
+]
