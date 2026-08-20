@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { getClassLanguageCode } from '@/shared/utils/navigation'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
@@ -15,7 +16,7 @@ const EVENT_STYLES = {
 
 const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick }) => {
   const navigate = useNavigate()
-  const { language, t } = useLanguage()
+  const { t } = useLanguage()
   const { formatTime } = useTimezone()
   const { background, border } = EVENT_STYLES[event?.eventType] || EVENT_STYLES["other"];
 
@@ -57,7 +58,7 @@ const EventBlock = ({ event, top, height, width = '96%', left = '2%', onClick })
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/${language || 'vi'}/meet/class-${event?.classId}`);
+            navigate(`/${encodeURIComponent(getClassLanguageCode(event?.classLanguage) || 'en')}/meet/class-${event?.classId}`);
           }}
           className="absolute bottom-[-14px] left-1/2 -translate-x-1/2 w-[90%] py-1 bg-white border border-[#990011] text-[#990011] rounded-md text-xs font-bold hover:bg-red-50 z-20 shadow-sm"
         >

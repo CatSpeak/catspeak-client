@@ -6,6 +6,7 @@ import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
 import SharePopover from '../EventDetailModal/SharePopover'
 
 const EventBlockDetail = ({ event, open, onClose }) => {
@@ -34,7 +35,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
       case 'my-event':
         return navigate(`/workspace/my-calendar`, { state: { activeTab: 'event' } })
       case 'registered-event':
-        return navigate(`/${language || 'vi'}/cat-speak/calendar`)
+        return navigate(`/${getCommunityLang(language)}/cat-speak/calendar`)
       case 'other':
         return
     }
@@ -99,7 +100,7 @@ const EventBlockDetail = ({ event, open, onClose }) => {
           <div className="p-4 border-t border-border flex items-center justify-center gap-3 bg-white shrink-0">
             <PillButton
               variant='outline'
-              onClick={() => navigate(`/${language || 'vi'}/meet/class-${event?.classId}`)}
+              onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(event?.classLanguage) || 'en')}/meet/class-${event?.classId}`)}
             >
               {t.calendar?.enterRoom || "Vào phòng"}
             </PillButton>

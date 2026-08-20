@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import { IconButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { getClassLanguageCode } from '@/shared/utils/navigation'
 import TablePagination from "@/features/courses/components/shared/TablePagination"
 import DatePicker from '@/shared/components/ui/inputs/DatePicker'
 import SearchInput from '@/shared/components/ui/inputs/SearchInput'
@@ -102,7 +103,7 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
       key: 'roomName',
       label: t.calendar?.room || 'Phòng',
       render: (row) => row.class?.id ? (
-        <Link to={`/${language || 'vi'}/meet/class-${row.class.id}`} className="text-[#990011] hover:underline font-medium hover:text-[#80000e]">
+        <Link to={`/${encodeURIComponent(getClassLanguageCode(row.class?.language) || 'en')}/meet/class-${row.class.id}`} className="text-[#990011] hover:underline font-medium hover:text-[#80000e]">
           {row.roomName || t.calendar?.classRoom || 'Phòng học'}
         </Link>
       ) : (

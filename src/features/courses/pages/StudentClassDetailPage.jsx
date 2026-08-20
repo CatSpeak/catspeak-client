@@ -20,6 +20,7 @@ import {
   getSafeMediaUrl,
 } from "../utils/courseUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { useRoleOverride } from "../components/RoleSwitcher"
 
 import ClassDetailTabs from "../components/ClassDetailTabs"
@@ -316,7 +317,7 @@ const StudentClassDetailPage = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => navigate(`/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
                 className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
               >
                 <Video size={14} className="fill-white" />
@@ -363,7 +364,7 @@ const StudentClassDetailPage = () => {
             joinRoomLabel={c.joinRoom || "Join Room"}
             noUpcomingLabel={c.student?.noUpcomingSessions || "No upcoming sessions"}
             onJoinRoom={() => navigate(
-              `/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`
+              `/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`
             )}
           />
         )}

@@ -123,6 +123,7 @@ const MyCalendarPage = () => {
           events.push({
             id: newId,
             classId: session.class?.id,
+            classLanguage: session.class?.language,
             title: session.class?.name || (t.calendar?.teachingSchedule || 'Lịch dạy'),
             subtitle: session.sessionNumber ? `${t.calendar?.session || 'Buổi'} ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
             startTime: startDateTime,
@@ -149,6 +150,7 @@ const MyCalendarPage = () => {
           events.push({
             id: newId,
             classId: session.class?.id,
+            classLanguage: session.class?.language,
             title: session.class?.name || (t.calendar?.studentSchedule || 'Lịch học'),
             subtitle: session.sessionNumber ? `${t.calendar?.session || 'Buổi'} ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
             startTime: startDateTime,

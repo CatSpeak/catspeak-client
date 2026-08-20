@@ -1,6 +1,7 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
+import { getCommunityLang } from "@/shared/utils/navigation"
 
 const CheckoutBreadcrumbs = ({ t, language }) => {
   const navigate = useNavigate()
@@ -8,7 +9,7 @@ const CheckoutBreadcrumbs = ({ t, language }) => {
   const breadcrumbItems = [
     {
       label: t.nav?.home || "Home",
-      onClick: () => navigate(`/${language}/community`),
+      onClick: () => navigate(`/${getCommunityLang(language)}/community`),
     },
     {
       label: t.nav?.pricing || "Pricing",

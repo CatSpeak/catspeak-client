@@ -12,6 +12,7 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import { formatCurrency } from "../utils/courseUtils"
+import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
@@ -229,7 +230,7 @@ const ClassDetailPage = () => {
               {/* Vào phòng học button */}
               <button
                 type="button"
-                onClick={() => navigate(`/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
                 className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
               >
                 <Video size={14} className="fill-white" />
@@ -303,7 +304,7 @@ const ClassDetailPage = () => {
             giveFeedbackLabel={c.giveFeedback || "Give feedback"}
             prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
             onJoinRoom={() => navigate(
-              `/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`
+              `/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`
             )}
             onTaskAction={() => navigate("/workspace/courses/schedule")}
             onViewTasks={() => navigate("/workspace/courses/schedule")}

@@ -20,6 +20,7 @@ import {
 } from "@/store/api/coursesApi"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getCommunityLang } from "@/shared/utils/navigation"
 import {
   enterCall,
   setPiP,
@@ -72,7 +73,7 @@ export const VideoCallProvider = ({ children }) => {
       toast.error(
         t?.rooms?.callEnded?.expiredToast || "Cuộc gọi đã kết thúc do hết thời lượng phòng"
       )
-      const communityLang = localStorage.getItem("communityLanguage") || language || "en"
+      const communityLang = getCommunityLang(language)
       navigate(`/${communityLang}/community`, { replace: true })
     }
   }, [currentRoomObj, isLoadingRoomDataCheck, language, navigate, t])

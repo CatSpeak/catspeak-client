@@ -9,11 +9,11 @@ import CourseSelectFilter from "../../components/CourseSelectFilter"
 import TablePagination from "../../components/shared/TablePagination"
 import { filterStudentClasses } from "../../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const UNKNOWN_VALUE = "—"
 const PAGE_SIZE = 24
-const SUPPORTED_ROUTE_LANGUAGES = new Set(["en", "vi", "zh"])
 const SIMPLE_TIME_PATTERN = /^\d{2}:\d{2}(?::\d{2})?$/
 
 const isRecord = (value) => (
@@ -136,14 +136,10 @@ const normalizeCollection = (rawData, normalizer) => {
   return { items, issueCount, hasMalformedShape: false }
 }
 
-const StudentDashboard = ({ t, language }) => {
+const StudentDashboard = ({ t }) => {
   const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const sc = useMemo(() => t?.courses?.student || {}, [t])
   const navigate = useNavigate()
-  const normalizedLanguage = toText(language).toLowerCase()
-  const routeLanguage = SUPPORTED_ROUTE_LANGUAGES.has(normalizedLanguage)
-    ? normalizedLanguage
-    : "vi"
 
   // Local State
   const [searchQuery, setSearchQuery] = useState("")
@@ -192,7 +188,7 @@ const StudentDashboard = ({ t, language }) => {
     const classId = toText(cls?.id)
     if (!classId) return
     navigate(
-      `/${routeLanguage}/meet/${encodeURIComponent(`class-${classId}`)}`,
+      `/${getClassLanguageCode(cls?.language) || "en"}/meet/${encodeURIComponent(`class-${classId}`)}`,
     )
   }
 

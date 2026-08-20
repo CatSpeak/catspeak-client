@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
 
 const EVENT_STYLES = {
   "teaching-schedule": { background: "#f1fff8", border: "" },
@@ -31,7 +32,7 @@ const EventCard = ({ event, onClick }) => {
       case 'my-event':
         return navigate(`/workspace/my-calendar`, { state: { activeTab: 'event' } })
       case 'registered-event':
-        return navigate(`/${language || 'vi'}/cat-speak/calendar`)
+        return navigate(`/${getCommunityLang(language)}/cat-speak/calendar`)
       case 'other':
         return
     }
@@ -64,7 +65,7 @@ const EventCard = ({ event, onClick }) => {
             variant='outline'
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/${language || 'vi'}/meet/class-${event?.classId}`);
+              navigate(`/${encodeURIComponent(getClassLanguageCode(event?.classLanguage) || 'en')}/meet/class-${event?.classId}`);
             }}
             className='!h-8'
             roundedClass='h-8 rounded-full'
