@@ -4,13 +4,10 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { useGetAllCoursesQuery } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-
 import CourseTable from "../components/CourseTable"
 import CourseTablePageHeader from "../components/CourseTablePageHeader"
-import CourseTabs from "../components/CourseTabs"
-import TablePagination from "../components/shared/TablePagination"
+import { Breadcrumb, Pagination, Tabs } from "@/shared/components/ui/navigation"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapCourseTableRow } from "../utils/courseTransforms"
@@ -52,6 +49,8 @@ const AllCoursesPage = () => {
       {
         classCount: c.classCount,
         studentsCount: c.studentsCount,
+        noClasses: c.noClasses || "Chưa có lớp",
+        free: c.free || "Miễn phí",
         tba: c.workspaceUi?.tba,
       },
       formatDate,
@@ -70,8 +69,8 @@ const AllCoursesPage = () => {
     { value: "all", label: ac.tabAll || "All" },
     { value: "teaching", label: ac.tabTeaching || "Teaching" },
     { value: "open", label: ac.tabOpen || "Open Enrollment" },
-    { value: "not_started", label: ac.tabNotStarted || "Not Started" },
     { value: "archived", label: ac.tabArchived || "Archived" },
+    { value: "not_started", label: ac.tabNotStarted || "Coming Soon" },
   ]
 
   const handleTabChange = (tab) => {
@@ -111,11 +110,11 @@ const AllCoursesPage = () => {
         onCreate={() => navigate("/workspace/courses/create")}
       />
 
-      <CourseTabs
+      <Tabs
         tabs={tabs}
         activeTab={activeTab}
         onChange={handleTabChange}
-        className="gap-6 border-b border-border pb-px"
+        fullWidth={false}
       />
 
       {error && data !== undefined && (
@@ -141,13 +140,10 @@ const AllCoursesPage = () => {
             onDelete={(id) => deleteHelper.setTargetId(id)}
           />
 
-          <TablePagination
-            currentPage={currentPage}
+          <Pagination
+            page={currentPage}
             totalPages={pagination.totalPages}
-            totalCount={pagination.totalItems}
-            limit={pagination.pageSize}
-            onPageChange={setCurrentPage}
-            t={t}
+            onChangePage={setCurrentPage}
           />
         </div>
       ) : (
