@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { } from 'react'
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -10,16 +10,12 @@ import { IconButton } from '@/shared/components/ui/buttons'
 import CalendarMonthView from './CalendarMonthView'
 import CalendarWeekView from './CalendarWeekView'
 import EventFilter from './EventFilter'
+import DatePicker from '@/shared/components/ui/inputs/DatePicker'
 
 import { useLanguage } from '@/shared/context/LanguageContext'
-
-const getLegend = (t) => [
-  { type: 'teaching-schedule', label: t.calendar?.teachingSchedule || 'Lịch dạy', color: '#34ce56' },
-  { type: 'student-schedule', label: t.calendar?.studentSchedule || 'Lịch học', color: '#0e6eec' },
-  { type: 'my-event', label: t.calendar?.myEvents || 'Sự kiện của tôi', color: '#f83b4f' },
-  { type: 'registered-event', label: t.calendar?.registered || 'Đã đăng ký', color: '#e2b60a' },
-  { type: 'other', label: t.calendar?.other || 'Khác', color: '#888888' },
-]
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { getEventTypeOptions } from '@/features/calendar/data/calendarConstants'
+import useFilterModal from '@/features/calendar/hooks/useFilterModal'
 
 const CalendarTab = ({
   currentDate,
@@ -29,18 +25,15 @@ const CalendarTab = ({
   onChangeView,
   onPrev,
   onNext,
+  onChangeMonth,
   onSelectDate,
   activeFilters = [],
   onApplyFilter,
+  classesOptions,
 }) => {
   const { t, language } = useLanguage()
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [filterOpenCount, setFilterOpenCount] = useState(0)
-
-  const handleApplyFilter = (selectedTypes) => {
-    if (onApplyFilter) onApplyFilter(selectedTypes)
-    setFilterOpen(false)
-  }
+  const { isTeacher } = useRoleOverride()
+  const { filterOpen, filterOpenCount, openFilter, closeFilter, handleApplyFilter } = useFilterModal(onApplyFilter)
 
   const monthNum = currentDate.format('M')
   const yearNum = currentDate.format('YYYY')
@@ -51,10 +44,10 @@ const CalendarTab = ({
     localizedMonth = `${yearNum}年 ${monthNum}月`
   }
 
-  const LEGEND = getLegend(t)
+  const LEGEND = getEventTypeOptions(t, isTeacher)
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
+    <div className="bg-white p-4 md:p-6 lg:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-border">
         <div className="flex items-center gap-2">
@@ -66,9 +59,25 @@ const CalendarTab = ({
           >
             <ChevronLeft />
           </IconButton>
-          <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[100px] md:min-w-[150px] text-center">
-            {localizedMonth}
-          </span>
+          <div className='flex'>
+            <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[80px] max-w-[80px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
+              {localizedMonth}
+            </span>
+            <div className="relative flex items-center justify-center w-6 h-6">
+              <CalendarIcon className='mt-6 md:mt-0' />
+              <div className="absolute top-0 left-0 w-6 h-6 opacity-0 overflow-hidden cursor-pointer">
+                <DatePicker
+                  value={currentDate.toDate()}
+                  onChange={(date) => {
+                    if (date && onChangeMonth) {
+                      onChangeMonth(date)
+                    }
+                  }}
+                  className="w-6 h-6"
+                />
+              </div>
+            </div>
+          </div>
           <IconButton
             onClick={onNext}
             variant="ghost"
@@ -103,7 +112,7 @@ const CalendarTab = ({
               variant="outline"
               className='!w-10 !h-10'
               innerClassName="!w-8 !h-8"
-              onClick={() => { setFilterOpenCount(c => c + 1); setFilterOpen(true) }}
+              onClick={openFilter}
               title="Bộ lọc"
             >
               <SlidersHorizontal />
@@ -126,6 +135,8 @@ const CalendarTab = ({
             selectedDate={selectedDate}
             events={events}
             onSelectDate={onSelectDate}
+            onPrev={onPrev}
+            onNext={onNext}
           />
         )}
       </div>
@@ -133,7 +144,7 @@ const CalendarTab = ({
       {/* Legend */}
       <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-border">
         {LEGEND.map((item) => (
-          <div key={item.type} className="flex items-center gap-2">
+          <div key={item.key} className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full" style={{ backgroundColor: item.color }} />
             <span className="text-sm text-gray-500">{item.label}</span>
           </div>
@@ -143,9 +154,10 @@ const CalendarTab = ({
       <EventFilter
         key={filterOpenCount}
         open={filterOpen}
-        onClose={() => setFilterOpen(false)}
+        onClose={closeFilter}
         onApply={handleApplyFilter}
         activeFilters={activeFilters}
+        classesOptions={classesOptions}
       />
     </div>
   )
