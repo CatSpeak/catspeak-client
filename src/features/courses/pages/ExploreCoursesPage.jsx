@@ -1,6 +1,13 @@
 import React, { useState, useMemo, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Compass, RefreshCw, BookOpen, GraduationCap, ArrowUpDown, Coins, X, RotateCcw, Sparkles, ChevronDown, Activity } from "lucide-react"
+import {
+  Compass,
+  RefreshCw,
+  BookOpen,
+  GraduationCap,
+  ArrowUpDown,
+  Filter,
+} from "lucide-react"
 
 import {
   useGetExploreCoursesQuery
@@ -10,17 +17,15 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 import CourseSearchInput from "../components/CourseSearchInput"
 import CourseSelectFilter from "../components/CourseSelectFilter"
-import TablePagination from "../components/shared/TablePagination"
 import ViewModeToggle from "../components/shared/ViewModeToggle"
 import StudentCourseCard from "../student/components/StudentCourseCard"
 import ClassCard from "../components/ClassCard"
 import CourseTabs from "../components/CourseTabs"
-import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
-import { formatCurrencyVND } from "../utils/courseUtils"
+import ExploreCoursesFilterModal from "../components/ExploreCoursesFilterModal"
 import { resolveItemLayout } from "../utils/catalogLayout"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 24
 
 const ExploreCoursesPage = () => {
   const { t } = useLanguage()
@@ -31,44 +36,23 @@ const ExploreCoursesPage = () => {
 
   // Filter States
   const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
-  const [enrollmentStatus, setEnrollmentStatus] = useState("all") // "all" | "upcoming" | "open" | "closed"
+  const [selectedStatuses, setSelectedStatuses] = useState([]) // [] means all, or array of selected status values
+  const [appliedLanguage, setAppliedLanguage] = useState("all") // "all" | "ENGLISH" | "CHINESE"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [minPriceInput, setMinPriceInput] = useState("")
   const [maxPriceInput, setMaxPriceInput] = useState("")
-  const [showPricePopover, setShowPricePopover] = useState(false)
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
-  const popoverRef = useRef(null)
+  // Search input state (typing) vs applied search query (submitted on Enter / search button)
+  const [searchInputValue, setSearchInputValue] = useState("")
+  const [appliedSearchQuery, setAppliedSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const {
-    currentPage,
-    debouncedSearchQuery,
-    searchQuery,
-    setCurrentPage,
-    setSearchQuery,
-  } = usePaginatedSearch()
-
-  // Close price popover on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-        setShowPricePopover(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  // Community language drives the catalog language filter (same source as Rooms).
-  // Only English and Chinese are supported — Vietnamese is intentionally excluded.
-  const communityLanguage = (() => {
-    const stored = typeof window !== "undefined"
-      ? localStorage.getItem("communityLanguage")
-      : null
-    if (stored === "zh") return "CHINESE"
-    if (stored === "en") return "ENGLISH"
-    return undefined
-  })()
+  // Infinite Scroll State
+  const [catalogItems, setCatalogItems] = useState([])
+  const [hasMore, setHasMore] = useState(true)
+  const secondLastItemRef = useRef(null)
 
   const sortOptions = [
     { value: "default", label: sc.sortDefault || "Mới nhất" },
@@ -77,7 +61,7 @@ const ExploreCoursesPage = () => {
   ]
 
   const enrollmentStatusOptions = [
-    { value: "all", label: sc.enrollmentStatusAll || "Tất cả trạng thái" },
+    { value: "all", label: sc.enrollmentStatusAll || "Tất cả" },
     { value: "open", label: sc.enrollmentStatusOpen || "Đang mở đăng ký" },
     { value: "upcoming", label: sc.enrollmentStatusUpcoming || "Chưa mở đăng ký" },
     { value: "closed", label: sc.enrollmentStatusClosed || "Đã đóng đăng ký" },
@@ -88,6 +72,47 @@ const ExploreCoursesPage = () => {
     { value: "courses", label: sc.tabCourses || "Khóa học", icon: BookOpen },
     { value: "classes", label: sc.tabClasses || "Lớp học", icon: GraduationCap },
   ]
+
+  // Event 1: Search submitted via Enter or Search button click
+  const handleSearchSubmit = (val) => {
+    setAppliedSearchQuery(typeof val === "string" ? val.trim() : searchInputValue.trim())
+    setCurrentPage(1)
+  }
+
+  // Event 2: Apply filters from Modal
+  const handleApplyModalFilters = ({ language, enrollmentStatus, minPrice, maxPrice }) => {
+    setAppliedLanguage(language)
+    setMinPriceInput(minPrice)
+    setMaxPriceInput(maxPrice)
+    if (enrollmentStatus !== "all") {
+      setSelectedStatuses([enrollmentStatus])
+    } else {
+      setSelectedStatuses([])
+    }
+    setCurrentPage(1)
+  }
+
+  // Event 3: Multi-select status handler
+  const handleToggleStatus = (val) => {
+    setCurrentPage(1)
+    if (val === "all") {
+      setSelectedStatuses([])
+      return
+    }
+    setSelectedStatuses((prev) => {
+      let next
+      if (prev.includes(val)) {
+        next = prev.filter((s) => s !== val)
+      } else {
+        next = [...prev, val]
+      }
+      const specificStatuses = ["open", "upcoming", "closed"]
+      if (specificStatuses.every((s) => next.includes(s))) {
+        return []
+      }
+      return next
+    })
+  }
 
   // Validate price range inputs
   const parsedMin = minPriceInput !== "" && !isNaN(Number(minPriceInput)) ? Number(minPriceInput) : undefined
@@ -103,37 +128,79 @@ const ExploreCoursesPage = () => {
     activeMaxPrice = undefined
   }
 
+  const activeEnrollmentStatus = useMemo(() => {
+    if (selectedStatuses.length === 0) return undefined
+    if (selectedStatuses.length === 1) return selectedStatuses[0]
+    return selectedStatuses.join(",")
+  }, [selectedStatuses])
+
+  const resolvedLanguage = useMemo(() => {
+    if (appliedLanguage && appliedLanguage !== "all") {
+      return appliedLanguage.toLowerCase()
+    }
+    return undefined
+  }, [appliedLanguage])
+
   // Explore Courses API Query
   const exploreCatalogQuery = useGetExploreCoursesQuery({
     page: currentPage,
     pageSize: PAGE_SIZE,
-    language: communityLanguage,
-    search: debouncedSearchQuery.trim() || undefined,
+    language: resolvedLanguage,
+    search: appliedSearchQuery || undefined,
     sort: sortOrder !== "default" ? sortOrder : undefined,
     minPrice: activeMinPrice,
     maxPrice: activeMaxPrice,
     type: contentType !== "all" ? contentType : undefined,
-    enrollmentStatus: enrollmentStatus !== "all" ? enrollmentStatus : undefined,
+    enrollmentStatus: activeEnrollmentStatus,
   })
-
-  const combinedCatalog = useMemo(() => {
-    const raw = exploreCatalogQuery.currentData?.data
-    return Array.isArray(raw) ? raw : []
-  }, [exploreCatalogQuery.currentData])
 
   const isLoading = exploreCatalogQuery.isLoading
   const isFetching = exploreCatalogQuery.isFetching
   const error = exploreCatalogQuery.error
-  const pagination = exploreCatalogQuery.currentData?.pagination
 
-  const totalPages = Number(pagination?.totalPages) || 1
-  const totalItems = Number(pagination?.totalItems) || combinedCatalog.length
+  // Sync / Accumulate data for Infinite Scroll
+  useEffect(() => {
+    if (exploreCatalogQuery.data) {
+      const raw = exploreCatalogQuery.data.data
+      const items = Array.isArray(raw) ? raw : []
+      const pagination = exploreCatalogQuery.data.pagination
+      const totalPages = Number(pagination?.totalPages) || 1
+
+      if (currentPage === 1) {
+        setCatalogItems(items)
+      } else {
+        setCatalogItems((prev) => {
+          const existingIds = new Set(prev.map((i) => String(i.id)))
+          const newItems = items.filter((i) => !existingIds.has(String(i.id)))
+          return [...prev, ...newItems]
+        })
+      }
+      setHasMore(currentPage < totalPages && items.length > 0)
+    }
+  }, [exploreCatalogQuery.data, currentPage])
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    if (!secondLastItemRef.current || !hasMore || isFetching) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !isFetching) {
+          setCurrentPage((prev) => prev + 1)
+        }
+      },
+      {
+        rootMargin: "250px",
+      },
+    )
+    observer.observe(secondLastItemRef.current)
+    return () => observer.disconnect()
+  }, [catalogItems, hasMore, isFetching])
+
   const isWorkspace = window.location.pathname.startsWith("/workspace")
 
   const handleOpenCourseDetail = (course) => {
     if (!course?.id) return
     const courseId = encodeURIComponent(String(course.id))
-    const isWorkspace = window.location.pathname.startsWith("/workspace")
     if (isWorkspace) {
       navigate(`/workspace/explore-courses/details/${courseId}`)
     } else {
@@ -152,8 +219,10 @@ const ExploreCoursesPage = () => {
   }
 
   const handleClearFilters = () => {
-    setSearchQuery("")
-    setEnrollmentStatus("all")
+    setSearchInputValue("")
+    setAppliedSearchQuery("")
+    setSelectedStatuses([])
+    setAppliedLanguage("all")
     setContentType("all")
     setSortOrder("default")
     setMinPriceInput("")
@@ -180,27 +249,25 @@ const ExploreCoursesPage = () => {
   }
 
   const hasPriceFilter = minPriceInput !== "" || maxPriceInput !== ""
-  const hasActiveFilters = searchQuery.trim() !== "" || contentType !== "all" || sortOrder !== "default" || enrollmentStatus !== "all" || hasPriceFilter
+  const hasActiveModalFilters =
+    appliedLanguage !== "all"
+    || hasPriceFilter
+    || selectedStatuses.length > 0
+  const hasActiveFilters =
+    appliedSearchQuery !== ""
+    || contentType !== "all"
+    || sortOrder !== "default"
+    || selectedStatuses.length > 0
+    || appliedLanguage !== "all"
+    || hasPriceFilter
 
-  const setPricePreset = (minVal, maxVal) => {
-    setMinPriceInput(minVal)
-    setMaxPriceInput(maxVal)
-    setCurrentPage(1)
-  }
+  const modalEnrollmentStatus = selectedStatuses.length === 1 ? selectedStatuses[0] : "all"
+
+  // Check if we are loading initial page or after filter changes
+  const isInitialLoading = (isLoading || isFetching) && currentPage === 1
 
   return (
     <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
-      {/* ─── Breadcrumbs ─── */}
-      {/* <Breadcrumb
-        items={[
-          {
-            label: dict.home || "Home",
-            onClick: () => navigate(window.location.pathname.startsWith("/workspace") ? "/workspace/explore-courses" : "/explore-courses")
-          },
-          { label: dict.exploreCourses || "Explore Courses" },
-        ]}
-      /> */}
-
       {/* ─── Header & Subtitle ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -214,8 +281,8 @@ const ExploreCoursesPage = () => {
         </div>
       </div>
 
-      {/* ─── Category Tabs ─── */}
-      <div className="border-b border-border/80 pb-px">
+      {/* ─── Category Tabs & Filter Button ─── */}
+      <div className="flex items-center justify-between border-b border-border/80 pb-px">
         <CourseTabs
           tabs={categoryTabs}
           activeTab={contentType}
@@ -224,26 +291,51 @@ const ExploreCoursesPage = () => {
             setCurrentPage(1)
           }}
         />
+
+        {/* Filter Modal Trigger Button ("<Filter /> Bộ lọc") */}
+        <button
+          type="button"
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
+        >
+          <Filter size={16} className="text-[#b20a1c]" />
+          <span>{sc.filter || "Bộ lọc"}</span>
+          {hasActiveModalFilters && (
+            <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
+          )}
+        </button>
       </div>
 
-      {/* ─── Sleek E-Commerce Filter Bar ─── */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-border/80 shadow-xs flex flex-col gap-3.5">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full justify-between">
-          {/* Search Input */}
-          <div className="flex-1 min-w-0">
+      {/* ─── Explore Courses Filter Modal ─── */}
+      <ExploreCoursesFilterModal
+        open={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        initialLanguage={appliedLanguage}
+        initialEnrollmentStatus={modalEnrollmentStatus}
+        initialMinPrice={minPriceInput}
+        initialMaxPrice={maxPriceInput}
+        onApply={handleApplyModalFilters}
+      />
+
+      {/* ─── Filter Section (2 Rows, No Parent Border/Card) ─── */}
+      <div className="flex flex-col gap-4">
+        {/* Row 1: Search Input, Sort Selector, View Mode Toggle */}
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 w-full">
+          {/* Search Input (rounded-full, no border, white bg) */}
+          <div className="flex-1 min-w-0 max-w-[878px]">
             <CourseSearchInput
-              value={searchQuery}
-              onChange={(val) => {
-                setSearchQuery(val)
-                setCurrentPage(1)
-              }}
+              value={searchInputValue}
+              onChange={setSearchInputValue}
+              onSearch={handleSearchSubmit}
               placeholder={sc.searchPlaceholder || "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."}
+              className="w-full"
+              inputClassName="w-full h-11 pl-5 pr-11 bg-white border-0 outline-none rounded-full text-sm font-normal text-slate-800 placeholder:text-slate-400 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
             />
           </div>
 
-          {/* E-Commerce Uniform Height Pill Controls (h-9) */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Sort Order Pill Selector */}
+          {/* Right Controls: Sort Order & View Mode Toggle */}
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Sort Order Selector (ghost variant: no bg, border, font normal) */}
             <CourseSelectFilter
               value={sortOrder}
               onChange={(val) => {
@@ -252,231 +344,85 @@ const ExploreCoursesPage = () => {
               }}
               options={sortOptions}
               icon={ArrowUpDown}
+              variant="ghost"
             />
 
-            {/* Enrollment Status Pill Selector */}
-            <CourseSelectFilter
-              value={enrollmentStatus}
-              onChange={(val) => {
-                setEnrollmentStatus(val)
-                setCurrentPage(1)
-              }}
-              options={enrollmentStatusOptions}
-              icon={Activity}
-            />
-
-            {/* View Mode Toggle */}
+            {/* View Mode Toggle (white bg, rounded-full container, circular buttons) */}
             <ViewModeToggle value={viewMode} onChange={setViewMode} />
-
-            {/* Price Popover Pill Button */}
-            <div className="relative" ref={popoverRef}>
-              <button
-                type="button"
-                onClick={() => setShowPricePopover((prev) => !prev)}
-                className={`h-9 px-3.5 rounded-full border text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${hasPriceFilter || showPricePopover
-                  ? "border-[#b20a1c] bg-rose-50 text-[#b20a1c] ring-2 ring-rose-100"
-                  : "border-border bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-              >
-                <Coins size={14} className={hasPriceFilter ? "text-[#b20a1c]" : "text-slate-500"} />
-                <span>
-                  {hasPriceFilter
-                    ? `${minPriceInput ? formatCurrencyVND(minPriceInput) : "0 đ"} - ${maxPriceInput ? formatCurrencyVND(maxPriceInput) : "∞"}`
-                    : (sc.priceRange || "Khoảng giá")}
-                </span>
-              </button>
-
-              {/* Price Popover Dropdown Card */}
-              {showPricePopover && (
-                <div className="absolute left-0 sm:left-auto sm:right-0 top-11 z-50 w-80 max-w-[calc(100vw-2rem)] bg-white border border-border/80 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 animate-fadeIn">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                    <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                      <Sparkles size={14} className="text-[#b20a1c]" /> {sc.filterByPrice || "Lọc Theo Học Phí"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowPricePopover(false)}
-                      className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
-                      aria-label="Close"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-
-                  {/* Presets */}
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{sc.quickPresets || "Gợi ý nhanh"}</span>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setPricePreset("", "")}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "" && maxPriceInput === ""
-                          ? "bg-slate-950 text-white shadow-xs"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                          }`}
-                      >
-                        {sc.allPrices || "Tất cả giá"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPricePreset("0", "500000")}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "0" && maxPriceInput === "500000"
-                          ? "bg-[#b20a1c] text-white shadow-xs"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                          }`}
-                      >
-                        {sc.under500k || "Dưới 500.000 đ"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPricePreset("500000", "2000000")}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "500000" && maxPriceInput === "2000000"
-                          ? "bg-[#b20a1c] text-white shadow-xs"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                          }`}
-                      >
-                        {sc.range500kTo2M || "500k - 2 triệu"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPricePreset("2000000", "")}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "2000000" && maxPriceInput === ""
-                          ? "bg-[#b20a1c] text-white shadow-xs"
-                          : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                          }`}
-                      >
-                        {sc.above2M || "Trên 2 triệu"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Manual Inputs */}
-                  <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                    <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{sc.customPriceRange || "Tùy chỉnh khoảng giá"}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          min="0"
-                          placeholder={sc.priceFrom || "Từ (VNĐ)"}
-                          value={minPriceInput}
-                          onChange={(e) => {
-                            setMinPriceInput(e.target.value)
-                            setCurrentPage(1)
-                          }}
-                          className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-                      <span className="text-slate-400 font-bold text-xs shrink-0">-</span>
-                      <div className="relative flex-1">
-                        <input
-                          type="number"
-                          min="0"
-                          placeholder={sc.priceTo || "Đến (VNĐ)"}
-                          value={maxPriceInput}
-                          onChange={(e) => {
-                            setMaxPriceInput(e.target.value)
-                            setCurrentPage(1)
-                          }}
-                          className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Footer Actions */}
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                    {hasPriceFilter ? (
-                      <button
-                        type="button"
-                        onClick={() => setPricePreset("", "")}
-                        className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
-                      >
-                        {sc.clearPriceFilter || "Xóa lọc giá"}
-                      </button>
-                    ) : (
-                      <span />
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setShowPricePopover(false)}
-                      className="bg-[#b20a1c] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs hover:bg-[#960817] transition-all cursor-pointer"
-                    >
-                      {sc.apply || "Áp dụng"}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
-        {/* ─── Active Filter Pills Bar ─── */}
-        {hasActiveFilters && (
-          <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-extrabold text-slate-400 uppercase text-[10px] tracking-wider mr-1">{sc.activeFiltersLabel || "Bộ lọc đang áp dụng:"}</span>
+        {/* Row 2: Status multi-select list */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold text-slate-700 mr-1">
+            {sc.statusLabel || "Trạng thái:"}
+          </span>
 
-            {searchQuery.trim() !== "" && (
-              <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                {sc.keywordPrefix || "Từ khóa:"} "{searchQuery.trim()}"
-                <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setSearchQuery("")} />
-              </span>
-            )}
+          {enrollmentStatusOptions.map((opt) => {
+            const isSelected =
+              opt.value === "all"
+                ? selectedStatuses.length === 0
+                : selectedStatuses.includes(opt.value)
 
-            {contentType !== "all" && (
-              <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                {sc.typePrefix || "Loại:"} {contentType === "courses" ? (sc.tabCourses || "Khóa học") : (sc.tabClasses || "Lớp học")}
-                <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setContentType("all")} />
-              </span>
-            )}
-
-            {sortOrder !== "default" && (
-              <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                {sc.sortPrefix || "Sắp xếp:"} {sortOrder === "price_asc" ? (sc.sortPriceAsc || "Giá thấp đến cao") : (sc.sortRelevance || "Độ tương quan")}
-                <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setSortOrder("default")} />
-              </span>
-            )}
-
-            {enrollmentStatus !== "all" && (
-              <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                {sc.enrollmentStatusPrefix || "Trạng thái:"} {enrollmentStatusOptions.find((o) => o.value === enrollmentStatus)?.label}
-                <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setEnrollmentStatus("all")} />
-              </span>
-            )}
-
-            {hasPriceFilter && (
-              <span className="bg-rose-50/90 text-[#b20a1c] border border-rose-200/80 px-3 py-1 rounded-full font-extrabold flex items-center gap-1.5 shadow-2xs">
-                {sc.pricePrefix || "Giá:"} {minPriceInput ? formatCurrencyVND(minPriceInput) : "0 đ"} - {maxPriceInput ? formatCurrencyVND(maxPriceInput) : "∞"}
-                <X size={12} className="cursor-pointer hover:text-rose-800" onClick={() => setPricePreset("", "")} />
-              </span>
-            )}
-
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="text-slate-500 hover:text-[#b20a1c] font-extrabold text-xs flex items-center gap-1 ml-auto cursor-pointer transition-colors"
-            >
-              <RotateCcw size={12} />
-              <span>{sc.clearAll || "Xóa tất cả"}</span>
-            </button>
-          </div>
-        )}
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => handleToggleStatus(opt.value)}
+                className={`h-8 px-4 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  isSelected
+                    ? "bg-[#b20a1c] text-white shadow-xs"
+                    : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-0 shadow-2xs"
+                }`}
+              >
+                <span>{opt.label}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {/* ─── Catalog Grid Section ─── */}
+      {/* ─── Catalog Section with Infinite Scroll ─── */}
       <div aria-busy={isFetching}>
-        {isLoading ? (
-          <div
-            role="status"
-            aria-live="polite"
-            className="flex min-h-[360px] items-center justify-center rounded-3xl border border-border/80 bg-white p-6 shadow-xs"
-          >
-            <LoadingSpinner />
-            <span className="sr-only">
-              {sc.loadingLearningData || "Loading data..."}
-            </span>
-          </div>
-        ) : error && combinedCatalog.length === 0 ? (
+        {isInitialLoading ? (
+          /* Initial / Filter Change Skeleton Loader */
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-3xl border border-border/80 bg-white p-4 shadow-xs flex flex-col gap-4 animate-pulse"
+                >
+                  <div className="aspect-[16/10] w-full bg-slate-200 rounded-2xl" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-slate-200 rounded-md w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded-md w-1/2" />
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-auto">
+                    <div className="h-4 bg-slate-200 rounded-md w-1/3" />
+                    <div className="h-8 bg-slate-200 rounded-full w-20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-3xl border border-border/80 bg-white p-5 shadow-xs flex gap-5 animate-pulse items-center"
+                >
+                  <div className="w-44 h-28 bg-slate-200 rounded-2xl shrink-0" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-5 bg-slate-200 rounded-md w-2/3" />
+                    <div className="h-3 bg-slate-100 rounded-md w-1/3" />
+                    <div className="h-4 bg-slate-200 rounded-md w-1/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : error && catalogItems.length === 0 ? (
           <div
             role="alert"
             className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-6 text-center"
@@ -499,7 +445,7 @@ const ExploreCoursesPage = () => {
               <span>{isFetching ? "Retrying..." : "Retry"}</span>
             </button>
           </div>
-        ) : combinedCatalog.length === 0 ? (
+        ) : catalogItems.length === 0 ? (
           <div
             role="status"
             className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 bg-white p-8 text-center shadow-xs"
@@ -525,50 +471,66 @@ const ExploreCoursesPage = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className={viewMode === "list"
-              ? "flex flex-col gap-4"
-              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"}>
-              {combinedCatalog.map((item, idx) => {
+            {/* Cards Grid / List */}
+            <div
+              className={
+                viewMode === "list"
+                  ? "flex flex-col gap-4"
+                  : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
+              }
+            >
+              {catalogItems.map((item, idx) => {
+                const isSecondLast =
+                  idx === Math.max(0, catalogItems.length - 2) ||
+                  (catalogItems.length === 1 && idx === 0)
+
                 if (item.isClassItem) {
                   const classLayout = resolveItemLayout(item, viewMode)
                   return (
-                    <ClassCard
-                      key={`cls-${item.id}`}
-                      cls={item}
-                      isStudent={true}
-                      courseTitle={item.courseTitle}
-                      viewMode={classLayout}
-                      onClick={() => handleOpenClassDetail(item)}
-                      onEnroll={() => handleOpenClassDetail(item)}
-                      onShare={handleShareClass}
-                    />
+                    <div
+                      ref={isSecondLast ? secondLastItemRef : null}
+                      key={`cls-${item.id || idx}`}
+                      className="w-full"
+                    >
+                      <ClassCard
+                        cls={item}
+                        isStudent={true}
+                        courseTitle={item.courseTitle}
+                        viewMode={classLayout}
+                        onClick={() => handleOpenClassDetail(item)}
+                        onEnroll={() => handleOpenClassDetail(item)}
+                        onShare={handleShareClass}
+                      />
+                    </div>
                   )
                 }
+
                 return (
-                  <StudentCourseCard
-                    key={`crs-${item.id}`}
-                    course={item}
-                    isEnrolled={false}
-                    viewMode={viewMode}
-                    onViewDetails={() => handleOpenCourseDetail(item)}
-                    onJoin={() => handleOpenCourseDetail(item)}
-                    onShare={handleShareCourse}
-                    t={t}
-                    index={idx}
-                  />
+                  <div
+                    ref={isSecondLast ? secondLastItemRef : null}
+                    key={`crs-${item.id || idx}`}
+                    className="w-full"
+                  >
+                    <StudentCourseCard
+                      course={item}
+                      isEnrolled={false}
+                      viewMode={viewMode}
+                      onViewDetails={() => handleOpenCourseDetail(item)}
+                      onJoin={() => handleOpenCourseDetail(item)}
+                      onShare={handleShareCourse}
+                      t={t}
+                      index={idx}
+                    />
+                  </div>
                 )
               })}
             </div>
 
-            {totalPages > 1 && (
-              <TablePagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalItems}
-                limit={PAGE_SIZE}
-                onPageChange={setCurrentPage}
-                t={t}
-              />
+            {/* Infinite Scroll Bottom Spinner */}
+            {isFetching && currentPage > 1 && (
+              <div className="flex justify-center py-6">
+                <div className="w-8 h-8 border-2 border-[#b20a1c] border-t-transparent rounded-full animate-spin" />
+              </div>
             )}
           </div>
         )}
