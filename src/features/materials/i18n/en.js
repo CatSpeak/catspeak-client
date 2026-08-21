@@ -174,6 +174,27 @@ export default {
     sharedBy: "Shared by",
     anonymousUser: "Anonymous user",
     folderInfo: "Folder Information",
-    shareDate: "Share date"
+    shareDate: "Share date",
+    deleteFolderImpactMsg: 'Deleting folder "{{name}}" will delete {{folders}} subfolders and {{materials}} materials. This action cannot be undone.',
+    errors: {
+      "FOLDER_NAME_REQUIRED": "Folder name cannot be empty.",
+      "DUPLICATE_FOLDER_NAME": "A folder with this name already exists in this location.",
+      "PARENT_FOLDER_NOT_FOUND": "Parent folder not found or access denied.",
+      "FOLDER_NOT_FOUND": "Folder not found or access denied.",
+      "TARGET_FOLDER_NOT_FOUND": "Target folder not found or access denied.",
+      "NO_FILE_SELECTED": "No files selected.",
+      "UNSUPPORTED_FILE_TYPE": "Unsupported file format. Accepted formats: PDF, DOCX, XLSX, PPTX, JPG, PNG.",
+      "FILE_TOO_LARGE": "File exceeds the 50 MB limit.",
+      "STORAGE_LIMIT_EXCEEDED": "File exceeds remaining storage quota.",
+      "MATERIAL_NOT_FOUND": "Material not found or access denied.",
+      "MATERIAL_NAME_REQUIRED": "File name cannot be empty.",
+      "DUPLICATE_MATERIAL_NAME": "A file with this name already exists in this folder.",
+      "MOVE_TO_SELF_NOT_ALLOWED": "Cannot move a folder into itself.",
+      "MOVE_TO_SUBFOLDER_NOT_ALLOWED": "Cannot move a folder into its subfolder.",
+      "NO_ITEMS_SELECTED": "You must select at least one material or folder to move.",
+      "DOWNLOAD_NOT_ALLOWED": "This material/folder does not allow downloads.",
+      "INVALID_EXPIRATION_DATE": "Expiration date must be in the future.",
+      "INVALID_MAX_USES": "Maximum uses must be greater than 0."
+    }
   }
 }

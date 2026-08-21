@@ -174,6 +174,27 @@ export default {
     sharedBy: "分享者",
     anonymousUser: "匿名用户",
     folderInfo: "文件夹信息",
-    shareDate: "分享日期"
+    shareDate: "分享日期",
+    deleteFolderImpactMsg: '删除文件夹 "{{name}}" 将同时删除 {{folders}} 个子文件夹和 {{materials}} 个资料。此操作无法撤销。',
+    errors: {
+      "FOLDER_NAME_REQUIRED": "文件夹名称不能为空。",
+      "DUPLICATE_FOLDER_NAME": "该位置已存在同名文件夹。",
+      "PARENT_FOLDER_NOT_FOUND": "父文件夹不存在或无访问权限。",
+      "FOLDER_NOT_FOUND": "文件夹不存在或无访问权限。",
+      "TARGET_FOLDER_NOT_FOUND": "目标文件夹不存在或无访问权限。",
+      "NO_FILE_SELECTED": "未选择任何文件。",
+      "UNSUPPORTED_FILE_TYPE": "不支持的文件格式。 仅支持：PDF, DOCX, XLSX, PPTX, JPG, PNG。",
+      "FILE_TOO_LARGE": "文件超过 50 MB 限制。",
+      "STORAGE_LIMIT_EXCEEDED": "文件超过存储限额。",
+      "MATERIAL_NOT_FOUND": "资料不存在或无访问权限。",
+      "MATERIAL_NAME_REQUIRED": "文件名不能为空。",
+      "DUPLICATE_MATERIAL_NAME": "该文件夹中已存在同名文件。",
+      "MOVE_TO_SELF_NOT_ALLOWED": "无法将文件夹移动到其自身中。",
+      "MOVE_TO_SUBFOLDER_NOT_ALLOWED": "无法将文件夹移动到其子文件夹中。",
+      "NO_ITEMS_SELECTED": "必须选择至少一个资料或文件夹才能移动。",
+      "DOWNLOAD_NOT_ALLOWED": "该资料/文件夹不允许下载。",
+      "INVALID_EXPIRATION_DATE": "过期时间必须是将来的时间。",
+      "INVALID_MAX_USES": "最大使用次数必须大于0。"
+    }
   }
 }

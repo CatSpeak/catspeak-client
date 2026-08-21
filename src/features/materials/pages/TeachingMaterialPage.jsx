@@ -18,7 +18,7 @@ import Dropdown from '@/shared/components/ui/Dropdown';
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useContextMenu } from '@/shared/hooks/useContextMenu';
 import ContextMenu from '@/shared/components/ui/ContextMenu';
-import { useGetPersonalMaterialsQuery, useGetBookmarkedMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery, useBookmarkFolderMutation, useBookmarkMaterialMutation } from '@/store/api/materialApi';
+import { useGetPersonalMaterialsQuery, useGetBookmarkedMaterialsQuery, useRecordMaterialDownloadMutation, useGetPersonalMaterialByIdQuery, useGetFolderTreeQuery, useBookmarkFolderMutation, useBookmarkMaterialMutation, useGetDeletionImpactQuery } from '@/store/api/materialApi';
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { LoadingSpinner } from '@/shared/components/ui/indicators';
 import { Breadcrumb } from '@/shared/components/ui/navigation';
@@ -51,6 +51,13 @@ const TeachingMaterialPage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [deletingItem, setDeletingItem] = useState({ id: null, name: "", count: 0, type: "folder" });
+
+  // Impact query cho xóa thư mục
+  const [impactFolderId, setImpactFolderId] = useState(null);
+  const { data: impactData, isFetching: isImpactFetching } = useGetDeletionImpactQuery(
+    impactFolderId,
+    { skip: !impactFolderId }
+  );
 
   // Filter States
   const [filterMode, setFilterMode] = useState(null); // 'folder' | 'fileType' | null
@@ -121,7 +128,9 @@ const TeachingMaterialPage = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error(t.materials.bookmarkError);
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.bookmarkError;
+      toast.error(errMsg);
     }
   };
 
@@ -359,7 +368,14 @@ const TeachingMaterialPage = () => {
                       setIsRenameModalOpen(true);
                     }}
                     onDelete={() => {
-                      setDeletingItem({ id: folder.id, name: folder.name, count: (folder.subFolderCount || 0) + (folder.materialCount || 0), type: 'folder' });
+                      const fId = folder.id || folder.folderId;
+                      setImpactFolderId(fId);
+                      setDeletingItem({
+                        id: fId,
+                        name: folder.name || folder.folderName,
+                        count: (folder.subFolderCount || 0) + (folder.materialCount || 0),
+                        type: 'folder'
+                      });
                       setIsDeleteFolderOpen(true);
                     }}
                     onShare={() => {
@@ -471,11 +487,21 @@ const TeachingMaterialPage = () => {
 
       <DeleteFolderModal
         open={isDeleteFolderOpen}
-        onClose={() => setIsDeleteFolderOpen(false)}
-        item={deletingItem}
+        onClose={() => {
+          setIsDeleteFolderOpen(false);
+          setImpactFolderId(null);
+        }}
+        item={deletingItem.type === 'folder' ? {
+          ...deletingItem,
+          isImpactLoading: isImpactFetching,
+          affectedDetail: impactData
+            ? { folders: (impactData?.data || impactData)?.subFolderCount ?? 0, materials: (impactData?.data || impactData)?.materialCount ?? 0 }
+            : null
+        } : deletingItem}
         onSuccess={() => {
           setSelectedItems([]);
           setIsDeleteFolderOpen(false);
+          setImpactFolderId(null);
         }}
       />
 
