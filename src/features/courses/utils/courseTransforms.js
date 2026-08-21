@@ -1,6 +1,7 @@
 import {
   formatCurrencyVND,
   getCourseGradientAndIcon,
+  stripHtmlToText,
 } from "./courseUtils"
 import { toLocalDateString } from "./dateUtils"
 import { formatScheduleDays } from "@/shared/utils/dateUtils"
@@ -20,9 +21,12 @@ const fillTemplate = (template, values) => (
   )
 )
 
-const formatPrice = (value, fallback = "") => (
-  toNonNegativeNumber(value) === null ? fallback : formatCurrencyVND(value)
-)
+const formatPrice = (value, fallback = "", freeLabel = "Miễn phí") => {
+  const num = toNonNegativeNumber(value)
+  if (num === null) return fallback
+  if (num === 0) return freeLabel || "Miễn phí"
+  return formatCurrencyVND(num)
+}
 
 export const getScheduleRange = (daysAhead = 180) => {
   const today = new Date()
@@ -36,12 +40,24 @@ export const getScheduleRange = (daysAhead = 180) => {
 }
 
 export const getProgressPercent = (progress) => {
-  const completedSessions = toNonNegativeNumber(progress?.completedSessions)
-  const totalSessions = toNonNegativeNumber(progress?.totalSessions)
-  if (completedSessions === null || totalSessions === null || totalSessions === 0) {
-    return null
+  if (progress === null || progress === undefined) return 0
+  if (typeof progress === "number") {
+    return Math.min(100, Math.max(0, Math.round(progress)))
   }
-  return Math.min(100, Math.round((completedSessions / totalSessions) * 100))
+  if (typeof progress === "string" && !isNaN(Number(progress))) {
+    return Math.min(100, Math.max(0, Math.round(Number(progress))))
+  }
+  if (typeof progress === "object") {
+    if (progress.percentage != null && !isNaN(Number(progress.percentage))) {
+      return Math.min(100, Math.max(0, Math.round(Number(progress.percentage))))
+    }
+    const completedSessions = toNonNegativeNumber(progress.completedSessions ?? progress.completed)
+    const totalSessions = toNonNegativeNumber(progress.totalSessions ?? progress.total)
+    if (completedSessions !== null && totalSessions !== null && totalSessions > 0) {
+      return Math.min(100, Math.max(0, Math.round((completedSessions / totalSessions) * 100)))
+    }
+  }
+  return 0
 }
 
 export const filterByStatus = (list, statusFilter) => {
@@ -59,23 +75,56 @@ export const mapTeacherCourseSummary = (
   formatDate = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
+  const studentCount = toNonNegativeNumber(
+    course.studentCount ?? course.totalStudents
+  )
+  const minPriceNum = toNonNegativeNumber(course.priceRange?.min ?? course.minPrice ?? course.price ?? course.tuitionFee)
+  const maxPriceNum = toNonNegativeNumber(course.priceRange?.max ?? course.maxPrice ?? course.price ?? course.tuitionFee)
+  const rawStartDate = course.startDate || course.createdAt
+  const rawEndDate = course.endDate
+
+  const formattedStart = (formatDate && rawStartDate) ? formatDate(rawStartDate) : (rawStartDate || null)
+  const formattedEnd = (formatDate && rawEndDate) ? formatDate(rawEndDate) : (rawEndDate || null)
+
+  const courseProgress = course.progress != null
+    ? getProgressPercent(course.progress)
+    : (Array.isArray(course.classes) && course.classes.length > 0
+        ? Math.round(
+            course.classes.reduce((sum, c) => sum + (getProgressPercent(c.progress) || 0), 0) / course.classes.length
+          )
+        : 0)
+
+  const classCountNum = toNonNegativeNumber(course.classCount) ?? 0
+  const hasClasses = classCountNum > 0
+
+  const classCountText = hasClasses
+    ? (labels.classCount ? fillTemplate(labels.classCount, { count: classCountNum }) : `${classCountNum} classes`)
+    : (labels.noClasses || "Chưa có lớp")
 
   return {
     id: course.id,
-    title: course.name || course.title,
+    title: course.name || course.title || labels.untitledCourse || "—",
+    subtitle: course.language ? `Khóa học tiếng ${course.language.toLowerCase()}` : stripHtmlToText(course.description),
     language: course.language || "",
     description: course.description || "",
-    classCount: toDisplayCount(course.classCount),
-    students: (() => {
-      const studentCount = toNonNegativeNumber(
-        course.studentCount ?? course.totalStudents
-      )
-      return studentCount === null
-        ? "—"
-        : fillTemplate(labels.studentsCount, { count: studentCount })
-    })(),
-    createdAt: formatDate ? (formatDate(course.createdAt) || labels.tba) : (labels.tba || "—"),
-    status: course.status || "",
+    classCount: classCountText,
+    classCountNum,
+    hasClasses,
+    studentCount: studentCount ?? 0,
+    slots: studentCount ?? 0,
+    students: studentCount === null
+      ? "—"
+      : fillTemplate(labels.studentsCount, { count: studentCount }),
+    createdAt: formatDate ? (formatDate(course.createdAt) || labels.tba || "—") : (labels.tba || "—"),
+    startDate: formattedStart || (labels.tba || "—"),
+    endDate: formattedEnd || (labels.tba || "—"),
+    dateRange: formattedStart && formattedEnd ? `${formattedStart} - ${formattedEnd}` : (formattedStart || (labels.tba || "—")),
+    schedule: course.scheduleSummary || classCountText,
+    progress: courseProgress,
+    minPrice: minPriceNum !== null ? formatPrice(minPriceNum, "", labels.free || "Miễn phí") : null,
+    maxPrice: maxPriceNum !== null ? formatPrice(maxPriceNum, "", labels.free || "Miễn phí") : null,
+    price: minPriceNum !== null ? formatPrice(minPriceNum, labels.tba || "—", labels.free || "Miễn phí") : null,
+    status: course.status || "TEACHING",
     icon,
     gradient,
     thumbnailUrl: course.thumbnailUrl,
@@ -96,6 +145,7 @@ export const mapTeacherClassSummary = (
   const startTimeStr = cls.schedule?.startTime
   const endTimeStr = cls.schedule?.endTime
   const startDateStr = cls.startDate
+  const endDateStr = cls.endDate
 
   const scheduleDaysText = formatScheduleDaysFunc
     ? formatScheduleDaysFunc(cls.schedule?.days, labels.tba, " - ", startTimeStr, startDateStr)
@@ -109,38 +159,55 @@ export const mapTeacherClassSummary = (
     ? formatScheduleTime(endTimeStr, startDateStr)
     : endTimeStr
 
+  const formattedStart = (() => {
+    const raw = cls.startDate || cls.enrollmentStart || cls.created_at || cls.createdAt
+    const formatted = (formatDate && raw) ? formatDate(raw) : null
+    return formatted || (cls.startDate ? cls.startDate : null)
+  })()
+
+  const formattedEnd = (() => {
+    const raw = cls.endDate || cls.enrollmentEnd
+    const formatted = (formatDate && raw) ? formatDate(raw) : null
+    return formatted || (cls.endDate ? cls.endDate : null)
+  })()
+
+  const minPriceNum = toNonNegativeNumber(cls.minPrice ?? cls.priceMin ?? cls.price ?? cls.tuitionFee)
+  const maxPriceNum = toNonNegativeNumber(cls.maxPrice ?? cls.priceMax ?? cls.price ?? cls.tuitionFee)
+  const tuitionNum = toNonNegativeNumber(cls.tuitionFee ?? cls.price ?? cls.minPrice)
+
+  const rawSlotCount = toNonNegativeNumber(cls.slots ?? cls.capacity ?? cls.maxStudents ?? cls.studentCount) ?? 0
+  const enrolledCount = toNonNegativeNumber(cls.studentCount ?? cls.enrolledStudents) ?? 0
+
   return {
     id: cls.id,
     courseId: cls.courseId,
-    title: cls.name || cls.title,
+    title: cls.name || cls.title || labels.untitledClass || "—",
+    subtitle: cls.courseName || cls.courseTitle || (cls.courseId ? `Khóa ${cls.courseTitle || cls.courseName}` : (labels.standaloneClass || "Lớp độc lập")),
     courseTitle: cls.courseId
       ? (cls.courseName || cls.courseTitle || labels.notAvailable || "—")
       : null,
     language: cls.language || "",
     levels: Array.isArray(cls.levels) ? cls.levels : [],
-    schedule: scheduleDaysText,
+    schedule: scheduleDaysText && scheduleDaysText !== "—" ? scheduleDaysText : (labels.tba || "—"),
     time: startFormatted && endFormatted
       ? `${startFormatted} - ${endFormatted}`
-      : labels.tba,
+      : (labels.tba || "—"),
     students: fillTemplate(labels.studentsRatio, {
-      enrolled: toDisplayCount(cls.studentCount ?? cls.enrolledStudents),
-      slots: toDisplayCount(cls.slots),
+      enrolled: toDisplayCount(enrolledCount),
+      slots: toDisplayCount(rawSlotCount),
     }),
-    slots: toNonNegativeNumber(cls.slots),
+    studentCount: enrolledCount,
+    slots: rawSlotCount,
     progress,
     progressText: `${toDisplayCount(cls.progress?.completedSessions)}/${toDisplayCount(cls.progress?.totalSessions)}`,
-    startDate: (() => {
-      const raw = cls.startDate || cls.enrollmentStart || cls.created_at || cls.createdAt
-      const formatted = (formatDate && raw) ? formatDate(raw) : null
-      return formatted || (cls.startDate ? cls.startDate : (labels.tba || "—"))
-    })(),
-    endDate: (() => {
-      const raw = cls.endDate || cls.enrollmentEnd
-      const formatted = (formatDate && raw) ? formatDate(raw) : null
-      return formatted || (cls.endDate ? cls.endDate : (labels.tba || "—"))
-    })(),
-    price: formatPrice(cls.tuitionFee, labels.tba),
-    status: cls.status || "",
+    startDate: formattedStart || (labels.tba || "—"),
+    endDate: formattedEnd || (labels.tba || "—"),
+    dateRange: formattedStart && formattedEnd ? `${formattedStart} - ${formattedEnd}` : (formattedStart || (labels.tba || "—")),
+    minPrice: minPriceNum !== null ? formatPrice(minPriceNum, "", labels.free || "Miễn phí") : null,
+    maxPrice: maxPriceNum !== null ? formatPrice(maxPriceNum, "", labels.free || "Miễn phí") : null,
+    price: tuitionNum !== null ? formatPrice(tuitionNum, labels.tba || "—", labels.free || "Miễn phí") : (labels.tba || "—"),
+    isFree: tuitionNum === 0 || (minPriceNum === 0 && (maxPriceNum === 0 || maxPriceNum === null)),
+    status: cls.status || "TEACHING",
     icon,
     gradient,
     thumbnailUrl: cls.thumbnailUrl,
@@ -154,27 +221,41 @@ export const mapCourseTableRow = (
   formatDate = null,
 ) => {
   const { gradient, icon } = getCourseGradientAndIcon(index)
-  const classCount = toDisplayCount(course.classCount)
+  const classCountNum = toNonNegativeNumber(course.classCount) ?? 0
+  const hasClasses = classCountNum > 0
   const totalStudents = toDisplayCount(course.totalStudents ?? course.studentCount)
-  const minP = toNonNegativeNumber(course.priceRange?.min ?? course.price ?? course.tuitionFee)
-  const maxP = toNonNegativeNumber(course.priceRange?.max ?? course.price ?? course.tuitionFee)
+  const minP = toNonNegativeNumber(course.priceRange?.min ?? course.minPrice ?? course.price ?? course.tuitionFee)
+  const maxP = toNonNegativeNumber(course.priceRange?.max ?? course.maxPrice ?? course.price ?? course.tuitionFee)
 
   const formattedPrice = (() => {
+    if (minP === 0 && (maxP === 0 || maxP === null)) {
+      return labels.free || "Miễn phí"
+    }
     if (minP !== null && maxP !== null) {
       return minP === maxP
         ? formatCurrencyVND(minP)
         : `${formatCurrencyVND(minP)} - ${formatCurrencyVND(maxP)}`
     }
-    if (minP !== null) return formatCurrencyVND(minP)
-    if (maxP !== null) return formatCurrencyVND(maxP)
-    return labels.tba
+    if (minP !== null) return minP === 0 ? (labels.free || "Miễn phí") : formatCurrencyVND(minP)
+    if (maxP !== null) return maxP === 0 ? (labels.free || "Miễn phí") : formatCurrencyVND(maxP)
+    return labels.tba || "—"
   })()
+
+  const classCountText = hasClasses
+    ? (labels.classCount ? fillTemplate(labels.classCount, { count: classCountNum }) : `${classCountNum} classes`)
+    : (labels.noClasses || "Chưa có lớp")
+
+  const studentsText = labels.studentsCount
+    ? fillTemplate(labels.studentsCount, { count: totalStudents })
+    : `${totalStudents} students`
 
   return {
     id: course.id,
-    title: course.title || course.name,
-    classCount: fillTemplate(labels.classCount, { count: classCount }),
-    students: fillTemplate(labels.studentsCount, { count: totalStudents }),
+    title: course.title || course.name || labels.untitledCourse || "—",
+    classCount: classCountText,
+    hasClasses,
+    classCountNum,
+    students: studentsText,
     progress: getProgressPercent(course.progress),
     startDate: (() => {
       const raw = course.startDate || course.createdAt
@@ -187,7 +268,9 @@ export const mapCourseTableRow = (
       return formatted || (course.endDate ? course.endDate : (labels.tba || "—"))
     })(),
     price: formattedPrice,
+    isFree: (minP === 0 && (maxP === 0 || maxP === null)) || (minP === 0 && maxP === undefined),
     status: course.status,
+    level: course.level || (Array.isArray(course.levels) && course.levels[0]) || "",
     icon,
     gradient,
     thumbnailUrl: course.thumbnailUrl,
@@ -250,7 +333,8 @@ export const mapClassTableRow = (
       const formatted = (formatDate && raw) ? formatDate(raw) : null
       return formatted || (cls.endDate ? cls.endDate : (labels.tba || "—"))
     })(),
-    price: formatPrice(cls.tuitionFee, labels.tba),
+    price: cls.tuitionFee === 0 || cls.price === 0 ? (labels.free || "Miễn phí") : formatPrice(cls.tuitionFee ?? cls.price, labels.tba),
+    level: cls.level || (Array.isArray(cls.levels) && cls.levels[0]) || "",
     icon,
     gradient,
     thumbnailUrl: cls.thumbnailUrl,

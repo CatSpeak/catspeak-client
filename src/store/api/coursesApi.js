@@ -396,9 +396,18 @@ const transformPaginatedResponse = (response, itemTransformer) => {
     Math.max(1, Math.ceil(totalItems / pageSize)),
   )
 
+  let adjustedTotalItems = totalItems
+  let adjustedTotalPages = totalPages
+
+  // Guard against backend bug where totalItems/totalPages does not account for status/search filter:
+  if (page === 1 && rawItems.length < pageSize) {
+    adjustedTotalItems = rawItems.length
+    adjustedTotalPages = 1
+  }
+
   return {
     data,
-    pagination: { page, pageSize, totalItems, totalPages },
+    pagination: { page, pageSize, totalItems: adjustedTotalItems, totalPages: adjustedTotalPages },
   }
 }
 
