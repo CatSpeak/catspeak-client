@@ -91,10 +91,10 @@ const StudentCourseCard = ({
 
   const slotsText =
     remainingSlots != null
-      ? sc.slotsRemaining
-        ? sc.slotsRemaining.replace("{{count}}", remainingSlots)
-        : `Còn ${remainingSlots} chỗ`
-      : sc.slotsAvailable || "Còn chỗ"
+      ? (sc.slotsRemaining || c.slotsRemaining
+        ? (sc.slotsRemaining || c.slotsRemaining).replace("{{count}}", remainingSlots)
+        : `Còn ${remainingSlots} chỗ`)
+      : sc.slotsAvailable || c.slotsAvailable || "Còn chỗ"
 
   // --- List View Mode ---
   if (viewMode === "list") {
