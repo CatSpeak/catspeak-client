@@ -86,9 +86,9 @@ const ClassCard = ({
 
   const slotsText =
     remainingSlots != null
-      ? c.slotsRemaining
-        ? c.slotsRemaining.replace("{{count}}", remainingSlots)
-        : `Còn ${remainingSlots} chỗ`
+      ? (c.slotsRemaining || sc.slotsRemaining
+        ? (c.slotsRemaining || sc.slotsRemaining).replace("{{count}}", remainingSlots)
+        : `Còn ${remainingSlots} chỗ`)
       : c.slotsAvailable || sc.slotsAvailable || "Còn chỗ"
 
   return viewMode === "list" ? (
