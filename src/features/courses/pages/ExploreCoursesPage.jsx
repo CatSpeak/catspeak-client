@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Compass,
@@ -7,8 +7,6 @@ import {
   GraduationCap,
   ArrowUpDown,
   Filter,
-  X,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -24,8 +22,7 @@ import ViewModeToggle from "../components/shared/ViewModeToggle"
 import StudentCourseCard from "../student/components/StudentCourseCard"
 import ClassCard from "../components/ClassCard"
 import CourseTabs from "../components/CourseTabs"
-import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
-import { formatCurrencyVND } from "../utils/courseUtils"
+import ExploreCoursesFilterModal from "../components/ExploreCoursesFilterModal"
 import { resolveItemLayout } from "../utils/catalogLayout"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
@@ -41,43 +38,17 @@ const ExploreCoursesPage = () => {
   // Filter States
   const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
   const [selectedStatuses, setSelectedStatuses] = useState([]) // [] means all, or array of selected status values
+  const [appliedLanguage, setAppliedLanguage] = useState("all") // "all" | "ENGLISH" | "CHINESE"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [minPriceInput, setMinPriceInput] = useState("")
   const [maxPriceInput, setMaxPriceInput] = useState("")
-  const [showPricePopover, setShowPricePopover] = useState(false)
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
-  const popoverRef = useRef(null)
-
-  const {
-    currentPage,
-    debouncedSearchQuery,
-    searchQuery,
-    setCurrentPage,
-    setSearchQuery,
-  } = usePaginatedSearch()
-
-  // Close price popover on outside click
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-        setShowPricePopover(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  // Community language drives the catalog language filter (same source as Rooms).
-  // Only English and Chinese are supported — Vietnamese is intentionally excluded.
-  const communityLanguage = (() => {
-    const stored = typeof window !== "undefined"
-      ? localStorage.getItem("communityLanguage")
-      : null
-    if (stored === "zh") return "CHINESE"
-    if (stored === "en") return "ENGLISH"
-    return undefined
-  })()
+  // Search input state (typing) vs applied search query (submitted on Enter / search button)
+  const [searchInputValue, setSearchInputValue] = useState("")
+  const [appliedSearchQuery, setAppliedSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
 
   const sortOptions = [
     { value: "default", label: sc.sortDefault || "Mới nhất" },
@@ -98,7 +69,26 @@ const ExploreCoursesPage = () => {
     { value: "classes", label: sc.tabClasses || "Lớp học", icon: GraduationCap },
   ]
 
-  // Multi-select status handler
+  // Event 1: Search submitted via Enter or Search button click
+  const handleSearchSubmit = (val) => {
+    setAppliedSearchQuery(typeof val === "string" ? val.trim() : searchInputValue.trim())
+    setCurrentPage(1)
+  }
+
+  // Event 2: Apply filters from Modal
+  const handleApplyModalFilters = ({ language, enrollmentStatus, minPrice, maxPrice }) => {
+    setAppliedLanguage(language)
+    setMinPriceInput(minPrice)
+    setMaxPriceInput(maxPrice)
+    if (enrollmentStatus !== "all") {
+      setSelectedStatuses([enrollmentStatus])
+    } else {
+      setSelectedStatuses([])
+    }
+    setCurrentPage(1)
+  }
+
+  // Event 3: Multi-select status handler
   const handleToggleStatus = (val) => {
     setCurrentPage(1)
     if (val === "all") {
@@ -140,12 +130,19 @@ const ExploreCoursesPage = () => {
     return selectedStatuses.join(",")
   }, [selectedStatuses])
 
+  const resolvedLanguage = useMemo(() => {
+    if (appliedLanguage && appliedLanguage !== "all") {
+      return appliedLanguage.toLowerCase()
+    }
+    return undefined
+  }, [appliedLanguage])
+
   // Explore Courses API Query
   const exploreCatalogQuery = useGetExploreCoursesQuery({
     page: currentPage,
     pageSize: PAGE_SIZE,
-    language: communityLanguage,
-    search: debouncedSearchQuery.trim() || undefined,
+    language: resolvedLanguage,
+    search: appliedSearchQuery || undefined,
     sort: sortOrder !== "default" ? sortOrder : undefined,
     minPrice: activeMinPrice,
     maxPrice: activeMaxPrice,
@@ -189,8 +186,10 @@ const ExploreCoursesPage = () => {
   }
 
   const handleClearFilters = () => {
-    setSearchQuery("")
+    setSearchInputValue("")
+    setAppliedSearchQuery("")
     setSelectedStatuses([])
+    setAppliedLanguage("all")
     setContentType("all")
     setSortOrder("default")
     setMinPriceInput("")
@@ -217,13 +216,19 @@ const ExploreCoursesPage = () => {
   }
 
   const hasPriceFilter = minPriceInput !== "" || maxPriceInput !== ""
-  const hasActiveFilters = searchQuery.trim() !== "" || contentType !== "all" || sortOrder !== "default" || selectedStatuses.length > 0 || hasPriceFilter
+  const hasActiveModalFilters =
+    appliedLanguage !== "all"
+    || hasPriceFilter
+    || selectedStatuses.length > 0
+  const hasActiveFilters =
+    appliedSearchQuery !== ""
+    || contentType !== "all"
+    || sortOrder !== "default"
+    || selectedStatuses.length > 0
+    || appliedLanguage !== "all"
+    || hasPriceFilter
 
-  const setPricePreset = (minVal, maxVal) => {
-    setMinPriceInput(minVal)
-    setMaxPriceInput(maxVal)
-    setCurrentPage(1)
-  }
+  const modalEnrollmentStatus = selectedStatuses.length === 1 ? selectedStatuses[0] : "all"
 
   return (
     <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
@@ -251,143 +256,30 @@ const ExploreCoursesPage = () => {
           }}
         />
 
-        {/* Filter Popover Button ("<Filter /> Bộ lọc") */}
-        <div className="relative" ref={popoverRef}>
-          <button
-            type="button"
-            onClick={() => setShowPricePopover((prev) => !prev)}
-            className="flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
-          >
-            <Filter size={16} className="text-[#b20a1c]" />
-            <span>{sc.filter || "Bộ lọc"}</span>
-            {hasPriceFilter && (
-              <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
-            )}
-          </button>
-
-          {/* Price Popover Dropdown Card */}
-          {showPricePopover && (
-            <div className="absolute right-0 top-10 z-50 w-80 max-w-[calc(100vw-2rem)] bg-white border border-border/80 rounded-3xl p-5 shadow-2xl flex flex-col gap-4 animate-fadeIn">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-[#b20a1c]" /> {sc.filterByPrice || "Lọc Theo Học Phí"}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowPricePopover(false)}
-                  className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
-                  aria-label="Close"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-
-              {/* Presets */}
-              <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{sc.quickPresets || "Gợi ý nhanh"}</span>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setPricePreset("", "")}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "" && maxPriceInput === ""
-                      ? "bg-slate-950 text-white shadow-xs"
-                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                      }`}
-                  >
-                    {sc.allPrices || "Tất cả giá"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPricePreset("0", "500000")}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "0" && maxPriceInput === "500000"
-                      ? "bg-[#b20a1c] text-white shadow-xs"
-                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                      }`}
-                  >
-                    {sc.under500k || "Dưới 500.000 đ"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPricePreset("500000", "2000000")}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "500000" && maxPriceInput === "2000000"
-                      ? "bg-[#b20a1c] text-white shadow-xs"
-                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                      }`}
-                  >
-                    {sc.range500kTo2M || "500k - 2 triệu"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPricePreset("2000000", "")}
-                    className={`px-3 py-2 rounded-xl text-xs font-bold text-left transition-all cursor-pointer ${minPriceInput === "2000000" && maxPriceInput === ""
-                      ? "bg-[#b20a1c] text-white shadow-xs"
-                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 border border-border/60"
-                      }`}
-                  >
-                    {sc.above2M || "Trên 2 triệu"}
-                  </button>
-                </div>
-              </div>
-
-              {/* Manual Inputs */}
-              <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{sc.customPriceRange || "Tùy chỉnh khoảng giá"}</span>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder={sc.priceFrom || "Từ (VNĐ)"}
-                      value={minPriceInput}
-                      onChange={(e) => {
-                        setMinPriceInput(e.target.value)
-                        setCurrentPage(1)
-                      }}
-                      className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                  <span className="text-slate-400 font-bold text-xs shrink-0">-</span>
-                  <div className="relative flex-1">
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder={sc.priceTo || "Đến (VNĐ)"}
-                      value={maxPriceInput}
-                      onChange={(e) => {
-                        setMaxPriceInput(e.target.value)
-                        setCurrentPage(1)
-                      }}
-                      className="w-full h-9 px-3 bg-slate-50 border border-border rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-[#b20a1c] focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer Actions */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                {hasPriceFilter ? (
-                  <button
-                    type="button"
-                    onClick={() => setPricePreset("", "")}
-                    className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
-                  >
-                    {sc.clearPriceFilter || "Xóa lọc giá"}
-                  </button>
-                ) : (
-                  <span />
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowPricePopover(false)}
-                  className="bg-[#b20a1c] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-xs hover:bg-[#960817] transition-all cursor-pointer"
-                >
-                  {sc.apply || "Áp dụng"}
-                </button>
-              </div>
-            </div>
+        {/* Filter Modal Trigger Button ("<Filter /> Bộ lọc") */}
+        <button
+          type="button"
+          onClick={() => setIsFilterModalOpen(true)}
+          className="flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
+        >
+          <Filter size={16} className="text-[#b20a1c]" />
+          <span>{sc.filter || "Bộ lọc"}</span>
+          {hasActiveModalFilters && (
+            <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
           )}
-        </div>
+        </button>
       </div>
+
+      {/* ─── Explore Courses Filter Modal ─── */}
+      <ExploreCoursesFilterModal
+        open={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        initialLanguage={appliedLanguage}
+        initialEnrollmentStatus={modalEnrollmentStatus}
+        initialMinPrice={minPriceInput}
+        initialMaxPrice={maxPriceInput}
+        onApply={handleApplyModalFilters}
+      />
 
       {/* ─── Filter Section (2 Rows, No Parent Border/Card) ─── */}
       <div className="flex flex-col gap-4">
@@ -396,11 +288,9 @@ const ExploreCoursesPage = () => {
           {/* Search Input (rounded-full, no border, white bg) */}
           <div className="flex-1 min-w-0 max-w-[878px]">
             <CourseSearchInput
-              value={searchQuery}
-              onChange={(val) => {
-                setSearchQuery(val)
-                setCurrentPage(1)
-              }}
+              value={searchInputValue}
+              onChange={setSearchInputValue}
+              onSearch={handleSearchSubmit}
               placeholder={sc.searchPlaceholder || "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."}
               className="w-full"
               inputClassName="w-full h-11 pl-5 pr-11 bg-white border-0 outline-none rounded-full text-sm font-normal text-slate-800 placeholder:text-slate-400 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
@@ -409,7 +299,7 @@ const ExploreCoursesPage = () => {
 
           {/* Right Controls: Sort Order & View Mode Toggle */}
           <div className="flex items-center gap-3 shrink-0">
-            {/* Sort Order Selector (ghost variant: no bg, no border, font normal) */}
+            {/* Sort Order Selector (ghost variant: no bg, border, font normal) */}
             <CourseSelectFilter
               value={sortOrder}
               onChange={(val) => {
