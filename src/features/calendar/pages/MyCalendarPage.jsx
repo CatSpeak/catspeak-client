@@ -26,7 +26,7 @@ const MyCalendarPage = () => {
   const [prevLocationKey, setPrevLocationKey] = useState(location.key)
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState(dayjs().date())
-  const [viewType, setViewType] = useState('month')
+  const [viewType, setViewType] = useState('week')
   const [activeFilters, setActiveFilters] = useState([])
 
   // Adjust state during render to avoid cascading renders from useEffect
