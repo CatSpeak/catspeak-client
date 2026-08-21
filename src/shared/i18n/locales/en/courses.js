@@ -945,6 +945,28 @@ export default {
     retry: "Try again"
   },
   createExam: {
+    validation: {
+      invalidForm: "Quiz information is invalid. Please double check.",
+      QuizNameRequired: "Please enter the quiz title.",
+      QuizInvalidTimeLimit: "Time limit must be greater than 0.",
+      QuizInvalidMaxAttempts: "Maximum attempts must be a positive integer.",
+      QuizInvalidPassPercent: "Passing percentage must be between 0 and 100.",
+      QuizInvalidOpenTime: "Please select a valid open time.",
+      QuizOpenTimeRequired: "Please select an open time before publishing.",
+      QuizInvalidCloseTime: "Close time must be valid and after open time.",
+      QuizCloseTimeRequired: "Please select a close time before publishing.",
+      QuizCloseTimeInPast: "Close time must be in the future.",
+      QuizNoQuestions: "Please add at least one question before publishing.",
+      QuizInvalidQuestion: "One or more questions are invalid.",
+      QuizInvalidQuestionType: "Please select a valid question type.",
+      QuizQuestionContentRequired: "Please enter content for all questions.",
+      QuizInvalidQuestionPoints: "Question points must be non-negative.",
+      QuizInvalidQuestionOptions:
+        "Each multiple-choice question requires at least 2 non-empty options.",
+      QuizInvalidCorrectAnswers: "Please select valid correct answers.",
+      QuizCorrectAnswerRequired: "Please enter the correct answer.",
+      QuizInvalidMaxWordCount: "Max word count must be a positive integer.",
+    },
     importExcelHowToTitle: "How to create questions via Excel file",
     importExcelTip1: "Each row is one question. Empty rows will be ignored.",
     importExcelTip2: "Question Text column: The content of the question (required, cannot be empty).",
