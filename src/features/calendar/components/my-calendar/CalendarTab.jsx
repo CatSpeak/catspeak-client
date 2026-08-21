@@ -3,7 +3,6 @@ import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   SlidersHorizontal,
   Table2
 } from 'lucide-react'
@@ -14,11 +13,12 @@ import EventFilter from './EventFilter'
 import DatePicker from '@/shared/components/ui/inputs/DatePicker'
 
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
-const getLegend = (t) => [
-  { type: 'teaching-schedule', label: t.calendar?.teachingSchedule || 'Lịch dạy', color: '#34ce56' },
+const getLegend = (t, isTeacher) => [
+  ...(isTeacher ? [{ type: 'teaching-schedule', label: t.calendar?.teachingSchedule || 'Lịch dạy', color: '#34ce56' }] : []),
   { type: 'student-schedule', label: t.calendar?.studentSchedule || 'Lịch học', color: '#0e6eec' },
-  { type: 'my-event', label: t.calendar?.myEvents || 'Sự kiện của tôi', color: '#f83b4f' },
+  ...(isTeacher ? [{ type: 'my-event', label: t.calendar?.myEvents || 'Sự kiện của tôi', color: '#f83b4f' }] : []),
   { type: 'registered-event', label: t.calendar?.registered || 'Đã đăng ký', color: '#e2b60a' },
   { type: 'other', label: t.calendar?.other || 'Khác', color: '#888888' },
 ]
@@ -37,6 +37,7 @@ const CalendarTab = ({
   onApplyFilter,
 }) => {
   const { t, language } = useLanguage()
+  const { isTeacher } = useRoleOverride()
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterOpenCount, setFilterOpenCount] = useState(0)
 
@@ -54,7 +55,7 @@ const CalendarTab = ({
     localizedMonth = `${yearNum}年 ${monthNum}月`
   }
 
-  const LEGEND = getLegend(t)
+  const LEGEND = getLegend(t, isTeacher)
 
   return (
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
