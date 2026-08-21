@@ -4,6 +4,7 @@ import {
   formatCurrencyVND,
   getSafeMediaUrl,
   defaultCourseThumbnail,
+  isClosingSoon,
 } from "../utils/courseUtils"
 import { getLocalizedLanguageName } from "../data/courseFormOptions"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -76,11 +77,12 @@ const ClassCard = ({
     ? cls.levels.filter(Boolean).join(", ")
     : cls.level || cls.levels || ""
 
+  // Do not display openClassCount in ClassCard
   const sessionsText = cls.totalSessions
     ? `${cls.totalSessions} ${c.sessionsUnit || "buổi học"}`
-    : cls.openClassCount != null
-    ? `${cls.openClassCount} ${sc.classesOpen || "lớp mở"}`
     : null
+
+  const closingSoon = isClosingSoon(minEnrollmentEnd, Date.now(), 1)
 
   const slotsText =
     remainingSlots != null
@@ -93,13 +95,13 @@ const ClassCard = ({
     <div
       onClick={isLocked ? undefined : onClick}
       aria-disabled={isLocked || undefined}
-      className={`bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group ${
+      className={`bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-3.5 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group ${
         isClassEnrolled ? "border-emerald-400 ring-2 ring-emerald-50" : ""
       } ${isLocked ? "opacity-60 cursor-not-allowed" : ""}`}
     >
-      <div className="flex items-center gap-5 flex-1 min-w-0">
-        {/* Thumbnail */}
-        <div className="h-24 w-36 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-xs border border-border group-hover:scale-[1.02] transition-transform duration-300">
+      <div className="flex items-center gap-4 sm:gap-5 flex-1 min-w-0">
+        {/* Thumbnail (-25% height) */}
+        <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-xs border border-border">
           <img
             src={thumbnailUrl || defaultCourseThumbnail}
             alt={cls.name || cls.title || ""}
@@ -141,16 +143,24 @@ const ClassCard = ({
                 <img
                   src={teacherAvatar}
                   alt={teacherName}
-                  className="w-6 h-6 rounded-full object-cover ring-1 ring-slate-200"
+                  className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200 shrink-0 shadow-2xs"
                 />
               ) : (
-                <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px]">
+                <span className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
                   {teacherName.charAt(0).toUpperCase()}
                 </span>
               )}
-              <span className="text-xs font-bold text-slate-800 truncate">
-                {teacherName}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
+                  {c.instructorLabel || sc.instructor || "Giảng viên"}
+                </span>
+                <span
+                  className="text-xs font-bold text-slate-800 truncate leading-tight mt-0.5"
+                  title={teacherName}
+                >
+                  {teacherName}
+                </span>
+              </div>
             </div>
             <span className="bg-[#FFF0F2] text-[#b20a1c] text-[11px] font-extrabold px-2.5 py-0.5 rounded-xl border border-rose-200/60 shrink-0">
               {c.classBadge || "Lớp học"}
@@ -207,10 +217,15 @@ const ClassCard = ({
             {tuitionLabel}
           </span>
         </div>
-        <div className="text-emerald-600 font-bold text-xs flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <span>{slotsText}</span>
-        </div>
+        {closingSoon ? (
+          <span className="text-amber-600 font-bold text-xs shrink-0">
+            {c.closingSoon || sc.closingSoon || "Sắp đóng tuyển sinh"}
+          </span>
+        ) : (
+          <span className="text-emerald-600 font-bold text-xs shrink-0">
+            {slotsText}
+          </span>
+        )}
       </div>
     </div>
   ) : (
@@ -225,12 +240,12 @@ const ClassCard = ({
           : "border-border cursor-pointer hover:border-[#b20a1c]/30"
       }`}
     >
-      {/* Thumbnail Area */}
-      <div className="relative h-48 w-full bg-slate-100 flex items-center justify-center shrink-0 rounded-t-3xl overflow-visible border-b border-slate-100">
+      {/* Thumbnail Area (-25% height: h-36 instead of h-48) */}
+      <div className="relative h-36 w-full bg-slate-100 flex items-center justify-center shrink-0 rounded-t-3xl overflow-visible border-b border-slate-100">
         <img
           src={thumbnailUrl || defaultCourseThumbnail}
           alt={cls.name || cls.title || ""}
-          className="w-full h-full object-cover rounded-t-3xl group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover rounded-t-3xl"
           loading="lazy"
           decoding="async"
         />
@@ -264,8 +279,8 @@ const ClassCard = ({
       </div>
 
       {/* Class Details Content */}
-      <div className="p-5 pt-6 flex flex-col flex-1 justify-between gap-4">
-        <div className="flex flex-col gap-3">
+      <div className="p-3.5 pt-5 flex flex-col flex-1 justify-between gap-3">
+        <div className="flex flex-col gap-2.5">
           {/* Hàng 1: Avatar & Teacher Name (Left) + Soft Red Badge (Right) */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
@@ -280,12 +295,17 @@ const ClassCard = ({
                   {teacherName.charAt(0).toUpperCase()}
                 </div>
               )}
-              <span
-                className="text-xs font-bold text-slate-800 truncate"
-                title={teacherName}
-              >
-                {teacherName}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
+                  {c.instructorLabel || sc.instructor || "Giảng viên"}
+                </span>
+                <span
+                  className="text-xs font-bold text-slate-800 truncate leading-tight mt-0.5"
+                  title={teacherName}
+                >
+                  {teacherName}
+                </span>
+              </div>
             </div>
 
             <span className="bg-[#FFF0F2] text-[#b20a1c] text-[11px] font-extrabold px-2.5 py-1 rounded-xl border border-rose-200/60 shrink-0">
@@ -302,7 +322,7 @@ const ClassCard = ({
           </h3>
 
           {/* Hàng 3: Ô vàng nhạt, bo góc, không viền, 4 dòng theo thứ tự */}
-          <div className="bg-amber-50/90 rounded-2xl p-3.5 flex flex-col gap-2">
+          <div className="bg-amber-50/90 rounded-2xl p-2.5 flex flex-col gap-1.5">
             {/* 1. <Clock /> {schedule} */}
             {scheduleText && (
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 min-w-0">
@@ -329,7 +349,7 @@ const ClassCard = ({
               </div>
             )}
 
-            {/* 4. <BookOpen /> {sessionsText} */}
+            {/* 4. <BookOpen /> {sessionsText} (Only sessions, no openClassCount) */}
             {sessionsText && (
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 min-w-0">
                 <BookOpen size={14} className="text-amber-500 shrink-0" />
@@ -339,8 +359,8 @@ const ClassCard = ({
           </div>
         </div>
 
-        {/* Footer: Pricing (Left) + Còn {remainingSlots} chỗ (Right, chữ xanh lá) */}
-        <div className="pt-3 border-t border-slate-150 flex items-center justify-between gap-3">
+        {/* Footer: Pricing (Left) + Còn {remainingSlots} chỗ / Sắp đóng tuyển sinh (Right) */}
+        <div className="pt-2.5 border-t border-slate-150 flex items-center justify-between gap-3">
           <div className="flex flex-col">
             <span className="text-slate-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-extrabold">
               {c.tuition || "Học phí"}
@@ -350,10 +370,15 @@ const ClassCard = ({
             </span>
           </div>
 
-          <div className="text-emerald-600 font-bold text-xs flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>{slotsText}</span>
-          </div>
+          {closingSoon ? (
+            <span className="text-amber-600 font-bold text-xs shrink-0">
+              {c.closingSoon || sc.closingSoon || "Sắp đóng tuyển sinh"}
+            </span>
+          ) : (
+            <span className="text-emerald-600 font-bold text-xs shrink-0">
+              {slotsText}
+            </span>
+          )}
         </div>
       </div>
     </div>

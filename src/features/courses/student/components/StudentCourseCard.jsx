@@ -5,10 +5,10 @@ import {
   formatCurrencyVND,
   getSafeMediaUrl,
   defaultCourseThumbnail,
+  isClosingSoon,
 } from "../../utils/courseUtils"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const StudentCourseCard = ({
   course,
@@ -21,11 +21,9 @@ const StudentCourseCard = ({
   index,
 }) => {
   const { t: contextT } = useLanguage()
-  const { formatDateMonth } = useTimezone()
   const t = propsT || contextT
   const c = t?.courses || {}
   const sc = c?.student || {}
-  const ui = c?.workspaceUi || {}
   const { gradient, icon: Icon } = getCourseGradientAndIcon(index)
   const thumbnailUrl = getSafeMediaUrl(course.thumbnailUrl)
 
@@ -84,11 +82,12 @@ const StudentCourseCard = ({
     ? course.levels.filter(Boolean).join(", ")
     : course.levels || ""
 
+  // Do not display minEnrollmentEnd in StudentCourseCard
   const scheduleText = course.duration
     ? `${course.duration} ${c.hoursUnit || "giờ"}`
-    : minEnrollmentEnd
-    ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateMonth(minEnrollmentEnd, ui.tba || "TBA")}`
     : null
+
+  const closingSoon = isClosingSoon(minEnrollmentEnd, Date.now(), 1)
 
   const slotsText =
     remainingSlots != null
@@ -102,11 +101,11 @@ const StudentCourseCard = ({
     return (
       <div
         onClick={onViewDetails}
-        className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+        className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-3.5 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
       >
-        <div className="flex items-center gap-5 flex-1 min-w-0">
-          {/* Thumbnail */}
-          <div className="h-24 w-36 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-xs border border-border group-hover:scale-[1.02] transition-transform duration-300">
+        <div className="flex items-center gap-4 sm:gap-5 flex-1 min-w-0">
+          {/* Thumbnail (-25% height) */}
+          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-xs border border-border">
             {thumbnailUrl ? (
               <img
                 src={thumbnailUrl}
@@ -156,16 +155,21 @@ const StudentCourseCard = ({
                   <img
                     src={teacherAvatar}
                     alt={teacherName}
-                    className="w-6 h-6 rounded-full object-cover ring-1 ring-slate-200"
+                    className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200 shrink-0 shadow-2xs"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px]">
+                  <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
                     {teacherName.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <span className="text-xs font-bold text-slate-800 truncate">
-                  {teacherName}
-                </span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
+                    {sc.instructor || c.instructorLabel || "Giảng viên"}
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 truncate leading-tight mt-0.5" title={teacherName}>
+                    {teacherName}
+                  </span>
+                </div>
               </div>
               <span className="bg-[#FFF0F2] text-[#b20a1c] text-[11px] font-extrabold px-2.5 py-0.5 rounded-xl border border-rose-200/60 shrink-0">
                 {sc.courseBadge || c.courseBadge || "Khóa học"}
@@ -221,10 +225,15 @@ const StudentCourseCard = ({
               {priceText}
             </span>
           </div>
-          <div className="text-emerald-600 font-bold text-xs flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>{slotsText}</span>
-          </div>
+          {closingSoon ? (
+            <span className="text-amber-600 font-bold text-xs shrink-0">
+              {sc.closingSoon || c.closingSoon || "Sắp đóng tuyển sinh"}
+            </span>
+          ) : (
+            <span className="text-emerald-600 font-bold text-xs shrink-0">
+              {slotsText}
+            </span>
+          )}
         </div>
       </div>
     )
@@ -236,12 +245,12 @@ const StudentCourseCard = ({
       onClick={onViewDetails}
       className="relative bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group overflow-visible"
     >
-      {/* Thumbnail Area */}
-      <div className="relative h-48 w-full bg-slate-100 flex items-center justify-center shrink-0 rounded-t-3xl overflow-visible border-b border-slate-100">
+      {/* Thumbnail Area (-25% height: h-36 instead of h-48) */}
+      <div className="relative h-36 w-full bg-slate-100 flex items-center justify-center shrink-0 rounded-t-3xl overflow-visible border-b border-slate-100">
         <img
           src={thumbnailUrl || defaultCourseThumbnail}
           alt={course.name || course.title || ""}
-          className="w-full h-full object-cover rounded-t-3xl group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover rounded-t-3xl"
           loading="lazy"
           decoding="async"
         />
@@ -275,8 +284,8 @@ const StudentCourseCard = ({
       </div>
 
       {/* Content Details */}
-      <div className="p-5 pt-6 flex flex-col flex-1 justify-between gap-4">
-        <div className="flex flex-col gap-3">
+      <div className="p-3.5 pt-5 flex flex-col flex-1 justify-between gap-3">
+        <div className="flex flex-col gap-2.5">
           {/* Hàng 1: Avatar & Teacher Name (Left) + Soft Red Badge (Right) */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
@@ -291,9 +300,14 @@ const StudentCourseCard = ({
                   {teacherName.charAt(0).toUpperCase()}
                 </div>
               )}
-              <span className="text-xs font-bold text-slate-800 truncate" title={teacherName}>
-                {teacherName}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
+                  {sc.instructor || c.instructorLabel || "Giảng viên"}
+                </span>
+                <span className="text-xs font-bold text-slate-800 truncate leading-tight mt-0.5" title={teacherName}>
+                  {teacherName}
+                </span>
+              </div>
             </div>
 
             <span className="bg-[#FFF0F2] text-[#b20a1c] text-[11px] font-extrabold px-2.5 py-1 rounded-xl border border-rose-200/60 shrink-0">
@@ -310,8 +324,8 @@ const StudentCourseCard = ({
           </h3>
 
           {/* Hàng 3: Ô vàng nhạt, bo góc, không viền, 4 dòng theo thứ tự */}
-          <div className="bg-amber-50/90 rounded-2xl p-3.5 flex flex-col gap-2">
-            {/* 1. <Clock /> {schedule} */}
+          <div className="bg-amber-50/90 rounded-2xl p-2.5 flex flex-col gap-1.5">
+            {/* 1. <Clock /> {schedule} (Only duration, no minEnrollmentEnd) */}
             {scheduleText && (
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 min-w-0">
                 <Clock size={14} className="text-amber-500 shrink-0" />
@@ -351,8 +365,8 @@ const StudentCourseCard = ({
           </div>
         </div>
 
-        {/* Footer: Học phí (Left) + Còn {remainingSlots} chỗ (Right, chữ xanh lá) */}
-        <div className="pt-3 border-t border-slate-150 flex items-center justify-between gap-3">
+        {/* Footer: Học phí (Left) + Còn {remainingSlots} chỗ / Sắp đóng tuyển sinh (Right) */}
+        <div className="pt-2.5 border-t border-slate-150 flex items-center justify-between gap-3">
           <div className="flex flex-col">
             <span className="text-slate-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-extrabold">
               {sc.tuition || "Học phí"}
@@ -362,10 +376,15 @@ const StudentCourseCard = ({
             </span>
           </div>
 
-          <div className="text-emerald-600 font-bold text-xs flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200/60 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>{slotsText}</span>
-          </div>
+          {closingSoon ? (
+            <span className="text-amber-600 font-bold text-xs shrink-0">
+              {sc.closingSoon || c.closingSoon || "Sắp đóng tuyển sinh"}
+            </span>
+          ) : (
+            <span className="text-emerald-600 font-bold text-xs shrink-0">
+              {slotsText}
+            </span>
+          )}
         </div>
       </div>
     </div>

@@ -734,6 +734,8 @@ export default {
     clearPriceFilter: "清除价格筛选",
     clear: "清除",
     apply: "应用",
+    instructor: "讲师",
+    closingSoon: "即将截止招生",
     activeFiltersLabel: "已应用筛选：",
     keywordPrefix: "关键词：",
     typePrefix: "类型：",

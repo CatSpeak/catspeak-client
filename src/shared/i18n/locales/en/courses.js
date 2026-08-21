@@ -734,6 +734,8 @@ export default {
     clearPriceFilter: "Clear price filter",
     clear: "Clear",
     apply: "Apply",
+    instructor: "Instructor",
+    closingSoon: "Closing soon",
     activeFiltersLabel: "Active Filters:",
     keywordPrefix: "Keyword:",
     typePrefix: "Type:",
