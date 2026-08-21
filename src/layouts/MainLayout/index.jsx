@@ -112,7 +112,11 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         />
       )}
 
-      <div className="relative flex min-h-screen text-left overflow-x-clip">
+      <div
+        className={`relative flex min-h-screen text-left overflow-x-clip ${
+          isLandingPage ? "bg-white" : "bg-primaryBg"
+        }`}
+      >
         {!isLandingPage && (
           <MainSidebar
             isMobileOpen={isMobileSidebarOpen}
