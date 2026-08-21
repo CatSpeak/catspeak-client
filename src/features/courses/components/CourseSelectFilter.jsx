@@ -26,8 +26,8 @@ const CourseSelectFilter = ({
         <div
           className={`w-full py-2 px-3 text-xs rounded-xl flex items-center justify-between transition-all duration-150 cursor-pointer ${
             isSelected
-              ? "bg-rose-50 text-[#b20a1c] font-black"
-              : "text-slate-700 hover:bg-slate-50 font-medium"
+              ? "bg-rose-50 text-[#b20a1c] font-normal"
+              : "text-slate-700 hover:bg-slate-50 font-normal"
           }`}
         >
           <span>{option.label}</span>
@@ -44,10 +44,12 @@ const CourseSelectFilter = ({
           title={title}
           className={
             variant === "ghost"
-              ? `h-11 px-3 text-sm font-normal flex items-center gap-2 transition-all cursor-pointer outline-none bg-transparent border-0 text-slate-700 hover:text-slate-950 ${
-                  isOpen ? "text-[#b20a1c]" : ""
+              ? `h-11 px-4 rounded-full border border-border text-sm font-normal flex items-center gap-2 transition-all cursor-pointer outline-none bg-transparent text-slate-700 hover:border-slate-400 hover:text-slate-950 ${
+                  isOpen
+                    ? "border-[#b20a1c] text-[#b20a1c] ring-2 ring-rose-100"
+                    : ""
                 } ${className}`
-              : `h-9 px-3.5 rounded-full border text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer shadow-2xs outline-none ${
+              : `h-9 px-3.5 rounded-full border text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-2xs outline-none ${
                   isOpen
                     ? "border-[#b20a1c] bg-rose-50 text-[#b20a1c] ring-2 ring-rose-100"
                     : "border-border bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"
