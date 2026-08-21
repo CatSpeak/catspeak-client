@@ -11,6 +11,9 @@ const CourseSelectFilter = ({
   title,
   icon: Icon,
   variant = "pill",
+  trigger: customTrigger,
+  align = "right",
+  dropdownClassName = "min-w-[200px] shadow-xl border border-border/80 rounded-2xl p-1.5 z-50 bg-white",
 }) => {
   const selectedOptionObj = options.find((o) => o.value === value)
 
@@ -20,8 +23,9 @@ const CourseSelectFilter = ({
       value={value}
       onChange={(val) => onChange(val)}
       disabled={disabled}
+      align={align}
       className={variant === "ghost" ? `h-11 flex items-center ${className}` : className}
-      dropdownClassName="min-w-[170px] shadow-xl border border-border/80 rounded-2xl p-1.5 z-50 bg-white"
+      dropdownClassName={dropdownClassName}
       activeColor="#b20a1c"
       renderOption={(option, isSelected) => (
         <div
@@ -37,7 +41,7 @@ const CourseSelectFilter = ({
           )}
         </div>
       )}
-      trigger={(isOpen, _, toggle) => (
+      trigger={customTrigger || ((isOpen, _, toggle) => (
         <button
           type="button"
           onClick={toggle}
@@ -57,7 +61,7 @@ const CourseSelectFilter = ({
         >
           {Icon && (
             <Icon
-              size={15}
+              size={14}
               className={
                 isOpen
                   ? "text-[#b20a1c]"
@@ -69,13 +73,13 @@ const CourseSelectFilter = ({
           )}
           <span>{selectedOptionObj?.label || "Select..."}</span>
           <ChevronDown
-            size={13}
+            size={12}
             className={`transition-transform duration-200 ${
               isOpen ? "rotate-180 text-[#b20a1c]" : "text-slate-400"
             }`}
           />
         </button>
-      )}
+      ))}
     />
   )
 }

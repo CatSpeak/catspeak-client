@@ -500,17 +500,21 @@ const routesConfig = [
               {
                 path: "materials",
                 element: (
-                  <LazyRoute>
-                    <TeachingMaterialPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <TeachingMaterialPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "materials/:folderId",
                 element: (
-                  <LazyRoute>
-                    <TeachingMaterialPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <TeachingMaterialPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {

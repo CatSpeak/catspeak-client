@@ -251,5 +251,10 @@ export default {
   workspaceSingleEvent: "Sự kiện đơn lẻ",
   workspaceOccurrence: "buổi",
   workspaceOccurrences: "buổi",
+  eventType: "Loại lịch",
+  classOrCourse: "Lớp học / Khóa học",
+  selectClass: "Chọn lớp học",
+  prevWeek: "Tuần trước",
+  nextWeek: "Tuần sau",
 }
 

@@ -254,5 +254,10 @@ export default {
   workspaceSingleEvent: "Single event",
   workspaceOccurrence: "occurrence",
   workspaceOccurrences: "occurrences",
+  eventType: "Schedule Type",
+  classOrCourse: "Class / Course",
+  selectClass: "Select a class",
+  prevWeek: "Previous week",
+  nextWeek: "Next week",
 };
 

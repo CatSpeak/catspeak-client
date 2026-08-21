@@ -11,8 +11,7 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import { Breadcrumb, Tabs } from "@/shared/components/ui/navigation"
 
 import CourseManagementCard from "../components/CourseManagementCard"
 import CourseSelectFilter from "../components/CourseSelectFilter"
@@ -48,6 +47,21 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
     { value: "not_started", label: c.notStartedStatus || "Not Started" },
     { value: "archived", label: c.archive || "Archived" },
   ]
+
+  const mainTabs = useMemo(() => [
+    {
+      id: "courses",
+      value: "courses",
+      label: c.myCoursesTab || "Khóa học của tôi",
+      icon: BookOpen,
+    },
+    {
+      id: "classes",
+      value: "classes",
+      label: c.myClassesTab || "Lớp học của tôi",
+      icon: GraduationCap,
+    },
+  ], [c.myCoursesTab, c.myClassesTab])
 
   const handleTabChange = (tabId) => {
     setSearchParams((prev) => {
@@ -165,12 +179,15 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
       course,
       index,
       {
+        classCount: c.classCount,
+        noClasses: c.noClasses || "Chưa có lớp",
         studentsCount: c.studentsCount,
+        free: c.free || "Miễn phí",
         tba: c.workspaceUi?.tba,
       },
       formatDate,
     )),
-    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, formatDate],
+    [coursesRaw, c.classCount, c.noClasses, c.studentsCount, c.free, c.workspaceUi?.tba, formatDate],
   )
 
   const classList = useMemo(
@@ -297,20 +314,23 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
       </div>
 
       {/* ─── Navigation Tabs & Controls ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-2 mt-2">
+      <div className="flex items-end justify-between border-b border-gray-200/90 mt-3 mb-3">
+        {/* Left Tabs */}
         <Tabs
-          tabs={tabs}
+          tabs={mainTabs}
           activeTab={activeTab}
           onChange={handleTabChange}
           fullWidth={false}
-          className="border-b-0"
+          className="border-b-0 -mb-[1px]"
         />
 
-        <div className="flex items-center gap-3 self-end sm:self-auto">
+        {/* Right Filter & View Mode Controls */}
+        <div className="flex items-center gap-3 pb-2">
           <CourseSelectFilter
             value={statusFilter}
             onChange={setStatusFilter}
             options={statusOptions}
+            align="right"
           />
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </div>
@@ -335,7 +355,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 mt-2">
+        <div className="flex flex-col gap-6 mt-1">
           {filteredDisplayList.length === 0 ? (
             <EmptyCoursesState
               icon={statusFilter !== "all" ? FilterX : (isCoursesTab ? BookOpen : GraduationCap)}
@@ -376,7 +396,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
               }
             />
           ) : (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>
+            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
               {filteredDisplayList.map((item) => (
                 <CourseManagementCard
                   key={item.id}
@@ -414,9 +434,9 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
             <button
               type="button"
               onClick={() => navigate(isCoursesTab ? "/workspace/courses/all" : "/workspace/classes/all-classes")}
-              className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2 cursor-pointer"
+              className="text-sm font-semibold text-[#b20a1c] hover:underline self-center py-4 cursor-pointer"
             >
-              {c.myCourses?.viewAll || "View all"}
+              {c.myCourses?.viewAll || "Xem tất cả"}
             </button>
           )}
         </div>
