@@ -36,10 +36,11 @@ const DeleteFolderModal = ({ open, onClose, onSuccess, item }) => {
         }).unwrap();
         const resData = result?.data || result;
         if (resData?.totalFailed > 0) {
-          toast(
-            `Xóa ${resData.totalRequested} mục: ${resData.totalSucceeded} thành công, ${resData.totalFailed} thất bại`,
-            { icon: "⚠️" },
-          );
+          const partialSuccessMsg = t.materials.deleteBulkPartialSuccess
+            ?.replace("{{total}}", resData.totalRequested)
+            ?.replace("{{success}}", resData.totalSucceeded)
+            ?.replace("{{fail}}", resData.totalFailed);
+          toast(partialSuccessMsg, { icon: "⚠️" });
         } else {
           toast.success(
             t.materials.deletedMultipleSuccess.replace(
