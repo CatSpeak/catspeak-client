@@ -254,5 +254,7 @@ export default {
   eventType: "Loại lịch",
   classOrCourse: "Lớp học / Khóa học",
   selectClass: "Chọn lớp học",
+  prevWeek: "Tuần trước",
+  nextWeek: "Tuần sau",
 }
 

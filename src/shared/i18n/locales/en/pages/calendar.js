@@ -257,5 +257,7 @@ export default {
   eventType: "Schedule Type",
   classOrCourse: "Class / Course",
   selectClass: "Select a class",
+  prevWeek: "Previous week",
+  nextWeek: "Next week",
 };
 

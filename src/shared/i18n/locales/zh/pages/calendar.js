@@ -253,4 +253,6 @@ export default {
   eventType: "日程类型",
   classOrCourse: "班级/课程",
   selectClass: "选择班级",
+  prevWeek: "上周",
+  nextWeek: "下周",
 };

@@ -6,6 +6,7 @@ import EventBlock from './EventBlock'
 import EventBlockDetail from './EventBlockDetail'
 import CalendarDayView from './CalendarDayView'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { useLanguage } from '@/shared/context/LanguageContext'
 import { HOURS, WEEK_DAY_KEYS } from '@/features/calendar/data/calendarConstants'
 import { parseEventsForDay, layoutEventClusters } from '@/features/calendar/utils/eventLayoutUtils'
 
@@ -18,6 +19,7 @@ const CalendarWeekView = ({
   onSelectDate,
 }) => {
   const { formatScheduleDays, parseIsoToZoneDate } = useTimezone()
+  const { t } = useLanguage()
 
   // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
   const DAY_LABELS = WEEK_DAY_KEYS.map(day =>
@@ -68,7 +70,7 @@ const CalendarWeekView = ({
           onClick={onPrev}
           variant="ghost"
           className="text-gray-400 hover:text-[#990011]"
-          title="Tuần trước"
+          title={t.calendar?.prevWeek || "Tuần trước"}
         >
           <ChevronLeft className="w-5 h-5" />
         </IconButton>
@@ -106,7 +108,7 @@ const CalendarWeekView = ({
           onClick={onNext}
           variant="ghost"
           className="text-gray-400 hover:text-[#990011]"
-          title="Tuần sau"
+          title={t.calendar?.nextWeek || "Tuần sau"}
         >
           <ChevronRight className="w-5 h-5" />
         </IconButton>
