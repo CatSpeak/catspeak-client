@@ -60,7 +60,9 @@ const SaveSharedMaterialModal = ({ open, onClose, onSuccess, item }) => {
       onSuccess ? onSuccess() : onClose();
     } catch (error) {
       console.error("Failed to save shared material", error);
-      toast.error("Lưu tài liệu thất bại");
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.actionFailed;
+      toast.error(errMsg);
     }
   };
 
