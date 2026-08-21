@@ -11,23 +11,28 @@ const ViewModeToggle = ({ value, onChange, className = "" }) => {
   ]
 
   return (
-    <div className={`flex items-center h-10 bg-gray-50/90 p-1 rounded-xl border border-border ${className}`}>
-      {viewModes.map(({ value: mode, icon, label }) => (
-        <button
-          key={mode}
-          type="button"
-          aria-label={label}
-          aria-pressed={value === mode}
-          onClick={() => onChange(mode)}
-          className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all cursor-pointer ${
-            value === mode
-              ? "bg-white text-[#990011] shadow-xs"
-              : "text-gray-400 hover:text-gray-600"
-          }`}
-        >
-          {React.createElement(icon, { size: 15 })}
-        </button>
-      ))}
+    <div
+      className={`flex items-center bg-white p-1 rounded-full border-0 shadow-2xs gap-1 ${className}`}
+    >
+      {viewModes.map(({ value: mode, icon, label }) => {
+        const isActive = value === mode
+        return (
+          <button
+            key={mode}
+            type="button"
+            aria-label={label}
+            aria-pressed={isActive}
+            onClick={() => onChange(mode)}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              isActive
+                ? "bg-[#b20a1c] text-white shadow-xs"
+                : "text-slate-400 hover:text-slate-700 bg-transparent hover:bg-slate-50"
+            }`}
+          >
+            {React.createElement(icon, { size: 15 })}
+          </button>
+        )
+      })}
     </div>
   )
 }
