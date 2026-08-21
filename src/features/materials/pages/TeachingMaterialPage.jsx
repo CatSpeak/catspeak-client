@@ -56,15 +56,24 @@ const TeachingMaterialPage = () => {
   const [filterMode, setFilterMode] = useState(null); // 'folder' | 'fileType' | null
   const [filterFileType, setFilterFileType] = useState(null);
 
+  const [sortField, sortDir] = sortBy.split('_');
+  const actualSortBy = ['name', 'size'].includes(sortField) ? sortField : 'date';
+  const actualSortOrder = sortField === 'oldest' ? 'asc' : (sortDir || 'desc');
+
   const { data: regularMaterialsData, isLoading: isRegularLoading } = useGetPersonalMaterialsQuery({
     folderId,
     keyword: searchQuery,
-    sortBy: sortBy,
+    sortBy: actualSortBy,
+    sortOrder: actualSortOrder,
+    filterMode: filterMode,
+    filterFileType: filterFileType
   }, { skip: filterMode === 'bookmark' && !folderId });
 
   const { data: bookmarkedMaterialsData, isLoading: isBookmarkLoading } = useGetBookmarkedMaterialsQuery({
     keyword: searchQuery,
-    sortBy: sortBy,
+    sortBy: actualSortBy,
+    sortOrder: actualSortOrder,
+    filterFileType: filterFileType
   }, { skip: filterMode !== 'bookmark' || !!folderId });
 
   const materialsData = (filterMode === 'bookmark' && !folderId) ? bookmarkedMaterialsData : regularMaterialsData;
@@ -130,132 +139,12 @@ const TeachingMaterialPage = () => {
 
   const responseData = materialsData?.data || materialsData || {};
   const folders = useMemo(() => {
-    if (filterMode === 'fileType') return [];
-
-    let rawFolders = [];
-    if (filterMode === 'folder') {
-      const metaMap = {};
-      if (Array.isArray(responseData.folders)) {
-        responseData.folders.forEach(f => {
-          metaMap[f.id] = f;
-        });
-      }
-
-      const flattenFolders = (nodes) => {
-        let flat = [];
-        for (const node of nodes) {
-          const id = node.folderId || node.id;
-          const meta = metaMap[id];
-          flat.push({
-            ...node,
-            id,
-            name: node.folderName || node.name,
-            subFolderCount: meta?.subFolderCount || node.subFolderCount,
-            materialCount: meta?.materialCount || node.materialCount,
-            updatedAt: meta?.updatedAt || node.updatedAt
-          });
-          const children = node.subFolders || node.children || [];
-          if (children.length > 0) {
-            flat = flat.concat(flattenFolders(children));
-          }
-        }
-        return flat;
-      };
-
-      if (folderId) {
-        const findNode = (nodes, targetId) => {
-          for (const node of nodes) {
-            if (String(node.folderId) === String(targetId) || String(node.id) === String(targetId)) return node;
-            const children = node.subFolders || node.children || [];
-            const found = findNode(children, targetId);
-            if (found) return found;
-          }
-          return null;
-        };
-        const targetNode = findNode(rawFoldersTree, folderId);
-        rawFolders = flattenFolders(targetNode?.subFolders || targetNode?.children || []);
-      } else {
-        rawFolders = flattenFolders(rawFoldersTree);
-      }
-
-      if (searchQuery.trim()) {
-        const lowerQuery = searchQuery.toLowerCase();
-        rawFolders = rawFolders.filter(f => (f.name || '').toLowerCase().includes(lowerQuery));
-      }
-    } else {
-      rawFolders = Array.isArray(responseData.folders) ? responseData.folders.map(f => ({ ...f, id: f.folderId || f.id })) : [];
-    }
-
-    if (filterMode === 'bookmark' && folderId) {
-      rawFolders = rawFolders.filter(f => f.isBookmarked);
-    }
-
-    rawFolders.sort((a, b) => {
-      const nameA = a.name || '';
-      const nameB = b.name || '';
-      const dateA = new Date(a.updatedAt || 0).getTime();
-      const dateB = new Date(b.updatedAt || 0).getTime();
-
-      switch (sortBy) {
-        case 'name_asc': return nameA.localeCompare(nameB);
-        case 'name_desc': return nameB.localeCompare(nameA);
-        case 'newest': return dateB - dateA;
-        case 'oldest': return dateA - dateB;
-        case 'size_asc': return dateA - dateB;
-        case 'size_desc': return dateB - dateA;
-        default: return 0;
-      }
-    });
-
-    return rawFolders;
-  }, [responseData.folders, filterMode, sortBy, folderId, rawFoldersTree, searchQuery]);
+    return Array.isArray(responseData.folders) ? responseData.folders.map(f => ({ ...f, id: f.folderId || f.id })) : [];
+  }, [responseData.folders]);
 
   const files = useMemo(() => {
-    let rawFiles = Array.isArray(responseData.materials) ? responseData.materials.map(file => ({ ...file, id: file.materialId || file.id })) : [];
-    if (filterMode === 'folder') return [];
-
-    if (filterMode === 'fileType' && filterFileType) {
-      const typeMap = {
-        word: ['doc', 'docx'],
-        excel: ['xls', 'xlsx', 'csv'],
-        powerpoint: ['ppt', 'pptx'],
-        image: ['png', 'jpg', 'jpeg'],
-        pdf: ['pdf']
-      };
-
-      rawFiles = rawFiles.filter(file => {
-        const name = file.fileName || file.name || '';
-        const extMatch = name.match(/\.([^.]+)$/);
-        const ext = extMatch ? extMatch[1].toLowerCase() : '';
-        return typeMap[filterFileType]?.includes(ext);
-      });
-    }
-
-    if (filterMode === 'bookmark' && folderId) {
-      rawFiles = rawFiles.filter(f => f.isBookmarked);
-    }
-
-    rawFiles.sort((a, b) => {
-      const nameA = a.fileName || a.name || '';
-      const nameB = b.fileName || b.name || '';
-      const dateA = new Date(a.updatedAt || 0).getTime();
-      const dateB = new Date(b.updatedAt || 0).getTime();
-      const sizeA = a.fileSize || a.size || a.sizeBytes || 0;
-      const sizeB = b.fileSize || b.size || b.sizeBytes || 0;
-
-      switch (sortBy) {
-        case 'name_asc': return nameA.localeCompare(nameB);
-        case 'name_desc': return nameB.localeCompare(nameA);
-        case 'newest': return dateB - dateA;
-        case 'oldest': return dateA - dateB;
-        case 'size_asc': return sizeA - sizeB;
-        case 'size_desc': return sizeB - sizeA;
-        default: return 0;
-      }
-    });
-
-    return rawFiles;
-  }, [responseData.materials, filterMode, filterFileType, sortBy, folderId]);
+    return Array.isArray(responseData.materials) ? responseData.materials.map(file => ({ ...file, id: file.materialId || file.id })) : [];
+  }, [responseData.materials]);
   const materials = useMemo(() => [...folders, ...files], [folders, files]);
 
   useEffect(() => {
@@ -274,7 +163,7 @@ const TeachingMaterialPage = () => {
 
   return (
     <div
-      className=" bg-[#f3f3f3] min-h-screen"
+      className="min-h-screen"
       onContextMenu={(e) => {
         if (e.target.closest('button, input, a, .group, [role="button"], .cursor-pointer')) {
           return;
@@ -454,7 +343,7 @@ const TeachingMaterialPage = () => {
                   <FolderItem
                     key={folder.id || folder.folderId}
                     title={folder.name || folder.folderName}
-                    totalItems={t.materials.itemsCount.replace('{{count}}', (folder.subFolderCount || 0) + (folder.materialCount || 0))}
+                    totalItems={(!searchQuery && !filterMode) ? t.materials.itemsCount.replace('{{count}}', (folder.subFolderCount || 0) + (folder.materialCount || 0)) : null}
                     updatedAt={folder.updatedAt ? t.materials.updated.replace('{{date}}', formatDate(folder.updatedAt)) : ''}
                     isSelected={selectedItems.some(i => (i.id || i.folderId) === (folder.id || folder.folderId) && i._type === 'folder')}
                     isSelectionMode={selectedItems.length > 0}
