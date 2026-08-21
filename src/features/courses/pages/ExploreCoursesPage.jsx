@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Compass,
@@ -17,7 +17,6 @@ import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 import CourseSearchInput from "../components/CourseSearchInput"
 import CourseSelectFilter from "../components/CourseSelectFilter"
-import TablePagination from "../components/shared/TablePagination"
 import ViewModeToggle from "../components/shared/ViewModeToggle"
 import StudentCourseCard from "../student/components/StudentCourseCard"
 import ClassCard from "../components/ClassCard"
@@ -26,7 +25,7 @@ import ExploreCoursesFilterModal from "../components/ExploreCoursesFilterModal"
 import { resolveItemLayout } from "../utils/catalogLayout"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 24
 
 const ExploreCoursesPage = () => {
   const { t } = useLanguage()
@@ -49,6 +48,11 @@ const ExploreCoursesPage = () => {
   const [searchInputValue, setSearchInputValue] = useState("")
   const [appliedSearchQuery, setAppliedSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+
+  // Infinite Scroll State
+  const [catalogItems, setCatalogItems] = useState([])
+  const [hasMore, setHasMore] = useState(true)
+  const secondLastItemRef = useRef(null)
 
   const sortOptions = [
     { value: "default", label: sc.sortDefault || "Mới nhất" },
@@ -150,24 +154,53 @@ const ExploreCoursesPage = () => {
     enrollmentStatus: activeEnrollmentStatus,
   })
 
-  const combinedCatalog = useMemo(() => {
-    const raw = exploreCatalogQuery.currentData?.data
-    return Array.isArray(raw) ? raw : []
-  }, [exploreCatalogQuery.currentData])
-
   const isLoading = exploreCatalogQuery.isLoading
   const isFetching = exploreCatalogQuery.isFetching
   const error = exploreCatalogQuery.error
-  const pagination = exploreCatalogQuery.currentData?.pagination
 
-  const totalPages = Number(pagination?.totalPages) || 1
-  const totalItems = Number(pagination?.totalItems) || combinedCatalog.length
+  // Sync / Accumulate data for Infinite Scroll
+  useEffect(() => {
+    if (exploreCatalogQuery.data) {
+      const raw = exploreCatalogQuery.data.data
+      const items = Array.isArray(raw) ? raw : []
+      const pagination = exploreCatalogQuery.data.pagination
+      const totalPages = Number(pagination?.totalPages) || 1
+
+      if (currentPage === 1) {
+        setCatalogItems(items)
+      } else {
+        setCatalogItems((prev) => {
+          const existingIds = new Set(prev.map((i) => String(i.id)))
+          const newItems = items.filter((i) => !existingIds.has(String(i.id)))
+          return [...prev, ...newItems]
+        })
+      }
+      setHasMore(currentPage < totalPages && items.length > 0)
+    }
+  }, [exploreCatalogQuery.data, currentPage])
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    if (!secondLastItemRef.current || !hasMore || isFetching) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !isFetching) {
+          setCurrentPage((prev) => prev + 1)
+        }
+      },
+      {
+        rootMargin: "250px",
+      },
+    )
+    observer.observe(secondLastItemRef.current)
+    return () => observer.disconnect()
+  }, [catalogItems, hasMore, isFetching])
+
   const isWorkspace = window.location.pathname.startsWith("/workspace")
 
   const handleOpenCourseDetail = (course) => {
     if (!course?.id) return
     const courseId = encodeURIComponent(String(course.id))
-    const isWorkspace = window.location.pathname.startsWith("/workspace")
     if (isWorkspace) {
       navigate(`/workspace/explore-courses/details/${courseId}`)
     } else {
@@ -229,6 +262,9 @@ const ExploreCoursesPage = () => {
     || hasPriceFilter
 
   const modalEnrollmentStatus = selectedStatuses.length === 1 ? selectedStatuses[0] : "all"
+
+  // Check if we are loading initial page or after filter changes
+  const isInitialLoading = (isLoading || isFetching) && currentPage === 1
 
   return (
     <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
@@ -346,20 +382,47 @@ const ExploreCoursesPage = () => {
         </div>
       </div>
 
-      {/* ─── Catalog Grid Section ─── */}
+      {/* ─── Catalog Section with Infinite Scroll ─── */}
       <div aria-busy={isFetching}>
-        {isLoading ? (
-          <div
-            role="status"
-            aria-live="polite"
-            className="flex min-h-[360px] items-center justify-center rounded-3xl border border-border/80 bg-white p-6 shadow-xs"
-          >
-            <LoadingSpinner />
-            <span className="sr-only">
-              {sc.loadingLearningData || "Loading data..."}
-            </span>
-          </div>
-        ) : error && combinedCatalog.length === 0 ? (
+        {isInitialLoading ? (
+          /* Initial / Filter Change Skeleton Loader */
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-3xl border border-border/80 bg-white p-4 shadow-xs flex flex-col gap-4 animate-pulse"
+                >
+                  <div className="aspect-[16/10] w-full bg-slate-200 rounded-2xl" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-slate-200 rounded-md w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded-md w-1/2" />
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 mt-auto">
+                    <div className="h-4 bg-slate-200 rounded-md w-1/3" />
+                    <div className="h-8 bg-slate-200 rounded-full w-20" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-3xl border border-border/80 bg-white p-5 shadow-xs flex gap-5 animate-pulse items-center"
+                >
+                  <div className="w-44 h-28 bg-slate-200 rounded-2xl shrink-0" />
+                  <div className="flex-1 space-y-3">
+                    <div className="h-5 bg-slate-200 rounded-md w-2/3" />
+                    <div className="h-3 bg-slate-100 rounded-md w-1/3" />
+                    <div className="h-4 bg-slate-200 rounded-md w-1/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : error && catalogItems.length === 0 ? (
           <div
             role="alert"
             className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-6 text-center"
@@ -382,7 +445,7 @@ const ExploreCoursesPage = () => {
               <span>{isFetching ? "Retrying..." : "Retry"}</span>
             </button>
           </div>
-        ) : combinedCatalog.length === 0 ? (
+        ) : catalogItems.length === 0 ? (
           <div
             role="status"
             className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 bg-white p-8 text-center shadow-xs"
@@ -408,50 +471,66 @@ const ExploreCoursesPage = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className={viewMode === "list"
-              ? "flex flex-col gap-4"
-              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"}>
-              {combinedCatalog.map((item, idx) => {
+            {/* Cards Grid / List */}
+            <div
+              className={
+                viewMode === "list"
+                  ? "flex flex-col gap-4"
+                  : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
+              }
+            >
+              {catalogItems.map((item, idx) => {
+                const isSecondLast =
+                  idx === Math.max(0, catalogItems.length - 2) ||
+                  (catalogItems.length === 1 && idx === 0)
+
                 if (item.isClassItem) {
                   const classLayout = resolveItemLayout(item, viewMode)
                   return (
-                    <ClassCard
-                      key={`cls-${item.id}`}
-                      cls={item}
-                      isStudent={true}
-                      courseTitle={item.courseTitle}
-                      viewMode={classLayout}
-                      onClick={() => handleOpenClassDetail(item)}
-                      onEnroll={() => handleOpenClassDetail(item)}
-                      onShare={handleShareClass}
-                    />
+                    <div
+                      ref={isSecondLast ? secondLastItemRef : null}
+                      key={`cls-${item.id || idx}`}
+                      className="w-full"
+                    >
+                      <ClassCard
+                        cls={item}
+                        isStudent={true}
+                        courseTitle={item.courseTitle}
+                        viewMode={classLayout}
+                        onClick={() => handleOpenClassDetail(item)}
+                        onEnroll={() => handleOpenClassDetail(item)}
+                        onShare={handleShareClass}
+                      />
+                    </div>
                   )
                 }
+
                 return (
-                  <StudentCourseCard
-                    key={`crs-${item.id}`}
-                    course={item}
-                    isEnrolled={false}
-                    viewMode={viewMode}
-                    onViewDetails={() => handleOpenCourseDetail(item)}
-                    onJoin={() => handleOpenCourseDetail(item)}
-                    onShare={handleShareCourse}
-                    t={t}
-                    index={idx}
-                  />
+                  <div
+                    ref={isSecondLast ? secondLastItemRef : null}
+                    key={`crs-${item.id || idx}`}
+                    className="w-full"
+                  >
+                    <StudentCourseCard
+                      course={item}
+                      isEnrolled={false}
+                      viewMode={viewMode}
+                      onViewDetails={() => handleOpenCourseDetail(item)}
+                      onJoin={() => handleOpenCourseDetail(item)}
+                      onShare={handleShareCourse}
+                      t={t}
+                      index={idx}
+                    />
+                  </div>
                 )
               })}
             </div>
 
-            {totalPages > 1 && (
-              <TablePagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalCount={totalItems}
-                limit={PAGE_SIZE}
-                onPageChange={setCurrentPage}
-                t={t}
-              />
+            {/* Infinite Scroll Bottom Spinner */}
+            {isFetching && currentPage > 1 && (
+              <div className="flex justify-center py-6">
+                <div className="w-8 h-8 border-2 border-[#b20a1c] border-t-transparent rounded-full animate-spin" />
+              </div>
             )}
           </div>
         )}
