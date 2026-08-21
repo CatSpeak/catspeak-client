@@ -16,10 +16,13 @@ const EventFilter = ({ open, onClose, onApply, activeFilters, classesOptions = [
   const { isTeacher } = useRoleOverride()
 
   // Initialize state with props or fallback to default
-  const [selected, setSelected] = useState(activeFilters || defaultFilters)
+  const [selected, setSelected] = useState(() => {
+    if (activeFilters && activeFilters.eventTypes) return activeFilters;
+    return defaultFilters;
+  })
 
   useEffect(() => {
-    if (open && activeFilters) {
+    if (open && activeFilters && activeFilters.eventTypes) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelected(activeFilters)
     }
@@ -69,12 +72,12 @@ const EventFilter = ({ open, onClose, onApply, activeFilters, classesOptions = [
                 className="flex items-center gap-2.5 text-sm text-[#4E4E4E] cursor-pointer"
               >
                 <Checkbox
-                  checked={selected.eventTypes.includes(opt.key)}
+                  checked={selected?.eventTypes?.includes(opt.key)}
                   onChange={(e) => {
                     if (e.target.checked) {
-                      setSelected({ ...selected, eventTypes: [...selected.eventTypes, opt.key] })
+                      setSelected({ ...selected, eventTypes: [...(selected?.eventTypes || []), opt.key] })
                     } else {
-                      setSelected({ ...selected, eventTypes: selected.eventTypes.filter(k => k !== opt.key) })
+                      setSelected({ ...selected, eventTypes: (selected?.eventTypes || []).filter(k => k !== opt.key) })
                     }
                   }}
                 />

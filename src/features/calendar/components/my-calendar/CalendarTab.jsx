@@ -59,7 +59,7 @@ const CalendarTab = ({
   const LEGEND = getLegend(t, isTeacher)
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
+    <div className="bg-white p-4 md:p-6 lg:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-border">
         <div className="flex items-center gap-2">
@@ -72,11 +72,11 @@ const CalendarTab = ({
             <ChevronLeft />
           </IconButton>
           <div className='flex'>
-            <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[100px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
+            <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[80px] max-w-[80px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
               {localizedMonth}
             </span>
             <div className="relative flex items-center justify-center w-6 h-6">
-              <CalendarIcon />
+              <CalendarIcon className='mt-6 md:mt-0' />
               <div className="absolute top-0 left-0 w-6 h-6 opacity-0 overflow-hidden cursor-pointer">
                 <DatePicker
                   value={currentDate.toDate()}

@@ -60,9 +60,10 @@ const CalendarWeekView = ({
 
 
   return (
-    <div className="w-full flex flex-col h-full min-h-0 max-h-[500px]">
-      {/* Week Header */}
-      <div className="flex border-b border-border pb-4 items-center relative">
+    <div className="w-full h-full min-h-0 max-h-[500px] overflow-x-auto scrollbar-app">
+      <div className="flex flex-col min-w-[700px] h-full min-h-0">
+        {/* Week Header */}
+        <div className="flex border-b border-border pb-4 items-center relative">
         <IconButton
           onClick={onPrev}
           variant="ghost"
@@ -264,6 +265,7 @@ const CalendarWeekView = ({
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
       />
+      </div>
     </div>
   )
 }

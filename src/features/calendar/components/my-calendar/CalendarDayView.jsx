@@ -9,7 +9,7 @@ import dayjs from 'dayjs'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
-const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilters = [], onApplyFilter, onShareEvent, hideHeader = false }) => {
+const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilters = null, onApplyFilter, onShareEvent, hideHeader = false }) => {
   const { formatScheduleDays, parseIsoToZoneDate } = useTimezone()
   const [filterOpen, setFilterOpen] = useState(false)
   const [filterOpenCount, setFilterOpenCount] = useState(0)
