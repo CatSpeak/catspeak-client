@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import dayjs from "dayjs";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
 import { useEventForm } from "../hooks/useEventForm";
 import EventDateTimeSection from "../components/CreateEventModal/EventDateTimeSection";
@@ -47,6 +48,7 @@ const CreateEventPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
+  const { formatTime } = useTimezone();
   const cal = t.calendar || {};
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -227,14 +229,14 @@ const CreateEventPage = () => {
   // Preview data
   const previewTitle = form.title || cal.randomEventTitle;
   const previewStart = form.startTime
-    ? dayjs(form.startTime).format("HH:mm")
+    ? formatTime(form.startTime)
     : "hh/mm";
   const previewEnd = form.endTime
-    ? dayjs(form.endTime).format("HH:mm")
+    ? formatTime(form.endTime)
     : "hh/mm";
 
   return (
-    <div className=" min-h-screen bg-[#F3F3F3]">
+    <div className=" min-h-screen bg-primaryBg">
       {/* Breadcrumb */}
       <div className="px-5 py-3 pt-2">
         <Breadcrumb items={breadcrumbItems} />
@@ -355,11 +357,11 @@ const CreateEventPage = () => {
                           <Clock size={11} />
                           <span>
                             {draft.startTime
-                              ? dayjs(draft.startTime).format("HH:mm")
+                              ? formatTime(draft.startTime)
                               : "--:--"}
                             {" - "}
                             {draft.endTime
-                              ? dayjs(draft.endTime).format("HH:mm")
+                              ? formatTime(draft.endTime)
                               : "--:--"}
                           </span>
                         </div>
@@ -645,7 +647,7 @@ const CreateEventPage = () => {
             </h2>
 
             {/* Preview card */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#E5E5E5]">
+            <div className="bg-white rounded-2xl p-4 shadow-sm border border-border">
               <div className="flex items-start gap-3">
                 {/* Preview image */}
                 <div
@@ -711,7 +713,7 @@ const CreateEventPage = () => {
                     )}
                   </h2>
                 </div>
-                <div className="bg-white rounded-2xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden">
                   {drafts.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                       <BookmarkCheck size={32} className="mb-2 opacity-30" />
@@ -758,11 +760,11 @@ const CreateEventPage = () => {
                                 <Clock size={11} />
                                 <span>
                                   {draft.startTime
-                                    ? dayjs(draft.startTime).format("HH:mm")
+                                    ? formatTime(draft.startTime)
                                     : "--:--"}
                                   {" - "}
                                   {draft.endTime
-                                    ? dayjs(draft.endTime).format("HH:mm")
+                                    ? formatTime(draft.endTime)
                                     : "--:--"}
                                 </span>
                               </div>

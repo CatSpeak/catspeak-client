@@ -1,28 +1,42 @@
 import React from "react"
-import { Outlet, useLocation, useNavigate } from "react-router-dom"
-import { useEffect } from "react"
+import { Outlet, useLocation } from "react-router-dom"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
+import { PageNotFound } from "@/shared/pages"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
+
+const TEACHER_ONLY_PREFIXES = [
+  "/workspace/dashboard",
+  "/workspace/courses",
+  "/workspace/classes",
+  "/workspace/analytics",
+  "/workspace/teaching-tasks",
+  "/workspace/schedule",
+  "/workspace/vouchers",
+]
 
 const WorkspaceLayout = () => {
-  const { isStudent, isTeacher, isRoleResolved } = useRoleOverride()
+  const { isTeacher, isRoleResolved, isLoading } = useRoleOverride()
   const location = useLocation()
-  const navigate = useNavigate()
 
-  useEffect(() => {
-    if (isRoleResolved && isStudent) {
-      // Teacher-only routes based on the features specified
-      const teacherRoutes = ["/workspace/courses", "/workspace/classes", "/workspace/schedule", "/workspace/teaching-tasks", "/workspace/analytics"]
+  const isTeacherOnlyPath = TEACHER_ONLY_PREFIXES.some((prefix) =>
+    location.pathname.startsWith(prefix),
+  )
 
-      const isTeacherRoute = teacherRoutes.some(route => location.pathname.includes(route))
-
-      if (isTeacherRoute) {
-        navigate("/workspace/learning", { replace: true })
-      }
+  if (isTeacherOnlyPath) {
+    if (isLoading || !isRoleResolved) {
+      return (
+        <div className="flex min-h-[240px] items-center justify-center">
+          <LoadingSpinner />
+        </div>
+      )
     }
-  }, [isStudent, isTeacher, isRoleResolved, location.pathname, navigate])
+    if (!isTeacher) {
+      return <PageNotFound />
+    }
+  }
 
   return (
-    <div className="flex-1 h-full overflow-y-auto flex flex-col bg-[#f3f3f3] relative">
+    <div className="flex-1 h-full overflow-y-auto flex flex-col bg-primaryBg relative">
       <div className="mx-auto w-full min-w-0 p-4 sm:p-6 flex-1 flex flex-col">
         <Outlet />
       </div>

@@ -84,7 +84,7 @@ const VideoCallErrorFallback = ({
       </div>
 
       {/* Toggle Button */}
-      <div className="pt-4 sm:pt-6 w-full border-t border-[#e5e5e5] flex items-center justify-center">
+      <div className="pt-4 sm:pt-6 w-full border-t border-border flex items-center justify-center">
         <PillButton
           variant="secondary-no-outline"
           endIcon={

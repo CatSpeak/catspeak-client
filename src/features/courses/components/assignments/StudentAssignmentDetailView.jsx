@@ -608,7 +608,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     return (
       <div
         key={`${safeUrl || name}-${index}`}
-        className="flex items-center justify-between p-3 bg-gray-50 border border-gray-150 rounded-xl hover:bg-gray-100/50 transition-colors"
+        className="flex items-center justify-between p-3 bg-gray-50 border border-border rounded-xl hover:bg-gray-100/50 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
           <FileText size={18} className={getFileIconColorClass(name)} />
@@ -652,13 +652,13 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
 
       {/* Header Title & Navigation back */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-150 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBack}
             aria-label={sa.goBack}
-            className="p-2.5 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl transition-all cursor-pointer shadow-2xs"
+            className="p-2.5 border border-border hover:bg-gray-50 text-gray-500 rounded-xl transition-all cursor-pointer shadow-2xs"
             title={sa.goBack}
           >
             <ChevronLeft size={16} />
@@ -701,7 +701,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
         {/* Due Date Indicator */}
         {assignment.dueDate && (
-          <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 border border-gray-150 rounded-xl px-4 py-2.5 w-fit">
+          <div className="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 border border-border rounded-xl px-4 py-2.5 w-fit">
             <Calendar size={14} className="text-gray-400" />
             <span className="font-semibold">
               {sa.deadlineLabel}{" "}
@@ -717,8 +717,8 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
         {/* Left Column (65%) */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* Instructions and Details */}
-          <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-4">
-            <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
+          <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-4">
+            <div className="flex items-center gap-2 border-b border-border pb-3">
               <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
               <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
                 {ca.descriptionLabel}
@@ -737,7 +737,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
 
             {/* Teacher attachments */}
             {parsedTeacherAttachments.length > 0 && (
-              <div className="mt-4 border-t border-gray-100 pt-4">
+              <div className="mt-4 border-t border-border pt-4">
                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                   <Paperclip size={12} />
                   {ca.attachmentsLabel}
@@ -754,7 +754,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
             <form
               onSubmit={handleSubmit}
               aria-busy={isSubmitting}
-              className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5"
+              className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-5"
             >
               <div className="flex items-center gap-2 border-b border-gray-50 pb-3">
                 <span className="w-1.5 h-4 bg-[#990011] rounded-full" />
@@ -893,7 +893,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
               </button>
             </form>
           ) : (
-            <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-4 border-t-4 border-t-red-500 animate-fadeIn">
+            <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-4 border-t-4 border-t-red-500 animate-fadeIn">
               <h3 className="text-xs font-black text-red-500 uppercase tracking-wider flex items-center gap-1.5 leading-none">
                 <AlertTriangle size={14} />
                 {sa.submissionsClosedHeading}
@@ -913,7 +913,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
         <div className="flex flex-col gap-6">
           {/* Grade and feedback panel (if released/returned) */}
           {submission && submissionStatus === "returned" && (
-            <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
+            <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-5 border-t-4 border-t-emerald-500 animate-fadeIn">
               <h3 className="text-xs font-black text-gray-400 tracking-wider uppercase leading-none">
                 {sa.gradingDetails}
               </h3>
@@ -945,7 +945,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                   {cg.generalFeedback}
                 </span>
                 {submissionComment ? (
-                  <p className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750 leading-relaxed whitespace-pre-line">
+                  <p className="bg-gray-50 border border-border rounded-2xl p-4 text-xs font-semibold text-gray-750 leading-relaxed whitespace-pre-line">
                     {submissionComment}
                   </p>
                 ) : (
@@ -958,8 +958,8 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
           )}
 
           {/* Submission Details View / Empty State */}
-          <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-4 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-4 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <span className={`w-1.5 h-4 rounded-full ${submission ? "bg-emerald-500" : "bg-gray-300"}`} />
                 <h3 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider">
@@ -992,7 +992,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                     </h4>
                     <RenderHTML
                       html={displayedSubmissionText}
-                      className="bg-gray-50 border border-gray-150 rounded-2xl p-4 text-xs font-semibold text-gray-750"
+                      className="bg-gray-50 border border-border rounded-2xl p-4 text-xs font-semibold text-gray-750"
                       fallback={
                         <span className="italic text-gray-400 text-xs font-medium">
                           {cg.noTextResponse}
@@ -1016,7 +1016,7 @@ const StudentAssignmentDetailContent = ({ assignment: initialAssignment, assignm
                 )}
               </div>
             ) : (
-              <div className="py-6 flex flex-col items-center justify-center text-center gap-2.5 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 p-4">
+              <div className="py-6 flex flex-col items-center justify-center text-center gap-2.5 bg-gray-50/50 rounded-2xl border border-dashed border-border p-4">
                 <div className="w-10 h-10 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center">
                   <FileText size={20} />
                 </div>

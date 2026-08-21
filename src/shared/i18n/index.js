@@ -7,6 +7,11 @@ import { profileTranslations } from "@/features/profile/i18n"
 import { chatTranslations } from "@/features/chat/i18n"
 import { websitesTranslations } from "@/features/websites/i18n"
 import { newsTranslations } from "@/features/news/i18n"
+import { bankAccountsTranslations } from "@/features/bank-accounts/i18n"
+import { refundTranslations } from "@/features/refunds/i18n"
+import { materialsTranslations } from "@/features/materials/i18n"
+import { landingTranslations } from "@/features/landing/i18n"
+import { voucherTranslations } from "@/features/vouchers/i18n"
 
 const isObject = (item) =>
   Boolean(item && typeof item === "object" && !Array.isArray(item))
@@ -32,9 +37,45 @@ const deepMerge = (...objects) => {
 }
 
 export const translations = {
-  vi: deepMerge(vi, billingTranslations.vi, profileTranslations.vi, chatTranslations.vi, websitesTranslations.vi, newsTranslations.vi),
-  en: deepMerge(en, billingTranslations.en, profileTranslations.en, chatTranslations.en, websitesTranslations.en, newsTranslations.en),
-  zh: deepMerge(zh, billingTranslations.zh, profileTranslations.zh, chatTranslations.zh, websitesTranslations.zh, newsTranslations.zh),
+  vi: deepMerge(
+    vi,
+    billingTranslations.vi,
+    profileTranslations.vi,
+    chatTranslations.vi,
+    websitesTranslations.vi,
+    newsTranslations.vi,
+    bankAccountsTranslations.vi,
+    refundTranslations.vi,
+    materialsTranslations.vi,
+    landingTranslations.vi,
+    voucherTranslations.vi,
+  ),
+  en: deepMerge(
+    en,
+    billingTranslations.en,
+    profileTranslations.en,
+    chatTranslations.en,
+    websitesTranslations.en,
+    newsTranslations.en,
+    bankAccountsTranslations.en,
+    refundTranslations.en,
+    materialsTranslations.en,
+    landingTranslations.en,
+    voucherTranslations.en,
+  ),
+  zh: deepMerge(
+    zh,
+    billingTranslations.zh,
+    profileTranslations.zh,
+    chatTranslations.zh,
+    websitesTranslations.zh,
+    newsTranslations.zh,
+    bankAccountsTranslations.zh,
+    refundTranslations.zh,
+    materialsTranslations.zh,
+    landingTranslations.zh,
+    voucherTranslations.zh,
+  ),
 }
 
 export const languageNames = {

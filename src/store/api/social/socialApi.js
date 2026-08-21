@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { createReauthBaseQuery } from "../baseApi"
+import { getBrowserTimeZone } from "@/shared/constants/timezones"
 
 const socialRawBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_SOCIAL_API_BASE_URL || "/api/social",
@@ -14,6 +15,13 @@ const socialRawBaseQuery = fetchBaseQuery({
     if (match) {
       headers.set("X-Community-Lang", match[1])
     }
+
+    // Attach user timezone (e.g. "Asia/Ho_Chi_Minh")
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
+    headers.set("X-Time-Zone", userTz)
+
+    // Attach local timezone offset in minutes
+    headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
 
     return headers
   },

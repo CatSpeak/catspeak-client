@@ -1,5 +1,6 @@
 import React from "react"
 import { ArrowLeft } from "lucide-react"
+import FluentCard from "@/shared/components/ui/FluentCard"
 
 const FullscreenOverlayShell = ({
   backgroundImageUrl,
@@ -37,11 +38,11 @@ const FullscreenOverlayShell = ({
       <div
         className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center p-5 ${contentClassName}`}
       >
-        <div
-          className={`bg-white p-6 rounded-3xl shadow-2xl w-full ${maxWidthClass} flex flex-col items-center ${cardClassName}`}
+        <FluentCard
+          className={`shadow-2xl w-full ${maxWidthClass} items-center ${cardClassName}`}
         >
           {children}
-        </div>
+        </FluentCard>
       </div>
     </div>
   )

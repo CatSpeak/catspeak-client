@@ -17,12 +17,13 @@ export const parseMetadata = (metadata) => {
 const ENABLE_MOCK_PARTICIPANTS = false
 
 export const MOCK_PARTICIPANTS = ENABLE_MOCK_PARTICIPANTS
-  ? Array.from({ length: 4 }, (_, i) => ({
+  ? Array.from({ length: 100 }, (_, i) => ({
       identity: `mock-user-${i + 1}`,
       name: `Mock Participant ${i + 1}`,
       isLocal: false,
       isMicrophoneEnabled: i % 2 === 0,
-      isCameraEnabled: false,
+      isCameraEnabled: i < 10,
+      isMockCamera: i < 10,
       isScreenShareEnabled: false,
       metadata: "{}",
       getTrackPublication: () => null,
@@ -88,7 +89,7 @@ export const useParticipantList = (allParticipants, localParticipant) => {
       }
     }
 
-    // Sort: raised hands first (by time), recent speakers (descending timestamp), then local user, then others
+    // Sort: raised hands first (by time), then local user, then others
     list.sort((a, b) => {
       const metaA = parseMetadata(a.metadata)
       const metaB = parseMetadata(b.metadata)
@@ -105,15 +106,7 @@ export const useParticipantList = (allParticipants, localParticipant) => {
         return timeA - timeB // Ascending
       }
 
-      // Recent speaker sticky sorting (descending by lastSpokeAt)
-      const spokeA = lastSpokeRef.current.get(a.identity) || 0
-      const spokeB = lastSpokeRef.current.get(b.identity) || 0
-
-      if (spokeA !== spokeB) {
-        return spokeB - spokeA // Most recent speaker comes first
-      }
-
-      // Keep local user first if neither has spoken
+      // Keep local user first if neither has hand raised
       if (a.isLocal && !b.isLocal) return -1
       if (!a.isLocal && b.isLocal) return 1
 

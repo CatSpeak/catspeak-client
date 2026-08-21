@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react"
-import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils"
 import { unlockAudioContext } from "@/shared/utils/audioUnlockUtils"
@@ -50,7 +49,8 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
   )
 
   const { data: bgData } = useGetCurrentBackgroundQuery()
-  const virtualBackgroundUrl = bgData?.data?.activeBackgroundUrl
+  const virtualBackgroundUrl =
+    bgData?.activeBackgroundUrl ?? bgData?.data?.activeBackgroundUrl
 
   // Update background if it changes (via CombinedVideoTransformer.updateTransformerOptions)
   useEffect(() => {
@@ -329,6 +329,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
         }
       })()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioDeviceId])
 
   useEffect(() => {
@@ -351,6 +352,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
         }
       })()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoDeviceId])
 
   // ── switchBeauty — called when beauty options change (mirrors useCombinedProcessor) ──

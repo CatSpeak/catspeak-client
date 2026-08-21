@@ -6,8 +6,11 @@ import React, {
   useMemo,
 } from "react";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { CheckCircle, Loader2, GraduationCap } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetUserProfileQuery } from "@/store/api/userApi";
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
 import { store } from "@/store";
 import {
   instructorApi,
@@ -119,6 +122,7 @@ function getApplicationStatus(app) {
 
 const InstructorPage = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const ins = t.profile?.instructor || {};
   const { startTask } = useGlobalTask();
 
@@ -131,6 +135,20 @@ const InstructorPage = () => {
 
   const { data: userProfileData, isLoading: isLoadingProfile } =
     useGetUserProfileQuery();
+
+  // True when the current account is a teacher account, OR the (user) account has
+  // a linked teacher account (approved profile re-pointed to the teacher account).
+  const userProfile = userProfileData?.data ?? userProfileData ?? {};
+  const isTeacher = !!userProfile.isTeacher;
+
+  const { switchRole, isSwitching: isSwitchingAccount } = useRoleOverride();
+
+  const handleSwitchToTeacherAccount = useCallback(async () => {
+    const success = await switchRole("Teacher");
+    if (success) {
+      navigate("/");
+    }
+  }, [switchRole, navigate]);
 
   const [applyInstructor, { isLoading: isApplying }] =
     useApplyInstructorMutation();
@@ -611,14 +629,47 @@ const InstructorPage = () => {
     );
   }
 
-  // Not applied + not showing form → empty state
+  // Not applied + not showing form → empty state.
+  // When the account has a linked (approved) teacher account the profile now lives
+  // on that teacher account — show a switch CTA instead of the "not applied" state.
   if (hasNotApplied && !showForm) {
     return (
       <div className="flex flex-col gap-4">
         <PageTitle>
-        {t.nav?.instructor || "Giảng viên"}
-      </PageTitle>
-        <InstructorEmptyState onApply={() => setShowForm(true)} t={t} />
+          {t.nav?.instructor || "Giảng viên"}
+        </PageTitle>
+        {isTeacher ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+            <div className="flex items-center gap-3 mb-2">
+              <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+              <h3 className="text-sm font-bold text-emerald-800">
+                {ins.switchToTeacherTitle || "Hồ sơ đã được duyệt"}
+              </h3>
+            </div>
+            <p className="text-sm text-emerald-700 ml-8 mb-3">
+              {ins.switchToTeacherDesc ||
+                "Hồ sơ Giảng viên của bạn đã được phê duyệt. Chuyển sang tài khoản giáo viên để quản lý nội dung giảng dạy."}
+            </p>
+            <div className="ml-8">
+              <button
+                onClick={handleSwitchToTeacherAccount}
+                disabled={isSwitchingAccount}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors shadow-sm disabled:opacity-60"
+              >
+                {isSwitchingAccount ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <GraduationCap size={16} />
+                )}
+                {isSwitchingAccount
+                  ? (ins.switching || "Đang chuyển...")
+                  : (ins.switchToTeacherAccount || "Chuyển sang tài khoản giáo viên")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <InstructorEmptyState onApply={() => setShowForm(true)} t={t} />
+        )}
       </div>
     );
   }

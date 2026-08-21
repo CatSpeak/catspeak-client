@@ -110,7 +110,7 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
               className={`flex items-center justify-center gap-2.5 h-14 rounded-xl border text-base font-medium transition-all ${
                 eventType === "online"
                   ? "border-[#990011] bg-[#990011]/5 text-[#990011]"
-                  : "border-[#E5E5E5] text-black hover:border-gray-400"
+                  : "border-border text-black hover:border-gray-400"
               }`}
             >
               <Link2 size={18} />
@@ -123,7 +123,7 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
               className={`flex items-center justify-center gap-2.5 h-14 rounded-xl border text-base font-medium transition-all ${
                 eventType === "offline"
                   ? "border-[#990011] bg-[#990011]/5 text-[#990011]"
-                  : "border-[#E5E5E5] text-black hover:border-gray-400"
+                  : "border-border text-black hover:border-gray-400"
               }`}
             >
               <MapPin size={18} />
@@ -207,7 +207,7 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
 
               <div
                 onClick={() => startTimeRef.current?.showPicker?.()}
-                className="flex items-center w-full h-12 rounded-xl border border-[#E5E5E5] px-4 cursor-pointer hover:border-[#990011] focus-within:border-[#990011] transition-colors"
+                className="flex items-center w-full h-12 rounded-xl border border-border px-4 cursor-pointer hover:border-[#990011] focus-within:border-[#990011] transition-colors"
               >
                 <input
                   ref={startTimeRef}
@@ -230,7 +230,7 @@ const FilterModal = ({ open, onClose, onApply, initialFilters = {} }) => {
 
               <div
                 onClick={() => endTimeRef.current?.showPicker?.()}
-                className="flex items-center w-full h-12 rounded-xl border border-[#E5E5E5] px-4 cursor-pointer hover:border-[#990011] focus-within:border-[#990011] transition-colors"
+                className="flex items-center w-full h-12 rounded-xl border border-border px-4 cursor-pointer hover:border-[#990011] focus-within:border-[#990011] transition-colors"
               >
                 <input
                   ref={endTimeRef}

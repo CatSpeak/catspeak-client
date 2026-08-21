@@ -43,7 +43,7 @@ const DayScheduleMonthView = ({
       </h3>
 
       {/* Tabs */}
-      <div className="flex w-full border-b border-[#E5E5E5] mb-6">
+      <div className="flex w-full border-b border-border mb-6">
         <button
           onClick={() => setMonthTab("upcoming")}
           className={`flex-1 flex items-center justify-center gap-2 pb-3 text-[16px] font-medium border-b-2 transition-all ${
@@ -88,7 +88,7 @@ const DayScheduleMonthView = ({
               <div
                 key={day}
                 onClick={() => onSelectDate && onSelectDate(day)}
-                className="flex items-center justify-between px-5 py-[14px] border border-[#E5E5E5] rounded-[16px] cursor-pointer hover:border-[#990011] transition-colors"
+                className="flex items-center justify-between px-5 py-[14px] border border-border rounded-[16px] cursor-pointer hover:border-[#990011] transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-[15px] font-medium text-black">

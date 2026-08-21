@@ -206,17 +206,13 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
 
     window.addEventListener("resize", scheduleMeasure);
     window.addEventListener("orientationchange", scheduleMeasure);
-    window.addEventListener("scroll", scheduleMeasure, { passive: true });
     visualViewport?.addEventListener("resize", scheduleMeasure);
-    visualViewport?.addEventListener("scroll", scheduleMeasure);
 
     return () => {
       window.clearTimeout(settleTimer);
       window.removeEventListener("resize", scheduleMeasure);
       window.removeEventListener("orientationchange", scheduleMeasure);
-      window.removeEventListener("scroll", scheduleMeasure);
       visualViewport?.removeEventListener("resize", scheduleMeasure);
-      visualViewport?.removeEventListener("scroll", scheduleMeasure);
 
       if (measureRafRef.current !== null) {
         window.cancelAnimationFrame(measureRafRef.current);
@@ -224,19 +220,6 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
       }
     };
   }, [bottomGap]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || reels.length === 0) return;
-
-    const height = container.clientHeight;
-    if (height <= 0) return;
-
-    const expectedScrollTop = activeIndexRef.current * height;
-    if (Math.abs(container.scrollTop - expectedScrollTop) > 2) {
-      container.scrollTop = expectedScrollTop;
-    }
-  }, [effectiveContainerHeight, reels.length]);
 
   const commitActiveIndex = useCallback(
     (nextIndex) => {
@@ -507,7 +490,7 @@ const ReelScrollContainer = React.forwardRef(function ReelScrollContainer(
                   e.stopPropagation();
                   onClose();
                 }}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center cursor-pointer transition-colors duration-200 border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:bg-gray-50"
+                className="w-10 h-10 rounded-full bg-white flex items-center justify-center cursor-pointer transition-colors duration-200 border border-border shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:bg-gray-50"
                 aria-label="Back"
               >
                 <ChevronLeft size={24} className="text-gray-700" />

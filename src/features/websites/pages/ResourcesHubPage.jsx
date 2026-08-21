@@ -129,7 +129,7 @@ const ResourcesHubPage = () => {
   }, [categoryCounts, t.websites?.category, activeLang]);
 
   return (
-    <FluentAnimation className="min-h-screen bg-[#f3f3f3] flex flex-col p-0 sm:p-6 gap-4 sm:gap-6">
+    <FluentAnimation className="min-h-screen bg-primaryBg flex flex-col p-0 sm:p-6 gap-4 sm:gap-6">
       {/* ── Dashboard Hero Banner ── */}
 
       <div className="relative rounded-none sm:rounded-xl bg-gradient-to-br from-[#3b0712] via-[#6b1428] to-[#2d050d] text-white py-8 px-4 sm:py-12 sm:px-8 shadow-lg shadow-rose-950/30 border-b sm:border border-rose-500/25 z-20">
@@ -157,9 +157,9 @@ const ResourcesHubPage = () => {
                 t.websites?.search?.placeholder ||
                 "Search tools, platforms, or exams (e.g. Quizlet, HSK)..."
               }
-              className="w-full !bg-white/10 !backdrop-blur-sm !border-white/25 !text-white shadow-lg focus-within:!border-white/40 transition-colors duration-200"
-              inputClassName="placeholder:text-rose-100/70 text-white"
-              buttonClassName="group-hover:!bg-white/15 text-white"
+              className="w-full shadow-lg"
+              inputClassName="text-gray-500 placeholder:text-gray-400"
+              buttonClassName=""
               focusBorder={false}
             />
           </div>

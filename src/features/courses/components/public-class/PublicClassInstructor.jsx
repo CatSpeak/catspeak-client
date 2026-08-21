@@ -11,7 +11,7 @@ const PublicClassInstructor = ({ classData }) => {
   const teacher = classData?.teacher || {}
   const teacherName = teacher.fullName || teacher.name || teacher.title || c.defaultInstructor || "CatSpeak Instructor"
   const teacherTitle = teacher.title || pc.defaultTeacherTitle || "Giảng Viên Ngôn Ngữ Cao Cấp"
-  const teacherAvatar = getSafeMediaUrl(teacher.avatar)
+  const teacherAvatar = getSafeMediaUrl(teacher.avatar || teacher.avatarImageUrl || teacher.avatarUrl)
   const teacherBio = teacher.introduction || teacher.description || pc.defaultTeacherBio ||
     "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc."
 
@@ -21,7 +21,7 @@ const PublicClassInstructor = ({ classData }) => {
         {pc.instructorTitle || "Thông Tin Giảng Viên Chuyên Trách"}
       </h2>
 
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs">
+      <div className="bg-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           {/* Avatar */}
           <div className="shrink-0">

@@ -277,7 +277,7 @@ const StudentQuizRow = ({ quiz, cg, onSelect }) => {
             {cg.quizStatusToDo}
           </span>
         ) : (
-          <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-gray-200 uppercase tracking-wider">
+          <span className="bg-gray-100 text-gray-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-border uppercase tracking-wider">
             {cg.statusUnavailable}
           </span>
         )}
@@ -389,7 +389,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
   return (
     <div
       onClick={() => onSelect(assignment.id)}
-      className="group relative bg-white border border-gray-200 hover:border-amber-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-amber-500 overflow-hidden"
+      className="group relative bg-white border border-border hover:border-amber-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-amber-500 overflow-hidden"
     >
       <div>
         {/* Top Header Row */}
@@ -475,7 +475,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
             onSelect(assignment.id)
           }}
           className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer ${displayStatus === "returned"
-            ? "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
+            ? "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-border"
             : displayStatus === "submitted" || displayStatus === "late"
               ? "bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200"
               : isExpired
@@ -533,7 +533,7 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
   return (
     <div
       onClick={() => onSelect && onSelect(quiz.id)}
-      className="group relative bg-white border border-gray-200 hover:border-red-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-[#990011] overflow-hidden"
+      className="group relative bg-white border border-border hover:border-red-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-[#990011] overflow-hidden"
     >
       <div>
         {/* Top Header Row */}
@@ -782,7 +782,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
 
       {/* Footer Settings & Actions */}
       <div>
-        <div className="bg-gray-50 border border-gray-100 rounded-xl p-2.5 flex justify-between items-center mb-3 text-[10px] font-extrabold text-gray-600">
+        <div className="bg-gray-50 border border-border rounded-xl p-2.5 flex justify-between items-center mb-3 text-[10px] font-extrabold text-gray-600">
           <span>
             {interpolate(cg.scoreScaleLabel, {
               score: quiz.gradingScale === "Hundred"
@@ -810,7 +810,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
               onClick={() => navigate(
                 `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`
               )}
-              className="flex-1 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-[10px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider cursor-pointer"
+              className="flex-1 py-2 border border-border hover:bg-gray-50 text-gray-700 font-extrabold text-[10px] rounded-xl text-center transition-all active:scale-99 uppercase tracking-wider cursor-pointer"
             >
               {cg.btnContinueEditing}
             </button>
@@ -830,7 +830,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
             onClick={() => navigate(
               `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
             )}
-            className="w-full py-2 border border-gray-200 hover:bg-gray-50 text-gray-655 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider cursor-pointer"
+            className="w-full py-2 border border-border hover:bg-gray-50 text-gray-655 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider cursor-pointer"
           >
             {cg.viewQuizDetails}
           </button>
@@ -1216,7 +1216,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
         {/* ─── 1. Student Dashboard Overview Metrics (4 Cards) ─── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Card 1: Total Items */}
-          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
             <div className="w-11 h-11 rounded-xl bg-red-50 text-[#990011] flex items-center justify-center shrink-0 border border-red-100">
               <FileText size={20} />
             </div>
@@ -1227,10 +1227,10 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
           </div>
 
           {/* Card 2: Action Required / Pending */}
-          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${pendingStudentItemsCount > 0
               ? "bg-amber-50 text-amber-700 border-amber-200"
-              : "bg-gray-100 text-gray-500 border-gray-200"
+              : "bg-gray-100 text-gray-500 border-border"
               }`}>
               <Clock size={20} />
             </div>
@@ -1241,7 +1241,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
           </div>
 
           {/* Card 3: Completed */}
-          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
             <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
               <CheckCircle2 size={20} />
             </div>
@@ -1252,7 +1252,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
           </div>
 
           {/* Card 4: Graded / Returned */}
-          <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
+          <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex items-center gap-3.5 hover:shadow-xs transition-shadow">
             <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-200">
               <Award size={20} />
             </div>
@@ -1264,7 +1264,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
         </div>
 
         {/* ─── 2. Rich Control Bar (Search, Tabs, Filter, Sort, View Mode Toggle) ─── */}
-        <div className="bg-white border border-gray-200/80 rounded-2xl p-4 shadow-2xs flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+        <div className="bg-white border border-border/80 rounded-2xl p-4 shadow-2xs flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
 
           {/* Left: Content Type Tabs with Counts */}
           <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl shrink-0">
@@ -1324,7 +1324,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder={cg.searchByTitlePlaceholder}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-8 py-2 text-xs font-semibold text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
+                className="w-full bg-gray-50 border border-border rounded-xl pl-9 pr-8 py-2 text-xs font-semibold text-gray-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
               />
               {searchTerm && (
                 <button
@@ -1342,7 +1342,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               <select
                 value={statusFilter}
                 onChange={(e) => selectStatusOption(e.target.value)}
-                className="bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
+                className="bg-gray-50 border border-border rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
               >
                 <option value="all">{cg.statusAllOptions}</option>
                 <option value="pending">{cg.statusPendingOption}</option>
@@ -1358,7 +1358,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
               <select
                 value={sortBy}
                 onChange={(e) => selectSortOption(e.target.value)}
-                className="bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
+                className="bg-gray-50 border border-border rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
               >
                 <option value="dueSoon">{cg.sortDueSoon}</option>
                 <option value="newest">{cg.sortNewest}</option>
@@ -1368,7 +1368,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
 
             {/* View Mode Toggle Switcher */}
-            <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl border border-gray-200/60 shrink-0">
+            <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl border border-border/60 shrink-0">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
@@ -1417,7 +1417,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
 
         {/* ─── 3. Main Content (Grid View or List View) ─── */}
         {totalStudentItems === 0 ? (
-          <div className="bg-white border border-gray-200/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3">
+          <div className="bg-white border border-border/80 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400">
               <FileText size={24} />
             </div>
@@ -1469,11 +1469,11 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
           </div>
         ) : (
           /* Table List View Layout */
-          <div className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden shadow-2xs">
+          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
                 <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50/80 text-gray-700 font-extrabold uppercase tracking-wider">
+                  <tr className="border-b border-border bg-gray-50/80 text-gray-700 font-extrabold uppercase tracking-wider">
                     <th className="p-4 pl-6">{cg.contentHeader}</th>
                     <th className="p-4">{cg.deadlineCloseHeader}</th>
                     <th className="p-4">{cg.thStatus}</th>
@@ -1575,7 +1575,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             onChange={handleSearchChange}
             placeholder={cg.searchPlaceholder}
             aria-label={cg.searchContent}
-            className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
+            className="w-full bg-white border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
           />
         </div>
 
@@ -1586,7 +1586,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             <select
               value={statusFilter}
               onChange={(e) => selectStatusOption(e.target.value)}
-              className="w-full bg-white border border-gray-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
+              className="w-full bg-white border border-border rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
             >
               <option value="all">{cg.statusFilter}</option>
               <option value="published">{cg.badgePublished}</option>
@@ -1601,7 +1601,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             <select
               value={sortBy}
               onChange={(e) => selectSortOption(e.target.value)}
-              className="w-full bg-white border border-gray-200 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
+              className="w-full bg-white border border-border rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
             >
               <option value="newest">{cg.sortNewest}</option>
               <option value="oldest">{cg.sortOldest}</option>
@@ -1636,7 +1636,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
 
       {/* ─── Grid of Assignment & Quiz Cards ─── */}
       {hasNoItems ? (
-        <div className="text-center py-16 bg-white border border-gray-150 rounded-3xl p-6 shadow-xs text-xs text-gray-400 font-bold">
+        <div className="text-center py-16 bg-white border border-border rounded-3xl p-6 shadow-xs text-xs text-gray-400 font-bold">
           {hasVisibleListError
             ? listErrorMessage
             : cg.noDataLabel}
@@ -1756,7 +1756,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                 {/* Progress / Status Block */}
                 <div>
                   {hasStats ? (
-                    <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex flex-col gap-1.5 mb-4 shadow-2xs">
+                    <div className="bg-gray-50 border border-border rounded-xl p-3 flex flex-col gap-1.5 mb-4 shadow-2xs">
                       {/* Bar metrics */}
                       <div className="flex justify-between items-center text-[10px] text-gray-500 font-extrabold leading-none">
                         <span>
@@ -1793,7 +1793,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                     </div>
                   ) : (
                     /* Draft or unavailable-statistics placeholder block */
-                    <div className="bg-gray-50 border border-dashed border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 mb-4 h-[64px]">
+                    <div className="bg-gray-50 border border-dashed border-border rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 mb-4 h-[64px]">
                       <FileText size={14} className="text-gray-400" />
                       <span className="text-[10px] text-gray-400 font-bold leading-none">
                         {isDraft
@@ -1816,7 +1816,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
                     <button
                       type="button"
                       onClick={() => setSearchParams({ tab: "grading", assignmentId: assignment.id })}
-                      className="w-full py-2 border border-gray-200 hover:bg-gray-50 text-gray-650 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider"
+                      className="w-full py-2 border border-border hover:bg-gray-50 text-gray-650 font-extrabold text-[11px] rounded-xl text-center transition-colors active:scale-99 uppercase tracking-wider"
                     >
                       {cg.btnViewSubmissions}
                     </button>

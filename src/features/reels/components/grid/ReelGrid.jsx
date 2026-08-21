@@ -38,7 +38,7 @@ const ReelGrid = memo(function ReelGrid({ reels, onReelClick }) {
   }
 
   return (
-    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6 w-full mx-auto">
+    <div className="columns-2 sm:columns-3 lg:columns-4 xl:columns-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6 w-full mx-auto">
       {reels.map((reel, index) => (
         <div
           key={reel.id}

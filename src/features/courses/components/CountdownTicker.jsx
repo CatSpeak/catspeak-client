@@ -23,20 +23,31 @@ const CountdownTicker = ({ targetDate }) => {
       const remainingMs = countdownTargetMs - currentTime
       if (remainingMs <= 0) return
 
-      const millisecondsUntilMinuteChanges = remainingMs % 60000
+      const millisecondsUntilMinuteChanges = (remainingMs % 60000) || 60000
       timer = setTimeout(
         updateCountdown,
-        millisecondsUntilMinuteChanges > 0 ? millisecondsUntilMinuteChanges + 10 : 10
+        millisecondsUntilMinuteChanges + 50
       )
     }
 
     timer = setTimeout(updateCountdown, 0)
-    return () => clearTimeout(timer)
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setNowMs(Date.now())
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
   }, [countdownTargetMs])
 
   const minutesLeft = countdownTargetMs === null
     ? null
-    : Math.max(0, Math.floor((countdownTargetMs - nowMs) / 60000))
+    : Math.max(0, Math.ceil((countdownTargetMs - nowMs) / 60000))
 
   const countdownTime = useMemo(() => {
     if (minutesLeft === null) return null
@@ -62,7 +73,7 @@ const CountdownTicker = ({ targetDate }) => {
   }
 
   return (
-    <div className="flex justify-around items-center text-center py-3 border-b border-gray-100 select-none">
+    <div className="flex justify-around items-center text-center py-3 border-b border-border select-none">
       <div className="flex flex-col">
         <span className="text-3xl font-black text-gray-950 leading-none">{countdownTime.days}</span>
         <span className="text-[10px] text-gray-400 font-bold mt-2 uppercase tracking-wider">

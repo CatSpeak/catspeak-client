@@ -136,7 +136,7 @@ export default function SharedChallengeLayout({
               onClick={handlePrevPage}
               disabled={page === 0}
               aria-label="Previous challenges"
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-[#F0F0F0] active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronLeft size={18} />
             </button>
@@ -149,7 +149,7 @@ export default function SharedChallengeLayout({
               onClick={handleNextPage}
               disabled={page >= totalPages - 1}
               aria-label="Next challenges"
-              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-[#F0F0F0] active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+              className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
             >
               <ChevronRight size={18} />
             </button>
@@ -183,7 +183,7 @@ export default function SharedChallengeLayout({
             ))}
           </div>
         ) : (
-          <div className="w-full flex flex-col items-center justify-center py-16 px-4 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 my-4">
+          <div className="w-full flex flex-col items-center justify-center py-16 px-4 bg-gray-50 rounded-2xl border-2 border-dashed border-border my-4">
             <div className="w-16 h-16 bg-white shadow-sm rounded-full flex items-center justify-center mb-4">
               <span className="text-3xl block">🎈</span>
             </div>

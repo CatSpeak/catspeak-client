@@ -1,0 +1,47 @@
+export default {
+  landing: {
+    leadingTeam: {
+      title: "Leading and Accompanying Team",
+      subtitle: "High Quality",
+      viewInstructor: "View instructor",
+      defaultInstructor: "Instructor",
+      defaultRole: "CatSpeak Instructor",
+      prefixLanguage: "Instructor of",
+      emptyText: "No featured instructors available.",
+      prevInstructor: "Previous instructor",
+      nextInstructor: "Next instructor",
+      recruitment: {
+        title: "Want to become part of the CatSpeak Team?",
+        description:
+          "Share knowledge, connect with a global community, and manage your time flexibly with a leading tech platform.",
+        instructorArea: "Instructor Area",
+        registerInstructor: "Apply to become an Instructor",
+      },
+      languages: {
+        en: "English",
+        vi: "Vietnamese",
+        zh: "Chinese",
+        ja: "Japanese",
+        ko: "Korean",
+        fr: "French",
+        de: "German",
+        es: "Spanish",
+        ru: "Russian",
+        it: "Italian",
+        th: "Thai",
+        pt: "Portuguese",
+      },
+    },
+    news: {
+      subtitle: "Latest Updates",
+      titlePrefix: "News from",
+      titleSuffix: "Cat Speak",
+      viewAll: "View details",
+      viewArticle: "Read article",
+      newBadge: "New",
+      emptyText: "No news articles available yet",
+      prevNews: "Previous news",
+      nextNews: "Next news",
+    },
+  },
+}

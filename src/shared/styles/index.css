@@ -1,10 +1,12 @@
+@import "tw-animate-css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* CSS Variables */
 :root {
-  --font-primary: "Nunito", "Noto Sans", sans-serif;
+  --font-primary: "Nunito", "Noto Sans SC", "Noto Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
   --cath-red-50: #100002;
@@ -25,6 +27,41 @@
   --cath-warning: #e7001a;
   --cath-success: #4b0008;
   --cath-dusk: #1a1a2e;
+
+  /* Shadcn UI Theme HSL Tokens */
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5.9% 10%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
 }
 
 .font-nunito {
@@ -51,6 +88,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Perfectly balanced bold styling (especially for CJK / Chinese text) */
+strong,
+b {
+  font-weight: 700;
+  -webkit-text-stroke: 0.2px currentColor;
+  color: #0f172a;
+}
+
 #root {
   width: 100%;
   min-height: 100vh;
@@ -59,6 +104,44 @@ body {
 /* Smooth scrolling and prevent layout shift */
 html {
   scroll-behavior: smooth;
+}
+
+/* Custom Global Scrollbar matching CatSpeak theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cath-red-700) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--cath-red-700) 0%, var(--cath-primary) 100%);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--cath-red-900) 0%, var(--cath-red-700) 100%);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--cath-red-500);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Hide all default browser password reveal and clear icons */
@@ -84,6 +167,7 @@ input[type="password"]::-webkit-reveal {
 
 /* Tailwind Scrollbar utilities */
 @layer utilities {
+
   /* Standard thin scrollbar (used in sidebar, lists, etc.) */
   .scrollbar-app {
     scrollbar-width: thin;
@@ -100,27 +184,27 @@ input[type="password"]::-webkit-reveal {
   }
 
   .scrollbar-app::-webkit-scrollbar-thumb {
-    background-color: #990011;
+    background: #990011;
     border-radius: 9999px;
   }
 
-  /* Scrollbar visible only on hover */
-  .scrollbar-app-hover {
+  /* Thin dark scrollbar (used for dark menus/modals) */
+  .scrollbar-dark {
     scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
+    scrollbar-color: #4b0008 #1a1a2e;
   }
 
-  .scrollbar-app-hover::-webkit-scrollbar {
+  .scrollbar-dark::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
-  .scrollbar-app-hover::-webkit-scrollbar-track {
-    background: transparent;
+  .scrollbar-dark::-webkit-scrollbar-track {
+    background: #1a1a2e;
   }
 
-  .scrollbar-app-hover::-webkit-scrollbar-thumb {
-    background-color: transparent;
+  .scrollbar-dark::-webkit-scrollbar-thumb {
+    background: #4b0008;
     border-radius: 9999px;
   }
 
@@ -153,38 +237,79 @@ input[type="password"]::-webkit-reveal {
   }
 
   /* Hidden scrollbar */
-  .scrollbar-hidden {
+  .scrollbar-hidden,
+  .scrollbar-none {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
 
-  .scrollbar-hidden::-webkit-scrollbar {
+  .scrollbar-hidden::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
     display: none;
+    width: 0;
+    height: 0;
   }
 }
 
-/* Custom date picker styling to prevent native overlap and make entire input clickable */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  background: transparent;
-  bottom: 0;
-  color: transparent;
-  cursor: pointer;
-  height: auto;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: auto;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
 }
 
 /* Shaky animation for inputs with error */
 @keyframes shake {
-  10%, 90% { transform: translateX(-2px); }
-  20%, 80% { transform: translateX(4px); }
-  30%, 50%, 70% { transform: translateX(-6px); }
-  40%, 60% { transform: translateX(6px); }
+
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translateX(-6px);
+  }
+
+  40%,
+  60% {
+    transform: translateX(6px);
+  }
 }
 
 .animate-shake {
   animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Sonner outer toast wrapper styling */
+[data-sonner-toast] {
+  border-radius: 12px;
+}
+
+/* TinyMCE Editor Custom Styling */
+.tox.tox-tinymce {
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 1rem;
+}
+
+.tox .tox-editor-header {
+  box-shadow: none !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.tox .tox-toolbar,
+.tox .tox-toolbar__primary,
+.tox .tox-toolbar__overflow,
+.tox .tox-toolbar-overlord {
+  box-shadow: none !important;
 }

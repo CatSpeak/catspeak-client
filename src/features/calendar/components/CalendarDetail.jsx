@@ -180,7 +180,7 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
 
   return (
     <div className="col-span-7 w-full h-full min-h-[400px] sm:min-h-[500px]">
-      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-[#E5E5E5] shadow-sm p-3 w-full flex flex-col h-[500px] sm:h-[700px] transition-all">
+      <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-border shadow-sm p-3 w-full flex flex-col h-[500px] sm:h-[700px] transition-all">
         {/* Calendar Day View Scroll Container */}
         <div
           ref={scrollRef}

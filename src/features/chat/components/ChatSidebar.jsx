@@ -73,7 +73,7 @@ const ChatSidebar = ({
             onClick={onNewChatClick}
             size="sm"
             variant="transparent"
-            className="text-[#606060] hover:bg-[#F2F2F2]"
+            className="text-[#606060] hover:bg-primaryBg"
             aria-label="New chat or group"
           >
             <SquarePen size={20} />

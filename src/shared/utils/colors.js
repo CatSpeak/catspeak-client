@@ -48,7 +48,7 @@ export const colors = {
 
   // ── Gray & Neutral Background Options ─────────────────
   // Main page background color (used for core page/layout content panels)
-  primary2: "#f3f3f3", 
+  primary2: "#F5F5F7", 
   
   // Custom colors
   headingColor: "#2e2e2e",

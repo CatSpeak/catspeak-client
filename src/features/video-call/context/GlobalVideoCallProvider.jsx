@@ -10,6 +10,23 @@ import {
 } from "@/features/video-call/services/callBroadcastChannel"
 import GlobalCallContent from "./GlobalCallContent"
 
+const GlobalVideoCallContext = createContext(null)
+
+export const useGlobalVideoCall = () => {
+  const ctx = useContext(GlobalVideoCallContext)
+  if (!ctx)
+    throw new Error(
+      "useGlobalVideoCall must be used within GlobalVideoCallProvider",
+    )
+  return ctx
+}
+
+// Backward-compat alias (existing components import VideoCallContext)
+export { GlobalVideoCallContext as VideoCallContext }
+
+// Re-export navigate bridge (used by routesConfig RootLayout)
+export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
+
 import { MOCK_PARTICIPANTS } from "@/features/video-call/hooks/useParticipantList"
 
 // --- Idle context (no active call) ------------------------------------------
@@ -108,6 +125,8 @@ const IDLE_VALUE = {
   hideEmptyTiles: false,
   setHideEmptyTiles: () => {},
 
+  showAiSuggestions: true,
+  setShowAiSuggestions: () => {},
   showRoomSettings: false,
   setShowRoomSettings: () => {},
   activeSettingsTab: "audio-video",
@@ -115,25 +134,14 @@ const IDLE_VALUE = {
   deviceSelection: null,
 }
 
-const GlobalVideoCallContext = createContext(IDLE_VALUE)
-
-export const useGlobalVideoCall = () => {
-  const ctx = useContext(GlobalVideoCallContext)
-  return ctx || IDLE_VALUE
-}
-
-// Backward-compat alias (existing components import VideoCallContext)
-export { GlobalVideoCallContext as VideoCallContext }
-
-// Re-export navigate bridge (used by routesConfig RootLayout)
-export { useRegisterNavigate } from "@/features/video-call/hooks/useNavigateRef"
-
 const IdleCallContent = ({
   children,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
   speakingAssistantEnabled,
   setSpeakingAssistantEnabled,
+  showAiSuggestions,
+  setShowAiSuggestions,
 }) => (
   <GlobalVideoCallContext.Provider
     value={{
@@ -142,6 +150,8 @@ const IdleCallContent = ({
       setReceiveSystemMsgs,
       speakingAssistantEnabled,
       setSpeakingAssistantEnabled,
+      showAiSuggestions,
+      setShowAiSuggestions,
     }}
   >
     {children}
@@ -179,6 +189,15 @@ export const GlobalVideoCallProvider = ({ children }) => {
     )
   }, [speakingAssistantEnabled])
 
+  const [showAiSuggestions, setShowAiSuggestions] = useState(() => {
+    const saved = localStorage.getItem("showAiSuggestions")
+    return saved !== null ? JSON.parse(saved) : true
+  })
+
+  useEffect(() => {
+    localStorage.setItem("showAiSuggestions", JSON.stringify(showAiSuggestions))
+  }, [showAiSuggestions])
+
   // Cross-tab call state broadcast listener
   useEffect(() => {
     const unsubscribe = subscribeToCallBroadcast(({ type }) => {
@@ -205,6 +224,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
         setReceiveSystemMsgs={setReceiveSystemMsgs}
         speakingAssistantEnabled={speakingAssistantEnabled}
         setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
+        showAiSuggestions={showAiSuggestions}
+        setShowAiSuggestions={setShowAiSuggestions}
       >
         {children}
       </IdleCallContent>
@@ -214,14 +235,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
   const isMobileDevice =
     typeof window !== "undefined" &&
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-
-  console.log("[GlobalVideoCallProvider] Rendering LiveKitRoom:", {
-    livekitServerUrl,
-    sessionId: callInfo?.sessionId,
-    initMicOn: callInfo?.initMicOn,
-    initCamOn: callInfo?.initCamOn,
-    isMobileDevice,
-  })
 
   return (
     <LiveKitRoom
@@ -233,11 +246,11 @@ export const GlobalVideoCallProvider = ({ children }) => {
       video={callInfo.initCamOn}
       className="contents"
       options={{ publishDefaults: { simulcast: !isMobileDevice } }}
-      onConnected={() => {
-        console.log("[GlobalVideoCallProvider] LiveKitRoom connected successfully!")
-      }}
       onDisconnected={(reason) => {
-        console.error("[GlobalVideoCallProvider] LiveKitRoom onDisconnected:", reason)
+        console.error(
+          "[GlobalVideoCallProvider] LiveKitRoom onDisconnected:",
+          reason,
+        )
       }}
       onError={(err) => {
         console.error("[GlobalVideoCallProvider] LiveKitRoom onError:", {
@@ -252,6 +265,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
         ContextProvider={GlobalVideoCallContext.Provider}
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        showAiSuggestions={showAiSuggestions}
+        setShowAiSuggestions={setShowAiSuggestions}
         panelState={panelState}
         speakingAssistantEnabled={speakingAssistantEnabled}
         setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}

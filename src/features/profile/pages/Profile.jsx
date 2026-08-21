@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useParams, useNavigate, useLocation } from "react-router-dom"
+import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -19,7 +19,7 @@ import Tabs from "@/shared/components/ui/navigation/Tabs"
 import ProfileHomeTab from "../components/ProfileHomeTab"
 import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
-import ProfileDocumentsTab from "../components/ProfileDocumentsTab"
+import ProfileMaterialsTab from "../components/ProfileMaterialsTab"
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
 import CompletedClass from "../components/CompletedClass"
 
@@ -39,9 +39,9 @@ const Profile = () => {
   useEffect(() => {
     if (!urlAccountId && user?.accountId) {
       const isWorkspace = location.pathname.startsWith("/workspace")
-      navigate(`${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}`, { replace: true })
+      navigate(`${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}${location.search}`, { replace: true })
     }
-  }, [urlAccountId, user, navigate, location.pathname])
+  }, [urlAccountId, user, navigate, location.pathname, location.search])
 
   // Fetch private profile if own profile, otherwise skip
   const { data: privateProfileData, isLoading: loadingPrivate } =
@@ -50,7 +50,9 @@ const Profile = () => {
   const { data: publicProfileResponse, isLoading: loadingPublic } =
     useGetPublicProfileQuery(targetAccountId, { skip: isOwnProfile })
 
-  const profileData = isOwnProfile ? privateProfileData : publicProfileResponse
+  // Normalize profile data (handle both raw object and wrapped response { data: ... })
+  const rawProfileData = isOwnProfile ? privateProfileData : publicProfileResponse
+  const profile = rawProfileData?.data ?? rawProfileData ?? null
   const isLoading = isOwnProfile ? loadingPrivate : loadingPublic
 
   // Fetch Friendship Data
@@ -62,7 +64,7 @@ const Profile = () => {
   })
   const { data: pendingResponse } = useGetPendingFriendRequestsQuery(
     undefined,
-    { skip: !isOwnProfile },
+    { skip: !isOwnProfile, pollingInterval: 4000 },
   )
 
   const friendsCount = Array.isArray(friendsResponse)
@@ -75,11 +77,21 @@ const Profile = () => {
     ? pendingResponse.length
     : pendingResponse?.data?.length || 0
 
-  const [activeTab, setActiveTab] = useState("home")
+  const [searchParams] = useSearchParams()
+  const currentToken = searchParams.get("sharedMaterialToken")
+
+  const [activeTab, setActiveTab] = useState(currentToken ? "documents" : "home")
   const [friendsSubTab, setFriendsSubTab] = useState(null)
 
-  const stateHooks = useProfileState(profileData)
-  const mutationHooks = useProfileMutations(t, profileData, stateHooks)
+  const stateHooks = useProfileState(profile)
+  const mutationHooks = useProfileMutations(t, profile, stateHooks)
+  const [prevToken, setPrevToken] = useState(currentToken)
+  if (currentToken !== prevToken) {
+    setPrevToken(currentToken)
+    if (currentToken) {
+      setActiveTab("documents")
+    }
+  }
 
   const {
     formData,
@@ -107,7 +119,9 @@ const Profile = () => {
   if (isLoading) return <div>Loading...</div>
 
   // Use avatarImageUrl as the primary avatar for the profile
-  const displayAvatarUrl = formData.avatarImageUrl
+  const displayAvatarUrl = isOwnProfile
+    ? formData.avatarImageUrl
+    : profile?.avatarImageUrl
 
   const tabs = [
     { id: "home", label: t.profile?.tabs?.home || "Nhà" },
@@ -121,16 +135,30 @@ const Profile = () => {
     { id: "completedClass", label: t.profile?.tabs?.completedClass || "Lớp học đã hoàn thành" }
   ]
 
+  // Prepare normalized data for header
+  const headerData = isOwnProfile
+    ? {
+      ...profile,
+      ...formData,
+      location: formData.location || formData.address || profile?.location || profile?.address,
+    }
+    : {
+      ...profile,
+      location: profile?.location || profile?.address,
+    }
+
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] p-4 sm:p-6 bg-main-bg">
+    <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg">
       <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
         {/* Top Header Section */}
         <SocialProfileHeader
-          user={profileData?.data}
-          formData={isOwnProfile ? formData : profileData?.data}
+          user={profile}
+          formData={headerData}
           t={t}
           targetAccountId={targetAccountId}
           isOwnProfile={isOwnProfile}
+          friendsCount={friendsCount}
+          followersCount={followersCount}
         />
 
         {/* Tab Navigation */}
@@ -168,7 +196,7 @@ const Profile = () => {
             />
           )}
           {activeTab === "documents" && (
-            <ProfileDocumentsTab
+            <ProfileMaterialsTab
               targetAccountId={targetAccountId}
               isOwnProfile={isOwnProfile}
             />
@@ -186,7 +214,7 @@ const Profile = () => {
         <ProfileOtpModal
           open={isOtpModalOpen}
           onClose={() => setIsOtpModalOpen(false)}
-          email={profileData?.data?.email}
+          email={profile?.email}
           title={
             editingField === "phoneNumber"
               ? t.profile?.personalInfo?.verifyPhoneTitle ||

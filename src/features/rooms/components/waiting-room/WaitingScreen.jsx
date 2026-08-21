@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { toast } from "react-hot-toast"
+import React, { useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { Copy, Mic, Video, Volume2, Info, Check, X, Edit2 } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -38,9 +37,11 @@ const WaitingScreen = ({
   deviceSelection,
 }) => {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const participants = room?.currentParticipants || session?.participants || []
-  const meetingFallbackImage = room?.languageType === "English" ? meetingFallbackImageEN : meetingFallbackImageZH
+  const meetingFallbackImage =
+    room?.languageType === "English"
+      ? meetingFallbackImageEN
+      : meetingFallbackImageZH
   const { t, language } = useLanguage()
   const { lang } = useParams()
   const effectiveParticipantCount = participantCount ?? participants.length
@@ -62,10 +63,9 @@ const WaitingScreen = ({
   return (
     <FullscreenOverlayShell
       backgroundImageUrl={room?.thumbnailUrl || meetingFallbackImage}
-      onBack={() => navigate(getCommunityPath(lang || language))}
+      onBack={() => navigate(-1)}
       backLabel={t.rooms.waitingScreen.backToCommunity}
-      maxWidthClass="max-w-[85vw]"
-      cardClassName="rounded-[12px] h-auto min-w-fit"
+      maxWidthClass="max-w-[520px] lg:max-w-6xl"
     >
       {webview.isWebView && (
         <div className="mb-4 w-full rounded-lg bg-amber-500/15 border border-amber-500/30 p-3 text-amber-200 text-sm flex items-start gap-2.5 shadow-sm">
@@ -79,17 +79,18 @@ const WaitingScreen = ({
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row items-center w-full">
-        {/* Video Preview & Participants */}
-        <div className="flex w-full lg:w-3/5 flex-col items-center gap-4">
-          <RoomInformation
-            session={session}
-            room={room}
-            participants={participants}
-            participantCount={participantCount}
-            className="block lg:hidden"
-          />
+      {/* Mobile/Tablet Header: Room Information at top (< 1024px) */}
+      <RoomInformation
+        session={session}
+        room={room}
+        participants={participants}
+        participantCount={participantCount}
+        className="block lg:hidden mb-4"
+      />
 
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 w-full items-center">
+        {/* Left Column: Video Preview & Nickname */}
+        <div className="flex flex-col items-center w-full lg:col-span-7 gap-3">
           <VideoPreview
             user={user}
             localStream={localStream}
@@ -102,16 +103,17 @@ const WaitingScreen = ({
             onOpenSettings={() => setIsSettingsModalOpen(true)}
           />
 
-          {/* Edit nickname */}
+          {/* Edit nickname for Desktop */}
           <EditNickname
             user={user}
             onEditName={() => setIsEditingName(true)}
-            className="lg:flex hidden"
+            className="hidden lg:flex"
           />
         </div>
 
-        <div className="flex w-full lg:w-2/5 items-center flex-col space-y-6 justify-center">
-          {/* Room name, topic & participants preview */}
+        {/* Right Column: Room Details & Action Container */}
+        <div className="flex flex-col items-center justify-center w-full lg:col-span-5 h-full gap-6">
+          {/* Desktop Only: Room name, topic & participants preview */}
           <RoomInformation
             session={session}
             room={room}
@@ -121,14 +123,14 @@ const WaitingScreen = ({
           />
 
           {/* Copy Link, Join Buttons */}
-          <div className="flex flex-col items-center gap-3 w-full max-w-[400px]">
-            <div className="flex w-full flex-col flex-wrap md:flex-row gap-2 lg:max-w-[240px] md:max-w-full">
+          <div className="flex flex-col items-center gap-3 w-full max-w-[360px]">
+            <div className="flex w-full flex-col sm:flex-row gap-2.5">
               <PillButton
                 onClick={onJoin}
                 disabled={isFull}
                 aria-disabled={isFull}
                 title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
-                className="w-full sm:flex-1"
+                className="w-full sm:flex-1 py-2.5"
               >
                 {t.rooms.waitingScreen.joinNow}
               </PillButton>
@@ -136,7 +138,7 @@ const WaitingScreen = ({
                 onClick={handleCopyLink}
                 variant="secondary"
                 startIcon={<Copy />}
-                className="w-full sm:flex-1"
+                className="w-full sm:flex-1 py-2.5"
               >
                 {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
               </PillButton>
@@ -152,7 +154,7 @@ const WaitingScreen = ({
             <EditNickname
               user={user}
               onEditName={() => setIsEditingName(true)}
-              className="lg:hidden flex"
+              className="flex lg:hidden mt-1"
             />
           </div>
         </div>

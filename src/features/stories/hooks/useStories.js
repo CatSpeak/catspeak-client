@@ -25,9 +25,9 @@ const useStories = (languageCommunity) => {
   const [interactWithStory] = useInteractWithStoryMutation()
   const [deleteStory] = useDeleteStoryMutation()
 
-  // Safe Data Extraction
-  const stories = storiesData?.data ?? []
-  const myStoriesRaw = myStoriesData?.data ?? []
+  // Data Extraction (unwrapped by baseApi, guaranteed Array to prevent .map()/.filter() errors)
+  const stories = Array.isArray(storiesData) ? storiesData : []
+  const myStoriesRaw = Array.isArray(myStoriesData) ? myStoriesData : []
 
   // Filter out expired stories
   const myStories = myStoriesRaw.filter((story) => {

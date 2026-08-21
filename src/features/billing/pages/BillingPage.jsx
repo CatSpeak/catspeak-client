@@ -1,164 +1,88 @@
-import React, { useState, useMemo } from "react"
-import { useGetPaymentHistoryQuery, useRepayMutation } from "@/store/api/paymentsApi"
+import React from "react"
+import { useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { Pagination } from "@/shared/components/ui/navigation"
-import BillingFilters from "../components/BillingFilters"
-import BillingTable from "../components/BillingTable"
-import ReportIssueModal from "../invoices/components/ReportIssueModal"
+import { Tabs } from "@/shared/components/ui/navigation"
+import PageTitle from "@/shared/components/ui/PageTitle"
+import PaymentHistoryTab from "../components/PaymentHistoryTab"
+import RefundHistoryTab from "../components/RefundHistoryTab"
+import PlanUsageTab from "./PlanUsageTab"
+import { Gauge, Receipt, RotateCcw } from "lucide-react"
 
-const ITEMS_PER_PAGE = 5
+const VALID_TABS = ["usage", "payments", "refunds"]
 
 const BillingPage = () => {
   const { t } = useLanguage()
   const hist = t.billing?.history || {}
+  const refundT = t.refunds || {}
+  const pu = t?.planUsage || {}
 
-  const STATUS_MAP = {
-    1: { label: hist.statuses?.success || "Success", styles: "bg-[#E5F7ED] text-green-700" },
-    3: { label: hist.statuses?.pending || "Pending", styles: "bg-[#FFFBEA] text-yellow-700" },
-    0: { label: hist.statuses?.cancelled || "Cancelled", styles: "bg-[#F3F3F3] text-[#7A7574]" },
-  }
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabParam = searchParams.get("tab")
+  const activeTab = VALID_TABS.includes(tabParam) ? tabParam : "usage"
 
-  const { data: invoices = [], isLoading } = useGetPaymentHistoryQuery()
-  const [repay] = useRepayMutation()
+  const navTabs = [
+    {
+      id: "usage",
+      label: pu.tabUsage || "Hạn Ngạch & Gói",
+      icon: Gauge,
+    },
+    {
+      id: "payments",
+      label: hist.title || "Lịch sử thanh toán",
+      icon: Receipt,
+    },
+    {
+      id: "refunds",
+      label: refundT.title || "Lịch sử hoàn tiền",
+      icon: RotateCcw,
+    },
+  ]
 
-  // State for modals & actions
-  const [reportTargetPaymentId, setReportTargetPaymentId] = useState(null)
-  const [repayingId, setRepayingId] = useState(null)
-
-  // Filters
-  const [searchQuery, setSearchQuery] = useState("")
-  const [dateFilter, setDateFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [currentPage, setCurrentPage] = useState(1)
-
-  // Filter logic
-  const filteredInvoices = useMemo(() => {
-    return invoices.filter((inv) => {
-      const searchStr = searchQuery.toLowerCase()
-      const matchesSearch =
-        !searchQuery || inv.orderCode?.toString().toLowerCase().includes(searchStr)
-
-      const matchesStatus =
-        statusFilter === "all" || inv.status.toString() === statusFilter
-
-      let matchesDate = true
-      if (dateFilter !== "all") {
-        const invDate = new Date(inv.createDate)
-        const now = new Date()
-        if (dateFilter === "week") {
-          matchesDate = invDate >= new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-        } else if (dateFilter === "month") {
-          matchesDate = invDate >= new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-        }
-      }
-      return matchesSearch && matchesStatus && matchesDate
-    })
-  }, [invoices, searchQuery, statusFilter, dateFilter])
-
-  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / ITEMS_PER_PAGE))
-  const paginatedInvoices = filteredInvoices.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE,
-  )
-
-  // Reset page when filters change
-  const handleSearchChange = (val) => {
-    setSearchQuery(val)
-    setCurrentPage(1)
-  }
-  const handleDateFilterChange = (val) => {
-    setDateFilter(val)
-    setCurrentPage(1)
-  }
-  const handleStatusFilterChange = (val) => {
-    setStatusFilter(val)
-    setCurrentPage(1)
-  }
-
-  const handleReport = (invoice) => {
-    setReportTargetPaymentId(invoice.paymentId || invoice.orderCode)
-  }
-
-  const handleRepay = async (invoice) => {
-    try {
-      setRepayingId(invoice.paymentId)
-      const res = await repay({
-        paymentId: invoice.paymentId,
-        returnUrl: `${window.location.origin}/billing/result`,
-        cancelUrl: `${window.location.origin}/billing/result`,
-      }).unwrap()
-
-      const checkoutUrl = res?.checkoutUrl || res?.data?.checkoutUrl
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl
-      }
-    } catch (err) {
-      console.error("Failed to repay order:", err)
-    } finally {
-      setRepayingId(null)
+  const getPageTitle = () => {
+    switch (activeTab) {
+      case "payments":
+        return hist.title || "Lịch sử thanh toán"
+      case "refunds":
+        return refundT.title || "Lịch sử hoàn tiền"
+      case "usage":
+      default:
+        return pu.pageTitle || "Quản Lý Gói Dịch Vụ & Hạn Ngạch"
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-[#E5E5E5] border-t-cath-red-700 rounded-full animate-spin" />
-      </div>
-    )
+  const getPageSubtitle = () => {
+    switch (activeTab) {
+      case "payments":
+        return hist.subtitle || "Xem lại lịch sử các giao dịch và hóa đơn thanh toán của bạn."
+      case "refunds":
+        return refundT.subtitle || "Theo dõi tình trạng các yêu cầu hoàn tiền của bạn."
+      case "usage":
+      default:
+        return pu.pageSubtitle || "Theo dõi hạn ngạch sử dụng thực tế và quản lý gói dịch vụ của bạn."
+    }
   }
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 bg-white min-h-[calc(100vh-70px)]">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-70px)]">
       {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-cath-red-700 mb-1">
-          {hist.title || "Payment History"}
-        </h2>
-        <p className="text-gray-500 text-sm">
-          {hist.subtitle || "View your past invoices and billing history."}
-        </p>
+      <div className="mb-6 flex flex-col gap-1">
+        <PageTitle>{getPageTitle()}</PageTitle>
+        <p className="text-gray-500 text-sm">{getPageSubtitle()}</p>
       </div>
 
-      <div className=" !justify-start gap-6 min-h-[500px]">
-        {/* Filters */}
-        <BillingFilters
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          dateFilter={dateFilter}
-          onDateFilterChange={handleDateFilterChange}
-          statusFilter={statusFilter}
-          onStatusFilterChange={handleStatusFilterChange}
-          t={t}
-        />
+      {/* Tabs */}
+      <Tabs
+        tabs={navTabs}
+        activeTab={activeTab}
+        onChange={(id) => setSearchParams({ tab: id })}
+        fullWidth={false}
+        className="mb-6"
+      />
 
-        {/* Table */}
-        <BillingTable
-          invoices={paginatedInvoices}
-          statusMap={STATUS_MAP}
-          onReport={handleReport}
-          onRepay={handleRepay}
-          repayingId={repayingId}
-          t={t}
-        />
-
-        {/* Pagination — only show when more than 5 items */}
-        {filteredInvoices.length > ITEMS_PER_PAGE && (
-          <Pagination
-            page={currentPage}
-            totalPages={totalPages}
-            onChangePage={setCurrentPage}
-          />
-        )}
-      </div>
-
-      {/* Report Issue Modal */}
-      {Boolean(reportTargetPaymentId) && (
-        <ReportIssueModal
-          isOpen={Boolean(reportTargetPaymentId)}
-          paymentId={reportTargetPaymentId}
-          onClose={() => setReportTargetPaymentId(null)}
-        />
-      )}
+      {/* Active Tab Content */}
+      {activeTab === "usage" && <PlanUsageTab />}
+      {activeTab === "payments" && <PaymentHistoryTab />}
+      {activeTab === "refunds" && <RefundHistoryTab />}
     </div>
   )
 }

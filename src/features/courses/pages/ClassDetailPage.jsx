@@ -12,17 +12,22 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import { formatCurrency } from "../utils/courseUtils"
-import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
+import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 
-import ClassDetailTabs from "../components/ClassDetailTabs"
+import { Tabs } from "@/shared/components/ui/navigation"
 import ClassOverviewTab from "../components/overview/ClassOverviewTab"
 import CreatePostTypeModal from "../components/CreatePostTypeModal"
+
+import { useAuth } from "@/features/auth"
+import { useRoleOverride } from "../components/RoleSwitcher"
 
 const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
 const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
+const ClassInviteFriendsTab = lazy(() => import("../components/members/ClassInviteFriendsTab"))
+const VouchersTab = lazy(() => import("@/features/vouchers/components/VouchersTab"))
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
@@ -39,10 +44,13 @@ const ClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { language, t } = useLanguage()
-  const { userTimeZone } = useTimezone()
+  const { formatWeeklySchedule } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const ui = c.workspaceUi || {}
+
+  const { user } = useAuth()
+  const { isTeacher } = useRoleOverride()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const assignmentId = searchParams.get("assignmentId")
@@ -50,7 +58,15 @@ const ClassDetailPage = () => {
   const hasGradingDeepLink = Boolean(assignmentId || quizId)
 
   const urlTab = searchParams.get("tab")
-  const VALID_TABS = ["overview", "members", "lecture-hall", "feed", "grading"]
+  const VALID_TABS = [
+    "overview",
+    "members",
+    "lecture-hall",
+    "feed",
+    "grading",
+    "invite-friends",
+    "vouchers",
+  ]
   const initialTab = (urlTab && VALID_TABS.includes(urlTab)) ? urlTab : "overview"
   const activeTab = hasGradingDeepLink ? "grading" : initialTab
 
@@ -135,19 +151,27 @@ const ClassDetailPage = () => {
     }
   }
 
+  const isClassTeacher = Boolean(
+    isTeacher
+    || user?.isTeacher
+    || (user?.accountId && [
+      classData?.teacherId,
+      classData?.instructorId,
+      classData?.teacher?.id,
+      classData?.teacher?.accountId,
+    ].some((tid) => tid != null && String(tid) === String(user.accountId)))
+  )
+
   const tabs = [
     { value: "overview", label: cd.overview || "Overview" },
     { value: "members", label: cd.members || "Members" },
     { value: "lecture-hall", label: cd.lectureHall || "Lecture Hall" },
     { value: "grading", label: cd.grading || "Grading" },
+    ...(isClassTeacher ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }] : []),
+    // ...(isClassTeacher ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }] : []),
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(
-    classData || {},
-    language || "en",
-    ui.tba,
-    userTimeZone,
-  )
+  const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
 
   if (
     isDetailLoading
@@ -206,7 +230,7 @@ const ClassDetailPage = () => {
               {/* Vào phòng học button */}
               <button
                 type="button"
-                onClick={() => navigate(`/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
                 className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
               >
                 <Video size={14} className="fill-white" />
@@ -242,10 +266,12 @@ const ClassDetailPage = () => {
           </div>
 
           {/* ─── Navigation Tabs ─── */}
-          <ClassDetailTabs
+          <Tabs
             tabs={tabs}
             activeTab={activeTab}
             onChange={handleTabChange}
+            fullWidth={false}
+            className="border-b border-border/80"
           />
         </>
       )}
@@ -278,7 +304,7 @@ const ClassDetailPage = () => {
             giveFeedbackLabel={c.giveFeedback || "Give feedback"}
             prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
             onJoinRoom={() => navigate(
-              `/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`
+              `/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`
             )}
             onTaskAction={() => navigate("/workspace/courses/schedule")}
             onViewTasks={() => navigate("/workspace/courses/schedule")}
@@ -305,6 +331,20 @@ const ClassDetailPage = () => {
             isStudent={false}
             language={language}
             cd={cd}
+          />
+        )}
+
+        {activeTab === "invite-friends" && isClassTeacher && (
+          <ClassInviteFriendsTab
+            classData={classData}
+            cd={cd}
+          />
+        )}
+
+        {activeTab === "vouchers" && isClassTeacher && (
+          <VouchersTab
+            scope="class"
+            classId={id}
           />
         )}
       </Suspense>

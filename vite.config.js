@@ -18,6 +18,16 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       proxy: {
+        "/api/v1/Instructors": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
+        "/api/v1/instructor": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
         "/api/teacher": {
           target: "https://instructor-staging-api.catspeak.com.vn",
           changeOrigin: true,
@@ -29,6 +39,16 @@ export default defineConfig(({ mode }) => {
           secure: true,
         },
         "/api/explore": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
+        "/api/personal-materials": {
+          target: "https://instructor-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+        },
+        "/api/vouchers": {
           target: "https://instructor-staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
@@ -101,6 +121,10 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "react-hot-toast": path.resolve(
+          __dirname,
+          "./src/shared/utils/toastBridge.jsx",
+        ),
         "@layouts": path.resolve(__dirname, "./src/layouts"),
 
         "@routes": path.resolve(__dirname, "./src/routes"),

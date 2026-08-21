@@ -5,13 +5,29 @@ import YouTubeEmbed from "./YouTubeEmbed"
 import LinkPreviewCard from "./LinkPreviewCard"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-// Matches strings that contain ONLY 1 to 3 emoji characters (optionally separated by spaces)
-const EMOJI_ONLY_REGEX =
-  /^(?:(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)(?:\s*(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F)){0,2})$/u
-
 const isEmojiOnly = (text) => {
-  if (!text) return false
-  return EMOJI_ONLY_REGEX.test(text.trim())
+  if (!text || typeof text !== "string") return false
+  const clean = text.trim()
+  if (!clean) return false
+  try {
+    const withoutEmojis = clean
+      .replace(/[\s\uFE00-\uFE0F\u200D\u{1F3FB}-\u{1F3FF}]/gu, "")
+      .replace(/\p{Extended_Pictographic}/gu, "")
+      .replace(/\p{Emoji_Presentation}/gu, "")
+    return withoutEmojis.length === 0
+  } catch {
+    return false
+  }
+}
+
+const splitEmojis = (str) => {
+  if (!str) return []
+  const clean = str.trim().replace(/\s+/g, "")
+  if (typeof Intl !== "undefined" && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" })
+    return Array.from(segmenter.segment(clean), (s) => s.segment)
+  }
+  return Array.from(clean)
 }
 
 /**
@@ -58,7 +74,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
       : `${
           isOwn
             ? "rounded-2xl bg-[#990011] text-white"
-            : "rounded-2xl bg-[#F2F2F2]"
+            : "rounded-2xl bg-primaryBg"
         } px-4 py-3 min-h-[40px] min-w-[60px] inline-block max-w-full`
 
   return (
@@ -91,7 +107,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
           {textContent && (
             <div
               className={`w-full ${
-                isOwn ? "bg-[#990011] text-white" : "bg-[#F2F2F2] text-gray-900"
+                isOwn ? "bg-[#990011] text-white" : "bg-primaryBg text-gray-900"
               } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText
@@ -131,7 +147,7 @@ const ChatBubbleContent = ({ message, isOwn }) => {
               className={`w-full ${
                 isOwn
                   ? "bg-[#990011] text-white"
-                  : "bg-[#F2F2F2] text-gray-900 shadow-xs"
+                  : "bg-primaryBg text-gray-900 shadow-xs"
               } px-4 py-3 rounded-b-2xl rounded-t-none text-left`}
             >
               <FormattedText
@@ -142,6 +158,12 @@ const ChatBubbleContent = ({ message, isOwn }) => {
             </div>
           )}
         </div>
+      ) : isEmoji ? (
+        <span className="inline-flex flex-wrap items-center -space-x-2 md:-space-x-2.5 text-3xl md:text-4xl leading-none select-text">
+          {splitEmojis(textContent).map((emoji, idx) => (
+            <span key={idx} className="inline-block">{emoji}</span>
+          ))}
+        </span>
       ) : (
         /* Text only message */
         textContent && (

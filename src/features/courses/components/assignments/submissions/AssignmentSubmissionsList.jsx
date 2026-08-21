@@ -115,7 +115,7 @@ const AssignmentSubmissionsList = ({
         </h1>
       </div>
 
-      <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-5 animate-fade-in">
+      <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-5 animate-fade-in">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl font-extrabold text-gray-950 leading-tight mb-3">
@@ -151,7 +151,7 @@ const AssignmentSubmissionsList = ({
               onClick={() => {
                 navigate(`/workspace/courses/class/${encodeURIComponent(String(classId))}/assignment/${encodeURIComponent(String(assignmentId))}`)
               }}
-              className="h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
+              className="h-10 px-4 bg-white border border-border hover:border-gray-300 text-gray-700 font-extrabold text-xs rounded-xl flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
             >
               <Edit size={14} className="text-gray-500" />
               <span>{gradingTranslations.editBtn}</span>
@@ -184,7 +184,7 @@ const AssignmentSubmissionsList = ({
               <button
                 type="button"
                 onClick={() => setShowMoreMenu((isOpen) => !isOpen)}
-                className="w-10 h-10 border border-gray-200 hover:bg-gray-50 rounded-xl flex items-center justify-center text-gray-500 transition-colors shadow-2xs cursor-pointer"
+                className="w-10 h-10 border border-border hover:bg-gray-50 rounded-xl flex items-center justify-center text-gray-500 transition-colors shadow-2xs cursor-pointer"
                 aria-label={gradingTranslations.moreAssignmentActions}
                 aria-expanded={showMoreMenu}
                 aria-haspopup="menu"
@@ -195,7 +195,7 @@ const AssignmentSubmissionsList = ({
               {showMoreMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
-                  <div role="menu" className="absolute right-0 mt-2 w-56 bg-white border border-gray-150 rounded-2xl shadow-xl py-2 z-50 text-xs font-bold text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div role="menu" className="absolute right-0 mt-2 w-56 bg-white border border-border rounded-2xl shadow-xl py-2 z-50 text-xs font-bold text-gray-700 animate-in fade-in slide-in-from-top-2 duration-150">
                     <button
                       type="button"
                       role="menuitem"
@@ -238,7 +238,7 @@ const AssignmentSubmissionsList = ({
                         setShowMoreMenu(false)
                         setShowDeleteModal(true)
                       }}
-                      className="w-full text-left px-4 py-2.5 hover:bg-red-50 transition-colors flex items-center gap-2 text-red-600 cursor-pointer border-t border-gray-100"
+                      className="w-full text-left px-4 py-2.5 hover:bg-red-50 transition-colors flex items-center gap-2 text-red-600 cursor-pointer border-t border-border"
                     >
                       <Trash2 size={14} />
                       <span>{gradingTranslations.deleteAssignment}</span>
@@ -292,7 +292,7 @@ const AssignmentSubmissionsList = ({
         </div>
       </div>
 
-      <div className="bg-white border border-gray-150 rounded-3xl p-6 shadow-xs flex flex-col gap-6 animate-fade-in">
+      <div className="bg-white border border-border rounded-3xl p-6 shadow-xs flex flex-col gap-6 animate-fade-in">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="relative w-full lg:w-72">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -302,7 +302,7 @@ const AssignmentSubmissionsList = ({
               onChange={(event) => onStudentSearchChange(event.target.value)}
               aria-label={gradingTranslations.searchStudentsPlaceholder}
               placeholder={gradingTranslations.searchStudentsPlaceholder}
-              className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
+              className="w-full bg-white border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all placeholder-gray-400"
             />
           </div>
 
@@ -317,7 +317,7 @@ const AssignmentSubmissionsList = ({
                   aria-pressed={isActive}
                   className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all active:scale-95 ${isActive
                     ? "bg-[#990011] border-[#990011] text-white shadow-2xs"
-                    : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300"
+                    : "bg-white border-border text-gray-600 hover:bg-gray-50 hover:border-gray-300"
                     }`}
                 >
                   {filter.label}
@@ -331,7 +331,7 @@ const AssignmentSubmissionsList = ({
               value={activeFilter}
               onChange={(event) => onActiveFilterChange(event.target.value)}
               aria-label={gradingTranslations.filterLabel}
-              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all appearance-none cursor-pointer"
+              className="w-full bg-white border border-border rounded-xl px-4 py-2.5 pr-10 text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all appearance-none cursor-pointer"
             >
               {filters.map((filter) => (
                 <option key={filter.id} value={filter.id}>{filter.label}</option>

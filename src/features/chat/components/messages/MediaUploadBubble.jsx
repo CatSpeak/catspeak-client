@@ -25,7 +25,7 @@ const MediaUploadBubble = ({ pendingUpload, onRetry, onCancel }) => {
       <div className="flex flex-col w-full max-w-[360px]">
         <ListItem
           lines={2}
-          className="bg-[#F3F3F3] rounded-2xl overflow-hidden text-left"
+          className="bg-primaryBg rounded-2xl overflow-hidden text-left"
           leftContent={getFileIcon(fileName)}
           rightContent={
             <div className="flex items-center gap-1">

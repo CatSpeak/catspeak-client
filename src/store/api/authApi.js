@@ -70,6 +70,9 @@ export const authApi = baseApi.injectEndpoints({
             ...data,
             user: data.user || user
           }))
+          // Reset the whole API cache so every query refetches under the new
+          // account instead of serving stale data from the previous account.
+          dispatch(baseApi.util.resetApiState())
         } catch (error) {
           console.error(error)
         }

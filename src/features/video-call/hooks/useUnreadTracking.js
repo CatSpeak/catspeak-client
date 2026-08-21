@@ -107,10 +107,13 @@ export const useUnreadTracking = ({
     })
 
     if (newHandRaised) {
-      const audio = new Audio('/sounds/hand-raise.mp3')
+      const audio = new Audio("/sounds/hand-raise.mp3")
       audio.volume = 0.5
-      audio.play().catch(err => {
-        console.warn("Hand raise audio blocked by browser autoplay policy:", err)
+      audio.play().catch((err) => {
+        console.warn(
+          "Hand raise audio blocked by browser autoplay policy:",
+          err,
+        )
       })
     }
 

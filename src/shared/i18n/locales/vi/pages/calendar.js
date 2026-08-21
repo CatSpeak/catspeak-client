@@ -1,4 +1,5 @@
 export default {
+  searchClass: "Tìm tên lớp...",
   generalCalendar: "Lịch tổng hợp",
   personalCalendar: "Lịch cá nhân",
   studentSchedule: "Lịch học",
@@ -164,7 +165,7 @@ export default {
   },
   maxOccurrencesWarning: "Hệ thống chỉ hỗ trợ tạo tối đa 24 buổi học cho mỗi chuỗi sự kiện. Những buổi vượt quá giới hạn này sẽ không được tạo.",
   // New calendar UI
-  schedule: "Thời gian biểu",
+  schedule: "Danh sách sự kiện",
   monthSchedule: "Lịch trình sự kiện tháng",
   upcoming: "Sắp diễn ra",
   eventDayLegend: "Ngày sự kiện",

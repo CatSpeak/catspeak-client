@@ -33,7 +33,7 @@ const RightSideControls = ({ className = "" }) => {
           className={
             showParticipants
               ? "[&>div]:!bg-cath-red-600 [&>div]:hover:!bg-cath-red-700 [&>div]:!text-white"
-              : "[&>div]:!bg-[#F2F2F2] [&>div]:hover:!bg-[#E6E6E6] [&>div]:!text-black"
+              : "[&>div]:!bg-primaryBg [&>div]:hover:!bg-[#E6E6E6] [&>div]:!text-black"
           }
         >
           {participants?.length > 0 ? participants.length : null}
@@ -47,7 +47,7 @@ const RightSideControls = ({ className = "" }) => {
           title={t.rooms?.videoCall?.controls?.chat || "Chat"}
           iconActive={<MessageSquare />}
           iconInactive={<MessageSquare />}
-          inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
+          inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
         />
         {unreadMessages > 0 && (
           <div className="absolute top-0 md:-top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow-sm pointer-events-none z-10">
@@ -61,7 +61,7 @@ const RightSideControls = ({ className = "" }) => {
         onClick={() => setIsLayoutModalOpen(true)}
         iconActive={<LayoutGrid />}
         iconInactive={<LayoutGrid />}
-        inactiveClassOverride="bg-[#F2F2F2] hover:bg-[#E6E6E6] text-black"
+        inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
       />
 
       <ChooseLayoutModal

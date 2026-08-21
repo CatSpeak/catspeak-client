@@ -3,7 +3,7 @@ import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line no-unused-vars
 import { Check, X, Calendar, Clock, Loader2 } from "lucide-react"
 import { formatCurrencyVND } from "../../utils/courseUtils"
-import { formatScheduleDays } from "../../utils/scheduleUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const FOCUSABLE_SELECTOR = [
   "button:not([disabled])",
@@ -24,8 +24,8 @@ const StudentJoinModal = ({
   success,
   onSuccessClose,
   t,
-  language,
 }) => {
+  const { formatScheduleDays, formatScheduleTime } = useTimezone()
   const dialogRef = useRef(null)
   const previousFocusRef = useRef(null)
 
@@ -106,12 +106,19 @@ const StudentJoinModal = ({
   const sc = t?.courses?.student || {}
   const tuitionLabel = selectedClass.tuitionFee == null
     ? sc.toBeAnnounced
-    : formatCurrencyVND(selectedClass.tuitionFee)
-  const scheduleTime = (
-    selectedClass.schedule?.startTime
-    && selectedClass.schedule?.endTime
-  )
-    ? `${selectedClass.schedule.startTime} - ${selectedClass.schedule.endTime}`
+    : Number(selectedClass.tuitionFee) === 0
+      ? (sc.priceFree || "Miễn phí")
+      : formatCurrencyVND(selectedClass.tuitionFee)
+  const startFormatted = formatScheduleTime && selectedClass.schedule?.startTime
+    ? formatScheduleTime(selectedClass.schedule.startTime, selectedClass.startDate)
+    : selectedClass.schedule?.startTime
+
+  const endFormatted = formatScheduleTime && selectedClass.schedule?.endTime
+    ? formatScheduleTime(selectedClass.schedule.endTime, selectedClass.startDate)
+    : selectedClass.schedule?.endTime
+
+  const scheduleTime = (startFormatted && endFormatted)
+    ? `${startFormatted} - ${endFormatted}`
     : sc.toBeAnnounced
 
   const modalBody = (
@@ -174,15 +181,16 @@ const StudentJoinModal = ({
               </p>
 
               {/* Class summary card */}
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 w-full text-left my-6 flex flex-col gap-2.5 text-xs text-gray-600 font-semibold">
+              <div className="bg-gray-50 rounded-2xl p-4 border border-border w-full text-left my-6 flex flex-col gap-2.5 text-xs text-gray-600 font-semibold">
                 <p className="font-extrabold text-gray-900 text-sm truncate">{course.title}</p>
                 <div className="flex items-center gap-2">
                   <Calendar size={13} className="text-gray-400" />
                   <span>
                     {formatScheduleDays(
                       selectedClass.schedule?.days,
-                      language,
                       sc.toBeAnnounced,
+                      " - ",
+                      selectedClass.schedule?.startTime,
                     )}
                   </span>
                 </div>
@@ -214,12 +222,12 @@ const StudentJoinModal = ({
               </p>
 
               {/* Fee info */}
-              <div className="w-full bg-gray-50 rounded-2xl p-4 border border-gray-100 my-5 flex flex-col gap-2">
+              <div className="w-full bg-gray-50 rounded-2xl p-4 border border-border my-5 flex flex-col gap-2">
                 <div className="flex justify-between items-center text-xs font-bold">
                   <span className="text-gray-400">{sc.classBatch}</span>
                   <span className="text-gray-800 text-right truncate max-w-[200px]">{selectedClass.title}</span>
                 </div>
-                <div className="flex justify-between items-center text-xs font-bold border-t border-gray-200/50 pt-2 mt-1">
+                <div className="flex justify-between items-center text-xs font-bold border-t border-border/50 pt-2 mt-1">
                   <span className="text-gray-400 uppercase">{sc.tuition}</span>
                   <span className="text-[#b20a1c] font-black text-sm">{tuitionLabel}</span>
                 </div>

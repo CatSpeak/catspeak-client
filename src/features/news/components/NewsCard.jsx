@@ -97,10 +97,10 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group flex flex-col bg-white border border-[#e5e5e5] rounded-xl cursor-pointer"
+      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-hidden"
     >
       {/* ── Image area ───────────────────────────────────────────── */}
-      <div className="relative flex-1 min-h-0 rounded-t-xl">
+      <div className="relative w-full rounded-t-xl overflow-hidden">
         {hasMedia ? (
           <div className="w-full h-full rounded-t-xl rounded-b-none overflow-hidden">
             <Carousel
@@ -126,13 +126,15 @@ const NewsCard = ({ news }) => {
       </div>
 
       {/* ── Content ──────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-1 p-4">
-        <h3 className="font-bold line-clamp-2">{news.title}</h3>
+      <div className="flex flex-col gap-1.5 p-4 flex-1">
+        <h3 className="font-bold text-base text-foreground break-words leading-snug">
+          {news.title}
+        </h3>
         {news.excerpt && (
           <p className="text-sm text-[#4a4a4a] line-clamp-2">{news.excerpt}</p>
         )}
         {/* Inline dot-separated metadata row */}
-        <div className="flex items-center text-sm gap-1.5 text-[#606060]">
+        <div className="flex items-center text-sm gap-1.5 text-[#606060] mt-auto pt-1">
           <span>
             {news.viewCount || 0} {newsCard?.views || "views"}
           </span>
@@ -145,7 +147,7 @@ const NewsCard = ({ news }) => {
 
       {/* ── Action bar ────────────────────────────────────────────── */}
       <div
-        className="grid grid-cols-3 border-t border-[#e5e5e5] rounded-b-xl"
+        className="grid grid-cols-3 border-t border-border rounded-b-xl"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <div
@@ -158,7 +160,7 @@ const NewsCard = ({ news }) => {
               const type = news.currentUserReaction || "Like";
               handleReact(e, type);
             }}
-            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-[#f3f3f3] rounded-bl-xl"
+            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-bl-xl"
           >
             <ReactionIcon reaction={news.currentUserReaction} size={20} />
             <span className="text-sm text-[#606060]">
@@ -185,7 +187,7 @@ const NewsCard = ({ news }) => {
         </div>
 
         {/* Comments */}
-        <button className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-[#f3f3f3]">
+        <button className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg">
           <MessageSquare
             size={20}
             strokeWidth={1.5}
@@ -199,7 +201,7 @@ const NewsCard = ({ news }) => {
         {/* Share */}
         <button
           onClick={handleShare}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-[#f3f3f3] rounded-br-xl"
+          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-br-xl"
           aria-label="Share"
         >
           <Share size={20} strokeWidth={1.5} className="text-[#606060]" />

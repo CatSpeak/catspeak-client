@@ -88,7 +88,7 @@ const ProfileHomeTab = ({
                 />
                 <button
                   onClick={handleOpenEditorEmpty}
-                  className="flex-1 h-10 pl-5 text-left text-gray-500 bg-transparent border border-[#e5e5e5] hover:border-cath-red-700 rounded-full outline-none cursor-pointer text-sm transition-colors"
+                  className="flex-1 h-10 pl-5 text-left text-gray-500 bg-transparent border border-border hover:border-cath-red-700 rounded-full outline-none cursor-pointer text-sm transition-colors"
                 >
                   {t.profile?.home?.whatOnYourMind || "Bạn đang nghĩ gì?"}
                 </button>
@@ -108,7 +108,7 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerImageRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-[#f3f3f3] active:bg-green-100 transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm text-[#16a34a] hover:bg-primaryBg active:bg-green-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <Image size={20} className="text-[#16a34a]" />
                   <span>{t.profile?.home?.photo || "Ảnh"}</span>

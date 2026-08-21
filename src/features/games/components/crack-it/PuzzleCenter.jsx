@@ -114,7 +114,7 @@ const PuzzleCenter = () => {
   })()
 
   return (
-    <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
+    <div className="flex-1 bg-white rounded-2xl shadow-sm border border-border flex flex-col md:flex-row overflow-hidden min-h-0 w-full">
       {/* Trái: Ảnh full — object-cover, không thừa khoảng trống */}
       <div className="w-full md:w-1/2 flex-1 min-h-0 p-2 sm:p-3 md:p-4 flex items-center justify-center bg-slate-50/50 overflow-hidden">
         <div className="relative h-full w-auto max-h-full aspect-square rounded-2xl overflow-hidden shadow-md border-2 md:border-4 border-white ring-1 ring-gray-100">

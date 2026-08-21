@@ -47,7 +47,7 @@ const ReelUploadProgress = () => {
           <motion.button
             layoutId="upload-panel"
             onClick={() => dispatch(toggleMinimize())}
-            className="flex items-center gap-3 bg-white/95 border border-gray-200/80 shadow-lg hover:shadow-xl rounded-full px-4 py-2.5 cursor-pointer select-none transition-all active:scale-[0.98] focus:outline-none"
+            className="flex items-center gap-3 bg-white/95 border border-border/80 shadow-lg hover:shadow-xl rounded-full px-4 py-2.5 cursor-pointer select-none transition-all active:scale-[0.98] focus:outline-none"
           >
             {isUploading && (
               <div className="relative w-5 h-5 flex items-center justify-center">
@@ -97,10 +97,10 @@ const ReelUploadProgress = () => {
           /* EXPANDED DETAILED CARD VIEW */
           <motion.div
             layoutId="upload-panel"
-            className="w-80 bg-white/95 backdrop-blur-md border border-gray-200/80 shadow-2xl rounded-2xl p-4 flex flex-col gap-3.5 select-none"
+            className="w-80 bg-white/95 backdrop-blur-md border border-border/80 shadow-2xl rounded-2xl p-4 flex flex-col gap-3.5 select-none"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-150/70 pb-2">
+            <div className="flex items-center justify-between border-b border-border/70 pb-2">
               <div className="flex items-center gap-2">
                 <Film size={16} className={error ? "text-red-500" : success ? "text-emerald-500" : "text-[#990011]"} />
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -138,7 +138,7 @@ const ReelUploadProgress = () => {
               {isUploading && (
                 <div className="flex flex-col gap-2">
                   {/* Progress Bar Container */}
-                  <div className="relative w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-200/20">
+                  <div className="relative w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-border/20">
                     <div
                       className="bg-gradient-to-r from-[#990011] to-[#b30018] h-full rounded-full transition-all duration-300"
                       style={{ width: `${progress}%` }}
@@ -169,7 +169,7 @@ const ReelUploadProgress = () => {
                   </div>
                   <button
                     onClick={handleClose}
-                    className="w-full mt-1.5 text-xs font-bold text-gray-700 hover:text-gray-800 bg-gray-100 hover:bg-gray-200/80 border border-gray-200/50 rounded-xl py-2 transition-all active:scale-[0.98] text-center focus:outline-none"
+                    className="w-full mt-1.5 text-xs font-bold text-gray-700 hover:text-gray-800 bg-gray-100 hover:bg-gray-200/80 border border-border/50 rounded-xl py-2 transition-all active:scale-[0.98] text-center focus:outline-none"
                   >
                     Done
                   </button>
@@ -186,7 +186,7 @@ const ReelUploadProgress = () => {
                   </div>
                   <button
                     onClick={handleClose}
-                    className="w-full mt-1.5 text-xs font-bold text-gray-700 hover:text-gray-800 bg-gray-100 hover:bg-gray-200/80 border border-gray-200/50 rounded-xl py-2 transition-all active:scale-[0.98] text-center focus:outline-none"
+                    className="w-full mt-1.5 text-xs font-bold text-gray-700 hover:text-gray-800 bg-gray-100 hover:bg-gray-200/80 border border-border/50 rounded-xl py-2 transition-all active:scale-[0.98] text-center focus:outline-none"
                   >
                     Dismiss
                   </button>

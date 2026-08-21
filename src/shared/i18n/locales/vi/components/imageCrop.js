@@ -1,0 +1,40 @@
+export default {
+  title: "Cắt ảnh",
+  subtitle:
+    "Kéo ảnh để di chuyển, kéo các góc để thay đổi kích thước khung cắt, hoặc phóng to/thu nhỏ.",
+  close: "Đóng",
+  cancel: "Hủy",
+  applyCrop: "Áp dụng",
+  zoomIn: "Phóng to",
+  zoomOut: "Thu nhỏ",
+  rotate: "Xoay 90°",
+  flipHorizontal: "Lật ngang",
+  flipVertical: "Lật dọc",
+  reset: "Đặt lại biến đổi & kích thước",
+  resizeAreaHint: "Kéo để thay đổi kích thước khung cắt",
+  loadErrorBlocked:
+    "Không thể tải ảnh này. Ảnh có thể không khả dụng hoặc bị máy chủ nguồn chặn.",
+  loadErrorUnsupported:
+    "Không thể tải ảnh này. Ảnh có thể không khả dụng hoặc có định dạng không được hỗ trợ.",
+  presets: {
+    avatar: "Ảnh đại diện (1:1)",
+    square: "Hình vuông (1:1)",
+    thumbnail: "Hình thu nhỏ (16:9)",
+    banner: "Ảnh bìa (3.2:1)",
+    story: "Tin / Story (9:16)",
+    portrait: "Chân dung (4:5)",
+    classic: "Cổ điển (4:3)",
+    free: "Tự do",
+  },
+  upload: {
+    uploadImage: "Tải ảnh lên",
+    dragDrop: "Kéo & thả ảnh vào đây",
+    hint: "PNG, JPG, WEBP tối đa {{maxSize}}MB",
+    change: "Thay đổi",
+    remove: "Xóa",
+    crop: "Cắt",
+    sizeExceeded: "Kích thước tệp ({{fileSize}} MB) vượt quá giới hạn {{maxSize}} MB.",
+    clickToViewFull: "Nhấp để xem ảnh đầy đủ",
+    uploadedImage: "Ảnh đã tải lên",
+  },
+}

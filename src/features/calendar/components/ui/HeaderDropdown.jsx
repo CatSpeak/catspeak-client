@@ -33,7 +33,7 @@ const HeaderDropdown = ({ triggerIcon, label, children }) => {
             <FluentAnimation
               direction="down"
               exit={true}
-              className="pointer-events-auto rounded-[12px] bg-white shadow-lg border border-gray-100 ring-1 ring-black ring-opacity-5 overflow-hidden"
+              className="pointer-events-auto rounded-[12px] bg-white shadow-lg border border-border ring-1 ring-black ring-opacity-5 overflow-hidden"
             >
               {typeof children === "function"
                 ? children(() => setIsOpen(false))

@@ -8,23 +8,23 @@ const PaymentMethodSelector = ({ t, selectedMethod, onMethodChange }) => {
   const isPayosSelected = selectedMethod === "payos"
 
   return (
-    <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm space-y-4">
+    <div className="bg-white border border-border rounded-3xl p-6 shadow-sm space-y-4">
       <h2 className="text-xl font-bold text-gray-900 mb-6">
         {t.billing?.checkoutModal?.paymentMethod || "Phương thức thanh toán"}
       </h2>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {/* PayOS Method (Active) */}
         <button
           type="button"
           onClick={() => onMethodChange("payos")}
-          className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left cursor-pointer ${isPayosSelected
+          className={`w-full flex items-center justify-between p-3 rounded-2xl border transition-all text-left cursor-pointer ${isPayosSelected
             ? "border-[#BE0015] bg-[#FFF5F5]"
-            : "border-gray-200 bg-white hover:border-gray-300"
+            : "border-border bg-white hover:border-gray-300"
             }`}
         >
           <div className="flex items-center gap-3">
-            <div className={`w-12 h-10 rounded-xl overflow-hidden flex items-center justify-center p-1 bg-white border border-gray-100`}>
+            <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center p-1.5 bg-white border border-border shrink-0 shadow-2xs">
               <img src={payosLogo} alt="PayOS" className="w-full h-full object-contain" />
             </div>
             <div>
@@ -43,14 +43,14 @@ const PaymentMethodSelector = ({ t, selectedMethod, onMethodChange }) => {
           </div>
         </button>
 
-        {/* Stripe Method (Disabled) */}
+        {/* Momo Method (Disabled) */}
         <button
           type="button"
           disabled
-          className="w-full flex items-center justify-between p-4 rounded-2xl border border-gray-200 bg-[#FAFAFA] opacity-75 cursor-not-allowed text-left relative overflow-hidden"
+          className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-[#FAFAFA] opacity-75 cursor-not-allowed text-left relative overflow-hidden"
         >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-10 rounded-xl overflow-hidden flex items-center justify-center p-1 bg-white border border-gray-100">
+            <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center p-1.5 bg-white border border-border shrink-0 shadow-2xs">
               <img src={momoLogo} alt="Momo" className="w-full h-full object-contain opacity-50 grayscale" />
             </div>
             <div>
@@ -69,10 +69,10 @@ const PaymentMethodSelector = ({ t, selectedMethod, onMethodChange }) => {
         <button
           type="button"
           disabled
-          className="w-full flex items-center justify-between p-4 rounded-2xl border border-gray-200 bg-[#FAFAFA] opacity-75 cursor-not-allowed text-left relative overflow-hidden"
+          className="w-full flex items-center justify-between p-3 rounded-2xl border border-border bg-[#FAFAFA] opacity-75 cursor-not-allowed text-left relative overflow-hidden"
         >
           <div className="flex items-center gap-3">
-            <div className="w-12 h-10 rounded-xl overflow-hidden flex items-center justify-center p-1 bg-white border border-gray-100">
+            <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center p-1.5 bg-white border border-border shrink-0 shadow-2xs">
               <img src={stripeLogo} alt="Stripe" className="w-full h-full object-contain opacity-50 grayscale" />
             </div>
             <div>

@@ -1,9 +1,13 @@
+import React from "react";
 import dayjs from "dayjs";
-import DatePicker from "@/shared/components/ui/inputs/DatePicker";
-import TimeDropdown from "../ui/TimeDropdown";
-import TimezoneDropdown from "../ui/TimezoneDropdown";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import DateTimePicker from "@/shared/components/ui/inputs/DateTimePicker";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { formatTimeInZone } from "../../utils/timeFormatters";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /** Safely converts a Firestore Timestamp or plain Date to a JS Date */
 const toDate = (value) =>
@@ -15,63 +19,41 @@ const EventDateTimeSection = ({
   onStartTimeChange,
   endTime,
   onEndTimeChange,
-  selectedTimezone,
-  onTimezoneChange,
   errors,
   children,
 }) => {
   const { t } = useLanguage();
-  const cal = t.calendar;
+  const { formatTime, userTimeZone, buildDateTimeInZone } = useTimezone();
+  const cal = t.calendar || {};
+
+  const tz = userTimeZone || "Asia/Ho_Chi_Minh";
+
+  const getDatePickerValue = (date) => {
+    if (!date) return null;
+    const d = toDate(date);
+    return dayjs(d).tz(tz).format("YYYY-MM-DD");
+  };
 
   return (
     <div className="flex flex-col gap-6 items-start w-full">
-      {/* Start / End time & Timezone */}
-      <div className="flex flex-col gap-6 w-full">
+      {/* Start / End time — 2 separate rows */}
+      <div className="flex flex-col gap-5 w-full">
+        {/* Row 1: Start time */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
           <span className="text-base w-[150px] shrink-0 font-medium">
             {cal.startTime}
           </span>
           <div className="flex flex-col gap-1 flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-3">
-              <DatePicker
-                value={toDate(startTime)}
-                onChange={(d) => {
-                  const newDate = dayjs(d);
-                  const current = startTime
-                    ? dayjs(toDate(startTime))
-                    : dayjs().hour(0).minute(0).second(0);
-                  onStartTimeChange(
-                    current
-                      .year(newDate.year())
-                      .month(newDate.month())
-                      .date(newDate.date())
-                      .toDate(),
-                  );
-                }}
-                color={eventColor}
-                className={
-                  errors?.startTime ? "border-red-500 rounded-2xl" : ""
-                }
-              />
-              <TimeDropdown
-                value={
-                  startTime ? formatTimeInZone(startTime, selectedTimezone) : ""
-                }
-                color={eventColor}
-                onChange={(hhmm) => {
-                  const [h, m] = hhmm.split(":");
-                  const base = startTime
-                    ? dayjs(toDate(startTime))
-                    : dayjs().startOf("day");
-                  onStartTimeChange(
-                    base.hour(Number(h)).minute(Number(m)).second(0).toDate(),
-                  );
-                }}
-                className={
-                  errors?.startTime ? "border-red-500 rounded-2xl" : ""
-                }
-              />
-            </div>
+            <DateTimePicker
+              dateValue={getDatePickerValue(startTime)}
+              timeValue={startTime ? formatTime(startTime) : ""}
+              onChange={(dateStr, timeStr) => {
+                onStartTimeChange(buildDateTimeInZone(startTime, dateStr, timeStr));
+              }}
+              color={eventColor}
+              error={Boolean(errors?.startTime)}
+              className="w-[220px] h-11"
+            />
             {errors?.startTime && (
               <span className="text-red-500 text-xs mt-1">
                 {errors.startTime}
@@ -80,47 +62,22 @@ const EventDateTimeSection = ({
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-0">
-          <span className="text-base w-[150px] shrink-0 mt-3 font-medium">
+        {/* Row 2: End time */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
+          <span className="text-base w-[150px] shrink-0 font-medium">
             {cal.endTime}
           </span>
           <div className="flex flex-col gap-1 flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-3">
-              <DatePicker
-                value={toDate(endTime)}
-                onChange={(d) => {
-                  const newDate = dayjs(d);
-                  const current = endTime
-                    ? dayjs(toDate(endTime))
-                    : dayjs().hour(0).minute(0).second(0);
-                  onEndTimeChange(
-                    current
-                      .year(newDate.year())
-                      .month(newDate.month())
-                      .date(newDate.date())
-                      .toDate(),
-                  );
-                }}
-                color={eventColor}
-                className={errors?.endTime ? "border-red-500 rounded-2xl" : ""}
-              />
-              <TimeDropdown
-                value={
-                  endTime ? formatTimeInZone(endTime, selectedTimezone) : ""
-                }
-                color={eventColor}
-                onChange={(hhmm) => {
-                  const [h, m] = hhmm.split(":");
-                  const base = endTime
-                    ? dayjs(toDate(endTime))
-                    : dayjs().startOf("day");
-                  onEndTimeChange(
-                    base.hour(Number(h)).minute(Number(m)).second(0).toDate(),
-                  );
-                }}
-                className={errors?.endTime ? "border-red-500 rounded-2xl" : ""}
-              />
-            </div>
+            <DateTimePicker
+              dateValue={getDatePickerValue(endTime)}
+              timeValue={endTime ? formatTime(endTime) : ""}
+              onChange={(dateStr, timeStr) => {
+                onEndTimeChange(buildDateTimeInZone(endTime, dateStr, timeStr));
+              }}
+              color={eventColor}
+              error={Boolean(errors?.endTime)}
+              className="w-[220px] h-11"
+            />
             {errors?.endTime && (
               <span className="text-red-500 text-xs mt-1">
                 {errors.endTime}
@@ -128,22 +85,9 @@ const EventDateTimeSection = ({
             )}
           </div>
         </div>
-
-        {children}
-
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0">
-          <span className="text-base w-[150px] shrink-0">
-            {cal.timezone || "Timezone"}
-          </span>
-          <div className="flex-1 min-w-0">
-            <TimezoneDropdown
-              value={selectedTimezone}
-              onChange={onTimezoneChange}
-              activeColor={eventColor}
-            />
-          </div>
-        </div>
       </div>
+
+      {children}
     </div>
   );
 };

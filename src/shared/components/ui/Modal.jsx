@@ -33,7 +33,7 @@ const ModalContent = ({
     previousFocusRef.current = document.activeElement
     const focusFrame = window.requestAnimationFrame(() => {
       const firstFocusable = dialogRef.current?.querySelector(
-        "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+        "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
       )
       const focusTarget = firstFocusable || dialogRef.current
       focusTarget?.focus()
@@ -51,8 +51,8 @@ const ModalContent = ({
 
       const focusableElements = Array.from(
         dialogRef.current.querySelectorAll(
-          "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
-        )
+          "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
+        ),
       )
       if (focusableElements.length === 0) {
         event.preventDefault()
@@ -104,9 +104,11 @@ const ModalContent = ({
         exit={{ opacity: 0 }}
         transition={{ duration: 0.2 }}
         className={`relative flex flex-col w-full shadow-xl overflow-hidden ${
-          fullScreenOnMobile 
-            ? "h-full md:h-auto md:max-h-[90vh]" 
-            : "h-auto max-h-[90vh]"
+          /(^|\s)(md:|lg:|xl:|2xl:)?h-/.test(className)
+            ? ""
+            : fullScreenOnMobile
+              ? "h-full md:h-auto md:max-h-[600px]"
+              : "h-auto max-h-[480px] sm:max-h-[540px] md:max-h-[600px]"
         } ${
           /(^|\s)(md:|lg:|xl:|2xl:)?(max-w-|w-)/.test(className)
             ? ""
@@ -115,8 +117,8 @@ const ModalContent = ({
           /(^|\s)rounded/.test(className)
             ? ""
             : fullScreenOnMobile
-              ? "rounded-none md:rounded-3xl md:border md:border-[#E5e5e5]"
-              : "rounded-3xl border border-[#E5e5e5]"
+              ? "rounded-none md:rounded-3xl md:border md:border-border"
+              : "rounded-3xl border border-border"
         } ${className}`}
         role="dialog"
         aria-modal="true"
@@ -129,7 +131,10 @@ const ModalContent = ({
           <div className={headerClassName}>
             {title ? (
               typeof title === "string" ? (
-                <h2 id={titleId} className="text-[20px] leading-[26px] font-semibold">
+                <h2
+                  id={titleId}
+                  className="text-[20px] leading-[26px] font-semibold"
+                >
                   {title}
                 </h2>
               ) : (
@@ -154,7 +159,9 @@ const ModalContent = ({
 
         {subHeader && <div className={subHeaderClassName}>{subHeader}</div>}
 
-        <div className={bodyClassName}>{children}</div>
+        <div className={`${bodyClassName} ${!footer ? "mb-4 sm:mb-6" : ""}`}>
+          {children}
+        </div>
 
         {footer && <div className={footerClassName}>{footer}</div>}
       </motion.div>

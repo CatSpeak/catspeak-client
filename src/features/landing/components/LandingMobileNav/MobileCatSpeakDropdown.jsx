@@ -18,7 +18,12 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
   const location = useLocation();
   const isActive = useActiveLink(navKey);
 
-  const currentLang = lang || localStorage.getItem("communityLanguage") || "en";
+  const currentLang =
+    lang ||
+    (localStorage.getItem("communityLanguage") &&
+    localStorage.getItem("communityLanguage") !== "vi"
+      ? localStorage.getItem("communityLanguage")
+      : "zh");
 
   const isOnCatSpeak = location.pathname.includes("/cat-speak");
   const [open, setOpen] = useState(isOnCatSpeak);
@@ -59,8 +64,8 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
           title={mainLabel}
           className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors min-w-0 ${
             isActive || open
-              ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
-              : "hover:bg-[#F2F2F2]"
+              ? "bg-primaryBg text-cath-red-700 hover:bg-[#E6E6E6]"
+              : "hover:bg-primaryBg"
           }`}
         >
           <span className="truncate min-w-0">{mainLabel}</span>
@@ -72,7 +77,7 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
             e.stopPropagation();
             setOpen((prev) => !prev);
           }}
-          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-[#F2F2F2] ${
+          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-primaryBg ${
             isActive || open ? "text-cath-red-700" : ""
           }`}
         >
@@ -97,8 +102,8 @@ const MobileCatSpeakDropdown = ({ navKey, onClose }) => {
                 title={item.label}
                 className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors min-w-0 ${
                   isItemActive
-                    ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
-                    : "hover:bg-[#F2F2F2]"
+                    ? "bg-primaryBg text-cath-red-700 hover:bg-[#E6E6E6]"
+                    : "hover:bg-primaryBg"
                 }`}
               >
                 <div className="flex-shrink-0 min-w-[32px]">

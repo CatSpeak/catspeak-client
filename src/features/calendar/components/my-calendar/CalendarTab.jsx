@@ -56,22 +56,24 @@ const CalendarTab = ({
   return (
     <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm flex flex-col gap-6 h-full min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#E5E5E5]">
+      <div className="flex items-center justify-between pb-4 border-b border-border">
         <div className="flex items-center gap-2">
           <IconButton
             onClick={onPrev}
             variant="ghost"
-            innerClassName="!text-[#990011]"
+            innerClassName="!text-[#990011] !w-8 !h-8"
+            className='!w-10 !h-10'
           >
             <ChevronLeft />
           </IconButton>
-          <span className="text-xl font-semibold text-[#1A1A1A] min-w-[150px] text-center">
+          <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[100px] md:min-w-[150px] text-center">
             {localizedMonth}
           </span>
           <IconButton
             onClick={onNext}
             variant="ghost"
-            innerClassName="!text-[#990011]"
+            innerClassName="!text-[#990011] !w-8 !h-8"
+            className='!w-10 !h-10'
           >
             <ChevronRight />
           </IconButton>
@@ -129,7 +131,7 @@ const CalendarTab = ({
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-[#E5E5E5]">
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-6 border-t border-border">
         {LEGEND.map((item) => (
           <div key={item.type} className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full" style={{ backgroundColor: item.color }} />

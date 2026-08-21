@@ -301,7 +301,7 @@ const EventDetailBody = ({
           <button
             onClick={() => setConfirmDeleteId(null)}
             disabled={isCancelling}
-            className="px-4 py-2 text-sm font-medium text-black bg-[#f2f2f2] rounded-lg hover:bg-[#d9d9d9] transition-colors"
+            className="px-4 py-2 text-sm font-medium text-black bg-primaryBg rounded-lg hover:bg-[#d9d9d9] transition-colors"
           >
             {t.calendar?.cancel || "Hủy"}
           </button>

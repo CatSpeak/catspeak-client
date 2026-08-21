@@ -33,6 +33,16 @@ const Avatar = ({
   className = "",
   style = {},
 }) => {
+  const numericSize =
+    typeof size === "number"
+      ? size
+      : size === "sm"
+      ? 32
+      : size === "md"
+      ? 40
+      : size === "lg"
+      ? 48
+      : parseInt(size, 10) || 24
   const [imgError, setImgError] = useState(false)
   let navigate
   try {
@@ -48,7 +58,7 @@ const Avatar = ({
   }, [src])
 
   const initial = fallback || (name ? name.charAt(0).toUpperCase() : "U")
-  const fontSize = Math.max(10, Math.round(size * 0.4))
+  const fontSize = Math.max(10, Math.round(numericSize * 0.4))
 
   const isClickable = clickable && (Boolean(accountId) || Boolean(onClick))
 
@@ -58,15 +68,15 @@ const Avatar = ({
     }
     if (accountId && !e.defaultPrevented) {
       e.stopPropagation()
-      navigate(getProfilePath(accountId))
+      window.open(getProfilePath(accountId), "_blank", "noopener,noreferrer")
     }
   }
 
   const baseStyle = {
-    width: `${size}px`,
-    height: `${size}px`,
-    minWidth: `${size}px`,
-    minHeight: `${size}px`,
+    width: `${numericSize}px`,
+    height: `${numericSize}px`,
+    minWidth: `${numericSize}px`,
+    minHeight: `${numericSize}px`,
     fontSize: `${fontSize}px`,
     boxShadow: speaking
       ? "0 0 0 2px #3D9E60, 0 0 10px rgba(61, 158, 96, 0.5)"

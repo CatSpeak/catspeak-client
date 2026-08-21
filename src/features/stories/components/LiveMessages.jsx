@@ -81,7 +81,7 @@ const LiveMessages = ({ languageCommunity }) => {
 
   const breadcrumbItems = [
     {
-      label: t.nav?.community || "Trang chủ",
+      label: t.nav?.community || "Cộng đồng",
       onClick: () => navigate("/en/community"),
     },
     {

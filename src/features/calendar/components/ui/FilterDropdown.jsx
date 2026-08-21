@@ -26,7 +26,7 @@ const FilterDropdown = ({ label, options = [], onSelect }) => {
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={handleToggle}
-        className={`flex items-center px-3 gap-3 rounded-[5px] hover:bg-[#FAFAFA] text-sm leading-5 border border-[#E5E5E5] min-w-[130px] min-h-[32px] justify-between`}
+        className={`flex items-center px-3 gap-3 rounded-[5px] hover:bg-[#FAFAFA] text-sm leading-5 border border-border min-w-[130px] min-h-[32px] justify-between`}
       >
         <span className="truncate">{selected ? selected.label : label}</span>
         <ChevronDown
@@ -43,16 +43,16 @@ const FilterDropdown = ({ label, options = [], onSelect }) => {
             <FluentAnimation
               direction="down"
               exit={true}
-              className="rounded-[5px] bg-[#F9F9F9] shadow-lg border border-[#E5E5E5] overflow-hidden"
+              className="rounded-[5px] bg-[#F9F9F9] shadow-lg border border-border overflow-hidden"
             >
               <div className="flex flex-col gap-1 p-1">
                 {options.map((option, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSelect(option)}
-                    className={`w-full h-[32px] rounded-[5px] text-left px-3 text-sm hover:bg-[#F0F0F0] ${
+                    className={`w-full h-[32px] rounded-[5px] text-left px-3 text-sm hover:bg-primaryBg ${
                       selected?.value === option.value
-                        ? "text-cath-red-700 bg-[#F0F0F0]"
+                        ? "text-cath-red-700 bg-primaryBg"
                         : ""
                     }`}
                   >

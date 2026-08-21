@@ -18,6 +18,7 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
   const isActive = useActiveLink(navKey);
 
   const [communityOpen, setCommunityOpen] = useState(false);
+  const [overrideCommunity, setOverrideCommunity] = useState(null);
 
   // ---- Supported codes (scalable) ----
   const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), []);
@@ -29,8 +30,8 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
       return lang;
     }
 
-    return localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY;
-  }, [lang, supportedCodes]);
+    return overrideCommunity || localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY;
+  }, [lang, supportedCodes, overrideCommunity]);
 
   // ---- Display label ----
   const displayLabel = useMemo(() => {
@@ -60,13 +61,14 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
     setCommunityOpen(false);
 
     const isInsideEcosystem =
+      supportedCodes.includes(lang) ||
       location.pathname === `/${currentCommunity}` ||
       location.pathname.startsWith(`/${currentCommunity}/`);
 
     if (isInsideEcosystem) {
       window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode);
     } else {
-      window.location.href = `/${newCode}/community`;
+      window.location.reload();
     }
 
     onClose?.();
@@ -81,8 +83,8 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
           title={displayLabel}
           className={`flex-grow h-10 text-sm px-3 flex items-center text-left rounded-[5px] transition-colors min-w-0 ${
             isActive || communityOpen
-              ? "bg-[#F2F2F2] text-cath-red-700 hover:bg-[#E6E6E6]"
-              : "hover:bg-[#F2F2F2]"
+              ? "bg-primaryBg text-cath-red-700 hover:bg-[#E6E6E6]"
+              : "hover:bg-primaryBg"
           }`}
         >
           <span className="truncate min-w-0">{displayLabel}</span>
@@ -94,7 +96,7 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
             e.stopPropagation();
             setCommunityOpen((prev) => !prev);
           }}
-          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-[#F2F2F2] ${
+          className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-primaryBg ${
             isActive || communityOpen ? "text-cath-red-700" : ""
           }`}
         >

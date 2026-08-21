@@ -109,7 +109,7 @@ const ReelCardV2 = React.memo(function ReelCardV2({ reel, onSelect }) {
     >
       {/* Media Container */}
       <div 
-        className="relative w-full rounded-[24px] overflow-hidden bg-gray-100 shadow-sm transition-transform duration-300"
+        className="relative w-full min-h-[180px] rounded-[24px] overflow-hidden bg-gray-100 shadow-sm transition-transform duration-300"
         style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)', transform: 'translateZ(0)' }}
       >
         {/* Thumbnail */}

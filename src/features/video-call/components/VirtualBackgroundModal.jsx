@@ -137,7 +137,7 @@ const VirtualBackgroundModal = ({
               : ["backgrounds"];
             if (availableTabs.length <= 1) return null;
             return (
-              <div className="flex border-b border-[#E5E5E5] mb-3">
+              <div className="flex border-b border-border mb-3">
                 {availableTabs.map((tab) => (
                   <button
                     key={tab}

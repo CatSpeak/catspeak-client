@@ -6,8 +6,47 @@
  * @returns {string} e.g. "/en/community"
  */
 export const getCommunityPath = (language) => {
-  const lang = localStorage.getItem("communityLanguage") || language || "en"
-  return `/${lang}/community`
+  return `/${getCommunityLang(language)}/community`
+}
+
+/**
+ * Returns a language code valid for community routes (zh/en) — never vi,
+ * since the community ecosystem has no Vietnamese community.
+ *
+ * @param {string} [language] - Optional fallback language code (e.g. "vi", "en")
+ * @returns {string} e.g. "en" or "zh"
+ */
+export const getCommunityLang = (language) => {
+  const saved = localStorage.getItem("communityLanguage")
+  const lang =
+    saved && saved !== "vi"
+      ? saved
+      : language && language !== "vi"
+      ? language
+      : "zh"
+  return lang || "zh"
+}
+
+const CLASS_LANGUAGE_CODE_MAP = {
+  en: "en",
+  english: "en",
+  zh: "zh",
+  chinese: "zh",
+}
+
+/**
+ * Maps a class language name/code (e.g. "English", "Chinese", "en") to the
+ * language code used in the /:lang/meet room URL. The system does not support
+ * Vietnamese classes or communities, so Vietnamese is intentionally never
+ * returned. Returns undefined when the language cannot be resolved so callers
+ * can fall back to their own default.
+ *
+ * @param {string} [classLanguage]
+ * @returns {string|undefined} e.g. "en", "zh"
+ */
+export const getClassLanguageCode = (classLanguage) => {
+  if (!classLanguage) return undefined
+  return CLASS_LANGUAGE_CODE_MAP[String(classLanguage).trim().toLowerCase()]
 }
 
 /**

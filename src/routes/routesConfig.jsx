@@ -32,7 +32,7 @@ import LanguageLayout from "./LanguageLayout";
 import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
 import { Navigate } from "react-router-dom";
-import { AuthGuard } from "@/shared/components";
+import { AuthGuard, RoleGuard } from "@/shared/components";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
@@ -79,6 +79,7 @@ const WorkspaceEventsPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceEventsPage"),
 );
 const BillingFeature = lazy(() => import("@/features/billing/index.jsx"));
+const RefundHistoryPage = lazy(() => import("@/features/refunds/pages/RefundHistoryPage.jsx"));
 const MyLearningPage = lazy(
   () => import("@/features/courses/pages/MyLearningPage"),
 );
@@ -90,6 +91,9 @@ const PricingPage = lazy(
 );
 const CheckoutPage = lazy(
   () => import("@/features/billing/pages/CheckoutPage.jsx"),
+);
+const CheckoutClassPage = lazy(
+  () => import("@/features/billing/pages/CheckoutClassPage.jsx"),
 );
 const MyCoursesPage = lazy(
   () => import("@/features/courses/pages/MyCoursesPage"),
@@ -108,6 +112,15 @@ const MyClassesPage = lazy(
 );
 const WorkspaceAnalyticsPage = lazy(
   () => import("@/features/courses/components/WorkspaceAnalyticsPage"),
+);
+const WorkspaceDashboardPage = lazy(
+  () => import("@/features/courses/components/WorkspaceDashboardPage"),
+);
+const CreateVoucherPage = lazy(
+  () => import("@/features/vouchers/pages/CreateVoucherPage"),
+);
+const VoucherDetailPage = lazy(
+  () => import("@/features/vouchers/pages/VoucherDetailPage"),
 );
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
@@ -139,15 +152,24 @@ const SchedulePage = lazy(
 const CreateAssignmentPage = lazy(
   () => import("@/features/courses/pages/CreateAssignmentPage"),
 );
-const CustomRoomsPage = lazy(
-  () => import("@/features/rooms/pages/CustomRoomsPage"),
+const WorkspaceRoomsPage = lazy(
+  () => import("@/features/rooms/pages/WorkspaceRoomsPage"),
 );
 
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),
 );
+const TeachingMaterialPage = lazy(
+  () => import("@/features/materials/pages/TeachingMaterialPage"),
+);
+const SharedMaterialRedirectPage = lazy(
+  () => import("@/features/materials/pages/SharedMaterialRedirectPage"),
+);
 const StudentTakeQuizView = lazy(
   () => import("@/features/courses/components/grading/StudentTakeQuizView"),
+);
+const ReviewClassPage = lazy(
+  () => import("@/features/courses/pages/ReviewClassPage"),
 );
 
 const routesConfig = [
@@ -174,10 +196,10 @@ const routesConfig = [
             element: <VerifyEmailPage />,
           },
           {
-            path: "pricing",
+            path: "shared-material/:token",
             element: (
               <LazyRoute>
-                <PricingPage />
+                <SharedMaterialRedirectPage />
               </LazyRoute>
             ),
           },
@@ -213,6 +235,16 @@ const routesConfig = [
               <LazyRoute>
                 <PublicClassDetailPage />
               </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/class/:id/checkout",
+            element: (
+              <AuthGuard>
+                <LazyRoute>
+                  <CheckoutClassPage />
+                </LazyRoute>
+              </AuthGuard>
             ),
           },
           {
@@ -418,19 +450,33 @@ const routesConfig = [
                 ),
               },
               {
+                path: "explore-courses/class/:id/checkout",
+                element: (
+                  <AuthGuard>
+                    <LazyRoute>
+                      <CheckoutClassPage />
+                    </LazyRoute>
+                  </AuthGuard>
+                ),
+              },
+              {
                 path: "courses",
                 element: (
-                  <LazyRoute>
-                    <MyCoursesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <MyCoursesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "classes",
                 element: (
-                  <LazyRoute>
-                    <MyClassesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <MyClassesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
@@ -444,81 +490,167 @@ const routesConfig = [
               {
                 path: "teaching-tasks",
                 element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <WorkspaceCalendarPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "materials",
+                element: (
                   <LazyRoute>
-                    <WorkspaceCalendarPage />
+                    <TeachingMaterialPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "materials/:folderId",
+                element: (
+                  <LazyRoute>
+                    <TeachingMaterialPage />
                   </LazyRoute>
                 ),
               },
               {
                 path: "schedule",
                 element: (
-                  <LazyRoute>
-                    <SchedulePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <SchedulePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "analytics",
                 element: (
-                  <LazyRoute>
-                    <WorkspaceAnalyticsPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <WorkspaceAnalyticsPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "dashboard",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <WorkspaceDashboardPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/create",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateVoucherPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/edit/:id",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateVoucherPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/:id",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <VoucherDetailPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "vouchers/detail/:id",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <VoucherDetailPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/all",
                 element: (
-                  <LazyRoute>
-                    <AllCoursesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <AllCoursesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "classes/all-classes",
                 element: (
-                  <LazyRoute>
-                    <AllClassesPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <AllClassesPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/create",
                 element: (
-                  <LazyRoute>
-                    <CreateCoursePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateCoursePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/edit/:id",
                 element: (
-                  <LazyRoute>
-                    <CreateCoursePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateCoursePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "classes/create-class",
                 element: (
-                  <LazyRoute>
-                    <CreateClassPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateClassPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/edit-class/:id",
                 element: (
-                  <LazyRoute>
-                    <CreateClassPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <CreateClassPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "courses/schedule",
                 element: (
-                  <LazyRoute>
-                    <SchedulePage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <SchedulePage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
@@ -658,6 +790,14 @@ const routesConfig = [
                 ),
               },
               {
+                path: "learning/class/:id/review",
+                element: (
+                  <LazyRoute>
+                    <ReviewClassPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "learning/class/:id/bulletin-board/:boardId",
                 element: (
                   <LazyRoute>
@@ -735,7 +875,7 @@ const routesConfig = [
                 path: "rooms",
                 element: (
                   <LazyRoute>
-                    <CustomRoomsPage />
+                    <WorkspaceRoomsPage />
                   </LazyRoute>
                 ),
               },
@@ -813,6 +953,14 @@ const routesConfig = [
                 ),
               },
               {
+                path: "pricing",
+                element: (
+                  <LazyRoute>
+                    <PricingPage />
+                  </LazyRoute>
+                ),
+              },
+              {
                 path: "billing",
                 element: (
                   <LazyRoute>
@@ -827,6 +975,10 @@ const routesConfig = [
                     <PaymentResultPage />
                   </LazyRoute>
                 ),
+              },
+              {
+                path: "refunds",
+                element: <Navigate to="/billing?tab=refunds" replace />,
               },
               { path: "*", element: <PageNotFound /> },
             ],

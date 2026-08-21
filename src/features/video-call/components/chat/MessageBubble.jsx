@@ -5,6 +5,32 @@ import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
 import YouTubeEmbed from "@/features/chat/components/messages/YouTubeEmbed"
 import LinkPreviewCard from "@/features/chat/components/messages/LinkPreviewCard"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+
+const isEmojiOnly = (text) => {
+  if (!text || typeof text !== "string") return false
+  const clean = text.trim()
+  if (!clean) return false
+  try {
+    const withoutEmojis = clean
+      .replace(/[\s\uFE00-\uFE0F\u200D\u{1F3FB}-\u{1F3FF}]/gu, "")
+      .replace(/\p{Extended_Pictographic}/gu, "")
+      .replace(/\p{Emoji_Presentation}/gu, "")
+    return withoutEmojis.length === 0
+  } catch {
+    return false
+  }
+}
+
+const splitEmojis = (str) => {
+  if (!str) return []
+  const clean = str.trim().replace(/\s+/g, "")
+  if (typeof Intl !== "undefined" && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" })
+    return Array.from(segmenter.segment(clean), (s) => s.segment)
+  }
+  return Array.from(clean)
+}
 
 /**
  * Renders vocabulary suggestions inside dynamic cat-head styled pills
@@ -190,7 +216,17 @@ const SentenceSuggestions = ({
  */
 const MessageBubble = ({ msg, t, onReplyTo }) => {
   const { formatTime } = useTimezone()
+  const { user } = useGlobalVideoCall()
   const [expandedIdx, setExpandedIdx] = React.useState(null)
+
+  const currentUserName = user?.fullName || user?.username || user?.nickname || user?.email || ""
+  const isMe = msg.from?.isLocal ?? false
+
+  const isMentionedMe = React.useMemo(() => {
+    if (!currentUserName || isMe || !msg.message) return false
+    const regex = new RegExp(`@${currentUserName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, "i")
+    return regex.test(msg.message)
+  }, [currentUserName, isMe, msg.message])
 
   const renderFormattedMessage = (text) => {
     if (!text) return text
@@ -218,12 +254,11 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
     return (
       <>
         {prefixNode}
-        <FormattedText text={mainText} isOwn={isMe} />
+        <FormattedText text={mainText} isOwn={isMe} currentUserName={currentUserName} />
       </>
     )
   }
 
-  const isMe = msg.from?.isLocal ?? false
   const isSystem =
     msg.from?.isSystem || msg.isSystem || (!msg.from && !msg.topic)
   const isAi = msg.from?.isAi || false
@@ -247,6 +282,8 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
 
   const showText = isVi ? "Xem nghĩa" : isZh ? "显示解释" : "Show meaning"
   const hideText = isVi ? "Ẩn nghĩa" : isZh ? "隐藏解释" : "Hide meaning"
+
+  const isEmoji = !msg.replyTo && !msg.status && !msg.vocabulary && !msg.suggestedSentences && isEmojiOnly(msg.message)
 
   return (
     <div className={`flex flex-col mb-2 ${isMe ? "items-end" : "items-start"}`}>
@@ -273,16 +310,20 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
           />
         ) : (
           <div
-            className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words ${isMe
-              ? "bg-[#990011] text-white"
-              : msg.status === "error"
-                ? "bg-red-100 text-red-900 border border-red-200"
-                : isSystem
-                  ? "bg-orange-100 text-orange-900"
-                  : isAi
-                    ? "bg-amber-50 text-amber-900"
-                    : "bg-[#F0F0F0] text-black"
-              }`}
+            className={
+              isEmoji
+                ? "bg-transparent p-0 text-3xl md:text-4xl leading-relaxed select-text border-0 shadow-none min-h-0 min-w-0"
+                : `max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words transition-all ${isMe
+                  ? "bg-[#990011] text-white"
+                  : msg.status === "error"
+                    ? "bg-red-100 text-red-900 border border-red-200"
+                    : isSystem
+                      ? "bg-orange-100 text-orange-900"
+                      : isAi
+                        ? "bg-amber-50 text-amber-900"
+                        : "bg-[#F0F0F0] text-black"
+                  }`
+            }
           >
             {/* Reply Context */}
             {msg.replyTo && (
@@ -324,6 +365,12 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
                 expandedIdx={expandedIdx}
                 setExpandedIdx={setExpandedIdx}
               />
+            ) : isEmoji ? (
+              <span className="inline-flex flex-wrap items-center -space-x-2 md:-space-x-2.5 text-3xl md:text-4xl leading-none select-text">
+                {splitEmojis(msg.message).map((emoji, idx) => (
+                  <span key={idx} className="inline-block">{emoji}</span>
+                ))}
+              </span>
             ) : (
               <div>
                 {msg.message &&

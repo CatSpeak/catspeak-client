@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import dayjs from 'dayjs'
 import EventBlock from './EventBlock'
 import EventBlockDetail from './EventBlockDetail'
+import { useTimezone } from '@/shared/hooks/useTimezone'
 
-const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 const HOURS = Array.from({ length: 24 }, (_, i) => i) // 0 to 23
 
 const CalendarWeekView = ({
@@ -11,6 +11,13 @@ const CalendarWeekView = ({
   selectedDate,
   events,
 }) => {
+  const { formatScheduleDays } = useTimezone()
+
+  // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
+  const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day =>
+    formatScheduleDays([day])
+  )
+
   const daysInMonth = currentDate.daysInMonth()
   const [selectedEvent, setSelectedEvent] = useState(null)
 
@@ -44,7 +51,7 @@ const CalendarWeekView = ({
   return (
     <div className="w-full flex flex-col h-full min-h-0 max-h-[500px]">
       {/* Week Header */}
-      <div className="flex ml-16 border-b border-[#E5E5E5] pb-4">
+      <div className="flex ml-16 border-b border-border pb-4">
         {weekDates.map((dateObj, idx) => {
           const isToday = dateObj.dateStr === now.format('YYYY-MM-DD')
           return (
@@ -92,7 +99,7 @@ const CalendarWeekView = ({
                         if (!ev.startTime) return null
                         const evStart = dayjs(ev.startTime)
                         const evEnd = ev.endTime ? dayjs(ev.endTime) : evStart.add(1, 'hour')
-                        
+
                         const colStart = dayjs(dateObj.dateStr) // 00:00:00 of this column
                         const colEnd = colStart.add(1, 'day')   // 00:00:00 of next day
 
@@ -165,7 +172,7 @@ const CalendarWeekView = ({
                           columns.push([pEv])
                         }
                       })
-                      
+
                       const numColumns = columns.length
                       cluster.forEach(pEv => {
                         pEv.width = `calc(${100 / numColumns}% - 4px)`
@@ -203,11 +210,11 @@ const CalendarWeekView = ({
           )}
         </div>
       </div>
-      
-      <EventBlockDetail 
-        open={!!selectedEvent} 
-        event={selectedEvent} 
-        onClose={() => setSelectedEvent(null)} 
+
+      <EventBlockDetail
+        open={!!selectedEvent}
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
       />
     </div>
   )

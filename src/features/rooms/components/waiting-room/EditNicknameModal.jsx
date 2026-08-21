@@ -12,7 +12,9 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
 
   useEffect(() => {
     if (open) {
-      setTempName(user?.nickname || "")
+      queueMicrotask(() => {
+        setTempName(user?.nickname || "")
+      })
     }
   }, [open, user?.nickname])
 
@@ -28,7 +30,7 @@ const EditNicknameModal = ({ open, onClose, user, t }) => {
         "Nickname updated successfully",
       )
       onClose()
-    } catch (err) {
+    } catch {
       toast.error(
         t?.rooms?.waitingScreen?.updateNameError || "Failed to update nickname",
       )

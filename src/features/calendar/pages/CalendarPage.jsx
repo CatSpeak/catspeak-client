@@ -26,6 +26,8 @@ import {
   pingActiveCall,
   requestLeaveActiveCall,
 } from "@/features/video-call/services/callBroadcastChannel";
+import { HeaderImage } from "../assets";
+import WorkshopCoverflowCarousel from "@/features/workshops/components/WorkshopCoverflowCarousel";
 
 const CalendarPage = () => {
   const { lang } = useParams();
@@ -85,13 +87,9 @@ const CalendarPage = () => {
     }
   };
 
-  // Fetch event counts for current month
-  // Send browser UTC offset so backend groups events by local day, not UTC day.
-  const timezoneOffsetMinutes = -new Date().getTimezoneOffset(); // e.g. 420 for UTC+7
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
-    timezoneOffsetMinutes,
   });
 
   const eventCountsByDay = useMemo(() => {
@@ -169,10 +167,10 @@ const CalendarPage = () => {
   const yearNum = currentDate.format("YYYY");
 
   let localizedMonth = `${cal.month || "THÁNG"} ${monthNum} ${yearNum}`;
-  if (language === 'en') {
-    localizedMonth = `${currentDate.locale('en').format('MMMM')} ${yearNum}`
-  } else if (language === 'zh') {
-    localizedMonth = `${yearNum}年 ${monthNum}月`
+  if (language === "en") {
+    localizedMonth = `${currentDate.locale("en").format("MMMM")} ${yearNum}`;
+  } else if (language === "zh") {
+    localizedMonth = `${yearNum}年 ${monthNum}月`;
   }
 
   const checkAndIntercept = async (action) => {
@@ -222,13 +220,13 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-4 overflow-hidden bg-[#F3F3F3] min-h-screen">
+    <div className="w-full flex flex-col gap-4 overflow-hidden bg-primaryBg min-h-screen">
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
       </div>
-      <div className="w-full px-6 md:px-0 flex justify-center">
-        <div className="w-full md:w-3/4 lg:w-2/3">
-          <WorkshopCarousel hideTitle={true} />
+      <div className="w-full px-4 sm:px-6 md:px-0 flex justify-center py-4">
+        <div className="w-full ">
+          <WorkshopCoverflowCarousel />
         </div>
       </div>
       {/* <div className="relative w-full overflow-hidden aspect-[16/5] bg-white">
@@ -241,7 +239,7 @@ const CalendarPage = () => {
 
       <div className="px-6 pt-5 pb-8">
         <CalendarPageHeader
-          title={cal.schedule || "Thời gian biểu"}
+          title={cal.schedule || "Danh sách sự kiện"}
           onOpenFilters={() => setIsFilterOpen(true)}
         />
 
@@ -282,7 +280,9 @@ const CalendarPage = () => {
                 onEventsUpdate={setDayEvents}
                 eventCountsByDay={eventCountsByDay}
                 totalUniqueEvents={eventCountsData?.totalUniqueEvents || 0}
-                totalUniqueRegisteredEvents={eventCountsData?.totalUniqueRegisteredEvents || 0}
+                totalUniqueRegisteredEvents={
+                  eventCountsData?.totalUniqueRegisteredEvents || 0
+                }
                 onSelectDate={(d) => {
                   setSelectedDate(d);
                   setSelectedEvent(null);

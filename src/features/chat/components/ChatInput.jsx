@@ -143,7 +143,7 @@ const ChatInput = ({
 
       <div
         onClick={() => textareaRef.current?.focus()}
-        className={`w-full grid grid-cols-[auto_1fr_auto] border border-[#e5e5e5] focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${
+        className={`w-full grid grid-cols-[auto_1fr_auto] border border-border focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${
           isMultiline
             ? "pb-[3px] pt-3 min-h-[110px] gap-y-2"
             : "items-center h-14"
@@ -228,12 +228,11 @@ const ChatInput = ({
                     <Smile />
                   </IconButton>
                 }
-                content={(close) => (
+                content={() => (
                   <EmojiPickerWrapper
                     onSelect={(emoji) => {
                       insertEmoji(emoji, textareaRef, value, onChange)
                       addRecent(emoji)
-                      if (typeof close === "function") close()
                     }}
                   />
                 )}

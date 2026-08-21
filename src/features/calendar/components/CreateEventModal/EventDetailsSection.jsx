@@ -62,7 +62,7 @@ const EventDetailsSection = ({
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder={cal.eventNamePlaceholder}
-            variant="square"
+            variant="semi-round"
             color={eventColor}
             containerClassName="w-full"
             error={errors.title}
@@ -91,7 +91,7 @@ const EventDetailsSection = ({
                   disabled={isCountriesLoading}
                   activeColor={eventColor}
                   className="w-full"
-                  // triggerClassName={`border ${errors.count ryId ? "border-red-500" : ""}`}
+                  roundedClass="rounded-xl"
                   enableSearch
                 />
                 {errors.countryId && (
@@ -112,7 +112,7 @@ const EventDetailsSection = ({
                   }
                   activeColor={eventColor}
                   className="w-full"
-                  // triggerClassName={`border ${errors.cityId ? "border-red-500" : "border-[#C6C6C6]"}`}
+                  roundedClass="rounded-xl"
                   enableSearch
                 />
                 {errors.cityId && (
@@ -189,7 +189,7 @@ const EventDetailsSection = ({
                     onMaxParticipantsChange("");
                   }
                 }}
-                variant="square"
+                variant="semi-round"
                 color={eventColor}
                 placeholder={cal.maxParticipantsPlaceholder || "0"}
                 className="text-center !px-2"
@@ -212,7 +212,7 @@ const EventDetailsSection = ({
             value={conditionsInput}
             onChange={(e) => onConditionsChange(e.target.value)}
             placeholder={cal.conditionsPlaceholder}
-            variant="square"
+            variant="semi-round"
             color={eventColor}
             containerClassName="w-full"
           />
@@ -243,7 +243,7 @@ const EventDetailsSection = ({
         </div>
         <div className="flex  gap-2 w-full min-w-0">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 h-[56px] px-4 rounded-md border border-[#C6C6C6] bg-gray-50 text-sm text-gray-400 cursor-not-allowed select-none">
+            <div className="flex items-center gap-2 h-11 px-4 rounded-xl border border-[#C6C6C6] bg-gray-50 text-sm text-gray-400 cursor-not-allowed select-none">
               <span>{cal.free || "Miễn phí"}</span>
             </div>
           </div>

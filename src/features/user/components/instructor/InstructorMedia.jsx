@@ -32,7 +32,7 @@ const InstructorMedia = ({
               ins.introPlaceholder ||
               "Để duy trì hình ảnh chuyên nghiệp và phản ánh những phẩm chất lý tưởng của một giáo viên. (≤ 200-300 ký tự)"
             }
-            className={`w-full bg-gray-50/50 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-0 transition-all duration-200 resize-none disabled:text-gray-500 ${errors.introduction ? "border-red-500 focus:border-red-500 hover:!border-red-500" : "border-[#e5e5e5] focus:border-[#e5e5e5] hover:!border-cath-red-700"}`}
+            className={`w-full bg-gray-50/50 border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-0 transition-all duration-200 resize-none disabled:text-gray-500 ${errors.introduction ? "border-red-500 focus:border-red-500 hover:!border-red-500" : "border-border focus:border-border hover:!border-cath-red-700"}`}
           />
           {errors.introduction && (
             <p className="text-xs text-red-500">{errors.introduction}</p>
@@ -64,7 +64,7 @@ const InstructorMedia = ({
         </div>
 
         {formData.videoFile ? (
-          <div className="flex items-center justify-center w-full bg-gray-50/50 border border-gray-100 rounded-xl py-6">
+          <div className="flex items-center justify-center w-full bg-gray-50/50 border border-border rounded-xl py-6">
             <span className="text-sm font-medium text-gray-600">
               {typeof formData.videoFile === "string"
                 ? "Video đã tải lên"
@@ -74,7 +74,7 @@ const InstructorMedia = ({
         ) : (
           <div className="flex flex-col gap-1 w-full">
             <div
-              className={`flex flex-col items-center justify-center w-full bg-gray-50/50 border rounded-xl py-8 px-4 text-center ${errors.videoFile ? "border-red-500 bg-red-50/10 border-solid" : "border-gray-100"}`}
+              className={`flex flex-col items-center justify-center w-full bg-gray-50/50 border rounded-xl py-8 px-4 text-center ${errors.videoFile ? "border-red-500 bg-red-50/10 border-solid" : "border-border"}`}
             >
               <p
                 className={`text-[12px] max-w-lg ${errors.videoFile ? "text-red-500" : "text-gray-400"}`}

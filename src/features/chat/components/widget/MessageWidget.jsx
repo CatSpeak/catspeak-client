@@ -12,6 +12,7 @@ import {
 import useMessageSignalR from "../../hooks/useMessageSignalR"
 import useChatMessageActions from "@/features/chat/hooks/useChatMessageActions"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 import {
   closeWidget,
   openWidget,
@@ -275,7 +276,7 @@ const MessageWidget = () => {
             <Link
               to={activeConversationId ? `/chat/${activeConversationId}` : "/chat"}
               onClick={() => dispatch(closeWidget())}
-              className="h-12 flex items-center justify-center gap-2 border-t border-[#e5e5e5] px-4 text-sm text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
+              className="h-12 flex items-center justify-center gap-2 border-t border-border px-4 text-sm text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
             >
               <ExternalLink size={20} />
               See all in Chat
@@ -315,7 +316,7 @@ const MessageWidget = () => {
         )}
       </MessageModal>
 
-      <button
+      <IconButton
         onClick={() => {
           if (!isAuthenticated) {
             openAuthModal("login")
@@ -323,16 +324,17 @@ const MessageWidget = () => {
           }
           dispatch(toggleWidget())
         }}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        variant="filled"
+        className="relative"
         aria-label="Tin nhắn"
       >
         <MessageCircle size={20} />
         {totalUnreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-white bg-red-500 text-[10px] text-white shadow-sm dark:border-gray-800">
+          <span className="absolute -top-1 -right-1 flex h-4 min-w-[1rem] px-1 items-center justify-center rounded-full border-white bg-red-500 text-[10px] text-white shadow-sm dark:border-gray-800 z-10">
             {totalUnreadCount > 99 ? "99+" : totalUnreadCount}
           </span>
         )}
-      </button>
+      </IconButton>
 
       {/* ── File Size Limit Modal ────────────────────── */}
       <FileSizeLimitModal

@@ -1,5 +1,8 @@
 import { baseApi } from "./baseApi"
-import { buildQuizFormData, buildQuestionFormData } from "@/features/courses/utils/quizUtils"
+import {
+  buildQuizFormData,
+  buildQuestionFormData,
+} from "@/features/courses/utils/quizUtils"
 
 // ─── Helpers for UTC to Local conversion ───────────────────────────────
 const parseToLocalTimeStr = (isoString) => {
@@ -47,6 +50,8 @@ const transformNextSession = (data) => {
 
   return {
     ...data.nextSession,
+    rawStartTime: data.nextSession.startTime,
+    rawEndTime: data.nextSession.endTime,
     date: [
       startLocal.getFullYear(),
       String(startLocal.getMonth() + 1).padStart(2, "0"),
@@ -60,11 +65,8 @@ const transformNextSession = (data) => {
 
 // ─── Transformers & Data Mappers ──────────────────────────────────────
 
-const isRecord = (value) => (
-  value !== null
-  && typeof value === "object"
-  && !Array.isArray(value)
-)
+const isRecord = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value)
 
 const toText = (value) => {
   if (typeof value === "string") return value
@@ -79,11 +81,8 @@ const toNullableNumber = (value, { nonNegative = false } = {}) => {
   return number
 }
 
-const toTextList = (value) => (
-  Array.isArray(value)
-    ? value.map(toText).filter(Boolean)
-    : []
-)
+const toTextList = (value) =>
+  Array.isArray(value) ? value.map(toText).filter(Boolean) : []
 
 const transformPerson = (person) => {
   if (!isRecord(person)) return null
@@ -104,29 +103,25 @@ const transformPerson = (person) => {
 }
 
 const transformTeachingProgress = (data) => {
-  const source = isRecord(data?.teachingProgress)
-    ? data.teachingProgress
-    : {}
+  const source = isRecord(data?.teachingProgress) ? data.teachingProgress : {}
   const completed = toNullableNumber(
     source.completed ?? data?.completedSessions,
     { nonNegative: true },
   )
-  const total = toNullableNumber(
-    source.total ?? data?.totalSessions,
-    { nonNegative: true },
-  )
+  const total = toNullableNumber(source.total ?? data?.totalSessions, {
+    nonNegative: true,
+  })
   const percentage = toNullableNumber(source.percentage, { nonNegative: true })
 
   return {
     completed,
     total,
-    percentage: percentage === null
-      ? (
-        completed !== null && total !== null && total > 0
+    percentage:
+      percentage === null
+        ? completed !== null && total !== null && total > 0
           ? Math.min(100, Math.round((completed / total) * 100))
           : null
-      )
-      : Math.min(100, percentage),
+        : Math.min(100, percentage),
   }
 }
 
@@ -134,7 +129,8 @@ const transformCourse = (course) => {
   if (!isRecord(course)) return null
   const id = toText(course.id)
   if (!id) return null
-  const resolvedTitle = toText(course.name) || toText(course.title) || "Untitled Course"
+  const resolvedTitle =
+    toText(course.name) || toText(course.title) || "Untitled Course"
   const resolvedStudents = toNullableNumber(
     course.studentCount ?? course.totalStudents,
     { nonNegative: true },
@@ -155,7 +151,9 @@ const transformCourse = (course) => {
     language: toText(course.language),
     levels: toTextList(course.levels),
     description: toText(course.description),
-    totalSessions: toNullableNumber(course.totalSessions, { nonNegative: true }),
+    totalSessions: toNullableNumber(course.totalSessions, {
+      nonNegative: true,
+    }),
     enrollmentStart: toText(course.enrollmentStart),
     enrollmentEnd: toText(course.enrollmentEnd),
     classCount: toNullableNumber(course.classCount, { nonNegative: true }),
@@ -169,9 +167,9 @@ const transformCourse = (course) => {
     createdAt: toText(course.createdAt),
     teacher,
     teacherId:
-      teacher?.accountId
-      || toText(course.teacherId)
-      || toText(course.accountId),
+      teacher?.accountId ||
+      toText(course.teacherId) ||
+      toText(course.accountId),
   }
 }
 
@@ -181,8 +179,11 @@ const transformClass = (cls) => {
   if (!id) return null
   const courseId = toText(cls.courseId) || null
   const rawCourseTitle = toText(cls.courseName) || toText(cls.courseTitle)
-  const resolvedCourseTitle = courseId ? (rawCourseTitle || "Course") : (rawCourseTitle || null)
-  const resolvedClassTitle = toText(cls.name) || toText(cls.title) || "Untitled Class"
+  const resolvedCourseTitle = courseId
+    ? rawCourseTitle || "Course"
+    : rawCourseTitle || null
+  const resolvedClassTitle =
+    toText(cls.name) || toText(cls.title) || "Untitled Class"
   const resolvedStudentCount = toNullableNumber(
     cls.studentCount ?? cls.enrolledStudents,
     { nonNegative: true },
@@ -198,7 +199,9 @@ const transformClass = (cls) => {
       progressSource.totalSessions ?? cls.totalSessions,
       { nonNegative: true },
     ),
-    percentage: toNullableNumber(progressSource.percentage, { nonNegative: true }),
+    percentage: toNullableNumber(progressSource.percentage, {
+      nonNegative: true,
+    }),
   }
   if (resolvedProgress.percentage !== null) {
     resolvedProgress.percentage = Math.min(100, resolvedProgress.percentage)
@@ -213,7 +216,9 @@ const transformClass = (cls) => {
     endTime: toText(entry.endTime),
   }))
   const firstSchedule = normalizedScheduleEntries[0]
-  const nextSessionStart = parseToLocalTimeStr(toText(cls.nextSession?.startTime))
+  const nextSessionStart = parseToLocalTimeStr(
+    toText(cls.nextSession?.startTime),
+  )
   const nextSessionEnd = parseToLocalTimeStr(toText(cls.nextSession?.endTime))
 
   return {
@@ -234,15 +239,29 @@ const transformClass = (cls) => {
     enrollmentEnd: toText(cls.enrollmentEnd),
     startDate: toText(cls.startDate),
     endDate: toText(cls.endDate),
-    schedule: normalizedScheduleEntries.length > 0 ? {
-      days: normalizedScheduleEntries.map((entry) => entry.dayOfWeek).filter(Boolean),
-      startTime: parseToLocalTimeStr(firstSchedule?.startTime),
-      endTime: parseToLocalTimeStr(firstSchedule?.endTime),
-    } : (isRecord(cls.nextSession) ? {
-      days: [],
+    nextSession: isRecord(cls.nextSession) ? {
+      ...cls.nextSession,
+      rawStartTime: cls.nextSession.startTime,
+      rawEndTime: cls.nextSession.endTime,
       startTime: nextSessionStart,
       endTime: nextSessionEnd,
-    } : { days: [], startTime: "", endTime: "" }),
+    } : cls.nextSession,
+    schedule:
+      normalizedScheduleEntries.length > 0
+        ? {
+          days: normalizedScheduleEntries
+            .map((entry) => entry.dayOfWeek)
+            .filter(Boolean),
+          startTime: parseToLocalTimeStr(firstSchedule?.startTime),
+          endTime: parseToLocalTimeStr(firstSchedule?.endTime),
+        }
+        : isRecord(cls.nextSession)
+          ? {
+            days: [],
+            startTime: nextSessionStart,
+            endTime: nextSessionEnd,
+          }
+          : { days: [], startTime: "", endTime: "" },
     rawSchedule: normalizedScheduleEntries.map((entry) => ({
       dayOfWeek: entry.dayOfWeek,
       startTime: parseToLocalTimeStr(entry.startTime),
@@ -251,23 +270,26 @@ const transformClass = (cls) => {
     slots: toNullableNumber(cls.capacity ?? cls.slots, { nonNegative: true }),
     studentCount: resolvedStudentCount,
     enrolledStudents: resolvedStudentCount,
-    tuitionFee: toNullableNumber(cls.price ?? cls.tuitionFee, { nonNegative: true }),
+    tuitionFee: toNullableNumber(cls.price ?? cls.tuitionFee, {
+      nonNegative: true,
+    }),
     status: toText(cls.status),
     roomId: toText(cls.roomId),
     roomName: toText(cls.roomName),
     thumbnailUrl: toText(cls.thumbnailUrl),
     teacher,
     teacherId:
-      teacher?.accountId
-      || toText(cls.teacherId)
-      || toText(cls.accountId),
+      teacher?.accountId || toText(cls.teacherId) || toText(cls.accountId),
   }
 }
 
 const transformExploreItem = (item) => {
   if (!isRecord(item)) return null
   const isClassItem = String(item?.type || "").toLowerCase() === "class"
-  const title = toText(item.name) || toText(item.title) || (isClassItem ? "Untitled Class" : "Untitled Course")
+  const title =
+    toText(item.name) ||
+    toText(item.title) ||
+    (isClassItem ? "Untitled Class" : "Untitled Course")
   const teacher = transformPerson(item.teacher)
 
   return {
@@ -283,25 +305,37 @@ const transformExploreItem = (item) => {
     tuitionFee: toNullableNumber(item.price, { nonNegative: true }),
     priceMin: toNullableNumber(item.priceMin, { nonNegative: true }),
     priceMax: toNullableNumber(item.priceMax, { nonNegative: true }),
-    priceRange: (item.priceMin != null || item.priceMax != null) ? {
-      min: toNullableNumber(item.priceMin, { nonNegative: true }),
-      max: toNullableNumber(item.priceMax, { nonNegative: true }),
-    } : null,
-    openClassCount: toNullableNumber(item.openClassCount, { nonNegative: true }),
+    priceRange:
+      item.priceMin != null || item.priceMax != null
+        ? {
+          min: toNullableNumber(item.priceMin, { nonNegative: true }),
+          max: toNullableNumber(item.priceMax, { nonNegative: true }),
+        }
+        : null,
+    openClassCount: toNullableNumber(item.openClassCount, {
+      nonNegative: true,
+    }),
     studentCount: toNullableNumber(item.studentCount, { nonNegative: true }),
-    remainingSlots: toNullableNumber(item.remainingSlots, { nonNegative: true }),
+    remainingSlots: toNullableNumber(item.remainingSlots, {
+      nonNegative: true,
+    }),
     thumbnailUrl: toText(item.thumbnailUrl),
     createdAt: toText(item.createdAt),
-    teacher: teacher ? {
-      ...teacher,
-      avatar: teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl
-    } : null
+    teacher: teacher
+      ? {
+        ...teacher,
+        avatar: teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl,
+      }
+      : null,
   }
 }
 
 const transformPaginatedResponse = (response, itemTransformer) => {
   if (!response) {
-    return { data: [], pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 } }
+    return {
+      data: [],
+      pagination: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 },
+    }
   }
 
   const outerRecord = isRecord(response) ? response : {}
@@ -330,41 +364,41 @@ const transformPaginatedResponse = (response, itemTransformer) => {
       : fallback
   }
   const page = toPositiveInteger(
-    responseRecord.pagination?.page
-    ?? outerRecord.pagination?.page
-    ?? responseRecord.page
-    ?? outerRecord.page,
+    responseRecord.pagination?.page ??
+    outerRecord.pagination?.page ??
+    responseRecord.page ??
+    outerRecord.page,
     1,
   )
   const pageSize = toPositiveInteger(
-    responseRecord.pagination?.pageSize
-    ?? outerRecord.pagination?.pageSize
-    ?? responseRecord.pageSize
-    ?? outerRecord.pageSize,
+    responseRecord.pagination?.pageSize ??
+    outerRecord.pagination?.pageSize ??
+    responseRecord.pageSize ??
+    outerRecord.pageSize,
     Math.max(1, rawItems.length || 10),
   )
   const totalItems = toNonNegativeInteger(
-    responseRecord.pagination?.totalItems
-    ?? outerRecord.pagination?.totalItems
-    ?? responseRecord.pagination?.total
-    ?? outerRecord.pagination?.total
-    ?? responseRecord.totalCount
-    ?? outerRecord.totalCount
-    ?? responseRecord.total
-    ?? outerRecord.total,
+    responseRecord.pagination?.totalItems ??
+    outerRecord.pagination?.totalItems ??
+    responseRecord.pagination?.total ??
+    outerRecord.pagination?.total ??
+    responseRecord.totalCount ??
+    outerRecord.totalCount ??
+    responseRecord.total ??
+    outerRecord.total,
     rawItems.length,
   )
   const totalPages = toPositiveInteger(
-    responseRecord.pagination?.totalPages
-    ?? outerRecord.pagination?.totalPages
-    ?? responseRecord.totalPages
-    ?? outerRecord.totalPages,
+    responseRecord.pagination?.totalPages ??
+    outerRecord.pagination?.totalPages ??
+    responseRecord.totalPages ??
+    outerRecord.totalPages,
     Math.max(1, Math.ceil(totalItems / pageSize)),
   )
 
   return {
     data,
-    pagination: { page, pageSize, totalItems, totalPages }
+    pagination: { page, pageSize, totalItems, totalPages },
   }
 }
 
@@ -383,7 +417,8 @@ const getQuizContentInvalidationTags = (classId, quizId) => [
 
 // ─── API Injector Slice ───────────────────────────────────────────────
 
-const isFileValue = (value) => typeof File !== "undefined" && value instanceof File
+const isFileValue = (value) =>
+  typeof File !== "undefined" && value instanceof File
 
 const appendFormValue = (formData, key, value) => {
   if (value === undefined || value === null || value === "") return
@@ -399,12 +434,22 @@ const appendFormValue = (formData, key, value) => {
 
       if (typeof item === "object" && !isFileValue(item)) {
         Object.entries(item).forEach(([nestedKey, nestedValue]) => {
-          const camelKey = nestedKey.charAt(0).toLowerCase() + nestedKey.slice(1)
-          const pascalKey = nestedKey.charAt(0).toUpperCase() + nestedKey.slice(1)
+          const camelKey =
+            nestedKey.charAt(0).toLowerCase() + nestedKey.slice(1)
+          const pascalKey =
+            nestedKey.charAt(0).toUpperCase() + nestedKey.slice(1)
 
-          appendFormValue(formData, `${key}[${index}].${camelKey}`, nestedValue)
+          appendFormValue(
+            formData,
+            `${key}[${index}].${camelKey}`,
+            nestedValue,
+          )
           if (camelKey !== pascalKey) {
-            appendFormValue(formData, `${key}[${index}].${pascalKey}`, nestedValue)
+            appendFormValue(
+              formData,
+              `${key}[${index}].${pascalKey}`,
+              nestedValue,
+            )
           }
         })
         return
@@ -426,45 +471,50 @@ const appendFormValue = (formData, key, value) => {
 
 const buildFormData = (fields) => {
   const formData = new FormData()
-  Object.entries(fields).forEach(([key, value]) => appendFormValue(formData, key, value))
+  Object.entries(fields).forEach(([key, value]) =>
+    appendFormValue(formData, key, value),
+  )
   return formData
 }
 
-const buildCreateCourseFormData = (data) => buildFormData({
-  Name: data.title,
-  Language: data.language ? data.language.toUpperCase() : "",
-  Levels: Array.isArray(data.levels) ? data.levels : [],
-  Description: data.description,
-  Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null
-})
+const buildCreateCourseFormData = (data) =>
+  buildFormData({
+    Name: data.title,
+    Language: data.language ? data.language.toUpperCase() : "",
+    Levels: Array.isArray(data.levels) ? data.levels : [],
+    Description: data.description,
+    Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
+  })
 
-const buildUpdateCourseFormData = (data) => buildFormData({
-  Name: data.title,
-  Language: data.language ? data.language.toUpperCase() : "",
-  Levels: Array.isArray(data.levels) ? data.levels : [],
-  Description: data.description,
-  Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
-  ThumbnailUrl: typeof data.thumbnailUrl === "string" ? data.thumbnailUrl : null
-})
+const buildUpdateCourseFormData = (data) =>
+  buildFormData({
+    Name: data.title,
+    Language: data.language ? data.language.toUpperCase() : "",
+    Levels: Array.isArray(data.levels) ? data.levels : [],
+    Description: data.description,
+    Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
+    ThumbnailUrl:
+      typeof data.thumbnailUrl === "string" ? data.thumbnailUrl : null,
+  })
 
 const mapToStandardDayOfWeek = (day) => {
   if (!day) return null
   const dayStr = String(day).trim().toUpperCase()
   const mapping = {
-    "MON": "MON",
-    "TUE": "TUE",
-    "WED": "WED",
-    "THU": "THU",
-    "FRI": "FRI",
-    "SAT": "SAT",
-    "SUN": "SUN",
-    "MONDAY": "MON",
-    "TUESDAY": "TUE",
-    "WEDNESDAY": "WED",
-    "THURSDAY": "THU",
-    "FRIDAY": "FRI",
-    "SATURDAY": "SAT",
-    "SUNDAY": "SUN"
+    MON: "MON",
+    TUE: "TUE",
+    WED: "WED",
+    THU: "THU",
+    FRI: "FRI",
+    SAT: "SAT",
+    SUN: "SUN",
+    MONDAY: "MON",
+    TUESDAY: "TUE",
+    WEDNESDAY: "WED",
+    THURSDAY: "THU",
+    FRIDAY: "FRI",
+    SATURDAY: "SAT",
+    SUNDAY: "SUN",
   }
   return mapping[dayStr] || null
 }
@@ -499,34 +549,55 @@ const parseNumberOrNull = (value) => {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-const buildCreateClassFormData = (data) => buildFormData({
-  CourseId: parseIntegerOrNull(data.courseId),
-  Name: data.title,
-  Language: data.language ? data.language.toUpperCase() : "",
-  Levels: data.levels || [],
-  Description: data.description,
-  TotalSessions: data.totalSessions === "" || data.totalSessions == null
-    ? null
-    : parseIntegerOrNull(data.totalSessions),
-  EnrollmentStart: data.enrollmentStart || null,
-  EnrollmentEnd: data.enrollmentEnd || null,
-  StartDate: data.startDate || null,
-  Capacity: data.slots === "" || data.slots == null
-    ? null
-    : parseIntegerOrNull(data.slots),
-  Price: data.tuitionFee === "" || data.tuitionFee == null
-    ? null
-    : parseNumberOrNull(data.tuitionFee),
-  Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
-  Schedule: getClassSchedule(data),
-  CommissionPercent: parseNumberOrNull(data.commissionPercent),
-  Status: data.status || null,
-})
+const buildCreateClassFormData = (data) =>
+  buildFormData({
+    CourseId: parseIntegerOrNull(data.courseId),
+    Name: data.title,
+    Language: data.language ? data.language.toUpperCase() : "",
+    Levels: data.levels || [],
+    Description: data.description,
+    TotalSessions:
+      data.totalSessions === "" || data.totalSessions == null
+        ? null
+        : parseIntegerOrNull(data.totalSessions),
+    EnrollmentStart: data.enrollmentStart || null,
+    EnrollmentEnd: data.enrollmentEnd || null,
+    StartDate: data.startDate || null,
+    Capacity:
+      data.slots === "" || data.slots == null
+        ? null
+        : parseIntegerOrNull(data.slots),
+    Price:
+      data.tuitionFee === "" || data.tuitionFee == null
+        ? null
+        : parseNumberOrNull(data.tuitionFee),
+    Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
+    Schedule: getClassSchedule(data),
+    CommissionPercent: parseNumberOrNull(data.commissionPercent),
+    Status: data.status || null,
+    RequireMinimumAttendance: Boolean(data.requireMinimumAttendance ?? data.requireMinAttendance),
+    MinimumAttendanceRate: (data.requireMinimumAttendance ?? data.requireMinAttendance)
+      ? parseIntegerOrNull(data.minimumAttendanceRate ?? data.minAttendanceRate)
+      : null,
+    LateAttendancePolicy: data.lateAttendancePolicy ?? (data.includeLateAttendance === false ? "IgnoreLate" : "CountLate"),
+  })
 
 const buildAnalyticsQueryParams = (params = {}) => {
   const mapping = {
     groupBy: "GroupBy",
     GroupBy: "GroupBy",
+    period: "Period",
+    Period: "Period",
+    compare: "Compare",
+    Compare: "Compare",
+    customStartDate: "CustomStartDate",
+    CustomStartDate: "CustomStartDate",
+    customEndDate: "CustomEndDate",
+    CustomEndDate: "CustomEndDate",
+    compareCustomStartDate: "CompareCustomStartDate",
+    CompareCustomStartDate: "CompareCustomStartDate",
+    compareCustomEndDate: "CompareCustomEndDate",
+    CompareCustomEndDate: "CompareCustomEndDate",
     startDate: "StartDate",
     StartDate: "StartDate",
     endDate: "EndDate",
@@ -561,6 +632,32 @@ const buildAnalyticsQueryParams = (params = {}) => {
   return queryParams
 }
 
+const buildDashboardQueryParams = (params = {}) => {
+  const mapping = {
+    periodType: "PeriodType",
+    PeriodType: "PeriodType",
+    fromDate: "FromDate",
+    FromDate: "FromDate",
+    toDate: "ToDate",
+    ToDate: "ToDate",
+    compareType: "CompareType",
+    CompareType: "CompareType",
+    courseId: "CourseId",
+    CourseId: "CourseId",
+    classId: "ClassId",
+    ClassId: "ClassId",
+  }
+
+  const queryParams = {}
+  Object.entries(params).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && val !== "") {
+      const targetKey = mapping[key] || key
+      queryParams[targetKey] = val
+    }
+  })
+  return queryParams
+}
+
 export const coursesApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Public Explore Endpoints
@@ -572,17 +669,38 @@ export const coursesApi = baseApi.injectEndpoints({
           page: params?.page || 1,
           pageSize: params?.pageSize || 24,
           search: params?.search ? params.search.trim() : undefined,
-          sort: params?.sort && params.sort !== "default" ? params.sort : undefined,
-          language: params?.language && params.language !== "all" ? params.language.toLowerCase() : undefined,
-          minPrice: params?.minPrice != null && !isNaN(Number(params.minPrice)) ? Number(params.minPrice) : undefined,
-          maxPrice: params?.maxPrice != null && !isNaN(Number(params.maxPrice)) ? Number(params.maxPrice) : undefined,
-          type: params?.type && params.type !== "all"
-            ? (params.type === "courses" ? "course" : params.type === "classes" ? "class" : String(params.type).toLowerCase())
-            : undefined,
+          sort:
+            params?.sort && params.sort !== "default" ? params.sort : undefined,
+          language:
+            params?.language && params.language !== "all"
+              ? params.language.toLowerCase()
+              : undefined,
+          minPrice:
+            params?.minPrice != null && !isNaN(Number(params.minPrice))
+              ? Number(params.minPrice)
+              : undefined,
+          maxPrice:
+            params?.maxPrice != null && !isNaN(Number(params.maxPrice))
+              ? Number(params.maxPrice)
+              : undefined,
+          type:
+            params?.type && params.type !== "all"
+              ? params.type === "courses"
+                ? "course"
+                : params.type === "classes"
+                  ? "class"
+                  : String(params.type).toLowerCase()
+              : undefined,
+          enrollmentStatus:
+            params?.enrollmentStatus &&
+            params.enrollmentStatus !== "all"
+              ? String(params.enrollmentStatus).toLowerCase()
+              : undefined,
         },
         extraOptions: { skipAuthHeader: true },
       }),
-      transformResponse: (response) => transformPaginatedResponse(response, transformExploreItem),
+      transformResponse: (response) =>
+        transformPaginatedResponse(response, transformExploreItem),
       providesTags: ["ExploreCatalog"],
     }),
 
@@ -594,14 +712,16 @@ export const coursesApi = baseApi.injectEndpoints({
         params: {
           page: params?.page || 1,
           pageSize: params?.pageSize || 100,
-          language: params?.language ? params.language.toUpperCase() : undefined,
+          language: params?.language
+            ? params.language.toUpperCase()
+            : undefined,
           search: params?.search,
         },
       }),
       transformResponse: (response) => {
         return transformPaginatedResponse(response, transformCourse)
       },
-      providesTags: ["StudentCourses"]
+      providesTags: ["StudentCourses"],
     }),
 
     getStudentAvailableClasses: builder.query({
@@ -611,11 +731,14 @@ export const coursesApi = baseApi.injectEndpoints({
         params: {
           page: params?.page || 1,
           pageSize: params?.pageSize || 100,
-          language: params?.language ? params.language.toUpperCase() : undefined,
+          language: params?.language
+            ? params.language.toUpperCase()
+            : undefined,
           search: params?.search,
         },
       }),
-      transformResponse: (response) => transformPaginatedResponse(response, transformClass),
+      transformResponse: (response) =>
+        transformPaginatedResponse(response, transformClass),
       providesTags: ["StudentClasses"],
     }),
 
@@ -623,18 +746,24 @@ export const coursesApi = baseApi.injectEndpoints({
       async queryFn(params, queryApi, extraOptions, baseQuery) {
         const pageSize = params?.pageSize || 100
         const fetchPage = async (page) => {
-          const result = await baseQuery({
-            url: "/student/classes/my-enrollments",
-            method: "GET",
-            params: { page, pageSize },
-          }, queryApi, extraOptions)
+          const result = await baseQuery(
+            {
+              url: "/student/classes/my-enrollments",
+              method: "GET",
+              params: { page, pageSize },
+            },
+            queryApi,
+            extraOptions,
+          )
           if (result.error) return result
           return {
             data: transformPaginatedResponse(result.data, transformClass),
           }
         }
 
-        const firstPage = await fetchPage(params?.all === true ? 1 : (params?.page || 1))
+        const firstPage = await fetchPage(
+          params?.all === true ? 1 : params?.page || 1,
+        )
         if (firstPage.error || params?.all !== true) return firstPage
 
         const totalPages = firstPage.data.pagination.totalPages
@@ -675,7 +804,26 @@ export const coursesApi = baseApi.injectEndpoints({
           },
         }
       },
-      providesTags: ["StudentClasses"]
+      providesTags: ["StudentClasses"],
+    }),
+
+    getStudentCompletedClasses: builder.query({
+      query: () => ({
+        url: "/student/classes/completed",
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        const items = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+            ? data.data
+            : []
+        return {
+          data: items.map((cls) => transformClass(cls)).filter(Boolean),
+        }
+      },
+      providesTags: ["StudentClasses"],
     }),
 
     getExploreCourseDetail: builder.query({
@@ -686,30 +834,36 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) => {
         const data = response?.data ?? response
-        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        if (!data || typeof data !== "object" || Array.isArray(data))
+          return null
         const transformedCourse = transformCourse(data)
         if (!transformedCourse) return null
         const transformedClasses = Array.isArray(data.classes)
-          ? data.classes.map((cls) => {
-            const transformedClass = transformClass(cls)
-            return transformedClass
-              ? {
-                ...transformedClass,
-                isEnrolled: cls.isEnrolled === true,
-                enrolledCount: cls.enrolledCount ?? null,
-              }
-              : null
-          }).filter(Boolean)
+          ? data.classes
+            .map((cls) => {
+              const transformedClass = transformClass(cls)
+              return transformedClass
+                ? {
+                  ...transformedClass,
+                  isEnrolled: cls.isEnrolled === true,
+                  enrolledCount: cls.enrolledCount ?? null,
+                }
+                : null
+            })
+            .filter(Boolean)
           : []
-        const enrolledClass = transformedClasses.find(cls => cls.isEnrolled)
+        const enrolledClass = transformedClasses.find((cls) => cls.isEnrolled)
         return {
           ...transformedCourse,
           enrolledClassId: enrolledClass?.id || null,
-          enrolledClassName: enrolledClass?.name || enrolledClass?.title || null,
-          classes: transformedClasses
+          enrolledClassName:
+            enrolledClass?.name || enrolledClass?.title || null,
+          classes: transformedClasses,
         }
       },
-      providesTags: (result, error, id) => [{ type: "CourseDetail", id: String(id) }]
+      providesTags: (result, error, id) => [
+        { type: "CourseDetail", id: String(id) },
+      ],
     }),
 
     getExploreClassDetail: builder.query({
@@ -720,7 +874,8 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) => {
         const data = response?.data ?? response
-        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        if (!data || typeof data !== "object" || Array.isArray(data))
+          return null
         const transformedClass = transformClass(data)
         if (!transformedClass) return null
         return {
@@ -731,7 +886,9 @@ export const coursesApi = baseApi.injectEndpoints({
           teachingProgress: transformTeachingProgress(data),
         }
       },
-      providesTags: (result, error, id) => [{ type: "ClassDetail", id: String(id) }]
+      providesTags: (result, error, id) => [
+        { type: "ClassDetail", id: String(id) },
+      ],
     }),
 
     getStudentCourseDetail: builder.query({
@@ -741,30 +898,36 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) => {
         const data = response?.data ?? response
-        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        if (!data || typeof data !== "object" || Array.isArray(data))
+          return null
         const transformedCourse = transformCourse(data)
         if (!transformedCourse) return null
         const transformedClasses = Array.isArray(data.classes)
-          ? data.classes.map((cls) => {
-            const transformedClass = transformClass(cls)
-            return transformedClass
-              ? {
-                ...transformedClass,
-                isEnrolled: cls.isEnrolled === true,
-                enrolledCount: cls.enrolledCount ?? null,
-              }
-              : null
-          }).filter(Boolean)
+          ? data.classes
+            .map((cls) => {
+              const transformedClass = transformClass(cls)
+              return transformedClass
+                ? {
+                  ...transformedClass,
+                  isEnrolled: cls.isEnrolled === true,
+                  enrolledCount: cls.enrolledCount ?? null,
+                }
+                : null
+            })
+            .filter(Boolean)
           : []
-        const enrolledClass = transformedClasses.find(cls => cls.isEnrolled)
+        const enrolledClass = transformedClasses.find((cls) => cls.isEnrolled)
         return {
           ...transformedCourse,
           enrolledClassId: enrolledClass?.id || null,
-          enrolledClassName: enrolledClass?.name || enrolledClass?.title || null,
-          classes: transformedClasses
+          enrolledClassName:
+            enrolledClass?.name || enrolledClass?.title || null,
+          classes: transformedClasses,
         }
       },
-      providesTags: (result, error, id) => [{ type: "CourseDetail", id: String(id) }]
+      providesTags: (result, error, id) => [
+        { type: "CourseDetail", id: String(id) },
+      ],
     }),
 
     getStudentClassDetail: builder.query({
@@ -774,7 +937,8 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) => {
         const data = response?.data ?? response
-        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        if (!data || typeof data !== "object" || Array.isArray(data))
+          return null
         const transformedClass = transformClass(data)
         if (!transformedClass) return null
         return {
@@ -785,11 +949,13 @@ export const coursesApi = baseApi.injectEndpoints({
           teachingProgress: transformTeachingProgress(data),
         }
       },
-      providesTags: (result, error, id) => [{ type: "ClassDetail", id: String(id) }]
+      providesTags: (result, error, id) => [
+        { type: "ClassDetail", id: String(id) },
+      ],
     }),
 
     enrollInCourse: builder.mutation({
-      async queryFn({ classId }, _queryApi, _extraOptions, baseQuery) {
+      async queryFn({ classId, confirmScheduleConflict }, _queryApi, _extraOptions, baseQuery) {
         const numericClassId = Number(classId)
 
         if (!Number.isSafeInteger(numericClassId) || numericClassId <= 0) {
@@ -808,6 +974,7 @@ export const coursesApi = baseApi.injectEndpoints({
             paymentType: "ClassEnrollment",
             classId: numericClassId,
             pendingClassData: "",
+            confirmScheduleConflict: confirmScheduleConflict === true,
             returnUrl:
               window.location.origin +
               `/workspace/learning/class/${encodePathSegment(numericClassId)}`,
@@ -823,7 +990,7 @@ export const coursesApi = baseApi.injectEndpoints({
         ...(courseId == null
           ? []
           : [{ type: "CourseDetail", id: String(courseId) }]),
-      ]
+      ],
     }),
 
     // 2. Get All Courses
@@ -839,7 +1006,8 @@ export const coursesApi = baseApi.injectEndpoints({
           pageSize: params.pageSize,
         },
       }),
-      transformResponse: (response) => transformPaginatedResponse(response, transformCourse),
+      transformResponse: (response) =>
+        transformPaginatedResponse(response, transformCourse),
       providesTags: ["Courses"],
     }),
 
@@ -857,7 +1025,8 @@ export const coursesApi = baseApi.injectEndpoints({
           pageSize: params.pageSize,
         },
       }),
-      transformResponse: (response) => transformPaginatedResponse(response, transformClass),
+      transformResponse: (response) =>
+        transformPaginatedResponse(response, transformClass),
       providesTags: ["Classes"],
     }),
 
@@ -869,7 +1038,8 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) => {
         const data = response?.data ?? response
-        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        if (!data || typeof data !== "object" || Array.isArray(data))
+          return null
         const transformedCourse = transformCourse(data)
         if (!transformedCourse) return null
         return {
@@ -879,7 +1049,9 @@ export const coursesApi = baseApi.injectEndpoints({
             : [],
         }
       },
-      providesTags: (result, error, id) => [{ type: "CourseDetail", id: String(id) }],
+      providesTags: (result, error, id) => [
+        { type: "CourseDetail", id: String(id) },
+      ],
     }),
 
     // 5. Get Class Detail
@@ -890,7 +1062,8 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response) => {
         const data = response?.data ?? response
-        if (!data || typeof data !== "object" || Array.isArray(data)) return null
+        if (!data || typeof data !== "object" || Array.isArray(data))
+          return null
         const transformedClass = transformClass(data)
         if (!transformedClass) return null
 
@@ -900,10 +1073,12 @@ export const coursesApi = baseApi.injectEndpoints({
         return {
           ...transformedClass,
           nextSession,
-          teachingProgress
+          teachingProgress,
         }
       },
-      providesTags: (result, error, id) => [{ type: "ClassDetail", id: String(id) }],
+      providesTags: (result, error, id) => [
+        { type: "ClassDetail", id: String(id) },
+      ],
     }),
 
     // 9. Create Course
@@ -914,7 +1089,8 @@ export const coursesApi = baseApi.injectEndpoints({
         body: buildCreateCourseFormData(data),
         formData: true,
       }),
-      transformResponse: (response) => transformCourse(response?.data || response),
+      transformResponse: (response) =>
+        transformCourse(response?.data || response),
       invalidatesTags: ["Courses"],
     }),
 
@@ -926,7 +1102,8 @@ export const coursesApi = baseApi.injectEndpoints({
         body: buildUpdateCourseFormData(data),
         formData: true,
       }),
-      transformResponse: (response) => transformCourse(response?.data || response),
+      transformResponse: (response) =>
+        transformCourse(response?.data || response),
       invalidatesTags: (result, error, { id }) => [
         { type: "CourseDetail", id: String(id) },
         "Courses",
@@ -950,11 +1127,15 @@ export const coursesApi = baseApi.injectEndpoints({
     createClass: builder.mutation({
       query: (data) => {
         const schedule = getClassSchedule(data)
-        const fallbackCancelUrl = window.location.origin + window.location.pathname
+        const fallbackCancelUrl =
+          window.location.origin + window.location.pathname
         let cancelUrl = fallbackCancelUrl
         if (typeof data.cancelUrl === "string" && data.cancelUrl.trim()) {
           try {
-            const parsedCancelUrl = new URL(data.cancelUrl, window.location.origin)
+            const parsedCancelUrl = new URL(
+              data.cancelUrl,
+              window.location.origin,
+            )
             if (parsedCancelUrl.origin === window.location.origin) {
               cancelUrl = parsedCancelUrl.href
             }
@@ -976,6 +1157,11 @@ export const coursesApi = baseApi.injectEndpoints({
           price: parseNumberOrNull(data.tuitionFee ?? data.price),
           description: data.description || "",
           timezone: data.timezone || "Asia/Ho_Chi_Minh",
+          requireMinimumAttendance: Boolean(data.requireMinimumAttendance ?? data.requireMinAttendance),
+          minimumAttendanceRate: (data.requireMinimumAttendance ?? data.requireMinAttendance)
+            ? parseIntegerOrNull(data.minimumAttendanceRate ?? data.minAttendanceRate)
+            : null,
+          lateAttendancePolicy: data.lateAttendancePolicy ?? (data.includeLateAttendance === false ? "IgnoreLate" : "CountLate"),
         }
         return {
           url: "/v1/Payments/checkout",
@@ -983,7 +1169,8 @@ export const coursesApi = baseApi.injectEndpoints({
           body: {
             paymentType: "ClassOpeningFee",
             pendingClassData: JSON.stringify(pendingClassData),
-            returnUrl: window.location.origin + "/workspace/classes/all-classes",
+            returnUrl:
+              window.location.origin + "/workspace/classes/all-classes",
             cancelUrl,
             planId: 0,
             classId: 0,
@@ -1006,15 +1193,18 @@ export const coursesApi = baseApi.injectEndpoints({
         body: buildCreateClassFormData(data),
         formData: true,
       }),
-      transformResponse: (response) => transformClass(response?.data || response),
+      transformResponse: (response) =>
+        transformClass(response?.data || response),
       invalidatesTags: (result, error, { id, courseId, data }) => [
         { type: "ClassDetail", id: String(id) },
         ...((courseId ?? data?.courseId) == null
           ? []
-          : [{
-            type: "CourseDetail",
-            id: String(courseId ?? data.courseId),
-          }]),
+          : [
+            {
+              type: "CourseDetail",
+              id: String(courseId ?? data.courseId),
+            },
+          ]),
         "Classes",
         "StudentClasses",
         "Schedule",
@@ -1062,7 +1252,21 @@ export const coursesApi = baseApi.injectEndpoints({
       }),
     }),
 
-
+    // 14. Invite to Class
+    inviteToClass: builder.mutation({
+      query: ({ classId, accountIds, accountId }) => {
+        const resolvedAccountIds = Array.isArray(accountIds)
+          ? accountIds.map(Number).filter((id) => !isNaN(id) && id > 0)
+          : (accountId != null ? [Number(accountId)] : (accountIds != null ? [Number(accountIds)] : []))
+        return {
+          url: `/teacher/classes/${encodePathSegment(classId)}/invite`,
+          method: "POST",
+          body: {
+            accountIds: resolvedAccountIds,
+          },
+        }
+      },
+    }),
 
     // 16. Get Teacher Assignments
     getTeacherAssignments: builder.query({
@@ -1071,7 +1275,9 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
         params: { status, search, onlyUnassigned },
       }),
-      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `class-${classId}` }],
+      providesTags: (result, error, { classId }) => [
+        { type: "ClassGrading", id: `class-${classId}` },
+      ],
     }),
 
     // 17. Get Student Assignments
@@ -1080,7 +1286,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/student/classes/${encodePathSegment(classId)}/assignments`,
         method: "GET",
       }),
-      providesTags: (result, error, { classId }) => [{ type: "ClassGrading", id: `student-${classId}` }],
+      providesTags: (result, error, { classId }) => [
+        { type: "ClassGrading", id: `student-${classId}` },
+      ],
     }),
 
     // 18. Get Student Assignment By ID
@@ -1089,7 +1297,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/student/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}`,
         method: "GET",
       }),
-      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `student-assignment-${assignmentId}` }],
+      providesTags: (result, error, { assignmentId }) => [
+        { type: "ClassGrading", id: `student-assignment-${assignmentId}` },
+      ],
     }),
 
     // 19. Get Current Student Submission
@@ -1098,7 +1308,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/student/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}/my-submission`,
         method: "GET",
       }),
-      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `my-submission-${assignmentId}` }],
+      providesTags: (result, error, { assignmentId }) => [
+        { type: "ClassGrading", id: `my-submission-${assignmentId}` },
+      ],
     }),
 
     // 20. Submit / Resubmit Assignment
@@ -1120,7 +1332,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${encodePathSegment(classId)}/assignments/${encodePathSegment(assignmentId)}`,
         method: "GET",
       }),
-      providesTags: (result, error, { assignmentId }) => [{ type: "ClassGrading", id: `assignment-${assignmentId}` }],
+      providesTags: (result, error, { assignmentId }) => [
+        { type: "ClassGrading", id: `assignment-${assignmentId}` },
+      ],
     }),
 
     // 22. Create Assignment (multipart/form-data)
@@ -1252,7 +1466,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${encodePathSegment(classId)}/materials`,
         method: "GET",
       }),
-      providesTags: (result, error, classId) => [{ type: "ClassMaterials", id: classId }]
+      providesTags: (result, error, classId) => [
+        { type: "ClassMaterials", id: classId },
+      ],
     }),
 
     uploadClassMaterial: builder.mutation({
@@ -1262,18 +1478,22 @@ export const coursesApi = baseApi.injectEndpoints({
         return {
           url: `/teacher/classes/${encodePathSegment(classId)}/materials`,
           method: "POST",
-          body: formData
+          body: formData,
         }
       },
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassMaterials", id: classId }]
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "ClassMaterials", id: classId },
+      ],
     }),
 
     deleteClassMaterial: builder.mutation({
       query: ({ classId, materialId }) => ({
         url: `/teacher/classes/${encodePathSegment(classId)}/materials/${encodePathSegment(materialId)}`,
-        method: "DELETE"
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "ClassMaterials", id: classId }]
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "ClassMaterials", id: classId },
+      ],
     }),
 
     // ─── Schedule ─────────────────────────────────────────────────────
@@ -1290,13 +1510,15 @@ export const coursesApi = baseApi.injectEndpoints({
           ? responseRecord.dates
           : Array.isArray(responseRecord.data?.dates)
             ? responseRecord.data.dates
-            : (Array.isArray(response) ? response : [])
+            : Array.isArray(response)
+              ? response
+              : []
         const converted = rawDates
           .map((dateValue) => parseToLocalDateStr(dateValue))
           .filter(Boolean)
         return {
           ...responseRecord,
-          dates: converted
+          dates: converted,
         }
       },
       providesTags: ["Schedule"],
@@ -1314,20 +1536,26 @@ export const coursesApi = baseApi.injectEndpoints({
           ? responseRecord.data
           : Array.isArray(responseRecord.items)
             ? responseRecord.items
-            : (Array.isArray(response) ? response : [])
-        const converted = rawSessions.filter(isRecord).map(session => ({
+            : Array.isArray(response)
+              ? response
+              : []
+        const converted = rawSessions.filter(isRecord).map((session) => ({
           ...session,
+          rawStartTime: session.startTime,
+          rawEndTime: session.endTime,
           startTime: parseToLocalTimeStr(session.startTime),
           endTime: parseToLocalTimeStr(session.endTime),
           date: parseToLocalDateStr(session.startTime),
-          class: session.class ? {
-            ...session.class,
-            id: session.class.id?.toString() || ""
-          } : null
+          class: session.class
+            ? {
+              ...session.class,
+              id: session.class.id?.toString() || "",
+            }
+            : null,
         }))
         return {
           ...responseRecord,
-          data: converted
+          data: converted,
         }
       },
       providesTags: ["Schedule"],
@@ -1345,20 +1573,26 @@ export const coursesApi = baseApi.injectEndpoints({
           ? responseRecord.data
           : Array.isArray(responseRecord.items)
             ? responseRecord.items
-            : (Array.isArray(response) ? response : [])
-        const converted = rawSessions.filter(isRecord).map(session => ({
+            : Array.isArray(response)
+              ? response
+              : []
+        const converted = rawSessions.filter(isRecord).map((session) => ({
           ...session,
+          rawStartTime: session.startTime,
+          rawEndTime: session.endTime,
           startTime: parseToLocalTimeStr(session.startTime),
           endTime: parseToLocalTimeStr(session.endTime),
           date: parseToLocalDateStr(session.startTime),
-          class: session.class ? {
-            ...session.class,
-            id: session.class.id?.toString() || ""
-          } : null
+          class: session.class
+            ? {
+              ...session.class,
+              id: session.class.id?.toString() || "",
+            }
+            : null,
         }))
         return {
           ...responseRecord,
-          data: converted
+          data: converted,
         }
       },
       providesTags: ["Schedule"],
@@ -1386,95 +1620,108 @@ export const coursesApi = baseApi.injectEndpoints({
         const data = response?.data ?? response
         if (!data) return []
 
-        const rawSections = data.sections
-          ?? data.items
-          ?? (Array.isArray(data) ? data : [])
+        const rawSections =
+          data.sections ?? data.items ?? (Array.isArray(data) ? data : [])
 
         return rawSections.map((section) => {
-          const rawItems = section.items
-            ?? section.contents
-            ?? section.lessons
-            ?? []
+          const rawItems =
+            section.items ?? section.contents ?? section.lessons ?? []
 
           return {
             id: section.id?.toString() || "",
             name: section.name || section.title || "Untitled Section",
             description: section.description || section.subtitle || "",
-            isVisibleToStudents: section.isVisibleToStudents ?? (section.isHidden === false),
-            items: rawItems.filter((item) => {
-              if (item.itemType === "BulletinBoard" && !item.bulletinBoard) return false
-              if (item.itemType === "Link" && !item.link) return false
-              if (item.itemType === "Material" && !item.material) return false
-              if (item.itemType === "Assignment" && !item.assignment) return false
-              if (item.itemType === "Quiz" && !item.quiz) return false
-              return true
-            }).map((item) => {
-              const itemTypeMap = {
-                "BulletinBoard": "bulletinBoard",
-                "Link": "link",
-                "Material": "material",
-                "Assignment": "assignment",
-                "Quiz": "quiz",
-              }
-              const type = item.itemType ? itemTypeMap[item.itemType] || item.itemType.toLowerCase() : (item.type || item.contentType || "material").toLowerCase()
-
-              let title = item.title || item.name || "Untitled"
-              let meta = item.meta || item.description || ""
-              let metaType = item.metaType || "none"
-              let content = item.content || ""
-              let fileUrl = ""
-              let fileName = ""
-
-              if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
-                title = item.bulletinBoard.title || title
-                // metaType = "clock"
-                meta = item.bulletinBoard.content
-              } else if (item.itemType === "Link" && item.link) {
-                title = item.link.title || title
-                meta = item.link.url || meta
-              } else if (item.itemType === "Material" && item.material) {
-                // title = item.material.title || item.material.name || title
-                title = item.material.fileName
-                const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
-                const sizeBytes = item.material.fileSize || item.material.size || 0
-                let sizeStr = ""
-                if (sizeBytes > 0) {
-                  if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`
-                  else if (sizeBytes < 1024 * 1024) sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`
-                  else sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+            isVisibleToStudents:
+              section.isVisibleToStudents ?? section.isHidden === false,
+            items: rawItems
+              .filter((item) => {
+                if (item.itemType === "BulletinBoard" && !item.bulletinBoard)
+                  return false
+                if (item.itemType === "Link" && !item.link) return false
+                if (item.itemType === "Material" && !item.material)
+                  return false
+                if (item.itemType === "Assignment" && !item.assignment)
+                  return false
+                if (item.itemType === "Quiz" && !item.quiz) return false
+                return true
+              })
+              .map((item) => {
+                const itemTypeMap = {
+                  BulletinBoard: "bulletinBoard",
+                  Link: "link",
+                  Material: "material",
+                  Assignment: "assignment",
+                  Quiz: "quiz",
                 }
-                meta = sizeStr ? `${ext} - ${sizeStr}` : ext
-                metaType = "file"
-                fileUrl = item.material.fileUrl || item.material.url || ""
-                fileName = item.material.fileName || item.material.name || ""
-              } else if (item.itemType === "Assignment" && item.assignment) {
-                title = item.assignment.name
-                metaType = "clock"
-              } else if (item.itemType === "Quiz" && item.quiz) {
-                title = item.quiz.name
-                metaType = "clock"
-              }
+                const type = item.itemType
+                  ? itemTypeMap[item.itemType] || item.itemType.toLowerCase()
+                  : (item.type || item.contentType || "material").toLowerCase()
 
-              return {
-                id: item.id?.toString() || "",
-                itemId: item.itemId?.toString() || "",
-                type,
-                content,
-                title,
-                meta,
-                metaType,
-                fileUrl,
-                fileName,
-                isVisibleToStudents: item.isVisibleToStudents ?? (item.isHidden === false),
-                dueDate: item.assignment?.dueDate,
-                openTime: item.quiz?.openTime,
-                closeTime: item.quiz?.closeTime,
-              }
-            }),
+                let title = item.title || item.name || "Untitled"
+                let meta = item.meta || item.description || ""
+                let metaType = item.metaType || "none"
+                let content = item.content || ""
+                let fileUrl = ""
+                let fileName = ""
+
+                if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
+                  title = item.bulletinBoard.title || title
+                  // metaType = "clock"
+                  meta = item.bulletinBoard.content
+                } else if (item.itemType === "Link" && item.link) {
+                  title = item.link.title || title
+                  meta = item.link.url || meta
+                } else if (item.itemType === "Material" && item.material) {
+                  // title = item.material.title || item.material.name || title
+                  title = item.material.fileName
+                  const ext = item.material.fileUrl
+                    ? item.material.fileUrl.split(".").pop().toUpperCase()
+                    : "FILE"
+                  const sizeBytes =
+                    item.material.fileSize || item.material.size || 0
+                  let sizeStr = ""
+                  if (sizeBytes > 0) {
+                    if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`
+                    else if (sizeBytes < 1024 * 1024)
+                      sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`
+                    else
+                      sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+                  }
+                  meta = sizeStr ? `${ext} - ${sizeStr}` : ext
+                  metaType = "file"
+                  fileUrl = item.material.fileUrl || item.material.url || ""
+                  fileName = item.material.fileName || item.material.name || ""
+                } else if (item.itemType === "Assignment" && item.assignment) {
+                  title = item.assignment.name
+                  metaType = "clock"
+                } else if (item.itemType === "Quiz" && item.quiz) {
+                  title = item.quiz.name
+                  metaType = "clock"
+                }
+
+                return {
+                  id: item.id?.toString() || "",
+                  itemId: item.itemId?.toString() || "",
+                  type,
+                  content,
+                  title,
+                  meta,
+                  metaType,
+                  fileUrl,
+                  fileName,
+                  isVisibleToStudents:
+                    item.isVisibleToStudents ?? item.isHidden === false,
+                  dueDate: item.assignment?.dueDate,
+                  openTime: item.quiz?.openTime,
+                  closeTime: item.quiz?.closeTime,
+                }
+              }),
           }
         })
       },
-      providesTags: (result, error, classId) => [{ type: "Curriculum", id: classId }],
+      providesTags: (result, error, classId) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Get curriculum by class (Student view)
@@ -1487,93 +1734,103 @@ export const coursesApi = baseApi.injectEndpoints({
         const data = response?.data ?? response
         if (!data) return []
 
-        const rawSections = data.sections
-          ?? data.items
-          ?? (Array.isArray(data) ? data : [])
+        const rawSections =
+          data.sections ?? data.items ?? (Array.isArray(data) ? data : [])
 
         return rawSections.map((section) => {
-          const rawItems = section.items
-            ?? section.contents
-            ?? section.lessons
-            ?? []
+          const rawItems =
+            section.items ?? section.contents ?? section.lessons ?? []
 
           return {
             id: section.id?.toString() || "",
             name: section.name || section.title || "Untitled Section",
             description: section.description || section.subtitle || "",
             isVisibleToStudents: section.isVisibleToStudents ?? true,
-            items: rawItems.filter((item) => {
-              if (item.itemType === "BulletinBoard" && !item.bulletinBoard) return false
-              if (item.itemType === "Link" && !item.link) return false
-              if (item.itemType === "Material" && !item.material) return false
-              if (item.itemType === "Assignment" && !item.assignment) return false
-              if (item.itemType === "Quiz" && !item.quiz) return false
-              return true
-            }).map((item) => {
-              const itemTypeMap = {
-                "BulletinBoard": "bulletinBoard",
-                "Link": "link",
-                "Material": "material",
-                "Assignment": "assignment",
-                "Quiz": "quiz",
-              }
-              const type = item.itemType ? itemTypeMap[item.itemType] || item.itemType.toLowerCase() : (item.type || item.contentType || "material").toLowerCase()
-
-              let title = item.title || item.name || "Untitled"
-              let meta = item.meta || item.description || ""
-              let metaType = item.metaType || "none"
-              let content = item.content || ""
-              let fileUrl = ""
-
-
-              if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
-                title = item.bulletinBoard.title || title
-                // metaType = "clock"
-                meta = item.bulletinBoard.content
-              } else if (item.itemType === "Link" && item.link) {
-                title = item.link.title || title
-                meta = item.link.url || meta
-              } else if (item.itemType === "Material" && item.material) {
-                // title = item.material.title || item.material.name || title
-                title = item.material.fileName
-                const ext = item.material.fileUrl ? item.material.fileUrl.split('.').pop().toUpperCase() : "FILE"
-                const sizeBytes = item.material.fileSize || item.material.size || 0
-                let sizeStr = ""
-                if (sizeBytes > 0) {
-                  if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`
-                  else if (sizeBytes < 1024 * 1024) sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`
-                  else sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+            items: rawItems
+              .filter((item) => {
+                if (item.itemType === "BulletinBoard" && !item.bulletinBoard)
+                  return false
+                if (item.itemType === "Link" && !item.link) return false
+                if (item.itemType === "Material" && !item.material)
+                  return false
+                if (item.itemType === "Assignment" && !item.assignment)
+                  return false
+                if (item.itemType === "Quiz" && !item.quiz) return false
+                return true
+              })
+              .map((item) => {
+                const itemTypeMap = {
+                  BulletinBoard: "bulletinBoard",
+                  Link: "link",
+                  Material: "material",
+                  Assignment: "assignment",
+                  Quiz: "quiz",
                 }
-                meta = sizeStr ? `${ext} • ${sizeStr}` : ext
-                metaType = "file"
-                fileUrl = item.material.fileUrl || item.material.url || ""
-              } else if (item.itemType === "Assignment" && item.assignment) {
-                title = item.assignment.name
-                metaType = "clock"
-              } else if (item.itemType === "Quiz" && item.quiz) {
-                title = item.quiz.name
-                metaType = "clock"
-              }
+                const type = item.itemType
+                  ? itemTypeMap[item.itemType] || item.itemType.toLowerCase()
+                  : (item.type || item.contentType || "material").toLowerCase()
 
-              return {
-                id: item.id?.toString() || "",
-                itemId: item.itemId?.toString() || "",
-                type,
-                content,
-                title,
-                meta,
-                metaType,
-                fileUrl,
-                isVisibleToStudents: item.isVisibleToStudents ?? true,
-                dueDate: item.assignment?.dueDate,
-                openTime: item.quiz?.openTime,
-                closeTime: item.quiz?.closeTime,
-              }
-            }),
+                let title = item.title || item.name || "Untitled"
+                let meta = item.meta || item.description || ""
+                let metaType = item.metaType || "none"
+                let content = item.content || ""
+                let fileUrl = ""
+
+                if (item.itemType === "BulletinBoard" && item.bulletinBoard) {
+                  title = item.bulletinBoard.title || title
+                  // metaType = "clock"
+                  meta = item.bulletinBoard.content
+                } else if (item.itemType === "Link" && item.link) {
+                  title = item.link.title || title
+                  meta = item.link.url || meta
+                } else if (item.itemType === "Material" && item.material) {
+                  // title = item.material.title || item.material.name || title
+                  title = item.material.fileName
+                  const ext = item.material.fileUrl
+                    ? item.material.fileUrl.split(".").pop().toUpperCase()
+                    : "FILE"
+                  const sizeBytes =
+                    item.material.fileSize || item.material.size || 0
+                  let sizeStr = ""
+                  if (sizeBytes > 0) {
+                    if (sizeBytes < 1024) sizeStr = `${sizeBytes} B`
+                    else if (sizeBytes < 1024 * 1024)
+                      sizeStr = `${(sizeBytes / 1024).toFixed(1)} KB`
+                    else
+                      sizeStr = `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+                  }
+                  meta = sizeStr ? `${ext} • ${sizeStr}` : ext
+                  metaType = "file"
+                  fileUrl = item.material.fileUrl || item.material.url || ""
+                } else if (item.itemType === "Assignment" && item.assignment) {
+                  title = item.assignment.name
+                  metaType = "clock"
+                } else if (item.itemType === "Quiz" && item.quiz) {
+                  title = item.quiz.name
+                  metaType = "clock"
+                }
+
+                return {
+                  id: item.id?.toString() || "",
+                  itemId: item.itemId?.toString() || "",
+                  type,
+                  content,
+                  title,
+                  meta,
+                  metaType,
+                  fileUrl,
+                  isVisibleToStudents: item.isVisibleToStudents ?? true,
+                  dueDate: item.assignment?.dueDate,
+                  openTime: item.quiz?.openTime,
+                  closeTime: item.quiz?.closeTime,
+                }
+              }),
           }
         })
       },
-      providesTags: (result, error, classId) => [{ type: "Curriculum", id: classId }],
+      providesTags: (result, error, classId) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Create a new section in a class curriculum
@@ -1595,12 +1852,20 @@ export const coursesApi = baseApi.injectEndpoints({
 
     // Update a section in a class curriculum
     updateCurriculumSection: builder.mutation({
-      query: ({ classId, sectionId, name, description, isVisibleToStudents = true }) => ({
+      query: ({
+        classId,
+        sectionId,
+        name,
+        description,
+        isVisibleToStudents = true,
+      }) => ({
         url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}`,
         method: "PUT",
         body: { name, description, isVisibleToStudents },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Delete a section in a class curriculum
@@ -1609,27 +1874,47 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Create a bulletin board in a section
     createBulletinBoard: builder.mutation({
-      query: ({ classId, sectionId, title, content, allowStudentReply = true, isVisibleToStudents = true }) => ({
+      query: ({
+        classId,
+        sectionId,
+        title,
+        content,
+        allowStudentReply = true,
+        isVisibleToStudents = true,
+      }) => ({
         url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/bulletin-boards`,
         method: "POST",
         body: { title, content, allowStudentReply, isVisibleToStudents },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Update a bulletin board in a section
     updateBulletinBoard: builder.mutation({
-      query: ({ classId, boardId, title, content, allowStudentReply, isVisibleToStudents }) => ({
+      query: ({
+        classId,
+        boardId,
+        title,
+        content,
+        allowStudentReply,
+        isVisibleToStudents,
+      }) => ({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}`,
         method: "PUT",
         body: { title, content, allowStudentReply, isVisibleToStudents },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Get a bulletin board detail
@@ -1638,14 +1923,22 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/${boardId}`,
         method: "GET",
       }),
-      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      providesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Upload material to a section
     uploadMaterialToSection: builder.mutation({
-      query: ({ classId, sectionId, files, title, isVisibleToStudents = true }) => {
+      query: ({
+        classId,
+        sectionId,
+        files,
+        title,
+        isVisibleToStudents = true,
+      }) => {
         const formData = new FormData()
-        files.forEach(file => {
+        files.forEach((file) => {
           formData.append("Files", file)
         })
         if (title) formData.append("Title", title)
@@ -1653,20 +1946,30 @@ export const coursesApi = baseApi.injectEndpoints({
         return {
           url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/materials`,
           method: "POST",
-          body: formData
+          body: formData,
         }
       },
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Add link to a section
     addLinkToSection: builder.mutation({
-      query: ({ classId, sectionId, title, url, isVisibleToStudents = true }) => ({
+      query: ({
+        classId,
+        sectionId,
+        title,
+        url,
+        isVisibleToStudents = true,
+      }) => ({
         url: `/teacher/classes/${classId}/curriculum/sections/${sectionId}/links`,
         method: "POST",
         body: { title, url, isVisibleToStudents },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Update a link in a curriculum section
@@ -1676,7 +1979,9 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Add assignments to a section
@@ -1686,7 +1991,9 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
         body: { assignmentIds },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Add quizzes to a section
@@ -1696,7 +2003,9 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
         body: { quizIds },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Change visibility of an item in a section
@@ -1705,7 +2014,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/items/${itemId}/visibility?isVisible=${isVisibleToStudents}`,
         method: "PUT",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Delete item in a section
@@ -1714,7 +2025,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/items/${itemId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Get list posts in a bulletin board (Student)
@@ -1724,8 +2037,11 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
         params: { page, pageSize, search },
       }),
-      transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
-      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      transformResponse: (response) =>
+        transformPaginatedResponse(response, (item) => item),
+      providesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Get post detail (Student)
@@ -1734,7 +2050,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/student/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
         method: "GET",
       }),
-      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      providesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Create comment in a bulletin board (Student)
@@ -1744,7 +2062,9 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
         body: { content },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Get list posts in a bulletin board
@@ -1754,8 +2074,11 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
         params: { page, pageSize, search },
       }),
-      transformResponse: (response) => transformPaginatedResponse(response, (item) => item),
-      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      transformResponse: (response) =>
+        transformPaginatedResponse(response, (item) => item),
+      providesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Create a post in a bulletin board
@@ -1766,7 +2089,9 @@ export const coursesApi = baseApi.injectEndpoints({
         body: formData,
         formData: true,
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Get post detail
@@ -1775,7 +2100,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
         method: "GET",
       }),
-      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      providesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Update a post in a bulletin board
@@ -1786,7 +2113,9 @@ export const coursesApi = baseApi.injectEndpoints({
         body: formData,
         formData: true,
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Delete a post in a bulletin board
@@ -1795,7 +2124,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/posts/${postId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Create comment in a bulletin board
@@ -1807,7 +2138,9 @@ export const coursesApi = baseApi.injectEndpoints({
           content,
         },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Get comment detail
@@ -1816,7 +2149,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
         method: "GET",
       }),
-      providesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      providesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Update a comment in a bulletin board
@@ -1829,7 +2164,9 @@ export const coursesApi = baseApi.injectEndpoints({
           isVisibleToStudents,
         },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Delete a comment in a bulletin board
@@ -1838,7 +2175,9 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${classId}/curriculum/bulletin-boards/comments/${commentId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // Create a reply in a comment
@@ -1851,7 +2190,9 @@ export const coursesApi = baseApi.injectEndpoints({
           isVisibleToStudents,
         },
       }),
-      invalidatesTags: (result, error, { classId }) => [{ type: "Curriculum", id: classId }],
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "Curriculum", id: classId },
+      ],
     }),
 
     // ─── Teacher Quiz Endpoints ────────────────────────────────────────
@@ -1896,9 +2237,8 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
         body: buildQuizFormData(body),
       }),
-      invalidatesTags: (result, error, { classId }) => (
-        getQuizListInvalidationTags(classId)
-      ),
+      invalidatesTags: (result, error, { classId }) =>
+        getQuizListInvalidationTags(classId),
     }),
 
     updateTeacherQuiz: builder.mutation({
@@ -1907,9 +2247,8 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "PUT",
         body: buildQuizFormData(body, { isUpdate: true }),
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     deleteTeacherQuiz: builder.mutation({
@@ -1932,9 +2271,8 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
         body: buildQuestionFormData(body),
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     updateTeacherQuestion: builder.mutation({
@@ -1943,9 +2281,8 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "PUT",
         body: buildQuestionFormData(body),
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     deleteTeacherQuestion: builder.mutation({
@@ -1953,9 +2290,8 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/${encodePathSegment(questionId)}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     reorderTeacherQuestions: builder.mutation({
@@ -1964,9 +2300,8 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "PUT",
         body: questionIds,
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     cloneTeacherQuestion: builder.mutation({
@@ -1974,9 +2309,8 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/${encodePathSegment(questionId)}/clone`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     publishTeacherQuiz: builder.mutation({
@@ -1984,9 +2318,8 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/publish`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     closeTeacherQuiz: builder.mutation({
@@ -1994,9 +2327,8 @@ export const coursesApi = baseApi.injectEndpoints({
         url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/close`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
     }),
 
     previewTeacherQuiz: builder.mutation({
@@ -2020,9 +2352,16 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: (result, error, { classId, quizId }) => (
-        getQuizContentInvalidationTags(classId, quizId)
-      ),
+      invalidatesTags: (result, error, { classId, quizId }) =>
+        getQuizContentInvalidationTags(classId, quizId),
+    }),
+
+    importTeacherQuestionsPreview: builder.mutation({
+      query: ({ classId, quizId, formData }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/quizzes/${encodePathSegment(quizId)}/questions/import-preview`,
+        method: "POST",
+        body: formData,
+      }),
     }),
 
     getTeacherQuizGrading: builder.query({
@@ -2148,9 +2487,7 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => {
-        const list = Array.isArray(response)
-          ? response
-          : response?.data || []
+        const list = Array.isArray(response) ? response : response?.data || []
         return list
       },
     }),
@@ -2161,9 +2498,7 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => {
-        const list = Array.isArray(response)
-          ? response
-          : response?.data || []
+        const list = Array.isArray(response) ? response : response?.data || []
         return list
       },
     }),
@@ -2353,6 +2688,25 @@ export const coursesApi = baseApi.injectEndpoints({
         responseHandler: (response) => response.blob(),
       }),
     }),
+
+    // 5. Dashboard
+    getDashboard: builder.query({
+      query: (params) => ({
+        url: "/teacher/dashboard",
+        method: "GET",
+        params: buildDashboardQueryParams(params),
+      }),
+      providesTags: ["Analytics"],
+    }),
+
+    exportDashboard: builder.mutation({
+      query: (params) => ({
+        url: "/teacher/dashboard/export",
+        method: "GET",
+        params: buildDashboardQueryParams(params),
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
   }),
 })
 
@@ -2363,6 +2717,7 @@ export const {
   useGetStudentAvailableCoursesQuery,
   useGetStudentAvailableClassesQuery,
   useGetStudentJoinedClassesQuery,
+  useGetStudentCompletedClassesQuery,
   useGetStudentCourseDetailQuery,
   useGetStudentClassDetailQuery,
   useEnrollInCourseMutation,
@@ -2402,6 +2757,7 @@ export const {
   useGetCommissionQuery,
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
+  useInviteToClassMutation,
   useGetCurriculumByClassQuery,
   useGetStudentCurriculumByClassQuery,
   useCreateCurriculumSectionMutation,
@@ -2446,6 +2802,7 @@ export const {
   usePreviewTeacherQuizMutation,
   useDownloadQuizTemplateMutation,
   useImportTeacherQuestionsMutation,
+  useImportTeacherQuestionsPreviewMutation,
   useGetTeacherQuizGradingQuery,
   useGradeTeacherEssayMutation,
   useGetTeacherQuizStatsQuery,
@@ -2483,4 +2840,7 @@ export const {
   useGetAnalyticsStudentsByClassQuery,
   useGetAnalyticsStudentsByCourseQuery,
   useExportAnalyticsStudentsMutation,
+  // Dashboard Hooks
+  useGetDashboardQuery,
+  useExportDashboardMutation,
 } = coursesApi

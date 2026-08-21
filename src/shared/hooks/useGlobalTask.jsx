@@ -49,6 +49,7 @@ export const useGlobalTask = () => {
       taskFn = null,
       isHidden = false,
       isUploadTask = false,
+      baseUrlOverride = null,
       onSuccess = null,
       onError = null,
     }) => {
@@ -84,7 +85,7 @@ export const useGlobalTask = () => {
         const xhr = new XMLHttpRequest();
 
         const targetUrl = url || "";
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
+        const baseUrl = baseUrlOverride || import.meta.env.VITE_API_BASE_URL || "/api";
         const finalUrl = targetUrl.startsWith("http")
           ? targetUrl
           : `${baseUrl}${targetUrl}`;
@@ -137,7 +138,7 @@ export const useGlobalTask = () => {
             let resData = null;
             try {
               resData = JSON.parse(xhr.responseText);
-            } catch {}
+            } catch { }
 
             dispatch(
               updateTask({
@@ -156,7 +157,7 @@ export const useGlobalTask = () => {
             try {
               const res = JSON.parse(xhr.responseText);
               errorMsg = res.message || errorMsg;
-            } catch {}
+            } catch { }
 
             dispatch(
               updateTask({

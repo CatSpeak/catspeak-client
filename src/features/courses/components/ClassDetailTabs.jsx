@@ -4,7 +4,7 @@ import { Lock } from "lucide-react"
 const ClassDetailTabs = ({ tabs, activeTab, onChange, onLockedSelect }) => (
   <div
     role="tablist"
-    className="flex border-b border-gray-150 pb-px gap-8 text-sm font-bold text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-none"
+    className="flex border-b border-border pb-px gap-8 text-sm font-bold text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-none"
   >
     {tabs.map(({ value, label, locked = false }) => {
       const isActive = activeTab === value

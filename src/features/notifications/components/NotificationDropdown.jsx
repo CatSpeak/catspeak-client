@@ -28,7 +28,7 @@ const NotificationDropdown = ({ onClose, isMobile, notifications, unreadCount, m
         : "rounded-xl shadow-lg ring-1 ring-black ring-opacity-5"
         }`}
     >
-      <div className="flex items-center gap-3 border-b border-gray-100 p-4">
+      <div className="flex items-center gap-3 border-b border-border p-4">
         {isMobile && (
           <button
             onClick={onClose}

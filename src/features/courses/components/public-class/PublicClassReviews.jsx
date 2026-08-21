@@ -48,7 +48,7 @@ const PublicClassReviews = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Rating Breakdown Card */}
-        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between shadow-xs">
+        <div className="lg:col-span-5 bg-white border border-border rounded-3xl p-6 flex flex-col justify-between shadow-xs">
           <div>
             <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
               Đánh giá trung bình
@@ -97,7 +97,7 @@ const PublicClassReviews = () => {
           {MOCK_REVIEWS.map((review) => (
             <div
               key={review.id}
-              className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xs relative"
+              className="bg-white border border-border rounded-3xl p-6 shadow-2xs relative"
             >
               <Quote className="absolute top-4 right-4 text-slate-200" size={32} />
 

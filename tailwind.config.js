@@ -34,7 +34,7 @@ export default {
         success: "#4b0008",
         headingColor: "#2e2e2e",
         textColor: "#515151",
-        primary2: "#f3f3f3",
+        primary2: "#F5F5F7",
         darkOverlay: "rgba(0,0,0,0.2)",
         lightOverlay: "rgba(255,255,255,0.4)",
         lighttextGray: "#9ca0ab",
@@ -47,8 +47,32 @@ export default {
         text555: "#555",
         secondary: "#606060",
         dusk: "#1a1a2e",
-        border: "#e5e5e5",
-        "main-bg": "#f3f3f3",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        primaryBg: "#F5F5F7",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
       },
       width: {
         150: "150px",

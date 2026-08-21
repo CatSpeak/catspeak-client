@@ -20,7 +20,7 @@ const RoomsMobileDrawer = ({ isOpen, onClose, title, children }) => {
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex h-[56px] items-center justify-between border-b border-gray-200 px-4">
+        <div className="flex h-[56px] items-center justify-between border-b border-border px-4">
           <h2 className="text-base font-semibold text-gray-900">{title}</h2>
           <button
             onClick={onClose}

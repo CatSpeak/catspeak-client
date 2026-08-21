@@ -1,14 +1,17 @@
 import { MicOff, VideoOff, MonitorUp, Hand } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { useEffect, useRef, useReducer, useMemo } from "react"
+import { useState, useEffect, useRef, useReducer, useMemo } from "react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { Track, ParticipantEvent } from "livekit-client"
 import { motion } from "framer-motion"
 
-
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getProfilePath } from "@/shared/utils/navigation"
+
+import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Renders a single participant's video tile using LiveKit.
@@ -22,6 +25,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 const VideoTileInner = ({ participant, onClick }) => {
   const { t } = useLanguage()
   const isSpeaking = useIsSpeaking(participant)
+  const { room, user, isHost: isHostFromContext } = useVideoCallContext()
+  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   // Force re-render whenever tracks change on this participant so that
   // getTrackPublication() returns the latest track references.
@@ -61,7 +66,6 @@ const VideoTileInner = ({ participant, onClick }) => {
     }
   }
   const meta = parseMetadata(participant.metadata)
-  // console.log("Participant Metadata [VideoTile]:", meta)
   const isHandRaised = meta.handRaised === true
   const avatarUrl = sanitizeAvatarUrl(meta.avatarImageUrl)
 
@@ -73,7 +77,7 @@ const VideoTileInner = ({ participant, onClick }) => {
   // Get the camera track publication
   const cameraPub = participant.getTrackPublication(Track.Source.Camera)
   const cameraTrack = cameraPub?.track
-  const isVideoVisible = webcamOn && !!cameraTrack
+  const isVideoVisible = webcamOn && (!!cameraTrack || participant.isMockCamera)
 
   const videoRef = useRef(null)
 
@@ -104,20 +108,37 @@ const VideoTileInner = ({ participant, onClick }) => {
       <div
         className={`pointer-events-none absolute inset-0 z-10 rounded-xl transition-all duration-200 ${
           isSpeaking
-            ? "border-2 border-solid border-[#3D9E60] ring-1 ring-inset ring-[#F3F3F3]"
+            ? "border-2 border-solid border-[#3D9E60] ring-1 ring-inset ring-[#F5F5F7]"
             : "border-2 border-solid border-transparent shadow-sm"
         }`}
       />
-      {/* Video element for camera track */}
-      <video
-        autoPlay
-        playsInline
-        muted={isLocal}
-        ref={videoRef}
-        className={`h-full w-full object-cover ${
-          isVideoVisible ? "block" : "hidden"
-        } ${isLocal ? "-scale-x-100" : ""}`}
-      />
+
+      {/* Video element for real camera track OR Mock Camera Preview */}
+      {isVideoVisible ? (
+        participant.isMockCamera && !cameraTrack ? (
+          <div className="relative h-full w-full bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 flex flex-col items-center justify-center p-4 select-none">
+            <Avatar
+              src={avatarUrl}
+              name={displayName}
+              size="lg"
+              theme={theme}
+            />
+            <span className="mt-2 text-[10px] font-semibold text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/30 backdrop-blur-sm animate-pulse">
+              🎥 Camera (Mock)
+            </span>
+          </div>
+        ) : (
+          <video
+            autoPlay
+            playsInline
+            muted={isLocal}
+            ref={videoRef}
+            className={`h-full w-full object-cover ${
+              isVideoVisible ? "block" : "hidden"
+            } ${isLocal ? "-scale-x-100" : ""}`}
+          />
+        )
+      ) : null}
 
       {/* Avatar fallback when no video */}
       {!isVideoVisible && (
@@ -160,15 +181,34 @@ const VideoTileInner = ({ participant, onClick }) => {
       )}
 
       {/* Bottom Controls Overlay */}
-      <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none z-20">
+      <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 pointer-events-none z-20">
         {/* Status icons and Name */}
-        <div className="flex min-w-0 items-center gap-1.5 rounded-full bg-black/40 px-3 py-2 text-white backdrop-blur-sm pointer-events-auto">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-1.5 rounded-full bg-black/40 px-2 py-1 sm:px-3 sm:py-2 text-white backdrop-blur-sm pointer-events-auto">
           <div className="flex flex-shrink-0 items-center gap-1">
-            {screenShareOn && <MonitorUp size={16} />}
-            {!micOn && <MicOff size={16} />}
-            {!webcamOn && <VideoOff size={16} />}
+            {screenShareOn && <MonitorUp size={14} className="sm:w-4 sm:h-4" />}
+            {!micOn && <MicOff size={14} className="sm:w-4 sm:h-4" />}
+            {!webcamOn && <VideoOff size={14} className="sm:w-4 sm:h-4" />}
           </div>
-          <div className="min-w-0 truncate font-medium text-sm">
+          <div
+            onClick={(e) => {
+              const accountId =
+                meta.accountId ||
+                (/^\d+$/.test(participant.identity) ? participant.identity : null)
+              if (accountId) {
+                e.stopPropagation()
+                window.open(
+                  getProfilePath(accountId),
+                  "_blank",
+                  "noopener,noreferrer",
+                )
+              }
+            }}
+            className={`min-w-0 truncate font-medium text-xs sm:text-sm ${
+              meta.accountId || /^\d+$/.test(participant.identity)
+                ? "cursor-pointer hover:underline"
+                : ""
+            }`}
+          >
             {displayName}{" "}
             {isLocal &&
               (t.rooms?.videoCall?.participantList?.youSuffix || "(You)")}

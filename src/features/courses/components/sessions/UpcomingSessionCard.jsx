@@ -1,10 +1,10 @@
-import React from "react"
-import { Calendar, Clock, Users } from "lucide-react"
+import React from "react";
+import { Calendar, Clock, Users } from "lucide-react";
 
-import CourseStatusPill from "../CourseStatusPill"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { useTimezone } from "@/shared/hooks/useTimezone"
-import { getLocalizedLanguageName } from "../../data/courseFormOptions"
+import CourseStatusPill from "../CourseStatusPill";
+import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import { getLocalizedLanguageName } from "../../data/courseFormOptions";
 
 const UpcomingSessionCard = ({
   nextClass,
@@ -17,12 +17,12 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
-  const { t } = useLanguage()
-  const { formatDateMonth, formatScheduleTime } = useTimezone()
-  const ui = t.courses?.workspaceUi || {}
+  const { language, t } = useLanguage();
+  const { formatDateMonth, formatScheduleTime } = useTimezone();
+  const ui = t.courses?.workspaceUi || {};
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-xs flex flex-col gap-5">
+    <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
       <h3 className="text-lg font-black text-gray-950 tracking-tight">
         {upcomingSessionLabel}
       </h3>
@@ -53,19 +53,69 @@ const UpcomingSessionCard = ({
               <Clock size={14} className="text-gray-400" />
               <span>
                 {(() => {
-                  const startTimeStr = nextClass.schedule?.startTime || nextClass.startTime
-                  const endTimeStr = nextClass.schedule?.endTime || nextClass.endTime
-                  if (!startTimeStr) return ui.tba || "TBA"
-                  const startFormatted = formatScheduleTime(startTimeStr)
-                  const endFormatted = endTimeStr ? formatScheduleTime(endTimeStr) : ""
-                  return endFormatted ? `${startFormatted} - ${endFormatted}` : startFormatted
+                  const ns = nextClass?.nextSession;
+                  const schedObj = Array.isArray(nextClass?.schedule)
+                    ? nextClass.schedule[0]
+                    : nextClass?.schedule;
+                  const rawIsoDate =
+                    ns?.rawStartTime ||
+                    ns?.date ||
+                    (typeof ns?.startTime === "string" &&
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                      ? ns.startTime
+                      : null) ||
+                    nextClass?.date ||
+                    nextClass?.startDate;
+                  const sessionDate =
+                    typeof rawIsoDate === "string"
+                      ? rawIsoDate.split("T")[0]
+                      : null;
+                  const sessionStartTime =
+                    schedObj?.startTime ||
+                    (typeof ns?.startTime === "string" && !ns.startTime.includes("T") ? ns.startTime : null) ||
+                    ns?.startTime ||
+                    nextClass?.startTime;
+                  const sessionEndTime =
+                    schedObj?.endTime ||
+                    (typeof ns?.endTime === "string" && !ns.endTime.includes("T") ? ns.endTime : null) ||
+                    ns?.endTime ||
+                    nextClass?.endTime;
+
+                  if (!sessionStartTime) return ui.tba || "TBA";
+                  const startFormatted = formatScheduleTime(sessionStartTime);
+                  const endFormatted = sessionEndTime
+                    ? formatScheduleTime(sessionEndTime)
+                    : "";
+                  return endFormatted
+                    ? `${startFormatted} - ${endFormatted}`
+                    : startFormatted;
                 })()}
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
               <Calendar size={14} className="text-gray-400" />
               <span>
-                {formatDateMonth(nextClass.startDate || nextClass.date, ui.tba)}
+                {(() => {
+                  const ns = nextClass?.nextSession;
+                  const schedObj = Array.isArray(nextClass?.schedule)
+                    ? nextClass.schedule[0]
+                    : nextClass?.schedule;
+                  const rawIsoDate =
+                    ns?.rawStartTime ||
+                    ns?.date ||
+                    (typeof ns?.startTime === "string" &&
+                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                      ? ns.startTime
+                      : null) ||
+                    nextClass?.date ||
+                    nextClass?.startDate;
+                  const sessionDate =
+                    typeof rawIsoDate === "string"
+                      ? rawIsoDate.split("T")[0]
+                      : null;
+
+                  return formatDateMonth(sessionDate, ui.tba);
+                })()}
               </span>
             </div>
           </div>
@@ -89,12 +139,14 @@ const UpcomingSessionCard = ({
           </div>
         </div>
       ) : (
-        <div className="bg-[#FCFCFC] border border-gray-150 rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
+        <div className="bg-[#FCFCFC] border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
           <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
             <Calendar size={18} />
           </div>
           <div className="flex flex-col gap-0.5">
-            <span className="font-extrabold text-base text-gray-700">{noUpcomingLabel}</span>
+            <span className="font-extrabold text-base text-gray-700">
+              {noUpcomingLabel}
+            </span>
             <p className="text-sm text-gray-400 font-semibold max-w-[200px] leading-relaxed">
               {createClassToScheduleLabel}
             </p>
@@ -110,7 +162,7 @@ const UpcomingSessionCard = ({
         {viewAllLabel}
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default UpcomingSessionCard
+export default UpcomingSessionCard;

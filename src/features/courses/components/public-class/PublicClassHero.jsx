@@ -1,17 +1,22 @@
-import React from "react"
-import { ShieldCheck, Share2 } from "lucide-react"
+import React, { useState } from "react"
+import { ShieldCheck, Share2, Check, ArrowLeft } from "lucide-react"
 import { getSafeMediaUrl, defaultCourseThumbnail } from "../../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const PublicClassHero = ({
   classData,
   isEnrolled,
   isEnrolling,
+  isUpcoming,
+  enrollmentIssue,
   onEnroll,
+  onBack,
 }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const pc = c.publicClass || {}
+  const [linkCopied, setLinkCopied] = useState(false)
 
   const teacher = classData?.teacher || {}
   const teacherName = teacher.fullName || teacher.name || teacher.title || c.defaultInstructor || "CatSpeak Instructor"
@@ -19,7 +24,7 @@ const PublicClassHero = ({
   const bgThumbnailUrl = getSafeMediaUrl(classData?.thumbnailUrl) || defaultCourseThumbnail
 
   return (
-    <section className="relative bg-slate-950 text-white overflow-hidden min-h-[480px] sm:min-h-[560px] lg:min-h-[620px] flex flex-col justify-end pt-16 pb-16 sm:pb-20 border-b border-slate-800">
+    <section className="relative bg-slate-950 text-white overflow-hidden min-h-[480px] sm:min-h-[560px] lg:min-h-[620px] flex flex-col justify-between pt-6 pb-16 sm:pb-20 border-b border-slate-800">
       {/* Full-Vibrancy Thumbnail Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-85 transition-all duration-700"
@@ -30,13 +35,32 @@ const PublicClassHero = ({
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/60 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+      {/* Top Bar with Return Back Button */}
+      {onBack && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-4 pb-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 backdrop-blur-md text-sm font-semibold transition-all duration-200 group cursor-pointer shadow-md hover:shadow-lg"
+          >
+            <ArrowLeft size={18} className="transition-transform duration-200 text-slate-300" />
+            <span>{pc.back || t.common?.back || "Quay lại"}</span>
+          </button>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full pt-6">
         <div className="max-w-4xl flex flex-col gap-5">
           {/* Top Tags */}
           <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold">
             <span className="bg-[#b20a1c] text-white px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
               {pc.onlineBadge || "Lớp Học Trực Tuyến"}
             </span>
+            {isUpcoming && (
+              <span className="bg-indigo-600 text-white px-3 py-1 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
+              </span>
+            )}
             {classData?.language && (
               <span className="bg-slate-900/90 text-white border border-slate-700/80 backdrop-blur-md px-3 py-1 rounded-full font-medium">
                 {classData.language}
@@ -46,7 +70,7 @@ const PublicClassHero = ({
 
           {/* Title */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight tracking-tight drop-shadow-md">
-            {classData?.title || pc.defaultTitle || "Chi Tiết Lớp Học CatSpeak"}
+            {classData?.title || classData?.name || pc.defaultTitle || "Chi Tiết Lớp Học CatSpeak"}
           </h1>
 
           {/* Instructor Badge */}
@@ -79,9 +103,33 @@ const PublicClassHero = ({
               <button
                 type="button"
                 onClick={onEnroll}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-900/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-lg shadow-emerald-900/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base cursor-pointer"
               >
                 {c.enterClass || pc.enterClass || "Vào Lớp Học"}
+              </button>
+            ) : isUpcoming ? (
+              <button
+                type="button"
+                onClick={onEnroll}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold px-8 py-3.5 rounded-2xl shadow-xl shadow-indigo-900/40 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-base cursor-pointer"
+              >
+                {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
+              </button>
+            ) : enrollmentIssue === "full" ? (
+              <button
+                type="button"
+                disabled
+                className="bg-slate-800 text-slate-400 font-extrabold px-8 py-3.5 rounded-2xl flex items-center gap-2 text-base cursor-not-allowed"
+              >
+                {pc.classFull || "Đã đủ học viên"}
+              </button>
+            ) : enrollmentIssue === "closed" ? (
+              <button
+                type="button"
+                disabled
+                className="bg-slate-800 text-slate-400 font-extrabold px-8 py-3.5 rounded-2xl flex items-center gap-2 text-base cursor-not-allowed"
+              >
+                {pc.enrollmentClosed || "Đã đóng đăng ký"}
               </button>
             ) : (
               <button
@@ -96,17 +144,20 @@ const PublicClassHero = ({
 
             <button
               type="button"
-              onClick={() => {
-                if (navigator.share) {
-                  navigator.share({ title: classData?.title, url: window.location.href })
-                } else {
-                  navigator.clipboard.writeText(window.location.href)
-                }
+              onClick={async () => {
+                const shareUrl = `${window.location.origin}/explore-courses/class/${classData?.id || classData?._id}`
+                await copyShareLink({
+                  url: shareUrl,
+                  successMessage: c.classDetail?.linkCopied || "Link copied!",
+                  errorMessage: c.classDetail?.linkCopyFailed || "Failed to copy link",
+                })
+                setLinkCopied(true)
+                setTimeout(() => setLinkCopied(false), 2000)
               }}
               className="bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 p-3.5 rounded-2xl transition-colors backdrop-blur-md cursor-pointer"
               title={pc.shareClass || "Chia sẻ lớp học"}
             >
-              <Share2 size={20} />
+              {linkCopied ? <Check size={20} /> : <Share2 size={20} />}
             </button>
           </div>
 

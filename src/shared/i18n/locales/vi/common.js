@@ -36,7 +36,7 @@ export default {
   nav: {
     home: "Trang chủ",
     rooms: "Phòng",
-    community: "Trang chủ",
+    community: "Cộng đồng",
     learningResources: "Tài nguyên học tập",
     workspaceReels: "Reels cá nhân",
     catSpeak: "Cat Speak",
@@ -49,6 +49,7 @@ export default {
     calendar: "Lịch",
     events: "Sự kiện",
     analytics: "Thống kê",
+    dashboard: "Bảng điều khiển",
     cart: "Giỏ hàng",
     courses: "Khóa học",
     allCourses: "Các khóa học",
@@ -57,7 +58,9 @@ export default {
     myCalendar: "Lịch của tôi",
     schedule: "Lịch giảng dạy",
     teachingTasks: "Công việc giảng dạy",
+    vouchers: "Ưu đãi & Voucher",
     myLearning: "Góc học tập",
+    manageMaterials: "Quản lý tài liệu",
     exploreCourses: "Khám phá khóa học",
     messages: "Tin nhắn",
     settings: "Cài đặt",
@@ -76,9 +79,11 @@ export default {
     accountInfo: "Thông tin tài khoản",
     systemConfig: "Thiết lập hệ thống",
     emailNotifyTitle: "Nhận email thông báo & tin tức từ CatSpeak",
-    emailNotifyDesc: "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
+    emailNotifyDesc:
+      "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
     timezoneTitle: "Múi giờ",
-    timezoneDesc: "Điều chỉnh lịch hẹn, lịch sử trò chuyện và thống kê theo múi giờ của bạn.",
+    timezoneDesc:
+      "Điều chỉnh lịch hẹn, lịch sử trò chuyện và thống kê theo múi giờ của bạn.",
     timezoneSelect: "Chọn múi giờ",
     timezoneUpdated: "Đã cập nhật múi giờ.",
     timezoneUpdateFailed: "Cập nhật múi giờ thất bại.",
@@ -129,6 +134,22 @@ export default {
     thankYou: "Cảm ơn bạn đã kiên nhẫn chờ đợi! ^^",
   },
   noOptionsFound: "Không tìm thấy lựa chọn nào",
+  loading: "Đang tải...",
+  search: "Tìm kiếm...",
+  selected: "Đã chọn",
+  inviteDropdown: {
+    loading: "Đang tải...",
+    noFriendsAvailable: "Không có bạn bè nào sẵn sàng để chọn",
+    noTeachersAvailable: "Không có giảng viên nào sẵn sàng để chọn",
+    noUsersAvailable: "Không có người dùng nào sẵn sàng để chọn",
+    selectFriends: "Chọn bạn bè...",
+    selectTeachers: "Chọn giảng viên...",
+    selectUsers: "Chọn người dùng...",
+    searchFriends: "Tìm kiếm bạn bè...",
+    searchTeachers: "Tìm kiếm giảng viên...",
+    searchUsers: "Tìm kiếm...",
+    teacherBadge: "Giảng viên",
+  },
   pagination: {
     page: "Trang",
     of: "trên",
@@ -164,11 +185,15 @@ export default {
   notifications: {
     new_post: {
       title: "Bài viết mới từ CatSpeak",
-      body: "Có bài viết mới: \"{postTitle}\"",
+      body: 'Có bài viết mới: "{postTitle}"',
     },
     new_challenge: {
       title: "Thử thách mới!",
-      body: "Thử thách mới: \"{challengeTitle}\" đang chờ bạn!",
+      body: 'Thử thách mới: "{challengeTitle}" đang chờ bạn!',
+    },
+    instructor_profile_approved: {
+      title: "Hồ sơ Giảng viên đã được phê duyệt",
+      body: "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
     },
   },
-};
+}

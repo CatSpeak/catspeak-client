@@ -146,7 +146,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
               <select
                 value={roomCount}
                 onChange={(e) => setRoomCount(Number(e.target.value))}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-primary2 focus:ring-1 focus:ring-primary2"
+                className="w-full rounded-xl border border-border bg-white px-3 py-2 text-sm focus:border-primary2 focus:ring-1 focus:ring-primary2"
               >
                 {[2, 3, 4, 5, 6].map((num) => (
                   <option key={num} value={num}>
@@ -182,7 +182,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                       max={120}
                       value={timerDuration}
                       onChange={(e) => setTimerDuration(Math.max(1, Number(e.target.value)))}
-                      className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm text-center"
+                      className="w-20 rounded-lg border border-border px-2 py-1 text-sm text-center"
                     />
                     <span className="text-xs text-slate-500">{t.rooms.breakoutRooms.minutes}</span>
                   </div>
@@ -222,7 +222,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                       min={1}
                       value={maxParticipants}
                       onChange={(e) => setMaxParticipants(Math.max(1, Number(e.target.value)))}
-                      className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm text-center"
+                      className="w-20 rounded-lg border border-border px-2 py-1 text-sm text-center"
                     />
                     <span className="text-xs text-slate-500">{t.rooms.breakoutRooms.membersPerRoom}</span>
                   </div>
@@ -277,7 +277,7 @@ const BreakoutRoomsModal = ({ isOpen, onClose, sessionId, participants = [], roo
                               <select
                                 value={roomIndex}
                                 onChange={(e) => handleMoveStudent(studentId, Number(e.target.value))}
-                                className="text-[10px] bg-white border border-slate-200 rounded px-1 py-0.5 text-slate-600 focus:outline-none"
+                                className="text-[10px] bg-white border border-border rounded px-1 py-0.5 text-slate-600 focus:outline-none"
                               >
                                 {allocations.map((_, idx) => (
                                   <option key={idx} value={idx}>

@@ -17,16 +17,14 @@ const CourseTable = ({ courses, t, onDelete }) => {
   })
 
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+    <div className="w-full overflow-x-auto rounded-2xl border border-border bg-white">
       <table className="w-full border-collapse text-left text-xs font-semibold text-gray-500">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50/50 text-gray-700 font-extrabold uppercase tracking-wider">
-            <th className="p-4 border-r border-gray-200 w-[160px]">{c.coverImage || "Ảnh đại diện"}</th>
-            <th className="p-4 border-r border-gray-200">{c.courseInfo || "Thông tin khóa học"}</th>
-            <th className="p-4 border-r border-gray-200 w-[140px]">{c.startDate || "Ngày mở"}</th>
-            <th className="p-4 border-r border-gray-200 w-[140px]">{c.endDate || "Ngày hết"}</th>
-            <th className="p-4 border-r border-gray-200 w-[130px]">{c.price || "Giá cả"}</th>
-            <th className="p-4 w-[100px] text-center">{c.action || "Hành động"}</th>
+          <tr className="border-b border-border bg-gray-50/50 text-gray-700 font-extrabold uppercase tracking-wider">
+            <th className="p-4 border-r border-border w-[160px]">{c.coverImage || "Ảnh đại diện"}</th>
+            <th className="p-4 border-r border-border">{c.courseInfo || "Thông tin khóa học"}</th>
+            <th className="p-4 border-r border-border w-[180px]">{c.startDate || "Ngày mở"}</th>
+            <th className="p-4 w-[120px] text-center">{c.action || "Hành động"}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 text-gray-700">
@@ -45,16 +43,16 @@ const CourseTable = ({ courses, t, onDelete }) => {
             >
 
               {/* Cover Image cell */}
-              <td className="p-4 border-r border-gray-200">
+              <td className="p-4 border-r border-border">
                 <CourseThumbnail
                   item={item}
                   title={item.title}
-                  className="w-32 h-20 rounded-xl border border-gray-100"
+                  className="w-32 h-20 rounded-xl border border-border"
                 />
               </td>
 
               {/* Course Info cell */}
-              <td className="p-4 border-r border-gray-200 min-w-[280px]">
+              <td className="p-4 border-r border-border min-w-[280px]">
                 <div className="flex flex-col gap-2">
                   <div className="flex">
                     <StatusBadge
@@ -93,18 +91,8 @@ const CourseTable = ({ courses, t, onDelete }) => {
               </td>
 
               {/* Start Date */}
-              <td className="p-4 border-r border-gray-200 text-sm font-extrabold text-gray-800">
+              <td className="p-4 border-r border-border text-sm font-extrabold text-gray-800">
                 {item.startDate}
-              </td>
-
-              {/* End Date */}
-              <td className="p-4 border-r border-gray-200 text-sm font-extrabold text-gray-800">
-                {item.endDate}
-              </td>
-
-              {/* Price */}
-              <td className="p-4 border-r border-gray-200 text-sm font-extrabold text-gray-900">
-                {item.price}
               </td>
 
               {/* Actions */}
@@ -147,7 +135,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                           setActiveDropdown(null);
                           if (onDelete) onDelete(item.id);
                         }}
-                        className="w-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-100"
+                        className="w-full px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-border"
                       >
                         <Trash2 size={13} />
                         <span>{c.courseDetail?.deleteCourse || "Delete Course"}</span>

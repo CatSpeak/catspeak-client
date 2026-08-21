@@ -6,7 +6,7 @@ const ClassSidebar = () => {
   const { t } = useLanguage()
 
   return (
-    <aside className="min-h-[300px] w-full max-w-[360px] rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+    <aside className="min-h-[300px] w-full max-w-[360px] rounded-3xl border border-border bg-white p-8 text-center shadow-sm">
       <div className="flex flex-col items-center justify-center h-full">
         {/* Icon */}
         <div className="mb-4">

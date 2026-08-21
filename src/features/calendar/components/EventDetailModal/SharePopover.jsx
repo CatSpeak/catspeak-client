@@ -10,7 +10,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * Self-contained share button with a popover that shows the generated link
  * and a copy-to-clipboard action.
  */
-const SharePopover = ({ eventId, occurrenceId }) => {
+const SharePopover = ({ eventId, occurrenceId, className = "" }) => {
   const { t } = useLanguage()
   const { shareRef, sharePopoverOpen, shareUrl, isSharing, handleShare } =
     useEventShare(eventId, occurrenceId)
@@ -28,7 +28,7 @@ const SharePopover = ({ eventId, occurrenceId }) => {
       <button
         onClick={handleShare}
         disabled={isSharing}
-        className="bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 disabled:opacity-50"
+        className={`bg-primaryBg hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 disabled:opacity-50 ${className}`}
         title={t.calendar?.shareEvent || "Chia sẻ sự kiện"}
       >
         {isSharing ? <Loader2 className="animate-spin" /> : <Share2 />}

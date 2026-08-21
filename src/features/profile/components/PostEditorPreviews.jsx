@@ -18,7 +18,7 @@ const PostEditorPreviews = ({
           return (
             <div
               key={`existing-${media.postMediaId}`}
-              className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center min-h-[180px] shrink-0"
+              className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center min-h-[180px] shrink-0"
             >
               <img
                 src={media.mediaUrl}
@@ -38,7 +38,7 @@ const PostEditorPreviews = ({
           return (
             <div
               key={`existing-${media.postMediaId}`}
-              className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 min-h-[180px] shrink-0"
+              className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 min-h-[180px] shrink-0"
             >
               <LocalVideoPreview url={media.mediaUrl} />
               <button
@@ -54,9 +54,9 @@ const PostEditorPreviews = ({
           return (
             <div
               key={`existing-${media.postMediaId}`}
-              className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center min-h-[60px] shrink-0"
+              className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center min-h-[60px] shrink-0"
             >
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-white w-full">
+              <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-white w-full">
                 <div className="flex items-center gap-3 overflow-hidden flex-1">
                   <FileText className="w-6 h-6 text-blue-500 shrink-0" />
                   <div className="flex flex-col min-w-0">
@@ -93,7 +93,7 @@ const PostEditorPreviews = ({
           return (
             <div
               key={`new-${index}`}
-              className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center min-h-[180px] shrink-0"
+              className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center min-h-[180px] shrink-0"
             >
               <img
                 src={url}
@@ -113,7 +113,7 @@ const PostEditorPreviews = ({
           return (
             <div
               key={`new-${index}`}
-              className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 min-h-[180px] shrink-0"
+              className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 min-h-[180px] shrink-0"
             >
               <LocalVideoPreview url={url} />
               <button
@@ -129,9 +129,9 @@ const PostEditorPreviews = ({
           return (
             <div
               key={`new-${index}`}
-              className="relative w-full rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 flex items-center justify-center min-h-[60px] shrink-0"
+              className="relative w-full rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center min-h-[60px] shrink-0"
             >
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-white w-full">
+              <div className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-white w-full">
                 <div className="flex items-center gap-3 overflow-hidden flex-1">
                   <FileText className="w-6 h-6 text-blue-500 shrink-0" />
                   <div className="flex flex-col min-w-0">

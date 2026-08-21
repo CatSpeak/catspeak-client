@@ -42,10 +42,10 @@ const SegmentedButtons = ({
           isFirst && isLast
             ? "rounded-full"
             : isFirst
-            ? "rounded-l-full"
-            : isLast
-            ? "rounded-r-full"
-            : "rounded-none"
+              ? "rounded-l-full"
+              : isLast
+                ? "rounded-r-full"
+                : "rounded-none"
 
         const startIcon = option.startIcon || option.icon
 
@@ -62,7 +62,7 @@ const SegmentedButtons = ({
               className={`w-full h-10 px-4 text-sm font-medium flex items-center justify-center gap-2 transition whitespace-nowrap border ${roundedClasses} ${
                 isSelected
                   ? "bg-cath-red-700 border-cath-red-700 text-white shadow-sm"
-                  : "bg-white dark:bg-neutral-800 border-[#e5e5e5] dark:border-neutral-700 text-neutral-600 dark:text-neutral-400 group-hover:bg-[#f3f3f3] dark:group-hover:bg-neutral-700 group-hover:text-neutral-900 dark:group-hover:text-white"
+                  : "bg-white border-[#e5e5e5] text-neutral-600 group-hover:bg-primaryBg group-hover:text-neutral-900"
               }`}
             >
               {renderIcon(startIcon)}

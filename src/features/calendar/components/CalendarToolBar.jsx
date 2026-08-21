@@ -56,7 +56,7 @@ const CalendarToolBar = () => {
             <input
               type="text"
               placeholder="Tìm kiếm sự kiện..."
-              className="h-10 w-full rounded-full border border-gray-200 bg-white pl-4 pr-11 text-sm outline-none focus:border-[#8e0000] transition-all"
+              className="h-10 w-full rounded-full border border-border bg-white pl-4 pr-11 text-sm outline-none focus:border-[#8e0000] transition-all"
             />
             <Search
               className="absolute right-3 text-[#8e0000] cursor-pointer"
@@ -66,7 +66,7 @@ const CalendarToolBar = () => {
           */}
           <button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center justify-center h-10 w-10 rounded-full bg-[#F2F2F2] hover:bg-[#D9D9D9] transition-all shrink-0"
+            className="flex items-center justify-center h-10 w-10 rounded-full bg-primaryBg hover:bg-[#D9D9D9] transition-all shrink-0"
             title="Create New"
           >
             <Plus size={24} color="#8e0000" strokeWidth={1.5} />

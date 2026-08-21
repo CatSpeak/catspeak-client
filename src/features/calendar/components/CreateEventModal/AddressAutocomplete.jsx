@@ -68,7 +68,7 @@ const AddressAutocomplete = ({
         value={value || ""}
         onChange={handleInputChange}
         placeholder={placeholder}
-        variant="square"
+        variant="semi-round"
         color={eventColor}
         containerClassName="w-full"
         error={error}
@@ -83,7 +83,7 @@ const AddressAutocomplete = ({
         <div className="absolute top-full left-0 w-full z-50 mt-2">
           <FluentAnimation
             direction="down"
-            className="shadow-lg border border-[#E5E5E5] rounded-2xl bg-white max-h-60 overflow-y-auto"
+            className="shadow-lg border border-border rounded-2xl bg-white max-h-60 overflow-y-auto"
           >
             {isLoading ? (
               <div className="p-4 text-sm text-center text-gray-500">
@@ -96,7 +96,7 @@ const AddressAutocomplete = ({
                     <button
                       type="button"
                       onClick={() => handleSelect(feature)}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-start gap-3 border-b border-gray-100 last:border-0"
+                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-start gap-3 border-b border-border last:border-0"
                     >
                       <MapPin
                         size={16}

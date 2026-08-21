@@ -61,6 +61,12 @@ export default {
     mainAvatarLabel: "Main Account Avatar",
     changeMeetingAvatar: "Change Meeting Avatar",
     clickToChangeMeetingAvatar: "Click to change meeting avatar",
+    updatingCover: "Updating cover photo...",
+    updateCoverSuccess: "Cover photo updated successfully",
+    updateCoverError: "Failed to update cover photo",
+    editCover: "Edit cover photo",
+    invalidImageFormat: "Please select a valid image file",
+    coverSizeLimit: "Cover image size must not exceed 5MB",
   },
   instructor: {
     title: "Instructor",
@@ -100,9 +106,7 @@ export default {
     submit: "Submit",
     edit: "Edit",
     addCredential: "Add credential",
-    selectLanguages: "Select language",
     selectNationality: "Select nationality",
-    selectNativeLanguage: "Select native language",
     inputFieldPlaceholder: "Input field",
     notAppliedTitle: "You haven't applied yet",
     notAppliedDescription:
@@ -116,6 +120,11 @@ export default {
     statusApproved: "Application Approved",
     statusApprovedDesc:
       "Congratulations! Your instructor application has been approved.",
+    switchToTeacherTitle: "Application Approved",
+    switchToTeacherDesc:
+      "Your instructor application has been approved. Switch to your teacher account to manage teaching content.",
+    switchToTeacherAccount: "Switch to Teacher Account",
+    switching: "Switching...",
     statusRejected: "Application Rejected",
     statusRejectedDesc:
       "Unfortunately, your application was not approved at this time.",
@@ -138,6 +147,18 @@ export default {
     formInvalid: "Please fill all required fields before submitting.",
     credentialSizeLimit: "Each credential must be smaller than {max}MB (current {actual}MB).",
     videoSizeLimit: "Video must be smaller than {max}MB (current {actual}MB).",
+  },
+  friends: {
+    teacher: "Teacher",
+    member: "Member",
+    subTabs: {
+      teachers: "Teachers",
+      members: "Members",
+    },
+    empty: {
+      noTeachers: "No teachers yet.",
+      noMembers: "No members yet.",
+    },
   },
   notifications: {
     friend_request: {

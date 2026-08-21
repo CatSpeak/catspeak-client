@@ -2,7 +2,7 @@ import { Provider } from "react-redux"
 import AppRouter from "@routes"
 import { store } from "@store"
 import "@styles/app.css"
-import { Toaster } from "react-hot-toast"
+import AppToaster from "@/shared/components/ui/AppToaster"
 
 import { ConversationSignalRProvider } from "@/features/chat/context/ConversationSignalRContext"
 import GlobalSignalRHandler from "@/features/chat/components/GlobalSignalRHandler"
@@ -13,12 +13,13 @@ import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
 import { SidebarProvider } from "@/shared/context/SidebarContext"
 import { LanguageProvider } from "@/shared/context/LanguageContext"
-import { ScrollToTopButton } from "@/shared/components/ui/buttons"
+// import { ScrollToTopButton } from "@/shared/components/ui/buttons";
 import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
-import TimezoneBackfill from "@/shared/components/TimezoneBackfill"
+import CompletionReviewPrompt from "@/features/courses/components/CompletionReviewPrompt"
+// import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
 
 import WebViewGuard from "@/shared/components/WebViewGuard"
 
@@ -26,7 +27,6 @@ function App() {
   return (
     <Provider store={store}>
       <AuthVisibilitySync />
-      <TimezoneBackfill />
       <LanguageProvider>
         <WebViewGuard>
           <GlobalVideoCallProvider>
@@ -36,7 +36,8 @@ function App() {
               <ConversationSignalRProvider>
                 <GlobalPresenceProvider>
                   <GlobalSignalRHandler />
-                  <Toaster position="top-center" limit={1} />
+                  <AppToaster />
+                  <CompletionReviewPrompt />
                   {/* <ScrollToTopButton /> */}
                   <AppRouter />
                   <PiPWidget />

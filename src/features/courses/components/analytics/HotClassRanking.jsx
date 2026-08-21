@@ -87,7 +87,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              className="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-7 h-7 rounded-lg border border-border bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-border disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
             >
               <ChevronLeft size={14} />
             </button>
@@ -98,7 +98,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
                 onClick={() => setCurrentPage(pNum)}
                 className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${pNum === safePage
                   ? "bg-[#990011] border-[#990011] text-white"
-                  : "bg-white border-gray-200 text-gray-700 hover:border-[#990011] hover:text-[#990011]"
+                  : "bg-white border-border text-gray-700 hover:border-[#990011] hover:text-[#990011]"
                   }`}
               >
                 {pNum}
@@ -108,7 +108,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              className="w-7 h-7 rounded-lg border border-gray-200 bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-gray-200 disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-7 h-7 rounded-lg border border-border bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-border disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
             >
               <ChevronRight size={14} />
             </button>

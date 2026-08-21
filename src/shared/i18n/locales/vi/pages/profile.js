@@ -43,7 +43,8 @@ export default {
     newPassword: "Mật khẩu mới",
     confirmPassword: "Xác nhận mật khẩu mới",
     newPasswordMinLength: "Mật khẩu mới phải có ít nhất 6 ký tự",
-    newPasswordSameAsCurrent: "Mật khẩu mới không được trùng với mật khẩu hiện tại",
+    newPasswordSameAsCurrent:
+      "Mật khẩu mới không được trùng với mật khẩu hiện tại",
     newPasswordLengthValid: "Độ dài mật khẩu hợp lệ",
     passwordsMismatch: "Mật khẩu xác nhận không khớp",
     passwordsMatch: "Mật khẩu xác nhận khớp",
@@ -57,10 +58,17 @@ export default {
     updateMeetingAvatarSuccess: "Cập nhật ảnh đại diện phòng họp thành công",
     updateMeetingAvatarError: "Không thể cập nhật ảnh đại diện phòng họp",
     meetingAvatarLabel: "Ảnh đại diện trong phòng họp",
-    meetingAvatarHint: "Ảnh này sẽ hiển thị cho người khác khi bạn tham gia phòng họp.",
+    meetingAvatarHint:
+      "Ảnh này sẽ hiển thị cho người khác khi bạn tham gia phòng họp.",
     mainAvatarLabel: "Ảnh đại diện chính tài khoản",
     changeMeetingAvatar: "Đổi ảnh phòng họp",
     clickToChangeMeetingAvatar: "Bấm để đổi ảnh phòng họp",
+    updatingCover: "Đang cập nhật ảnh bìa...",
+    updateCoverSuccess: "Cập nhật ảnh bìa thành công",
+    updateCoverError: "Không thể cập nhật ảnh bìa",
+    editCover: "Sửa ảnh bìa",
+    invalidImageFormat: "Vui lòng chọn tệp hình ảnh hợp lệ",
+    coverSizeLimit: "Kích thước ảnh bìa không được vượt quá 5MB",
   },
   instructor: {
     title: "Giảng viên",
@@ -100,9 +108,7 @@ export default {
     submit: "Gửi",
     edit: "Chỉnh sửa",
     addCredential: "Thêm chứng chỉ",
-    selectLanguages: "Chọn ngôn ngữ",
     selectNationality: "Chọn quốc tịch",
-    selectNativeLanguage: "Chọn ngôn ngữ mẹ đẻ",
     inputFieldPlaceholder: "Nhập thông tin",
     notAppliedTitle: "Bạn chưa đăng ký",
     notAppliedDescription:
@@ -116,6 +122,11 @@ export default {
     statusApproved: "Đã được duyệt",
     statusApprovedDesc:
       "Chúc mừng! Đơn đăng ký giảng viên của bạn đã được phê duyệt.",
+    switchToTeacherTitle: "Hồ sơ đã được duyệt",
+    switchToTeacherDesc:
+      "Hồ sơ Giảng viên của bạn đã được phê duyệt. Chuyển sang tài khoản giáo viên để quản lý nội dung giảng dạy.",
+    switchToTeacherAccount: "Chuyển sang tài khoản giáo viên",
+    switching: "Đang chuyển...",
     statusRejected: "Đã bị từ chối",
     statusRejectedDesc:
       "Rất tiếc, đơn đăng ký của bạn chưa được chấp nhận lần này.",
@@ -139,13 +150,26 @@ export default {
     tagsUpdatedError: "Lỗi khi cập nhật thẻ",
     certifyError: "Vui lòng xác nhận và đồng ý với các quy định của nền tảng.",
     formInvalid: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi gửi.",
-    credentialSizeLimit: "Mỗi chứng chỉ phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
+    credentialSizeLimit:
+      "Mỗi chứng chỉ phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
     videoSizeLimit: "Video phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
+  },
+  friends: {
+    teacher: "Giảng viên",
+    member: "Thành viên",
+    subTabs: {
+      teachers: "Giảng viên",
+      members: "Thành viên",
+    },
+    empty: {
+      noTeachers: "Chưa có giáo viên nào.",
+      noMembers: "Chưa có thành viên nào.",
+    },
   },
   notifications: {
     friend_request: {
       title: "Yêu cầu kết bạn mới",
       body: "{requesterName} đã gửi cho bạn yêu cầu kết bạn.",
-    }
-  }
-}
+    },
+  },
+};

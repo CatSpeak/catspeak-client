@@ -7,8 +7,10 @@ import NotificationDropdown from "./NotificationDropdown"
 import { useAuth } from "@/features/auth"
 import AuthModalContext from "@/shared/context/AuthModalContext"
 import useClickOutside from "@/shared/hooks/useClickOutside"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useNotifications } from "../hooks/useNotifications"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 const useIsMobile = (breakpoint = 425) => {
   const [isMobile, setIsMobile] = useState(
@@ -35,25 +37,7 @@ const NotificationWidget = () => {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
 
   useClickOutside(dropdownRef, () => setIsOpen(false), { enabled: isOpen && !isMobile })
-
-  useEffect(() => {
-    if (isOpen && isMobile) {
-      const originalOverflow = document.body.style.overflow
-      const originalPaddingRight = document.body.style.paddingRight
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth
-
-      if (scrollbarWidth > 0) {
-        document.body.style.paddingRight = `${scrollbarWidth}px`
-      }
-      document.body.style.overflow = "hidden"
-
-      return () => {
-        document.body.style.overflow = originalOverflow
-        document.body.style.paddingRight = originalPaddingRight
-      }
-    }
-  }, [isOpen, isMobile])
+  useScrollLock(isOpen && isMobile)
 
   const toggleDropdown = () => {
     if (!isAuthenticated) {
@@ -98,18 +82,19 @@ const NotificationWidget = () => {
 
   return (
     <div className="relative flex items-center" ref={dropdownRef}>
-      <button
+      <IconButton
         onClick={toggleDropdown}
-        className={`relative flex h-10 w-10 items-center justify-center rounded-full transition-colors bg-[#F2F2F2] hover:bg-[#D9D9D9] ${isOpen ? "" : ""}`}
+        variant="filled"
+        className="relative"
         aria-label={t.header?.notifications || "Notifications"}
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white z-10">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </button>
+      </IconButton>
 
       <AnimatePresence>
         {isOpen && !isMobile && (

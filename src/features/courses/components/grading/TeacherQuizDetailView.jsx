@@ -204,7 +204,7 @@ const CustomChartTooltip = ({ active, payload, label }) => {
   const qg = t.courses?.grading?.teacherQuiz || {}
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-2.5 rounded-xl shadow-lg border border-gray-100 text-xs">
+      <div className="bg-white p-2.5 rounded-xl shadow-lg border border-border text-xs">
         <p className="font-bold text-gray-900">{qg.scoreRange}: {label}</p>
         <p className="text-[#990011] font-semibold mt-0.5">
           {qg.studentCount}: {payload[0].value}
@@ -237,7 +237,7 @@ const StatusBadge = ({ status }) => {
     )
   }
   return (
-    <span className="bg-gray-100 text-gray-600 border border-gray-200 text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+    <span className="bg-gray-100 text-gray-600 border border-border text-xs font-semibold px-3 py-1 rounded-full inline-flex items-center gap-1.5">
       <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
       {qg.statusClosed}
     </span>
@@ -347,7 +347,7 @@ const AudioPlayerBar = ({ src }) => {
   }
 
   return (
-    <div className="mt-3 mb-3 w-full bg-gray-50 border border-gray-150 p-3.5 rounded-2xl flex items-center gap-3">
+    <div className="mt-3 mb-3 w-full bg-gray-50 border border-border p-3.5 rounded-2xl flex items-center gap-3">
       {src && (
         <audio
           ref={audioRef}
@@ -417,7 +417,7 @@ const TeacherAttemptState = ({
       <button
         type="button"
         onClick={onClose}
-        className="w-9 h-9 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
+        className="w-9 h-9 rounded-xl border border-border hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
         title={qg.goBack}
       >
         <ArrowLeft className="w-5 h-5" />
@@ -426,7 +426,7 @@ const TeacherAttemptState = ({
         {title}
       </h1>
     </div>
-    <div className="min-h-[360px] bg-white rounded-3xl border border-gray-150 flex flex-col items-center justify-center gap-4 p-8 text-center">
+    <div className="min-h-[360px] bg-white rounded-3xl border border-border flex flex-col items-center justify-center gap-4 p-8 text-center">
       {isLoading ? (
         <LoadingSpinner />
       ) : (
@@ -735,7 +735,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl border border-gray-200 hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-xl border border-border hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
             title={qg.goBack}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -778,13 +778,13 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
       <div className="flex-1 w-full mx-auto grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
         {/* Left Column: Active Question & Answer Details */}
         {currentQuestion ? (
-          <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-150 flex flex-col gap-6 shadow-xs">
+          <div className="bg-white rounded-3xl p-6 md:p-8 border border-border flex flex-col gap-6 shadow-xs">
             {/* Question Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+            <div className="flex items-center justify-between border-b border-border pb-4">
               <h2 className="text-xl md:text-2xl font-black text-[#990011] tracking-tight">
                 {interpolate(qg.questionNumber, { number: currentQuestionIndex + 1 })}
               </h2>
-              <span className="px-3.5 py-1 bg-gray-100 border border-gray-200 rounded-xl text-xs font-bold text-gray-700">
+              <span className="px-3.5 py-1 bg-gray-100 border border-border rounded-xl text-xs font-bold text-gray-700">
                 {pointsMax !== null
                   ? interpolate(qg.points, { count: pointsMax })
                   : qg.noMaximumScore}
@@ -805,7 +805,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
 
             {/* Question Image Media */}
             {(currentQuestion.mediaUrl || currentQuestion.imageUrl) && (
-              <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center p-2">
+              <div className="rounded-2xl overflow-hidden border border-border bg-gray-50 flex items-center justify-center p-2">
                 <img
                   src={currentQuestion.mediaUrl || currentQuestion.imageUrl}
                   alt={interpolate(qg.questionIllustration, {
@@ -822,18 +822,18 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             )}
 
             {/* Student Answer Box */}
-            <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+            <div className="flex flex-col gap-2 pt-2 border-t border-border">
               <span className="text-xs font-extrabold text-gray-500 uppercase tracking-wide">
                 {qg.answerLabel}
               </span>
 
               {isCurrentEssay ? (
-                <div className="bg-gray-50/80 border border-gray-200 rounded-2xl p-5 text-sm font-medium text-gray-800 leading-relaxed min-h-[120px] whitespace-pre-wrap">
+                <div className="bg-gray-50/80 border border-border rounded-2xl p-5 text-sm font-medium text-gray-800 leading-relaxed min-h-[120px] whitespace-pre-wrap">
                   {currentQuestion.studentFillText || currentQuestion.answerText || qg.noStudentEssayAnswer}
                 </div>
               ) : currentQuestion.type === "FillInBlank" ? (
                 <div className="flex flex-col gap-3 text-xs">
-                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+                  <div className="bg-gray-50 border border-border rounded-2xl p-4">
                     <span className="font-bold text-gray-500 block mb-1">{qg.studentAnswer}</span>
                     <p className="text-gray-900 font-bold whitespace-pre-wrap">
                       {currentQuestion.studentFillText || currentQuestion.answerText || currentQuestion.fillText || qg.noAnswer}
@@ -861,7 +861,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                     const isRightOpt = correctAnswers.includes(strIdx) || correctAnswers.includes(opt)
                     const isMultipleChoice = currentQuestion.type === "MultipleChoiceMultiple"
 
-                    let style = "bg-gray-50 border-gray-150 text-gray-700"
+                    let style = "bg-gray-50 border-border text-gray-700"
                     let boxStyle = "border-gray-300 bg-white"
                     if (isStudentPick && isRightOpt) {
                       style = "bg-emerald-50 border-emerald-300 text-emerald-900 font-bold"
@@ -899,7 +899,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl p-12 text-center text-gray-400 font-bold border border-gray-150">
+          <div className="bg-white rounded-3xl p-12 text-center text-gray-400 font-bold border border-border">
             {qg.questionInformationNotFound}
           </div>
         )}
@@ -907,11 +907,11 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
         {/* Right Column: Questions Navigation Grid & Grading Panel */}
         <div className="flex flex-col gap-6 select-none">
           {/* Card 1: Questions List Navigation Grid */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-150 shadow-xs flex flex-col gap-4">
+          <div className="bg-white rounded-3xl p-6 border border-border shadow-xs flex flex-col gap-4">
             <h3 className="text-base font-black text-center text-gray-900 tracking-tight">
               {qg.questionsList}
             </h3>
-            <div className="border-b border-gray-150" />
+            <div className="border-b border-border" />
 
             <div className="grid grid-cols-5 gap-3 mx-auto">
               {displayQuestions.map((q, qIdx) => {
@@ -943,14 +943,14 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
           </div>
 
           {/* Card 2: Grading & Feedback Panel */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-150 shadow-xs flex flex-col gap-5">
+          <div className="bg-white rounded-3xl p-6 border border-border shadow-xs flex flex-col gap-5">
             <h3 className="text-base font-black text-center text-gray-900 tracking-tight">
               {isCurrentEssay ? qg.gradingAndFeedback : qg.automaticGradingResult}
             </h3>
-            <div className="border-b border-gray-150" />
+            <div className="border-b border-border" />
 
             {/* Student Avatar Card */}
-            <div className="bg-gray-50 border border-gray-150 rounded-2xl p-4 flex items-center gap-3.5">
+            <div className="bg-gray-50 border border-border rounded-2xl p-4 flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-full bg-gray-300 shrink-0 flex items-center justify-center text-gray-600 font-bold text-sm">
                 {studentName.charAt(0).toUpperCase()}
               </div>
@@ -970,7 +970,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                 {/* Score Stepper */}
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">{qg.score}</label>
-                  <div className="flex items-center rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 p-1">
+                  <div className="flex items-center rounded-2xl overflow-hidden border border-border bg-gray-50 p-1">
                     <button
                       type="button"
                       onClick={() => handleStepScore(-0.5)}
@@ -1016,7 +1016,7 @@ const TeacherStudentGradeView = ({ submission, quizDetail, onClose, classId, qui
                       }
                     }}
                     placeholder={qg.feedbackPlaceholder}
-                    className="w-full p-4 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-800 bg-gray-50/50 min-h-[110px] resize-y focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
+                    className="w-full p-4 border border-border rounded-2xl text-xs font-semibold text-gray-800 bg-gray-50/50 min-h-[110px] resize-y focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
                   />
                 </div>
 
@@ -1088,7 +1088,7 @@ const QuestionDetailCard = ({ question, index }) => {
   }
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative mb-4">
+    <div className="bg-white rounded-3xl p-6 shadow-sm border border-border relative mb-4">
       {/* Header Row */}
       <div className="flex items-center justify-between mb-3">
         <h4 className="text-lg font-bold text-[#990011]">
@@ -1126,7 +1126,7 @@ const QuestionDetailCard = ({ question, index }) => {
 
       {/* Image Media Preview */}
       {imageUrl && (
-        <div className="mb-3 rounded-2xl overflow-hidden border border-gray-100 flex justify-center bg-gray-50 p-2">
+        <div className="mb-3 rounded-2xl overflow-hidden border border-border flex justify-center bg-gray-50 p-2">
           <img
             src={imageUrl}
             alt={interpolate(qg.questionIllustration, { number: index + 1 })}
@@ -1157,7 +1157,7 @@ const QuestionDetailCard = ({ question, index }) => {
                 key={optIdx}
                 className={`w-full p-4 rounded-2xl border flex items-center gap-3 text-sm font-medium transition-all ${isCorrect
                   ? "bg-red-50/50 border-red-300 text-red-900 font-bold"
-                  : "bg-gray-50/70 border-gray-100 text-gray-700"
+                  : "bg-gray-50/70 border-border text-gray-700"
                   }`}
               >
                 {isMultipleChoice ? (
@@ -1202,7 +1202,7 @@ const QuestionDetailCard = ({ question, index }) => {
 
       {/* Essay / Text Question info */}
       {type === "Essay" && (
-        <div className="mt-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs text-gray-500 font-medium">
+        <div className="mt-3 p-4 bg-gray-50 rounded-2xl border border-border text-xs text-gray-500 font-medium">
           {interpolate(qg.essayManualWordLimit, {
             count: question.maxWordCount || 500,
           })}
@@ -1458,7 +1458,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       />
 
       {/* Main Header Card */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white rounded-3xl p-6 shadow-sm border border-border mb-6">
         {/* Top Header Row */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -1484,14 +1484,14 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="w-9 h-9 rounded-full border border-gray-200 hover:bg-gray-50 flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full border border-border hover:bg-gray-50 flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
                 aria-label={qg.moreOptions}
               >
                 <MoreVertical className="w-4 h-4" />
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-30 text-xs font-medium">
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-border py-2 z-30 text-xs font-medium">
                   {quizDetail.status === "Draft" && (
                     <button
                       type="button"
@@ -1597,7 +1597,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="border-b border-gray-200 mb-6 flex gap-8">
+      <div className="border-b border-border mb-6 flex gap-8">
         <button
           type="button"
           onClick={() => setActiveTab("overview")}
@@ -1646,7 +1646,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           {/* Left Column (Main Content) */}
           <div className="lg:col-span-8 space-y-6">
             {/* Mô tả Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-border">
               <h3 className="text-base font-bold text-gray-900 mb-3">{qg.description}</h3>
               <div className="text-sm text-gray-600 leading-relaxed">
                 {quizDetail.description ? (
@@ -1686,7 +1686,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       <QuestionDetailCard key={q.id || idx} question={q} index={idx} />
                     ))
                   ) : (
-                    <div className="rounded-3xl border border-gray-100 bg-white p-8 text-center text-sm font-medium text-gray-400">
+                    <div className="rounded-3xl border border-border bg-white p-8 text-center text-sm font-medium text-gray-400">
                       {qg.quizHasNoQuestions}
                     </div>
                   )}
@@ -1726,7 +1726,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
           {/* Right Column (Sidebar) */}
           <div className="lg:col-span-4">
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-border space-y-4">
               <h3 className="text-base font-bold text-gray-900 mb-4">
                 {qg.quizConfiguration}
               </h3>
@@ -1797,7 +1797,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
       {/* TAB CONTENT: Submissions (Danh sách nộp bài) */}
       {activeTab === "submissions" && (
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-border">
           {/* Header & Search */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <h3 className="text-base font-bold text-gray-900">
@@ -1813,7 +1813,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                   setSubmissionPage(1)
                 }}
                 placeholder={qg.searchStudentsPlaceholder}
-                className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs focus:outline-none focus:border-[#990011]"
+                className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-xl border border-border text-xs focus:outline-none focus:border-[#990011]"
               />
             </div>
           </div>
@@ -1838,29 +1838,29 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto rounded-2xl border border-gray-200">
+              <div className="overflow-x-auto rounded-2xl border border-border">
                 <table className="w-full text-xs text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#F9FAFB] text-gray-700 font-semibold border-b border-gray-200">
-                      <th className="py-4 px-5 border-r border-gray-200">
+                    <tr className="bg-[#F9FAFB] text-gray-700 font-semibold border-b border-border">
+                      <th className="py-4 px-5 border-r border-border">
                         <div className="flex items-center justify-between gap-2">
                           <span>{qg.studentInformation}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
                         </div>
                       </th>
-                      <th className="py-4 px-5 border-r border-gray-200">
+                      <th className="py-4 px-5 border-r border-border">
                         <div className="flex items-center justify-center gap-2">
                           <span>{qg.submissionStatus}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
                         </div>
                       </th>
-                      <th className="py-4 px-5 border-r border-gray-200">
+                      <th className="py-4 px-5 border-r border-border">
                         <div className="flex items-center justify-center gap-2">
                           <span>{qg.gradingStatus}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
                         </div>
                       </th>
-                      <th className="py-4 px-5 border-r border-gray-200">
+                      <th className="py-4 px-5 border-r border-border">
                         <div className="flex items-center justify-center gap-2">
                           <span>{qg.score}</span>
                           <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
@@ -1892,7 +1892,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             className="hover:bg-gray-50/60 transition-colors"
                           >
                             {/* Col 1: Student info */}
-                            <td className="py-4 px-5 border-r border-gray-200">
+                            <td className="py-4 px-5 border-r border-border">
                               <div className="flex items-center gap-3">
                                 {st.avatar ? (
                                   <img
@@ -1918,7 +1918,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 2: Submission status */}
-                            <td className="py-4 px-5 border-r border-gray-200 text-center">
+                            <td className="py-4 px-5 border-r border-border text-center">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${subStatus.style}`}
                               >
@@ -1927,7 +1927,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 3: Grading status */}
-                            <td className="py-4 px-5 border-r border-gray-200 text-center">
+                            <td className="py-4 px-5 border-r border-border text-center">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${gradStatus.style}`}
                               >
@@ -1936,7 +1936,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 4: Score */}
-                            <td className="py-4 px-5 border-r border-gray-200 text-center text-sm font-semibold text-gray-800">
+                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800">
                               {displayScore}
                             </td>
 
@@ -1990,7 +1990,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       type="button"
                       disabled={submissionPage <= 1}
                       onClick={() => setSubmissionPage((page) => Math.max(1, page - 1))}
-                      className="rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-xl border border-border px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {qg.previousPage}
                     </button>
@@ -2015,7 +2015,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         (isStatsLoading || (isStatsFetching && statsResponse === undefined)) ? (
           <div
             role="status"
-            className="flex min-h-[320px] items-center justify-center rounded-3xl border border-gray-100 bg-white"
+            className="flex min-h-[320px] items-center justify-center rounded-3xl border border-border bg-white"
           >
             <LoadingSpinner />
             <span className="sr-only">{qg.loadingStatistics}</span>
@@ -2040,7 +2040,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
         ) : !statsData ? (
           <div
             role="status"
-            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-gray-100 bg-white p-8 text-center"
+            className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-white p-8 text-center"
           >
             <BarChart2 className="h-10 w-10 text-gray-300" />
             <p className="text-sm font-semibold text-gray-500">
@@ -2055,7 +2055,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               </span>
             )}
             {/* Header Card */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-border">
               {/* Title & Export Row */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <h2 className="text-xl md:text-2xl font-bold text-gray-900">
@@ -2077,7 +2077,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               {/* 4 Stat Cards Row */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Card 1: Điểm TB */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-gray-100">
+                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
                   <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center font-bold text-sm text-[#990011] shrink-0">
                     Σ
                   </div>
@@ -2090,7 +2090,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 </div>
 
                 {/* Card 2: Tỷ lệ hoàn thành */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-gray-100">
+                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
                   <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] shrink-0">
                     <CheckCircle2 className="w-5 h-5 text-[#990011]" />
                   </div>
@@ -2103,7 +2103,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 </div>
 
                 {/* Card 3: Điểm cao nhất */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-gray-100">
+                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
                   <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-[#990011] shrink-0">
                     <TrendingUp className="w-5 h-5 text-[#990011]" />
                   </div>
@@ -2116,7 +2116,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 </div>
 
                 {/* Card 4: Điểm thấp nhất */}
-                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-gray-100">
+                <div className="bg-gray-50/70 rounded-2xl p-4 flex items-center gap-3 border border-border">
                   <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 shrink-0">
                     <TrendingDown className="w-5 h-5 text-gray-700" />
                   </div>
@@ -2133,7 +2133,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             {/* Bottom Grid: Left (Score Distribution) + Right (Top Missed Questions) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Left Column: Phân bố điểm số */}
-              <div className="lg:col-span-8 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+              <div className="lg:col-span-8 bg-white rounded-3xl p-6 shadow-sm border border-border flex flex-col justify-between">
                 <h3 className="text-base font-bold text-gray-900 mb-4">
                   {qg.scoreDistribution}
                 </h3>
@@ -2184,7 +2184,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               </div>
 
               {/* Right Column: Câu hỏi sai nhiều nhất */}
-              <div className="lg:col-span-4 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col">
+              <div className="lg:col-span-4 bg-white rounded-3xl p-6 shadow-sm border border-border flex flex-col">
                 <h3 className="text-base font-bold text-gray-900 mb-6">
                   {qg.mostMissedQuestions}
                 </h3>

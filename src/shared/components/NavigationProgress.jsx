@@ -58,7 +58,9 @@ const NavigationProgress = () => {
         query?.endpointName === "getReelById" ||
         query?.endpointName === "getReelComments" ||
         query?.endpointName === "getBreakoutStatus" ||
-        query?.endpointName === "getPostComments"
+        query?.endpointName === "getPostComments" ||
+        query?.endpointName === "setDefaultInstructorBankAccount" ||
+        query?.endpointName === "getInstructorBankAccounts"
       ) {
         return false
       }

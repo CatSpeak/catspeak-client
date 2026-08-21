@@ -2,6 +2,7 @@ export default {
   profile: "Profile",
   personalPage: "My Profile",
   settings: "Settings",
+  generalInfo: "Edit Profile",
   logout: "Log out",
   soon: "Soon",
   language: "Language",

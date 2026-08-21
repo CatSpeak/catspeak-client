@@ -70,7 +70,7 @@ export default {
       privacyPolicy: "Privacy Policy"
     },
     history: {
-      title: "Payment History",
+      title: "Payment history",
       subtitle: "View your past invoices and billing history.",
       noHistoryTitle: "No payment history",
       noHistorySubtitle: "You don't have any past invoices yet. Once you upgrade or make a payment, it will appear here.",
@@ -80,14 +80,16 @@ export default {
       dateFilterMonth: "Last 30 days",
       statusFilterAll: "All statuses",
       statusFilterSuccess: "Success",
+      statusFilterFailed: "Failed",
       statusFilterPending: "Pending",
+      statusFilterRefunded: "Refunded",
       statusFilterCancelled: "Cancelled",
       noResults: "No results found",
       noResultsHint: "Try changing the filters or search keyword.",
       showingResults: "Showing {{count}} result(s)",
       columns: {
         date: "Date",
-        orderCode: "Order Code",
+        orderCode: "Order code",
         method: "Method",
         amount: "Amount",
         status: "Status",
@@ -96,46 +98,144 @@ export default {
       actions: {
         report: "Report",
         repay: "Repay",
+        refund: "Refund",
       },
       statuses: {
         success: "Success",
+        failed: "Failed",
         pending: "Pending",
+        refunded: "Refunded",
         cancelled: "Cancelled",
       }
     },
     result: {
       cancelling: "Cancelling payment...",
-      successTitle: "Payment Successful!",
+      successTitle: "Payment successful!",
       successSubtitle: "Thank you for your purchase. Your plan has been successfully upgraded.",
       redirecting: "Redirecting...",
       processing: "Verifying payment status...",
-      returnToBilling: "Return to Billing",
+      returnToBilling: "Return to billing history",
     },
     checkoutModal: {
-      title: "Subscription Checkout",
+      title: "Subscription checkout",
       subtitle: "You are choosing to upgrade to {{planName}}.",
-      paymentMethod: "Payment Method",
-      payosSub: "Bank Transfer / QR Code",
+      paymentMethod: "Payment method",
+      payosSub: "Bank transfer / QR Code",
       momoSub: "Pay with MoMo e-wallet",
-      stripeSub: "Credit / Debit Card",
+      stripeSub: "Credit / debit card",
       comingSoon: "Coming soon",
       cancel: "Cancel",
-      confirm: "Confirm & Pay"
+      confirm: "Confirm & pay"
     },
     reportIssueModal: {
-      title: "Report Payment Issue",
+      title: "Report payment issue",
       subtitle: "If you experienced an issue with payment #{{paymentId}}, please explain below. You can also upload a screenshot of your transaction.",
       explanationLabel: "Explanation",
       explanationPlaceholder: "Please describe the issue...",
-      proofImageLabel: "Proof Image (Optional)",
+      proofImageLabel: "Proof image (optional)",
       uploadFileText: "Click to upload a file",
       errorNoExplanation: "Please provide an explanation.",
       errorSubmitFailed: "Failed to submit report. Please try again.",
       cancel: "Cancel",
-      submit: "Submit Report",
-      successTitle: "Report Submitted",
+      submit: "Submit report",
+      successTitle: "Report submitted",
       successSubtitle: "We have received your report and will investigate the issue.",
       done: "Done"
+    },
+    checkoutClass: {
+      // Breadcrumb
+      breadcrumbHome: "Home",
+      breadcrumbExplore: "Explore courses",
+      breadcrumbCourseDetail: "Course details",
+      breadcrumbClassDetail: "Class details",
+      breadcrumbCheckout: "Class checkout",
+
+      // Page
+      pageTitle: "Class Checkout",
+      classNotFound: "Class not found",
+      classNotFoundDesc: "This class may not exist or has been removed.",
+      backToHome: "Back to home",
+
+      // Fallback texts
+      fallbackName: "You",
+      fallbackCourseName: "Standalone class",
+      fallbackNoSchedule: "No schedule yet",
+      fallbackUpdating: "Updating",
+      fallbackAccountNotFound: "No account found with this email.",
+      paymentSuccess: "Payment successful!",
+      paymentError: "An error occurred during payment.",
+      voucherUnavailable: "Code {{code}} is no longer available, automatically removed from the order",
+
+      // ClassInfoSection
+      classInfo: "Class information",
+      slotsAvailable: "{{available}}/{{max}} slots available",
+      sessions: "sessions",
+      instructor: "Instructor:",
+
+      // LearnerSection
+      addLearner: "Add learner",
+      emailPlaceholder: "Enter learner email",
+      adding: "Adding",
+      add: "Add",
+      payer: "(Payer)",
+      totalLearners: "Total learners:",
+      addLearnerError: "An error occurred while adding learner",
+
+      // OrderSummary
+      orderSummary: "Order summary",
+      unitPrice: "Unit price",
+      perPerson: "/ person",
+      learnerCount: "Number of learners",
+      subtotal: "Subtotal",
+      discount: "Discount",
+      maxDiscount: "Max:",
+      tuition: "Tuition",
+      totalPayment: "Total payment",
+      youSaved: "You saved {{amount}}!",
+      processing: "Processing...",
+      confirmPayment: "Confirm payment",
+      free: "Free",
+      scheduleConflictTitle: "Schedule Conflict",
+      scheduleConflictDesc: "The schedule of this class conflicts with a class you are currently enrolled in:",
+      confirmEnroll: "Enroll Anyway",
+      cancel: "Cancel",
+
+      // VoucherSection
+      searchVoucher: "Search code...",
+      expiry: "Exp:",
+      neverExpires: "Never expires",
+      viewAllOffers: "View all offers →",
+      voucherCode: "Voucher code",
+      appliedCount: "{{count}} code(s) applied",
+      change: "Change",
+      sponsorInstructor: "Instructor",
+      selectFromMyVouchers: "Select from my vouchers",
+      noVouchersForClass: "No vouchers available for this class",
+
+      // VoucherCard
+      sponsorInstructorBadge: "INSTRUCTOR",
+      maxDiscountLabel: "Max discount:",
+      ineligible: "Ineligible",
+      applied: "Applied",
+      use: "Use",
+
+      // Ineligible reason patterns
+      reasonMinLearners: "Requires at least {{count}} learners in the order",
+      reasonMinOrder: "Minimum order of {{minAmount}} (Subtotal: {{currentAmount}})",
+
+      // VoucherModal
+      myOffers: "My offers",
+      searchOffers: "Search offers...",
+      noOffersTitle: "No offers available",
+      noOffersDesc: "You don't have any voucher codes yet. Check back later or contact your instructor for promotions.",
+
+      // VoucherCategoryList
+      categoryValid: "Available",
+      categoryInvalidClass: "Not applicable for this class",
+      categoryIneligible: "Ineligible",
+      categoryExpired: "Expired",
+      categoryExhausted: "Out of uses",
+      voucherCountSuffix: "code(s)",
     }
   }
 }

@@ -26,7 +26,7 @@ const RoomFilterSidebar = ({ inDrawer = false }) => {
 
   return (
     <aside
-      className={`rounded-xl bg-white overflow-hidden flex flex-col ${inDrawer ? "" : "shadow-sm border border-[#e5e5e5] lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-6.5rem)]"}`}
+      className={`rounded-xl bg-white overflow-hidden flex flex-col ${inDrawer ? "" : "shadow-sm border border-border lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-6.5rem)]"}`}
     >
       {/* Search Header */}
       <div className="border-b border-[#C6C6C6] p-5">

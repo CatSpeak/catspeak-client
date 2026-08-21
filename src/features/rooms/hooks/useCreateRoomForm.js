@@ -1,8 +1,7 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { useCreateRoomMutation } from "@/store/api/roomsApi"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
-import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getLanguageName = (langCode) => {
@@ -19,7 +18,6 @@ const getLanguageName = (langCode) => {
 }
 
 export const useCreateRoomForm = () => {
-  const { user } = useAuth()
   const { t } = useLanguage()
   const [formData, setFormData] = useState({
     name: "",
@@ -50,7 +48,7 @@ export const useCreateRoomForm = () => {
     }
   }
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       name: "",
       topics: [],
@@ -60,7 +58,7 @@ export const useCreateRoomForm = () => {
     })
     setNameError("")
     setPasswordError("")
-  }
+  }, [])
 
   const handleTopicChange = (event) => {
     const newValue = event.target ? event.target.value : event

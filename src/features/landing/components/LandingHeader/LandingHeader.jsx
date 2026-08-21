@@ -1,20 +1,20 @@
-import React, { useState } from "react";
-import { Menu } from "lucide-react";
+import React, { useState } from "react"
+import { Menu } from "lucide-react"
 
-import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher";
-import { useAuth } from "@/features/auth";
-import LandingHeaderLogo from "./LandingHeaderLogo";
-import DesktopNav from "../LandingDesktopNav/DesktopNav";
-import LandingHeaderGuestControls from "./LandingHeaderGuestControls";
-import LandingHeaderUserControls from "./LandingHeaderUserControls";
-import { MobileSidebar } from "@/features/navigation";
+import LanguageSwitcher from "@/shared/components/ui/LanguageSwitcher"
+import { useAuth } from "@/features/auth"
+import LandingHeaderLogo from "./LandingHeaderLogo"
+import DesktopNav from "../LandingDesktopNav/DesktopNav"
+import LandingHeaderGuestControls from "./LandingHeaderGuestControls"
+import LandingHeaderUserControls from "./LandingHeaderUserControls"
+import { MobileSidebar } from "@/features/navigation"
 const LandingHeader = ({ onGetStarted }) => {
-  const { isAuthenticated: isLoggedIn } = useAuth();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { isAuthenticated: isLoggedIn } = useAuth()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+    setMobileOpen(!mobileOpen)
+  }
 
   return (
     <header className="sticky top-4 z-[60] flex justify-center w-full px-4">
@@ -40,7 +40,7 @@ const LandingHeader = ({ onGetStarted }) => {
 
         {/* Right Section: Controls */}
         <div className="flex min-w-0 flex-1 items-center justify-end">
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1">
             <div className="lg:block">
               <LanguageSwitcher />
             </div>
@@ -60,7 +60,7 @@ const LandingHeader = ({ onGetStarted }) => {
         setIsMobileOpen={setMobileOpen}
       />
     </header>
-  );
-};
+  )
+}
 
-export default LandingHeader;
+export default LandingHeader

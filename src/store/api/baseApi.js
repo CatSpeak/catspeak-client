@@ -50,7 +50,10 @@ const baseQuery = fetchBaseQuery({
     headers.set("X-Time-Zone", userTz)
 
     // Attach local timezone offset in minutes (JS returns negative for UTC+X, e.g. -420 for UTC+7)
-    headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
+    headers.set(
+      "X-Timezone-Offset",
+      (-new Date().getTimezoneOffset()).toString(),
+    )
 
     return headers
   },
@@ -72,7 +75,10 @@ const instructorBaseQuery = fetchBaseQuery({
     const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
     headers.set("X-Time-Zone", userTz)
 
-    headers.set("X-Timezone-Offset", (-new Date().getTimezoneOffset()).toString())
+    headers.set(
+      "X-Timezone-Offset",
+      (-new Date().getTimezoneOffset()).toString(),
+    )
 
     return headers
   },
@@ -279,8 +285,7 @@ export function createReauthBaseQuery(queryResolver) {
     }
 
     // ── Handle server-down / network errors ─────────────────────────
-    const isAborted =
-      api.signal.aborted || result.error?.name === "AbortError"
+    const isAborted = api.signal.aborted || result.error?.name === "AbortError"
 
     const status = result.error?.status
     const isServerError =
@@ -317,7 +322,12 @@ export function createReauthBaseQuery(queryResolver) {
       const res = result.data
 
       // New API (Double-nested: { success: true, data: { data: [...], additionalData: {...} } })
-      if (res.success && res.data && typeof res.data === "object" && "data" in res.data) {
+      if (
+        res.success &&
+        res.data &&
+        typeof res.data === "object" &&
+        "data" in res.data
+      ) {
         result.data = res.data
       }
       // Standard New API envelope ({ success: true, data: { ... } })
@@ -339,8 +349,17 @@ const baseQueryWithReauth = createReauthBaseQuery(
     const isCoursesRoute =
       url &&
       (url.toLowerCase().startsWith("/teacher/") ||
+        url.toLowerCase().startsWith("teacher/") ||
         url.toLowerCase().startsWith("/student/") ||
-        url.toLowerCase().startsWith("/explore/"))
+        url.toLowerCase().startsWith("student/") ||
+        url.toLowerCase().startsWith("/explore/") ||
+        url.toLowerCase().startsWith("/v1/instructor") ||
+        url.toLowerCase().startsWith("/v1/instructors") ||
+        url.toLowerCase().startsWith("explore/") ||
+        url.toLowerCase().startsWith("/personal-materials") ||
+        url.toLowerCase().startsWith("personal-materials") ||
+        url.toLowerCase().startsWith("/vouchers") ||
+        url.toLowerCase().startsWith("vouchers"))
     const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
     return activeQuery(args, api, extraOptions)
   },
@@ -377,6 +396,7 @@ export const baseApi = createApi({
     "ClassMaterials",
     "Schedule",
     "Commission",
+    "HonoredInstructors",
     "Curriculum",
     "Breakout",
     "CustomRooms",
@@ -388,6 +408,14 @@ export const baseApi = createApi({
     "StudentQuizzes",
     "StudentQuizResult",
     "Analytics",
+    "InstructorBankAccounts",
+    "RefundHistory",
+    "PersonalMaterials",
+    "Reviews",
+    "Vouchers",
+    "VoucherDetail",
+    "VoucherStats",
+    "VoucherUsages",
   ],
   endpoints: () => ({}),
 })

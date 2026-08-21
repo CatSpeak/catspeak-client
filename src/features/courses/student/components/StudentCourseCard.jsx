@@ -1,10 +1,11 @@
-import React from "react"
-import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar } from "lucide-react"
+import React, { useState } from "react"
+import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar, Share2, Check, AlertTriangle } from "lucide-react"
 import {
   getCourseGradientAndIcon,
   formatCurrencyVND,
   getSafeMediaUrl,
   defaultCourseThumbnail,
+  isClosingSoon,
 } from "../../utils/courseUtils"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -16,6 +17,7 @@ const StudentCourseCard = ({
   viewMode = "grid",
   onViewDetails,
   onJoin,
+  onShare,
   t: propsT,
   index
 }) => {
@@ -58,6 +60,10 @@ const StudentCourseCard = ({
   const remainingSlots = course.remainingSlots != null ? Number(course.remainingSlots) : null
   const minEnrollmentEnd = course.minEnrollmentEnd || course.enrollmentEnd
 
+  const [linkCopied, setLinkCopied] = useState(false)
+
+  const closingSoon = isClosingSoon(minEnrollmentEnd)
+
   const handleCardAction = (e) => {
     e.stopPropagation()
     if (isEnrolled) {
@@ -74,11 +80,11 @@ const StudentCourseCard = ({
     return (
       <div
         onClick={onViewDetails}
-        className="bg-white rounded-3xl border border-slate-200 hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+        className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
       >
         <div className="flex items-center gap-5 flex-1 min-w-0">
           {/* Thumbnail */}
-          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-sm border border-slate-200 group-hover:scale-[1.02] transition-transform duration-300">
+          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-sm border border-border group-hover:scale-[1.02] transition-transform duration-300">
             {thumbnailUrl ? (
               <img
                 src={thumbnailUrl}
@@ -92,6 +98,25 @@ const StudentCourseCard = ({
                 <Icon size={28} className="stroke-[1.5] text-white" />
               </div>
             )}
+            {onShare && (
+              <button
+                type="button"
+                onClick={async (event) => {
+                  event.stopPropagation()
+                  try {
+                    await onShare(course)
+                    setLinkCopied(true)
+                    setTimeout(() => setLinkCopied(false), 2000)
+                  } catch (e) {
+                    console.error("Share failed", e)
+                  }
+                }}
+                className="absolute top-1.5 right-1.5 z-10 h-6 w-6 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all duration-200 opacity-0 group-hover:opacity-100 active:scale-90 cursor-pointer"
+                title={sc.shareCourse || "Share"}
+              >
+                {linkCopied ? <Check size={10} /> : <Share2 size={10} />}
+              </button>
+            )}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -101,7 +126,7 @@ const StudentCourseCard = ({
                 <BookOpen size={10} />
                 {sc.courseBadge || "Khóa học"}
               </span>
-              <span className="bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-slate-200">
+              <span className="bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-border">
                 {getLocalizedLanguageName(course.language, t)}
               </span>
               {openClassCount != null && openClassCount > 0 && (
@@ -137,7 +162,12 @@ const StudentCourseCard = ({
                 <span>{studentCount} {sc.studentsUnit || "học viên"}</span>
               </div>
             )}
-            {remainingSlots != null && (
+            {closingSoon ? (
+              <div className="flex items-center gap-1 text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60">
+                <AlertTriangle size={12} />
+                <span>{sc.closingSoon || "Sắp đóng tuyển sinh"}</span>
+              </div>
+            ) : remainingSlots != null && (
               <div className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60">
                 <Clock size={12} />
                 <span>{sc.slotsRemaining ? sc.slotsRemaining.replace("{{count}}", remainingSlots) : `Còn ${remainingSlots} chỗ`}</span>
@@ -168,7 +198,7 @@ const StudentCourseCard = ({
   return (
     <div
       onClick={onViewDetails}
-      className="bg-white rounded-3xl border border-slate-200 hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
+      className="relative bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
     >
       {/* Thumbnail Area */}
       <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">
@@ -179,6 +209,26 @@ const StudentCourseCard = ({
           loading="lazy"
           decoding="async"
         />
+
+        {onShare && (
+          <button
+            type="button"
+            onClick={async (event) => {
+              event.stopPropagation()
+              try {
+                await onShare(course)
+                setLinkCopied(true)
+                setTimeout(() => setLinkCopied(false), 2000)
+              } catch (e) {
+                console.error("Share failed", e)
+              }
+            }}
+            className="absolute top-3 right-3 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-black/30 hover:bg-black/60 backdrop-blur-sm text-white transition-all duration-200 opacity-0 group-hover:opacity-100 active:scale-90 cursor-pointer"
+            title={sc.shareCourse || "Share"}
+          >
+            {linkCopied ? <Check size={14} /> : <Share2 size={14} />}
+          </button>
+        )}
       </div>
 
       {/* Content Details */}
@@ -231,15 +281,22 @@ const StudentCourseCard = ({
                 </span>
               </div>
 
-              {/* 4. Registration Deadline */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Calendar size={13} className="text-amber-500 shrink-0" />
-                <span className="truncate text-slate-800">
-                  {minEnrollmentEnd
-                    ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateMonth(minEnrollmentEnd, ui.tba || "TBA")}`
-                    : (ui.tba || "TBA")}
-                </span>
-              </div>
+              {/* 4. Registration Deadline / Closing Soon */}
+              {closingSoon ? (
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <AlertTriangle size={13} className="text-rose-500 shrink-0" />
+                  <span className="truncate text-rose-700 font-black">{sc.closingSoon || "Sắp đóng tuyển sinh"}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Calendar size={13} className="text-amber-500 shrink-0" />
+                  <span className="truncate text-slate-800">
+                    {minEnrollmentEnd
+                      ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateMonth(minEnrollmentEnd, ui.tba || "TBA")}`
+                      : (ui.tba || "TBA")}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

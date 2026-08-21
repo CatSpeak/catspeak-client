@@ -75,11 +75,11 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
 
   return (
     <div
-      className={`${embedInStack ? "w-[380px] max-w-full pointer-events-auto shadow-xl" : "fixed bottom-6 right-6 z-[9999] w-[380px] pointer-events-auto"} bg-white border border-[#e5e5e5] rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col transition-all duration-300`}
+      className={`${embedInStack ? "w-[380px] max-w-full pointer-events-auto shadow-xl" : "fixed bottom-6 right-6 z-[9999] w-[380px] pointer-events-auto"} bg-white border border-border rounded-xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col transition-all duration-300`}
     >
       {/* Widget Header */}
       <div
-        className="bg-white border-b border-[#e5e5e5] px-4 h-14 flex items-center justify-between cursor-pointer select-none"
+        className="bg-white border-b border-border px-4 h-14 flex items-center justify-between cursor-pointer select-none"
         onClick={() => setIsMinimized(!isMinimized)}
       >
         <div className="flex items-center gap-2">
@@ -87,7 +87,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
         </div>
         <div className="flex items-center">
           <button className="group flex h-12 w-12 shrink-0 items-center justify-center focus:outline-none">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-[#F2F2F2]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-primaryBg">
               {isMinimized ? <ChevronUp /> : <ChevronDown />}
             </div>
           </button>
@@ -100,7 +100,7 @@ const UploadProgressPanel = ({ embedInStack = false }) => {
               className="group flex h-12 w-12 shrink-0 items-center justify-center focus:outline-none"
               title="Clear all"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-[#F2F2F2]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full transition-colors text-[#606060] group-hover:text-black group-hover:bg-primaryBg">
                 <X />
               </div>
             </button>

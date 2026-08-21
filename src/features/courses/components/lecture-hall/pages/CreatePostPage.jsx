@@ -275,7 +275,7 @@ const CreatePostPage = () => {
             </label>
             <div
               onClick={handleAvatarClick}
-              className="group relative border border-[#E2E2E2] rounded-xl bg-[#F8F9FA] hover:bg-[#F2F2F2] flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[294px]"
+              className="group relative border border-[#E2E2E2] rounded-xl bg-[#F8F9FA] hover:bg-primaryBg flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[294px]"
             >
               <input
                 ref={avatarInputRef}

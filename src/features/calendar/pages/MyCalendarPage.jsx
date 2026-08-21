@@ -13,10 +13,11 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import toast from 'react-hot-toast'
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const MyCalendarPage = () => {
   const { t } = useLanguage()
+  const { getZoneDateStr } = useTimezone()
   const { isTeacher } = useRoleOverride()
   const navigate = useNavigate()
   const location = useLocation()
@@ -113,13 +114,8 @@ const MyCalendarPage = () => {
     // 1. (Teacher Schedule)
     if (teacherScheduleSessions?.data && Array.isArray(teacherScheduleSessions.data)) {
       teacherScheduleSessions.data.forEach((session, index) => {
-        // Construct full startTime and endTime from date and time
-        const startDateTime = session.date && session.startTime
-          ? dayjs(`${session.date}T${session.startTime}`).toISOString()
-          : dayjs().toISOString();
-        const endDateTime = session.date && session.endTime
-          ? dayjs(`${session.date}T${session.endTime}`).toISOString()
-          : dayjs().toISOString();
+        const startDateTime = session.rawStartTime || session.startTime || dayjs().toISOString();
+        const endDateTime = session.rawEndTime || session.endTime || dayjs().toISOString();
 
         const newId = `teaching-${session.id || session.class?.id || `idx-${index}`}-${session.sessionNumber}`;
         if (!seenIds.has(newId)) {
@@ -127,6 +123,7 @@ const MyCalendarPage = () => {
           events.push({
             id: newId,
             classId: session.class?.id,
+            classLanguage: session.class?.language,
             title: session.class?.name || (t.calendar?.teachingSchedule || 'Lịch dạy'),
             subtitle: session.sessionNumber ? `${t.calendar?.session || 'Buổi'} ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
             startTime: startDateTime,
@@ -144,13 +141,8 @@ const MyCalendarPage = () => {
     // 2. (Student Schedule)
     if (studentScheduleSessions?.data && Array.isArray(studentScheduleSessions.data)) {
       studentScheduleSessions.data.forEach((session, index) => {
-        // Construct full startTime and endTime from date and time
-        const startDateTime = session.date && session.startTime
-          ? dayjs(`${session.date}T${session.startTime}`).toISOString()
-          : dayjs().toISOString();
-        const endDateTime = session.date && session.endTime
-          ? dayjs(`${session.date}T${session.endTime}`).toISOString()
-          : dayjs().toISOString();
+        const startDateTime = session.rawStartTime || session.startTime || dayjs().toISOString();
+        const endDateTime = session.rawEndTime || session.endTime || dayjs().toISOString();
 
         const newId = `student-${session.id || session.class?.id || `idx-${index}`}-${session.sessionNumber}`;
         if (!seenIds.has(newId)) {
@@ -158,6 +150,7 @@ const MyCalendarPage = () => {
           events.push({
             id: newId,
             classId: session.class?.id,
+            classLanguage: session.class?.language,
             title: session.class?.name || (t.calendar?.studentSchedule || 'Lịch học'),
             subtitle: session.sessionNumber ? `${t.calendar?.session || 'Buổi'} ${session.sessionNumber}/${session.totalSessions || '?'}` : '',
             startTime: startDateTime,
@@ -195,17 +188,13 @@ const MyCalendarPage = () => {
   // Filter events for the selected date
   const eventsForSelectedDate = useMemo(() => {
     const targetDateStr = currentDate.date(selectedDate).format('YYYY-MM-DD')
-    const targetStart = dayjs(targetDateStr)
-    const targetEnd = targetStart.add(1, 'day')
 
     return filteredEvents.filter(ev => {
       if (!ev.startTime) return false
-      const evStart = dayjs(ev.startTime)
-      const evEnd = ev.endTime ? dayjs(ev.endTime) : evStart.add(1, 'hour')
-      // Check if event timeline overlaps with the target day
-      return evStart.isBefore(targetEnd) && evEnd.isAfter(targetStart)
+      const evDateStr = getZoneDateStr(ev.startTime)
+      return evDateStr === targetDateStr
     })
-  }, [selectedDate, currentDate, filteredEvents])
+  }, [selectedDate, currentDate, filteredEvents, getZoneDateStr])
 
   const handleNext = () => {
     if (viewType === 'week') {
@@ -254,14 +243,14 @@ const MyCalendarPage = () => {
         ]}
       />
 
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between flex-col md:flex-row'>
         <p className='text-[40px] font-semibold text-[#1A1A1A]'>{t.nav?.myCalendar || 'Lịch của tôi'}</p>
         {isTeacher && (
           <div className='flex gap-4'>
             <PillButton
               variant='primary'
               startIcon={<CalendarClock className='w-4 h-4' />}
-              onClick={() => toast.success(t.comingSoon?.title || "Tính năng đang phát triển")}>
+              onClick={() => navigate('/workspace/classes')}>
               {t.calendar?.changeTeachingSchedule || 'Thay đổi lịch dạy'}
             </PillButton>
             <PillButton

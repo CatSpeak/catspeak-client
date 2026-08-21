@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useMemo } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import React, { useState, useRef, useEffect, useMemo, lazy, Suspense } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import {
@@ -7,35 +7,70 @@ import {
   useGetTeacherCourseTeachingTasksCombinedQuery,
   useDeleteCourseMutation,
 } from "@/store/api/coursesApi"
-import { Pencil, Trash2 } from "lucide-react"
+import { Check, Pencil, Share2, Trash2 } from "lucide-react"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import { Tabs } from "@/shared/components/ui/navigation"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
   getSafeMediaUrl,
   defaultCourseThumbnail,
 } from "../utils/courseUtils"
 import { mapTeachingTask } from "../utils/courseTransforms"
+import { ensureDate } from "@/shared/utils/dateUtils"
+import { useAuth } from "@/features/auth"
+import { useRoleOverride } from "../components/RoleSwitcher"
 
 import ClassCard from "../components/ClassCard"
 import CourseInfoCard from "../components/CourseInfoCard"
 import TeachingTasksSection from "../components/assignments/TeachingTasksSection"
 import UpcomingSessionCard from "../components/sessions/UpcomingSessionCard"
+import { copyShareLink } from "@/shared/utils/shareUtils"
+
+const VouchersTab = lazy(() => import("@/features/vouchers/components/VouchersTab"))
 
 const CourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const c = t.courses || {}
   const ui = c.workspaceUi || {}
   const taskText = c.grading || {}
 
+  const { user } = useAuth()
+  const { isTeacher } = useRoleOverride()
+
   const [showMenu, setShowMenu] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const menuRef = useRef(null)
 
   const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
+  const [linkCopied, setLinkCopied] = useState(false)
+
+  const handleCopyLink = async () => {
+    const shareUrl = `${window.location.origin}/explore-courses/details/${id}`
+    const ok = await copyShareLink({
+      url: shareUrl,
+      successMessage: c.courseDetail?.linkCopied || "Link copied!",
+      errorMessage: c.courseDetail?.linkCopyFailed || "Failed to copy link",
+    })
+    if (ok) {
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    }
+  }
+
+  const handleShareClass = async (clsItem) => {
+    const shareUrl = `${window.location.origin}/explore-courses/class/${clsItem.id || clsItem._id}`
+    await copyShareLink({
+      url: shareUrl,
+      successMessage: c.classDetail?.linkCopied || "Link copied!",
+      errorMessage: c.classDetail?.linkCopyFailed || "Failed to copy link",
+    })
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -185,27 +220,70 @@ const CourseDetailPage = () => {
     thumbnailUrl: getSafeMediaUrl(rawCourse.thumbnailUrl)
   }
 
-  // Only show an upcoming session when the API provides one.
+  // Prioritize upcoming future session over past sessions
+  const nowMs = Date.now()
   const nextSessionCandidate = classes
     .map((cls) => {
-      const startTimeMs = new Date(cls.nextSession?.startTime || "").getTime()
+      const ns = cls?.nextSession
+      const datePart = ns?.date || cls?.startDate || ""
+      let rawTs = ns?.rawStartTime || ns?.startTime || ""
+      if (typeof rawTs === "string" && !rawTs.includes("T") && !rawTs.includes("-") && datePart) {
+        const cleanDate = datePart.includes("T") ? datePart.split("T")[0] : datePart
+        rawTs = `${cleanDate}T${rawTs}`
+      } else if (!rawTs && datePart) {
+        rawTs = datePart
+      }
+      const d = ensureDate(rawTs)
+      const startTimeMs = d ? d.getTime() : NaN
       return { cls, startTimeMs }
     })
     .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
-    .sort((left, right) => left.startTimeMs - right.startTimeMs)[0]
+    .sort((left, right) => {
+      const aUpcoming = left.startTimeMs >= nowMs ? 1 : 0
+      const bUpcoming = right.startTimeMs >= nowMs ? 1 : 0
+      if (aUpcoming !== bUpcoming) return bUpcoming - aUpcoming
+      return Math.abs(left.startTimeMs - nowMs) - Math.abs(right.startTimeMs - nowMs)
+    })[0]
   const nextSessionClass = nextSessionCandidate?.cls || null
 
   const nextClass = nextSessionClass
     ? {
       ...nextSessionClass,
-      startDate: nextSessionClass.nextSession?.date || nextSessionClass.nextSession?.startTime || nextSessionClass.startDate,
+      nextSession: nextSessionClass.nextSession,
+      startDate: nextSessionClass.nextSession?.date || nextSessionClass.startDate,
       schedule: {
         ...nextSessionClass.schedule,
-        startTime: nextSessionClass.nextSession?.startTime || nextSessionClass.schedule?.startTime,
-        endTime: nextSessionClass.nextSession?.endTime || nextSessionClass.schedule?.endTime,
+        startTime: nextSessionClass.schedule?.startTime || nextSessionClass.nextSession?.startTime,
+        endTime: nextSessionClass.schedule?.endTime || nextSessionClass.nextSession?.endTime,
       },
     }
     : null
+
+  const isCourseTeacher = Boolean(
+    isTeacher
+    || user?.isTeacher
+    || (user?.accountId && [
+      rawCourse?.teacherId,
+      rawCourse?.instructorId,
+      rawCourse?.teacher?.id,
+      rawCourse?.teacher?.accountId,
+    ].some((tid) => tid != null && String(tid) === String(user.accountId)))
+  )
+
+  const urlTab = searchParams.get("tab")
+  const VALID_COURSE_TABS = ["overview", "vouchers"]
+  const activeTab = (urlTab && VALID_COURSE_TABS.includes(urlTab)) ? urlTab : "overview"
+
+  const handleTabChange = (tab) => {
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.set("tab", tab)
+    setSearchParams(nextSearchParams)
+  }
+
+  const courseTabs = [
+    { value: "overview", label: c.courseDetail?.overview || "Tổng quan" },
+    // ...(isCourseTeacher ? [{ value: "vouchers", label: "Ưu đãi" }] : []),
+  ]
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
@@ -229,8 +307,20 @@ const CourseDetailPage = () => {
         {c.student?.courseDetails || "Course Details"}
       </h1>
 
-      {/* ─── Grid Content (2 Columns) ─── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* ─── Navigation Tabs ─── */}
+      {isCourseTeacher && (
+        <Tabs
+          tabs={courseTabs}
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          fullWidth={false}
+          className="border-b border-border/80"
+        />
+      )}
+
+      {/* ─── Tab Content ─── */}
+      {activeTab === "overview" ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* LEFT COLUMN: Visual Banner, Information Card & Current Classes */}
         <div className="lg:col-span-2 flex flex-col gap-4">
@@ -253,6 +343,16 @@ const CourseDetailPage = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/15 z-0" />
             </div>
 
+            {/* Share / Copy Link Button */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              title={c.courseDetail?.shareCourse || "Share course"}
+              className="absolute top-4 right-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white transition-all active:scale-90 cursor-pointer"
+            >
+              {linkCopied ? <Check size={18} /> : <Share2 size={18} />}
+            </button>
+
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 w-full">
               {/* Course Title */}
               <h2 className="text-2xl sm:text-3xl font-black leading-tight tracking-tight max-w-xl">
@@ -274,7 +374,7 @@ const CourseDetailPage = () => {
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-border rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                     <button
                       type="button"
                       onClick={() => {
@@ -287,7 +387,7 @@ const CourseDetailPage = () => {
                       <span>{c.courseDetail?.editCourse || c.createCourse?.updateCourse || "Chỉnh sửa khóa học"}</span>
                     </button>
 
-                    <div className="my-1 border-t border-gray-100" />
+                    <div className="my-1 border-t border-border" />
 
                     <button
                       type="button"
@@ -345,12 +445,13 @@ const CourseDetailPage = () => {
                       onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(String(cls.id))}`)}
                       progressLabel={c.progress || "Progress"}
                       courseTitle={courseData.title}
+                      onShare={handleShareClass}
                     />
                   )
                 })
               ) : (
                 /* Empty state card */
-                <div className="bg-[#FCFCFC] border border-gray-150 rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[220px] col-span-2">
+                <div className="bg-[#FCFCFC] border border-border rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[220px] col-span-2">
                   <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
                     <Pencil size={24} className="stroke-[1.5]" />
                   </div>
@@ -395,6 +496,15 @@ const CourseDetailPage = () => {
           />
         </div>
       </div>
+    ) : (
+      <Suspense
+        fallback={
+          <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
+        }
+      >
+        <VouchersTab scope="course" courseId={id} />
+      </Suspense>
+    )}
 
       <ConfirmationModal
         open={showDeleteModal}

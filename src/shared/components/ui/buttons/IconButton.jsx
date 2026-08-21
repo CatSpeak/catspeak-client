@@ -1,17 +1,23 @@
-import React from "react";
+import React from "react"
 
 const IconButton = ({
   children,
   onClick,
   title,
   disabled = false,
-  variant = "filled", // "filled" | "ghost" | "outline" | "primary"
+  variant = "filled", // "filled" | "ghost" | "outline" | "primary" | "iconOnly" | "transparent" | "overlay"
   size = "sm", // "xs" | "sm" | "md"
   className = "",
   innerClassName = "",
+  as,
+  type = "button",
   ...props
 }) => {
   const sizeClasses = {
+    xs: {
+      button: "w-8 h-8",
+      inner: "w-8 h-8 [&>svg]:!w-4 [&>svg]:!h-4",
+    },
     sm: {
       button: "w-12 h-12",
       inner: "w-10 h-10 [&>svg]:!w-6 [&>svg]:!h-6",
@@ -20,25 +26,29 @@ const IconButton = ({
       button: "w-14 h-14",
       inner: "w-14 h-14 [&>svg]:!w-6 [&>svg]:!h-6",
     },
-  };
+  }
 
   const variantClasses = {
     primary: "bg-[#990011] group-hover/icon:bg-[#80000e] text-white",
-    filled: "bg-[#F2F2F2] group-hover/icon:bg-[#C2C2C2]",
+    secondary:
+      "bg-[#F3F4F6] border border-[#E5E7EB] text-[#9CA3AF] group-hover/icon:bg-[#E5E7EB]",
+    filled: "bg-primaryBg group-hover/icon:bg-[#C2C2C2]",
     ghost: "bg-transparent group-hover/icon:bg-[#CCCCCC]",
+    iconOnly:
+      "bg-transparent text-white/60 group-hover/icon:text-white transition-colors duration-150",
     transparent: "bg-transparent",
     overlay:
       "bg-black/50 group-hover/icon:bg-black/80 text-white/70 group-hover/icon:text-white transition-all",
     outline:
-      "bg-transparent group-hover/icon:bg-[#f3f3f3] group-active/icon:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
+      "bg-transparent group-hover/icon:bg-primaryBg group-active/icon:bg-[#e5e5e5] border-[1.5px] border-solid border-[#990011] text-[#990011]",
   }
 
-  const currentSize = sizeClasses[size] || sizeClasses.sm;
+  const currentSize = sizeClasses[size] || sizeClasses.sm
+  const Component = as || (onClick ? "button" : "div")
 
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
+    <Component
+      {...(Component === "button" ? { onClick, disabled, type } : {})}
       title={title}
       className={`group/icon inline-flex items-center justify-center rounded-full focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${currentSize.button} ${className}`}
       {...props}
@@ -48,8 +58,8 @@ const IconButton = ({
       >
         {children}
       </span>
-    </button>
-  );
-};
+    </Component>
+  )
+}
 
-export default IconButton;
+export default IconButton

@@ -10,6 +10,8 @@ import {
   formatToYYYYMMDD,
   getSafeMediaUrl,
 } from "../utils/courseUtils"
+import { convertTimeStrToTz } from "@/shared/utils/dateUtils"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 // ─── Defaults ───
 
@@ -39,12 +41,21 @@ const createInitialState = (initialCourseId) => ({
   selectedLanguage: "English",
   level: "A1",
   admissionStart: "",
+  admissionStartHours: "",
   admissionEnd: "",
+  admissionEndHours: "",
   startDate: "",
+  startDateHours: "",
   sessions: 24,
   capacity: 6,
   description: "",
   fee: "850000",
+  requireMinimumAttendance: true,
+  requireMinAttendance: true,
+  minimumAttendanceRate: 80,
+  minAttendanceRate: 80,
+  lateAttendancePolicy: "CountLate",
+  includeLateAttendance: true,
   thumbnailFile: null,
   thumbnailPreview: "",
   checkedDays: createDefaultCheckedDays(),
@@ -65,7 +76,7 @@ const API_DAYS_TO_LOCAL_KEYS = {
   SUN: "sunday",
 }
 
-function parseScheduleFromApi(cls) {
+function parseScheduleFromApi(cls, userTimeZone = null) {
   const checkedDays = {
     monday: false,
     tuesday: false,
@@ -92,8 +103,8 @@ function parseScheduleFromApi(cls) {
       if (key) {
         checkedDays[key] = true
         timeSlots[key] = {
-          start: item.startTime || "",
-          end: item.endTime || "",
+          start: convertTimeStrToTz(item.startTime, userTimeZone) || item.startTime || "",
+          end: convertTimeStrToTz(item.endTime, userTimeZone) || item.endTime || "",
         }
       }
     })
@@ -102,7 +113,10 @@ function parseScheduleFromApi(cls) {
       const key = API_DAYS_TO_LOCAL_KEYS[day]
       if (key) {
         checkedDays[key] = true
-        timeSlots[key] = { start: startTime, end: endTime }
+        timeSlots[key] = {
+          start: convertTimeStrToTz(startTime, userTimeZone) || startTime || "",
+          end: convertTimeStrToTz(endTime, userTimeZone) || endTime || "",
+        }
       }
     })
   }
@@ -128,21 +142,39 @@ function classFormReducer(state, action) {
       return createInitialState(action.initialCourseId)
 
     case "HYDRATE_FROM_CLASS": {
-      const { cls } = action
-      const { checkedDays, timeSlots } = parseScheduleFromApi(cls)
+      const {
+        cls,
+        userTimeZone,
+        admissionStart,
+        admissionStartHours,
+        admissionEnd,
+        admissionEndHours,
+        startDate,
+        startDateHours,
+      } = action
+      const { checkedDays, timeSlots } = parseScheduleFromApi(cls, userTimeZone)
       return {
         ...state,
         courseId: cls.courseId || "",
         className: cls.name || cls.title || "",
         selectedLanguage: cls.language || "",
         level: cls.levels?.[0] || "",
-        admissionStart: formatToYYYYMMDD(cls.enrollmentStart),
-        admissionEnd: formatToYYYYMMDD(cls.enrollmentEnd),
-        startDate: formatToYYYYMMDD(cls.startDate),
+        admissionStart,
+        admissionStartHours,
+        admissionEnd,
+        admissionEndHours,
+        startDate,
+        startDateHours,
         sessions: cls.totalSessions ?? "",
         capacity: cls.slots ?? "",
         description: cls.description || "",
         fee: cls.tuitionFee?.toString() || "",
+        requireMinimumAttendance: cls.requireMinimumAttendance ?? cls.requireMinAttendance ?? true,
+        requireMinAttendance: cls.requireMinimumAttendance ?? cls.requireMinAttendance ?? true,
+        minimumAttendanceRate: cls.minimumAttendanceRate ?? cls.minAttendanceRate ?? 80,
+        minAttendanceRate: cls.minimumAttendanceRate ?? cls.minAttendanceRate ?? 80,
+        lateAttendancePolicy: cls.lateAttendancePolicy || (cls.includeLateAttendance === false ? "IgnoreLate" : "CountLate"),
+        includeLateAttendance: cls.lateAttendancePolicy ? (cls.lateAttendancePolicy === "CountLate") : (cls.includeLateAttendance ?? true),
         thumbnailFile: null,
         thumbnailPreview: cls.thumbnailUrl
           ? (getSafeMediaUrl(cls.thumbnailUrl) || "")
@@ -255,6 +287,7 @@ export function useClassFormReducer({
   onFormInstanceChange,
   toastError,
 }) {
+  const { userTimeZone, getZoneDateStr, formatTime } = useTimezone()
   const [state, dispatch] = useReducer(
     classFormReducer,
     initialCourseId,
@@ -438,7 +471,17 @@ export function useClassFormReducer({
       hydratedDetailsKeyRef.current = formInstanceKey
       thumbnailReaderRef.current?.abort()
       thumbnailReaderRef.current = null
-      dispatch({ type: "HYDRATE_FROM_CLASS", cls })
+      dispatch({
+        type: "HYDRATE_FROM_CLASS",
+        cls,
+        userTimeZone,
+        admissionStart: getZoneDateStr(cls.enrollmentStart),
+        admissionStartHours: cls.enrollmentStart ? formatTime(cls.enrollmentStart) : "",
+        admissionEnd: getZoneDateStr(cls.enrollmentEnd),
+        admissionEndHours: cls.enrollmentEnd ? formatTime(cls.enrollmentEnd) : "",
+        startDate: getZoneDateStr(cls.startDate),
+        startDateHours: cls.startDate ? formatTime(cls.startDate) : "",
+      })
     }
   }, [
     classDetailResponse,
@@ -446,6 +489,7 @@ export function useClassFormReducer({
     recoverClassResponse,
     isEditMode,
     isRecoverMode,
+    userTimeZone,
   ])
 
   // ─── Handlers ───

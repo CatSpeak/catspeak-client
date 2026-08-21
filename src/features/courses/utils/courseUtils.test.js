@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import test from "node:test"
 // The repository's alias-only import resolver does not recognize Node's built-in protocol.
 // eslint-disable-next-line import/no-unresolved
@@ -6,6 +7,7 @@ import assert from "node:assert/strict"
 import {
   getClassEnrollmentIssue,
   getSafeMediaUrl,
+  isClosingSoon,
 } from "./courseUtils.js"
 
 const openClass = {
@@ -47,10 +49,17 @@ test("enrollment eligibility enforces status and enrollment boundaries", () => {
   )
   assert.equal(
     getClassEnrollmentIssue({
+      classData: { ...openClass, status: "UPCOMING" },
+      nowMs: Date.parse("2026-07-25T00:00:00.000Z"),
+    }),
+    "upcoming",
+  )
+  assert.equal(
+    getClassEnrollmentIssue({
       classData: openClass,
       nowMs: Date.parse("2026-06-30T23:59:59.000Z"),
     }),
-    "closed",
+    "upcoming",
   )
   assert.equal(
     getClassEnrollmentIssue({
@@ -85,4 +94,22 @@ test("safe media URLs reject executable schemes and embedded credentials", () =>
     getSafeMediaUrl("https://cdn.example.com/file.png"),
     "https://cdn.example.com/file.png",
   )
+})
+
+test("isClosingSoon flags deadlines within threshold and ignores past/far deadlines", () => {
+  const now = Date.parse("2026-07-25T00:00:00.000Z")
+  assert.equal(
+    isClosingSoon("2026-07-28T00:00:00.000Z", now), // 3 days out
+    true,
+  )
+  assert.equal(
+    isClosingSoon("2026-08-25T00:00:00.000Z", now), // 31 days out
+    false,
+  )
+  assert.equal(
+    isClosingSoon("2026-07-20T00:00:00.000Z", now), // past
+    false,
+  )
+  assert.equal(isClosingSoon(null, now), false)
+  assert.equal(isClosingSoon("not-a-date", now), false)
 })

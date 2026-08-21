@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useCallback } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import Slider from "@/shared/components/ui/Slider"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -53,8 +53,10 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
     DEFAULT_AI_SETTINGS.proficiencyLevel,
   )
 
-  const isValidProficiencyLevel = (value) =>
-    proficiencyLevels.some((level) => level.value === value)
+  const isValidProficiencyLevel = useCallback(
+    (value) => proficiencyLevels.some((level) => level.value === value),
+    [proficiencyLevels],
+  )
 
   // Load persisted settings (or defaults) every time the modal opens.
   useEffect(() => {
@@ -68,24 +70,26 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
       saved = null
     }
 
-    // supportLanguage is persisted; learningLanguage is always re-derived from URL.
-    const savedSupport = availableSupportLanguages.includes(saved?.supportLanguage)
-      ? saved.supportLanguage
-      : null
-    setSupportLanguage(savedSupport)
+    queueMicrotask(() => {
+      // supportLanguage is persisted; learningLanguage is always re-derived from URL.
+      const savedSupport = availableSupportLanguages.includes(saved?.supportLanguage)
+        ? saved.supportLanguage
+        : null
+      setSupportLanguage(savedSupport)
 
-    const available = VOICE_AVAILABILITY[foreignLanguage] ?? ["female"]
-    const savedVoice = saved?.voice ?? DEFAULT_AI_SETTINGS.voice
-    setVoice(available.includes(savedVoice) ? savedVoice : available[0])
+      const available = VOICE_AVAILABILITY[foreignLanguage] ?? ["female"]
+      const savedVoice = saved?.voice ?? DEFAULT_AI_SETTINGS.voice
+      setVoice(available.includes(savedVoice) ? savedVoice : available[0])
 
-    setSpeed(
-      typeof saved?.speed === "number" ? saved.speed : SPEED_CONFIG.default,
-    )
-    const savedProficiency = isValidProficiencyLevel(saved?.proficiencyLevel)
-      ? saved.proficiencyLevel
-      : DEFAULT_AI_SETTINGS.proficiencyLevel
-    setProficiencyLevel(savedProficiency)
-  }, [open, foreignLanguage, proficiencyLevels, availableSupportLanguages])
+      setSpeed(
+        typeof saved?.speed === "number" ? saved.speed : SPEED_CONFIG.default,
+      )
+      const savedProficiency = isValidProficiencyLevel(saved?.proficiencyLevel)
+        ? saved.proficiencyLevel
+        : DEFAULT_AI_SETTINGS.proficiencyLevel
+      setProficiencyLevel(savedProficiency)
+    })
+  }, [open, foreignLanguage, proficiencyLevels, availableSupportLanguages, isValidProficiencyLevel])
 
   const handleConfirm = () => {
     const settings = { supportLanguage, speed, voice, proficiencyLevel }
@@ -109,7 +113,7 @@ const AISessionSettingsModal = ({ open, onConfirm, onCancel, urlLang }) => {
     `inline-flex h-10 items-center rounded-full px-4 text-sm border transition-colors ${
       active
         ? "bg-cath-red-700 border-cath-red-700 text-white hover:bg-cath-red-800 hover:border-cath-red-800"
-        : "border-[#C6C6C6] hover:bg-[#F2F2F2]"
+        : "border-[#C6C6C6] hover:bg-primaryBg"
     }`
 
   return (

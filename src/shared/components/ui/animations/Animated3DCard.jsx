@@ -48,7 +48,7 @@ const Animated3DCard = ({
 
       {/* Front */}
       <div
-        className={`relative rounded-2xl bg-white flex flex-col overflow-hidden border border-[#e5e5e5] shadow-sm sm:group-hover/card:shadow-none will-change-transform translate-y-[0px] transition-all duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] sm:group-hover/card:-translate-y-[6px] sm:group-hover/card:duration-[250ms] sm:group-hover/card:ease-[cubic-bezier(.3,.7,.4,1.5)] ${className}`}
+        className={`relative rounded-2xl bg-white flex flex-col overflow-hidden border border-border shadow-sm sm:group-hover/card:shadow-none will-change-transform translate-y-[0px] transition-all duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] sm:group-hover/card:-translate-y-[6px] sm:group-hover/card:duration-[250ms] sm:group-hover/card:ease-[cubic-bezier(.3,.7,.4,1.5)] ${className}`}
         style={
           isPressed
             ? { transform: "translateY(-2px)", transitionDuration: "34ms" }

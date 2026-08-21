@@ -88,20 +88,24 @@ export const useCallActions = ({
   // ── Chat ──
 
   const handleSendMessage = useCallback(
-    (text, replyTarget) => {
-      if (replyTarget) {
-        chatSend(
-          JSON.stringify({
-            isReply: true,
-            text,
-            replyTo: {
-              message: replyTarget.message,
-              name: replyTarget.from?.name || "User",
-            },
-          }),
-        );
-      } else {
-        chatSend(text);
+    async (text, replyTarget) => {
+      try {
+        if (replyTarget) {
+          await chatSend(
+            JSON.stringify({
+              isReply: true,
+              text,
+              replyTo: {
+                message: replyTarget.message,
+                name: replyTarget.from?.name || "User",
+              },
+            }),
+          );
+        } else {
+          await chatSend(text);
+        }
+      } catch (err) {
+        console.error("[useCallActions] Failed to send chat message:", err);
       }
     },
     [chatSend],

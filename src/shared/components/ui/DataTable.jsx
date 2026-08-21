@@ -28,11 +28,19 @@ const DataTable = ({
   emptyIcon,
   renderMobileCard,
   className = "",
+  striped = false,
+  headerRowClassName = "bg-red-50/50 text-cath-red-800 border-b border-red-100",
+  tbodyClassName = "bg-white",
+  rowClassName = "",
+  onRowClick,
+  tableClassName = "",
 }) => {
   // Empty state
   if (data.length === 0) {
     return (
-      <div className={`flex flex-col items-center justify-center py-20 flex-1 ${className}`}>
+      <div
+        className={`flex flex-col items-center justify-center py-20 flex-1 ${className}`}
+      >
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
           {emptyIcon || <FileText className="w-8 h-8 text-gray-400" />}
         </div>
@@ -45,36 +53,62 @@ const DataTable = ({
   return (
     <>
       {/* Desktop table — hidden on mobile */}
-      <FluentCard padding="!p-0" className={`overflow-hidden flex-1 hidden md:block !border-gray-200 !rounded-2xl ${className}`}>
-        <table className="w-full text-left border-collapse">
+      <FluentCard
+        padding="!p-0"
+        className={`overflow-hidden flex-1 hidden md:block shadow-none !border-border !rounded-xl ${className}`}
+      >
+        <table className={`w-full text-left border-collapse ${tableClassName}`}>
           <thead>
-            <tr className="bg-red-50/50 text-cath-red-800 border-b border-red-100">
+            <tr className={headerRowClassName}>
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`py-4 px-6 font-semibold text-[13px] ${col.headerClassName || ""}`}
+                  className={`p-4 font-semibold ${col.headerClassName || ""}`}
                 >
-                  {col.label}
+                  <span
+                    className="block whitespace-normal break-words line-clamp-2 text-ellipsis overflow-hidden"
+                    title={
+                      typeof col.label === "string" ? col.label : undefined
+                    }
+                  >
+                    {col.label}
+                  </span>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white">
-            {data.map((row, index) => (
-              <tr
-                key={rowKey ? rowKey(row, index) : index}
-                className="border-b border-gray-100 last:border-0 hover:bg-gray-50/80 transition-colors"
-              >
-                {columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className={`py-4 px-6 text-sm ${col.className || "text-gray-600"}`}
-                  >
-                    {col.render ? col.render(row, index) : row[col.key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
+          <tbody className={tbodyClassName}>
+            {data.map((row, index) => {
+              const customRowClass =
+                typeof rowClassName === "function"
+                  ? rowClassName(row, index)
+                  : rowClassName
+
+              return (
+                <tr
+                  key={rowKey ? rowKey(row, index) : index}
+                  onClick={
+                    onRowClick ? () => onRowClick(row, index) : undefined
+                  }
+                  className={`border-b border-border last:border-0 transition-colors ${
+                    onRowClick ? "cursor-pointer" : ""
+                  } ${
+                    striped
+                      ? "odd:bg-white even:bg-gray-50/60 hover:bg-gray-100/70"
+                      : "hover:bg-gray-50/80"
+                  } ${customRowClass}`}
+                >
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={`px-4 py-1 ${col.className || ""}`}
+                    >
+                      {col.render ? col.render(row, index) : row[col.key]}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </FluentCard>

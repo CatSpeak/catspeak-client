@@ -16,14 +16,13 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
   // Fetch sample backgrounds
   const { data: samplesResponse, isLoading: isSamplesLoading } =
     useGetSampleBackgroundsQuery()
-  const samples = samplesResponse?.data || samplesResponse || []
+  const samples = Array.isArray(samplesResponse) ? samplesResponse : []
 
   // Fetch current active background
   const { data: currentBackgroundResponse } = useGetCurrentBackgroundQuery()
-  const activeUrl =
-    currentBackgroundResponse?.data?.activeBackgroundUrl || null
+  const activeUrl = currentBackgroundResponse?.activeBackgroundUrl ?? null
   const customUploadedUrl =
-    currentBackgroundResponse?.data?.customUploadedBackgroundUrl || null
+    currentBackgroundResponse?.customUploadedBackgroundUrl ?? null
 
   const [selectedUrl, setSelectedUrl] = useState(activeUrl)
   const [isUploading, setIsUploading] = useState(false)
@@ -74,11 +73,11 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
       await uploadCustom(formData).unwrap()
 
       const res = await getCurrent().unwrap()
-      const uploadedUrl = res?.data?.customUploadedBackgroundUrl || null
+      const uploadedUrl = res?.customUploadedBackgroundUrl ?? null
 
       if (uploadedUrl) {
         // Ensure it's active
-        if (res?.data?.activeBackgroundUrl !== uploadedUrl) {
+        if (res?.activeBackgroundUrl !== uploadedUrl) {
           await setActive({ backgroundUrl: uploadedUrl }).unwrap()
         }
         setSelectedUrl(uploadedUrl)
@@ -116,7 +115,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
           <div
             onClick={() => handleSelect(null)}
             className={`relative w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 block ${
-              selectedUrl === null ? "border-cath-red-700" : "border-[#e5e5e5]"
+              selectedUrl === null ? "border-cath-red-700" : "border-border"
             } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
           >
             <div className="absolute inset-0 flex items-center justify-center">
@@ -134,7 +133,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
           {/* Upload Option */}
           <label
             className={`relative w-full cursor-pointer rounded-lg border border-dashed aspect-video overflow-hidden transition-all duration-200 block bg-gray-50 hover:bg-gray-100 ${
-              isUploading ? "border-[#e5e5e5]" : "border-[#e5e5e5]"
+              isUploading ? "border-border" : "border-border"
             }`}
           >
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -167,7 +166,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
               className={`relative  w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
                 selectedUrl === customUploadedUrl
                   ? "border-cath-red-700"
-                  : "border-[#e5e5e5]"
+                  : "border-border"
               } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
             >
               <div className="absolute inset-0">
@@ -199,7 +198,7 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
                 className={`relative  w-full cursor-pointer rounded-lg border aspect-video overflow-hidden transition-all duration-200 group block ${
                   selectedUrl === url
                     ? "border-cath-red-700"
-                    : "border-[#e5e5e5]"
+                    : "border-border"
                 } ${isSettingActive || isUploading ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}`}
               >
                 <div className="absolute inset-0">

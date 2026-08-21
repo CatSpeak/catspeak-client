@@ -10,11 +10,22 @@ const MobileNavItem = ({ navKey, onClose }) => {
 
   if (navKey === "cart" || navKey === "connect") return null;
 
-  const currentLang = lang || localStorage.getItem("communityLanguage") || "en";
+  const currentLang =
+    lang ||
+    (localStorage.getItem("communityLanguage") &&
+    localStorage.getItem("communityLanguage") !== "vi"
+      ? localStorage.getItem("communityLanguage")
+      : "zh");
 
   let href;
   if (navKey === "catSpeak") {
     href = `/${currentLang}/cat-speak/news`;
+  } else if (navKey === "exploreCourses") {
+    href = "/explore-courses";
+  } else if (navKey === "learningResources") {
+    href = "/resources";
+  } else if (navKey === "community") {
+    href = "/community";
   } else if (navKey === "cart") {
     href = "/cart";
   } else if (navKey === "connect") {
@@ -23,20 +34,17 @@ const MobileNavItem = ({ navKey, onClose }) => {
     href = "/";
   }
 
-  const label = t.nav?.[navKey] || navKey;
-
   return (
     <NavLink
       to={href}
       onClick={onClose}
-      title={label}
-      className={`flex items-center px-3 h-10 w-full text-sm rounded-[5px] transition-colors min-w-0 ${
+      className={`flex items-center px-3 h-10 text-sm rounded-[5px] transition-colors ${
         isActive
-          ? "text-cath-red-700 bg-[#F2F2F2] hover:bg-[#E6E6E6]"
-          : "hover:bg-[#F2F2F2]"
+          ? "text-cath-red-700 bg-primaryBg hover:bg-[#E6E6E6]"
+          : "hover:bg-primaryBg"
       }`}
     >
-      <span className="truncate min-w-0">{label}</span>
+      {t.nav?.[navKey] || navKey}
     </NavLink>
   );
 };

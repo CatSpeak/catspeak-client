@@ -1,4 +1,4 @@
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import { badges } from "@/shared/constants/constants"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Button3D from "@/shared/components/ui/buttons/Button3D"
@@ -12,13 +12,12 @@ const SessionActionButtons = ({
   isCreatingStudyGroup,
   isCreatingAI,
   isCreatingCustom,
-  canUseAI,
 }) => {
   const { t } = useLanguage()
 
   return (
-    <div className="relative mt-5">
-      <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 mt-2">
+    <div className="relative mt-4">
+      <div className="relative flex flex-col sm:flex-row sm:flex-wrap gap-4 mt-2">
         {badges.map((b) => {
           const Icon = b.icon
           const isOneOnOne = b.id === "connect_1_1"
@@ -28,7 +27,8 @@ const SessionActionButtons = ({
 
           if (isAI) return null
 
-          const isActionable = isOneOnOne || isStudyGroup || isAI || isCustomRoom
+          const isActionable =
+            isOneOnOne || isStudyGroup || isAI || isCustomRoom
 
           const handleClick = () => {
             if (isOneOnOne) handleCreateOneOnOneSession()
@@ -53,7 +53,7 @@ const SessionActionButtons = ({
           const label = labelKey ? t.rooms.sessionActions[labelKey] : b.label
 
           return (
-            <motion.div
+            <Motion.div
               key={b.id}
               className={`flex items-center w-full sm:w-auto`}
               onClick={isActionable ? handleClick : undefined}
@@ -62,11 +62,11 @@ const SessionActionButtons = ({
                 disabled={!isActionable || isLoadingThis}
                 loading={isActionable && isLoadingThis}
                 className="w-full sm:w-auto sm:min-w-[140px]"
-                roundedClass="rounded-full"
+                roundedClass="rounded-xl"
               >
                 {label}
               </Button3D>
-            </motion.div>
+            </Motion.div>
           )
         })}
       </div>

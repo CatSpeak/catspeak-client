@@ -50,7 +50,7 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
   return (
     <Modal open={true} onClose={onClose} showCloseButton={false} className="max-w-sm w-full p-0">
       <div className="flex flex-col max-h-[80vh]">
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <h2 className="text-lg font-bold text-gray-900">
             {lang.title || "Save to Playlist"}
           </h2>
@@ -90,13 +90,13 @@ export default function ReelPlaylistModal({ reelId, onClose }) {
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-100 bg-gray-50 shrink-0">
+        <div className="p-4 border-t border-border bg-gray-50 shrink-0">
           <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showCreateInput ? 'max-h-24 opacity-100 mb-2' : 'max-h-0 opacity-0 mb-0'}`}>
             <div className="flex gap-2 items-center">
               <input 
                 type="text" 
                 placeholder={lang.placeholder || "Enter playlist name..."}
-                className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-cath-red-500 focus:ring-0"
+                className="flex-1 px-4 py-2.5 bg-white border border-border rounded-xl text-sm outline-none focus:border-cath-red-500 focus:ring-0"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreatePlaylist()}

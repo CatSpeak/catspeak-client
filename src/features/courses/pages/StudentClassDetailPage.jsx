@@ -19,8 +19,9 @@ import {
   getClassEnrollmentIssueMessage,
   getSafeMediaUrl,
 } from "../utils/courseUtils"
-import { formatWeeklyScheduleText } from "../utils/scheduleUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { getClassLanguageCode } from "@/shared/utils/navigation"
+import { useRoleOverride } from "../components/RoleSwitcher"
 
 import ClassDetailTabs from "../components/ClassDetailTabs"
 import StudentClassOverviewTab from "../components/overview/StudentClassOverviewTab"
@@ -45,8 +46,9 @@ const ENROLLED_ONLY_TABS = new Set(["members", "lecture-hall", "feed", "grading"
 const StudentClassDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { isStudent } = useRoleOverride()
   const { language, t } = useLanguage()
-  const { userTimeZone } = useTimezone()
+  const { formatWeeklySchedule } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const scd = c.studentCourseDetail || {}
@@ -107,6 +109,14 @@ const StudentClassDetailPage = () => {
       classData?.teacherId,
     ].some((ownerId) => ownerId != null && String(ownerId) === currentUserId)
   )
+
+  useEffect(() => {
+    // Only redirect if they are the owner AND they are currently in Teacher mode.
+    // If isStudent is true, they intentionally switched to student mode to preview, so we don't redirect.
+    if (isOwner && id && !isStudent) {
+      navigate(`/workspace/courses/class/${id}${window.location.search}`, { replace: true })
+    }
+  }, [isOwner, id, navigate, isStudent])
 
   // Enrollment Status
   const activeTab = isEnrolled
@@ -214,12 +224,7 @@ const StudentClassDetailPage = () => {
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklyScheduleText(
-    classData || {},
-    language || "en",
-    ui.tba,
-    userTimeZone,
-  )
+  const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
 
   if (
     isDetailLoading
@@ -256,11 +261,11 @@ const StudentClassDetailPage = () => {
           { label: c.student?.dashboardTitle || "Lớp học của tôi", onClick: () => navigate("/workspace/learning") },
           ...(classData.courseId
             ? [
-                {
-                  label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
-                  onClick: () => navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`),
-                },
-              ]
+              {
+                label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
+                onClick: () => navigate(`/workspace/learning/details/${encodeURIComponent(String(classData.courseId))}`),
+              },
+            ]
             : []),
           { label: c.student?.classDetails || "Class Details" },
         ]}
@@ -312,7 +317,7 @@ const StudentClassDetailPage = () => {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => navigate(`/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
                 className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
               >
                 <Video size={14} className="fill-white" />
@@ -359,7 +364,7 @@ const StudentClassDetailPage = () => {
             joinRoomLabel={c.joinRoom || "Join Room"}
             noUpcomingLabel={c.student?.noUpcomingSessions || "No upcoming sessions"}
             onJoinRoom={() => navigate(
-              `/${encodeURIComponent(language || "vi")}/meet/${encodeURIComponent(`class-${id}`)}`
+              `/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`
             )}
           />
         )}

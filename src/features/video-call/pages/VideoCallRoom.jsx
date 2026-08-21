@@ -33,8 +33,6 @@ import StudentSpeakingWidget from "@/features/video-call/components/StudentSpeak
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
 import { GameProvider } from "@/features/games/context/GameContext"
-import PictureITOverlay from "@/features/games/components/picture-it/components/PictureITOverlay"
-import CrackItOverlay from "@/features/games/components/crack-it/CrackItOverlay"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
 import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
@@ -146,10 +144,6 @@ const VideoCallRoomContent = () => {
   const [hasConnected, setHasConnected] = useState(false)
 
   useEffect(() => {
-    console.log(
-      "[VideoCallRoom] LiveKit connectionState changed:",
-      connectionState,
-    )
     if (connectionState === ConnectionState.Connected) {
       setHasConnected(true)
     }
@@ -226,7 +220,7 @@ const VideoCallRoomContent = () => {
       <RoomHeader />
 
       {/* Main Content Area */}
-      <div className="p-4 md:p-6 relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-[#F3F3F3] bg-white gap-4 sm:gap-6">
+      <div className="p-4 relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-primaryBg bg-white gap-4">
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
@@ -271,7 +265,7 @@ const VideoCallRoomContent = () => {
               className="hidden lg:flex flex-col overflow-hidden relative"
               style={{ width: 360 }}
             >
-              <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-[#E5E5E5] overflow-hidden">
+              <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                 {showParticipants && <ParticipantList />}
                 {showSpeakingTimeBalance && isHost && (
                   <SpeakingTimeBalancePanel
@@ -319,7 +313,7 @@ const VideoCallRoomContent = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.25, ease: "easeOut" }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white shadow-2xl flex flex-col border-l border-[#E5E5E5] overflow-hidden"
+              className="fixed right-0 top-0 bottom-0 z-50 w-[360px] bg-white shadow-2xl flex flex-col border-l border-border overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {showParticipants && <ParticipantList />}
@@ -381,7 +375,7 @@ const VideoCallRoomContent = () => {
                 {!showChat && (
                   <button
                     type="button"
-                    className="text-black flex w-full items-center gap-2 border-b border-[#E5E5E5] px-4 py-3 text-left hover:bg-gray-50 shrink-0"
+                    className="text-black flex w-full items-center gap-2 border-b border-border px-4 py-3 text-left hover:bg-gray-50 shrink-0"
                     onClick={() => setActiveSidePanel(null)}
                   >
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary2/10">
@@ -393,33 +387,34 @@ const VideoCallRoomContent = () => {
                   </button>
                 )}
 
-                <div className="flex-1 overflow-y-auto bg-white min-h-0">
-                  {showParticipants && <ParticipantList hideTitle />}
-                  {showSpeakingTimeBalance && isHost && (
-                    <SpeakingTimeBalancePanel
-                      onClose={() => setActiveSidePanel(null)}
-                    />
-                  )}
-                  {showVirtualBackground && <BackgroundsAndEffectsPanel />}
-                  {showAvatarPicker && <AvatarUrlPicker />}
-                  {showTroubleshoot && <TroubleshootPanel hideTitle />}
-                  {showBreakout && isBreakoutSupported(room?.roomType) && (
-                    <BreakoutSidebarPanel
-                      sessionId={parentSessionId}
-                      onClose={() => setActiveSidePanel(null)}
-                    />
-                  )}
-                  {showChat && (
-                    <ChatBox
-                      messages={messages}
-                      currentUser={user}
-                      onSendMessage={handleSendMessage}
-                      isConnected={isConnected}
-                      className="h-full w-full rounded-t-[24px]"
-                      hideTitle
-                    />
-                  )}
-                </div>
+                {showChat ? (
+                  <ChatBox
+                    messages={messages}
+                    currentUser={user}
+                    onSendMessage={handleSendMessage}
+                    isConnected={isConnected}
+                    className="flex-1 min-h-0 w-full rounded-t-[24px]"
+                    hideTitle
+                  />
+                ) : (
+                  <div className="flex-1 overflow-y-auto bg-white min-h-0">
+                    {showParticipants && <ParticipantList hideTitle />}
+                    {showSpeakingTimeBalance && isHost && (
+                      <SpeakingTimeBalancePanel
+                        onClose={() => setActiveSidePanel(null)}
+                      />
+                    )}
+                    {showVirtualBackground && <BackgroundsAndEffectsPanel />}
+                    {showAvatarPicker && <AvatarUrlPicker />}
+                    {showTroubleshoot && <TroubleshootPanel hideTitle />}
+                    {showBreakout && isBreakoutSupported(room?.roomType) && (
+                      <BreakoutSidebarPanel
+                        sessionId={parentSessionId}
+                        onClose={() => setActiveSidePanel(null)}
+                      />
+                    )}
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           </div>

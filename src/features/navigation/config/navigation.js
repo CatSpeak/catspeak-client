@@ -12,12 +12,13 @@ import {
   Film,
   Mail,
   BookOpen,
-  MessageCircle,
   DoorOpen,
   Globe,
-  Users,
   BarChart,
   CalendarDays,
+  Compass,
+  Folder,
+  Ticket,
 } from "lucide-react"
 
 export const navSections = [
@@ -27,10 +28,10 @@ export const navSections = [
     items: [
       { key: "community", path: "/community", icon: Home },
       {
-        key: "messages",
-        label: "Chat",
-        path: "/chat",
-        icon: MessageCircle,
+        key: "exploreCourses",
+        label: "Explore Courses",
+        path: "/explore-courses",
+        icon: Compass,
       },
       {
         key: "learningResources",
@@ -50,7 +51,7 @@ export const navSections = [
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
-      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
+      { key: "events", path: "/cat-speak/calendar", icon: Calendar },
     ],
   },
   {
@@ -58,25 +59,42 @@ export const navSections = [
     labelKey: "workspace",
     defaultLabel: "My Workspace",
     maxInitial: 5,
-    items: [
-      { key: "profile", path: "/workspace/profile", icon: User },
-      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
-      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
-      { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
-      { key: "recordings", path: "/workspace/recordings", icon: Mic },
-      { key: "workspaceReels", path: "/workspace/reels", icon: Film },
-      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-      { key: "myClass", path: "/workspace/classes", icon: Users },
-      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
-      { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
-      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
-      // { key: "events", path: "/workspace/events", icon: Calendar },
+    groups: [
+      {
+        key: "teaching",
+        roles: ["Teacher"],
+        items: [
+          { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
+          { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+          { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+          { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+        ],
+      },
+      {
+        key: "general",
+        items: [
+          { key: "profile", path: "/workspace/profile", icon: User },
+          { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
+          { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
+          { key: "recordings", path: "/workspace/recordings", icon: Mic },
+          { key: "workspaceReels", path: "/workspace/reels", icon: Film },
+          { key: "manageMaterials", path: "/workspace/materials", icon: Folder },
+        ],
+      },
     ],
+    get items() {
+      return this.groups.flatMap((g) => g.items)
+    },
   },
 ]
 
 export const navLinks = [
-  { key: "community", path: "/community", hasDropdown: true, icon: Home },
+  {
+    key: "community",
+    path: "/community",
+    icon: Home,
+  },
   {
     key: "catSpeak",
     hasDropdown: true,
@@ -90,32 +108,37 @@ export const navLinks = [
     ],
   },
   {
-    key: "messages",
-    label: "Chat",
-    path: "/chat",
-    icon: MessageCircle,
-    isPrivate: true,
-    showOnHorizontalBar: false,
-  },
-  {
     key: "workspace",
     hasDropdown: true,
     icon: Briefcase,
     requiresAuth: true,
-    subItems: [
-      { key: "profile", path: "/workspace/profile", icon: User },
-      { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
-      { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
-      { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
-      { key: "recordings", path: "/workspace/recordings", icon: Mic },
-      { key: "reels", path: "/workspace/reels", icon: Film },
-      { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
-      { key: "myClass", path: "/workspace/classes", icon: Users },
-      // { key: "schedule", path: "/workspace/schedule", icon: Calendar },
-      { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
-      { key: "analytics", path: "/workspace/analytics", icon: BarChart },
-      // { key: "events", path: "/workspace/events", icon: Calendar },
+    groups: [
+      {
+        key: "teaching",
+        roles: ["Teacher"],
+        items: [
+          { key: "dashboard", path: "/workspace/dashboard", icon: LayoutDashboard },
+          { key: "myCourses", path: "/workspace/courses", icon: GraduationCap },
+          { key: "teachingTasks", path: "/workspace/teaching-tasks", icon: Briefcase },
+          { key: "analytics", path: "/workspace/analytics", icon: BarChart },
+        ],
+      },
+      {
+        key: "general",
+        items: [
+          { key: "profile", path: "/workspace/profile", icon: User },
+          { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "myCalendar", path: "/workspace/my-calendar", icon: CalendarDays },
+          { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
+          { key: "recordings", path: "/workspace/recordings", icon: Mic },
+          { key: "reels", path: "/workspace/reels", icon: Film },
+          { key: "manageMaterials", path: "/workspace/materials", icon: Folder },
+        ],
+      },
     ],
+    get subItems() {
+      return this.groups.flatMap((g) => g.items)
+    },
   },
   {
     key: "horizontalBar",
@@ -124,12 +147,17 @@ export const navLinks = [
     showOnHorizontalBar: false,
   },
   {
+    key: "exploreCourses",
+    label: "Explore Courses",
+    path: "/explore-courses",
+    icon: Compass,
+  },
+  {
     key: "learningResources",
     label: "Resource Hub",
     path: "/resources",
     icon: Globe,
     isPrivate: true,
-    showOnHorizontalBar: false,
   },
 ]
 

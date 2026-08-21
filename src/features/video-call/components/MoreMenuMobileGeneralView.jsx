@@ -78,7 +78,15 @@ const MoreMenuMobileGeneralView = ({
   return (
     <>
       {hasDuration && (
-        <div className="flex items-center justify-center text-lg font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-12 w-full">
+        <div
+          className={`flex items-center justify-center text-base font-medium rounded-xl py-2 px-5 h-12 w-full transition-all ${
+            closingRemainingSeconds !== null && closingRemainingSeconds <= 60
+              ? "bg-red-100 text-red-700 border border-red-300 font-bold animate-pulse shadow-sm"
+              : closingRemainingSeconds !== null && closingRemainingSeconds <= 300
+              ? "bg-amber-100 text-amber-900 border border-amber-300 font-bold animate-pulse shadow-sm"
+              : "bg-[#F5F5F5] text-black"
+          }`}
+        >
           {t?.rooms?.videoCall?.remainingTime || "Thời gian còn lại"}:{" "}
           {formattedRemaining} / {formattedMax}
         </div>

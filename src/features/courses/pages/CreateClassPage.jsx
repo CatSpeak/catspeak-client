@@ -1,5 +1,12 @@
 import React, { useMemo, useRef, useEffect, useCallback } from "react"
 import { useNavigate, useLocation, useParams } from "react-router-dom"
+import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { toast } from "react-hot-toast"
 import { Editor } from "@tinymce/tinymce-react"
@@ -10,7 +17,8 @@ import {
   ChevronDown,
   Upload,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  Check,
 } from "lucide-react"
 
 import {
@@ -21,7 +29,8 @@ import {
   useDeleteClassMutation
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
-import { DatePicker } from "@/shared/components/ui/inputs"
+import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
+import TimeDropdown from "@/features/calendar/components/ui/TimeDropdown"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
@@ -36,6 +45,7 @@ import {
 import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 import { useClassFormReducer } from "../hooks/useClassFormReducer"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -49,6 +59,7 @@ const DAYS_OF_WEEK = [
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
+  const { userTimeZone, toIsoInZone, convertTimeToUtc, getShiftedDayToUtc } = useTimezone()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -137,6 +148,12 @@ const CreateClassPage = () => {
     () => (Array.isArray(coursesData?.data) ? coursesData.data : []),
     [coursesData],
   )
+  const today = useMemo(() => {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d
+  }, [])
+
   const tomorrow = useMemo(() => {
     const d = new Date()
     d.setDate(d.getDate() + 1)
@@ -191,12 +208,21 @@ const CreateClassPage = () => {
     selectedLanguage,
     level,
     admissionStart,
+    admissionStartHours,
     admissionEnd,
+    admissionEndHours,
     startDate,
+    startDateHours,
     sessions,
     capacity,
     description,
     fee,
+    requireMinimumAttendance = true,
+    requireMinAttendance = true,
+    minimumAttendanceRate = 80,
+    minAttendanceRate = 80,
+    lateAttendancePolicy = "CountLate",
+    includeLateAttendance = true,
     thumbnailFile,
     thumbnailPreview,
     checkedDays,
@@ -297,25 +323,26 @@ const CreateClassPage = () => {
 
     setErrors({})
 
-    const start = parseLocalDateString(startDate)
-    const enrollStart = parseLocalDateString(admissionStart)
-    const enrollEnd = parseLocalDateString(admissionEnd)
+    const start = parseLocalDateString(startDate, startDateHours || "00:00")
+    const enrollStart = parseLocalDateString(admissionStart, admissionStartHours || "00:00")
+    const enrollEnd = parseLocalDateString(admissionEnd, admissionEndHours || "00:00")
     if (!start || !enrollStart || !enrollEnd) {
       toast.error(cc.toastInvalidDates || "Enter valid enrollment and class dates.")
       return
     }
 
     if (!isEditMode) {
-      if (enrollStart && enrollStart < tomorrow) {
-        toast.error(cc.toastAdmissionStartPast || "Admission start date must be from tomorrow onwards!")
+      const now = new Date()
+      if (enrollStart && enrollStart <= now) {
+        toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
         return
       }
-      if (enrollEnd && enrollEnd < tomorrow) {
-        toast.error(cc.toastAdmissionEndPast || "Admission end date must be from tomorrow onwards!")
+      if (enrollEnd && enrollEnd <= now) {
+        toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
         return
       }
-      if (start && start < tomorrow) {
-        toast.error(cc.toastStartPast || "Start date must be from tomorrow onwards!")
+      if (start && start <= now) {
+        toast.error(cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!")
         return
       }
     }
@@ -327,6 +354,11 @@ const CreateClassPage = () => {
 
     if (enrollEnd && start && start < enrollEnd) {
       toast.error(cc.toastStartLater || "Start date must be later than or equal to enrollment end date!")
+      return
+    }
+
+    if (enrollEnd && start && start < enrollEnd) {
+      toast.error(cc.toastStartLater || "Ngày khai giảng phải bằng hoặc trễ hơn thời gian kết thúc tuyển sinh!")
       return
     }
 
@@ -362,11 +394,16 @@ const CreateClassPage = () => {
       saturday: "SAT",
       sunday: "SUN"
     }
-    const schedule = checkedDaysList.map(k => ({
-      dayOfWeek: daysCodeMap[k],
-      startTime: timeSlots[k].start,
-      endTime: timeSlots[k].end
-    }))
+    const schedule = checkedDaysList.map(k => {
+      const rawDay = daysCodeMap[k]
+      const localStart = timeSlots[k].start
+      const localEnd = timeSlots[k].end
+      return {
+        dayOfWeek: getShiftedDayToUtc(rawDay, localStart),
+        startTime: convertTimeToUtc(localStart),
+        endTime: convertTimeToUtc(localEnd)
+      }
+    })
 
     submitGuardRef.current = true
     const submittedFormKey = formInstanceKey
@@ -387,6 +424,14 @@ const CreateClassPage = () => {
         ? originalLevels
         : [level]
 
+      const activeTz = userTimeZone || "Asia/Ho_Chi_Minh"
+
+      const formatToLocalISO = (dateStr) => {
+        if (!dateStr) return ""
+        const clean = String(dateStr).split("T")[0]
+        return dayjs.tz(`${clean}T00:00:00`, activeTz).toISOString()
+      }
+
       const payload = {
         courseId,
         title: className.trim(),
@@ -394,14 +439,20 @@ const CreateClassPage = () => {
         levels: payloadLevels,
         description,
         totalSessions: sessionCount,
-        enrollmentStart: admissionStart ? `${admissionStart}T00:00:00Z` : "",
-        enrollmentEnd: admissionEnd ? `${admissionEnd}T00:00:00Z` : "",
-        startDate: startDate ? `${startDate}T00:00:00Z` : "",
+        enrollmentStart: toIsoInZone(admissionStart, admissionStartHours || "00:00"),
+        enrollmentEnd: toIsoInZone(admissionEnd, admissionEndHours || "00:00"),
+        startDate: toIsoInZone(startDate, startDateHours || "00:00"),
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
+        requireMinimumAttendance,
+        requireMinAttendance,
+        minimumAttendanceRate: requireMinimumAttendance ? (parseInt(minAttendanceRate, 10) || 80) : null,
+        minAttendanceRate: requireMinimumAttendance ? (parseInt(minAttendanceRate, 10) || 80) : null,
+        lateAttendancePolicy: lateAttendancePolicy || (includeLateAttendance ? "CountLate" : "IgnoreLate"),
+        includeLateAttendance: lateAttendancePolicy === "CountLate" || includeLateAttendance,
         thumbnailUrl: thumbnailFile || thumbnailPreview || "",
-        timezone: "Asia/Ho_Chi_Minh",
+        timezone: activeTz,
         cancelUrl: (
           window.location.origin
           + window.location.pathname
@@ -503,17 +554,37 @@ const CreateClassPage = () => {
         )) ||
         (typeof errCode === "string" && (errCode.includes("SESSION_CONFLICT") || errCode.includes("SCHEDULE_CONFLICT")))
 
+      const isPayOSError =
+        errCode === "PAYOS_ERROR" ||
+        (typeof errMsg === "string" && (
+          errMsg.includes("Enrollment start must be in the future") ||
+          errMsg.includes("Enrollment end must be after enrollment start") ||
+          errMsg.includes("PAYOS_ERROR")
+        ))
+
       let displayMessage
-      if (isLanguageNotAllowed) {
+      if (isScheduleConflict) {
+        displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT") && !errMsg.includes("PAYOS_ERROR"))
+          ? errMsg
+          : (cc.toastScheduleConflictDefault || "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.")
+      } else if (isLanguageNotAllowed) {
         displayMessage = cc.languageNotAllowed || c.createCourse?.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
       } else if (isScheduleLocked) {
         displayMessage = cc.scheduleLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Teaching schedule cannot be changed for this class.")
       } else if (isLevelsLocked) {
         displayMessage = cc.levelsLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Class level cannot be changed for this class.")
-      } else if (isScheduleConflict) {
-        displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT"))
-          ? errMsg
-          : (cc.toastScheduleConflictDefault || "Schedule conflict detected with another class!")
+      } else if (isPayOSError) {
+        if (typeof errMsg === "string" && (errMsg.includes("Enrollment end must be after") || errMsg.includes("end date must be later"))) {
+          displayMessage = cc.toastAdmissionEndLater || "Enrollment end date must be later than enrollment start date!"
+        } else if (typeof errMsg === "string" && (errMsg.includes("Enrollment start must be in the future") || errMsg.includes("start must be in the future"))) {
+          displayMessage = cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!"
+        } else if (typeof errMsg === "string" && (errMsg.includes("Start date must be") || errMsg.includes("start date"))) {
+          displayMessage = cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!"
+        } else {
+          displayMessage = isEditMode
+            ? (cc.toastUpdateFail || "Failed to update class!")
+            : (cc.toastCreateFail || "Failed to create class!")
+        }
       } else if (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("Missing")) {
         displayMessage = errMsg
       } else {
@@ -653,7 +724,7 @@ const CreateClassPage = () => {
           type="button"
           onClick={() => navigate(-1)}
           disabled={isFormBusy}
-          className="p-2.5 border border-gray-200 hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+          className="p-2.5 border border-border hover:bg-gray-100/80 text-gray-600 rounded-xl transition-all cursor-pointer shadow-2xs flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
           title={t.common?.back || "Quay lại"}
         >
           <ArrowLeft size={18} />
@@ -667,7 +738,7 @@ const CreateClassPage = () => {
       <form
         onSubmit={handleSubmit}
         aria-busy={isFormBusy}
-        className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col gap-6 flex-1"
+        className="bg-white rounded-2xl p-6 border border-border shadow-sm flex flex-col gap-6 flex-1"
       >
 
         <h2 className="text-lg font-bold text-gray-900 border-b border-gray-50 pb-2">
@@ -690,7 +761,7 @@ const CreateClassPage = () => {
                   value={courseId}
                   onChange={(e) => handleCourseChange(e.target.value)}
                   disabled={isEditMode || isRecoverMode || !!initialCourseId}
-                  className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                  className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                 >
                   <option value="">{cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}</option>
                   {isEditMode || isRecoverMode ? (
@@ -717,7 +788,7 @@ const CreateClassPage = () => {
                 }}
                 disabled={isRecoverMode}
                 placeholder={cc.placeholderClassName || "Enter class name"}
-                className={`w-full h-11 px-4 bg-white border ${errors.className ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                className={`w-full h-11 px-4 bg-white border ${errors.className ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all placeholder:text-gray-400 disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
               />
             </div>
 
@@ -734,7 +805,7 @@ const CreateClassPage = () => {
                       clearError("selectedLanguage")
                     }}
                     disabled={isRecoverMode || !!initialCourseId || !!courseId}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
                     {languagesList.map((lang) => (
@@ -757,7 +828,7 @@ const CreateClassPage = () => {
                       clearError("level")
                     }}
                     disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
+                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
                   >
                     <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
                     {levelsList.map((lvl) => {
@@ -775,66 +846,74 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Admission Period & Start Date Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex flex-col gap-2 md:col-span-2">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.admissionPeriod} <span className="text-[#990011]">*</span></label>
-                <div className="flex items-center gap-1.5">
-                  <div className="flex-1">
-                    <DatePicker
-                      value={admissionStart}
-                      onChange={(date) => {
-                        setField("admissionStart", date ? toLocalDateString(date) : "")
-                        clearError("admissionStart")
-                      }}
-                      mode="date"
-                      color="#990011"
-                      placeholder="dd/MM/yyyy"
-                      minDate={isEditMode ? null : tomorrow}
-                      className={`w-full ${errors.admissionStart ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                    />
-                  </div>
-                  <span className="text-gray-300 text-xs font-bold">-</span>
-                  <div className="flex-1">
-                    <DatePicker
-                      value={admissionEnd}
-                      onChange={(date) => {
-                        setField("admissionEnd", date ? toLocalDateString(date) : "")
-                        clearError("admissionEnd")
-                      }}
-                      mode="date"
-                      color="#990011"
-                      placeholder="dd/MM/yyyy"
-                      minDate={isEditMode ? null : tomorrow}
-                      className={`w-full ${errors.admissionEnd ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
-                    />
-                  </div>
-                </div>
+            {/* Admission Period & Start Date — 3 inputs on 1 single row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              {/* Col 1: Thời hạn đăng ký (Từ) */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.admissionPeriod || "Thời hạn đăng ký"}<span className="text-[#990011]">*</span>
+                </label>
+                <DateTimePicker
+                  dateValue={admissionStart}
+                  timeValue={admissionStartHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("admissionStart", dateStr)
+                    setField("admissionStartHours", timeStr)
+                    clearError("admissionStart")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.admissionStart)}
+                  className="w-full"
+                />
               </div>
 
-              <div className="flex flex-col gap-2 md:col-span-1">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.startDate} <span className="text-[#990011]">*</span></label>
-                <DatePicker
-                  value={startDate}
-                  onChange={(date) => {
-                    setField("startDate", date ? toLocalDateString(date) : "")
+              {/* Col 2: Thời hạn đăng ký (Đến) */}
+              <div className="flex flex-col gap-1">
+                <DateTimePicker
+                  dateValue={admissionEnd}
+                  timeValue={admissionEndHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("admissionEnd", dateStr)
+                    setField("admissionEndHours", timeStr)
+                    clearError("admissionEnd")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.admissionEnd)}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Col 3: Ngày bắt đầu */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.startDate} <span className="text-[#990011]">*</span>
+                </label>
+                <DateTimePicker
+                  dateValue={startDate}
+                  timeValue={startDateHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("startDate", dateStr)
+                    setField("startDateHours", timeStr)
                     clearError("startDate")
                   }}
-                  mode="date"
                   color="#990011"
-                  placeholder="dd/MM/yyyy"
-                  minDate={isEditMode ? null : tomorrow}
-                  className={`w-full ${errors.startDate ? "border-red-500 ring-2 ring-red-200 rounded-xl" : ""}`}
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.startDate)}
+                  className="w-full"
                 />
               </div>
             </div>
+
+
 
             {/* Number of Sessions & Capacity Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Number of Sessions */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.numberOfSessions} <span className="text-[#990011]">*</span></label>
-                <div className={`flex items-center bg-white border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
+                <div className={`flex items-center bg-white border ${errors.sessions ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
                     onClick={() => setField("sessions", Math.max(1, (parseInt(sessions, 10) || 1) - 1))}
@@ -864,7 +943,7 @@ const CreateClassPage = () => {
               {/* Capacity */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.capacity} <span className="text-[#990011]">*</span></label>
-                <div className={`flex items-center bg-white border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-gray-200 hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
+                <div className={`flex items-center bg-white border ${errors.capacity ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus-within:border-[#990011]"} rounded-xl overflow-hidden h-11 transition-all`}>
                   <button
                     type="button"
                     onClick={() => setField("capacity", Math.max(1, (parseInt(capacity, 10) || 1) - 1))}
@@ -892,18 +971,136 @@ const CreateClassPage = () => {
               </div>
             </div>
 
+            {/* Attendance Requirements Block */}
+            <div className={`bg-white rounded-2xl p-4 border border-border flex flex-col md:flex-row gap-5 md:gap-8 items-stretch justify-between ${isEditMode ? "opacity-75 bg-slate-50/50" : ""}`}>
+              {/* Left Column: Minimum Attendance Rate */}
+              <div className="flex-1 flex flex-col gap-3 justify-center">
+                {/* Header row */}
+                <div className="flex items-center gap-2">
+                  <div
+                    role="checkbox"
+                    tabIndex={isEditMode ? -1 : 0}
+                    aria-checked={requireMinAttendance}
+                    onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
+                    onKeyDown={(e) => {
+                      if (!isEditMode && (e.key === "Enter" || e.key === " ")) {
+                        e.preventDefault()
+                        setField("requireMinAttendance", !requireMinAttendance)
+                      }
+                    }}
+                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isEditMode
+                      ? "cursor-not-allowed opacity-60 bg-gray-100 border-gray-300 text-gray-500"
+                      : requireMinAttendance
+                        ? "bg-[#990011] border-[#990011] text-white cursor-pointer"
+                        : "bg-white border-gray-300 hover:border-gray-400 cursor-pointer"
+                      }`}
+                  >
+                    {requireMinAttendance && <Check size={14} strokeWidth={3} />}
+                  </div>
+                  <span
+                    onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
+                    className={`font-bold text-sm text-gray-800 select-none ${isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                  >
+                    {cc.requireMinAttendanceLabel || "Yêu cầu tỷ lệ tham dự tối thiểu"}
+                  </span>
+                  <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
+                </div>
+
+                {/* Content row */}
+                <div className="flex items-center justify-between sm:justify-start gap-4 pt-1">
+                  <span className="text-sm font-medium text-gray-700">
+                    {cc.minAttendanceRateLabel || "Tỷ lệ tham dự tối thiểu"}
+                  </span>
+                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-32 transition-all ${(!isEditMode && requireMinAttendance) ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                    }`}>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      disabled={isEditMode || !requireMinAttendance}
+                      value={minAttendanceRate}
+                      onChange={(e) => {
+                        if (isEditMode) return
+                        const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0))
+                        setField("minAttendanceRate", val)
+                      }}
+                      className="w-full h-full px-3 text-center font-bold text-sm text-gray-800 outline-none bg-transparent disabled:cursor-not-allowed"
+                    />
+                    <div className="h-full bg-gray-50 border-l border-gray-200 px-3 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0 select-none">
+                      %
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vertical Divider for md screens */}
+              <div className="hidden md:block w-px bg-border self-stretch" />
+
+              {/* Right Column: Attendance Calculation Type */}
+              <div className="flex-1 flex flex-col gap-3 justify-center">
+                {/* Header row */}
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-sm text-gray-800">
+                    {cc.requireAttendanceTypeLabel || "Yêu cầu Lần tham dự"}
+                  </span>
+                  <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
+                </div>
+
+                {/* Radio options */}
+                <div className="flex flex-col gap-2.5 pt-1">
+                  <label
+                    onClick={() => {
+                      if (isEditMode) return
+                      setField("lateAttendancePolicy", "CountLate")
+                      setField("includeLateAttendance", true)
+                    }}
+                    className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "CountLate" || includeLateAttendance)
+                      ? "border-[#990011] bg-white"
+                      : "border-gray-300 group-hover:border-gray-400 bg-white"
+                      }`}>
+                      {(lateAttendancePolicy === "CountLate" || includeLateAttendance) && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
+                      {cc.includeLateAttendanceOption || "Tính cả lần tham dự muộn"}
+                    </span>
+                  </label>
+
+                  <label
+                    onClick={() => {
+                      if (isEditMode) return
+                      setField("lateAttendancePolicy", "IgnoreLate")
+                      setField("includeLateAttendance", false)
+                    }}
+                    className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance)
+                      ? "border-[#990011] bg-white"
+                      : "border-gray-300 group-hover:border-gray-400 bg-white"
+                      }`}>
+                      {(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance) && <div className="w-2 h-2 rounded-full bg-[#990011]" />}
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900">
+                      {cc.excludeLateAttendanceOption || "Không tính lần tham dự muộn"}
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             {/* Teaching Schedule */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.teachingSchedule}</label>
 
               {/* Outer Gray Container */}
-              <div className={`bg-white rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"} flex flex-col gap-4`}>
+              <div className={`bg-white rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-border"} flex flex-col gap-4`}>
                 <span className="text-xs font-bold text-gray-500">
                   {cc.chooseDays || "Choose days of the week"}
                 </span>
 
                 {/* Weekdays selection grid inside */}
-                <div className="grid grid-cols-7 border border-gray-200 rounded-xl overflow-hidden text-center divide-x divide-gray-200 bg-white">
+                <div className="grid grid-cols-7 border border-border rounded-xl overflow-hidden text-center divide-x divide-gray-200 bg-white">
                   {DAYS_OF_WEEK.map((day) => {
                     const isChecked = checkedDays[day.key]
                     return (
@@ -941,7 +1138,7 @@ const CreateClassPage = () => {
                     if (!isChecked) return null
 
                     return (
-                      <div key={day.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 first:pt-0 border-t border-gray-100 first:border-t-0">
+                      <div key={day.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 first:pt-0 border-t border-border first:border-t-0">
                         {/* Day badge & label */}
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-[#990011] text-white font-extrabold text-xs flex items-center justify-center flex-shrink-0">
@@ -998,7 +1195,7 @@ const CreateClassPage = () => {
                     handleThumbnailClick()
                   }
                 }}
-                className="group relative border border-dashed border-gray-200 rounded-2xl p-4 bg-white hover:border-gray-300 hover:bg-gray-50/80 flex flex-col items-center justify-center text-center min-h-[150px] cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
+                className="group relative border border-dashed border-border rounded-2xl p-4 bg-white hover:border-gray-300 hover:bg-gray-50/80 flex flex-col items-center justify-center text-center min-h-[150px] cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#990011]"
               >
                 <input
                   ref={fileInputRef}
@@ -1064,7 +1261,7 @@ const CreateClassPage = () => {
                     value={fee ? parseInt(fee).toLocaleString("vi-VN") : ""}
                     onChange={(e) => formatFeeInput(e.target.value)}
                     placeholder="850.000"
-                    className="w-full h-11 pl-4 pr-12 bg-white border border-gray-200 hover:border-gray-300 focus:border-[#990011] outline-none rounded-xl text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400"
+                    className="w-full h-11 pl-4 pr-12 bg-white border border-border hover:border-gray-300 focus:border-[#990011] outline-none rounded-xl text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-extrabold text-xs">VND</span>
                 </div>
@@ -1077,7 +1274,7 @@ const CreateClassPage = () => {
                     type="text"
                     value={amountReceived}
                     disabled
-                    className="w-full h-11 pl-4 pr-12 bg-[#F2F2F2]/40 border border-transparent rounded-xl text-sm font-extrabold text-gray-500 cursor-not-allowed"
+                    className="w-full h-11 pl-4 pr-12 bg-primaryBg/40 border border-transparent rounded-xl text-sm font-extrabold text-gray-500 cursor-not-allowed"
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-450 font-extrabold text-xs">VND</span>
                 </div>
@@ -1085,7 +1282,7 @@ const CreateClassPage = () => {
             </div>
 
             {/* Platform Fee info message */}
-            <div className="flex gap-2 text-[10px] text-gray-400 font-bold items-start bg-gray-50/40 p-2.5 rounded-xl border border-gray-100">
+            <div className="flex gap-2 text-[10px] text-gray-400 font-bold items-start bg-gray-50/40 p-2.5 rounded-xl border border-border">
               <Info size={13} className="text-[#990011] flex-shrink-0 mt-0.5" />
               <span>{labelCommissionNote}</span>
             </div>
@@ -1104,7 +1301,7 @@ const CreateClassPage = () => {
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-gray-100 mt-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-border mt-auto">
           {/* Left Side: Fee detail */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D]">

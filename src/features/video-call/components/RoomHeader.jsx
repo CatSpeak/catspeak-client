@@ -7,7 +7,7 @@ import { useSessionTimer } from "@/features/video-call"
 import { useParticipants, useLocalParticipant } from "@livekit/components-react"
 import { toast } from "react-hot-toast"
 import { IconButton } from "@/shared/components/ui/buttons"
-import { Link2 } from "lucide-react"
+import { Link2, Clock } from "lucide-react"
 import { copyRoomLink } from "@/shared/utils/shareUtils"
 import RightSideControls from "./RightSideControls"
 
@@ -15,8 +15,10 @@ const RoomHeader = () => {
   const { t, language } = useLanguage()
   const { lang } = useParams()
   const { room, closingRemainingSeconds } = useVideoCallContext()
-  const { formattedRemaining, formattedMax, hasDuration, formattedElapsed } =
+  const { formattedRemaining, formattedMax, hasDuration, remainingSeconds } =
     useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
+
+  const effectiveRemaining = closingRemainingSeconds ?? remainingSeconds
 
   const rawRoomName = room?.name || "General"
 
@@ -44,7 +46,7 @@ const RoomHeader = () => {
     hostParticipant.identity === localParticipant.identity
 
   return (
-    <div className="flex items-center justify-between bg-white px-4 h-[56px] shrink-0 border-b border-[#e5e5e5]">
+    <div className="flex items-center justify-between bg-white px-4 h-[56px] shrink-0 border-b border-border">
       <div className="flex items-center gap-2 md:gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
@@ -96,8 +98,28 @@ const RoomHeader = () => {
 
       <div className="flex items-center gap-1">
         {hasDuration && (
-          <div className="hidden md:flex items-center justify-center text-sm font-medium text-black md:text-base bg-[#F5F5F5] rounded-xl py-2 px-5 h-10 w-full">
-            {formattedRemaining} / {formattedMax}
+          <div
+            className={`hidden md:flex items-center justify-center gap-2 text-xs md:text-sm font-semibold rounded-full py-1.5 px-4 h-9 transition-all select-none ${
+              effectiveRemaining !== null && effectiveRemaining <= 60
+                ? "bg-red-50 text-red-600 border border-red-200 shadow-2xs animate-pulse"
+                : effectiveRemaining !== null && effectiveRemaining <= 300
+                ? "bg-amber-50 text-amber-700 border border-amber-200/90 shadow-2xs"
+                : "bg-neutral-100/80 text-neutral-600 border border-neutral-200/60"
+            }`}
+          >
+            <Clock
+              size={15}
+              className={
+                effectiveRemaining !== null && effectiveRemaining <= 60
+                  ? "text-red-500"
+                  : effectiveRemaining !== null && effectiveRemaining <= 300
+                  ? "text-amber-500"
+                  : "text-neutral-400"
+              }
+            />
+            <span>
+              {formattedRemaining} <span className="opacity-40 font-normal">/ {formattedMax}</span>
+            </span>
           </div>
         )}
       </div>

@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Calendar, Clock, Check, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronsLeft, ChevronsRight, Calendar, Clock, Check, X } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { FluentAnimation } from "@/shared/components/ui/animations";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import Dropdown from "@/shared/components/ui/Dropdown";
 
 const normalizeFormat = (fmt) => {
   if (!fmt) return null;
@@ -55,7 +56,7 @@ const DatePicker = ({
   );
 
   // Confirmed time state
-  const [selectedHour, setSelectedHour] = useState(initialDate ? initialDate.hour() : 12);
+  const [selectedHour, setSelectedHour] = useState(initialDate ? initialDate.hour() : 0);
   const [selectedMinute, setSelectedMinute] = useState(initialDate ? initialDate.minute() : 0);
 
   // Draft unconfirmed time/date state for popup interaction
@@ -79,14 +80,33 @@ const DatePicker = ({
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target) &&
-        (!portalRef.current || !portalRef.current.contains(event.target))
-      ) {
-        setIsOpen(false);
+      const target = event.target;
+      if (!target) return;
+
+      // 1. Clicked inside the main input field trigger
+      if (dropdownRef.current && dropdownRef.current.contains(target)) {
+        return;
       }
+      // 2. Clicked inside DatePicker popover card
+      if (portalRef.current && portalRef.current.contains(target)) {
+        return;
+      }
+      // 3. Clicked inside any child dropdown portal, menu item, or unmounted sub-component
+      if (
+        !document.body.contains(target) ||
+        (target.closest && (
+          target.closest('[data-dropdown-portal]') ||
+          target.closest('.dropdown-portal') ||
+          target.closest('[data-portal]') ||
+          target.closest('[role="listbox"]')
+        ))
+      ) {
+        return;
+      }
+
+      setIsOpen(false);
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -134,6 +154,15 @@ const DatePicker = ({
     const handleScroll = (e) => {
       if (!isOpen) return;
       if (portalRef.current && (portalRef.current.contains(e.target) || e.target === portalRef.current)) return;
+      if (
+        e.target &&
+        e.target !== window &&
+        e.target !== document &&
+        e.target !== document.body &&
+        e.target !== document.documentElement
+      ) {
+        return;
+      }
       if (typeof window !== "undefined" && window.innerWidth < 640) return;
       handleClose();
     };
@@ -354,7 +383,11 @@ const DatePicker = ({
           if (!disabled) setIsOpen(!isOpen);
         }}
         disabled={disabled}
-        className={`hover:bg-[#f0f0f0] flex items-center justify-between border border-[#e5e5e5] rounded-md whitespace-nowrap text-center text-base px-4 h-12 bg-white outline-none w-full ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "hover:bg-gray-50"}`}
+        className={`flex items-center justify-between border rounded-xl whitespace-nowrap text-sm px-3.5 h-11 bg-white outline-none w-full transition-all duration-200 ${
+          isOpen
+            ? "border-[#990011] ring-2 ring-red-100"
+            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/80"
+        } ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : ""}`}
       >
         <span className={!date && (!value || mode !== "time") ? "text-[#7A7574] font-normal" : ""}>
           {date || (mode === "time" && value)
@@ -400,13 +433,13 @@ const DatePicker = ({
                       <FluentAnimation
                         direction={portalCoords.flipUp ? "up" : "down"}
                         exit={true}
-                        className="bg-white/95 backdrop-blur-md border border-[#E5E5E5] rounded-2xl shadow-xl p-4 flex flex-col gap-3"
+                        className="bg-white/95 backdrop-blur-md border border-border rounded-2xl shadow-xl p-4 flex flex-col gap-3"
                       >
                         {/* TIME-ONLY MODE - APPLE WHEEL SCROLL UI */}
                         {mode === "time" ? (
                           <div className="flex flex-col gap-3">
                             {/* Header */}
-                            <div className="flex items-center justify-between border-b border-gray-150 pb-2">
+                            <div className="flex items-center justify-between border-b border-border pb-2">
                               <span className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
                                 <Clock size={16} className="text-gray-500" />
                                 {language === "en" ? "Select Time" : language === "zh" ? "选择时间" : "Chọn Giờ"}
@@ -433,7 +466,7 @@ const DatePicker = ({
                               {/* Wheel Tumbler */}
                               <div className="relative flex items-center justify-center h-[200px] select-none bg-gray-50/50 rounded-xl overflow-hidden touch-pan-y">
                                 {/* Center highlight row banner */}
-                                <div className="absolute top-1/2 -translate-y-1/2 left-3 right-3 h-10 bg-white border-y border-gray-200 shadow-2xs rounded-lg pointer-events-none" />
+                                <div className="absolute top-1/2 -translate-y-1/2 left-3 right-3 h-10 bg-white border-y border-border shadow-2xs rounded-lg pointer-events-none" />
 
                                 <div className="flex items-center justify-center w-full z-10 px-4 h-[200px]">
                                   {/* Hours Wheel */}
@@ -559,7 +592,7 @@ const DatePicker = ({
                                   {weekDays.map((day) => (
                                     <div
                                       key={day}
-                                      className="text-center text-[12px] font-bold text-gray-400 pb-1 border-b border-gray-100"
+                                      className="text-center text-[12px] font-bold text-gray-400 pb-1 border-b border-border"
                                     >
                                       {day}
                                     </div>
@@ -633,45 +666,59 @@ const DatePicker = ({
 
                             {/* INLINE TIME PICKER IN DATETIME MODE */}
                             {mode === "datetime" && viewMode === "day" && (
-                              <div className="mt-2 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-                                <span className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                              <div className="mt-2 pt-3 border-t border-border flex items-center justify-between gap-1.5">
+                                <span className="text-xs font-bold text-gray-600 flex items-center gap-1 shrink-0">
                                   <Clock size={14} className="text-gray-400" />
                                   {language === "en" ? "Time:" : "Giờ:"}
                                 </span>
                                 <div className="flex items-center gap-1">
-                                  <select
+                                  <Dropdown
+                                    options={hoursList.map((h) => ({
+                                      label: String(h).padStart(2, "0"),
+                                      value: h,
+                                    }))}
                                     value={tempHour}
-                                    onChange={(e) => handleSelectHourItem(Number(e.target.value))}
-                                    className="h-8 px-2 bg-gray-50 border border-gray-200 rounded text-xs font-bold text-gray-800 outline-none focus:border-[var(--focus-color)]"
-                                    style={{ "--focus-color": color }}
-                                  >
-                                    {hoursList.map((h) => (
-                                      <option key={h} value={h}>
-                                        {String(h).padStart(2, "0")}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <span className="font-bold text-gray-400">:</span>
-                                  <select
+                                    onChange={(opt) => handleSelectHourItem(typeof opt === "object" ? opt.value : opt)}
+                                    dropdownClassName="w-[85px] min-w-[85px] max-h-[180px] p-1 shadow-xl"
+                                    activeColor={color}
+                                    trigger={
+                                      <button
+                                        type="button"
+                                        className="h-8 w-[58px] px-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 flex items-center justify-between transition-colors shadow-2xs cursor-pointer"
+                                      >
+                                        <span>{String(tempHour).padStart(2, "0")}</span>
+                                        <ChevronDown size={12} className="text-gray-400 shrink-0" />
+                                      </button>
+                                    }
+                                  />
+                                  <span className="text-xs font-bold text-gray-400">:</span>
+                                  <Dropdown
+                                    options={minutesList.map((m) => ({
+                                      label: String(m).padStart(2, "0"),
+                                      value: m,
+                                    }))}
                                     value={tempMinute}
-                                    onChange={(e) => handleSelectMinuteItem(Number(e.target.value))}
-                                    className="h-8 px-2 bg-gray-50 border border-gray-200 rounded text-xs font-bold text-gray-800 outline-none focus:border-[var(--focus-color)]"
-                                    style={{ "--focus-color": color }}
-                                  >
-                                    {minutesList.map((m) => (
-                                      <option key={m} value={m}>
-                                        {String(m).padStart(2, "0")}
-                                      </option>
-                                    ))}
-                                  </select>
+                                    onChange={(opt) => handleSelectMinuteItem(typeof opt === "object" ? opt.value : opt)}
+                                    dropdownClassName="w-[85px] min-w-[85px] max-h-[180px] p-1 shadow-xl"
+                                    activeColor={color}
+                                    trigger={
+                                      <button
+                                        type="button"
+                                        className="h-8 w-[58px] px-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 flex items-center justify-between transition-colors shadow-2xs cursor-pointer"
+                                      >
+                                        <span>{String(tempMinute).padStart(2, "0")}</span>
+                                        <ChevronDown size={12} className="text-gray-400 shrink-0" />
+                                      </button>
+                                    }
+                                  />
                                 </div>
                                 <button
                                   type="button"
                                   onClick={handleConfirmTime}
-                                  className="px-3 py-1.5 text-xs font-bold text-white rounded transition-all active:scale-95 shadow-2xs cursor-pointer"
+                                  className="h-8 px-3 text-white text-xs font-bold rounded-lg shadow-2xs hover:brightness-95 transition-all flex items-center justify-center shrink-0 cursor-pointer"
                                   style={{ backgroundColor: color }}
                                 >
-                                  {language === "en" ? "Done" : "Xác nhận"}
+                                  {language === "en" ? "Confirm" : "Xác nhận"}
                                 </button>
                               </div>
                             )}

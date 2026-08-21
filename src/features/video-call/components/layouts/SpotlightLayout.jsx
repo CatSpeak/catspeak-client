@@ -1,11 +1,10 @@
+import React, { useMemo } from "react"
 import ScreenShareTile from "../ScreenShareTile"
 import VideoTile from "../VideoTile"
-import GameSpotlight from "../GameSpotlight"
 import GameTile from "../GameTile"
+import OverflowTile from "../OverflowTile"
 import { useGame } from "@/features/games/context/GameContext"
-
-const scrollbarClasses =
-  "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
+import { useGridParticipants } from "@/features/video-call/hooks/useGridParticipants"
 
 // Identifier cho spotlight item = game. Dùng string literal để track ở redux/video state.
 export const GAME_SPOTLIGHT_TYPE = "game"
@@ -23,55 +22,114 @@ const SpotlightLayout = ({
   const isSpotlightGame =
     isGameActive && spotlightItem?.type === GAME_SPOTLIGHT_TYPE
 
-  // Khi game là main spotlight: tất cả screen share + participants xuống sidebar.
-  // Khi spotlight là screen share/video: tất cả những thứ còn lại xuống sidebar.
-  // Khi game active nhưng không phải main: chỉ game xuống sidebar.
-  let sidebarScreenShares = []
-  let sidebarParticipants = []
-
-  if (isSpotlightGame) {
-    sidebarScreenShares = screenShareTracks ?? []
-    sidebarParticipants = participants
-  } else {
-    // Loại bỏ spotlight screen share khỏi sidebar (nếu spotlight là screen share).
-    sidebarScreenShares = (screenShareTracks ?? []).filter((trackRef) => {
+  // Filter sidebar items
+  const sidebarScreenShares = useMemo(() => {
+    if (isSpotlightGame) return screenShareTracks ?? []
+    return (screenShareTracks ?? []).filter((trackRef) => {
       if (spotlightItem?.type !== "screen") return true
       return (
         trackRef.publication?.trackSid !==
-        spotlightItem.trackRef.publication?.trackSid
+        spotlightItem.trackRef?.publication?.trackSid
       )
     })
+  }, [isSpotlightGame, screenShareTracks, spotlightItem])
 
-    if (spotlightItem?.type === "screen") {
-      sidebarParticipants = participants
-    } else if (spotlightItem?.type === "video") {
-      sidebarParticipants = participants.filter(
+  const sidebarParticipants = useMemo(() => {
+    if (isSpotlightGame || spotlightItem?.type === "screen") {
+      return participants ?? []
+    }
+    if (spotlightItem?.type === "video") {
+      return (participants ?? []).filter(
         (p) => p.identity !== spotlightItem?.participant?.identity,
       )
-    } else {
-      sidebarParticipants = participants
     }
-  }
+    return participants ?? []
+  }, [isSpotlightGame, participants, spotlightItem])
 
-  // Game tile chỉ xuất hiện trong sidebar khi nó KHÔNG phải spotlight chính.
   const showGameInSidebar = isGameActive && !isSpotlightGame
 
-  const hasSidebarItems =
-    sidebarScreenShares.length > 0 ||
-    sidebarParticipants.length > 0 ||
-    showGameInSidebar
-
-  const getSidebarItemClass = () => {
-    if (totalItems <= 5) {
-      return "flex-shrink-0 w-[120px] sm:w-[150px] aspect-video md:w-full md:flex-1 md:aspect-auto md:h-auto relative"
+  // Combine sidebar items into single array for useGridParticipants
+  const sidebarAllItems = useMemo(() => {
+    const list = []
+    if (showGameInSidebar) {
+      list.push({ type: GAME_SPOTLIGHT_TYPE, key: GAME_SPOTLIGHT_TYPE })
     }
-    return "flex-shrink-0 w-[120px] sm:w-[150px] md:w-full aspect-video md:flex-shrink-0 relative"
+    sidebarScreenShares.forEach((t) => {
+      list.push({
+        type: "screen",
+        data: t,
+        key: `screen-${t.publication?.trackSid || t.participant?.identity}`,
+      })
+    })
+    sidebarParticipants.forEach((p) => {
+      list.push({
+        type: "video",
+        data: p,
+        key: `video-${p.identity}`,
+      })
+    })
+    return list
+  }, [showGameInSidebar, sidebarScreenShares, sidebarParticipants])
+
+  // Limit sidebar items: max 3 tiles on mobile (<640px), max 5 on desktop
+  const { visibleItems, overflowItems, overflowCount } = useGridParticipants(
+    sidebarAllItems,
+    5,
+  )
+
+  const hasSidebarItems = sidebarAllItems.length > 0
+
+  const renderSidebarItem = (item) => {
+    if (item.type === GAME_SPOTLIGHT_TYPE) {
+      return (
+        <div key={item.key} className="relative h-full w-full min-h-0 min-w-0">
+          <GameTile
+            isMain={false}
+            onClick={() => handleTileClick({ type: GAME_SPOTLIGHT_TYPE })}
+          />
+        </div>
+      )
+    }
+
+    if (item.type === "screen") {
+      return (
+        <div key={item.key} className="relative h-full w-full min-h-0 min-w-0">
+          <ScreenShareTile
+            trackRef={item.data}
+            presenterDisplayName={
+              item.data.participant?.name ||
+              item.data.participant?.identity ||
+              "Unknown"
+            }
+            isLocal={item.data.participant?.isLocal}
+            onClick={
+              isGameActive
+                ? undefined
+                : () => handleTileClick({ type: "screen", trackRef: item.data })
+            }
+          />
+        </div>
+      )
+    }
+
+    return (
+      <div key={item.key} className="relative h-full w-full min-h-0 min-w-0">
+        <VideoTile
+          participant={item.data}
+          onClick={
+            isGameActive
+              ? undefined
+              : () => handleTileClick({ type: "video", participant: item.data })
+          }
+        />
+      </div>
+    )
   }
 
   return (
-    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden">
-      {/* Main: spotlighted tile */}
-      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0 relative">
+    <div className="flex h-full w-full flex-col gap-1 md:flex-row overflow-hidden p-0">
+      {/* Main spotlight tile */}
+      <div className="flex-[3] md:flex-[4] min-h-0 min-w-0 relative overflow-hidden rounded-xl">
         {isSpotlightGame ? (
           <GameTile isMain={true} />
         ) : spotlightItem?.type === "screen" ? (
@@ -99,56 +157,21 @@ const SpotlightLayout = ({
         ) : null}
       </div>
 
-      {/* Sidebar: all other tiles — ẩn trên mobile khi game đang active */}
+      {/* Sidebar: non-spotlighted tiles without scrollbars */}
       {hasSidebarItems && (
         <div
           className={`min-h-0 min-w-0 ${isGameActive ? "hidden md:flex flex-1" : "flex flex-1"}`}
         >
-          <div
-            className={`
-              flex flex-1 gap-1 min-h-0 min-w-0 pr-1
-              flex-row overflow-x-auto
-              md:flex-col md:overflow-y-auto md:overflow-x-hidden
-              ${scrollbarClasses}
-            `}
-          >
-            {/* Game tile khi nó không phải main spotlight */}
-            {showGameInSidebar && (
-              <div className={getSidebarItemClass()}>
-                <GameTile
-                  isMain={false}
-                  onClick={() => handleTileClick({ type: GAME_SPOTLIGHT_TYPE })}
+          <div className="flex flex-1 gap-1 min-h-0 min-w-0 flex-row md:flex-col overflow-hidden">
+            {visibleItems.map((item) => renderSidebarItem(item))}
+            {overflowCount > 0 && (
+              <div className="relative h-full w-full min-h-0 min-w-0 overflow-hidden rounded-xl">
+                <OverflowTile
+                  overflowItems={overflowItems}
+                  overflowCount={overflowCount}
                 />
               </div>
             )}
-
-            {sidebarScreenShares.map((trackRef) => (
-              <div
-                key={trackRef.publication?.trackSid}
-                className={getSidebarItemClass()}
-              >
-                <ScreenShareTile
-                  trackRef={trackRef}
-                  presenterDisplayName={
-                    trackRef.participant?.name ||
-                    trackRef.participant?.identity ||
-                    "Unknown"
-                  }
-                  isLocal={trackRef.participant?.isLocal}
-                  onClick={() => handleTileClick({ type: "screen", trackRef })}
-                />
-              </div>
-            ))}
-            {sidebarParticipants.map((participant) => (
-              <div key={participant.identity} className={getSidebarItemClass()}>
-                <VideoTile
-                  participant={participant}
-                  onClick={() =>
-                    handleTileClick({ type: "video", participant })
-                  }
-                />
-              </div>
-            ))}
           </div>
         </div>
       )}

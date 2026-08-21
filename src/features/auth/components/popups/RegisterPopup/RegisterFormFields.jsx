@@ -152,11 +152,10 @@ const RegisterFormFields = ({
             )}
             renderOption={(option, isSelected) => (
               <div
-                className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${
-                  isSelected
-                    ? "bg-[#F6F6F6] font-semibold"
-                    : "hover:bg-[#F6F6F6]"
-                }`}
+                className={`w-full h-10 px-3 text-left text-sm flex items-center gap-3 ${isSelected
+                  ? "bg-[#F6F6F6] font-semibold"
+                  : "hover:bg-[#F6F6F6]"
+                  }`}
               >
                 <span className="text-base shrink-0">{option.icon}</span>
                 <span className="truncate flex-1">{option.label}</span>
@@ -198,11 +197,10 @@ const RegisterFormFields = ({
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`text-sm flex items-center justify-between border rounded-3xl px-4 h-[56px] w-full bg-white transition-colors hover:border-[#8e0000] focus:border-[#8e0000] ${
-                  errors.preferredLanguage
-                    ? "border-red-500"
-                    : "border-[#e5e5e5]"
-                }`}
+                className={`text-sm flex items-center justify-between border rounded-2xl px-4 h-[56px] w-full bg-white transition-colors hover:border-[#8e0000] focus:border-[#8e0000] ${errors.preferredLanguage
+                  ? "border-red-500"
+                  : "border-border"
+                  }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
                   {selectedOption?.icon}
@@ -263,9 +261,8 @@ const RegisterFormFields = ({
               <button
                 type="button"
                 onClick={toggleDropdown}
-                className={`text-sm flex items-center justify-between border rounded-3xl px-4 h-[56px] w-full bg-white transition-colors hover:border-[#8e0000] focus:border-[#8e0000] ${
-                  errors.country ? "border-red-500" : "border-[#e5e5e5]"
-                }`}
+                className={`text-sm flex items-center justify-between border rounded-2xl px-4 h-[56px] w-full bg-white transition-colors hover:border-[#8e0000] focus:border-[#8e0000] ${errors.country ? "border-red-500" : "border-border"
+                  }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
                   {selectedOption?.icon}

@@ -9,11 +9,11 @@ import CourseSelectFilter from "../../components/CourseSelectFilter"
 import TablePagination from "../../components/shared/TablePagination"
 import { filterStudentClasses } from "../../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
 
 const UNKNOWN_VALUE = "—"
 const PAGE_SIZE = 24
-const SUPPORTED_ROUTE_LANGUAGES = new Set(["en", "vi", "zh"])
 const SIMPLE_TIME_PATTERN = /^\d{2}:\d{2}(?::\d{2})?$/
 
 const isRecord = (value) => (
@@ -136,14 +136,10 @@ const normalizeCollection = (rawData, normalizer) => {
   return { items, issueCount, hasMalformedShape: false }
 }
 
-const StudentDashboard = ({ t, language }) => {
-  const { formatDate } = useTimezone()
+const StudentDashboard = ({ t }) => {
+  const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const sc = useMemo(() => t?.courses?.student || {}, [t])
   const navigate = useNavigate()
-  const normalizedLanguage = toText(language).toLowerCase()
-  const routeLanguage = SUPPORTED_ROUTE_LANGUAGES.has(normalizedLanguage)
-    ? normalizedLanguage
-    : "vi"
 
   // Local State
   const [searchQuery, setSearchQuery] = useState("")
@@ -192,7 +188,7 @@ const StudentDashboard = ({ t, language }) => {
     const classId = toText(cls?.id)
     if (!classId) return
     navigate(
-      `/${routeLanguage}/meet/${encodeURIComponent(`class-${classId}`)}`,
+      `/${getClassLanguageCode(cls?.language) || "en"}/meet/${encodeURIComponent(`class-${classId}`)}`,
     )
   }
 
@@ -318,7 +314,7 @@ const StudentDashboard = ({ t, language }) => {
       />
 
       {/* ─── Coursera-Style Student Profile Welcome Banner ─── */}
-      <div className="bg-white rounded-3xl p-6 border border-gray-150 shadow-xs relative flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 mt-2">
+      <div className="bg-white rounded-3xl p-6 border border-border shadow-xs relative flex flex-col md:flex-row items-center justify-between gap-6 shrink-0 mt-2">
         <div className="flex items-start gap-4 flex-1">
           {/* Avatar initial in dark circle */}
           <div
@@ -367,7 +363,7 @@ const StudentDashboard = ({ t, language }) => {
         </div>
 
         {/* Isometric 3D Portal Illustration on the right */}
-        <div className="w-56 h-36 shrink-0 relative overflow-hidden flex items-center justify-center select-none bg-slate-50/50 rounded-2xl border border-gray-100/50">
+        <div className="w-56 h-36 shrink-0 relative overflow-hidden flex items-center justify-center select-none bg-slate-50/50 rounded-2xl border border-border/50">
           <svg
             aria-hidden="true"
             focusable="false"
@@ -407,7 +403,7 @@ const StudentDashboard = ({ t, language }) => {
       <div className="flex flex-col gap-6">
 
         {/* Search & Selection Filters bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between bg-white rounded-3xl p-5 border border-gray-150 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full justify-between bg-white rounded-3xl p-5 border border-border shadow-xs">
           {/* Search Box */}
           <label className="flex-1">
             <span className="sr-only">
@@ -519,7 +515,7 @@ const StudentDashboard = ({ t, language }) => {
               {visibleFilteredClasses.length === 0 ? (
                 <div
                   role="status"
-                  className="flex min-h-[450px] flex-col items-center justify-center gap-4 rounded-3xl border border-gray-150 bg-white p-8 text-center shadow-xs"
+                  className="flex min-h-[450px] flex-col items-center justify-center gap-4 rounded-3xl border border-border bg-white p-8 text-center shadow-xs"
                 >
                   <div className="w-16 h-16 rounded-3xl bg-red-50 text-[#990011] flex items-center justify-center border border-red-100/60 shadow-xs mb-1 select-none">
                     {isFilteredEmpty ? (
@@ -547,7 +543,7 @@ const StudentDashboard = ({ t, language }) => {
                       <button
                         type="button"
                         onClick={clearFilters}
-                        className="h-10 px-5 rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-extrabold transition-all cursor-pointer active:scale-95"
+                        className="h-10 px-5 rounded-full border border-border bg-white hover:bg-gray-50 text-gray-700 text-xs font-extrabold transition-all cursor-pointer active:scale-95"
                       >
                         {sc.clearFilters || "Clear filters"}
                       </button>
@@ -571,12 +567,20 @@ const StudentDashboard = ({ t, language }) => {
                       ? getProgressPercent(cls.progress)
                       : null
                     const classTitle = cls.title || cls.name || "Untitled class"
-                    const scheduleDays = cls.schedule?.days?.join(" - ") || UNKNOWN_VALUE
-                    const scheduleTime = (
-                      cls.schedule?.startTime &&
-                      cls.schedule?.endTime
-                    )
-                      ? `${cls.schedule.startTime} - ${cls.schedule.endTime}`
+                    const scheduleDays = formatScheduleDays
+                      ? formatScheduleDays(cls.schedule?.days, UNKNOWN_VALUE, " - ", cls.schedule?.startTime, cls.startDate)
+                      : (cls.schedule?.days?.join(" - ") || UNKNOWN_VALUE)
+
+                    const startFormatted = formatScheduleTime && cls.schedule?.startTime
+                      ? formatScheduleTime(cls.schedule.startTime, cls.startDate)
+                      : cls.schedule?.startTime
+
+                    const endFormatted = formatScheduleTime && cls.schedule?.endTime
+                      ? formatScheduleTime(cls.schedule.endTime, cls.startDate)
+                      : cls.schedule?.endTime
+
+                    const scheduleTime = startFormatted && endFormatted
+                      ? `${startFormatted} - ${endFormatted}`
                       : UNKNOWN_VALUE
                     const statusLabel = cls.status
                       ? (sc.classStatuses?.[cls.status]
@@ -587,7 +591,7 @@ const StudentDashboard = ({ t, language }) => {
                       <div
                         key={cls.id}
                         onClick={() => handleOpenClassDetail(cls)}
-                        className="group flex cursor-pointer flex-col items-stretch justify-between gap-6 rounded-3xl border border-gray-150 bg-white p-5 transition-all duration-300 hover:border-gray-250 hover:shadow-md md:flex-row md:items-center"
+                        className="group flex cursor-pointer flex-col items-stretch justify-between gap-6 rounded-3xl border border-border bg-white p-5 transition-all duration-300 hover:border-gray-250 hover:shadow-md md:flex-row md:items-center"
                       >
                         <div className="flex flex-1 flex-col gap-2">
                           <div className="flex flex-wrap items-center gap-2">
@@ -630,7 +634,7 @@ const StudentDashboard = ({ t, language }) => {
                           </div>
                         </div>
 
-                        <div className="flex shrink-0 items-center justify-between gap-6 border-t border-gray-150 pt-4 md:justify-end md:border-t-0 md:pt-0">
+                        <div className="flex shrink-0 items-center justify-between gap-6 border-t border-border pt-4 md:justify-end md:border-t-0 md:pt-0">
                           <div className="flex min-w-[120px] flex-col gap-1">
                             <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-400">
                               <span>{sc.progress || "Progress"}</span>

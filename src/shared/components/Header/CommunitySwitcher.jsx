@@ -40,7 +40,17 @@ const CommunitySwitcher = () => {
     if (newCode === currentCommunity) { setIsOpen(false); return }
     localStorage.setItem("communityLanguage", newCode)
     setIsOpen(false)
-    window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+
+    const isInsideEcosystem =
+      supportedCodes.includes(lang) ||
+      location.pathname === `/${currentCommunity}` ||
+      location.pathname.startsWith(`/${currentCommunity}/`)
+
+    if (isInsideEcosystem) {
+      window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+    } else {
+      window.location.reload()
+    }
   }
 
   return (
@@ -65,7 +75,7 @@ const CommunitySwitcher = () => {
             <FluentAnimation
               direction="down"
               exit
-              className="rounded-xl border border-[#E5E5E5] shadow-xl bg-white overflow-hidden"
+              className="rounded-xl border border-border shadow-xl bg-white overflow-hidden"
             >
               <div className="flex flex-col gap-0.5 p-1.5">
                 {LANGUAGE_CONFIG.map((config) => {

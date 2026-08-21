@@ -12,12 +12,7 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
 
   const MAX_VISIBLE = 5
   const visibleParticipants = participants.slice(0, MAX_VISIBLE)
-  const remainingCount =
-    participants.length > MAX_VISIBLE
-      ? participants.length - MAX_VISIBLE
-      : count > MAX_VISIBLE
-        ? count - MAX_VISIBLE
-        : 0
+  const remainingCount = Math.max(0, count - visibleParticipants.length)
 
   return (
     <div className="flex w-full flex-col items-center">
@@ -34,7 +29,7 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
           </div>
         ))}
         {remainingCount > 0 && (
-          <div className="z-10 -ml-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-semibold text-gray-600 shadow-sm">
+          <div className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-semibold text-gray-600 shadow-sm ${visibleParticipants.length > 0 ? "-ml-3" : ""}`}>
             +{remainingCount}
           </div>
         )}

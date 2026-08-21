@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useSearchParams, useParams, useNavigate } from "react-router-dom";
+import React, { useState } from "react"
+import { useSearchParams, useParams, useNavigate } from "react-router-dom"
 import {
   CommunicateTab,
   RoomsTabs,
@@ -11,148 +11,150 @@ import {
   JoinRoomModal,
   AISessionSettingsModal,
   RoomsBannerContent,
-} from "@/features/rooms";
-import { WorkshopCarousel } from "@/features/workshops";
+} from "@/features/rooms"
+import { WorkshopCarousel } from "@/features/workshops"
 
-import { useCreateAISessionMutation } from "@/store/api/roomsApi";
-import { AnimatePresence } from "framer-motion";
+import { useCreateAISessionMutation } from "@/store/api/roomsApi"
+import { AnimatePresence } from "framer-motion"
 import {
   FadeAnimation,
   FluentAnimation,
-} from "@/shared/components/ui/animations";
-import { useSelector, useDispatch } from "react-redux";
-import { leaveCall } from "@/store/slices/videoCallSlice";
-import SwitchCallModal from "@/features/video-call/components/SwitchCallModal";
+} from "@/shared/components/ui/animations"
+import { useSelector, useDispatch } from "react-redux"
+import { leaveCall } from "@/store/slices/videoCallSlice"
+import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import {
   pingActiveCall,
   requestLeaveActiveCall,
-} from "@/features/video-call/services/callBroadcastChannel";
+} from "@/features/video-call/services/callBroadcastChannel"
 
 const RoomsPage = () => {
-  const [showSwitchModal, setShowSwitchModal] = useState(false);
-  const [pendingAction, setPendingAction] = useState(null);
+  const [showSwitchModal, setShowSwitchModal] = useState(false)
+  const [pendingAction, setPendingAction] = useState(null)
 
-  const { isInCall } = useSelector((s) => s.videoCall);
-  const dispatch = useDispatch();
+  const { isInCall } = useSelector((s) => s.videoCall)
+  const dispatch = useDispatch()
 
-  const [page, setPage] = useState(1);
-  const [tab, setTab] = useState("communicate");
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { lang } = useParams();
+  const [page, setPage] = useState(1)
+  const [tab, setTab] = useState("communicate")
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { lang } = useParams()
 
-  const { state, actions } = useRoomsPageLogic();
-  const [createAISession] = useCreateAISessionMutation();
+  const { state, actions } = useRoomsPageLogic()
+  const [createAISession] = useCreateAISessionMutation()
 
   const langMap = {
     en: "English",
     zh: "Chinese",
     vi: "Vietnamese",
-  };
-  const languageType = lang ? [langMap[lang]] : undefined;
+  }
+  const languageType = lang ? [langMap[lang]] : undefined
 
   const checkAndIntercept = async (action) => {
-    const remoteActive = await pingActiveCall();
+    const remoteActive = await pingActiveCall()
     if (isInCall || remoteActive) {
-      setPendingAction(() => action);
-      setShowSwitchModal(true);
-      return true;
+      setPendingAction(() => action)
+      setShowSwitchModal(true)
+      return true
     }
-    return false;
-  };
+    return false
+  }
 
   const proceedCreateOneOnOne = async () => {
     const action = () => {
       actions.handleCreateOneOnOneSession(() => {
-        const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
+        const supportedLangCode = ["zh", "vi", "en"].includes(lang)
+          ? lang
+          : "en"
         const preferences = {
           roomType: "OneToOne",
           topics: [],
           languageType: langMap[supportedLangCode],
-        };
-        navigate("/queue", { state: preferences });
-      });
-    };
-    if (await checkAndIntercept(action)) return;
-    action();
-  };
+        }
+        navigate("/queue", { state: preferences })
+      })
+    }
+    if (await checkAndIntercept(action)) return
+    action()
+  }
 
   const proceedCreateStudyGroup = async () => {
     const action = () => {
       actions.handleCreateStudyGroupSession(() => {
-        actions.openJoinRoomModal();
-      });
-    };
-    if (await checkAndIntercept(action)) return;
-    action();
-  };
+        actions.openJoinRoomModal()
+      })
+    }
+    if (await checkAndIntercept(action)) return
+    action()
+  }
 
   const handleCreateCustomRoom = async () => {
     const action = () => {
       actions.handleCreateCustomRoomSession(() => {
-        actions.openCreateRoomModal("group");
-      });
-    };
-    if (await checkAndIntercept(action)) return;
-    action();
-  };
+        actions.openCreateRoomModal("group")
+      })
+    }
+    if (await checkAndIntercept(action)) return
+    action()
+  }
 
   const handleConfirmSwitch = async () => {
-    setShowSwitchModal(false);
-    requestLeaveActiveCall();
+    setShowSwitchModal(false)
+    requestLeaveActiveCall()
     if (isInCall) {
-      dispatch(leaveCall());
+      dispatch(leaveCall())
     }
 
     if (typeof pendingAction === "function") {
-      pendingAction();
+      pendingAction()
     }
-    setPendingAction(null);
-  };
+    setPendingAction(null)
+  }
 
   const handleCancelSwitch = () => {
-    setShowSwitchModal(false);
-    setPendingAction(null);
-  };
+    setShowSwitchModal(false)
+    setPendingAction(null)
+  }
 
   const handleCreateAI = async (settings) => {
-    actions.closeAISettingsModal();
+    actions.closeAISettingsModal()
     const action = () => {
       actions.handleCreateAISession(async () => {
         try {
-          const result = await createAISession(settings).unwrap();
+          const result = await createAISession(settings).unwrap()
           navigate(`/${lang}/meet/${result.roomId}`, {
             state: { fromQueue: true, isAISession: true },
-          });
+          })
         } catch (err) {
-          console.error("Failed to create AI session", err);
+          console.error("Failed to create AI session", err)
         }
-      });
-    };
-    if (await checkAndIntercept(action)) return;
-    action();
-  };
+      })
+    }
+    if (await checkAndIntercept(action)) return
+    action()
+  }
 
-  const requiredLevels = searchParams.getAll("requiredLevels");
+  const requiredLevels = searchParams.getAll("requiredLevels")
   const requiredLevelsArg =
-    requiredLevels.length > 0 ? requiredLevels : undefined;
+    requiredLevels.length > 0 ? requiredLevels : undefined
 
-  const categoriesParam = searchParams.get("categories");
+  const categoriesParam = searchParams.get("categories")
   const categories = categoriesParam
     ? categoriesParam.split(",").map((c) => c.trim())
-    : undefined;
+    : undefined
 
-  const topicsValues = searchParams.getAll("topics");
-  const topicsArg = topicsValues.length > 0 ? topicsValues : undefined;
+  const topicsValues = searchParams.getAll("topics")
+  const topicsArg = topicsValues.length > 0 ? topicsValues : undefined
 
-  const searchArg = searchParams.get("search");
+  const searchArg = searchParams.get("search")
 
-  const pageSize = 12;
+  const pageSize = 12
   const shouldFetch =
-    !!categories || !!topicsArg || !!requiredLevelsArg || !!searchArg;
+    !!categories || !!topicsArg || !!requiredLevelsArg || !!searchArg
 
-  const hasOtherCategory = categories?.includes("Other");
-  const apiCategories = hasOtherCategory ? undefined : categories;
+  const hasOtherCategory = categories?.includes("Other")
+  const apiCategories = hasOtherCategory ? undefined : categories
 
   const { data: responseData } = useGetRoomsQuery(
     {
@@ -165,12 +167,12 @@ const RoomsPage = () => {
       roomName: searchArg,
     },
     { skip: !shouldFetch },
-  );
+  )
 
-  let rooms = responseData?.data ?? (Array.isArray(responseData) ? responseData : []);
+  let rooms = responseData?.items ?? []
 
   if (hasOtherCategory) {
-    const known = ["Knowledge", "Culture", "Lifestyle", "Growth"];
+    const known = ["Knowledge", "Culture", "Lifestyle", "Growth"]
     rooms = rooms.filter((r) => {
       const isOtherRoom =
         !r.categories ||
@@ -179,26 +181,24 @@ const RoomsPage = () => {
         r.categories.includes("Other") ||
         (Array.isArray(r.categories)
           ? !known.some((c) => r.categories.includes(c))
-          : !known.some((c) => r.categories.includes(c)));
+          : !known.some((c) => r.categories.includes(c)))
 
-      if (isOtherRoom && categories.includes("Other")) return true;
+      if (isOtherRoom && categories.includes("Other")) return true
       if (r.categories && r.categories.length > 0) {
         return categories.some(
           (selected) => selected !== "Other" && r.categories.includes(selected),
-        );
+        )
       }
-      return false;
-    });
+      return false
+    })
   }
 
   // Local pagination
-  const totalFilteredCount = rooms.length;
-  const totalPages = Math.max(1, Math.ceil(totalFilteredCount / pageSize));
+  const totalFilteredCount = rooms.length
+  const totalPages = Math.max(1, Math.ceil(totalFilteredCount / pageSize))
 
   // Slice rooms for current page
-  rooms = rooms.slice((page - 1) * pageSize, page * pageSize);
-
-  const additionalData = responseData?.additionalData ?? {};
+  rooms = rooms.slice((page - 1) * pageSize, page * pageSize)
 
   return (
     <>
@@ -229,29 +229,27 @@ const RoomsPage = () => {
           direction="up"
           className="w-full h-full flex flex-col"
         >
-          <div className="p-5 flex-1 min-w-0 pt-8 px-0">
-            <WorkshopCarousel
-              hideTitle={true}
-              leftContent={
-                <RoomsBannerContent
-                  sessionProps={{
-                    handleCreateOneOnOneSession: proceedCreateOneOnOne,
-                    handleCreateStudyGroupSession: proceedCreateStudyGroup,
-                    handleCreateAISession: () => actions.openAISettingsModal(),
-                    handleCreateCustomRoomSession: handleCreateCustomRoom,
-                    isCreatingOneOnOne: state.isCreatingOneOnOne,
-                    isCreatingStudyGroup: state.isCreatingStudyGroup,
-                    isCreatingAI: state.isCreatingAI,
-                    isCreatingCustom: state.isCreatingCustom,
-                    canUseAI: true,
-                  }}
-                />
-              }
-            />
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mb-6">
+              <RoomsBannerContent
+                sessionProps={{
+                  handleCreateOneOnOneSession: proceedCreateOneOnOne,
+                  handleCreateStudyGroupSession: proceedCreateStudyGroup,
+                  handleCreateAISession: () => actions.openAISettingsModal(),
+                  handleCreateCustomRoomSession: handleCreateCustomRoom,
+                  isCreatingOneOnOne: state.isCreatingOneOnOne,
+                  isCreatingStudyGroup: state.isCreatingStudyGroup,
+                  isCreatingAI: state.isCreatingAI,
+                  isCreatingCustom: state.isCreatingCustom,
+                  canUseAI: true,
+                }}
+              />
+              <WorkshopCarousel hideTitle={true} />
+            </div>
 
-            <div className="w-full flex flex-col pt-6 backdrop-blur-sm border-t border-white shadow-[0_-2px_2px_rgba(0,0,0,0.02)] shaw">
-              {/* Tabs */}
-              <RoomsTabs tab={tab} setTab={setTab} />
+            <div className="w-full flex flex-col">
+              {/* Tabs hidden temporarily to save vertical space */}
+              {/* <RoomsTabs tab={tab} setTab={setTab} /> */}
 
               <div className="w-full">
                 <AnimatePresence mode="wait">
@@ -278,7 +276,7 @@ const RoomsPage = () => {
         </FluentAnimation>
       </AnimatePresence>
     </>
-  );
-};
+  )
+}
 
-export default RoomsPage;
+export default RoomsPage

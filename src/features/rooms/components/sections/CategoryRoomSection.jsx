@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { AnimatePresence, motion  } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
 import RoomCard from "../RoomCard"
 import EmptyRoomState from "../EmptyRoomState"
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import useResponsiveItemsPerPage from "@/features/rooms/hooks/useResponsiveItemsPerPage"
 
@@ -49,20 +47,20 @@ const CategoryRoomSection = ({
       topics,
       categories: [categoryKey],
     },
-    { skip: isOther || !responseData?.additionalData?.hasNextPage }
+    { skip: isOther || !responseData?.additionalData?.hasNextPage },
   )
 
   const { currentRooms, totalCount, totalPages, hasNextPage } = useMemo(() => {
-    const rawFetched = responseData?.data ?? responseData?.items ?? (Array.isArray(responseData) ? responseData : [])
-    const fetched = Array.isArray(rawFetched) ? rawFetched : []
-    const additionalData = responseData?.additionalData || {}
+    let fetched = responseData?.items ?? []
+    const pagination = responseData?.pagination || {}
 
     if (isOther) {
       const known = ["Knowledge", "Culture", "Lifestyle", "Growth"]
       const filtered = fetched.filter((r) => {
-        if (!r.categories || r.categories === "[]" || r.categories.length === 0) return true
+        if (!r.categories || r.categories === "[]" || r.categories.length === 0)
+          return true
         if (r.categories.includes("Other")) return true
-        
+
         const hasKnown = Array.isArray(r.categories)
           ? known.some((c) => r.categories.includes(c))
           : known.some((c) => r.categories.includes(c))
@@ -80,9 +78,9 @@ const CategoryRoomSection = ({
 
     return {
       currentRooms: fetched,
-      totalCount: additionalData.totalCount || 0,
-      totalPages: additionalData.totalPages || 1,
-      hasNextPage: additionalData.hasNextPage || false,
+      totalCount: pagination.totalCount || 0,
+      totalPages: pagination.totalPages || 1,
+      hasNextPage: pagination.hasNextPage || false,
     }
   }, [responseData, isOther, page, pageSize])
 
@@ -94,19 +92,27 @@ const CategoryRoomSection = ({
 
   useEffect(() => {
     if (!isFetching && currentRooms.length > 0) {
-      setDisplayRooms(currentRooms)
-      setVisualPage(page)
+      queueMicrotask(() => {
+        setDisplayRooms(currentRooms)
+        setVisualPage(page)
+      })
     }
   }, [currentRooms, isFetching, page])
 
   useEffect(() => {
     if (page === 1) {
-      setAccumulatedRooms(currentRooms)
+      queueMicrotask(() => {
+        setAccumulatedRooms(currentRooms)
+      })
     } else if (currentRooms.length > 0) {
-      setAccumulatedRooms((prev) => {
-        const existingIds = new Set(prev.map((r) => r.roomId))
-        const newRooms = currentRooms.filter((r) => !existingIds.has(r.roomId))
-        return [...prev, ...newRooms]
+      queueMicrotask(() => {
+        setAccumulatedRooms((prev) => {
+          const existingIds = new Set(prev.map((r) => r.roomId))
+          const newRooms = currentRooms.filter(
+            (r) => !existingIds.has(r.roomId),
+          )
+          return [...prev, ...newRooms]
+        })
       })
     }
   }, [currentRooms, page])
@@ -143,7 +149,8 @@ const CategoryRoomSection = ({
     if (!tickingRef.current) {
       window.requestAnimationFrame(() => {
         if (scrollContainerRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+          const { scrollLeft, scrollWidth, clientWidth } =
+            scrollContainerRef.current
           if (scrollLeft + clientWidth >= scrollWidth - 50) {
             if (hasNextPage && !isFetching) {
               setSlideDirection("left")
@@ -170,7 +177,10 @@ const CategoryRoomSection = ({
             <h6 className="text-lg sm:text-xl font-bold text-cath-red-700">
               {title}
             </h6>
-            <ChevronRight className="text-cath-red-700 w-5 h-5 sm:w-6 sm:h-6" strokeWidth={3} />
+            <ChevronRight
+              className="text-cath-red-700 w-5 h-5 sm:w-6 sm:h-6"
+              strokeWidth={3}
+            />
           </div>
         </button>
 
@@ -181,7 +191,7 @@ const CategoryRoomSection = ({
                 onClick={goPrev}
                 disabled={!canGoPrev || isFetching}
                 aria-label="Previous rooms"
-                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-[#F0F0F0] active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
               </button>
@@ -201,7 +211,7 @@ const CategoryRoomSection = ({
                 onClick={goNext}
                 disabled={!canGoNext || isFetching}
                 aria-label="Next rooms"
-                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-[#F0F0F0] active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
               >
                 <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
               </button>
@@ -257,7 +267,12 @@ const CategoryRoomSection = ({
     )
   }
 
-  const gridCols = itemsPerPage === 1 ? "grid-cols-1" : itemsPerPage === 2 ? "grid-cols-2" : "grid-cols-4"
+  const gridCols =
+    itemsPerPage === 1
+      ? "grid-cols-1"
+      : itemsPerPage === 2
+        ? "grid-cols-2"
+        : "grid-cols-4"
 
   const slideVariants = {
     enter: (direction) => ({
@@ -279,8 +294,12 @@ const CategoryRoomSection = ({
       {renderHeader()}
 
       <div className="w-full relative min-h-[280px]">
-        <AnimatePresence mode="popLayout" initial={false} custom={slideDirection}>
-          <motion.div
+        <AnimatePresence
+          mode="popLayout"
+          initial={false}
+          custom={slideDirection}
+        >
+          <Motion.div
             key={visualPage}
             custom={slideDirection}
             variants={slideVariants}
@@ -288,7 +307,7 @@ const CategoryRoomSection = ({
             animate="center"
             exit="exit"
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className={`grid ${gridCols} gap-3 w-full transition-opacity duration-300 ${isFetching && !isLoading ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}
+            className={`grid ${gridCols} gap-4 w-full transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-40 pointer-events-none" : "opacity-100"}`}
           >
             {isLoading || (displayRooms.length === 0 && isFetching)
               ? Array.from({ length: itemsPerPage }).map((_, idx) => (
@@ -300,7 +319,7 @@ const CategoryRoomSection = ({
               : displayRooms.map((room) => (
                   <RoomCard key={room.roomId} room={room} />
                 ))}
-          </motion.div>
+          </Motion.div>
         </AnimatePresence>
       </div>
     </div>
