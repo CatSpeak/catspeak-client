@@ -46,6 +46,7 @@ import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 import { useClassFormReducer } from "../hooks/useClassFormReducer"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import ClassScheduleCalendarPreview from "../components/ClassScheduleCalendarPreview"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -1297,6 +1298,15 @@ const CreateClassPage = () => {
                 </span>
               </div>
             )}
+
+            {/* Calendar & Schedule Preview */}
+            <ClassScheduleCalendarPreview
+              startDate={startDate}
+              sessions={sessions}
+              checkedDays={checkedDays}
+              timeSlots={timeSlots}
+              editingClassId={id}
+            />
           </div>
         </div>
 
