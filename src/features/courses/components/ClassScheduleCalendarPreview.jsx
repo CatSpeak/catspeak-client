@@ -21,6 +21,7 @@ const ClassScheduleCalendarPreview = ({
   checkedDays = {},
   timeSlots = {},
   editingClassId = "",
+  isEditMode = false,
 }) => {
   const { t, language } = useLanguage()
   const { userTimeZone, getZoneDateStr, formatScheduleTime } = useTimezone()
@@ -340,13 +341,15 @@ const ClassScheduleCalendarPreview = ({
           <span>{cc.legendOtherSchedule || "Ngày có lịch khác"}</span>
         </div>
 
-        {/* Middle Legend: Đã qua */}
-        <div className="flex items-center gap-1.5">
-          <span className="w-5 h-5 rounded-full bg-gray-200 text-gray-500 font-bold text-[10px] flex items-center justify-center">
-            01
-          </span>
-          <span>{cc.legendPastSchedule || "Đã qua"}</span>
-        </div>
+        {/* Middle Legend: Đã qua (chỉ hiển thị khi đang chỉnh sửa lớp) */}
+        {(isEditMode || Boolean(editingClassId)) && (
+          <div className="flex items-center gap-1.5">
+            <span className="w-5 h-5 rounded-full bg-gray-200 text-gray-500 font-bold text-[10px] flex items-center justify-center">
+              01
+            </span>
+            <span>{cc.legendPastSchedule || "Đã qua"}</span>
+          </div>
+        )}
 
         {/* Right Legend: Lịch dạy hiện tại */}
         <div className="flex items-center gap-1.5">

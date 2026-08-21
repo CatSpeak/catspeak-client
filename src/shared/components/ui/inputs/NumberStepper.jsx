@@ -61,7 +61,7 @@ const NumberStepper = ({
         value={localValue}
         onChange={handleInputChange}
         onBlur={handleBlur}
-        className="flex-1 h-12 text-center outline-none bg-transparent [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        className="flex-1 h-12 text-center outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
 
       <button
