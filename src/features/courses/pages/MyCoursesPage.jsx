@@ -314,18 +314,18 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
       </div>
 
       {/* ─── Navigation Tabs & Controls ─── */}
-      <div className="flex items-center justify-between border-b border-gray-200/90 pb-0 mt-3 mb-3">
+      <div className="flex items-end justify-between border-b border-gray-200/90 mt-3 mb-3">
         {/* Left Tabs */}
         <Tabs
           tabs={mainTabs}
           activeTab={activeTab}
           onChange={handleTabChange}
           fullWidth={false}
-          className="border-b-0"
+          className="border-b-0 -mb-[1px]"
         />
 
         {/* Right Filter & View Mode Controls */}
-        <div className="flex items-center gap-3 pb-2.5">
+        <div className="flex items-center gap-3 pb-2">
           <CourseSelectFilter
             value={statusFilter}
             onChange={setStatusFilter}
