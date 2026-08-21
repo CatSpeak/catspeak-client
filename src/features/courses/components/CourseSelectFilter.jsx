@@ -10,6 +10,7 @@ const CourseSelectFilter = ({
   disabled = false,
   title,
   icon: Icon,
+  trigger: customTrigger,
 }) => {
   const selectedOptionObj = options.find((o) => o.value === value)
 
@@ -34,7 +35,7 @@ const CourseSelectFilter = ({
           )}
         </div>
       )}
-      trigger={(isOpen, _, toggle) => (
+      trigger={customTrigger || ((isOpen, _, toggle) => (
         <button
           type="button"
           onClick={toggle}
@@ -53,7 +54,7 @@ const CourseSelectFilter = ({
               }`}
           />
         </button>
-      )}
+      ))}
     />
   )
 }

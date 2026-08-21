@@ -39,6 +39,20 @@ export function formatToYYYYMMDD(isoStr) {
   }
 }
 
+export const stripHtmlToText = (html) => {
+  if (!html || typeof html !== "string") return ""
+  try {
+    if (typeof window !== "undefined" && typeof DOMParser !== "undefined") {
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(html, "text/html")
+      return (doc.body.textContent || "").replace(/\s+/g, " ").trim()
+    }
+  } catch {
+    // fallback
+  }
+  return html.replace(/<[^>]*>/g, " ").replace(/&[a-z0-9]+;/gi, " ").replace(/\s+/g, " ").trim()
+}
+
 
 
 /**
