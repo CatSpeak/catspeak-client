@@ -35,6 +35,7 @@ const CalendarTab = ({
   onSelectDate,
   activeFilters = [],
   onApplyFilter,
+  classesOptions,
 }) => {
   const { t, language } = useLanguage()
   const { isTeacher } = useRoleOverride()
@@ -168,6 +169,7 @@ const CalendarTab = ({
         onClose={() => setFilterOpen(false)}
         onApply={handleApplyFilter}
         activeFilters={activeFilters}
+        classesOptions={classesOptions}
       />
     </div>
   )

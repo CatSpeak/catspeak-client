@@ -6,12 +6,12 @@ import EventCardDetail from './EventCardDetail'
 import EventFilter from './EventFilter'
 import { useLanguage } from '@/shared/context/LanguageContext'
 
-const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onApplyFilter, onShareEvent }) => {
+const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onApplyFilter, onShareEvent, classesOptions }) => {
   const { t } = useLanguage()
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [filterOpenCount, setFilterOpenCount] = useState(0)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [prevDate, setPrevDate] = useState(date)
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [filterOpenCount, setFilterOpenCount] = useState(0)
 
   // Reset selected event when date changes
   if (date !== prevDate) {
@@ -63,13 +63,13 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
         )}
       </div>
 
-      {/* Filter Modal */}
       <EventFilter
         key={filterOpenCount}
         open={filterOpen}
         onClose={() => setFilterOpen(false)}
         onApply={handleApplyFilter}
         activeFilters={activeFilters}
+        classesOptions={classesOptions}
       />
     </div>
   )

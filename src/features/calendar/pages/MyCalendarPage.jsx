@@ -27,7 +27,10 @@ const MyCalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState(dayjs().date())
   const [viewType, setViewType] = useState('week')
-  const [activeFilters, setActiveFilters] = useState([])
+  const [activeFilters, setActiveFilters] = useState({
+    eventTypes: ['teaching-schedule', 'student-schedule', 'my-event', 'registered-event', 'other'],
+    classIds: [],
+  })
 
   // Adjust state during render to avoid cascading renders from useEffect
   if (location.key !== prevLocationKey) {
@@ -180,9 +183,32 @@ const MyCalendarPage = () => {
     return events;
   }, [teacherScheduleSessions, myEvents, registeredEvents, studentScheduleSessions, studentRegisteredEvents, t])
 
+  const classesOptions = useMemo(() => {
+    const map = new Map();
+    allEvents.forEach(ev => {
+      if (ev.classId && ev.title && (ev.eventType === 'teaching-schedule' || ev.eventType === 'student-schedule')) {
+        map.set(ev.classId.toString(), ev.title);
+      }
+    });
+    return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+  }, [allEvents]);
+
   const filteredEvents = useMemo(() => {
-    if (activeFilters.length === 0) return allEvents
-    return allEvents.filter(e => activeFilters.includes(e.eventType))
+    return allEvents.filter(ev => {
+      // 1. Loại lịch
+      if (!activeFilters.eventTypes.includes(ev.eventType)) {
+        return false;
+      }
+
+      // 2. Lớp học/khóa học
+      if (activeFilters.classIds.length > 0) {
+        if (ev.classId && !activeFilters.classIds.includes(ev.classId.toString())) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }, [activeFilters, allEvents])
 
   // Filter events for the selected date
@@ -287,6 +313,7 @@ const MyCalendarPage = () => {
               onSelectDate={setSelectedDate}
               activeFilters={activeFilters}
               onApplyFilter={setActiveFilters}
+              classesOptions={classesOptions}
             />
           </div>
           {viewType === 'month' && (
@@ -297,6 +324,7 @@ const MyCalendarPage = () => {
                   events={eventsForSelectedDate}
                   activeFilters={activeFilters}
                   onApplyFilter={setActiveFilters}
+                  classesOptions={classesOptions}
                 />
               </div>
             </div>

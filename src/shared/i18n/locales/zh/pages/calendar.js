@@ -250,5 +250,7 @@ export default {
   workspaceSingleEvent: "单次活动",
   workspaceOccurrence: "场次",
   workspaceOccurrences: "场次",
+  eventType: "日程类型",
+  classOrCourse: "班级/课程",
+  selectClass: "选择班级",
 };
-
