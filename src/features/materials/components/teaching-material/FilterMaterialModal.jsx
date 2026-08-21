@@ -14,14 +14,16 @@ const FilterMaterialModal = ({ open, onClose, currentFilters, onApply }) => {
     { value: 'image', label: t.materials.imageFilter }
   ];
 
-  const [filterMode, setFilterMode] = useState(currentFilters?.filterMode || 'folder');
+  const [filterMode, setFilterMode] = useState(
+    currentFilters.filterMode || null,
+  );
   const [filterFileType, setFilterFileType] = useState(currentFilters?.filterFileType || 'word');
   const [prevOpen, setPrevOpen] = useState(open);
 
   if (open !== prevOpen) {
     setPrevOpen(open);
     if (open) {
-      setFilterMode(currentFilters?.filterMode || 'folder');
+      setFilterMode(currentFilters?.filterMode || null);
       setFilterFileType(currentFilters?.filterFileType || 'word');
     }
   }
