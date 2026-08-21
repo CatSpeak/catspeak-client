@@ -745,6 +745,8 @@ export default {
     clearPriceFilter: "Xóa lọc giá",
     clear: "Xóa",
     apply: "Áp dụng",
+    instructor: "Giảng viên",
+    closingSoon: "Sắp đóng tuyển sinh",
     activeFiltersLabel: "Bộ lọc đang áp dụng:",
     keywordPrefix: "Từ khóa:",
     typePrefix: "Loại:",
