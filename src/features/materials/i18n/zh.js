@@ -55,6 +55,7 @@ export default {
     createFolderSuccess: "创建文件夹成功",
     createFolderError: "创建文件夹失败",
     deletedMultipleSuccess: "成功删除 {{count}} 个项目",
+    deleteBulkPartialSuccess: "已处理删除 {{total}} 个项目：{{success}} 成功，{{fail}} 失败",
     deletedFolderSuccess: "成功删除文件夹",
     deletedFileSuccess: "成功删除文件",
     deleteError: "删除时发生错误",

@@ -55,6 +55,7 @@ export default {
     createFolderSuccess: "Folder created successfully",
     createFolderError: "Failed to create folder",
     deletedMultipleSuccess: "Successfully deleted {{count}} items",
+    deleteBulkPartialSuccess: "Processed deletion of {{total}} items: {{success}} succeeded, {{fail}} failed",
     deletedFolderSuccess: "Folder deleted successfully",
     deletedFileSuccess: "File deleted successfully",
     deleteError: "An error occurred while deleting",

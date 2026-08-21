@@ -55,6 +55,7 @@ export default {
     createFolderSuccess: "Tạo thư mục thành công",
     createFolderError: "Tạo thư mục thất bại",
     deletedMultipleSuccess: "Đã xóa {{count}} mục thành công",
+    deleteBulkPartialSuccess: "Đã xử lý xóa {{total}} mục: {{success}} thành công, {{fail}} thất bại",
     deletedFolderSuccess: "Đã xóa thư mục thành công",
     deletedFileSuccess: "Đã xóa tệp thành công",
     deleteError: "Có lỗi xảy ra khi xóa",
