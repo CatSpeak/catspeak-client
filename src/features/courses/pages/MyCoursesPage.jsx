@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { BookOpen, FilterX, GraduationCap, Plus, SlidersHorizontal } from "lucide-react"
+import { BookOpen, FilterX, GraduationCap, Plus } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 import {
@@ -330,20 +330,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
             value={statusFilter}
             onChange={setStatusFilter}
             options={statusOptions}
-            trigger={(isOpen, _, toggle) => (
-              <button
-                type="button"
-                onClick={toggle}
-                title={mc.filterStatus || "Lọc theo trạng thái"}
-                className={`w-10 h-10 rounded-full border flex items-center justify-center transition-all cursor-pointer shadow-xs ${
-                  isOpen || statusFilter !== "all"
-                    ? "border-[#b20a1c] bg-rose-50 text-[#b20a1c] ring-2 ring-rose-100"
-                    : "border-[#b20a1c]/40 bg-white text-[#b20a1c] hover:bg-rose-50/50 hover:border-[#b20a1c]"
-                }`}
-              >
-                <SlidersHorizontal size={18} />
-              </button>
-            )}
+            align="right"
           />
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </div>
