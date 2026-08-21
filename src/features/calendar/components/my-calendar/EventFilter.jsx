@@ -5,11 +5,7 @@ import { Checkbox } from '@/shared/components/ui/inputs'
 import Dropdown from '@/shared/components/ui/Dropdown'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useRoleOverride } from '@/features/courses/components/RoleSwitcher'
-
-const defaultFilters = {
-  eventTypes: ['teaching-schedule', 'student-schedule', 'my-event', 'registered-event', 'other'],
-  classIds: [],
-}
+import { DEFAULT_FILTERS, getEventTypeOptions } from '@/features/calendar/data/calendarConstants'
 
 const EventFilter = ({ open, onClose, onApply, activeFilters, classesOptions = [] }) => {
   const { t } = useLanguage()
@@ -18,7 +14,7 @@ const EventFilter = ({ open, onClose, onApply, activeFilters, classesOptions = [
   // Initialize state with props or fallback to default
   const [selected, setSelected] = useState(() => {
     if (activeFilters && activeFilters.eventTypes) return activeFilters;
-    return defaultFilters;
+    return DEFAULT_FILTERS;
   })
 
   useEffect(() => {
@@ -29,21 +25,15 @@ const EventFilter = ({ open, onClose, onApply, activeFilters, classesOptions = [
   }, [open, activeFilters])
 
   const handleReset = () => {
-    setSelected(defaultFilters)
-    onApply(defaultFilters)
+    setSelected(DEFAULT_FILTERS)
+    onApply(DEFAULT_FILTERS)
   }
 
   const handleApply = () => {
     onApply(selected)
   }
 
-  const EVENT_TYPE_OPTIONS = [
-    ...(isTeacher ? [{ key: 'teaching-schedule', label: t.calendar?.teachingSchedule || 'Lịch dạy', color: '#34ce56' }] : []),
-    { key: 'student-schedule', label: t.calendar?.studentSchedule || 'Lịch học', color: '#0e6eec' },
-    ...(isTeacher ? [{ key: 'my-event', label: t.calendar?.myEvents || 'Sự kiện của tôi', color: '#f83b4f' }] : []),
-    { key: 'registered-event', label: t.calendar?.registered || 'Đã đăng ký', color: '#e2b60a' },
-    { key: 'other', label: t.calendar?.other || 'Khác', color: '#888888' },
-  ]
+  const EVENT_TYPE_OPTIONS = getEventTypeOptions(t, isTeacher)
 
   return (
     <Modal

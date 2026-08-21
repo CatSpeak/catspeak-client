@@ -5,23 +5,18 @@ import EventCard from './EventCard'
 import EventCardDetail from './EventCardDetail'
 import EventFilter from './EventFilter'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import useFilterModal from '@/features/calendar/hooks/useFilterModal'
 
 const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onApplyFilter, onShareEvent, classesOptions }) => {
   const { t } = useLanguage()
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [prevDate, setPrevDate] = useState(date)
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [filterOpenCount, setFilterOpenCount] = useState(0)
+  const { filterOpen, filterOpenCount, openFilter, closeFilter, handleApplyFilter } = useFilterModal(onApplyFilter)
 
   // Reset selected event when date changes
   if (date !== prevDate) {
     setPrevDate(date)
     setSelectedEvent(null)
-  }
-
-  const handleApplyFilter = (selectedTypes) => {
-    if (onApplyFilter) onApplyFilter(selectedTypes)
-    setFilterOpen(false)
   }
 
   if (selectedEvent) {
@@ -43,7 +38,7 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
           variant="outline"
           className='!w-10 !h-10'
           innerClassName="!w-8 !h-8"
-          onClick={() => { setFilterOpenCount(c => c + 1); setFilterOpen(true) }}
+          onClick={openFilter}
           title="Bộ lọc"
         >
           <SlidersHorizontal />
@@ -66,7 +61,7 @@ const DailyEventPanel = ({ date = '20/01', events = [], activeFilters = [], onAp
       <EventFilter
         key={filterOpenCount}
         open={filterOpen}
-        onClose={() => setFilterOpen(false)}
+        onClose={closeFilter}
         onApply={handleApplyFilter}
         activeFilters={activeFilters}
         classesOptions={classesOptions}

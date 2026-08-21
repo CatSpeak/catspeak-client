@@ -6,24 +6,19 @@ import EventCardDetail from './EventCardDetail'
 import EventFilter from './EventFilter'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import dayjs from 'dayjs'
-
-const HOURS = Array.from({ length: 24 }, (_, i) => i)
+import { HOURS, DAY_NAME_MAP } from '@/features/calendar/data/calendarConstants'
+import { parseEventsForDay, layoutEventClusters } from '@/features/calendar/utils/eventLayoutUtils'
+import useFilterModal from '@/features/calendar/hooks/useFilterModal'
 
 const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilters = null, onApplyFilter, onShareEvent, hideHeader = false }) => {
   const { formatScheduleDays, parseIsoToZoneDate } = useTimezone()
-  const [filterOpen, setFilterOpen] = useState(false)
-  const [filterOpenCount, setFilterOpenCount] = useState(0)
+  const { filterOpen, filterOpenCount, openFilter, closeFilter, handleApplyFilter } = useFilterModal(onApplyFilter)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [prevDate, setPrevDate] = useState(date)
 
   if (date !== prevDate) {
     setPrevDate(date)
     setSelectedEvent(null)
-  }
-
-  const handleApplyFilter = (selectedTypes) => {
-    if (onApplyFilter) onApplyFilter(selectedTypes)
-    setFilterOpen(false)
   }
 
   if (selectedEvent) {
@@ -35,8 +30,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
   }
 
   const dDate = targetDate || dayjs()
-  const dayNameRaw = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'][dDate.day()]
-  const dayLabel = formatScheduleDays([dayNameRaw])
+  const dayLabel = formatScheduleDays([DAY_NAME_MAP[dDate.day()]])
   const formattedDate = dDate.format('D/M')
   const dateStr = dDate.format('YYYY-MM-DD')
 
@@ -45,84 +39,9 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
   const currentHour = now.hour()
   const currentMin = now.minute()
 
-  const parsedEvents = events
-    .map((ev) => {
-      if (!ev.startTime) return null
-      const evStart = dayjs(parseIsoToZoneDate(ev.startTime))
-      const evEnd = ev.endTime ? dayjs(parseIsoToZoneDate(ev.endTime)) : evStart.add(1, 'hour')
-      const colStart = dayjs(dateStr)
-      const colEnd = colStart.add(1, 'day')
-
-      if (!evStart.isBefore(colEnd) || !evEnd.isAfter(colStart)) return null
-
-      const renderStart = evStart.isBefore(colStart) ? colStart : evStart
-      const renderEnd = evEnd.isAfter(colEnd) ? colEnd : evEnd
-
-      const startH = renderStart.hour()
-      const startM = renderStart.minute()
-      const topMinutes = startH * 60 + startM
-      const durationMinutes = renderEnd.diff(renderStart, 'minute') || 60
-
-      return {
-        event: ev,
-        renderStart,
-        renderEnd,
-        topMinutes,
-        durationMinutes,
-        originalId: ev.id
-      }
-    })
-    .filter(Boolean)
-
-  parsedEvents.sort((a, b) => a.renderStart.valueOf() - b.renderStart.valueOf())
-
-  const clusters = []
-  let currentCluster = []
-  let clusterEnd = null
-
-  parsedEvents.forEach(pEv => {
-    if (clusterEnd === null || !pEv.renderStart.isBefore(clusterEnd)) {
-      if (currentCluster.length > 0) {
-        clusters.push(currentCluster)
-      }
-      currentCluster = [pEv]
-      clusterEnd = pEv.renderEnd
-    } else {
-      currentCluster.push(pEv)
-      if (pEv.renderEnd.isAfter(clusterEnd)) {
-        clusterEnd = pEv.renderEnd
-      }
-    }
-  })
-  if (currentCluster.length > 0) {
-    clusters.push(currentCluster)
-  }
-
-  clusters.forEach(cluster => {
-    const columns = []
-    cluster.forEach(pEv => {
-      let placed = false
-      for (let i = 0; i < columns.length; i++) {
-        const lastEv = columns[i][columns[i].length - 1]
-        if (!pEv.renderStart.isBefore(lastEv.renderEnd)) {
-          columns[i].push(pEv)
-          pEv.colIdx = i
-          placed = true
-          break
-        }
-      }
-      if (!placed) {
-        pEv.colIdx = columns.length
-        columns.push([pEv])
-      }
-    })
-
-    const numColumns = columns.length
-    cluster.forEach(pEv => {
-      pEv.width = `calc(${100 / numColumns}% - 4px)`
-      pEv.left = `calc(${(pEv.colIdx * 100) / numColumns}% + 2px)`
-    })
-  })
+  // Use shared utils for event parsing and layout
+  const parsedEvents = parseEventsForDay(events, dateStr, parseIsoToZoneDate)
+  layoutEventClusters(parsedEvents)
 
   return (
     <div className={`flex flex-col min-h-0 w-full ${hideHeader ? '' : 'border bg-white rounded-xl'} h-full flex-1`}>
@@ -142,7 +61,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
             variant="outline"
             className='!w-10 !h-10 shrink-0'
             innerClassName="!w-8 !h-8"
-            onClick={() => { setFilterOpenCount(c => c + 1); setFilterOpen(true) }}
+            onClick={openFilter}
             title="Bộ lọc"
           >
             <SlidersHorizontal />
@@ -168,7 +87,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
               <div key={i} className="h-[60px] border-t border-[#F5F5F5] w-full" />
             ))}
 
-            <div className="absolute inset-0 flex pointer-events-none">
+            <div className="absolute inset-0 flex pointer-events-none z-10">
               <div className="flex-1 relative pointer-events-auto">
                 {parsedEvents.map(pEv => (
                   <EventBlock
@@ -187,7 +106,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
             {/* Current Time Line */}
             {isToday && (
               <div
-                className="absolute left-0 right-4 border-t border-red-500 flex items-center z-20 pointer-events-none"
+                className="absolute left-0 right-4 border-t border-red-500 flex items-center z-[5] pointer-events-none"
                 style={{ top: `${(currentHour * 60) + currentMin}px` }}
               >
                 <span className="absolute text-xs font-bold text-red-500 bg-white pr-1 -left-12">
@@ -202,7 +121,7 @@ const CalendarDayView = ({ date = '20/01', targetDate, events = [], activeFilter
       <EventFilter
         key={filterOpenCount}
         open={filterOpen}
-        onClose={() => setFilterOpen(false)}
+        onClose={closeFilter}
         onApply={handleApplyFilter}
         activeFilters={activeFilters}
       />

@@ -6,8 +6,8 @@ import EventBlock from './EventBlock'
 import EventBlockDetail from './EventBlockDetail'
 import CalendarDayView from './CalendarDayView'
 import { useTimezone } from '@/shared/hooks/useTimezone'
-
-const HOURS = Array.from({ length: 24 }, (_, i) => i) // 0 to 23
+import { HOURS, WEEK_DAY_KEYS } from '@/features/calendar/data/calendarConstants'
+import { parseEventsForDay, layoutEventClusters } from '@/features/calendar/utils/eventLayoutUtils'
 
 const CalendarWeekView = ({
   currentDate,
@@ -20,7 +20,7 @@ const CalendarWeekView = ({
   const { formatScheduleDays, parseIsoToZoneDate } = useTimezone()
 
   // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
-  const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day =>
+  const DAY_LABELS = WEEK_DAY_KEYS.map(day =>
     formatScheduleDays([day])
   )
 
@@ -138,97 +138,15 @@ const CalendarWeekView = ({
               ))}
 
               {/* Events Overlay */}
-              <div className="absolute inset-0 flex pointer-events-none">
-                {weekDates.map((dateObj, colIdx) => (
-                  <div key={colIdx} className="flex-1 relative pointer-events-auto border-r border-[#F5F5F5] last:border-r-0">
-                    {(() => {
-                      const parsedEvents = events
-                        .map((ev) => {
-                          if (!ev.startTime) return null
-                          const evStart = dayjs(parseIsoToZoneDate(ev.startTime))
-                          const evEnd = ev.endTime ? dayjs(parseIsoToZoneDate(ev.endTime)) : evStart.add(1, 'hour')
+              <div className="absolute inset-0 flex pointer-events-none z-10">
+                {weekDates.map((dateObj, colIdx) => {
+                  // Use shared utils for event parsing and layout
+                  const parsedEvents = parseEventsForDay(events, dateObj.dateStr, parseIsoToZoneDate)
+                  layoutEventClusters(parsedEvents)
 
-                          const colStart = dayjs(dateObj.dateStr) // 00:00:00 of this column
-                          const colEnd = colStart.add(1, 'day')   // 00:00:00 of next day
-
-                          // Check if event overlaps with this day column
-                          if (!evStart.isBefore(colEnd) || !evEnd.isAfter(colStart)) return null
-
-                          // Calculate the start and end time visually restricted within this day column
-                          const renderStart = evStart.isBefore(colStart) ? colStart : evStart
-                          const renderEnd = evEnd.isAfter(colEnd) ? colEnd : evEnd
-
-                          const startH = renderStart.hour()
-                          const startM = renderStart.minute()
-
-                          const topMinutes = startH * 60 + startM
-                          const durationMinutes = renderEnd.diff(renderStart, 'minute') || 60
-
-                          return {
-                            event: ev,
-                            renderStart,
-                            renderEnd,
-                            topMinutes,
-                            durationMinutes,
-                            originalId: ev.id
-                          }
-                        })
-                        .filter(Boolean)
-
-                      // Sort by renderStart time
-                      parsedEvents.sort((a, b) => a.renderStart.valueOf() - b.renderStart.valueOf())
-
-                      // Group overlapping events into clusters
-                      const clusters = []
-                      let currentCluster = []
-                      let clusterEnd = null
-
-                      parsedEvents.forEach(pEv => {
-                        if (clusterEnd === null || !pEv.renderStart.isBefore(clusterEnd)) {
-                          if (currentCluster.length > 0) {
-                            clusters.push(currentCluster)
-                          }
-                          currentCluster = [pEv]
-                          clusterEnd = pEv.renderEnd
-                        } else {
-                          currentCluster.push(pEv)
-                          if (pEv.renderEnd.isAfter(clusterEnd)) {
-                            clusterEnd = pEv.renderEnd
-                          }
-                        }
-                      })
-                      if (currentCluster.length > 0) {
-                        clusters.push(currentCluster)
-                      }
-
-                      // For each cluster, find columns to lay them out side-by-side
-                      clusters.forEach(cluster => {
-                        const columns = []
-                        cluster.forEach(pEv => {
-                          let placed = false
-                          for (let i = 0; i < columns.length; i++) {
-                            const lastEv = columns[i][columns[i].length - 1]
-                            if (!pEv.renderStart.isBefore(lastEv.renderEnd)) {
-                              columns[i].push(pEv)
-                              pEv.colIdx = i
-                              placed = true
-                              break
-                            }
-                          }
-                          if (!placed) {
-                            pEv.colIdx = columns.length
-                            columns.push([pEv])
-                          }
-                        })
-
-                        const numColumns = columns.length
-                        cluster.forEach(pEv => {
-                          pEv.width = `calc(${100 / numColumns}% - 4px)`
-                          pEv.left = `calc(${(pEv.colIdx * 100) / numColumns}% + 2px)`
-                        })
-                      })
-
-                      return parsedEvents.map(pEv => (
+                  return (
+                    <div key={colIdx} className="flex-1 relative pointer-events-auto border-r border-[#F5F5F5] last:border-r-0">
+                      {parsedEvents.map(pEv => (
                         <EventBlock
                           key={`${pEv.originalId}-${dateObj.dateStr}`}
                           event={pEv.event}
@@ -238,17 +156,17 @@ const CalendarWeekView = ({
                           left={pEv.left}
                           onClick={() => setSelectedEvent(pEv.event)}
                         />
-                      ))
-                    })()}
-                  </div>
-                ))}
+                      ))}
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
             {/* Current Time Line */}
             {showCurrentTime && (
               <div
-                className="absolute left-0 right-0 border-t border-red-500 flex items-center pointer-events-none z-10"
+                className="absolute left-0 right-0 border-t border-red-500 flex items-center pointer-events-none z-[5]"
                 style={{ top: `${(currentHour * 60) + currentMin}px` }}
               >
                 <span className="absolute text-xs font-bold text-red-500 bg-white pr-1">
