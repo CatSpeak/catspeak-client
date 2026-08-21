@@ -6,27 +6,27 @@ export const materialApi = baseApi.injectEndpoints({
 
     //  Get a list of personal materials
     getPersonalMaterials: builder.query({
-      query: ({ folderId, keyword, sortBy } = {}) => ({
+      query: ({ folderId, keyword, sortBy, sortOrder, filterMode, filterFileType, filterStatus, timeFilter } = {}) => ({
         url: "/personal-materials",
-        params: { folderId, keyword, sortBy },
+        params: { folderId, keyword, sortBy, sortOrder, filterMode, filterFileType, filterStatus, timeFilter },
       }),
       providesTags: ["PersonalMaterials"],
     }),
 
     // Get a list of public materials of a user
     getPublicMaterialsByUserId: builder.query({
-      query: ({ targetAccountId, folderId, keyword, sortBy, sortOrder }) => ({
+      query: ({ targetAccountId, folderId, keyword, sortBy, sortOrder, filterMode, filterFileType, timeFilter }) => ({
         url: `/personal-materials/public/users/${targetAccountId}`,
-        params: { folderId, keyword, sortBy, sortOrder },
+        params: { folderId, keyword, sortBy, sortOrder, filterMode, filterFileType, timeFilter },
       }),
       providesTags: ["PersonalMaterials"],
     }),
 
     // Get a list of bookmarked materials
     getBookmarkedMaterials: builder.query({
-      query: ({ keyword, sortBy, sortOrder } = {}) => ({
+      query: ({ keyword, sortBy, sortOrder, filterFileType, timeFilter } = {}) => ({
         url: "/personal-materials/bookmarks",
-        params: { keyword, sortBy, sortOrder },
+        params: { keyword, sortBy, sortOrder, filterFileType, timeFilter },
       }),
       providesTags: ["PersonalMaterials"],
     }),

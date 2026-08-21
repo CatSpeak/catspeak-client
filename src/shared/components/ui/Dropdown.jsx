@@ -418,6 +418,15 @@ const Dropdown = ({
                         </div>
                       ) : filteredOptions.length > 0 ? (
                         filteredOptions.map((option, idx) => {
+                          if (option.type === "divider") {
+                            return (
+                              <hr
+                                key={`divider-${idx}`}
+                                className="border-t border-gray-200 my-1 w-full"
+                              />
+                            )
+                          }
+
                           const isSelected = isOptionSelected(option.value)
                           const optionKey =
                             option.key ||
