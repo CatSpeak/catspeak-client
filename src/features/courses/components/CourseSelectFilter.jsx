@@ -20,6 +20,7 @@ const CourseSelectFilter = ({
       value={value}
       onChange={(val) => onChange(val)}
       disabled={disabled}
+      className={variant === "ghost" ? `h-11 flex items-center ${className}` : className}
       dropdownClassName="min-w-[170px] shadow-xl border border-border/80 rounded-2xl p-1.5 z-50 bg-white"
       activeColor="#b20a1c"
       renderOption={(option, isSelected) => (
@@ -44,10 +45,10 @@ const CourseSelectFilter = ({
           title={title}
           className={
             variant === "ghost"
-              ? `h-11 px-4 rounded-full border border-border text-sm font-normal flex items-center gap-2 transition-all cursor-pointer outline-none bg-transparent text-slate-700 hover:border-slate-400 hover:text-slate-950 ${
+              ? `h-11 px-4 rounded-full border border-border text-sm font-normal flex items-center gap-2 transition-all cursor-pointer outline-none bg-transparent text-slate-700 hover:border-slate-400 hover:text-slate-950 box-border leading-none ${
                   isOpen ? "border-[#b20a1c] text-[#b20a1c] ring-2 ring-rose-100" : ""
                 } ${className}`
-              : `h-9 px-3.5 rounded-full border text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-2xs outline-none ${
+              : `h-9 px-3.5 rounded-full border text-xs font-normal flex items-center gap-2 transition-all cursor-pointer shadow-2xs outline-none box-border leading-none ${
                   isOpen
                     ? "border-[#b20a1c] bg-rose-50 text-[#b20a1c] ring-2 ring-rose-100"
                     : "border-border bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50"

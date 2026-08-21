@@ -11,7 +11,7 @@ const ViewModeToggle = ({ value, onChange, className = "" }) => {
   ]
 
   return (
-    <div className={`flex items-center bg-white p-1 rounded-full border-0 shadow-2xs gap-1 ${className}`}>
+    <div className={`flex items-center h-11 bg-white p-1 rounded-full border-0 shadow-2xs gap-1 box-border ${className}`}>
       {viewModes.map(({ value: mode, icon, label }) => {
         const isActive = value === mode
         return (
