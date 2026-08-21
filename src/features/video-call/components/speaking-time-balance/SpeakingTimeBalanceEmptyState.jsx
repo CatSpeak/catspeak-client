@@ -9,11 +9,14 @@ import TeacherTalkRatioCard from "./TeacherTalkRatioCard"
 const SpeakingTimeBalanceEmptyState = ({
   studentParticipants = [],
   studentCount = 0,
+  isBreakoutMode = false,
   labels = {},
 }) => {
   return (
     <>
-      <TeacherTalkRatioCard hasAnySpeechData={false} labels={labels} />
+      {!isBreakoutMode && (
+        <TeacherTalkRatioCard hasAnySpeechData={false} labels={labels} />
+      )}
 
       <div className="bg-[#F8F9FA] border-y border-[#EFEFEF] px-4 py-2 flex items-center justify-between text-xs font-medium text-gray-600 shrink-0">
         <span>

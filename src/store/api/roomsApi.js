@@ -266,6 +266,32 @@ export const roomsApi = baseApi.injectEndpoints({
     getSpeakingStats: builder.query({
       query: (sessionId) => `/rooms/session/${sessionId}/speaking-stats`,
     }),
+
+    // Get real-time speaking statistics for all active breakout rooms (and main room)
+    getBreakoutSpeakingStats: builder.query({
+      query: (arg) => {
+        let sessionId
+        let includeMainRoom = true
+
+        if (typeof arg === "object" && arg !== null) {
+          sessionId = arg.sessionId
+          if (arg.includeMainRoom !== undefined) {
+            includeMainRoom = arg.includeMainRoom
+          }
+        } else {
+          sessionId = arg
+        }
+
+        return {
+          url: `/rooms/${sessionId}/breakout/speaking-stats`,
+          params: { includeMainRoom },
+        }
+      },
+      providesTags: (result, error, arg) => {
+        const sessionId = typeof arg === "object" && arg !== null ? arg.sessionId : arg
+        return [{ type: "Breakout", id: `${sessionId}-SpeakingStats` }]
+      },
+    }),
   }),
 })
 
@@ -298,5 +324,7 @@ export const {
   useInviteToRoomMutation,
   // Speaking Stats
   useGetSpeakingStatsQuery,
+  useGetBreakoutSpeakingStatsQuery,
+  useLazyGetBreakoutSpeakingStatsQuery,
 } = roomsApi
 

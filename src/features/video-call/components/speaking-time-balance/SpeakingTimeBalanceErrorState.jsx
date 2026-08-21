@@ -9,6 +9,7 @@ import TeacherTalkRatioCard from "./TeacherTalkRatioCard"
 const SpeakingTimeBalanceErrorState = ({
   studentParticipants = [],
   studentCount = 0,
+  isBreakoutMode = false,
   labels = {},
 }) => {
   return (
@@ -28,7 +29,9 @@ const SpeakingTimeBalanceErrorState = ({
         </div>
       </div>
 
-      <TeacherTalkRatioCard isError={true} labels={labels} />
+      {!isBreakoutMode && (
+        <TeacherTalkRatioCard isError={true} labels={labels} />
+      )}
 
       <div className="bg-[#F8F9FA] border-y border-[#EFEFEF] px-4 py-2 flex items-center justify-between text-xs font-medium text-gray-600 shrink-0">
         <span>

@@ -788,6 +788,8 @@ export default {
     notStartedTitle: "Chưa bắt đầu chia nhóm",
     notStartedDesc:
       "Giáo viên chưa mở phòng thảo luận nhóm nhỏ cho buổi học này.",
+    lowSpeakingNotice: "⚠️ Có {count} học viên phát biểu ít",
+    lowSpeakingBadge: "⚠️ {count} HV ít",
     changeLocked: "Đã khóa chuyển phòng",
     roomFull: "Phòng đã đầy",
     roomPrefix: "Phòng ",

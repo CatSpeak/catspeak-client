@@ -21,6 +21,8 @@ const BreakoutActiveRoomList = ({
   students = [],
   handleHostLeave,
   isJoiningRoom,
+  breakoutRoomsMap = {},
+  breakoutRoomsStats = [],
 }) => {
   const { t } = useLanguage()
   const [dragOverRoomId, setDragOverRoomId] = useState(null)
@@ -224,6 +226,42 @@ const BreakoutActiveRoomList = ({
           ? studentCount >= status.maxParticipantsPerRoom
           : false
 
+        // Speaking balance calculation per breakout room
+        const roomSpeakingStats =
+          breakoutRoomsMap[String(room.sessionId)] ||
+          (room.roomId ? breakoutRoomsMap[String(room.roomId)] : null)
+
+        let lowSpeakingCount = 0
+        if (
+          roomSpeakingStats &&
+          studentCount > 0 &&
+          roomSpeakingStats.totalStudentDurationSec > 0
+        ) {
+          const expectedSharePercent = Math.round(100 / studentCount)
+          for (const student of studentParticipants) {
+            const studentAccountId = String(student.accountId)
+            const st =
+              roomSpeakingStats.statsMap[studentAccountId] ||
+              (student.identity ? roomSpeakingStats.statsMap[student.identity] : null)
+            const durationSec = st?.totalDurationSeconds || 0
+            const totalWords = st?.totalWords || 0
+
+            const sharePercent =
+              roomSpeakingStats.totalStudentDurationSec > 0
+                ? Math.round((durationSec / roomSpeakingStats.totalStudentDurationSec) * 100)
+                : 0
+
+            const ratioOfExp =
+              expectedSharePercent > 0
+                ? (sharePercent / expectedSharePercent) * 100
+                : 0
+
+            if (ratioOfExp < 60 || totalWords === 0 || durationSec === 0) {
+              lowSpeakingCount++
+            }
+          }
+        }
+
         return (
           <div
             key={room.sessionId}
@@ -261,7 +299,7 @@ const BreakoutActiveRoomList = ({
                 </div>
               }
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <span className="truncate max-w-[120px] text-left">
                   {room.roomName}
                 </span>
@@ -269,6 +307,14 @@ const BreakoutActiveRoomList = ({
                   <Badge color="emerald">
                     {t.rooms.breakoutRooms.youAreHere}
                   </Badge>
+                )}
+                {lowSpeakingCount > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
+                    {(t.rooms.breakoutRooms.lowSpeakingBadge || "⚠️ {count} HV ít").replace(
+                      "{count}",
+                      String(lowSpeakingCount),
+                    )}
+                  </span>
                 )}
               </div>
             </ListItem>
@@ -308,6 +354,23 @@ const BreakoutActiveRoomList = ({
                     })
                   )}
                 </div>
+
+                {/* Low speaking time balance notice button */}
+                {lowSpeakingCount > 0 && (
+                  <div className="px-4 pt-3 pb-1">
+                    <PillButton
+                      variant="secondary"
+                      className="w-full cursor-default !border !border-red-200 font-medium"
+                      bgColor="#FFF1F0"
+                      textColor="#CF1322"
+                    >
+                      {(t.rooms.breakoutRooms.lowSpeakingNotice || "⚠️ Có {count} học viên phát biểu ít").replace(
+                        "{count}",
+                        String(lowSpeakingCount),
+                      )}
+                    </PillButton>
+                  </div>
+                )}
 
                 {/* Join sub-room button */}
                 {!isHostInThisRoom && (

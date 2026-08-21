@@ -636,6 +636,8 @@ export default {
     switchError: "无法切换房间",
     notStartedTitle: "尚未开始分组",
     notStartedDesc: "老师尚未为本次课程开放分组房间。",
+    lowSpeakingNotice: "⚠️ 有 {count} 位学员发言较少",
+    lowSpeakingBadge: "⚠️ {count} 少",
     changeLocked: "更换房间已锁定",
     roomFull: "房间已满",
     roomPrefix: "房间 ",

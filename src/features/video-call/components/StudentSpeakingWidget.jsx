@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback } from "react"
+import { useSelector } from "react-redux"
 import { motion } from "framer-motion"
 import { X } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -25,6 +26,9 @@ const parseMetadata = (metadata) => {
 const StudentSpeakingWidget = ({ onClose, isError = false }) => {
   const { t } = useLanguage()
   const widgetT = t?.rooms?.videoCall?.speakingTimeBalance?.studentWidget || {}
+  const { isBreakoutActive, breakoutRoomName } = useSelector(
+    (s) => s.videoCall,
+  )
 
   const {
     user,
@@ -92,7 +96,12 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
   }, [totalStudentDurationSec, durationSec])
 
   // Room title (Main Room vs Breakout Room)
-  const roomTitle = widgetT.meMainRoom || "Tôi: Main Room"
+  const roomTitle = isBreakoutActive
+    ? (widgetT.meBreakout || "Tôi: {name}").replace(
+        "{name}",
+        breakoutRoomName || "Breakout Room",
+      )
+    : widgetT.meMainRoom || "Tôi: Main Room"
 
   return (
     <motion.div

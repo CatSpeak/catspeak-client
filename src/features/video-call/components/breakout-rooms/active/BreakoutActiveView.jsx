@@ -19,6 +19,7 @@ import BreakoutActiveRoomList from "./BreakoutActiveRoomList"
 import BreakoutActiveFooter from "./BreakoutActiveFooter"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useDragScroll } from "../../../hooks/useDragScroll"
+import { useBreakoutSpeakingStats } from "../../../hooks/useBreakoutSpeakingStats"
 
 const BreakoutActiveView = ({
   sessionId,
@@ -31,6 +32,15 @@ const BreakoutActiveView = ({
 }) => {
   const { t } = useLanguage()
   const dispatch = useDispatch()
+
+  const { breakoutRoomsMap, breakoutRoomsStats } = useBreakoutSpeakingStats(
+    sessionId,
+    {
+      enabled: Boolean(status?.isBreakoutActive),
+      includeMainRoom: true,
+      pollingInterval: 30000,
+    },
+  )
 
   const [stopBreakoutRooms, { isLoading: isStopping }] =
     useStopBreakoutRoomsMutation()
@@ -182,6 +192,8 @@ const BreakoutActiveView = ({
           students={allLiveStudents}
           handleHostLeave={handleHostLeave}
           isJoiningRoom={isJoiningRoom}
+          breakoutRoomsMap={breakoutRoomsMap}
+          breakoutRoomsStats={breakoutRoomsStats}
         />
       </div>
 

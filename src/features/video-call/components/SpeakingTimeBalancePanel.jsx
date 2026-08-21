@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react"
+import { useSelector } from "react-redux"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
@@ -9,6 +10,7 @@ import {
   SpeakingTimeBalanceLegend,
   SpeakingTimeBalanceEmptyState,
   SpeakingTimeBalanceErrorState,
+  BreakoutRoomSTBView,
 } from "./speaking-time-balance"
 
 /**
@@ -35,6 +37,9 @@ const SpeakingTimeBalancePanel = ({
 }) => {
   const { t } = useLanguage()
   const stbT = t?.rooms?.videoCall?.speakingTimeBalance || {}
+  const { isBreakoutActive, breakoutRoomName } = useSelector(
+    (s) => s.videoCall,
+  )
 
   const {
     participants = [],
@@ -53,6 +58,10 @@ const SpeakingTimeBalancePanel = ({
   const activeIsLoading =
     isLoading || isSpeakingStatsLoading || (isSpeakingStatsFetching && !speakingStatsLastUpdated)
   const activeIsError = isError || isSpeakingStatsError
+
+  const panelTitle = isBreakoutActive
+    ? `${breakoutRoomName || "Phòng thảo luận"} — STB`
+    : stbT.title || "Speaking Time Balance"
 
   // Timer tick updated every 1 second (avoiding synchronous setState in effect body)
   const [now, setNow] = useState(() => Date.now())
@@ -205,6 +214,7 @@ const SpeakingTimeBalancePanel = ({
     <div className="flex flex-col h-full w-full bg-white">
       {/* Header */}
       <SpeakingTimeBalanceHeader
+        title={panelTitle}
         secondsAgo={secondsAgo}
         isLoading={activeIsLoading}
         isError={activeIsError}
@@ -229,17 +239,26 @@ const SpeakingTimeBalancePanel = ({
         <SpeakingTimeBalanceErrorState
           studentParticipants={studentParticipants}
           studentCount={studentCount}
+          isBreakoutMode={isBreakoutActive}
+          labels={stbT}
+        />
+      ) : isBreakoutActive ? (
+        /* State: Breakout Room Mode (Matches stb-detail-breakout-panel.png) */
+        <BreakoutRoomSTBView
+          studentCount={studentCount}
+          expectedSharePercent={expectedSharePercent}
+          participantStatsList={participantStatsList}
           labels={stbT}
         />
       ) : !hasAnySpeechData ? (
-        /* State: No Data Yet */
+        /* State: No Data Yet (Main Room only) */
         <SpeakingTimeBalanceEmptyState
           studentParticipants={studentParticipants}
           studentCount={studentCount}
           labels={stbT}
         />
       ) : (
-        /* State: Active Data */
+        /* State: Main Room Mode (With Teacher Talk & Progress Bars) */
         <>
           <TeacherTalkRatioCard
             hasAnySpeechData={hasAnySpeechData}
