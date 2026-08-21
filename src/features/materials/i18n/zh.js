@@ -194,7 +194,8 @@ export default {
       "NO_ITEMS_SELECTED": "必须选择至少一个资料或文件夹才能移动。",
       "DOWNLOAD_NOT_ALLOWED": "该资料/文件夹不允许下载。",
       "INVALID_EXPIRATION_DATE": "过期时间必须是将来的时间。",
-      "INVALID_MAX_USES": "最大使用次数必须大于0。"
+      "INVALID_MAX_USES": "最大使用次数必须大于0。",
+      "TEACHER_PROFILE_REQUIRED": "您必须拥有教师资料才能公开分享资料。"
     }
   }
 }

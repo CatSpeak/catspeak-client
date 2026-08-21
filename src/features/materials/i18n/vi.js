@@ -194,7 +194,8 @@ export default {
       "NO_ITEMS_SELECTED": "Phải chọn ít nhất một tài liệu hoặc thư mục để di chuyển.",
       "DOWNLOAD_NOT_ALLOWED": "Tài liệu/Thư mục này không cho phép tải xuống.",
       "INVALID_EXPIRATION_DATE": "Thời điểm hết hạn phải nằm trong tương lai.",
-      "INVALID_MAX_USES": "Số lần dùng tối đa phải lớn hơn 0."
+      "INVALID_MAX_USES": "Số lần dùng tối đa phải lớn hơn 0.",
+      "TEACHER_PROFILE_REQUIRED": "Bạn phải có hồ sơ giáo viên để chia sẻ tài liệu công khai."
     }
   }
 }

@@ -194,7 +194,8 @@ export default {
       "NO_ITEMS_SELECTED": "You must select at least one material or folder to move.",
       "DOWNLOAD_NOT_ALLOWED": "This material/folder does not allow downloads.",
       "INVALID_EXPIRATION_DATE": "Expiration date must be in the future.",
-      "INVALID_MAX_USES": "Maximum uses must be greater than 0."
+      "INVALID_MAX_USES": "Maximum uses must be greater than 0.",
+      "TEACHER_PROFILE_REQUIRED": "You must have a teacher profile to share materials publicly."
     }
   }
 }
