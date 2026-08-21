@@ -220,6 +220,12 @@ const MyCalendarPage = () => {
     }
   }
 
+  const handleMonthChange = (newDate) => {
+    const targetDate = dayjs(newDate)
+    setCurrentDate(targetDate)
+    setSelectedDate(targetDate.date())
+  }
+
   const tabOptions = [
     { id: 'calendar', label: t.calendar?.generalCalendar || 'Lịch tổng hợp', icon: CalendarDays },
     ...(isTeacher ? [
@@ -277,6 +283,7 @@ const MyCalendarPage = () => {
               onChangeView={setViewType}
               onPrev={handlePrev}
               onNext={handleNext}
+              onChangeMonth={handleMonthChange}
               onSelectDate={setSelectedDate}
               activeFilters={activeFilters}
               onApplyFilter={setActiveFilters}

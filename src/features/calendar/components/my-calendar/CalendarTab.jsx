@@ -3,6 +3,7 @@ import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   SlidersHorizontal,
   Table2
 } from 'lucide-react'
@@ -10,6 +11,7 @@ import { IconButton } from '@/shared/components/ui/buttons'
 import CalendarMonthView from './CalendarMonthView'
 import CalendarWeekView from './CalendarWeekView'
 import EventFilter from './EventFilter'
+import DatePicker from '@/shared/components/ui/inputs/DatePicker'
 
 import { useLanguage } from '@/shared/context/LanguageContext'
 
@@ -29,6 +31,7 @@ const CalendarTab = ({
   onChangeView,
   onPrev,
   onNext,
+  onChangeMonth,
   onSelectDate,
   activeFilters = [],
   onApplyFilter,
@@ -66,9 +69,25 @@ const CalendarTab = ({
           >
             <ChevronLeft />
           </IconButton>
-          <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[100px] md:min-w-[150px] text-center">
-            {localizedMonth}
-          </span>
+          <div className='flex'>
+            <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[100px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
+              {localizedMonth}
+            </span>
+            <div className="relative flex items-center justify-center w-6 h-6">
+              <CalendarIcon />
+              <div className="absolute top-0 left-0 w-6 h-6 opacity-0 overflow-hidden cursor-pointer">
+                <DatePicker
+                  value={currentDate.toDate()}
+                  onChange={(date) => {
+                    if (date && onChangeMonth) {
+                      onChangeMonth(date)
+                    }
+                  }}
+                  className="w-6 h-6"
+                />
+              </div>
+            </div>
+          </div>
           <IconButton
             onClick={onNext}
             variant="ghost"
@@ -126,6 +145,8 @@ const CalendarTab = ({
             selectedDate={selectedDate}
             events={events}
             onSelectDate={onSelectDate}
+            onPrev={onPrev}
+            onNext={onNext}
           />
         )}
       </div>

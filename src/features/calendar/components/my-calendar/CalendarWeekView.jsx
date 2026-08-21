@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import dayjs from 'dayjs'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { IconButton } from '@/shared/components/ui/buttons'
 import EventBlock from './EventBlock'
 import EventBlockDetail from './EventBlockDetail'
 import { useTimezone } from '@/shared/hooks/useTimezone'
@@ -10,6 +12,8 @@ const CalendarWeekView = ({
   currentDate,
   selectedDate,
   events,
+  onPrev,
+  onNext,
 }) => {
   const { formatScheduleDays } = useTimezone()
 
@@ -51,15 +55,23 @@ const CalendarWeekView = ({
   return (
     <div className="w-full flex flex-col h-full min-h-0 max-h-[500px]">
       {/* Week Header */}
-      <div className="flex ml-16 border-b border-border pb-4">
+      <div className="flex border-b border-border pb-4 items-center relative">
+        <IconButton
+          onClick={onPrev}
+          variant="ghost"
+          className="text-gray-400 hover:text-[#990011]"
+          title="Tuần trước"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </IconButton>
         {weekDates.map((dateObj, idx) => {
           const isToday = dateObj.dateStr === now.format('YYYY-MM-DD')
           return (
             <div
               key={idx}
-              className="flex-1 flex flex-col items-center gap-1 py-2"
+              className="flex-1 flex flex-col items-center gap-1"
             >
-              <div className={`w-12 h-12 flex items-center justify-center rounded-full text-sm font-semibold tracking-wider transition-all 
+              <div className={`w-16 h-16 flex items-center justify-center rounded-full text-sm font-semibold tracking-wider transition-all 
                 ${isToday ? 'text-white bg-[#990011]' : 'text-[#1A1A1A]'}`}>
                 {DAY_LABELS[idx]}
               </div>
@@ -69,6 +81,14 @@ const CalendarWeekView = ({
             </div>
           )
         })}
+        <IconButton
+          onClick={onNext}
+          variant="ghost"
+          className="text-gray-400 hover:text-[#990011]"
+          title="Tuần sau"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </IconButton>
       </div>
 
       {/* Time Scrollable */}
