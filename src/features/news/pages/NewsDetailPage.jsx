@@ -79,28 +79,26 @@ const NewsDetailSkeleton = () => (
         </div>
 
         {/* Right Column: Comments Sidebar Skeleton Island */}
-        <div className="w-full min-w-0">
-          <div className="lg:sticky lg:top-[76px]">
-            <FluentCard
-              padding="p-3.5 sm:p-4"
-              rounded="rounded-2xl"
-              className="shadow-sm border-[#e5e7eb]"
-            >
-              <Skeleton className="h-6 w-32 mb-4" />
-              <div className="flex flex-col gap-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-3">
-                    <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-                    <div className="flex-1 flex flex-col gap-2">
-                      <Skeleton className="h-3.5 w-28" />
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-3/4" />
-                    </div>
+        <div className="w-full min-w-0 lg:sticky lg:top-[76px] lg:self-start">
+          <FluentCard
+            padding="p-3.5 sm:p-4"
+            rounded="rounded-2xl"
+            className="shadow-sm border-[#e5e7eb]"
+          >
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                  <div className="flex-1 flex flex-col gap-2">
+                    <Skeleton className="h-3.5 w-28" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
                   </div>
-                ))}
-              </div>
-            </FluentCard>
-          </div>
+                </div>
+              ))}
+            </div>
+          </FluentCard>
         </div>
       </div>
     </div>
@@ -303,20 +301,18 @@ const NewsDetailPage = () => {
           </div>
 
           {/* ── Right Column: Comments Sidebar Island ───────────── */}
-          <div className="w-full min-w-0">
-            <div className="lg:sticky lg:top-[76px]">
-              <FluentCard
-                padding="p-3.5 sm:p-4"
-                rounded="rounded-2xl"
-                className="shadow-sm border-[#e5e7eb] lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto"
-              >
-                <CommentsSection
-                  ref={commentsRef}
-                  postId={newsItem.postId}
-                  totalComments={newsItem.totalComments || 0}
-                />
-              </FluentCard>
-            </div>
+          <div className="w-full min-w-0 lg:sticky lg:top-[76px] lg:self-start">
+            <FluentCard
+              padding="p-3.5 sm:p-4"
+              rounded="rounded-2xl"
+              className="shadow-sm border-[#e5e7eb] lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto"
+            >
+              <CommentsSection
+                ref={commentsRef}
+                postId={newsItem.postId}
+                totalComments={newsItem.totalComments || 0}
+              />
+            </FluentCard>
           </div>
         </div>
 
