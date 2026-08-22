@@ -199,6 +199,9 @@ export default {
       scheduleConflictDesc: "The schedule of this class conflicts with a class you are currently enrolled in:",
       confirmEnroll: "Enroll Anyway",
       cancel: "Cancel",
+      removeVoucherTitle: "Remove discount code?",
+      removeVoucherDesc: "Are you sure you want to remove code {{code}}? Total payment will return to {{totalAmount}}. You will lose the discount of {{discountAmount}}.",
+      removeVoucherConfirm: "Remove code",
 
       // VoucherSection
       searchVoucher: "Search code...",
