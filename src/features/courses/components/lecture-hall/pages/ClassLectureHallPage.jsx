@@ -21,6 +21,8 @@ import {
   useDeleteItemInCurriculumMutation
 } from "@/store/api/coursesApi"
 import SectionCard from "../components/curriculum/SectionCard"
+import MaterialDetailView from "../components/curriculum/MaterialDetailView"
+import LinkDetailView from "../components/curriculum/LinkDetailView"
 import CreateBulletinBoardModal from "../components/modals/CreateBulletinBoardModal"
 import AddMaterialModal from "../components/modals/AddMaterialModal"
 import AddActivityModal from "../components/modals/AddActivityModal"
@@ -68,6 +70,9 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
   const [targetSectionId, setTargetSectionId] = useState(null)
   const [targetSectionName, setTargetSectionName] = useState("")
   const [editItemData, setEditItemData] = useState(null)
+
+  // Active Detail View State (replaces the section list)
+  const [activeDetailView, setActiveDetailView] = useState(null) // { type: 'link' | 'material', item: object }
 
   // Section Modal State
   const [sectionModal, setSectionModal] = useState({
@@ -607,52 +612,75 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
 
       {!isLoading && !isError && (
         <>
-          {/* Sections List */}
-          <div className="space-y-6">
-            {sections.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
-                <FolderOpen size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
-                {isStudent ? (
-                  <p>{dict.curriculum.emptyState}</p>
+          {activeDetailView ? (
+            <div className="w-full">
+              {activeDetailView.type === 'material' && (
+                <MaterialDetailView 
+                  itemData={activeDetailView.item} 
+                  onBack={() => setActiveDetailView(null)} 
+                />
+              )}
+              {activeDetailView.type === 'link' && (
+                <LinkDetailView 
+                  itemData={activeDetailView.item} 
+                  onBack={() => setActiveDetailView(null)} 
+                />
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Sections List */}
+              <div className="space-y-6">
+                {sections.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-sm text-[#6B7280] border border-dashed border-[#E2E2E2] rounded-xl bg-white">
+                    <FolderOpen size={32} className="mb-3 text-[#9CA3AF] opacity-80" />
+                    {isStudent ? (
+                      <p>{dict.curriculum.emptyState}</p>
+                    ) : (
+                      <p>{dict.curriculum.emptyStateHint}</p>
+                    )}
+                  </div>
                 ) : (
-                  <p>{dict.curriculum.emptyStateHint}</p>
+                  sections.map((section, secIdx) => (
+                    <SectionCard
+                      key={section.id}
+                      classId={id}
+                      section={section}
+                      secIdx={secIdx}
+                      totalSections={sections.length}
+                      isStudent={isStudent}
+                      onOpenAddItem={handleOpenAddItemModal}
+                      onEditSection={handleOpenEditSection}
+                      onToggleSectionVisibility={handleToggleSectionVisibility}
+                      onDeleteSection={handleDeleteSection}
+                      onEditItem={handleEditItem}
+                      onToggleItemVisibility={handleToggleItemVisibility}
+                      onDeleteItem={handleDeleteItem}
+                      onSelectLesson={(item, type) => {
+                        if (type === 'link' || type === 'material') {
+                          setActiveDetailView({ type, item });
+                        }
+                      }}
+                    />
+                  ))
                 )}
               </div>
-            ) : (
-              sections.map((section, secIdx) => (
-                <SectionCard
-                  key={section.id}
-                  classId={id}
-                  section={section}
-                  secIdx={secIdx}
-                  totalSections={sections.length}
-                  isStudent={isStudent}
-                  onOpenAddItem={handleOpenAddItemModal}
-                  onEditSection={handleOpenEditSection}
-                  onToggleSectionVisibility={handleToggleSectionVisibility}
-                  onDeleteSection={handleDeleteSection}
-                  onEditItem={handleEditItem}
-                  onToggleItemVisibility={handleToggleItemVisibility}
-                  onDeleteItem={handleDeleteItem}
-                />
-              ))
-            )}
-          </div>
 
-          {/* Add New Section Button */}
-          {!isStudent && (
-            <div className="flex justify-center">
-              <PillButton
-                variant="outline"
-                onClick={handleOpenAddSection}
-                endIcon={<Plus size={10} className="text-primary" />}
-                className="w-full font-semibold text-base"
-              >
-                {dict.curriculum.addSection}
-              </PillButton>
-            </div>
-          )
-          }
+              {/* Add New Section Button */}
+              {!isStudent && (
+                <div className="flex justify-center mt-6">
+                  <PillButton
+                    variant="outline"
+                    onClick={handleOpenAddSection}
+                    endIcon={<Plus size={16} className="text-primary ml-1" />}
+                    className="w-full font-semibold text-base"
+                  >
+                    {dict.curriculum.addSection}
+                  </PillButton>
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
 

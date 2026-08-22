@@ -17,6 +17,7 @@ import {
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { PillButton } from "@/shared/components/ui/buttons"
 
 // Helper function to resolve icon and background based on item type
 const getItemConfig = (type) => {
@@ -57,6 +58,7 @@ const getItemConfig = (type) => {
 const StudentLessonRow = ({
   item = {},
   className = "",
+  onSelectLesson = () => { },
 }) => {
   const { t, language } = useLanguage()
   const { formatDateTime } = useTimezone()
@@ -80,6 +82,7 @@ const StudentLessonRow = ({
   const IconComponent = config.Icon
 
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [prevIsYoutubeLink, setPrevIsYoutubeLink] = useState(isYoutubeLink)
 
   if (isYoutubeLink !== prevIsYoutubeLink) {
@@ -121,20 +124,64 @@ const StudentLessonRow = ({
     if (displayData.type === "bulletinBoard") {
       navigate(`${basePath}/bulletin-board/${displayData.itemId}`, { state: { displayData } })
     } else if (displayData.type === "link" || isYoutubeLink) {
-      navigate(`${basePath}/links/${displayData.itemId}`)
+      onSelectLesson(item, "link")
     } else if (displayData.type === "assignment") {
       navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
     } else if (displayData.type === "quiz") {
       navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
     } else if (displayData.type === "material") {
-      navigate(`${basePath}/materials/${displayData.itemId}`)
+      onSelectLesson(item, "material")
+    }
+  }
+
+  const handleDownload = async (e) => {
+    e.stopPropagation();
+    const materialData = item.material || item
+    const fileUrl = materialData.fileUrl || materialData.url || materialData.FileUrl || item.fileUrl;
+    
+    if (!fileUrl) {
+      handleRowClick();
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+
+      const originalFilename = fileUrl.split("/").pop().split("?")[0] || "";
+      const ext = originalFilename.includes(".") ? originalFilename.split(".").pop() : "";
+
+      let cleanTitle = displayData.title || item.title || "download";
+
+      if (ext && !cleanTitle.toLowerCase().endsWith(`.${ext.toLowerCase()}`)) {
+        cleanTitle = `${cleanTitle}.${ext}`;
+      }
+
+      link.download = cleanTitle;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Lỗi khi tải file:", error);
+      window.open(fileUrl, "_blank");
+    } finally {
+      setIsDownloading(false);
     }
   }
 
   const renderRightAction = () => {
     if (displayData.type === "link") {
       return (
-        <button
+        <PillButton
+          variant="outline"
           onClick={(e) => {
             e.stopPropagation();
             if (isYoutubeLink) {
@@ -143,26 +190,23 @@ const StudentLessonRow = ({
               handleRowClick();
             }
           }}
-          className="flex items-center gap-2 px-4 py-1.5 border border-[#B52A2A] text-[#B52A2A] rounded-full text-sm font-medium hover:bg-red-50 transition-colors"
+          startIcon={isYoutubeLink ? (isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />) : <ExternalLink size={16} />}
         >
-          {isYoutubeLink ? (isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />) : <ExternalLink size={16} />}
-          <span>{isYoutubeLink ? (isExpanded ? "Đóng" : "Mở video") : "Mở liên kết"}</span>
-        </button>
+          {isYoutubeLink ? (isExpanded ? "Đóng" : "Mở video") : "Mở liên kết"}
+        </PillButton>
       )
     }
 
     if (displayData.type === "material") {
       return (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRowClick();
-          }}
-          className="flex items-center gap-2 px-4 py-1.5 border border-[#B52A2A] text-[#B52A2A] rounded-full text-sm font-medium hover:bg-red-50 transition-colors"
+        <PillButton
+          variant="outline"
+          onClick={handleDownload}
+          loading={isDownloading}
+          startIcon={<Download size={16} />}
         >
-          <Download size={16} />
-          <span>Tải xuống</span>
-        </button>
+          Tải xuống
+        </PillButton>
       )
     }
 
@@ -210,11 +254,7 @@ const StudentLessonRow = ({
   return (
     <div
       onClick={() => {
-        if (isYoutubeLink) {
-          setIsExpanded(!isExpanded);
-        } else {
-          handleRowClick();
-        }
+        handleRowClick();
       }}
       className={`rounded-xl p-4 flex flex-col relative transition-all bg-white border border-[#E2E2E2] cursor-pointer hover:border-[#B52A2A] hover:shadow-sm ${className}`}
     >

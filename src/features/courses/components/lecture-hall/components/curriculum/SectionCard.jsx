@@ -17,6 +17,7 @@ const SectionCard = ({
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
+  onSelectLesson = () => { },
   className = "",
 }) => {
   const { t } = useLanguage()
@@ -87,6 +88,7 @@ const SectionCard = ({
                 <StudentLessonRow
                   key={item.id}
                   item={item}
+                  onSelectLesson={onSelectLesson}
                 />
               ) : (
                 <LessonItemRow
@@ -97,6 +99,7 @@ const SectionCard = ({
                   onEditItem={(it) => onEditItem(section.id, it)}
                   onToggleItemVisibility={(itemId) => onToggleItemVisibility(section.id, itemId)}
                   onDeleteItem={(itemId) => onDeleteItem(section.id, itemId)}
+                  onSelectLesson={onSelectLesson}
                 />
               )
             ))
