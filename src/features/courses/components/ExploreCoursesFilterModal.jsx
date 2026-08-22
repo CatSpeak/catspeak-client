@@ -104,7 +104,7 @@ const ExploreCoursesFilterModal = ({
             <div className="flex items-center gap-2 mb-2">
               <Activity size={16} className="text-[#b20a1c]" />
               <label className="text-sm font-bold text-slate-900">
-                {sc.enrollmentStatusLabel || "Trạng thái tuyển sinh"}
+                {sc.enrollmentStatusLabel || "Trạng thái lớp học / khóa học"}
               </label>
             </div>
             <Dropdown

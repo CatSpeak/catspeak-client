@@ -312,11 +312,11 @@ const ExploreCoursesPage = () => {
           }}
         />
 
-        {/* Filter Modal Trigger Button ("<Filter /> Bộ lọc") */}
+        {/* Filter Modal Trigger Button (>= sm only) */}
         <button
           type="button"
           onClick={() => setIsFilterModalOpen(true)}
-          className="flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
+          className="hidden sm:flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
         >
           <Filter size={16} className="text-[#b20a1c]" />
           <span>{sc.filter || "Bộ lọc"}</span>
@@ -339,24 +339,40 @@ const ExploreCoursesPage = () => {
       {/* ─── Filter Section (2 Rows, No Parent Border/Card) ─── */}
       <div className="flex flex-col gap-4">
         {/* Row 1: Search Input, Sort Selector, View Mode Toggle */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 w-full">
-          {/* Search Input (rounded-full, no border, white bg) */}
-          <div className="flex-1 min-w-0 max-w-[878px]">
-            <CourseSearchInput
-              value={searchInputValue}
-              onChange={setSearchInputValue}
-              onSearch={handleSearchSubmit}
-              placeholder={
-                sc.searchPlaceholder ||
-                "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."
-              }
-              className="w-full"
-              inputClassName="w-full h-11 pl-5 pr-11 bg-white border-0 outline-none rounded-full text-sm font-normal text-slate-800 placeholder:text-slate-400 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
-            />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full">
+          {/* Left Block: Search Input */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0 max-w-[878px]">
+            {/* Search Input (rounded-full, no border, white bg) */}
+            <div className="flex-1 min-w-0">
+              <CourseSearchInput
+                value={searchInputValue}
+                onChange={setSearchInputValue}
+                onSearch={handleSearchSubmit}
+                placeholder={
+                  sc.searchPlaceholder ||
+                  "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."
+                }
+                className="w-full"
+                inputClassName="w-full h-11 pl-5 pr-11 bg-white border-0 outline-none rounded-full text-sm font-normal text-slate-800 placeholder:text-slate-400 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
+              />
+            </div>
           </div>
 
           {/* Right Controls: Sort Order & View Mode Toggle */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+            {/* Filter Modal Trigger Button (< sm only) */}
+            <button
+              type="button"
+              onClick={() => setIsFilterModalOpen(true)}
+              className="sm:hidden h-11 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer border-0 outline-none shadow-2xs active:scale-95 shrink-0"
+            >
+              <Filter size={15} className="text-white" />
+              <span>{sc.filter || "Bộ lọc"}</span>
+              {hasActiveModalFilters && (
+                <span className="w-2 h-2 rounded-full bg-white" />
+              )}
+            </button>
+
             {/* Sort Order Selector (ghost variant: no bg, border, font normal) */}
             <CourseSelectFilter
               value={sortOrder}
@@ -370,12 +386,16 @@ const ExploreCoursesPage = () => {
             />
 
             {/* View Mode Toggle (white bg, rounded-full container, circular buttons) */}
-            <ViewModeToggle value={viewMode} onChange={setViewMode} />
+            <ViewModeToggle
+              value={viewMode}
+              onChange={setViewMode}
+              className="hidden sm:block"
+            />
           </div>
         </div>
 
-        {/* Row 2: Status multi-select list */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Row 2: Status multi-select list (visible on >= sm screens, on < sm it is available inside the filter dropdown modal) */}
+        <div className="hidden sm:flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-slate-700 mr-1">
             {sc.statusLabel || "Trạng thái:"}
           </span>
