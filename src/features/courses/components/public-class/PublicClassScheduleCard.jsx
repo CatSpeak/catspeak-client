@@ -23,11 +23,15 @@ const DAY_INDEX_MAP = {
 
 const PublicClassScheduleCard = ({ classData }) => {
   const { t, language } = useLanguage()
-  const { userTimeZone, formatScheduleDays, formatScheduleTime, formatDate } =
-    useTimezone()
+  const {
+    userTimeZone,
+    formatScheduleDays,
+    formatScheduleTime,
+    formatDate,
+    getZoneDateStr,
+  } = useTimezone()
   const c = t.courses || {}
   const pc = c.publicClass || {}
-  const cd = c.classDetail || {}
 
   // 1. Identify start date and end date
   const rawStartDate =
@@ -35,10 +39,40 @@ const PublicClassScheduleCard = ({ classData }) => {
   const rawEndDate =
     classData?.endDate || classData?.end_date || classData?.admissionEnd
 
-  // Schedule days list & session times
-  const rawDays = classData?.schedule?.days || []
-  const startTime = classData?.schedule?.startTime
-  const endTime = classData?.schedule?.endTime
+  // Schedule days list & session times (supporting both array and object formats)
+  const rawSchedule = classData?.schedule
+  const rawDays = useMemo(() => {
+    if (Array.isArray(rawSchedule)) {
+      return rawSchedule.map((s) => s.dayOfWeek).filter(Boolean)
+    }
+    return rawSchedule?.days || []
+  }, [rawSchedule])
+
+  const firstSchedule =
+    Array.isArray(rawSchedule) && rawSchedule.length > 0
+      ? rawSchedule[0]
+      : rawSchedule
+  const startTime = firstSchedule?.startTime
+  const endTime = firstSchedule?.endTime
+
+  // Modified Sessions list
+  const modifiedSessions = useMemo(() => {
+    if (!Array.isArray(classData?.modifiedSessions)) return []
+    return classData.modifiedSessions
+  }, [classData?.modifiedSessions])
+
+  // Map modified sessions by localized date string (YYYY-MM-DD)
+  const modifiedSessionsByDate = useMemo(() => {
+    const map = new Map()
+    modifiedSessions.forEach((session) => {
+      if (!session?.date) return
+      const dateKey = getZoneDateStr(session.date, session.startTime)
+      if (dateKey) {
+        map.set(dateKey, session)
+      }
+    })
+    return map
+  }, [modifiedSessions, getZoneDateStr])
 
   // Calculate days of week indices that have class
   const classDayIndices = useMemo(() => {
@@ -151,6 +185,7 @@ const PublicClassScheduleCard = ({ classData }) => {
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = currentMonth.date(d)
       const dayOfWeek = dateObj.day()
+      const dateKey = dateObj.format("YYYY-MM-DD")
 
       const isWithinDuration =
         (!startDayjs ||
@@ -161,12 +196,17 @@ const PublicClassScheduleCard = ({ classData }) => {
           dateObj.isBefore(endDayjs, "day"))
 
       const isClassDay = classDayIndices.has(dayOfWeek) && isWithinDuration
+      const modifiedSession = modifiedSessionsByDate.get(dateKey)
+      const isModifiedSession = Boolean(modifiedSession)
 
       arr.push({
         day: d,
         isCurrentMonth: true,
         date: dateObj,
+        dateKey,
         isClassDay,
+        isModifiedSession,
+        modifiedSession,
       })
     }
     // Trailing days to fill 35 or 42 slots
@@ -188,6 +228,7 @@ const PublicClassScheduleCard = ({ classData }) => {
     classDayIndices,
     startDayjs,
     endDayjs,
+    modifiedSessionsByDate,
   ])
 
   // Localized Month string
@@ -214,11 +255,18 @@ const PublicClassScheduleCard = ({ classData }) => {
   // Schedule text summary
   const defaultScheduleText = pc.flexibleSchedule || "Lịch linh hoạt"
   const scheduleDaysText = formatScheduleDays(
-    classData?.schedule?.days,
+    rawDays,
     defaultScheduleText,
     " - ",
-    classData?.schedule?.startTime,
+    startTime,
   )
+
+  const scheduleDaysWithModifiedText =
+    modifiedSessions.length > 0
+      ? (pc.scheduleWithModified || "{{schedule}} và {{count}} buổi ngoại lệ")
+          .replace("{{schedule}}", scheduleDaysText)
+          .replace("{{count}}", modifiedSessions.length)
+      : scheduleDaysText
 
   const timeFormatted =
     startTime && endTime
@@ -340,23 +388,39 @@ const PublicClassScheduleCard = ({ classData }) => {
           const isToday =
             item.day === dayjs().date() && currentMonth.isSame(dayjs(), "month")
 
+          let badgeClass = "text-slate-700"
+          let titleText = ""
+
+          if (item.isModifiedSession) {
+            const mSession = item.modifiedSession
+            const mTime =
+              mSession?.startTime && mSession?.endTime
+                ? `${formatScheduleTime(mSession.startTime, mSession.date)} - ${formatScheduleTime(mSession.endTime, mSession.date)}`
+                : mSession?.startTime
+                  ? formatScheduleTime(mSession.startTime, mSession.date)
+                  : ""
+            titleText = `${pc.modifiedSession || "Buổi ngoại lệ"}${mTime ? `: ${mTime}` : ""}`
+            badgeClass = isToday
+              ? "bg-amber-100 text-amber-900 border border-slate-900 font-bold"
+              : "bg-amber-100 text-amber-900 font-bold"
+          } else if (item.isClassDay) {
+            titleText = pc.classDayLegend || "Ngày có buổi học"
+            badgeClass = isToday
+              ? "bg-rose-50 text-[#b20a1c] font-bold border border-slate-900"
+              : "bg-rose-50 text-[#b20a1c] font-bold"
+          } else if (isToday) {
+            titleText = pc.todayLegend || "Hôm nay"
+            badgeClass = "border border-slate-900 text-slate-900 font-bold"
+          }
+
           return (
             <div
               key={`day-${idx}`}
               className="h-8 flex items-center justify-center relative"
             >
               <div
-                className={`
-                  w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold select-none
-                  ${
-                    item.isClassDay
-                      ? "bg-rose-50 text-[#b20a1c] font-bold"
-                      : isToday
-                        ? "border border-slate-900 text-slate-900 font-bold"
-                        : "text-slate-700"
-                  }
-                `}
-                title={item.isClassDay ? "Ngày có buổi học" : ""}
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold select-none ${badgeClass}`}
+                title={titleText}
               >
                 {item.day}
               </div>
@@ -375,7 +439,7 @@ const PublicClassScheduleCard = ({ classData }) => {
         )}
         <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
           <CalendarIcon size={14} className="text-[#b20a1c] shrink-0" />
-          <span>{scheduleDaysText}</span>
+          <span>{scheduleDaysWithModifiedText}</span>
         </div>
         {timeFormatted && (
           <div className="flex items-center gap-2 text-xs font-medium text-slate-700">
@@ -386,11 +450,17 @@ const PublicClassScheduleCard = ({ classData }) => {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-[11px] text-slate-500 font-medium pt-1">
+      <div className="flex items-center gap-3.5 text-[11px] text-slate-500 font-medium pt-1 flex-wrap">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
           <span>{pc.classDayLegend || "Ngày học"}</span>
         </div>
+        {modifiedSessions.length > 0 && (
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span>{pc.modifiedSessionLegend || "Buổi ngoại lệ"}</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full border border-slate-900" />
           <span>{pc.todayLegend || "Hôm nay"}</span>
