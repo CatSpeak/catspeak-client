@@ -9,9 +9,7 @@ import {
   Filter,
 } from "lucide-react"
 
-import {
-  useGetExploreCoursesQuery
-} from "@/store/api/coursesApi"
+import { useGetExploreCoursesQuery } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
@@ -29,6 +27,7 @@ const PAGE_SIZE = 24
 
 const ExploreCoursesPage = () => {
   const { t } = useLanguage()
+  const communityLanguage = localStorage.getItem("communityLanguage") || "en"
   const navigate = useNavigate()
   const c = t.courses || {}
   const sc = c.student || {}
@@ -37,7 +36,6 @@ const ExploreCoursesPage = () => {
   // Filter States
   const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
   const [selectedStatuses, setSelectedStatuses] = useState([]) // [] means all, or array of selected status values
-  const [appliedLanguage, setAppliedLanguage] = useState("all") // "all" | "ENGLISH" | "CHINESE"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [minPriceInput, setMinPriceInput] = useState("")
@@ -63,25 +61,37 @@ const ExploreCoursesPage = () => {
   const enrollmentStatusOptions = [
     { value: "all", label: sc.enrollmentStatusAll || "Tất cả" },
     { value: "open", label: sc.enrollmentStatusOpen || "Đang mở đăng ký" },
-    { value: "upcoming", label: sc.enrollmentStatusUpcoming || "Chưa mở đăng ký" },
+    {
+      value: "upcoming",
+      label: sc.enrollmentStatusUpcoming || "Chưa mở đăng ký",
+    },
     { value: "closed", label: sc.enrollmentStatusClosed || "Đã đóng đăng ký" },
   ]
 
   const categoryTabs = [
     { value: "all", label: sc.tabAllCatalog || "Tất cả", icon: Compass },
     { value: "courses", label: sc.tabCourses || "Khóa học", icon: BookOpen },
-    { value: "classes", label: sc.tabClasses || "Lớp học", icon: GraduationCap },
+    {
+      value: "classes",
+      label: sc.tabClasses || "Lớp học",
+      icon: GraduationCap,
+    },
   ]
 
   // Event 1: Search submitted via Enter or Search button click
   const handleSearchSubmit = (val) => {
-    setAppliedSearchQuery(typeof val === "string" ? val.trim() : searchInputValue.trim())
+    setAppliedSearchQuery(
+      typeof val === "string" ? val.trim() : searchInputValue.trim(),
+    )
     setCurrentPage(1)
   }
 
   // Event 2: Apply filters from Modal
-  const handleApplyModalFilters = ({ language, enrollmentStatus, minPrice, maxPrice }) => {
-    setAppliedLanguage(language)
+  const handleApplyModalFilters = ({
+    enrollmentStatus,
+    minPrice,
+    maxPrice,
+  }) => {
     setMinPriceInput(minPrice)
     setMaxPriceInput(maxPrice)
     if (enrollmentStatus !== "all") {
@@ -115,8 +125,14 @@ const ExploreCoursesPage = () => {
   }
 
   // Validate price range inputs
-  const parsedMin = minPriceInput !== "" && !isNaN(Number(minPriceInput)) ? Number(minPriceInput) : undefined
-  const parsedMax = maxPriceInput !== "" && !isNaN(Number(maxPriceInput)) ? Number(maxPriceInput) : undefined
+  const parsedMin =
+    minPriceInput !== "" && !isNaN(Number(minPriceInput))
+      ? Number(minPriceInput)
+      : undefined
+  const parsedMax =
+    maxPriceInput !== "" && !isNaN(Number(maxPriceInput))
+      ? Number(maxPriceInput)
+      : undefined
 
   let activeMinPrice = parsedMin
   let activeMaxPrice = parsedMax
@@ -135,11 +151,11 @@ const ExploreCoursesPage = () => {
   }, [selectedStatuses])
 
   const resolvedLanguage = useMemo(() => {
-    if (appliedLanguage && appliedLanguage !== "all") {
-      return appliedLanguage.toLowerCase()
-    }
-    return undefined
-  }, [appliedLanguage])
+    const code = (communityLanguage || "en").toLowerCase()
+    if (code === "zh" || code === "chinese") return "chinese"
+    if (code === "en" || code === "english") return "english"
+    return "english"
+  }, [communityLanguage])
 
   // Explore Courses API Query
   const exploreCatalogQuery = useGetExploreCoursesQuery({
@@ -157,6 +173,11 @@ const ExploreCoursesPage = () => {
   const isLoading = exploreCatalogQuery.isLoading
   const isFetching = exploreCatalogQuery.isFetching
   const error = exploreCatalogQuery.error
+
+  // Reset page when language changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [resolvedLanguage])
 
   // Sync / Accumulate data for Infinite Scroll
   useEffect(() => {
@@ -222,7 +243,6 @@ const ExploreCoursesPage = () => {
     setSearchInputValue("")
     setAppliedSearchQuery("")
     setSelectedStatuses([])
-    setAppliedLanguage("all")
     setContentType("all")
     setSortOrder("default")
     setMinPriceInput("")
@@ -249,25 +269,24 @@ const ExploreCoursesPage = () => {
   }
 
   const hasPriceFilter = minPriceInput !== "" || maxPriceInput !== ""
-  const hasActiveModalFilters =
-    appliedLanguage !== "all"
-    || hasPriceFilter
-    || selectedStatuses.length > 0
+  const hasActiveModalFilters = hasPriceFilter || selectedStatuses.length > 0
   const hasActiveFilters =
-    appliedSearchQuery !== ""
-    || contentType !== "all"
-    || sortOrder !== "default"
-    || selectedStatuses.length > 0
-    || appliedLanguage !== "all"
-    || hasPriceFilter
+    appliedSearchQuery !== "" ||
+    contentType !== "all" ||
+    sortOrder !== "default" ||
+    selectedStatuses.length > 0 ||
+    hasPriceFilter
 
-  const modalEnrollmentStatus = selectedStatuses.length === 1 ? selectedStatuses[0] : "all"
+  const modalEnrollmentStatus =
+    selectedStatuses.length === 1 ? selectedStatuses[0] : "all"
 
   // Check if we are loading initial page or after filter changes
   const isInitialLoading = (isLoading || isFetching) && currentPage === 1
 
   return (
-    <div className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}>
+    <div
+      className={`flex flex-col gap-6 text-[#2e2e2e] ${isWorkspace ? "" : "p-4 sm:p-6"}`}
+    >
       {/* ─── Header & Subtitle ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -276,7 +295,8 @@ const ExploreCoursesPage = () => {
             <span>{dict.exploreCourses || "Explore Courses"}</span>
           </h1>
           <p className="text-sm text-slate-500 font-medium mt-1">
-            {sc.exploreCoursesSubtitle || "Discover and enroll in top language courses and standalone classes to start your learning journey."}
+            {sc.exploreCoursesSubtitle ||
+              "Discover and enroll in top language courses and standalone classes to start your learning journey."}
           </p>
         </div>
       </div>
@@ -310,7 +330,6 @@ const ExploreCoursesPage = () => {
       <ExploreCoursesFilterModal
         open={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
-        initialLanguage={appliedLanguage}
         initialEnrollmentStatus={modalEnrollmentStatus}
         initialMinPrice={minPriceInput}
         initialMaxPrice={maxPriceInput}
@@ -327,7 +346,10 @@ const ExploreCoursesPage = () => {
               value={searchInputValue}
               onChange={setSearchInputValue}
               onSearch={handleSearchSubmit}
-              placeholder={sc.searchPlaceholder || "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."}
+              placeholder={
+                sc.searchPlaceholder ||
+                "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."
+              }
               className="w-full"
               inputClassName="w-full h-11 pl-5 pr-11 bg-white border-0 outline-none rounded-full text-sm font-normal text-slate-800 placeholder:text-slate-400 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
             />
@@ -431,7 +453,8 @@ const ExploreCoursesPage = () => {
               {sc.loadErrorTitle || "Unable to load data"}
             </h3>
             <p className="max-w-sm text-sm font-semibold text-red-700">
-              {sc.loadErrorDescription || "Check your connection and try again."}
+              {sc.loadErrorDescription ||
+                "Check your connection and try again."}
             </p>
             <button
               type="button"
@@ -450,14 +473,22 @@ const ExploreCoursesPage = () => {
             role="status"
             className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 bg-white p-8 text-center shadow-xs"
           >
-            <Compass size={52} aria-hidden="true" className="text-slate-300 stroke-[1.2]" />
+            <Compass
+              size={52}
+              aria-hidden="true"
+              className="text-slate-300 stroke-[1.2]"
+            />
             <h3 className="text-lg font-extrabold text-slate-800">
-              {hasActiveFilters ? (sc.noCoursesFound || "No items found") : (sc.noAvailableCourses || "No offerings available")}
+              {hasActiveFilters
+                ? sc.noCoursesFound || "No items found"
+                : sc.noAvailableCourses || "No offerings available"}
             </h3>
             <p className="max-w-xs text-sm font-semibold text-slate-500">
               {hasActiveFilters
-                ? (sc.noCoursesFoundDesc || "Try clearing your search query or price filter.")
-                : (sc.noAvailableCoursesDesc || "There are no public offerings available right now.")}
+                ? sc.noCoursesFoundDesc ||
+                  "Try clearing your search query or price filter."
+                : sc.noAvailableCoursesDesc ||
+                  "There are no public offerings available right now."}
             </p>
             {hasActiveFilters && (
               <button

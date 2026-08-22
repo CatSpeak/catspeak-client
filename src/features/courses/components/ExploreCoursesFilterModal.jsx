@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { X, SlidersHorizontal, Sparkles, Globe, Activity, ChevronDown, Check } from "lucide-react"
+import { X, SlidersHorizontal, Sparkles, Activity, ChevronDown, Check } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 
 const ExploreCoursesFilterModal = ({
   open,
   onClose,
-  initialLanguage = "all",
   initialEnrollmentStatus = "all",
   initialMinPrice = "",
   initialMaxPrice = "",
@@ -17,27 +16,19 @@ const ExploreCoursesFilterModal = ({
   const c = t.courses || {}
   const sc = c.student || {}
 
-  const [localLanguage, setLocalLanguage] = useState(initialLanguage)
   const [localEnrollmentStatus, setLocalEnrollmentStatus] = useState(initialEnrollmentStatus)
   const [localMinPrice, setLocalMinPrice] = useState(initialMinPrice)
   const [localMaxPrice, setLocalMaxPrice] = useState(initialMaxPrice)
 
   useEffect(() => {
     if (open) {
-      setLocalLanguage(initialLanguage)
       setLocalEnrollmentStatus(initialEnrollmentStatus)
       setLocalMinPrice(initialMinPrice)
       setLocalMaxPrice(initialMaxPrice)
     }
-  }, [open, initialLanguage, initialEnrollmentStatus, initialMinPrice, initialMaxPrice])
+  }, [open, initialEnrollmentStatus, initialMinPrice, initialMaxPrice])
 
   if (!open) return null
-
-  const languageOptions = [
-    { value: "all", label: sc.allLanguages || "Tất cả ngôn ngữ" },
-    { value: "ENGLISH", label: sc.languages?.English || "Tiếng Anh" },
-    { value: "CHINESE", label: sc.languages?.Chinese || "Tiếng Trung" },
-  ]
 
   const enrollmentStatusOptions = [
     { value: "all", label: sc.enrollmentStatusAll || "Tất cả" },
@@ -46,7 +37,6 @@ const ExploreCoursesFilterModal = ({
     { value: "closed", label: sc.enrollmentStatusClosed || "Đã đóng đăng ký" },
   ]
 
-  const selectedLanguageObj = languageOptions.find((o) => o.value === localLanguage) || languageOptions[0]
   const selectedStatusObj = enrollmentStatusOptions.find((o) => o.value === localEnrollmentStatus) || enrollmentStatusOptions[0]
 
   const handlePricePreset = (minVal, maxVal) => {
@@ -55,7 +45,6 @@ const ExploreCoursesFilterModal = ({
   }
 
   const handleClear = () => {
-    setLocalLanguage("all")
     setLocalEnrollmentStatus("all")
     setLocalMinPrice("")
     setLocalMaxPrice("")
@@ -63,7 +52,6 @@ const ExploreCoursesFilterModal = ({
 
   const handleApply = () => {
     onApply({
-      language: localLanguage,
       enrollmentStatus: localEnrollmentStatus,
       minPrice: localMinPrice,
       maxPrice: localMaxPrice,
@@ -72,8 +60,7 @@ const ExploreCoursesFilterModal = ({
   }
 
   const hasActiveFilters =
-    localLanguage !== "all"
-    || localEnrollmentStatus !== "all"
+    localEnrollmentStatus !== "all"
     || localMinPrice !== ""
     || localMaxPrice !== ""
 
@@ -111,54 +98,6 @@ const ExploreCoursesFilterModal = ({
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Language Filter */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Globe size={16} className="text-[#b20a1c]" />
-              <label className="text-sm font-bold text-slate-900">
-                {sc.languageLabel || "Ngôn ngữ"}
-              </label>
-            </div>
-            <Dropdown
-              options={languageOptions}
-              value={localLanguage}
-              onChange={(val) => setLocalLanguage(val)}
-              className="w-full"
-              dropdownClassName="w-full min-w-full shadow-xl border border-border/80 rounded-2xl p-1.5 z-50 bg-white"
-              activeColor="#b20a1c"
-              renderOption={(option, isSelected) => (
-                <div
-                  className={`w-full py-2.5 px-3 text-xs rounded-xl flex items-center justify-between transition-all duration-150 cursor-pointer ${
-                    isSelected
-                      ? "bg-rose-50 text-[#b20a1c] font-semibold"
-                      : "text-slate-700 hover:bg-slate-50 font-normal"
-                  }`}
-                >
-                  <span>{option.label}</span>
-                  {isSelected && <Check size={14} className="text-[#b20a1c]" />}
-                </div>
-              )}
-              trigger={(isOpen, _, toggle) => (
-                <button
-                  type="button"
-                  onClick={toggle}
-                  className={`w-full h-11 px-4 rounded-2xl border text-sm font-normal flex items-center justify-between transition-all cursor-pointer outline-none ${
-                    isOpen
-                      ? "border-[#b20a1c] bg-rose-50/40 text-slate-900 ring-2 ring-rose-100"
-                      : "border-border bg-slate-50 hover:bg-slate-100/80 text-slate-800"
-                  }`}
-                >
-                  <span>{selectedLanguageObj?.label}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-200 text-slate-400 ${
-                      isOpen ? "rotate-180 text-[#b20a1c]" : ""
-                    }`}
-                  />
-                </button>
-              )}
-            />
-          </div>
 
           {/* Enrollment Status Filter */}
           <div>
