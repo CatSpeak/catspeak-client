@@ -121,9 +121,18 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
       })
       dispatch(roomsApi.util.invalidateTags([{ type: "Breakout" }]))
       if (parentSessionId && subSessionId === parentSessionId) {
+        toast.success(
+          t?.rooms?.breakoutRooms?.returnToMainSuccess ??
+            "Đang quay trở lại phòng chính...",
+        )
         dispatch(exitBreakout())
         dispatch(updateLivekitToken(token))
       } else {
+        toast.success(
+          t?.rooms?.breakoutRooms?.joinedRoomSuccess
+            ? `${t.rooms.breakoutRooms.joinedRoomSuccess} ${roomName || ""}`
+            : `Đang di chuyển vào ${roomName || "phòng thảo luận"}...`,
+        )
         dispatch(enterBreakout({ subSessionId, roomName, token }))
       }
     },
@@ -136,6 +145,10 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
         parentSessionIdValue,
         roomName,
       })
+      toast.success(
+        t?.rooms?.breakoutRooms?.roomsClosedReturnMain ??
+          "Phòng thảo luận đã kết thúc. Đang quay trở lại phòng chính...",
+      )
       dispatch(roomsApi.util.invalidateTags([{ type: "Breakout" }]))
       dispatch(exitBreakout())
       if (token) {
@@ -164,7 +177,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
         }
       }
     },
-    [dispatch, roomId, callInfo?.roomId, callInfo?.roomData?.id, callInfo?.sessionId, parentSessionId],
+    [dispatch, roomId, callInfo?.roomId, callInfo?.roomData?.id, callInfo?.sessionId, parentSessionId, t],
   )
 
   const handleBreakoutStatusChanged = useCallback(
@@ -218,6 +231,27 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   const handleBroadcastNotification = useCallback(
     (parentSessionIdValue, message) => {
       console.info("[SignalR] BroadcastNotification received:", message)
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext
+        if (AudioContext) {
+          const ctx = new AudioContext()
+          const now = ctx.currentTime
+          const osc = ctx.createOscillator()
+          const gain = ctx.createGain()
+          osc.type = "sine"
+          osc.frequency.setValueAtTime(587.33, now) // D5
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.15) // A5
+          gain.gain.setValueAtTime(0.2, now)
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4)
+          osc.connect(gain)
+          gain.connect(ctx.destination)
+          osc.start(now)
+          osc.stop(now + 0.4)
+        }
+      } catch (e) {
+        /* ignore audio restriction */
+      }
+
       const title =
         t?.rooms?.breakoutRooms?.broadcastToastTitle ?? "Thông báo từ Host"
       toast.custom(
@@ -225,17 +259,17 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
           <div
             className={`${
               toastInstance.visible ? "animate-enter" : "animate-leave"
-            } flex items-center gap-4 w-[90vw] max-w-[480px] rounded-xl bg-white p-3 shadow-faq-card`}
+            } flex items-center gap-4 w-[90vw] max-w-[480px] rounded-xl bg-white p-3.5 shadow-lg border border-amber-200`}
           >
-            <div className="bg-[#FEF5C7] border rounded-full w-10 h-10 flex items-center justify-center">
+            <div className="bg-[#FEF5C7] border border-amber-300 rounded-full w-10 h-10 flex items-center justify-center shrink-0">
               <Megaphone color="#F4AB1B" size={20} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium md:text-lg text-base text-[#F4AB1B] leading-tight">
+              <p className="font-semibold text-base text-amber-600 leading-tight">
                 {title}
               </p>
-              <p className="md:text-base text-sm text-[#7B7979] mt-0.5 break-words">
-                &ldquo;{message}&rdquo;
+              <p className="text-sm text-slate-700 mt-1 break-words font-medium">
+                {message}
               </p>
             </div>
             <IconButton
@@ -247,7 +281,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
             </IconButton>
           </div>
         ),
-        { duration: 10000 },
+        { duration: 12000, id: `broadcast-${Date.now()}` },
       )
     },
     [t],
