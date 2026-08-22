@@ -619,6 +619,8 @@ export default {
     toastVerifyProfile: "Please verify your profile identity to complete the transaction!",
     toastScheduleConflict: "Schedule conflict with class {{class}} ({{start}} - {{end}})!",
     toastScheduleConflictDefault: "Schedule conflict detected with your existing classes! Please select a different time slot or day.",
+    toastStartDateMismatchFirstSession: "Class start date ({{startDate}}) does not match the first scheduled session date ({{firstSessionDate}}). Please choose a start date that falls on one of the scheduled weekdays.",
+    toastStartDateMismatchFirstSessionDefault: "Class start date does not match the first scheduled session date. Please choose a start date that falls on one of the scheduled weekdays.",
     toastAdmissionStartPast: "Admission start date must not be in the past!",
     toastAdmissionEndPast: "Admission end date must not be in the past!",
     toastStartPast: "Class start date must be at least 1 day after enrollment end date!",

@@ -619,6 +619,8 @@ export default {
     toastVerifyProfile: "请先完成身份验证以继续进行交易！",
     toastScheduleConflict: "时间冲突：与班级 {{class}} ({{start}} - {{end}})!",
     toastScheduleConflictDefault: "与您的其他班级课程时间冲突！请选择其他上课时间。",
+    toastStartDateMismatchFirstSession: "开课日期（{{startDate}}）与首次排课日期（{{firstSessionDate}}）不一致。请选择符合排课周几的开课日期！",
+    toastStartDateMismatchFirstSessionDefault: "开课日期与首次排课日期不一致。请选择符合排课周几的开课日期！",
     toastAdmissionStartPast: "招生开始日期必须从明天开始！",
     toastAdmissionEndPast: "招生结束日期必须从明天开始！",
     toastStartPast: "开课日期必须从明天开始！",
