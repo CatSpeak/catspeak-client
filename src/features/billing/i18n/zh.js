@@ -199,6 +199,9 @@ export default {
       scheduleConflictDesc: "此课程的时间与您当前注册的课程冲突：",
       confirmEnroll: "继续注册",
       cancel: "取消",
+      removeVoucherTitle: "删除优惠码？",
+      removeVoucherDesc: "您确定要删除优惠码 {{code}} 吗？总付款金额将恢复为 {{totalAmount}}。您将失去 {{discountAmount}} 的折扣优惠。",
+      removeVoucherConfirm: "删除优惠码",
 
       // VoucherSection
       searchVoucher: "搜索优惠码...",

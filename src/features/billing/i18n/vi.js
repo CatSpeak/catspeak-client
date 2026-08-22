@@ -199,6 +199,9 @@ export default {
       scheduleConflictDesc: "Lịch học của lớp này trùng với lớp bạn đang học:",
       confirmEnroll: "Vẫn đăng ký",
       cancel: "Hủy",
+      removeVoucherTitle: "Xóa mã giảm giá?",
+      removeVoucherDesc: "Bạn có chắc muốn xóa mã {{code}}? Tổng thanh toán sẽ trở về {{totalAmount}}. Bạn sẽ mất ưu đãi giảm {{discountAmount}}.",
+      removeVoucherConfirm: "Xóa mã",
 
       // VoucherSection
       searchVoucher: "Tìm mã...",
