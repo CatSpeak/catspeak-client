@@ -1,8 +1,10 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
+const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
   const secT = t.courses?.analytics?.sections || {}
   const learnersStr = secT.learners || "học viên"
@@ -37,7 +39,14 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
             return (
               <div
                 key={row.className || idx}
-                className="grid grid-cols-1 md:grid-cols-[36px_minmax(200px,1.25fr)_minmax(220px,1.6fr)] gap-3 items-center py-3 px-2 hover:bg-[#fffafb] transition-colors"
+                onClick={() => {
+                  if (onRowClick) {
+                    onRowClick(row)
+                  } else {
+                    navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId || row.className || "class-b2-sang")}`)
+                  }
+                }}
+                className="grid grid-cols-1 md:grid-cols-[36px_minmax(200px,1.25fr)_minmax(220px,1.6fr)] gap-3 items-center py-3 px-2 hover:bg-[#fffafb] transition-colors cursor-pointer group"
               >
                 {/* Rank number */}
                 <span className="w-6 h-6 rounded-full bg-[#fff0d7] text-[#9a5a00] font-bold flex items-center justify-center text-xs">
@@ -46,7 +55,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
 
                 {/* Class details */}
                 <div className="flex flex-col min-w-0">
-                  <strong className="text-xs font-bold text-gray-900 truncate">
+                  <strong className="text-xs font-bold text-gray-900 group-hover:text-[#990011] transition-colors truncate">
                     {row.className}
                   </strong>
                   <small className="text-[11px] text-gray-500 truncate">

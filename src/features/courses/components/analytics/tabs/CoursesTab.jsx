@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsDataTable from "../AnalyticsDataTable"
@@ -12,6 +13,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const CoursesTab = ({ queryParams = {} }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
@@ -136,7 +138,19 @@ const CoursesTab = ({ queryParams = {} }) => {
         <h2 className="text-base font-bold text-gray-900 mb-3">{secT.independentClasses || "Hiệu quả lớp riêng"}</h2>
         <AnalyticsDataTable
           columns={[
-            { key: "className", label: colT.class || "Lớp học" },
+            {
+              key: "className",
+              label: colT.class || "Lớp học",
+              render: (val, row) => (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId || row.className || "class-b2-sang")}`)}
+                  className="font-bold text-left text-gray-900 hover:text-[#990011] transition-colors cursor-pointer hover:underline"
+                >
+                  {val}
+                </button>
+              ),
+            },
             { key: "students", label: colT.totalStudents || "Học viên", align: "right" },
             { key: "gross", label: colT.grossRevenue || "Doanh thu", align: "right" },
             { key: "fill", label: colT.fillRate || "Lấp đầy", align: "right" },

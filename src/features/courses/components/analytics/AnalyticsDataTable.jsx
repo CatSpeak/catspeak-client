@@ -125,7 +125,7 @@ const AnalyticsDataTable = ({
                       className={`p-2.5 text-gray-800 ${col.align === "right" ? "text-right" : "text-left"
                         }`}
                     >
-                      {row[col.key]}
+                      {col.render ? col.render(row[col.key], row) : row[col.key]}
                     </td>
                   ))}
                 </tr>
