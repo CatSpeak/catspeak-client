@@ -2092,6 +2092,8 @@ export default {
     jumpToday: "Hôm nay",
     jumpStart: "Bắt đầu",
     jumpEnd: "Kết thúc",
+    classDayLegend: "Ngày học",
+    todayLegend: "Hôm nay",
     spotsLeft: "{{remaining}}/{{capacity}} chỗ",
     spotsSub: "Số người trong 1 lớp.",
     instructorTitle: "Thông tin giảng viên",

@@ -35,7 +35,7 @@ const PublicClassSidebarCTA = ({
   ]
 
   return (
-    <div className="bg-white border border-border rounded-3xl p-6 flex flex-col gap-5 shadow-xs">
+    <div className="bg-white border border-border rounded-3xl p-5 flex flex-col gap-4 shadow-xs">
       {/* Thumbnail */}
       <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-100 border border-slate-100">
         <img
