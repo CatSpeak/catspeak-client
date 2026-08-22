@@ -133,7 +133,7 @@ const StudentLessonRow = ({
     } else if (displayData.type === "assignment") {
       onSelectLesson(item, "assignment")
     } else if (displayData.type === "quiz") {
-      navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
+      onSelectLesson(item, "quiz")
     } else if (displayData.type === "material") {
       onSelectLesson(item, "material")
     }

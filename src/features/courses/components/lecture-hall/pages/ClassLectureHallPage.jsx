@@ -23,6 +23,7 @@ import {
 import SectionCard from "../components/curriculum/SectionCard"
 import MaterialDetailView from "../components/curriculum/MaterialDetailView"
 import AssignmentDetailView from "../components/curriculum/AssignmentDetailView"
+import QuizDetailView from "../components/curriculum/QuizDetailView"
 import LinkDetailView from "../components/curriculum/LinkDetailView"
 import CreateBulletinBoardModal from "../components/modals/CreateBulletinBoardModal"
 import AddMaterialModal from "../components/modals/AddMaterialModal"
@@ -634,6 +635,13 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
                   onBack={() => setActiveDetailView(null)}
                 />
               )}
+              {activeDetailView.type === 'quiz' && (
+                <QuizDetailView
+                  sectionData={activeDetailView.section}
+                  itemData={activeDetailView.item}
+                  onBack={() => setActiveDetailView(null)}
+                />
+              )}
             </div>
           ) : (
             <>
@@ -665,7 +673,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
                       onToggleItemVisibility={handleToggleItemVisibility}
                       onDeleteItem={handleDeleteItem}
                       onSelectLesson={(item, type) => {
-                        if (type === 'link' || type === 'material' || type === 'assignment') {
+                        if (type === 'link' || type === 'material' || type === 'assignment' || type === 'quiz') {
                           setActiveDetailView({ type, item, section });
                         }
                       }}
