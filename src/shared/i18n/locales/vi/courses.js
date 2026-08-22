@@ -1157,6 +1157,8 @@ export default {
     sortNewest: "Sắp xếp: Mới nhất",
     sortOldest: "Sắp xếp: Cũ nhất",
     badgePublished: "ĐÃ ĐĂNG",
+    badgeOpen: "ĐANG MỞ",
+    badgeUpcomingOpen: "SẮP MỞ",
     badgeUpcoming: "SẮP ĐẾN HẠN",
     badgeDraft: "NHÁP",
     badgeClosed: "ĐÃ ĐÓNG",
