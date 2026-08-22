@@ -153,6 +153,7 @@ export const DesktopSubNavContent = ({ item, onItemClick }) => {
             "analytics",
             "schedule",
             "teachingTasks",
+            "manageMaterials",
           ]
           if (teacherTabs.includes(sub.key) && !isTeacher) return false
 

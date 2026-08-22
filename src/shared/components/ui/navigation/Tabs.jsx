@@ -21,9 +21,14 @@ const Tabs = memo(
     inactiveClassName = "text-[#606060]",
     fullWidth = true,
   }) => {
+    const isResponsive = fullWidth === "responsive"
+    const isFull = fullWidth === true
+
     return (
       <div
-        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${!fullWidth ? 'gap-0 sm:gap-6' : ''} ${className}`}
+        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${
+          !isFull && !isResponsive ? "gap-1 sm:gap-2" : ""
+        } ${className}`}
       >
         {tabs.map((tab) => {
           const tabKey = tab.id ?? tab.value
@@ -33,13 +38,18 @@ const Tabs = memo(
           return (
             <button
               key={tabKey}
+              type="button"
               onClick={() => onChange(tabKey)}
-              className={`h-12 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${
-                fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
+              className={`h-11 shrink-0 group relative flex items-center justify-center transition-colors cursor-pointer ${
+                isResponsive
+                  ? "flex-1 sm:flex-initial px-3 sm:px-4 min-w-fit"
+                  : isFull
+                    ? "flex-1 min-w-fit sm:min-w-[120px]"
+                    : "flex-none px-2.5 sm:px-3.5"
               }`}
             >
               <div
-                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${
+                className={`relative h-full flex items-center justify-center gap-2 text-sm transition-colors w-full px-2 ${
                   isActive ? activeClassName : inactiveClassName
                 }`}
               >

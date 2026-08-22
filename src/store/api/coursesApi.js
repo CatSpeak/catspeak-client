@@ -136,12 +136,16 @@ const transformCourse = (course) => {
     { nonNegative: true },
   )
   const teacher = transformPerson(course.teacher)
-  const priceRange = isRecord(course.priceRange)
-    ? {
-      min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
-      max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
-    }
-    : null
+  const minPrice = toNullableNumber(course.minPrice ?? course.priceRange?.min, { nonNegative: true })
+  const maxPrice = toNullableNumber(course.maxPrice ?? course.priceRange?.max, { nonNegative: true })
+  const priceRange = (minPrice !== null || maxPrice !== null)
+    ? { min: minPrice, max: maxPrice }
+    : (isRecord(course.priceRange)
+      ? {
+        min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
+        max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
+      }
+      : null)
 
   return {
     ...course,
@@ -162,6 +166,8 @@ const transformCourse = (course) => {
     status: toText(course.status),
     startDate: toText(course.startDate),
     endDate: toText(course.endDate),
+    minPrice,
+    maxPrice,
     priceRange,
     thumbnailUrl: toText(course.thumbnailUrl),
     createdAt: toText(course.createdAt),
@@ -396,9 +402,18 @@ const transformPaginatedResponse = (response, itemTransformer) => {
     Math.max(1, Math.ceil(totalItems / pageSize)),
   )
 
+  let adjustedTotalItems = totalItems
+  let adjustedTotalPages = totalPages
+
+  // Guard against backend bug where totalItems/totalPages does not account for status/search filter:
+  if (page === 1 && rawItems.length < pageSize) {
+    adjustedTotalItems = rawItems.length
+    adjustedTotalPages = 1
+  }
+
   return {
     data,
-    pagination: { page, pageSize, totalItems, totalPages },
+    pagination: { page, pageSize, totalItems: adjustedTotalItems, totalPages: adjustedTotalPages },
   }
 }
 
@@ -673,7 +688,11 @@ export const coursesApi = baseApi.injectEndpoints({
             params?.sort && params.sort !== "default" ? params.sort : undefined,
           language:
             params?.language && params.language !== "all"
-              ? params.language.toLowerCase()
+              ? params.language.toLowerCase() === "zh"
+                ? "chinese"
+                : params.language.toLowerCase() === "en"
+                  ? "english"
+                  : params.language.toLowerCase()
               : undefined,
           minPrice:
             params?.minPrice != null && !isNaN(Number(params.minPrice))

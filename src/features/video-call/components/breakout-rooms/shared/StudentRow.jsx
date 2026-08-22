@@ -149,4 +149,4 @@ const StudentRow = ({
   )
 }
 
-export default StudentRow
+export default React.memo(StudentRow)

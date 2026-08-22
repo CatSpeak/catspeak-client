@@ -126,7 +126,8 @@ const Dropdown = ({
         const flipUp = spaceBelow < 300 && spaceAbove > spaceBelow
 
         // Check horizontal clipping (assume ~260px width default)
-        const forceAlignRight = rect.left + 260 > window.innerWidth
+        const forceAlignRight = rect.left + 260 > window.innerWidth && rect.right >= 260
+        const forceAlignLeft = rect.right < 260 || rect.left < 50
 
         setPortalCoords((prev) => {
           const newTop = rect.top + window.scrollY
@@ -139,7 +140,8 @@ const Dropdown = ({
             prev.width === rect.width &&
             prev.height === rect.height &&
             prev.flipUp === flipUp &&
-            prev.forceAlignRight === forceAlignRight
+            prev.forceAlignRight === forceAlignRight &&
+            prev.forceAlignLeft === forceAlignLeft
           ) {
             return prev
           }
@@ -151,6 +153,7 @@ const Dropdown = ({
             height: rect.height,
             flipUp,
             forceAlignRight,
+            forceAlignLeft,
           }
         })
       }
@@ -325,13 +328,15 @@ const Dropdown = ({
     </PillButton>
   )
 
-  const alignClass = portalCoords?.forceAlignRight
-    ? "right-0 origin-top-right"
-    : align === "right"
+  const alignClass = portalCoords?.forceAlignLeft
+    ? "left-0 origin-top-left"
+    : portalCoords?.forceAlignRight
       ? "right-0 origin-top-right"
-      : align === "center"
-        ? "-translate-x-1/2 left-1/2 origin-top"
-        : "left-0 origin-top-left"
+      : align === "right"
+        ? "right-0 origin-top-right"
+        : align === "center"
+          ? "-translate-x-1/2 left-1/2 origin-top"
+          : "left-0 origin-top-left"
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
@@ -418,6 +423,15 @@ const Dropdown = ({
                         </div>
                       ) : filteredOptions.length > 0 ? (
                         filteredOptions.map((option, idx) => {
+                          if (option.type === "divider") {
+                            return (
+                              <hr
+                                key={`divider-${idx}`}
+                                className="border-t border-gray-200 my-1 w-full"
+                              />
+                            )
+                          }
+
                           const isSelected = isOptionSelected(option.value)
                           const optionKey =
                             option.key ||

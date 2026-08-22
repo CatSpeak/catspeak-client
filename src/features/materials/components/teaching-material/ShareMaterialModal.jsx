@@ -106,7 +106,9 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
           toast.success(t.materials.updateShareSettingsSuccess);
         } catch (error) {
           console.error("Share error:", error);
-          toast.error(t.materials.updateShareSettingsError);
+          const errCode = error?.data?.message;
+          const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.updateShareSettingsError;
+          toast.error(errMsg);
           setIsPublic(false);
           materialIsPublic.current = false;
         }
@@ -156,7 +158,9 @@ const ShareMaterialModal = ({ open, onClose, item }) => {
       onClose();
     } catch (error) {
       console.error("Share error:", error);
-      toast.error(t.materials.updateShareSettingsError);
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.updateShareSettingsError;
+      toast.error(errMsg);
     }
   };
 
