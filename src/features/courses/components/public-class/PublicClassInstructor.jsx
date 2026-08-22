@@ -1,5 +1,5 @@
 import React from "react"
-import { ShieldCheck, Star, Users, Award, BookOpen, CheckCircle } from "lucide-react"
+import { BadgeCheck } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getSafeMediaUrl } from "../../utils/courseUtils"
 
@@ -9,19 +9,30 @@ const PublicClassInstructor = ({ classData }) => {
   const pc = c.publicClass || {}
 
   const teacher = classData?.teacher || {}
-  const teacherName = teacher.fullName || teacher.name || teacher.title || c.defaultInstructor || "CatSpeak Instructor"
-  const teacherTitle = teacher.title || pc.defaultTeacherTitle || "Giảng Viên Ngôn Ngữ Cao Cấp"
-  const teacherAvatar = getSafeMediaUrl(teacher.avatar || teacher.avatarImageUrl || teacher.avatarUrl)
-  const teacherBio = teacher.introduction || teacher.description || pc.defaultTeacherBio ||
+  const teacherName =
+    teacher.fullName ||
+    teacher.name ||
+    teacher.title ||
+    c.defaultInstructor ||
+    "CatSpeak Instructor"
+  const teacherTitle =
+    teacher.title || pc.defaultTeacherTitle || "Giảng Viên Ngôn Ngữ Cao Cấp"
+  const teacherAvatar = getSafeMediaUrl(
+    teacher.avatar || teacher.avatarImageUrl || teacher.avatarUrl,
+  )
+  const teacherBio =
+    teacher.introduction ||
+    teacher.description ||
+    pc.defaultTeacherBio ||
     "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc."
 
   return (
     <div id="instructor" className="scroll-mt-24">
-      <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight mb-6">
-        {pc.instructorTitle || "Thông Tin Giảng Viên Chuyên Trách"}
+      <h2 className="text-xl sm:text-2xl font-bold text-slate-950 tracking-tight mb-6">
+        {pc.instructorTitle || "Thông tin giảng viên"}
       </h2>
 
-      <div className="bg-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
+      <div className="bg-gradient-to-bl from-rose-100/60 via-rose-100/10 to-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           {/* Avatar */}
           <div className="shrink-0">
@@ -29,10 +40,10 @@ const PublicClassInstructor = ({ classData }) => {
               <img
                 src={teacherAvatar}
                 alt={teacherName}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover ring-4 ring-rose-100 shadow-md"
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-md"
               />
             ) : (
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-[#b20a1c] to-rose-700 text-white font-black text-3xl flex items-center justify-center shadow-md">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-[#b20a1c] to-rose-700 text-white font-bold text-3xl flex items-center justify-center shadow-md">
                 {teacherName.charAt(0).toUpperCase()}
               </div>
             )}
@@ -42,8 +53,8 @@ const PublicClassInstructor = ({ classData }) => {
           <div className="flex-1 flex flex-col gap-3">
             <div>
               <div className="flex items-center gap-1.5 text-xs font-bold text-[#b20a1c] uppercase tracking-wider mb-1">
-                <ShieldCheck size={15} />
-                {pc.verifiedTeacher || "Giảng Viên Xác Thực Bởi CatSpeak"}
+                <BadgeCheck size={15} />
+                {pc.verifiedTeacher || "Giảng viên được xác minh bởi Catspeak"}
               </div>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
                 {teacherName}
@@ -72,7 +83,7 @@ const PublicClassInstructor = ({ classData }) => {
             </div> */}
 
             {/* Bio */}
-            <p className="text-sm text-slate-600 leading-relaxed font-medium">
+            <p className="text-sm text-slate-600 leading-relaxed font-medium text-justify">
               {teacherBio}
             </p>
 

@@ -35,7 +35,7 @@ const PublicClassSidebarCTA = ({
   ]
 
   return (
-    <div className="bg-white border border-border rounded-3xl p-6 sticky top-20 flex flex-col gap-5">
+    <div className="bg-white border border-border rounded-3xl p-6 flex flex-col gap-5 shadow-xs">
       {/* Thumbnail */}
       <div className="relative h-44 rounded-2xl overflow-hidden bg-slate-100 border border-slate-100">
         <img
@@ -67,15 +67,15 @@ const PublicClassSidebarCTA = ({
             <button
               type="button"
               onClick={onEnroll}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full bg-[#b20a1c] hover:bg-[#960817] text-white font-bold py-3.5 px-4 rounded-full flex items-center justify-center gap-2 text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               <Check size={16} /> {c.enterClass || pc.enterClass || "Vào Lớp Học"}
             </button>
           ) : isUpcoming ? (
             <button
               type="button"
-              onClick={onEnroll}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              disabled
+              className="w-full bg-[#b20a1c] text-white font-bold py-3.5 px-4 rounded-full flex items-center justify-center gap-2 text-sm opacity-90 cursor-not-allowed shadow-md"
             >
               {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
             </button>
@@ -83,7 +83,7 @@ const PublicClassSidebarCTA = ({
             <button
               type="button"
               disabled
-              className="w-full bg-gray-100 text-gray-400 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+              className="w-full bg-gray-100 text-gray-400 font-bold py-3.5 px-4 rounded-full flex items-center justify-center gap-2 text-sm cursor-not-allowed"
             >
               {pc.classFull || "Đã đủ học viên"}
             </button>
@@ -91,7 +91,7 @@ const PublicClassSidebarCTA = ({
             <button
               type="button"
               disabled
-              className="w-full bg-gray-100 text-gray-400 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm cursor-not-allowed"
+              className="w-full bg-gray-100 text-gray-400 font-bold py-3.5 px-4 rounded-full flex items-center justify-center gap-2 text-sm cursor-not-allowed"
             >
               {pc.enrollmentClosed || "Đã đóng đăng ký"}
             </button>
@@ -100,7 +100,7 @@ const PublicClassSidebarCTA = ({
               type="button"
               onClick={onEnroll}
               disabled={isEnrolling}
-              className="w-full bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
+              className="w-full bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 px-4 rounded-full flex items-center justify-center gap-2 text-sm shadow-md transition-all active:scale-[0.98] cursor-pointer"
             >
               {isEnrolling ? (pc.processing || "Đang xử lý...") : (c.enrollNow || pc.enrollNow || "Đăng Ký Ngay")}
             </button>
