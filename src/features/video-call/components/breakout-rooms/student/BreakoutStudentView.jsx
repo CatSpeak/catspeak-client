@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { Users, ChevronDown, ChevronRight, Volume2 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useDispatch } from "react-redux"
@@ -33,6 +33,30 @@ const BreakoutStudentView = ({
   const roomCreatorId = callInfo?.roomData?.creatorId
 
   const [expandedRooms, setExpandedRooms] = useState({ main: true })
+
+  // Collect all breakout participant account IDs to prevent duplicate rendering in Main Room
+  const breakoutAccountIds = useMemo(() => {
+    return new Set(
+      status?.breakoutSessions?.flatMap((br) =>
+        br.participants?.map((p) => String(p.accountId))
+      ) || []
+    )
+  }, [status?.breakoutSessions])
+
+  // Filter main room participants so no breakout participant appears in main room
+  const mainRoomParticipants = useMemo(() => {
+    return (status?.mainRoom?.participants || []).filter(
+      (p) => !breakoutAccountIds.has(String(p.accountId))
+    )
+  }, [status?.mainRoom?.participants, breakoutAccountIds])
+
+  const mainRoomStudentCount = useMemo(() => {
+    return mainRoomParticipants.filter(
+      (p) => String(p.accountId) !== String(roomCreatorId),
+    ).length
+  }, [mainRoomParticipants, roomCreatorId])
+
+  const isUserInMainRoom = String(currentSubSessionId) === String(sessionId)
 
   useEffect(() => {
     if (status?.breakoutSessions) {
@@ -106,14 +130,6 @@ const BreakoutStudentView = ({
       </div>
     )
   }
-
-  // Get main room participants from backend status
-  const mainRoomParticipants = status?.mainRoom?.participants || []
-  const mainRoomStudentCount = mainRoomParticipants.filter(
-    (p) => String(p.accountId) !== String(roomCreatorId),
-  ).length
-
-  const isUserInMainRoom = String(currentSubSessionId) === String(sessionId)
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-white">
