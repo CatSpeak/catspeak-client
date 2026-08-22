@@ -38,7 +38,7 @@ const BreakoutActiveView = ({
     {
       enabled: Boolean(status?.isBreakoutActive),
       includeMainRoom: true,
-      pollingInterval: 30000,
+      pollingInterval: 60000,
     },
   )
 

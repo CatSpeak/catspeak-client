@@ -915,7 +915,7 @@ const GlobalCallContent = ({
       enabled:
         isSpeakingTimeBalanceSupported(roomData) &&
         (panelState.showSpeakingTimeBalance || showStudentSpeakingWidget),
-      pollingInterval: 30000,
+      pollingInterval: 60000,
     },
   )
 

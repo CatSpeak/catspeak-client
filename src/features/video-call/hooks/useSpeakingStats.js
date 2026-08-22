@@ -26,16 +26,16 @@ export const formatSpeakingDuration = (totalSeconds = 0) => {
 }
 
 /**
- * Custom React hook that polls cumulative speaking statistics via API every 30 seconds.
+ * Custom React hook that polls cumulative speaking statistics via API every 60 seconds.
  *
  * @param {import("livekit-client").Room|null} _lkRoom
  * @param {number|string|null} sessionId
  * @returns {{ statsMap: Record<string, { totalWords: number, totalDurationMs: number, totalDurationSeconds: number, wpm: number }>, roomTotalDuration: number }}
  */
 export const useSpeakingStats = (_lkRoom, sessionId, options = {}) => {
-  const { enabled = true, pollingInterval = 30000 } = options
+  const { enabled = true, pollingInterval = 60000 } = options
 
-  // 1. Poll cumulative stats from backend API every 30 seconds only when enabled
+  // 1. Poll cumulative stats from backend API every 60 seconds only when enabled
   const {
     data: statsData,
     fulfilledTimeStamp,

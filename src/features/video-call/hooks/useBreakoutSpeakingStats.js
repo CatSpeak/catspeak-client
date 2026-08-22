@@ -60,13 +60,13 @@ const parseRoomStats = (roomStats) => {
  * @param {object} options
  * @param {boolean} [options.enabled=true] - Whether polling/querying is active
  * @param {boolean} [options.includeMainRoom=true] - Whether to include Main Room stats
- * @param {number} [options.pollingInterval=30000] - Polling interval in ms (default 30s)
+ * @param {number} [options.pollingInterval=60000] - Polling interval in ms (default 60s)
  */
 export const useBreakoutSpeakingStats = (sessionId, options = {}) => {
   const {
     enabled = true,
     includeMainRoom = true,
-    pollingInterval = 30000,
+    pollingInterval = 60000,
   } = options
 
   const {
