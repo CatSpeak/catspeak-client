@@ -236,7 +236,7 @@ const PublicClassScheduleCard = ({ classData }) => {
   }
 
   return (
-    <div className="bg-white border border-border rounded-3xl p-6 flex flex-col gap-4 shadow-xs">
+    <div className="bg-white border border-border rounded-3xl p-5 flex flex-col gap-3.5 shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

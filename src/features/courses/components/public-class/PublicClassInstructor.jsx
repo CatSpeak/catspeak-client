@@ -28,11 +28,11 @@ const PublicClassInstructor = ({ classData }) => {
 
   return (
     <div id="instructor" className="scroll-mt-24">
-      <h2 className="text-xl sm:text-2xl font-bold text-slate-950 tracking-tight mb-6">
+      <h2 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight mb-3">
         {pc.instructorTitle || "Thông tin giảng viên"}
       </h2>
 
-      <div className="bg-gradient-to-bl from-rose-100/60 via-rose-100/10 to-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
+      <div className="bg-gradient-to-bl from-rose-100/60 via-rose-100/10 to-white border border-border rounded-3xl p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row items-start gap-6">
           {/* Avatar */}
           <div className="shrink-0">

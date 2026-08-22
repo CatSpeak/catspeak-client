@@ -2090,6 +2090,8 @@ export default {
     jumpToday: "Today",
     jumpStart: "Start",
     jumpEnd: "End",
+    classDayLegend: "Class day",
+    todayLegend: "Today",
     spotsLeft: "{{remaining}}/{{capacity}} spots",
     spotsSub: "Allowed student enrollment capacity",
     instructorTitle: "Instructor Information",

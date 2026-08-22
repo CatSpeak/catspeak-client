@@ -6,6 +6,7 @@ import {
 } from "../../utils/courseUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { copyShareLink } from "@/shared/utils/shareUtils"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const PublicClassHero = ({
   classData,
@@ -76,8 +77,9 @@ const PublicClassHero = ({
               </span>
             )}
             {classData?.language && (
-              <span className="bg-slate-900/90 text-white border border-slate-700/80 backdrop-blur-md px-2.5 py-0.5 rounded-full font-medium text-[11px]">
-                {classData.language}
+              <span className="bg-slate-900/90 text-white border border-slate-700/80 backdrop-blur-md px-2.5 py-0.5 rounded-full font-medium text-[11px] uppercase">
+                {getLocalizedLanguageName(classData.language, t) ||
+                  classData.language}
               </span>
             )}
           </div>

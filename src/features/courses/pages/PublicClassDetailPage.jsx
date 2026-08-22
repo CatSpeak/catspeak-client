@@ -206,7 +206,7 @@ const PublicClassDetailPage = () => {
 
   return (
     <>
-      <div className="min-h-screen text-slate-900 pb-24 lg:pb-16">
+      <div className="min-h-screen text-slate-900 pb-12">
         {/* Hero Section */}
         <PublicClassHero
           classData={classData}
@@ -223,20 +223,20 @@ const PublicClassDetailPage = () => {
 
         {/* Review summary strip */}
         {id ? (
-          <div className="mx-auto mt-4 flex max-w-7xl items-center justify-center px-4">
+          <div className="mx-auto mt-3 flex max-w-7xl items-center justify-center px-4">
             <ClassReviewSummary classId={id} />
           </div>
         ) : null}
 
         {/* Main Content Layout */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-            {/* Main Detail Column */}
-            <div className="lg:col-span-8 flex flex-col gap-12">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Primary Column (About & Instructor) */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
               {/* About / Class Overview */}
               <section id="about" className="scroll-mt-24">
-                <div className="bg-white border border-border rounded-3xl p-6 sm:p-8 shadow-xs">
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight mb-4">
+                <div className="bg-white border border-border rounded-3xl p-5 sm:p-6 shadow-xs">
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-950 tracking-tight mb-3">
                     {pc.overviewTitle || "Về lớp học"}
                   </h2>
                   {classData.description ? (
@@ -260,82 +260,18 @@ const PublicClassDetailPage = () => {
               {/* <PublicClassFAQ /> */}
             </div>
 
-            {/* Sticky Sidebar Column (Desktop) */}
-            <div className="hidden lg:block lg:col-span-4">
-              <div className="sticky top-20 flex flex-col gap-6">
-                <PublicClassSidebarCTA
-                  classData={classData}
-                  isEnrolled={isEnrolled}
-                  isUpcoming={isUpcoming}
-                  onEnroll={handleEnrollAction}
-                />
-                <PublicClassScheduleCard classData={classData} />
-              </div>
+            {/* Secondary Column (CTA & Schedule): Stacked below Instructor on mobile/tablet, Sticky on Desktop */}
+            <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-20">
+              <PublicClassSidebarCTA
+                classData={classData}
+                isEnrolled={isEnrolled}
+                isUpcoming={isUpcoming}
+                onEnroll={handleEnrollAction}
+              />
+              <PublicClassScheduleCard classData={classData} />
             </div>
           </div>
         </main>
-
-        {/* Fixed Bottom CTA Bar (Mobile & Tablet) */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-border p-4 shadow-2xl flex items-center justify-between gap-4">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-              {c.tuition || pc.tuitionFeeFull || "Học phí trọn gói"}
-            </span>
-            <span className="text-lg font-bold text-slate-950">
-              {tuitionValue != null
-                ? Number(tuitionValue) === 0
-                  ? c.student?.priceFree || "Miễn phí"
-                  : `${Number(tuitionValue).toLocaleString()} VNĐ`
-                : pc.tbaFee || "Chưa xác định"}
-            </span>
-          </div>
-
-          {isEnrolled ? (
-            <button
-              type="button"
-              onClick={handleEnrollAction}
-              className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white font-bold shadow-md transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 text-sm cursor-pointer"
-            >
-              <Check size={16} />{" "}
-              {c.enterClass || pc.enterClass || "Vào Lớp Học"}
-            </button>
-          ) : isUpcoming ? (
-            <button
-              type="button"
-              disabled
-              className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-[#b20a1c] text-white font-bold inline-flex items-center justify-center gap-2 text-sm cursor-not-allowed opacity-90 shadow-md"
-            >
-              {pc.upcomingLabel || c.upcomingStatus || "Sắp diễn ra"}
-            </button>
-          ) : enrollmentIssue === "full" ? (
-            <button
-              type="button"
-              disabled
-              className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-gray-100 text-gray-400 font-bold inline-flex items-center justify-center gap-2 text-sm cursor-not-allowed"
-            >
-              {pc.classFull || "Đã đủ học viên"}
-            </button>
-          ) : enrollmentIssue === "closed" ? (
-            <button
-              type="button"
-              disabled
-              className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-gray-100 text-gray-400 font-bold inline-flex items-center justify-center gap-2 text-sm cursor-not-allowed"
-            >
-              {pc.enrollmentClosed || "Đã đóng đăng ký"}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleEnrollAction}
-              disabled={isEnrolling}
-              className="h-10 sm:h-11 px-5 sm:px-6 rounded-full bg-[#b20a1c] hover:bg-[#960817] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold shadow-md transition-all active:scale-[0.98] inline-flex items-center justify-center gap-2 text-sm cursor-pointer"
-            >
-              {isEnrolling
-                ? pc.processing || "Đang xử lý..."
-                : c.enrollNow || pc.enrollNow || "Đăng Ký Ngay"}
-            </button>
-          )}
-        </div>
       </div>
 
       {/* {conflictClasses && (

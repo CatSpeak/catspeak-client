@@ -1982,6 +1982,8 @@ export default {
     jumpToday: "今天",
     jumpStart: "开课",
     jumpEnd: "结课",
+    classDayLegend: "上课日",
+    todayLegend: "今天",
     spotsLeft: "{{remaining}}/{{capacity}} 名额",
     spotsSub: "允许报名该班级的人数",
     instructorTitle: "主讲教师信息",
