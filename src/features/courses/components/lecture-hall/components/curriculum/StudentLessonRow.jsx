@@ -19,6 +19,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { PillButton } from "@/shared/components/ui/buttons"
 import AssignmentStatusBadge from "./AssignmentStatusBadge"
+import QuizStatusBadge from "./QuizStatusBadge"
 
 // Helper function to resolve icon and background based on item type
 const getItemConfig = (type) => {
@@ -81,6 +82,9 @@ const StudentLessonRow = ({
   const isYoutubeLink = displayData.type === "link" && displayData.meta && (displayData.meta.includes("youtube.com") || displayData.meta.includes("youtu.be"))
   const config = getItemConfig(displayData.type || "assignment")
   const IconComponent = config.Icon
+
+  console.log(displayData);
+
 
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -212,14 +216,13 @@ const StudentLessonRow = ({
     }
 
     if (displayData.type === "assignment") {
-      const status = item.status || item.studentStatus;
       return (
         <div className="flex items-center gap-3">
           <AssignmentStatusBadge
-            status={status}
+            classId={classId}
+            assignmentId={item.itemId}
+            assignment={{ dueDate: item.deadline || item.dueDate, ...item.assignment }}
             isCompleted={item.isCompleted}
-            submittedAt={item.submittedAt}
-            deadline={item.deadline || item.dueDate}
           />
           <ChevronRight size={18} className="text-[#191C1D] shrink-0" />
         </div>
@@ -227,19 +230,14 @@ const StudentLessonRow = ({
     }
 
     if (displayData.type === "quiz") {
-      const status = item.status || item.studentStatus || "pending";
-      const isDone = status === "completed" || status === "submitted" || status === "graded" || item.isCompleted;
       return (
         <div className="flex items-center gap-3">
-          {isDone ? (
-            <span className="bg-[#D1F7E3] text-[#039855] px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-              Đã làm
-            </span>
-          ) : (
-            <span className="bg-[#FEF0C7] text-[#B54708] px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-              Chưa làm
-            </span>
-          )}
+          <QuizStatusBadge
+            classId={classId}
+            quizId={displayData.itemId || item.itemId}
+            isCompleted={item.isCompleted}
+            closeTime={item.closeTime || item.quiz?.closeTime}
+          />
           <ChevronRight size={18} className="text-[#191C1D] shrink-0" />
         </div>
       )

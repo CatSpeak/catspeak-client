@@ -1,51 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useGetMyAssignmentSubmissionQuery } from "@/store/api/coursesApi";
+import { getSubmissionStatus, getAssignmentTimeline } from "@/features/courses/utils/assignmentUtils";
 
-const AssignmentStatusBadge = ({ status, isCompleted, submittedAt, deadline }) => {
+const AssignmentStatusBadge = ({ classId, assignmentId, assignment, submission: propSubmission, isCompleted }) => {
   const { t } = useLanguage();
   const cg = t.courses?.grading || {};
   const cd = t.courses?.classDetail || {};
+  const [nowMs] = useState(() => Date.now());
 
-  const rawStatus = status || "pending";
-  const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.toLowerCase() : "pending";
-  
-  const isDone = ["completed", "submitted", "graded", "late", "returned"].includes(normalizedStatus) || isCompleted;
+  const hasEmbeddedSubmission = assignment && (Object.prototype.hasOwnProperty.call(assignment, "mySubmission") || Object.prototype.hasOwnProperty.call(assignment, "submission"));
+  const embeddedSubmission = assignment?.mySubmission ?? assignment?.submission ?? null;
 
-  if (!isDone && normalizedStatus !== "late" && normalizedStatus !== "returned") {
+  const { currentData: fetchedSubmission, isLoading } = useGetMyAssignmentSubmissionQuery(
+    { classId, assignmentId },
+    { skip: !classId || !assignmentId || !!propSubmission || hasEmbeddedSubmission }
+  );
+
+  const isRecord = (value) => (value !== null && typeof value === "object" && !Array.isArray(value));
+  const responsePayload = (isRecord(fetchedSubmission) && Object.prototype.hasOwnProperty.call(fetchedSubmission, "data")) ? fetchedSubmission.data : fetchedSubmission;
+
+  const submission = propSubmission || embeddedSubmission || (isRecord(responsePayload) ? responsePayload : null);
+  const submissionStatus = getSubmissionStatus(submission);
+
+  if (isLoading && !propSubmission && !hasEmbeddedSubmission) {
+    return <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">...</span>;
+  }
+
+  const submittedAtMs = submission?.submittedAt ? new Date(submission.submittedAt).getTime() : 0;
+  const dueAtMs = assignment?.dueDate ? new Date(assignment.dueDate).getTime() : 0;
+  const isSubmissionLate = submittedAtMs > 0 && dueAtMs > 0 ? submittedAtMs > dueAtMs : false;
+
+  const displayStatus = submissionStatus === "graded"
+    ? (isSubmissionLate ? "late" : "submitted")
+    : submissionStatus;
+
+  const { isExpired } = getAssignmentTimeline(assignment || {}, nowMs);
+
+  if (displayStatus === "not_submitted") {
+    if (isCompleted) {
+      return (
+        <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-blue-200 uppercase tracking-wider whitespace-nowrap">
+          {cd.statusNeedsGrading || "Đã nộp"}
+        </span>
+      );
+    }
+    if (isExpired) {
+      return (
+        <span className="bg-red-50 text-red-655 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-red-200 uppercase tracking-wider whitespace-nowrap">
+          {cg.badgeExpired || "Hết hạn"}
+        </span>
+      );
+    }
     return (
-      <span className="bg-red-50 text-red-700 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 uppercase tracking-wide whitespace-nowrap">
+      <span className="bg-amber-50 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-amber-200 uppercase tracking-wider whitespace-nowrap">
         {cd.statusNotSubmitted || "Chưa nộp"}
       </span>
     );
   }
 
-  let displayStatus = normalizedStatus;
-  if (normalizedStatus === "graded" || normalizedStatus === "submitted" || normalizedStatus === "completed" || isCompleted) {
-    const submittedAtMs = submittedAt ? new Date(submittedAt).getTime() : 0;
-    const dueAtMs = deadline ? new Date(deadline).getTime() : 0;
-    const isSubmissionLate = submittedAtMs > 0 && dueAtMs > 0 ? submittedAtMs > dueAtMs : false;
-    displayStatus = isSubmissionLate ? "late" : "submitted";
+  if (displayStatus === "submitted" || displayStatus === "late") {
+    return (
+      <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-blue-200 uppercase tracking-wider whitespace-nowrap">
+        {displayStatus === "late" ? (cg.filterLate || "Nộp muộn") : (cd.statusNeedsGrading || "Đã nộp")}
+      </span>
+    );
   }
 
   if (displayStatus === "returned") {
     return (
-      <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded border border-emerald-100 uppercase tracking-wide whitespace-nowrap">
+      <span className="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-200 uppercase tracking-wider whitespace-nowrap">
         {cg.filterReturned || "Đã trả điểm"}
       </span>
     );
   }
-  
-  if (displayStatus === "late") {
-    return (
-      <span className="bg-red-50 text-red-700 text-[10px] font-extrabold px-2.5 py-1 rounded border border-red-100 uppercase tracking-wide whitespace-nowrap">
-        {cg.filterLate || "Nộp muộn"}
-      </span>
-    );
-  }
-  
+
   return (
-    <span className="bg-blue-50 text-blue-700 text-[10px] font-extrabold px-2.5 py-1 rounded border border-blue-100 uppercase tracking-wide whitespace-nowrap">
-      {cd.statusNeedsGrading || "Đã nộp"}
+    <span className="bg-gray-50 text-gray-400 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-gray-200 uppercase tracking-wider whitespace-nowrap">
+      {displayStatus || "—"}
     </span>
   );
 };

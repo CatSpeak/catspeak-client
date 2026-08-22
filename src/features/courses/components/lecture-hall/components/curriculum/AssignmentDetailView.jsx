@@ -209,10 +209,11 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         <div className="flex items-center gap-3 mb-3 flex-wrap">
           <h1 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A]">{title}</h1>
           <AssignmentStatusBadge
-            status={rawStatus}
+            classId={classId}
+            assignmentId={targetAssignmentId}
+            assignment={{ dueDate: deadline, ...assignmentData }}
+            submission={apiSubmission}
             isCompleted={itemData?.isCompleted}
-            submittedAt={submittedAt}
-            deadline={deadline}
           />
         </div>
 
