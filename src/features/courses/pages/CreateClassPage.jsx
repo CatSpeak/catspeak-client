@@ -30,7 +30,7 @@ import {
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
-import TimeDropdown from "@/features/calendar/components/ui/TimeDropdown"
+import Dropdown from "@/shared/components/ui/Dropdown"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
@@ -46,6 +46,7 @@ import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 import { useClassFormReducer } from "../hooks/useClassFormReducer"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import ClassScheduleCalendarPreview from "../components/ClassScheduleCalendarPreview"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -284,6 +285,39 @@ const CreateClassPage = () => {
   const handleThumbnailClick = () => {
     fileInputRef.current?.click()
   }
+
+  const lockedClass = (isEditMode ? classDetailResponse : recoverClassResponse)?.data
+    || (isEditMode ? classDetailResponse : recoverClassResponse)
+  const lockedCourseTitle = lockedClass?.courseName || lockedClass?.courseTitle || courseId
+
+  const courseOptions = useMemo(() => {
+    if (isEditMode || isRecoverMode) {
+      return courseId
+        ? [{ value: courseId, label: lockedCourseTitle }]
+        : [{ value: "", label: cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --" }]
+    }
+    return [
+      { value: "", label: cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --" },
+      ...coursesList.map((course) => ({ value: course.id, label: course.title }))
+    ]
+  }, [isEditMode, isRecoverMode, courseId, lockedCourseTitle, coursesList, cc])
+
+  const languageOptions = useMemo(() => {
+    return languagesList.map((lang) => ({
+      value: lang.name,
+      label: getLocalizedLanguageName(lang.name, t),
+    }))
+  }, [languagesList, t])
+
+  const levelOptions = useMemo(() => {
+    return levelsList.map((lvl) => {
+      const lvlName = typeof lvl === "object" && lvl !== null ? (lvl.name || String(lvl)) : String(lvl)
+      return {
+        value: lvlName,
+        label: lvlName,
+      }
+    })
+  }, [levelsList])
 
   const labelCommissionNote = (cc.commissionNote || "The platform will withhold a {{commission}}% commission fee on each successful student enrollment.")
     .replace("{{commission}}", feeDetails.commissionRate)
@@ -641,9 +675,6 @@ const CreateClassPage = () => {
     }
   }
 
-  const lockedClass = (isEditMode ? classDetailResponse : recoverClassResponse)?.data
-    || (isEditMode ? classDetailResponse : recoverClassResponse)
-  const lockedCourseTitle = lockedClass?.courseName || lockedClass?.courseTitle || courseId
   const isFormBusy = isCreating || isUpdating || isDeleting
 
   if (
@@ -756,24 +787,29 @@ const CreateClassPage = () => {
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                 {cc.belongsToCourseOptional || cc.belongsToCourse || "Belongs to Course (Optional)"}
               </label>
-              <div className="relative">
-                <select
-                  value={courseId}
-                  onChange={(e) => handleCourseChange(e.target.value)}
-                  disabled={isEditMode || isRecoverMode || !!initialCourseId}
-                  className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
-                >
-                  <option value="">{cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}</option>
-                  {isEditMode || isRecoverMode ? (
-                    courseId && <option value={courseId}>{lockedCourseTitle}</option>
-                  ) : (
-                    coursesList.map((course) => (
-                      <option key={course.id} value={course.id}>{course.title}</option>
-                    ))
-                  )}
-                </select>
-                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <Dropdown
+                options={courseOptions}
+                value={courseId}
+                onChange={(val) => handleCourseChange(val)}
+                disabled={isEditMode || isRecoverMode || !!initialCourseId}
+                placeholder={cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}
+                dropdownClassName="w-full"
+                trigger={(isOpen, selectedOption, toggle) => (
+                  <button
+                    type="button"
+                    onClick={toggle}
+                    disabled={isEditMode || isRecoverMode || !!initialCourseId}
+                    className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
+                      errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                    }`}
+                  >
+                    <span className={courseId ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
+                      {selectedOption?.label || (courseId ? lockedCourseTitle : (cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"))}
+                    </span>
+                    <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                )}
+              />
             </div>
 
             {/* Class Name */}
@@ -796,53 +832,63 @@ const CreateClassPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.language} <span className="text-[#990011]">*</span></label>
-                <div className="relative">
-                  <select
-                    value={selectedLanguage}
-                    onChange={(e) => {
-                      setField("selectedLanguage", e.target.value)
-                      setField("level", "")
-                      clearError("selectedLanguage")
-                    }}
-                    disabled={isRecoverMode || !!initialCourseId || !!courseId}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
-                  >
-                    <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
-                    {languagesList.map((lang) => (
-                      <option key={lang.id} value={lang.name}>
-                        {getLocalizedLanguageName(lang.name, t)}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
+                <Dropdown
+                  options={languageOptions}
+                  value={selectedLanguage}
+                  onChange={(val) => {
+                    setField("selectedLanguage", val)
+                    setField("level", "")
+                    clearError("selectedLanguage")
+                  }}
+                  disabled={isRecoverMode || !!initialCourseId || !!courseId}
+                  placeholder={c.languagePlaceholder || "Eg. English, Chinese..."}
+                  dropdownClassName="w-full"
+                  trigger={(isOpen, selectedOption, toggle) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      disabled={isRecoverMode || !!initialCourseId || !!courseId}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
+                        errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                      }`}
+                    >
+                      <span className={selectedLanguage ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
+                        {selectedOption?.label || (selectedLanguage ? getLocalizedLanguageName(selectedLanguage, t) : (c.languagePlaceholder || "Eg. English, Chinese..."))}
+                      </span>
+                      <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                />
               </div>
 
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.level} <span className="text-[#990011]">*</span></label>
-                <div className="relative">
-                  <select
-                    value={level}
-                    onChange={(e) => {
-                      setField("level", e.target.value)
-                      clearError("level")
-                    }}
-                    disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
-                  >
-                    <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
-                    {levelsList.map((lvl) => {
-                      const lvlName = typeof lvl === "object" && lvl !== null ? (lvl.name || String(lvl)) : String(lvl)
-                      const lvlKey = typeof lvl === "object" && lvl !== null ? (lvl.id || lvl.name) : String(lvl)
-                      return (
-                        <option key={lvlKey} value={lvlName}>
-                          {lvlName}
-                        </option>
-                      )
-                    })}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
+                <Dropdown
+                  options={levelOptions}
+                  value={level}
+                  onChange={(val) => {
+                    setField("level", val)
+                    clearError("level")
+                  }}
+                  disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
+                  placeholder={c.levelPlaceholder || "Eg. A1, B2..."}
+                  dropdownClassName="w-full"
+                  trigger={(isOpen, selectedOption, toggle) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
+                        errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                      }`}
+                    >
+                      <span className={level ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
+                        {selectedOption?.label || level || (c.levelPlaceholder || "Eg. A1, B2...")}
+                      </span>
+                      <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                />
               </div>
             </div>
 
@@ -928,7 +974,7 @@ const CreateClassPage = () => {
                       setField("sessions", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("sessions")
                     }}
-                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
+                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <button
                     type="button"
@@ -958,7 +1004,7 @@ const CreateClassPage = () => {
                       setField("capacity", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("capacity")
                     }}
-                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
+                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <button
                     type="button"
@@ -1024,7 +1070,7 @@ const CreateClassPage = () => {
                         const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0))
                         setField("minAttendanceRate", val)
                       }}
-                      className="w-full h-full px-3 text-center font-bold text-sm text-gray-800 outline-none bg-transparent disabled:cursor-not-allowed"
+                      className="w-full h-full px-3 text-center font-bold text-sm text-gray-800 outline-none bg-transparent disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <div className="h-full bg-gray-50 border-l border-gray-200 px-3 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0 select-none">
                       %
@@ -1296,6 +1342,18 @@ const CreateClassPage = () => {
                     .replace("{{minFee}}", formatCurrency(minFee))}
                 </span>
               </div>
+            )}
+
+            {/* Calendar & Schedule Preview (Only show in edit mode) */}
+            {isEditMode && (
+              <ClassScheduleCalendarPreview
+                startDate={startDate}
+                sessions={sessions}
+                checkedDays={checkedDays}
+                timeSlots={timeSlots}
+                editingClassId={id}
+                isEditMode={isEditMode}
+              />
             )}
           </div>
         </div>

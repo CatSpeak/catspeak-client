@@ -296,6 +296,11 @@ export const materialApi = baseApi.injectEndpoints({
         "PersonalMaterials",
       ],
     }),
+
+    getDeletionImpact: builder.query({
+      query: (folderId) => `/personal-materials/folders/deletion-impact/${folderId}`,
+      providesTags: (result, error, folderId) => [{ type: 'PersonalMaterials', id: `impact-${folderId}` }],
+    }),
   }),
   overrideExisting: false,
 });
@@ -331,4 +336,5 @@ export const {
   useGenerateFolderShareTokenMutation,
   useGetFolderByShareTokenQuery,
   useGetPublicMaterialsByUserIdQuery,
+  useGetDeletionImpactQuery,
 } = materialApi;

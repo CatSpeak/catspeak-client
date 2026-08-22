@@ -106,7 +106,9 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
       onClose();
     } catch (error) {
       console.error("Failed to create folder", error);
-      toast.error(t.materials.createFolderError);
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.createFolderError;
+      toast.error(errMsg);
     }
   };
 
@@ -146,7 +148,7 @@ const CreateFolderModal = ({ open, onClose, currentFolderId }) => {
           label={t.materials.folderName}
           labelClassName="font-bold text-base"
           placeholder={t.materials.enterFolderName}
-          className="!h-12 rounded-xl"
+          className="!h-12 rounded-xl px-3"
         />
         <div>
           <TextInput

@@ -688,7 +688,11 @@ export const coursesApi = baseApi.injectEndpoints({
             params?.sort && params.sort !== "default" ? params.sort : undefined,
           language:
             params?.language && params.language !== "all"
-              ? params.language.toLowerCase()
+              ? params.language.toLowerCase() === "zh"
+                ? "chinese"
+                : params.language.toLowerCase() === "en"
+                  ? "english"
+                  : params.language.toLowerCase()
               : undefined,
           minPrice:
             params?.minPrice != null && !isNaN(Number(params.minPrice))
