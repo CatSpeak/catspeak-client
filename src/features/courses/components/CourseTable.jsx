@@ -170,25 +170,25 @@ const CourseTable = ({ courses, t, onDelete }) => {
 
       {/* ─── Desktop View (>= md): Full 6-Column Table ─── */}
       <div className="hidden md:block w-full overflow-x-auto rounded-3xl border border-border bg-white shadow-xs">
-        <table className="w-full min-w-[840px] border-collapse text-left text-xs font-semibold text-gray-500">
+        <table className="w-full min-w-[920px] border-collapse text-left text-xs font-semibold text-gray-500">
           <thead>
             <tr className="border-b border-border bg-gray-50/60 text-gray-800 font-bold">
-              <th className="p-4 border-r border-border w-[170px] min-w-[150px]">
+              <th className="p-4 border-r border-border w-[170px] min-w-[150px] whitespace-nowrap">
                 {c.coverImage || "Ảnh đại diện"}
               </th>
-              <th className="p-4 border-r border-border min-w-[280px]">
+              <th className="p-4 border-r border-border min-w-[260px]">
                 {c.courseInfo || "Thông tin khóa học"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[110px]">
+              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.startDate || "Ngày mở"}
               </th>
-              <th className="p-4 border-r border-border w-[130px] min-w-[110px]">
+              <th className="p-4 border-r border-border w-[130px] min-w-[120px] text-center whitespace-nowrap">
                 {c.endDate || "Ngày hết"}
               </th>
-              <th className="p-4 border-r border-border w-[140px] min-w-[120px]">
+              <th className="p-4 border-r border-border w-[180px] min-w-[170px] text-center whitespace-nowrap">
                 {c.price || "Giá cả"}
               </th>
-              <th className="p-4 w-[110px] text-center">{c.action || "Hành động"}</th>
+              <th className="p-4 w-[110px] text-center whitespace-nowrap">{c.action || "Hành động"}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border text-gray-700">
@@ -216,7 +216,7 @@ const CourseTable = ({ courses, t, onDelete }) => {
                 </td>
 
                 {/* Course Info cell */}
-                <td className="p-4 border-r border-border min-w-[280px] align-middle">
+                <td className="p-4 border-r border-border min-w-[260px] align-middle">
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between gap-2">
                       <CourseStatusPill status={item.status} />
@@ -250,17 +250,17 @@ const CourseTable = ({ courses, t, onDelete }) => {
                 </td>
 
                 {/* Start Date */}
-                <td className="p-4 border-r border-border text-sm font-semibold text-gray-800 align-middle">
+                <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
                   {item.startDate || "—"}
                 </td>
 
                 {/* End Date */}
-                <td className="p-4 border-r border-border text-sm font-semibold text-gray-800 align-middle">
+                <td className="p-4 border-r border-border text-center text-sm font-semibold text-gray-800 align-middle whitespace-nowrap">
                   {item.endDate || "—"}
                 </td>
 
                 {/* Price */}
-                <td className="p-4 border-r border-border text-sm sm:text-base font-extrabold text-gray-950 align-middle">
+                <td className="p-4 border-r border-border text-center text-sm sm:text-base font-bold text-gray-950 align-middle whitespace-nowrap">
                   {item.isFree || item.price === "0đ" || item.price === "Miễn phí" || item.price === "Free" || item.price === "免费" || item.price === c.free ? (
                     <span className="text-[#16A34A]">{c.free || "Miễn phí"}</span>
                   ) : (
