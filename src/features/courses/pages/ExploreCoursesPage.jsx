@@ -35,7 +35,7 @@ const ExploreCoursesPage = () => {
 
   // Filter States
   const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
-  const [selectedStatuses, setSelectedStatuses] = useState([]) // [] means all, or array of selected status values
+  const [selectedStatus, setSelectedStatus] = useState("all") // "all" | "open" | "upcoming" | "closed"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [minPriceInput, setMinPriceInput] = useState("")
@@ -94,34 +94,14 @@ const ExploreCoursesPage = () => {
   }) => {
     setMinPriceInput(minPrice)
     setMaxPriceInput(maxPrice)
-    if (enrollmentStatus !== "all") {
-      setSelectedStatuses([enrollmentStatus])
-    } else {
-      setSelectedStatuses([])
-    }
+    setSelectedStatus(enrollmentStatus || "all")
     setCurrentPage(1)
   }
 
-  // Event 3: Multi-select status handler
-  const handleToggleStatus = (val) => {
+  // Event 3: Single-select status handler
+  const handleSelectStatus = (val) => {
     setCurrentPage(1)
-    if (val === "all") {
-      setSelectedStatuses([])
-      return
-    }
-    setSelectedStatuses((prev) => {
-      let next
-      if (prev.includes(val)) {
-        next = prev.filter((s) => s !== val)
-      } else {
-        next = [...prev, val]
-      }
-      const specificStatuses = ["open", "upcoming", "closed"]
-      if (specificStatuses.every((s) => next.includes(s))) {
-        return []
-      }
-      return next
-    })
+    setSelectedStatus((prev) => (prev === val ? "all" : val))
   }
 
   // Validate price range inputs
@@ -145,10 +125,9 @@ const ExploreCoursesPage = () => {
   }
 
   const activeEnrollmentStatus = useMemo(() => {
-    if (selectedStatuses.length === 0) return undefined
-    if (selectedStatuses.length === 1) return selectedStatuses[0]
-    return selectedStatuses.join(",")
-  }, [selectedStatuses])
+    if (!selectedStatus || selectedStatus === "all") return undefined
+    return selectedStatus
+  }, [selectedStatus])
 
   const resolvedLanguage = useMemo(() => {
     const code = (communityLanguage || "en").toLowerCase()
@@ -242,7 +221,7 @@ const ExploreCoursesPage = () => {
   const handleClearFilters = () => {
     setSearchInputValue("")
     setAppliedSearchQuery("")
-    setSelectedStatuses([])
+    setSelectedStatus("all")
     setContentType("all")
     setSortOrder("default")
     setMinPriceInput("")
@@ -269,16 +248,15 @@ const ExploreCoursesPage = () => {
   }
 
   const hasPriceFilter = minPriceInput !== "" || maxPriceInput !== ""
-  const hasActiveModalFilters = hasPriceFilter || selectedStatuses.length > 0
+  const hasActiveModalFilters = hasPriceFilter || selectedStatus !== "all"
   const hasActiveFilters =
     appliedSearchQuery !== "" ||
     contentType !== "all" ||
     sortOrder !== "default" ||
-    selectedStatuses.length > 0 ||
+    selectedStatus !== "all" ||
     hasPriceFilter
 
-  const modalEnrollmentStatus =
-    selectedStatuses.length === 1 ? selectedStatuses[0] : "all"
+  const modalEnrollmentStatus = selectedStatus
 
   // Check if we are loading initial page or after filter changes
   const isInitialLoading = (isLoading || isFetching) && currentPage === 1
@@ -394,23 +372,20 @@ const ExploreCoursesPage = () => {
           </div>
         </div>
 
-        {/* Row 2: Status multi-select list (visible on >= sm screens, on < sm it is available inside the filter dropdown modal) */}
+        {/* Row 2: Status single-select list (visible on >= sm screens, on < sm it is available inside the filter dropdown modal) */}
         <div className="hidden sm:flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-slate-700 mr-1">
             {sc.statusLabel || "Trạng thái:"}
           </span>
 
           {enrollmentStatusOptions.map((opt) => {
-            const isSelected =
-              opt.value === "all"
-                ? selectedStatuses.length === 0
-                : selectedStatuses.includes(opt.value)
+            const isSelected = selectedStatus === opt.value
 
             return (
               <button
                 key={opt.value}
                 type="button"
-                onClick={() => handleToggleStatus(opt.value)}
+                onClick={() => handleSelectStatus(opt.value)}
                 className={`h-8 px-4 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
                   isSelected
                     ? "bg-[#b20a1c] text-white shadow-xs"
