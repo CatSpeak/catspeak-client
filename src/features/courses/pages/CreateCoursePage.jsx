@@ -527,30 +527,37 @@ const CreateCoursePage = () => {
         </div>
 
         {/* ─── Action Buttons ─── */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-border mt-auto w-full">
-          {isEditMode && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-border mt-auto w-full">
+          {/* Secondary / auxiliary actions (Delete & Clear) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            {isEditMode && (
+              <PillButton
+                type="button"
+                variant="outline"
+                onClick={() => setShowDeleteModal(true)}
+                disabled={isDeleting}
+                className="flex-1 sm:flex-initial !border-red-500 !text-red-600 hover:!bg-red-50 whitespace-nowrap"
+              >
+                <Trash2 size={16} />
+                <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>
+              </PillButton>
+            )}
             <PillButton
               type="button"
-              variant="outline"
-              onClick={() => setShowDeleteModal(true)}
-              disabled={isDeleting}
-              className="mr-auto !border-red-500 !text-red-600 hover:!bg-red-50"
+              variant="secondary"
+              onClick={handleClear}
+              className={`${isEditMode ? "flex-1 sm:flex-initial" : "w-full sm:w-auto"} whitespace-nowrap`}
             >
-              <Trash2 size={16} />
-              <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>
+              {cc.clear || c.clearBtn || "Làm mới"}
             </PillButton>
-          )}
-          <PillButton
-            type="button"
-            variant="secondary"
-            onClick={handleClear}
-          >
-            {cc.clear || c.clearBtn || "Làm mới"}
-          </PillButton>
+          </div>
+
+          {/* Primary Action Button (Bottom on mobile) */}
           <PillButton
             type="submit"
             variant="primary"
             disabled={isCreating || isUpdating}
+            className="w-full sm:w-auto whitespace-nowrap"
           >
             {labelCourseAction}
           </PillButton>
