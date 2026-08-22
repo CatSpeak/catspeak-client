@@ -611,6 +611,8 @@ export default {
     toastVerifyProfile: "Vui lòng hoàn thành định danh tài khoản để tiếp tục giao dịch!",
     toastScheduleConflict: "Xung đột lịch với lớp {{class}} ({{start}} - {{end}})!",
     toastScheduleConflictDefault: "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.",
+    toastStartDateMismatchFirstSession: "Ngày bắt đầu lớp học ({{startDate}}) không trùng với ngày buổi học đầu tiên ({{firstSessionDate}}). Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
+    toastStartDateMismatchFirstSessionDefault: "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
     toastAdmissionStartPast: "Thời gian bắt đầu tuyển sinh không được ở quá khứ!",
     toastAdmissionEndPast: "Thời gian kết thúc tuyển sinh không được ở quá khứ!",
     toastStartPast: "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
