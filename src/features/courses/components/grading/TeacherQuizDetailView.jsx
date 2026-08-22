@@ -15,6 +15,7 @@ import {
   useGetTeacherStudentAttemptQuery,
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import { useGetPublicProfileQuery } from "@/store/api/userApi"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import Pagination from "@/shared/components/ui/navigation/Pagination"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
@@ -22,6 +23,67 @@ import { IconButton } from "@/shared/components/ui/buttons"
 import { getQuizObjectFromResponse } from "@/features/courses/utils/quizUtils"
 import TableColumnFilter from "./TableColumnFilter"
 import MobileSubmissionsFilterModal from "./MobileSubmissionsFilterModal"
+
+// Student Initials Helper
+const getStudentInitials = (name, fallback) => {
+  if (!name || typeof name !== "string") return fallback
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+  return name.slice(0, 2).toUpperCase()
+}
+
+const QuizStudentAvatar = ({ student, size = "md", fallbackInitials = "HV" }) => {
+  const [hasError, setHasError] = useState(false)
+  const targetId =
+    student?.studentId ||
+    (typeof student?.id === "number" ||
+    (typeof student?.id === "string" && !student?.id.startsWith("submission-"))
+      ? student.id
+      : null)
+
+  const { data: profileResponse } = useGetPublicProfileQuery(targetId, {
+    skip: Boolean(student?.avatar) || !targetId,
+  })
+  const profile = profileResponse?.data || profileResponse
+  const avatarUrl =
+    student?.avatar ||
+    profile?.avatarUrl ||
+    profile?.avatar ||
+    profile?.meetingAvatarUrl
+
+  const studentName =
+    student?.studentName ||
+    student?.name ||
+    profile?.fullName ||
+    profile?.name ||
+    fallbackInitials
+  const initials = getStudentInitials(studentName, fallbackInitials)
+
+  const sizeClasses =
+    size === "sm" ? "w-10 h-10 text-xs" : "w-12 h-12 text-sm"
+
+  if (avatarUrl && !hasError) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={studentName}
+        onError={() => setHasError(true)}
+        className={`${sizeClasses} rounded-full object-cover shrink-0 border border-border`}
+      />
+    )
+  }
+
+  return (
+    <div
+      className={`${sizeClasses} rounded-full bg-[#990011] text-white font-bold flex items-center justify-center shrink-0 shadow-2xs`}
+    >
+      {initials}
+    </div>
+  )
+}
+
 import {
   Pencil,
   MoreVertical,
@@ -274,16 +336,6 @@ const formatTimeAgo = (dateStr, qg) => {
   if (diffHours < 24) return interpolate(qg.hoursAgo, { count: diffHours })
   const diffDays = Math.floor(diffHours / 24)
   return interpolate(qg.daysAgo, { count: diffDays })
-}
-
-// Student Initials Helper
-const getStudentInitials = (name, fallback) => {
-  if (!name || typeof name !== "string") return fallback
-  const parts = name.trim().split(/\s+/)
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-  }
-  return name.slice(0, 2).toUpperCase()
 }
 
 // Submission Status Helper
@@ -2048,17 +2100,11 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         {/* Top Row: Avatar, Name, Time & Eye Action Button */}
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3 min-w-0">
-                            {st.avatar ? (
-                              <img
-                                src={st.avatar}
-                                alt={studentName}
-                                className="w-10 h-10 rounded-full object-cover shrink-0"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 font-bold text-xs flex items-center justify-center shrink-0">
-                                {initials}
-                              </div>
-                            )}
+                            <QuizStudentAvatar
+                              student={st}
+                              size="sm"
+                              fallbackInitials={qg.studentInitials || "HV"}
+                            />
                             <div className="min-w-0">
                               <h5 className="font-bold text-gray-900 text-sm truncate">
                                 {studentName}
@@ -2218,17 +2264,11 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             {/* Col 1: Student info */}
                             <td className="py-4 px-5 border-r border-border">
                               <div className="flex items-center gap-3">
-                                {st.avatar ? (
-                                  <img
-                                    src={st.avatar}
-                                    alt={studentName}
-                                    className="w-12 h-12 rounded-full object-cover shrink-0"
-                                  />
-                                ) : (
-                                  <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-600 font-bold text-sm flex items-center justify-center shrink-0">
-                                    {initials}
-                                  </div>
-                                )}
+                                <QuizStudentAvatar
+                                  student={st}
+                                  size="md"
+                                  fallbackInitials={qg.studentInitials || "HV"}
+                                />
                                 <div>
                                   <h5 className="font-bold text-gray-900 text-sm">
                                     {studentName}
