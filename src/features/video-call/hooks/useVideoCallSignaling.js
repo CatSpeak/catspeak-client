@@ -30,8 +30,8 @@ export const useVideoCallSignaling = (handlers = {}) => {
       return
     }
 
-    const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || "/api").trim().replace(/^\/+(https?:\/\/)/i, "$1")
-    const baseUrl = rawApiUrl.replace(/\/api\/?$/, "")
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "/api"
+    const baseUrl = apiUrl.replace(/\/api\/?$/, "")
     const hubUrl = `${baseUrl}/hubs/videochat`
 
     console.info("[VideoCallSignalR] Connecting to hub at:", hubUrl)

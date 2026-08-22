@@ -28,16 +28,9 @@ export function tokenSecondsRemaining(token) {
 // How many seconds before expiry we proactively refresh (0 = refresh when expired)
 export const PROACTIVE_REFRESH_BUFFER = 0
 
-// Normalize baseUrl to guard against accidental leading slash typos like "/http://localhost:7001/api"
-function normalizeBaseUrl(url) {
-  if (!url) return "/api"
-  const trimmed = url.trim()
-  return trimmed.replace(/^\/+(https?:\/\/)/i, "$1")
-}
-
 // ─── Base Query ─────────────────────────────────────────────────────
 const baseQuery = fetchBaseQuery({
-  baseUrl: normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL),
+  baseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
   prepareHeaders: (headers, { getState, extraOptions }) => {
     if (!extraOptions?.skipAuthHeader) {
       const token = getState().auth.token
@@ -67,7 +60,7 @@ const baseQuery = fetchBaseQuery({
 })
 
 const instructorBaseQuery = fetchBaseQuery({
-  baseUrl: normalizeBaseUrl(import.meta.env.VITE_INSTRUCTOR_API_BASE_URL),
+  baseUrl: import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api",
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token
     if (token) {
