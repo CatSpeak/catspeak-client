@@ -167,7 +167,21 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
       )
       dispatch(
         roomsApi.util.invalidateTags([
+          { type: "Breakout" },
           { type: "Breakout", id: parentSessionIdValue },
+        ]),
+      )
+    },
+    [dispatch],
+  )
+
+  const handleParticipantLeft = useCallback(
+    (sessionId, accountId) => {
+      console.info("[SignalR] ParticipantLeft received:", { sessionId, accountId })
+      dispatch(
+        roomsApi.util.invalidateTags([
+          { type: "Breakout" },
+          { type: "Breakout", id: sessionId },
         ]),
       )
     },
@@ -217,6 +231,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
     JoinBreakoutRoom: handleJoinBreakoutRoom,
     ReturnToMainRoom: handleReturnToMainRoom,
     BreakoutStatusChanged: handleBreakoutStatusChanged,
+    ParticipantLeft: handleParticipantLeft,
     BroadcastNotification: handleBroadcastNotification,
   })
 
