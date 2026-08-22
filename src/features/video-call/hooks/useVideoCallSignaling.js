@@ -24,20 +24,21 @@ export const useVideoCallSignaling = (handlers = {}) => {
   const hasToken = !!token
 
   useEffect(() => {
-    if (!hasToken) {
+    const activeToken = store.getState().auth.token || token || localStorage.getItem("token")
+    if (!activeToken) {
       console.warn("[VideoCallSignalR] No token found, cannot connect.")
       return
     }
 
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || "/api"
-    const baseUrl = apiUrl.replace(/\/api\/?$/, "")
+    const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || "/api").trim().replace(/^\/+(https?:\/\/)/i, "$1")
+    const baseUrl = rawApiUrl.replace(/\/api\/?$/, "")
     const hubUrl = `${baseUrl}/hubs/videochat`
+
+    console.info("[VideoCallSignalR] Connecting to hub at:", hubUrl)
 
     const newConnection = new HubConnectionBuilder()
       .withUrl(hubUrl, {
-        accessTokenFactory: () => store.getState().auth.token,
-        transport:
-          HttpTransportType.ServerSentEvents | HttpTransportType.LongPolling,
+        accessTokenFactory: () => store.getState().auth.token || token || localStorage.getItem("token") || "",
       })
       .withAutomaticReconnect()
       .configureLogging(LogLevel.None)
@@ -48,6 +49,7 @@ export const useVideoCallSignaling = (handlers = {}) => {
     const safeHandler =
       (name) =>
       (...args) => {
+        console.info(`[VideoCallSignalR] Event received: ${name}`, ...args)
         const handler = handlersRef.current[name]
         if (handler) {
           handler(...args)
@@ -71,18 +73,14 @@ export const useVideoCallSignaling = (handlers = {}) => {
         await newConnection.start()
         setIsConnected(true)
         setConnectionId(newConnection.connectionId)
+        console.info("[VideoCallSignalR] Hub connected successfully. ConnectionId:", newConnection.connectionId)
 
         // Notify handler of connection if needed
         if (handlersRef.current.OnConnected) {
           handlersRef.current.OnConnected(newConnection)
         }
       } catch (err) {
-        if (
-          !err.toString().includes("AbortError") &&
-          !err.toString().includes("negotiation")
-        ) {
-          console.error("[VideoCallSignalR] Connection Error:", err)
-        }
+        console.error("[VideoCallSignalR] Connection Error:", err)
         setIsConnected(false)
       }
     }

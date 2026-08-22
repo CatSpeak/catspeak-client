@@ -28,17 +28,15 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
       return
     }
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api"
-    const hubUrl = `${baseUrl.replace(/\/api$/, "")}/hubs/videochat`
+    const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || "/api").trim().replace(/^\/+(https?:\/\/)/i, "$1")
+    const baseUrl = rawApiUrl.replace(/\/api\/?$/, "")
+    const hubUrl = `${baseUrl}/hubs/videochat`
 
-    console.log("[VideoChatSignalR] Connecting to VideoChatHub at:", hubUrl)
+    console.info("[VideoChatSignalR] Connecting to VideoChatHub at:", hubUrl)
 
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
         accessTokenFactory: () => token,
-        transport:
-          signalR.HttpTransportType.ServerSentEvents |
-          signalR.HttpTransportType.LongPolling,
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.None)
