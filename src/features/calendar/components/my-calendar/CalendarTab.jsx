@@ -60,11 +60,12 @@ const CalendarTab = ({
             <ChevronLeft />
           </IconButton>
           <div className='flex'>
-            <span className="text-base md:text-xl font-semibold text-[#1A1A1A] min-w-[80px] max-w-[80px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
-              {localizedMonth}
+            <span className="text-lg md:text-xl font-semibold text-[#1A1A1A] min-w-[80px] md:min-w-[150px] text-center flex items-center justify-center gap-2">
+              <span className="hidden md:inline">{localizedMonth}</span>
+              <span className="md:hidden">{monthNum.padStart(2, '0')}/{yearNum}</span>
             </span>
             <div className="relative flex items-center justify-center w-6 h-6">
-              <CalendarIcon className='mt-6 md:mt-0' />
+              <CalendarIcon className='' />
               <div className="absolute top-0 left-0 w-6 h-6 opacity-0 overflow-hidden cursor-pointer">
                 <DatePicker
                   value={currentDate.toDate()}
