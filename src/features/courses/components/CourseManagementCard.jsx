@@ -111,14 +111,14 @@ const CourseManagementCard = ({
     return (
       <div
         onClick={() => onOpen(item)}
-        className="bg-white rounded-3xl border border-border hover:border-border p-4 sm:p-5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 md:gap-6 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group"
+        className="bg-white rounded-3xl border border-border hover:border-border p-3.5 sm:p-5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-6 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group"
       >
         {/* Top / Left: Thumbnail and Main Info */}
-        <div className="flex items-start sm:items-center gap-3.5 sm:gap-5 flex-1 min-w-0">
+        <div className="flex items-start sm:items-center gap-3 sm:gap-5 flex-1 min-w-0">
           <CourseThumbnail
             item={item}
             title={item.title}
-            className="h-20 w-28 sm:h-24 sm:w-36 rounded-2xl bg-slate-100 shadow-xs shrink-0"
+            className="h-20 w-24 sm:h-24 sm:w-36 rounded-2xl bg-slate-100 shadow-xs shrink-0"
           >
             <div className="absolute top-2 left-2 bg-[#F59E0B] text-gray-950 font-bold text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
               <Users size={11} className="text-gray-950" />
@@ -127,27 +127,27 @@ const CourseManagementCard = ({
           </CourseThumbnail>
 
           <div className="flex flex-col min-w-0 flex-1 gap-1">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <h3 className="font-bold text-base sm:text-lg text-gray-950 truncate group-hover:text-[#990011] transition-colors">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2.5 min-w-0 flex-1">
+                <CourseStatusPill status={item.status} className="w-fit self-start" />
+                <h3 className="font-bold text-sm sm:text-lg text-gray-950 truncate group-hover:text-[#990011] transition-colors">
                   {item.title}
                 </h3>
-                <CourseStatusPill status={item.status} />
               </div>
               {/* On mobile: 3-dots action menu in header */}
-              <div className="md:hidden shrink-0" onClick={(e) => e.stopPropagation()}>
+              <div className="md:hidden shrink-0 -mt-1 -mr-1" onClick={(e) => e.stopPropagation()}>
                 <CourseActionMenu item={item} labels={labels} onEdit={onEdit} onDelete={onDelete} />
               </div>
             </div>
 
             {subtitleText && <p className="text-xs font-medium text-gray-500 truncate">{subtitleText}</p>}
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600 mt-0.5 sm:mt-1">
-              <span className="flex items-center gap-1.5">
-                {isCourse ? <GraduationCap size={14} className="text-gray-500 shrink-0" /> : <Clock size={13} className="text-gray-500 shrink-0" />}
+            <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-xs text-gray-600 mt-0.5 sm:mt-1">
+              <span className="flex items-center gap-1.5 shrink-0">
+                {isCourse ? <GraduationCap size={13} className="text-gray-500 shrink-0" /> : <Clock size={13} className="text-gray-500 shrink-0" />}
                 <span className="truncate">{scheduleText}</span>
               </span>
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 shrink-0">
                 <Calendar size={13} className="text-gray-500 shrink-0" />
                 <span className="truncate">{dateRangeText}</span>
               </span>
@@ -156,21 +156,33 @@ const CourseManagementCard = ({
         </div>
 
         {/* Bottom / Right: Pricing, Progress & Desktop Action Menu */}
-        <div className="flex items-center justify-between md:justify-end gap-4 sm:gap-6 pt-3 md:pt-0 border-t border-border md:border-t-0 shrink-0">
+        <div className="flex items-center justify-between md:justify-end gap-3 sm:gap-6 pt-3 md:pt-0 border-t border-gray-100 md:border-t-0 shrink-0">
           {isCourse ? (
-            <div className="flex items-center md:flex-col md:items-end justify-between w-full md:w-auto gap-1 text-left md:text-right">
-              <span className="text-[11px] text-gray-400 font-bold">{labels.createdDate || "Ngày tạo"}</span>
-              <span className="text-xs sm:text-sm font-bold text-gray-900">{item.createdAt || (labels.tba || "—")}</span>
+            <div className="flex items-center justify-between w-full md:w-auto gap-2 text-left md:text-right">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] text-gray-400 font-semibold">{labels.createdDate || "Ngày tạo"}:</span>
+                <span className="text-xs sm:text-sm font-bold text-gray-900">{item.createdAt || (labels.tba || "—")}</span>
+              </div>
+              <span className="text-[#b20a1c] font-bold text-xs hover:underline flex items-center gap-1 md:hidden">
+                {labels.manageDetails || "Quản lý chi tiết"} →
+              </span>
             </div>
           ) : (
-            <>
-              <div className="flex flex-col items-start md:items-end gap-0.5 text-left md:text-right">
-                <span className="text-[11px] text-gray-500">{labels.price || "Giá cả"}</span>
-                <span className={`text-xs sm:text-sm font-bold ${isFree ? "text-[#16A34A]" : "text-gray-950"}`}>{priceDisplay}</span>
+            <div className="flex flex-col gap-2 w-full md:w-auto md:flex-row md:items-center md:gap-6">
+              <div className="flex items-center justify-between md:justify-start gap-4">
+                <div className="flex items-center md:flex-col items-start md:items-end gap-1.5 md:gap-0.5 text-left md:text-right">
+                  <span className="text-[11px] text-gray-500 font-medium">{labels.price || "Giá cả"}:</span>
+                  <span className={`text-xs sm:text-sm font-bold ${isFree ? "text-[#16A34A]" : "text-gray-950"}`}>{priceDisplay}</span>
+                </div>
+
+                <div className="flex items-center md:hidden gap-1 text-[11px] font-semibold text-gray-700">
+                  <span>{labels.progress || "Tiến độ"}:</span>
+                  <span className="font-bold text-[#8B0000]">{progressPercent}%</span>
+                </div>
               </div>
 
-              <div className="w-32 sm:w-36 flex flex-col gap-1">
-                <div className="flex justify-between text-[11px] font-semibold text-gray-700">
+              <div className="w-full md:w-36 flex flex-col gap-1">
+                <div className="hidden md:flex justify-between text-[11px] font-semibold text-gray-700">
                   <span>{labels.progress || "Tiến độ"}</span>
                   <span>{progressPercent}%</span>
                 </div>
@@ -178,7 +190,7 @@ const CourseManagementCard = ({
                   <div className="h-full bg-[#8B0000] rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {/* Desktop 3-dots action menu */}

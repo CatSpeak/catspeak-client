@@ -136,12 +136,16 @@ const transformCourse = (course) => {
     { nonNegative: true },
   )
   const teacher = transformPerson(course.teacher)
-  const priceRange = isRecord(course.priceRange)
-    ? {
-      min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
-      max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
-    }
-    : null
+  const minPrice = toNullableNumber(course.minPrice ?? course.priceRange?.min, { nonNegative: true })
+  const maxPrice = toNullableNumber(course.maxPrice ?? course.priceRange?.max, { nonNegative: true })
+  const priceRange = (minPrice !== null || maxPrice !== null)
+    ? { min: minPrice, max: maxPrice }
+    : (isRecord(course.priceRange)
+      ? {
+        min: toNullableNumber(course.priceRange.min, { nonNegative: true }),
+        max: toNullableNumber(course.priceRange.max, { nonNegative: true }),
+      }
+      : null)
 
   return {
     ...course,
@@ -162,6 +166,8 @@ const transformCourse = (course) => {
     status: toText(course.status),
     startDate: toText(course.startDate),
     endDate: toText(course.endDate),
+    minPrice,
+    maxPrice,
     priceRange,
     thumbnailUrl: toText(course.thumbnailUrl),
     createdAt: toText(course.createdAt),

@@ -104,12 +104,15 @@ const AllClassesPage = () => {
         onCreate={() => navigate("/workspace/classes/create-class")}
       />
 
-      <Tabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onChange={handleTabChange}
-        fullWidth={false}
-      />
+      <div className="w-full overflow-x-auto scrollbar-hidden -mb-2">
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          fullWidth={false}
+          className="min-w-max border-b border-border"
+        />
+      </div>
 
       {error && data !== undefined && (
         <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">

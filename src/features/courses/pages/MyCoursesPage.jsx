@@ -314,23 +314,25 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
       </div>
 
       {/* ─── Navigation Tabs & Controls ─── */}
-      <div className="flex items-end justify-between border-b border-gray-200/90 mt-3 mb-3">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between sm:border-b sm:border-gray-200/90 mt-3 mb-3 gap-3 sm:gap-4">
         {/* Left Tabs */}
-        <Tabs
-          tabs={mainTabs}
-          activeTab={activeTab}
-          onChange={handleTabChange}
-          fullWidth={false}
-          className="border-b-0 -mb-[1px]"
-        />
+        <div className="w-full sm:w-auto overflow-x-auto scrollbar-hidden -mb-[1px] border-b border-gray-200/90 sm:border-b-0">
+          <Tabs
+            tabs={mainTabs}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+            fullWidth="responsive"
+            className="w-full sm:w-auto border-b-0"
+          />
+        </div>
 
         {/* Right Filter & View Mode Controls */}
-        <div className="flex items-center gap-3 pb-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2.5 pb-2 shrink-0">
           <CourseSelectFilter
             value={statusFilter}
             onChange={setStatusFilter}
             options={statusOptions}
-            align="right"
+            align="left"
           />
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </div>
