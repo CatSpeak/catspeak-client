@@ -389,7 +389,7 @@ const ExploreCoursesPage = () => {
             <ViewModeToggle
               value={viewMode}
               onChange={setViewMode}
-              className="hidden sm:block"
+              className="hidden sm:flex"
             />
           </div>
         </div>
