@@ -18,6 +18,7 @@ import { getDisplayData } from "../../utils/curriculumUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { PillButton } from "@/shared/components/ui/buttons"
+import AssignmentStatusBadge from "./AssignmentStatusBadge"
 
 // Helper function to resolve icon and background based on item type
 const getItemConfig = (type) => {
@@ -138,7 +139,7 @@ const StudentLessonRow = ({
     e.stopPropagation();
     const materialData = item.material || item
     const fileUrl = materialData.fileUrl || materialData.url || materialData.FileUrl || item.fileUrl;
-    
+
     if (!fileUrl) {
       handleRowClick();
       return;
@@ -211,19 +212,15 @@ const StudentLessonRow = ({
     }
 
     if (displayData.type === "assignment") {
-      const status = item.status || item.studentStatus || "pending";
-      const isDone = status === "completed" || status === "submitted" || status === "graded" || item.isCompleted;
+      const status = item.status || item.studentStatus;
       return (
         <div className="flex items-center gap-3">
-          {isDone ? (
-            <span className="bg-[#D1F7E3] text-[#039855] px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-              Đã nộp
-            </span>
-          ) : (
-            <span className="bg-[#FEF0C7] text-[#B54708] px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-              Cần nộp
-            </span>
-          )}
+          <AssignmentStatusBadge
+            status={status}
+            isCompleted={item.isCompleted}
+            submittedAt={item.submittedAt}
+            deadline={item.deadline || item.dueDate}
+          />
           <ChevronRight size={18} className="text-[#191C1D] shrink-0" />
         </div>
       )

@@ -616,21 +616,22 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
           {activeDetailView ? (
             <div className="w-full">
               {activeDetailView.type === 'material' && (
-                <MaterialDetailView 
-                  itemData={activeDetailView.item} 
-                  onBack={() => setActiveDetailView(null)} 
+                <MaterialDetailView
+                  itemData={activeDetailView.item}
+                  onBack={() => setActiveDetailView(null)}
                 />
               )}
               {activeDetailView.type === 'link' && (
-                <LinkDetailView 
-                  itemData={activeDetailView.item} 
-                  onBack={() => setActiveDetailView(null)} 
+                <LinkDetailView
+                  itemData={activeDetailView.item}
+                  onBack={() => setActiveDetailView(null)}
                 />
               )}
               {activeDetailView.type === 'assignment' && (
-                <AssignmentDetailView 
-                  itemData={activeDetailView.item} 
-                  onBack={() => setActiveDetailView(null)} 
+                <AssignmentDetailView
+                  sectionData={activeDetailView.section}
+                  itemData={activeDetailView.item}
+                  onBack={() => setActiveDetailView(null)}
                 />
               )}
             </div>
@@ -665,7 +666,7 @@ const ClassLectureHallPage = ({ id, isStudent }) => {
                       onDeleteItem={handleDeleteItem}
                       onSelectLesson={(item, type) => {
                         if (type === 'link' || type === 'material' || type === 'assignment') {
-                          setActiveDetailView({ type, item });
+                          setActiveDetailView({ type, item, section });
                         }
                       }}
                     />
