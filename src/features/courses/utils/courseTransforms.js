@@ -224,21 +224,24 @@ export const mapCourseTableRow = (
   const classCountNum = toNonNegativeNumber(course.classCount) ?? 0
   const hasClasses = classCountNum > 0
   const totalStudents = toDisplayCount(course.totalStudents ?? course.studentCount)
-  const minP = toNonNegativeNumber(course.priceRange?.min ?? course.minPrice ?? course.price ?? course.tuitionFee)
-  const maxP = toNonNegativeNumber(course.priceRange?.max ?? course.maxPrice ?? course.price ?? course.tuitionFee)
+  const minP = toNonNegativeNumber(course.minPrice ?? course.priceRange?.min ?? course.price ?? course.tuitionFee)
+  const maxP = toNonNegativeNumber(course.maxPrice ?? course.priceRange?.max ?? course.price ?? course.tuitionFee)
 
   const formattedPrice = (() => {
+    if (!hasClasses && minP === null && maxP === null) {
+      return labels.tba || "Chưa xác định"
+    }
     if (minP === 0 && (maxP === 0 || maxP === null)) {
       return labels.free || "Miễn phí"
     }
     if (minP !== null && maxP !== null) {
       return minP === maxP
-        ? formatCurrencyVND(minP)
-        : `${formatCurrencyVND(minP)} - ${formatCurrencyVND(maxP)}`
+        ? (minP === 0 ? (labels.free || "Miễn phí") : formatCurrencyVND(minP))
+        : `${minP === 0 ? (labels.free || "Miễn phí") : formatCurrencyVND(minP)} - ${formatCurrencyVND(maxP)}`
     }
     if (minP !== null) return minP === 0 ? (labels.free || "Miễn phí") : formatCurrencyVND(minP)
     if (maxP !== null) return maxP === 0 ? (labels.free || "Miễn phí") : formatCurrencyVND(maxP)
-    return labels.tba || "—"
+    return labels.tba || "Chưa xác định"
   })()
 
   const classCountText = hasClasses
@@ -257,16 +260,19 @@ export const mapCourseTableRow = (
     classCountNum,
     students: studentsText,
     progress: getProgressPercent(course.progress),
+    // 1. Ngày mở: Ngày tạo Khóa học (createdAt)
     startDate: (() => {
-      const raw = course.startDate || course.createdAt
+      const raw = course.createdAt || course.startDate
       const formatted = (formatDate && raw) ? formatDate(raw) : null
-      return formatted || (course.startDate ? course.startDate : (labels.tba || "—"))
+      return formatted || (raw ? new Date(raw).toLocaleDateString("vi-VN") : (labels.tba || "Chưa xác định"))
     })(),
+    // 2. Ngày hết: Ngày kết thúc của lớp cuối cùng kết thúc, nếu còn lớp đang hoạt động thì hiển thị chưa xác định
     endDate: (() => {
-      const raw = course.endDate || course.enrollmentEnd
+      const raw = course.endDate
       const formatted = (formatDate && raw) ? formatDate(raw) : null
-      return formatted || (course.endDate ? course.endDate : (labels.tba || "—"))
+      return formatted || (raw ? new Date(raw).toLocaleDateString("vi-VN") : (labels.tba || "Chưa xác định"))
     })(),
+    // 3. Giá cả: min - max (vd: 900.000đ - 1.500.000đ)
     price: formattedPrice,
     isFree: (minP === 0 && (maxP === 0 || maxP === null)) || (minP === 0 && maxP === undefined),
     status: course.status,

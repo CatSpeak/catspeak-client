@@ -21,10 +21,13 @@ const Tabs = memo(
     inactiveClassName = "text-[#606060]",
     fullWidth = true,
   }) => {
+    const isResponsive = fullWidth === "responsive"
+    const isFull = fullWidth === true
+
     return (
       <div
         className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${
-          !fullWidth ? "gap-1 sm:gap-2" : ""
+          !isFull && !isResponsive ? "gap-1 sm:gap-2" : ""
         } ${className}`}
       >
         {tabs.map((tab) => {
@@ -38,13 +41,15 @@ const Tabs = memo(
               type="button"
               onClick={() => onChange(tabKey)}
               className={`h-11 shrink-0 group relative flex items-center justify-center transition-colors cursor-pointer ${
-                fullWidth
-                  ? "flex-1 min-w-fit sm:min-w-[120px]"
-                  : "flex-none px-2.5 sm:px-3.5"
+                isResponsive
+                  ? "flex-1 sm:flex-initial px-3 sm:px-4 min-w-fit"
+                  : isFull
+                    ? "flex-1 min-w-fit sm:min-w-[120px]"
+                    : "flex-none px-2.5 sm:px-3.5"
               }`}
             >
               <div
-                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${
+                className={`relative h-full flex items-center justify-center gap-2 text-sm transition-colors w-full px-2 ${
                   isActive ? activeClassName : inactiveClassName
                 }`}
               >
