@@ -48,56 +48,50 @@ const TeacherInforCard = ({
 
         {/* Padding bên dưới email */}
         <div className="w-full pt-3">
-          {/* 3 cards thể hiện: rating, reviewCount, totalClasses */}
-          {(() => {
-            const rawReviews = Number(
-              teacher.reviewCount ??
-              teacher.totalReviews ??
-              rawCourse.reviewCount ??
-              0
-            )
-            const displayReviews = rawReviews >= 5 ? rawReviews : "—"
+          {/* Cards thể hiện: rating, reviewCount (nếu >= 5), totalClasses */}
+          <div className="flex items-center justify-center gap-2 w-full">
+            {/* Rating */}
+            {Number(teacher.totalReviews ?? teacher.reviewCount ?? 0) >= 5 && (
+              <TeacherStatCard
+                className="flex-1 min-w-0"
+                title={scd.rating || "Đánh giá"}
+                value={
+                  teacher.rating ??
+                  teacher.averageRating ??
+                  rawCourse.rating ??
+                  "5.0"
+                }
+                color="#f59e0b"
+                icon={
+                  <Star size={13} className="fill-amber-400 text-amber-400" />
+                }
+              />
+            )}
 
-            return (
-              <div className="grid grid-cols-3 gap-2 w-full">
-                {/* Rating */}
-                <TeacherStatCard
-                  title="Đánh giá"
-                  value={
-                    teacher.rating ??
-                    teacher.averageRating ??
-                    rawCourse.rating ??
-                    "5.0"
-                  }
-                  color="#f59e0b"
-                  icon={
-                    <Star size={13} className="fill-amber-400 text-amber-400" />
-                  }
-                />
+            {/* Review Count */}
 
-                {/* Review Count */}
-                <TeacherStatCard
-                  title="Lượt đánh giá"
-                  value={displayReviews}
-                  color="#8c65e0"
-                  icon={<Medal size={15} />}
-                />
+            <TeacherStatCard
+              className="flex-1 min-w-0"
+              title={scd.totalReviews || "Lượt đánh giá"}
+              value={teacher.totalReviews ?? teacher.reviewCount}
+              color="#8c65e0"
+              icon={<Medal size={15} />}
+            />
 
-                {/* Total Classes */}
-                <TeacherStatCard
-                  title="Lớp học"
-                  value={
-                    teacher.totalClasses ??
-                    teacher.classCount ??
-                    classes.length ??
-                    0
-                  }
-                  color="#1c7dfc"
-                  icon={<BookOpen size={15} />}
-                />
-              </div>
-            )
-          })()}
+            {/* Total Classes */}
+            <TeacherStatCard
+              className="flex-1 min-w-0"
+              title={scd.classesCount || "Lớp học"}
+              value={
+                teacher.totalClasses ??
+                teacher.classCount ??
+                classes.length ??
+                0
+              }
+              color="#1c7dfc"
+              icon={<BookOpen size={15} />}
+            />
+          </div>
         </div>
 
         {/* Introduction paragraph */}
@@ -105,6 +99,7 @@ const TeacherInforCard = ({
           {teacher.introduction ||
             teacher.bio ||
             teacher.description ||
+            scd.defaultBio ||
             "Giảng viên tâm huyết với nhiều năm kinh nghiệm giảng dạy ngôn ngữ và phát triển kỹ năng cho học viên."}
         </p>
       </div>
@@ -123,14 +118,14 @@ const TeacherInforCard = ({
           className="flex-1 h-10 bg-gradient-to-r from-[#e3495b] to-[#f59aa5] hover:opacity-95 text-white text-xs sm:text-sm font-bold rounded-full flex items-center justify-center gap-1.5 sm:gap-2 transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
         >
           <SquareUserRound size={16} />
-          <span>Trang cá nhân</span>
+          <span>{scd.profileBtn || "Trang cá nhân"}</span>
         </button>
 
         <button
           type="button"
           onClick={handleContactTeacher}
           disabled={!teacher.accountId && !teacher.id}
-          title="Nhắn tin với giảng viên"
+          title={scd.messageTeacher || "Nhắn tin với giảng viên"}
           className="h-10 w-10 rounded-full border border-cath-red-700 hover:bg-red-50 text-cath-red-700 flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
         >
           <Mail size={17} />

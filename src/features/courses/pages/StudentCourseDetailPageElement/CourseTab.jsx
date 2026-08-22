@@ -7,8 +7,6 @@ import {
   Users,
   GraduationCap,
   CheckCircle2,
-  ChevronUp,
-  ChevronDown,
   Calendar,
   ExternalLink,
   Star,
@@ -63,7 +61,7 @@ const CourseTab = ({
                 <div className="flex items-center gap-2">
                   <BookOpen size={18} className="text-cath-red-700" />
                   <span className="text-xs sm:text-sm font-semibold text-gray-500">
-                    Tổng số lớp
+                    {scd.totalClasses || "Tổng số lớp"}
                   </span>
                 </div>
                 <div className="text-xl sm:text-2xl font-bold text-gray-900 mt-3">
@@ -76,12 +74,13 @@ const CourseTab = ({
                 <div className="flex items-center gap-2">
                   <Video size={18} className="text-cath-red-700" />
                   <span className="text-xs sm:text-sm font-semibold text-gray-500">
-                    Hình thức học
+                    {scd.learningMethod || "Hình thức học"}
                   </span>
                 </div>
                 <div className="text-sm sm:text-base font-bold text-gray-900 mt-3 truncate">
                   {rawCourse.teachingMethod ||
                     c.student?.onlineClassroom ||
+                    scd.defaultOnlineClassroom ||
                     "Phòng học trực tuyến Cat Speak"}
                 </div>
               </div>
@@ -91,11 +90,14 @@ const CourseTab = ({
                 <div className="flex items-center gap-2">
                   <Globe size={18} className="text-cath-red-700" />
                   <span className="text-xs sm:text-sm font-semibold text-gray-500">
-                    Ngôn ngữ
+                    {scd.language || "Ngôn ngữ"}
                   </span>
                 </div>
                 <div className="text-sm sm:text-base font-bold text-gray-900 mt-3 truncate">
-                  {rawCourse.languageName || rawCourse.language || "Tiếng Anh"}
+                  {rawCourse.languageName ||
+                    rawCourse.language ||
+                    scd.defaultLanguage ||
+                    "Tiếng Anh"}
                 </div>
               </div>
             </div>
@@ -103,14 +105,15 @@ const CourseTab = ({
             {/* Về khóa học */}
             <div className="bg-white rounded-3xl p-5 sm:p-7 border border-gray-100 shadow-sm flex flex-col gap-3.5">
               <h3 className="text-base sm:text-lg font-bold text-gray-900">
-                Về khóa học
+                {scd.aboutCourse || "Về khóa học"}
               </h3>
               <div className="text-sm sm:text-base text-gray-600 font-normal leading-relaxed text-justify">
                 <RenderHTML
                   html={rawCourse.description}
                   fallback={
                     <span className="text-gray-500 italic text-sm">
-                      Chưa có thông tin mô tả chi tiết cho khóa học này.
+                      {scd.noCourseDescription ||
+                        "Chưa có thông tin mô tả chi tiết cho khóa học này."}
                     </span>
                   }
                 />
@@ -126,16 +129,22 @@ const CourseTab = ({
               <div className="bg-white rounded-3xl border border-gray-200 p-10 text-center text-gray-400 font-medium flex flex-col items-center justify-center shadow-sm">
                 <span className="text-gray-800 text-base font-bold mb-1">
                   {activeTab === "upcoming"
-                    ? "Chưa có lớp học nào sắp mở đăng ký"
+                    ? scd.noUpcomingClasses ||
+                      "Chưa có lớp học nào sắp mở đăng ký"
                     : activeTab === "closed"
-                      ? "Không có lớp học nào đã đóng đăng ký"
-                      : c.student?.noClassesTitle || "Chưa có lớp học nào"}
+                      ? scd.noClosedClasses ||
+                        "Không có lớp học nào đã đóng đăng ký"
+                      : scd.noClasses ||
+                        c.student?.noClassesTitle ||
+                        "Chưa có lớp học nào"}
                 </span>
                 <span className="text-sm text-gray-500 max-w-sm">
                   {activeTab === "upcoming"
-                    ? "Vui lòng quay lại sau hoặc xem các lớp học đang mở khác."
+                    ? scd.noUpcomingClassesDesc ||
+                      "Vui lòng quay lại sau hoặc xem các lớp học đang mở khác."
                     : activeTab === "all"
-                      ? c.student?.noClassesDesc ||
+                      ? scd.noClassesDesc ||
+                        c.student?.noClassesDesc ||
                         "Các lớp học mới sẽ được cập nhật sớm. Vui lòng quay lại sau."
                       : ""}
                 </span>
@@ -158,12 +167,15 @@ const CourseTab = ({
                   cls.tuitionFee == null
                     ? ui.tba || "TBA"
                     : Number(cls.tuitionFee) === 0
-                      ? sc.priceFree || "Miễn phí"
+                      ? scd.priceFree || sc.priceFree || "Miễn phí"
                       : formatCurrencyVND(cls.tuitionFee)
                 const levelsText =
                   Array.isArray(cls.levels) && cls.levels.length > 0
                     ? cls.levels.join(", ")
-                    : cls.level || rawCourse?.level || "Cơ bản"
+                    : cls.level ||
+                      rawCourse?.level ||
+                      scd.defaultLevel ||
+                      "Cơ bản"
 
                 const startBadge = getStartDateBadge(cls.startDate)
                 const enrollmentPeriodText =
@@ -174,6 +186,12 @@ const CourseTab = ({
                       : cls.enrollmentEnd
                         ? `${formatDate(cls.enrollmentEnd)}`
                         : ui.tba || "TBA"
+
+                const remainingSlotsString = (
+                  scd.remainingSlotsText || "Còn {{remaining}}/{{total}} chỗ"
+                )
+                  .replace("{{remaining}}", String(remainingSlots ?? 0))
+                  .replace("{{total}}", String(totalSlots ?? 0))
 
                 return (
                   <div
@@ -196,14 +214,14 @@ const CourseTab = ({
                       {/* Left Side: Start Date Badge + Title + Sub-info */}
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         {/* Start Date Badge */}
-                        <div className="bg-cath-red-700/5 border border-cath-red-700/15 rounded-2xl w-14 h-16 sm:w-16 sm:h-18 flex flex-col items-center justify-center shrink-0 p-1 select-none shadow-sm">
+                        <div className="bg-cath-red-700/5 border border-cath-red-700/15 rounded-2xl w-16 h-16 sm:w-20 sm:h-18 flex flex-col items-center justify-center shrink-0 p-1 select-none shadow-sm">
                           <span className="text-[10px] sm:text-[11px] font-bold text-cath-red-700 tracking-tight leading-none">
-                            Bắt đầu
+                            {scd.startDateBadge || "Bắt đầu"}
                           </span>
                           <span className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">
                             {startBadge.day}
                           </span>
-                          <span className="text-[11px] sm:text-xs font-semibold text-amber-500 capitalize leading-none">
+                          <span className="text-[10px] sm:text-xs font-semibold text-amber-500 capitalize leading-none text-center truncate max-w-full px-0.5">
                             {startBadge.month}
                           </span>
                         </div>
@@ -221,7 +239,10 @@ const CourseTab = ({
                                   : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
                                 window.open(classPath, "_blank")
                               }}
-                              title="Xem chi tiết lớp học trong tab mới"
+                              title={
+                                scd.viewClassDetailsNewTab ||
+                                "Xem chi tiết lớp học trong tab mới"
+                              }
                               className="p-1 text-gray-400 hover:text-cath-red-700 transition-colors inline-flex items-center justify-center cursor-pointer"
                             >
                               <ExternalLink size={16} />
@@ -230,7 +251,9 @@ const CourseTab = ({
                               <span className="bg-green-100 text-green-700 font-bold text-xs px-2.5 py-0.5 rounded-full flex items-center gap-1">
                                 <CheckCircle2 size={11} />
                                 <span>
-                                  {c.student?.enrolled || "Đã tham gia"}
+                                  {scd.enrolledBadge ||
+                                    c.student?.enrolled ||
+                                    "Đã tham gia"}
                                 </span>
                               </span>
                             )}
@@ -268,7 +291,9 @@ const CourseTab = ({
                               />
                               <span>
                                 {enrolledSeats ?? 0}{" "}
-                                {c.student?.studentsText || "học viên"}
+                                {scd.studentsUnit ||
+                                  c.student?.studentsText ||
+                                  "học viên"}
                               </span>
                             </div>
 
@@ -280,7 +305,8 @@ const CourseTab = ({
                               <span>{levelsText}</span>
                             </div>
 
-                            {Number(cls.reviewCount ?? cls.totalReviews ?? 0) >= 5 && (
+                            {Number(cls.reviewCount ?? cls.totalReviews ?? 0) >=
+                              5 && (
                               <div className="flex items-center gap-1.5">
                                 <Star
                                   size={14}
@@ -289,7 +315,7 @@ const CourseTab = ({
                                 <span>
                                   {cls.rating != null
                                     ? `${Number(cls.rating).toFixed(1)} (${cls.reviewCount ?? cls.totalReviews})`
-                                    : `${cls.reviewCount ?? cls.totalReviews} đánh giá`}
+                                    : `${cls.reviewCount ?? cls.totalReviews} ${scd.reviewsUnit || "đánh giá"}`}
                                 </span>
                               </div>
                             )}
@@ -297,18 +323,20 @@ const CourseTab = ({
                         </div>
                       </div>
 
-                      {/* Right Side: Price, Slots, Expand Link, and Register Button */}
+                      {/* Right Side: Price, Slots, and Register Button */}
                       <div className="flex items-center gap-4 sm:gap-6 shrink-0 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100">
-                        <div className="flex flex-col items-start sm:items-end">
+                        {/* Tuition & Slots: Căn trái và nằm bên trái button */}
+                        <div className="flex flex-col items-start text-left min-w-[120px] sm:min-w-[140px] shrink-0">
                           <span className="text-xl sm:text-2xl font-bold text-cath-red-700 tracking-tight leading-tight">
                             {tuitionLabel}
                           </span>
                           <span className="text-xs sm:text-sm font-medium text-amber-500">
-                            Còn {remainingSlots ?? 0}/{totalSlots ?? 0} chỗ
+                            {remainingSlotsString}
                           </span>
                         </div>
 
-                        <div>
+                        {/* Button: Fixed width container */}
+                        <div className="w-36 sm:w-44 shrink-0 flex justify-end">
                           {isClassEnrolled ? (
                             <button
                               type="button"
@@ -318,9 +346,11 @@ const CourseTab = ({
                                   `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`,
                                 )
                               }}
-                              className="h-10 px-6 sm:px-8 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-full transition-all active:scale-95 shadow-sm cursor-pointer whitespace-nowrap"
+                              className="w-full h-10 sm:h-11 px-4 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-bold rounded-full transition-all active:scale-95 shadow-sm cursor-pointer truncate flex items-center justify-center"
                             >
-                              {c.student?.goToWorkspace || "Vào học →"}
+                              {scd.goToWorkspace ||
+                                c.student?.goToWorkspace ||
+                                "Vào học →"}
                             </button>
                           ) : (
                             <button
@@ -333,14 +363,16 @@ const CourseTab = ({
                                 e.stopPropagation()
                                 handleClassRegister(cls)
                               }}
-                              className={`h-10 sm:h-11 px-7 sm:px-9 text-sm sm:text-base font-bold rounded-full transition-all shadow-sm whitespace-nowrap ${
+                              className={`w-full h-10 sm:h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold rounded-full transition-all shadow-sm truncate text-center flex items-center justify-center ${
                                 classButton.key === "open"
                                   ? "bg-cath-red-700 hover:bg-[#80000e] text-white active:scale-95 cursor-pointer"
                                   : "bg-gray-100 text-gray-400 cursor-not-allowed"
                               }`}
                             >
                               {enrollingClassId === cls.id
-                                ? sc.processing || "Đang xử lý..."
+                                ? scd.processing ||
+                                  sc.processing ||
+                                  "Đang xử lý..."
                                 : classButton.label}
                             </button>
                           )}
@@ -354,7 +386,7 @@ const CourseTab = ({
                         id={`class-details-${cls.id}`}
                         className="border-t border-gray-100 pt-5 mt-5 flex flex-col gap-5 animate-fadeIn"
                       >
-                        {/* Top 4 Specification Cards */}
+                        {/* Top Specification Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                           {/* Card 1: Remaining Slots */}
                           <div className="bg-white rounded-2xl p-3.5 border border-gray-200 flex items-start gap-3 shadow-sm">
@@ -364,7 +396,9 @@ const CourseTab = ({
                             />
                             <div className="flex flex-col gap-0.5">
                               <span className="text-gray-400 font-medium text-xs">
-                                {c.student?.remainingSlots || "Remaining Slots"}
+                                {scd.remainingSlotsLabel ||
+                                  c.student?.remainingSlots ||
+                                  "Số chỗ còn lại"}
                               </span>
                               <span className="text-gray-900 font-bold text-base">
                                 {remainingSlots ?? "N/A"}/{totalSlots ?? "N/A"}
@@ -380,7 +414,9 @@ const CourseTab = ({
                             />
                             <div className="flex flex-col gap-0.5">
                               <span className="text-gray-400 font-medium text-xs">
-                                {c.student?.levelLabel || "Trình độ"}
+                                {scd.levelLabel ||
+                                  c.student?.levelLabel ||
+                                  "Trình độ"}
                               </span>
                               <span className="text-gray-900 font-bold text-base">
                                 {levelsText}
@@ -396,7 +432,8 @@ const CourseTab = ({
                             />
                             <div className="flex flex-col gap-0.5 min-w-0">
                               <span className="text-gray-400 font-medium text-xs">
-                                {c.student?.enrollmentPeriod ||
+                                {scd.enrollmentPeriod ||
+                                  c.student?.enrollmentPeriod ||
                                   "Thời gian đăng ký"}
                               </span>
                               <span className="text-gray-900 font-bold text-sm sm:text-base truncate">
@@ -413,11 +450,14 @@ const CourseTab = ({
                             />
                             <div className="flex flex-col gap-0.5 min-w-0">
                               <span className="text-gray-400 font-medium text-xs">
-                                {c.student?.virtualClassroom || "Hình thức học"}
+                                {scd.learningMethod ||
+                                  c.student?.virtualClassroom ||
+                                  "Hình thức học"}
                               </span>
                               <span className="text-gray-900 font-bold text-sm sm:text-base truncate">
                                 {cls.roomName ||
                                   c.student?.onlineClassroom ||
+                                  scd.defaultOnlineClassroom ||
                                   "Phòng học trực tuyến Cat Speak"}
                               </span>
                             </div>
@@ -428,7 +468,8 @@ const CourseTab = ({
                         {cls.rawSchedule && cls.rawSchedule.length > 0 && (
                           <div className="flex flex-col gap-2">
                             <span className="font-bold text-gray-700 text-sm">
-                              {c.student?.weeklySchedule ||
+                              {scd.weeklySchedule ||
+                                c.student?.weeklySchedule ||
                                 "Lịch học hàng tuần"}
                             </span>
                             <div className="flex flex-wrap gap-2.5">
@@ -457,7 +498,9 @@ const CourseTab = ({
                         {/* About Class / Description */}
                         <div className="flex flex-col gap-1.5">
                           <span className="font-bold text-gray-700 text-sm">
-                            {c.student?.aboutClass || "Về lớp học"}
+                            {scd.aboutClass ||
+                              c.student?.aboutClass ||
+                              "Về lớp học"}
                           </span>
                           <RenderHTML
                             html={cls.description}
