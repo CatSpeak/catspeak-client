@@ -31,7 +31,7 @@ const StudentCourseDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isStudent } = useRoleOverride()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const {
     formatDate,
     formatScheduleTime,
@@ -105,7 +105,7 @@ const StudentCourseDetailPage = () => {
     } else if (authModalCtx?.openAuthModal) {
       authModalCtx.openAuthModal("login", window.location.pathname)
     } else {
-      toast.error(sc.loginToEnroll || "Vui lòng đăng nhập để đăng ký lớp học.")
+      toast.error(scd.loginToEnroll || sc.loginToEnroll || "Vui lòng đăng nhập để đăng ký lớp học.")
     }
   }
 
@@ -113,7 +113,7 @@ const StudentCourseDetailPage = () => {
     if (cls.enrolledInCourse) {
       return {
         key: "in_course",
-        label: sc.alreadyEnrolledInCourse || "Đã đăng ký khóa này",
+        label: scd.alreadyEnrolledInCourse || sc.alreadyEnrolledInCourse || "Đã đăng ký khóa này",
         disabled: true,
       }
     }
@@ -122,29 +122,29 @@ const StudentCourseDetailPage = () => {
     if (issue === "full")
       return {
         key: "full",
-        label: sc.classFull || "Đã đủ học viên",
+        label: scd.classFull || sc.classFull || "Đã đủ học viên",
         disabled: true,
       }
     if (issue === "closed")
       return {
         key: "closed",
-        label: sc.enrollmentClosed || "Đã đóng đăng ký",
+        label: scd.enrollmentClosed || sc.enrollmentClosed || "Đã đóng đăng ký",
         disabled: true,
       }
     if (issue === "upcoming")
       return {
         key: "upcoming",
-        label: sc.upcomingStatus || "Chưa mở đăng ký",
+        label: scd.upcomingStatus || sc.upcomingStatus || "Chưa mở đăng ký",
         disabled: true,
       }
     if (issue === "unavailable")
       return {
         key: "unavailable",
-        label: sc.enrollmentUnavailable || "Chưa mở đăng ký",
+        label: scd.enrollmentUnavailable || sc.enrollmentUnavailable || "Chưa mở đăng ký",
         disabled: true,
       }
 
-    return { key: "open", label: sc.register || "Đăng ký", disabled: false }
+    return { key: "open", label: scd.register || sc.register || "Đăng ký", disabled: false }
   }
 
   const isRecord = (value) =>
@@ -182,11 +182,20 @@ const StudentCourseDetailPage = () => {
   }, [activeTab, classes, upcomingClasses, closedClasses])
 
   const courseDetailTabs = useMemo(() => [
-    { value: "overview", label: "Tổng quan" },
-    { value: "all", label: `Các lớp học hiện có (${classes.length})` },
-    { value: "upcoming", label: `Chưa mở đăng ký (${upcomingClasses.length})` },
-    { value: "closed", label: `Đã đóng đăng ký (${closedClasses.length})` },
-  ], [classes.length, upcomingClasses.length, closedClasses.length])
+    { value: "overview", label: scd.tabOverview || "Tổng quan" },
+    {
+      value: "all",
+      label: (scd.tabAllClasses || "Các lớp học hiện có ({{count}})").replace("{{count}}", String(classes.length)),
+    },
+    {
+      value: "upcoming",
+      label: (scd.tabUpcomingClasses || "Chưa mở đăng ký ({{count}})").replace("{{count}}", String(upcomingClasses.length)),
+    },
+    {
+      value: "closed",
+      label: (scd.tabClosedClasses || "Đã đóng đăng ký ({{count}})").replace("{{count}}", String(closedClasses.length)),
+    },
+  ], [scd, classes.length, upcomingClasses.length, closedClasses.length])
 
   const { data: profileResponse } = useGetUserProfileQuery(undefined, {
     skip: !isWorkspace,
@@ -243,11 +252,16 @@ const StudentCourseDetailPage = () => {
   }
 
   const getStartDateBadge = (startDateStr) => {
-    if (!startDateStr) return { day: "—", month: "TBA" }
+    if (!startDateStr) return { day: "—", month: ui.tba || "TBA" }
     const d = new Date(startDateStr)
-    if (isNaN(d.getTime())) return { day: "—", month: "TBA" }
+    if (isNaN(d.getTime())) return { day: "—", month: ui.tba || "TBA" }
     const day = d.getDate()
-    const month = d.toLocaleDateString("en-US", { month: "short" })
+    const month =
+      c.months?.[d.getMonth()] ||
+      d.toLocaleDateString(
+        language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US",
+        { month: "long" },
+      )
     return { day, month }
   }
 
