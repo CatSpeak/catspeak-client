@@ -126,7 +126,7 @@ const StudentLessonRow = ({
     } else if (displayData.type === "link" || isYoutubeLink) {
       onSelectLesson(item, "link")
     } else if (displayData.type === "assignment") {
-      navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
+      onSelectLesson(item, "assignment")
     } else if (displayData.type === "quiz") {
       navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
     } else if (displayData.type === "material") {
