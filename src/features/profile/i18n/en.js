@@ -98,7 +98,8 @@ export default {
       completedLabel: "Completed",
     },
     review: {
-      title: "Class review",
+      title: "Course Review",
+      subtitle: "Share your experience to help the learning community grow.",
       shareExperience: "Share your experience",
       optional: "(optional)",
       detailRating: "Detailed rating",
@@ -136,11 +137,12 @@ export default {
         "5": "Excellent",
       },
       popup: {
-        titlePrefix: "Congratulations, you completed",
+        titlePrefix: "Congratulations on completing",
         subtitle: "You can share this achievement on your profile as proof of completing the course.",
         later: "Later",
         review: "Review",
-        share: "Share now",
+        share: "Share",
+        completedDate: "Completion date",
       },
     },
     documents: {
