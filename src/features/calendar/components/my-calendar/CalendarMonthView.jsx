@@ -1,6 +1,7 @@
 import React from 'react'
 import dayjs from 'dayjs'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const EVENT_COLORS = {
   'teaching-schedule': '#34ce56',
@@ -17,6 +18,7 @@ const CalendarMonthView = ({
   events
 }) => {
   const { formatScheduleDays, getZoneDateStr } = useTimezone()
+  const { t } = useLanguage()
 
   // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
   const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day =>
@@ -54,9 +56,10 @@ const CalendarMonthView = ({
     <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto scrollbar-app pr-2">
       {/* Days Header */}
       <div className="grid grid-cols-7 gap-1 text-center border-b border-border pb-4 mb-4">
-        {DAY_LABELS.map((label) => (
+        {DAY_LABELS.map((label, idx) => (
           <div key={label} className="text-base text-[#1A1A1A] font-medium tracking-wider">
-            {label}
+            <span className="hidden sm:inline">{label}</span>
+            <span className="sm:hidden">{t.calendar?.weekDaysShort?.[idx] || label}</span>
           </div>
         ))}
       </div>

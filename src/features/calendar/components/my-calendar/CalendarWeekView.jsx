@@ -96,7 +96,8 @@ const CalendarWeekView = ({
             >
               <div className={`w-16 h-16 flex items-center justify-center rounded-full text-sm font-semibold tracking-wider transition-all 
                 ${isActive ? 'text-white bg-[#990011] shadow-md' : 'text-[#1A1A1A] group-hover:bg-gray-100'}`}>
-                {DAY_LABELS[idx]}
+                <span className="hidden sm:inline">{DAY_LABELS[idx]}</span>
+                <span className="sm:hidden">{t.calendar?.weekDaysShort?.[idx] || DAY_LABELS[idx]}</span>
               </div>
               <div className={`text-lg font-medium ${isActive ? 'text-[#990011]' : 'text-gray-600'}`}>
                 {dateObj.formatted}
