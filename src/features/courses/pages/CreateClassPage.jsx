@@ -596,8 +596,21 @@ const CreateClassPage = () => {
           errMsg.includes("PAYOS_ERROR")
         ))
 
+      const dateMismatchMatch = typeof errMsg === "string" && errMsg.match(/Class start date \((.*?)\) does not match the first scheduled session date \((.*?)\)/i)
+      const isStartDateMismatch = Boolean(dateMismatchMatch) || (typeof errMsg === "string" && errMsg.includes("does not match the first scheduled session date"))
+
       let displayMessage
-      if (isScheduleConflict) {
+      if (isStartDateMismatch) {
+        const startD = dateMismatchMatch ? dateMismatchMatch[1] : ""
+        const firstSessionD = dateMismatchMatch ? dateMismatchMatch[2] : ""
+        if (startD && firstSessionD && cc.toastStartDateMismatchFirstSession) {
+          displayMessage = cc.toastStartDateMismatchFirstSession
+            .replace("{{startDate}}", startD)
+            .replace("{{firstSessionDate}}", firstSessionD)
+        } else {
+          displayMessage = cc.toastStartDateMismatchFirstSessionDefault || "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!"
+        }
+      } else if (isScheduleConflict) {
         displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT") && !errMsg.includes("PAYOS_ERROR"))
           ? errMsg
           : (cc.toastScheduleConflictDefault || "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.")
@@ -1018,7 +1031,7 @@ const CreateClassPage = () => {
             </div>
 
             {/* Attendance Requirements Block */}
-            <div className={`bg-white rounded-2xl p-4 border border-border flex flex-col md:flex-row gap-5 md:gap-8 items-stretch justify-between ${isEditMode ? "opacity-75 bg-slate-50/50" : ""}`}>
+            <div className={`bg-white rounded-2xl p-4 sm:p-5 border border-border flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 items-stretch justify-between ${isEditMode ? "opacity-75 bg-slate-50/50" : ""}`}>
               {/* Left Column: Minimum Attendance Rate */}
               <div className="flex-1 flex flex-col gap-3 justify-center">
                 {/* Header row */}
@@ -1034,7 +1047,7 @@ const CreateClassPage = () => {
                         setField("requireMinAttendance", !requireMinAttendance)
                       }
                     }}
-                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isEditMode
+                    className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-all ${isEditMode
                       ? "cursor-not-allowed opacity-60 bg-gray-100 border-gray-300 text-gray-500"
                       : requireMinAttendance
                         ? "bg-[#990011] border-[#990011] text-white cursor-pointer"
@@ -1045,7 +1058,7 @@ const CreateClassPage = () => {
                   </div>
                   <span
                     onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
-                    className={`font-bold text-sm text-gray-800 select-none ${isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                    className={`font-bold text-sm text-gray-800 select-none flex-1 ${isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                   >
                     {cc.requireMinAttendanceLabel || "Yêu cầu tỷ lệ tham dự tối thiểu"}
                   </span>
@@ -1053,11 +1066,11 @@ const CreateClassPage = () => {
                 </div>
 
                 {/* Content row */}
-                <div className="flex items-center justify-between sm:justify-start gap-4 pt-1">
+                <div className="flex flex-row items-center justify-between sm:justify-start gap-3 sm:gap-4 pt-1">
                   <span className="text-sm font-medium text-gray-700">
                     {cc.minAttendanceRateLabel || "Tỷ lệ tham dự tối thiểu"}
                   </span>
-                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-32 transition-all ${(!isEditMode && requireMinAttendance) ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-28 sm:w-32 shrink-0 transition-all ${(!isEditMode && requireMinAttendance) ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
                     }`}>
                     <input
                       type="number"
@@ -1079,14 +1092,15 @@ const CreateClassPage = () => {
                 </div>
               </div>
 
-              {/* Vertical Divider for md screens */}
+              {/* Divider for md screens and mobile */}
               <div className="hidden md:block w-px bg-border self-stretch" />
+              <div className="block md:hidden border-t border-border/80 my-0.5" />
 
               {/* Right Column: Attendance Calculation Type */}
               <div className="flex-1 flex flex-col gap-3 justify-center">
                 {/* Header row */}
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-gray-800">
+                  <span className="font-bold text-sm text-gray-800 flex-1">
                     {cc.requireAttendanceTypeLabel || "Yêu cầu Lần tham dự"}
                   </span>
                   <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
@@ -1102,7 +1116,7 @@ const CreateClassPage = () => {
                     }}
                     className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                   >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "CountLate" || includeLateAttendance)
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${(lateAttendancePolicy === "CountLate" || includeLateAttendance)
                       ? "border-[#990011] bg-white"
                       : "border-gray-300 group-hover:border-gray-400 bg-white"
                       }`}>
@@ -1121,7 +1135,7 @@ const CreateClassPage = () => {
                     }}
                     className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                   >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance)
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance)
                       ? "border-[#990011] bg-white"
                       : "border-gray-300 group-hover:border-gray-400 bg-white"
                       }`}>
@@ -1145,26 +1159,26 @@ const CreateClassPage = () => {
                   {cc.chooseDays || "Choose days of the week"}
                 </span>
 
-                {/* Weekdays selection grid inside */}
-                <div className="grid grid-cols-7 border border-border rounded-xl overflow-hidden text-center divide-x divide-gray-200 bg-white">
+                {/* Day selector boxes */}
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-2 text-center bg-gray-50/50 p-1.5 rounded-xl border border-border">
                   {DAYS_OF_WEEK.map((day) => {
                     const isChecked = checkedDays[day.key]
                     return (
                       <div
                         key={day.key}
                         onClick={() => handleToggleDay(day.key)}
-                        className={`flex flex-col gap-2.5 py-2.5 cursor-pointer select-none transition-all ${isChecked ? "bg-[#990011]/5" : "hover:bg-gray-50/50"
+                        className={`flex flex-col gap-1.5 sm:gap-2 py-2 cursor-pointer select-none transition-all rounded-lg ${isChecked ? "bg-[#990011] text-white" : "bg-transparent hover:bg-white"
                           }`}
                       >
-                        <span className={`text-[10px] font-black uppercase tracking-wider ${isChecked ? "text-[#990011]" : "text-gray-400"}`}>
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${isChecked ? "text-white" : "text-gray-400"}`}>
                           {cc.days?.[day.key]?.short || cc.days?.[day.key]?.code || day.label}
                         </span>
                         <div className="flex justify-center">
-                          <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${isChecked
-                            ? "bg-[#990011] border-[#990011] text-white"
+                          <div className={`w-3 h-3 rounded-full border flex items-center justify-center transition-all ${isChecked
+                            ? "bg-white border-white"
                             : "border-gray-300 bg-white"
                             }`}>
-                            {isChecked && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                            {isChecked && <div className="w-1 h-1 rounded-full bg-[#990011]" />}
                           </div>
                         </div>
                       </div>
@@ -1359,14 +1373,14 @@ const CreateClassPage = () => {
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-border mt-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 sm:gap-6 pt-6 border-t border-border mt-auto w-full">
           {/* Left Side: Fee detail */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D]">
-              <Info size={16} />
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="w-9 h-9 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D] shrink-0">
+              <Info size={17} />
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-none">
+            <div className="flex flex-col gap-1 min-w-0">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
                 {cc.classOpeningFee || "CLASS OPENING FEE"}
               </span>
               <div className="flex items-center gap-2 flex-wrap">
@@ -1385,31 +1399,36 @@ const CreateClassPage = () => {
             </div>
           </div>
 
-          {/* Right Side: Cancel & Confirm */}
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {isEditMode && (
+          {/* Right Side: Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            {/* Secondary actions on mobile: Delete & Cancel in a row */}
+            <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  disabled={isFormBusy}
+                  className="flex-1 sm:flex-initial h-11 px-5 bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-1.5 justify-center disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  <Trash2 size={13} />
+                  <span>{cc.deleteClass || "Delete Class"}</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setShowDeleteModal(true)}
+                onClick={() => navigate("/workspace/classes/all-classes")}
                 disabled={isFormBusy}
-                className="h-11 px-6 bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-1.5 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap"
               >
-                <Trash2 size={13} />
-                <span>{cc.deleteClass || "Delete Class"}</span>
+                {cc.cancel}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => navigate("/workspace/classes/all-classes")}
-              disabled={isFormBusy}
-              className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {cc.cancel}
-            </button>
+            </div>
+
+            {/* Primary Action Button: full-width on bottom for mobile */}
             <button
               type="submit"
               disabled={isFormBusy}
-              className="flex-1 sm:flex-initial h-11 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto h-11 px-7 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isEditMode ? (cc.saveChanges || "Save Changes") : (cc.confirmPay || "Confirm & Pay")}
             </button>
