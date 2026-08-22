@@ -62,6 +62,7 @@ export const useVideoCallSignaling = (handlers = {}) => {
       "JoinBreakoutRoom",
       "ReturnToMainRoom",
       "BreakoutStatusChanged",
+      "ParticipantLeft",
       "BroadcastNotification",
     ]
     events.forEach((evt) => {
