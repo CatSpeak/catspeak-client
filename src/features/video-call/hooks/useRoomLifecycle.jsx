@@ -140,27 +140,35 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
       dispatch(exitBreakout())
       if (token) {
         dispatch(updateLivekitToken(token))
-      } else if (roomId) {
-        // Fetch a fresh token for the main room
-        dispatch(
-          livekitApi.endpoints.getLivekitToken.initiate({
-            roomId: Number(roomId),
-          }),
-        )
-          .unwrap()
-          .then((res) => {
-            dispatch(updateLivekitToken(res.participantToken))
-          })
-          .catch((err) => {
-            console.error("[SignalR] Failed to fetch main room token:", err)
-          })
+      } else {
+        const activeRoomId = roomId || callInfo?.roomId || callInfo?.roomData?.id
+        const targetSessionId = parentSessionIdValue || parentSessionId || callInfo?.sessionId
+        if (activeRoomId) {
+          // Fetch a fresh token for the main room
+          dispatch(
+            livekitApi.endpoints.getLivekitToken.initiate({
+              roomId: Number(activeRoomId),
+              sessionId: targetSessionId ? Number(targetSessionId) : undefined,
+            }),
+          )
+            .unwrap()
+            .then((res) => {
+              const freshToken = res?.participantToken || res?.token || res?.cathspeak?.participant_token
+              if (freshToken) {
+                dispatch(updateLivekitToken(freshToken))
+              }
+            })
+            .catch((err) => {
+              console.error("[SignalR] Failed to fetch main room token:", err)
+            })
+        }
       }
     },
-    [dispatch, roomId, t],
+    [dispatch, roomId, callInfo?.roomId, callInfo?.roomData?.id, callInfo?.sessionId, parentSessionId],
   )
 
   const handleBreakoutStatusChanged = useCallback(
-    (parentSessionIdValue) => {
+    async (parentSessionIdValue) => {
       console.info(
         "[SignalR] BreakoutStatusChanged received:",
         parentSessionIdValue,
@@ -171,8 +179,27 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
           { type: "Breakout", id: parentSessionIdValue },
         ]),
       )
+
+      // If breakout status changed to false (closed) while client is in a sub-session, automatically return to main room
+      const targetSessionId = parentSessionIdValue || parentSessionId
+      if (targetSessionId) {
+        try {
+          const res = await dispatch(
+            roomsApi.endpoints.getBreakoutStatus.initiate(targetSessionId, {
+              forceRefetch: true,
+            }),
+          ).unwrap()
+
+          if (res && res.isBreakoutActive === false) {
+            // Breakout is closed, ensure participant returns to main room
+            handleReturnToMainRoom(targetSessionId)
+          }
+        } catch (err) {
+          // Ignore
+        }
+      }
     },
-    [dispatch],
+    [dispatch, parentSessionId, handleReturnToMainRoom],
   )
 
   const handleParticipantLeft = useCallback(
