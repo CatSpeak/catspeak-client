@@ -733,7 +733,7 @@ export default {
     filter: "Bộ lọc",
     filterModalTitle: "Bộ lọc",
     statusLabel: "Trạng thái:",
-    enrollmentStatusLabel: "Trạng thái tuyển sinh",
+    enrollmentStatusLabel: "Trạng thái lớp học / khóa học",
     enrollmentStatusAll: "Tất cả",
     enrollmentStatusOpen: "Đang mở đăng ký",
     enrollmentStatusUpcoming: "Chưa mở đăng ký",
