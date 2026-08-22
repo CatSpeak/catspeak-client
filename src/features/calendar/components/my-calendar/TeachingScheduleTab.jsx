@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { ChevronLeft, ChevronRight, Calendar, Clock, X, Edit, DoorOpen, MoreVertical } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, Clock, X, Edit, DoorOpen, MoreVertical, Video } from 'lucide-react'
 import { useGetScheduleSessionsQuery } from '@/store/api/coursesApi'
 import DataTable from '@/shared/components/ui/DataTable'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
@@ -173,13 +173,52 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
 
     return (
       <div className="bg-gray-50 border border-border p-4 rounded-xl flex flex-col gap-2">
-        <div className="flex justify-between items-start gap-4">
-          <span className="font-semibold text-gray-900 line-clamp-2">
+        <div className="flex justify-between items-baseline gap-4">
+          <Link
+            to={row.class?.id ? `/workspace/courses/class/${row.class.id}` : '#'}
+            className="font-semibold text-[#1A1C1C] hover:text-[#990011] hover:underline line-clamp-2 mt-1 truncate"
+          >
             {row.class?.name || t.calendar?.noClassName || 'Không có tên lớp'}
-          </span>
-          <span className="text-xs font-medium bg-[#990011]/10 text-[#990011] px-2 py-1 rounded-full whitespace-nowrap">
-            {t.calendar?.session || 'Buổi'} {row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'}
-          </span>
+          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs font-medium bg-[#990011]/10 text-[#990011] px-2 py-1 rounded-full whitespace-nowrap">
+              {t.calendar?.session || 'Buổi'} {row.sessionNumber ? `${row.sessionNumber}/${row.totalSessions || '?'}` : '-'}
+            </span>
+            <div onClick={(e) => e.stopPropagation()}>
+              <Popover
+                trigger={
+                  <IconButton variant="ghost" size="sm" className="-mr-2">
+                    <MoreVertical className="w-5 h-5 text-gray-500" />
+                  </IconButton>
+                }
+                content={(close) => (
+                  <div className="flex flex-col min-w-[200px] p-1 bg-white rounded-xl shadow-lg border border-border">
+                    <MenuItem
+                      onClick={() => {
+                        navigate(`/workspace/courses/class/${row.class?.id}`)
+                        close && close()
+                      }}
+                      icon={<DoorOpen className="w-4 h-4 text-gray-400" />}
+                    >
+                      {t.calendar?.enterClassroom || 'Vào lớp học'}
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        if (row.class?.id) {
+                          navigate(`/workspace/courses/edit-class/${row.class.id}`)
+                        }
+                        close && close()
+                      }}
+                      icon={<Edit className="w-4 h-4 text-gray-400" />}
+                    >
+                      {t.calendar?.editSchedule || 'Chỉnh sửa lịch học'}
+                    </MenuItem>
+                  </div>
+                )}
+                placement="bottom-right"
+              />
+            </div>
+          </div>
         </div>
         <div className="text-sm text-gray-600 space-y-2 mt-2">
           <div className="flex items-center gap-2">
@@ -189,6 +228,16 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-gray-400 shrink-0" />
             <span>{timeText}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Video className="w-4 h-4 text-gray-400 shrink-0" />
+            {row.class?.id ? (
+              <Link to={`/${encodeURIComponent(getClassLanguageCode(row.class?.language) || 'en')}/meet/class-${row.class.id}`} className="text-[#990011] hover:underline hover:text-[#80000e]">
+                {row.roomName || t.calendar?.classRoom || 'Phòng học'}
+              </Link>
+            ) : (
+              <span>{row.roomName || t.calendar?.notAssigned || 'Chưa xác định'}</span>
+            )}
           </div>
         </div>
       </div>
@@ -206,8 +255,9 @@ const TeachingScheduleTab = ({ currentDate = dayjs(), onPrev, onNext }) => {
           >
             <ChevronLeft />
           </IconButton>
-          <span className="text-xl font-semibold text-[#1A1A1A] min-w-[150px] text-center">
-            {localizedMonth}
+          <span className="text-lg sm:text-xl font-semibold text-[#1A1A1A] min-w-[100px] sm:min-w-[150px] text-center">
+            <span className="hidden sm:inline">{localizedMonth}</span>
+            <span className="sm:hidden">{monthNum.padStart(2, '0')}/{yearNum}</span>
           </span>
           <IconButton
             onClick={onNext}
