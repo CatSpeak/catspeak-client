@@ -15,12 +15,34 @@ const PublicClassStatsBar = ({ classData }) => {
   )
 
   const defaultScheduleText = pc.flexibleSchedule || "Lịch linh hoạt"
+  const rawSchedule = classData?.schedule
+  const scheduleDays = Array.isArray(rawSchedule)
+    ? rawSchedule.map((s) => s.dayOfWeek).filter(Boolean)
+    : rawSchedule?.days || []
+  const firstSchedule =
+    Array.isArray(rawSchedule) && rawSchedule.length > 0
+      ? rawSchedule[0]
+      : rawSchedule
+
   const scheduleDaysText = formatScheduleDays(
-    classData?.schedule?.days,
+    scheduleDays,
     defaultScheduleText,
     " - ",
-    classData?.schedule?.startTime,
+    firstSchedule?.startTime,
   )
+
+  const modifiedSessionsCount = Array.isArray(classData?.modifiedSessions)
+    ? classData.modifiedSessions.length
+    : 0
+
+  let scheduleTitle = scheduleDaysText
+  if (modifiedSessionsCount > 0) {
+    const template =
+      pc.scheduleWithModified || "{{schedule}} và\n{{count}} buổi ngoại lệ"
+    scheduleTitle = template
+      .replace("{{schedule}}", scheduleDaysText)
+      .replace("{{count}}", modifiedSessionsCount)
+  }
 
   const remaining = classData?.remainingSlots ?? 0
   const capacity = classData?.capacity ?? 0
@@ -43,7 +65,7 @@ const PublicClassStatsBar = ({ classData }) => {
     },
     {
       id: "schedule",
-      title: scheduleDaysText,
+      title: scheduleTitle,
       subtitle: pc.scheduleSub || "Thời gian linh hoạt",
       icon: Calendar,
     },
@@ -70,7 +92,7 @@ const PublicClassStatsBar = ({ classData }) => {
                 />
               </div>
               <div className="flex flex-col gap-0.5 min-w-0">
-                <span className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                <span className="text-sm sm:text-base font-bold text-slate-900 leading-snug whitespace-pre-line">
                   {item.title}
                 </span>
                 <p className="text-xs text-slate-500 font-medium leading-normal">
