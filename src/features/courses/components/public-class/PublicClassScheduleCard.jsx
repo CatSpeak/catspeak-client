@@ -324,7 +324,7 @@ const PublicClassScheduleCard = ({ classData }) => {
           type="button"
           onClick={() => setCurrentMonth(dayjs())}
           className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-            currentMonth.isSame(dayjs(), "month")
+            currentMonth.isSame(dayjs(), "day")
               ? "bg-slate-900 text-white border-slate-900 font-bold"
               : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
           }`}
@@ -336,7 +336,7 @@ const PublicClassScheduleCard = ({ classData }) => {
             type="button"
             onClick={() => setCurrentMonth(dayjs(rawStartDate))}
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-              currentMonth.isSame(dayjs(rawStartDate), "month")
+              currentMonth.isSame(dayjs(rawStartDate), "day")
                 ? "bg-slate-900 text-white border-slate-900 font-bold"
                 : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
             }`}
@@ -349,7 +349,7 @@ const PublicClassScheduleCard = ({ classData }) => {
             type="button"
             onClick={() => setCurrentMonth(dayjs(effectiveEndDate))}
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-              currentMonth.isSame(dayjs(effectiveEndDate), "month")
+              currentMonth.isSame(dayjs(effectiveEndDate), "day")
                 ? "bg-slate-900 text-white border-slate-900 font-bold"
                 : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
             }`}
