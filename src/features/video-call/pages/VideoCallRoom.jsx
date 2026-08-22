@@ -35,7 +35,10 @@ import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvid
 import { GameProvider } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import VideoCallLoading from "@/features/video-call/components/VideoCallLoading"
-import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  isBreakoutSupported,
+  isSpeakingTimeBalanceSupported,
+} from "@/features/video-call/utils/roomTypeHelpers"
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
 
 const VideoCallRoomContent = () => {
@@ -237,7 +240,7 @@ const VideoCallRoomContent = () => {
 
             {/* Student Floating Speaking Time Balance Widget */}
             <AnimatePresence>
-              {showStudentSpeakingWidget && !isHost && (
+              {showStudentSpeakingWidget && !isHost && isSpeakingTimeBalanceSupported(room) && (
                 <div className="absolute right-4 bottom-4 z-30 pointer-events-auto">
                   <StudentSpeakingWidget
                     onClose={() => setShowStudentSpeakingWidget(false)}
@@ -267,7 +270,7 @@ const VideoCallRoomContent = () => {
             >
               <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                 {showParticipants && <ParticipantList />}
-                {showSpeakingTimeBalance && isHost && (
+                {showSpeakingTimeBalance && isHost && isSpeakingTimeBalanceSupported(room) && (
                   <SpeakingTimeBalancePanel
                     onClose={() => setActiveSidePanel(null)}
                   />
@@ -317,7 +320,7 @@ const VideoCallRoomContent = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {showParticipants && <ParticipantList />}
-              {showSpeakingTimeBalance && isHost && (
+              {showSpeakingTimeBalance && isHost && isSpeakingTimeBalanceSupported(room) && (
                 <SpeakingTimeBalancePanel
                   onClose={() => setActiveSidePanel(null)}
                 />
@@ -399,7 +402,7 @@ const VideoCallRoomContent = () => {
                 ) : (
                   <div className="flex-1 overflow-y-auto bg-white min-h-0">
                     {showParticipants && <ParticipantList hideTitle />}
-                    {showSpeakingTimeBalance && isHost && (
+                    {showSpeakingTimeBalance && isHost && isSpeakingTimeBalanceSupported(room) && (
                       <SpeakingTimeBalancePanel
                         onClose={() => setActiveSidePanel(null)}
                       />

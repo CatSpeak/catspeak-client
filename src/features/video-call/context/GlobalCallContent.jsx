@@ -51,7 +51,10 @@ import {
   ROOM_SETTING_KEYS,
 } from "@/features/video-call/utils/roomSettingHelpers"
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
-import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  isRoomHost,
+  isSpeakingTimeBalanceSupported,
+} from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -909,7 +912,9 @@ const GlobalCallContent = ({
     lkRoom,
     activeSessionId,
     {
-      enabled: panelState.showSpeakingTimeBalance || showStudentSpeakingWidget,
+      enabled:
+        isSpeakingTimeBalanceSupported(roomData) &&
+        (panelState.showSpeakingTimeBalance || showStudentSpeakingWidget),
       pollingInterval: 30000,
     },
   )

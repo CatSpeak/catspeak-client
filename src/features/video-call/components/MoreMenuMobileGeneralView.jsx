@@ -19,7 +19,10 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSessionTimer } from "../hooks/useSessionTimer"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
-import { isBreakoutSupported } from "../utils/roomTypeHelpers"
+import {
+  isBreakoutSupported,
+  isSpeakingTimeBalanceSupported,
+} from "../utils/roomTypeHelpers"
 
 const MoreMenuMobileGeneralView = ({
   setShowMoreMenu,
@@ -130,58 +133,61 @@ const MoreMenuMobileGeneralView = ({
         </button>
       </div>
 
-      <div
-        className={`grid ${
-          !isAISession &&
-          isBreakoutSupported(room?.roomType) &&
-          (isHost || isBreakoutActive)
-            ? "grid-cols-2"
-            : "grid-cols-1"
-        } gap-3`}
-      >
-        <button
-          onClick={() => {
-            if (isHost) {
-              setShowSpeakingTimeBalance(!showSpeakingTimeBalance)
-            } else {
-              setShowStudentSpeakingWidget(!showStudentSpeakingWidget)
-            }
-            setShowMoreMenu(false)
-          }}
-          className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors px-3 ${
-            (isHost ? showSpeakingTimeBalance : showStudentSpeakingWidget)
-              ? "bg-red-100 text-red-600"
-              : "bg-[#F5F5F5] text-black"
-          }`}
+      {(!isAISession && (isSpeakingTimeBalanceSupported(room) || (isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive)))) && (
+        <div
+          className={`grid ${
+            isSpeakingTimeBalanceSupported(room) &&
+            isBreakoutSupported(room?.roomType) &&
+            (isHost || isBreakoutActive)
+              ? "grid-cols-2"
+              : "grid-cols-1"
+          } gap-3`}
         >
-          <BarChart2 size={20} className="shrink-0" />
-          <span className="truncate">
-            {t.rooms?.videoCall?.controls?.speakingTimeBalance ||
-              "Speaking Time Balance"}
-          </span>
-        </button>
-
-        {!isAISession &&
-          isBreakoutSupported(room?.roomType) &&
-          (isHost || isBreakoutActive) && (
+          {isSpeakingTimeBalanceSupported(room) && (
             <button
               onClick={() => {
-                setShowBreakout(!showBreakout)
+                if (isHost) {
+                  setShowSpeakingTimeBalance(!showSpeakingTimeBalance)
+                } else {
+                  setShowStudentSpeakingWidget(!showStudentSpeakingWidget)
+                }
                 setShowMoreMenu(false)
               }}
               className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors px-3 ${
-                showBreakout
+                (isHost ? showSpeakingTimeBalance : showStudentSpeakingWidget)
                   ? "bg-red-100 text-red-600"
                   : "bg-[#F5F5F5] text-black"
               }`}
             >
-              <Split size={20} className="shrink-0" />
+              <BarChart2 size={20} className="shrink-0" />
               <span className="truncate">
-                {t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
+                {t.rooms?.videoCall?.controls?.speakingTimeBalance ||
+                  "Speaking Time Balance"}
               </span>
             </button>
           )}
-      </div>
+
+          {isBreakoutSupported(room?.roomType) &&
+            (isHost || isBreakoutActive) && (
+              <button
+                onClick={() => {
+                  setShowBreakout(!showBreakout)
+                  setShowMoreMenu(false)
+                }}
+                className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors px-3 ${
+                  showBreakout
+                    ? "bg-red-100 text-red-600"
+                    : "bg-[#F5F5F5] text-black"
+                }`}
+              >
+                <Split size={20} className="shrink-0" />
+                <span className="truncate">
+                  {t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
+                </span>
+              </button>
+            )}
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3">
         <button

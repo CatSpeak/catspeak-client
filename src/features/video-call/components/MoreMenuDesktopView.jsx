@@ -20,7 +20,10 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useRecordingStatus } from "@/features/video-call/hooks/useRecordingStatus"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
-import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  isBreakoutSupported,
+  isSpeakingTimeBalanceSupported,
+} from "@/features/video-call/utils/roomTypeHelpers"
 import MenuItem from "@/shared/components/ui/MenuItem"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
 
@@ -111,21 +114,23 @@ const MoreMenuDesktopView = ({
         label={t.rooms?.videoCall?.controls?.participants || "Participants"}
       />
 
-      <MenuItem
-        onClick={() => {
-          if (isHost) {
-            setShowSpeakingTimeBalance(!showSpeakingTimeBalance)
-          } else {
-            setShowStudentSpeakingWidget(!showStudentSpeakingWidget)
+      {!isAISession && isSpeakingTimeBalanceSupported(room) && (
+        <MenuItem
+          onClick={() => {
+            if (isHost) {
+              setShowSpeakingTimeBalance(!showSpeakingTimeBalance)
+            } else {
+              setShowStudentSpeakingWidget(!showStudentSpeakingWidget)
+            }
+            setShowMoreMenu(false)
+          }}
+          icon={<BarChart2 size={20} />}
+          label={
+            t?.rooms?.videoCall?.controls?.speakingTimeBalance ||
+            "Speaking Time Balance"
           }
-          setShowMoreMenu(false)
-        }}
-        icon={<BarChart2 size={20} />}
-        label={
-          t?.rooms?.videoCall?.controls?.speakingTimeBalance ||
-          "Speaking Time Balance"
-        }
-      />
+        />
+      )}
 
       {!isAISession &&
         isBreakoutSupported(room?.roomType) &&
