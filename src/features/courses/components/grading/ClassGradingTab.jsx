@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import StudentAssignmentDetailView from "../assignments/StudentAssignmentDetailView"
 import AssignmentSubmissionsView from "../assignments/submissions/AssignmentSubmissionsView"
-import TablePagination from "../shared/TablePagination"
+import Pagination from "@/shared/components/ui/navigation/Pagination"
 import {
   Search,
   ChevronDown,
@@ -40,6 +40,9 @@ import {
   useGetTeacherQuizzesQuery,
   useGetStudentQuizzesQuery,
   usePublishTeacherQuizMutation,
+  useGetAssignmentSubmissionsQuery,
+  useGetTeacherQuizStatsQuery,
+  useGetTeacherQuizStudentsQuery,
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import {
@@ -55,6 +58,7 @@ import {
 } from "../../utils/quizUtils"
 
 const STUDENT_PAGE_SIZE = 10
+const TEACHER_PAGE_SIZE = 9
 const interpolate = (template, values) => Object.entries(values).reduce(
   (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
   template || "",
@@ -671,22 +675,56 @@ const QuizCard = ({
 
   const statusStr = String(quiz.status || "").toLowerCase()
   const isDraft = statusStr === "draft"
-  const isOpen = statusStr === "open"
-  const isUpcoming = statusStr === "upcoming"
   const isClosed = statusStr === "closed"
-  const isPublished = isOpen || isUpcoming
-
+  const isPublished = !isDraft && !isClosed
+  const openTimestamp = quiz.openTime ? new Date(quiz.openTime).getTime() : 0
   const closeTimestamp = quiz.closeTime ? new Date(quiz.closeTime).getTime() : 0
+  const isUpcomingOpen = isPublished && openTimestamp > 0 && openTimestamp > nowMs
   const isExpired = isClosed || (closeTimestamp > 0 && closeTimestamp < nowMs)
-  const isDueSoon = !isExpired && closeTimestamp > 0 && closeTimestamp - nowMs < 24 * 60 * 60 * 1000
+  const isDueSoon = isPublished && !isExpired && closeTimestamp > 0 && (closeTimestamp - nowMs <= 3 * 24 * 60 * 60 * 1000)
+  const isOpen = isPublished && !isUpcomingOpen && !isExpired
+
+  const { data: studentsResponse } = useGetTeacherQuizStudentsQuery(
+    { classId, quizId: quiz?.id, pageSize: 100 },
+    { skip: !classId || !quiz?.id || isDraft }
+  )
 
   const rawItemEnrolled = Number(
     quiz.enrolledCount ?? quiz.studentCount ?? quiz.totalStudents ?? quiz.enrolledStudents ?? quiz.memberCount ?? 0
   )
-  const enrolledCount = rawItemEnrolled > 0 ? rawItemEnrolled : classEnrolledCount
-  const submittedCount = Number(
+
+  const rawStudents = studentsResponse?.data?.students
+    ?? studentsResponse?.students
+    ?? studentsResponse?.data?.items
+    ?? studentsResponse?.items
+    ?? (Array.isArray(studentsResponse?.data) ? studentsResponse.data : (Array.isArray(studentsResponse) ? studentsResponse : null))
+
+  const actualQuizSubmitted = Array.isArray(rawStudents)
+    ? rawStudents.filter((st) => {
+        if (!st) return false
+        const s = String(st.status || st.submissionStatus || "").toLowerCase()
+        return (
+          s.includes("nộp") ||
+          s.includes("submitted") ||
+          s.includes("muộn") ||
+          s.includes("late") ||
+          s.includes("graded") ||
+          s.includes("chấm") ||
+          (st.score !== null && st.score !== undefined && st.score !== "" && st.score !== "–")
+        )
+      }).length
+    : null
+
+  const totalStudentsCount = Array.isArray(rawStudents) && rawStudents.length > 0
+    ? rawStudents.length
+    : (rawItemEnrolled > 0 ? rawItemEnrolled : classEnrolledCount)
+
+  const enrolledCount = totalStudentsCount > 0 ? totalStudentsCount : classEnrolledCount
+
+  const submittedCount = actualQuizSubmitted ?? (Number(
     quiz.submittedCount ?? quiz.submissionCount ?? quiz.submissionsCount ?? quiz.totalSubmissions ?? 0
-  ) || 0
+  ) || 0)
+
   const statsPercentage = enrolledCount > 0 ? Math.min(100, Math.round((submittedCount / enrolledCount) * 100)) : 0
 
   const title = quiz.name || quiz.title || cg.untitledQuiz || "Untitled Quiz"
@@ -742,36 +780,47 @@ const QuizCard = ({
         {/* Header Row: Badges & 3-dot Menu */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Status Badge */}
+            {/* 1. Main Publish Status Badge */}
             {isDraft && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
                 <Pencil size={9} />
-                <span>{cg.badgeDraft || "Draft"}</span>
+                <span>{cg.badgeDraft || "NHÁP"}</span>
               </span>
             )}
             {isPublished && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
                 <Check size={10} strokeWidth={2.5} />
-                <span>{cg.badgePublished || "Đã đăng"}</span>
+                <span>{cg.badgePublished || "ĐÃ ĐĂNG"}</span>
               </span>
             )}
             {isClosed && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
                 <X size={10} strokeWidth={2.5} />
-                <span>{cg.badgeClosed || "Đã đóng"}</span>
+                <span>{cg.badgeClosed || "ĐÃ ĐÓNG"}</span>
               </span>
             )}
 
-            {/* Timeline / Urgency Badge */}
-            {!isDraft && isExpired && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
-                {cg.badgeExpired || "Hết hạn"}
-              </span>
-            )}
-            {!isDraft && !isExpired && isDueSoon && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
-                {cg.badgeUpcoming || "Sắp đến hạn"}
-              </span>
+            {/* 2. Secondary Tag (chỉ hiển thị 1 tag duy nhất: HẾT HẠN > SẮP ĐẾN HẠN > SẮP MỞ > ĐANG MỞ) */}
+            {!isDraft && !isClosed && (
+              <>
+                {isExpired ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
+                    {cg.badgeExpired || "HẾT HẠN"}
+                  </span>
+                ) : isDueSoon ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
+                    {cg.badgeUpcoming || "SẮP ĐẾN HẠN"}
+                  </span>
+                ) : isUpcomingOpen ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e0f2fe] text-[#0369a1]">
+                    {cg.badgeUpcomingOpen || "SẮP MỞ"}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] text-[#2e7d32]">
+                    {cg.badgeOpen || "ĐANG MỞ"}
+                  </span>
+                )}
+              </>
             )}
           </div>
 
@@ -887,7 +936,17 @@ const TeacherAssignmentCard = ({
   const status = getAssignmentStatus(assignment)
   const isDraft = status === "draft"
   const isClosed = status === "closed"
-  const isPublished = status === "published"
+  const isPublished = !isDraft && !isClosed
+
+  const { isExpired } = getAssignmentTimeline(assignment, nowMs)
+  const dueTime = assignment?.dueDate ? new Date(assignment.dueDate).getTime() : null
+  const isDueSoon = isPublished && !isExpired && dueTime && (dueTime - nowMs <= 3 * 24 * 60 * 60 * 1000)
+  const isOpen = isPublished && !isExpired
+
+  const { data: submissionsResponse } = useGetAssignmentSubmissionsQuery(
+    { classId, assignmentId: assignment?.id },
+    { skip: !classId || !assignment?.id || isDraft }
+  )
 
   const rawItemEnrolled = getAssignmentCount(assignment, [
     "enrolledCount",
@@ -899,16 +958,20 @@ const TeacherAssignmentCard = ({
   ])
   const enrolledCount = (rawItemEnrolled !== null && rawItemEnrolled > 0) ? rawItemEnrolled : classEnrolledCount
 
-  const submittedCount = getAssignmentCount(assignment, [
+  const rawSubmissions = submissionsResponse?.data ?? submissionsResponse
+  const actualSubmissionsCount = Array.isArray(rawSubmissions)
+    ? rawSubmissions.filter((s) => s && s.status !== "not_submitted").length
+    : null
+
+  const submittedCount = actualSubmissionsCount ?? (getAssignmentCount(assignment, [
     "submittedCount",
     "submissionCount",
     "submissionsCount",
     "totalSubmissions",
     "submittedStudents",
-  ]) ?? 0
+  ]) ?? 0)
   const statsPercentage = enrolledCount > 0 ? Math.min(100, Math.round((submittedCount / enrolledCount) * 100)) : 0
 
-  const { isExpired, isUpcoming } = getAssignmentTimeline(assignment, nowMs)
   const title = getAssignmentTitle(assignment, cg.untitledAssignment || "Untitled Assignment")
   const subtitle = assignment.orderIndex
     ? `Bài tập số ${assignment.orderIndex}`
@@ -947,36 +1010,43 @@ const TeacherAssignmentCard = ({
         {/* Header Row: Badges & 3-dot Menu */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Status Badge */}
+            {/* 1. Main Publish Status Badge */}
             {isDraft && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
                 <Pencil size={9} />
-                <span>{cg.badgeDraft || "Draft"}</span>
+                <span>{cg.badgeDraft || "NHÁP"}</span>
               </span>
             )}
             {isPublished && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
                 <Check size={10} strokeWidth={2.5} />
-                <span>{cg.badgePublished || "Đã đăng"}</span>
+                <span>{cg.badgePublished || "ĐÃ ĐĂNG"}</span>
               </span>
             )}
             {isClosed && (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
                 <X size={10} strokeWidth={2.5} />
-                <span>{cg.badgeClosed || "Đã đóng"}</span>
+                <span>{cg.badgeClosed || "ĐÃ ĐÓNG"}</span>
               </span>
             )}
 
-            {/* Timeline / Urgency Badge */}
-            {!isDraft && isExpired && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
-                {cg.badgeExpired || "Hết hạn"}
-              </span>
-            )}
-            {!isDraft && !isExpired && isUpcoming && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
-                {cg.badgeUpcoming || "Sắp đến hạn"}
-              </span>
+            {/* 2. Secondary Tag (chỉ hiển thị 1 tag duy nhất: HẾT HẠN > SẮP ĐẾN HẠN > ĐANG MỞ) */}
+            {!isDraft && !isClosed && (
+              <>
+                {isExpired ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
+                    {cg.badgeExpired || "HẾT HẠN"}
+                  </span>
+                ) : isDueSoon ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
+                    {cg.badgeUpcoming || "SẮP ĐẾN HẠN"}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] text-[#2e7d32]">
+                    {cg.badgeOpen || "ĐANG MỞ"}
+                  </span>
+                )}
+              </>
             )}
           </div>
 
@@ -1097,6 +1167,7 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const [contentType, setContentType] = useState("all") // "all" | "assignments" | "quizzes"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [studentPage, setStudentPage] = useState(1)
+  const [teacherPage, setTeacherPage] = useState(1)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   useEffect(() => {
@@ -1274,6 +1345,19 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const showAssignments = contentType === "all" || contentType === "assignments"
   const showQuizzes = contentType === "all" || contentType === "quizzes"
 
+  const teacherCombinedItems = useMemo(() => {
+    const items = []
+    if (showQuizzes) {
+      filteredQuizzes.forEach((quiz) => items.push({ type: "quiz", data: quiz, createdAt: getTimestamp(quiz.createdAt) }))
+    }
+    if (showAssignments) {
+      filteredAssignments.forEach((assignment) => items.push({ type: "assignment", data: assignment, createdAt: getTimestamp(assignment.createdAt) }))
+    }
+    return items.sort((a, b) => {
+      return sortBy === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+    })
+  }, [showQuizzes, showAssignments, filteredQuizzes, filteredAssignments, sortBy])
+
   // Student Metrics Computation
   const totalAssignmentsCount = assignments.length
   const totalQuizzesCount = quizzes.length
@@ -1417,21 +1501,25 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const selectContentType = (value) => {
     setContentType(value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   const selectStatusOption = (value) => {
     setStatusFilter(value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   const selectSortOption = (value) => {
     setSortBy(value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   // Deep links are backed by detail endpoints; avoid fetching the full list first.
@@ -1811,7 +1899,14 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   }
 
   // ─── Main View: Teacher Cards Grid ───
-  const hasNoItems = (showAssignments ? filteredAssignments.length : 0) === 0 && (showQuizzes ? filteredQuizzes.length : 0) === 0
+  const totalTeacherItems = teacherCombinedItems.length
+  const teacherTotalPages = Math.max(1, Math.ceil(totalTeacherItems / TEACHER_PAGE_SIZE))
+  const activeTeacherPage = Math.min(teacherPage, teacherTotalPages)
+  const visibleTeacherItems = teacherCombinedItems.slice(
+    (activeTeacherPage - 1) * TEACHER_PAGE_SIZE,
+    activeTeacherPage * TEACHER_PAGE_SIZE,
+  )
+  const hasNoItems = totalTeacherItems === 0
 
   return (
     <div className="flex flex-col gap-5">
@@ -1923,37 +2018,41 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             : cg.noDataLabel}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          {/* Render Quiz Cards */}
-          {showQuizzes && filteredQuizzes.map((quiz) => (
-            <QuizCard
-              key={`quiz-${quiz.id}`}
-              quiz={quiz}
-              classId={classId}
-              cg={cg}
-              language={language}
-              navigate={navigate}
-              nowMs={nowMs}
-              classEnrolledCount={classEnrolledCount}
-            />
-          ))}
-
-          {/* Render Assignment Cards */}
-          {showAssignments && filteredAssignments.map((assignment) => (
-            <TeacherAssignmentCard
-              key={`assign-${assignment.id}`}
-              assignment={assignment}
-              classId={classId}
-              cg={cg}
-              nowMs={nowMs}
-              onViewSubmissions={(id) => setSearchParams({ tab: "grading", assignmentId: id })}
-              navigate={navigate}
-              classEnrolledCount={classEnrolledCount}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          {visibleTeacherItems.map((item) => (
+            item.type === "quiz" ? (
+              <QuizCard
+                key={`quiz-${item.data.id}`}
+                quiz={item.data}
+                classId={classId}
+                cg={cg}
+                language={language}
+                navigate={navigate}
+                nowMs={nowMs}
+                classEnrolledCount={classEnrolledCount}
+              />
+            ) : (
+              <TeacherAssignmentCard
+                key={`assign-${item.data.id}`}
+                assignment={item.data}
+                classId={classId}
+                cg={cg}
+                nowMs={nowMs}
+                onViewSubmissions={(id) => setSearchParams({ tab: "grading", assignmentId: id })}
+                navigate={navigate}
+                classEnrolledCount={classEnrolledCount}
+              />
+            )
           ))}
         </div>
       )}
+
+      {/* ─── Pagination ─── */}
+      <Pagination
+        page={activeTeacherPage}
+        totalPages={teacherTotalPages}
+        onChangePage={setTeacherPage}
+      />
 
     </div>
   )
