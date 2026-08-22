@@ -1213,6 +1213,8 @@ export default {
     sortNewest: "排序：最新",
     sortOldest: "排序：最旧",
     badgePublished: "已发布",
+    badgeOpen: "开放中",
+    badgeUpcomingOpen: "即将开放",
     badgeUpcoming: "即将截止",
     badgeDraft: "草稿",
     badgeClosed: "已关闭",
