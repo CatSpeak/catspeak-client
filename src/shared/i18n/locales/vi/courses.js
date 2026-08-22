@@ -1308,7 +1308,7 @@ export default {
     viewSubmissionBtn: "Xem bài nộp",
     scoreLabel: "Điểm",
     badgeOpen: "ĐANG MỞ",
-    viewQuizDetails: "Xem chi tiết bài kiểm tra",
+    viewQuizDetails: "Xem bài kiểm tra",
     scoreScaleLabel: "Điểm: {{score}}",
     publishingQuiz: "Đang đăng...",
     publishQuiz: "Đăng bài kiểm tra",

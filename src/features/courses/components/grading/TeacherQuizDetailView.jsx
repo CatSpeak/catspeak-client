@@ -16,6 +16,7 @@ import {
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import Tabs from "@/shared/components/ui/navigation/Tabs"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { getQuizObjectFromResponse } from "@/features/courses/utils/quizUtils"
 import {
@@ -413,36 +414,36 @@ const TeacherAttemptState = ({
 
   return (
     <div className="min-h-[450px] bg-gray-100 flex flex-col">
-    <div className="pb-4 flex items-center gap-3">
-      <button
-        type="button"
-        onClick={onClose}
-        className="w-9 h-9 rounded-xl border border-border hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
-        title={qg.goBack}
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
-      <h1 className="text-xl md:text-2xl font-black text-gray-950 tracking-tight">
-        {title}
-      </h1>
-    </div>
-    <div className="min-h-[360px] bg-white rounded-3xl border border-border flex flex-col items-center justify-center gap-4 p-8 text-center">
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : (
-        <AlertCircle className="w-10 h-10 text-amber-500" />
-      )}
-      <p className="max-w-md text-sm font-semibold text-gray-600">{message}</p>
-      {!isLoading && onRetry && (
+      <div className="pb-4 flex items-center gap-3">
         <button
           type="button"
-          onClick={onRetry}
-          className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e]"
+          onClick={onClose}
+          className="w-9 h-9 rounded-xl border border-border hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors cursor-pointer"
+          title={qg.goBack}
         >
-          {qg.retry}
+          <ArrowLeft className="w-5 h-5" />
         </button>
-      )}
-    </div>
+        <h1 className="text-xl md:text-2xl font-black text-gray-950 tracking-tight">
+          {title}
+        </h1>
+      </div>
+      <div className="min-h-[360px] bg-white rounded-3xl border border-border flex flex-col items-center justify-center gap-4 p-8 text-center">
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <AlertCircle className="w-10 h-10 text-amber-500" />
+        )}
+        <p className="max-w-md text-sm font-semibold text-gray-600">{message}</p>
+        {!isLoading && onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e]"
+          >
+            {qg.retry}
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -1235,6 +1236,21 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       return next
     })
   }
+
+  const quizTabs = [
+    { id: "overview", label: qg.overview },
+    { id: "submissions", label: qg.submissions },
+    { id: "stats", label: qg.statistics },
+    { id: "edit", label: qg.edit },
+  ]
+
+  const handleTabChange = (tabId) => {
+    if (tabId === "edit") {
+      onEdit?.()
+      return
+    }
+    setActiveTab(tabId)
+  }
   const [isQuestionsCollapsed, setIsQuestionsCollapsed] = useState(false)
   const [visibleQuestionsCount, setVisibleQuestionsCount] = useState(1)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -1597,48 +1613,13 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="border-b border-border mb-6 flex gap-8">
-        <button
-          type="button"
-          onClick={() => setActiveTab("overview")}
-          className={`pb-3 px-1 text-sm transition-colors cursor-pointer font-bold ${activeTab === "overview"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
-        >
-          {qg.overview}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("submissions")}
-          className={`pb-3 px-1 text-sm transition-colors cursor-pointer font-bold ${activeTab === "submissions"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
-        >
-          {qg.submissions}
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("stats")}
-          className={`pb-3 px-1 text-sm transition-colors cursor-pointer font-bold ${activeTab === "stats"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
-        >
-          {qg.statistics}
-        </button>
-        <button
-          type="button"
-          onClick={onEdit}
-          className={`pb-3 px-1 text-sm transition-colors cursor-pointer font-bold ${activeTab === "edit"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
-        >
-          {qg.edit}
-        </button>
-      </div>
+      <Tabs
+        tabs={quizTabs}
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        fullWidth={false}
+        className="mb-6"
+      />
 
       {/* TAB CONTENT: Overview (Tổng quan) */}
       {activeTab === "overview" && (
@@ -1839,34 +1820,34 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
           ) : (
             <>
               <div className="overflow-x-auto rounded-2xl border border-border">
-                <table className="w-full text-xs text-left border-collapse">
+                <table className="min-w-[720px] w-full text-xs text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#F9FAFB] text-gray-700 font-semibold border-b border-border">
-                      <th className="py-4 px-5 border-r border-border">
+                    <tr className="bg-[#F9FAFB] text-gray-700 font-semibold border-b border-border whitespace-nowrap">
+                      <th className="py-4 px-5 border-r border-border min-w-[220px]">
                         <div className="flex items-center justify-between gap-2">
                           <span>{qg.studentInformation}</span>
-                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5] shrink-0" />
                         </div>
                       </th>
-                      <th className="py-4 px-5 border-r border-border">
-                        <div className="flex items-center justify-center gap-2">
+                      <th className="py-4 px-5 border-r border-border min-w-[150px]">
+                        <div className="flex items-center justify-between gap-2">
                           <span>{qg.submissionStatus}</span>
-                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5] shrink-0" />
                         </div>
                       </th>
-                      <th className="py-4 px-5 border-r border-border">
-                        <div className="flex items-center justify-center gap-2">
+                      <th className="py-4 px-5 border-r border-border min-w-[150px]">
+                        <div className="flex items-center justify-between gap-2">
                           <span>{qg.gradingStatus}</span>
-                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5] shrink-0" />
                         </div>
                       </th>
-                      <th className="py-4 px-5 border-r border-border">
-                        <div className="flex items-center justify-center gap-2">
+                      <th className="py-4 px-5 border-r border-border min-w-[100px]">
+                        <div className="flex items-center justify-between gap-2">
                           <span>{qg.score}</span>
-                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5]" />
+                          <SlidersHorizontal className="w-3.5 h-3.5 text-[#990011] stroke-[2.5] shrink-0" />
                         </div>
                       </th>
-                      <th className="py-4 px-5 text-center">
+                      <th className="py-4 px-5 text-center min-w-[80px]">
                         <span>{qg.actions}</span>
                       </th>
                     </tr>
@@ -1892,7 +1873,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             className="hover:bg-gray-50/60 transition-colors"
                           >
                             {/* Col 1: Student info */}
-                            <td className="py-4 px-5 border-r border-border">
+                            <td className="py-4 px-5 border-r border-border whitespace-nowrap">
                               <div className="flex items-center gap-3">
                                 {st.avatar ? (
                                   <img
@@ -1918,7 +1899,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 2: Submission status */}
-                            <td className="py-4 px-5 border-r border-border text-center">
+                            <td className="py-4 px-5 border-r border-border text-center whitespace-nowrap">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${subStatus.style}`}
                               >
@@ -1927,7 +1908,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 3: Grading status */}
-                            <td className="py-4 px-5 border-r border-border text-center">
+                            <td className="py-4 px-5 border-r border-border text-center whitespace-nowrap">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${gradStatus.style}`}
                               >
@@ -1936,12 +1917,12 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 4: Score */}
-                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800">
+                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800 whitespace-nowrap">
                               {displayScore}
                             </td>
 
                             {/* Col 5: Action */}
-                            <td className="py-4 px-5 text-center">
+                            <td className="py-4 px-5 text-center whitespace-nowrap">
                               <button
                                 type="button"
                                 disabled={targetStudentId === null || targetStudentId === undefined}
@@ -1962,7 +1943,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       <tr>
                         <td
                           colSpan={5}
-                          className="py-12 text-center text-gray-400 text-xs font-medium"
+                          className="py-12 text-center text-gray-400 text-xs font-medium whitespace-nowrap"
                         >
                           {submissionSearch
                             ? qg.noMatchingStudents
