@@ -11,9 +11,7 @@ const GeneralSection = ({
   className = "",
 }) => {
   return (
-    <div
-      className={`bg-white rounded-3xl p-4 sm:p-6 flex flex-col items-center shadow-xs ${className}`}
-    >
+    <div className={`p-4 sm:p-6 flex flex-col items-center${className}`}>
       <div className="w-full flex flex-col items-center">
         {/* Header: Title & Nút Share */}
         <div className="relative w-full flex items-center justify-center min-h-[44px]">
