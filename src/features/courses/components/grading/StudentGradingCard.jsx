@@ -2,6 +2,7 @@ import React from "react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { ArrowRight, Clock, List } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * Thẻ hiển thị thông tin bài tập/bài kiểm tra cho học viên
@@ -21,6 +22,9 @@ const StudentGradingCard = ({
   actionText = "Làm bài",
   onAction = () => { },
 }) => {
+  const { t } = useLanguage()
+  const gradingT = t?.courses?.grading || {}
+  
   const isOverdue = status === "overdue"
   const isPending = status === "pending"
 
@@ -67,7 +71,7 @@ const StudentGradingCard = ({
           <div className="flex items-center gap-2.5 text-sm font-medium text-gray-500">
             <Clock size={16} className="text-gray-400" />
             <span>
-              {duration} phút
+              {gradingT.minsLabel ? gradingT.minsLabel.replace("{{mins}}", duration) : `${duration} phút`}
             </span>
           </div>
         )}
@@ -75,7 +79,7 @@ const StudentGradingCard = ({
           <div className="flex items-center gap-2.5 text-sm font-medium text-gray-500">
             <List size={16} className="text-gray-400" />
             <span>
-              {questionCount} Câu hỏi
+              {gradingT.questionsLabel ? gradingT.questionsLabel.replace("{{count}}", questionCount) : `${questionCount} Câu hỏi`}
             </span>
           </div>
         )}
@@ -98,7 +102,7 @@ const StudentGradingCard = ({
           )}
           {(status === "submitted" || status === "late" || status === "graded") && (
             <span className="text-gray-500 font-medium text-sm">
-              {footerText || "Chờ chấm điểm"}
+              {footerText || gradingT.studentTab?.pendingGrading || "Chờ chấm điểm"}
             </span>
           )}
           {status === "returned" && (
@@ -106,8 +110,8 @@ const StudentGradingCard = ({
               <span className="text-[#0E6EEC] text-3xl font-black tracking-tight leading-none">
                 {score !== null ? score : "—"}
               </span>
-              <span className="text-gray-400 text-sm font-bold tracking-wider">
-                Điểm
+              <span className="text-gray-400 text-sm font-bold tracking-wider capitalize">
+                {t?.courses?.quiz?.points || gradingT.thGrade || "Điểm"}
               </span>
             </div>
           )}

@@ -41,6 +41,8 @@ const getDisplayableItems = (items) => {
 
 const StudentGradingTab = ({ id: classId }) => {
   const { t } = useLanguage()
+  const filterT = t.courses.grading.filterModal
+  const gradingT = t.courses.grading
   const { formatDateTime } = useTimezone()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -102,9 +104,10 @@ const StudentGradingTab = ({ id: classId }) => {
       if (remainingMs <= 0) return ""
       const days = Math.floor(remainingMs / (1000 * 60 * 60 * 24))
       const hours = Math.floor((remainingMs / (1000 * 60 * 60)) % 24)
-      if (days > 0) return `Còn ${days} ngày ${hours} giờ`
-      if (hours > 0) return `Còn ${hours} giờ`
-      return `Còn ${Math.floor((remainingMs / (1000 * 60)) % 60)} phút`
+      const tabT = gradingT.studentTab
+      if (days > 0) return tabT.timeLeftDaysHours.replace("{{days}}", days).replace("{{hours}}", hours)
+      if (hours > 0) return tabT.timeLeftHours.replace("{{hours}}", hours)
+      return tabT.timeLeftMins.replace("{{mins}}", Math.floor((remainingMs / (1000 * 60)) % 60))
     }
 
     assignments.forEach((assignment) => {
@@ -115,39 +118,39 @@ const StudentGradingTab = ({ id: classId }) => {
       const isExpired = dueDateMs > 0 && dueDateMs < nowMs
 
       let status = "pending"
-      let statusLabel = "Chưa làm"
+      let statusLabel = filterT.statusPending
       let scoreText = null
       let footerText = ""
-      let actionText = "Làm bài"
+      let actionText = gradingT.studentTab.startTask
 
       if (subStatus) {
         if (subStatus === "submitted" || subStatus === "late") {
           status = subStatus
-          statusLabel = subStatus === "late" ? "Nộp muộn" : "Đã nộp"
-          footerText = "Chờ chấm điểm"
-          actionText = "Xem chi tiết"
+          statusLabel = subStatus === "late" ? gradingT.filterLate : filterT.statusSubmitted
+          footerText = gradingT.studentTab.pendingGrading
+          actionText = gradingT.studentTab.viewDetails
         } else if (subStatus === "graded") {
           status = "graded"
-          statusLabel = "Đã chấm"
-          footerText = "Chờ công bố điểm"
-          actionText = "Xem chi tiết"
+          statusLabel = filterT.statusGraded
+          footerText = gradingT.studentTab.awaitingScore
+          actionText = gradingT.studentTab.viewDetails
         } else if (subStatus === "returned") {
           status = "returned"
-          statusLabel = "Đã có điểm"
+          statusLabel = gradingT.studentTab.statusReturned
           scoreText = submission.grade != null ? String(submission.grade) : null
-          actionText = "Xem kết quả"
+          actionText = gradingT.viewGradeBtn
         }
       } else if (isExpired) {
         status = "overdue"
-        statusLabel = "Quá hạn"
-        actionText = "Đã đóng"
+        statusLabel = filterT.statusOverdue
+        actionText = gradingT.studentTab.closed
       }
 
       items.push({
         type: "assignment",
         id: assignment.id,
         raw: assignment,
-        title: assignment.name || "Bài tập không tên",
+        title: assignment.name || gradingT.untitledAssignment,
         duration: null,
         questionCount: null,
         dueDateMs,
@@ -155,7 +158,7 @@ const StudentGradingTab = ({ id: classId }) => {
         status,
         statusLabel,
         timeRemainingText: status === "pending" ? calculateTimeRemaining(remainingMs) : "",
-        deadlineText: assignment.dueDate ? `Hạn ${formatDateTime(assignment.dueDate).split(' ')[0]}` : "",
+        deadlineText: assignment.dueDate ? gradingT.studentTab.deadline.replace("{{date}}", formatDateTime(assignment.dueDate).split(' ')[0]) : "",
         scoreText,
         footerText,
         actionText,
@@ -170,39 +173,39 @@ const StudentGradingTab = ({ id: classId }) => {
       const isExpired = closeTimestamp > 0 && closeTimestamp < nowMs
 
       let status = "pending"
-      let statusLabel = "Chưa làm"
+      let statusLabel = filterT.statusPending
       let scoreText = null
       let footerText = ""
-      let actionText = "Làm bài"
+      let actionText = gradingT.studentTab.startTask
 
       if (subStatus) {
         if (subStatus === "submitted" || subStatus === "late") {
           status = subStatus
-          statusLabel = subStatus === "late" ? "Nộp muộn" : "Đã nộp"
-          footerText = "Chờ chấm điểm"
-          actionText = "Xem chi tiết"
+          statusLabel = subStatus === "late" ? gradingT.filterLate : filterT.statusSubmitted
+          footerText = gradingT.studentTab.pendingGrading
+          actionText = gradingT.studentTab.viewDetails
         } else if (subStatus === "graded") {
           status = "graded"
-          statusLabel = "Đã chấm"
-          footerText = "Chờ công bố điểm"
-          actionText = "Xem chi tiết"
+          statusLabel = filterT.statusGraded
+          footerText = gradingT.studentTab.awaitingScore
+          actionText = gradingT.studentTab.viewDetails
         } else if (subStatus === "returned") {
           status = "returned"
-          statusLabel = "Đã có điểm"
+          statusLabel = gradingT.studentTab.statusReturned
           scoreText = submission?.grade != null ? String(submission.grade) : (quiz.recordScore != null ? String(quiz.recordScore) : null)
-          actionText = "Xem kết quả"
+          actionText = gradingT.viewGradeBtn
         }
       } else if (isExpired) {
         status = "overdue"
-        statusLabel = "Quá hạn"
-        actionText = "Đã đóng"
+        statusLabel = filterT.statusOverdue
+        actionText = gradingT.studentTab.closed
       }
 
       items.push({
         type: "quiz",
         id: quiz.id,
         raw: quiz,
-        title: quiz.name || "Bài kiểm tra không tên",
+        title: quiz.name || gradingT.untitledQuiz,
         duration: quiz.timeLimitMinutes ?? "0",
         questionCount: quiz.totalQuestions ?? 0,
         dueDateMs: closeTimestamp,
@@ -210,7 +213,7 @@ const StudentGradingTab = ({ id: classId }) => {
         status,
         statusLabel,
         timeRemainingText: status === "pending" ? calculateTimeRemaining(remainingMs) : "",
-        deadlineText: quiz.closeTime ? `Hạn ${formatDateTime(quiz.closeTime).split(' ')[0]}` : "",
+        deadlineText: quiz.closeTime ? gradingT.studentTab.deadline.replace("{{date}}", formatDateTime(quiz.closeTime).split(' ')[0]) : "",
         scoreText,
         footerText,
         actionText,
@@ -218,6 +221,7 @@ const StudentGradingTab = ({ id: classId }) => {
     })
 
     return items
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assignments, quizzes, nowMs, formatDateTime])
 
   // Filter items based on activeTab and activeType
@@ -313,11 +317,11 @@ const StudentGradingTab = ({ id: classId }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-[#1A1A1A]">Quản lý bài</h2>
+        <h2 className="text-xl font-bold text-[#1A1A1A]">{gradingT.gradingTitle || "Quản lý bài"}</h2>
         <div className="relative">
           <IconButton
             onClick={() => setShowFilterModal(true)}
-            title="Lọc trạng thái"
+            title={filterT.title}
             variant="outline"
           >
             <SlidersHorizontal />
@@ -344,7 +348,7 @@ const StudentGradingTab = ({ id: classId }) => {
 
       {visibleItems.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center text-gray-500">
-          Không có bài tập/bài kiểm tra nào.
+          {gradingT.noMatchingItems}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -352,7 +356,7 @@ const StudentGradingTab = ({ id: classId }) => {
             <StudentGradingCard
               key={`${item.type}-${item.id}`}
               type={item.type}
-              typeLabel={item.type === "assignment" ? "Bài nộp" : "Bài kiểm tra"}
+              typeLabel={item.type === "assignment" ? filterT.typeAssignment : filterT.typeQuiz}
               status={item.status}
               statusLabel={item.statusLabel}
               title={item.title}

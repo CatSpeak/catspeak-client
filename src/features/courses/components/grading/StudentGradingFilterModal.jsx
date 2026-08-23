@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const StudentGradingFilterModal = ({
   open,
@@ -11,6 +12,9 @@ const StudentGradingFilterModal = ({
   activeType,
   onTypeChange,
 }) => {
+  const { t } = useLanguage()
+  const filterT = t.courses.grading.filterModal
+
   const [localStatus, setLocalStatus] = useState(activeStatus)
   const [localType, setLocalType] = useState(activeType)
 
@@ -23,17 +27,17 @@ const StudentGradingFilterModal = ({
   }, [open, activeStatus, activeType])
 
   const statusOptions = [
-    { value: "all", label: "Tất cả" },
-    { value: "pending", label: "Chưa làm" },
-    { value: "submitted", label: "Đã nộp" },
-    { value: "graded", label: "Đã chấm" },
-    { value: "overdue", label: "Quá hạn" },
+    { value: "all", label: filterT.statusAll },
+    { value: "pending", label: filterT.statusPending },
+    { value: "submitted", label: filterT.statusSubmitted },
+    { value: "graded", label: filterT.statusGraded },
+    { value: "overdue", label: filterT.statusOverdue },
   ]
 
   const typeOptions = [
-    { value: "all", label: "Tất cả" },
-    { value: "assignment", label: "Bài nộp" },
-    { value: "quiz", label: "Bài kiểm tra" },
+    { value: "all", label: filterT.typeAll },
+    { value: "assignment", label: filterT.typeAssignment },
+    { value: "quiz", label: filterT.typeQuiz },
   ]
 
   const handleReset = () => {
@@ -51,20 +55,20 @@ const StudentGradingFilterModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title="Bộ lọc"
+      title={filterT.title}
       footer={
         <div className="flex items-center gap-3 w-full">
           <PillButton variant="secondary" onClick={handleReset} className="flex-1">
-            Đặt lại
+            {filterT.resetBtn}
           </PillButton>
           <PillButton variant="primary" onClick={handleApply} className="flex-1">
-            Áp dụng
+            {filterT.applyBtn}
           </PillButton>
         </div>
       }
     >
       <div className="flex flex-col gap-2 mb-4">
-        <label className="font-bold text-gray-900 text-sm">Trạng thái</label>
+        <label className="font-bold text-gray-900 text-sm">{filterT.status}</label>
         <Dropdown
           options={statusOptions}
           value={localStatus}
@@ -75,7 +79,7 @@ const StudentGradingFilterModal = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="font-bold text-gray-900 text-sm">Loại bài</label>
+        <label className="font-bold text-gray-900 text-sm">{filterT.type}</label>
         <Dropdown
           options={typeOptions}
           value={localType}
