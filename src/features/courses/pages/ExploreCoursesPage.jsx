@@ -154,6 +154,7 @@ const ExploreCoursesPage = () => {
     const code = (communityLanguage || "en").toLowerCase()
     if (code === "zh" || code === "chinese") return "chinese"
     if (code === "en" || code === "english") return "english"
+    if (code === "ja" || code === "japanese") return "japanese"
     return "english"
   }, [communityLanguage])
 

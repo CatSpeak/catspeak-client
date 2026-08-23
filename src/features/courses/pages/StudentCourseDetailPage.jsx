@@ -21,6 +21,7 @@ import {
   getClassEnrollmentIssue,
 } from "../utils/courseUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
+import { getLocalizedLanguageName } from "../data/courseFormOptions"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { Calendar, Clock, Mail, CheckCircle2, BookOpen, FileText, Globe, User, Radio, Users, Video, ChevronDown, ChevronUp, GraduationCap, Share2, Check, AlertTriangle } from "lucide-react"
 import useRoleOverride from "../components/RoleSwitcher"
@@ -216,7 +217,8 @@ const StudentCourseDetailPage = () => {
   }
 
   // Data helpers
-  const languageLabel = rawCourse.language || "—"
+  const languageLabel =
+    getLocalizedLanguageName(rawCourse.language, t) || rawCourse.language || "—"
   const thumbnailUrl = getSafeMediaUrl(rawCourse.thumbnailUrl)
   const teacherAvatarUrl = getSafeMediaUrl(teacher.avatarImageUrl)
 

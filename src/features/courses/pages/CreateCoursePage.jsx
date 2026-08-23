@@ -21,7 +21,7 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { getInstructorFormLanguages } from "../data/courseFormOptions"
+import { getInstructorFormLanguages, getLocalizedLanguageName } from "../data/courseFormOptions"
 import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
@@ -465,7 +465,7 @@ const CreateCoursePage = () => {
               <Dropdown
                 options={languagesList.map((lang) => ({
                   value: lang.name,
-                  label: lang.name,
+                  label: getLocalizedLanguageName(lang.name, t),
                 }))}
                 value={selectedLanguage}
                 onChange={(val) => {
