@@ -7,6 +7,8 @@ import { useGetTeacherAllTeachingTasksCombinedQuery } from "@/store/api/coursesA
 import TeachingTasksTable from "../components/assignments/TeachingTasksTable"
 import { defaultCourseThumbnail } from "../utils/courseUtils"
 
+import Pagination from "@/shared/components/ui/navigation/Pagination"
+
 const AllTeachingTasksPage = () => {
   const { t } = useLanguage()
   const c = t.courses || {}
@@ -14,14 +16,23 @@ const AllTeachingTasksPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams()
   const activeTab = searchParams.get("tab") || "urgent"
+  const page = parseInt(searchParams.get("page") || "1", 10)
+  const limit = 10
 
   const {
-    currentData: data,
+    currentData: pagedResult,
     isLoading,
     isFetching,
     error,
     refetch,
-  } = useGetTeacherAllTeachingTasksCombinedQuery()
+  } = useGetTeacherAllTeachingTasksCombinedQuery({
+    page,
+    limit,
+    status: activeTab,
+  })
+
+  const data = pagedResult?.items || []
+  const totalPages = pagedResult?.totalPages || 0
 
   // const data = [
   //   {
@@ -71,16 +82,8 @@ const AllTeachingTasksPage = () => {
   // const refetch = () => {}
 
   const tasks = useMemo(() => {
-    const rawTasks = Array.isArray(data) ? data : []
-    // Filter logic based on tab status
-    return rawTasks.filter(task => {
-      const taskStatus = (task.status || "").toLowerCase()
-      if (activeTab === "urgent") return taskStatus === "urgent"
-      if (activeTab === "required") return taskStatus === "required"
-      if (activeTab === "later") return taskStatus === "later"
-      return true
-    })
-  }, [data, activeTab])
+    return Array.isArray(data) ? data : []
+  }, [data])
 
   const tabs = [
     { value: "urgent", label: c.taskTabUrgent || "Urgent" },
@@ -92,6 +95,15 @@ const AllTeachingTasksPage = () => {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
       next.set("tab", tab)
+      next.set("page", "1") // Reset to page 1 on tab change
+      return next
+    })
+  }
+
+  const handlePageChange = (newPage) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("page", newPage.toString())
       return next
     })
   }
@@ -136,6 +148,15 @@ const AllTeachingTasksPage = () => {
       ) : tasks.length > 0 ? (
         <div className="flex flex-col gap-2 mt-4">
           <TeachingTasksTable tasks={tasks} defaultCourseThumbnail={defaultCourseThumbnail} />
+          {totalPages > 1 && (
+            <div className="mt-4 px-2">
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onChangePage={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div className="text-center py-12 text-sm text-gray-400 font-semibold bg-gray-50/50 rounded-2xl border border-dashed border-border mt-4">
