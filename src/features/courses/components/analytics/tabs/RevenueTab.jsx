@@ -30,43 +30,83 @@ const RevenueTab = ({ group, queryParams = {} }) => {
   const { data: revenueByClassData } = useGetAnalyticsRevenueByClassQuery(activeParams)
   const { data: topClassesData } = useGetAnalyticsRevenueTopClassesQuery(activeParams)
 
-  // 1. KPIs (strict API data)
+  // 3. Line Chart Data (Revenue Trend)
+  const trendPoints = (trendDataApi?.trendData || [])
+    .filter((point) => point?.label || point?.date)
+
+  const chartLabels = trendPoints.map((p) => p.label || p.date)
+  const seriesRevenue = trendPoints.map((p) => (p.totalRevenue != null ? p.totalRevenue / 1000000 : 0))
+
+  // 1. Comparison & KPIs
+  const hasComparison = Boolean(queryParams.compare && queryParams.compare !== "")
+  const getCompareNote = () => {
+    if (!hasComparison) return ""
+    if (queryParams.compare === "__lastYear__") return kpiT.vsSamePeriodLastYear || "so với cùng kỳ năm trước"
+    if (group === "day") return "so với tháng trước"
+    if (group === "week") return "so với quý trước"
+    if (group === "month") return "so với năm trước"
+    if (group === "year") return "so với giai đoạn trước"
+    return kpiT.vsPrevious || "so với kỳ trước"
+  }
+  const compareNote = getCompareNote()
+
+  const fmtGrowth = (growth) => {
+    if (growth === null || growth === undefined || isNaN(growth)) return ""
+    const sign = growth >= 0 ? "↑" : "↓"
+    return `${sign} ${numberVi(Math.abs(growth), 1)}%`
+  }
+
+  const latestPoint = trendPoints.length > 0 ? trendPoints[trendPoints.length - 1] : null
+  const prevPoint = trendPoints.length > 1 ? trendPoints[trendPoints.length - 2] : null
+
+  const revenueGrowth = prevPoint && prevPoint.totalRevenue > 0
+    ? ((latestPoint.totalRevenue - prevPoint.totalRevenue) / prevPoint.totalRevenue) * 100
+    : null
+
+  const netGrowth = prevPoint && prevPoint.netReceipt > 0
+    ? ((latestPoint.netReceipt - prevPoint.netReceipt) / prevPoint.netReceipt) * 100
+    : revenueGrowth
+
+  const feeGrowth = prevPoint && prevPoint.platformFee > 0
+    ? ((latestPoint.platformFee - prevPoint.platformFee) / prevPoint.platformFee) * 100
+    : revenueGrowth
+
   const overview = overviewData || {}
   const kpis = [
     {
       label: kpiT.totalRevenue || "Tổng doanh thu",
       value: money(overview.totalRevenue ?? 0),
-      delta: "",
+      delta: hasComparison && revenueGrowth != null ? fmtGrowth(revenueGrowth) : "",
       tone: "red",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && revenueGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.netEarnings || "Thực nhận",
       value: money(overview.netReceipt ?? 0),
-      delta: "",
+      delta: hasComparison && netGrowth != null ? fmtGrowth(netGrowth) : "",
       tone: "green",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && netGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.platformFee || "Phí nền tảng",
       value: money(overview.platformFee ?? 0),
-      delta: "",
+      delta: hasComparison && feeGrowth != null ? fmtGrowth(feeGrowth) : "",
       tone: "blue",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && feeGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.topRevenueClass || "Lớp doanh thu cao nhất",
       value: overview.topClassByRevenue || "-",
       delta: "",
       tone: "orange",
-      note: "Top lớp",
+      note: overview.topClassByRevenue ? "Top lớp" : "",
     },
     {
       label: kpiT.avgRevenuePerClass || "Doanh thu TB/lớp",
       value: money(overview.averageRevenuePerClass ?? 0),
-      delta: "",
+      delta: hasComparison && revenueGrowth != null ? fmtGrowth(revenueGrowth) : "",
       tone: "purple",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && revenueGrowth != null ? compareNote : "",
     },
   ]
 
@@ -76,14 +116,6 @@ const RevenueTab = ({ group, queryParams = {} }) => {
     label: r.className,
     value: r.grossRevenue ?? r.revenue ?? 0,
   }))
-
-  // 3. Line Chart Data (Revenue Trend)
-  const trendPoints = (trendDataApi?.trendData || [])
-    .filter((point) => point?.label || point?.date)
-
-  const chartLabels = trendPoints.map((p) => p.label || p.date)
-
-  const seriesRevenue = trendPoints.map((p) => (p.totalRevenue != null ? p.totalRevenue / 1000000 : 0))
 
   // 4. Detail Table Data
   const tableItems = revenueByClassData?.data || (Array.isArray(revenueByClassData) ? revenueByClassData : [])

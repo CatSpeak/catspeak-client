@@ -134,16 +134,11 @@ const AnalyticsFilterBar = ({
         { value: CUSTOM_PERIOD_VALUE, label: filterT.custom || "Tùy chỉnh" },
       ]
 
-  const compareOptions = isCustom
-    ? [
-        { value: "", label: filterT.noComparison || "Không so sánh" },
-        { value: COMPARE_PREVIOUS_VALUE, label: filterT.previousPeriod || "Kỳ liền trước" },
-        { value: COMPARE_LAST_YEAR_VALUE, label: lastYearLabel },
-      ]
+  const compareOptions = period === "alltime"
+    ? [{ value: "", label: filterT.noComparison || "Không so sánh" }]
     : [
         { value: "", label: filterT.noComparison || "Không so sánh" },
         ...meta.comparisons,
-        { value: COMPARE_LAST_YEAR_VALUE, label: lastYearLabel },
       ]
 
   const selectClass =

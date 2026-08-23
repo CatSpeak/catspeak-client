@@ -29,43 +29,61 @@ const CoursesTab = ({ queryParams = {} }) => {
   const { data: standaloneData } = useGetAnalyticsCourseClassStandaloneClassesQuery(activeParams)
   const { data: hotClassesData } = useGetAnalyticsCourseClassHotClassesQuery(activeParams)
 
-  // 1. KPIs (strict API data)
+  // 1. Comparison & KPIs
+  const hasComparison = Boolean(queryParams.compare && queryParams.compare !== "")
+  const getCompareNote = () => {
+    if (!hasComparison) return ""
+    if (queryParams.compare === "__lastYear__") return kpiT.vsSamePeriodLastYear || "so với cùng kỳ năm trước"
+    if (group === "day") return "so với kỳ trước"
+    if (group === "week") return "so với tuần trước"
+    if (group === "month") return "so với tháng trước"
+    if (group === "year") return "so với năm trước"
+    return kpiT.vsPrevious || "so với kỳ trước"
+  }
+  const compareNote = getCompareNote()
+
+  const fmtGrowth = (growth) => {
+    if (growth === null || growth === undefined || isNaN(growth)) return ""
+    const sign = growth >= 0 ? "↑" : "↓"
+    return `${sign} ${numberVi(Math.abs(growth), 1)}%`
+  }
+
   const overview = overviewData || {}
   const kpis = [
     {
       label: kpiT.totalCourses || "Tổng khóa học",
       value: String(overview.totalCourses ?? 0),
-      delta: "",
+      delta: hasComparison && overview.courseGrowth != null ? fmtGrowth(overview.courseGrowth) : "",
       tone: "green",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.courseGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.totalClasses || "Tổng lớp học",
       value: String(overview.totalClasses ?? 0),
-      delta: "",
+      delta: hasComparison && overview.classGrowth != null ? fmtGrowth(overview.classGrowth) : "",
       tone: "orange",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.classGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.activeClasses || "Lớp đang mở",
       value: String(overview.openClasses ?? 0),
-      delta: "",
+      delta: hasComparison && overview.openClassGrowth != null ? fmtGrowth(overview.openClassGrowth) : "",
       tone: "blue",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.openClassGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.avgFillRate || "Tỷ lệ lấp đầy TB",
       value: `${overview.averageFillRate ?? 0}%`,
-      delta: "",
+      delta: hasComparison && overview.fillRateGrowth != null ? fmtGrowth(overview.fillRateGrowth) : "",
       tone: "purple",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.fillRateGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.avgCompletionRate || "Tỷ lệ hoàn thành TB",
       value: `${overview.averageCompletionRate ?? 0}%`,
-      delta: "",
+      delta: hasComparison && overview.completionRateGrowth != null ? fmtGrowth(overview.completionRateGrowth) : "",
       tone: "green",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.completionRateGrowth != null ? compareNote : "",
     },
   ]
 

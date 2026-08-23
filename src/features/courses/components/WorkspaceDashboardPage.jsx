@@ -218,26 +218,50 @@ const WorkspaceDashboardPage = () => {
     return labelMap[key]
   }
 
+  const getCompareNote = () => {
+    if (compare === "none") return ""
+    if (compare === "year") return kpiT.vsSamePeriodLastYear || "so với cùng kỳ năm trước"
+    if (preset === "today") return "so với hôm qua"
+    if (preset === "week") return "so với tuần trước"
+    if (preset === "month") return "so với tháng trước"
+    if (preset === "quarter") return "so với quý trước"
+    if (preset === "year") return "so với năm trước"
+    return kpiT.vsPrevious || "so với kỳ trước"
+  }
+  const currentCompareNote = getCompareNote()
+
   const kpiItems = (dashboard?.kpis || [])
     .filter((kpi) => KPI_DEFS.some((d) => d.key === kpi.key))
-    .map((kpi) => ({
-      key: kpi.key,
-      label: kpiLabel(kpi.key),
-      value: formatKpi(kpi),
-      delta: kpi.growth === null || kpi.growth === undefined ? "" : fmtGrowth(kpi.growth),
-      tone: kpiTone(kpi.key),
-      note: kpi.growth === null || kpi.growth === undefined ? "" : (kpiT.vsPrevious || "so với kỳ trước"),
-    }))
+    .map((kpi) => {
+      const hasGrowth = compare !== "none" && kpi.growth !== null && kpi.growth !== undefined
+      return {
+        key: kpi.key,
+        label: kpiLabel(kpi.key),
+        value: formatKpi(kpi),
+        delta: hasGrowth ? fmtGrowth(kpi.growth) : "",
+        tone: kpiTone(kpi.key),
+        note: hasGrowth ? currentCompareNote : "",
+      }
+    })
 
   // ── Students snapshot ──
   const students = dashboard?.students || {}
   const studentTrendPoints = students.trendData || []
-  const studentGrowthVal = students.metrics?.growthRate != null ? fmtGrowth(students.metrics.growthRate) : "↑ 24%"
-  const studentRetVal = students.metrics?.retentionGrowth != null ? fmtGrowth(students.metrics.retentionGrowth) : "↑ 4,1%"
+  const studentsKpi = kpiItems.find((k) => k.key === "totalStudents")
+  const studentGrowthVal = compare !== "none"
+    ? (students.metrics?.growthRate != null ? fmtGrowth(students.metrics.growthRate) : (studentsKpi?.delta || ""))
+    : ""
+  const studentRetVal = compare !== "none"
+    ? (students.metrics?.retentionGrowth != null ? fmtGrowth(students.metrics.retentionGrowth) : "")
+    : ""
 
   // ── Revenue snapshot ──
   const revenue = dashboard?.revenue || {}
   const revenueTrendPoints = revenue.trendData || []
+  const revenueKpi = kpiItems.find((k) => k.key === "totalRevenue")
+  const revenueGrowthVal = compare !== "none"
+    ? (revenue.metrics?.growthRate != null ? fmtGrowth(revenue.metrics.growthRate) : (revenueKpi?.delta || ""))
+    : ""
   const netReceipt = revenue.metrics?.netReceipt ?? (revenue.metrics?.totalRevenue ? revenue.metrics.totalRevenue * 0.95 : 0)
   const platformFee = revenue.metrics?.platformFee ?? (revenue.metrics?.totalRevenue ? revenue.metrics.totalRevenue * 0.05 : 0)
 
@@ -305,6 +329,7 @@ const WorkspaceDashboardPage = () => {
         classes={classes}
         onExport={handleExport}
         isExporting={isExporting}
+        resolvedFilter={dashboard?.filter}
       />
 
       {/* 6 Top KPI Cards */}
@@ -343,17 +368,17 @@ const WorkspaceDashboardPage = () => {
               <MiniStatBox
                 label={kpiT.newStudents || "Học viên mới"}
                 value={numberVi(students.metrics?.newStudents ?? 0, 0)}
-                delta={studentGrowthVal ? `${studentGrowthVal} so với kỳ trước` : ""}
+                delta={studentGrowthVal ? `${studentGrowthVal} ${currentCompareNote}` : ""}
               />
               <MiniStatBox
                 label={kpiT.returningStudents || "Học viên quay lại"}
                 value={numberVi(students.metrics?.returningStudents ?? 0, 0)}
-                delta="↑ 8% so với kỳ trước"
+                delta={studentRetVal ? `${studentRetVal} ${currentCompareNote}` : ""}
               />
               <MiniStatBox
                 label={kpiT.retentionRate || "Tỷ lệ duy trì"}
-                value={`${numberVi(students.metrics?.retentionRate ?? 72.4, 1)}%`}
-                delta={studentRetVal ? `${studentRetVal} so với kỳ trước` : ""}
+                value={`${numberVi(students.metrics?.retentionRate ?? 0, 1)}%`}
+                delta={studentRetVal ? `${studentRetVal} ${currentCompareNote}` : ""}
               />
             </div>
           </div>
@@ -385,17 +410,17 @@ const WorkspaceDashboardPage = () => {
               <MiniStatBox
                 label={kpiT.totalRevenue || "Tổng doanh thu"}
                 value={money(revenue.metrics?.totalRevenue ?? 0)}
-                delta="↑ 18% so với kỳ trước"
+                delta={revenueGrowthVal ? `${revenueGrowthVal} ${currentCompareNote}` : ""}
               />
               <MiniStatBox
                 label={kpiT.platformFee || "Phí nền tảng"}
                 value={money(platformFee)}
-                delta="5% phí sàn"
+                delta={compare !== "none" ? "5% phí sàn" : ""}
               />
               <MiniStatBox
                 label={kpiT.netEarnings || "Thực nhận"}
                 value={money(netReceipt)}
-                delta="↑ 18% so với kỳ trước"
+                delta={revenueGrowthVal ? `${revenueGrowthVal} ${currentCompareNote}` : ""}
               />
             </div>
           </div>
@@ -539,37 +564,37 @@ const WorkspaceDashboardPage = () => {
               value={
                 quality.metrics?.averageRating != null
                   ? `${numberVi(quality.metrics.averageRating, 1)}/5`
-                  : "4,8/5"
+                  : "0/5"
               }
-              delta="↑ 0,2 so với kỳ trước"
+              delta={compare !== "none" && quality.metrics?.ratingGrowth != null ? `${fmtGrowth(quality.metrics.ratingGrowth)} ${currentCompareNote}` : ""}
             />
             <MiniStatBox
               label={kpiT.reEnrollmentRate || "Tỷ lệ ĐK lại"}
               value={
                 quality.metrics?.reenrollmentRate != null
                   ? `${numberVi(quality.metrics.reenrollmentRate, 1)}%`
-                  : "61%"
+                  : "0%"
               }
-              delta="↑ 5% so với kỳ trước"
+              delta={compare !== "none" && quality.metrics?.reenrollmentGrowth != null ? `${fmtGrowth(quality.metrics.reenrollmentGrowth)} ${currentCompareNote}` : ""}
             />
             <MiniStatBox
               label={kpiT.conversionRate || "Chuyển đổi ĐK"}
               value={
                 quality.metrics?.conversionRate != null
                   ? `${numberVi(quality.metrics.conversionRate, 1)}%`
-                  : "42%"
+                  : "0%"
               }
-              delta="↑ 3% so với kỳ trước"
+              delta={compare !== "none" && quality.metrics?.conversionGrowth != null ? `${fmtGrowth(quality.metrics.conversionGrowth)} ${currentCompareNote}` : ""}
             />
             <MiniStatBox
               label={kpiT.cancellationRate || "Tỷ lệ hủy"}
               value={
                 quality.metrics?.cancellationRate != null
                   ? `${numberVi(quality.metrics.cancellationRate, 1)}%`
-                  : "6%"
+                  : "0%"
               }
-              delta="↓ 1% so với kỳ trước"
-              isDown={true}
+              delta={compare !== "none" && quality.metrics?.cancellationGrowth != null ? `${fmtGrowth(quality.metrics.cancellationGrowth)} ${currentCompareNote}` : ""}
+              isDown={Boolean(quality.metrics?.cancellationGrowth && quality.metrics.cancellationGrowth < 0)}
             />
           </div>
         </SnapshotCard>

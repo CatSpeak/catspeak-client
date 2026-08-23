@@ -74,28 +74,99 @@ const getLocale = (language) => {
   return "en-US"
 }
 
-const formatMonthLabel = (date, language) => (
-  new Intl.DateTimeFormat(getLocale(language), {
-    month: "2-digit",
-    year: "numeric",
-  }).format(date)
-)
+const formatMonthLabel = (date, language, withUnit = false) => {
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const y = date.getFullYear()
+  if (String(language || "").toLowerCase().startsWith("vi")) {
+    return withUnit ? `Tháng ${m}/${y} (Theo ngày)` : `Tháng ${m}/${y}`
+  }
+  return withUnit ? `${m}/${y} (Daily)` : `${m}/${y}`
+}
 
-const formatQuarterLabel = (date, language) => {
+const formatQuarterLabel = (date, language, withUnit = false) => {
   const quarter = Math.floor(date.getMonth() / 3) + 1
   const year = date.getFullYear()
   if (String(language || "").toLowerCase().startsWith("vi")) {
-    return `Quý ${quarter}/${year}`
+    return withUnit ? `Quý ${quarter}/${year} (Theo tuần)` : `Quý ${quarter}/${year}`
   }
   if (String(language || "").toLowerCase().startsWith("zh")) {
     return `${year}年第${quarter}季度`
   }
-  return `Q${quarter}/${year}`
+  return withUnit ? `Q${quarter}/${year} (Weekly)` : `Q${quarter}/${year}`
+}
+
+const formatYearPeriodLabel = (year, language) => {
+  if (String(language || "").toLowerCase().startsWith("vi")) {
+    return `Năm ${year} (Theo tháng)`
+  }
+  return `Year ${year} (Monthly)`
+}
+
+const getDayOptions = (now, language) => {
+  const isVi = String(language || "").toLowerCase().startsWith("vi")
+  const today = new Date(now)
+  const dStr = `${pad(today.getDate())}/${pad(today.getMonth() + 1)}/${today.getFullYear()}`
+  return [
+    {
+      value: "day-30d",
+      label: isVi ? "30 ngày gần nhất" : "Last 30 days",
+      startDate: toDateKey(new Date(today.getTime() - 29 * 86400000)),
+      endDate: toDateKey(today),
+    },
+    {
+      value: "day-7d",
+      label: isVi ? "7 ngày gần nhất" : "Last 7 days",
+      startDate: toDateKey(new Date(today.getTime() - 6 * 86400000)),
+      endDate: toDateKey(today),
+    },
+    {
+      value: "day-today",
+      label: isVi ? `Hôm nay (${dStr})` : `Today (${dStr})`,
+      startDate: toDateKey(today),
+      endDate: toDateKey(today),
+    },
+  ]
+}
+
+const getWeekOptions = (now, language) => {
+  const isVi = String(language || "").toLowerCase().startsWith("vi")
+  const results = []
+  const d = new Date(now)
+  const y = d.getFullYear()
+  const m = d.getMonth()
+  const day = d.getDate()
+  const dayOfWeek = d.getDay() === 0 ? 6 : d.getDay() - 1 // Mon=0 .. Sun=6
+
+  for (let i = 0; i < 6; i++) {
+    const startOfWeek = new Date(y, m, day - dayOfWeek - i * 7)
+    const endOfWeek = new Date(y, m, day + (6 - dayOfWeek) - i * 7)
+    const sStr = `${pad(startOfWeek.getDate())}/${pad(startOfWeek.getMonth() + 1)}`
+    const eStr = `${pad(endOfWeek.getDate())}/${pad(endOfWeek.getMonth() + 1)}/${endOfWeek.getFullYear()}`
+    const label = i === 0
+      ? (isVi ? `Tuần này (${sStr} – ${eStr})` : `This week (${sStr} – ${eStr})`)
+      : i === 1
+        ? (isVi ? `Tuần trước (${sStr} – ${eStr})` : `Last week (${sStr} – ${eStr})`)
+        : (isVi ? `Tuần (${sStr} – ${eStr})` : `Week (${sStr} – ${eStr})`)
+    results.push({
+      value: `week-range-${toDateKey(startOfWeek)}_${toDateKey(endOfWeek)}`,
+      label,
+      startDate: toDateKey(startOfWeek),
+      endDate: toDateKey(endOfWeek),
+    })
+  }
+  return results
 }
 
 const getMonthOptions = (now, language) => Array.from({ length: 12 }, (_, index) => {
   const date = new Date(now.getFullYear(), now.getMonth() - index, 1)
-  return { value: toMonthKey(date), label: formatMonthLabel(date, language) }
+  const startM = new Date(date.getFullYear(), date.getMonth(), 1)
+  const endM = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+  return {
+    value: toMonthKey(date),
+    label: formatMonthLabel(date, language),
+    startDate: toDateKey(startM),
+    endDate: toDateKey(endM),
+  }
 })
 
 const getQuarterOptions = (now, language) => Array.from({ length: 8 }, (_, index) => {
@@ -103,88 +174,65 @@ const getQuarterOptions = (now, language) => Array.from({ length: 8 }, (_, index
   return { value: toQuarterKey(date), label: formatQuarterLabel(date, language) }
 })
 
-const getYearOptions = (now) => Array.from({ length: 5 }, (_, index) => {
+const getYearOptions = (now, language) => Array.from({ length: 5 }, (_, index) => {
   const year = now.getFullYear() - index
-  return { value: String(year), label: String(year) }
+  return { value: String(year), label: isViLang(language) ? `Năm ${year}` : `Year ${year}` }
 })
 
-const getFiveYearOptions = (now) => {
+const getFiveYearOptions = (now, language) => {
   const currentEnd = Math.floor(now.getFullYear() / 5) * 5 + 4
   return Array.from({ length: 3 }, (_, index) => {
     const endYear = currentEnd - index * 5
     const startYear = endYear - 4
+    const prefix = isViLang(language) ? "Giai đoạn " : ""
     return {
       value: `${startYear}-${endYear}`,
-      label: `${startYear}–${endYear}`,
+      label: `${prefix}${startYear}–${endYear}`,
     }
   })
 }
 
-const getComparisonOptions = (periods, getPreviousValue, language) => periods.map((period) => ({
-  value: getPreviousValue(period.value),
-  label: formatComparisonLabel(period, getPreviousValue(period.value), language),
-}))
-
-const formatComparisonLabel = (period, previousValue, language) => {
-  if (period.value.length === 4) return previousValue
-
-  if (/^\d{4}-\d{2}$/.test(period.value)) {
-    return formatMonthLabel(parseMonth(previousValue), language)
-  }
-
-  if (/^\d{4}-Q[1-4]$/.test(period.value)) {
-    return formatQuarterLabel(parseQuarter(previousValue), language)
-  }
-
-  return previousValue.replace("-", "–")
-}
+const isViLang = (language) => String(language || "").toLowerCase().startsWith("vi")
 
 export const getAnalyticsFilterMeta = (language, now = new Date()) => {
   const safeNow = new Date(now)
-  const monthPeriods = getMonthOptions(safeNow, language)
-  const quarterPeriods = getQuarterOptions(safeNow, language)
-  const yearPeriods = getYearOptions(safeNow)
-  const fiveYearPeriods = getFiveYearOptions(safeNow)
+  const isVi = isViLang(language)
+  const dayPeriods = [...getDayOptions(safeNow, language), ...getMonthOptions(safeNow, language)]
+  const weekPeriods = [...getWeekOptions(safeNow, language), ...getQuarterOptions(safeNow, language)]
+  const monthPeriods = [...getMonthOptions(safeNow, language), ...getYearOptions(safeNow, language)]
+  const yearPeriods = [...getYearOptions(safeNow, language), ...getFiveYearOptions(safeNow, language)]
 
   return {
     day: {
       label: "day",
-      periods: monthPeriods,
-      comparisons: getComparisonOptions(
-        monthPeriods,
-        (value) => toMonthKey(new Date(parseMonth(value, safeNow).getFullYear(), parseMonth(value, safeNow).getMonth() - 1, 1)),
-        language,
-      ),
+      periods: dayPeriods,
+      comparisons: [
+        { value: "__previous__", label: isVi ? "Kỳ liền trước" : "Previous period" },
+        { value: "__lastYear__", label: isVi ? "Cùng kỳ năm trước" : "Same period last year" },
+      ],
     },
     week: {
       label: "week",
-      periods: quarterPeriods,
-      comparisons: getComparisonOptions(
-        quarterPeriods,
-        (value) => toQuarterKey(new Date(parseQuarter(value, safeNow).getFullYear(), parseQuarter(value, safeNow).getMonth() - 3, 1)),
-        language,
-      ),
+      periods: weekPeriods,
+      comparisons: [
+        { value: "__previous__", label: isVi ? "Tuần trước (Kỳ trước)" : "Previous week" },
+        { value: "__lastYear__", label: isVi ? "Cùng kỳ năm trước" : "Same period last year" },
+      ],
     },
     month: {
       label: "month",
-      periods: yearPeriods,
-      comparisons: getComparisonOptions(
-        yearPeriods,
-        (value) => String(parseYear(value, safeNow.getFullYear()) - 1),
-        language,
-      ),
+      periods: monthPeriods,
+      comparisons: [
+        { value: "__previous__", label: isVi ? "Tháng trước (Kỳ trước)" : "Previous month" },
+        { value: "__lastYear__", label: isVi ? "Cùng kỳ năm trước" : "Same period last year" },
+      ],
     },
     year: {
       label: "year",
-      periods: fiveYearPeriods,
-      comparisons: getComparisonOptions(
-        fiveYearPeriods,
-        (value) => {
-          const [start, end] = value.split("-").map(Number)
-          return `${start - 5}-${end - 5}`
-        },
-        language,
-      ),
+      periods: yearPeriods,
+      comparisons: [
+        { value: "__previous__", label: isVi ? "Năm trước (Kỳ trước)" : "Previous year" },
+      ],
     },
   }
 }

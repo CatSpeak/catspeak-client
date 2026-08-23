@@ -19,6 +19,7 @@ import {
 } from "@/store/api/coursesApi"
 import {
   buildAnalyticsQueryParams,
+  CUSTOM_PERIOD_VALUE,
   getAnalyticsFilterMeta,
   getDrillDownSelection,
   resolveAnalyticsScope,
@@ -121,14 +122,40 @@ const WorkspaceAnalyticsPage = () => {
     (item) => String(item.id) === String(classFilter),
   )
 
+  const selectedPeriodMeta = (filterMeta?.[group]?.periods || []).find((p) => p.value === period)
+
+  let resolvedPeriodParam = period
+  let resolvedStartDate = customStartDate
+  let resolvedEndDate = customEndDate
+
+  if (period === CUSTOM_PERIOD_VALUE) {
+    resolvedStartDate = customStartDate
+    resolvedEndDate = customEndDate
+    resolvedPeriodParam = "custom"
+  } else if (selectedPeriodMeta?.startDate && selectedPeriodMeta?.endDate) {
+    resolvedStartDate = selectedPeriodMeta.startDate
+    resolvedEndDate = selectedPeriodMeta.endDate
+    resolvedPeriodParam = "custom"
+  } else if (group === "month" && /^\d{4}-\d{2}$/.test(period)) {
+    const [yStr, mStr] = period.split("-")
+    const yNum = parseInt(yStr, 10)
+    const mNum = parseInt(mStr, 10)
+    const startM = `${yNum}-${String(mNum).padStart(2, "0")}-01`
+    const endMDate = new Date(yNum, mNum, 0)
+    const endM = `${yNum}-${String(mNum).padStart(2, "0")}-${String(endMDate.getDate()).padStart(2, "0")}`
+    resolvedStartDate = startM
+    resolvedEndDate = endM
+    resolvedPeriodParam = "custom"
+  }
+
   const activeQueryParams = buildAnalyticsQueryParams({
     group,
-    period,
+    period: resolvedPeriodParam,
     compare,
     courseId: selectedCourseObj ? parseInt(selectedCourseObj.id, 10) : undefined,
     classId: selectedClassObj ? parseInt(selectedClassObj.id, 10) : undefined,
-    customStartDate,
-    customEndDate,
+    customStartDate: resolvedStartDate || undefined,
+    customEndDate: resolvedEndDate || undefined,
   })
 
   // Drill-down from month trend to day trend
