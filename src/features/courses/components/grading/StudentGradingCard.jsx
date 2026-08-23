@@ -8,19 +8,19 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * Thẻ hiển thị thông tin bài tập/bài kiểm tra cho học viên
  */
 const StudentGradingCard = ({
-  status = "pending",
-  statusLabel = "Chưa làm",
-  title = "",
-  typeLabel = "",
-  type = "assignment",
-  duration = "0",
-  questionCount = "0",
-  timeRemainingText = "",
-  deadlineText = "",
-  score = null,
-  footerText = "",
-  actionText = "Làm bài",
-  onAction = () => { },
+  status,
+  statusLabel,
+  title,
+  typeLabel,
+  type,
+  duration,
+  questionCount,
+  timeRemainingText,
+  deadlineText,
+  score,
+  footerText,
+  actionText,
+  onAction,
 }) => {
   const { t } = useLanguage()
   const gradingT = t?.courses?.grading || {}
