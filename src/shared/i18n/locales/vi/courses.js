@@ -96,8 +96,18 @@ export default {
   taskSpeakingSubtitle: "Lớp tiếng anh luyện nói",
   taskWritingSubtitle: "Lớp viết anh ngữ chuyên nghiệp",
   months: [
-    "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+    "Tháng 1",
+    "Tháng 2",
+    "Tháng 3",
+    "Tháng 4",
+    "Tháng 5",
+    "Tháng 6",
+    "Tháng 7",
+    "Tháng 8",
+    "Tháng 9",
+    "Tháng 10",
+    "Tháng 11",
+    "Tháng 12",
   ],
   weekdays: ["HAI", "BA", "TƯ", "NĂM", "SÁU", "BẢY", "CHỦ NHẬT"],
   workspaceUi: {
@@ -120,13 +130,17 @@ export default {
     returnToWorkspace: "Quay lại không gian làm việc",
     tabs: {
       students: "Học viên",
-      studentsSubtitle: "Phân tích tăng trưởng, duy trì và đăng ký lại của học viên.",
+      studentsSubtitle:
+        "Phân tích tăng trưởng, duy trì và đăng ký lại của học viên.",
       revenue: "Doanh thu",
-      revenueSubtitle: "Phân tích doanh thu ở cấp lớp học và phần thực nhận sau phí nền tảng.",
+      revenueSubtitle:
+        "Phân tích doanh thu ở cấp lớp học và phần thực nhận sau phí nền tảng.",
       courses: "Khóa học & Lớp học",
-      coursesSubtitle: "Phân tích tách biệt giữa hiệu quả khóa học và hiệu quả từng lớp học.",
+      coursesSubtitle:
+        "Phân tích tách biệt giữa hiệu quả khóa học và hiệu quả từng lớp học.",
       quality: "Chất lượng giảng dạy",
-      qualitySubtitle: "Phân tích chất lượng sau khi học và sức hút trước khi học.",
+      qualitySubtitle:
+        "Phân tích chất lượng sau khi học và sức hút trước khi học.",
     },
     filters: {
       dataGroup: "Nhóm dữ liệu",
@@ -275,7 +289,8 @@ export default {
   },
   workspaceRedirect: {
     loading: "Đang tải không gian làm việc",
-    loadFailed: "Không thể xác định không gian làm việc của bạn. Vui lòng thử lại.",
+    loadFailed:
+      "Không thể xác định không gian làm việc của bạn. Vui lòng thử lại.",
     retrying: "Đang thử lại...",
     retry: "Thử lại",
   },
@@ -297,7 +312,8 @@ export default {
     otherBatchSelected: "Đã chọn lớp khác",
     checkingEnrollment: "Đang kiểm tra trạng thái đăng ký...",
     checkingEnrollmentShort: "Đang kiểm tra...",
-    toastEnrollToViewLectureHall: "Vui lòng đăng ký và thanh toán học phí để xem giảng đường!",
+    toastEnrollToViewLectureHall:
+      "Vui lòng đăng ký và thanh toán học phí để xem giảng đường!",
     upcomingSession: "Buổi học sắp tới",
     untitledBatch: "Lớp học chưa có tên",
     timeLabel: "Thời gian",
@@ -310,7 +326,8 @@ export default {
   classWorkspace: {
     noInstructor: "Thông tin giảng viên hiện không khả dụng.",
     unnamedStudent: "Học viên chưa có tên",
-    rosterUnavailable: "Tính năng quản lý danh sách học viên hiện chưa khả dụng.",
+    rosterUnavailable:
+      "Tính năng quản lý danh sách học viên hiện chưa khả dụng.",
   },
   classMaterials: {
     toastSingleFile: "Vui lòng chỉ chọn một tài liệu mỗi lần.",
@@ -325,7 +342,8 @@ export default {
     searchMaterialsLabel: "Tìm kiếm tài liệu",
     searchMaterials: "Tìm kiếm tài liệu...",
     materialsUnavailable: "Tài liệu dành cho học viên hiện chưa khả dụng",
-    materialsUnavailableDescription: "Tài liệu sẽ xuất hiện tại đây khi có nội dung.",
+    materialsUnavailableDescription:
+      "Tài liệu sẽ xuất hiện tại đây khi có nội dung.",
     someMaterialsUnavailable: "Không thể hiển thị một số tài liệu.",
     loadingMaterials: "Đang tải tài liệu...",
     materialsLoadFailed: "Không thể tải tài liệu",
@@ -366,7 +384,8 @@ export default {
     averageProgress: "Tiến độ trung bình",
     upcomingSession: "Buổi học tiếp theo",
     noUpcoming: "Chưa có buổi học nào",
-    createClassToSchedule: "Tạo một lớp học để lên lịch cho buổi học đầu tiên của bạn.",
+    createClassToSchedule:
+      "Tạo một lớp học để lên lịch cho buổi học đầu tiên của bạn.",
     description: "Mô tả",
     noDescription: "Chưa có mô tả nào.",
     loadFailed: "Không thể tải thông tin khóa học.",
@@ -375,7 +394,8 @@ export default {
     courseActions: "Tùy chọn khóa học",
     editCourse: "Chỉnh sửa khóa học",
     deleteCourse: "Xóa khóa học",
-    confirmDeleteCourse: "Bạn có chắc chắn muốn xóa khóa học này? Tất cả các lớp học liên quan cũng sẽ bị ảnh hưởng.",
+    confirmDeleteCourse:
+      "Bạn có chắc chắn muốn xóa khóa học này? Tất cả các lớp học liên quan cũng sẽ bị ảnh hưởng.",
     toastDeleteSuccess: "Xóa khóa học thành công!",
     toastDeleteFailed: "Xóa khóa học thất bại!",
     linkCopied: "Đã sao chép liên kết!",
@@ -426,7 +446,8 @@ export default {
     searchMaterials: "Tìm tài liệu...",
     loadingMaterials: "Đang tải tài liệu...",
     noMaterials: "Chưa có tài liệu nào",
-    startUploading: "Bắt đầu tải lên tài liệu học tập để chia sẻ với lớp học của bạn.",
+    startUploading:
+      "Bắt đầu tải lên tài liệu học tập để chia sẻ với lớp học của bạn.",
     uploadMaterial: "Tải lên tài liệu",
     selectFile: "Chọn một tệp tin hoặc kéo thả",
     uploadNow: "Tải lên ngay",
@@ -463,7 +484,8 @@ export default {
     inviteToClass: "Mời tham gia lớp",
     invited: "Đã gửi lời mời",
     noFriendsToInvite: "Không có bạn bè nào để mời",
-    noFriendsToInviteDesc: "Tất cả bạn bè của bạn đã tham gia lớp học này hoặc bạn chưa có bạn bè trong danh sách.",
+    noFriendsToInviteDesc:
+      "Tất cả bạn bè của bạn đã tham gia lớp học này hoặc bạn chưa có bạn bè trong danh sách.",
     noFriendsFound: "Không tìm thấy bạn bè phù hợp",
     noFriendsFoundDesc: "Vui lòng thử tìm kiếm với từ khóa khác.",
     toastInviteSuccess: "Đã gửi lời mời tham gia lớp học cho {{name}}!",
@@ -517,14 +539,18 @@ export default {
     completedOn: "Đã hoàn thành ngày {{date}}",
     noCourses: "Chưa có khóa học nào",
     noCoursesTitle: "Bắt đầu hành trình giảng dạy",
-    noCoursesDesc: "Bạn chưa tạo khóa học nào. Hãy tạo khóa học đầu tiên để xây dựng giáo trình, tải lên tài liệu và quản lý các lớp học.",
+    noCoursesDesc:
+      "Bạn chưa tạo khóa học nào. Hãy tạo khóa học đầu tiên để xây dựng giáo trình, tải lên tài liệu và quản lý các lớp học.",
     noFilteredCoursesTitle: "Không tìm thấy khóa học phù hợp",
-    noFilteredCoursesDesc: "Không có khóa học nào khớp với bộ lọc trạng thái đã chọn. Hãy thử thay đổi hoặc xóa bộ lọc để xem các khóa học khác.",
+    noFilteredCoursesDesc:
+      "Không có khóa học nào khớp với bộ lọc trạng thái đã chọn. Hãy thử thay đổi hoặc xóa bộ lọc để xem các khóa học khác.",
     noClasses: "Chưa có lớp học nào",
     noClassesTitle: "Sẵn sàng tạo lớp học đầu tiên?",
-    noClassesDesc: "Hiện tại bạn chưa có lớp học nào. Tạo lớp học để lên lịch các buổi học, theo dõi điểm danh và giao bài tập cho học viên.",
+    noClassesDesc:
+      "Hiện tại bạn chưa có lớp học nào. Tạo lớp học để lên lịch các buổi học, theo dõi điểm danh và giao bài tập cho học viên.",
     noFilteredClassesTitle: "Không tìm thấy lớp học phù hợp",
-    noFilteredClassesDesc: "Không có lớp học nào khớp với bộ lọc trạng thái đã chọn. Hãy thử thay đổi hoặc xóa bộ lọc để xem các lớp học khác.",
+    noFilteredClassesDesc:
+      "Không có lớp học nào khớp với bộ lọc trạng thái đã chọn. Hãy thử thay đổi hoặc xóa bộ lọc để xem các lớp học khác.",
     resetFilter: "Đặt lại bộ lọc",
     viewAll: "Xem tất cả",
     statusAll: "Tất cả trạng thái",
@@ -533,8 +559,10 @@ export default {
     retry: "Thử lại",
     refreshingCourses: "Đang làm mới tổng quan khóa học",
     refreshingClasses: "Đang làm mới tổng quan lớp học",
-    refreshCoursesFailed: "Không thể làm mới một số dữ liệu khóa học. Thông tin đang hiển thị có thể đã cũ.",
-    refreshClassesFailed: "Không thể làm mới một số dữ liệu lớp học. Thông tin đang hiển thị có thể đã cũ."
+    refreshCoursesFailed:
+      "Không thể làm mới một số dữ liệu khóa học. Thông tin đang hiển thị có thể đã cũ.",
+    refreshClassesFailed:
+      "Không thể làm mới một số dữ liệu lớp học. Thông tin đang hiển thị có thể đã cũ.",
   },
   createCourse: {
     title: "Tạo khóa học",
@@ -544,7 +572,8 @@ export default {
     avatarLabel: "Ảnh đại diện khóa học",
     avatarDesc1: "Kéo & thả hoặc bấm để chọn ảnh",
     avatarDesc2: "PNG, JPG, WEBP (tối đa 50MB)",
-    avatarHint: "Khuyên dùng hình ảnh tỉ lệ 4:3 sắc nét để hiển thị tối ưu nhất.",
+    avatarHint:
+      "Khuyên dùng hình ảnh tỉ lệ 4:3 sắc nét để hiển thị tối ưu nhất.",
     changeImage: "Thay đổi ảnh",
     removeImage: "Xóa ảnh",
     courseNameLabel: "Tên khóa học",
@@ -564,8 +593,10 @@ export default {
     toastUpdateFailed: "Cập nhật khóa học thất bại!",
     toastCreateSuccess: "Tạo khóa học thành công!",
     toastCreateFailed: "Tạo khóa học thất bại!",
-    languageNotAllowed: "Ngôn ngữ được chọn không nằm trong danh sách ngôn ngữ bạn được phép giảng dạy.",
-    validationErrorToast: "Thông tin khóa học chưa hợp lệ. Vui lòng kiểm tra lại tên khóa học hoặc ngôn ngữ!",
+    languageNotAllowed:
+      "Ngôn ngữ được chọn không nằm trong danh sách ngôn ngữ bạn được phép giảng dạy.",
+    validationErrorToast:
+      "Thông tin khóa học chưa hợp lệ. Vui lòng kiểm tra lại tên khóa học hoặc ngôn ngữ!",
     toastClearSuccess: "Đã xóa thông tin form",
   },
   createClass: {
@@ -595,10 +626,13 @@ export default {
     toastSelectCourseFirst: "Vui lòng chọn khóa học trước!",
     toastSelectSchedule: "Vui lòng chọn ít nhất một ngày dạy!",
     toastCreateSuccess: "Lớp học đã được tạo thành công!",
-    commissionNote: "Phí hoa hồng hệ thống {{commission}}% ({{amount}} VND) sẽ được khấu trừ từ mỗi lượt đăng ký của học viên.",
-    minTuitionFeeNote: "Mức học phí tối thiểu cho cấu hình lớp học này là {{minFee}} VNĐ. Vui lòng điều chỉnh lại!",
+    commissionNote:
+      "Phí hoa hồng hệ thống {{commission}}% ({{amount}} VND) sẽ được khấu trừ từ mỗi lượt đăng ký của học viên.",
+    minTuitionFeeNote:
+      "Mức học phí tối thiểu cho cấu hình lớp học này là {{minFee}} VNĐ. Vui lòng điều chỉnh lại!",
     placeholderClassName: "Ví dụ: IELTS Nâng Cao",
-    placeholderDescription: "Thông tin chi tiết về lớp học, mục tiêu học tập...",
+    placeholderDescription:
+      "Thông tin chi tiết về lớp học, mục tiêu học tập...",
     chooseDays: "Chọn các buổi trong tuần",
     detailedSchedule: "Khung giờ chi tiết",
     days: {
@@ -615,18 +649,30 @@ export default {
     selectCourseOption: "-- Lớp học độc lập (Không thuộc khóa học) --",
     standaloneClass: "Lớp độc lập",
     noCourse: "Không thuộc khóa học",
-    toastAdmissionAndStart: "Vui lòng nhập đầy đủ thời hạn đăng ký và ngày bắt đầu!",
-    toastVerifyProfile: "Vui lòng hoàn thành định danh tài khoản để tiếp tục giao dịch!",
-    toastScheduleConflict: "Xung đột lịch với lớp {{class}} ({{start}} - {{end}})!",
-    toastScheduleConflictDefault: "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.",
-    toastStartDateMismatchFirstSession: "Ngày bắt đầu lớp học ({{startDate}}) không trùng với ngày buổi học đầu tiên ({{firstSessionDate}}). Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
-    toastStartDateMismatchFirstSessionDefault: "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
-    toastAdmissionStartPast: "Thời gian bắt đầu tuyển sinh không được ở quá khứ!",
-    toastAdmissionEndPast: "Thời gian kết thúc tuyển sinh không được ở quá khứ!",
-    toastStartPast: "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
-    toastAdmissionEndLater: "Thời gian kết thúc tuyển sinh phải trễ hơn thời gian bắt đầu tuyển sinh!",
-    toastStartLater: "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
-    toastPayOSEnrollmentFuture: "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
+    toastAdmissionAndStart:
+      "Vui lòng nhập đầy đủ thời hạn đăng ký và ngày bắt đầu!",
+    toastVerifyProfile:
+      "Vui lòng hoàn thành định danh tài khoản để tiếp tục giao dịch!",
+    toastScheduleConflict:
+      "Xung đột lịch với lớp {{class}} ({{start}} - {{end}})!",
+    toastScheduleConflictDefault:
+      "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.",
+    toastStartDateMismatchFirstSession:
+      "Ngày bắt đầu lớp học ({{startDate}}) không trùng với ngày buổi học đầu tiên ({{firstSessionDate}}). Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
+    toastStartDateMismatchFirstSessionDefault:
+      "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
+    toastAdmissionStartPast:
+      "Thời gian bắt đầu tuyển sinh không được ở quá khứ!",
+    toastAdmissionEndPast:
+      "Thời gian kết thúc tuyển sinh không được ở quá khứ!",
+    toastStartPast:
+      "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
+    toastAdmissionEndLater:
+      "Thời gian kết thúc tuyển sinh phải trễ hơn thời gian bắt đầu tuyển sinh!",
+    toastStartLater:
+      "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
+    toastPayOSEnrollmentFuture:
+      "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
     toastUpdateSuccess: "Cập nhật lớp học thành công!",
     toastRedirectPayment: "Đang chuyển đến trang thanh toán...",
     toastUpdateFail: "Lỗi cập nhật lớp học!",
@@ -641,8 +687,10 @@ export default {
     toastInvalidImage: "Vui lòng chọn ảnh định dạng JPG, PNG hoặc WebP.",
     toastFileTooLarge: "Dung lượng ảnh không được vượt quá 5MB!",
     toastImageReadFail: "Không thể đọc ảnh đã chọn.",
-    toastInvalidDates: "Vui lòng nhập thời gian tuyển sinh và thời gian học hợp lệ.",
-    toastInvalidScheduleTime: "Giờ kết thúc của mỗi buổi học phải sau giờ bắt đầu.",
+    toastInvalidDates:
+      "Vui lòng nhập thời gian tuyển sinh và thời gian học hợp lệ.",
+    toastInvalidScheduleTime:
+      "Giờ kết thúc của mỗi buổi học phải sau giờ bắt đầu.",
     loadFailed: "Không thể tải biểu mẫu lớp học. Vui lòng thử lại.",
     retry: "Thử lại",
     thumbnailLabel: "Ảnh đại diện lớp học",
@@ -654,8 +702,10 @@ export default {
     editClass: "Chỉnh sửa lớp học",
     scheduleLocked: "Không thể thay đổi lịch học cho lớp học này.",
     levelsLocked: "Không thể thay đổi trình độ cho lớp học này.",
-    priceLocked: "Học phí đã bị khóa do lớp học đã có học viên đăng ký hoặc thanh toán!",
-    priceLockedNote: "Học phí đã được khóa do lớp học đã có học viên đăng ký/thanh toán.",
+    priceLocked:
+      "Học phí đã bị khóa do lớp học đã có học viên đăng ký hoặc thanh toán!",
+    priceLockedNote:
+      "Học phí đã được khóa do lớp học đã có học viên đăng ký/thanh toán.",
     legendOtherSchedule: "Ngày có lịch khác",
     legendCurrentSchedule: "Lịch dạy hiện tại",
     legendPastSchedule: "Đã qua",
@@ -665,14 +715,15 @@ export default {
     classInfoTitle: "Thông tin lớp học",
     recoverClassInfo: "Khôi phục thông tin lớp",
     deleteClass: "Xóa lớp học",
-    confirmDeleteClassMsg: "Bạn có chắc chắn muốn xóa lớp học này? Hành động này không thể hoàn tác.",
+    confirmDeleteClassMsg:
+      "Bạn có chắc chắn muốn xóa lớp học này? Hành động này không thể hoàn tác.",
     deleteConfirmButton: "Xóa",
     saveChanges: "Lưu thay đổi",
     requireMinAttendanceLabel: "Yêu cầu tỷ lệ tham dự tối thiểu",
     minAttendanceRateLabel: "Tỷ lệ tham dự tối thiểu",
     requireAttendanceTypeLabel: "Yêu cầu Lần tham dự",
     includeLateAttendanceOption: "Tính cả lần tham dự muộn",
-    excludeLateAttendanceOption: "Không tính lần tham dự muộn"
+    excludeLateAttendanceOption: "Không tính lần tham dự muộn",
   },
   allCourses: {
     title: "Toàn bộ khóa học",
@@ -683,10 +734,11 @@ export default {
     tabArchived: "Đã lưu trữ",
     searchPlaceholder: "Tìm kiếm...",
     refreshing: "Đang làm mới danh sách khóa học",
-    refreshFailed: "Không thể tải dữ liệu khóa học mới nhất. Danh sách đang hiển thị có thể đã cũ.",
+    refreshFailed:
+      "Không thể tải dữ liệu khóa học mới nhất. Danh sách đang hiển thị có thể đã cũ.",
     loadFailed: "Không thể tải danh sách khóa học. Vui lòng thử lại.",
     retry: "Thử lại",
-    noResults: "Không tìm thấy khóa học."
+    noResults: "Không tìm thấy khóa học.",
   },
   allClasses: {
     title: "Toàn bộ lớp học",
@@ -698,16 +750,20 @@ export default {
     searchPlaceholder: "Tìm kiếm...",
     studentsRatio: "{{enrolled}} / {{slots}} học viên",
     refreshing: "Đang làm mới danh sách lớp học",
-    refreshFailed: "Không thể tải dữ liệu lớp học mới nhất. Danh sách đang hiển thị có thể đã cũ.",
+    refreshFailed:
+      "Không thể tải dữ liệu lớp học mới nhất. Danh sách đang hiển thị có thể đã cũ.",
     loadFailed: "Không thể tải danh sách lớp học. Vui lòng thử lại.",
     retry: "Thử lại",
-    noResults: "Không tìm thấy lớp học."
+    noResults: "Không tìm thấy lớp học.",
   },
   student: {
     dashboardTitle: "Khóa học & Học tập của tôi",
-    exploreCoursesSubtitle: "Khám phá và đăng ký các khóa học ngôn ngữ hàng đầu để bắt đầu hành trình học tập của bạn.",
-    loginRequiredTitle: "Vui lòng đăng nhập để xem danh sách khóa học & lớp học",
-    loginRequiredDesc: "Bạn cần đăng nhập tài khoản CatSpeak để khám phá và đăng ký các khóa học.",
+    exploreCoursesSubtitle:
+      "Khám phá và đăng ký các khóa học ngôn ngữ hàng đầu để bắt đầu hành trình học tập của bạn.",
+    loginRequiredTitle:
+      "Vui lòng đăng nhập để xem danh sách khóa học & lớp học",
+    loginRequiredDesc:
+      "Bạn cần đăng nhập tài khoản CatSpeak để khám phá và đăng ký các khóa học.",
     loginNow: "Đăng nhập ngay",
     tabAllCatalog: "Tất cả",
     tabCourses: "Khóa học",
@@ -716,7 +772,8 @@ export default {
     exploreCourses: "Khám phá khóa học",
     myClasses: "Lớp học đã tham gia",
     welcomeTitle: "Chào mừng bạn quay lại!",
-    welcomeSubtitle: "Theo dõi tiến độ, tham gia các buổi học trực tuyến và khám phá các lộ trình học mới.",
+    welcomeSubtitle:
+      "Theo dõi tiến độ, tham gia các buổi học trực tuyến và khám phá các lộ trình học mới.",
     joinedOn: "Đã tham gia ngày",
     classDuration: "Thời lượng",
     sessionsCount: "{{count}} buổi học",
@@ -724,7 +781,8 @@ export default {
     joinCourse: "Tham gia khóa học",
     exploreMore: "Khám phá các khóa học",
     details: "Xem chi tiết",
-    searchPlaceholder: "Tìm kiếm khóa học theo tiêu đề, cấp độ hoặc ngôn ngữ...",
+    searchPlaceholder:
+      "Tìm kiếm khóa học theo tiêu đề, cấp độ hoặc ngôn ngữ...",
     languageLabel: "Ngôn ngữ",
     levelLabel: "Trình độ",
     allLevels: "Tất cả trình độ",
@@ -768,10 +826,11 @@ export default {
     clearAll: "Xóa tất cả",
     clearFilters: "Xóa bộ lọc",
     enrollmentConfirmTitle: "Xác nhận đăng ký học",
-    enrollmentConfirmMsg: "Bạn có chắc chắn muốn đăng ký lớp học \"{{className}}\" của khóa học \"{{courseName}}\"?",
+    enrollmentConfirmMsg:
+      'Bạn có chắc chắn muốn đăng ký lớp học "{{className}}" của khóa học "{{courseName}}"?',
     enrollNow: "Xác nhận & Đăng ký",
     cancel: "Hủy bỏ",
-    enrolledSuccess: "Đăng ký thành công vào lớp \"{{className}}\"!",
+    enrolledSuccess: 'Đăng ký thành công vào lớp "{{className}}"!',
     alreadyEnrolled: "Bạn đã đăng ký khóa học này rồi.",
     goToClasses: "Đi tới Lớp học của tôi",
     languages: {
@@ -794,7 +853,8 @@ export default {
     joinRoom: "Vào phòng học",
     sessionsCountText: "buổi học",
     noCoursesFound: "Không tìm thấy khóa học nào",
-    noCoursesFoundDesc: "Hãy thử xóa truy vấn tìm kiếm hoặc bộ lọc để tìm các khóa học khác.",
+    noCoursesFoundDesc:
+      "Hãy thử xóa truy vấn tìm kiếm hoặc bộ lọc để tìm các khóa học khác.",
     enrolledStatus: "Đã đăng ký",
     batchesCount: "{{count}} lớp học",
     batchesAvailable: "Có {{count}} lớp học",
@@ -810,9 +870,11 @@ export default {
     courseInstructor: "Giảng viên phụ trách",
     slotsAvailable: "Còn {{slots}} chỗ trống",
     noEnrolledTitle: "Chưa đăng ký khóa học nào",
-    noEnrolledDesc: "Bạn chưa tham gia khóa học nào. Hãy ghé tab Khám phá để tìm lớp học phù hợp nhé!",
+    noEnrolledDesc:
+      "Bạn chưa tham gia khóa học nào. Hãy ghé tab Khám phá để tìm lớp học phù hợp nhé!",
     noClassesTitle: "Chưa tham gia lớp học nào",
-    noClassesDesc: "Bạn chưa đăng ký tham gia lớp học nào. Hãy khám phá ngay danh sách các khóa học & lớp học hấp dẫn để bắt đầu học tập!",
+    noClassesDesc:
+      "Bạn chưa đăng ký tham gia lớp học nào. Hãy khám phá ngay danh sách các khóa học & lớp học hấp dẫn để bắt đầu học tập!",
     upcomingSessions: "Buổi học sắp tới",
     pastSessions: "Buổi học đã hoàn thành",
     sessionTopic: "Chủ đề: {{topic}}",
@@ -826,7 +888,8 @@ export default {
     totalClasses: "Tổng số lớp",
     classesText: "lớp học",
     targetLevel: "Trình độ mục tiêu",
-    selectClassDesc: "Chọn lớp học phù hợp nhất với lịch trình hàng ngày của bạn.",
+    selectClassDesc:
+      "Chọn lớp học phù hợp nhất với lịch trình hàng ngày của bạn.",
     startsOn: "Bắt đầu vào",
     enrolled: "Đã đăng ký",
     tuitionFee: "Học phí",
@@ -846,7 +909,8 @@ export default {
     profile: "Trang cá nhân",
     contactInstructor: "Liên hệ",
     inDevelopment: "Tính năng đang phát triển",
-    defaultClassDesc: "Lớp học tương tác trực tuyến hàng tuần với sự hướng dẫn của giảng viên bản xứ, thực hành giao tiếp 1-1 và phản hồi thời gian thực.",
+    defaultClassDesc:
+      "Lớp học tương tác trực tuyến hàng tuần với sự hướng dẫn của giảng viên bản xứ, thực hành giao tiếp 1-1 và phản hồi thời gian thực.",
     classmates: "Bạn học",
     members: "Quản lý thành viên",
     feed: "Bảng tin",
@@ -854,18 +918,24 @@ export default {
     grading: "Chấm điểm & quản lý",
     myGrades: "Bài tập & Điểm số",
     materials: "Tài liệu học tập",
-    toastEnrollToViewClassmates: "Vui lòng đăng ký và thanh toán học phí để xem bạn học!",
-    toastEnrollToViewFeed: "Vui lòng đăng ký và thanh toán học phí để xem bảng tin!",
-    toastEnrollToViewGrades: "Vui lòng đăng ký và thanh toán học phí để xem điểm số!",
-    toastEnrollToViewMaterials: "Vui lòng đăng ký và thanh toán học phí để xem tài liệu!",
+    toastEnrollToViewClassmates:
+      "Vui lòng đăng ký và thanh toán học phí để xem bạn học!",
+    toastEnrollToViewFeed:
+      "Vui lòng đăng ký và thanh toán học phí để xem bảng tin!",
+    toastEnrollToViewGrades:
+      "Vui lòng đăng ký và thanh toán học phí để xem điểm số!",
+    toastEnrollToViewMaterials:
+      "Vui lòng đăng ký và thanh toán học phí để xem tài liệu!",
     noUpcomingSessions: "Chưa có buổi học nào lên lịch",
     confirmEnrollment: "Xác nhận đăng ký lớp học",
-    enrollmentConfirmRedirectMsg: "Bạn có chắc chắn muốn đăng ký lớp học {{className}}? Bạn sẽ được chuyển hướng sang trang thanh toán học phí.",
+    enrollmentConfirmRedirectMsg:
+      "Bạn có chắc chắn muốn đăng ký lớp học {{className}}? Bạn sẽ được chuyển hướng sang trang thanh toán học phí.",
     payAndEnroll: "Thanh toán",
     progress: "Tiến độ học tập",
     yourClass: "Lớp học của bạn (Giảng viên)",
     manageCourse: "Quản lý khóa học (Giảng viên)",
-    cannotEnrollOwn: "Bạn không thể đăng ký khóa học hoặc lớp học do chính mình tạo.",
+    cannotEnrollOwn:
+      "Bạn không thể đăng ký khóa học hoặc lớp học do chính mình tạo.",
     startDate: "Ngày khai giảng:",
     goToWorkspace: "Vào lớp học",
     enrollBatch: "Đăng ký lớp",
@@ -885,11 +955,14 @@ export default {
     loadErrorTitle: "Không thể tải dữ liệu học tập",
     loadErrorDescription: "Vui lòng kiểm tra kết nối và thử lại.",
     invalidDataTitle: "Dữ liệu học tập không khả dụng",
-    invalidDataDescription: "Máy chủ trả về dữ liệu khóa học hoặc lớp học không hợp lệ.",
+    invalidDataDescription:
+      "Máy chủ trả về dữ liệu khóa học hoặc lớp học không hợp lệ.",
     refreshError: "Không thể làm mới dữ liệu học tập mới nhất.",
-    partialDataWarning: "Không thể tải một phần dữ liệu học tập. Các kết quả khả dụng được hiển thị bên dưới.",
+    partialDataWarning:
+      "Không thể tải một phần dữ liệu học tập. Các kết quả khả dụng được hiển thị bên dưới.",
     refreshing: "Đang làm mới...",
-    catalogLevelFilterUnavailable: "Bộ lọc trình độ không khả dụng cho danh mục này.",
+    catalogLevelFilterUnavailable:
+      "Bộ lọc trình độ không khả dụng cho danh mục này.",
     notAvailable: "Chưa có",
     noMatchingClassesTitle: "Không có lớp học phù hợp",
     noMatchingClassesDesc: "Hãy thay đổi từ khóa hoặc bộ lọc để tìm lớp khác.",
@@ -908,8 +981,8 @@ export default {
       NOT_STARTED: "Chưa bắt đầu",
       ARCHIVED: "Đã lưu trữ",
       COMPLETED: "Đã hoàn thành",
-      CANCELLED: "Đã hủy"
-    }
+      CANCELLED: "Đã hủy",
+    },
   },
   createAssignment: {
     pageTitle: "Tạo bài nộp",
@@ -970,41 +1043,58 @@ export default {
     errorCreate: "Không thể tạo bài nộp",
     errorForbidden: "Bạn không có quyền thực hiện thao tác này với bài tập.",
     errorNotFound: "Không tìm thấy bài tập hoặc lớp học.",
-    errorFileTooLarge: "Có tệp đính kèm vượt quá giới hạn dung lượng của máy chủ.",
+    errorFileTooLarge:
+      "Có tệp đính kèm vượt quá giới hạn dung lượng của máy chủ.",
     errorFileTypeUnsupported: "Có định dạng tệp đính kèm không được hỗ trợ.",
-    errorNetwork: "Không thể kết nối với máy chủ. Hãy kiểm tra kết nối và thử lại.",
+    errorNetwork:
+      "Không thể kết nối với máy chủ. Hãy kiểm tra kết nối và thử lại.",
     errorGeneric: "Không thể hoàn tất thao tác với bài tập. Vui lòng thử lại.",
     unnamedFile: "Tệp chưa có tên",
     loadFailed: "Không thể tải biểu mẫu bài nộp.",
-    retry: "Thử lại"
+    retry: "Thử lại",
   },
   createExam: {
     importExcelHowToTitle: "Hướng dẫn tạo câu hỏi bằng file Excel",
-    importExcelTip1: "Mỗi dòng là một câu hỏi. Để trống dòng nào thì dòng đó bị bỏ qua.",
-    importExcelTip2: "Cột Question Text: nội dung câu hỏi (bắt buộc, không được để trống).",
-    importExcelTip3: "Cột Question Type: chọn đúng 1 trong 5 loại: MultipleChoiceSingle (trắc nghiệm 1 đáp án), MultipleChoiceMultiple (nhiều đáp án), TrueFalse (đúng/sai), FillInBlank (điền khuyết), Essay (tự luận).",
-    importExcelTip4: 'Cột Option 1-5: mỗi ô là 1 lựa chọn. Trắc nghiệm cần ít nhất 2 lựa chọn; Đúng/Sai điền "Đúng" và "Sai" vào 2 ô đầu; câu Điền khuyết / Tự luận để trống.',
-    importExcelTip5: "Cột Correct Answer: Trắc nghiệm & Đúng/Sai nhập SỐ THỨ TỰ của đáp án đúng (1 = Option 1, 3 = Option 3, nhiều đáp án ngăn cách bằng dấu phẩy, ví dụ: 1, 3, 5). Câu Điền khuyết nhập đáp án chính xác (ví dụ: 100). Câu Tự luận để trống.",
-    importExcelTip6: "Cột Image Link (tùy chọn): dán link ảnh công khai, hệ thống tự tải về. Link nội bộ/không truy cập được sẽ bị bỏ qua nhưng vẫn import câu hỏi bình thường.",
-    importExcelTip7: "Điểm câu hỏi mặc định 5, tất cả câu hỏi đều được đặt bắt buộc trả lời.",
+    importExcelTip1:
+      "Mỗi dòng là một câu hỏi. Để trống dòng nào thì dòng đó bị bỏ qua.",
+    importExcelTip2:
+      "Cột Question Text: nội dung câu hỏi (bắt buộc, không được để trống).",
+    importExcelTip3:
+      "Cột Question Type: chọn đúng 1 trong 5 loại: MultipleChoiceSingle (trắc nghiệm 1 đáp án), MultipleChoiceMultiple (nhiều đáp án), TrueFalse (đúng/sai), FillInBlank (điền khuyết), Essay (tự luận).",
+    importExcelTip4:
+      'Cột Option 1-5: mỗi ô là 1 lựa chọn. Trắc nghiệm cần ít nhất 2 lựa chọn; Đúng/Sai điền "Đúng" và "Sai" vào 2 ô đầu; câu Điền khuyết / Tự luận để trống.',
+    importExcelTip5:
+      "Cột Correct Answer: Trắc nghiệm & Đúng/Sai nhập SỐ THỨ TỰ của đáp án đúng (1 = Option 1, 3 = Option 3, nhiều đáp án ngăn cách bằng dấu phẩy, ví dụ: 1, 3, 5). Câu Điền khuyết nhập đáp án chính xác (ví dụ: 100). Câu Tự luận để trống.",
+    importExcelTip6:
+      "Cột Image Link (tùy chọn): dán link ảnh công khai, hệ thống tự tải về. Link nội bộ/không truy cập được sẽ bị bỏ qua nhưng vẫn import câu hỏi bình thường.",
+    importExcelTip7:
+      "Điểm câu hỏi mặc định 5, tất cả câu hỏi đều được đặt bắt buộc trả lời.",
     close: "Đóng",
     toastTemplateDownloaded: "Tải file mẫu thành công!",
     toastTemplateDownloadFailed: "Tải file mẫu thất bại.",
-    toastMultipleFilesSelected: "Chỉ hỗ trợ tải lên 1 file mỗi lần. Hệ thống đã chọn file đầu tiên.",
-    toastEnterTitleBeforeImport: "Vui lòng nhập tên bài kiểm tra trước khi import file.",
-    toastAutoCreateFailed: "Không thể tự động tạo bài kiểm tra. Vui lòng thử lại.",
+    toastMultipleFilesSelected:
+      "Chỉ hỗ trợ tải lên 1 file mỗi lần. Hệ thống đã chọn file đầu tiên.",
+    toastEnterTitleBeforeImport:
+      "Vui lòng nhập tên bài kiểm tra trước khi import file.",
+    toastAutoCreateFailed:
+      "Không thể tự động tạo bài kiểm tra. Vui lòng thử lại.",
     toastExtractingQuestions: "Đang trích xuất câu hỏi từ file...",
     toastNoValidQuestions: "Không tìm thấy câu hỏi hợp lệ trong file.",
-    toastExtractSuccess: "Đã trích xuất {{count}} câu hỏi thành công! Bạn có thể chỉnh sửa trước khi lưu.",
+    toastExtractSuccess:
+      "Đã trích xuất {{count}} câu hỏi thành công! Bạn có thể chỉnh sửa trước khi lưu.",
     toastExtractFailed: "Trích xuất file thất bại.",
     toastFileRemoved: "Đã xóa file đã tải lên. Bạn có thể chọn file mới.",
-    extractedSuccessDesc: "Đã trích xuất câu hỏi thành công — có thể chỉnh sửa trực tiếp bên dưới.",
+    extractedSuccessDesc:
+      "Đã trích xuất câu hỏi thành công — có thể chỉnh sửa trực tiếp bên dưới.",
     reupload: "Upload lại",
-    uploadSingleFileOnlyDragDrop: "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng kéo thả 1 file duy nhất.",
+    uploadSingleFileOnlyDragDrop:
+      "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng kéo thả 1 file duy nhất.",
     importFromExcel: "Nhập câu hỏi từ file Excel",
-    uploadExcelDesc: "Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi.",
+    uploadExcelDesc:
+      "Tải lên file Excel (.xlsx) theo mẫu để tự động tạo câu hỏi.",
     chooseFile: "Chọn tệp",
-    uploadSingleFileOnlySelect: "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng chọn lại 1 file duy nhất.",
+    uploadSingleFileOnlySelect:
+      "Chỉ hỗ trợ tải lên 1 file mỗi lần. Vui lòng chọn lại 1 file duy nhất.",
     downloadTemplate: "Tải file mẫu",
     supportedFormat: "Định dạng hỗ trợ: .xlsx | Dung lượng tối đa: 20 MB",
     orDragDrop: "hoặc kéo thả tệp vào đây",
@@ -1056,8 +1146,10 @@ export default {
     invalidResponse: "Dữ liệu bài kiểm tra trả về không hợp lệ.",
     loadFailed: "Không thể tải bài kiểm tra.",
     classLoadFailed: "Không thể tải thông tin lớp học.",
-    draftReloadFailed: "Bản nháp đã được lưu nhưng chưa thể tải lại dữ liệu mới nhất.",
-    closedNotice: "Bài kiểm tra đã đóng. Thời gian mở/đóng, tùy chọn nộp muộn, thời lượng, câu hỏi, thang điểm và chế độ trả kết quả không thể thay đổi.",
+    draftReloadFailed:
+      "Bản nháp đã được lưu nhưng chưa thể tải lại dữ liệu mới nhất.",
+    closedNotice:
+      "Bài kiểm tra đã đóng. Thời gian mở/đóng, tùy chọn nộp muộn, thời lượng, câu hỏi, thang điểm và chế độ trả kết quả không thể thay đổi.",
     toastQuestionAdded: "Đã thêm câu hỏi mới",
     toastQuestionCopied: "Đã sao chép câu hỏi",
     toastQuestionDeleted: "Đã xóa câu hỏi",
@@ -1069,8 +1161,10 @@ export default {
     toastChangesSaved: "Đã lưu thay đổi.",
     toastPublishSuccess: "Đã đăng bài kiểm tra thành công.",
     errorSave: "Không thể lưu bài kiểm tra. Vui lòng thử lại.",
-    errorPublish: "Không thể đăng bài kiểm tra. Vui lòng kiểm tra thông tin và thử lại.",
-    draftSavedPublishFailed: "Bản nháp đã được lưu nhưng chưa được đăng. {{error}}",
+    errorPublish:
+      "Không thể đăng bài kiểm tra. Vui lòng kiểm tra thông tin và thử lại.",
+    draftSavedPublishFailed:
+      "Bản nháp đã được lưu nhưng chưa được đăng. {{error}}",
     saving: "Đang lưu...",
     saveChanges: "Lưu thay đổi",
     publishQuiz: "Đăng bài kiểm tra",
@@ -1126,9 +1220,11 @@ export default {
     dateTimePlaceholder: "dd/MM/yyyy, --:--",
     postTypeModalTitle: "Tạo hoạt động mới",
     postTypeModalAssignmentTitle: "Bài tập",
-    postTypeModalAssignmentDesc: "Tạo bài tập tự luận hoặc nộp file cho học sinh",
+    postTypeModalAssignmentDesc:
+      "Tạo bài tập tự luận hoặc nộp file cho học sinh",
     postTypeModalExamTitle: "Bài kiểm tra",
-    postTypeModalExamDesc: "Tạo bài kiểm tra trắc nghiệm, tự luận có tính điểm và hẹn giờ",
+    postTypeModalExamDesc:
+      "Tạo bài kiểm tra trắc nghiệm, tự luận có tính điểm và hẹn giờ",
     preview: {
       bannerText: "Đây là chế độ xem trước của bài kiểm tra",
       backToEdit: "Quay lại chỉnh sửa",
@@ -1193,7 +1289,8 @@ export default {
     thActions: "Thao tác",
     btnView: "Xem",
     noStudentsFound: "Không tìm thấy học viên nào.",
-    paginationShowing: "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} học viên",
+    paginationShowing:
+      "Hiển thị {{start}} đến {{end}} trong tổng số {{total}} học viên",
     modalTitle: "Chấm điểm bài nộp",
     modalSubmissionContent: "Nội dung nộp bài:",
     modalNotSubmittedMsg: "Học viên chưa nộp bài tập này.",
@@ -1226,7 +1323,8 @@ export default {
     submittedFilesHeader: "Các tệp tin đã nộp",
     noTextResponse: "Không có nội dung trả lời trực tiếp.",
     noSubmissionYetTitle: "Chưa có bài nộp",
-    noSubmissionYetMsg: "Bạn chưa gửi bài làm cho bài tập này. Hãy nhập nội dung và nhấn Nộp bài.",
+    noSubmissionYetMsg:
+      "Bạn chưa gửi bài làm cho bài tập này. Hãy nhập nội dung và nhấn Nộp bài.",
     totalItems: "Tổng số bài",
     pendingWork: "Bài cần làm",
     completedWork: "Đã hoàn thành",
@@ -1253,7 +1351,8 @@ export default {
     autoGraded: "Tự động chấm",
     manualGraded: "Chấm thủ công",
     quizPublishedToast: "Đã xuất bản bài kiểm tra!",
-    quizPublishErrorToast: "Không thể đăng bài kiểm tra. Vui lòng kiểm tra nội dung và thử lại.",
+    quizPublishErrorToast:
+      "Không thể đăng bài kiểm tra. Vui lòng kiểm tra nội dung và thử lại.",
     badgeQuiz: "BÀI KIỂM TRA",
     badgeAssignment: "BÀI TẬP",
     viewModeGrid: "Xem dạng Thẻ (Grid)",
@@ -1288,7 +1387,8 @@ export default {
     deleteAssignment: "Xóa bài tập",
     filterLabel: "Lọc bài nộp",
     deleteModalTitle: "Xóa bài tập?",
-    deleteModalConfirmMsg: "Bạn có chắc chắn muốn xóa “{{assignmentTitle}}”? Hành động này không thể hoàn tác.",
+    deleteModalConfirmMsg:
+      "Bạn có chắc chắn muốn xóa “{{assignmentTitle}}”? Hành động này không thể hoàn tác.",
     deletingLabel: "Đang xóa...",
     deleteConfirmBtn: "Xóa",
     cancelBtn: "Hủy",
@@ -1308,7 +1408,8 @@ export default {
     loadingSubmissions: "Đang tải danh sách bài nộp",
     loadSubmissionsError: "Không thể tải danh sách bài nộp.",
     assignmentNotPublished: "Bài tập này chưa được đăng.",
-    invalidAssignmentSubmissionData: "Dữ liệu bài tập hoặc bài nộp không hợp lệ.",
+    invalidAssignmentSubmissionData:
+      "Dữ liệu bài tập hoặc bài nộp không hợp lệ.",
     retry: "Thử lại",
     toastDeleteSuccess: "Đã xóa bài tập thành công.",
     toastDeleteError: "Không thể xóa bài tập.",
@@ -1337,21 +1438,24 @@ export default {
     studentAssignment: {
       maxFilesAllowed: "Bạn có thể đính kèm tối đa {{maxFiles}} tệp.",
       invalidSelectedFile: "Tệp đã chọn không hợp lệ.",
-      fileFormatNotAllowed: "Không cho phép tệp {{extension}}. Định dạng hỗ trợ: {{formats}}.",
+      fileFormatNotAllowed:
+        "Không cho phép tệp {{extension}}. Định dạng hỗ trợ: {{formats}}.",
       noFileExtension: "Không cho phép tệp không có phần mở rộng.",
       fileEmptyOrInvalid: "{{fileName}} trống hoặc không hợp lệ.",
       fileExceedsLimit: "{{fileName}} vượt quá giới hạn 50 MB.",
       fileAlreadySelected: "{{fileName}} đã được chọn.",
       submissionsClosedOrExpired: "Đã đóng nhận bài hoặc đã quá hạn nộp.",
       contentOrFileRequired: "Hãy nhập nội dung hoặc đính kèm ít nhất một tệp.",
-      changeBeforeResubmit: "Hãy thực hiện ít nhất một thay đổi trước khi nộp lại.",
+      changeBeforeResubmit:
+        "Hãy thực hiện ít nhất một thay đổi trước khi nộp lại.",
       submissionCannotBeEmpty: "Bài nộp không được để trống.",
       submitSuccess: "Đã nộp bài tập thành công.",
       submitError: "Không thể nộp bài tập. Vui lòng thử lại.",
       loadingAssignment: "Đang tải bài tập",
       loadAssignmentError: "Không thể tải bài tập.",
       assignmentNotPublished: "Bài tập này chưa được đăng.",
-      invalidAssignmentSubmissionData: "Dữ liệu bài tập hoặc bài nộp không hợp lệ.",
+      invalidAssignmentSubmissionData:
+        "Dữ liệu bài tập hoặc bài nộp không hợp lệ.",
       retry: "Thử lại",
       goBack: "Quay lại",
       unnamedFile: "Tệp chưa có tên",
@@ -1366,31 +1470,36 @@ export default {
       resubmitHeading: "Cập nhật bài nộp",
       submitHeading: "Nộp bài của bạn",
       textSubmissionPlaceholder: "Nhập nội dung bài làm tại đây...",
-      supportedFilesSummary: "Hỗ trợ: {{formats}} • Tối đa {{maxFiles}} tệp • 50 MB mỗi tệp",
+      supportedFilesSummary:
+        "Hỗ trợ: {{formats}} • Tối đa {{maxFiles}} tệp • 50 MB mỗi tệp",
       anyFileFormat: "Mọi định dạng tệp",
       filesPendingUpload: "Tệp sẵn sàng tải lên",
       submittingAssignment: "Đang nộp...",
       resubmitButton: "Nộp lại bài tập",
       submitButton: "Nộp bài tập",
       submissionsClosedHeading: "Đã đóng nhận bài",
-      submissionsLockedDescription: "Giảng viên đã khóa nhận bài cho bài tập này.",
-      assignmentUnavailableDescription: "Bài tập này hiện không khả dụng để nộp.",
+      submissionsLockedDescription:
+        "Giảng viên đã khóa nhận bài cho bài tập này.",
+      assignmentUnavailableDescription:
+        "Bài tập này hiện không khả dụng để nộp.",
       deadlinePassedDescription: "Đã quá hạn nộp bài.",
       gradingDetails: "Chi tiết chấm điểm",
       outOfScore: "{{score}} / {{maxScore}}",
-      noFeedback: "Chưa có nhận xét."
+      noFeedback: "Chưa có nhận xét.",
     },
     studentQuiz: {
       answerPlaceholder: "Nhập câu trả lời của bạn tại đây...",
       answersAutosave: "Câu trả lời được tự động lưu",
       attemptCount: "{{count}} lượt",
       autoSubmitSuccess: "Đã tự động nộp bài kiểm tra.",
-      autosaveError: "Không thể tự động lưu. Vui lòng kiểm tra kết nối và thử lại.",
+      autosaveError:
+        "Không thể tự động lưu. Vui lòng kiểm tra kết nối và thử lại.",
       autosaveFailed: "Tự động lưu thất bại",
       back: "Quay lại",
       cancel: "Hủy bỏ",
       cancelContinue: "Hủy, tiếp tục làm",
-      confirmSubmissionDescription: "Bạn đã làm {{answered}}/{{total}} câu hỏi. Bạn có chắc chắn muốn nộp bài ngay bây giờ?",
+      confirmSubmissionDescription:
+        "Bạn đã làm {{answered}}/{{total}} câu hỏi. Bạn có chắc chắn muốn nộp bài ngay bây giờ?",
       confirmSubmissionTitle: "Xác nhận nộp bài kiểm tra?",
       confirmSubmit: "Xác nhận nộp",
       continueQuiz: "Tiếp tục làm bài",
@@ -1411,9 +1520,11 @@ export default {
       inProgress: "ĐANG LÀM BÀI",
       incorrectScore: "Sai ({{earned}}/{{max}} điểm)",
       instructions: "Hướng dẫn làm bài:",
-      loadQuizErrorDescription: "Dữ liệu bài kiểm tra không hợp lệ hoặc kết nối đã bị gián đoạn.",
+      loadQuizErrorDescription:
+        "Dữ liệu bài kiểm tra không hợp lệ hoặc kết nối đã bị gián đoạn.",
       loadQuizErrorTitle: "Không thể tải bài kiểm tra",
-      loadResultErrorDescription: "Kết quả chưa sẵn sàng hoặc dữ liệu trả về không hợp lệ.",
+      loadResultErrorDescription:
+        "Kết quả chưa sẵn sàng hoặc dữ liệu trả về không hợp lệ.",
       loadResultErrorTitle: "Không thể tải kết quả",
       loading: "Đang tải...",
       loadingQuiz: "Đang tải bài kiểm tra",
@@ -1426,10 +1537,14 @@ export default {
       noQuestionContent: "Chưa có nội dung câu hỏi.",
       noQuestions: "Không có câu hỏi nào.",
       notOpenYet: "Chưa đến giờ mở",
-      noticeAutosave: "Hệ thống sẽ tự động lưu câu trả lời và tự động nộp bài khi hết giờ.",
-      noticeCountdown: "Thời gian làm bài sẽ đếm ngược ngay sau khi bạn nhấn Bắt đầu.",
-      noticeResumeAttempt: "Lượt làm và đồng hồ cũ sẽ tiếp tục. Các câu trả lời đã lưu trước đó có thể chưa hiển thị lại; hãy kiểm tra kỹ trước khi thay đổi hoặc nộp bài.",
-      noticeStableConnection: "Vui lòng giữ kết nối internet ổn định trong quá trình làm bài.",
+      noticeAutosave:
+        "Hệ thống sẽ tự động lưu câu trả lời và tự động nộp bài khi hết giờ.",
+      noticeCountdown:
+        "Thời gian làm bài sẽ đếm ngược ngay sau khi bạn nhấn Bắt đầu.",
+      noticeResumeAttempt:
+        "Lượt làm và đồng hồ cũ sẽ tiếp tục. Các câu trả lời đã lưu trước đó có thể chưa hiển thị lại; hãy kiểm tra kỹ trước khi thay đổi hoặc nộp bài.",
+      noticeStableConnection:
+        "Vui lòng giữ kết nối internet ổn định trong quá trình làm bài.",
       pendingGrading: "Đang chờ chấm",
       pendingScore: "Chờ chấm ({{earned}}/{{max}} điểm)",
       points: "{{count}} điểm",
@@ -1456,11 +1571,13 @@ export default {
       remainingAttempts: "Lượt còn lại",
       resultFailed: "Không đạt",
       resultPassed: "Đạt",
-      resultSummaryFallback: "Đang hiển thị bản tóm tắt bài nộp; chưa thể tải kết quả chi tiết mới nhất.",
+      resultSummaryFallback:
+        "Đang hiển thị bản tóm tắt bài nộp; chưa thể tải kết quả chi tiết mới nhất.",
       resumeAttemptPrompt: "Bạn có một lượt làm bài đang dở. Tiếp tục làm bài?",
       resumeAttemptSuccess: "Đã tiếp tục lượt làm bài đang dở.",
       retakeQuiz: "Làm lại bài kiểm tra",
-      retakeQuizPrompt: "Bạn đã nộp bài kiểm tra này. Bạn muốn xem kết quả hay làm lại bài?",
+      retakeQuizPrompt:
+        "Bạn đã nộp bài kiểm tra này. Bạn muốn xem kết quả hay làm lại bài?",
       seeResults: "Xem kết quả",
       retry: "Thử lại",
       retrySubmission: "Thử nộp lại",
@@ -1477,7 +1594,8 @@ export default {
       statusUnknown: "KHÔNG XÁC ĐỊNH",
       statusUpcoming: "SẮP MỞ",
       submit: "Nộp bài",
-      submitError: "Không thể nộp bài. Câu trả lời vẫn còn trên màn hình; vui lòng thử lại.",
+      submitError:
+        "Không thể nộp bài. Câu trả lời vẫn còn trên màn hình; vui lòng thử lại.",
       submitSuccess: "Nộp bài kiểm tra thành công!",
       submittedAt: "Đã nộp: {{date}}",
       submitting: "Đang nộp...",
@@ -1496,7 +1614,7 @@ export default {
       wordCountWithLimit: "{{count}} / {{max}} từ",
       yourAnswer: "Câu trả lời của bạn:",
       yourEssayAnswer: "Bài luận của bạn:",
-      yourSelection: "Lựa chọn của bạn: "
+      yourSelection: "Lựa chọn của bạn: ",
     },
     teacherQuiz: {
       actions: "Hành động",
@@ -1661,8 +1779,8 @@ export default {
       updatingStatistics: "Đang cập nhật thống kê bài kiểm tra",
       viewAttempt: "Xem bài làm",
       viewMoreQuestions: "Xem thêm {{count}} câu hỏi",
-      yes: "Có"
-    }
+      yes: "Có",
+    },
   },
   lectureHall: {
     loading: "Đang tải...",
@@ -1679,7 +1797,7 @@ export default {
     tabs: {
       curriculum: "Nội dung học",
       bulletinBoard: "Bảng tin",
-      meetingRoom: "Phòng học"
+      meetingRoom: "Phòng học",
     },
     bulletinBoard: {
       addPost: "Thêm bài viết",
@@ -1692,7 +1810,8 @@ export default {
       edit: "Chỉnh sửa",
       delete: "Xoá",
       confirmDelete: "Xác nhận xóa bài viết",
-      confirmDeleteMsg: "Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.",
+      confirmDeleteMsg:
+        "Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.",
       searchPlaceholder: "Tìm kiếm bài viết...",
       noPosts: "Chưa có bài viết nào",
       noPostsDescription: "Các bài viết sẽ xuất hiện tại đây khi có nội dung.",
@@ -1754,8 +1873,8 @@ export default {
         courseDetail: "Chi tiết khóa học",
         classDetail: "Chi tiết lớp học",
         boardDetail: "Bảng tin",
-        postDetail: "Chi tiết bài viết"
-      }
+        postDetail: "Chi tiết bài viết",
+      },
     },
     createPost: {
       title: "Tạo bài viết",
@@ -1815,7 +1934,8 @@ export default {
       addActivitySuccess: "Thêm hoạt động thành công!",
       addMaterialSuccess: "Tải tài liệu lên thành công!",
       deleteConfirmTitle: "Xác nhận xoá",
-      deleteConfirmMessage: "Bạn có chắc chắn muốn xoá mục này không? Hành động này không thể hoàn tác.",
+      deleteConfirmMessage:
+        "Bạn có chắc chắn muốn xoá mục này không? Hành động này không thể hoàn tác.",
       createBoard: "Tạo bảng tin",
       addMaterial: "Thêm tài liệu",
       addActivity: "Thêm hoạt động học tập",
@@ -1837,11 +1957,13 @@ export default {
       fileTypeFallback: "TỆP",
       addMaterialRequired: "Vui lòng chọn ít nhất một tệp học liệu.",
       addMaterialError: "Không thể thêm học liệu.",
-      addActivitySuccessCount: "Đã thêm thành công {{count}} hoạt động học tập!",
+      addActivitySuccessCount:
+        "Đã thêm thành công {{count}} hoạt động học tập!",
       addActivityError: "Không thể thêm hoạt động học tập.",
       updateLinkError: "Không thể cập nhật liên kết.",
       toastVisibilitySuccess: "Đã cập nhật trạng thái hiển thị của nội dung",
-      toastVisibilityError: "Không thể cập nhật trạng thái hiển thị của nội dung",
+      toastVisibilityError:
+        "Không thể cập nhật trạng thái hiển thị của nội dung",
       loadError: "Không thể tải nội dung khóa học. Vui lòng thử lại.",
     },
     modals: {
@@ -1938,66 +2060,68 @@ export default {
         toastUpdateError: "Không thể cập nhật mục. Vui lòng thử lại.",
         toastVisibilitySuccess: "Đã cập nhật trạng thái hiển thị của mục",
         toastVisibilityError: "Không thể cập nhật trạng thái hiển thị của mục",
-      }
+      },
     },
     notifications: {
       class_update: {
         title: "Cập nhật lớp học",
-        body: 'Thông tin lớp "{className}" đã được cập nhật'
+        body: 'Thông tin lớp "{className}" đã được cập nhật',
       },
       schedule_change: {
         title: "Lịch dạy đã thay đổi",
-        body: 'Lịch dạy của lớp "{className}" đã được điều chỉnh'
+        body: 'Lịch dạy của lớp "{className}" đã được điều chỉnh',
       },
       assignment_new: {
         title: "Lớp {className}",
-        body: "Giảng viên đã thêm một bài nộp mới - {assignmentName}."
+        body: "Giảng viên đã thêm một bài nộp mới - {assignmentName}.",
       },
       assignment_update: {
         title: "Lớp {className}",
-        body: "{assignmentName} đã dời lịch nộp bài."
+        body: "{assignmentName} đã dời lịch nộp bài.",
       },
       assignment_graded: {
         title: "Lớp {className}",
-        body: "Kết quả {assignmentName} đã có."
+        body: "Kết quả {assignmentName} đã có.",
       },
       assignment_regraded: {
         title: "Lớp {className}",
-        body: "{assignmentName} của bạn đã được chấm lại."
+        body: "{assignmentName} của bạn đã được chấm lại.",
       },
       quiz_new: {
         title: "Lớp {className}",
-        body: "Giảng viên đã thêm một bài kiểm tra mới - {quizName}."
+        body: "Giảng viên đã thêm một bài kiểm tra mới - {quizName}.",
       },
       quiz_update: {
         title: "Lớp {className}",
-        body: "{quizName} đã dời lịch đóng."
+        body: "{quizName} đã dời lịch đóng.",
       },
       quiz_regraded: {
         title: "Lớp {className}",
-        body: "{quizName} của bạn đã được chấm lại."
+        body: "{quizName} của bạn đã được chấm lại.",
       },
       class_invite: {
         title: "Lời mời vào lớp học",
-        body: "{teacherName} đã mời bạn tham gia lớp học \"{className}\""
+        body: '{teacherName} đã mời bạn tham gia lớp học "{className}"',
       },
       class_paid: {
         title: "Thanh toán lớp học thành công",
-        body: "Bạn đã thanh toán thành công cho lớp học \"{className}\"."
+        body: 'Bạn đã thanh toán thành công cho lớp học "{className}".',
       },
       class_invited_paid: {
         title: "Lớp học đã được thanh toán",
-        body: "{payerName} đã thanh toán cho lớp học \"{className}\" và bạn đã ở trong lớp!"
-      }
-    }
+        body: '{payerName} đã thanh toán cho lớp học "{className}" và bạn đã ở trong lớp!',
+      },
+    },
   },
   publicClass: {
     loading: "Đang tải thông tin lớp học...",
     notFoundTitle: "Không tìm thấy thông tin lớp học",
-    notFoundDesc: "Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm.",
+    notFoundDesc:
+      "Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm.",
     exploreOtherBtn: "Khám Phá Các Lớp Học Khác",
     overviewTitle: "Về lớp học",
-    defaultDescription: "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc.",
+    defaultDescription:
+      "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc.",
     tuitionFeeFull: "Học phí trọn gói",
     tbaFee: "Chưa xác định",
     enterClass: "Vào Lớp Học",
@@ -2010,12 +2134,13 @@ export default {
     instructorLabel: "Giảng viên",
     shareClass: "Chia sẻ lớp học",
     sessionsCount: "{{count}} buổi học",
-    interactiveSub: "Trực tuyến & tương tác 1:1",
+    interactiveSub: "Trực tuyến",
     allLevels: "Mọi trình độ",
-    curriculumSub: "Trình độ.",
+    curriculumSub: "Trình độ",
     flexibleSchedule: "Lịch linh hoạt",
     scheduleSub: "Thời gian linh hoạt",
     scheduleWithModified: "{{schedule}} và\n{{count}} buổi ngoại lệ",
+    andModifiedSessions: "và {{count}} buổi ngoại lệ",
     modifiedSession: "Buổi ngoại lệ",
     modifiedSessionLegend: "Buổi ngoại lệ",
     scheduleTitle: "Lịch học",
@@ -2025,11 +2150,12 @@ export default {
     classDayLegend: "Ngày học",
     todayLegend: "Hôm nay",
     spotsLeft: "{{remaining}}/{{capacity}} chỗ",
-    spotsSub: "Số người trong 1 lớp.",
+    spotsSub: "Số người đã đăng ký",
     instructorTitle: "Thông tin giảng viên",
     verifiedTeacher: "Giảng viên được xác minh bởi Catspeak",
     defaultTeacherTitle: "Giảng Viên Ngôn Ngữ Cao Cấp",
-    defaultTeacherBio: "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc.",
+    defaultTeacherBio:
+      "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc.",
     featLive: "Học trực tuyến tương tác trực tiếp",
     featCurriculum: "Giáo trình bài tập & tài liệu độc quyền",
     featFeedback: "Chấm chữa bài tập & phản hồi 1:1",
@@ -2039,15 +2165,19 @@ export default {
     classIncludes: "Lớp học bao gồm:",
     faqTitle: "Các Câu Hỏi Thường Gặp (FAQ)",
     faq1Q: "Tôi cần trình độ Tiếng Anh thế nào để tham gia lớp?",
-    faq1A: "Lớp học được thiết kế phù hợp cho nhiều cấp độ từ Sơ cấp (Basic) đến Trung cấp (Intermediate). Trước khi bắt đầu, giảng viên sẽ có buổi định hướng giúp bạn nắm bắt lộ trình học hiệu quả nhất.",
+    faq1A:
+      "Lớp học được thiết kế phù hợp cho nhiều cấp độ từ Sơ cấp (Basic) đến Trung cấp (Intermediate). Trước khi bắt đầu, giảng viên sẽ có buổi định hướng giúp bạn nắm bắt lộ trình học hiệu quả nhất.",
     faq2Q: "Lớp học diễn ra dưới hình thức nào?",
-    faq2A: "Lớp học được tổ chức trực tuyến 100% qua nền tảng CatSpeak Video Room với sự tương tác trực tiếp 2 chiều giữa giảng viên và học viên.",
+    faq2A:
+      "Lớp học được tổ chức trực tuyến 100% qua nền tảng CatSpeak Video Room với sự tương tác trực tiếp 2 chiều giữa giảng viên và học viên.",
     faq3Q: "Nếu tôi bận nghỉ 1 buổi học thì sao?",
-    faq3A: "Tất cả các buổi học đều có bản ghi hình (Recording) và slide bài giảng lưu trữ trên hệ thống. Bạn có thể xem lại bài học bất kỳ lúc nào.",
+    faq3A:
+      "Tất cả các buổi học đều có bản ghi hình (Recording) và slide bài giảng lưu trữ trên hệ thống. Bạn có thể xem lại bài học bất kỳ lúc nào.",
     faq4Q: "Làm thế nào để nhận chứng chỉ hoàn thành?",
-    faq4A: "Sau khi hoàn thành tối thiểu 80% số buổi học và nộp đủ các bài tập / bài kiểm tra giữa kỳ & cuối kỳ, bạn sẽ nhận được chứng chỉ số CatSpeak.",
+    faq4A:
+      "Sau khi hoàn thành tối thiểu 80% số buổi học và nộp đủ các bài tập / bài kiểm tra giữa kỳ & cuối kỳ, bạn sẽ nhận được chứng chỉ số CatSpeak.",
     faq5Q: "Chính sách đăng ký & hoàn tiền như thế nào?",
-    faq5A: "CatSpeak cam kết hỗ trợ đổi lớp hoặc hoàn tiền 100% trong vòng 7 ngày đầu tiên nếu bạn cảm thấy lớp học không phù hợp với nhu cầu."
-  }
+    faq5A:
+      "CatSpeak cam kết hỗ trợ đổi lớp hoặc hoàn tiền 100% trong vòng 7 ngày đầu tiên nếu bạn cảm thấy lớp học không phù hợp với nhu cầu.",
+  },
 }
-
