@@ -25,6 +25,7 @@ import { useRoleOverride } from "../components/RoleSwitcher"
 
 import ClassDetailTabs from "../components/ClassDetailTabs"
 import StudentClassOverviewTab from "../components/overview/StudentClassOverviewTab"
+import StudentClassOverview from "./StudentClassOverview"
 
 const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
 // const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
@@ -62,7 +63,7 @@ const StudentClassDetailPage = () => {
   const urlTab = searchParams.get("tab")
   const requestedTab = (urlTab && VALID_TABS.includes(urlTab))
     ? urlTab
-    : "overview"
+    : (isStudent ? "lecture-hall" : "overview")
   const hasLockedTabDeepLink = ENROLLED_ONLY_TABS.has(requestedTab)
 
   const handleTabChange = (tab) => {
@@ -122,7 +123,7 @@ const StudentClassDetailPage = () => {
   // Enrollment Status
   const activeTab = isEnrolled
     ? (hasGradingDeepLink ? "grading" : requestedTab)
-    : "overview"
+    : (isStudent ? "lecture-hall" : "overview")
 
   useEffect(() => {
     if (
@@ -137,7 +138,7 @@ const StudentClassDetailPage = () => {
     }
 
     const nextParams = new URLSearchParams(searchParams)
-    nextParams.set("tab", "overview")
+    nextParams.set("tab", isStudent ? "lecture-hall" : "overview")
     GRADING_DETAIL_PARAM_KEYS.forEach((key) => nextParams.delete(key))
     setSearchParams(nextParams, { replace: true })
   }, [
@@ -150,6 +151,7 @@ const StudentClassDetailPage = () => {
     isEnrolled,
     searchParams,
     setSearchParams,
+    isStudent
   ])
 
   // State Management for UI Actions
@@ -219,8 +221,8 @@ const StudentClassDetailPage = () => {
   }
 
   const tabs = [
-    { value: "overview", label: c.student?.overview || "Overview" },
-    { value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled },
+    ...(!isStudent ? [{ value: "overview", label: c.student?.overview || "Overview" }] : []),
+    ...(!isStudent ? [{ value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled }] : []),
     { value: "lecture-hall", label: c.student?.lectureHall || "Lecture Hall", locked: !isEnrolled },
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
   ]
@@ -273,76 +275,91 @@ const StudentClassDetailPage = () => {
       />
 
       {/* ─── Page Heading & Header Actions ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-          {c.student?.classDetails || "Class Details"}
-        </h1>
+      {isStudent ?
+        (<StudentClassOverview
+          classData={classData}
+          onJoinRoom={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+          onChat={() => {
+            if (classData?.chatGroupId) {
+              navigate(`/chat/${classData.chatGroupId}`)
+            } else {
+              navigate("/chat")
+            }
+          }}
+        />
+        ) : (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h1 className="text-3xl font-black text-gray-950 tracking-tight">
+              {c.student?.classDetails || "Class Details"}
+            </h1>
 
-        <div className="flex items-center gap-3">
-          {!isEnrolled ? (
-            <button
-              type="button"
-              onClick={handleEnroll}
-              disabled={
-                isEnrolling
-                || isOwner
-                || Boolean(enrollmentIssue)
-              }
-              title={
-                isOwner
-                  ? (
-                    c.student?.cannotEnrollOwn
-                    || "You cannot enroll in your own course or class."
-                  )
-                  : (
-                    enrollmentIssue
-                      ? getClassEnrollmentIssueMessage(
+            <div className="flex items-center gap-3">
+              {!isEnrolled ? (
+                <button
+                  type="button"
+                  onClick={handleEnroll}
+                  disabled={
+                    isEnrolling
+                    || isOwner
+                    || Boolean(enrollmentIssue)
+                  }
+                  title={
+                    isOwner
+                      ? (
+                        c.student?.cannotEnrollOwn
+                        || "You cannot enroll in your own course or class."
+                      )
+                      : (
+                        enrollmentIssue
+                          ? getClassEnrollmentIssueMessage(
+                            enrollmentIssue,
+                            c.student,
+                          )
+                          : undefined
+                      )
+                  }
+                  className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
+                >
+                  <span>
+                    {enrollmentIssue
+                      ? getClassEnrollmentIssueLabel(
                         enrollmentIssue,
                         c.student,
                       )
-                      : undefined
-                  )
-              }
-              className="h-10 px-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm disabled:opacity-50"
-            >
-              <span>
-                {enrollmentIssue
-                  ? getClassEnrollmentIssueLabel(
-                    enrollmentIssue,
-                    c.student,
-                  )
-                  : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
-              </span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
-                className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
-              >
-                <Video size={14} className="fill-white" />
-                <span>{c.student?.joinRoom || c.joinRoom || "Vào phòng học"}</span>
-              </button>
+                      : (c.student?.enrollAndPay || "Enroll & Pay Tuition")}
+                  </span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
+                    className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
+                  >
+                    <Video size={14} className="fill-white" />
+                    <span>{c.student?.joinRoom || c.joinRoom || "Vào phòng học"}</span>
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  if (classData?.chatGroupId) {
-                    navigate(`/chat/${classData.chatGroupId}`)
-                  } else {
-                    navigate("/chat")
-                  }
-                }}
-                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
-              >
-                <MessageSquare size={14} className="fill-[#990011]" />
-                <span>{c.student?.chat || "Chat"}</span>
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (classData?.chatGroupId) {
+                        navigate(`/chat/${classData.chatGroupId}`)
+                      } else {
+                        navigate("/chat")
+                      }
+                    }}
+                    className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
+                  >
+                    <MessageSquare size={14} className="fill-[#990011]" />
+                    <span>{c.student?.chat || "Chat"}</span>
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>)}
+
+
 
       {/* ─── Navigation Tabs ─── */}
       <ClassDetailTabs
