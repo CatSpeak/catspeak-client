@@ -206,23 +206,27 @@ const LessonItemRow = ({
               </h4>
             </div>
 
-            {displayData.meta && (
+            {(displayData.meta || isHidden) && (
               <div className={`flex items-center gap-1 text-[13px] font-normal ${isHidden ? "text-gray-200" : "text-[#7B7979]"}`}>
-                {item.isVisibleToStudents === false && (
+                {isHidden && (
                   <span className="inline-flex items-center gap-1 bg-white text-[#7B7979] text-[10px] px-2.5 py-0.5 rounded-full font-bold mr-2">
                     <span className="font-bold">{dict.hiddenStatus || "Đang ẩn"}</span>
                     <EyeOff size={10} strokeWidth={3} />
                   </span>
                 )}
-                {displayData.metaType === "file" ? (
-                  <FileText size={13} className="shrink-0" />
-                ) : displayData.metaType === "none" ? null : (
-                  <Clock size={13} className="shrink-0" />
+                {displayData.meta && (
+                  <>
+                    {displayData.metaType === "file" ? (
+                      <FileText size={13} className="shrink-0" />
+                    ) : displayData.metaType === "none" ? null : (
+                      <Clock size={13} className="shrink-0" />
+                    )}
+                    <div
+                      className="line-clamp-1"
+                      dangerouslySetInnerHTML={{ __html: displayData.meta }}
+                    />
+                  </>
                 )}
-                <div
-                  className="line-clamp-1"
-                  dangerouslySetInnerHTML={{ __html: displayData.meta }}
-                />
               </div>
             )}
           </div>

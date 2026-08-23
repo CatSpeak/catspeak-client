@@ -115,6 +115,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
       className="md:max-w-2xl rounded-[24px]"
       headerClassName="flex items-center justify-between px-6 md:px-8 py-6 md:py-8"
       bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
+      footerClassName="p-0"
       footer={
         <div className="flex justify-between gap-4 px-6 md:px-10 pb-8 pt-2">
           <button
