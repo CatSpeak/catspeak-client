@@ -9,7 +9,12 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ListItem from "@/shared/components/ui/ListItem"
 import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 
-const LANG_MAP = { English: "en", Chinese: "zh", Vietnamese: "vi", Japanese: "ja" }
+const LANG_MAP = {
+  English: "en",
+  Chinese: "zh",
+  Vietnamese: "vi",
+  Japanese: "ja",
+}
 const DISPLAY_NAMES = { en: "English", vi: "Tiếng Việt", zh: "中文", ja: "日本語" }
 const LANG_FLAGS = { en: UK, vi: VietNam, zh: China, ja: Japan }
 
