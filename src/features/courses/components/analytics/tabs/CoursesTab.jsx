@@ -3,7 +3,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsDataTable from "../AnalyticsDataTable"
 import HotClassRanking from "../HotClassRanking"
-import { money, numberVi } from "../../../data/analyticsData"
+import { money, numberVi, getLocalizedCompareNote } from "../../../data/analyticsData"
 import {
   useGetAnalyticsCourseClassOverviewQuery,
   useGetAnalyticsCourseClassEffectivenessQuery,
@@ -11,15 +11,15 @@ import {
   useGetAnalyticsCourseClassHotClassesQuery,
 } from "@/store/api/coursesApi"
 
-const CoursesTab = ({ queryParams = {} }) => {
-  const { t } = useLanguage()
+const CoursesTab = ({ group, queryParams = {} }) => {
+  const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
   const colT = analyticsT.tableCols || {}
 
   const activeParams = {
-    groupBy: "Month",
+    groupBy: group ? group.charAt(0).toUpperCase() + group.slice(1) : "Month",
     ...queryParams,
   }
 
@@ -29,47 +29,56 @@ const CoursesTab = ({ queryParams = {} }) => {
   const { data: standaloneData } = useGetAnalyticsCourseClassStandaloneClassesQuery(activeParams)
   const { data: hotClassesData } = useGetAnalyticsCourseClassHotClassesQuery(activeParams)
 
-  // 1. KPIs (strict API data)
+  // 1. Comparison & KPIs
+  const hasComparison = Boolean(queryParams.compare && queryParams.compare !== "")
+  const compareNote = getLocalizedCompareNote(group, queryParams.compare, language, t)
+
+  const fmtGrowth = (growth) => {
+    if (growth === null || growth === undefined || isNaN(growth)) return ""
+    const sign = growth >= 0 ? "↑" : "↓"
+    return `${sign} ${numberVi(Math.abs(growth), 1, language)}%`
+  }
+
   const overview = overviewData || {}
   const kpis = [
     {
       label: kpiT.totalCourses || "Tổng khóa học",
       value: String(overview.totalCourses ?? 0),
-      delta: "",
+      delta: hasComparison && overview.courseGrowth != null ? fmtGrowth(overview.courseGrowth) : "",
       tone: "green",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.courseGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.totalClasses || "Tổng lớp học",
       value: String(overview.totalClasses ?? 0),
-      delta: "",
+      delta: hasComparison && overview.classGrowth != null ? fmtGrowth(overview.classGrowth) : "",
       tone: "orange",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.classGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.activeClasses || "Lớp đang mở",
       value: String(overview.openClasses ?? 0),
-      delta: "",
+      delta: hasComparison && overview.openClassGrowth != null ? fmtGrowth(overview.openClassGrowth) : "",
       tone: "blue",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.openClassGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.avgFillRate || "Tỷ lệ lấp đầy TB",
       value: `${overview.averageFillRate ?? 0}%`,
-      delta: "",
+      delta: hasComparison && overview.fillRateGrowth != null ? fmtGrowth(overview.fillRateGrowth) : "",
       tone: "purple",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.fillRateGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.avgCompletionRate || "Tỷ lệ hoàn thành TB",
       value: `${overview.averageCompletionRate ?? 0}%`,
-      delta: "",
+      delta: hasComparison && overview.completionRateGrowth != null ? fmtGrowth(overview.completionRateGrowth) : "",
       tone: "green",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && overview.completionRateGrowth != null ? compareNote : "",
     },
   ]
 
-  const fmtPercent = (val) => (val != null && !isNaN(val) ? `${numberVi(val, 1)}%` : "0%")
+  const fmtPercent = (val) => (val != null && !isNaN(val) ? `${numberVi(val, 1, language)}%` : "0%")
 
   // 2. Course Performance Table Data
   const effItems = effectivenessData?.data || (Array.isArray(effectivenessData) ? effectivenessData : [])
@@ -77,7 +86,7 @@ const CoursesTab = ({ queryParams = {} }) => {
     course: r.courseName || "-",
     classCount: r.classCount ?? 0,
     students: r.totalStudents ?? 0,
-    average: money(r.averageRevenuePerClass || 0),
+    average: money(r.averageRevenuePerClass || 0, language),
     averageRaw: r.averageRevenuePerClass || 0,
     fill: fmtPercent(r.averageFillRate),
     fillRaw: r.averageFillRate || 0,
@@ -90,7 +99,7 @@ const CoursesTab = ({ queryParams = {} }) => {
   const independentClasses = saItems.map((r) => ({
     className: r.className || "-",
     students: r.studentCount ?? 0,
-    gross: money(r.revenue || 0),
+    gross: money(r.revenue || 0, language),
     grossRaw: r.revenue || 0,
     fill: fmtPercent(r.fillRate),
     fillRaw: r.fillRate || 0,
@@ -102,11 +111,11 @@ const CoursesTab = ({ queryParams = {} }) => {
   const hotItems = hotClassesData?.data || (Array.isArray(hotClassesData) ? hotClassesData : [])
   const hotRankingRows = hotItems.map((r) => ({
     className: r.className || "-",
-    course: r.courseName || "Khóa học",
+    course: r.courseName || (colT.course || "Khóa học"),
     learners: r.students ?? 0,
     fill: r.fillRate ?? 0,
     fillRaw: r.fillRate || 0,
-    gross: money(r.revenue || 0),
+    gross: money(r.revenue || 0, language),
     grossRaw: r.revenue || 0,
     newRegistrations: r.newEnrollments || 0,
   }))
