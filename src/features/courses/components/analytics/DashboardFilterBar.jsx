@@ -35,7 +35,7 @@ const DashboardFilterBar = ({
   isExporting = false,
   resolvedFilter = null,
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const dashT = t.courses?.dashboard || {}
   const filterT = dashT.filters || {}
   const analyticsFilterT = t.courses?.analytics?.filters || {}
@@ -60,15 +60,18 @@ const DashboardFilterBar = ({
     }
   }
 
-  const computedRange = getPresetDateRange(preset)
+  const computedRange = getPresetDateRange(preset, new Date(), {
+    allTime: dashT.periodOptions?.all || "Toàn bộ thời gian",
+    selectedPeriod: filterT.currentPeriod || "Theo kỳ đã chọn",
+  })
   const displayedDateRange =
     preset === "custom"
-      ? (fromDate && toDate ? `${formatDateStr(fromDate)} – ${formatDateStr(toDate)}` : "Tùy chọn ngày")
+      ? (fromDate && toDate ? `${formatDateStr(fromDate)} – ${formatDateStr(toDate)}` : (dashT.periodOptions?.custom || "Tùy chọn ngày"))
       : (resolvedFilter?.startDate && resolvedFilter?.endDate
         ? `${formatDateStr(resolvedFilter.startDate)} – ${formatDateStr(resolvedFilter.endDate)}`
         : computedRange.display)
 
-  const compareOptions = getCompareOptionsForPreset(preset, filterT)
+  const compareOptions = getCompareOptionsForPreset(preset, filterT, language)
 
   const courseList = courses
     .map((item) => ({ value: String(item.id), label: item.name || item.title }))

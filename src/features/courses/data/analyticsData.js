@@ -488,8 +488,60 @@ export const getDrillDownSelection = ({ group, period, index }) => {
   }
 }
 
-export const numberVi = (value, maximumFractionDigits = 2) => (
-  new Intl.NumberFormat("vi-VN", { maximumFractionDigits }).format(value)
+export const getLocalizedCompareNote = (groupOrPreset, compare, language = "vi", t = {}) => {
+  if (compare === "none" || !compare) return ""
+  const lang = String(language || "vi").toLowerCase()
+  const isZh = lang.startsWith("zh")
+  const isEn = lang.startsWith("en")
+  const kpiT = t?.courses?.analytics?.kpis || {}
+
+  if (compare === "__lastYear__" || compare === "year") {
+    if (kpiT.vsSamePeriodLastYear) return kpiT.vsSamePeriodLastYear
+    if (isZh) return "较去年同期"
+    if (isEn) return "vs same period last year"
+    return "so với cùng kỳ năm trước"
+  }
+
+  const key = String(groupOrPreset || "").toLowerCase()
+  if (key === "day" || key === "today") {
+    if (isZh) return "较昨日"
+    if (isEn) return "vs yesterday"
+    return "so với hôm qua"
+  }
+  if (key === "week") {
+    if (isZh) return "较上周"
+    if (isEn) return "vs last week"
+    return "so với tuần trước"
+  }
+  if (key === "month") {
+    if (isZh) return "较上月"
+    if (isEn) return "vs last month"
+    return "so với tháng trước"
+  }
+  if (key === "quarter") {
+    if (isZh) return "较上季度"
+    if (isEn) return "vs last quarter"
+    return "so với quý trước"
+  }
+  if (key === "year") {
+    if (isZh) return "较去年"
+    if (isEn) return "vs last year"
+    return "so với năm trước"
+  }
+
+  if (kpiT.vsPrevious) return kpiT.vsPrevious
+  if (isZh) return "较上期"
+  if (isEn) return "vs previous period"
+  return "so với kỳ trước"
+}
+
+export const numberVi = (value, maximumFractionDigits = 2, language = "vi") => (
+  new Intl.NumberFormat(getLocale(language), { maximumFractionDigits }).format(value || 0)
 )
 
-export const money = (value) => `${new Intl.NumberFormat("vi-VN").format(value)} đ`
+export const money = (value, language = "vi") => {
+  const lang = String(language || "vi").toLowerCase()
+  const val = Number(value) || 0
+  const formatted = new Intl.NumberFormat(getLocale(lang)).format(val)
+  return `${formatted} ₫`
+}

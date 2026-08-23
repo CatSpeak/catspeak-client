@@ -4,7 +4,7 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { money, numberVi } from "../../../data/analyticsData"
+import { money, numberVi, getLocalizedCompareNote } from "../../../data/analyticsData"
 import {
   useGetAnalyticsRevenueOverviewQuery,
   useGetAnalyticsRevenueTrendQuery,
@@ -13,7 +13,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const RevenueTab = ({ group, queryParams = {} }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
@@ -39,21 +39,12 @@ const RevenueTab = ({ group, queryParams = {} }) => {
 
   // 1. Comparison & KPIs
   const hasComparison = Boolean(queryParams.compare && queryParams.compare !== "")
-  const getCompareNote = () => {
-    if (!hasComparison) return ""
-    if (queryParams.compare === "__lastYear__") return kpiT.vsSamePeriodLastYear || "so với cùng kỳ năm trước"
-    if (group === "day") return "so với tháng trước"
-    if (group === "week") return "so với quý trước"
-    if (group === "month") return "so với năm trước"
-    if (group === "year") return "so với giai đoạn trước"
-    return kpiT.vsPrevious || "so với kỳ trước"
-  }
-  const compareNote = getCompareNote()
+  const compareNote = getLocalizedCompareNote(group, queryParams.compare, language, t)
 
   const fmtGrowth = (growth) => {
     if (growth === null || growth === undefined || isNaN(growth)) return ""
     const sign = growth >= 0 ? "↑" : "↓"
-    return `${sign} ${numberVi(Math.abs(growth), 1)}%`
+    return `${sign} ${numberVi(Math.abs(growth), 1, language)}%`
   }
 
   const latestPoint = trendPoints.length > 0 ? trendPoints[trendPoints.length - 1] : null
@@ -75,21 +66,21 @@ const RevenueTab = ({ group, queryParams = {} }) => {
   const kpis = [
     {
       label: kpiT.totalRevenue || "Tổng doanh thu",
-      value: money(overview.totalRevenue ?? 0),
+      value: money(overview.totalRevenue ?? 0, language),
       delta: hasComparison && revenueGrowth != null ? fmtGrowth(revenueGrowth) : "",
       tone: "red",
       note: hasComparison && revenueGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.netEarnings || "Thực nhận",
-      value: money(overview.netReceipt ?? 0),
+      value: money(overview.netReceipt ?? 0, language),
       delta: hasComparison && netGrowth != null ? fmtGrowth(netGrowth) : "",
       tone: "green",
       note: hasComparison && netGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.platformFee || "Phí nền tảng",
-      value: money(overview.platformFee ?? 0),
+      value: money(overview.platformFee ?? 0, language),
       delta: hasComparison && feeGrowth != null ? fmtGrowth(feeGrowth) : "",
       tone: "blue",
       note: hasComparison && feeGrowth != null ? compareNote : "",
@@ -103,7 +94,7 @@ const RevenueTab = ({ group, queryParams = {} }) => {
     },
     {
       label: kpiT.avgRevenuePerClass || "Doanh thu TB/lớp",
-      value: money(overview.averageRevenuePerClass ?? 0),
+      value: money(overview.averageRevenuePerClass ?? 0, language),
       delta: hasComparison && revenueGrowth != null ? fmtGrowth(revenueGrowth) : "",
       tone: "purple",
       note: hasComparison && revenueGrowth != null ? compareNote : "",

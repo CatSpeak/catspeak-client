@@ -34,7 +34,7 @@ export const formatDateIso = (d) => {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
 }
 
-export const getPresetDateRange = (preset, now = new Date()) => {
+export const getPresetDateRange = (preset, now = new Date(), labels = {}) => {
   const d = new Date(now)
   const y = d.getFullYear()
   const m = d.getMonth()
@@ -91,50 +91,61 @@ export const getPresetDateRange = (preset, now = new Date()) => {
       return {
         startDate: null,
         endDate: null,
-        display: "Toàn bộ thời gian",
+        display: labels.allTime || "Toàn bộ thời gian",
       }
     default:
       return {
         startDate: null,
         endDate: null,
-        display: "Theo kỳ đã chọn",
+        display: labels.selectedPeriod || "Theo kỳ đã chọn",
       }
   }
 }
 
-export const getCompareOptionsForPreset = (preset, translations = {}) => {
+export const getCompareOptionsForPreset = (preset, translations = {}, language = "vi") => {
   const t = translations || {}
-  const noComp = t.none || "Không so sánh"
-  const lastYear = t.samePeriodLastYear || "Cùng kỳ năm trước"
+  const lang = String(language || "vi").toLowerCase()
+  const isZh = lang.startsWith("zh")
+  const isEn = lang.startsWith("en")
+
+  const noComp = t.none || (isZh ? "不对比" : isEn ? "No Comparison" : "Không so sánh")
+  const lastYear = t.samePeriodLastYear || (isZh ? "去年同期" : isEn ? "Same Period Last Year" : "Cùng kỳ năm trước")
+  const yesterday = t.yesterday || (isZh ? "昨天 (上一周期)" : isEn ? "Yesterday (Previous Period)" : "Hôm qua (Kỳ trước)")
+  const sameDayLastYear = t.sameDayLastYear || (isZh ? "去年同日" : isEn ? "Same Day Last Year" : "Cùng ngày năm trước")
+  const lastWeek = t.lastWeek || (isZh ? "上周 (上一周期)" : isEn ? "Last Week (Previous Period)" : "Tuần trước (Kỳ trước)")
+  const lastMonth = t.lastMonth || (isZh ? "上月 (上一周期)" : isEn ? "Last Month (Previous Period)" : "Tháng trước (Kỳ trước)")
+  const lastQuarter = t.lastQuarter || (isZh ? "上季度 (上一周期)" : isEn ? "Last Quarter (Previous Period)" : "Quý trước (Kỳ trước)")
+  const prevYear = t.lastYear || (isZh ? "去年 (上一周期)" : isEn ? "Last Year (Previous Period)" : "Năm trước (Kỳ trước)")
+  const prevPeriod = t.previous || (isZh ? "上一周期" : isEn ? "Previous Period" : "Kỳ liền trước")
 
   switch (preset) {
     case "today":
       return [
-        { value: "prev", label: t.yesterday || "Hôm qua (Kỳ trước)" },
-        { value: "year", label: t.sameDayLastYear || "Cùng ngày năm trước" },
+        { value: "prev", label: yesterday },
+        { value: "year", label: sameDayLastYear },
         { value: "none", label: noComp },
       ]
     case "week":
       return [
-        { value: "prev", label: t.lastWeek || "Tuần trước" },
+        { value: "prev", label: lastWeek },
         { value: "year", label: lastYear },
         { value: "none", label: noComp },
       ]
     case "month":
       return [
-        { value: "prev", label: t.lastMonth || "Tháng trước" },
+        { value: "prev", label: lastMonth },
         { value: "year", label: lastYear },
         { value: "none", label: noComp },
       ]
     case "quarter":
       return [
-        { value: "prev", label: t.lastQuarter || "Quý trước" },
+        { value: "prev", label: lastQuarter },
         { value: "year", label: lastYear },
         { value: "none", label: noComp },
       ]
     case "year":
       return [
-        { value: "prev", label: t.lastYear || "Năm trước" },
+        { value: "prev", label: prevYear },
         { value: "none", label: noComp },
       ]
     case "all":
@@ -142,7 +153,7 @@ export const getCompareOptionsForPreset = (preset, translations = {}) => {
     case "custom":
     default:
       return [
-        { value: "prev", label: t.previous || "Kỳ liền trước" },
+        { value: "prev", label: prevPeriod },
         { value: "year", label: lastYear },
         { value: "none", label: noComp },
       ]

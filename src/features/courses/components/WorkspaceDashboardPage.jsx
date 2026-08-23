@@ -11,7 +11,7 @@ import AnalyticsKpiGrid from "./analytics/AnalyticsKpiGrid"
 import AnalyticsLineChart from "./analytics/AnalyticsLineChart"
 import AnalyticsBarChart from "./analytics/AnalyticsBarChart"
 import HotClassRanking from "./analytics/HotClassRanking"
-import { money, numberVi } from "../data/analyticsData"
+import { money, numberVi, getLocalizedCompareNote } from "../data/analyticsData"
 import {
   useGetDashboardQuery,
   useExportDashboardMutation,
@@ -104,7 +104,7 @@ const compareTypeMap = { prev: "PreviousPeriod", year: "SamePeriodLastYear", non
 const WorkspaceDashboardPage = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const dashT = t.courses?.dashboard || {}
   const kpiT = t.courses?.analytics?.kpis || {}
   const metricsT = dashT.metrics || {}
@@ -194,16 +194,16 @@ const WorkspaceDashboardPage = () => {
   const fmtGrowth = (growth) => {
     if (growth === null || growth === undefined) return ""
     const sign = growth >= 0 ? "↑" : "↓"
-    return `${sign} ${numberVi(Math.abs(growth), 1)}%`
+    return `${sign} ${numberVi(Math.abs(growth), 1, language)}%`
   }
 
   const kpiTone = (key) => KPI_DEFS.find((d) => d.key === key)?.tone || "red"
 
   const formatKpi = (kpi) => {
     if (kpi.value === null || kpi.value === undefined) return na
-    if (kpi.key === "totalRevenue") return money(kpi.value)
-    if (kpi.key === "averageRating") return `${numberVi(kpi.value, 1)}/5`
-    return numberVi(kpi.value, 0)
+    if (kpi.key === "totalRevenue") return money(kpi.value, language)
+    if (kpi.key === "averageRating") return `${numberVi(kpi.value, 1, language)}/5`
+    return numberVi(kpi.value, 0, language)
   }
 
   const kpiLabel = (key) => {
@@ -218,17 +218,7 @@ const WorkspaceDashboardPage = () => {
     return labelMap[key]
   }
 
-  const getCompareNote = () => {
-    if (compare === "none") return ""
-    if (compare === "year") return kpiT.vsSamePeriodLastYear || "so với cùng kỳ năm trước"
-    if (preset === "today") return "so với hôm qua"
-    if (preset === "week") return "so với tuần trước"
-    if (preset === "month") return "so với tháng trước"
-    if (preset === "quarter") return "so với quý trước"
-    if (preset === "year") return "so với năm trước"
-    return kpiT.vsPrevious || "so với kỳ trước"
-  }
-  const currentCompareNote = getCompareNote()
+  const currentCompareNote = getLocalizedCompareNote(preset, compare, language, t)
 
   const kpiItems = (dashboard?.kpis || [])
     .filter((kpi) => KPI_DEFS.some((d) => d.key === kpi.key))
@@ -340,7 +330,7 @@ const WorkspaceDashboardPage = () => {
         {/* Học viên snapshot */}
         <SnapshotCard
           title={secT.students || "Học viên"}
-          subtitle="Tình hình học viên trong kỳ đang chọn"
+          subtitle={secT.studentsSubtitle || "Tình hình học viên trong kỳ đang chọn"}
           onViewDetails={() => handleViewDetails("students")}
           viewDetailsLabel={viewDetailsLabel}
         >
@@ -360,24 +350,24 @@ const WorkspaceDashboardPage = () => {
                     color: "#F97316",
                   },
                 ]}
-                valueFormatter={(val) => numberVi(val, 0)}
-                axisFormatter={(val) => numberVi(Math.round(val), 0)}
+                valueFormatter={(val) => numberVi(val, 0, language)}
+                axisFormatter={(val) => numberVi(Math.round(val), 0, language)}
               />
             </div>
             <div className="w-full sm:w-48 lg:w-56 flex flex-col gap-2.5 flex-shrink-0">
               <MiniStatBox
                 label={kpiT.newStudents || "Học viên mới"}
-                value={numberVi(students.metrics?.newStudents ?? 0, 0)}
+                value={numberVi(students.metrics?.newStudents ?? 0, 0, language)}
                 delta={studentGrowthVal ? `${studentGrowthVal} ${currentCompareNote}` : ""}
               />
               <MiniStatBox
                 label={kpiT.returningStudents || "Học viên quay lại"}
-                value={numberVi(students.metrics?.returningStudents ?? 0, 0)}
+                value={numberVi(students.metrics?.returningStudents ?? 0, 0, language)}
                 delta={studentRetVal ? `${studentRetVal} ${currentCompareNote}` : ""}
               />
               <MiniStatBox
                 label={kpiT.retentionRate || "Tỷ lệ duy trì"}
-                value={`${numberVi(students.metrics?.retentionRate ?? 0, 1)}%`}
+                value={`${numberVi(students.metrics?.retentionRate ?? 0, 1, language)}%`}
                 delta={studentRetVal ? `${studentRetVal} ${currentCompareNote}` : ""}
               />
             </div>
@@ -387,7 +377,7 @@ const WorkspaceDashboardPage = () => {
         {/* Doanh thu snapshot */}
         <SnapshotCard
           title={secT.revenue || "Doanh thu"}
-          subtitle="Doanh thu phát sinh trực tiếp ở cấp lớp học"
+          subtitle={secT.revenueSubtitle || "Doanh thu phát sinh trực tiếp ở cấp lớp học"}
           onViewDetails={() => handleViewDetails("revenue")}
           viewDetailsLabel={viewDetailsLabel}
         >
@@ -402,24 +392,24 @@ const WorkspaceDashboardPage = () => {
                     color: "#E11D48",
                   },
                 ]}
-                valueFormatter={(val) => money(val)}
-                axisFormatter={(val) => money(Math.round(val))}
+                valueFormatter={(val) => money(val, language)}
+                axisFormatter={(val) => money(Math.round(val), language)}
               />
             </div>
             <div className="w-full sm:w-48 lg:w-56 flex flex-col gap-2.5 flex-shrink-0">
               <MiniStatBox
                 label={kpiT.totalRevenue || "Tổng doanh thu"}
-                value={money(revenue.metrics?.totalRevenue ?? 0)}
+                value={money(revenue.metrics?.totalRevenue ?? 0, language)}
                 delta={revenueGrowthVal ? `${revenueGrowthVal} ${currentCompareNote}` : ""}
               />
               <MiniStatBox
                 label={kpiT.platformFee || "Phí nền tảng"}
-                value={money(platformFee)}
-                delta={compare !== "none" ? "5% phí sàn" : ""}
+                value={money(platformFee, language)}
+                delta={compare !== "none" ? (metricsT.platformFeeRate || "5% phí sàn") : ""}
               />
               <MiniStatBox
                 label={kpiT.netEarnings || "Thực nhận"}
-                value={money(netReceipt)}
+                value={money(netReceipt, language)}
                 delta={revenueGrowthVal ? `${revenueGrowthVal} ${currentCompareNote}` : ""}
               />
             </div>
@@ -432,7 +422,7 @@ const WorkspaceDashboardPage = () => {
         {/* Hiệu suất giảng dạy snapshot */}
         <SnapshotCard
           title={secT.performance || "Hiệu suất giảng dạy"}
-          subtitle="Snapshot vận hành trong kỳ"
+          subtitle={secT.performanceSubtitle || "Snapshot vận hành trong kỳ"}
         >
           <div className="flex flex-col gap-2.5 py-1">
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] border border-[#DEE0E5]">
@@ -445,7 +435,7 @@ const WorkspaceDashboardPage = () => {
                 </span>
               </div>
               <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
-                {numberVi(performance.totalTeachingHours ?? 127.5, 1)} giờ
+                {numberVi(performance.totalTeachingHours ?? 127.5, 1, language)} {metricsT.hours || "giờ"}
               </strong>
             </div>
 
@@ -459,7 +449,7 @@ const WorkspaceDashboardPage = () => {
                 </span>
               </div>
               <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
-                {numberVi(performance.completedSessions ?? 48, 0)} buổi
+                {numberVi(performance.completedSessions ?? 48, 0, language)} {metricsT.sessions || "buổi"}
               </strong>
             </div>
 
@@ -474,8 +464,8 @@ const WorkspaceDashboardPage = () => {
               </div>
               <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
                 {performance.averageDurationMinutes != null
-                  ? `${numberVi(performance.averageDurationMinutes, 0)} phút`
-                  : "75 phút"}
+                  ? `${numberVi(performance.averageDurationMinutes, 0, language)} ${metricsT.minutes || "phút"}`
+                  : `75 ${metricsT.minutes || "phút"}`}
               </strong>
             </div>
           </div>
@@ -484,7 +474,7 @@ const WorkspaceDashboardPage = () => {
         {/* Khóa học & Lớp học snapshot */}
         <SnapshotCard
           title={secT.courseClass || "Khóa học & Lớp học"}
-          subtitle="Hiệu quả vận hành và mức độ lấp đầy"
+          subtitle={secT.courseClassSubtitle || "Hiệu quả vận hành và mức độ lấp đầy"}
           onViewDetails={() => handleViewDetails("courses")}
           viewDetailsLabel={viewDetailsLabel}
         >
@@ -492,24 +482,24 @@ const WorkspaceDashboardPage = () => {
             {/* 3 mini stats in 1 row */}
             <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
-                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title="Lớp đang mở">
-                  Lớp đang mở
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.activeClasses || "Lớp đang mở"}>
+                  {kpiT.activeClasses || "Lớp đang mở"}
                 </span>
                 <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
                   {courseClass.metrics?.openClasses ?? 14}
                 </strong>
               </div>
               <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
-                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title="Lấp đầy TB">
-                  Lấp đầy TB
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.avgFillRate || "Lấp đầy TB"}>
+                  {kpiT.avgFillRate || "Lấp đầy TB"}
                 </span>
                 <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
                   {Math.round(courseClass.metrics?.averageFillRate ?? 82)}%
                 </strong>
               </div>
               <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
-                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title="Hoàn thành TB">
-                  Hoàn thành TB
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.avgCompletionRate || "Hoàn thành TB"}>
+                  {kpiT.avgCompletionRate || "Hoàn thành TB"}
                 </span>
                 <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
                   {Math.round(courseClass.metrics?.averageCompletionRate ?? 76)}%
@@ -520,7 +510,7 @@ const WorkspaceDashboardPage = () => {
             {/* Top fill rate bars */}
             <div className="mt-1">
               <span className="text-xs font-semibold text-[#14171F] block mb-2">
-                Top lớp theo tỷ lệ lấp đầy
+                {secT.topFillRate || "Top lớp theo tỷ lệ lấp đầy"}
               </span>
               <div className="flex flex-col gap-2">
                 {(fillRateRows.length > 0
@@ -554,7 +544,7 @@ const WorkspaceDashboardPage = () => {
         {/* Chất lượng giảng dạy snapshot */}
         <SnapshotCard
           title={secT.quality || "Chất lượng giảng dạy"}
-          subtitle="Chất lượng sau học và sức hút trước học"
+          subtitle={secT.qualitySubtitle || "Chất lượng sau học và sức hút trước học"}
           onViewDetails={() => handleViewDetails("quality")}
           viewDetailsLabel={viewDetailsLabel}
         >
@@ -563,7 +553,7 @@ const WorkspaceDashboardPage = () => {
               label={kpiT.avgRating || "Đánh giá TB"}
               value={
                 quality.metrics?.averageRating != null
-                  ? `${numberVi(quality.metrics.averageRating, 1)}/5`
+                  ? `${numberVi(quality.metrics.averageRating, 1, language)}/5`
                   : "0/5"
               }
               delta={compare !== "none" && quality.metrics?.ratingGrowth != null ? `${fmtGrowth(quality.metrics.ratingGrowth)} ${currentCompareNote}` : ""}
@@ -572,7 +562,7 @@ const WorkspaceDashboardPage = () => {
               label={kpiT.reEnrollmentRate || "Tỷ lệ ĐK lại"}
               value={
                 quality.metrics?.reenrollmentRate != null
-                  ? `${numberVi(quality.metrics.reenrollmentRate, 1)}%`
+                  ? `${numberVi(quality.metrics.reenrollmentRate, 1, language)}%`
                   : "0%"
               }
               delta={compare !== "none" && quality.metrics?.reenrollmentGrowth != null ? `${fmtGrowth(quality.metrics.reenrollmentGrowth)} ${currentCompareNote}` : ""}
@@ -581,7 +571,7 @@ const WorkspaceDashboardPage = () => {
               label={kpiT.conversionRate || "Chuyển đổi ĐK"}
               value={
                 quality.metrics?.conversionRate != null
-                  ? `${numberVi(quality.metrics.conversionRate, 1)}%`
+                  ? `${numberVi(quality.metrics.conversionRate, 1, language)}%`
                   : "0%"
               }
               delta={compare !== "none" && quality.metrics?.conversionGrowth != null ? `${fmtGrowth(quality.metrics.conversionGrowth)} ${currentCompareNote}` : ""}
@@ -590,7 +580,7 @@ const WorkspaceDashboardPage = () => {
               label={kpiT.cancellationRate || "Tỷ lệ hủy"}
               value={
                 quality.metrics?.cancellationRate != null
-                  ? `${numberVi(quality.metrics.cancellationRate, 1)}%`
+                  ? `${numberVi(quality.metrics.cancellationRate, 1, language)}%`
                   : "0%"
               }
               delta={compare !== "none" && quality.metrics?.cancellationGrowth != null ? `${fmtGrowth(quality.metrics.cancellationGrowth)} ${currentCompareNote}` : ""}
