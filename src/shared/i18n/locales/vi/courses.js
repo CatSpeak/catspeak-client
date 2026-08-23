@@ -2306,14 +2306,9 @@ export default {
     notFoundDesc:
       "Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm.",
     exploreOtherBtn: "Khám Phá Các Lớp Học Khác",
-<<<<<<< HEAD
-    overviewTitle: "Về lớp học",
-    defaultDescription: "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc.",
-=======
     overviewTitle: "Giới Thiệu Chi Tiết Về Lớp Học",
     defaultDescription:
       "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc.",
->>>>>>> b74fb7cb
     tuitionFeeFull: "Học phí trọn gói",
     tbaFee: "Chưa xác định",
     enterClass: "Vào Lớp Học",
