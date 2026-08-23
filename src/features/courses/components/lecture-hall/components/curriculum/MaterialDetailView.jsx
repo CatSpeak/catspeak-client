@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ArrowLeft, FileText, Download } from 'lucide-react'
-import { PillButton } from '@/shared/components/ui/buttons'
+import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
@@ -53,31 +53,31 @@ const MaterialDetailView = ({ itemData, onBack }) => {
           <span>{dict.postDetail.back || "Quay lại"}</span>
         </button>
         <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
-          Tài liệu không tồn tại
+          {dict.curriculum?.unnamedMaterial || "Tài liệu không tồn tại"}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col w-full animate-fade-in">
+    <div className="flex flex-col w-full animate-fade-in space-y-6">
       <PillButton
         startIcon={<ArrowLeft size={16} />}
         onClick={onBack}
         className='w-fit'
         variant='secondary-no-outline'
       >
-        Giảng đường
+        {t.courses?.lectureHall?.title || "Giảng đường"}
       </PillButton>
 
       <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#E2E2E2] w-full">
         <div className="flex flex-col gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center shrink-0">
+            <IconButton size="md" variant="secondary" >
               <FileText size={28} className="text-[#DC2626]" />
-            </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A]">
+            </IconButton>
+            <div className="flex flex-col space-y-1 flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A] truncate">
                 {displayData?.title || itemData.title}
               </h2>
               <div className="text-base text-[#7B7979]">
@@ -97,7 +97,7 @@ const MaterialDetailView = ({ itemData, onBack }) => {
             startIcon={<Download size={18} />}
             className="w-fit"
           >
-            Tải xuống
+            {dict.curriculum?.download || "Tải xuống"}
           </PillButton>
         </div>
       </div>

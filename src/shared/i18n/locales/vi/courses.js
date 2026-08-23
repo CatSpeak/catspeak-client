@@ -1117,6 +1117,7 @@ export default {
     },
   },
   grading: {
+    justNow: "Vừa xong",
     searchPlaceholder: "Tìm kiếm bài nộp...",
     statusFilter: "Trạng thái bài nộp",
     statusAll: "Tất cả trạng thái",
@@ -1301,6 +1302,9 @@ export default {
     searchContent: "Tìm kiếm nội dung học tập",
     statsUnavailableLabel: "Chưa có thống kê",
     studentAssignment: {
+      assignmentNotFound: "Bài tập không tồn tại",
+      submittedHeading: "Đã nộp bài",
+      allowLateSubmission: "Cho phép nộp muộn",
       maxFilesAllowed: "Bạn có thể đính kèm tối đa {{maxFiles}} tệp.",
       invalidSelectedFile: "Tệp đã chọn không hợp lệ.",
       fileFormatNotAllowed: "Không cho phép tệp {{extension}}. Định dạng hỗ trợ: {{formats}}.",
@@ -1347,6 +1351,14 @@ export default {
       noFeedback: "Chưa có nhận xét."
     },
     studentQuiz: {
+      quizStatus: "Trạng thái làm bài",
+      attemptCountLabel: "Số lần làm lại",
+      unlimitedAttempts: "Không giới hạn",
+      highestScore: "Điểm số cao nhất",
+      outOfAttempts: "0 (Hết lượt)",
+      cannotTakeQuiz: "Không thể làm bài",
+      attemptsLeftMeta: "Còn {{rem}} / {{max}} lần",
+      opensAt: "Mở từ",
       answerPlaceholder: "Nhập câu trả lời của bạn tại đây...",
       answersAutosave: "Câu trả lời được tự động lưu",
       attemptCount: "{{count}} lượt",
@@ -1631,6 +1643,7 @@ export default {
     }
   },
   lectureHall: {
+    title: "Giảng đường",
     loading: "Đang tải...",
     removeFileTooltip: "Xóa tệp",
     unknownSection: "Mục không xác định",
@@ -1798,6 +1811,17 @@ export default {
       postCount: "{{count}} bài viết",
       dueDateMeta: "Hạn nộp: {{date}}",
       closesAtMeta: "Đóng lúc: {{date}}",
+      openLink: "Mở liên kết",
+      openVideo: "Mở video",
+      close: "Đóng",
+      download: "Tải xuống",
+      belongsTo: "Thuộc",
+      generalSection: "Mục chung",
+      yes: "Có",
+      no: "Không",
+      openTime: "Mở",
+      closeTime: "Đóng",
+      materialNotFound: "Tài liệu không tồn tại",
       unnamedMaterial: "Tài liệu không có tiêu đề",
       unknownFileSize: "Không rõ dung lượng",
       fileTypeFallback: "TỆP",

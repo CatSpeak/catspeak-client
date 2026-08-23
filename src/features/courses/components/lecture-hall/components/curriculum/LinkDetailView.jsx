@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { ArrowLeft, VideoOff, Link2, ExternalLink } from 'lucide-react'
-import { PillButton } from '@/shared/components/ui/buttons'
+import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getDisplayData } from "../../utils/curriculumUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
@@ -57,24 +57,24 @@ const LinkDetailView = ({ itemData, onBack }) => {
   }
 
   return (
-    <div className="flex flex-col w-full animate-fade-in">
+    <div className="flex flex-col w-full animate-fade-in space-y-6">
       <PillButton
         startIcon={<ArrowLeft size={16} />}
         onClick={onBack}
         className='w-fit'
         variant='secondary-no-outline'
       >
-        Giảng đường
+        {t.courses?.lectureHall?.title || "Giảng đường"}
       </PillButton>
 
       <div className="bg-white rounded-xl p-4 sm:p-6 w-full">
         <div className="flex flex-col gap-6">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#D1F7E3] flex items-center justify-center shrink-0">
-              <Link2 size={28} className="text-[#12B76A]" />
-            </div>
-            <div className="flex flex-col space-y-1">
-              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A]">
+            <IconButton size="md" variant="secondary" >
+              <Link2 className="text-[#12B76A]" />
+            </IconButton>
+            <div className="flex flex-col space-y-1 flex-1 min-w-0">
+              <h2 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A] truncate">
                 {displayData?.title || itemData.title}
               </h2>
               <a
@@ -103,7 +103,7 @@ const LinkDetailView = ({ itemData, onBack }) => {
             startIcon={<ExternalLink size={18} />}
             className="w-fit"
           >
-            Mở liên kết
+            {dict.curriculum?.openLink || "Mở liên kết"}
           </PillButton>
 
           {isYoutubeLink && (

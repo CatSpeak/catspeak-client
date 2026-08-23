@@ -30,7 +30,7 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
           {t.courses?.lectureHall?.postDetail?.back || "Quay lại"}
         </PillButton>
         <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
-          Bài kiểm tra không tồn tại
+          {sq.loadQuizErrorTitle || "Bài kiểm tra không tồn tại"}
         </div>
       </div>
     )
@@ -39,8 +39,10 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
   const quizData = itemData?.quiz || itemData
 
   const cg = t.courses?.grading || {}
+  const sq = t.courses?.grading?.studentQuiz || {}
+  const dict = t.courses?.lectureHall?.curriculum || {}
 
-  const title = quizData?.name || "Bài kiểm tra"
+  const title = quizData?.name || dict.quiz || "Bài kiểm tra"
   const description = quizData?.description || ""
 
   const openTime = quizData?.openTime
@@ -93,7 +95,7 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
         className='w-fit'
         variant='secondary-no-outline'
       >
-        Giảng đường
+        {t.courses?.lectureHall?.title || "Giảng đường"}
       </PillButton>
 
       {/* Quiz Info Card */}
@@ -110,20 +112,20 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
         </div>
 
         <div className="flex flex-col gap-2 text-sm text-[#7B7979]">
-          <span className='font-semibold'>Thuộc: {sectionData?.name || "Mục chung"}</span>
+          <span className='font-semibold'>{dict.belongsTo || "Thuộc"}: {sectionData?.name || dict.generalSection || "Mục chung"}</span>
 
           <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-col sm:flex-row">
             {formattedOpenTime && (
               <div className="flex items-center gap-1.5">
                 <Clock size={14} className="shrink-0 text-emerald-600" />
-                <span className="text-emerald-700">Mở từ {formattedOpenTime}</span>
+                <span className="text-emerald-700">{sq.opensAt || "Mở từ"} {formattedOpenTime}</span>
               </div>
             )}
 
             {formattedCloseTime && (
               <div className="flex items-center gap-1.5">
                 <Clock size={14} className="shrink-0 text-red-500" />
-                <span className="text-red-600">Đóng lúc {formattedCloseTime}</span>
+                <span className="text-red-600">{dict.closesAtMeta ? dict.closesAtMeta.replace("{{date}}", formattedCloseTime) : `Đóng lúc ${formattedCloseTime}`}</span>
               </div>
             )}
           </div>
@@ -132,14 +134,14 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
             {hasTimeLimit && (
               <div className="flex items-center gap-1.5">
                 <Timer size={14} className="text-red-500 shrink-0" />
-                <span>{quizData.timeLimitMinutes} phút</span>
+                <span>{cg.minsLabel ? cg.minsLabel.replace("{{mins}}", quizData.timeLimitMinutes) : `${quizData.timeLimitMinutes} phút`}</span>
               </div>
             )}
 
             {questionCount !== null && (
               <div className="flex items-center gap-1.5">
                 <FileText size={14} className="text-blue-500 shrink-0" />
-                <span>{questionCount} câu hỏi</span>
+                <span>{cg.questionsLabel ? cg.questionsLabel.replace("{{count}}", questionCount) : `${questionCount} câu hỏi`}</span>
               </div>
             )}
           </div>
@@ -158,23 +160,23 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex-1 space-y-4">
             <h2 className="text-lg font-semibold text-[#1A1A1A]">
-              Trạng thái làm bài
+              {sq.quizStatus || "Trạng thái làm bài"}
             </h2>
 
             <div className="grid grid-cols-2 gap-4 max-w-sm">
               <div className="flex flex-col p-3 bg-gray-50 rounded-xl border border-gray-100">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Số lần làm lại</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{sq.attemptCountLabel || "Số lần làm lại"}</span>
                 <span className="text-sm font-bold text-gray-900">
                   {hasRemainingAttempts && Number.isFinite(remainingAttemptsNum)
-                    ? (hasMaxAttempts ? `Còn ${remainingAttemptsNum} / ${maxAttemptsNum} lần` : remainingAttemptsNum)
-                    : (!hasRemainingAttempts ? "0 (Hết lượt)" : "Không giới hạn")
+                    ? (hasMaxAttempts ? (sq.attemptsLeftMeta ? sq.attemptsLeftMeta.replace("{{rem}}", remainingAttemptsNum).replace("{{max}}", maxAttemptsNum) : `Còn ${remainingAttemptsNum} / ${maxAttemptsNum} lần`) : remainingAttemptsNum)
+                    : (!hasRemainingAttempts ? (sq.outOfAttempts || "0 (Hết lượt)") : (sq.unlimitedAttempts || "Không giới hạn"))
                   }
                 </span>
               </div>
 
               {showGrading && (
                 <div className="flex flex-col p-3 bg-[#faf0f1] rounded-xl border border-red-100">
-                  <span className="text-xs font-semibold text-[#c8402e]/70 uppercase tracking-wider mb-1">Điểm số cao nhất</span>
+                  <span className="text-xs font-semibold text-[#c8402e]/70 uppercase tracking-wider mb-1">{sq.highestScore || "Điểm số cao nhất"}</span>
                   <div className="flex items-end gap-1">
                     <span className="text-lg font-black text-[#c8402e] leading-none">{score}</span>
                     <span className="text-xs font-bold text-[#c8402e]/60 mb-0.5">/ 10</span>
@@ -201,18 +203,18 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
 
             {(!isDone || hasRemainingAttempts) && (!isExpired) && (
               <PillButton
-                onClick={() => handleTakeQuiz()}
+                onClick={handleTakeQuiz}
                 roundedClass='rounded-xl'
                 startIcon={isDone ? <RefreshCcw size={16} /> : <Play size={16} />}
                 className="w-full sm:w-auto"
               >
-                {isDone ? (cg.retryQuizBtn || "Làm lại bài") : (cg.takeQuizBtn || "Làm bài")}
+                {isDone ? (cg.retakeQuizBtn || "Làm lại bài") : (cg.startQuizBtn || "Làm bài")}
               </PillButton>
             )}
 
             {isExpired && !hasRemainingAttempts && !isDone && (
               <span className="text-sm font-bold text-red-500 bg-red-50 px-4 py-2 rounded-xl border border-red-100">
-                Không thể làm bài
+                {sq.cannotTakeQuiz || "Không thể làm bài"}
               </span>
             )}
           </div>

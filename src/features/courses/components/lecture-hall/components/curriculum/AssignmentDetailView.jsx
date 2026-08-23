@@ -41,7 +41,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
           {t.courses?.lectureHall?.postDetail?.back || "Quay lại"}
         </PillButton>
         <div className="text-center py-12 text-sm text-[#EF4444] border border-dashed border-[#FCA5A5] rounded-xl bg-[#FEF2F2]">
-          Bài nộp không tồn tại
+          {sa.assignmentNotFound || "Bài nộp không tồn tại"}
         </div>
       </div>
     )
@@ -53,8 +53,9 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const apiSubmission = assignmentData?.studentSubmission
 
   const sa = t.courses?.grading?.studentAssignment || {}
+  const dict = t.courses?.lectureHall?.curriculum || {}
 
-  const title = apiAssignment?.name || "Bài nộp"
+  const title = apiAssignment?.name || dict.assignment || "Bài nộp"
   const description = apiAssignment?.description || ""
   const deadline = apiAssignment?.dueDate
   const formattedDeadline = deadline ? formatDateTime(deadline) : null
@@ -84,7 +85,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const submissionFileName = parsedFiles?.[0]?.FileName || "Bai_lam.docx"
   const submittedAt = apiSubmission?.submittedAt
   const score = apiSubmission?.score ?? "0"
-  const feedback = apiSubmission?.contentText || "Chưa có nhận xét"
+  const feedback = apiSubmission?.contentText || sa.noFeedback || "Chưa có nhận xét"
 
   const rawStatus = apiSubmission?.status || "pending"
   const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.toLowerCase() : "pending"
@@ -97,7 +98,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
       const newFiles = Array.from(e.target.files);
       const totalFiles = selectedFiles.length + newFiles.length;
       if (totalFiles > maxFiles) {
-        toast.error(`Bạn chỉ được nộp tối đa ${maxFiles} tệp`);
+        toast.error((sa.maxFilesAllowed || "Bạn chỉ được nộp tối đa {{maxFiles}} tệp").replace("{{maxFiles}}", maxFiles));
         return;
       }
       setSelectedFiles((prev) => [...prev, ...newFiles]);
@@ -130,7 +131,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
 
     const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
     if (totalSize > 25 * 1024 * 1024) {
-      toast.error("Tổng kích thước tệp vượt quá giới hạn 25MB");
+      toast.error(sa.fileExceedsLimit?.replace("{{fileName}}", "Total") || "Tổng kích thước tệp vượt quá giới hạn 25MB");
       return;
     }
 
@@ -188,7 +189,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         className='w-fit'
         variant='secondary-no-outline'
       >
-        Giảng đường
+        {t.courses?.lectureHall?.title}
       </PillButton>
 
 
@@ -206,11 +207,11 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         </div>
 
         <div className="flex flex-col items-start gap-2 text-sm text-[#7B7979] mb-6 flex-wrap">
-          <span className='font-semibold'>Thuộc: {sectionData.name}</span>
+          <span className='font-semibold'>{dict.belongsTo || "Thuộc"}: {sectionData?.name || dict.generalSection || "Mục chung"}</span>
           {formattedDeadline && (
             <div className="flex items-center gap-1">
               <Clock size={14} />
-              <span>Hạn nộp {formattedDeadline}</span>
+              <span>{dict.dueDateMeta ? dict.dueDateMeta.replace("{{date}}", formattedDeadline) : `Hạn nộp ${formattedDeadline}`}</span>
             </div>
           )}
         </div>
@@ -232,7 +233,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
               >
                 <FileText size={16} className="text-[#F59E0B]" />
                 <span className="text-sm text-[#5B403C] truncate w-full">
-                  {att.title || att.fileName || `Tài liệu ${idx + 1}`}
+                  {att.title || att.fileName || (dict.unnamedMaterial ? `${dict.unnamedMaterial} ${idx + 1}` : `Tài liệu ${idx + 1}`)}
                 </span>
               </div>
             ))}
@@ -251,9 +252,9 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
                     <Check size={24} className="text-[#1c6dd7]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-[#1A1A1A]">Đã nộp bài</h3>
+                    <h3 className="text-lg font-semibold text-[#1A1A1A]">{sa.submittedHeading || "Đã nộp bài"}</h3>
                     <p className="text-sm text-[#7B7979] mt-0.5">
-                      Nộp lúc: {submittedAt ? formatDateTime(submittedAt) : "Vừa xong"}
+                      {t.courses?.grading?.submittedAtLabel || "Nộp lúc: "} {submittedAt ? formatDateTime(submittedAt) : (t.courses?.grading?.justNow || "Vừa xong")}
                     </p>
                     <a href={submissionFileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[#7B7979] mt-0.5 hover:underline">
                       {submissionFileName}
@@ -270,7 +271,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
                     onClick={() => handleDownloadAttachment(submissionFileUrl, submissionFileName)}
                     startIcon={<FileText size={14} />}
                   >
-                    Bài đã nộp
+                    {t.courses?.grading?.mySubmission || "Bài đã nộp"}
                   </PillButton>
                   <PillButton
                     onClick={() => setIsResubmitting(true)}
@@ -278,7 +279,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
                     variant='outline'
                     startIcon={<RefreshCcw size={14} />}
                   >
-                    Nộp lại
+                    {sa.resubmitButton || "Nộp lại"}
                   </PillButton>
                 </div>
               </div>
@@ -287,7 +288,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
 
           {showGrading && (
             <FluentCard className="p-4 sm:p-6 mb-6">
-              <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">Kết quả</h3>
+              <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">{t.courses?.grading?.examResult || "Kết quả"}</h3>
 
               <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
                 <div className="bg-[#faf0f1] rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shrink-0">
@@ -296,7 +297,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold text-[#7B7979] uppercase tracking-wider">Nhận xét của giảng viên</span>
+                  <span className="text-xs font-semibold text-[#7B7979] uppercase tracking-wider">{t.courses?.grading?.generalFeedback || "Nhận xét của giảng viên"}</span>
                   <p className="text-sm text-[#1A1C1C]">
                     {feedback}
                   </p>
@@ -309,14 +310,14 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
         <FluentCard className="p-4 sm:p-6 mb-6 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg sm:text-xl font-semibold text-[#1A1A1A]">
-              {isResubmitting ? "Nộp lại bài" : "Nộp bài của bạn"}
+              {isResubmitting ? (sa.resubmitHeading || "Nộp lại bài") : (sa.submitHeading || "Nộp bài của bạn")}
             </h2>
             {isResubmitting && (
               <button
                 onClick={() => setIsResubmitting(false)}
                 className="text-sm text-[#4B5563] hover:text-[#1A1A1A] transition-colors"
               >
-                Hủy
+                {sa.cancel || t.courses?.grading?.studentQuiz?.cancel || "Hủy"}
               </button>
             )}
           </div>
@@ -364,21 +365,25 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload size={28} className="text-[#9CA3AF] mb-3" />
-              <p className="text-sm text-[#9CA3AF] mb-1 text-center">Hỗ trợ định dạng doc, pdf, tối đa {maxFiles} tệp</p>
-              <p className="text-sm text-[#9CA3AF] text-center">Tổng kích cỡ dưới &lt;= 25mb</p>
+              <p className="text-sm text-[#9CA3AF] mb-1 text-center">
+                {sa.supportedFilesSummary
+                  ? sa.supportedFilesSummary.replace("{{formats}}", "doc, pdf").replace("{{maxFiles}}", maxFiles)
+                  : `Hỗ trợ định dạng doc, pdf, tối đa ${maxFiles} tệp`}
+              </p>
+              <p className="text-sm text-[#9CA3AF] text-center">{sa.fileExceedsLimit?.replace("{{fileName}}", "Total").replace("50 MB", "25MB") || "Tổng kích cỡ dưới <= 25mb"}</p>
             </FluentCard>
           )}
 
 
           <div className="flex items-center justify-between w-full">
             <p className="text-base text-[#7B7979]">
-              Cho phép nộp muộn: {isAllowLate ? "Có" : "Không"}
+              {sa.allowLateSubmission || "Cho phép nộp muộn"}: {isAllowLate ? (dict.yes || "Có") : (dict.no || "Không")}
             </p>
             <PillButton
               onClick={handleSubmit}
               disabled={isSubmitting || selectedFiles.length === 0}
             >
-              {isSubmitting ? "Đang nộp..." : "Nộp bài"}
+              {isSubmitting ? (sa.submittingAssignment || "Đang nộp...") : (sa.submitButton || "Nộp bài")}
             </PillButton>
           </div>
         </FluentCard>

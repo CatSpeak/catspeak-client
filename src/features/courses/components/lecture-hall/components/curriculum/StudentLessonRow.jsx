@@ -197,7 +197,7 @@ const StudentLessonRow = ({
           }}
           startIcon={isYoutubeLink ? (isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />) : <ExternalLink size={16} />}
         >
-          {isYoutubeLink ? (isExpanded ? "Đóng" : "Mở video") : "Mở liên kết"}
+          {isYoutubeLink ? (isExpanded ? (dict.close || "Đóng") : (dict.openVideo || "Mở video")) : (dict.openLink || "Mở liên kết")}
         </PillButton>
       )
     }
@@ -210,7 +210,7 @@ const StudentLessonRow = ({
           loading={isDownloading}
           startIcon={<Download size={16} />}
         >
-          Tải xuống
+          {dict.download || "Tải xuống"}
         </PillButton>
       )
     }
@@ -274,11 +274,11 @@ const StudentLessonRow = ({
 
             {displayData.meta && (
               <div className="flex items-center gap-1.5 text-[13px] text-[#6B7280] font-normal">
-                {displayData.type === "material" || displayData.type === "assignment" ? (
+                {/* {displayData.type === "material" || displayData.type === "assignment" ? (
                   <Clock size={14} className="shrink-0" />
                 ) : displayData.type === "link" && !isYoutubeLink ? (
                   <Clock size={14} className="shrink-0" />
-                ) : null}
+                ) : null} */}
                 <div
                   className="line-clamp-1 truncate"
                   dangerouslySetInnerHTML={{ __html: displayData.meta }}
