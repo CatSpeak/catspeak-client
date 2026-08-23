@@ -344,10 +344,12 @@ export default {
     tabUpcomingClasses: "Chưa mở đăng ký ({{count}})",
     tabClosedClasses: "Đã đóng đăng ký ({{count}})",
     noUpcomingClasses: "Chưa có lớp học nào sắp mở đăng ký",
-    noUpcomingClassesDesc: "Vui lòng quay lại sau hoặc xem các lớp học đang mở khác.",
+    noUpcomingClassesDesc:
+      "Vui lòng quay lại sau hoặc xem các lớp học đang mở khác.",
     noClosedClasses: "Không có lớp học nào đã đóng đăng ký",
     noClasses: "Chưa có lớp học nào",
-    noClassesDesc: "Các lớp học mới sẽ được cập nhật sớm. Vui lòng quay lại sau.",
+    noClassesDesc:
+      "Các lớp học mới sẽ được cập nhật sớm. Vui lòng quay lại sau.",
     totalClasses: "Tổng số lớp",
     learningMethod: "Hình thức học",
     defaultOnlineClassroom: "Phòng học trực tuyến Cat Speak",
@@ -362,7 +364,8 @@ export default {
     rating: "Đánh giá",
     totalReviews: "Lượt đánh giá",
     classesCount: "Lớp học",
-    defaultBio: "Giảng viên tâm huyết với nhiều năm kinh nghiệm giảng dạy ngôn ngữ và phát triển kỹ năng cho học viên.",
+    defaultBio:
+      "Giảng viên tâm huyết với nhiều năm kinh nghiệm giảng dạy ngôn ngữ và phát triển kỹ năng cho học viên.",
 
     // Class Item & Buttons
     startDateBadge: "Bắt đầu",
@@ -845,7 +848,8 @@ export default {
       emptyRegistered: "Bạn chưa đăng ký lớp học nào",
       emptyCompleted: "Bạn chưa hoàn thành lớp học nào",
       emptyCancelled: "Bạn không có lớp học nào đã huỷ",
-      startJourney: "Hãy bắt đầu hành trình học tập của bạn bằng cách tham gia các khoá học của chúng tôi.",
+      startJourney:
+        "Hãy bắt đầu hành trình học tập của bạn bằng cách tham gia các khoá học của chúng tôi.",
       exploreCourses: "Khám phá khóa học",
       noSchedule: "Chưa có lịch",
       noTime: "Chưa có giờ",
@@ -859,7 +863,7 @@ export default {
       cancelEnrollment: "Hủy đăng ký",
       enterClass: "Vào lớp",
       enterRoom: "Vào phòng",
-      viewClass: "Xem lớp"
+      viewClass: "Xem lớp",
     },
     dashboardTitle: "Khóa học & Học tập của tôi",
     exploreCoursesSubtitle:
@@ -1409,7 +1413,7 @@ export default {
       timeLeftHours: "Còn {{hours}} giờ",
       timeLeftMins: "Còn {{mins}} phút",
       deadline: "Hạn {{date}}",
-      statusReturned: "Đã chấm điểm"
+      statusReturned: "Đã chấm điểm",
     },
     filterAll: "Tất cả",
     filterNotSubmitted: "Chưa nộp",
@@ -2306,7 +2310,7 @@ export default {
     notFoundDesc:
       "Lớp học có thể đã bị xóa hoặc đường dẫn không hợp lệ. Vui lòng quay lại danh sách lớp học để khám phá thêm.",
     exploreOtherBtn: "Khám Phá Các Lớp Học Khác",
-    overviewTitle: "Giới Thiệu Chi Tiết Về Lớp Học",
+    overviewTitle: "Về lớp học",
     defaultDescription:
       "Lớp học mang đến môi trường học tập tương tác cao, kết hợp giữa lý thuyết nền tảng và các hoạt động thực hành giao tiếp sát với thực tế công việc.",
     tuitionFeeFull: "Học phí trọn gói",
