@@ -74,13 +74,28 @@ const CreateBulletinBoardModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title={initialData ? dict.editTitle : dict.title}
+      title={
+        <div className="w-full relative flex items-center justify-center">
+          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D]">
+            {initialData ? dict.editTitle : dict.title || "Tạo bảng tin"}
+          </h2>
+          <button 
+            type="button" 
+            onClick={onClose}
+            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+          >
+            <X size={28} strokeWidth={1.5} />
+          </button>
+        </div>
+      }
+      showCloseButton={false}
       fullScreenOnMobile={false}
-      className="md:max-w-2xl rounded-xl h-auto max-h-[95vh] md:max-h-[750px]"
-      headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
-      bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
+      className="md:max-w-[900px] rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px]"
+      headerClassName="flex items-center justify-between px-6 md:px-10 py-6 md:py-8"
+      bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
+      footerClassName="p-0"
       footer={
-        <div className="flex justify-between gap-4 px-1 pb-1 pt-1">
+        <div className="flex justify-between gap-4 px-6 md:px-10 pb-8 pt-2">
           <button
             type="button"
             onClick={onClose}
