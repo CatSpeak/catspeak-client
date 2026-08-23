@@ -35,11 +35,20 @@ const ResourcesHubPage = () => {
     if (!currentLang) return "en";
     if (currentLang.startsWith("zh")) return "zh";
     if (currentLang.startsWith("vi")) return "vi";
+    if (currentLang.startsWith("ja")) return "ja";
     return "en";
   }, [currentLang]);
 
   const heroTitles = useMemo(() => {
     const baseTitle = t.websites?.hero?.title || "Resource Hub";
+    if (activeLang === "ja") {
+      return [
+        baseTitle,
+        "AI学習ツール",
+        "模擬試験シミュレーター",
+        "辞書・総合ポータル",
+      ];
+    }
     if (activeLang === "zh") {
       return [baseTitle, "AI 语言工具", "互动测试模拟器", "在线词典与平台"];
     }

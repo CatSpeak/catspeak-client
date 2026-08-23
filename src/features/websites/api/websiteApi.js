@@ -285,11 +285,6 @@ const resources = [
   },
   // 2. Luyện thi HSK miễn phí
   {
-    id: "improve-mandarin-hsk-practice-tests",
-    lang: "zh",
-    url: "https://improvemandarin.com/hsk-practice-test/",
-  },
-  {
     id: "mandarin-bean-hsk-test",
     lang: "zh",
     url: "https://mandarinbean.com/hsk-chinese-test-online/",
@@ -299,22 +294,12 @@ const resources = [
     lang: "zh",
     url: "https://hskmocktest.com/",
   },
-  {
-    id: "hsk-course-free-hsk-mock-tests",
-    lang: "zh",
-    url: "https://www.hskcourse.com/hsk-sample-test/",
-  },
 
   // 3. Nền tảng học tổng hợp miễn phí
   {
     id: "mandarin-bean",
     lang: "zh",
     url: "https://mandarinbean.com/",
-  },
-  {
-    id: "improve-mandarin-chinese-lessons",
-    lang: "zh",
-    url: "https://improvemandarin.com/chinese-lessons/",
   },
 
   // 4. Luyện nghe
@@ -352,11 +337,6 @@ const resources = [
   },
 
   // 6. Phát âm — Pinyin & Thanh điệu
-  {
-    id: "chinese-pronunciation-wiki",
-    lang: "zh",
-    url: "https://resources.allsetlearning.com/chinese/pronunciation/",
-  },
   {
     id: "ut-austin-pinyin-pronunciation-practice",
     lang: "zh",
@@ -403,6 +383,36 @@ const resources = [
     lang: "zh",
     url: "https://mandarinbean.com/",
   },
+  {
+    id: "pandaist",
+    lang: "zh",
+    url: "https://pandaist.com/",
+  },
+  {
+    id: "hskatlas",
+    lang: "zh",
+    url: "https://hskatlas.com/",
+  },
+  {
+    id: "hskheadlines",
+    lang: "zh",
+    url: "https://hskheadlines.com/",
+  },
+  {
+    id: "readchinese",
+    lang: "zh",
+    url: "https://www.readchinese.org/",
+  },
+  {
+    id: "realhsk",
+    lang: "zh",
+    url: "https://realhsk.com/",
+  },
+  {
+    id: "chinesehskreading",
+    lang: "zh",
+    url: "https://chinesehskreading.com/",
+  },
 
   // 11. Website tự học tiếng Trung nội địa (giao diện tiếng Việt)
   {
@@ -415,4 +425,68 @@ const resources = [
     lang: "zh",
     url: "https://tiengtrungthuonghai.vn/",
   },
+
+  // --- Tiếng Nhật (ja) ---
+  // 1. Luyện thi JLPT
+  {
+    id: "on-jlpt",
+    lang: "ja",
+    url: "http://onjlpt.com/",
+  },
+
+  // 2. Nền tảng học tổng hợp
+  {
+    id: "mlc-japanese",
+    lang: "ja",
+    url: "https://www.mlcjapanese.co.jp/",
+  },
+
+  // 3. Luyện đọc hiểu & Dokkai
+
+  // 4. Ngữ pháp
+  {
+    id: "tufs-grammar-module",
+    lang: "ja",
+    url: "https://www.coelang.tufs.ac.jp/mt/ja/gmod/",
+  },
+
+  // 5. Luyện nghe
+  {
+    id: "nhk-world-japan",
+    lang: "ja",
+    url: "https://www3.nhk.or.jp/nhkworld/lesson/vi/lessons/",
+  },
+
+  // 6. Phát âm & Ngữ điệu
+  {
+    id: "ojad-search",
+    lang: "ja",
+    url: "https://www.gavo.t.u-tokyo.ac.jp/ojad/search",
+  },
+  {
+    id: "ojad-phrasing",
+    lang: "ja",
+    url: "https://www.gavo.t.u-tokyo.ac.jp/ojad/phrasing/index",
+  },
+
+  // 7. Từ vựng & Kanji
+  {
+    id: "kanjieasy",
+    lang: "ja",
+    url: "https://kanjieasy.vercel.app/",
+  },
+
+  // 8. Từ điển
+  {
+    id: "takoboto",
+    lang: "ja",
+    url: "https://takoboto.jp/?w=1362530",
+  },
+  {
+    id: "kanjipedia",
+    lang: "ja",
+    url: "https://www.kanjipedia.jp/",
+  },
+
+  // 9. Dành cho trẻ em / Nhập môn
 ]
