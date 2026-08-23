@@ -781,4 +781,143 @@ export const websites = [
       },
     ],
   },
+  {
+    key: "ja-exam",
+    category: "exam",
+    icon: BookOpenCheck,
+    lang: "ja",
+    subItems: [
+      {
+        key: "on-jlpt",
+        label: "Ôn JLPT",
+        path: "/resources/on-jlpt",
+        description: "Đủ kiến thức tổng hợp các trình độ từ N5 tới N1.",
+        color: "#145efc",
+        img: "https://onjlpt.com/favicon.ico",
+      },
+    ],
+  },
+  {
+    key: "ja-platform",
+    category: "platform",
+    icon: LibraryBig,
+    lang: "ja",
+    subItems: [
+      {
+        key: "mlc-japanese",
+        label: "MLC Japanese",
+        path: "/resources/mlc-japanese",
+        description: "Giáo trình học tiếng Nhật bằng tiếng Nhật N5 - N1.",
+      },
+    ],
+  },
+  // {
+  //   key: "ja-reading",
+  //   category: "reading",
+  //   icon: BookOpenText,
+  //   lang: "ja",
+  //   subItems: [
+  //   ],
+  // },
+  {
+    key: "ja-grammar",
+    category: "grammar",
+    icon: Puzzle,
+    lang: "ja",
+    subItems: [
+      {
+        key: "tufs-grammar-module",
+        label: "Ôn tiếng Nhật của Trường Đại Học Ngoại Ngữ Tokyo",
+        path: "/resources/tufs-grammar-module",
+        description: "Tham khảo ngữ pháp bằng tiếng Nhật.",
+        color: "#c7819a",
+      },
+    ],
+  },
+  {
+    key: "ja-listening",
+    category: "listening",
+    icon: Headphones,
+    lang: "ja",
+    subItems: [
+      {
+        key: "nhk-world-japan",
+        label: "NHK World Japan",
+        path: "/resources/nhk-world-japan",
+        description:
+          "Web của NHK. Bạn sẽ được hướng dẫn về nội dung đoạn video, sau đó luyện tập các mẫu câu quan trọng. Học xong 1 video là vận dụng được luôn mẫu câu đó vào đời sống.",
+        img: "https://www3.nhk.or.jp/nhkworld/common/site_images/nw_webapp_152x152.png",
+      },
+    ],
+  },
+  {
+    key: "ja-pronunciation",
+    category: "pronunciation",
+    icon: MicVocal,
+    lang: "ja",
+    subItems: [
+      {
+        key: "ojad-search",
+        label: "Từ Điển Các Thể Trong Tiếng Nhật",
+        path: "/resources/ojad-search",
+        description:
+          "Web giúp luyện và kiểm tra phát âm, trọng âm, trường âm các từ vựng tiếng Nhật. Rất hữu ích để luyện phát âm chuẩn.",
+        color: "#ffd06b",
+      },
+      {
+        key: "ojad-phrasing",
+        label: "Đọc Ngữ Điệu",
+        path: "/resources/ojad-phrasing",
+        description: "Web tra accent (cách đọc từ & câu tiếng Nhật).",
+        color: "#ffd06b",
+      },
+    ],
+  },
+  {
+    key: "ja-vocabulary",
+    category: "vocabulary",
+    icon: NotebookPen,
+    lang: "ja",
+    subItems: [
+      {
+        key: "kanjieasy",
+        label: "KanjiEasy",
+        path: "/resources/kanjieasy",
+        description: "Mindmap Kanji N5 - N3.",
+        img: "https://kanjieasy.vercel.app/favicon.svg",
+        color: "#152238",
+      },
+    ],
+  },
+  {
+    key: "ja-dictionary",
+    category: "dictionary",
+    icon: LibraryBig,
+    lang: "ja",
+    subItems: [
+      {
+        key: "takoboto",
+        label: "TAKOBOTO",
+        path: "/resources/takoboto",
+        description: "Tra cứu từ điển tiếng Nhật.",
+        img: "https://takoboto.jp/takoboto_48x48.png",
+        color: "#fa0000",
+      },
+      {
+        key: "kanjipedia",
+        label: "Từ Điển Kanji",
+        path: "/resources/kanjipedia",
+        description: "Web tra cứu kanji của Kanken.",
+      },
+    ],
+  },
+  // {
+  //   key: "ja-kids",
+  //   category: "kids",
+  //   icon: Baby,
+  //   lang: "ja",
+  //   subItems: [
+
+  //   ],
+  // },
 ]
