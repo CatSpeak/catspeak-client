@@ -1216,7 +1216,7 @@ export default {
     thStudent: "Học viên",
     thStatus: "Trạng thái",
     thSubmittedTime: "Thời gian nộp",
-    thGrade: "Điểm số",
+    thGrade: "Điểm",
     thActions: "Thao tác",
     btnView: "Xem",
     noStudentsFound: "Không tìm thấy học viên nào.",

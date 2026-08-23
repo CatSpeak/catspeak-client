@@ -24,7 +24,7 @@ const StudentGradingCard = ({
 }) => {
   const { t } = useLanguage()
   const gradingT = t?.courses?.grading || {}
-  
+
   const isOverdue = status === "overdue"
   const isPending = status === "pending"
 
@@ -107,7 +107,7 @@ const StudentGradingCard = ({
           )}
           {status === "returned" && (
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[#0E6EEC] text-3xl font-black tracking-tight leading-none">
+              <span className="text-[#0E6EEC] text-2xl font-black tracking-tight leading-none">
                 {score !== null ? score : "—"}
               </span>
               <span className="text-gray-400 text-sm font-bold tracking-wider capitalize">
