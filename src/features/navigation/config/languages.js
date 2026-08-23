@@ -11,19 +11,19 @@ export const LANGUAGE_CONFIG = [
   {
     code: "zh",
     labelKey: "china",
-    fallbackLabel: "Trung Quốc",
+    fallbackLabel: "China",
     flag: China,
   },
   {
     code: "en",
     labelKey: "english",
-    fallbackLabel: "Anh",
+    fallbackLabel: "English",
     flag: UK,
   },
   {
     code: "ja",
     labelKey: "japan",
-    fallbackLabel: "日本語",
+    fallbackLabel: "Japan",
     flag: Japan,
   },
 ]
