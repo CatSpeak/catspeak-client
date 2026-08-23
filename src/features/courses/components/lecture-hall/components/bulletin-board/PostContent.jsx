@@ -32,7 +32,7 @@ const PostContent = ({ post = {} }) => {
   } = post
 
   return (
-    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+    <div className="bg-white rounded-2xl md:rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm space-y-4 md:space-y-6">
       {/* Header: Author + 3 dots */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

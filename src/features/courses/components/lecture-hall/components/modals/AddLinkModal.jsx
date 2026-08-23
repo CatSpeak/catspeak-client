@@ -80,11 +80,13 @@ const AddLinkModal = ({
         </div>
       }
       showCloseButton={false}
+      fullScreenOnMobile={false}
       className="md:max-w-2xl rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px]"
       headerClassName="flex items-center justify-between px-6 md:px-10 py-6 md:py-8"
-      bodyClassName="px-6 md:px-10 pb-10 flex-1 overflow-y-auto"
+      bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
+      footerClassName="p-0"
       footer={
-        <div className="flex justify-between gap-4 px-1 pb-1 pt-1">
+        <div className="flex justify-between gap-4 px-6 md:px-10 pb-8 pt-2">
           <button
             type="button"
             onClick={onClose}
@@ -107,17 +109,18 @@ const AddLinkModal = ({
         {/* Display Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            Tên hiển thị
+            {dict.linkName || "Tên hiển thị"}
           </label>
           <TextInput
             required
+            type="text"
             value={title}
             onChange={(e) => {
               setTitle(e.target.value)
               if (errors.title) setErrors((prev) => ({ ...prev, title: false }))
             }}
             error={errors.title}
-            placeholder={"VD: Link họp..."}
+            placeholder={dict.linkPlaceholder || "VD: Bài giảng..."}
             className={`rounded-xl !h-[52px] px-4 text-sm bg-[#F3F4F5] border-0 focus:ring-1 focus:ring-gray-300 ${errors.title ? "ring-2 ring-red-400" : ""}`}
           />
         </div>
@@ -125,7 +128,7 @@ const AddLinkModal = ({
         {/* URL Link Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            Đường dẫn liên kết (URL)
+            {dict.url || "Đường dẫn liên kết (URL)"}
           </label>
           <TextInput
             required
@@ -150,7 +153,7 @@ const AddLinkModal = ({
               }
             }}
             error={errors.url}
-            placeholder={"VD: Link họp..."}
+            placeholder={dict.urlPlaceholder || "Dán link video tại đây"}
             className={`rounded-xl !h-[52px] px-4 text-sm bg-[#F3F4F5] border-0 focus:ring-1 focus:ring-gray-300 ${errors.url ? "ring-2 ring-red-400" : ""}`}
           />
         </div>

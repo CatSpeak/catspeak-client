@@ -44,24 +44,24 @@ const CommentList = ({
   const hasMore = !showAll && totalCount > previewCount
 
   return (
-    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm">
+    <div className="bg-white rounded-2xl md:rounded-[24px] p-4 sm:p-6 md:p-8 shadow-sm h-fit">
       {/* Header */}
-      <h3 className="text-[24px] font-medium text-[#191C1D] mb-6">
+      <h3 className="text-[20px] font-semibold text-[#191C1D] mb-4">
         {totalCount} {dict.replies || "Phản hồi"}
       </h3>
 
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-8">
         {/* Comment input */}
         {!locked && (
-          <div className="flex items-start gap-4">
+          <div className="flex flex-row items-start gap-3 md:gap-4 w-full">
             <Avatar
               src={currentUserAvatar}
               name={currentUserName}
               alt={currentUserName}
               size={40}
-              className="w-10 h-10 mt-1"
+              className="w-10 h-10 mt-1 shrink-0"
             />
-            <div className="flex-1">
+            <div className="flex-1 w-full min-w-0">
               <CommentInput
                 onSubmit={onSubmit}
               />
