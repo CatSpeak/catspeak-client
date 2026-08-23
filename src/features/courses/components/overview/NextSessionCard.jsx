@@ -5,9 +5,9 @@ import FluentCard from '@/shared/components/ui/FluentCard'
 import { useLanguage } from '@/shared/context/LanguageContext'
 
 const NextSessionCard = ({
-  title = "Khóa tiếng anh luyện nói",
-  time = "11:45 AM",
-  date = "Hôm nay, 15/07/2026",
+  title,
+  time,
+  date,
   status,
   language,
   onAction,
