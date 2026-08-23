@@ -116,15 +116,15 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
       <AnalyticsKpiGrid items={kpis} />
 
       {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         {/* Growth Trend */}
-        <div className="lg:col-span-7 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.studentGrowth || "Tăng trưởng học viên"}</h2>
+        <div className="xl:col-span-7 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentGrowth || "Tăng trưởng học viên"}</h2>
           <AnalyticsLineChart
             chartLabels={chartLabels}
             series={[
-              { name: kpiT.totalStudents || "Tổng học viên", values: seriesTotalStudents, color: "#e11d2e" },
-              { name: kpiT.newStudents || "Học viên mới", values: seriesNewStudents, color: "#f97316" },
+              { name: kpiT.totalStudents || "Tổng học viên", values: seriesTotalStudents, color: "#E11D48" },
+              { name: kpiT.newStudents || "Học viên mới", values: seriesNewStudents, color: "#F97316" },
             ]}
             yAxisLabel={kpiT.totalStudents || "Số học viên"}
             valueFormatter={(val) => `${numberVi(val, 0)} ${hvSuffix}`}
@@ -135,17 +135,17 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
         </div>
 
         {/* Student By Class Bar Chart */}
-        <div className="lg:col-span-5 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm flex flex-col">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
+        <div className="xl:col-span-5 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm flex flex-col">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
           <AnalyticsBarChart rows={barData} formatter={(val) => `${val} ${hvSuffix}`} />
         </div>
       </div>
 
-      {/* Tables Row */}
-      <div className="grid grid-cols-1 gap-4">
+      {/* Tables Row: 2 columns in Figma */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Course Table */}
-        <div className="bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.studentsByCourse || "Học viên theo khóa học"}</h2>
+        <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentsByCourse || "Học viên theo khóa học"}</h2>
           <AnalyticsDataTable
             columns={[
               { key: "course", label: colT.course || "Khóa học" },
@@ -153,27 +153,25 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
               { key: "total", label: colT.totalStudents || "Tổng HV", align: "right" },
               { key: "average", label: colT.avgStudents || "HV TB/lớp", align: "right" },
               { key: "newStudents", label: colT.newStudents || "HV mới", align: "right" },
-              { key: "retention", label: colT.retentionRate || "Tỷ lệ duy trì", align: "right" },
             ]}
             data={courseTableData}
-            pageSize={5}
+            pageSize={4}
           />
         </div>
 
         {/* Class Table */}
-        <div className="bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
+        <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
           <AnalyticsDataTable
             columns={[
               { key: "className", label: colT.class || "Lớp học" },
               { key: "course", label: colT.course || "Khóa học" },
               { key: "learners", label: colT.totalStudents || "Học viên", align: "right" },
               { key: "newStudents", label: colT.newStudents || "HV mới", align: "right" },
-              { key: "returning", label: colT.returning || "HV quay lại", align: "right" },
               { key: "fill", label: colT.fillRate || "Lấp đầy", align: "right" },
             ]}
             data={classTableData}
-            pageSize={6}
+            pageSize={4}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-﻿import React from "react"
+import React from "react"
 import { Download } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DatePicker from "@/shared/components/ui/inputs/DatePicker"
@@ -12,7 +12,7 @@ import {
 } from "./filterConstants"
 
 const selectClass =
-  "h-10 border border-gray-200 rounded-xl px-3 text-sm text-gray-800 bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all cursor-pointer font-normal"
+  "h-10 border border-[#D6D9E0] rounded-lg px-3 text-sm text-[#14171F] bg-white hover:border-[#B20514] focus:outline-none focus:ring-1 focus:ring-[#B20514] transition-all cursor-pointer font-normal"
 
 const DashboardFilterBar = ({
   preset,
@@ -88,9 +88,9 @@ const DashboardFilterBar = ({
   }
 
   return (
-    <section className="bg-white border border-[#e6e7ea] rounded-2xl p-3.5 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-3 items-end shadow-sm">
+    <section className="bg-white border border-[#DEE0E5] rounded-xl p-3.5 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 items-end shadow-sm">
       {/* Preset selection */}
-      <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
         <label htmlFor="dash-preset">{filterT.timePeriod || "Khoảng thời gian"}</label>
         <select
           id="dash-preset"
@@ -106,22 +106,26 @@ const DashboardFilterBar = ({
         </select>
       </div>
 
-      {/* Custom range (only when preset === custom) */}
-      {preset === "custom" && (
-        <>
-          <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
-            <label>{filterT.fromDate || "Từ ngày"}</label>
+      {/* Date range or Custom Range */}
+      {preset === "custom" ? (
+        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+          <label>{filterT.fromDate || "Kỳ đang xem"}</label>
+          <div className="grid grid-cols-2 gap-1.5">
             <DatePicker value={fromDate} onChange={(d) => setFromDate(toDateString(d))} />
-          </div>
-          <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
-            <label>{filterT.toDate || "Đến ngày"}</label>
             <DatePicker value={toDate} onChange={(d) => setToDate(toDateString(d))} />
           </div>
-        </>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
+          <label>{filterT.currentPeriod || "Kỳ đang xem"}</label>
+          <div className="h-10 border border-[#D6D9E0] rounded-lg px-3 text-sm text-[#14171F] bg-[#FBFBFC] flex items-center truncate">
+            {fromDate && toDate ? `${fromDate} – ${toDate}` : "Theo kỳ đã chọn"}
+          </div>
+        </div>
       )}
 
       {/* Compare selection */}
-      <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
         <label htmlFor="dash-compare">{filterT.compareTo || "So sánh với"}</label>
         <select
           id="dash-compare"
@@ -138,7 +142,7 @@ const DashboardFilterBar = ({
       </div>
 
       {/* Course selection */}
-      <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
         <label htmlFor="dash-course">{filterT.course || "Khóa học"}</label>
         <select
           id="dash-course"
@@ -157,7 +161,7 @@ const DashboardFilterBar = ({
       </div>
 
       {/* Class selection */}
-      <div className="flex flex-col gap-1 text-xs font-semibold text-gray-500">
+      <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
         <label htmlFor="dash-class">{filterT.class || "Lớp học"}</label>
         <select
           id="dash-class"
@@ -178,9 +182,9 @@ const DashboardFilterBar = ({
         type="button"
         disabled={isExporting}
         onClick={() => onExport && onExport()}
-        className="h-10 border border-[#990011] text-[#990011] hover:bg-[#990011]/5 bg-white font-bold rounded-xl flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+        className="h-10 border border-[#BF0514] text-[#B20514] hover:bg-[#FFEEF0] bg-white font-semibold rounded-lg flex items-center justify-center gap-2 text-sm transition-all active:scale-95 cursor-pointer disabled:opacity-50"
       >
-        <Download size={18} />
+        <Download size={16} />
         {isExporting ? (filterT.exporting || "Đang xuất...") : (filterT.exportReport || "Xuất báo cáo")}
       </button>
     </section>

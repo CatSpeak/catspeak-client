@@ -48,10 +48,17 @@ const QualityTab = ({ group, queryParams = {} }) => {
       note: kpiT.vsPrevious || "so với kỳ trước",
     },
     {
-      label: kpiT.conversionRate || "Tỷ lệ chuyển đổi đăng ký",
+      label: kpiT.fillRate || "Tỷ lệ lấp đầy",
+      value: `${numberVi(overview.fillRate ?? overview.averageFillRate ?? 0, 1)}%`,
+      delta: "",
+      tone: "purple",
+      note: kpiT.vsPrevious || "so với kỳ trước",
+    },
+    {
+      label: kpiT.conversionRate || "Chuyển đổi đăng ký",
       value: `${numberVi(overview.conversionRate ?? 0, 1)}%`,
       delta: "",
-      tone: "orange",
+      tone: "blue",
       note: kpiT.vsPrevious || "so với kỳ trước",
     },
     {
@@ -78,20 +85,22 @@ const QualityTab = ({ group, queryParams = {} }) => {
     value: item.percentage,
   }))
 
+  const fmtPercent = (val) => (val != null && !isNaN(val) ? `${numberVi(val, 1)}%` : "0%")
+
   // 4. Quality Detail Table
   const qualityItems = qualityByClassData?.data || (Array.isArray(qualityByClassData) ? qualityByClassData : [])
   const qualityTableData = qualityItems.map((r) => ({
-    className: r.className,
+    className: r.className || "-",
     course: r.courseName || "Khóa học",
     rating: (r.averageRating || 0).toFixed(1),
     ratingRaw: r.averageRating || 0,
-    fill: `${r.fillRate}%`,
+    fill: fmtPercent(r.fillRate),
     fillRaw: r.fillRate || 0,
-    conversion: `${r.conversionRate}%`,
+    conversion: fmtPercent(r.conversionRate),
     conversionRaw: r.conversionRate || 0,
-    repeat: `${r.reenrollmentRate}%`,
+    repeat: fmtPercent(r.reenrollmentRate),
     repeatRaw: r.reenrollmentRate || 0,
-    cancellation: `${r.cancellationRate}%`,
+    cancellation: fmtPercent(r.cancellationRate),
     cancellationRaw: r.cancellationRate || 0,
   }))
 
@@ -101,13 +110,13 @@ const QualityTab = ({ group, queryParams = {} }) => {
       <AnalyticsKpiGrid items={kpis} />
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         {/* Rating Trend Chart */}
-        <div className="lg:col-span-7 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.ratingTrend || "Xu hướng đánh giá theo thời gian"}</h2>
+        <div className="xl:col-span-7 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.ratingTrend || "Xu hướng đánh giá theo thời gian"}</h2>
           <AnalyticsLineChart
             chartLabels={chartLabels}
-            series={[{ name: kpiT.avgRating || "Đánh giá trung bình", values: seriesRating, color: "#e11d2e" }]}
+            series={[{ name: kpiT.avgRating || "Đánh giá trung bình", values: seriesRating, color: "#E11D48" }]}
             yAxisLabel={kpiT.avgRating || "Điểm đánh giá"}
             valueFormatter={(val) => `${numberVi(val, 2)}/5`}
             axisFormatter={(val) => numberVi(val, 1)}
@@ -115,15 +124,15 @@ const QualityTab = ({ group, queryParams = {} }) => {
         </div>
 
         {/* Star Distribution Bar Chart */}
-        <div className="lg:col-span-5 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.starDistribution || "Phân bố đánh giá"}</h2>
+        <div className="xl:col-span-5 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.starDistribution || "Phân bố đánh giá"}</h2>
           <AnalyticsBarChart rows={starDistribution} formatter={(val) => `${val}%`} />
         </div>
       </div>
 
       {/* Quality Detail Table */}
-      <div className="bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900 mb-3">{secT.qualityByClass || "Chất lượng theo lớp học"}</h2>
+      <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+        <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.qualityByClass || "Chất lượng theo lớp học"}</h2>
         <AnalyticsDataTable
           columns={[
             { key: "className", label: colT.class || "Lớp học" },
@@ -135,7 +144,7 @@ const QualityTab = ({ group, queryParams = {} }) => {
             { key: "cancellation", label: colT.cancellation || "Tỷ lệ hủy", align: "right" },
           ]}
           data={qualityTableData}
-          pageSize={7}
+          pageSize={6}
         />
       </div>
     </div>
