@@ -292,6 +292,7 @@ const WorkspaceAnalyticsPage = () => {
 
           {activeTab === "courses" && (
             <CoursesTab
+              group={group}
               courseFilter={courseFilter}
               queryParams={activeQueryParams}
             />

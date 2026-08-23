@@ -4,7 +4,7 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { numberVi } from "../../../data/analyticsData"
+import { numberVi, getLocalizedCompareNote } from "../../../data/analyticsData"
 import {
   useGetAnalyticsStudentsOverviewQuery,
   useGetAnalyticsStudentsGrowthQuery,
@@ -13,7 +13,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
@@ -40,21 +40,12 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
 
   // 1. Comparison & KPIs Mapping
   const hasComparison = Boolean(queryParams.compare && queryParams.compare !== "")
-  const getCompareNote = () => {
-    if (!hasComparison) return ""
-    if (queryParams.compare === "__lastYear__") return kpiT.vsSamePeriodLastYear || "so với cùng kỳ năm trước"
-    if (group === "day") return "so với tháng trước"
-    if (group === "week") return "so với quý trước"
-    if (group === "month") return "so với năm trước"
-    if (group === "year") return "so với giai đoạn trước"
-    return kpiT.vsPrevious || "so với kỳ trước"
-  }
-  const compareNote = getCompareNote()
+  const compareNote = getLocalizedCompareNote(group, queryParams.compare, language, t)
 
   const fmtGrowth = (growth) => {
     if (growth === null || growth === undefined || isNaN(growth)) return ""
     const sign = growth >= 0 ? "↑" : "↓"
-    return `${sign} ${numberVi(Math.abs(growth), 1)}%`
+    return `${sign} ${numberVi(Math.abs(growth), 1, language)}%`
   }
 
   const latestPoint = growthPoints.length > 0 ? growthPoints[growthPoints.length - 1] : null
@@ -72,36 +63,36 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
   const kpis = [
     {
       label: kpiT.totalStudents || "Tổng học viên",
-      value: numberVi(overview.totalStudents ?? 0, 0),
+      value: numberVi(overview.totalStudents ?? 0, 0, language),
       delta: hasComparison && totalStudentsGrowth != null ? fmtGrowth(totalStudentsGrowth) : "",
       tone: "red",
       note: hasComparison && totalStudentsGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.newStudents || "Học viên mới",
-      value: numberVi(overview.newStudents ?? 0, 0),
+      value: numberVi(overview.newStudents ?? 0, 0, language),
       delta: hasComparison && newStudentsGrowth != null ? fmtGrowth(newStudentsGrowth) : "",
       tone: "green",
       note: hasComparison && newStudentsGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.returningStudents || "Học viên quay lại",
-      value: numberVi(overview.returningStudents ?? 0, 0),
-      delta: hasComparison && overview.returningStudents ? `+${numberVi(overview.returningStudents, 0)}` : "",
+      value: numberVi(overview.returningStudents ?? 0, 0, language),
+      delta: hasComparison && overview.returningStudents ? `+${numberVi(overview.returningStudents, 0, language)}` : "",
       tone: "orange",
       note: hasComparison && overview.returningStudents ? compareNote : "",
     },
     {
       label: kpiT.retentionRate || "Tỷ lệ duy trì học viên",
-      value: `${numberVi(overview.retentionRate ?? 0, 1)}%`,
-      delta: hasComparison && overview.retentionRate ? `+${numberVi(overview.retentionRate, 1)}%` : "",
+      value: `${numberVi(overview.retentionRate ?? 0, 1, language)}%`,
+      delta: hasComparison && overview.retentionRate ? `+${numberVi(overview.retentionRate, 1, language)}%` : "",
       tone: "purple",
       note: hasComparison && overview.retentionRate ? compareNote : "",
     },
     {
       label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
-      value: `${numberVi(overview.reenrollmentRate ?? 0, 1)}%`,
-      delta: hasComparison && overview.reenrollmentRate ? `+${numberVi(overview.reenrollmentRate, 1)}%` : "",
+      value: `${numberVi(overview.reenrollmentRate ?? 0, 1, language)}%`,
+      delta: hasComparison && overview.reenrollmentRate ? `+${numberVi(overview.reenrollmentRate, 1, language)}%` : "",
       tone: "orange",
       note: hasComparison && overview.reenrollmentRate ? compareNote : "",
     },
