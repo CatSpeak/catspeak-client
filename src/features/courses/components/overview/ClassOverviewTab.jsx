@@ -17,6 +17,7 @@ import "react-circular-progressbar/dist/styles.css"
 import CountdownTicker from "../CountdownTicker"
 import TeachingTasksSection from "../assignments/TeachingTasksSection"
 import VoucherSection from "./VoucherSection"
+import OverlapAvatar from "@/shared/components/ui/OverlapAvatar"
 import { useGetTeacherClassTeachingTasksCombinedQuery } from "@/store/api/coursesApi"
 import { mapTeachingTask } from "../../utils/courseTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -117,6 +118,23 @@ const ClassOverviewTab = ({
   const studentCount = Number.isFinite(studentCountValue)
     ? Math.max(0, Math.floor(studentCountValue))
     : null
+
+  const students = useMemo(() => {
+    const list = Array.isArray(classData?.students)
+      ? classData.students
+      : Array.isArray(classData?.members)
+        ? classData.members
+        : Array.isArray(classData?.enrollments)
+          ? classData.enrollments
+          : []
+    return list.map((s) => ({
+      id: s.id ?? s.accountId ?? s.userId,
+      name: s.name ?? s.fullName ?? s.studentName ?? "",
+      avatarUrl:
+        getSafeMediaUrl(s.avatarUrl ?? s.avatar ?? s.avatarImageUrl) ||
+        (s.avatarUrl ?? s.avatar ?? s.avatarImageUrl),
+    }))
+  }, [classData])
 
   const { data: rawTasks = [], isLoading: isLoadingTasks } =
     useGetTeacherClassTeachingTasksCombinedQuery(id, { skip: !id || isStudent })
@@ -561,11 +579,17 @@ const ClassOverviewTab = ({
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <Users size={16} className="text-gray-400" />
-                      <span className="text-[11px] font-bold text-gray-400 font-sans">
-                        {studentCount ?? "—"}
-                      </span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {students.length > 0 ? (
+                        <OverlapAvatar users={students} maxShow={3} size={24} />
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          <Users size={16} className="text-gray-400" />
+                          <span className="text-[11px] font-bold text-gray-400 font-sans">
+                            {studentCount ?? "—"}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <button
