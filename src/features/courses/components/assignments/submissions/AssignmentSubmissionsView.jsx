@@ -691,6 +691,8 @@ const AssignmentSubmissionsContent = ({ assignment, assignmentId: assignmentIdPr
         key={`${assignmentId}-${activeStudent.submissionId || activeStudent.id}`}
         assignmentTitle={assignmentTitle}
         assignmentMaxScore={assignmentMaxScore}
+        assignmentClosed={assignmentClosed}
+        classId={classId}
         student={activeStudent}
         onBack={() => setSearchParams(
           (currentParams) => getGradingSearchParams(currentParams, assignmentId)
