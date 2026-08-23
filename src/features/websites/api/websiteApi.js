@@ -285,11 +285,6 @@ const resources = [
   },
   // 2. Luyện thi HSK miễn phí
   {
-    id: "improve-mandarin-hsk-practice-tests",
-    lang: "zh",
-    url: "https://improvemandarin.com/hsk-practice-test/",
-  },
-  {
     id: "mandarin-bean-hsk-test",
     lang: "zh",
     url: "https://mandarinbean.com/hsk-chinese-test-online/",
@@ -299,22 +294,12 @@ const resources = [
     lang: "zh",
     url: "https://hskmocktest.com/",
   },
-  {
-    id: "hsk-course-free-hsk-mock-tests",
-    lang: "zh",
-    url: "https://www.hskcourse.com/hsk-sample-test/",
-  },
 
   // 3. Nền tảng học tổng hợp miễn phí
   {
     id: "mandarin-bean",
     lang: "zh",
     url: "https://mandarinbean.com/",
-  },
-  {
-    id: "improve-mandarin-chinese-lessons",
-    lang: "zh",
-    url: "https://improvemandarin.com/chinese-lessons/",
   },
 
   // 4. Luyện nghe
@@ -352,11 +337,6 @@ const resources = [
   },
 
   // 6. Phát âm — Pinyin & Thanh điệu
-  {
-    id: "chinese-pronunciation-wiki",
-    lang: "zh",
-    url: "https://resources.allsetlearning.com/chinese/pronunciation/",
-  },
   {
     id: "ut-austin-pinyin-pronunciation-practice",
     lang: "zh",
@@ -402,6 +382,36 @@ const resources = [
     id: "mandarin-bean-graded-reading",
     lang: "zh",
     url: "https://mandarinbean.com/",
+  },
+  {
+    id: "pandaist",
+    lang: "zh",
+    url: "https://pandaist.com/",
+  },
+  {
+    id: "hskatlas",
+    lang: "zh",
+    url: "https://hskatlas.com/",
+  },
+  {
+    id: "hskheadlines",
+    lang: "zh",
+    url: "https://hskheadlines.com/",
+  },
+  {
+    id: "readchinese",
+    lang: "zh",
+    url: "https://www.readchinese.org/",
+  },
+  {
+    id: "realhsk",
+    lang: "zh",
+    url: "https://realhsk.com/",
+  },
+  {
+    id: "chinesehskreading",
+    lang: "zh",
+    url: "https://chinesehskreading.com/",
   },
 
   // 11. Website tự học tiếng Trung nội địa (giao diện tiếng Việt)
