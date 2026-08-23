@@ -1,12 +1,13 @@
 import React from "react"
 import { Trash2, X } from "lucide-react"
-import { formatFileSize, getFileIcon } from "../../utils/fileUtils"
+import { formatFileSize, getFileStyle } from "../../utils/fileUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const FileAttachmentItem = ({ file, onRemove, variant = "default" }) => {
   const { t } = useLanguage()
   const dict = t.courses.lectureHall
   const isModal = variant === "modal"
+  const style = getFileStyle(file.name)
 
   return (
     <div
@@ -16,8 +17,9 @@ const FileAttachmentItem = ({ file, onRemove, variant = "default" }) => {
         }`}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 bg-red-100/70 text-[#72000d] rounded-xl flex items-center justify-center shrink-0">
-          {getFileIcon(file.name)}
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${style.bg} relative overflow-hidden shadow-sm`}>
+          <span className="text-white text-[11px] font-bold tracking-wider z-10">{style.label}</span>
+          <div className="absolute top-0 right-0 w-3 h-3 bg-white opacity-20 rounded-bl-lg" />
         </div>
         <div className="min-w-0">
           <p

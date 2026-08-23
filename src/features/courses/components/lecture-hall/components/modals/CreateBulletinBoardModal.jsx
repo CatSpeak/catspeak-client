@@ -4,7 +4,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import ToggleOption from "../ui/ToggleOption"
-import { MessageSquare, Eye } from "lucide-react"
+import { MessageSquare, Eye, X, Plus } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -75,24 +75,26 @@ const CreateBulletinBoardModal = ({
       open={open}
       onClose={onClose}
       title={initialData ? dict.editTitle : dict.title}
-      className="md:max-w-2xl rounded-xl"
+      fullScreenOnMobile={false}
+      className="md:max-w-2xl rounded-xl h-auto max-h-[95vh] md:max-h-[750px]"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
       footer={
-        <div className="flex justify-end gap-3 px-1">
-          <PillButton
+        <div className="flex justify-between gap-4 px-1 pb-1 pt-1">
+          <button
             type="button"
-            variant="outline"
             onClick={onClose}
-            bgColor={"white"}
-            textColor={"#72000d"}
-            borderColor={"#E2E2E2"}
+            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
           >
-            {dict.cancel}
-          </PillButton>
-          <PillButton onClick={handleSubmit}>
-            {initialData ? dict.save : dict.create}
-          </PillButton>
+            {dict.cancel || "Hủy"} <X size={18} strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
+          >
+            {initialData ? dict.save || "Lưu" : dict.create || "Tạo bảng tin"} <Plus size={18} strokeWidth={2} />
+          </button>
         </div>
       }
 

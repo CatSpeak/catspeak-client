@@ -3,7 +3,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import ToggleOption from "../ui/ToggleOption"
-import { Eye } from "lucide-react"
+import { Eye, X, Plus } from "lucide-react"
 import { useCreateCurriculumSectionMutation, useUpdateCurriculumSectionMutation } from "@/store/api/coursesApi"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -96,38 +96,51 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
     <Modal
       open={sectionModal.open}
       onClose={() => setSectionModal((prev) => ({ ...prev, open: false }))}
-      title={sectionModal.mode === "create" ? dict.createTitle : dict.editTitle}
-      className="md:max-w-md rounded-xl"
-      headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
-      bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
-      footer={
-        <div className="flex justify-end gap-3 px-1">
-          <PillButton
-            type="button"
-            variant="secondary-no-outline"
+      title={
+        <div className="w-full relative flex items-center justify-center">
+          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D]">
+            {sectionModal.mode === "create" ? dict.createTitle : dict.editTitle}
+          </h2>
+          <button 
+            type="button" 
             onClick={() => setSectionModal((prev) => ({ ...prev, open: false }))}
-            bgColor={"white"}
-            textColor={"#72000d"}
-            borderColor={"#E2E2E2"}
-            disabled={isSaving}
+            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
           >
-            {dict.cancel}
-          </PillButton>
-          <PillButton
-            type="submit"
+            <X size={28} strokeWidth={1.5} />
+          </button>
+        </div>
+      }
+      showCloseButton={false}
+      fullScreenOnMobile={false}
+      className="md:max-w-2xl rounded-[24px]"
+      headerClassName="flex items-center justify-between px-6 md:px-8 py-6 md:py-8"
+      bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
+      footer={
+        <div className="flex justify-between gap-4 px-6 md:px-10 pb-8 pt-2">
+          <button
+            type="button"
+            onClick={() => setSectionModal((prev) => ({ ...prev, open: false }))}
             disabled={isSaving}
+            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
+          >
+            {dict.cancel} <X size={18} strokeWidth={2} />
+          </button>
+          <button
+            type="button"
             onClick={handleSubmit}
+            disabled={isSaving}
+            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
           >
-            {isSaving ? dict.saving : dict.save}
-          </PillButton>
+            {sectionModal.mode === "create" ? dict.save : dict.saveChanges || "Lưu"} <Plus size={18} strokeWidth={2} />
+          </button>
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section name */}
         <div>
-          <label className="block text-sm font-semibold text-[#374151] mb-1.5">
-            {dict.sectionName} <span className="text-[#EF4444]">*</span>
+          <label className="block text-[15px] font-medium text-[#374151] mb-2">
+            {dict.sectionName}
           </label>
           <TextInput
             required
@@ -138,28 +151,29 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
             }}
             error={errors.name}
             placeholder={dict.namePlaceholder}
-            className={`rounded-xl !h-[50px] px-4 text-sm ${errors.name ? "border-red-500 ring-2 ring-red-200" : ""}`}
+            className={`rounded-[16px] bg-gray-50/30 border-gray-200 !h-[54px] px-4 text-[15px] ${errors.name ? "border-red-500 ring-2 ring-red-200" : ""}`}
           />
         </div>
 
         {/* Section description */}
         <div>
+          <label className="block text-[15px] font-medium text-[#374151] mb-2">
+            {dict.sectionDesc}
+          </label>
           <TextInput
             multiline
             rows={3}
-            label={dict.sectionDesc}
-            labelClassName="text-sm font-semibold text-[#191C1D]"
             value={sectionModal.description || ""}
             onChange={(e) =>
               setSectionModal((prev) => ({ ...prev, description: e.target.value }))
             }
             placeholder={dict.descPlaceholder}
-            className="rounded-xl max-h-[86px] px-4 text-sm py-3 overflow-y-auto"
+            className="rounded-[16px] bg-gray-50/30 border-gray-200 min-h-[86px] px-4 text-[15px] py-3 overflow-y-auto"
           />
         </div>
 
         {/* Toggle */}
-        <div className="space-y-3 pt-2">
+        <div className="pt-2">
           <ToggleOption
             icon={<Eye size={20} className="text-[#F83B4F]" />}
             iconBg="bg-[#FFEAED]"
@@ -167,6 +181,7 @@ const SectionModal = ({ sectionModal, setSectionModal, onSaveSection, onSectionC
             description={dict.visibleToStudentsDesc || ""}
             checked={isVisible}
             onChange={handleToggleVisible}
+            className="border border-gray-200/60 rounded-[16px] p-4 bg-gray-50/30"
           />
         </div>
       </form>

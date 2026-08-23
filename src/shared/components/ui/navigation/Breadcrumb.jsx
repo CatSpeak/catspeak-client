@@ -1,6 +1,6 @@
 import React from "react";
 
-const Breadcrumb = ({ items, className = "" }) => {
+const Breadcrumb = ({ items, separator = "/", className = "" }) => {
   return (
     <div
       className={`flex min-w-0 max-w-full items-center gap-3 overflow-hidden text-sm leading-[1.4] ${className}`}
@@ -23,7 +23,7 @@ const Breadcrumb = ({ items, className = "" }) => {
               </button>
             )}
 
-            {!isLast && <span className="shrink-0 text-[#7b7979]">/</span>}
+            {!isLast && <span className="shrink-0 text-[#7b7979] font-medium">{separator}</span>}
           </React.Fragment>
         );
       })}
