@@ -30,10 +30,10 @@ const SectionCard = ({
 
   return (
     <div
-      className={`bg-[#F3F4F5] border border-[#E2E2E2] rounded-xl ${className}`}
+      className={`bg-white border border-[#E2E2E2] rounded-3xl shadow-sm ${className}`}
     >
       {/* Section Header */}
-      <div className={`flex items-center justify-between gap-4 px-6 py-4 bg-[#F3F4F5] w-full ${isExpanded ? "rounded-t-xl border-b border-[#E2E2E2]" : "rounded-xl"}`}>
+      <div className={`flex items-center justify-between gap-4 px-6 py-5 bg-white w-full ${isExpanded ? "rounded-t-3xl border-b border-[#E2E2E2]" : "rounded-3xl"}`}>
         <div className="space-y-1">
           <div className="flex items-center gap-3 flex-wrap">
             <span

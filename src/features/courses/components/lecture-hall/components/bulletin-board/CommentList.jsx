@@ -1,6 +1,7 @@
 import React from "react"
 import { MessageSquareOff, MessageSquare } from "lucide-react"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
+import Avatar from "@/shared/components/ui/Avatar"
 import CommentItem from "./CommentItem"
 import CommentInput from "./CommentInput"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -43,27 +44,30 @@ const CommentList = ({
   const hasMore = !showAll && totalCount > previewCount
 
   return (
-    <div className="bg-[#F8F9FA] rounded-xl border border-[#E2E2E2] shadow-faq-card">
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm">
       {/* Header */}
-      <div className="flex items-center gap-3 px-8 py-5 border-b border-[#E2E2E2]">
-        <span className="text-xl font-bold text-[#191C1D]">{dict.replies}</span>
-        {totalCount > 0 && (
-          <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#FEA53F] text-[#6C3E00] text-xs font-bold">
-            {totalCount}
-          </span>
-        )}
-      </div>
+      <h3 className="text-[24px] font-medium text-[#191C1D] mb-6">
+        {totalCount} {dict.replies || "Phản hồi"}
+      </h3>
 
-      <div className="px-8 py-6">
+      <div className="space-y-8">
         {/* Comment input */}
         {!locked && (
-          <CommentInput
-            currentUserAvatar={currentUserAvatar}
-            currentUserName={currentUserName}
-            onSubmit={onSubmit}
-            placeholder={dict.inputPlaceholder}
-          />)
-        }
+          <div className="flex items-start gap-4">
+            <Avatar
+              src={currentUserAvatar}
+              name={currentUserName}
+              alt={currentUserName}
+              size={40}
+              className="w-10 h-10 mt-1"
+            />
+            <div className="flex-1">
+              <CommentInput
+                onSubmit={onSubmit}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Locked state */}
         {locked ? (

@@ -32,61 +32,59 @@ const PostContent = ({ post = {} }) => {
   } = post
 
   return (
-    <div className="bg-[#F8F9FA] rounded-xl p-6 border border-[#E2E2E2] shadow-faq-card space-y-6">
-      {/* Header: tag + menu */}
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+      {/* Header: Author + 3 dots */}
       <div className="flex items-center justify-between">
-        {/* Author info */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Avatar
             src={authorAvatar}
             name={authorName}
             alt={authorName}
             size={48}
+            className="w-12 h-12"
           />
-          <div className="space-y-1">
-            <p className="font-semibold text-xl text-[#191C1D]">{authorName}</p>
+          <div className="space-y-0.5">
+            <p className="font-semibold text-[17px] text-[#191C1D]">{authorName}</p>
             <p className="flex items-center gap-1 text-sm text-[#7B7979]">
-              <Clock size={12} className="shrink-0" />
+              <Clock size={14} className="shrink-0" />
               {date}
             </p>
           </div>
         </div>
 
-        {/* <IconButton
-          variant="ghost"
-          className="ml-auto"
-          title={dict.postOptionsTooltip}
-        >
-          <MoreVertical size={16} />
-        </IconButton> */}
+        <button className="text-gray-500 hover:bg-gray-100 p-2 rounded-full transition-colors">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+        </button>
       </div>
 
       {/* Title */}
-      <h1 className="text-[28px] font-bold text-[#191C1D]">{title}</h1>
+      <h2 className="text-[24px] font-medium text-[#191C1D]">
+        {title}
+      </h2>
 
-      {/* Banner image */}
-      {thumbnailUrl && (
-        <div className="rounded-xl overflow-hidden">
-          <img
-            src={thumbnailUrl}
-            alt={dict.bannerAlt}
-            className="w-full object-cover max-w-3xl"
-          />
+      {/* Image / Thumbnail */}
+      {thumbnailUrl ? (
+        <div className="w-full rounded-2xl overflow-hidden bg-[#F8F9FA]">
+          <img src={thumbnailUrl} alt="Thumbnail" className="w-full h-auto object-cover max-h-[400px]" />
+        </div>
+      ) : (
+        <div className="w-full h-[240px] md:h-[300px] bg-[#D9D9D9] rounded-2xl"></div>
+      )}
+
+      {/* Content */}
+      {content && (
+        <div className="text-[#333333] leading-relaxed">
+          <RenderHTML html={content} className="text-[#1A1A1A] text-[15px] leading-relaxed" />
         </div>
       )}
 
-      {/* Text content */}
-      {content && (
-        <RenderHTML html={content} className="text-[#1A1A1A] text-lg leading-relaxed" />
-      )}
-
       {/* Attachments */}
-      {attachments.length > 0 && (
-        <div className="space-y-3 mt-4">
+      {attachments?.length > 0 && (
+        <div className="space-y-3 pt-4">
           {attachments.map((file, idx) => (
             <div
               key={idx}
-              onClick={() => file.url && window.open(file.url, '_blank')}
+              onClick={() => file.url && window.open(file.url, "_blank")}
               onKeyDown={(event) => {
                 if (file.url && (event.key === "Enter" || event.key === " ")) {
                   event.preventDefault()
@@ -96,14 +94,16 @@ const PostContent = ({ post = {} }) => {
               role={file.url ? "button" : undefined}
               tabIndex={file.url ? 0 : undefined}
               title={dict.openAttachmentTooltip.replace("{{name}}", file.name)}
-              className="flex items-center gap-4 bg-white border border-[#E2E2E2] rounded-xl px-4 py-3 cursor-pointer hover:bg-[#FFF5F4] transition-colors"
+              className="flex items-center gap-4 bg-[#F8F9FA] rounded-2xl p-4 cursor-pointer hover:bg-gray-100 transition-colors"
             >
-              <div className="w-10 h-10 rounded-lg bg-red-100/70 flex items-center justify-center shrink-0">
-                {getFileIcon(file.name)}
+              <div className="w-12 h-12 rounded-xl bg-[#E22E2E] flex items-center justify-center shrink-0 shadow-sm text-white font-bold text-xs">
+                PDF
               </div>
-              <div>
-                <p className="text-sm font-semibold text-[#191C1D]">{file.name}</p>
-                <p className="text-xs text-[#5B403C]">{file.size}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[15px] font-semibold text-[#191C1D] truncate">
+                  {file.name}
+                </p>
+                <p className="text-[13px] text-[#7B7979] mt-0.5">{file.size}</p>
               </div>
             </div>
           ))}
