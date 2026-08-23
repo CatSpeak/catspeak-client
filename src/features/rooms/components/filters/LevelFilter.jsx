@@ -15,6 +15,7 @@ const LevelFilter = () => {
     en: "English",
     zh: "Chinese",
     vi: "Vietnamese",
+    ja: "Japanese",
   }
   const currentLanguage = lang ? langMap[lang] : "English"
   const baseLevels = LEVELS[currentLanguage] || LEVELS.English
