@@ -214,8 +214,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
       serverUrl={livekitServerUrl}
       token={livekitToken}
       connect={true}
-      audio={callInfo.initMicOn}
-      video={callInfo.initCamOn}
+      audio={callInfo?.initMicOn ?? false}
+      video={callInfo?.initCamOn ?? false}
       className="contents"
       options={{ publishDefaults: { simulcast: !isMobileDevice } }}
       onDisconnected={(reason) => {
