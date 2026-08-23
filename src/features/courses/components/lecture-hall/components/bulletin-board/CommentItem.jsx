@@ -92,7 +92,7 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
                 onClick={() => onViewReplies && onViewReplies(comment)}
                 className="text-[13px] font-semibold text-[#990011] hover:underline"
               >
-                Xem {replyCount} phản hồi
+                {dict.viewMoreReplies ? dict.viewMoreReplies.replace("{{count}}", replyCount) : `Xem ${replyCount} phản hồi`}
               </button>
               <span className="text-[#990011] text-[13px]">.</span>
             </>
@@ -101,7 +101,7 @@ const CommentItem = ({ comment = {}, onReply, onViewReplies }) => {
             onClick={() => onReply && onReply(comment)}
             className="text-[13px] font-semibold text-[#990011] hover:underline"
           >
-            Phản hồi
+            {dict.reply || "Phản hồi"}
           </button>
         </div>
       </div>
