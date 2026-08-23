@@ -399,7 +399,7 @@ const VideoCallRoomWrapper = () => {
   const { lang } = useParams()
   return (
     <VideoCallProvider>
-      <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
+      <GameProvider roomLanguage={lang === "zh" ? "zh" : lang === "ja" ? "ja" : "en"}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>

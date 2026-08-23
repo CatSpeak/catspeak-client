@@ -23,6 +23,7 @@ export default {
     vietnam: "Việt Nam",
     china: "Trung Quốc",
     english: "Anh",
+    japan: "日本語",
   },
   switchRole: "Chuyển vai trò",
   studentRole: "Học viên",

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useMemo } from "react"
 import { ChevronDown, ChevronRight, MoreVertical, Volume2 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import Popover from "@/shared/components/ui/Popover"
@@ -26,7 +26,30 @@ const BreakoutActiveRoomList = ({
   const [dragOverRoomId, setDragOverRoomId] = useState(null)
   const dragTimeout = useRef(null)
 
-  if (!status) return null
+  // 1. Collect all breakout participant account IDs to prevent duplicate rendering in Main Room
+  const breakoutAccountIds = useMemo(() => {
+    return new Set(
+      status?.breakoutSessions?.flatMap((br) =>
+        br.participants?.map((p) => String(p.accountId))
+      ) || []
+    )
+  }, [status?.breakoutSessions])
+
+  // 2. Filter main room participants so no breakout participant appears in main room
+  const mainRoomParticipants = useMemo(() => {
+    return (status?.mainRoom?.participants || []).filter(
+      (p) => !breakoutAccountIds.has(String(p.accountId))
+    )
+  }, [status?.mainRoom?.participants, breakoutAccountIds])
+
+  const mainRoomStudentCount = useMemo(() => {
+    return mainRoomParticipants.filter(
+      (p) => String(p.accountId) !== String(roomCreatorId),
+    ).length
+  }, [mainRoomParticipants, roomCreatorId])
+
+  const isHostInMainRoom = String(currentSubSessionId) === String(sessionId)
+  const isMainExpanded = expandedRooms["main"] ?? true
 
   const handleDragOver = (e, roomId) => {
     e.preventDefault()
@@ -88,31 +111,27 @@ const BreakoutActiveRoomList = ({
     }
   }
 
-  // Get main room participants from status
-  const mainRoomParticipants = status.mainRoom?.participants || []
-  const mainRoomStudentCount = mainRoomParticipants.filter(
-    (p) => String(p.accountId) !== String(roomCreatorId),
-  ).length
+  const enrichedRooms = useMemo(() => {
+    return (
+      status?.breakoutSessions?.map((br) => {
+        const studentParticipants =
+          br.participants?.filter(
+            (p) => String(p.accountId) !== String(roomCreatorId),
+          ) || []
+        const studentCount = studentParticipants.length
+        const isFull = status?.maxParticipantsPerRoom
+          ? studentCount >= status.maxParticipantsPerRoom
+          : false
+        return {
+          id: br.sessionId,
+          name: br.roomName,
+          isFull,
+        }
+      }) || []
+    )
+  }, [status?.breakoutSessions, status?.maxParticipantsPerRoom, roomCreatorId])
 
-  const isHostInMainRoom = String(currentSubSessionId) === String(sessionId)
-  const isMainExpanded = expandedRooms["main"] ?? true
-
-  const enrichedRooms =
-    status.breakoutSessions?.map((br) => {
-      const studentParticipants =
-        br.participants?.filter(
-          (p) => String(p.accountId) !== String(roomCreatorId),
-        ) || []
-      const studentCount = studentParticipants.length
-      const isFull = status.maxParticipantsPerRoom
-        ? studentCount >= status.maxParticipantsPerRoom
-        : false
-      return {
-        id: br.sessionId,
-        name: br.roomName,
-        isFull,
-      }
-    }) || []
+  if (!status) return null
 
   return (
     <div className="py-2 px-1 space-y-3">

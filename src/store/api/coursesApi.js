@@ -1719,6 +1719,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 }
 
                 return {
+                  ...item,
                   id: item.id?.toString() || "",
                   itemId: item.itemId?.toString() || "",
                   type,
@@ -1830,6 +1831,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 }
 
                 return {
+                  ...item,
                   id: item.id?.toString() || "",
                   itemId: item.itemId?.toString() || "",
                   type,
@@ -2522,6 +2524,17 @@ export const coursesApi = baseApi.injectEndpoints({
       },
     }),
 
+    getTeacherAllTeachingTasksCombined: builder.query({
+      query: () => ({
+        url: `/teacher/teaching-tasks/combined`,
+        method: "GET",
+      }),
+      transformResponse: (response) => {
+        const list = Array.isArray(response) ? response : response?.data || []
+        return list
+      },
+    }),
+
     // ─── Analytics Endpoints ──────────────────────────────────────────
 
     // 1. AnalyticsCourseClass
@@ -2838,6 +2851,7 @@ export const {
   // Teaching Tasks Hooks
   useGetTeacherClassTeachingTasksCombinedQuery,
   useGetTeacherCourseTeachingTasksCombinedQuery,
+  useGetTeacherAllTeachingTasksCombinedQuery,
   // Analytics Hooks
   useGetAnalyticsCourseClassOverviewQuery,
   useGetAnalyticsCourseClassEffectivenessQuery,

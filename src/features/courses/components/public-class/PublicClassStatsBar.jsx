@@ -9,15 +9,40 @@ const PublicClassStatsBar = ({ classData }) => {
   const pc = t.courses?.publicClass || {}
 
   const totalSessions = classData?.totalSessions || classData?.sessionsCount
-  const sessionsTitle = (pc.sessionsCount || "{{count}} buổi học").replace("{{count}}", totalSessions)
+  const sessionsTitle = (pc.sessionsCount || "{{count}} buổi học").replace(
+    "{{count}}",
+    totalSessions,
+  )
 
   const defaultScheduleText = pc.flexibleSchedule || "Lịch linh hoạt"
+  const rawSchedule = classData?.schedule
+  const scheduleDays = Array.isArray(rawSchedule)
+    ? rawSchedule.map((s) => s.dayOfWeek).filter(Boolean)
+    : rawSchedule?.days || []
+  const firstSchedule =
+    Array.isArray(rawSchedule) && rawSchedule.length > 0
+      ? rawSchedule[0]
+      : rawSchedule
+
   const scheduleDaysText = formatScheduleDays(
-    classData?.schedule?.days,
+    scheduleDays,
     defaultScheduleText,
     " - ",
-    classData?.schedule?.startTime,
+    firstSchedule?.startTime,
   )
+
+  const modifiedSessionsCount = Array.isArray(classData?.modifiedSessions)
+    ? classData.modifiedSessions.length
+    : 0
+
+  let scheduleTitle = scheduleDaysText
+  if (modifiedSessionsCount > 0) {
+    const template =
+      pc.scheduleWithModified || "{{schedule}} và\n{{count}} buổi ngoại lệ"
+    scheduleTitle = template
+      .replace("{{schedule}}", scheduleDaysText)
+      .replace("{{count}}", modifiedSessionsCount)
+  }
 
   const remaining = classData?.remainingSlots ?? 0
   const capacity = classData?.capacity ?? 0
@@ -27,54 +52,53 @@ const PublicClassStatsBar = ({ classData }) => {
 
   const stats = [
     {
-      id: "sessions",
-      title: sessionsTitle,
-      subtitle: pc.interactiveSub || "Học trực tiếp & tương tác 1:1",
-      icon: Clock,
-      highlight: true
+      id: "certificate",
+      title: spotsTitle,
+      subtitle: pc.spotsSub || "Số người trong 1 lớp.",
+      icon: User,
     },
     {
       id: "level",
       title: classData?.levels?.[0] || pc.allLevels || "Mọi trình độ",
-      subtitle: pc.curriculumSub || "Lộ trình đào tạo bài bản",
+      subtitle: pc.curriculumSub || "Trình độ.",
       icon: BarChart3,
-      iconColor: "text-[#b20a1c]"
     },
     {
       id: "schedule",
-      title: scheduleDaysText,
-      subtitle: pc.scheduleSub || "Thời gian linh hoạt theo tuần",
+      title: scheduleTitle,
+      subtitle: pc.scheduleSub || "Thời gian linh hoạt",
       icon: Calendar,
-      iconColor: "text-blue-600"
     },
     {
-      id: "certificate",
-      title: spotsTitle,
-      subtitle: pc.spotsSub || "Số người được phép đăng ký lớp học",
-      icon: User,
-      iconColor: "text-emerald-600"
-    }
+      id: "sessions",
+      title: sessionsTitle,
+      subtitle: pc.interactiveSub || "Trực tuyến & tương tác 1:1",
+      icon: Clock,
+      highlight: true,
+    },
   ]
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-      <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6 sm:p-8 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
+      <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-4 sm:p-5 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {stats.map((item) => {
           const Icon = item.icon
           return (
-            <div
-              key={item.id}
-              className={`flex flex-col gap-1.5`}
-            >
-              <div className="flex items-center gap-2">
-                <Icon size={18} className={item.iconColor || "text-[#b20a1c]"} />
-                <span className="text-base sm:text-lg font-black text-slate-900 leading-none">
+            <div key={item.id} className="flex items-start gap-3">
+              <div className="shrink-0 mt-0.5">
+                <Icon
+                  size={20}
+                  className={item.iconColor || "text-[#b20a1c]"}
+                />
+              </div>
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-sm sm:text-base font-bold text-slate-900 leading-snug whitespace-pre-line">
                   {item.title}
                 </span>
+                <p className="text-xs text-slate-500 font-medium leading-normal">
+                  {item.subtitle}
+                </p>
               </div>
-              <p className="text-xs text-slate-500 font-medium">
-                {item.subtitle}
-              </p>
             </div>
           )
         })}

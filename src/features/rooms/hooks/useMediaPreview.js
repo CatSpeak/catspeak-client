@@ -150,27 +150,33 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
           const lkTrack = new LocalVideoTrack(rawVideoTrack)
           lkVideoTrackRef.current = lkTrack
 
-          if (!processorRef.current) {
-            const transformer = new CombinedVideoTransformer()
-            processorRef.current = new ProcessorWrapper(transformer, "preview-combined-processor")
-            setProcessorStatus("initializing")
+          if (processorRef.current?.destroy) {
+            try {
+              await processorRef.current.destroy()
+            } catch {}
+            processorRef.current = null
           }
 
-          await lkTrack.setProcessor(processorRef.current)
+          const transformer = new CombinedVideoTransformer()
+          const newProcessor = new ProcessorWrapper(transformer, "preview-combined-processor")
+          processorRef.current = newProcessor
+          setProcessorStatus("initializing")
+
+          await lkTrack.setProcessor(newProcessor)
           setProcessorStatus("attached")
 
           // Apply stored beauty options from localStorage (pre-join settings)
           const storedBeauty = readStoredBeautyOptions()
           if (storedBeauty) {
             lastAppliedBeautyRef.current = storedBeauty
-            await processorRef.current
+            await newProcessor
               .updateTransformerOptions({ beautyOptions: storedBeauty })
               .catch(() => {})
           }
 
           // Apply virtual background if one is already active
           if (virtualBackgroundUrl) {
-            await processorRef.current
+            await newProcessor
               .updateTransformerOptions({
                 bgOptions: { backgroundDisabled: false, imagePath: virtualBackgroundUrl, blurRadius: undefined },
               })
@@ -294,6 +300,12 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
           rawVideoTrackRef.current.stop()
           rawVideoTrackRef.current = null
         }
+
+        if (processorRef.current?.destroy) {
+          processorRef.current.destroy().catch(() => {})
+          processorRef.current = null
+        }
+        setProcessorStatus("idle")
 
         // Remove stopped tracks from streamRef
         streamRef.current = new MediaStream(

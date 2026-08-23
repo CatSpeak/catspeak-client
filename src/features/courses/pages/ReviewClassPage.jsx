@@ -11,6 +11,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getSafeMediaUrl } from "../utils/courseUtils"
+import { getLocalizedLanguageName } from "../data/courseFormOptions"
 
 const UNKNOWN = "—"
 
@@ -186,7 +187,7 @@ const ReviewClassPage = () => {
               ) : null}
               {context.language ? (
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  {context.language}
+                  {getLocalizedLanguageName(context.language, t) || context.language}
                   {Array.isArray(context.levels) && context.levels.length > 0
                     ? ` · ${context.levels.join(" · ")}`
                     : ""}

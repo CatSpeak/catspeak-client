@@ -12,6 +12,8 @@ const getLanguageName = (langCode) => {
       return "Vietnamese"
     case "en":
       return "English"
+    case "ja":
+      return "Japanese"
     default:
       return "English"
   }
@@ -20,7 +22,9 @@ const getLanguageName = (langCode) => {
 export const useEditCustomRoomForm = (room, open, onClose) => {
   const { lang } = useParams()
   const { t } = useLanguage()
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
+    ? lang
+    : "en"
   const selectedLanguage = room?.languageType || getLanguageName(supportedLangCode)
 
   const [updateCustomRoom, { isLoading: isUpdating }] =

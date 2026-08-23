@@ -14,6 +14,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon"
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
+import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
 
 const CustomRoomCard = ({
@@ -37,7 +38,11 @@ const CustomRoomCard = ({
 
   // Thumbnail fallback handling
   const fallbackThumbnail =
-    room.languageType === "Chinese" ? ZHThumbnail : ENThumbnail
+    room.languageType === "Japanese"
+      ? JPThumbnail
+      : "Chinese" == room.languageType
+        ? ZHThumbnail
+        : ENThumbnail
   const displayThumbnail =
     imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl
 

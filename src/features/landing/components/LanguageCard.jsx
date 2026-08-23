@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { China, UK } from "@/shared/assets/icons/flags"
+import { China, UK, Japan } from "@/shared/assets/icons/flags"
 import { MainLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 
@@ -18,6 +18,13 @@ const languages = [
     labelKey: "english",
     flag: UK,
     className: "left-[53%] top-[44%]",
+  },
+  {
+    code: "ja",
+    name: "日本語",
+    labelKey: "japan",
+    flag: Japan,
+    className: "left-[31.5%] top-[70%]",
   },
 ]
 
@@ -39,7 +46,7 @@ export default function LanguageCard({ onCommunityChange }) {
   }, [])
 
   const handleSelect = (code) => {
-    const target = code === "en" || code === "zh" ? code : "zh"
+    const target = code === "en" || code === "zh" || code === "ja" ? code : "zh"
     setActiveCommunity(target)
     localStorage.setItem("communityLanguage", target)
     if (onCommunityChange) onCommunityChange(target)
