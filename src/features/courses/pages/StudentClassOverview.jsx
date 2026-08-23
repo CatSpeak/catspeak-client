@@ -45,7 +45,7 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
               size={48}
             />
             <div className="flex flex-col text-sm text-left text-[#7B7979]">
-              <span className="text-[14px] font-medium leading-tight">Giảng viên</span>
+              <span className="text-[14px] font-medium leading-tight">{t.profile?.instructor?.title || "Giảng viên"}</span>
               <span className="text-[16px] font-semibold leading-tight mt-0.5">{instructorName}</span>
             </div>
           </div>
