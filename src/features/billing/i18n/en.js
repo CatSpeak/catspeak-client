@@ -180,6 +180,10 @@ export default {
       payer: "(Payer)",
       totalLearners: "Total learners:",
       addLearnerError: "An error occurred while adding learner",
+      friendSuggestions: "Friend suggestions",
+      selectedFriendsCount: "{{count}} selected",
+      selectFriendsHint: "Select friends to add",
+      addSelected: "Add",
 
       // OrderSummary
       orderSummary: "Order summary",
