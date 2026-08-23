@@ -720,6 +720,8 @@ export default {
       "The breakout session has ended. You are being automatically moved back to the main room...",
     movingDesc: "You are being automatically moved to the breakout room...",
     roomFullError: "Cannot move because the room is full.",
+    setupModeTip: "Room Pre-assignment Mode: Assign students to rooms, then click \"Open rooms\" below to officially start breakout rooms.",
+    setupStageHint: "Student assigned to room. Click 'Open rooms' below to apply.",
   },
   game: {
     crackIt: {

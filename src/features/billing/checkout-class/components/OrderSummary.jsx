@@ -1,7 +1,12 @@
-import React from 'react'
-import VoucherSection from './VoucherSection'
-import { PillButton } from '@/shared/components/ui/buttons'
-import { formatCurrency, calculateVoucherDiscount } from '../../utils/checkoutUtils'
+import React, { useState } from "react";
+import VoucherSection from "./VoucherSection";
+import { PillButton } from "@/shared/components/ui/buttons";
+import {
+  formatCurrency,
+  calculateVoucherDiscount,
+} from "../../utils/checkoutUtils";
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
+import { AlertTriangle } from "lucide-react";
 
 const OrderSummary = ({
   // className,
@@ -16,18 +21,22 @@ const OrderSummary = ({
   onCheckout,
   isProcessing,
   isVoucherLoading,
-  t
+  t,
 }) => {
-  const tc = t.billing.checkoutClass
-  const subtotal = unitPrice * learnersCount
+  const tc = t.billing.checkoutClass;
+  const [voucherToRemove, setVoucherToRemove] = useState(null);
+  const subtotal = unitPrice * learnersCount;
 
-  const discountDetails = selectedVouchers.map(v => ({
+  const discountDetails = selectedVouchers.map((v) => ({
     ...v,
-    discountAmount: calculateVoucherDiscount(v, subtotal)
-  }))
+    discountAmount: calculateVoucherDiscount(v, subtotal),
+  }));
 
-  const totalDiscount = discountDetails.reduce((sum, v) => sum + v.discountAmount, 0)
-  const totalPayment = Math.max(0, subtotal - totalDiscount)
+  const totalDiscount = discountDetails.reduce(
+    (sum, v) => sum + v.discountAmount,
+    0,
+  );
+  const totalPayment = Math.max(0, subtotal - totalDiscount);
 
   return (
     <div className="bg-white rounded-xl shadow-faq-card border border-border p-6 sticky top-24 space-y-4">
@@ -41,17 +50,19 @@ const OrderSummary = ({
       <div className="space-y-4 text-sm">
         <div className="flex justify-between text-[#6B7280]">
           <span>{tc.unitPrice}</span>
-          <span className='text-[#111827]'>
-            {unitPrice === 0 ? tc.free : `${formatCurrency(unitPrice)} ${tc.perPerson}`}
+          <span className="text-[#111827]">
+            {unitPrice === 0
+              ? tc.free
+              : `${formatCurrency(unitPrice)} ${tc.perPerson}`}
           </span>
         </div>
         <div className="flex justify-between text-[#6B7280]">
           <span>{tc.learnerCount}</span>
-          <span className='text-[#111827]'>{learnersCount}</span>
+          <span className="text-[#111827]">{learnersCount}</span>
         </div>
       </div>
 
-      <div className='border-border border' />
+      <div className="border-border border" />
 
       <div className="space-y-4">
         <div className="flex justify-between font-bold text-[#111827]">
@@ -59,13 +70,18 @@ const OrderSummary = ({
           <span>{subtotal === 0 ? tc.free : formatCurrency(subtotal)}</span>
         </div>
 
-        {discountDetails.map(voucher => (
+        {discountDetails.map((voucher) => (
           <div key={voucher.id} className="flex justify-between text-[#00A854]">
             <div className="flex flex-col">
-              <span>{tc.discount} ({voucher.code})</span>
-              {voucher.maxDiscountAmount && voucher.discountType?.toLowerCase() === 'percentage' && (
-                <span className="text-xs opacity-80">{tc.maxDiscount} {formatCurrency(voucher.maxDiscountAmount)}</span>
-              )}
+              <span>
+                {tc.discount} ({voucher.code})
+              </span>
+              {voucher.maxDiscountAmount &&
+                voucher.discountType?.toLowerCase() === "percentage" && (
+                  <span className="text-xs opacity-80">
+                    {tc.maxDiscount} {formatCurrency(voucher.maxDiscountAmount)}
+                  </span>
+                )}
             </div>
             <span>-{formatCurrency(voucher.discountAmount)}</span>
           </div>
@@ -73,20 +89,22 @@ const OrderSummary = ({
 
         <div className="flex justify-between text-gray-600">
           <span>{tc.tuition}</span>
-          <span>{totalPayment === 0 ? tc.free : formatCurrency(totalPayment)}</span>
+          <span>
+            {totalPayment === 0 ? tc.free : formatCurrency(totalPayment)}
+          </span>
         </div>
       </div>
 
       {unitPrice !== 0 && (
         <>
-          <div className='border-border border' />
+          <div className="border-border border" />
 
           <VoucherSection
             vouchers={vouchers}
             suggestedTags={suggestedTags}
             selectedVouchers={selectedVouchers}
             onToggleVoucher={onToggleVoucher}
-            onRemoveVoucher={onRemoveVoucher}
+            onRemoveVoucher={setVoucherToRemove}
             onOpenModal={onOpenModal}
             isLoading={isVoucherLoading}
             t={t}
@@ -94,24 +112,26 @@ const OrderSummary = ({
         </>
       )}
 
-      <div className='border-border border' />
+      <div className="border-border border" />
 
       <div>
         <div className="flex justify-between items-end mb-1">
           <span className="font-bold text-[#111827]">{tc.totalPayment}</span>
-          <span className="text-2xl font-bold text-[#B20000]">{totalPayment === 0 ? tc.free : formatCurrency(totalPayment)}</span>
+          <span className="text-2xl font-bold text-[#B20000]">
+            {totalPayment === 0 ? tc.free : formatCurrency(totalPayment)}
+          </span>
         </div>
         {totalDiscount > 0 && (
           <p className="text-right text-sm text-[#00A854]">
-            {tc.youSaved.replace('{{amount}}', formatCurrency(totalDiscount))}
+            {tc.youSaved.replace("{{amount}}", formatCurrency(totalDiscount))}
           </p>
         )}
       </div>
 
       <PillButton
         fullWidth
-        roundedClass='rounded-xl'
-        className='flex-1 w-full'
+        roundedClass="rounded-xl"
+        className="flex-1 w-full"
         bgColor={"#B20000"}
         onClick={() => onCheckout(false)}
         disabled={isProcessing}
@@ -120,8 +140,54 @@ const OrderSummary = ({
       >
         {tc.confirmPayment}
       </PillButton>
-    </div>
-  )
-}
 
-export default OrderSummary
+      <ConfirmationModal
+        open={!!voucherToRemove}
+        onClose={() => setVoucherToRemove(null)}
+        onConfirm={() => {
+          if (voucherToRemove) {
+            onRemoveVoucher(voucherToRemove.id);
+          }
+          setVoucherToRemove(null);
+        }}
+        title={
+          <div className="flex items-center gap-2.5">
+            <div className="bg-red-50 text-[#B20000] rounded-full p-2 flex items-center justify-center">
+              <AlertTriangle size={20} />
+            </div>
+            <span className="text-lg font-black text-gray-950">
+              {tc.removeVoucherTitle}
+            </span>
+          </div>
+        }
+        cancelText={tc.cancel}
+        confirmText={tc.removeVoucherConfirm}
+        confirmVariant="destructive"
+      >
+        <div className="flex flex-col gap-4 mt-2 text-sm text-gray-600 leading-relaxed">
+          {voucherToRemove && (
+            <p>
+              {tc.removeVoucherDesc
+                ?.replace("{{code}}", voucherToRemove.code)
+                ?.replace(
+                  "{{totalAmount}}",
+                  formatCurrency(
+                    totalPayment +
+                      calculateVoucherDiscount(voucherToRemove, subtotal),
+                  ),
+                )
+                ?.replace(
+                  "{{discountAmount}}",
+                  formatCurrency(
+                    calculateVoucherDiscount(voucherToRemove, subtotal),
+                  ),
+                )}
+            </p>
+          )}
+        </div>
+      </ConfirmationModal>
+    </div>
+  );
+};
+
+export default OrderSummary;

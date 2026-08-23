@@ -672,6 +672,8 @@ export default {
     returningDesc: "分组讨论已结束。您将被自动移回主房间...",
     movingDesc: "您将被自动移至分组房间...",
     roomFullError: "由于房间已满，无法移动。",
+    setupModeTip: "预分配模式：将学生分配至各房间，然后点击下方的“打开房间”即可正式开始分组讨论。",
+    setupStageHint: "已将学生分配至房间。请点击下方的“打开房间”以应用。",
   },
   game: {
     crackIt: {
