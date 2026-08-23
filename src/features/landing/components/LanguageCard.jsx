@@ -7,21 +7,21 @@ import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 const languages = [
   {
     code: "zh",
-    name: "Trung Quốc",
+    name: "China",
     labelKey: "china",
     flag: China,
     className: "left-[10%] top-[44%]",
   },
   {
     code: "en",
-    name: "Anh",
+    name: "English",
     labelKey: "english",
     flag: UK,
     className: "left-[53%] top-[44%]",
   },
   {
     code: "ja",
-    name: "日本語",
+    name: "Japan",
     labelKey: "japan",
     flag: Japan,
     className: "left-[31.5%] top-[70%]",

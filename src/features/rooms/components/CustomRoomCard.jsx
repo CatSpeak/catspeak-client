@@ -124,7 +124,9 @@ const CustomRoomCard = ({
                   `${t?.rooms?.filters?.levelLabel || "Trình độ"}: ${room.requiredLevel}`
                 }
               >
-                {room.requiredLevel}
+                {t?.rooms?.filters?.levels?.[
+                  room.requiredLevel?.toLowerCase()
+                ] || room.requiredLevel}
               </div>
             )}
             {activeTopic &&
