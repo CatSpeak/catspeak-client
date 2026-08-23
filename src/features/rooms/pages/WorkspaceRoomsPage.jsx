@@ -47,7 +47,7 @@ const WorkspaceRoomsContent = () => {
   const navigate = useNavigate();
   const ct = t.rooms?.customRooms || {};
 
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
+  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang) ? lang : "en";
 
   // Tab State: "created" | "bookmark"
   const [activeTab, setActiveTab] = useState("created");

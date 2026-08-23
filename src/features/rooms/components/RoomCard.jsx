@@ -43,7 +43,9 @@ const RoomCard = ({ room }) => {
       ? localStorage.getItem("communityLanguage")
       : null) ||
     "en"
-  const fallbackThumbnail = currentLang === "zh" ? ZHThumbnail : ENThumbnail
+  const fallbackThumbnail = ["zh", "ja"].includes(currentLang)
+    ? ZHThumbnail
+    : ENThumbnail
   const [imageError, setImageError] = useState(false)
   const displayThumbnail =
     imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl

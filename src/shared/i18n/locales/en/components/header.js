@@ -23,6 +23,7 @@ export default {
     vietnam: "Vietnam",
     china: "China",
     english: "English",
+    japan: "日本語",
   },
   switchRole: "Switch Role",
   studentRole: "Student",
