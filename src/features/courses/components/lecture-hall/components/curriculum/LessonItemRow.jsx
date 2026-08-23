@@ -130,17 +130,17 @@ const LessonItemRow = ({
 
   return (
     <div
-      className={`rounded-2xl p-5 mb-4 flex flex-col relative transition-all shadow-sm ${isHidden
+      className={`rounded-xl md:rounded-2xl p-3 md:p-5 mb-3 md:mb-4 flex flex-col relative transition-all shadow-sm ${isHidden
         ? "bg-[#7B7979] border border-[#7B7979]"
         : "bg-white border border-[#E2E2E2] hover:border-gray-300"
         } ${className}`}
     >
-      <div className="flex items-center justify-between gap-4 w-full">
+      <div className="flex items-center justify-between gap-3 md:gap-4 w-full">
         {/* Left section: Drag Handle + Type Icon + Title & Meta */}
-        <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
           {/* Type Icon Circle */}
           <div
-            className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${config.iconBg}`}
+            className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 ${config.iconBg}`}
           >
             <IconComponent size={20} />
           </div>

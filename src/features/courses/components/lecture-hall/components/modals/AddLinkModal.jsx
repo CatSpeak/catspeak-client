@@ -80,6 +80,7 @@ const AddLinkModal = ({
         </div>
       }
       showCloseButton={false}
+      fullScreenOnMobile={false}
       className="md:max-w-2xl rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px]"
       headerClassName="flex items-center justify-between px-6 md:px-10 py-6 md:py-8"
       bodyClassName="px-6 md:px-10 pb-10 flex-1 overflow-y-auto"
