@@ -107,17 +107,18 @@ const AddLinkModal = ({
         {/* Display Title Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            Tên hiển thị
+            {dict.linkName || "Tên hiển thị"}
           </label>
           <TextInput
             required
+            type="text"
             value={title}
             onChange={(e) => {
               setTitle(e.target.value)
               if (errors.title) setErrors((prev) => ({ ...prev, title: false }))
             }}
             error={errors.title}
-            placeholder={"VD: Link họp..."}
+            placeholder={dict.linkPlaceholder || "VD: Bài giảng..."}
             className={`rounded-xl !h-[52px] px-4 text-sm bg-[#F3F4F5] border-0 focus:ring-1 focus:ring-gray-300 ${errors.title ? "ring-2 ring-red-400" : ""}`}
           />
         </div>
@@ -125,7 +126,7 @@ const AddLinkModal = ({
         {/* URL Link Input */}
         <div>
           <label className="block text-sm font-semibold text-[#374151] mb-2">
-            Đường dẫn liên kết (URL)
+            {dict.url || "Đường dẫn liên kết (URL)"}
           </label>
           <TextInput
             required
@@ -150,7 +151,7 @@ const AddLinkModal = ({
               }
             }}
             error={errors.url}
-            placeholder={"VD: Link họp..."}
+            placeholder={dict.urlPlaceholder || "Dán link video tại đây"}
             className={`rounded-xl !h-[52px] px-4 text-sm bg-[#F3F4F5] border-0 focus:ring-1 focus:ring-gray-300 ${errors.url ? "ring-2 ring-red-400" : ""}`}
           />
         </div>
