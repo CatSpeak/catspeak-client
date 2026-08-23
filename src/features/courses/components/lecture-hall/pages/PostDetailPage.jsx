@@ -142,8 +142,8 @@ const PostDetailPage = () => {
       />
 
       {/* ── Page Header ── */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-[32px] md:text-[40px] font-semibold text-[#191C1D]">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h1 className="text-[24px] sm:text-[32px] md:text-[40px] font-semibold text-[#191C1D]">
           Chi tiết bài viết
         </h1>
         <div className="flex gap-2">
@@ -158,12 +158,12 @@ const PostDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-7 w-full overflow-hidden">
+        <div className="lg:col-span-8 w-full overflow-hidden">
           {/* ── Nội dung bài đăng ── */}
           <PostContent post={formattedPost} />
         </div>
 
-        <div className="lg:col-span-5 w-full overflow-hidden">
+        <div className="lg:col-span-4 w-full overflow-hidden">
         <CommentList
           comments={comments}
           locked={!postDetail?.allowReply}

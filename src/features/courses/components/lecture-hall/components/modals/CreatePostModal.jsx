@@ -115,6 +115,7 @@ const CreatePostModal = ({ open, onClose, onSubmit = () => { } }) => {
       open={open}
       onClose={handleCloseModal}
       title={dict.title}
+      fullScreenOnMobile={false}
       className="md:max-w-2xl rounded-xl"
       headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
       bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
