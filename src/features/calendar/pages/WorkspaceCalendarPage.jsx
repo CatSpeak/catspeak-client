@@ -102,7 +102,8 @@ const WorkspaceCalendarPage = () => {
       <Breadcrumb
         items={[
           { label: t.nav.home || "Home", onClick: () => navigate("/workspace") },
-          { label: c.teachingTasks || "Teaching Tasks" }
+          { label: c.teachingTasks || "Teaching Tasks", onClick: () => navigate("/workspace/teaching-tasks") },
+          { label: c.overview || "Overview" }
         ]}
       />
 
@@ -141,7 +142,7 @@ const WorkspaceCalendarPage = () => {
           prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
           actionIcon="plus"
           emptyLabel={c.noTeachingTasks || "No teaching tasks available"}
-          onViewAll={() => navigate("/workspace/teaching-tasks/all")}
+          onViewAll={() => navigate("/workspace/teaching-tasks")}
         />
       </div>
     </div>
