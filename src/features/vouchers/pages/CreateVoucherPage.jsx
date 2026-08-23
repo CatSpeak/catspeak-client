@@ -5,6 +5,7 @@ import PageTitle from "@/shared/components/ui/PageTitle"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { StepPills } from "@/shared/components/ui/navigation"
+import FloatingActionDock from "@/shared/components/ui/containers/FloatingActionDock"
 import { useGetVoucherByIdQuery } from "../api/vouchersApi"
 import {
   useGetAllCoursesQuery,
@@ -167,7 +168,7 @@ const CreateVoucherPage = () => {
     : "Tạo voucher ưu đãi"
 
   return (
-    <div className="w-full space-y-6 pb-24 animate-in fade-in duration-300">
+    <div className="w-full space-y-6 pb-28 animate-in fade-in duration-300">
       {/* Back Button */}
       <PillButton
         variant="secondary"
@@ -216,50 +217,41 @@ const CreateVoucherPage = () => {
         )}
       </div>
 
-      {/* Bottom Sticky Action Footer matching Teacher Wireframes */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-3.5 px-6 shadow-lg">
-        <div className="w-full flex items-center justify-between">
-          {currentStep === 1 ? (
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-            >
-              Hủy
-            </button>
-          ) : (
+      {/* Floating Action Dock */}
+      <FloatingActionDock>
+        {currentStep === 2 ? (
+          <PillButton
+            variant="secondary-no-outline"
+            onClick={() => setCurrentStep(1)}
+            startIcon={<ArrowLeft />}
+          >
+            Quay lại
+          </PillButton>
+        ) : (
+          <div />
+        )}
+
+        <div className="flex items-center gap-3">
+          <PillButton
+            type="button"
+            variant="secondary"
+            disabled={isSubmitting}
+            onClick={() => handleSubmit(true)}
+          >
+            Lưu nháp
+          </PillButton>
+
+          {currentStep === 1 && (
             <PillButton
-              variant="secondary-no-outline"
-              onClick={() => setCurrentStep(1)}
-              startIcon={<ArrowLeft />}
+              type="button"
+              variant="primary"
+              onClick={onAdvanceToStep2}
             >
-              Quay lại
+              Tiếp theo
             </PillButton>
           )}
-
-          <div className="flex items-center gap-3">
-            <PillButton
-              type="button"
-              variant="secondary"
-              disabled={isSubmitting}
-              onClick={() => handleSubmit(true)}
-            >
-              {currentStep === 1 ? "Lưu nháp" : "Lưu Voucher"}
-            </PillButton>
-
-            {currentStep === 1 ? (
-              <PillButton
-                type="button"
-                variant="primary"
-                onClick={onAdvanceToStep2}
-                endIcon={<ChevronRight />}
-              >
-                Tiếp theo
-              </PillButton>
-            ) : null}
-          </div>
         </div>
-      </div>
+      </FloatingActionDock>
     </div>
   )
 }

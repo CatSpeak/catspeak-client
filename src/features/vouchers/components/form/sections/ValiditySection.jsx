@@ -1,6 +1,6 @@
 import React from "react"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import { TextInput } from "@/shared/components/ui/inputs"
+import { TextInput, Checkbox } from "@/shared/components/ui/inputs"
 
 export const ValiditySection = ({ form, errors, onChange }) => {
   return (
@@ -21,24 +21,25 @@ export const ValiditySection = ({ form, errors, onChange }) => {
       <TextInput
         type="date"
         label="Ngày kết thúc"
+        required={!form.isNeverExpired}
         disabled={Boolean(form.isNeverExpired)}
-        value={form.validTo || ""}
+        value={form.isNeverExpired ? "" : form.validTo || ""}
         onChange={(e) => onChange("validTo", e.target.value)}
-        error={errors?.validTo}
+        error={!form.isNeverExpired ? errors?.validTo : undefined}
       />
 
       {/* Checkbox Không giới hạn */}
-      <label className="flex items-center gap-2.5 cursor-pointer pt-1">
-        <input
-          type="checkbox"
+      <div
+        onClick={() => onChange("isNeverExpired", !form.isNeverExpired)}
+        className="group flex items-center gap-2 cursor-pointer select-none"
+      >
+        <Checkbox
+          withWrapper
           checked={Boolean(form.isNeverExpired)}
-          onChange={(e) => onChange("isNeverExpired", e.target.checked)}
-          className="w-4 h-4 rounded text-cath-red-700 focus:ring-cath-red-500 cursor-pointer"
+          onChange={() => {}}
         />
-        <span className="text-xs text-slate-700 font-medium">
-          Không giới hạn
-        </span>
-      </label>
+        <span>Không giới hạn</span>
+      </div>
     </FluentCard>
   )
 }

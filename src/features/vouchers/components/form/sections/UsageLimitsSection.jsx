@@ -24,10 +24,12 @@ export const UsageLimitsSection = ({ form, errors, onChange }) => {
       <TextInput
         type="number"
         label="Số lượt tối đa/người"
+        required
         value={form.perUserLimit || 1}
         onChange={(e) => onChange("perUserLimit", e.target.value)}
         placeholder="1"
         rightIcon={User}
+        error={errors?.perUserLimit}
       />
 
       {/* Giới hạn theo ngày */}

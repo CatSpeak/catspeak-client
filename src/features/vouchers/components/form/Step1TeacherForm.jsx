@@ -32,7 +32,10 @@ const Step1TeacherForm = ({
   const [classSearch, setClassSearch] = useState("")
   // Sub-selection mode when inside Course Scope: "all_classes" | "specific_classes"
   const [courseClassMode, setCourseClassMode] = useState(() => {
-    if (form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES && !isInitialClassContext) {
+    if (
+      form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES &&
+      !isInitialClassContext
+    ) {
       return "specific_classes"
     }
     return form.classIds && form.classIds.length > 0 && !isInitialClassContext
@@ -45,14 +48,19 @@ const Step1TeacherForm = ({
   const activeCourse = useMemo(() => {
     return (
       teacherCourses.find(
-        (c) => String(c.id) === String(selectedCourseId) || String(c._id) === String(selectedCourseId),
+        (c) =>
+          String(c.id) === String(selectedCourseId) ||
+          String(c._id) === String(selectedCourseId),
       ) ||
-      (courseNameParam ? { id: selectedCourseId, title: courseNameParam } : null) ||
+      (courseNameParam
+        ? { id: selectedCourseId, title: courseNameParam }
+        : null) ||
       teacherCourses[0]
     )
   }, [teacherCourses, selectedCourseId, courseNameParam])
 
-  const courseDisplayName = activeCourse?.title || activeCourse?.name || courseNameParam || "IELTS"
+  const courseDisplayName =
+    activeCourse?.title || activeCourse?.name || courseNameParam || "IELTS"
 
   // Classes belonging to the active course (or all teacher classes)
   const courseClasses = useMemo(() => {
@@ -68,9 +76,13 @@ const Step1TeacherForm = ({
     const targetId = form.classIds?.[0] || classIdParam
     return (
       teacherClasses.find(
-        (c) => String(c.id) === String(targetId) || String(c._id) === String(targetId),
+        (c) =>
+          String(c.id) === String(targetId) ||
+          String(c._id) === String(targetId),
       ) ||
-      (classNameParam ? { id: targetId, name: classNameParam, price: 900000 } : null) ||
+      (classNameParam
+        ? { id: targetId, name: classNameParam, price: 900000 }
+        : null) ||
       teacherClasses[0]
     )
   }, [teacherClasses, form.classIds, classIdParam, classNameParam])
@@ -80,7 +92,10 @@ const Step1TeacherForm = ({
 
   // Determine relevant classes for lowest tuition calculation
   const selectedClassesList = useMemo(() => {
-    return teacherClasses.filter((c) => form.classIds?.includes(c.id) || form.classIds?.includes(Number(c.id)))
+    return teacherClasses.filter(
+      (c) =>
+        form.classIds?.includes(c.id) || form.classIds?.includes(Number(c.id)),
+    )
   }, [teacherClasses, form.classIds])
 
   const { lowestTuition, lowestTuitionClassName } = useMemo(() => {
@@ -88,7 +103,12 @@ const Step1TeacherForm = ({
     if (isCourseScope || courseClassMode === "all_classes") {
       listToInspect = courseClasses.length > 0 ? courseClasses : teacherClasses
     } else {
-      listToInspect = selectedClassesList.length > 0 ? selectedClassesList : (courseClasses.length > 0 ? courseClasses : teacherClasses)
+      listToInspect =
+        selectedClassesList.length > 0
+          ? selectedClassesList
+          : courseClasses.length > 0
+            ? courseClasses
+            : teacherClasses
     }
 
     if (!listToInspect || listToInspect.length === 0) {
@@ -109,14 +129,23 @@ const Step1TeacherForm = ({
       lowestTuition: minPrice === Infinity ? 800000 : minPrice,
       lowestTuitionClassName: minClass?.name || minClass?.title || "Lớp BASIC",
     }
-  }, [isCourseScope, courseClassMode, courseClasses, teacherClasses, selectedClassesList])
+  }, [
+    isCourseScope,
+    courseClassMode,
+    courseClasses,
+    teacherClasses,
+    selectedClassesList,
+  ])
 
   // Filtered classes for search in class picker
   const filteredClasses = useMemo(() => {
-    const baseList = isCourseScope || activeCourse ? courseClasses : teacherClasses
+    const baseList =
+      isCourseScope || activeCourse ? courseClasses : teacherClasses
     if (!classSearch.trim()) return baseList
     return baseList.filter((cls) =>
-      (cls.name || cls.title || "").toLowerCase().includes(classSearch.toLowerCase().trim()),
+      (cls.name || cls.title || "")
+        .toLowerCase()
+        .includes(classSearch.toLowerCase().trim()),
     )
   }, [classSearch, isCourseScope, activeCourse, courseClasses, teacherClasses])
 
@@ -127,12 +156,20 @@ const Step1TeacherForm = ({
     Number(form.discountValue) >= lowestTuition
 
   // Estimation Calculation for 1 learner (when Class Scope is active)
-  const sampleOriginalTuition = activeClass?.price ?? activeClass?.tuitionFee ?? selectedClassesList[0]?.price ?? selectedClassesList[0]?.tuitionFee ?? 900000
+  const sampleOriginalTuition =
+    activeClass?.price ??
+    activeClass?.tuitionFee ??
+    selectedClassesList[0]?.price ??
+    selectedClassesList[0]?.tuitionFee ??
+    900000
   let discountAmountForOne = 0
   if (isPercent) {
     const pct = Math.min(Math.max(Number(form.discountValue) || 0, 0), 50)
     const rawDiscount = (sampleOriginalTuition * pct) / 100
-    const maxDiscount = Number(form.maxDiscountAmount) > 0 ? Number(form.maxDiscountAmount) : rawDiscount
+    const maxDiscount =
+      Number(form.maxDiscountAmount) > 0
+        ? Number(form.maxDiscountAmount)
+        : rawDiscount
     discountAmountForOne = Math.min(rawDiscount, maxDiscount)
   } else {
     discountAmountForOne = Math.min(
@@ -214,23 +251,16 @@ const Step1TeacherForm = ({
 
         <OtherConfigSection
           form={form}
+          errors={errors}
           onChange={onChange}
         />
       </div>
 
       {/* RIGHT COLUMN (4 cols): Thời gian hiệu lực, Giới hạn sử dụng, Ước tính (1 học viên) */}
       <div className="lg:col-span-4 space-y-6">
-        <ValiditySection
-          form={form}
-          errors={errors}
-          onChange={onChange}
-        />
+        <ValiditySection form={form} errors={errors} onChange={onChange} />
 
-        <UsageLimitsSection
-          form={form}
-          errors={errors}
-          onChange={onChange}
-        />
+        <UsageLimitsSection form={form} errors={errors} onChange={onChange} />
 
         {!isCourseScope && (
           <EstimateBox

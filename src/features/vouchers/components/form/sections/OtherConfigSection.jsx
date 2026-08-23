@@ -1,31 +1,32 @@
 import React from "react"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import { TextInput } from "@/shared/components/ui/inputs"
+import { TextInput, Checkbox } from "@/shared/components/ui/inputs"
 
-export const OtherConfigSection = ({ form, onChange }) => {
+export const OtherConfigSection = ({ form, errors = {}, onChange }) => {
   return (
     <FluentCard className="space-y-4">
       <h4 className="font-bold">Cấu hình khác</h4>
 
-      <label className="flex items-center gap-2.5 cursor-pointer">
-        <input
-          type="checkbox"
+      <div
+        onClick={() => onChange("isOnlyNewUser", !form.isOnlyNewUser)}
+        className="group flex items-center gap-2 cursor-pointer select-none"
+      >
+        <Checkbox
+          withWrapper
           checked={Boolean(form.isOnlyNewUser)}
-          onChange={(e) => onChange("isOnlyNewUser", e.target.checked)}
-          className="w-4 h-4 rounded text-cath-red-700 focus:ring-cath-red-500 cursor-pointer"
+          onChange={() => {}}
         />
-        <span className="text-xs text-slate-700 font-medium">
-          Chỉ dành cho người mới
-        </span>
-      </label>
+        <span>Chỉ dành cho người mới</span>
+      </div>
 
       <TextInput
         type="number"
         label="Số người học tối thiểu"
+        required
         value={form.minLearners || 1}
         onChange={(e) => onChange("minLearners", e.target.value)}
+        error={errors?.minLearners}
         placeholder="1"
-        containerClassName="sm:w-48"
       />
     </FluentCard>
   )
