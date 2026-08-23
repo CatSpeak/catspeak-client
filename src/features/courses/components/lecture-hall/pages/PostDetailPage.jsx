@@ -141,13 +141,29 @@ const PostDetailPage = () => {
         ]}
       />
 
-      <div className="min-w-6xl space-y-6">
-        {/* ── Nội dung bài đăng ── */}
-        <PostContent
-          post={formattedPost}
-        />
+      {/* ── Page Header ── */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-[32px] md:text-[40px] font-semibold text-[#191C1D]">
+          Chi tiết bài viết
+        </h1>
+        <div className="flex gap-2">
+          {/* Header Action Buttons from image */}
+          <button className="p-2 rounded-lg bg-white border border-[#E2E2E2] hover:bg-gray-50 transition-colors flex items-center justify-center h-10 w-10 shadow-sm">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          </button>
+          <button className="p-2 rounded-lg bg-[#990011] text-white hover:bg-[#80000e] transition-colors flex items-center justify-center h-10 w-10 shadow-sm">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+          </button>
+        </div>
+      </div>
 
-        {/* ── Phần phản hồi ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-7 w-full overflow-hidden">
+          {/* ── Nội dung bài đăng ── */}
+          <PostContent post={formattedPost} />
+        </div>
+
+        <div className="lg:col-span-5 w-full overflow-hidden">
         <CommentList
           comments={comments}
           locked={!postDetail?.allowReply}
@@ -160,6 +176,7 @@ const PostDetailPage = () => {
           onViewReplies={(c) => console.log("view replies of", c)}
           onShowAll={() => setShowAll(true)}
         />
+        </div>
       </div>
     </div>
   )
