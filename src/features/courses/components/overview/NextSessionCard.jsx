@@ -1,15 +1,14 @@
 import React from 'react'
 import { Clock, Calendar, ArrowRight } from 'lucide-react'
 import PillButton from '@/shared/components/ui/buttons/PillButton'
-import Avatar from '@/shared/components/ui/Avatar'
 import FluentCard from '@/shared/components/ui/FluentCard'
 
 const NextSessionCard = ({
   title = "Khóa tiếng anh luyện nói",
-  tags = ["China", "B2"],
   time = "11:45 AM",
   date = "Hôm nay, 15/07/2026",
-  status = "Live",
+  status,
+  language,
   onAction,
 }) => {
   return (
@@ -17,14 +16,11 @@ const NextSessionCard = ({
       {/* Top section: Tags and Status */}
       <div className="flex justify-between items-start w-full">
         <div className="flex items-center gap-2">
-          {tags.map((tag, idx) => (
-            <span
-              key={idx}
-              className="px-2 py-1 bg-[#F4AB1B] text-[#1A1A1A] text-sm font-semibold rounded-full"
-            >
-              {tag}
+          {language && (
+            <span className="px-2 py-1 bg-[#F4AB1B] text-[#1A1A1A] text-sm font-semibold rounded-full">
+              {language}
             </span>
-          ))}
+          )}
         </div>
       </div>
 
@@ -47,7 +43,7 @@ const NextSessionCard = ({
 
       {/* Footer: Avatars and Button */}
       <div className="flex items-center justify-end">
-        {status === 'Live' ? (
+        {status ? (
           <PillButton
             variant="primary"
             endIcon={<ArrowRight size={18} />}
