@@ -138,6 +138,8 @@ const videoCallSlice = createSlice({
           state.callInfo.sessionId = state.mainRoomCache.sessionId
         }
         state.mainRoomCache = null
+      } else if (state.parentSessionId && state.callInfo) {
+        state.callInfo.sessionId = state.parentSessionId
       }
       state.isBreakoutActive = false
       state.breakoutRoomName = null

@@ -199,6 +199,9 @@ export default {
       scheduleConflictDesc: "Lịch học của lớp này trùng với lớp bạn đang học:",
       confirmEnroll: "Vẫn đăng ký",
       cancel: "Hủy",
+      removeVoucherTitle: "Xóa mã giảm giá?",
+      removeVoucherDesc: "Bạn có chắc muốn xóa mã {{code}}? Tổng thanh toán sẽ trở về {{totalAmount}}. Bạn sẽ mất ưu đãi giảm {{discountAmount}}.",
+      removeVoucherConfirm: "Xóa mã",
 
       // VoucherSection
       searchVoucher: "Tìm mã...",
@@ -236,6 +239,44 @@ export default {
       categoryExpired: "Hết hạn",
       categoryExhausted: "Hết lượt",
       voucherCountSuffix: "mã",
+    },
+    errorCodes: {
+      // Lỗi chung
+      COMMON_INTERNAL_SERVER_ERROR: "Lỗi máy chủ nội bộ. Vui lòng thử lại.",
+      COMMON_EXTERNAL_SERVICE_ERROR: "Lỗi dịch vụ bên ngoài. Vui lòng thử lại sau.",
+      COMMON_BAD_REQUEST: "Yêu cầu không hợp lệ. Vui lòng kiểm tra lại thông tin.",
+      COMMON_CONFLICT: "Xảy ra xung đột. Vui lòng thử lại.",
+
+      // Lỗi thanh toán
+      PAYMENT_PLAN_NOT_FOUND: "Gói đăng ký đã chọn không còn khả dụng.",
+      PAYMENT_CLASS_NOT_FOUND: "Không tìm thấy lớp học hoặc lớp học không còn khả dụng.",
+      PAYMENT_LEARNER_NOT_FOUND: "Không tìm thấy tài khoản CatSpeak với email này.",
+      PAYMENT_LEARNER_ALREADY_ENROLLED: "Người học này đã đăng ký lớp học rồi.",
+      PAYMENT_LEARNER_ALREADY_IN_CHECKOUT: "Người học này đã có trong danh sách thanh toán.",
+      PAYMENT_CLASS_FULL: "Lớp học đã đầy chỗ.",
+      PAYMENT_ENROLLMENT_PERIOD_INACTIVE: "Thời gian đăng ký của lớp học này chưa mở hoặc đã kết thúc.",
+      PAYMENT_CLASS_ALREADY_STARTED: "Lớp học đã bắt đầu và không còn nhận đăng ký.",
+      PAYMENT_VOUCHER_UNAVAILABLE: "Mã {{code}} không còn khả dụng, đã tự động gỡ khỏi đơn hàng.",
+      PAYMENT_VOUCHER_DISCOUNT_CHANGED: "Số tiền giảm giá của voucher đã thay đổi. Vui lòng kiểm tra lại đơn hàng.",
+      PAYMENT_LINK_FAILED: "Không thể tạo liên kết thanh toán. Vui lòng thử lại.",
+      PAYMENT_ALREADY_PAID: "Giao dịch này đã được thanh toán thành công.",
+      PAYMENT_ALREADY_CANCELLED: "Giao dịch này đã được thanh toán và không thể hủy.",
+      PAYMENT_NOT_FOUND: "Không tìm thấy giao dịch thanh toán.",
+      PAYMENT_SERVICE_NOT_CONFIGURED: "Dịch vụ thanh toán tạm thời không khả dụng.",
+      PAYMENT_INVALID_TYPE: "Loại thanh toán không hợp lệ.",
+      PAYMENT_TRANSACTION_FAILED: "Giao dịch thất bại. Vui lòng thử lại.",
+
+      // Lỗi đăng ký lớp học
+      CLASS_ENROLLMENT_SCHEDULE_CONFLICT: "Phát hiện lịch học trùng.",
+      CLASS_ENROLLMENT_CLASS_FULL: "Lớp học đã đầy chỗ.",
+      CLASS_ENROLLMENT_PERIOD_CLOSED: "Thời gian đăng ký của lớp học đã kết thúc.",
+      CLASS_ENROLLMENT_CLASS_ALREADY_STARTED: "Lớp học đã bắt đầu.",
+
+      // Lỗi xác thực người học (từ gRPC)
+      ACCOUNT_NOT_FOUND: "Không tìm thấy tài khoản CatSpeak với email này.",
+      ALREADY_ENROLLED: "Người học này đã đăng ký lớp học rồi.",
+      CLASS_FULL: "Lớp học đã đầy chỗ.",
+      VALIDATION_ERROR: "Thông tin không hợp lệ. Vui lòng kiểm tra lại.",
     }
   }
 }

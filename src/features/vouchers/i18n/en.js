@@ -41,6 +41,7 @@ export const en = {
       neverExpired: "No Expiration",
     },
 
+    // Statuses
     status: {
       Draft: "Draft",
       Active: "Active",
@@ -51,6 +52,26 @@ export const en = {
       PendingApproval: "Pending Approval",
       Rejected: "Rejected",
       Stopped: "Stopped",
+      expiringSoon: "Expiring soon",
+    },
+
+    // Scopes
+    scope: {
+      All: "Cat Speak",
+      SpecificCourses: "Courses",
+      SpecificClasses: "Classes",
+    },
+
+    // Voucher Card & Section
+    card: {
+      appliedTitle: "Applied Vouchers",
+      noAppliedVouchers: "No active vouchers applied to this class.",
+      viewAll: "View All",
+      discount: "Off",
+      exp: "Exp",
+      neverExpired: "No Expiration",
+      remainingUsages: "{{remaining}}/{{limit}} uses left",
+      unlimitedUsages: "Unlimited uses",
     },
 
     actions: {
