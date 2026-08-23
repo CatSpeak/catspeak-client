@@ -15,6 +15,8 @@ const getLanguageName = (langCode) => {
       return "Vietnamese"
     case "en":
       return "English"
+    case "ja":
+      return "Japanese"
     default:
       return "English"
   }
@@ -38,7 +40,9 @@ export const useCreateCustomRoomForm = (open = true) => {
   const [nameError, setNameError] = useState("")
   const [passwordError, setPasswordError] = useState("")
 
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
+    ? lang
+    : "en"
   const selectedLanguage = getLanguageName(supportedLangCode)
 
   const { data: customRoomsData } = useGetMyCustomRoomsQuery(undefined, {

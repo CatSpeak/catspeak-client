@@ -5,6 +5,7 @@ const DISPLAY_NAMES = {
   en: "English",
   vi: "Tiếng Việt",
   zh: "中文",
+  ja: "日本語",
 }
 
 /**

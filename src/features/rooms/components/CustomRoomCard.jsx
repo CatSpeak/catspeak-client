@@ -36,8 +36,11 @@ const CustomRoomCard = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   // Thumbnail fallback handling
-  const fallbackThumbnail =
-    room.languageType === "Chinese" ? ZHThumbnail : ENThumbnail
+  const fallbackThumbnail = ["Chinese", "Japanese"].includes(
+    room.languageType,
+  )
+    ? ZHThumbnail
+    : ENThumbnail
   const displayThumbnail =
     imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl
 
