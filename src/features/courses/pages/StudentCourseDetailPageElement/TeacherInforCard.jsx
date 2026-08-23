@@ -17,34 +17,45 @@ const TeacherInforCard = ({
       className={`rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col items-center justify-between bg-[linear-gradient(225deg,rgba(153,0,17,0.12)_0%,rgba(255,255,255,1)_60%)] relative overflow-hidden ${className}`}
     >
       <div className="w-full flex flex-col items-center">
-        {/* Avatar (lớn, căn giữa) */}
-        {teacherAvatarUrl ? (
-          <img
-            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mx-auto"
-            src={teacherAvatarUrl}
-            alt={teacher.name || ""}
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-red-100 text-cath-red-700 flex items-center justify-center font-bold text-2xl sm:text-3xl border-4 border-white shadow-md mx-auto">
-            {(teacher.name || "T")[0]?.toUpperCase()}
-          </div>
-        )}
+        {/* Avatar + Name + Email card */}
+        <div
+          className="group cursor-pointer flex flex-col items-center transition-all duration-200"
+          onClick={() => {
+            const teacherId = teacher.accountId || teacher.id
+            if (teacherId) {
+              navigate(`/profile/${encodeURIComponent(String(teacherId))}`)
+            }
+          }}
+        >
+          {/* Avatar (lớn, căn giữa) */}
+          {teacherAvatarUrl ? (
+            <img
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mx-auto transition-transform duration-200 group-hover:scale-105"
+              src={teacherAvatarUrl}
+              alt={teacher.name || ""}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-red-100 text-cath-red-700 flex items-center justify-center font-bold text-2xl sm:text-3xl border-4 border-white shadow-md mx-auto transition-transform duration-200 group-hover:scale-105">
+              {(teacher.name || "T")[0]?.toUpperCase()}
+            </div>
+          )}
 
-        {/* Name */}
-        <h3 className="font-bold text-base sm:text-lg text-gray-900 text-center mt-3">
-          {teacher.name || scd.instructorUnavailable || "Giảng viên"}
-        </h3>
+          {/* Name */}
+          <h3 className="font-bold text-base sm:text-lg text-gray-900 group-hover:text-cath-red-700 transition-colors text-center mt-3">
+            {teacher.name || scd.instructorUnavailable || "Giảng viên"}
+          </h3>
 
-        {/* Email */}
-        <p className="text-xs text-gray-400 font-normal text-center mt-0.5">
-          {teacher.email ||
-            teacher.contactEmail ||
-            teacher.accountEmail ||
-            teacher.title ||
-            "teacher@catspeak.com"}
-        </p>
+          {/* Email */}
+          <p className="text-xs text-gray-400 group-hover:text-cath-red-700 transition-colors font-normal text-center mt-0.5">
+            {teacher.email ||
+              teacher.contactEmail ||
+              teacher.accountEmail ||
+              teacher.title ||
+              "teacher@catspeak.com"}
+          </p>
+        </div>
 
         {/* Padding bên dưới email */}
         <div className="w-full pt-3">
