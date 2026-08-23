@@ -7,23 +7,20 @@ import { Breadcrumb } from '@/shared/components/ui/navigation'
 import PageTitle from '@/shared/components/ui/PageTitle'
 import { useNavigate } from 'react-router-dom'
 import { PillButton } from '@/shared/components/ui/buttons'
-import { useGetStudentScheduleSessionsQuery } from "@/store/api/coursesApi"
+import { useGetStudentCompletedClassesQuery, useGetStudentJoinedClassesQuery, useGetStudentScheduleSessionsQuery } from "@/store/api/coursesApi"
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { getClassLanguageCode } from "@/shared/utils/navigation"
+import { getSafeMediaUrl, defaultCourseThumbnail } from "../utils/courseUtils"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 
 import dayjs from 'dayjs'
+import { Calendar, BookOpen } from 'lucide-react'
 
 const MyLearningOverview = ({ onShowAll }) => {
   const navigate = useNavigate()
   const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
 
   const [activeTab, setActiveTab] = useState("registered")
-
-  const tabs = [
-    { id: "registered", label: "Đã đăng ký" },
-    { id: "completed", label: "Hoàn thành" },
-    { id: "cancelled", label: "Đã huỷ" },
-  ]
 
   // Get sessions from today to next 30 days
   const dateParams = useMemo(() => {
@@ -40,6 +37,35 @@ const MyLearningOverview = ({ onShowAll }) => {
     const data = sessionsRes.data || sessionsRes
     return Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : []
   }, [sessionsRes])
+
+  const { data: joinedRes, isLoading: isJoinedLoading } = useGetStudentJoinedClassesQuery()
+
+  const { data: completedRes, isLoading: isCompletedLoading } = useGetStudentCompletedClassesQuery()
+
+  const joinedClasses = useMemo(() => {
+    if (!joinedRes) return []
+    const data = joinedRes.data || joinedRes
+    return Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : [])
+  }, [joinedRes])
+
+  const completedClasses = useMemo(() => {
+    if (!completedRes) return []
+    const data = completedRes.data || completedRes
+    return Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : [])
+  }, [completedRes])
+
+  const tabs = [
+    { id: "registered", label: "Đã đăng ký", badge: joinedClasses.length },
+    { id: "completed", label: "Hoàn thành", badge: completedClasses.length },
+    { id: "cancelled", label: "Đã huỷ" },
+  ]
+
+  const displayClasses =
+    activeTab === "registered" ? joinedClasses :
+      activeTab === "completed" ? completedClasses :
+        []
+
+  const isClassesLoading = isJoinedLoading || isCompletedLoading
 
   return (
     <div className="space-y-6">
@@ -103,7 +129,12 @@ const MyLearningOverview = ({ onShowAll }) => {
           })}
         </div>
       ) : (
-        <div className="py-4 text-gray-500">Không có buổi học nào sắp diễn ra.</div>
+        <div className='col-span-full w-full flex-1'>
+          <EmptyState variant="page"
+            icon={Calendar}
+            iconClassName="w-10 h-10 mb-3 text-gray-300"
+            message="Không có lớp học nào sắp diễn ra" />
+        </div>
       )}
 
       <Tabs
@@ -113,25 +144,103 @@ const MyLearningOverview = ({ onShowAll }) => {
         fullWidth={false}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {activeTab === "registered" && (
-          <>
-            <ClassCard />
-            <ClassCard title="Lớp giao tiếp cơ bản" progress={10} />
-            <ClassCard title="Lớp tiếng anh thương mại" progress={60} />
-          </>
-        )}
+      {isClassesLoading ? (
+        <div className="flex justify-center p-6"><LoadingSpinner /></div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {displayClasses.length > 0 ? (
+            displayClasses.slice(0, 3).map((cls) => {
+              const progress = (cls.progress?.completedSessions && cls.progress?.totalSessions)
+                ? Math.round((cls.progress.completedSessions / cls.progress.totalSessions) * 100)
+                : 0
 
-        {activeTab === "completed" && (
-          <ClassCard title="Phát âm chuẩn xác" progress={100} />
-        )}
+              const formattedStartDate = cls.startDate && formatDate ? formatDate(cls.startDate) : (cls.startDate || "?")
+              const formattedEndDate = cls.endDate && formatDate ? formatDate(cls.endDate) : "?"
+              const dateRange = cls.endDate ? `${formattedStartDate} - ${formattedEndDate}` : formattedStartDate
 
-        {activeTab === "cancelled" && (
-          <div className='w-full flex-1'>
-            <EmptyState variant="page" />
-          </div>
-        )}
-      </div>
+              // Handle transformed schedule object vs raw array
+              let rawDays = []
+              let rawStartTime = ""
+              let rawEndTime = ""
+
+              if (Array.isArray(cls.rawSchedule) && cls.rawSchedule.length > 0) {
+                rawDays = cls.rawSchedule.map(s => s.dayOfWeek).filter(Boolean)
+                rawStartTime = cls.rawSchedule[0].startTime
+                rawEndTime = cls.rawSchedule[0].endTime
+              } else if (Array.isArray(cls.schedule)) {
+                rawDays = cls.schedule.map(s => s.dayOfWeek).filter(Boolean)
+                rawStartTime = cls.schedule[0]?.startTime
+                rawEndTime = cls.schedule[0]?.endTime
+              } else if (cls.schedule && typeof cls.schedule === 'object') {
+                rawDays = cls.schedule.days || []
+                rawStartTime = cls.schedule.startTime
+                rawEndTime = cls.schedule.endTime
+              }
+
+              const scheduleDays = formatScheduleDays && rawDays.length > 0
+                ? formatScheduleDays(rawDays, "Chưa có lịch", " - ", rawStartTime, cls.startDate)
+                : (rawDays.length > 0 ? rawDays.join(' - ') : "Chưa có lịch")
+
+              const clsStartFormatted = formatScheduleTime && rawStartTime
+                ? formatScheduleTime(rawStartTime, cls.startDate)
+                : rawStartTime
+
+              const clsEndFormatted = formatScheduleTime && rawEndTime
+                ? formatScheduleTime(rawEndTime, cls.startDate)
+                : rawEndTime
+
+              const scheduleTime = clsStartFormatted && clsEndFormatted
+                ? `${clsStartFormatted} - ${clsEndFormatted}`
+                : "Chưa có giờ"
+
+              return (
+                <ClassCard
+                  key={cls.id}
+                  title={cls.title || cls.name || "Lớp học"}
+                  subtitle={cls.courseTitle || cls.courseName || "Khoá học"}
+                  instructorName={cls.teacher?.name || "Chưa phân công"}
+                  instructorAvatar={cls.teacher?.avatar || cls.teacher?.avatarImageUrl}
+                  coverImage={getSafeMediaUrl(cls.thumbnailUrl) || defaultCourseThumbnail}
+                  dateRange={dateRange}
+                  scheduleDays={scheduleDays}
+                  scheduleTime={scheduleTime}
+                  progress={progress}
+                  onEnter={() => navigate(`/workspace/learning/class/${cls.id}`)}
+                  onShare={() => copyShareLink({
+                    url: `/explore-courses/class/${cls.id}`,
+                    successMessage: "Đã sao chép link lớp học!"
+                  })}
+                />
+              )
+            })
+          ) : (
+            <div className='col-span-full w-full flex-1'>
+              <EmptyState
+                variant="page"
+                icon={BookOpen}
+                iconClassName="w-12 h-12 mb-3 text-gray-300"
+                message={
+                  activeTab === "registered" ? "Bạn chưa đăng ký lớp học nào" :
+                    activeTab === "completed" ? "Bạn chưa hoàn thành lớp học nào" :
+                      "Bạn không có lớp học nào đã huỷ"
+                }
+                description={
+                  activeTab === "registered"
+                    ? "Hãy bắt đầu hành trình học tập của bạn bằng cách tham gia các khoá học của chúng tôi."
+                    : null
+                }
+                action={
+                  activeTab === "registered" ? (
+                    <PillButton variant="primary" onClick={() => navigate("/explore-courses")} className="mt-4">
+                      Khám phá khóa học
+                    </PillButton>
+                  ) : null
+                }
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className='flex justify-center items-end'>
         <PillButton variant='secondary-no-outline' textColor={"#990011"} onClick={onShowAll}>

@@ -18,6 +18,7 @@ const ClassCard = ({
   progress = 25,
   onCancel,
   onEnter,
+  onShare,
 }) => {
   return (
     <FluentCard padding="p-0" className="overflow-hidden flex flex-col text-[#1A1A1A]">
@@ -29,7 +30,11 @@ const ClassCard = ({
 
         {/* Top right share button */}
         <IconButton variant="overlay"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onShare?.(e);
+          }}
           className='absolute top-2 right-2'>
           <Share2 size={16} />
         </IconButton>
