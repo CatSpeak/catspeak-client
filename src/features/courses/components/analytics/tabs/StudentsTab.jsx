@@ -4,7 +4,7 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { numberVi } from "../../../data/analyticsData"
+import { numberVi, getLocalizedCompareNote } from "../../../data/analyticsData"
 import {
   useGetAnalyticsStudentsOverviewQuery,
   useGetAnalyticsStudentsGrowthQuery,
@@ -13,7 +13,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
@@ -30,54 +30,73 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
   const { data: studentsByClassData } = useGetAnalyticsStudentsByClassQuery(activeParams)
   const { data: studentsByCourseData } = useGetAnalyticsStudentsByCourseQuery(activeParams)
 
-  // 1. KPIs Mapping (strict API data)
-  const overview = overviewData || {}
-  const kpis = [
-    {
-      label: kpiT.totalStudents || "Tổng học viên",
-      value: numberVi(overview.totalStudents ?? 0, 0),
-      delta: "",
-      tone: "red",
-      note: kpiT.vsPrevious || "so với kỳ trước",
-    },
-    {
-      label: kpiT.newStudents || "Học viên mới",
-      value: numberVi(overview.newStudents ?? 0, 0),
-      delta: "",
-      tone: "green",
-      note: kpiT.vsPrevious || "so với kỳ trước",
-    },
-    {
-      label: kpiT.returningStudents || "Học viên quay lại",
-      value: numberVi(overview.returningStudents ?? 0, 0),
-      delta: "",
-      tone: "orange",
-      note: kpiT.vsPrevious || "so với kỳ trước",
-    },
-    {
-      label: kpiT.retentionRate || "Tỷ lệ duy trì học viên",
-      value: `${numberVi(overview.retentionRate ?? 0, 1)}%`,
-      delta: "",
-      tone: "purple",
-      note: kpiT.vsPrevious || "so với kỳ trước",
-    },
-    {
-      label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
-      value: `${numberVi(overview.reenrollmentRate ?? 0, 1)}%`,
-      delta: "",
-      tone: "orange",
-      note: kpiT.vsPrevious || "so với kỳ trước",
-    },
-  ]
-
   // 2. Growth Line Chart
   const growthPoints = (growthData?.growthData || [])
     .filter((point) => point?.label || point?.date)
 
   const chartLabels = growthPoints.map((p) => p.label || p.date)
-
   const seriesTotalStudents = growthPoints.map((p) => p.totalStudents ?? 0)
   const seriesNewStudents = growthPoints.map((p) => p.newStudents ?? 0)
+
+  // 1. Comparison & KPIs Mapping
+  const hasComparison = Boolean(queryParams.compare && queryParams.compare !== "")
+  const compareNote = getLocalizedCompareNote(group, queryParams.compare, language, t)
+
+  const fmtGrowth = (growth) => {
+    if (growth === null || growth === undefined || isNaN(growth)) return ""
+    const sign = growth >= 0 ? "↑" : "↓"
+    return `${sign} ${numberVi(Math.abs(growth), 1, language)}%`
+  }
+
+  const latestPoint = growthPoints.length > 0 ? growthPoints[growthPoints.length - 1] : null
+  const prevPoint = growthPoints.length > 1 ? growthPoints[growthPoints.length - 2] : null
+
+  const totalStudentsGrowth = prevPoint && prevPoint.totalStudents > 0
+    ? ((latestPoint.totalStudents - prevPoint.totalStudents) / prevPoint.totalStudents) * 100
+    : null
+
+  const newStudentsGrowth = prevPoint && prevPoint.newStudents > 0
+    ? ((latestPoint.newStudents - prevPoint.newStudents) / prevPoint.newStudents) * 100
+    : null
+
+  const overview = overviewData || {}
+  const kpis = [
+    {
+      label: kpiT.totalStudents || "Tổng học viên",
+      value: numberVi(overview.totalStudents ?? 0, 0, language),
+      delta: hasComparison && totalStudentsGrowth != null ? fmtGrowth(totalStudentsGrowth) : "",
+      tone: "red",
+      note: hasComparison && totalStudentsGrowth != null ? compareNote : "",
+    },
+    {
+      label: kpiT.newStudents || "Học viên mới",
+      value: numberVi(overview.newStudents ?? 0, 0, language),
+      delta: hasComparison && newStudentsGrowth != null ? fmtGrowth(newStudentsGrowth) : "",
+      tone: "green",
+      note: hasComparison && newStudentsGrowth != null ? compareNote : "",
+    },
+    {
+      label: kpiT.returningStudents || "Học viên quay lại",
+      value: numberVi(overview.returningStudents ?? 0, 0, language),
+      delta: hasComparison && overview.returningStudents ? `+${numberVi(overview.returningStudents, 0, language)}` : "",
+      tone: "orange",
+      note: hasComparison && overview.returningStudents ? compareNote : "",
+    },
+    {
+      label: kpiT.retentionRate || "Tỷ lệ duy trì học viên",
+      value: `${numberVi(overview.retentionRate ?? 0, 1, language)}%`,
+      delta: hasComparison && overview.retentionRate ? `+${numberVi(overview.retentionRate, 1, language)}%` : "",
+      tone: "purple",
+      note: hasComparison && overview.retentionRate ? compareNote : "",
+    },
+    {
+      label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
+      value: `${numberVi(overview.reenrollmentRate ?? 0, 1, language)}%`,
+      delta: hasComparison && overview.reenrollmentRate ? `+${numberVi(overview.reenrollmentRate, 1, language)}%` : "",
+      tone: "orange",
+      note: hasComparison && overview.reenrollmentRate ? compareNote : "",
+    },
+  ]
 
   // 3. Course Table Data
   const courseItems = studentsByCourseData?.data || (Array.isArray(studentsByCourseData) ? studentsByCourseData : [])

@@ -180,6 +180,10 @@ export default {
       payer: "（付款人）",
       totalLearners: "学员总数：",
       addLearnerError: "添加学员时发生错误",
+      friendSuggestions: "好友推荐",
+      selectedFriendsCount: "已选 {{count}} 人",
+      selectFriendsHint: "选择要添加的好友",
+      addSelected: "添加",
 
       // OrderSummary
       orderSummary: "订单摘要",

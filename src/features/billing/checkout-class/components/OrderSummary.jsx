@@ -166,23 +166,23 @@ const OrderSummary = ({
       >
         <div className="flex flex-col gap-4 mt-2 text-sm text-gray-600 leading-relaxed">
           {voucherToRemove && (
-            <p>
-              {tc.removeVoucherDesc
-                ?.replace("{{code}}", voucherToRemove.code)
+            <p dangerouslySetInnerHTML={{
+              __html: tc.removeVoucherDesc
+                ?.replace("{{code}}", `<strong class="text-gray-900 font-bold">${voucherToRemove.code}</strong>`)
                 ?.replace(
                   "{{totalAmount}}",
-                  formatCurrency(
+                  `<strong class="text-gray-900 font-bold">${formatCurrency(
                     totalPayment +
                       calculateVoucherDiscount(voucherToRemove, subtotal),
-                  ),
+                  )}</strong>`
                 )
                 ?.replace(
                   "{{discountAmount}}",
-                  formatCurrency(
+                  `<strong class="text-gray-900 font-bold">${formatCurrency(
                     calculateVoucherDiscount(voucherToRemove, subtotal),
-                  ),
-                )}
-            </p>
+                  )}</strong>`
+                )
+            }} />
           )}
         </div>
       </ConfirmationModal>

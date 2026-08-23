@@ -8,7 +8,9 @@ import {
   ALL_CLASSES_VALUE,
   UNASSIGNED_VALUE,
   PRESET_OPTIONS,
-  COMPARE_OPTIONS,
+  getPresetDateRange,
+  getCompareOptionsForPreset,
+  formatDateStr,
 } from "./filterConstants"
 
 const selectClass =
@@ -31,8 +33,9 @@ const DashboardFilterBar = ({
   classes = [],
   onExport,
   isExporting = false,
+  resolvedFilter = null,
 }) => {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const dashT = t.courses?.dashboard || {}
   const filterT = dashT.filters || {}
   const analyticsFilterT = t.courses?.analytics?.filters || {}
@@ -46,6 +49,29 @@ const DashboardFilterBar = ({
     const day = String(d.getDate()).padStart(2, "0")
     return `${d.getFullYear()}-${m}-${day}`
   }
+
+  const handlePresetChange = (e) => {
+    const nextPreset = e.target.value
+    setPreset(nextPreset)
+    if (nextPreset === "all") {
+      setCompare("none")
+    } else if (nextPreset === "year" && compare === "year") {
+      setCompare("prev")
+    }
+  }
+
+  const computedRange = getPresetDateRange(preset, new Date(), {
+    allTime: dashT.periodOptions?.all || "Toàn bộ thời gian",
+    selectedPeriod: filterT.currentPeriod || "Theo kỳ đã chọn",
+  })
+  const displayedDateRange =
+    preset === "custom"
+      ? (fromDate && toDate ? `${formatDateStr(fromDate)} – ${formatDateStr(toDate)}` : (dashT.periodOptions?.custom || "Tùy chọn ngày"))
+      : (resolvedFilter?.startDate && resolvedFilter?.endDate
+        ? `${formatDateStr(resolvedFilter.startDate)} – ${formatDateStr(resolvedFilter.endDate)}`
+        : computedRange.display)
+
+  const compareOptions = getCompareOptionsForPreset(preset, filterT, language)
 
   const courseList = courses
     .map((item) => ({ value: String(item.id), label: item.name || item.title }))
@@ -95,7 +121,7 @@ const DashboardFilterBar = ({
         <select
           id="dash-preset"
           value={preset}
-          onChange={(e) => setPreset(e.target.value)}
+          onChange={handlePresetChange}
           className={selectClass}
         >
           {PRESET_OPTIONS.map((opt) => (
@@ -118,8 +144,8 @@ const DashboardFilterBar = ({
       ) : (
         <div className="flex flex-col gap-1 text-xs font-normal text-[#6B758A]">
           <label>{filterT.currentPeriod || "Kỳ đang xem"}</label>
-          <div className="h-10 border border-[#D6D9E0] rounded-lg px-3 text-sm text-[#14171F] bg-[#FBFBFC] flex items-center truncate">
-            {fromDate && toDate ? `${fromDate} – ${toDate}` : "Theo kỳ đã chọn"}
+          <div className="h-10 border border-[#D6D9E0] rounded-lg px-3 text-sm text-[#14171F] bg-[#FBFBFC] flex items-center font-medium truncate" title={displayedDateRange}>
+            {displayedDateRange}
           </div>
         </div>
       )}
@@ -132,10 +158,11 @@ const DashboardFilterBar = ({
           value={compare}
           onChange={(e) => setCompare(e.target.value)}
           className={selectClass}
+          disabled={preset === "all"}
         >
-          {COMPARE_OPTIONS.map((opt) => (
+          {compareOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {dashT.compareOptions?.[opt.key] || opt.key}
+              {opt.label}
             </option>
           ))}
         </select>
