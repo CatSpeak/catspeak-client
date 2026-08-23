@@ -235,6 +235,7 @@ const StudentLessonRow = ({
           <QuizStatusBadge
             classId={classId}
             quizId={displayData.itemId || item.itemId}
+            quiz={item.quiz}
             isCompleted={item.isCompleted}
             closeTime={item.closeTime || item.quiz?.closeTime}
           />

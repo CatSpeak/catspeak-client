@@ -1,31 +1,15 @@
 import React, { useState } from 'react';
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { useGetMyAssignmentSubmissionQuery } from "@/store/api/coursesApi";
 import { getSubmissionStatus, getAssignmentTimeline } from "@/features/courses/utils/assignmentUtils";
 
-const AssignmentStatusBadge = ({ classId, assignmentId, assignment, submission: propSubmission, isCompleted }) => {
+const AssignmentStatusBadge = ({ assignment, submission: propSubmission, isCompleted }) => {
   const { t } = useLanguage();
   const cg = t.courses?.grading || {};
   const cd = t.courses?.classDetail || {};
   const [nowMs] = useState(() => Date.now());
 
-  const hasEmbeddedSubmission = assignment && (Object.prototype.hasOwnProperty.call(assignment, "mySubmission") || Object.prototype.hasOwnProperty.call(assignment, "submission"));
-  const embeddedSubmission = assignment?.mySubmission ?? assignment?.submission ?? null;
-
-  const { currentData: fetchedSubmission, isLoading } = useGetMyAssignmentSubmissionQuery(
-    { classId, assignmentId },
-    { skip: !classId || !assignmentId || !!propSubmission || hasEmbeddedSubmission }
-  );
-
-  const isRecord = (value) => (value !== null && typeof value === "object" && !Array.isArray(value));
-  const responsePayload = (isRecord(fetchedSubmission) && Object.prototype.hasOwnProperty.call(fetchedSubmission, "data")) ? fetchedSubmission.data : fetchedSubmission;
-
-  const submission = propSubmission || embeddedSubmission || (isRecord(responsePayload) ? responsePayload : null);
+  const submission = propSubmission || assignment?.studentSubmission || assignment?.mySubmission || assignment?.submission || null;
   const submissionStatus = getSubmissionStatus(submission);
-
-  if (isLoading && !propSubmission && !hasEmbeddedSubmission) {
-    return <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">...</span>;
-  }
 
   const submittedAtMs = submission?.submittedAt ? new Date(submission.submittedAt).getTime() : 0;
   const dueAtMs = assignment?.dueDate ? new Date(assignment.dueDate).getTime() : 0;

@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast'
 import { ArrowLeft, Clock, FileText, Upload, X, Check, RefreshCcw } from 'lucide-react'
 import { PillButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useSubmitAssignmentMutation, useGetStudentAssignmentByIdQuery, useGetMyAssignmentSubmissionQuery } from "@/store/api/coursesApi"
+import { useSubmitAssignmentMutation } from "@/store/api/coursesApi"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import FluentCard from '@/shared/components/ui/FluentCard'
 import HorizontalCard from '@/shared/components/ui/HorizontalCard'
@@ -19,7 +19,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const { formatDateTime } = useTimezone()
   const [now] = useState(() => Date.now())
 
-  const [selectedFile, setSelectedFile] = useState(null)
+  const [selectedFiles, setSelectedFiles] = useState([])
   const fileInputRef = useRef(null)
   const [isResubmitting, setIsResubmitting] = useState(false)
 
@@ -27,22 +27,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   const targetAssignmentId = itemData?.itemId
   const [submitAssignment, { isLoading: isSubmitting }] = useSubmitAssignmentMutation()
 
-  const { data: assignmentResponse, isLoading: isAssignmentLoading } = useGetStudentAssignmentByIdQuery(
-    { classId, assignmentId: targetAssignmentId },
-    { skip: !classId || !targetAssignmentId }
-  )
-
-  const { data: submissionResponse, isLoading: isSubmissionLoading } = useGetMyAssignmentSubmissionQuery(
-    { classId, assignmentId: targetAssignmentId },
-    { skip: !classId || !targetAssignmentId }
-  )
-
-  // Early Returns (Loading / Missing Data)
-  if (isAssignmentLoading || isSubmissionLoading) {
-    return (
-      <LoadingSpinner />
-    )
-  }
+  console.log(itemData)
 
   if (!itemData) {
     return (
@@ -63,30 +48,25 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   }
 
   // Derived States & Dictionaries
-  const apiAssignment = assignmentResponse?.data || assignmentResponse
-  const apiSubmission = submissionResponse?.data || submissionResponse
-  const assignmentData = apiAssignment || itemData?.assignment || itemData
+  const assignmentData = itemData?.assignment || itemData
+  const apiAssignment = assignmentData
+  const apiSubmission = assignmentData?.studentSubmission
 
   const sa = t.courses?.grading?.studentAssignment || {}
 
-  const title = apiAssignment?.name || itemData?.title || "Bài nộp"
-  const description = apiAssignment?.description || itemData?.description || ""
-  const deadline = apiAssignment?.dueDate || itemData?.deadline
+  const title = apiAssignment?.name || "Bài nộp"
+  const description = apiAssignment?.description || ""
+  const deadline = apiAssignment?.dueDate
   const formattedDeadline = deadline ? formatDateTime(deadline) : null
   const isAllowLate = apiAssignment?.allowLateSubmission ?? true
+  const maxFiles = apiAssignment?.maxFiles ?? 1
 
   const dueDateMs = deadline ? new Date(deadline).getTime() : null
   const isExpired = dueDateMs !== null && dueDateMs < now
   const allowSubmission = !isExpired || isAllowLate
 
   // Attachments Processing
-  const attachments = assignmentData?.attachments || assignmentData?.materials || []
-  if (!attachments.length && (assignmentData?.fileUrl || assignmentData?.url)) {
-    attachments.push({
-      title: assignmentData.fileName || assignmentData.title || "Attachment",
-      fileUrl: assignmentData.fileUrl || assignmentData.url
-    })
-  }
+  const attachments = apiAssignment?.attachments || []
 
   // Submission Details Processing
   let parsedFiles = []
@@ -100,27 +80,32 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
     parsedFiles = apiSubmission.files
   }
 
-  const submissionFileUrl = parsedFiles?.[0]?.FileUrl || itemData?.submissionFileUrl || "#"
-  const submissionFileName = parsedFiles?.[0]?.FileName || itemData?.submissionFileName || "Bai_lam.docx"
-  const submittedAt = apiSubmission?.submittedAt || itemData?.submittedAt
-  const score = apiSubmission?.grade ?? itemData?.score ?? "0"
-  const feedback = apiSubmission?.comment || itemData?.feedback || "Chưa có nhận xét"
+  const submissionFileUrl = parsedFiles?.[0]?.FileUrl || "#"
+  const submissionFileName = parsedFiles?.[0]?.FileName || "Bai_lam.docx"
+  const submittedAt = apiSubmission?.submittedAt
+  const score = apiSubmission?.score ?? "0"
+  const feedback = apiSubmission?.contentText || "Chưa có nhận xét"
 
-  const rawStatus = apiSubmission?.status || itemData?.status || "pending"
+  const rawStatus = apiSubmission?.status || "pending"
   const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.toLowerCase() : "pending"
-  const isDone = ["completed", "submitted", "graded", "late", "returned"].includes(normalizedStatus) || itemData?.isCompleted
+  const isDone = ["completed", "submitted", "graded", "late", "returned"].includes(normalizedStatus)
   const showGrading = ["graded", "returned"].includes(normalizedStatus)
 
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0])
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      const totalFiles = selectedFiles.length + newFiles.length;
+      if (totalFiles > maxFiles) {
+        toast.error(`Bạn chỉ được nộp tối đa ${maxFiles} tệp`);
+        return;
+      }
+      setSelectedFiles((prev) => [...prev, ...newFiles]);
     }
   }
 
-  const handleRemoveFile = (e) => {
-    e.stopPropagation();
-    setSelectedFile(null);
+  const handleRemoveFile = (indexToRemove) => {
+    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -138,28 +123,31 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
       return;
     }
 
-    if (!selectedFile) {
+    if (selectedFiles.length === 0) {
       toast.error(sa.contentOrFileRequired || "Vui lòng chọn tệp để nộp");
       return;
     }
 
-    const fileSize = Number(selectedFile.size);
-    if (fileSize > 25 * 1024 * 1024) {
-      const msg = sa.fileExceedsLimit ? sa.fileExceedsLimit.replace("{{fileName}}", selectedFile.name) : `Kích thước tệp vượt quá giới hạn 25MB`;
-      toast.error(msg);
+    const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
+    if (totalSize > 25 * 1024 * 1024) {
+      toast.error("Tổng kích thước tệp vượt quá giới hạn 25MB");
       return;
     }
 
     const allowedTypes = [".doc", ".docx", ".pdf"];
-    const extension = selectedFile.name.substring(selectedFile.name.lastIndexOf(".")).toLowerCase();
-    if (!allowedTypes.includes(extension)) {
-      const msg = sa.fileFormatNotAllowed ? sa.fileFormatNotAllowed.replace("{{formats}}", allowedTypes.join(", ")) : "Định dạng tệp không hợp lệ";
-      toast.error(msg);
-      return;
+    for (const file of selectedFiles) {
+      const extension = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+      if (!allowedTypes.includes(extension)) {
+        const msg = sa.fileFormatNotAllowed ? sa.fileFormatNotAllowed.replace("{{formats}}", allowedTypes.join(", ")) : "Định dạng tệp không hợp lệ";
+        toast.error(msg);
+        return;
+      }
     }
 
     const formData = new FormData();
-    formData.append("Files", selectedFile);
+    selectedFiles.forEach((file) => {
+      formData.append("Files", file);
+    });
 
     try {
       await submitAssignment({
@@ -169,7 +157,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
       }).unwrap();
 
       toast.success(sa.submitSuccess || "Nộp bài thành công!");
-      setSelectedFile(null);
+      setSelectedFiles([]);
       setIsResubmitting(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -333,42 +321,54 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
             )}
           </div>
 
-          {selectedFile ? (
-            <HorizontalCard
-              leftContent={<FileText size={24} className="text-[#DC2626]" />}
-              rightContent={
-                <button
-                  onClick={handleRemoveFile}
-                  className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors"
-                  title="Xóa tệp"
+          {selectedFiles.length > 0 && (
+            <div className="space-y-3">
+              {selectedFiles.map((file, idx) => (
+                <HorizontalCard
+                  key={idx}
+                  leftContent={<FileText size={24} className="text-[#DC2626]" />}
+                  rightContent={
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveFile(idx);
+                      }}
+                      className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors"
+                    >
+                      <X size={18} />
+                    </button>
+                  }
+                  className="w-full !p-4 !min-h-0"
                 >
-                  <X size={18} />
-                </button>
-              }
-              className="w-full !p-4 !min-h-0"
-            >
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-sm font-medium text-[#1A1A1A] truncate">{selectedFile.name}</span>
-                <span className="text-xs text-[#7B7979]">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</span>
-              </div>
-            </HorizontalCard>
-          ) : (
-            <FluentCard
-              className="h-[294px] flex flex-col items-center justify-center transition-colors bg-[#f5f5f5] cursor-pointer hover:bg-gray-100"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload size={28} className="text-[#9CA3AF] mb-3" />
-              <p className="text-sm text-[#9CA3AF] mb-1 text-center">Hỗ trợ định dạng doc, pdf, tối đa 1 tệp</p>
-              <p className="text-sm text-[#9CA3AF] text-center">Kích cỡ dưới &lt;= 25mb</p>
-            </FluentCard>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm font-medium text-[#1A1A1A] truncate">{file.name}</span>
+                    <span className="text-xs text-[#7B7979]">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                  </div>
+                </HorizontalCard>
+              ))}
+            </div>
           )}
+
           <input
             type="file"
             ref={fileInputRef}
             className="hidden"
             accept=".doc,.docx,.pdf"
+            multiple={maxFiles > 1}
             onChange={handleFileChange}
           />
+
+          {selectedFiles.length < maxFiles && (
+            <FluentCard
+              className="h-[150px] flex flex-col items-center justify-center transition-colors bg-[#f5f5f5] cursor-pointer hover:bg-gray-100 mt-4"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload size={28} className="text-[#9CA3AF] mb-3" />
+              <p className="text-sm text-[#9CA3AF] mb-1 text-center">Hỗ trợ định dạng doc, pdf, tối đa {maxFiles} tệp</p>
+              <p className="text-sm text-[#9CA3AF] text-center">Tổng kích cỡ dưới &lt;= 25mb</p>
+            </FluentCard>
+          )}
+
 
           <div className="flex items-center justify-between w-full">
             <p className="text-base text-[#7B7979]">
@@ -376,7 +376,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
             </p>
             <PillButton
               onClick={handleSubmit}
-              disabled={isSubmitting || !selectedFile}
+              disabled={isSubmitting || selectedFiles.length === 0}
             >
               {isSubmitting ? "Đang nộp..." : "Nộp bài"}
             </PillButton>

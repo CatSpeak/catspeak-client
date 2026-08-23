@@ -1700,6 +1700,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 }
 
                 return {
+                  ...item,
                   id: item.id?.toString() || "",
                   itemId: item.itemId?.toString() || "",
                   type,
@@ -1811,6 +1812,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 }
 
                 return {
+                  ...item,
                   id: item.id?.toString() || "",
                   itemId: item.itemId?.toString() || "",
                   type,

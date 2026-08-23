@@ -3,9 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Clock, FileText, Timer, RefreshCcw, Eye, Play } from 'lucide-react'
 import { PillButton } from '@/shared/components/ui/buttons'
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetStudentQuizzesQuery } from "@/store/api/coursesApi"
 import { useTimezone } from "@/shared/hooks/useTimezone"
-import { getQuizListFromResponse } from "@/features/courses/utils/quizUtils"
 import FluentCard from '@/shared/components/ui/FluentCard'
 import { LoadingSpinner } from '@/shared/components/ui/indicators'
 import QuizStatusBadge from './QuizStatusBadge'
@@ -19,18 +17,6 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
   const [nowMs] = useState(() => Date.now())
 
   const targetQuizId = itemData?.itemId
-
-  const { data: quizzesResponse, isLoading } = useGetStudentQuizzesQuery(
-    { classId },
-    { skip: !classId || !targetQuizId }
-  )
-
-  console.log(quizzesResponse);
-
-
-  if (isLoading) {
-    return <LoadingSpinner />
-  }
 
   if (!itemData) {
     return (
@@ -50,23 +36,22 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
     )
   }
 
-  const quizzes = quizzesResponse ? getQuizListFromResponse(quizzesResponse) : []
-  const apiQuiz = quizzes?.find((q) => String(q.id) === String(targetQuizId))
-  const quizData = apiQuiz || itemData?.quiz || itemData
+  const quizData = itemData?.quiz || itemData
 
   const cg = t.courses?.grading || {}
 
-  const title = quizData?.name || quizData?.title || itemData?.title || cg.untitledQuiz || "Bài kiểm tra"
-  const description = quizData?.description || itemData?.description || ""
+  const title = quizData?.name || "Bài kiểm tra"
+  const description = quizData?.description || ""
 
-  const openTime = quizData?.openTime || itemData?.openTime
+  const openTime = quizData?.openTime
   const formattedOpenTime = openTime ? formatDateTime(openTime) : null
 
-  const closeTime = quizData?.closeTime || itemData?.closeTime
+  const closeTime = quizData?.closeTime
   const formattedCloseTime = closeTime ? formatDateTime(closeTime) : null
 
-  const recordStatus = typeof quizData?.recordStatus === "string" ? quizData.recordStatus.trim().toLowerCase() : quizData?.recordStatus
-  const isDone = recordStatus === "submitted" || recordStatus === "graded" || recordStatus === "completed" || itemData?.isCompleted
+  const apiSubmission = quizData?.studentSubmission
+  const recordStatus = typeof apiSubmission?.status === "string" ? apiSubmission.status.trim().toLowerCase() : "pending"
+  const isDone = recordStatus === "submitted" || recordStatus === "graded" || recordStatus === "completed"
 
   const closeTimeMs = closeTime ? new Date(closeTime).getTime() : 0
   const isExpired = closeTimeMs > 0 && closeTimeMs < nowMs
@@ -93,7 +78,7 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
   const maxAttemptsNum = Number(quizData?.maxAttempts ?? quizData?.totalAttempts)
   const hasMaxAttempts = Number.isFinite(maxAttemptsNum) && maxAttemptsNum > 0
 
-  const score = quizData?.grade ?? itemData?.score
+  const score = apiSubmission?.score
   const showGrading = isDone && score !== undefined && score !== null
 
   const handleTakeQuiz = (step = "") => {
@@ -118,6 +103,7 @@ const QuizDetailView = ({ itemData, onBack, sectionData }) => {
           <QuizStatusBadge
             classId={classId}
             quizId={targetQuizId}
+            quiz={quizData}
             isCompleted={itemData?.isCompleted}
             closeTime={closeTime}
           />

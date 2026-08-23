@@ -1,27 +1,11 @@
 import React, { useState } from 'react';
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { useGetStudentQuizzesQuery } from "@/store/api/coursesApi";
-import { getQuizListFromResponse } from "@/features/courses/utils/quizUtils";
-
-const QuizStatusBadge = ({ classId, quizId, isCompleted, closeTime }) => {
+const QuizStatusBadge = ({ quiz, isCompleted, closeTime }) => {
   const [nowMs] = useState(() => Date.now());
   const { t } = useLanguage();
   const cg = t.courses?.grading || {};
 
-  const { data: quizzesResponse, isLoading } = useGetStudentQuizzesQuery(
-    { classId },
-    { skip: !classId || !quizId }
-  );
-
-  let status;
-
-  if (quizzesResponse && quizId) {
-    const quizzes = getQuizListFromResponse(quizzesResponse);
-    const quiz = quizzes?.find((q) => String(q.id) === String(quizId));
-    if (quiz && quiz.recordStatus) {
-      status = quiz.recordStatus;
-    }
-  }
+  let status = quiz?.studentSubmission?.status || quiz?.recordStatus;
 
   const rawStatus = status || "todo";
   const recordStatus = typeof rawStatus === "string" ? rawStatus.trim().toLowerCase() : rawStatus;
@@ -29,9 +13,7 @@ const QuizStatusBadge = ({ classId, quizId, isCompleted, closeTime }) => {
   const isDone = recordStatus === "completed" || recordStatus === "submitted" || recordStatus === "graded" || isCompleted;
   const isInProgress = recordStatus === "inprogress";
 
-  if (isLoading && classId && quizId) {
-    return <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">...</span>;
-  }
+
 
   if (isDone) {
     return (
