@@ -176,8 +176,7 @@ const CheckoutClassPage = () => {
   const [lookupLearner] = useLazyLookupLearnerQuery();
 
   const handleAddLearner = async (email) => {
-    // Current account ids to prevent duplicate lookup and check backend
-    const currentAccountIds = learners.map((l) => l.id);
+    const currentAccountIds = learners.map((learner) => learner.id);
 
     try {
       const response = await lookupLearner({
@@ -186,15 +185,16 @@ const CheckoutClassPage = () => {
         currentAccountIds,
       }).unwrap();
 
-      // If backend returns success: false with HTTP 200, baseApi does not unwrap it
       if (response.success === false) {
         return {
           success: false,
-          message: response.message || tc.fallbackAccountNotFound,
+          message: getErrorMessage(
+            response.errorCode,
+            response.message || tc.fallbackAccountNotFound,
+          ),
         };
       }
 
-      // If success: true, baseApi unwraps it, so response IS the data object
       if (response.accountId) {
         const newLearner = {
           id: response.accountId,
@@ -203,15 +203,24 @@ const CheckoutClassPage = () => {
           email: response.email,
           isPayer: false,
         };
-        setLearners([...learners, newLearner]);
+
+        setLearners((prev) => [...prev, newLearner]);
         return { success: true };
-      } else {
-        return { success: false, message: tc.fallbackAccountNotFound };
       }
-    } catch (error) {
+
       return {
         success: false,
-        message: error?.data?.message || tc.fallbackAccountNotFound,
+        message: tc.fallbackAccountNotFound,
+      };
+    } catch (error) {
+      const responseData = error?.data?.data || error?.data || {};
+
+      return {
+        success: false,
+        message: getErrorMessage(
+          responseData.errorCode,
+          responseData.message || error?.error || tc.addLearnerError,
+        ),
       };
     }
   };
@@ -231,6 +240,13 @@ const CheckoutClassPage = () => {
   };
 
   const [checkout, { isLoading: isCheckoutLoading }] = useCheckoutMutation();
+
+  const getErrorMessage = (code, fallback) => {
+    if (!code) return fallback;
+    const i18nKey = `billing.errorCodes.${code}`;
+    const translatedMsg = t(i18nKey);
+    return translatedMsg !== i18nKey ? translatedMsg : fallback;
+  };
 
   const handleCheckout = async (confirmScheduleConflict = false) => {
     try {
@@ -276,35 +292,45 @@ const CheckoutClassPage = () => {
       }
     } catch (error) {
       const status = error?.status ?? error?.originalStatus;
-      const errorCode = error?.data?.errorCode || error?.data?.data?.errorCode;
+      const responseData = error?.data?.data || error?.data || {};
+      const errorCode = responseData.errorCode;
+      const errMsg = responseData.message || error?.error || tc.paymentError;
 
       if (
         status === 409 ||
         errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT"
       ) {
-        const message =
-          error?.data?.message || error?.data?.data?.message || "";
-        const names = (message.match(/Lịch học trùng với lớp: (.+)/) || [])[1];
-        setConflictClasses({
-          names: names ? names.split(", ").filter(Boolean) : [],
-        });
+        const names =
+          responseData.conflictingClassNames ||
+          (errMsg.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
+            ?.split(", ")
+            .filter(Boolean) ||
+          [];
+        setConflictClasses({ names });
         return;
       }
 
-      const errMsg = error?.data?.message || error?.error || tc.paymentError;
+      if (errorCode === "PAYMENT_VOUCHER_UNAVAILABLE") {
+        const codeMatch = errMsg.match(/CODE:([^|]+)/);
+        const voucherCode = codeMatch ? codeMatch[1] : "";
 
-      const voucherMatch = errMsg.match(/Voucher (.*?) không khả dụng/i);
-      if (voucherMatch) {
-        const voucherCode = voucherMatch[1];
-        setSelectedVouchers((prev) =>
-          prev.filter((v) => v.code !== voucherCode),
-        );
-        toast.error(tc.voucherUnavailable.replace("{{code}}", voucherCode));
-      } else if (errMsg.includes("Số tiền giảm giá của Voucher đã thay đổi")) {
-        toast.error(errMsg);
+        if (voucherCode) {
+          setSelectedVouchers((prev) =>
+            prev.filter((v) => v.code !== voucherCode),
+          );
+          const localizedMsg = getErrorMessage(
+            errorCode,
+            tc.voucherUnavailable,
+          );
+          toast.error(localizedMsg.replace("{{code}}", voucherCode));
+        } else {
+          toast.error(getErrorMessage(errorCode, errMsg));
+        }
+      } else if (errorCode === "PAYMENT_VOUCHER_DISCOUNT_CHANGED") {
+        toast.error(getErrorMessage(errorCode, errMsg));
         refetchVouchers();
       } else {
-        toast.error(errMsg);
+        toast.error(getErrorMessage(errorCode, errMsg));
       }
     }
   };
@@ -376,9 +402,9 @@ const CheckoutClassPage = () => {
               className={classData.className}
               unitPrice={classData.unitPrice}
               learnersCount={learners.length}
-              vouchers={[]}
-              suggestedTags={[]}
-              selectedVouchers={[]}
+              vouchers={resolvedVoucherData.availableVouchers}
+              suggestedTags={resolvedVoucherData.suggestedTags}
+              selectedVouchers={selectedVouchers}
               onToggleVoucher={handleToggleVoucher}
               onRemoveVoucher={(id) =>
                 setSelectedVouchers(selectedVouchers.filter((v) => v.id !== id))
