@@ -121,37 +121,92 @@ const PublicClassScheduleCard = ({ classData }) => {
     classDayIndices,
   ])
 
+  // 3. Compute earliest date (minimum among schedule start and all modified sessions)
+  // and latest date (maximum among schedule end and all modified sessions)
+  const earliestDate = useMemo(() => {
+    let earliest = null
+
+    if (rawStartDate && dayjs(rawStartDate).isValid()) {
+      earliest = dayjs(rawStartDate)
+    }
+
+    modifiedSessions.forEach((s) => {
+      if (!s?.date) return
+      const d = dayjs(s.date)
+      if (d.isValid()) {
+        if (!earliest || d.isBefore(earliest, "day")) {
+          earliest = d
+        }
+      }
+    })
+
+    return earliest
+  }, [rawStartDate, modifiedSessions])
+
+  const latestDate = useMemo(() => {
+    let latest = null
+
+    const endTarget = rawEndDate || effectiveEndDate
+    if (endTarget && dayjs(endTarget).isValid()) {
+      latest = dayjs(endTarget)
+    } else if (rawStartDate && dayjs(rawStartDate).isValid()) {
+      latest = dayjs(rawStartDate)
+    }
+
+    modifiedSessions.forEach((s) => {
+      if (!s?.date) return
+      const d = dayjs(s.date)
+      if (d.isValid()) {
+        if (!latest || d.isAfter(latest, "day")) {
+          latest = d
+        }
+      }
+    })
+
+    return latest
+  }, [rawEndDate, effectiveEndDate, rawStartDate, modifiedSessions])
+
   // Formatted date range strings
   const formattedStartDate = useMemo(() => {
-    if (!rawStartDate) return null
-    const d = dayjs(rawStartDate)
-    return d.isValid() ? formatDate(rawStartDate) : null
-  }, [rawStartDate, formatDate])
+    if (!earliestDate) return null
+    return earliestDate.isValid() ? formatDate(earliestDate.toISOString()) : null
+  }, [earliestDate, formatDate])
 
   const formattedEndDate = useMemo(() => {
-    if (!effectiveEndDate) return null
-    const d = dayjs(effectiveEndDate)
-    return d.isValid() ? formatDate(effectiveEndDate) : null
-  }, [effectiveEndDate, formatDate])
+    if (!latestDate) return null
+    return latestDate.isValid() ? formatDate(latestDate.toISOString()) : null
+  }, [latestDate, formatDate])
 
   const dateRangeText = useMemo(() => {
-    if (formattedStartDate && formattedEndDate) {
+    if (
+      formattedStartDate &&
+      formattedEndDate &&
+      earliestDate &&
+      latestDate &&
+      !earliestDate.isSame(latestDate, "day")
+    ) {
       return `${formattedStartDate} – ${formattedEndDate}`
     }
     if (formattedStartDate) {
       return `${c.student?.startsOn || pc.startsOn || "Khai giảng:"} ${formattedStartDate}`
     }
     return null
-  }, [formattedStartDate, formattedEndDate, c.student?.startsOn, pc.startsOn])
+  }, [
+    formattedStartDate,
+    formattedEndDate,
+    earliestDate,
+    latestDate,
+    c.student?.startsOn,
+    pc.startsOn,
+  ])
 
-  // Initial display month (defaults to class start date if available)
+  // Initial display month (defaults to earliest date if available)
   const initialDate = useMemo(() => {
-    if (rawStartDate) {
-      const d = dayjs(rawStartDate)
-      if (d.isValid()) return d
+    if (earliestDate && earliestDate.isValid()) {
+      return earliestDate
     }
     return dayjs()
-  }, [rawStartDate])
+  }, [earliestDate])
 
   const [currentMonth, setCurrentMonth] = useState(initialDate)
 
@@ -331,30 +386,30 @@ const PublicClassScheduleCard = ({ classData }) => {
         >
           {pc.jumpToday || "Hôm nay"}
         </button>
-        {rawStartDate && dayjs(rawStartDate).isValid() && (
+        {earliestDate && earliestDate.isValid() && (
           <button
             type="button"
-            onClick={() => setCurrentMonth(dayjs(rawStartDate))}
+            onClick={() => setCurrentMonth(earliestDate)}
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-              currentMonth.isSame(dayjs(rawStartDate), "day")
+              currentMonth.isSame(earliestDate, "day")
                 ? "bg-slate-900 text-white border-slate-900 font-bold"
                 : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            {pc.jumpStart || "Ngày bắt đầu"}
+            {pc.jumpStart || "Bắt đầu"}
           </button>
         )}
-        {effectiveEndDate && dayjs(effectiveEndDate).isValid() && (
+        {latestDate && latestDate.isValid() && (
           <button
             type="button"
-            onClick={() => setCurrentMonth(dayjs(effectiveEndDate))}
+            onClick={() => setCurrentMonth(latestDate)}
             className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-colors border cursor-pointer ${
-              currentMonth.isSame(dayjs(effectiveEndDate), "day")
+              currentMonth.isSame(latestDate, "day")
                 ? "bg-slate-900 text-white border-slate-900 font-bold"
                 : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
             }`}
           >
-            {pc.jumpEnd || "Ngày kết thúc"}
+            {pc.jumpEnd || "Kết thúc"}
           </button>
         )}
       </div>
