@@ -180,6 +180,10 @@ export default {
       payer: "(Người thanh toán)",
       totalLearners: "Tổng số người học:",
       addLearnerError: "Có lỗi xảy ra khi thêm người học",
+      friendSuggestions: "Gợi ý từ bạn bè",
+      selectedFriendsCount: "Đã chọn {{count}} người",
+      selectFriendsHint: "Chọn người bạn muốn thêm",
+      addSelected: "Thêm",
 
       // OrderSummary
       orderSummary: "Tóm tắt đơn hàng",

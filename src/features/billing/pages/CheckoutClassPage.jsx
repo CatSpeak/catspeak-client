@@ -15,6 +15,7 @@ import {
 } from "@/store/api/paymentsApi";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { useGetProfileQuery } from "@/store/api/authApi";
+import { useGetFriendsQuery } from "@/store/api/social/friendshipApi";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useEffect } from "react";
 import { toast } from "react-hot-toast";
@@ -45,6 +46,16 @@ const CheckoutClassPage = () => {
 
   const { data: profileResponse } = useGetProfileQuery();
   const currentUser = profileResponse?.data || profileResponse;
+  const currentAccountId = currentUser?.id || currentUser?.accountId;
+
+  const { data: friendsData } = useGetFriendsQuery(currentAccountId, {
+    skip: !currentAccountId,
+  });
+  const friendsList = Array.isArray(friendsData)
+    ? friendsData
+    : Array.isArray(friendsData?.data)
+    ? friendsData.data
+    : [];
 
   const [learners, setLearners] = useState(() => {
     if (currentUser) {
@@ -390,6 +401,7 @@ const CheckoutClassPage = () => {
               onAddLearner={handleAddLearner}
               onRemoveLearner={handleRemoveLearner}
               maxSlots={classData.availableSlots}
+              friendsList={friendsList}
               t={t}
             />
           </div>
