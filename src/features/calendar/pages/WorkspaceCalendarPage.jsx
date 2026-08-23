@@ -141,6 +141,7 @@ const WorkspaceCalendarPage = () => {
           prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
           actionIcon="plus"
           emptyLabel={c.noTeachingTasks || "No teaching tasks available"}
+          onViewAll={() => navigate("/workspace/teaching-tasks/all")}
         />
       </div>
     </div>

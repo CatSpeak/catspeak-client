@@ -2522,6 +2522,23 @@ export const coursesApi = baseApi.injectEndpoints({
       },
     }),
 
+    getTeacherAllTeachingTasksCombined: builder.query({
+      query: (params) => {
+        const queryStr = new URLSearchParams()
+        if (params?.page) queryStr.append("page", params.page)
+        if (params?.limit) queryStr.append("limit", params.limit)
+        if (params?.status) queryStr.append("status", params.status)
+        return {
+          url: `/teacher/teaching-tasks/combined?${queryStr.toString()}`,
+          method: "GET",
+        }
+      },
+      transformResponse: (response) => {
+        // Return the whole object which contains Items, TotalCount, Page, PageSize, TotalPages
+        return response
+      },
+    }),
+
     // ─── Analytics Endpoints ──────────────────────────────────────────
 
     // 1. AnalyticsCourseClass
@@ -2838,6 +2855,7 @@ export const {
   // Teaching Tasks Hooks
   useGetTeacherClassTeachingTasksCombinedQuery,
   useGetTeacherCourseTeachingTasksCombinedQuery,
+  useGetTeacherAllTeachingTasksCombinedQuery,
   // Analytics Hooks
   useGetAnalyticsCourseClassOverviewQuery,
   useGetAnalyticsCourseClassEffectivenessQuery,
