@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { Star, Calendar, Clock, CheckCircle2, Award, X } from "lucide-react"
+import { Star, Calendar, Clock, Award, X, Check } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import {
@@ -16,9 +16,13 @@ import { getLocalizedLanguageName } from "../data/courseFormOptions"
 const UNKNOWN = "—"
 
 const StarRating = ({ value, onChange, size = "sm" }) => {
-  const sizes = { sm: "h-5 w-5", md: "h-7 w-7", lg: "h-8 w-8" }
+  const sizes = {
+    sm: "h-5 w-5",
+    md: "h-6 w-6",
+    lg: "h-7 w-7 sm:h-8 sm:w-8",
+  }
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 sm:gap-1.5">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
@@ -26,14 +30,15 @@ const StarRating = ({ value, onChange, size = "sm" }) => {
           disabled={!onChange}
           onClick={() => onChange?.(star)}
           aria-label={`${star} star`}
-          className={`${onChange ? "cursor-pointer" : "cursor-default"} transition-transform ${onChange ? "hover:scale-110" : ""}`}
+          className={`${onChange ? "cursor-pointer" : "cursor-default"} transition-transform ${onChange ? "hover:scale-115 active:scale-95" : ""
+            }`}
         >
           <Star
-            className={`${sizes[size]} ${
-              star <= value
-                ? "fill-amber-400 text-amber-400"
-                : "fill-gray-200 text-gray-200"
-            }`}
+            className={`${sizes[size]} transition-colors ${star <= value
+              ? "fill-amber-400 text-amber-400"
+              : "fill-transparent text-gray-300"
+              }`}
+            strokeWidth={1.8}
           />
         </button>
       ))}
@@ -58,6 +63,7 @@ const ReviewClassPage = () => {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const [rewardPoints, setRewardPoints] = useState(0)
   const [errorMessage, setErrorMessage] = useState("")
+  const [thumbError, setThumbError] = useState(false)
 
   const canReview = context?.canReview === true
   const alreadyReviewed = context?.alreadyReviewed === true
@@ -83,7 +89,10 @@ const ReviewClassPage = () => {
   }, [scores])
 
   const overallDisplay = Math.round(overall)
-  const overallLabel = rv.ratingLabel?.[String(overallDisplay)] || ""
+  const overallLabel =
+    overallDisplay >= 4
+      ? "Rất hài lòng"
+      : rv.ratingLabel?.[String(overallDisplay)] || ""
 
   const formatDisplayDate = (value) => {
     if (!value) return UNKNOWN
@@ -112,7 +121,14 @@ const ReviewClassPage = () => {
           comment,
         },
       }).unwrap()
-      setRewardPoints(result?.rewardPoints ?? 0)
+      const earned =
+        result?.rewardPoints ??
+        result?.data?.rewardPoints ??
+        result?.pointsAwarded ??
+        result?.data?.pointsAwarded ??
+        result?.points ??
+        0
+      setRewardPoints(earned)
       setShowSuccess(true)
     } catch {
       setErrorMessage(rv.submitError || "Không thể gửi đánh giá. Vui lòng thử lại.")
@@ -121,7 +137,7 @@ const ReviewClassPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-primaryBg">
+      <div className="flex flex-1 min-h-[300px] items-center justify-center">
         <LoadingSpinner />
       </div>
     )
@@ -129,12 +145,12 @@ const ReviewClassPage = () => {
 
   if (isError || !context) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-primaryBg p-6">
+      <div className="flex flex-1 min-h-[300px] flex-col items-center justify-center gap-4 p-6">
         <p className="text-gray-500">{rv.errorLoading || "Đã xảy ra lỗi khi tải thông tin đánh giá."}</p>
         <button
           type="button"
           onClick={() => navigate("/workspace/profile")}
-          className="rounded-lg bg-[#B10A0A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#870003]"
+          className="rounded-lg bg-[#990011] px-4 py-2 text-sm font-semibold text-white hover:bg-[#80000e]"
         >
           {rv.goBack || "Về trang cá nhân"}
         </button>
@@ -144,15 +160,17 @@ const ReviewClassPage = () => {
 
   if (alreadyReviewed) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 bg-primaryBg p-6">
-        <CheckCircle2 size={48} className="text-green-500" />
+      <div className="flex flex-1 min-h-[300px] flex-col items-center justify-center gap-4 p-6">
+        <div className="w-16 h-16 rounded-full bg-[#dcfce7] flex items-center justify-center">
+          <Check size={32} className="text-[#16a34a]" strokeWidth={3} />
+        </div>
         <p className="text-lg font-semibold text-gray-800">
           {rv.alreadyReviewed || "Bạn đã đánh giá lớp học này"}
         </p>
         <button
           type="button"
           onClick={() => navigate("/workspace/profile")}
-          className="rounded-lg bg-[#B10A0A] px-4 py-2 text-sm font-semibold text-white hover:bg-[#870003]"
+          className="rounded-lg bg-[#990011] px-4 py-2 text-sm font-semibold text-white hover:bg-[#80000e]"
         >
           {rv.goBack || "Về trang cá nhân"}
         </button>
@@ -166,178 +184,254 @@ const ReviewClassPage = () => {
     { key: "materials", label: rv.materialsQuality || "Tài liệu & học liệu" },
   ]
 
+  const rawThumbnail =
+    context?.thumbnailUrl ||
+    context?.courseThumbnailUrl ||
+    context?.classThumbnailUrl ||
+    context?.imageUrl ||
+    context?.coverImageUrl ||
+    context?.course?.thumbnailUrl
+
+  const classThumbnailUrl = getSafeMediaUrl(rawThumbnail)
+  const initialLetter = (context.courseName || context.className || "C").charAt(0).toUpperCase()
+
   return (
-    <div className="flex min-h-screen items-start justify-center bg-primaryBg p-4 py-10 sm:p-8">
-      <div className="w-full max-w-[768px] rounded-2xl bg-white p-6 shadow-xl sm:p-8">
-        {/* Header card */}
-        <div className="rounded-xl border border-gray-100 p-5">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#5C6AC4] text-lg font-bold text-white">
-              {(context.courseName || context.className || "C").charAt(0)}
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="truncate text-lg font-bold text-gray-900">
-                {context.courseName || context.className}
-              </h2>
-              {context.courseId ? (
-                <p className="text-sm text-gray-500">
-                  {rv.classTag || "Lớp: "}
-                  {context.className}
-                </p>
-              ) : null}
-              {context.language ? (
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                  {getLocalizedLanguageName(context.language, t) || context.language}
-                  {Array.isArray(context.levels) && context.levels.length > 0
-                    ? ` · ${context.levels.join(" · ")}`
-                    : ""}
-                </p>
-              ) : null}
-              <div className="mt-2 flex items-center gap-2.5">
-                <Avatar
-                  src={getSafeMediaUrl(context.teacher?.avatarImageUrl)}
-                  name={context.teacher?.name}
-                  size={32}
-                />
-                <div className="leading-tight">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {context.teacher?.name || UNKNOWN}
+    <div className="flex w-full flex-1 items-start justify-center py-1 sm:py-3">
+      <div className="w-full max-w-[720px] rounded-2xl sm:rounded-3xl bg-white p-5 sm:p-7 shadow-sm border border-gray-100/90">
+        {/* Top Header */}
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-100 -mx-5 sm:-mx-7 px-5 sm:px-7 mb-5">
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+              {rv.title || "Đánh giá khóa học"}
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              {rv.subtitle || "Chia sẻ trải nghiệm của bạn để giúp cộng đồng học tập tốt hơn."}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setShowLeaveConfirm(true)}
+            className="w-8.5 h-8.5 p-2 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition cursor-pointer shrink-0"
+          >
+            <X size={17} />
+          </button>
+        </div>
+
+        {/* Course / Class Summary Card */}
+        <div className="rounded-2xl border border-gray-100/90 bg-white p-4 sm:p-4.5 mb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-5">
+            {/* Left: Thumbnail / Initial Letter Fallback + Course Name + Teacher */}
+            <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
+              {classThumbnailUrl && !thumbError ? (
+                <div className="w-[84px] sm:w-[96px] h-[56px] sm:h-[64px] min-w-[84px] sm:min-w-[96px] rounded-xl sm:rounded-2xl overflow-hidden shrink-0 shadow-xs border border-gray-100 bg-gray-50">
+                  <img
+                    src={classThumbnailUrl}
+                    alt={context.courseName || context.className || "Thumbnail"}
+                    className="w-full h-full object-cover"
+                    onError={() => setThumbError(true)}
+                  />
+                </div>
+              ) : (
+                <div className="w-[84px] sm:w-[96px] h-[56px] sm:h-[64px] min-w-[84px] sm:min-w-[96px] rounded-xl sm:rounded-2xl flex items-center justify-center bg-[#5C6AC4] text-lg sm:text-xl font-bold text-white shrink-0 shadow-xs">
+                  {initialLetter}
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base sm:text-lg font-bold text-gray-900 leading-snug truncate">
+                  {context.courseName || context.className}
+                </h2>
+                {context.className && (
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                    {rv.classTag || "Lớp: "}
+                    {context.className}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {rv.teacher || "Giảng viên"}
+                )}
+                {context.language ? (
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mt-0.5">
+                    {getLocalizedLanguageName(context.language, t) || context.language}
+                    {Array.isArray(context.levels) && context.levels.length > 0
+                      ? ` · ${context.levels.join(" · ")}`
+                      : ""}
+                  </p>
+                ) : null}
+                <div className="mt-2 flex items-center gap-2">
+                  <Avatar
+                    src={getSafeMediaUrl(context.teacher?.avatarImageUrl || context.teacher?.avatarUrl)}
+                    name={context.teacher?.name}
+                    size={26}
+                  />
+                  <div className="leading-tight">
+                    <p className="text-xs sm:text-sm font-semibold text-gray-900">
+                      {context.teacher?.name || UNKNOWN}
+                    </p>
+                    <p className="text-[11px] text-gray-400">
+                      {rv.teacher || "Giảng viên"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Date & Duration */}
+            <div className="flex sm:flex-col items-start justify-start gap-4 sm:gap-2.5 sm:border-l sm:border-gray-100 sm:pl-5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-50">
+              <div className="flex items-start gap-2">
+                <Calendar size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[11px] sm:text-xs text-gray-400 leading-none">
+                    {rv.completedDate || "Hoàn thành ngày"}
+                  </p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 leading-tight">
+                    {formatDisplayDate(context.completedAtUtc || context.completedAt)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <Clock size={15} className="text-gray-400 mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-[11px] sm:text-xs text-gray-400 leading-none">
+                    {rv.duration || "Thời lượng"}
+                  </p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 leading-tight">
+                    {context.totalSessions ?? 24} {rv.sessions || "buổi học"}
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar size={15} className="text-gray-400" />
-              <span className="text-gray-500">
-                {rv.completedDate || "Hoàn thành ngày"}:
-              </span>
-              <span className="font-semibold text-gray-900">
-                {formatDisplayDate(context.completedAtUtc)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Clock size={15} className="text-gray-400" />
-              <span className="text-gray-500">{rv.duration || "Thời lượng"}:</span>
-              <span className="font-semibold text-gray-900">
-                {context.totalSessions} {rv.sessions || "buổi học"}
-              </span>
-            </div>
-          </div>
         </div>
 
-        {/* Section 1: detailed ratings */}
-        <div className="mt-6">
-          <div className="flex items-center gap-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#B10A0A] text-sm font-bold text-white">
+        {/* Section 1: Detailed ratings */}
+        <div>
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="flex h-6 w-6 min-w-[24px] min-h-[24px] items-center justify-center rounded-full bg-[#990011] text-xs font-bold text-white shrink-0">
               1
             </span>
-            <h3 className="text-base font-bold text-gray-900">
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
               {rv.detailRating || "Đánh giá chi tiết"}
             </h3>
           </div>
-          <div className="mt-4 space-y-4 pl-0 sm:pl-9">
-            {ratingRows.map((row) => (
-              <div
-                key={row.key}
-                className="flex flex-wrap items-center justify-between gap-2"
-              >
-                <span className="text-sm font-medium text-gray-800">
-                  {row.label}
-                </span>
-                <div className="flex items-center gap-3">
-                  <StarRating
-                    value={scores[row.key]}
-                    onChange={(v) =>
-                      setScores((prev) => ({ ...prev, [row.key]: v }))
-                    }
-                  />
-                  <span
-                    className={`w-12 text-right text-sm font-medium ${
-                      scores[row.key] >= 4 ? "text-green-600" : "text-gray-600"
-                    }`}
-                  >
-                    {rv.ratingLabel?.[String(scores[row.key])] || ""}
+
+          <div className="space-y-2.5 pl-0 sm:pl-8">
+            {ratingRows.map((row) => {
+              const score = scores[row.key]
+              const label = rv.ratingLabel?.[String(score)] || ""
+              const isPositive = score >= 4
+              const isNegative = score > 0 && score <= 2
+              return (
+                <div
+                  key={row.key}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-0.5"
+                >
+                  <span className="text-xs sm:text-sm font-medium text-gray-800">
+                    {row.label}
                   </span>
+                  <div className="flex items-center gap-3 sm:gap-4 self-end sm:self-auto shrink-0">
+                    <StarRating
+                      value={score}
+                      onChange={(v) =>
+                        setScores((prev) => ({ ...prev, [row.key]: v }))
+                      }
+                    />
+                    <span
+                      className={`w-20 sm:w-24 text-right text-xs sm:text-sm font-medium whitespace-nowrap shrink-0 ${isPositive
+                        ? "text-[#10b981]"
+                        : isNegative
+                          ? "text-[#dc2626]"
+                          : score > 0
+                            ? "text-gray-600"
+                            : "text-transparent"
+                        }`}
+                    >
+                      {label || "—"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
-        <div className="my-6 border-t border-gray-100" />
+        {/* Section Divider */}
+        <div className="border-t border-gray-100 my-5" />
 
-        {/* Section 2: comment */}
+        {/* Section 2: Comment experience */}
         <div>
-          <div className="flex items-center gap-3">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#B10A0A] text-sm font-bold text-white">
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="flex h-6 w-6 min-w-[24px] min-h-[24px] items-center justify-center rounded-full bg-[#990011] text-xs font-bold text-white shrink-0">
               2
             </span>
-            <h3 className="text-base font-bold text-gray-900">
-              {rv.shareExperience || "Chia sẻ trải nghiệm của bạn"}{" "}
-              <span className="font-medium text-gray-500">
-                {rv.optional || "(không bắt buộc)"}
-              </span>
+            <h3 className="text-sm sm:text-base font-bold text-gray-900">
+              {rv.shareExperience || "Chia sẻ trải nghiệm của bạn"}
             </h3>
           </div>
-          <div className="relative mt-4 sm:ml-9">
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value.slice(0, 500))}
-              placeholder={
-                rv.commentPlaceholder ||
-                "Bạn thích điều gì ở khóa học này? Điều gì có thể cải thiện?"
-              }
-              rows={4}
-              className="w-full resize-none rounded-xl border border-gray-200 p-4 text-sm text-gray-700 outline-none transition focus:border-[#B10A0A]/50 focus:ring-2 focus:ring-[#B10A0A]/10"
-            />
-            <span className="absolute bottom-3 right-4 text-xs text-gray-400">
-              {comment.length}/500
-            </span>
-          </div>
-        </div>
 
-        {/* Overall rating */}
-        <div className="mt-6 sm:ml-9">
-          <h3 className="text-base font-bold text-gray-900">
-            {rv.overallRating || "Đánh giá tổng quan"}
-          </h3>
-          <div className="mt-2 flex items-center gap-4">
-            <StarRating value={overall} size="lg" />
-            <span className="text-sm font-medium text-gray-600">
-              {overall > 0 ? overallLabel : ""}
-            </span>
+          <div className="pl-0 sm:pl-8">
+            <div className="relative rounded-2xl border border-gray-200 bg-white p-3 sm:p-3.5 focus-within:border-gray-300 transition-colors">
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value.slice(0, 500))}
+                placeholder={
+                  rv.commentPlaceholder ||
+                  "Bạn thích điều gì ở khóa học này? Điều gì có thể cải thiện?"
+                }
+                rows={3}
+                className="w-full resize-none border-none p-0 text-xs sm:text-sm text-gray-700 placeholder-gray-400 outline-none"
+              />
+              <div className="text-[11px] text-gray-400 text-right mt-1 select-none">
+                {comment.length}/500
+              </div>
+            </div>
+
+            {/* Overall rating */}
+            <div className="mt-4">
+              <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-2">
+                {rv.overallRating || "Đánh giá tổng quan"}
+              </h4>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                <StarRating value={overall} size="lg" />
+                {overall > 0 && (
+                  <span
+                    className={`inline-flex items-center justify-center rounded-lg px-3 py-1 text-xs sm:text-sm font-semibold ${overall >= 4
+                      ? "bg-[#d1fae5] text-[#059669]"
+                      : overall <= 2
+                        ? "bg-red-50 text-red-600 border border-red-100"
+                        : "bg-gray-100 text-gray-700"
+                      }`}
+                  >
+                    {overallLabel}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
         {errorMessage && (
-          <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
+          <p className="mt-3.5 rounded-xl bg-red-50 px-3.5 py-2 text-xs sm:text-sm text-red-600 border border-red-100">
             {errorMessage}
           </p>
         )}
 
-        {/* Actions */}
-        <div className="mt-8 flex items-center justify-end gap-3">
+        {/* Bottom Action Footer */}
+        <div className="border-t border-gray-100 -mx-5 sm:-mx-7 mt-5 px-5 sm:px-7 pt-4 flex items-center justify-between gap-4">
           <button
             type="button"
             onClick={() => setShowLeaveConfirm(true)}
-            className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+            className="rounded-xl border border-gray-200 bg-white px-5 sm:px-6 py-2.5 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition active:scale-[0.98] cursor-pointer shadow-2xs"
           >
             {rv.back || "Quay lại"}
           </button>
+
           <button
             type="button"
             disabled={isSubmitting}
             onClick={handleSubmit}
-            className="rounded-lg bg-[#B10A0A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#870003] disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-[#990011] hover:bg-[#80000e] px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-semibold text-white transition active:scale-[0.98] cursor-pointer shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting
-              ? "..."
-              : rv.submit || "Gửi đánh giá"}
+            {isSubmitting ? "..." : rv.submit || "Gửi đánh giá"}
           </button>
         </div>
       </div>
@@ -374,48 +468,70 @@ const ReviewClassPage = () => {
       </Modal>
 
       {/* Success modal */}
-      <Modal open={showSuccess} showCloseButton={false} fullScreenOnMobile={false} className="max-w-[480px] rounded-xl !p-0">
-        <div className="relative p-8 text-center">
+      <Modal
+        open={showSuccess}
+        showCloseButton={false}
+        fullScreenOnMobile={false}
+        bodyClassName="p-0 !mb-0"
+        className="max-w-[420px] w-full rounded-3xl border border-gray-100 shadow-2xl overflow-hidden bg-white mx-4 !p-0"
+      >
+        <div className="relative p-6 sm:p-7 flex flex-col items-center text-center">
+          {/* Close button */}
           <button
             type="button"
             aria-label="Close"
             onClick={() => navigate("/workspace/profile")}
-            className="absolute right-4 top-4 text-gray-400 transition hover:text-gray-600"
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
           >
             <X size={18} />
           </button>
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#E6F4EA]">
-            <CheckCircle2 size={44} className="text-green-600" />
+
+          {/* Success Check Badge */}
+          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-[#dcfce7] flex items-center justify-center mb-4 sm:mb-5">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#16a34a] flex items-center justify-center text-white shadow-sm">
+              <Check size={22} className="text-white" strokeWidth={3} />
+            </div>
           </div>
-          <h2 className="mt-4 text-2xl font-bold text-gray-900">
+
+          {/* Title */}
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight text-center">
             {rv.successTitle || "Đánh giá thành công!"}
           </h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-gray-600">
+
+          {/* Subtitle */}
+          <p className="mt-2 text-xs sm:text-[13px] text-gray-500 text-center max-w-[320px] mx-auto leading-relaxed px-1">
             {rv.successMessage ||
               "Cảm ơn bạn đã chia sẻ trải nghiệm về khóa học. Đánh giá của bạn sẽ giúp cộng đồng học tốt hơn."}
           </p>
 
+          {/* Reward Info Card */}
           {rewardPoints > 0 && (
-            <div className="mt-6 flex items-center gap-3 rounded-lg bg-[#F8F9FA] p-4 text-left ring-1 ring-[#E5BDB8]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FEB316]/20">
-                <Award size={20} className="text-[#FEB316]" />
+            <div className="mt-5 w-full bg-[#f9fafb] border border-[#f5d0ce] rounded-2xl p-4 text-left flex items-center gap-3.5">
+              {/* Golden coin icon */}
+              <div className="w-10 h-10 rounded-full bg-[#fef3c7] flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full bg-[#f59e0b] flex items-center justify-center text-white shadow-xs">
+                  <Star size={13} className="fill-white text-white" />
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-700">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-gray-700">
                   {rv.rewardTitle || "Phần thưởng"}
                 </p>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm sm:text-base font-bold text-gray-900 truncate">
                   {rv.rewardReceived || "Bạn đã nhận được"}{" "}
-                  <span className="text-[#FFBA3B]">{rewardPoints} Points</span>
+                  <span className="text-[#f59e0b] font-bold">
+                    {rewardPoints ?? 0} Points
+                  </span>
                 </p>
               </div>
             </div>
           )}
 
+          {/* Button to Profile */}
           <button
             type="button"
             onClick={() => navigate("/workspace/profile")}
-            className="mt-6 w-full rounded-lg bg-[#870003] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#B10A0A]"
+            className="mt-6 w-full py-3 rounded-xl bg-[#870003] hover:bg-[#700002] text-white font-semibold text-sm transition-all active:scale-[0.98] shadow-sm cursor-pointer"
           >
             {rv.goBack || "Về trang cá nhân"}
           </button>

@@ -98,8 +98,9 @@ export default {
       completedLabel: "已完成",
     },
     review: {
-      title: "班级评价",
-      shareExperience: "分享你的体验",
+      title: "课程评价",
+      subtitle: "分享您的学习体验，帮助社区共同进步。",
+      shareExperience: "分享您的体验",
       optional: "（可选）",
       detailRating: "详细评分",
       contentQuality: "内容质量",
@@ -136,11 +137,12 @@ export default {
         "5": "优秀",
       },
       popup: {
-        titlePrefix: "恭喜您完成了",
+        titlePrefix: "恭喜您已完成",
         subtitle: "您可以将此成就分享到个人主页，作为完成课程的证明。",
         later: "稍后再说",
         review: "评价",
-        share: "立即分享",
+        share: "分享",
+        completedDate: "完成日期",
       },
     },
     documents: {

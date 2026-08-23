@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useSelector } from "react-redux"
-import { Share2, X, Star } from "lucide-react"
+import { Share2, X, Trophy } from "lucide-react"
 import Confetti from "react-confetti"
-import awardIcon from "@/shared/assets/images/award.svg"
 import { selectIsAuthenticated, selectCurrentUser } from "@/store/slices/authSlice"
 import { useGetPendingReviewQuery } from "@/store/api/reviewApi"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { copyShareLink } from "@/shared/utils/shareUtils"
 import Modal from "@/shared/components/ui/Modal"
 
 const getStorageKey = (userId) => {
@@ -66,7 +66,7 @@ const CompletionReviewPrompt = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated)
   const currentUser = useSelector(selectCurrentUser)
   const [dismissed, setDismissed] = useState(false)
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const { formatDate } = useTimezone()
   const windowSize = useWindowSize()
   const popupT = t?.profile?.review?.popup || {}
@@ -112,26 +112,68 @@ const CompletionReviewPrompt = () => {
 
   const formatDateStr = (value) => {
     if (!value) return "—"
-    return formatDate ? formatDate(String(value)) : String(value)
+    if (formatDate) {
+      const formatted = formatDate(String(value))
+      if (formatted) return formatted
+    }
+    try {
+      const d = new Date(value)
+      const day = String(d.getDate()).padStart(2, "0")
+      const month = String(d.getMonth() + 1).padStart(2, "0")
+      const year = d.getFullYear()
+      return `${day}/${month}/${year}`
+    } catch {
+      return String(value)
+    }
   }
 
   const courseDisplayName = pending?.courseName || pending?.className || "Khóa học"
 
-  const getCompletedSubtitle = () => {
-    if (!pending?.completedAtUtc) {
-      return (
-        popupT.subtitle ||
-        "Bạn có thể chia sẻ thành tích này lên trang cá nhân như một chứng thực hoàn thành khóa học."
-      )
+  const displayName =
+    currentUser?.fullName ||
+    currentUser?.name ||
+    currentUser?.displayName ||
+    currentUser?.username ||
+    "Học viên"
+
+  const userAvatarUrl =
+    currentUser?.avatarUrl ||
+    currentUser?.avatar ||
+    currentUser?.profilePictureUrl
+
+  const userInitials = useMemo(() => {
+    if (!displayName) return "U"
+    const parts = displayName.trim().split(/\s+/).filter(Boolean)
+    if (parts.length === 0) return "U"
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+    const p1 = parts[parts.length - 2][0]
+    const p2 = parts[parts.length - 1][0]
+    return (p1 + p2).toUpperCase()
+  }, [displayName])
+
+  const completionDate =
+    pending?.completedAtUtc || pending?.completedAt || pending?.completionDate
+
+  const completionDateStr = completionDate ? formatDateStr(completionDate) : "—"
+
+  const handleShare = async () => {
+    const profileUrl = `${window.location.origin}/profile/${userId}`
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: courseDisplayName,
+          text: `Tôi đã hoàn thành khóa học ${courseDisplayName} trên CatSpeak!`,
+          url: profileUrl,
+        })
+        return
+      } catch (err) {
+        if (err.name === "AbortError") return
+      }
     }
-    const dateFormatted = formatDateStr(pending.completedAtUtc)
-    if (language === "en") {
-      return `You completed this course on ${dateFormatted}.`
-    }
-    if (language === "zh") {
-      return `您已于 ${dateFormatted} 完成此课程。`
-    }
-    return `Bạn đã hoàn thành khóa học này vào ngày ${dateFormatted}.`
+    await copyShareLink({
+      url: profileUrl,
+      successMessage: "Đã sao chép liên kết chứng nhận hoàn thành khóa học!",
+    })
   }
 
   return (
@@ -155,74 +197,100 @@ const CompletionReviewPrompt = () => {
         showCloseButton={false}
         fullScreenOnMobile={false}
         bodyClassName="p-0 !mb-0"
-        className="max-w-[460px] w-full rounded-2xl border border-gray-200/80 shadow-2xl overflow-hidden bg-white mx-4"
+        className="max-w-[420px] w-full rounded-3xl border border-gray-100 shadow-2xl overflow-hidden bg-white mx-4"
       >
-        <div className="relative p-6 sm:p-8 flex flex-col items-center text-center">
+        <div className="relative p-6 sm:p-7 flex flex-col items-center text-center">
           {/* Close button */}
           <button
             type="button"
             aria-label="Close"
             onClick={close}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
+            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors p-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
           >
             <X size={18} />
           </button>
 
-          {/* Award Graphic inside framed container */}
-          <div className="relative flex items-center justify-center mb-4">
-            <div className="w-24 h-24 rounded-2xl bg-amber-50/80 border border-amber-100 flex items-center justify-center p-3 shadow-inner">
-              <img
-                src={awardIcon}
-                alt="Award"
-                className="h-full w-full object-contain"
-              />
+          {/* Trophy Badge in soft peach/orange circle */}
+          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-[#ffedd5] flex items-center justify-center mb-4 sm:mb-5">
+            <Trophy className="w-8 h-8 sm:w-9 sm:h-9 text-[#ea580c]" strokeWidth={2.2} />
+          </div>
+
+          {/* Title Header */}
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 leading-snug tracking-tight text-center px-2">
+            {popupT.titlePrefix || "Chúc mừng bạn đã hoàn thành"}
+            <br />
+            {courseDisplayName.endsWith("!") ? courseDisplayName : `${courseDisplayName}!`}
+          </h2>
+
+          {/* Subtitle */}
+          <p className="mt-2 text-xs sm:text-[13px] text-gray-500 text-center max-w-[320px] mx-auto leading-relaxed px-1">
+            {popupT.subtitle ||
+              "Bạn có thể chia sẻ thành tích này lên trang cá nhân như một chứng thực hoàn thành khóa học."}
+          </p>
+
+          {/* User & Completion Info Card */}
+          <div className="mt-5 w-full bg-[#f9fafb] border border-gray-100/90 rounded-2xl p-4 text-left">
+            {/* User row */}
+            <div className="flex items-center gap-3">
+              {userAvatarUrl ? (
+                <img
+                  src={userAvatarUrl}
+                  alt={displayName}
+                  className="w-9 h-9 rounded-full object-cover shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none"
+                  }}
+                />
+              ) : (
+                <div className="w-9 h-9 rounded-full bg-[#fee2e2] text-[#dc2626] font-bold text-xs sm:text-sm flex items-center justify-center shrink-0">
+                  {userInitials}
+                </div>
+              )}
+              <span className="font-semibold text-gray-900 text-sm sm:text-[15px] truncate">
+                {displayName}
+              </span>
+            </div>
+
+            {/* Divider line */}
+            <div className="border-t border-gray-200/60 my-3.5" />
+
+            {/* Completion date row */}
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <span className="text-gray-500">
+                {popupT.completedDate || "Ngày hoàn thành"}
+              </span>
+              <span className="font-semibold text-gray-900">
+                {completionDateStr}
+              </span>
             </div>
           </div>
 
-          {/* Title Header with Separate Lines */}
-          <div className="w-full">
-            <p className="text-sm font-medium text-gray-500">
-              {popupT.titlePrefix || "Chúc mừng bạn đã hoàn thành"}
-            </p>
-            <h2 className="mt-1 text-xl sm:text-2xl font-bold text-gray-900 tracking-tight leading-snug break-words px-2">
-              {courseDisplayName}
-            </h2>
-          </div>
+          {/* Action Buttons Row */}
+          <div className="mt-6 flex items-center gap-3 w-full">
+            <button
+              type="button"
+              onClick={close}
+              className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium text-xs sm:text-sm text-center transition-all active:scale-[0.98] cursor-pointer shadow-sm"
+            >
+              {popupT.later || "Để sau"}
+            </button>
 
-          {/* Subtitle with Completion Date */}
-          <p className="mt-2 text-xs sm:text-sm text-gray-500 max-w-sm leading-relaxed px-1">
-            {getCompletedSubtitle()}
-          </p>
-
-          {/* Action Buttons */}
-          <div className="mt-6 flex w-full flex-col gap-2.5">
             <button
               type="button"
               onClick={goReview}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#990011] hover:bg-[#80000e] text-white font-semibold py-3 px-4 text-sm transition-all shadow-sm hover:shadow active:scale-[0.99] cursor-pointer"
+              className="flex-1 py-2.5 px-3 sm:px-4 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-medium text-xs sm:text-sm text-center transition-all active:scale-[0.98] cursor-pointer shadow-sm"
             >
-              <Star size={16} className="fill-amber-300 text-amber-300" />
-              <span>{popupT.review || "Đánh giá ngay"}</span>
+              {popupT.review || "Đánh giá"}
             </button>
 
-            <div className="flex items-center gap-2 w-full">
-              <button
-                type="button"
-                onClick={close}
-                className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 text-gray-700 font-medium py-2.5 px-3 text-xs sm:text-sm transition-all active:scale-[0.99] cursor-pointer"
-              >
-                <Share2 size={15} className="text-gray-500" />
-                <span>{popupT.share || "Chia sẻ ngay"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={close}
-                className="flex items-center justify-center rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                {popupT.later || "Để sau"}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleShare}
+              aria-label={popupT.share || "Chia sẻ"}
+              className="w-11 h-11 sm:w-11 sm:h-11 rounded-xl bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center shrink-0 transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+            >
+              <Share2 size={18} className="text-white" />
+            </button>
           </div>
         </div>
       </Modal>
