@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RoomEvent } from "livekit-client"
 import { toast } from "react-hot-toast"
@@ -22,6 +22,12 @@ import { IconButton, PillButton } from "@/shared/components/ui/buttons"
 export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   const dispatch = useDispatch()
   const parentSessionId = useSelector((s) => s.videoCall.parentSessionId)
+  const isBreakoutActive = useSelector((s) => s.videoCall.isBreakoutActive)
+  const isBreakoutActiveRef = useRef(isBreakoutActive)
+  useEffect(() => {
+    isBreakoutActiveRef.current = isBreakoutActive
+  }, [isBreakoutActive])
+
   const callInfo = useSelector((s) => s.videoCall.callInfo)
   const roomId = callInfo?.roomId
   const [closingTargetMs, setClosingTargetMs] = useState(null)
@@ -124,6 +130,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
         toast.success(
           t?.rooms?.breakoutRooms?.returnToMainSuccess ??
             "Đang quay trở lại phòng chính...",
+          { id: "breakout-room-transition" },
         )
         dispatch(exitBreakout())
         dispatch(updateLivekitToken(token))
@@ -132,6 +139,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
           t?.rooms?.breakoutRooms?.joinedRoomSuccess
             ? `${t.rooms.breakoutRooms.joinedRoomSuccess} ${roomName || ""}`
             : `Đang di chuyển vào ${roomName || "phòng thảo luận"}...`,
+          { id: "breakout-room-transition" },
         )
         dispatch(enterBreakout({ subSessionId, roomName, token }))
       }
@@ -144,10 +152,17 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
       console.info("[SignalR] ReturnToMainRoom received:", {
         parentSessionIdValue,
         roomName,
+        isBreakoutActive: isBreakoutActiveRef.current,
       })
+      // Only process and notify if the participant is currently in a breakout sub-room or receiving a new token
+      if (!isBreakoutActiveRef.current && !token) {
+        return
+      }
+
       toast.success(
         t?.rooms?.breakoutRooms?.roomsClosedReturnMain ??
           "Phòng thảo luận đã kết thúc. Đang quay trở lại phòng chính...",
+        { id: "breakout-room-transition" },
       )
       dispatch(roomsApi.util.invalidateTags([{ type: "Breakout" }]))
       dispatch(exitBreakout())
@@ -193,7 +208,11 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
         ]),
       )
 
-      // If breakout status changed to false (closed) while client is in a sub-session, automatically return to main room
+      // Only check and auto-return if this client is ACTUALLY in a breakout sub-session
+      if (!isBreakoutActiveRef.current) {
+        return
+      }
+
       const targetSessionId = parentSessionIdValue || parentSessionId
       if (targetSessionId) {
         try {
@@ -230,7 +249,17 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
 
   const handleBroadcastNotification = useCallback(
     (parentSessionIdValue, message) => {
-      console.info("[SignalR] BroadcastNotification received:", message)
+      const broadcastText =
+        (typeof message === "string" && message) ||
+        (typeof parentSessionIdValue === "string" && parentSessionIdValue) ||
+        ""
+      console.info("[SignalR] BroadcastNotification received:", {
+        parentSessionIdValue,
+        message,
+        broadcastText,
+      })
+      if (!broadcastText) return
+
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext
         if (AudioContext) {
@@ -269,7 +298,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
                 {title}
               </p>
               <p className="text-sm text-slate-700 mt-1 break-words font-medium">
-                {message}
+                {broadcastText}
               </p>
             </div>
             <IconButton
@@ -281,7 +310,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
             </IconButton>
           </div>
         ),
-        { duration: 12000, id: `broadcast-${Date.now()}` },
+        { duration: 12000, id: "breakout-broadcast-banner" },
       )
     },
     [t],
