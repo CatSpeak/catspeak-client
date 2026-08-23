@@ -226,41 +226,12 @@ const BreakoutActiveRoomList = ({
           ? studentCount >= status.maxParticipantsPerRoom
           : false
 
-        // Speaking balance calculation per breakout room
+        // Speaking balance metrics per breakout room (pre-calculated from server)
         const roomSpeakingStats =
           breakoutRoomsMap[String(room.sessionId)] ||
           (room.roomId ? breakoutRoomsMap[String(room.roomId)] : null)
 
-        let lowSpeakingCount = 0
-        if (
-          roomSpeakingStats &&
-          studentCount > 0 &&
-          roomSpeakingStats.totalStudentDurationSec > 0
-        ) {
-          const expectedSharePercent = Math.round(100 / studentCount)
-          for (const student of studentParticipants) {
-            const studentAccountId = String(student.accountId)
-            const st =
-              roomSpeakingStats.statsMap[studentAccountId] ||
-              (student.identity ? roomSpeakingStats.statsMap[student.identity] : null)
-            const durationSec = st?.totalDurationSeconds || 0
-            const totalWords = st?.totalWords || 0
-
-            const sharePercent =
-              roomSpeakingStats.totalStudentDurationSec > 0
-                ? Math.round((durationSec / roomSpeakingStats.totalStudentDurationSec) * 100)
-                : 0
-
-            const ratioOfExp =
-              expectedSharePercent > 0
-                ? (sharePercent / expectedSharePercent) * 100
-                : 0
-
-            if (ratioOfExp < 60 || totalWords === 0 || durationSec === 0) {
-              lowSpeakingCount++
-            }
-          }
-        }
+        const lowSpeakingCount = roomSpeakingStats?.lowSpeakingCount ?? 0
 
         return (
           <div

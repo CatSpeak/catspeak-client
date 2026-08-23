@@ -69,7 +69,7 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
     }, 0)
   }, [roomTotalStudentDuration, studentParticipants, speakingStatsMap])
 
-  // Extract current user's speaking metrics
+  // Extract current user's speaking metrics (pre-calculated from server)
   const myStats = useMemo(() => {
     const localIdentity = localParticipant?.identity
     const localMeta = parseMetadata(localParticipant?.metadata)
@@ -81,19 +81,15 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
         totalWords: 0,
         totalDurationSeconds: 0,
         wpm: 0,
+        sharePercent: 0,
+        status: "normal",
       }
     )
   }, [localParticipant, user, speakingStatsMap])
 
   const totalWords = myStats?.totalWords || 0
   const durationSec = myStats?.totalDurationSeconds || 0
-
-  const sharePercent = useMemo(() => {
-    if (totalStudentDurationSec > 0 && durationSec > 0) {
-      return Math.round((durationSec / totalStudentDurationSec) * 100)
-    }
-    return 0
-  }, [totalStudentDurationSec, durationSec])
+  const sharePercent = myStats?.sharePercent || 0
 
   // Room title (Main Room vs Breakout Room)
   const roomTitle = isBreakoutActive

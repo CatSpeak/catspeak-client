@@ -48,6 +48,10 @@ const SpeakingTimeBalancePanel = ({
     speakingStatsMap = {},
     roomTotalDuration = 0,
     roomTotalStudentDuration = 0,
+    speakingTeacherSpeakingPercent = 0,
+    speakingStudentSpeakingPercent = 0,
+    speakingExpectedSharePercent = 25,
+    speakingHasAnySpeechData = false,
     speakingStatsLastUpdated,
     isSpeakingStatsLoading = false,
     isSpeakingStatsFetching = false,
@@ -97,61 +101,16 @@ const SpeakingTimeBalancePanel = ({
     [room, user],
   )
 
-  // Extract host/teacher participant and student participants
-  const hostParticipant = useMemo(() => {
-    return participants.find((p) => isHostOrTeacher(p))
-  }, [participants, isHostOrTeacher])
-
   const studentParticipants = useMemo(() => {
     if (!participants || participants.length === 0) return []
     return participants.filter((p) => !isHostOrTeacher(p))
   }, [participants, isHostOrTeacher])
 
-  // Teacher duration
-  const teacherStats = useMemo(() => {
-    if (!hostParticipant) return null
-    const hostMeta = parseMetadata(hostParticipant.metadata)
-    return (
-      speakingStatsMap[hostParticipant.identity] ||
-      (hostMeta.accountId ? speakingStatsMap[String(hostMeta.accountId)] : null)
-    )
-  }, [hostParticipant, speakingStatsMap])
-
-  const teacherDurationSec = teacherStats?.totalDurationSeconds || 0
-
-  // Total student duration from Redis/API or sum of student stats
-  const totalStudentDurationSec = useMemo(() => {
-    if (roomTotalStudentDuration > 0) return roomTotalStudentDuration
-    return studentParticipants.reduce((sum, p) => {
-      const meta = parseMetadata(p.metadata)
-      const st =
-        speakingStatsMap[p.identity] ||
-        (meta.accountId ? speakingStatsMap[String(meta.accountId)] : null)
-      return sum + (st?.totalDurationSeconds || 0)
-    }, 0)
-  }, [roomTotalStudentDuration, studentParticipants, speakingStatsMap])
-
-  // Dynamic Teacher vs Students ratio (FR-005)
-  const combinedTeacherStudentDuration = teacherDurationSec + totalStudentDurationSec
-
-  const { computedTeacherPercent, computedStudentPercent } = useMemo(() => {
-    if (combinedTeacherStudentDuration > 0) {
-      const teacherP = Math.round((teacherDurationSec / combinedTeacherStudentDuration) * 100)
-      const studentP = 100 - teacherP
-      return { computedTeacherPercent: teacherP, computedStudentPercent: studentP }
-    }
-    return {
-      computedTeacherPercent: 0,
-      computedStudentPercent: 0,
-    }
-  }, [combinedTeacherStudentDuration, teacherDurationSec])
-
-  // Student Fair Floor & Expected Share (FR-004: expected share = 100% / number of students)
   const studentCount = studentParticipants.length
   const expectedSharePercent =
-    studentCount > 0 ? Math.round(100 / studentCount) : 25
+    speakingExpectedSharePercent || (studentCount > 0 ? Math.round(100 / studentCount) : 25)
 
-  // Map each student participant to their speaking metrics
+  // Map each student participant to their pre-calculated speaking metrics from server
   const participantStatsList = useMemo(() => {
     return studentParticipants.map((p) => {
       const meta = parseMetadata(p.metadata)
@@ -167,48 +126,27 @@ const SpeakingTimeBalancePanel = ({
           totalWords: 0,
           totalDurationSeconds: 0,
           wpm: 0,
+          sharePercent: 0,
+          status: "normal",
         }
-
-      const durationSec = stats.totalDurationSeconds || 0
-      const totalWords = stats.totalWords || 0
-
-      // Calculate percentage of room total student duration (fair floor)
-      const sharePercent =
-        totalStudentDurationSec > 0
-          ? Math.round((durationSec / totalStudentDurationSec) * 100)
-          : 0
-
-      // Determine threshold status relative to expected share (FR-004 from SRS)
-      const ratioOfExpected =
-        expectedSharePercent > 0 ? (sharePercent / expectedSharePercent) * 100 : 0
-
-      let status = "normal" // "normal" | "attention" | "tooLow"
-      if (totalStudentDurationSec > 0) {
-        if (totalWords === 0 || durationSec === 0 || ratioOfExpected < 30) {
-          status = "tooLow"
-        } else if (ratioOfExpected < 60) {
-          status = "attention"
-        } else {
-          status = "normal"
-        }
-      }
 
       return {
         participant: p,
         name,
-        totalWords,
-        durationSec,
-        sharePercent,
-        status,
+        totalWords: stats.totalWords || 0,
+        durationSec: stats.totalDurationSeconds || 0,
+        sharePercent: stats.sharePercent || 0,
+        status: stats.status || "normal",
       }
     })
-  }, [studentParticipants, speakingStatsMap, totalStudentDurationSec, expectedSharePercent, t])
+  }, [studentParticipants, speakingStatsMap, t])
 
-  // Determine if session has any speech data
-  const hasAnySpeechData = useMemo(() => {
-    if (roomTotalDuration > 0 || totalStudentDurationSec > 0 || teacherDurationSec > 0) return true
-    return participantStatsList.some((p) => p.totalWords > 0 || p.durationSec > 0)
-  }, [roomTotalDuration, totalStudentDurationSec, teacherDurationSec, participantStatsList])
+  // Use pre-computed server speech flag or fallback
+  const hasAnySpeechData =
+    speakingHasAnySpeechData ||
+    roomTotalDuration > 0 ||
+    roomTotalStudentDuration > 0 ||
+    participantStatsList.some((p) => p.totalWords > 0 || p.durationSec > 0)
 
   return (
     <div className="flex flex-col h-full w-full bg-white">
@@ -262,8 +200,8 @@ const SpeakingTimeBalancePanel = ({
         <>
           <TeacherTalkRatioCard
             hasAnySpeechData={hasAnySpeechData}
-            teacherPercent={computedTeacherPercent}
-            studentPercent={computedStudentPercent}
+            teacherPercent={speakingTeacherSpeakingPercent}
+            studentPercent={speakingStudentSpeakingPercent}
             labels={stbT}
           />
 
