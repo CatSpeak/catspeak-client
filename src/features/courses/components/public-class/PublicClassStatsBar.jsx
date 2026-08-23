@@ -37,7 +37,7 @@ const PublicClassStatsBar = ({ classData }) => {
   const endTime = firstSchedule?.endTime || classData?.endTime
   const timeFormatted =
     startTime && endTime
-      ? `${formatScheduleTime(startTime)} - ${formatScheduleTime(endTime)}`
+      ? `${formatScheduleTime(startTime)} → ${formatScheduleTime(endTime)}`
       : startTime
         ? formatScheduleTime(startTime)
         : null
