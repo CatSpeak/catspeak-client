@@ -231,7 +231,14 @@ const BreakoutActiveRoomList = ({
           breakoutRoomsMap[String(room.sessionId)] ||
           (room.roomId ? breakoutRoomsMap[String(room.roomId)] : null)
 
-        const lowSpeakingCount = roomSpeakingStats?.lowSpeakingCount ?? 0
+        const tooLowStudents =
+          roomSpeakingStats?.participantsList?.filter(
+            (p) => !p.isTeacher && p.status === "tooLow",
+          ) || []
+        const lowSpeakingCount =
+          tooLowStudents.length > 0
+            ? tooLowStudents.length
+            : (roomSpeakingStats?.lowSpeakingCount ?? 0)
 
         return (
           <div
@@ -280,8 +287,8 @@ const BreakoutActiveRoomList = ({
                   </Badge>
                 )}
                 {lowSpeakingCount > 0 && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full shrink-0">
-                    {(t.rooms.breakoutRooms.lowSpeakingBadge || "⚠️ {count} HV ít").replace(
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full shrink-0 shadow-sm">
+                    {(t.rooms.breakoutRooms.lowSpeakingBadge || "⚠️ {count} HV chưa đạt").replace(
                       "{count}",
                       String(lowSpeakingCount),
                     )}

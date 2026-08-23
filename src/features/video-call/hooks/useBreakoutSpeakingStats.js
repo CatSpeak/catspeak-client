@@ -167,15 +167,26 @@ export const useBreakoutSpeakingStats = (sessionId, options = {}) => {
 
     const breakoutRoomsList = Array.isArray(rawData.breakoutRooms)
       ? rawData.breakoutRooms.map((room) => {
-          const parsed = parseRoomStats(room)
+          const lowSpeakingCount = Number(
+            room.lowSpeakingCount ?? room.fairShare?.lowSpeakingCount ?? 0,
+          )
+          const hasWarning = Boolean(
+            room.hasWarning ?? room.fairShare?.hasWarning ?? lowSpeakingCount > 0,
+          )
+          const studentCount = Number(
+            room.studentCount ?? room.overview?.studentCount ?? 0,
+          )
+          const hasAnySpeechData = Boolean(room.hasAnySpeechData)
 
           return {
             sessionId: room.sessionId,
             roomId: room.roomId,
             roomName: room.roomName || room.liveKitRoomName,
             liveKitRoomName: room.liveKitRoomName,
-            totalRoomWords: parsed.totalWords ?? 0,
-            ...parsed,
+            lowSpeakingCount,
+            hasWarning,
+            studentCount,
+            hasAnySpeechData,
           }
         })
       : []

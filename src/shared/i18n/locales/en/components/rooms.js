@@ -877,8 +877,8 @@ export default {
     notStartedTitle: "Breakout not started yet",
     notStartedDesc:
       "The teacher has not opened breakout rooms for this session yet.",
-    lowSpeakingNotice: "⚠️ {count} students with low speaking time",
-    lowSpeakingBadge: "⚠️ {count} low",
+    lowSpeakingNotice: "⚠️ {count} students below speaking target",
+    lowSpeakingBadge: "⚠️ {count} under target",
     changeLocked: "Room change locked",
     roomFull: "Room is full",
     roomPrefix: "Room ",
