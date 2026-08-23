@@ -5,6 +5,7 @@ import IconButton from '@/shared/components/ui/buttons/IconButton'
 import Avatar from '@/shared/components/ui/Avatar'
 import FluentCard from '@/shared/components/ui/FluentCard'
 import ProgressBar from '@/shared/components/ui/ProgressBar'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const ClassCard = ({
   coverImage,
@@ -16,10 +17,13 @@ const ClassCard = ({
   scheduleDays = "Mon - Tue - Wed",
   scheduleTime = "19:30 - 21:30",
   progress = 25,
-  onCancel,
+  // onCancel,
   onEnter,
   onShare,
 }) => {
+  const { t } = useLanguage()
+  const lo = t.courses?.student?.myLearningOverview || {}
+
   return (
     <FluentCard padding="p-0" className="overflow-hidden flex flex-col text-[#1A1A1A]">
       {/* Thumbnail */}
@@ -53,7 +57,7 @@ const ClassCard = ({
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm text-[#7B7979]">
             <Avatar src={instructorAvatar} size={30} />
-            <span>Giảng viên {instructorName}</span>
+            <span>{(lo.instructorPrefix || "Giảng viên")} {instructorName}</span>
           </div>
           <div className="flex items-center gap-2 text-base text-[#1A1A1A]">
             <Calendar size={18} className="text-[#1A1A1A] shrink-0" />
@@ -68,7 +72,7 @@ const ClassCard = ({
         {/* Progress */}
         <div className="">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-base text-[#1A1A1A]">Tiến độ</span>
+            <span className="text-base text-[#1A1A1A]">{lo.progressLabel || "Tiến độ"}</span>
             <span className="text-base font-semibold text-[#1A1A1A]">{progress}%</span>
           </div>
           <ProgressBar progress={progress} heightClass="h-2" colorClass="bg-[#990011]" />
@@ -76,19 +80,19 @@ const ClassCard = ({
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2">
-          <PillButton
+          {/* <PillButton
             variant="outline"
             onClick={onCancel}
             className="!h-10"
           >
-            Hủy đăng ký
-          </PillButton>
+            {lo.cancelEnrollment || "Hủy đăng ký"}
+          </PillButton> */}
           <PillButton
             variant="primary"
             onClick={onEnter}
             className="!h-10"
           >
-            Vào lớp
+            {lo.enterClass || "Vào lớp"}
           </PillButton>
         </div>
       </div>

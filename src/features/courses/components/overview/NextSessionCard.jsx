@@ -2,6 +2,7 @@ import React from 'react'
 import { Clock, Calendar, ArrowRight } from 'lucide-react'
 import PillButton from '@/shared/components/ui/buttons/PillButton'
 import FluentCard from '@/shared/components/ui/FluentCard'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const NextSessionCard = ({
   title = "Khóa tiếng anh luyện nói",
@@ -11,6 +12,9 @@ const NextSessionCard = ({
   language,
   onAction,
 }) => {
+  const { t } = useLanguage()
+  const lo = t.courses?.student?.myLearningOverview || {}
+
   return (
     <FluentCard className='space-y-3 text-[#1A1A1A]'>
       {/* Top section: Tags and Status */}
@@ -50,7 +54,7 @@ const NextSessionCard = ({
             onClick={onAction}
             className="!h-10"
           >
-            Vào phòng
+            {lo.enterRoom || "Vào phòng"}
           </PillButton>
         ) : (
           <PillButton
@@ -59,7 +63,7 @@ const NextSessionCard = ({
             onClick={onAction}
             className="!h-10"
           >
-            Xem lớp
+            {lo.viewClass || "Xem lớp"}
           </PillButton>
         )}
       </div>

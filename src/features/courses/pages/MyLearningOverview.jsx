@@ -15,10 +15,13 @@ import { copyShareLink } from "@/shared/utils/shareUtils"
 
 import dayjs from 'dayjs'
 import { Calendar, BookOpen } from 'lucide-react'
+import { useLanguage } from '@/shared/context/LanguageContext'
 
 const MyLearningOverview = ({ onShowAll }) => {
   const navigate = useNavigate()
   const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
+  const { t } = useLanguage()
+  const lo = t.courses?.student?.myLearningOverview || {}
 
   const [activeTab, setActiveTab] = useState("registered")
 
@@ -44,20 +47,20 @@ const MyLearningOverview = ({ onShowAll }) => {
 
   const joinedClasses = useMemo(() => {
     if (!joinedRes) return []
-    const data = joinedRes.data || joinedRes
-    return Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : [])
+    const items = joinedRes.data || joinedRes
+    return Array.isArray(items) ? items : []
   }, [joinedRes])
 
   const completedClasses = useMemo(() => {
     if (!completedRes) return []
-    const data = completedRes.data || completedRes
-    return Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : [])
+    const items = completedRes.data || completedRes
+    return Array.isArray(items) ? items : []
   }, [completedRes])
 
   const tabs = [
-    { id: "registered", label: "Đã đăng ký", badge: joinedClasses.length },
-    { id: "completed", label: "Hoàn thành", badge: completedClasses.length },
-    { id: "cancelled", label: "Đã huỷ" },
+    { id: "registered", label: lo.registered || "Đã đăng ký", badge: joinedClasses.length },
+    { id: "completed", label: lo.completed || "Hoàn thành", badge: completedClasses.length },
+    { id: "cancelled", label: lo.cancelled || "Đã huỷ" },
   ]
 
   const displayClasses =
@@ -72,13 +75,13 @@ const MyLearningOverview = ({ onShowAll }) => {
 
       <Breadcrumb
         items={[
-          { label: "Trang chủ", onClick: () => navigate("/") },
-          { label: "Lớp học của tôi" },
+          { label: lo.home || "Trang chủ", onClick: () => navigate("/") },
+          { label: lo.myLearning || "Lớp học của tôi" },
         ]}
       />
 
       <PageTitle className="text-[#1A1A1A]">
-        Buổi học sắp diễn ra
+        {lo.upcomingSessions || "Buổi học sắp diễn ra"}
       </PageTitle>
 
       {isSessionsLoading ? (
@@ -101,7 +104,7 @@ const MyLearningOverview = ({ onShowAll }) => {
 
             const timeDisplay = startFormatted && endFormatted
               ? `${startFormatted} - ${endFormatted}`
-              : "Chưa có giờ"
+              : (lo.noTime || "Chưa có giờ")
 
             const now = dayjs();
             const startRaw = dayjs(session.rawStartTime || session.startTime);
@@ -111,7 +114,7 @@ const MyLearningOverview = ({ onShowAll }) => {
             return (
               <NextSessionCard
                 key={session.id || index}
-                title={classInfo.title || classInfo.name || "Lớp học"}
+                title={classInfo.title || classInfo.name || lo.defaultClassTitle || "Lớp học"}
                 language={classInfo.language || "Tiếng Anh"}
                 date={formattedDate}
                 time={timeDisplay}
@@ -133,7 +136,7 @@ const MyLearningOverview = ({ onShowAll }) => {
           <EmptyState variant="page"
             icon={Calendar}
             iconClassName="w-10 h-10 mb-3 text-gray-300"
-            message="Không có lớp học nào sắp diễn ra" />
+            message={lo.noUpcomingSessions || "Không có lớp học nào sắp diễn ra"} />
         </div>
       )}
 
@@ -178,8 +181,8 @@ const MyLearningOverview = ({ onShowAll }) => {
               }
 
               const scheduleDays = formatScheduleDays && rawDays.length > 0
-                ? formatScheduleDays(rawDays, "Chưa có lịch", " - ", rawStartTime, cls.startDate)
-                : (rawDays.length > 0 ? rawDays.join(' - ') : "Chưa có lịch")
+                ? formatScheduleDays(rawDays, lo.noSchedule || "Chưa có lịch", " - ", rawStartTime, cls.startDate)
+                : (rawDays.length > 0 ? rawDays.join(' - ') : (lo.noSchedule || "Chưa có lịch"))
 
               const clsStartFormatted = formatScheduleTime && rawStartTime
                 ? formatScheduleTime(rawStartTime, cls.startDate)
@@ -191,14 +194,14 @@ const MyLearningOverview = ({ onShowAll }) => {
 
               const scheduleTime = clsStartFormatted && clsEndFormatted
                 ? `${clsStartFormatted} - ${clsEndFormatted}`
-                : "Chưa có giờ"
+                : (lo.noTime || "Chưa có giờ")
 
               return (
                 <ClassCard
                   key={cls.id}
-                  title={cls.title || cls.name || "Lớp học"}
-                  subtitle={cls.courseTitle || cls.courseName || "Khoá học"}
-                  instructorName={cls.teacher?.name || "Chưa phân công"}
+                  title={cls.title || cls.name || lo.defaultClassTitle || "Lớp học"}
+                  subtitle={cls.courseTitle || cls.courseName || lo.defaultCourseTitle || "-"}
+                  instructorName={cls.teacher?.name || lo.unassigned || "Chưa phân công"}
                   instructorAvatar={cls.teacher?.avatar || cls.teacher?.avatarImageUrl}
                   coverImage={getSafeMediaUrl(cls.thumbnailUrl) || defaultCourseThumbnail}
                   dateRange={dateRange}
@@ -208,7 +211,7 @@ const MyLearningOverview = ({ onShowAll }) => {
                   onEnter={() => navigate(`/workspace/learning/class/${cls.id}`)}
                   onShare={() => copyShareLink({
                     url: `/explore-courses/class/${cls.id}`,
-                    successMessage: "Đã sao chép link lớp học!"
+                    successMessage: lo.copiedLink || "Đã sao chép link lớp học!"
                   })}
                 />
               )
@@ -220,19 +223,19 @@ const MyLearningOverview = ({ onShowAll }) => {
                 icon={BookOpen}
                 iconClassName="w-12 h-12 mb-3 text-gray-300"
                 message={
-                  activeTab === "registered" ? "Bạn chưa đăng ký lớp học nào" :
-                    activeTab === "completed" ? "Bạn chưa hoàn thành lớp học nào" :
-                      "Bạn không có lớp học nào đã huỷ"
+                  activeTab === "registered" ? (lo.emptyRegistered || "Bạn chưa đăng ký lớp học nào") :
+                    activeTab === "completed" ? (lo.emptyCompleted || "Bạn chưa hoàn thành lớp học nào") :
+                      (lo.emptyCancelled || "Bạn không có lớp học nào đã huỷ")
                 }
                 description={
                   activeTab === "registered"
-                    ? "Hãy bắt đầu hành trình học tập của bạn bằng cách tham gia các khoá học của chúng tôi."
+                    ? (lo.startJourney || "Hãy bắt đầu hành trình học tập của bạn bằng cách tham gia các khoá học của chúng tôi.")
                     : null
                 }
                 action={
                   activeTab === "registered" ? (
                     <PillButton variant="primary" onClick={() => navigate("/explore-courses")} className="mt-4">
-                      Khám phá khóa học
+                      {lo.exploreCourses || "Khám phá khóa học"}
                     </PillButton>
                   ) : null
                 }
@@ -244,7 +247,7 @@ const MyLearningOverview = ({ onShowAll }) => {
 
       <div className='flex justify-center items-end'>
         <PillButton variant='secondary-no-outline' textColor={"#990011"} onClick={onShowAll}>
-          Xem tất cả
+          {lo.viewAll || "Xem tất cả"}
         </PillButton>
       </div>
     </div>
