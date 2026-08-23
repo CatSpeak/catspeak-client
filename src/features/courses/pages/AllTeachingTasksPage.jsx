@@ -114,8 +114,7 @@ const AllTeachingTasksPage = () => {
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
-          { label: c.myCoursesTab || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/") },
           { label: c.allTeachingTasksTitle || "Việc giảng dạy" },
         ]}
       />

@@ -495,17 +495,17 @@ const routesConfig = [
                 element: (
                   <RoleGuard allowedRoles={["Teacher"]}>
                     <LazyRoute>
-                      <WorkspaceCalendarPage />
+                      <AllTeachingTasksPage />
                     </LazyRoute>
                   </RoleGuard>
                 ),
               },
               {
-                path: "teaching-tasks/all",
+                path: "teaching-tasks/overview",
                 element: (
                   <RoleGuard allowedRoles={["Teacher"]}>
                     <LazyRoute>
-                      <AllTeachingTasksPage />
+                      <WorkspaceCalendarPage />
                     </LazyRoute>
                   </RoleGuard>
                 ),
