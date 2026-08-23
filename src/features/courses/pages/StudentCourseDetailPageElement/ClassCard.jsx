@@ -352,7 +352,7 @@ const ClassCard = ({
                 {cls.rawSchedule.map((s, idx) => (
                   <div
                     key={idx}
-                    className="bg-white border border-gray-200 rounded-xl px-3.5 py-1.5 text-sm font-medium text-gray-700 shadow-sm"
+                    className="w-full sm:w-auto bg-white border border-gray-200 rounded-xl px-3.5 py-2 sm:py-1.5 text-sm font-medium text-gray-700 shadow-sm"
                   >
                     <strong className="text-gray-900 font-bold">
                       {formatScheduleDays(
