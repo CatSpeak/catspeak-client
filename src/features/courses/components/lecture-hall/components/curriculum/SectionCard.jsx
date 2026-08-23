@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react"
 import { MoreVertical, EyeOff, ChevronUp, ChevronDown, Inbox } from "lucide-react"
 import LessonItemRow from "./LessonItemRow"
+import StudentLessonRow from "./StudentLessonRow"
 import { IconButton } from "@/shared/components/ui/buttons"
 import SectionActionMenu from "./SectionActionMenu"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -16,6 +17,7 @@ const SectionCard = ({
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
+  onSelectLesson = () => { },
   className = "",
 }) => {
   const { t } = useLanguage()
@@ -82,15 +84,24 @@ const SectionCard = ({
         <div className="bg-white w-full rounded-b-2xl md:rounded-b-3xl p-4 md:p-6 pt-2 md:pt-4">
           {section.items && section.items.length > 0 ? (
             section.items.map((item) => (
-              <LessonItemRow
-                key={item.id}
-                item={item}
-                isEdit={isEdit}
-                isStudent={isStudent}
-                onEditItem={(it) => onEditItem(section.id, it)}
-                onToggleItemVisibility={(itemId) => onToggleItemVisibility(section.id, itemId)}
-                onDeleteItem={(itemId) => onDeleteItem(section.id, itemId)}
-              />
+              isStudent ? (
+                <StudentLessonRow
+                  key={item.id}
+                  item={item}
+                  onSelectLesson={onSelectLesson}
+                />
+              ) : (
+                <LessonItemRow
+                  key={item.id}
+                  item={item}
+                  isEdit={isEdit}
+                  isStudent={isStudent}
+                  onEditItem={(it) => onEditItem(section.id, it)}
+                  onToggleItemVisibility={(itemId) => onToggleItemVisibility(section.id, itemId)}
+                  onDeleteItem={(itemId) => onDeleteItem(section.id, itemId)}
+                  onSelectLesson={onSelectLesson}
+                />
+              )
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-6 text-sm text-[#5B403C] border border-dashed border-[#E2E2E2] rounded-xl">

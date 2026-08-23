@@ -66,6 +66,7 @@ const LessonItemRow = ({
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
+  onSelectLesson = () => { },
   className = "",
 }) => {
   const { t, language } = useLanguage()
@@ -127,6 +128,29 @@ const LessonItemRow = ({
   if (isStudent && !item.isVisibleToStudents) return null
 
   const isHidden = item.isVisibleToStudents === false
+
+  const isClickable = ["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type);
+
+  const handleRowClick = () => {
+    const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
+    if (displayData.type === "bulletinBoard") {
+      navigate(`${basePath}/bulletin-board/${displayData.itemId}`, { state: { displayData } })
+    } else if (isYoutubeLink) {
+      onSelectLesson(item, "link")
+    } else if (displayData.type === "link") {
+      onSelectLesson(item, "link")
+    } else if (displayData.type === "assignment") {
+      navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
+    } else if (displayData.type === "quiz") {
+      if (isStudent) {
+        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
+      } else {
+        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}`)
+      }
+    } else if (displayData.type === "material") {
+      onSelectLesson(item, "material")
+    }
+  }
 
   return (
     <div
