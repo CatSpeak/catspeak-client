@@ -50,8 +50,8 @@ const ListItem = ({
   const baseBgClass = selected ? "bg-primaryBg dark:bg-neutral-800" : ""
 
   const defaultHoverClasses = selected
-    ? "hover:bg-[#E6E6E6] group-hover:bg-[#E6E6E6] dark:hover:bg-neutral-700 dark:group-hover:bg-neutral-700"
-    : "hover:bg-primaryBg group-hover:bg-primaryBg dark:hover:bg-neutral-800 dark:group-hover:bg-neutral-800"
+    ? "hover:bg-[#E6E6E6] group-hover:bg-[#E6E6E6] dark:hover:bg-neutral-200 dark:group-hover:bg-neutral-200"
+    : "hover:bg-primaryBg group-hover:bg-primaryBg dark:hover:bg-neutral-100 dark:group-hover:bg-neutral-100"
 
   const hoverClasses = hoverBgColor
     ? `hover:${hoverBgColor} group-hover:${hoverBgColor}`
