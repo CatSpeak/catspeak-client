@@ -442,7 +442,7 @@ export default {
     startByAdding: "Bắt đầu bằng cách thêm lớp học đầu tiên cho khóa học này.",
     quickStats: "Thống kê nhanh",
     activeClasses: "Lớp đang hoạt động",
-    totalStudents: "Tổng số học viên",
+    totalStudents: "Số học viên",
     averageProgress: "Tiến độ trung bình",
     upcomingSession: "Buổi học tiếp theo",
     noUpcoming: "Chưa có buổi học nào",
