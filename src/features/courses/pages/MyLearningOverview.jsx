@@ -17,13 +17,14 @@ import dayjs from 'dayjs'
 import { Calendar, BookOpen } from 'lucide-react'
 import { useLanguage } from '@/shared/context/LanguageContext'
 
-const MyLearningOverview = ({ onShowAll }) => {
+const MyLearningOverview = () => {
   const navigate = useNavigate()
   const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const { t } = useLanguage()
   const lo = t.courses?.student?.myLearningOverview || {}
 
   const [activeTab, setActiveTab] = useState("registered")
+  const [showAll, setShowAll] = useState(false)
 
   // Get sessions from today to next 30 days
   const dateParams = useMemo(() => {
@@ -48,7 +49,12 @@ const MyLearningOverview = ({ onShowAll }) => {
   const joinedClasses = useMemo(() => {
     if (!joinedRes) return []
     const items = joinedRes.data || joinedRes
-    return Array.isArray(items) ? items : []
+    const classes = Array.isArray(items) ? items : []
+
+    return classes.filter(cls => {
+      const status = (cls.status || "").toUpperCase()
+      return status !== "FINISHED" && status !== "ARCHIVED"
+    })
   }, [joinedRes])
 
   const completedClasses = useMemo(() => {
@@ -144,7 +150,10 @@ const MyLearningOverview = ({ onShowAll }) => {
       <Tabs
         tabs={tabs}
         activeTab={activeTab}
-        onChange={setActiveTab}
+        onChange={(tabId) => {
+          setActiveTab(tabId)
+          setShowAll(false)
+        }}
         fullWidth={false}
       />
 
@@ -153,7 +162,7 @@ const MyLearningOverview = ({ onShowAll }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {displayClasses.length > 0 ? (
-            displayClasses.slice(0, 3).map((cls) => {
+            displayClasses.slice(0, showAll ? displayClasses.length : 3).map((cls) => {
               const progress = (cls.progress?.completedSessions && cls.progress?.totalSessions)
                 ? Math.round((cls.progress.completedSessions / cls.progress.totalSessions) * 100)
                 : 0
@@ -200,6 +209,7 @@ const MyLearningOverview = ({ onShowAll }) => {
               return (
                 <ClassCard
                   key={cls.id}
+                  instructorId={cls.teacher?.accountId}
                   title={cls.title || cls.name || lo.defaultClassTitle || "Lớp học"}
                   subtitle={cls.courseTitle || cls.courseName || lo.defaultCourseTitle || "-"}
                   instructorName={cls.teacher?.name || lo.unassigned || "Chưa phân công"}
@@ -246,11 +256,13 @@ const MyLearningOverview = ({ onShowAll }) => {
         </div>
       )}
 
-      <div className='flex justify-center items-end'>
-        <PillButton variant='secondary-no-outline' textColor={"#990011"} onClick={onShowAll}>
-          {lo.viewAll || "Xem tất cả"}
-        </PillButton>
-      </div>
+      {displayClasses.length > 3 && (
+        <div className='flex justify-center items-end'>
+          <PillButton variant='secondary-no-outline' textColor={"#990011"} onClick={() => setShowAll(!showAll)}>
+            {showAll ? (lo.showLess || "Thu gọn") : (lo.viewAll || "Xem tất cả")}
+          </PillButton>
+        </div>
+      )}
     </div>
   )
 }

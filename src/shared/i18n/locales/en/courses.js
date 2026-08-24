@@ -729,7 +729,8 @@ export default {
       cancelEnrollment: "Cancel Enrollment",
       enterClass: "Enter Class",
       enterRoom: "Enter Room",
-      viewClass: "View Class"
+      viewClass: "View Class",
+      from: "From",
     },
     dashboardTitle: "My Courses & Learning",
     exploreCoursesSubtitle: "Discover and enroll in top language courses to start your learning journey.",

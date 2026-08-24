@@ -6,6 +6,7 @@ import Avatar from '@/shared/components/ui/Avatar'
 import FluentCard from '@/shared/components/ui/FluentCard'
 import ProgressBar from '@/shared/components/ui/ProgressBar'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useNavigate } from 'react-router-dom'
 
 const ClassCard = ({
   coverImage,
@@ -20,8 +21,10 @@ const ClassCard = ({
   // onCancel,
   onEnter,
   onShare,
+  instructorId
 }) => {
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const lo = t.courses?.student?.myLearningOverview || {}
 
   return (
@@ -46,7 +49,7 @@ const ClassCard = ({
 
       {/* Content */}
       <div className="p-4 sm:p-6 flex flex-col flex-1 space-y-4">
-        <div className="text-base font-medium text-[#7B7979]">{dateRange}</div>
+        <div className="text-base font-medium text-[#7B7979]">{(lo.from || "Từ")} {dateRange}</div>
 
         <div className="flex flex-col gap-0.5">
           <h3 className="text-lg font-bold text-[#1A1A1A] line-clamp-1">{title}</h3>
@@ -55,7 +58,10 @@ const ClassCard = ({
 
         {/* Info List */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-sm text-[#7B7979]">
+          <div
+            className="flex items-center gap-2 text-sm text-[#7B7979] cursor-pointer"
+            onClick={() => navigate(`/profile/${instructorId}`)}
+          >
             <Avatar src={instructorAvatar} size={30} />
             <span>{(lo.instructorPrefix || "Giảng viên")} {instructorName}</span>
           </div>

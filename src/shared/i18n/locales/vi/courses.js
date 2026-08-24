@@ -729,7 +729,8 @@ export default {
       cancelEnrollment: "Hủy đăng ký",
       enterClass: "Vào lớp",
       enterRoom: "Vào phòng",
-      viewClass: "Xem lớp"
+      viewClass: "Xem lớp",
+      from: "Từ",
     },
     dashboardTitle: "Khóa học & Học tập của tôi",
     exploreCoursesSubtitle: "Khám phá và đăng ký các khóa học ngôn ngữ hàng đầu để bắt đầu hành trình học tập của bạn.",

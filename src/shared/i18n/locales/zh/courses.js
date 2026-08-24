@@ -729,7 +729,8 @@ export default {
       cancelEnrollment: "取消报名",
       enterClass: "进入班级",
       enterRoom: "进入房间",
-      viewClass: "查看班级"
+      viewClass: "查看班级",
+      from: "从",
     },
     dashboardTitle: "我的课程和学习",
     exploreCoursesSubtitle: "探索并报名参加优质语言课程，开启您的学习之旅。",
