@@ -28,12 +28,13 @@ export const formatSpeakingDuration = (totalSeconds = 0) => {
 /**
  * Custom React hook that polls structured, pre-calculated speaking statistics via API every 60 seconds.
  *
- * @param {import("livekit-client").Room|null} _lkRoom
+ * @param {import("livekit-client").Room|null} lkRoom
  * @param {number|string|null} sessionId
  * @param {object} options
  */
-export const useSpeakingStats = (_lkRoom, sessionId, options = {}) => {
+export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
   const { enabled = true, pollingInterval = 60000 } = options
+  const roomName = lkRoom?.name || (sessionId ? String(sessionId) : null)
 
   // 1. Poll structured stats from backend API every 60 seconds only when enabled
   const {
@@ -43,8 +44,8 @@ export const useSpeakingStats = (_lkRoom, sessionId, options = {}) => {
     isFetching,
     isError,
     refetch,
-  } = useGetSpeakingStatsQuery(sessionId, {
-    skip: !sessionId || !enabled,
+  } = useGetSpeakingStatsQuery(roomName, {
+    skip: !roomName || !enabled,
     pollingInterval: enabled ? pollingInterval : 0,
     refetchOnMountOrArgChange: true,
   })
@@ -72,25 +73,99 @@ export const useSpeakingStats = (_lkRoom, sessionId, options = {}) => {
     }
 
     const overview = statsData.overview || {}
-    const teacherTalk = statsData.teacherTalkRatio || {}
-    const fairShare = statsData.fairShare || {}
+    const teacherTalk = statsData.teacherTalkRatio || statsData.teacher_talk_ratio || {}
+    const fairShare = statsData.fairShare || statsData.fair_share || {}
 
-    const totalWords = Number(overview.totalWords ?? statsData.totalRoomWords ?? 0)
-    const totalStudentWords = Number(overview.totalStudentWords ?? 0)
-    const roomDuration = Number(overview.totalDurationSeconds ?? statsData.totalRoomDurationSeconds ?? 0)
-    const studentDuration = Number(overview.totalStudentDurationSeconds ?? statsData.totalStudentDurationSeconds ?? 0)
-    const studentCount = Number(overview.studentCount ?? statsData.studentCount ?? 0)
+    const totalWords = Number(
+      overview.totalWords ??
+        overview.total_words ??
+        statsData.totalRoomWords ??
+        statsData.total_words ??
+        0,
+    )
+    const totalStudentWords = Number(
+      overview.totalStudentWords ??
+        overview.total_student_words ??
+        statsData.total_student_words ??
+        0,
+    )
+    const roomDuration = Number(
+      overview.totalDurationSeconds ??
+        overview.total_duration_seconds ??
+        statsData.totalRoomDurationSeconds ??
+        statsData.total_duration_seconds ??
+        0,
+    )
+    const studentDuration = Number(
+      overview.totalStudentDurationSeconds ??
+        overview.total_student_duration_seconds ??
+        statsData.total_student_duration_seconds ??
+        0,
+    )
+    const studentCount = Number(
+      overview.studentCount ??
+        overview.student_count ??
+        statsData.studentCount ??
+        statsData.student_count ??
+        0,
+    )
 
-    const teacherDurationSeconds = Number(teacherTalk.teacherDurationSeconds ?? statsData.teacherDurationSeconds ?? 0)
-    const teacherWords = Number(teacherTalk.teacherWords ?? 0)
-    const teacherSpeakingPercent = Number(teacherTalk.teacherPercent ?? statsData.teacherSpeakingPercent ?? 0)
-    const studentSpeakingPercent = Number(teacherTalk.studentPercent ?? statsData.studentSpeakingPercent ?? 0)
-    const teacherStatus = teacherTalk.status || statsData.teacherStatus || "ideal"
+    const teacherDurationSeconds = Number(
+      teacherTalk.teacherDurationSeconds ??
+        teacherTalk.teacher_duration_seconds ??
+        statsData.teacherDurationSeconds ??
+        statsData.teacher_duration_seconds ??
+        0,
+    )
+    const teacherWords = Number(
+      teacherTalk.teacherWords ?? teacherTalk.teacher_words ?? 0,
+    )
+    const teacherSpeakingPercent = Number(
+      teacherTalk.teacherPercent ??
+        teacherTalk.teacher_percent ??
+        statsData.teacherSpeakingPercent ??
+        statsData.teacher_speaking_percent ??
+        0,
+    )
+    const studentSpeakingPercent = Number(
+      teacherTalk.studentPercent ??
+        teacherTalk.student_percent ??
+        statsData.studentSpeakingPercent ??
+        statsData.student_speaking_percent ??
+        0,
+    )
+    const teacherStatus =
+      teacherTalk.status ||
+      statsData.teacherStatus ||
+      statsData.teacher_status ||
+      "ideal"
 
-    const expectedSharePercent = Number(fairShare.expectedSharePercent ?? statsData.expectedSharePercent ?? 25)
-    const lowSpeakingCount = Number(fairShare.lowSpeakingCount ?? statsData.lowSpeakingCount ?? 0)
-    const hasWarning = Boolean(fairShare.hasWarning ?? statsData.hasWarning)
-    const hasAnySpeechData = Boolean(statsData.hasAnySpeechData)
+    const expectedSharePercent = Number(
+      fairShare.expectedSharePercent ??
+        fairShare.expected_share_percent ??
+        statsData.expectedSharePercent ??
+        statsData.expected_share_percent ??
+        25,
+    )
+    const lowSpeakingCount = Number(
+      fairShare.lowSpeakingCount ??
+        fairShare.low_speaking_count ??
+        statsData.lowSpeakingCount ??
+        statsData.low_speaking_count ??
+        0,
+    )
+    const hasWarning = Boolean(
+      fairShare.hasWarning ??
+        fairShare.has_warning ??
+        statsData.hasWarning ??
+        statsData.has_warning,
+    )
+    const hasAnySpeechData = Boolean(
+      statsData.hasAnySpeechData ??
+        statsData.has_any_speech_data ??
+        totalWords > 0 ??
+        roomDuration > 0,
+    )
 
     const map = {}
     const participantsList = []
@@ -103,8 +178,16 @@ export const useSpeakingStats = (_lkRoom, sessionId, options = {}) => {
         const pStats = p.stats || {}
         const pBalance = p.balance || {}
 
-        const durationSec = Number(pStats.durationSeconds ?? p.totalDurationSeconds ?? 0)
-        const words = Number(pStats.words ?? p.totalWords ?? 0)
+        const durationSec = Number(
+          pStats.durationSeconds ??
+            pStats.duration_seconds ??
+            p.totalDurationSeconds ??
+            p.total_duration_seconds ??
+            0,
+        )
+        const words = Number(
+          pStats.words ?? p.totalWords ?? p.total_words ?? 0,
+        )
         const wpm =
           pStats.wpm ??
           p.wpm ??
@@ -112,27 +195,56 @@ export const useSpeakingStats = (_lkRoom, sessionId, options = {}) => {
             ? Math.round(words / (durationSec / 60))
             : 0)
 
+        const isTeacher = Boolean(p.isTeacher ?? p.is_teacher)
+        const isHost = Boolean(p.isHost ?? p.is_host)
+        const accountId = p.accountId ?? p.account_id ?? null
+
         const item = {
           participantId: pId,
-          accountId: p.accountId ?? null,
+          accountId,
           name: p.name ?? pId,
-          role: p.role ?? (p.isTeacher ? "teacher" : "student"),
-          isTeacher: Boolean(p.isTeacher),
-          isHost: Boolean(p.isHost),
+          role: p.role ?? (isTeacher ? "teacher" : "student"),
+          isTeacher,
+          isHost,
           totalWords: words,
           totalDurationSeconds: durationSec,
           wpm,
-          stbScore: Number(pBalance.stbScore ?? pBalance.sharePercent ?? p.sharePercent ?? 0),
-          timePercent: Number(pBalance.timePercent ?? 0),
-          wordCountPercent: Number(pBalance.wordCountPercent ?? 0),
-          sharePercent: Number(pBalance.sharePercent ?? p.sharePercent ?? 0),
-          ratioOfExpected: Number(pBalance.ratioOfExpected ?? p.ratioOfExpected ?? 0),
+          stbScore: Number(
+            pBalance.stbScore ??
+              pBalance.stb_score ??
+              pBalance.sharePercent ??
+              pBalance.share_percent ??
+              p.sharePercent ??
+              p.share_percent ??
+              0,
+          ),
+          timePercent: Number(
+            pBalance.timePercent ?? pBalance.time_percent ?? 0,
+          ),
+          wordCountPercent: Number(
+            pBalance.wordCountPercent ?? pBalance.word_count_percent ?? 0,
+          ),
+          sharePercent: Number(
+            pBalance.sharePercent ??
+              pBalance.share_percent ??
+              p.sharePercent ??
+              p.share_percent ??
+              0,
+          ),
+          ratioOfExpected: Number(
+            pBalance.ratioOfExpected ??
+              pBalance.ratio_of_expected ??
+              p.ratioOfExpected ??
+              p.ratio_of_expected ??
+              0,
+          ),
           status: pBalance.status || p.status || "normal", // "normal" | "attention" | "tooLow"
         }
 
         map[pId] = item
-        if (p.accountId) {
-          map[String(p.accountId)] = item
+        map[pId.toLowerCase()] = item
+        if (accountId) {
+          map[String(accountId)] = item
         }
         participantsList.push(item)
       }

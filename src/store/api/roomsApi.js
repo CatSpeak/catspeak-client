@@ -399,9 +399,12 @@ export const roomsApi = baseApi.injectEndpoints({
       invalidatesTags: ["Rooms", "CustomRooms"],
     }),
 
-    // Get real-time participant speaking stats for a session
+    // Get real-time participant speaking stats for a room
     getSpeakingStats: builder.query({
-      query: (sessionId) => `/rooms/session/${sessionId}/speaking-stats`,
+      query: (roomName) => `/rooms/${encodeURIComponent(roomName)}/speaking-stats`,
+      providesTags: (result, error, roomName) => [
+        { type: "Rooms", id: `SpeakingStats-${roomName}` },
+      ],
     }),
 
     // Get real-time speaking statistics for all active breakout rooms (and main room)
@@ -428,6 +431,21 @@ export const roomsApi = baseApi.injectEndpoints({
         const sessionId = typeof arg === "object" && arg !== null ? arg.sessionId : arg
         return [{ type: "Breakout", id: `${sessionId}-SpeakingStats` }]
       },
+    }),
+
+    // Class Speaking Analytics (Post-session aggregate data)
+    getClassSpeakingAnalytics: builder.query({
+      query: (classId) => `/rooms/class/${encodeURIComponent(classId)}/speaking-analytics`,
+      providesTags: (result, error, classId) => [{ type: "Rooms", id: `ClassAnalytics-${classId}` }],
+    }),
+
+    // Student Speaking History in Class
+    getStudentSpeakingHistory: builder.query({
+      query: ({ classId, studentId }) =>
+        `/rooms/class/${encodeURIComponent(classId)}/students/${encodeURIComponent(studentId)}/speaking-history`,
+      providesTags: (result, error, { classId, studentId }) => [
+        { type: "Rooms", id: `StudentAnalytics-${classId}-${studentId}` },
+      ],
     }),
   }),
 });
@@ -465,6 +483,8 @@ export const {
   useGetSpeakingStatsQuery,
   useGetBreakoutSpeakingStatsQuery,
   useLazyGetBreakoutSpeakingStatsQuery,
+  useGetClassSpeakingAnalyticsQuery,
+  useGetStudentSpeakingHistoryQuery,
   // My Rooms & Bookmarks & Advanced Room Creation
   useGetMyRoomsQuery,
   useLazyGetMyRoomsQuery,

@@ -46,6 +46,7 @@ const SpeakingTimeBalancePanel = ({
     user,
     room,
     speakingStatsMap = {},
+    speakingParticipantsList = [],
     roomTotalDuration = 0,
     roomTotalStudentDuration = 0,
     speakingTeacherSpeakingPercent = 0,
@@ -94,6 +95,7 @@ const SpeakingTimeBalancePanel = ({
   // Helper to distinguish Host/Teacher vs Students
   const isHostOrTeacher = useCallback(
     (p) => {
+      if (p.isTeacher || p.isHost) return true
       const meta = parseMetadata(p.metadata)
       const accountId = meta.accountId || (p.isLocal ? user?.accountId : null)
       return isRoomHost(room, accountId)
@@ -102,9 +104,15 @@ const SpeakingTimeBalancePanel = ({
   )
 
   const studentParticipants = useMemo(() => {
-    if (!participants || participants.length === 0) return []
-    return participants.filter((p) => !isHostOrTeacher(p))
-  }, [participants, isHostOrTeacher])
+    if (participants && participants.length > 0) {
+      const filtered = participants.filter((p) => !isHostOrTeacher(p))
+      if (filtered.length > 0) return filtered
+    }
+    if (speakingParticipantsList && speakingParticipantsList.length > 0) {
+      return speakingParticipantsList.filter((p) => !p.isTeacher && !p.isHost)
+    }
+    return []
+  }, [participants, speakingParticipantsList, isHostOrTeacher])
 
   const studentCount = studentParticipants.length
   const expectedSharePercent =
@@ -115,19 +123,23 @@ const SpeakingTimeBalancePanel = ({
     return studentParticipants.map((p) => {
       const meta = parseMetadata(p.metadata)
       const isLocal = p.isLocal
+      const pIdentity = p.identity || p.participantId || String(p.accountId || "")
       const name =
         p.name ||
-        p.identity ||
+        pIdentity ||
         (isLocal ? t?.rooms?.videoCall?.participantList?.you || "Bạn" : "Guest")
 
       const stats =
-        speakingStatsMap[p.identity] ||
-        (meta.accountId ? speakingStatsMap[String(meta.accountId)] : null) || {
-          totalWords: 0,
-          totalDurationSeconds: 0,
-          wpm: 0,
-          sharePercent: 0,
-          status: "normal",
+        speakingStatsMap[pIdentity] ||
+        speakingStatsMap[pIdentity?.toLowerCase()] ||
+        (meta.accountId ? speakingStatsMap[String(meta.accountId)] : null) ||
+        (p.accountId ? speakingStatsMap[String(p.accountId)] : null) ||
+        (p.participantId ? speakingStatsMap[p.participantId] : null) || {
+          totalWords: p.totalWords || 0,
+          totalDurationSeconds: p.totalDurationSeconds || 0,
+          wpm: p.wpm || 0,
+          sharePercent: p.sharePercent || 0,
+          status: p.status || "normal",
         }
 
       return {
