@@ -96,8 +96,18 @@ export default {
   taskSpeakingSubtitle: "English speaking class",
   taskWritingSubtitle: "Professional English writing",
   months: [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ],
   weekdays: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
   workspaceUi: {
@@ -120,13 +130,17 @@ export default {
     returnToWorkspace: "Return to Workspace",
     tabs: {
       students: "Students",
-      studentsSubtitle: "Analyze student growth, retention, and re-enrollment trends.",
+      studentsSubtitle:
+        "Analyze student growth, retention, and re-enrollment trends.",
       revenue: "Revenue",
-      revenueSubtitle: "Class-level revenue breakdown and net earnings after platform fees.",
+      revenueSubtitle:
+        "Class-level revenue breakdown and net earnings after platform fees.",
       courses: "Courses & Classes",
-      coursesSubtitle: "Distinguish overall course performance from individual class results.",
+      coursesSubtitle:
+        "Distinguish overall course performance from individual class results.",
       quality: "Teaching Quality",
-      qualitySubtitle: "Post-learning quality rating trends and pre-enrollment conversion rates.",
+      qualitySubtitle:
+        "Post-learning quality rating trends and pre-enrollment conversion rates.",
     },
     filters: {
       dataGroup: "Data Grouping",
@@ -288,7 +302,7 @@ export default {
     courseUnavailable: "Course details are unavailable.",
     refreshing: "Refreshing course details",
     refreshingClass: "Refreshing class details",
-    noClassDescription: "No description provided.",
+    noClassDescription: "No detailed description available for this class.",
     instructorUnavailable: "Instructor not provided",
     contactUnavailable: "Contact is not available yet.",
     locked: "Locked",
@@ -297,7 +311,8 @@ export default {
     otherBatchSelected: "Other batch selected",
     checkingEnrollment: "Checking enrollment status...",
     checkingEnrollmentShort: "Checking...",
-    toastEnrollToViewLectureHall: "Please enroll and pay tuition to view the lecture hall!",
+    toastEnrollToViewLectureHall:
+      "Please enroll and pay tuition to view the lecture hall!",
     upcomingSession: "Upcoming Session",
     untitledBatch: "Untitled Batch",
     timeLabel: "Time",
@@ -306,6 +321,68 @@ export default {
     linkCopied: "Link copied!",
     linkCopyFailed: "Failed to copy link",
     shareCourse: "Share course",
+
+    // Tabs & Overview
+    tabOverview: "Overview",
+    tabAllClasses: "Available Classes ({{count}})",
+    tabUpcomingClasses: "Upcoming ({{count}})",
+    tabClosedClasses: "Closed ({{count}})",
+    noUpcomingClasses: "No upcoming classes open for registration yet",
+    noUpcomingClassesDesc:
+      "Please check back later or explore other open classes.",
+    noClosedClasses: "No classes have closed registration",
+    noClasses: "No classes available",
+    noClassesDesc: "New classes will be updated soon. Please check back later.",
+    totalClasses: "Total Classes",
+    learningMethod: "Learning Method",
+    defaultOnlineClassroom: "Cat Speak Virtual Classroom",
+    language: "Language",
+    defaultLanguage: "English",
+    aboutCourse: "About Course",
+    noCourseDescription: "No detailed description available for this course.",
+
+    // Teacher Card
+    profileBtn: "Profile",
+    messageTeacher: "Message Instructor",
+    rating: "Rating",
+    totalReviews: "Reviews",
+    classesCount: "Classes",
+    defaultBio:
+      "Dedicated instructor with years of experience in language teaching and student skill development.",
+
+    // Class Item & Buttons
+    startDateBadge: "Starts",
+    viewClassDetails: "View Details",
+    viewClassDetailsNewTab: "Open class details in new tab",
+    collapse: "Collapse",
+    remainingSlotsText: "{{remaining}}/{{total}} slots left",
+    remainingSlotsLabel: "Remaining Slots",
+    levelLabel: "Level",
+    defaultLevel: "Beginner",
+    enrollmentPeriod: "Registration Period",
+    aboutClass: "About Class",
+    weeklySchedule: "Weekly Schedule",
+    studentsUnit: "students",
+    reviewsUnit: "reviews",
+    priceFree: "Free",
+    goToWorkspace: "Go to Class →",
+    enrolledBadge: "Enrolled",
+    alreadyEnrolledInCourse: "Already enrolled in course",
+    classFull: "Class Full",
+    enrollmentClosed: "Registration Closed",
+    upcomingStatus: "Not open yet",
+    enrollmentUnavailable: "Registration unavailable",
+    register: "Register",
+    processing: "Processing...",
+    loginToEnroll: "Please log in to register for the class.",
+    chatOpenFailed: "Could not open conversation.",
+
+    // Conflict Modal
+    scheduleConflictTitle: "Schedule Conflict",
+    scheduleConflictDesc:
+      "The schedule for this class conflicts with your current class:",
+    cancel: "Cancel",
+    confirmEnroll: "Proceed Anyway",
   },
   classWorkspace: {
     noInstructor: "Instructor information is not available.",
@@ -325,7 +402,8 @@ export default {
     searchMaterialsLabel: "Search materials",
     searchMaterials: "Search materials...",
     materialsUnavailable: "Student materials are not available yet",
-    materialsUnavailableDescription: "Materials will appear here when they become available.",
+    materialsUnavailableDescription:
+      "Materials will appear here when they become available.",
     someMaterialsUnavailable: "Some materials could not be displayed.",
     loadingMaterials: "Loading materials...",
     materialsLoadFailed: "Unable to load materials",
@@ -375,7 +453,8 @@ export default {
     courseActions: "Course actions",
     editCourse: "Edit Course",
     deleteCourse: "Delete Course",
-    confirmDeleteCourse: "Are you sure you want to delete this course? All associated classes will also be affected.",
+    confirmDeleteCourse:
+      "Are you sure you want to delete this course? All associated classes will also be affected.",
     toastDeleteSuccess: "Course deleted successfully!",
     toastDeleteFailed: "Failed to delete course!",
     linkCopied: "Link copied!",
@@ -426,7 +505,8 @@ export default {
     searchMaterials: "Search materials...",
     loadingMaterials: "Loading materials...",
     noMaterials: "No materials found",
-    startUploading: "Get started by uploading study files to share with your class.",
+    startUploading:
+      "Get started by uploading study files to share with your class.",
     uploadMaterial: "Upload Material",
     selectFile: "Select a file or drag & drop",
     uploadNow: "Upload Now",
@@ -463,12 +543,16 @@ export default {
     inviteToClass: "Invite to join this class",
     invited: "Invited",
     noFriendsToInvite: "No friends available to invite",
-    noFriendsToInviteDesc: "All your friends are already in this class or you don't have any friends yet.",
+    noFriendsToInviteDesc:
+      "All your friends are already in this class or you don't have any friends yet.",
     noFriendsFound: "No friends found",
     noFriendsFoundDesc: "Please try searching with a different keyword.",
     toastInviteSuccess: "Class invitation sent to {{name}}!",
     toastInviteFailed: "Failed to send invitation. Please try again!",
     searchFriends: "Search friends...",
+    searchMembers: "Search members...",
+    searchPlaceholder: "Search by name, email, phone...",
+    noStudentsFound: "No students found.",
     leadInstructor: "LEAD INSTRUCTOR",
     leadInstructorLabel: "Lead Instructor",
     message: "Message",
@@ -517,24 +601,32 @@ export default {
     completedOn: "Completed on {{date}}",
     noCourses: "No courses yet",
     noCoursesTitle: "Start Your Teaching Journey",
-    noCoursesDesc: "You haven't created any courses yet. Create your first course to structure modules, upload materials, and manage classes.",
+    noCoursesDesc:
+      "You haven't created any courses yet. Create your first course to structure modules, upload materials, and manage classes.",
     noFilteredCoursesTitle: "No matching courses found",
-    noFilteredCoursesDesc: "No courses match the selected status filter. Try changing or clearing your filter to view other courses.",
+    noFilteredCoursesDesc:
+      "No courses match the selected status filter. Try changing or clearing your filter to view other courses.",
     noClasses: "No classes yet",
     noClassesTitle: "Ready to Set Up Your First Class?",
-    noClassesDesc: "You don't have any active classes right now. Create a class to schedule live sessions, track attendance, and assign coursework.",
+    noClassesDesc:
+      "You don't have any active classes right now. Create a class to schedule live sessions, track attendance, and assign coursework.",
     noFilteredClassesTitle: "No matching classes found",
-    noFilteredClassesDesc: "No classes match the selected status filter. Try changing or clearing your filter to view other classes.",
+    noFilteredClassesDesc:
+      "No classes match the selected status filter. Try changing or clearing your filter to view other classes.",
     resetFilter: "Reset Filter",
     viewAll: "View all",
     statusAll: "All Status",
-    loadCoursesFailed: "The course overview could not be loaded. Please try again.",
-    loadClassesFailed: "The class overview could not be loaded. Please try again.",
+    loadCoursesFailed:
+      "The course overview could not be loaded. Please try again.",
+    loadClassesFailed:
+      "The class overview could not be loaded. Please try again.",
     retry: "Try again",
     refreshingCourses: "Refreshing course overview",
     refreshingClasses: "Refreshing class overview",
-    refreshCoursesFailed: "Some course data could not be refreshed. The displayed information may be out of date.",
-    refreshClassesFailed: "Some class data could not be refreshed. The displayed information may be out of date."
+    refreshCoursesFailed:
+      "Some course data could not be refreshed. The displayed information may be out of date.",
+    refreshClassesFailed:
+      "Some class data could not be refreshed. The displayed information may be out of date.",
   },
   createCourse: {
     title: "Create Course",
@@ -564,8 +656,10 @@ export default {
     toastUpdateFailed: "Course update failed!",
     toastCreateSuccess: "Course created successfully!",
     toastCreateFailed: "Course creation failed!",
-    languageNotAllowed: "The selected language is not allowed according to your instructor profile.",
-    validationErrorToast: "Invalid course information. Please check the course name or language!",
+    languageNotAllowed:
+      "The selected language is not allowed according to your instructor profile.",
+    validationErrorToast:
+      "Invalid course information. Please check the course name or language!",
     toastClearSuccess: "Cleared form inputs",
   },
   createClass: {
@@ -595,8 +689,10 @@ export default {
     toastSelectCourseFirst: "Please select a course first!",
     toastSelectSchedule: "Please select at least one teaching day!",
     toastCreateSuccess: "Class created successfully!",
-    commissionNote: "An platform commission of {{commission}}% (VND {{amount}}) will be deducted from each student registration.",
-    minTuitionFeeNote: "The minimum tuition fee for this class configuration is {{minFee}} VND. Please adjust it!",
+    commissionNote:
+      "An platform commission of {{commission}}% (VND {{amount}}) will be deducted from each student registration.",
+    minTuitionFeeNote:
+      "The minimum tuition fee for this class configuration is {{minFee}} VND. Please adjust it!",
     placeholderClassName: "E.g., IELTS Advanced",
     placeholderDescription: "Class details, goals...",
     chooseDays: "Choose days of the week",
@@ -616,17 +712,26 @@ export default {
     standaloneClass: "Standalone Class",
     noCourse: "No Course",
     toastAdmissionAndStart: "Please enter admission period and start date!",
-    toastVerifyProfile: "Please verify your profile identity to complete the transaction!",
-    toastScheduleConflict: "Schedule conflict with class {{class}} ({{start}} - {{end}})!",
-    toastScheduleConflictDefault: "Schedule conflict detected with your existing classes! Please select a different time slot or day.",
-    toastStartDateMismatchFirstSession: "Class start date ({{startDate}}) does not match the first scheduled session date ({{firstSessionDate}}). Please choose a start date that falls on one of the scheduled weekdays.",
-    toastStartDateMismatchFirstSessionDefault: "Class start date does not match the first scheduled session date. Please choose a start date that falls on one of the scheduled weekdays.",
+    toastVerifyProfile:
+      "Please verify your profile identity to complete the transaction!",
+    toastScheduleConflict:
+      "Schedule conflict with class {{class}} ({{start}} - {{end}})!",
+    toastScheduleConflictDefault:
+      "Schedule conflict detected with your existing classes! Please select a different time slot or day.",
+    toastStartDateMismatchFirstSession:
+      "Class start date ({{startDate}}) does not match the first scheduled session date ({{firstSessionDate}}). Please choose a start date that falls on one of the scheduled weekdays.",
+    toastStartDateMismatchFirstSessionDefault:
+      "Class start date does not match the first scheduled session date. Please choose a start date that falls on one of the scheduled weekdays.",
     toastAdmissionStartPast: "Admission start date must not be in the past!",
     toastAdmissionEndPast: "Admission end date must not be in the past!",
-    toastStartPast: "Class start date must be at least 1 day after enrollment end date!",
-    toastAdmissionEndLater: "Enrollment end date must be later than enrollment start date!",
-    toastStartLater: "Class start date must be at least 1 day after enrollment end date!",
-    toastPayOSEnrollmentFuture: "Class start date must be at least 1 day after enrollment end date!",
+    toastStartPast:
+      "Class start date must be at least 1 day after enrollment end date!",
+    toastAdmissionEndLater:
+      "Enrollment end date must be later than enrollment start date!",
+    toastStartLater:
+      "Class start date must be at least 1 day after enrollment end date!",
+    toastPayOSEnrollmentFuture:
+      "Class start date must be at least 1 day after enrollment end date!",
     toastUpdateSuccess: "Class updated successfully!",
     toastRedirectPayment: "Redirecting to payment...",
     toastUpdateFail: "Failed to update class!",
@@ -654,8 +759,10 @@ export default {
     editClass: "Edit Class",
     scheduleLocked: "Teaching schedule cannot be changed for this class.",
     levelsLocked: "Class level cannot be changed for this class.",
-    priceLocked: "Tuition fee cannot be changed because students have already enrolled or paid!",
-    priceLockedNote: "Tuition fee is locked because students have already enrolled or paid for this class.",
+    priceLocked:
+      "Tuition fee cannot be changed because students have already enrolled or paid!",
+    priceLockedNote:
+      "Tuition fee is locked because students have already enrolled or paid for this class.",
     legendOtherSchedule: "Other scheduled day",
     legendCurrentSchedule: "Current class schedule",
     legendPastSchedule: "Past session",
@@ -665,14 +772,15 @@ export default {
     classInfoTitle: "Class Information",
     recoverClassInfo: "Recover Class Information",
     deleteClass: "Delete Class",
-    confirmDeleteClassMsg: "Are you sure you want to delete this class? This action cannot be undone.",
+    confirmDeleteClassMsg:
+      "Are you sure you want to delete this class? This action cannot be undone.",
     deleteConfirmButton: "Delete",
     saveChanges: "Save Changes",
     requireMinAttendanceLabel: "Minimum Attendance Requirement",
     minAttendanceRateLabel: "Minimum Attendance Rate",
     requireAttendanceTypeLabel: "Attendance Calculation Type",
     includeLateAttendanceOption: "Include late attendance",
-    excludeLateAttendanceOption: "Exclude late attendance"
+    excludeLateAttendanceOption: "Exclude late attendance",
   },
   allCourses: {
     title: "All Courses",
@@ -683,10 +791,11 @@ export default {
     tabArchived: "Archived",
     searchPlaceholder: "Search...",
     refreshing: "Refreshing courses",
-    refreshFailed: "The latest course data could not be loaded. The displayed list may be out of date.",
+    refreshFailed:
+      "The latest course data could not be loaded. The displayed list may be out of date.",
     loadFailed: "Courses could not be loaded. Please try again.",
     retry: "Try again",
-    noResults: "No courses found."
+    noResults: "No courses found.",
   },
   allClasses: {
     title: "All Classes",
@@ -698,16 +807,47 @@ export default {
     searchPlaceholder: "Search...",
     studentsRatio: "{{enrolled}} / {{slots}} students",
     refreshing: "Refreshing classes",
-    refreshFailed: "The latest class data could not be loaded. The displayed list may be out of date.",
+    refreshFailed:
+      "The latest class data could not be loaded. The displayed list may be out of date.",
     loadFailed: "Classes could not be loaded. Please try again.",
     retry: "Try again",
-    noResults: "No classes found."
+    noResults: "No classes found.",
   },
   student: {
+    myLearningOverview: {
+      registered: "Registered",
+      completed: "Completed",
+      cancelled: "Cancelled",
+      home: "Home",
+      myLearning: "My Learning",
+      upcomingSessions: "Upcoming Sessions",
+      noUpcomingSessions: "No upcoming sessions",
+      emptyRegistered: "You haven't registered for any classes yet",
+      emptyCompleted: "You haven't completed any classes yet",
+      emptyCancelled: "You don't have any cancelled classes",
+      startJourney: "Start your learning journey by exploring our courses.",
+      exploreCourses: "Explore Courses",
+      noSchedule: "TBD",
+      noTime: "TBD",
+      defaultClassTitle: "Class",
+      defaultCourseTitle: "",
+      unassigned: "Unassigned",
+      copiedLink: "Link copied to clipboard!",
+      viewAll: "View All",
+      instructorPrefix: "Instructor",
+      progressLabel: "Progress",
+      cancelEnrollment: "Cancel Enrollment",
+      enterClass: "Enter Class",
+      enterRoom: "Enter Room",
+      viewClass: "View Class",
+      from: "From",
+    },
     dashboardTitle: "My Courses & Learning",
-    exploreCoursesSubtitle: "Discover and enroll in top language courses to start your learning journey.",
+    exploreCoursesSubtitle:
+      "Discover and enroll in top language courses to start your learning journey.",
     loginRequiredTitle: "Please log in to view available courses & classes",
-    loginRequiredDesc: "You need to log in to your CatSpeak account to explore and enroll in courses.",
+    loginRequiredDesc:
+      "You need to log in to your CatSpeak account to explore and enroll in courses.",
     loginNow: "Log In Now",
     tabAllCatalog: "All",
     tabCourses: "Courses",
@@ -716,7 +856,8 @@ export default {
     exploreCourses: "Explore Available Courses",
     myClasses: "My Joined Classes",
     welcomeTitle: "Welcome back, Learner!",
-    welcomeSubtitle: "Track your progress, join live classes, and explore new learning paths.",
+    welcomeSubtitle:
+      "Track your progress, join live classes, and explore new learning paths.",
     joinedOn: "Enrolled on",
     classDuration: "Duration",
     sessionsCount: "{{count}} sessions",
@@ -768,10 +909,11 @@ export default {
     clearAll: "Clear all",
     clearFilters: "Clear filters",
     enrollmentConfirmTitle: "Confirm Enrollment",
-    enrollmentConfirmMsg: "Are you sure you want to enroll in the class \"{{className}}\" for \"{{courseName}}\"?",
+    enrollmentConfirmMsg:
+      'Are you sure you want to enroll in the class "{{className}}" for "{{courseName}}"?',
     enrollNow: "Confirm & Enroll",
     cancel: "Cancel",
-    enrolledSuccess: "Successfully enrolled in \"{{className}}\"!",
+    enrolledSuccess: 'Successfully enrolled in "{{className}}"!',
     alreadyEnrolled: "You are already enrolled in this course.",
     goToClasses: "Go to My Classes",
     languages: {
@@ -794,7 +936,8 @@ export default {
     joinRoom: "Join room",
     sessionsCountText: "sessions",
     noCoursesFound: "No Courses Found",
-    noCoursesFoundDesc: "Try clearing your search query or filters to find other courses.",
+    noCoursesFoundDesc:
+      "Try clearing your search query or filters to find other courses.",
     enrolledStatus: "Enrolled",
     batchesCount: "{{count}} Batch(es)",
     batchesAvailable: "{{count}} Batch(es) Available",
@@ -810,9 +953,11 @@ export default {
     courseInstructor: "Course Instructor",
     slotsAvailable: "{{slots}} slots available",
     noEnrolledTitle: "No Enrolled Courses Yet",
-    noEnrolledDesc: "You haven't joined any courses. Visit the Explore tab to find classes!",
+    noEnrolledDesc:
+      "You haven't joined any courses. Visit the Explore tab to find classes!",
     noClassesTitle: "No Joined Classes Yet",
-    noClassesDesc: "You haven't joined any classes yet. Explore our courses & classes catalog to start learning!",
+    noClassesDesc:
+      "You haven't joined any classes yet. Explore our courses & classes catalog to start learning!",
     upcomingSessions: "Upcoming Sessions",
     pastSessions: "Completed Sessions",
     sessionTopic: "Topic: {{topic}}",
@@ -846,7 +991,8 @@ export default {
     profile: "Profile",
     contactInstructor: "Contact",
     inDevelopment: "Feature in development",
-    defaultClassDesc: "Weekly interactive live class batch featuring 1-on-1 speaking practice, real-time feedback, and structured curriculum modules.",
+    defaultClassDesc:
+      "Weekly interactive live class batch featuring 1-on-1 speaking practice, real-time feedback, and structured curriculum modules.",
     classmates: "Classmates",
     members: "Members",
     lectureHall: "Lecture Hall",
@@ -854,13 +1000,16 @@ export default {
     grading: "Grading & Management",
     myGrades: "Assignments & Grades",
     materials: "Materials",
-    toastEnrollToViewClassmates: "Please enroll and pay tuition to view classmates!",
+    toastEnrollToViewClassmates:
+      "Please enroll and pay tuition to view classmates!",
     toastEnrollToViewFeed: "Please enroll and pay tuition to view feed!",
     toastEnrollToViewGrades: "Please enroll and pay tuition to view grades!",
-    toastEnrollToViewMaterials: "Please enroll and pay tuition to view materials!",
+    toastEnrollToViewMaterials:
+      "Please enroll and pay tuition to view materials!",
     noUpcomingSessions: "No upcoming sessions",
     confirmEnrollment: "Confirm Class Enrollment",
-    enrollmentConfirmRedirectMsg: "Are you sure you want to enroll in {{className}}? You will be redirected to the tuition payment gateway.",
+    enrollmentConfirmRedirectMsg:
+      "Are you sure you want to enroll in {{className}}? You will be redirected to the tuition payment gateway.",
     payAndEnroll: "Pay & Enroll",
     progress: "Learning Progress",
     yourClass: "Your Class (Teacher)",
@@ -887,17 +1036,21 @@ export default {
     invalidDataTitle: "Learning data is unavailable",
     invalidDataDescription: "The server returned invalid course or class data.",
     refreshError: "Could not refresh the latest learning data.",
-    partialDataWarning: "Some learning data could not be loaded. The available results are shown below.",
+    partialDataWarning:
+      "Some learning data could not be loaded. The available results are shown below.",
     refreshing: "Refreshing...",
-    catalogLevelFilterUnavailable: "Level filtering is unavailable for this catalog.",
+    catalogLevelFilterUnavailable:
+      "Level filtering is unavailable for this catalog.",
     notAvailable: "Not available",
     noMatchingClassesTitle: "No matching classes",
-    noMatchingClassesDesc: "Try changing your search or filters to find another class.",
+    noMatchingClassesDesc:
+      "Try changing your search or filters to find another class.",
     clearFilters: "Clear filters",
     statusUnknown: "Unknown",
     progressUnavailable: "Progress unavailable",
     noAvailableCourses: "No available courses",
-    noAvailableCoursesDesc: "There are no courses available to enroll in right now.",
+    noAvailableCoursesDesc:
+      "There are no courses available to enroll in right now.",
     classStatuses: {
       ACTIVE: "Active",
       LIVE: "Live",
@@ -908,8 +1061,8 @@ export default {
       NOT_STARTED: "Not started",
       ARCHIVED: "Archived",
       COMPLETED: "Completed",
-      CANCELLED: "Cancelled"
-    }
+      CANCELLED: "Cancelled",
+    },
   },
   createAssignment: {
     pageTitle: "Create Assignment",
@@ -968,43 +1121,60 @@ export default {
     errorSaveDraft: "Failed to save the assignment draft",
     errorUpdate: "Failed to update the assignment",
     errorCreate: "Failed to create the assignment",
-    errorForbidden: "You do not have permission to perform this assignment action.",
+    errorForbidden:
+      "You do not have permission to perform this assignment action.",
     errorNotFound: "The assignment or class could not be found.",
     errorFileTooLarge: "An attachment exceeds the server's file-size limit.",
     errorFileTypeUnsupported: "An attachment type is not supported.",
-    errorNetwork: "The server could not be reached. Check your connection and try again.",
-    errorGeneric: "The assignment action could not be completed. Please try again.",
+    errorNetwork:
+      "The server could not be reached. Check your connection and try again.",
+    errorGeneric:
+      "The assignment action could not be completed. Please try again.",
     unnamedFile: "Unnamed file",
     loadFailed: "The assignment form could not be loaded.",
-    retry: "Try again"
+    retry: "Try again",
   },
   createExam: {
     importExcelHowToTitle: "How to create questions via Excel file",
     importExcelTip1: "Each row is one question. Empty rows will be ignored.",
-    importExcelTip2: "Question Text column: The content of the question (required, cannot be empty).",
-    importExcelTip3: "Question Type column: Select exactly 1 of the 5 types: MultipleChoiceSingle, MultipleChoiceMultiple, TrueFalse, FillInBlank, Essay.",
-    importExcelTip4: 'Option 1-5 columns: Each cell is an option. MCQs require at least 2 options; For True/False, enter "True" and "False" in the first 2 cells; leave blank for FillInBlank / Essay.',
-    importExcelTip5: "Correct Answer column: For MCQs & True/False, enter the OPTION NUMBER of the correct answer (1 = Option 1, 3 = Option 3, separate multiple answers with commas, e.g., 1, 3, 5). For FillInBlank, enter the exact text (e.g., 100). Leave blank for Essay.",
-    importExcelTip6: "Image Link column (optional): Paste a public image URL, the system will download it. Private/inaccessible links will be ignored, but the question will still be imported.",
-    importExcelTip7: "Default question score is 5, and all questions are set as required.",
+    importExcelTip2:
+      "Question Text column: The content of the question (required, cannot be empty).",
+    importExcelTip3:
+      "Question Type column: Select exactly 1 of the 5 types: MultipleChoiceSingle, MultipleChoiceMultiple, TrueFalse, FillInBlank, Essay.",
+    importExcelTip4:
+      'Option 1-5 columns: Each cell is an option. MCQs require at least 2 options; For True/False, enter "True" and "False" in the first 2 cells; leave blank for FillInBlank / Essay.',
+    importExcelTip5:
+      "Correct Answer column: For MCQs & True/False, enter the OPTION NUMBER of the correct answer (1 = Option 1, 3 = Option 3, separate multiple answers with commas, e.g., 1, 3, 5). For FillInBlank, enter the exact text (e.g., 100). Leave blank for Essay.",
+    importExcelTip6:
+      "Image Link column (optional): Paste a public image URL, the system will download it. Private/inaccessible links will be ignored, but the question will still be imported.",
+    importExcelTip7:
+      "Default question score is 5, and all questions are set as required.",
     close: "Close",
     toastTemplateDownloaded: "Template downloaded successfully!",
     toastTemplateDownloadFailed: "Failed to download template.",
-    toastMultipleFilesSelected: "Only 1 file supported at a time. The first file was selected.",
-    toastEnterTitleBeforeImport: "Please enter the exam title before importing a file.",
-    toastAutoCreateFailed: "Could not automatically create the exam. Please try again.",
+    toastMultipleFilesSelected:
+      "Only 1 file supported at a time. The first file was selected.",
+    toastEnterTitleBeforeImport:
+      "Please enter the exam title before importing a file.",
+    toastAutoCreateFailed:
+      "Could not automatically create the exam. Please try again.",
     toastExtractingQuestions: "Extracting questions from file...",
     toastNoValidQuestions: "No valid questions found in the file.",
-    toastExtractSuccess: "Successfully extracted {{count}} questions! You can edit them before saving.",
+    toastExtractSuccess:
+      "Successfully extracted {{count}} questions! You can edit them before saving.",
     toastExtractFailed: "Failed to extract file.",
     toastFileRemoved: "Uploaded file removed. You can select a new file.",
-    extractedSuccessDesc: "Questions extracted successfully — you can edit them directly below.",
+    extractedSuccessDesc:
+      "Questions extracted successfully — you can edit them directly below.",
     reupload: "Re-upload",
-    uploadSingleFileOnlyDragDrop: "Only 1 file supported at a time. Please drag and drop a single file.",
+    uploadSingleFileOnlyDragDrop:
+      "Only 1 file supported at a time. Please drag and drop a single file.",
     importFromExcel: "Import questions from Excel",
-    uploadExcelDesc: "Upload an Excel file (.xlsx) using the template to automatically generate questions.",
+    uploadExcelDesc:
+      "Upload an Excel file (.xlsx) using the template to automatically generate questions.",
     chooseFile: "Choose file",
-    uploadSingleFileOnlySelect: "Only 1 file supported at a time. Please select a single file.",
+    uploadSingleFileOnlySelect:
+      "Only 1 file supported at a time. Please select a single file.",
     downloadTemplate: "Download template",
     supportedFormat: "Supported format: .xlsx | Max size: 20 MB",
     orDragDrop: "or drag and drop file here",
@@ -1056,8 +1226,10 @@ export default {
     invalidResponse: "The quiz response was invalid.",
     loadFailed: "The quiz could not be loaded.",
     classLoadFailed: "The class details could not be loaded.",
-    draftReloadFailed: "The draft was saved, but its latest data could not be reloaded.",
-    closedNotice: "This quiz is closed. Its schedule, late-submission setting, time limit, questions, grading scale, and result-release mode can no longer be changed.",
+    draftReloadFailed:
+      "The draft was saved, but its latest data could not be reloaded.",
+    closedNotice:
+      "This quiz is closed. Its schedule, late-submission setting, time limit, questions, grading scale, and result-release mode can no longer be changed.",
     toastQuestionAdded: "New question added",
     toastQuestionCopied: "Question copied",
     toastQuestionDeleted: "Question deleted",
@@ -1069,7 +1241,8 @@ export default {
     toastChangesSaved: "Changes saved.",
     toastPublishSuccess: "Quiz published successfully.",
     errorSave: "The quiz could not be saved. Please try again.",
-    errorPublish: "The quiz could not be published. Check its details and try again.",
+    errorPublish:
+      "The quiz could not be published. Check its details and try again.",
     draftSavedPublishFailed: "The draft was saved but not published. {{error}}",
     saving: "Saving...",
     saveChanges: "Save Changes",
@@ -1126,9 +1299,11 @@ export default {
     dateTimePlaceholder: "dd/MM/yyyy, --:--",
     postTypeModalTitle: "Create New Classwork",
     postTypeModalAssignmentTitle: "Assignment",
-    postTypeModalAssignmentDesc: "Create essays or file submissions for students",
+    postTypeModalAssignmentDesc:
+      "Create essays or file submissions for students",
     postTypeModalExamTitle: "Exam",
-    postTypeModalExamDesc: "Create quizzes and essay tests with grades and timers",
+    postTypeModalExamDesc:
+      "Create quizzes and essay tests with grades and timers",
     preview: {
       bannerText: "This is a preview mode of the exam",
       backToEdit: "Back to Edit",
@@ -1157,7 +1332,9 @@ export default {
     sortNewest: "Sort: Newest",
     sortOldest: "Sort: Oldest",
     badgePublished: "PUBLISHED",
-    badgeUpcoming: "UPCOMING",
+    badgeOpen: "OPEN",
+    badgeUpcomingOpen: "UPCOMING",
+    badgeUpcoming: "DUE SOON",
     badgeDraft: "DRAFT",
     badgeClosed: "CLOSED",
     badgeExpired: "EXPIRED",
@@ -1226,7 +1403,8 @@ export default {
     submittedFilesHeader: "Submitted Files",
     noTextResponse: "No text response provided.",
     noSubmissionYetTitle: "No Submission Yet",
-    noSubmissionYetMsg: "You haven't submitted your response for this assignment yet. Complete your work and click Submit.",
+    noSubmissionYetMsg:
+      "You haven't submitted your response for this assignment yet. Complete your work and click Submit.",
     totalItems: "Total Items",
     pendingWork: "To Do / Pending",
     completedWork: "Completed",
@@ -1253,7 +1431,8 @@ export default {
     autoGraded: "Auto-graded",
     manualGraded: "Manual grading",
     quizPublishedToast: "Quiz published!",
-    quizPublishErrorToast: "Could not publish the quiz. Check its content and try again.",
+    quizPublishErrorToast:
+      "Could not publish the quiz. Check its content and try again.",
     badgeQuiz: "QUIZ",
     badgeAssignment: "ASSIGNMENT",
     viewModeGrid: "Grid View",
@@ -1263,8 +1442,11 @@ export default {
     teachingTaskPendingCount: "{{count}} pending",
     teachingTaskUrgent: "Urgent",
     teachingTaskRequired: "Required",
+    teachingTaskLater: "Later",
     teachingTaskGradeQuiz: "Grade quiz",
-    teachingTaskGradeAssignment: "Grade assignment",
+    teachingTaskGradeAssignment: "Grade submission",
+    submissionNeedToGrade: "Submissions to grade",
+    pendingSubmissionCount: "{{count}} submissions",
     statusUnknown: "Unknown",
     previousPage: "Previous page",
     nextPage: "Next page",
@@ -1288,7 +1470,8 @@ export default {
     deleteAssignment: "Delete assignment",
     filterLabel: "Filter submissions",
     deleteModalTitle: "Delete assignment?",
-    deleteModalConfirmMsg: "Are you sure you want to delete “{{assignmentTitle}}”? This action cannot be undone.",
+    deleteModalConfirmMsg:
+      "Are you sure you want to delete “{{assignmentTitle}}”? This action cannot be undone.",
     deletingLabel: "Deleting...",
     deleteConfirmBtn: "Delete",
     cancelBtn: "Cancel",
@@ -1308,7 +1491,8 @@ export default {
     loadingSubmissions: "Loading submissions",
     loadSubmissionsError: "Could not load assignment submissions.",
     assignmentNotPublished: "This assignment has not been published.",
-    invalidAssignmentSubmissionData: "The assignment or submission data is invalid.",
+    invalidAssignmentSubmissionData:
+      "The assignment or submission data is invalid.",
     retry: "Try again",
     toastDeleteSuccess: "Assignment deleted successfully.",
     toastDeleteError: "Could not delete the assignment.",
@@ -1335,15 +1519,21 @@ export default {
     searchContent: "Search classwork",
     statsUnavailableLabel: "Statistics unavailable",
     studentAssignment: {
+      assignmentNotFound: "Assignment not found",
+      submittedHeading: "Submitted",
+      allowLateSubmission: "Allow late submission",
       maxFilesAllowed: "You can attach up to {{maxFiles}} files.",
       invalidSelectedFile: "The selected file is invalid.",
-      fileFormatNotAllowed: "{{extension}} files are not allowed. Supported formats: {{formats}}.",
+      fileFormatNotAllowed:
+        "{{extension}} files are not allowed. Supported formats: {{formats}}.",
       noFileExtension: "Files without an extension are not allowed.",
       fileEmptyOrInvalid: "{{fileName}} is empty or invalid.",
       fileExceedsLimit: "{{fileName}} exceeds the 50 MB limit.",
       fileAlreadySelected: "{{fileName}} has already been selected.",
-      submissionsClosedOrExpired: "Submissions are closed or the deadline has passed.",
-      contentOrFileRequired: "Enter a text response or attach at least one file.",
+      submissionsClosedOrExpired:
+        "Submissions are closed or the deadline has passed.",
+      contentOrFileRequired:
+        "Enter a text response or attach at least one file.",
       changeBeforeResubmit: "Make at least one change before resubmitting.",
       submissionCannotBeEmpty: "A submission cannot be empty.",
       submitSuccess: "Assignment submitted successfully.",
@@ -1351,7 +1541,8 @@ export default {
       loadingAssignment: "Loading assignment",
       loadAssignmentError: "Could not load the assignment.",
       assignmentNotPublished: "This assignment has not been published.",
-      invalidAssignmentSubmissionData: "The assignment or submission data is invalid.",
+      invalidAssignmentSubmissionData:
+        "The assignment or submission data is invalid.",
       retry: "Try again",
       goBack: "Go back",
       unnamedFile: "Unnamed file",
@@ -1366,21 +1557,32 @@ export default {
       resubmitHeading: "Update your submission",
       submitHeading: "Submit your work",
       textSubmissionPlaceholder: "Enter your response here...",
-      supportedFilesSummary: "Supported: {{formats}} • Up to {{maxFiles}} files • 50 MB each",
+      supportedFilesSummary:
+        "Supported: {{formats}} • Up to {{maxFiles}} files • 50 MB each",
       anyFileFormat: "Any file format",
       filesPendingUpload: "Files ready to upload",
       submittingAssignment: "Submitting...",
       resubmitButton: "Resubmit assignment",
       submitButton: "Submit assignment",
       submissionsClosedHeading: "Submissions are closed",
-      submissionsLockedDescription: "Your teacher has locked submissions for this assignment.",
-      assignmentUnavailableDescription: "This assignment is not currently available for submission.",
+      submissionsLockedDescription:
+        "Your teacher has locked submissions for this assignment.",
+      assignmentUnavailableDescription:
+        "This assignment is not currently available for submission.",
       deadlinePassedDescription: "The submission deadline has passed.",
       gradingDetails: "Grading details",
       outOfScore: "{{score}} / {{maxScore}}",
-      noFeedback: "No feedback was provided."
+      noFeedback: "No feedback was provided.",
     },
     studentQuiz: {
+      quizStatus: "Quiz Status",
+      attemptCountLabel: "Attempts",
+      unlimitedAttempts: "Unlimited",
+      highestScore: "Highest Score",
+      outOfAttempts: "0 (Out of attempts)",
+      cannotTakeQuiz: "Cannot take quiz",
+      attemptsLeftMeta: "{{rem}} / {{max}} attempts left",
+      opensAt: "Opens at",
       answerPlaceholder: "Enter your answer here...",
       answersAutosave: "Answers are saved automatically",
       attemptCount: "{{count}} attempt(s)",
@@ -1390,7 +1592,8 @@ export default {
       back: "Back",
       cancel: "Cancel",
       cancelContinue: "Cancel and continue",
-      confirmSubmissionDescription: "You answered {{answered}}/{{total}} questions. Are you sure you want to submit now?",
+      confirmSubmissionDescription:
+        "You answered {{answered}}/{{total}} questions. Are you sure you want to submit now?",
       confirmSubmissionTitle: "Confirm quiz submission?",
       confirmSubmit: "Confirm submit",
       continueQuiz: "Continue quiz",
@@ -1404,16 +1607,19 @@ export default {
       falseOption: "False",
       flagForReview: "Flag for review",
       flagged: "Flagged",
-      goToQuestion: "Go to question {{number}}, {{answerState}}{{flaggedState}}",
+      goToQuestion:
+        "Go to question {{number}}, {{answerState}}{{flaggedState}}",
       gradedScore: "Graded ({{earned}}/{{max}} pts)",
       hint: "Hint:",
       importantNotice: "Important notice before you start:",
       inProgress: "IN PROGRESS",
       incorrectScore: "Incorrect ({{earned}}/{{max}} pts)",
       instructions: "Instructions:",
-      loadQuizErrorDescription: "The quiz data was invalid or the connection was interrupted.",
+      loadQuizErrorDescription:
+        "The quiz data was invalid or the connection was interrupted.",
       loadQuizErrorTitle: "Could not load the quiz",
-      loadResultErrorDescription: "The result is not ready or the response was invalid.",
+      loadResultErrorDescription:
+        "The result is not ready or the response was invalid.",
       loadResultErrorTitle: "Could not load the result",
       loading: "Loading...",
       loadingQuiz: "Loading quiz",
@@ -1426,10 +1632,13 @@ export default {
       noQuestionContent: "No question content.",
       noQuestions: "No questions available.",
       notOpenYet: "Not open yet",
-      noticeAutosave: "Answers are auto-saved, and the quiz is submitted automatically when time runs out.",
+      noticeAutosave:
+        "Answers are auto-saved, and the quiz is submitted automatically when time runs out.",
       noticeCountdown: "The countdown begins as soon as you select Start.",
-      noticeResumeAttempt: "Your existing attempt and timer will resume. Previously saved answers may not be shown again, so review carefully before changing or submitting answers.",
-      noticeStableConnection: "Keep a stable internet connection throughout the quiz.",
+      noticeResumeAttempt:
+        "Your existing attempt and timer will resume. Previously saved answers may not be shown again, so review carefully before changing or submitting answers.",
+      noticeStableConnection:
+        "Keep a stable internet connection throughout the quiz.",
       pendingGrading: "Pending grading",
       pendingScore: "Pending ({{earned}}/{{max}} pts)",
       points: "{{count}} pts",
@@ -1456,11 +1665,13 @@ export default {
       remainingAttempts: "Remaining attempts",
       resultFailed: "Failed",
       resultPassed: "Passed",
-      resultSummaryFallback: "Showing the submission summary; the latest detailed result could not be loaded.",
+      resultSummaryFallback:
+        "Showing the submission summary; the latest detailed result could not be loaded.",
       resumeAttemptPrompt: "You have an in-progress attempt. Continue it?",
       resumeAttemptSuccess: "Resumed your in-progress attempt.",
       retakeQuiz: "Retake quiz",
-      retakeQuizPrompt: "You have submitted this quiz. Would you like to view results or retake?",
+      retakeQuizPrompt:
+        "You have submitted this quiz. Would you like to view results or retake?",
       seeResults: "View Results",
       retry: "Retry",
       retrySubmission: "Retry submission",
@@ -1477,7 +1688,8 @@ export default {
       statusUnknown: "UNKNOWN",
       statusUpcoming: "UPCOMING",
       submit: "Submit",
-      submitError: "Could not submit. Your answers are still on screen; please try again.",
+      submitError:
+        "Could not submit. Your answers are still on screen; please try again.",
       submitSuccess: "Quiz submitted successfully!",
       submittedAt: "Submitted: {{date}}",
       submitting: "Submitting...",
@@ -1496,7 +1708,7 @@ export default {
       wordCountWithLimit: "{{count}} / {{max}} words",
       yourAnswer: "Your answer:",
       yourEssayAnswer: "Your essay answer:",
-      yourSelection: "Your selection: "
+      yourSelection: "Your selection: ",
     },
     teacherQuiz: {
       actions: "Actions",
@@ -1505,7 +1717,8 @@ export default {
       answerLabel: "Answer",
       attemptCountLabel: "Maximum attempts",
       attemptDataUnavailable: "Attempt data is unavailable.",
-      attemptQuestionsUnavailable: "No questions are available for this attempt.",
+      attemptQuestionsUnavailable:
+        "No questions are available for this attempt.",
       automaticGradingResult: "Automatic grading result",
       automaticallyGradedNotice: "This question was graded automatically.",
       averageScore: "Average score",
@@ -1661,10 +1874,11 @@ export default {
       updatingStatistics: "Updating quiz statistics",
       viewAttempt: "View attempt",
       viewMoreQuestions: "View {{count}} more questions",
-      yes: "Yes"
-    }
+      yes: "Yes",
+    },
   },
   lectureHall: {
+    title: "Lecture Hall",
     loading: "Loading...",
     removeFileTooltip: "Remove file",
     unknownSection: "Unknown section",
@@ -1679,7 +1893,7 @@ export default {
     tabs: {
       curriculum: "Curriculum",
       bulletinBoard: "Bulletin Board",
-      meetingRoom: "Meeting Room"
+      meetingRoom: "Meeting Room",
     },
     bulletinBoard: {
       addPost: "Add Post",
@@ -1692,7 +1906,8 @@ export default {
       edit: "Edit",
       delete: "Delete",
       confirmDelete: "Confirm Delete",
-      confirmDeleteMsg: "Are you sure you want to delete this post? This action cannot be undone.",
+      confirmDeleteMsg:
+        "Are you sure you want to delete this post? This action cannot be undone.",
       searchPlaceholder: "Search posts...",
       noPosts: "No posts yet",
       noPostsDescription: "Posts will appear here when they are available.",
@@ -1754,8 +1969,8 @@ export default {
         courseDetail: "Course Detail",
         classDetail: "Class Detail",
         boardDetail: "Bulletin Board",
-        postDetail: "Post Detail"
-      }
+        postDetail: "Post Detail",
+      },
     },
     createPost: {
       title: "Create Post",
@@ -1815,7 +2030,8 @@ export default {
       addActivitySuccess: "Activity added successfully!",
       addMaterialSuccess: "Material uploaded successfully!",
       deleteConfirmTitle: "Confirm Delete",
-      deleteConfirmMessage: "Are you sure you want to delete this item? This action cannot be undone.",
+      deleteConfirmMessage:
+        "Are you sure you want to delete this item? This action cannot be undone.",
       createBoard: "Create bulletin board",
       addMaterial: "Add material",
       addActivity: "Add learning activity",
@@ -1832,12 +2048,24 @@ export default {
       postCount: "{{count}} posts",
       dueDateMeta: "Due: {{date}}",
       closesAtMeta: "Closes: {{date}}",
+      openLink: "Open link",
+      openVideo: "Open video",
+      close: "Close",
+      download: "Download",
+      belongsTo: "Belongs to",
+      generalSection: "General section",
+      yes: "Yes",
+      no: "No",
+      openTime: "Opens",
+      closeTime: "Closes",
+      materialNotFound: "Material not found",
       unnamedMaterial: "Untitled material",
       unknownFileSize: "Unknown size",
       fileTypeFallback: "FILE",
       addMaterialRequired: "Please select at least one material file.",
       addMaterialError: "Failed to add material.",
-      addActivitySuccessCount: "Added {{count}} learning activities successfully!",
+      addActivitySuccessCount:
+        "Added {{count}} learning activities successfully!",
       addActivityError: "Failed to add learning activities.",
       updateLinkError: "Failed to update link.",
       toastVisibilitySuccess: "Item visibility updated",
@@ -1938,66 +2166,68 @@ export default {
         toastUpdateError: "Could not update the section. Please try again.",
         toastVisibilitySuccess: "Section visibility updated",
         toastVisibilityError: "Failed to update section visibility",
-      }
+      },
     },
     notifications: {
       class_update: {
         title: "Class update",
-        body: 'Class "{className}" has been updated'
+        body: 'Class "{className}" has been updated',
       },
       schedule_change: {
         title: "Schedule changed",
-        body: 'Schedule for class "{className}" has been adjusted'
+        body: 'Schedule for class "{className}" has been adjusted',
       },
       assignment_new: {
         title: "Class {className}",
-        body: "Instructor has added a new assignment - {assignmentName}."
+        body: "Instructor has added a new assignment - {assignmentName}.",
       },
       assignment_update: {
         title: "Class {className}",
-        body: "{assignmentName} deadline has been changed."
+        body: "{assignmentName} deadline has been changed.",
       },
       assignment_graded: {
         title: "Class {className}",
-        body: "Result for {assignmentName} is available."
+        body: "Result for {assignmentName} is available.",
       },
       assignment_regraded: {
         title: "Class {className}",
-        body: "Your {assignmentName} has been regraded."
+        body: "Your {assignmentName} has been regraded.",
       },
       quiz_new: {
         title: "Class {className}",
-        body: "Instructor has added a new quiz - {quizName}."
+        body: "Instructor has added a new quiz - {quizName}.",
       },
       quiz_update: {
         title: "Class {className}",
-        body: "{quizName} closing time has been changed."
+        body: "{quizName} closing time has been changed.",
       },
       quiz_regraded: {
         title: "Class {className}",
-        body: "Your {quizName} has been regraded."
+        body: "Your {quizName} has been regraded.",
       },
       class_invite: {
         title: "Class Invitation",
-        body: "{teacherName} has invited you to join the class \"{className}\""
+        body: '{teacherName} has invited you to join the class "{className}"',
       },
       class_paid: {
         title: "Class Payment Successful",
-        body: "You have successfully paid for the class \"{className}\"."
+        body: 'You have successfully paid for the class "{className}".',
       },
       class_invited_paid: {
         title: "Class Has Been Paid",
-        body: "{payerName} has paid for the class \"{className}\" and you are now enrolled!"
-      }
-    }
+        body: '{payerName} has paid for the class "{className}" and you are now enrolled!',
+      },
+    },
   },
   publicClass: {
     loading: "Loading class details...",
     notFoundTitle: "Class details not found",
-    notFoundDesc: "The class may have been deleted or the URL is invalid. Please return to explore courses.",
+    notFoundDesc:
+      "The class may have been deleted or the URL is invalid. Please return to explore courses.",
     exploreOtherBtn: "Explore Other Classes",
     overviewTitle: "Detailed Class Overview",
-    defaultDescription: "This class offers a highly interactive learning environment, combining core theory with practical communication activities tailored for real-world scenarios.",
+    defaultDescription:
+      "This class offers a highly interactive learning environment, combining core theory with practical communication activities tailored for real-world scenarios.",
     tuitionFeeFull: "All-inclusive tuition fee",
     tbaFee: "TBA",
     enterClass: "Enter Class",
@@ -2015,12 +2245,19 @@ export default {
     curriculumSub: "Structured training curriculum",
     flexibleSchedule: "Flexible schedule",
     scheduleSub: "Flexible weekly schedule",
+    scheduleTitle: "Schedule",
+    jumpToday: "Today",
+    jumpStart: "Start",
+    jumpEnd: "End",
+    classDayLegend: "Class day",
+    todayLegend: "Today",
     spotsLeft: "{{remaining}}/{{capacity}} spots",
     spotsSub: "Allowed student enrollment capacity",
     instructorTitle: "Instructor Information",
     verifiedTeacher: "Verified Instructor by CatSpeak",
     defaultTeacherTitle: "Senior Language Instructor",
-    defaultTeacherBio: "Experienced instructor specializing in international language communication training. Over 8 years of corporate and student teaching experience nationwide.",
+    defaultTeacherBio:
+      "Experienced instructor specializing in international language communication training. Over 8 years of corporate and student teaching experience nationwide.",
     featLive: "Interactive live online sessions",
     featCurriculum: "Exclusive exercises & course materials",
     featFeedback: "1:1 assignment grading & feedback",
@@ -2030,15 +2267,19 @@ export default {
     classIncludes: "This class includes:",
     faqTitle: "Frequently Asked Questions (FAQ)",
     faq1Q: "What level of language proficiency is required to join?",
-    faq1A: "The class is designed for multiple levels from Basic to Intermediate. Before starting, the instructor will hold an orientation session to help you choose the best learning path.",
+    faq1A:
+      "The class is designed for multiple levels from Basic to Intermediate. Before starting, the instructor will hold an orientation session to help you choose the best learning path.",
     faq2Q: "How is the class conducted?",
-    faq2A: "The class is held 100% online via the CatSpeak Video Room platform with direct 2-way interaction between the instructor and students.",
+    faq2A:
+      "The class is held 100% online via the CatSpeak Video Room platform with direct 2-way interaction between the instructor and students.",
     faq3Q: "What if I miss a class session?",
-    faq3A: "All class sessions are recorded and lecture slides are stored on the platform. You can rewatch lessons anytime.",
+    faq3A:
+      "All class sessions are recorded and lecture slides are stored on the platform. You can rewatch lessons anytime.",
     faq4Q: "How do I receive a completion certificate?",
-    faq4A: "After attending at least 80% of sessions and submitting all assignments/exams, you will receive a digital CatSpeak certificate.",
+    faq4A:
+      "After attending at least 80% of sessions and submitting all assignments/exams, you will receive a digital CatSpeak certificate.",
     faq5Q: "What is the registration and refund policy?",
-    faq5A: "CatSpeak guarantees class transfer or 100% refund within the first 7 days if you feel the class does not meet your needs."
-  }
+    faq5A:
+      "CatSpeak guarantees class transfer or 100% refund within the first 7 days if you feel the class does not meet your needs.",
+  },
 }
-

@@ -719,6 +719,8 @@ export default {
       "Cuộc thảo luận nhóm đã kết thúc. Bạn đang được tự động chuyển về phòng học chính...",
     movingDesc: "Bạn đang được tự động chuyển sang phòng thảo luận nhóm...",
     roomFullError: "Không thể di chuyển vì phòng đã đầy.",
+    setupModeTip: "Chế độ phân bổ phòng: Xếp nhóm học viên rồi nhấn nút \"Mở phòng\" bên dưới để chính thức đưa các thành viên vào phòng.",
+    setupStageHint: "Đã xếp học viên vào phòng. Nhấn 'Mở phòng' bên dưới để áp dụng.",
   },
   game: {
     crackIt: {

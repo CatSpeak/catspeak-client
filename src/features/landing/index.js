@@ -9,6 +9,8 @@ export { default as InstructorSkeletonCard } from "./components/InstructorSkelet
 export { default as NewsSection } from "./components/NewsSection"
 export { default as LandingNewsCard } from "./components/LandingNewsCard"
 export { default as LandingNewsSkeletonCard } from "./components/LandingNewsSkeletonCard"
+export { default as AnimatedCounter } from "./components/AnimatedCounter"
+export { default as ScrollReveal } from "./components/ScrollReveal"
 export { landingTranslations } from "./i18n"
 
 

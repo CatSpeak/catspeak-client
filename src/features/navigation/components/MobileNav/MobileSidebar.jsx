@@ -10,14 +10,14 @@ const MobileSidebar = ({ isMobileOpen, setIsMobileOpen }) => {
       {/* Mobile overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-black/50 z-40 min-[1280px]:hidden transition-opacity"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 h-full h-[100dvh] max-h-[100dvh] w-[320px] bg-white rounded-r-xl shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-50 lg:hidden overflow-hidden ${isMobileOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 left-0 bottom-0 h-full h-[100dvh] max-h-[100dvh] w-[320px] bg-white rounded-r-xl shadow-[4px_0_24px_rgba(0,0,0,0.08)] flex flex-col transition-transform duration-300 z-50 min-[1280px]:hidden overflow-hidden ${isMobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         {/* Header/Logo section */}

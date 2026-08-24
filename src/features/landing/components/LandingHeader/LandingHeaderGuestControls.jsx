@@ -1,4 +1,3 @@
-import React from "react";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import { useLanguage } from "@/shared/context/LanguageContext";
 

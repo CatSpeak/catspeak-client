@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useRef } from "react"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 import DesktopNavItem from "./DesktopNavItem"
 import DesktopSubNavDropdown from "./DesktopSubNavDropdown"
 import { DesktopSubNavContent } from "./DesktopSubNavContent"
@@ -33,7 +33,7 @@ const DesktopNav = ({ onRequestLogin }) => {
 
   return (
     <nav
-      className="relative hidden items-center justify-center p-1 gap-2 text-black lg:flex"
+      className="relative hidden items-center justify-center p-1 gap-2 text-black min-[1280px]:flex"
       onMouseLeave={handleMouseLeave}
     >
       {navLinks
@@ -45,7 +45,7 @@ const DesktopNav = ({ onRequestLogin }) => {
           return true
         })
         .map((item) => {
-          const { key, path, hasDropdown, subItems, noActive, color, img, requiresAuth } = item
+          const { key, path, subItems, noActive, color, img, requiresAuth } = item
           const isLocked = requiresAuth && !isAuthenticated
           const isDropdown = key === "community" || (subItems && subItems.length > 0)
 
@@ -65,7 +65,7 @@ const DesktopNav = ({ onRequestLogin }) => {
 
                 <AnimatePresence>
                   {activeKey === key && !isLocked && (
-                    <motion.div
+                    <Motion.div
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
@@ -79,7 +79,7 @@ const DesktopNav = ({ onRequestLogin }) => {
                         item={item}
                         onItemClick={() => setActiveKey(null)}
                       />
-                    </motion.div>
+                    </Motion.div>
                   )}
                 </AnimatePresence>
               </div>

@@ -2,6 +2,7 @@ export default {
   anonymous: "Ẩn danh",
   connect: "Kết nối",
   pass: "Bỏ qua",
+  report: "Báo cáo",
   interested: "Đã gửi quan tâm! Kiểm tra tin nhắn của bạn.",
   hidden: "Đã ẩn câu chuyện.",
   interactionFailed: "Tương tác thất bại.",
@@ -16,6 +17,10 @@ export default {
     description:
       "Sắp ra mắt: Khám phá các nền văn hóa, địa điểm và con người từ khắp nơi trên thế giới.",
   },
+  reportSuccess: "Báo cáo thành công",
+  reportFailed: "Báo cáo thất bại",
+  storyNotFound: "Không tìm thấy câu chuyện",
+  cannotReportOwn: "Không thể báo cáo câu chuyện của chính mình",
   reels: {
     title: "Reels",
     description: "Xem video từ cộng đồng của chúng tôi.",

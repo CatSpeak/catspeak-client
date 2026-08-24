@@ -55,6 +55,7 @@ const LessonItemRow = ({
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
+  onSelectLesson = () => { },
   className = "",
 }) => {
   const { t, language } = useLanguage()
@@ -119,12 +120,39 @@ const LessonItemRow = ({
 
   const isHidden = item.isVisibleToStudents === false
 
+  const isClickable = ["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type);
+
+  const handleRowClick = () => {
+    const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
+    if (displayData.type === "bulletinBoard") {
+      navigate(`${basePath}/bulletin-board/${displayData.itemId}`, { state: { displayData } })
+    } else if (isYoutubeLink) {
+      onSelectLesson(item, "link")
+    } else if (displayData.type === "link") {
+      onSelectLesson(item, "link")
+    } else if (displayData.type === "assignment") {
+      navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
+    } else if (displayData.type === "quiz") {
+      if (isStudent) {
+        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
+      } else {
+        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}`)
+      }
+    } else if (displayData.type === "material") {
+      onSelectLesson(item, "material")
+    }
+  }
+
   return (
     <div
+      onClick={(e) => {
+        if (e.target.closest("button") || e.target.closest("[role='menu']")) return;
+        if (isClickable) handleRowClick();
+      }}
       className={`rounded-xl p-4 flex flex-col relative transition-all ${isHidden
         ? "bg-[#fbfbfc] border border-[#edeeef] border-l-4 border-l-[#d1d5db] opacity-75"
         : `bg-[#F8F9FA] border border-[#E2E2E2] hover:border-cath-red-700 ${config.leftBorder}`
-        } ${className}`}
+        } ${isClickable ? "cursor-pointer" : ""} ${className}`}
     >
       <div className="flex items-center justify-between gap-4 w-full">
         {/* Left section: Drag Handle + Type Icon + Title & Meta */}
@@ -141,34 +169,7 @@ const LessonItemRow = ({
           <div className="min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <h4
-                className={`text-base font-semibold truncate max-w-full ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
-                onClick={() => {
-                  const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
-                  if (displayData.type === "bulletinBoard") {
-                    navigate(`${basePath}/bulletin-board/${displayData.itemId}`, { state: { displayData } })
-                  } else if (isYoutubeLink) {
-                    navigate(`${basePath}/links/${displayData.itemId}`)
-                  } else if (displayData.type === "link") {
-                    let urlToOpen = displayData.meta
-                    if (urlToOpen && !/^https?:\/\//i.test(urlToOpen)) {
-                      urlToOpen = 'https://' + urlToOpen
-                    }
-                    window.open(urlToOpen, "_blank")
-                  } else if (displayData.type === "assignment") {
-                    navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
-                  } else if (displayData.type === "quiz") {
-                    if (isStudent) {
-                      navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
-                    } else {
-                      navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}`)
-                    }
-                  } else if (displayData.type === "material") {
-                    const fileUrl = item.material?.fileUrl || item.material?.url || item.material?.FileUrl || item.fileUrl;
-                    if (fileUrl) {
-                      window.open(fileUrl, "_blank")
-                    }
-                  }
-                }}
+                className={`text-base font-semibold truncate max-w-full ${isClickable ? "text-[#191C1D] hover:underline" : "text-[#191C1D]"}`}
               >
                 {displayData.title}
               </h4>

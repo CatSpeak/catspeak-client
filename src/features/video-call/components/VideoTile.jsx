@@ -41,6 +41,8 @@ const VideoTileInner = ({ participant, onClick }) => {
       ParticipantEvent.TrackUnmuted,
       ParticipantEvent.TrackPublished,
       ParticipantEvent.TrackUnpublished,
+      ParticipantEvent.LocalTrackPublished,
+      ParticipantEvent.LocalTrackUnpublished,
       ParticipantEvent.MetadataChanged,
     ]
 
@@ -86,7 +88,7 @@ const VideoTileInner = ({ participant, onClick }) => {
     const el = videoRef.current
     if (!el) return
 
-    if (cameraTrack) {
+    if (cameraTrack && isVideoVisible) {
       cameraTrack.attach(el)
     }
 
@@ -95,7 +97,7 @@ const VideoTileInner = ({ participant, onClick }) => {
         cameraTrack.detach(el)
       }
     }
-  }, [cameraTrack])
+  }, [cameraTrack, isVideoVisible])
 
   return (
     <div

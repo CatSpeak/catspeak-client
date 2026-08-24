@@ -1,11 +1,10 @@
 import React, { useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ChevronDown } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { useAuth } from "@/features/auth"
-import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
 
 /**
  * Trigger pill component for desktop sub-nav dropdowns (e.g. catSpeak, workspace, community).
@@ -60,13 +59,13 @@ const DesktopSubNavDropdown = React.forwardRef(
         <span>{displayLabel}</span>
 
         {!isLocked && (
-          <motion.span
+          <Motion.span
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className="inline-flex shrink-0 items-center justify-center"
           >
             <ChevronDown size={16} />
-          </motion.span>
+          </Motion.span>
         )}
       </button>
     )
