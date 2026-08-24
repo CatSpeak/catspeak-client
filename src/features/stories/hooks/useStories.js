@@ -8,6 +8,7 @@ import {
   useCreateStoryMutation,
   useInteractWithStoryMutation,
   useDeleteStoryMutation,
+  useReportStoryMutation,
 } from "../api/storiesApi"
 import { useConversationSignalRContext } from "@/features/chat/context/ConversationSignalRContext"
 
@@ -24,6 +25,7 @@ const useStories = (languageCommunity) => {
   const [createStory, { isLoading: isCreating }] = useCreateStoryMutation()
   const [interactWithStory] = useInteractWithStoryMutation()
   const [deleteStory] = useDeleteStoryMutation()
+  const [reportStory] = useReportStoryMutation()
 
   // Data Extraction (unwrapped by baseApi, guaranteed Array to prevent .map()/.filter() errors)
   const stories = Array.isArray(storiesData) ? storiesData : []
@@ -101,6 +103,15 @@ const useStories = (languageCommunity) => {
     }
   }
 
+  const handleReport = async (storyId) => {
+    try {
+      await reportStory(storyId).unwrap()
+    } catch (error) {
+      console.error("Report failed:", error)
+      throw error // Throw to let UI handle toast
+    }
+  }
+
   return {
     stories,
     myStories,
@@ -109,6 +120,7 @@ const useStories = (languageCommunity) => {
     handleCreate,
     handleInteract,
     handleDelete,
+    handleReport,
     loadingStories,
     loadingMyStories,
     isCreating,

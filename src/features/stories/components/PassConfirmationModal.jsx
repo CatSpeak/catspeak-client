@@ -10,7 +10,7 @@ import { MessageSquare } from "lucide-react";
 
 dayjs.extend(relativeTime);
 
-const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
+const PassConfirmationModal = ({ open, story, onConnect, onReport, onClose }) => {
   const { t } = useLanguage();
   // const [confirmPass, setConfirmPass] = useState(false);
 
@@ -19,13 +19,16 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
     onClose();
   };
 
+  // const handlePass = () => {
+  //   // if (confirmPass) {
+  //   onPass(story);
+  //   handleClose();
+  // };
+
   const handleReport = () => {
     // if (confirmPass) {
-    onPass(story);
+    onReport(story);
     handleClose();
-    // } else {
-    //   setConfirmPass(true);
-    // }
   };
 
   const handleConnect = () => {
