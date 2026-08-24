@@ -86,6 +86,10 @@ const ControlBarMoreMenu = ({
                       <SubtitleLanguagePicker
                         languages={subtitleSupportedLangs}
                         selectedLanguage={null}
+                        label={
+                          t?.rooms?.videoCall?.controls?.selectSubtitleLanguage
+                        }
+                        languageNames={t?.rooms?.videoCall?.subtitleLanguages}
                         onSelect={(lang) => {
                           startSubtitles(lang)
                           setShowSubtitlePicker(false)

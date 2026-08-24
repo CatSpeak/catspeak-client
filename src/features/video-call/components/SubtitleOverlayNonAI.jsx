@@ -15,7 +15,6 @@ const LANG_MAP = {
   Vietnamese: "vi",
   Japanese: "ja",
 }
-const DISPLAY_NAMES = { en: "English", vi: "Tiếng Việt", zh: "中文", ja: "日本語" }
 const LANG_FLAGS = { en: UK, vi: VietNam, zh: China, ja: Japan }
 
 /**
@@ -89,8 +88,11 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                 )
               }
             >
-              {DISPLAY_NAMES[subtitleSelectedLanguage] ??
+              {t.rooms?.videoCall?.subtitleLanguages?.[
+                subtitleSelectedLanguage
+              ] ??
                 subtitleSelectedLanguage ??
+                t.rooms?.videoCall?.displayLanguage ??
                 "Language"}
             </PillButton>
 
@@ -136,7 +138,9 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                   />
                 }
               >
-                <span>{DISPLAY_NAMES[lang] ?? lang}</span>
+                <span>
+                  {t.rooms?.videoCall?.subtitleLanguages?.[lang] ?? lang}
+                </span>
               </ListItem>
             ))}
           </div>
