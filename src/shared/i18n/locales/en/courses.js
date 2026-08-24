@@ -2332,7 +2332,7 @@ export default {
     jumpEnd: "End",
     classDayLegend: "Class day",
     todayLegend: "Today",
-    spotsLeft: "{{remaining}}/{{capacity}} spots",
+    spotsLeft: "{{enrolled}}/{{capacity}} spots",
     spotsSub: "Registered students",
     instructorTitle: "Instructor Information",
     verifiedTeacher: "Verified Instructor by CatSpeak",
