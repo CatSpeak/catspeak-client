@@ -328,7 +328,8 @@ export default {
     tabUpcomingClasses: "Upcoming ({{count}})",
     tabClosedClasses: "Closed ({{count}})",
     noUpcomingClasses: "No upcoming classes open for registration yet",
-    noUpcomingClassesDesc: "Please check back later or explore other open classes.",
+    noUpcomingClassesDesc:
+      "Please check back later or explore other open classes.",
     noClosedClasses: "No classes have closed registration",
     noClasses: "No classes available",
     noClassesDesc: "New classes will be updated soon. Please check back later.",
@@ -346,7 +347,8 @@ export default {
     rating: "Rating",
     totalReviews: "Reviews",
     classesCount: "Classes",
-    defaultBio: "Dedicated instructor with years of experience in language teaching and student skill development.",
+    defaultBio:
+      "Dedicated instructor with years of experience in language teaching and student skill development.",
 
     // Class Item & Buttons
     startDateBadge: "Starts",
@@ -377,7 +379,8 @@ export default {
 
     // Conflict Modal
     scheduleConflictTitle: "Schedule Conflict",
-    scheduleConflictDesc: "The schedule for this class conflicts with your current class:",
+    scheduleConflictDesc:
+      "The schedule for this class conflicts with your current class:",
     cancel: "Cancel",
     confirmEnroll: "Proceed Anyway",
   },
@@ -1411,8 +1414,11 @@ export default {
     teachingTaskPendingCount: "{{count}} pending",
     teachingTaskUrgent: "Urgent",
     teachingTaskRequired: "Required",
+    teachingTaskLater: "Later",
     teachingTaskGradeQuiz: "Grade quiz",
-    teachingTaskGradeAssignment: "Grade assignment",
+    teachingTaskGradeAssignment: "Grade submission",
+    submissionNeedToGrade: "Submissions to grade",
+    pendingSubmissionCount: "{{count}} submissions",
     statusUnknown: "Unknown",
     previousPage: "Previous page",
     nextPage: "Next page",

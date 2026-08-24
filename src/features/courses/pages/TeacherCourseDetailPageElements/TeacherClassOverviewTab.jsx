@@ -98,20 +98,31 @@ const TeacherClassOverviewTab = ({
 
   const resolvedTeachingTasks = useMemo(() => {
     if (propTeachingTasks) return propTeachingTasks
-    return Array.isArray(rawTasks)
+    const list = Array.isArray(rawTasks)
       ? rawTasks
-          .map((task) =>
-            mapTeachingTask(task, {
-              pendingCount: taskText.teachingTaskPendingCount,
-              urgent: taskText.teachingTaskUrgent,
-              required: taskText.teachingTaskRequired,
-              gradeQuiz: taskText.teachingTaskGradeQuiz,
-              gradeAssignment: taskText.teachingTaskGradeAssignment,
-              unknown: taskText.statusUnknown,
-            }),
-          )
-          .filter(Boolean)
-      : []
+      : Array.isArray(rawTasks?.data)
+        ? rawTasks.data
+        : Array.isArray(rawTasks?.items)
+          ? rawTasks.items
+          : Array.isArray(rawTasks?.result)
+            ? rawTasks.result
+            : Array.isArray(rawTasks?.value)
+              ? rawTasks.value
+              : []
+
+    return list
+      .map((task) =>
+        mapTeachingTask(task, {
+          pendingCount: taskText.teachingTaskPendingCount,
+          urgent: taskText.teachingTaskUrgent,
+          required: taskText.teachingTaskRequired,
+          later: taskText.teachingTaskLater,
+          gradeQuiz: taskText.teachingTaskGradeQuiz,
+          gradeAssignment: taskText.teachingTaskGradeAssignment,
+          unknown: taskText.statusUnknown,
+        }),
+      )
+      .filter(Boolean)
   }, [
     propTeachingTasks,
     rawTasks,
@@ -120,6 +131,7 @@ const TeacherClassOverviewTab = ({
     taskText.teachingTaskPendingCount,
     taskText.teachingTaskRequired,
     taskText.teachingTaskUrgent,
+    taskText.teachingTaskLater,
     taskText.statusUnknown,
   ])
 
