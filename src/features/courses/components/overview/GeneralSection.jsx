@@ -172,7 +172,7 @@ const GeneralSection = ({
                         >
                           {cd.editClass || "Edit Class"}
                         </button>
-                        <button
+                        {/* <button
                           type="button"
                           role="menuitem"
                           disabled={isActionPending}
@@ -183,7 +183,7 @@ const GeneralSection = ({
                           className="w-full text-left p-3 hover:bg-gray-55 text-xs font-bold transition-colors"
                         >
                           {cd.completeClass || "Complete Class"}
-                        </button>
+                        </button> */}
                         <button
                           type="button"
                           role="menuitem"

@@ -4,10 +4,68 @@ import GeneralSection from "./GeneralSection"
 import CurrentClassesSection from "./CurrentClassesSection"
 import UpcomingSessionCard from "../../components/sessions/UpcomingSessionCard"
 import TeachingTasksSection from "../../components/assignments/TeachingTasksSection"
+import VoucherSection from "../../components/overview/VoucherSection"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetTeacherCourseTeachingTasksCombinedQuery } from "@/store/api/coursesApi"
 import { mapTeachingTask } from "../../utils/courseTransforms"
 import { ensureDate } from "@/shared/utils/dateUtils"
+
+const resolveNextClass = (classes, propNextClass) => {
+  if (propNextClass !== undefined) return propNextClass
+  const nowMs = Date.now()
+  const nextSessionCandidate = (classes || [])
+    .map((cls) => {
+      const ns = cls?.nextSession
+      const datePart = ns?.date || cls?.startDate || ""
+      let rawTs = ns?.rawStartTime || ns?.startTime || ""
+      if (
+        typeof rawTs === "string" &&
+        !rawTs.includes("T") &&
+        !rawTs.includes("-") &&
+        datePart
+      ) {
+        const cleanDate = datePart.includes("T")
+          ? datePart.split("T")[0]
+          : datePart
+        rawTs = `${cleanDate}T${rawTs}`
+      } else if (!rawTs && datePart) {
+        rawTs = datePart
+      }
+      const d = ensureDate(rawTs)
+      const startTimeMs = d ? d.getTime() : NaN
+      return { cls, startTimeMs }
+    })
+    .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
+    .sort((left, right) => {
+      const aUpcoming = left.startTimeMs >= nowMs ? 1 : 0
+      const bUpcoming = right.startTimeMs >= nowMs ? 1 : 0
+      if (aUpcoming !== bUpcoming) return bUpcoming - aUpcoming
+      return (
+        Math.abs(left.startTimeMs - nowMs) -
+        Math.abs(right.startTimeMs - nowMs)
+      )
+    })[0]
+
+  const nextSessionClass = nextSessionCandidate?.cls || null
+
+  return nextSessionClass
+    ? {
+        ...nextSessionClass,
+        nextSession: nextSessionClass.nextSession,
+        startDate:
+          nextSessionClass.nextSession?.date || nextSessionClass.startDate,
+        schedule: {
+          ...nextSessionClass.schedule,
+          startTime:
+            nextSessionClass.schedule?.startTime ||
+            nextSessionClass.nextSession?.startTime,
+          endTime:
+            nextSessionClass.schedule?.endTime ||
+            nextSessionClass.nextSession?.endTime,
+        },
+      }
+    : null
+}
 
 const TeacherClassOverviewTab = ({
   courseData = {},
@@ -30,65 +88,12 @@ const TeacherClassOverviewTab = ({
     return Array.isArray(courseData?.classes)
       ? courseData.classes.filter((item) => item && typeof item === "object")
       : []
-  }, [courseData?.classes])
+  }, [courseData])
 
-  // Tự tính toán lớp học có buổi học kế tiếp nếu không truyền từ ngoài vào
-  const resolvedNextClass = useMemo(() => {
-    if (propNextClass !== undefined) return propNextClass
-    const nowMs = Date.now()
-    const nextSessionCandidate = classes
-      .map((cls) => {
-        const ns = cls?.nextSession
-        const datePart = ns?.date || cls?.startDate || ""
-        let rawTs = ns?.rawStartTime || ns?.startTime || ""
-        if (
-          typeof rawTs === "string" &&
-          !rawTs.includes("T") &&
-          !rawTs.includes("-") &&
-          datePart
-        ) {
-          const cleanDate = datePart.includes("T")
-            ? datePart.split("T")[0]
-            : datePart
-          rawTs = `${cleanDate}T${rawTs}`
-        } else if (!rawTs && datePart) {
-          rawTs = datePart
-        }
-        const d = ensureDate(rawTs)
-        const startTimeMs = d ? d.getTime() : NaN
-        return { cls, startTimeMs }
-      })
-      .filter(({ startTimeMs }) => Number.isFinite(startTimeMs))
-      .sort((left, right) => {
-        const aUpcoming = left.startTimeMs >= nowMs ? 1 : 0
-        const bUpcoming = right.startTimeMs >= nowMs ? 1 : 0
-        if (aUpcoming !== bUpcoming) return bUpcoming - aUpcoming
-        return (
-          Math.abs(left.startTimeMs - nowMs) -
-          Math.abs(right.startTimeMs - nowMs)
-        )
-      })[0]
-
-    const nextSessionClass = nextSessionCandidate?.cls || null
-
-    return nextSessionClass
-      ? {
-          ...nextSessionClass,
-          nextSession: nextSessionClass.nextSession,
-          startDate:
-            nextSessionClass.nextSession?.date || nextSessionClass.startDate,
-          schedule: {
-            ...nextSessionClass.schedule,
-            startTime:
-              nextSessionClass.schedule?.startTime ||
-              nextSessionClass.nextSession?.startTime,
-            endTime:
-              nextSessionClass.schedule?.endTime ||
-              nextSessionClass.nextSession?.endTime,
-          },
-        }
-      : null
-  }, [classes, propNextClass])
+  const resolvedNextClass = useMemo(
+    () => resolveNextClass(classes, propNextClass),
+    [classes, propNextClass],
+  )
 
   // Tự fetch teaching tasks nếu không truyền từ ngoài vào
   const { data: rawTasks = [], isLoading: internalLoadingTasks } =
@@ -163,6 +168,15 @@ const TeacherClassOverviewTab = ({
       <div className="contents sm:flex sm:flex-col sm:gap-4 lg:col-span-2">
         <div className="order-1 sm:order-none">
           <GeneralSection courseData={courseData} id={id} />
+        </div>
+
+        <div className="order-5 sm:order-none">
+          <VoucherSection
+            courseData={courseData}
+            courseId={id || courseData?.id}
+            navigate={navigate}
+            cd={cd}
+          />
         </div>
 
         <div className="order-4 sm:order-none">
