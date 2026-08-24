@@ -41,8 +41,7 @@ const resolveNextClass = (classes, propNextClass) => {
       const bUpcoming = right.startTimeMs >= nowMs ? 1 : 0
       if (aUpcoming !== bUpcoming) return bUpcoming - aUpcoming
       return (
-        Math.abs(left.startTimeMs - nowMs) -
-        Math.abs(right.startTimeMs - nowMs)
+        Math.abs(left.startTimeMs - nowMs) - Math.abs(right.startTimeMs - nowMs)
       )
     })[0]
 
@@ -141,9 +140,7 @@ const TeacherClassOverviewTab = ({
   ])
 
   const resolvedIsLoadingTasks =
-    propIsLoadingTasks !== undefined
-      ? propIsLoadingTasks
-      : internalLoadingTasks
+    propIsLoadingTasks !== undefined ? propIsLoadingTasks : internalLoadingTasks
 
   const handleTaskAction = (task) => {
     if (propOnTaskAction) {
@@ -205,7 +202,7 @@ const TeacherClassOverviewTab = ({
                 )
               }
             }}
-            onViewAll={() => navigate("/workspace/courses/schedule")}
+            onViewAll={() => navigate("/workspace/my-calendar")}
           />
         </div>
 
