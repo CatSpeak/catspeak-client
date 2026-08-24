@@ -43,7 +43,10 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
         <div className='flex flex-col space-y-3 flex-1 min-w-0'>
           <h1 className="text-[28px] font-semibold text-[#1A1A1A] line-clamp-2">{title}</h1>
 
-          <div className="flex items-center gap-3 md:hidden w-full">
+          <div
+            className="flex items-center gap-3 md:hidden w-full"
+            onClick={() => navigate(`/profile/${classData?.teacherId || classData?.teacher?.accountId}`)}
+          >
             <Avatar
               src={avatarUrl}
               name={instructorName}
@@ -65,7 +68,7 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
 
             <div className="flex items-center gap-2">
               <MonitorPlay size={16} />
-              <span className="font-bold text-[#1A1A1A]">{t.courses?.nextSession || "Buổi học tiếp theo"}</span>
+              <span className="font-bold text-[#1A1A1A]">{t.courses?.courseDetail?.upcomingSession || "Buổi học tiếp theo"}</span>
             </div>
             <div className='max-w-xs'>
               <CountdownTicker targetDate={rawNs.rawStartTime} />
