@@ -1,17 +1,15 @@
 import React, { } from "react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useTimezone } from "@/shared/hooks/useTimezone";
 
 import Avatar from "@/shared/components/ui/Avatar";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import Modal from "@/shared/components/ui/Modal";
 import { MessageSquare } from "lucide-react";
 
-dayjs.extend(relativeTime);
-
 const PassConfirmationModal = ({ open, story, onConnect, onReport, onClose }) => {
   const { t } = useLanguage();
+  const { formatRelative } = useTimezone();
   // const [confirmPass, setConfirmPass] = useState(false);
 
   const handleClose = () => {
@@ -50,32 +48,49 @@ const PassConfirmationModal = ({ open, story, onConnect, onReport, onClose }) =>
       open={open}
       onClose={handleClose}
       title={t.catSpeak?.story || "Story"}
-      bodyClassName="p-4 md:p-6 pt-0 md:pt-0"
+      bodyClassName="px-4 md:px-6"
       className="md:max-w-[525px]"
+      footer={
+        <div className="flex justify-center gap-3 flex-1">
+          <PillButton
+            variant="secondary"
+            onClick={handleReport}
+            className="md:h-12 h-11 w-56"
+          >
+            {/* {confirmPass
+              ? t.catSpeak?.confirm || "Confirm Pass"
+              : t.catSpeak?.pass || "Pass"} */}
+            {t.catSpeak?.report || "Báo cáo"}
+          </PillButton>
+          <PillButton onClick={handleConnect} className="md:h-12 h-11 w-56">
+            {t.catSpeak?.connect || "Connect"}
+          </PillButton>
+        </div>
+      }
     >
-      <div className="md:space-y-6 space-y-4">
+      <div className="space-y-4">
         {/* User Info Header */}
-        <div className="flex items-center gap-3 pr-10">
+        <div className="flex items-center gap-4">
           <Avatar
             src={story.avatarImageUrl}
             name={story.username || t.catSpeak?.anonymous || "Anonymous"}
-            size={44}
+            size={56}
           />
           <div className="flex flex-col">
             <span className="font-semibold text-lg text-[#1a1a1a] truncate">
               {story.username || t.catSpeak?.anonymous || "Anonymous"}
             </span>
-            <div className="flex items-center gap-4 text-sm text-[#9e9e9e] mt-1">
+            <div className="flex items-center gap-4 text-sm text-secondary">
               {/* <span className="flex items-center gap-1">
                 <MessageSquare size={13} className="shrink-0" />
                 {story.commentCount || 0} {t.story?.replies}
               </span> */}
-              <span>{dayjs(story.createDate).fromNow()}</span>
+              <span>{t.story?.posted} {formatRelative(story.createDate)}</span>
             </div>
           </div>
         </div>
 
-        <div className="min-h-[40px] w-full break-words text-base leading-relaxed whitespace-pre-wrap">
+        <div className="w-full break-words text-base whitespace-pre-wrap">
           {story.storyContent}
         </div>
 
@@ -101,22 +116,6 @@ const PassConfirmationModal = ({ open, story, onConnect, onReport, onClose }) =>
             </div>
           </div>
         </div> */}
-
-        <div className="flex justify-center gap-3 flex-1">
-          <PillButton
-            variant="secondary"
-            onClick={handleReport}
-            className="md:h-12 h-11 w-56"
-          >
-            {/* {confirmPass
-              ? t.catSpeak?.confirm || "Confirm Pass"
-              : t.catSpeak?.pass || "Pass"} */}
-            {t.catSpeak?.report || "Báo cáo"}
-          </PillButton>
-          <PillButton onClick={handleConnect} className="md:h-12 h-11 w-56">
-            {t.catSpeak?.connect || "Connect"}
-          </PillButton>
-        </div>
       </div>
     </Modal>
   );

@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import Modal from "@/shared/components/ui/Modal";
 import { MessageSquare } from "lucide-react";
-
-dayjs.extend(relativeTime);
+import { useTimezone } from "@/shared/hooks/useTimezone";
 
 const MyStoryModal = ({ open, story, onClose, onDelete }) => {
   const { t } = useLanguage();
+  const { formatRelative } = useTimezone();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleClose = () => {
@@ -40,20 +38,36 @@ const MyStoryModal = ({ open, story, onClose, onDelete }) => {
       open={open}
       onClose={handleClose}
       title={t.story?.myStory || "My Story"}
-      bodyClassName="p-4 md:p-6 pt-0 md:pt-0"
+      showCloseButton={false}
+      bodyClassName="px-4 md:px-6"
       className="md:max-w-[525px]"
+      footer={
+        <div className="flex justify-center gap-3 flex-1">
+          <PillButton
+            variant="secondary"
+            onClick={handleClose}
+            className="md:h-12 h-11 w-56"
+          >
+            {t.messages?.close || "Close"}
+          </PillButton>
+          <PillButton onClick={handleDelete} className="md:h-12 h-11 w-56">
+            {confirmDelete
+              ? t.story?.confirmDelete || "Confirm Delete"
+              : t.story?.deleteStory || "Delete Story"}
+          </PillButton>
+        </div>
+      }
     >
-      <div className="md:space-y-6 space-y-4">
-        <div className="flex items-center gap-4 text-sm text-[#9e9e9e]">
+      <div className="md:space-y-1 space-y-0">
+        <div className="w-full break-words text-base whitespace-pre-wrap">
+          {story.storyContent}
+        </div>
+        <div className="flex items-center gap-4 text-sm text-secondary">
           {/* <span className="flex items-center gap-1">
             <MessageSquare size={13} className="shrink-0" />
             {story.commentCount || 0} {t.story?.replies}
           </span> */}
-          <span>{dayjs(story.createDate).fromNow()}</span>
-        </div>
-
-        <div className="min-h-[40px] w-full break-words text-base leading-relaxed whitespace-pre-wrap">
-          {story.storyContent}
+          <span>{t.story?.posted || "Posted: "}{formatRelative(story.createDate)}</span>
         </div>
 
         {/* <div className="space-y-4 text-sm">
@@ -76,21 +90,6 @@ const MyStoryModal = ({ open, story, onClose, onDelete }) => {
             </div>
           </div>
         </div> */}
-
-        <div className="flex justify-center gap-3 flex-1">
-          <PillButton
-            variant="secondary"
-            onClick={handleClose}
-            className="md:h-12 h-11 w-56"
-          >
-            {t.messages?.close || "Close"}
-          </PillButton>
-          <PillButton onClick={handleDelete} className="md:h-12 h-11 w-56">
-            {confirmDelete
-              ? t.story?.confirmDelete || "Confirm Delete"
-              : t.story?.deleteStory || "Delete Story"}
-          </PillButton>
-        </div>
       </div>
     </Modal>
   );
