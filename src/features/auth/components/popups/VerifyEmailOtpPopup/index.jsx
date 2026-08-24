@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Edit2, X, RefreshCw } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 import Modal from "@/shared/components/ui/Modal"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import {
@@ -46,12 +47,14 @@ const VerifyEmailOtpPopup = ({
     const otpValue = otp.trim()
     if (!otpValue) {
       setValidationError(
-        authText.validationOtpRequired || "Please enter the OTP!",
+        authText.validationOtpRequired || "Vui lòng nhập mã xác thực OTP",
       )
       return
     }
     if (otpValue.length !== 6) {
-      setValidationError(authText.validationOtpLength || "OTP must be 6 digits")
+      setValidationError(
+        authText.validationOtpLength || "Mã OTP phải có 6 chữ số",
+      )
       return
     }
 
@@ -75,14 +78,14 @@ const VerifyEmailOtpPopup = ({
     try {
       await resendEmailOtp({ email: currentEmail }).unwrap()
       setSuccessMsg(
-        authText.otpResentSuccess || "OTP has been resent successfully",
+        authText.otpResentSuccess || "Mã OTP đã được gửi lại thành công",
       )
     } catch (err) {
       const apiMsg = err?.data?.message
       setApiError(
         apiMsg === "Too many OTP requests. Please try again later."
           ? authText.tooManyOtpRequests
-          : apiMsg || "Failed to resend OTP.",
+          : apiMsg || "Gửi OTP thất bại.",
       )
     }
   }
@@ -112,32 +115,61 @@ const VerifyEmailOtpPopup = ({
       showCloseButton={true}
       className="max-w-lg rounded-none md:rounded-xl md:border md:border-border"
       headerClassName="flex items-center justify-between p-4 sm:p-6 pb-0"
+      title={
+        onSwitchMode ? (
+          <IconButton
+            variant="ghost"
+            size="sm"
+            onClick={() => onSwitchMode("register")}
+            title={authText.back || "Quay lại"}
+          >
+            <ArrowLeft />
+          </IconButton>
+        ) : null
+      }
       bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       footerClassName="p-4 sm:p-6"
-    >
-      <div>
-        {/* Back to register link (optional) */}
-        {onSwitchMode && (
-          <div className="mb-2 flex items-center">
+      footer={
+        <div className="w-full">
+          <PillButton
+            form="verify-email-otp-form"
+            type="submit"
+            loading={isVerifying}
+            disabled={isEditingEmail}
+            className="w-full mb-2"
+          >
+            {isVerifying
+              ? authText.verifying || "Đang xác minh"
+              : authText.verifyOtpButton || "Xác minh OTP"}
+          </PillButton>
+
+          <p className="text-center text-xs text-secondary">
+            <span>{authText.didntReceiveCode || "Không nhận được mã?"}</span>{" "}
             <button
               type="button"
-              onClick={() => onSwitchMode("register")}
-              className="flex items-center text-sm font-semibold text-primary hover:underline transition-colors"
+              onClick={handleResendOtp}
+              disabled={isResending}
+              className="font-semibold text-primary hover:underline disabled:opacity-50 inline-flex items-center"
             >
-              <ArrowLeft className="mr-1 h-4 w-4" />
-              {authText.back || "Quay lại"}
+              {isResending ? (
+                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+              ) : null}
+              {authText.resendOtp || "Gửi lại OTP"}
             </button>
-          </div>
-        )}
-
-        <h2 className="text-center text-3xl font-bold text-primary mb-2">
+          </p>
+        </div>
+      }
+    >
+      <div>
+        <h2 className="text-center text-3xl font-bold text-primary mb-6">
           {authText.verifyEmailTitle || "Xác minh OTP"}
         </h2>
 
         {!isEditingEmail ? (
           <p className="mb-6 text-center text-sm text-secondary flex flex-col items-center">
             <span>
-              {authText.verifyEmailSubtitle || "Chúng tôi đã gửi mã 6 chữ số đến"}
+              {authText.verifyEmailSubtitle ||
+                "Chúng tôi đã gửi mã 6 chữ số đến"}
             </span>
             <span className="inline-flex items-center gap-1 mt-0.5">
               <strong className="text-primary font-bold">{currentEmail}</strong>
@@ -157,39 +189,44 @@ const VerifyEmailOtpPopup = ({
             </span>
           </p>
         ) : (
-          <div className="mb-6 p-4 bg-gray-50 border border-border rounded-xl">
+          <div className="mb-6 w-full">
             <label className="block text-xs mb-1 text-secondary">
               {authText.newEmailPlaceholder || "Nhập email đúng"}
             </label>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 w-full">
               <TextInput
                 type="email"
                 variant="square"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
-                className="flex-1"
+                containerClassName="flex-1"
+                className="w-full"
               />
               <PillButton
                 type="button"
                 size="sm"
                 onClick={handleUpdateEmail}
                 loading={isResending}
+                className="shrink-0"
               >
                 {authText.updateEmail || "Update"}
               </PillButton>
-              <button
+              <IconButton
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setIsEditingEmail(false)}
-                className="p-2 text-secondary hover:text-primary transition-colors"
+                title={authText.cancel || "Cancel"}
+                className="shrink-0"
               >
-                <X size={20} />
-              </button>
+                <X size={16} />
+              </IconButton>
             </div>
           </div>
         )}
 
-        <form onSubmit={handleVerifyOtp}>
-          <div className="mb-6">
+        <form id="verify-email-otp-form" onSubmit={handleVerifyOtp}>
+          <div className="mb-2">
             <TextInput
               type="text"
               inputMode="numeric"
@@ -209,38 +246,10 @@ const VerifyEmailOtpPopup = ({
           </div>
 
           {successMsg && (
-            <div className="mb-4 rounded-lg bg-green-50 py-3 px-4 text-sm text-green-700">
+            <div className="mt-4 rounded-lg bg-green-50 py-3 px-4 text-sm text-green-700">
               {successMsg}
             </div>
           )}
-
-          <PillButton
-            type="submit"
-            loading={isVerifying}
-            disabled={isEditingEmail}
-            className="w-full mb-4"
-          >
-            {isVerifying
-              ? authText.verifying || "ĐANG XÁC MINH..."
-              : authText.verifyOtpButton || "Xác minh OTP"}
-          </PillButton>
-
-          <p className="text-center text-xs text-secondary">
-            <span>
-              {authText.didntReceiveCode || "Didn't receive the code?"}
-            </span>{" "}
-            <button
-              type="button"
-              onClick={handleResendOtp}
-              disabled={isResending}
-              className="font-semibold text-primary hover:underline disabled:opacity-50 inline-flex items-center"
-            >
-              {isResending ? (
-                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
-              ) : null}
-              {authText.resendOtp || "Resend OTP"}
-            </button>
-          </p>
         </form>
       </div>
     </Modal>
@@ -248,4 +257,3 @@ const VerifyEmailOtpPopup = ({
 }
 
 export default VerifyEmailOtpPopup
-

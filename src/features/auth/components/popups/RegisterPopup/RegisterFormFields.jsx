@@ -70,10 +70,14 @@ const RegisterFormFields = ({
 
   const handleChange = (field) => (e) => {
     const value =
-      e.target.type === "checkbox" ? e.target.checked : e.target.value
-    setFormData({ ...formData, [field]: value })
+      e.target?.type === "checkbox"
+        ? e.target.checked
+        : e?.target
+          ? e.target.value
+          : e
+    setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
-      setErrors({ ...errors, [field]: "" })
+      setErrors((prev) => ({ ...prev, [field]: "" }))
     }
   }
 
@@ -240,7 +244,7 @@ const RegisterFormFields = ({
             placeholder={authText.dateOfBirthPlaceholder}
             value={formData.dateOfBirth}
             onChange={handleChange("dateOfBirth")}
-            error={!!errors.dateOfBirth}
+            error={errors.dateOfBirth}
             helperText={errors.dateOfBirth}
           />
         </div>
@@ -262,7 +266,9 @@ const RegisterFormFields = ({
                 type="button"
                 onClick={toggleDropdown}
                 className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${
-                  errors.preferredLanguage ? "border-red-500" : "border-border"
+                  errors.preferredLanguage
+                    ? "!border-red-500 animate-shake"
+                    : "border-border"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">
@@ -325,7 +331,9 @@ const RegisterFormFields = ({
                 type="button"
                 onClick={toggleDropdown}
                 className={`flex items-center justify-between border rounded-md px-4 h-14 w-full bg-white transition-colors hover:border-primary focus:border-primary ${
-                  errors.country ? "border-red-500" : "border-border"
+                  errors.country
+                    ? "!border-red-500 animate-shake"
+                    : "border-border"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate mr-2">

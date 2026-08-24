@@ -233,7 +233,7 @@ const FormDatePicker = ({
     >
       <div
         className={`h-14 w-full flex items-center justify-between rounded-md border px-4 text-left transition-colors focus-within:border-primary hover:border-primary
-        ${error ? "border-red-500 focus-within:border-red-500" : "border-border"}
+        ${error ? "!border-red-500 focus-within:!border-red-500 animate-shake" : "border-border"}
         ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "bg-white"}`}
         onClick={() => {
           if (!disabled && !isOpen) setIsOpen(true)

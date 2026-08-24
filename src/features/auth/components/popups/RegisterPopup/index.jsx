@@ -37,23 +37,61 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     e.preventDefault()
     setApiError(null)
 
-    // Form validation
+    // Comprehensive client-side form validation
     const localErrors = {}
+    if (!formData.username?.trim()) {
+      localErrors.username =
+        authText.validationUsernameRequired || "Vui lòng nhập tên đăng nhập"
+    }
+
+    if (!formData.email?.trim()) {
+      localErrors.email =
+        authText.validationEmailRequired || "Vui lòng nhập email"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      localErrors.email =
+        authText.validationEmailInvalid || "Vui lòng nhập email hợp lệ"
+    }
+
     if (formData.phoneNumber) {
       if (!validatePhoneInput(formData.phoneNumber, formData.phonePrefix)) {
         localErrors.phoneNumber =
           authText.validationPhoneInvalid ||
-          "Số điện thoại không đúng định dạng"
+          "Số điện thoại không đúng định dạng."
       }
+    }
+
+    if (!formData.dateOfBirth) {
+      localErrors.dateOfBirth =
+        authText.validationDobRequired || "Vui lòng nhập ngày sinh"
+    }
+
+    if (!formData.preferredLanguage) {
+      localErrors.preferredLanguage =
+        authText.validationLanguageRequired || "Vui lòng chọn ngôn ngữ"
+    }
+
+    if (!formData.password) {
+      localErrors.password =
+        authText.validationPasswordRequired || "Vui lòng nhập mật khẩu"
+    } else if (formData.password.length < 6) {
+      localErrors.password =
+        authText.validationPasswordMin || "Mật khẩu phải có ít nhất 6 ký tự"
+    }
+
+    if (!formData.country) {
+      localErrors.country =
+        authText.validationCountryRequired || "Vui lòng chọn quốc gia"
     }
 
     if (!formData.termsAgreement) {
       localErrors.termsAgreement =
-        authText.validationTermsRequired || "Bạn cần đồng ý với điều khoản này"
+        authText.validationTermsRequired ||
+        "Bạn phải đồng ý với điều khoản và chính sách bảo mật"
     }
     if (!formData.policyAgreement) {
       localErrors.policyAgreement =
-        authText.validationPolicyRequired || "Bạn cần đồng ý với chính sách này"
+        authText.validationPolicyRequired ||
+        "Bạn phải đồng ý với chính sách thanh toán và bản quyền"
     }
 
     if (Object.keys(localErrors).length > 0) {
@@ -84,8 +122,9 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
       console.error("Registration failed:", err)
 
       const { fieldErrors, message } = parseRegisterError(err, authText)
-      if (fieldErrors) {
+      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
         setErrors(fieldErrors)
+        setApiError(null)
       } else {
         setApiError(message)
       }
@@ -134,7 +173,7 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
         </div>
       }
     >
-      <form id="register-form" onSubmit={handleSubmit}>
+      <form id="register-form" onSubmit={handleSubmit} noValidate>
         <h2 className="text-center text-3xl font-bold text-primary mb-6">
           {authText.registerTitle}
         </h2>
@@ -153,8 +192,12 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
           errors={errors}
           onChange={(field) => (e) => {
             const value =
-              e.target.type === "checkbox" ? e.target.checked : e.target.value
-            setFormData({ ...formData, [field]: value })
+              e.target?.type === "checkbox"
+                ? e.target.checked
+                : e?.target
+                  ? e.target.value
+                  : e
+            setFormData((prev) => ({ ...prev, [field]: value }))
             if (errors[field]) {
               setErrors((prev) => {
                 const newErrors = { ...prev }

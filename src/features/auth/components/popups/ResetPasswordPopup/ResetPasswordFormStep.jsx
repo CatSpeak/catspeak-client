@@ -3,8 +3,9 @@ import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { useResetPasswordMutation } from "@/store/api/authApi"
+import { parseApiError } from "@/shared/utils/apiError"
 
-const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
+const ResetPasswordFormStep = ({ email, token, onSuccess, onSwitchMode }) => {
   const { t } = useLanguage()
   const authText = t.auth || {}
 
@@ -20,12 +21,12 @@ const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
     if (!value)
       return (
         authText.validationNewPasswordRequired ||
-        "Please input your new password!"
+        "Vui lòng nhập mật khẩu mới"
       )
     if (value.length < 6)
       return (
         authText.validationPasswordMin ||
-        "Password must be at least 6 characters!"
+        "Mật khẩu phải có ít nhất 6 ký tự"
       )
     return ""
   }
@@ -34,11 +35,11 @@ const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
     if (!confirmPass)
       return (
         authText.validationConfirmPasswordRequired ||
-        "Please confirm your password!"
+        "Vui lòng xác nhận mật khẩu"
       )
     if (newPass !== confirmPass)
       return (
-        authText.validationPasswordMatch || "The two passwords do not match!"
+        authText.validationPasswordMatch || "Hai mật khẩu không khớp"
       )
     return ""
   }
@@ -65,19 +66,24 @@ const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
       onSuccess()
     } catch (err) {
       console.error("Reset password failed:", err)
+      const { message } = parseApiError(err)
       setApiError(
-        err?.data?.message ||
+        message ||
           authText.resetPasswordFailed ||
-          "Failed to reset password.",
+          "Đặt lại mật khẩu thất bại.",
       )
     }
   }
 
   return (
     <div>
-      <h2 className="text-center text-3xl font-bold text-primary mb-6">
+      <h2 className="text-center text-3xl font-bold text-primary mb-2">
         {authText.forgotStep3Title || "Đặt mật khẩu mới"}
       </h2>
+      <p className="text-center text-sm text-secondary mb-6">
+        {authText.forgotStep3Subtitle ||
+          "Tạo mật khẩu mạnh cho tài khoản của bạn"}
+      </p>
 
       <form onSubmit={handleResetPassword}>
         <div className="flex flex-col gap-6 mb-6">
@@ -89,13 +95,12 @@ const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
             variant="square"
             type="password"
             autoComplete="new-password"
-            placeholder={
-              authText.newPasswordPlaceholder || "Nhập mật khẩu mới"
-            }
+            placeholder={authText.newPasswordPlaceholder || "Nhập mật khẩu mới"}
             value={newPassword}
             onChange={(e) => {
               setNewPassword(e.target.value)
               setNewPasswordError("")
+              setApiError("")
             }}
             error={newPasswordError}
           />
@@ -109,12 +114,13 @@ const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
             type="password"
             autoComplete="new-password"
             placeholder={
-              authText.confirmPasswordPlaceholder || "Xác nhận lại mật khẩu"
+              authText.confirmPasswordPlaceholder || "Xác nhận mật khẩu mới"
             }
             value={confirmPassword}
             onChange={(e) => {
               setConfirmPassword(e.target.value)
               setConfirmPasswordError("")
+              setApiError("")
             }}
             error={confirmPasswordError}
           />
@@ -126,13 +132,29 @@ const ResetPasswordFormStep = ({ email, token, onSuccess }) => {
           </div>
         )}
 
-        <PillButton type="submit" loading={isResetting} className="w-full">
-          {authText.resetPasswordButton || "Đặt lại mật khẩu"}
+        <PillButton
+          type="submit"
+          loading={isResetting}
+          className="w-full mb-2"
+        >
+          {isResetting
+            ? authText.resetting || "Đang đặt lại mật khẩu"
+            : authText.resetPasswordButton || "Đặt lại mật khẩu"}
         </PillButton>
+
+        <p className="text-center text-xs text-secondary">
+          {authText.haveAccount || "Bạn đã có tài khoản?"}{" "}
+          <button
+            type="button"
+            className="font-semibold text-primary hover:underline"
+            onClick={() => onSwitchMode?.("login")}
+          >
+            {authText.loginLink || "Đăng nhập"}
+          </button>
+        </p>
       </form>
     </div>
   )
 }
 
 export default ResetPasswordFormStep
-
