@@ -1,29 +1,25 @@
-import { useState, useEffect } from "react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { NavLink, useParams } from "react-router-dom";
-import { Globe } from "lucide-react";
+import { useState } from "react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { NavLink, useParams } from "react-router-dom"
+import { Globe } from "lucide-react"
 
 const DesktopNavItem = ({ navKey, path, color, img }) => {
-  const { t } = useLanguage();
-  const { lang } = useParams();
-  const [imgError, setImgError] = useState(false);
+  const { t } = useLanguage()
+  const { lang } = useParams()
+  const [imgError, setImgError] = useState(false)
 
-  useEffect(() => {
-    setImgError(false);
-  }, [img]);
-
-  if (navKey === "cart" || navKey === "connect") return null;
+  if (navKey === "cart" || navKey === "connect") return null
 
   // Determine href based on key
-  let href;
+  let href
   if (navKey === "catSpeak") {
     const currentLang =
-      lang || localStorage.getItem("communityLanguage") || "zh";
-    href = `/${currentLang}/cat-speak/news`;
+      lang || localStorage.getItem("communityLanguage") || "zh"
+    href = `/${currentLang}/cat-speak/news`
   } else if (navKey === "workspace") {
-    href = "/workspace";
+    href = "/workspace"
   } else {
-    href = path || "/";
+    href = path || "/"
   }
 
   return (
@@ -34,6 +30,7 @@ const DesktopNavItem = ({ navKey, path, color, img }) => {
     >
       {img && !imgError ? (
         <img
+          key={img}
           src={img}
           alt=""
           onError={() => setImgError(true)}
@@ -44,8 +41,7 @@ const DesktopNavItem = ({ navKey, path, color, img }) => {
       ) : null}
       <span>{t.nav?.[navKey] || (navKey === "workspace" ? "My Workspace" : navKey)}</span>
     </NavLink>
-  );
-};
+  )
+}
 
-export default DesktopNavItem;
-
+export default DesktopNavItem
