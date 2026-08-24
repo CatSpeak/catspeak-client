@@ -180,6 +180,10 @@ export default {
       payer: "（付款人）",
       totalLearners: "学员总数：",
       addLearnerError: "添加学员时发生错误",
+      friendSuggestions: "好友推荐",
+      selectedFriendsCount: "已选 {{count}} 人",
+      selectFriendsHint: "选择要添加的好友",
+      addSelected: "添加",
 
       // OrderSummary
       orderSummary: "订单摘要",
@@ -199,6 +203,10 @@ export default {
       scheduleConflictDesc: "此课程的时间与您当前注册的课程冲突：",
       confirmEnroll: "继续注册",
       cancel: "取消",
+      removeVoucherTitle: "删除优惠码？",
+      removeVoucherDesc:
+        "确定要删除代码 {{code}} 吗？付款总额将恢复为 {{totalAmount}}，您将失去 {{discountAmount}} 的折扣。",
+      removeVoucherConfirm: "删除优惠码",
 
       // VoucherSection
       searchVoucher: "搜索优惠码...",
@@ -236,6 +244,37 @@ export default {
       categoryExpired: "已过期",
       categoryExhausted: "已用完",
       voucherCountSuffix: "个",
-    }
+    },
+    errorCodes: {
+      COMMON_INTERNAL_SERVER_ERROR: "发生内部服务器错误，请重试。",
+      COMMON_EXTERNAL_SERVICE_ERROR: "发生外部服务错误，请稍后重试。",
+      COMMON_BAD_REQUEST: "无效请求，请检查输入。",
+      COMMON_CONFLICT: "发生冲突，请重试。",
+      PAYMENT_PLAN_NOT_FOUND: "所选的订阅方案已不可用。",
+      PAYMENT_CLASS_NOT_FOUND: "未找到该班级，或该班级已不可用。",
+      PAYMENT_LEARNER_NOT_FOUND: "未找到该邮箱对应的 CatSpeak 账号。",
+      PAYMENT_LEARNER_ALREADY_ENROLLED: "该学员已报名此班级。",
+      PAYMENT_LEARNER_ALREADY_IN_CHECKOUT: "该学员已在结算列表中。",
+      PAYMENT_CLASS_FULL: "抱歉，该班级目前已经满员。",
+      PAYMENT_ENROLLMENT_PERIOD_INACTIVE: "该班级的报名时间尚未开放。",
+      PAYMENT_CLASS_ALREADY_STARTED: "该班级已开课，不再接受报名。",
+      PAYMENT_VOUCHER_UNAVAILABLE: "优惠码 {{code}} 已不可用，已从订单中移除。",
+      PAYMENT_VOUCHER_DISCOUNT_CHANGED: "优惠折扣已变更，请确认您的订单。",
+      PAYMENT_LINK_FAILED: "无法创建付款链接，请重试。",
+      PAYMENT_ALREADY_PAID: "该交易已支付。",
+      PAYMENT_ALREADY_CANCELLED: "该交易已支付，无法取消。",
+      PAYMENT_NOT_FOUND: "未找到付款交易。",
+      PAYMENT_SERVICE_NOT_CONFIGURED: "付款服务暂时不可用。",
+      PAYMENT_INVALID_TYPE: "付款类型无效。",
+      PAYMENT_TRANSACTION_FAILED: "交易失败，请重试。",
+      CLASS_ENROLLMENT_SCHEDULE_CONFLICT: "检测到时间冲突。",
+      CLASS_ENROLLMENT_CLASS_FULL: "该班级目前已经满员。",
+      CLASS_ENROLLMENT_PERIOD_CLOSED: "该班级的报名时间已结束。",
+      CLASS_ENROLLMENT_CLASS_ALREADY_STARTED: "该班级已开始上课。",
+      ACCOUNT_NOT_FOUND: "未找到该邮箱对应的 CatSpeak 账号。",
+      ALREADY_ENROLLED: "该学员已报名此班级。",
+      CLASS_FULL: "抱歉，该班级目前已经满员。",
+      VALIDATION_ERROR: "输入无效，请检查内容。",
+    },
   }
 }

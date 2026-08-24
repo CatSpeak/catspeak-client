@@ -267,6 +267,7 @@ export default {
     english: "英语",
     chinese: "中文",
     vietnamese: "越南语",
+    japanese: "日语",
     speed: "语速",
     speedSlow: "慢",
     speedNormal: "正常",
@@ -513,6 +514,9 @@ export default {
       bannedListDesc: "已被 Host 移出并禁止重新加入房间的成员列表。",
       unban: "解封",
       noBannedMembers: "暂无被封禁成员。",
+      noBannedMembersTitle: "暂无被封禁成员",
+      noBannedMembersDesc:
+        "被 Host 移出房间并禁止重新加入的成员将显示在此处。",
       successUnban: "已成功解封该成员",
       bannedFromRoom: "您的账号已被 Host 禁止加入此房间。",
     },
@@ -737,6 +741,7 @@ export default {
       winner: "获胜者",
       startDateLabel: "起始日期",
       endDateLabel: "结束日期",
+      out: "退出",
     },
     setup: {
       title: "游戏设置",

@@ -23,6 +23,7 @@ export default {
       vietnam: "Việt Nam",
       china: "Trung Quốc",
       english: "Anh",
+      japan: "Nhật Bản",
     },
     languages: {
       vi: "Tiếng Việt",
@@ -156,6 +157,11 @@ export default {
     of: "trên",
     prevPage: "Trang trước",
     nextPage: "Trang tiếp",
+  },
+  errors: {
+    maxActiveRoomsReached:
+      "Bạn đã đạt giới hạn số phòng hoạt động đồng thời. Vui lòng nâng cấp gói hoặc đóng phòng hiện tại.",
+    generalFailed: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
   uploadWidget: {
     uploading: "Đang tiến hành... {{progress}}%",

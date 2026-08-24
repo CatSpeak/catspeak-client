@@ -158,6 +158,11 @@ export default {
     prevPage: "前のページ",
     nextPage: "次のページ",
   },
+  errors: {
+    maxActiveRoomsReached:
+      "同時にアクティブにできるルーム数の上限に達しました。プランをアップグレードするか、既存のルームを閉じてください。",
+    generalFailed: "エラーが発生しました。もう一度お試しください。",
+  },
   uploadWidget: {
     uploading: "実行中... {{progress}}%",
     processing: "処理中... {{progress}}%",

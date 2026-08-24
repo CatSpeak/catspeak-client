@@ -23,6 +23,7 @@ export default {
       vietnam: "越南",
       china: "中国",
       english: "英语",
+      japan: "日本",
     },
     languages: {
       vi: "越南语",

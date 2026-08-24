@@ -840,6 +840,7 @@ export default {
   student: {
     myLearningOverview: {
       registered: "受講中",
+      from: "から",
       completed: "完了",
       cancelled: "キャンセル",
       home: "ホーム",
@@ -1496,8 +1497,11 @@ export default {
     teachingTaskPendingCount: "{{count}}件保留中",
     teachingTaskUrgent: "緊急",
     teachingTaskRequired: "必須",
+    teachingTaskLater: "後で処理",
     teachingTaskGradeQuiz: "クイズを採点",
     teachingTaskGradeAssignment: "課題を採点",
+    submissionNeedToGrade: "採点待ちの提出物",
+    pendingSubmissionCount: "{{count}}件の提出物",
     statusUnknown: "不明",
     previousPage: "前のページ",
     nextPage: "次のページ",

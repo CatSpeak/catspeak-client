@@ -296,6 +296,7 @@ export default {
     english: "English",
     chinese: "Chinese",
     vietnamese: "Vietnamese",
+    japanese: "Japanese",
     speed: "Speaking speed",
     speedSlow: "Slow",
     speedNormal: "Normal",
@@ -551,6 +552,9 @@ export default {
       bannedListDesc: "List of members banned from rejoining the room.",
       unban: "Unban",
       noBannedMembers: "No banned members in this room.",
+      noBannedMembersTitle: "No banned members yet",
+      noBannedMembersDesc:
+        "Members removed from the room and banned from rejoining by the Host will appear here.",
       successUnban: "Unbanned member successfully",
       bannedFromRoom: "Your account has been banned from joining this room by the Host.",
     },
@@ -786,6 +790,7 @@ export default {
       winner: "Winner",
       startDateLabel: "From date",
       endDateLabel: "To date",
+      out: "Exit",
     },
     setup: {
       title: "Game Setup",

@@ -93,6 +93,7 @@ export default {
       searchPlaceholder: "クラスを検索...",
       courseLabel: "コース: ",
       exploreMore: "コースを探索",
+      reviewed: "レビュー済み",
       reviewedLabel: "レビュー済み",
       reviewNow: "今すぐレビュー",
       completedLabel: "完了",

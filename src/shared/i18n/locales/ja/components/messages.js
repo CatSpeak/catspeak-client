@@ -13,4 +13,5 @@ export default {
   image: "画像",
   close: "閉じる",
   conversationNotFound: "会話が見つかりません",
+  seeAllChat: "チャットで全て表示",
 }
