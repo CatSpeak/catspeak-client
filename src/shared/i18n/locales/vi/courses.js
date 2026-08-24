@@ -540,7 +540,7 @@ export default {
     refreshing: "Đang làm mới thông tin lớp học",
     classId: "Mã lớp",
     toastRouting: "Đang định tuyến đến phòng học...",
-    createPost: "Tạo hoạt động",
+    createPost: "Tạo bài",
     cancelClass: "Hủy lớp học",
     inviteFriends: "Mời bạn bè",
     inviteToClass: "Mời tham gia lớp",
@@ -2109,7 +2109,7 @@ export default {
         toastContentRequired: "Vui lòng nhập mô tả bảng tin.",
       },
       section: {
-        createTitle: "Thêm Section",
+        createTitle: "Thêm mục",
         editTitle: "Đổi tên Section",
         sectionName: "Tên mục",
         sectionDesc: "Mô tả mục",
