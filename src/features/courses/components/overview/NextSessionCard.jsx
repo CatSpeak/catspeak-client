@@ -3,12 +3,15 @@ import { Clock, Calendar, ArrowRight } from 'lucide-react'
 import PillButton from '@/shared/components/ui/buttons/PillButton'
 import FluentCard from '@/shared/components/ui/FluentCard'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import CourseStatusPill from '../CourseStatusPill'
+import CourseLanguagePill from '../CourseLanguagePill'
 
 const NextSessionCard = ({
   title,
   time,
   date,
   status,
+  classStatus,
   language,
   onAction,
 }) => {
@@ -19,13 +22,14 @@ const NextSessionCard = ({
     <FluentCard className='space-y-3 text-[#1A1A1A]'>
       {/* Top section: Tags and Status */}
       <div className="flex justify-between items-start w-full">
-        <div className="flex items-center gap-2">
-          {language && (
-            <span className="px-2 py-1 bg-[#F4AB1B] text-[#1A1A1A] text-sm font-semibold rounded-full">
-              {language}
-            </span>
-          )}
-        </div>
+        {language && (
+          <CourseLanguagePill
+            language={language}
+          />
+        )}
+        {classStatus && (
+          <CourseStatusPill status={classStatus} />
+        )}
       </div>
 
       {/* Title */}

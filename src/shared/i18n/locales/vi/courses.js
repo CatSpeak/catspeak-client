@@ -873,6 +873,7 @@ export default {
       enterClass: "Vào lớp",
       enterRoom: "Vào phòng",
       viewClass: "Xem lớp",
+      from: "Từ",
     },
     dashboardTitle: "Khóa học & Học tập của tôi",
     exploreCoursesSubtitle:
