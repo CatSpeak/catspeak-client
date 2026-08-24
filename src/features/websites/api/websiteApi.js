@@ -464,7 +464,7 @@ const resources = [
   {
     id: "on-jlpt",
     lang: "ja",
-    url: "http://onjlpt.com/",
+    url: "https://onjlpt.com/",
   },
 
   // 2. Nền tảng học tổng hợp
