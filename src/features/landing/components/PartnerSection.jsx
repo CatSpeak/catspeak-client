@@ -1,5 +1,6 @@
 import Marquee from "react-fast-marquee"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
+import ScrollReveal, { ScrollItem } from "./ScrollReveal"
 import {
   CulturalRoots,
   EZTalking,
@@ -40,28 +41,32 @@ const PartnerSection = () => {
 
   return (
     <section className="w-full py-16 lg:py-20 bg-white overflow-hidden">
-      <div className="w-full text-center">
-        <h2 className="text-2xl sm:text-3xl font-bold text-[#990011] mb-8 lg:mb-12">
-          {partnerTitle}
-        </h2>
+      <ScrollReveal stagger className="w-full text-center">
+        <ScrollItem>
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#990011] mb-8 lg:mb-12">
+            {partnerTitle}
+          </h2>
+        </ScrollItem>
 
-        <div className="relative">
-          <Marquee speed={35} gradient={false} pauseOnHover autoFill>
-            {partners.map((partner) => (
-              <div key={partner.alt} className="mx-3 sm:mx-4 lg:mx-5">
-                <div className="w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] md:w-[160px] md:h-[160px] lg:w-[190px] lg:h-[190px] bg-white flex items-center justify-center overflow-hidden">
-                  <img
-                    src={partner.image}
-                    alt={partner.alt}
-                    className="w-full h-full object-contain p-4 sm:p-3"
-                    draggable={false}
-                  />
+        <ScrollItem>
+          <div className="relative">
+            <Marquee speed={35} gradient={false} pauseOnHover autoFill>
+              {partners.map((partner) => (
+                <div key={partner.alt} className="mx-3 sm:mx-4 lg:mx-5">
+                  <div className="w-[110px] h-[110px] sm:w-[140px] sm:h-[140px] md:w-[160px] md:h-[160px] lg:w-[190px] lg:h-[190px] bg-white flex items-center justify-center overflow-hidden">
+                    <img
+                      src={partner.image}
+                      alt={partner.alt}
+                      className="w-full h-full object-contain p-4 sm:p-3"
+                      draggable={false}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </Marquee>
-        </div>
-      </div>
+              ))}
+            </Marquee>
+          </div>
+        </ScrollItem>
+      </ScrollReveal>
     </section>
   )
 }

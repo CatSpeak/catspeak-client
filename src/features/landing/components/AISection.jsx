@@ -7,6 +7,7 @@ import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useNavigate } from "react-router-dom"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import PencilDoodle from "./PencilDoodle"
+import ScrollReveal, { ScrollItem } from "./ScrollReveal"
 
 const AISection = () => {
   const { t } = useLanguage()
@@ -42,50 +43,60 @@ const AISection = () => {
       />
 
       <div ref={contentRef} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-[#990011] px-6 sm:px-10 py-10 sm:py-12 rounded-xl">
-          {/* Left Side - Visual Card */}
-          <div className="relative order-2 lg:order-1">
-            <img
-              src={Map}
-              alt={aiT.imageAlt || "AI Section Card"}
-              className="w-full rounded-xl"
-            />
-          </div>
+        <ScrollReveal stagger>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center bg-[#990011] px-6 sm:px-10 py-10 sm:py-12 rounded-xl">
+            {/* Left Side - Visual Card */}
+            <ScrollItem className="relative order-2 lg:order-1">
+              <img
+                src={Map}
+                alt={aiT.imageAlt || "AI Section Card"}
+                className="w-full rounded-xl"
+              />
+            </ScrollItem>
 
-          {/* Right Side - Content */}
-          <div className="pt-4 order-1 lg:order-2">
-            {/* Sub-header */}
-            <p className="text-sm font-semibold text-[#FFB3AC] mb-2 tracking-wider uppercase">
-              {aiT.header}
-            </p>
+            {/* Right Side - Content */}
+            <div className="pt-4 order-1 lg:order-2">
+              {/* Sub-header */}
+              <ScrollItem>
+                <p className="text-sm font-semibold text-[#FFB3AC] mb-2 tracking-wider uppercase">
+                  {aiT.header}
+                </p>
+              </ScrollItem>
 
-            {/* Main Heading */}
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight">
-              {aiT.mainHeading}
-            </h2>
+              {/* Main Heading */}
+              <ScrollItem>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6 leading-tight">
+                  {aiT.mainHeading}
+                </h2>
+              </ScrollItem>
 
-            {/* Features List */}
-            <ul className="flex flex-col gap-4 mb-8 sm:mb-10">
-              {(aiT.features || []).map((feature, index) => (
-                <li key={index} className="flex items-start gap-3.5">
-                  <Check className="flex-shrink-0 mt-0.5 text-white" />
-                  <span className="text-white leading-relaxed">{feature}</span>
-                </li>
-              ))}
-            </ul>
+              {/* Features List */}
+              <ScrollItem>
+                <ul className="flex flex-col gap-4 mb-8 sm:mb-10">
+                  {(aiT.features || []).map((feature, index) => (
+                    <li key={index} className="flex items-start gap-3.5">
+                      <Check className="flex-shrink-0 mt-0.5 text-white" />
+                      <span className="text-white leading-relaxed">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </ScrollItem>
 
-            {/* CTA Button */}
-            <div className="text-left">
-              <PillButton
-                variant="secondary"
-                onClick={handleAction}
-                className="w-full lg:inline-flex lg:w-auto"
-              >
-                {aiT.learnMore}
-              </PillButton>
+              {/* CTA Button */}
+              <ScrollItem>
+                <div className="text-left">
+                  <PillButton
+                    variant="secondary"
+                    onClick={handleAction}
+                    className="w-full lg:inline-flex lg:w-auto"
+                  >
+                    {aiT.learnMore}
+                  </PillButton>
+                </div>
+              </ScrollItem>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   )

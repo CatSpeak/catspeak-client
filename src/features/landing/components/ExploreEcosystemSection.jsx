@@ -2,13 +2,14 @@ import { useRef } from "react"
 import { Bot, Crown, BookOpen, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PencilDoodle from "./PencilDoodle"
+import ScrollReveal, { ScrollItem } from "./ScrollReveal"
 
 const ECOSYSTEM_CONFIGS = [
   {
     key: "ai",
     icon: Bot,
     cardClass:
-      "bg-[#F4EEFF]/75 backdrop-blur-md border border-purple-200/60 shadow-sm hover:shadow-md transition-all",
+      "bg-[#F4EEFF]/75 backdrop-blur-md border border-purple-200/60 shadow-sm",
     accentBgClass: "bg-[#DDD6FE]/80",
     iconColorClass: "text-[#7C3AED]",
     accentTextColorClass: "text-[#6D28D9]",
@@ -21,7 +22,7 @@ const ECOSYSTEM_CONFIGS = [
     key: "gamification",
     icon: Crown,
     cardClass:
-      "bg-[#FEFCE8]/75 backdrop-blur-md border border-yellow-200/60 shadow-sm hover:shadow-md transition-all",
+      "bg-[#FEFCE8]/75 backdrop-blur-md border border-yellow-200/60 shadow-sm",
     accentBgClass: "bg-[#FEF08A]/80",
     iconColorClass: "text-[#CA8A04]",
     accentTextColorClass: "text-[#A16207]",
@@ -34,7 +35,7 @@ const ECOSYSTEM_CONFIGS = [
     key: "resources",
     icon: BookOpen,
     cardClass:
-      "bg-[#F0FDF4]/75 backdrop-blur-md border border-emerald-200/60 shadow-sm hover:shadow-md transition-all",
+      "bg-[#F0FDF4]/75 backdrop-blur-md border border-emerald-200/60 shadow-sm",
     accentBgClass: "bg-[#BBF7D0]/80",
     iconColorClass: "text-[#16A34A]",
     accentTextColorClass: "text-[#15803D]",
@@ -47,7 +48,7 @@ const ECOSYSTEM_CONFIGS = [
     key: "community",
     icon: Users,
     cardClass:
-      "bg-[#FDF2F8]/75 backdrop-blur-md border border-pink-200/60 shadow-sm hover:shadow-md transition-all",
+      "bg-[#FDF2F8]/75 backdrop-blur-md border border-pink-200/60 shadow-sm",
     accentBgClass: "bg-[#FBCFE8]/80",
     iconColorClass: "text-[#DB2777]",
     accentTextColorClass: "text-[#BE185D]",
@@ -79,71 +80,80 @@ const ExploreEcosystemSection = () => {
       />
 
       <div ref={contentRef} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
-        {/* Top Layered Speech Bubbles Cluster */}
-        <div className="relative w-[370px] h-[120px] mx-auto mb-8 select-none">
-          {/* Bubble 1: Top Left (Soft Pink Fill, Overlaps Bubble 2) */}
-          <div className="absolute top-0 left-0 z-20 bg-[#FEECEF] text-[#800A08] font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
-            {bubblesT.naturalCommunication || "Giao tiếp tự nhiên"}
-          </div>
-
-          {/* Bubble 2: Middle Right (Red Outline, Underneath 1 & 3) */}
-          <div className="absolute top-[18px] left-[140px] z-10 bg-white border-2 border-[#910B09] text-[#800A08] font-bold text-sm sm:text-base pl-8 pr-6 sm:pl-9 sm:pr-7 py-2.5 sm:py-3 rounded-[22px] rounded-tr-[36px] rounded-l-[8px] whitespace-nowrap">
-            {bubblesT.communityCommunication || "Giao tiếp cộng đồng"}
-          </div>
-
-          {/* Bubble 3: Bottom Center/Left (Soft Cream Fill, Overlaps Bubble 2) */}
-          <div className="absolute top-[64px] left-[35px] z-30 bg-[#FFF8E7] text-[#800A08] font-bold text-sm sm:text-base px-6 sm:px-7 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
-            {bubblesT.realtimePractice || "Thực Hành Real-time"}
-          </div>
-        </div>
-
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
-            {ecoT.title || "Khám phá hệ sinh thái học tập"}
-          </h2>
-          <p className="text-gray-600 text-base sm:text-lg mt-4 leading-relaxed">
-            {ecoT.subtitle ||
-              "Kết nối tri thức, tối ưu lộ trình và phát triển ngôn ngữ bền vững."}
-          </p>
-        </div>
-
-        {/* 4 Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {ECOSYSTEM_CONFIGS.map((config) => {
-            const Icon = config.icon
-            const feature = featuresT[config.key] || {}
-            const badge = feature.badge || config.defaultBadge
-            const title = feature.title || config.defaultTitle
-            const description = feature.description || config.defaultDesc
-
-            return (
-              <div
-                key={config.key}
-                className={`rounded-xl p-4 sm:p-6 flex flex-col justify-between ${config.cardClass}`}
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-inner ${config.accentBgClass} ${config.iconColorClass}`}
-                    >
-                      <Icon />
-                    </div>
-
-                    <span
-                      className={`text-xs font-bold px-3 py-1 rounded-full ${config.accentBgClass} ${config.accentTextColorClass}`}
-                    >
-                      {badge}
-                    </span>
-                  </div>
-
-                  <h3 className="text-2xl font-bold mt-6 mb-2">{title}</h3>
-                  <p className="text-secondary">{description}</p>
-                </div>
+        <ScrollReveal stagger staggerDelay={0.09}>
+          {/* Top Layered Speech Bubbles Cluster */}
+          <ScrollItem>
+            <div className="relative w-[370px] h-[120px] mx-auto mb-8 select-none">
+              {/* Bubble 1: Top Left (Soft Pink Fill, Overlaps Bubble 2) */}
+              <div className="absolute top-0 left-0 z-20 bg-[#FEECEF] text-[#800A08] font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
+                {bubblesT.naturalCommunication || "Giao tiếp tự nhiên"}
               </div>
-            )
-          })}
-        </div>
+
+              {/* Bubble 2: Middle Right (Red Outline, Underneath 1 & 3) */}
+              <div className="absolute top-[18px] left-[140px] z-10 bg-white border-2 border-[#910B09] text-[#800A08] font-bold text-sm sm:text-base pl-8 pr-6 sm:pl-9 sm:pr-7 py-2.5 sm:py-3 rounded-[22px] rounded-tr-[36px] rounded-l-[8px] whitespace-nowrap">
+                {bubblesT.communityCommunication || "Giao tiếp cộng đồng"}
+              </div>
+
+              {/* Bubble 3: Bottom Center/Left (Soft Cream Fill, Overlaps Bubble 2) */}
+              <div className="absolute top-[64px] left-[35px] z-30 bg-[#FFF8E7] text-[#800A08] font-bold text-sm sm:text-base px-6 sm:px-7 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
+                {bubblesT.realtimePractice || "Thực Hành Real-time"}
+              </div>
+            </div>
+          </ScrollItem>
+
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <ScrollItem>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
+                {ecoT.title || "Khám phá hệ sinh thái học tập"}
+              </h2>
+            </ScrollItem>
+            <ScrollItem>
+              <p className="text-gray-600 text-base sm:text-lg mt-4 leading-relaxed">
+                {ecoT.subtitle ||
+                  "Kết nối tri thức, tối ưu lộ trình và phát triển ngôn ngữ bền vững."}
+              </p>
+            </ScrollItem>
+          </div>
+
+          {/* 4 Feature Cards Grid — Sequential Reveal */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {ECOSYSTEM_CONFIGS.map((config) => {
+              const Icon = config.icon
+              const feature = featuresT[config.key] || {}
+              const badge = feature.badge || config.defaultBadge
+              const title = feature.title || config.defaultTitle
+              const description = feature.description || config.defaultDesc
+
+              return (
+                <ScrollItem key={config.key}>
+                  <div
+                    className={`rounded-xl p-4 sm:p-6 flex flex-col justify-between h-full ${config.cardClass}`}
+                  >
+                    <div>
+                      <div className="flex items-start justify-between">
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-inner ${config.accentBgClass} ${config.iconColorClass}`}
+                        >
+                          <Icon />
+                        </div>
+
+                        <span
+                          className={`text-xs font-bold px-3 py-1 rounded-full ${config.accentBgClass} ${config.accentTextColorClass}`}
+                        >
+                          {badge}
+                        </span>
+                      </div>
+
+                      <h3 className="text-2xl font-bold mt-6 mb-2">{title}</h3>
+                      <p className="text-secondary">{description}</p>
+                    </div>
+                  </div>
+                </ScrollItem>
+              )
+            })}
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   )

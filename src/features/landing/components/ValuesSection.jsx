@@ -3,6 +3,7 @@ import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { Play, Users, Bot, MessageCircle, Sparkles } from "lucide-react"
 import ValueCard from "./ValueCard"
 import PencilDoodle from "./PencilDoodle"
+import ScrollReveal, { ScrollItem } from "./ScrollReveal"
 
 const ValuesSection = () => {
   const { t } = useLanguage()
@@ -118,81 +119,100 @@ const ValuesSection = () => {
         ref={contentRef}
         className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6"
       >
-        {/* Header */}
-        <div className="mb-12 sm:mb-16 flex flex-col items-center justify-center space-y-3 text-center max-w-3xl mx-auto">
-          <span className="text-sm font-semibold text-secondary tracking-wider uppercase">
-            {whyChooseUs}
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#910B09] tracking-tight leading-tight">
-            {valuesTitle}
-          </h2>
-        </div>
-
-        {/* Playful Butterfly Wings Constellation Layout (Desktop) */}
-        <div className="hidden lg:grid grid-cols-12 gap-8 items-center min-h-[580px]">
-          {/* Left Wing (Cards 1 & 2) */}
-          <div className="col-span-4 flex flex-col gap-10">
-            <ValueCard
-              icon={valueMap.practice.icon}
-              title={valueMap.practice.title}
-              description={valueMap.practice.description}
-              color={valueMap.practice.color}
-              className="lg:-translate-x-2"
-            />
-            <ValueCard
-              icon={valueMap.community.icon}
-              title={valueMap.community.title}
-              description={valueMap.community.description}
-              color={valueMap.community.color}
-              className="lg:translate-x-4"
-            />
+        <ScrollReveal stagger staggerDelay={0.09}>
+          {/* Header */}
+          <div className="mb-12 sm:mb-16 flex flex-col items-center justify-center space-y-3 text-center max-w-3xl mx-auto">
+            <ScrollItem>
+              <span className="text-sm font-semibold text-secondary tracking-wider uppercase">
+                {whyChooseUs}
+              </span>
+            </ScrollItem>
+            <ScrollItem>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#910B09] tracking-tight leading-tight">
+                {valuesTitle}
+              </h2>
+            </ScrollItem>
           </div>
 
-          {/* Center Hub: Elevated AI Support (Card 3) */}
-          <div className="col-span-4 flex flex-col items-center justify-center lg:-translate-y-4">
-            <ValueCard
-              icon={valueMap.aiSupport.icon}
-              title={valueMap.aiSupport.title}
-              description={valueMap.aiSupport.description}
-              color={valueMap.aiSupport.color}
-              className="w-full"
-            />
+          {/* Playful Butterfly Wings Constellation Layout (Desktop) */}
+          <div className="hidden lg:grid grid-cols-12 gap-8 items-center min-h-[580px]">
+            {/* Left Wing (Cards 1 & 2) */}
+            <div className="col-span-4 flex flex-col gap-10">
+              <ScrollItem>
+                <ValueCard
+                  icon={valueMap.practice.icon}
+                  title={valueMap.practice.title}
+                  description={valueMap.practice.description}
+                  color={valueMap.practice.color}
+                  className="lg:-translate-x-2"
+                />
+              </ScrollItem>
+              <ScrollItem>
+                <ValueCard
+                  icon={valueMap.community.icon}
+                  title={valueMap.community.title}
+                  description={valueMap.community.description}
+                  color={valueMap.community.color}
+                  className="lg:translate-x-4"
+                />
+              </ScrollItem>
+            </div>
+
+            {/* Center Hub: Elevated AI Support (Card 3) */}
+            <div className="col-span-4 flex flex-col items-center justify-center lg:-translate-y-4">
+              <ScrollItem className="w-full">
+                <ValueCard
+                  icon={valueMap.aiSupport.icon}
+                  title={valueMap.aiSupport.title}
+                  description={valueMap.aiSupport.description}
+                  color={valueMap.aiSupport.color}
+                  className="w-full"
+                />
+              </ScrollItem>
+            </div>
+
+            {/* Right Wing (Cards 4 & 5) */}
+            <div className="col-span-4 flex flex-col gap-10">
+              <ScrollItem>
+                <ValueCard
+                  icon={valueMap.reallife.icon}
+                  title={valueMap.reallife.title}
+                  description={valueMap.reallife.description}
+                  color={valueMap.reallife.color}
+                  className="lg:translate-x-2"
+                />
+              </ScrollItem>
+              <ScrollItem>
+                <ValueCard
+                  icon={valueMap.networking.icon}
+                  title={valueMap.networking.title}
+                  description={valueMap.networking.description}
+                  color={valueMap.networking.color}
+                  className="lg:-translate-x-4"
+                />
+              </ScrollItem>
+            </div>
           </div>
 
-          {/* Right Wing (Cards 4 & 5) */}
-          <div className="col-span-4 flex flex-col gap-10">
-            <ValueCard
-              icon={valueMap.reallife.icon}
-              title={valueMap.reallife.title}
-              description={valueMap.reallife.description}
-              color={valueMap.reallife.color}
-              className="lg:translate-x-2"
-            />
-            <ValueCard
-              icon={valueMap.networking.icon}
-              title={valueMap.networking.title}
-              description={valueMap.networking.description}
-              color={valueMap.networking.color}
-              className="lg:-translate-x-4"
-            />
+          {/* Mobile / Tablet Responsive Stagger (< lg) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden">
+            {valueList.map((item, idx) => (
+              <ScrollItem
+                key={item.key}
+                className={
+                  idx === 4 ? "sm:col-span-2 sm:max-w-md sm:mx-auto" : ""
+                }
+              >
+                <ValueCard
+                  icon={item.icon}
+                  title={item.title}
+                  description={item.description}
+                  color={item.color}
+                />
+              </ScrollItem>
+            ))}
           </div>
-        </div>
-
-        {/* Mobile / Tablet Responsive Stagger (< lg) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden">
-          {valueList.map((item, idx) => (
-            <ValueCard
-              key={item.key}
-              icon={item.icon}
-              title={item.title}
-              description={item.description}
-              color={item.color}
-              className={
-                idx === 4 ? "sm:col-span-2 sm:max-w-md sm:mx-auto" : ""
-              }
-            />
-          ))}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   )

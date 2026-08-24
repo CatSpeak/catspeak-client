@@ -2,6 +2,7 @@ import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useRef } from "react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
+import ScrollReveal, { ScrollItem } from "./ScrollReveal"
 
 const AvatarPlaceholder = ({ name, color }) => {
   const initials = name
@@ -40,40 +41,46 @@ const ResponseSection = () => {
 
   return (
     <section className="relative w-full py-16 sm:py-20 lg:py-24 overflow-hidden">
-      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start px-4 sm:px-6">
+      <ScrollReveal stagger className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start px-4 sm:px-6">
         {/* Left: Title + Navigation */}
         <div className="lg:col-span-4 lg:pr-2">
-          <h2 className="text-4xl font-black text-[#990011] mb-2 leading-none">
-            {respT.title || "Phản hồi"}
-          </h2>
-          <p className="text-secondary leading-relaxed mb-8">
-            {respT.subtitle}
-          </p>
+          <ScrollItem>
+            <h2 className="text-4xl font-black text-[#990011] mb-2 leading-none">
+              {respT.title || "Phản hồi"}
+            </h2>
+          </ScrollItem>
+          <ScrollItem>
+            <p className="text-secondary leading-relaxed mb-8">
+              {respT.subtitle}
+            </p>
+          </ScrollItem>
 
-          <div className="hidden lg:flex gap-2">
-            <IconButton
-              onClick={() => handleScroll("left")}
-              variant="cathOutline"
-              size="sm"
-              className="cursor-pointer"
-              aria-label={respT.prevReview || "Previous review"}
-            >
-              <ChevronLeft />
-            </IconButton>
-            <IconButton
-              onClick={() => handleScroll("right")}
-              variant="cathOutline"
-              size="sm"
-              className="cursor-pointer"
-              aria-label={respT.nextReview || "Next review"}
-            >
-              <ChevronRight />
-            </IconButton>
-          </div>
+          <ScrollItem>
+            <div className="hidden lg:flex gap-2">
+              <IconButton
+                onClick={() => handleScroll("left")}
+                variant="cathOutline"
+                size="sm"
+                className="cursor-pointer"
+                aria-label={respT.prevReview || "Previous review"}
+              >
+                <ChevronLeft />
+              </IconButton>
+              <IconButton
+                onClick={() => handleScroll("right")}
+                variant="cathOutline"
+                size="sm"
+                className="cursor-pointer"
+                aria-label={respT.nextReview || "Next review"}
+              >
+                <ChevronRight />
+              </IconButton>
+            </div>
+          </ScrollItem>
         </div>
 
         {/* Right: Native scrollable cards extending off-screen to the right on desktop and mobile */}
-        <div className="lg:col-span-8 -mx-4 sm:-mx-6 lg:mx-0 lg:-mr-6 xl:-mr-[calc((100vw-1280px)/2+24px)] 2xl:-mr-[calc((100vw-1280px)/2+24px)] overflow-hidden">
+        <ScrollItem className="lg:col-span-8 -mx-4 sm:-mx-6 lg:mx-0 lg:-mr-6 xl:-mr-[calc((100vw-1280px)/2+24px)] 2xl:-mr-[calc((100vw-1280px)/2+24px)] overflow-hidden">
           <div
             ref={scrollRef}
             className="flex gap-6 overflow-x-auto scrollbar-none scroll-smooth py-3 px-4 sm:px-6 md:px-8 lg:px-1 snap-x snap-mandatory scroll-pl-4 sm:scroll-pl-6 md:scroll-pl-8 lg:scroll-pl-1"
@@ -100,8 +107,8 @@ const ResponseSection = () => {
               </div>
             ))}
           </div>
-        </div>
-      </div>
+        </ScrollItem>
+      </ScrollReveal>
     </section>
   )
 }

@@ -1,5 +1,6 @@
 import { Users, Award, Heart, BookOpen } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import AnimatedCounter from "./AnimatedCounter"
 
 const NumbersSection = () => {
   const { t } = useLanguage()
@@ -7,25 +8,29 @@ const NumbersSection = () => {
 
   const numbersData = [
     {
-      value: "50.000+",
+      numericValue: 50000,
+      suffix: "+",
       label: numbersT.participants || "Học viên đồng hành",
       icon: Users,
       sub: numbersT.participantsSub || "Trên toàn thế giới",
     },
     {
-      value: "500+",
+      numericValue: 500,
+      suffix: "+",
       label: numbersT.instructors || "Giảng viên chất lượng",
       icon: Award,
       sub: numbersT.instructorsSub || "Đạt chuẩn quốc tế",
     },
     {
-      value: "98%",
+      numericValue: 98,
+      suffix: "%",
       label: numbersT.satisfaction || "Tỷ lệ hài lòng",
       icon: Heart,
       sub: numbersT.satisfactionSub || "Đánh giá 5 sao",
     },
     {
-      value: "100+",
+      numericValue: 100,
+      suffix: "+",
       label: numbersT.courses || "Khóa học & Chủ đề",
       icon: BookOpen,
       sub: numbersT.coursesSub || "Đa dạng cấp độ",
@@ -48,7 +53,11 @@ const NumbersSection = () => {
                 <IconComponent size={24} />
               </div>
               <span className="text-3xl sm:text-4xl font-black text-[#910B09] tracking-tight">
-                {item.value}
+                <AnimatedCounter
+                  to={item.numericValue}
+                  suffix={item.suffix}
+                  delay={0.15 + index * 0.1}
+                />
               </span>
               <span className="text-sm font-bold text-gray-800 mt-1">
                 {item.label}
