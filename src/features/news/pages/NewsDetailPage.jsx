@@ -20,6 +20,8 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import { getImageUrl } from "@/shared/utils/imageUtils";
 import FluentCard from "@/shared/components/ui/FluentCard";
 import { Skeleton } from "@/shared/components/ui/indicators";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
+import { useAuth } from "@/features/auth";
 
 const NewsDetailSkeleton = () => (
   <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
@@ -107,6 +109,9 @@ const NewsDetailSkeleton = () => (
 
 const NewsDetailPage = () => {
   const { lang: paramLang, slug } = useParams();
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
+
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const lang = paramLang || language || "vi";
@@ -168,9 +173,19 @@ const NewsDetailPage = () => {
   const [reactToPost] = useReactToPostMutation();
   const newsItem = data?.data ?? data ?? null;
   const handleReact = (type) => {
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+
     if (!newsItem?.postId) return;
-    reactToPost({ postId: newsItem.postId, type });
+
+    reactToPost({
+      postId: newsItem.postId,
+      type,
+    });
   };
+
   const [sharePost] = useSharePostMutation();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");

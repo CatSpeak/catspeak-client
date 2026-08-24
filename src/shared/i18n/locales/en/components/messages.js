@@ -13,4 +13,5 @@ export default {
   image: "Image",
   close: "Close",
   conversationNotFound: "Conversation not found",
+  seeAllChat: "See all in Chat",
 }
