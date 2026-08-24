@@ -5,6 +5,11 @@ export default {
   interested: "興味を送信しました！メッセージを確認してください。",
   hidden: "ストーリーを非表示にしました。",
   interactionFailed: "操作に失敗しました。",
+  report: "報告",
+  reportSuccess: "報告しました",
+  reportFailed: "報告に失敗しました",
+  storyNotFound: "ストーリーが見つかりません",
+  cannotReportOwn: "自分のストーリーは報告できません",
   passConfirmationTitle: "スキップの確認",
   inappropriateLanguage:
     "この人は学術的な場で不適切な言葉を使っていますか？",

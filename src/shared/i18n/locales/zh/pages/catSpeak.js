@@ -277,5 +277,7 @@ export default {
     feedback: "发送反馈",
     menu: "菜单",
   },
+  created: "已创建",
+  expiresIn: "即将过期",
   story: "故事",
 };

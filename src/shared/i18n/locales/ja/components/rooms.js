@@ -528,6 +528,9 @@ export default {
       bannedListDesc: "ルームへの再参加を禁止されたメンバーのリスト。",
       unban: "禁止解除",
       noBannedMembers: "このルームには禁止されたメンバーはいません。",
+      noBannedMembersTitle: "禁止されたメンバーはいません",
+      noBannedMembersDesc:
+        "ホストによってルームから退出させられ、再入室を禁止されたメンバーがここに表示されます。",
       successUnban: "メンバーの禁止を解除しました",
       bannedFromRoom:
         "あなたのアカウントはこのルームへの参加をホストによって禁止されました。",
@@ -764,6 +767,7 @@ export default {
       winner: "勝者",
       startDateLabel: "開始日",
       endDateLabel: "終了日",
+      out: "退出",
     },
     setup: {
       title: "ゲーム設定",

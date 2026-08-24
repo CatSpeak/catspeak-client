@@ -145,6 +145,9 @@ export default {
     requiredField: "この項目は必須です",
     selectLanguagesError: "教える言語を選択してください",
     selectLevelError: "各言語の熟達度レベルを選択してください",
+    selectAtLeastOneTag: "少なくとも1つのタグを選択してください",
+    tagsUpdatedSuccess: "タグを更新しました",
+    tagsUpdatedError: "タグの更新に失敗しました",
     certifyError: "規約に同意するにはチェックボックスをオンにしてください。",
     formInvalid: "送信前にすべての必須項目を入力してください。",
     credentialSizeLimit:
