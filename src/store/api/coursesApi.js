@@ -2508,9 +2508,18 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => {
-        const list = Array.isArray(response) ? response : response?.data || []
-        return list
+        if (Array.isArray(response)) return response
+        if (Array.isArray(response?.data)) return response.data
+        if (Array.isArray(response?.items)) return response.items
+        if (Array.isArray(response?.result)) return response.result
+        if (Array.isArray(response?.value)) return response.value
+        if (Array.isArray(response?.data?.items)) return response.data.items
+        if (Array.isArray(response?.data?.tasks)) return response.data.tasks
+        return []
       },
+      providesTags: (result, error, classId) => [
+        { type: "TeachingTasks", id: classId },
+      ],
     }),
 
     getTeacherCourseTeachingTasksCombined: builder.query({
@@ -2519,9 +2528,18 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => {
-        const list = Array.isArray(response) ? response : response?.data || []
-        return list
+        if (Array.isArray(response)) return response
+        if (Array.isArray(response?.data)) return response.data
+        if (Array.isArray(response?.items)) return response.items
+        if (Array.isArray(response?.result)) return response.result
+        if (Array.isArray(response?.value)) return response.value
+        if (Array.isArray(response?.data?.items)) return response.data.items
+        if (Array.isArray(response?.data?.tasks)) return response.data.tasks
+        return []
       },
+      providesTags: (result, error, courseId) => [
+        { type: "TeachingTasks", id: courseId },
+      ],
     }),
 
     getTeacherAllTeachingTasksCombined: builder.query({

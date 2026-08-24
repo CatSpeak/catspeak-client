@@ -351,8 +351,8 @@ const ClassDetailPage = () => {
                 `/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`,
               )
             }
-            onTaskAction={() => navigate("/workspace/courses/schedule")}
-            onViewTasks={() => navigate("/workspace/courses/schedule")}
+            onTaskAction={() => navigate("/workspace/teaching-tasks")}
+            onViewTasks={() => navigate("/workspace/teaching-tasks")}
           />
         )}
 
