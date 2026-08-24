@@ -153,15 +153,17 @@ const PlanCard = ({
       : "0 18px 40px rgba(15, 23, 42, 0.08)";
 
   return (
-    <article
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
       animate={
         isHighlighted
           ? {
-              y: [0, -32, 0, -20, 0, -8, 0],
+              opacity: [0, 1, 1, 1, 1, 1, 1],
+              y: [12, -32, 0, -20, 0, -8, 0],
               scale: [1, 1.05, 0.98, 1.03, 0.99, 1.01, 1],
               rotate: [0, -1.5, 1.5, -1, 1, 0],
             }
-          : { y: 0, scale: 1, rotate: 0 }
+          : { opacity: 1, y: 0, scale: 1, rotate: 0 }
       }
       transition={
         isHighlighted
@@ -171,7 +173,7 @@ const PlanCard = ({
               repeatDelay: 0.15,
               ease: "easeOut",
             }
-          : { duration: 0.5 }
+          : { duration: 0.7, ease: "easeOut" }
       }
       className={`group relative flex h-[680px] max-h-[calc(100dvh-2rem)] min-h-0 flex-col overflow-hidden rounded-xl border bg-white transition-[box-shadow,border-color,background-color] duration-500 ${
         isHighlighted ? "ring-4 ring-cath-red-700/60 shadow-2xl" : ""
@@ -247,62 +249,71 @@ const PlanCard = ({
             <span className="h-px flex-1 bg-gray-100" />
           </div>
 
-          <ul className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto overscroll-contain pr-2">
-            {features.map((feature, index) => {
-              const isString = typeof feature === "string";
-              const isBoolean = !isString && feature.valueType === "boolean";
-              const isFalsy = isBoolean && feature.limitValue === "false";
-              const featureKey = isString
-                ? `${feature}-${index}`
-                : feature.id || index;
+          <div className="-mr-6 min-h-0 flex-1 overflow-y-hidden overscroll-contain  transition-all duration-300 group-hover:overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-transparent group-hover:[scrollbar-width:thin] group-hover:[&::-webkit-scrollbar-thumb]:rounded-full group-hover:[&::-webkit-scrollbar-thumb]:bg-black/15 sm:-mr-7">
+            <ul className="flex min-h-full flex-col gap-3.5 pr-6 sm:pr-7">
+              {features.map((feature, index) => {
+                const isString = typeof feature === "string";
+                const isBoolean = !isString && feature.valueType === "boolean";
+                const isFalsy = isBoolean && feature.limitValue === "false";
+                const featureKey = isString
+                  ? `${feature}-${index}`
+                  : feature.id || index;
 
-              return (
-                <li
-                  key={featureKey}
-                  className={`grid grid-cols-[20px_1fr] gap-3 text-sm leading-relaxed ${
-                    isFalsy ? "text-gray-400" : "text-gray-700"
-                  }`}
-                >
-                  <span
-                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
-                    style={
-                      isFalsy
-                        ? undefined
-                        : {
-                            color: cardColor,
-                          }
-                    }
-                  >
-                    {isFalsy ? (
-                      <X size={13} strokeWidth={3} />
-                    ) : (
-                      <Check size={13} strokeWidth={3} />
-                    )}
-                  </span>
-
-                  <span
-                    className={`min-w-0 font-semibold ${
-                      isFalsy ? "line-through decoration-gray-300" : ""
+                return (
+                  <motion.li
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: index * 0.06,
+                      ease: "easeOut",
+                    }}
+                    key={featureKey}
+                    className={`grid grid-cols-[20px_1fr] gap-3 text-sm leading-relaxed ${
+                      isFalsy ? "text-gray-400" : "text-gray-700"
                     }`}
                   >
-                    {isString ? (
-                      renderFeatureText(feature, cardColor)
-                    ) : !isBoolean && feature.limitValue ? (
-                      <>
-                        {feature.name}:{" "}
-                        <strong className="font-extrabold text-gray-900">
-                          {feature.limitValue}
-                          {getFeatureSuffix(feature.code, t)}
-                        </strong>
-                      </>
-                    ) : (
-                      feature.name
-                    )}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+                    <span
+                      className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
+                      style={
+                        isFalsy
+                          ? undefined
+                          : {
+                              color: cardColor,
+                            }
+                      }
+                    >
+                      {isFalsy ? (
+                        <X size={13} strokeWidth={3} />
+                      ) : (
+                        <Check size={13} strokeWidth={3} />
+                      )}
+                    </span>
+
+                    <span
+                      className={`min-w-0 font-semibold ${
+                        isFalsy ? "line-through decoration-gray-300" : ""
+                      }`}
+                    >
+                      {isString ? (
+                        renderFeatureText(feature, cardColor)
+                      ) : !isBoolean && feature.limitValue ? (
+                        <>
+                          {feature.name}:{" "}
+                          <strong className="font-extrabold text-gray-900">
+                            {feature.limitValue}
+                            {getFeatureSuffix(feature.code, t)}
+                          </strong>
+                        </>
+                      ) : (
+                        feature.name
+                      )}
+                    </span>
+                  </motion.li>
+                );
+              })}
+            </ul>
+          </div>
         </section>
 
         <footer className="mt-7 shrink-0 border-t border-border pt-5">
@@ -345,7 +356,7 @@ const PlanCard = ({
           )}
         </footer>
       </div>
-    </article>
+    </motion.article>
   );
 };
 
