@@ -120,6 +120,7 @@ const MyLearningOverview = ({ onShowAll }) => {
                 time={timeDisplay}
                 tags={classInfo.levels || []}
                 status={isLive}
+                classStatus={classInfo.status}
                 onAction={() => {
                   if (isLive) {
                     navigate(`/${getClassLanguageCode(classInfo.language) || "en"}/meet/${encodeURIComponent(`class-${classInfo.id}`)}`)
