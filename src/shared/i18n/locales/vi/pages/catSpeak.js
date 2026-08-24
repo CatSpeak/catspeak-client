@@ -2,6 +2,7 @@ export default {
   anonymous: "Ẩn danh",
   connect: "Kết nối",
   pass: "Bỏ qua",
+  report: "Báo cáo",
   interested: "Đã gửi quan tâm! Kiểm tra tin nhắn của bạn.",
   hidden: "Đã ẩn câu chuyện.",
   interactionFailed: "Tương tác thất bại.",
