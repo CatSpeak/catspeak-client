@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink";
