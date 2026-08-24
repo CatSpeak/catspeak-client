@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -10,22 +10,25 @@ import { MessageSquare } from "lucide-react";
 
 dayjs.extend(relativeTime);
 
-const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
+const PassConfirmationModal = ({ open, story, onConnect, onReport, onClose }) => {
   const { t } = useLanguage();
-  const [confirmPass, setConfirmPass] = useState(false);
+  // const [confirmPass, setConfirmPass] = useState(false);
 
   const handleClose = () => {
-    setConfirmPass(false);
+    // setConfirmPass(false);
     onClose();
   };
 
-  const handlePass = () => {
-    if (confirmPass) {
-      onPass(story);
-      handleClose();
-    } else {
-      setConfirmPass(true);
-    }
+  // const handlePass = () => {
+  //   // if (confirmPass) {
+  //   onPass(story);
+  //   handleClose();
+  // };
+
+  const handleReport = () => {
+    // if (confirmPass) {
+    onReport(story);
+    handleClose();
   };
 
   const handleConnect = () => {
@@ -102,12 +105,13 @@ const PassConfirmationModal = ({ open, story, onConnect, onPass, onClose }) => {
         <div className="flex justify-center gap-3 flex-1">
           <PillButton
             variant="secondary"
-            onClick={handlePass}
+            onClick={handleReport}
             className="md:h-12 h-11 w-56"
           >
-            {confirmPass
+            {/* {confirmPass
               ? t.catSpeak?.confirm || "Confirm Pass"
-              : t.catSpeak?.pass || "Pass"}
+              : t.catSpeak?.pass || "Pass"} */}
+            {t.catSpeak?.report || "Báo cáo"}
           </PillButton>
           <PillButton onClick={handleConnect} className="md:h-12 h-11 w-56">
             {t.catSpeak?.connect || "Connect"}
