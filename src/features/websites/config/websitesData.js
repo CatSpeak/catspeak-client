@@ -40,7 +40,7 @@ export const RESOURCE_CATEGORIES = {
     icon: Newspaper,
   },
   exam: {
-    labelEn: "IELTS / HSK Prep",
+    labelEn: "IELTS / HSK / JLPT Prep",
     labelZh: "备考专区",
     icon: BookOpenCheck,
   },
@@ -56,6 +56,25 @@ export const RESOURCE_CATEGORIES = {
   },
   writing: { labelEn: "Hanzi Writing", labelZh: "汉字书写", icon: NotebookPen },
   kids: { labelEn: "For Kids", labelZh: "少儿学习", icon: Baby },
+}
+
+/**
+ * Get total number of websites for a given language and optional category.
+ * If category is not provided (or undefined / "all"), counts all websites for that language.
+ *
+ * @param {"ja" | "zh" | "en"} [lang] - Language code
+ * @param {string} [category] - Optional category key (e.g. "test", "platform", "listening", etc.)
+ * @returns {number} Total count of matching websites
+ */
+export const getWebsiteCount = (lang, category) => {
+  let count = 0
+  websites.forEach((group) => {
+    if (lang && group.lang !== lang) return
+    const groupCategory = group.category || group.key
+    if (category && category !== "all" && groupCategory !== category) return
+    count += group.subItems?.length || 0
+  })
+  return count
 }
 
 export const websites = [
