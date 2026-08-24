@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Calendar, Clock, Users } from "lucide-react";
 
 import CourseStatusPill from "../CourseStatusPill";
+import OverlapAvatar from "@/shared/components/ui/OverlapAvatar";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { getLocalizedLanguageName } from "../../data/courseFormOptions";
+import { getSafeMediaUrl } from "../../utils/courseUtils";
+import { useGetClassDetailQuery } from "@/store/api/coursesApi";
 
 const UpcomingSessionCard = ({
   nextClass,
@@ -17,9 +20,40 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const { formatDateMonth, formatScheduleTime } = useTimezone();
   const ui = t.courses?.workspaceUi || {};
+
+  const targetClassId = nextClass?.id;
+  const { data: classDetail } = useGetClassDetailQuery(targetClassId, {
+    skip: !targetClassId,
+  });
+
+  const mergedClass = classDetail || nextClass;
+
+  const studentCountValue = Number(
+    mergedClass?.studentCount ?? mergedClass?.enrolledStudents,
+  );
+  const studentCount = Number.isFinite(studentCountValue)
+    ? Math.max(0, Math.floor(studentCountValue))
+    : null;
+
+  const students = useMemo(() => {
+    const list = Array.isArray(mergedClass?.students)
+      ? mergedClass.students
+      : Array.isArray(mergedClass?.members)
+        ? mergedClass.members
+        : Array.isArray(mergedClass?.enrollments)
+          ? mergedClass.enrollments
+          : [];
+    return list.map((s) => ({
+      id: s.id ?? s.accountId ?? s.userId,
+      name: s.name ?? s.fullName ?? s.studentName ?? "",
+      avatarUrl:
+        getSafeMediaUrl(s.avatarUrl ?? s.avatar ?? s.avatarImageUrl) ||
+        (s.avatarUrl ?? s.avatar ?? s.avatarImageUrl),
+    }));
+  }, [mergedClass]);
 
   return (
     <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
@@ -57,19 +91,6 @@ const UpcomingSessionCard = ({
                   const schedObj = Array.isArray(nextClass?.schedule)
                     ? nextClass.schedule[0]
                     : nextClass?.schedule;
-                  const rawIsoDate =
-                    ns?.rawStartTime ||
-                    ns?.date ||
-                    (typeof ns?.startTime === "string" &&
-                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
-                      ? ns.startTime
-                      : null) ||
-                    nextClass?.date ||
-                    nextClass?.startDate;
-                  const sessionDate =
-                    typeof rawIsoDate === "string"
-                      ? rawIsoDate.split("T")[0]
-                      : null;
                   const sessionStartTime =
                     schedObj?.startTime ||
                     (typeof ns?.startTime === "string" && !ns.startTime.includes("T") ? ns.startTime : null) ||
@@ -97,9 +118,6 @@ const UpcomingSessionCard = ({
               <span>
                 {(() => {
                   const ns = nextClass?.nextSession;
-                  const schedObj = Array.isArray(nextClass?.schedule)
-                    ? nextClass.schedule[0]
-                    : nextClass?.schedule;
                   const rawIsoDate =
                     ns?.rawStartTime ||
                     ns?.date ||
@@ -121,17 +139,27 @@ const UpcomingSessionCard = ({
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-1.5">
-              <Users size={14} className="text-gray-400" aria-hidden="true" />
-              <span className="text-[11px] font-bold text-gray-400 font-sans">
-                {nextClass.studentCount ?? "—"}
-              </span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              {students.length > 0 ? (
+                <OverlapAvatar users={students} maxShow={3} size={24} />
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <Users
+                    size={16}
+                    className="text-gray-400"
+                    aria-hidden="true"
+                  />
+                  <span className="text-[11px] font-bold text-gray-400 font-sans">
+                    {studentCount ?? "—"}
+                  </span>
+                </div>
+              )}
             </div>
 
             <button
               type="button"
               onClick={onJoin}
-              className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap"
+              className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap cursor-pointer"
             >
               <span>{joinRoomLabel}</span>
               <span>&rarr;</span>
