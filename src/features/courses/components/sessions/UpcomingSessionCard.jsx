@@ -1,13 +1,13 @@
-import React, { useMemo } from "react";
-import { Calendar, Clock, Users } from "lucide-react";
+import React, { useMemo } from "react"
+import { Calendar, Clock, Users } from "lucide-react"
 
-import CourseStatusPill from "../CourseStatusPill";
-import OverlapAvatar from "@/shared/components/ui/OverlapAvatar";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import { useTimezone } from "@/shared/hooks/useTimezone";
-import { getLocalizedLanguageName } from "../../data/courseFormOptions";
-import { getSafeMediaUrl } from "../../utils/courseUtils";
-import { useGetClassDetailQuery } from "@/store/api/coursesApi";
+import CourseStatusPill from "../CourseStatusPill"
+import OverlapAvatar from "@/shared/components/ui/OverlapAvatar"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
+import { getSafeMediaUrl } from "../../utils/courseUtils"
+import { useGetClassDetailQuery } from "@/store/api/coursesApi"
 
 const UpcomingSessionCard = ({
   nextClass,
@@ -20,23 +20,23 @@ const UpcomingSessionCard = ({
   onJoin,
   onViewAll,
 }) => {
-  const { t } = useLanguage();
-  const { formatDateMonth, formatScheduleTime } = useTimezone();
-  const ui = t.courses?.workspaceUi || {};
+  const { t } = useLanguage()
+  const { formatDateMonth, formatScheduleTime } = useTimezone()
+  const ui = t.courses?.workspaceUi || {}
 
-  const targetClassId = nextClass?.id;
+  const targetClassId = nextClass?.id
   const { data: classDetail } = useGetClassDetailQuery(targetClassId, {
     skip: !targetClassId,
-  });
+  })
 
-  const mergedClass = classDetail || nextClass;
+  const mergedClass = classDetail || nextClass
 
   const studentCountValue = Number(
     mergedClass?.studentCount ?? mergedClass?.enrolledStudents,
-  );
+  )
   const studentCount = Number.isFinite(studentCountValue)
     ? Math.max(0, Math.floor(studentCountValue))
-    : null;
+    : null
 
   const students = useMemo(() => {
     const list = Array.isArray(mergedClass?.students)
@@ -45,152 +45,171 @@ const UpcomingSessionCard = ({
         ? mergedClass.members
         : Array.isArray(mergedClass?.enrollments)
           ? mergedClass.enrollments
-          : [];
+          : []
     return list.map((s) => ({
       id: s.id ?? s.accountId ?? s.userId,
       name: s.name ?? s.fullName ?? s.studentName ?? "",
       avatarUrl:
         getSafeMediaUrl(s.avatarUrl ?? s.avatar ?? s.avatarImageUrl) ||
         (s.avatarUrl ?? s.avatar ?? s.avatarImageUrl),
-    }));
-  }, [mergedClass]);
+    }))
+  }, [mergedClass])
 
   return (
-    <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5">
-      <h3 className="text-lg font-black text-gray-950 tracking-tight">
-        {upcomingSessionLabel}
-      </h3>
+    <div
+      className={`bg-white rounded-3xl border border-border shadow-xs flex flex-col justify-between overflow-hidden transition-all ${
+        nextClass ? "hover:shadow-md hover:cursor-pointer hover:bg-gray-50/50" : ""
+      }`}
+      onClick={nextClass ? onJoin : undefined}
+    >
+      <div className="p-6 flex flex-col gap-5">
+        <h3 className="text-lg font-black text-gray-950 tracking-tight">
+          {upcomingSessionLabel}
+        </h3>
 
-      {nextClass ? (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-              {getLocalizedLanguageName(
-                nextClass.language || courseData?.language,
-                t,
-              ) || "—"}
-            </span>
-            <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
-              {nextClass.levels?.[0] || courseData?.levels?.[0] || "—"}
-            </span>
-            {nextClass.status && (
-              <CourseStatusPill status={nextClass.status} className="ml-auto" />
-            )}
-          </div>
-
-          <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-2">
-            {nextClass.title}
-          </h4>
-
-          <div className="flex flex-col gap-2 border-b border-gray-50 pb-4">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Clock size={14} className="text-gray-400" />
-              <span>
-                {(() => {
-                  const ns = nextClass?.nextSession;
-                  const schedObj = Array.isArray(nextClass?.schedule)
-                    ? nextClass.schedule[0]
-                    : nextClass?.schedule;
-                  const sessionStartTime =
-                    schedObj?.startTime ||
-                    (typeof ns?.startTime === "string" && !ns.startTime.includes("T") ? ns.startTime : null) ||
-                    ns?.startTime ||
-                    nextClass?.startTime;
-                  const sessionEndTime =
-                    schedObj?.endTime ||
-                    (typeof ns?.endTime === "string" && !ns.endTime.includes("T") ? ns.endTime : null) ||
-                    ns?.endTime ||
-                    nextClass?.endTime;
-
-                  if (!sessionStartTime) return ui.tba || "TBA";
-                  const startFormatted = formatScheduleTime(sessionStartTime);
-                  const endFormatted = sessionEndTime
-                    ? formatScheduleTime(sessionEndTime)
-                    : "";
-                  return endFormatted
-                    ? `${startFormatted} - ${endFormatted}`
-                    : startFormatted;
-                })()}
+        {nextClass ? (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+                {getLocalizedLanguageName(
+                  nextClass.language || courseData?.language,
+                  t,
+                ) || "—"}
               </span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Calendar size={14} className="text-gray-400" />
-              <span>
-                {(() => {
-                  const ns = nextClass?.nextSession;
-                  const rawIsoDate =
-                    ns?.rawStartTime ||
-                    ns?.date ||
-                    (typeof ns?.startTime === "string" &&
-                    (ns.startTime.includes("T") || ns.startTime.includes("-"))
-                      ? ns.startTime
-                      : null) ||
-                    nextClass?.date ||
-                    nextClass?.startDate;
-                  const sessionDate =
-                    typeof rawIsoDate === "string"
-                      ? rawIsoDate.split("T")[0]
-                      : null;
-
-                  return formatDateMonth(sessionDate, ui.tba);
-                })()}
+              <span className="bg-[#FEF3C7] text-[#D97706] font-bold text-[10px] px-2.5 py-0.5 rounded-full">
+                {nextClass.levels?.[0] || courseData?.levels?.[0] || "—"}
               </span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-1.5 min-w-0">
-              {students.length > 0 ? (
-                <OverlapAvatar users={students} maxShow={3} size={24} />
-              ) : (
-                <div className="flex items-center gap-1.5">
-                  <Users
-                    size={16}
-                    className="text-gray-400"
-                    aria-hidden="true"
-                  />
-                  <span className="text-[11px] font-bold text-gray-400 font-sans">
-                    {studentCount ?? "—"}
-                  </span>
-                </div>
+              {nextClass.status && (
+                <CourseStatusPill status={nextClass.status} className="ml-auto" />
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={onJoin}
-              className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap cursor-pointer"
-            >
-              <span>{joinRoomLabel}</span>
-              <span>&rarr;</span>
-            </button>
+            <h4 className="font-extrabold text-base text-gray-950 leading-snug line-clamp-2">
+              {nextClass.title}
+            </h4>
+
+            <div className="flex flex-col gap-2 border-b border-gray-50 pb-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                <Clock size={14} className="text-gray-400" />
+                <span>
+                  {(() => {
+                    const ns = nextClass?.nextSession
+                    const schedObj = Array.isArray(nextClass?.schedule)
+                      ? nextClass.schedule[0]
+                      : nextClass?.schedule
+                    const sessionStartTime =
+                      schedObj?.startTime ||
+                      (typeof ns?.startTime === "string" &&
+                      !ns.startTime.includes("T")
+                        ? ns.startTime
+                        : null) ||
+                      ns?.startTime ||
+                      nextClass?.startTime
+                    const sessionEndTime =
+                      schedObj?.endTime ||
+                      (typeof ns?.endTime === "string" &&
+                      !ns.endTime.includes("T")
+                        ? ns.endTime
+                        : null) ||
+                      ns?.endTime ||
+                      nextClass?.endTime
+
+                    if (!sessionStartTime) return ui.tba || "TBA"
+                    const startFormatted = formatScheduleTime(sessionStartTime)
+                    const endFormatted = sessionEndTime
+                      ? formatScheduleTime(sessionEndTime)
+                      : ""
+                    return endFormatted
+                      ? `${startFormatted} - ${endFormatted}`
+                      : startFormatted
+                  })()}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                <Calendar size={14} className="text-gray-400" />
+                <span>
+                  {(() => {
+                    const ns = nextClass?.nextSession
+                    const rawIsoDate =
+                      ns?.rawStartTime ||
+                      ns?.date ||
+                      (typeof ns?.startTime === "string" &&
+                      (ns.startTime.includes("T") || ns.startTime.includes("-"))
+                        ? ns.startTime
+                        : null) ||
+                      nextClass?.date ||
+                      nextClass?.startDate
+                    const sessionDate =
+                      typeof rawIsoDate === "string"
+                        ? rawIsoDate.split("T")[0]
+                        : null
+
+                    return formatDateMonth(sessionDate, ui.tba)
+                  })()}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-1.5 min-w-0">
+                {students.length > 0 ? (
+                  <OverlapAvatar users={students} maxShow={3} size={24} />
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <Users
+                      size={16}
+                      className="text-gray-400"
+                      aria-hidden="true"
+                    />
+                    <span className="text-[11px] font-bold text-gray-400 font-sans">
+                      {studentCount ?? "—"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onJoin?.(e)
+                }}
+                className="h-8 px-4 bg-[#b20a1c] hover:bg-[#990011] text-white text-xs font-black rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 whitespace-nowrap cursor-pointer"
+              >
+                <span>{joinRoomLabel}</span>
+                <span>&rarr;</span>
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="bg-[#FCFCFC] border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
-          <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-            <Calendar size={18} />
+        ) : (
+          <div className="bg-[#FCFCFC] border border-border rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[140px]">
+            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+              <Calendar size={18} />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="font-extrabold text-base text-gray-700">
+                {noUpcomingLabel}
+              </span>
+              <p className="text-sm text-gray-400 font-semibold max-w-[200px] leading-relaxed">
+                {createClassToScheduleLabel}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="font-extrabold text-base text-gray-700">
-              {noUpcomingLabel}
-            </span>
-            <p className="text-sm text-gray-400 font-semibold max-w-[200px] leading-relaxed">
-              {createClassToScheduleLabel}
-            </p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <button
         type="button"
-        onClick={onViewAll}
-        className="text-xs font-bold text-gray-400 hover:text-gray-600 hover:underline transition-colors mt-2 text-center"
+        onClick={(e) => {
+          e.stopPropagation()
+          onViewAll?.(e)
+        }}
+        className="w-full py-3.5 px-6 border-t border-border text-xs font-bold text-gray-500 hover:text-[#990011] hover:bg-gray-50 transition-colors text-center cursor-pointer flex items-center justify-center"
       >
         {viewAllLabel}
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default UpcomingSessionCard;
+export default UpcomingSessionCard

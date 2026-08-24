@@ -36,9 +36,11 @@ const CurrentClassesSection = ({
   }
 
   return (
-    <div className={`flex flex-col gap-5 ${className}`}>
-      <div className="flex justify-between items-center">
-        <h3 className="text-xl font-black text-gray-950 tracking-tight">
+    <div
+      className={`bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-5 ${className}`}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <h3 className="text-xl font-bold text-gray-950 tracking-tight">
           {cd.currentClasses || "Current Classes"}
         </h3>
 
@@ -49,23 +51,24 @@ const CurrentClassesSection = ({
               state: { courseId },
             })
           }
-          className="px-4 py-1.5 border border-[#b20a1c] hover:bg-red-50/50 text-[#b20a1c] text-xs font-black rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-sm cursor-pointer"
+          className="px-4 py-1.5 border border-[#b20a1c] hover:bg-red-50/50 text-[#b20a1c] text-xs font-bold rounded-full flex items-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
         >
           <span>{cd.addNewClass || "Add New Class"}</span>
-          <span className="text-sm font-light">+</span>
+          <span className="text-sm font-normal">+</span>
         </button>
       </div>
 
-      {/* Class Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {classes.length > 0 ? (
-          classes.map((cls) => {
+      {/* Class Cards List */}
+      {classes.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {classes.map((cls) => {
             const classKey = cls.id || cls._id
             return (
               <ClassCard
                 key={classKey}
                 cls={cls}
                 isStudent={false}
+                viewMode="grid"
                 onClick={() =>
                   navigate(
                     `/workspace/courses/class/${encodeURIComponent(String(classKey))}`,
@@ -76,25 +79,25 @@ const CurrentClassesSection = ({
                 onShare={handleShareClass}
               />
             )
-          })
-        ) : (
-          /* Empty state card */
-          <div className="bg-[#FCFCFC] border border-border rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[220px] col-span-2">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
-              <Pencil size={24} className="stroke-[1.5]" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <h4 className="font-extrabold text-sm text-gray-800">
-                {cd.noClassesYet || "No classes created yet"}
-              </h4>
-              <p className="text-xs text-gray-400 font-bold max-w-[240px] leading-relaxed">
-                {cd.startByAdding ||
-                  "Start by adding your first class to this course."}
-              </p>
-            </div>
+          })}
+        </div>
+      ) : (
+        /* Empty state card */
+        <div className="text-center py-8 px-4 text-gray-400 text-xs font-medium bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-white shadow-xs border border-gray-100 flex items-center justify-center text-gray-400">
+            <Pencil size={18} className="stroke-[1.8]" />
           </div>
-        )}
-      </div>
+          <div className="flex flex-col gap-0.5">
+            <h4 className="font-bold text-sm text-gray-700">
+              {cd.noClassesYet || "No classes created yet"}
+            </h4>
+            <p className="text-xs text-gray-400 font-medium max-w-[260px] leading-relaxed">
+              {cd.startByAdding ||
+                "Start by adding your first class to this course."}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
