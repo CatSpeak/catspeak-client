@@ -1,0 +1,16 @@
+export default {
+  title: "メッセージ",
+  loading: "読み込み中...",
+  error: "データの読み込みエラー",
+  noMessages: "メッセージはまだありません",
+  search: "検索",
+  placeholder: "Aa",
+  unknownUser: "不明なユーザー",
+  unknown: "?",
+  send: "送信",
+  add: "追加",
+  attach: "添付",
+  image: "画像",
+  close: "閉じる",
+  conversationNotFound: "会話が見つかりません",
+}

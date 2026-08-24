@@ -1,6 +1,7 @@
 import vi from "./locales/vi"
 import en from "./locales/en"
 import zh from "./locales/zh"
+import ja from "./locales/ja"
 
 import { billingTranslations } from "@/features/billing/i18n"
 import { profileTranslations } from "@/features/profile/i18n"
@@ -76,12 +77,26 @@ export const translations = {
     landingTranslations.zh,
     voucherTranslations.zh,
   ),
+  ja: deepMerge(
+    ja,
+    billingTranslations.ja,
+    profileTranslations.ja,
+    chatTranslations.ja,
+    websitesTranslations.ja,
+    newsTranslations.ja,
+    bankAccountsTranslations.ja,
+    refundTranslations.ja,
+    materialsTranslations.ja,
+    landingTranslations.ja,
+    voucherTranslations.ja,
+  ),
 }
 
 export const languageNames = {
   vi: "Tiếng Việt",
   en: "English",
   zh: "中文",
+  ja: "日本語",
 }
 
 // Export default để backward compatibility

@@ -28,6 +28,7 @@ export default {
       vi: "越南语",
       zh: "中文",
       en: "英语",
+      ja: "日语",
     },
   },
   pagination: {
