@@ -18,6 +18,7 @@ export default {
     viNom: "Vietnamese (Nom) - Coming soon",
     zh: "Chinese",
     en: "English",
+    ja: "Japanese",
   },
   countries: {
     vietnam: "Vietnam",
