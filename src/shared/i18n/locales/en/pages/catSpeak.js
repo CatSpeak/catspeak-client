@@ -2,6 +2,7 @@ export default {
   anonymous: "Anonymous",
   connect: "Connect",
   pass: "Pass",
+  report: "Report",
   interested: "Interest sent! Check your messages.",
   hidden: "Story hidden.",
   interactionFailed: "Interaction failed.",

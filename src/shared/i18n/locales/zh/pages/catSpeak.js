@@ -2,6 +2,7 @@ export default {
   anonymous: "匿名",
   connect: "连接",
   pass: "跳过",
+  report: "举报",
   interested: "已发送兴趣！请检查您的消息。",
   hidden: "已隐藏故事。",
   interactionFailed: "互动失败。",
