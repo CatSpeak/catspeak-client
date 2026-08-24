@@ -214,6 +214,7 @@ const CreateClassPage = () => {
     admissionEndHours,
     startDate,
     startDateHours,
+    retentionDays = 10,
     sessions,
     capacity,
     description,
@@ -476,6 +477,8 @@ const CreateClassPage = () => {
         enrollmentStart: toIsoInZone(admissionStart, admissionStartHours || "00:00"),
         enrollmentEnd: toIsoInZone(admissionEnd, admissionEndHours || "00:00"),
         startDate: toIsoInZone(startDate, startDateHours || "00:00"),
+        retentionDays: parseInt(retentionDays, 10) || 7,
+        archiveRetentionDays: parseInt(retentionDays, 10) || 7,
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
@@ -905,68 +908,6 @@ const CreateClassPage = () => {
               </div>
             </div>
 
-            {/* Admission Period & Start Date — 3 inputs on 1 single row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              {/* Col 1: Thời hạn đăng ký (Từ) */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                  {cc.admissionPeriod || "Thời hạn đăng ký"}<span className="text-[#990011]">*</span>
-                </label>
-                <DateTimePicker
-                  dateValue={admissionStart}
-                  timeValue={admissionStartHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("admissionStart", dateStr)
-                    setField("admissionStartHours", timeStr)
-                    clearError("admissionStart")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.admissionStart)}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Col 2: Thời hạn đăng ký (Đến) */}
-              <div className="flex flex-col gap-1">
-                <DateTimePicker
-                  dateValue={admissionEnd}
-                  timeValue={admissionEndHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("admissionEnd", dateStr)
-                    setField("admissionEndHours", timeStr)
-                    clearError("admissionEnd")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.admissionEnd)}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Col 3: Ngày bắt đầu */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                  {cc.startDate} <span className="text-[#990011]">*</span>
-                </label>
-                <DateTimePicker
-                  dateValue={startDate}
-                  timeValue={startDateHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("startDate", dateStr)
-                    setField("startDateHours", timeStr)
-                    clearError("startDate")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.startDate)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-
-
-
             {/* Number of Sessions & Capacity Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Number of Sessions */}
@@ -1145,6 +1086,113 @@ const CreateClassPage = () => {
                       {cc.excludeLateAttendanceOption || "Không tính lần tham dự muộn"}
                     </span>
                   </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 1: Thời gian tuyển sinh (Admission Period) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                {cc.admissionPeriod || "Thời gian tuyển sinh"} <span className="text-[#990011]">*</span>
+              </label>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex-1 min-w-0">
+                  <DateTimePicker
+                    dateValue={admissionStart}
+                    timeValue={admissionStartHours}
+                    onChange={(dateStr, timeStr) => {
+                      setField("admissionStart", dateStr)
+                      setField("admissionStartHours", timeStr)
+                      clearError("admissionStart")
+                    }}
+                    color="#990011"
+                    minDate={isEditMode ? null : today}
+                    error={Boolean(errors.admissionStart)}
+                    className="w-full"
+                  />
+                </div>
+                <span className="text-gray-400 font-bold select-none text-base shrink-0 px-0.5">—</span>
+                <div className="flex-1 min-w-0">
+                  <DateTimePicker
+                    dateValue={admissionEnd}
+                    timeValue={admissionEndHours}
+                    onChange={(dateStr, timeStr) => {
+                      setField("admissionEnd", dateStr)
+                      setField("admissionEndHours", timeStr)
+                      clearError("admissionEnd")
+                    }}
+                    color="#990011"
+                    minDate={isEditMode ? null : today}
+                    error={Boolean(errors.admissionEnd)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: Thời gian bắt đầu & Thời gian lưu trữ lớp sau kết thúc */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
+              {/* Col 1: Thời gian bắt đầu */}
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.startDate || "Thời gian bắt đầu"} <span className="text-[#990011]">*</span>
+                </label>
+                <DateTimePicker
+                  dateValue={startDate}
+                  timeValue={startDateHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("startDate", dateStr)
+                    setField("startDateHours", timeStr)
+                    clearError("startDate")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.startDate)}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Invisible spacer to match the dash in Row 1 */}
+              <span className="hidden sm:flex invisible font-bold select-none text-base shrink-0 px-0.5 pointer-events-none">—</span>
+
+              {/* Col 2: Thời gian lưu trữ lớp sau kết thúc */}
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.retentionPeriod || "Thời gian lưu trữ lớp sau kết thúc"}
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 flex items-center bg-white border border-border hover:border-gray-300 focus-within:border-[#990011] rounded-xl overflow-hidden h-11 transition-all">
+                    <button
+                      type="button"
+                      disabled={(parseInt(retentionDays, 10) || 0) <= 0}
+                      onClick={() => setField("retentionDays", Math.max(0, (parseInt(retentionDays, 10) || 0) - 1))}
+                      className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={retentionDays ?? 10}
+                      onChange={(e) => {
+                        const val = Math.min(10, Math.max(0, parseInt(e.target.value, 10) || 0))
+                        setField("retentionDays", val)
+                      }}
+                      className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={(parseInt(retentionDays, 10) || 0) >= 10}
+                      onClick={() => setField("retentionDays", Math.min(10, (parseInt(retentionDays, 10) || 0) + 1))}
+                      className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700 select-none shrink-0">
+                    {cc.daysUnit || "ngày"}
+                  </span>
                 </div>
               </div>
             </div>

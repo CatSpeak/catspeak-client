@@ -665,6 +665,8 @@ export default {
     level: "Level",
     admissionPeriod: "Admission Period",
     startDate: "Start Date",
+    retentionPeriod: "Class archive retention period",
+    daysUnit: "days",
     numberOfSessions: "Number of Sessions",
     capacity: "Capacity",
     teachingSchedule: "Teaching Schedule",
