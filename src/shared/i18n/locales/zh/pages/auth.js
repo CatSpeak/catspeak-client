@@ -66,6 +66,11 @@ export default {
   paymentPolicy: "支付政策",
   ipPolicy: "知识产权政策",
   languagePlaceholder: "选择您想学习的语言",
+  languages: {
+    chinese: "中文",
+    english: "英语",
+    japanese: "日语",
+  },
   countryPlaceholder: "选择您所在的国家",
   searchCountryPlaceholder: "搜索国家...",
   searchPhonePlaceholder: "搜索电话区号...",

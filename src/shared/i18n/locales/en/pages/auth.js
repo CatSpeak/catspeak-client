@@ -68,6 +68,11 @@ export default {
   paymentPolicy: "Payment Policy",
   ipPolicy: "Intellectual Property Rights",
   languagePlaceholder: "Select language you want to learn",
+  languages: {
+    chinese: "Chinese",
+    english: "English",
+    japanese: "Japanese",
+  },
   countryPlaceholder: "Select country you live in",
   searchCountryPlaceholder: "Search country...",
   searchPhonePlaceholder: "Search phone code...",

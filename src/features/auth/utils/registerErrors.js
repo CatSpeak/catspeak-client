@@ -40,7 +40,7 @@ export const parseRegisterError = (err, authText) => {
     for (const [key, messages] of Object.entries(apiErrors)) {
       // Find field matching key case-insensitively
       const fieldKey = Object.keys(FIELD_MAP).find(
-        (k) => k.toLowerCase() === key.toLowerCase()
+        (k) => k.toLowerCase() === key.toLowerCase(),
       )
       const field = fieldKey ? FIELD_MAP[fieldKey] : null
 
@@ -49,19 +49,31 @@ export const parseRegisterError = (err, authText) => {
         const lowerMsg = firstMessage.toLowerCase()
 
         // Handle 'already exists' specific errors
-        if (field === "email" && lowerMsg.includes("already exists") && authText.emailExists) {
+        if (
+          field === "email" &&
+          lowerMsg.includes("already exists") &&
+          authText.emailExists
+        ) {
           mapped[field] = authText.emailExists
-        } else if (field === "phoneNumber" && lowerMsg.includes("already exists") && authText.phoneExists) {
+        } else if (
+          field === "phoneNumber" &&
+          lowerMsg.includes("already exists") &&
+          authText.phoneExists
+        ) {
           mapped[field] = authText.phoneExists
-        } else if (field === "username" && lowerMsg.includes("already exists") && authText.usernameExists) {
+        } else if (
+          field === "username" &&
+          lowerMsg.includes("already exists") &&
+          authText.usernameExists
+        ) {
           mapped[field] = authText.usernameExists
         } else {
           // Use translated message if available, otherwise fall back to API message
-          const translationKey = fieldKey ? FIELD_TRANSLATION_MAP[fieldKey] : null
+          const translationKey = fieldKey
+            ? FIELD_TRANSLATION_MAP[fieldKey]
+            : null
           mapped[field] =
-            (translationKey && authText[translationKey]) ||
-            firstMessage ||
-            ""
+            (translationKey && authText[translationKey]) || firstMessage || ""
         }
       }
     }
@@ -71,17 +83,24 @@ export const parseRegisterError = (err, authText) => {
   }
 
   // Handle generic message translation for "already exists"
-  let genericMessage = err?.data?.message || err?.data?.title || authText.registrationFailed
-  
+  let genericMessage =
+    err?.data?.message || err?.data?.title || authText.registrationFailed
+
   if (typeof genericMessage === "string") {
     const lowerMsg = genericMessage.toLowerCase()
     if (lowerMsg.includes("already exists") || lowerMsg.includes("taken")) {
       if (lowerMsg.includes("username") && authText.usernameExists) {
-        return { fieldErrors: { username: authText.usernameExists }, message: null }
+        return {
+          fieldErrors: { username: authText.usernameExists },
+          message: null,
+        }
       } else if (lowerMsg.includes("email") && authText.emailExists) {
         return { fieldErrors: { email: authText.emailExists }, message: null }
       } else if (lowerMsg.includes("phone") && authText.phoneExists) {
-        return { fieldErrors: { phoneNumber: authText.phoneExists }, message: null }
+        return {
+          fieldErrors: { phoneNumber: authText.phoneExists },
+          message: null,
+        }
       }
     }
   }
@@ -91,3 +110,42 @@ export const parseRegisterError = (err, authText) => {
     message: genericMessage,
   }
 }
+
+/**
+ * Validates a phone number based on prefix format rules.
+ * Empty values are considered valid because phone numbers are optional.
+ *
+ * @param {string} phoneNumber
+ * @param {string} prefix
+ * @returns {boolean}
+ */
+export const validatePhoneInput = (phoneNumber, prefix) => {
+  if (!phoneNumber) return true
+  const clean = phoneNumber.replace(/[\s\-()/]/g, "")
+  if (!/^[0-9]+$/.test(clean)) return false
+
+  if (prefix === "+84") {
+    return /^(0?[35789]\d{8})$/.test(clean)
+  }
+  if (prefix === "+86") {
+    return /^(1[3-9]\d{9})$/.test(clean)
+  }
+  if (prefix === "+1") {
+    return /^([2-9]\d{9})$/.test(clean)
+  }
+  return clean.length >= 7 && clean.length <= 15
+}
+
+/**
+ * Returns maximum digits allowed based on country phone prefix.
+ *
+ * @param {string} prefix
+ * @returns {number}
+ */
+export const getMaxPhoneLength = (prefix) => {
+  if (prefix === "+84") return 10
+  if (prefix === "+86") return 11
+  if (prefix === "+1") return 10
+  return 15
+}
+

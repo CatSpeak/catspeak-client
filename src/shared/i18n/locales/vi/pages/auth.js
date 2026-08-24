@@ -68,6 +68,11 @@ export default {
   paymentPolicy: "Chính sách thanh toán",
   ipPolicy: "Bản quyền sở hữu trí tuệ",
   languagePlaceholder: "Chọn ngôn ngữ bạn muốn học",
+  languages: {
+    chinese: "Tiếng Trung",
+    english: "Tiếng Anh",
+    japanese: "Tiếng Nhật",
+  },
   countryPlaceholder: "Chọn quốc gia bạn đang sinh sống",
   searchCountryPlaceholder: "Tìm kiếm quốc gia...",
   searchPhonePlaceholder: "Tìm kiếm mã vùng...",

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
-import AuthButton from "../../ui/AuthButton"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { useVerifyResetOtpMutation } from "@/store/api/authApi"
 
@@ -51,51 +51,53 @@ const VerifyOtpStep = ({ email, onSuccess, onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center text-sm font-semibold text-[#990011] transition-colors hover:text-[#7a000d]"
+          className="flex items-center text-sm font-semibold text-primary hover:underline transition-colors"
         >
-          <ArrowLeft className="mr-1 h-4 w-4 " />
+          <ArrowLeft className="mr-1 h-4 w-4" />
           {authText.back || "Quay lại"}
         </button>
       </div>
 
-      <h2 className="mb-1 text-center text-[28px] font-bold text-[#990011]">
+      <h2 className="text-center text-3xl font-bold text-primary mb-2">
         {authText.forgotStep2Title || "Xác minh OTP"}
       </h2>
-      <p className="mb-6 text-center text-sm text-[#7A7574] flex flex-col">
-        {authText.forgotStep2Subtitle || "Chúng tôi đã gửi mã 6 chữ số đến"}{" "}
-        <strong className="text-[#F4AB1B]">{email}</strong>
+      <p className="mb-6 text-center text-sm text-secondary flex flex-col items-center">
+        <span>{authText.forgotStep2Subtitle || "Chúng tôi đã gửi mã 6 chữ số đến"}</span>
+        <strong className="text-primary font-bold">{email}</strong>
       </p>
 
       <form onSubmit={handleVerifyOtp}>
         <div className="mb-6">
           <TextInput
             type="text"
-            variant="round"
+            inputMode="numeric"
+            variant="square"
             placeholder={authText.otpPlaceholder || "Nhập mã OTP 6 chữ số"}
             maxLength={6}
             value={otp}
             onChange={(e) => {
-              const numericValue = e.target.value.replace(/\D/g, "");
-              setOtp(numericValue);
-              setError("");
+              const numericValue = e.target.value.replace(/\D/g, "")
+              setOtp(numericValue)
+              setError("")
             }}
-            className={`text-center text-lg tracking-widest ${error ? "!border-red-600 focus:!border-red-600" : ""}`}
+            className="text-center text-lg tracking-widest"
             error={error}
           />
         </div>
 
-        <AuthButton
+        <PillButton
           type="submit"
-          disabled={isVerifyingOtp}
-          className="w-1/2 rounded-full"
+          loading={isVerifyingOtp}
+          className="w-full"
         >
           {isVerifyingOtp
             ? authText.verifying || "ĐANG XÁC MINH..."
             : authText.verifyOtpButton || "Xác minh OTP"}
-        </AuthButton>
+        </PillButton>
       </form>
     </div>
-  );
+  )
 }
 
 export default VerifyOtpStep
+
