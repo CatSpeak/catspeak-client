@@ -28,6 +28,7 @@ export default {
       vi: "Vietnamese",
       zh: "Chinese",
       en: "English",
+      ja: "Japanese",
     },
   },
   pagination: {
