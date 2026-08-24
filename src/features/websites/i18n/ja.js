@@ -12,7 +12,8 @@ export default {
       zh: "🇨🇳 中文（中国語）",
     },
     search: {
-      placeholder: "ツール、プラットフォーム、試験を検索（例: Quizlet、HSK）...",
+      placeholder:
+        "ツール、プラットフォーム、試験を検索（例: Quizlet、HSK）...",
       clear: "クリア",
     },
     category: {
@@ -25,7 +26,7 @@ export default {
       vocabulary: "語彙",
       pronunciation: "発音",
       news: "ニュース＆記事",
-      exam: "IELTS / HSK対策",
+      exam: "IELTS / HSK / JLPT対策",
       reading: "段階別リーダー",
       dictionary: "辞書",
       writing: "漢字の書き方",

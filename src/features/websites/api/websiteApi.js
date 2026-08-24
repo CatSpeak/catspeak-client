@@ -1,4 +1,5 @@
 import { baseApi } from "@/store/api/baseApi"
+import { getWebsiteCount } from "../config/websitesData"
 
 export const websiteApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -37,6 +38,32 @@ export const websiteApi = baseApi.injectEndpoints({
       },
     }),
 
+    // Get count of websites by lang ("ja" | "zh" | "en") and optional category
+    getWebsiteCount: builder.query({
+      queryFn: (params) => {
+        let lang, category
+        if (typeof params === "object" && params !== null) {
+          lang = params.lang
+          category = params.category
+        } else if (typeof params === "string") {
+          lang = params
+        }
+        const count = getWebsiteCount(lang, category)
+        return { data: count }
+      },
+      providesTags: (result, error, params) => {
+        const lang = typeof params === "object" ? params?.lang : params
+        const category =
+          typeof params === "object" ? params?.category : undefined
+        return [
+          {
+            type: "Website",
+            id: `count-${lang || "all"}-${category || "all"}`,
+          },
+        ]
+      },
+    }),
+
     // Bonus: list resources
     getWebsites: builder.query({
       queryFn: () => {
@@ -47,7 +74,13 @@ export const websiteApi = baseApi.injectEndpoints({
   }),
 })
 
-export const { useGetWebsiteByIdQuery, useGetWebsitesQuery } = websiteApi
+export { getWebsiteCount }
+
+export const {
+  useGetWebsiteByIdQuery,
+  useGetWebsiteCountQuery,
+  useGetWebsitesQuery,
+} = websiteApi
 
 const resources = [
   // 1. Test trình độ tiếng Anh miễn phí
