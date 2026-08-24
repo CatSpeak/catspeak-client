@@ -86,65 +86,69 @@ const MyLearningOverview = () => {
         ]}
       />
 
-      <PageTitle className="text-[#1A1A1A]">
-        {lo.upcomingSessions || "Buổi học sắp diễn ra"}
-      </PageTitle>
+      {joinedClasses.length > 0 && (
+        <>
+          <PageTitle className="text-[#1A1A1A]">
+            {lo.upcomingSessions || "Buổi học sắp diễn ra"}
+          </PageTitle>
 
-      {isSessionsLoading ? (
-        <div className="flex justify-center p-6"><LoadingSpinner /></div>
-      ) : sessions.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {sessions.slice(0, 3).map((session, index) => {
-            const classInfo = session.class || {}
+          {isSessionsLoading ? (
+            <div className="flex justify-center p-6"><LoadingSpinner /></div>
+          ) : sessions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {sessions.slice(0, 3).map((session, index) => {
+                const classInfo = session.class || {}
 
-            const sessionDate = session.date || session.startTime || dateParams.from
-            const formattedDate = formatDate ? formatDate(sessionDate) : sessionDate
+                const sessionDate = session.date || session.startTime || dateParams.from
+                const formattedDate = formatDate ? formatDate(sessionDate) : sessionDate
 
-            const startFormatted = formatScheduleTime && session.rawStartTime
-              ? formatScheduleTime(session.rawStartTime)
-              : session.startTime
+                const startFormatted = formatScheduleTime && session.rawStartTime
+                  ? formatScheduleTime(session.rawStartTime)
+                  : session.startTime
 
-            const endFormatted = formatScheduleTime && session.rawEndTime
-              ? formatScheduleTime(session.rawEndTime)
-              : session.endTime
+                const endFormatted = formatScheduleTime && session.rawEndTime
+                  ? formatScheduleTime(session.rawEndTime)
+                  : session.endTime
 
-            const timeDisplay = startFormatted && endFormatted
-              ? `${startFormatted} - ${endFormatted}`
-              : (lo.noTime || "Chưa có giờ")
+                const timeDisplay = startFormatted && endFormatted
+                  ? `${startFormatted} - ${endFormatted}`
+                  : (lo.noTime || "Chưa có giờ")
 
-            const now = dayjs();
-            const startRaw = dayjs(session.rawStartTime || session.startTime);
-            const endRaw = dayjs(session.rawEndTime || session.endTime);
-            const isLive = now >= startRaw.subtract(15, 'minute') && now <= endRaw;
+                const now = dayjs();
+                const startRaw = dayjs(session.rawStartTime || session.startTime);
+                const endRaw = dayjs(session.rawEndTime || session.endTime);
+                const isLive = now >= startRaw.subtract(15, 'minute') && now <= endRaw;
 
-            return (
-              <NextSessionCard
-                key={session.id || index}
-                title={classInfo.title || classInfo.name || lo.defaultClassTitle || "Lớp học"}
-                language={classInfo.language || "Tiếng Anh"}
-                date={formattedDate}
-                time={timeDisplay}
-                tags={classInfo.levels || []}
-                status={isLive}
-                classStatus={classInfo.status}
-                onAction={() => {
-                  if (isLive) {
-                    navigate(`/${getClassLanguageCode(classInfo.language) || "en"}/meet/${encodeURIComponent(`class-${classInfo.id}`)}`)
-                  } else {
-                    navigate(`/workspace/learning/class/${classInfo.id}`)
-                  }
-                }}
-              />
-            )
-          })}
-        </div>
-      ) : (
-        <div className='col-span-full w-full flex-1'>
-          <EmptyState variant="page"
-            icon={Calendar}
-            iconClassName="w-10 h-10 mb-3 text-gray-300"
-            message={lo.noUpcomingSessions || "Không có lớp học nào sắp diễn ra"} />
-        </div>
+                return (
+                  <NextSessionCard
+                    key={session.id || index}
+                    title={classInfo.title || classInfo.name || lo.defaultClassTitle || "Lớp học"}
+                    language={classInfo.language || "Tiếng Anh"}
+                    date={formattedDate}
+                    time={timeDisplay}
+                    tags={classInfo.levels || []}
+                    status={isLive}
+                    classStatus={classInfo.status}
+                    onAction={() => {
+                      if (isLive) {
+                        navigate(`/${getClassLanguageCode(classInfo.language) || "en"}/meet/${encodeURIComponent(`class-${classInfo.id}`)}`)
+                      } else {
+                        navigate(`/workspace/learning/class/${classInfo.id}`)
+                      }
+                    }}
+                  />
+                )
+              })}
+            </div>
+          ) : (
+            <div className='col-span-full w-full flex-1'>
+              <EmptyState variant="page"
+                icon={Calendar}
+                iconClassName="w-10 h-10 mb-3 text-gray-300"
+                message={lo.noUpcomingSessions || "Không có lớp học nào sắp diễn ra"} />
+            </div>
+          )}
+        </>
       )}
 
       <Tabs
