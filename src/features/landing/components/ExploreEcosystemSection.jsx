@@ -1,131 +1,152 @@
-import { Bot, Crown, BookOpen, Users, MessageSquare } from "lucide-react";
+import { useRef } from "react"
+import { Bot, Crown, BookOpen, Users } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import PencilDoodle from "./PencilDoodle"
+
+const ECOSYSTEM_CONFIGS = [
+  {
+    key: "ai",
+    icon: Bot,
+    cardClass:
+      "bg-[#F4EEFF]/75 backdrop-blur-md border border-purple-200/60 shadow-sm hover:shadow-md transition-all",
+    accentBgClass: "bg-[#DDD6FE]/80",
+    iconColorClass: "text-[#7C3AED]",
+    accentTextColorClass: "text-[#6D28D9]",
+    defaultBadge: "Hỏi gì cũng được!",
+    defaultTitle: "Trợ lý AI",
+    defaultDesc:
+      "Có bài khó? Có điều mò mẫm? Hỏi AI ngay để được giải thích thật dễ hiểu và vui hơn.",
+  },
+  {
+    key: "gamification",
+    icon: Crown,
+    cardClass:
+      "bg-[#FEFCE8]/75 backdrop-blur-md border border-yellow-200/60 shadow-sm hover:shadow-md transition-all",
+    accentBgClass: "bg-[#FEF08A]/80",
+    iconColorClass: "text-[#CA8A04]",
+    accentTextColorClass: "text-[#A16207]",
+    defaultBadge: "Học mà vui, chơi mà giỏi!",
+    defaultTitle: "Vừa học vừa chơi",
+    defaultDesc:
+      "Thử thách nhỏ, trò chơi hay và nhiệm vụ thú vị đang chờ bạn khám phá.",
+  },
+  {
+    key: "resources",
+    icon: BookOpen,
+    cardClass:
+      "bg-[#F0FDF4]/75 backdrop-blur-md border border-emerald-200/60 shadow-sm hover:shadow-md transition-all",
+    accentBgClass: "bg-[#BBF7D0]/80",
+    iconColorClass: "text-[#16A34A]",
+    accentTextColorClass: "text-[#15803D]",
+    defaultBadge: "Kho báu kiến thức đầy rồi!",
+    defaultTitle: "Nguồn tài nguyên",
+    defaultDesc:
+      "Tìm sách, bài học, hình ảnh và những điều hay ho để học thêm mỗi ngày.",
+  },
+  {
+    key: "community",
+    icon: Users,
+    cardClass:
+      "bg-[#FDF2F8]/75 backdrop-blur-md border border-pink-200/60 shadow-sm hover:shadow-md transition-all",
+    accentBgClass: "bg-[#FBCFE8]/80",
+    iconColorClass: "text-[#DB2777]",
+    accentTextColorClass: "text-[#BE185D]",
+    defaultBadge: "Cùng học, cùng vui!",
+    defaultTitle: "Kết nối cộng đồng",
+    defaultDesc:
+      "Chia sẻ điều bạn biết, xem thành quả của bạn bè và tìm thêm những người cùng sở thích.",
+  },
+]
 
 const ExploreEcosystemSection = () => {
+  const { t } = useLanguage()
+  const contentRef = useRef(null)
+
+  const ecoT = t?.landing?.ecosystem || {}
+  const bubblesT = ecoT.bubbles || {}
+  const featuresT = ecoT.features || {}
+
   return (
-    <section className="w-full py-16 lg:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
-        {/* Top Speech Bubbles */}
-        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-6">
-          {/* Bubble 1 */}
-          <div className="bg-[#FFF0F2] text-[#910B09] font-bold text-sm sm:text-base px-6 py-2.5 rounded-full shadow-sm flex items-center gap-2 border border-rose-100 animate-bounce" style={{ animationDuration: "3s" }}>
-            <MessageSquare size={16} className="text-[#910B09]" />
-            <span>Giao tiếp tự nhiên</span>
+    <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 bg-white relative overflow-hidden">
+      {/* Hand-drawn SVG Doodle — Organic Loop path across and behind the cards */}
+      <PencilDoodle
+        path="M -30 460 C 140 420, 290 520, 460 480 C 560 460, 630 380, 650 310 C 665 240, 595 230, 545 280 C 490 330, 500 440, 590 490 C 690 550, 840 520, 990 480 C 1140 440, 1260 580, 1340 680 C 1390 750, 1440 730, 1490 710"
+        viewBox="0 0 1440 900"
+        targetRef={contentRef}
+        duration={2.8}
+        delay={250}
+        direction="ltr"
+      />
+
+      <div ref={contentRef} className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Top Layered Speech Bubbles Cluster */}
+        <div className="relative w-[370px] h-[120px] mx-auto mb-8 select-none">
+          {/* Bubble 1: Top Left (Soft Pink Fill, Overlaps Bubble 2) */}
+          <div className="absolute top-0 left-0 z-20 bg-[#FEECEF] text-[#800A08] font-bold text-sm sm:text-base px-5 sm:px-6 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
+            {bubblesT.naturalCommunication || "Giao tiếp tự nhiên"}
           </div>
 
-          {/* Bubble 2 */}
-          <div className="bg-white text-[#910B09] font-bold text-sm sm:text-base px-6 py-2.5 rounded-full shadow-sm border-2 border-[#910B09]">
-            <span>Giao tiếp cộng đồng</span>
+          {/* Bubble 2: Middle Right (Red Outline, Underneath 1 & 3) */}
+          <div className="absolute top-[18px] left-[140px] z-10 bg-white border-2 border-[#910B09] text-[#800A08] font-bold text-sm sm:text-base pl-8 pr-6 sm:pl-9 sm:pr-7 py-2.5 sm:py-3 rounded-[22px] rounded-tr-[36px] rounded-l-[8px] whitespace-nowrap">
+            {bubblesT.communityCommunication || "Giao tiếp cộng đồng"}
           </div>
 
-          {/* Bubble 3 */}
-          <div className="bg-[#FEF9C3] text-[#854D0E] font-bold text-sm sm:text-base px-6 py-2.5 rounded-full shadow-sm border border-yellow-200 animate-bounce" style={{ animationDuration: "3.5s" }}>
-            <span>Thực Hành Real-time</span>
+          {/* Bubble 3: Bottom Center/Left (Soft Cream Fill, Overlaps Bubble 2) */}
+          <div className="absolute top-[64px] left-[35px] z-30 bg-[#FFF8E7] text-[#800A08] font-bold text-sm sm:text-base px-6 sm:px-7 py-2.5 sm:py-3 rounded-[22px] rounded-bl-[4px] shadow-sm whitespace-nowrap">
+            {bubblesT.realtimePractice || "Thực Hành Real-time"}
           </div>
         </div>
 
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-14">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
-            Khám phá hệ sinh thái học tập
+            {ecoT.title || "Khám phá hệ sinh thái học tập"}
           </h2>
           <p className="text-gray-600 text-base sm:text-lg mt-4 leading-relaxed">
-            Kết nối tri thức, tối ưu lộ trình và phát triển ngôn ngữ bền vững.
+            {ecoT.subtitle ||
+              "Kết nối tri thức, tối ưu lộ trình và phát triển ngôn ngữ bền vững."}
           </p>
         </div>
 
         {/* 4 Feature Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-          {/* Card 1: Trợ lý AI */}
-          <div className="bg-[#F4EEFF] border border-purple-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition-all duration-300 group">
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#DDD6FE] text-[#7C3AED] flex items-center justify-center shadow-inner">
-                  <Bot size={26} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {ECOSYSTEM_CONFIGS.map((config) => {
+            const Icon = config.icon
+            const feature = featuresT[config.key] || {}
+            const badge = feature.badge || config.defaultBadge
+            const title = feature.title || config.defaultTitle
+            const description = feature.description || config.defaultDesc
+
+            return (
+              <div
+                key={config.key}
+                className={`rounded-xl p-4 sm:p-6 flex flex-col justify-between ${config.cardClass}`}
+              >
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-inner ${config.accentBgClass} ${config.iconColorClass}`}
+                    >
+                      <Icon />
+                    </div>
+
+                    <span
+                      className={`text-xs font-bold px-3 py-1 rounded-full ${config.accentBgClass} ${config.accentTextColorClass}`}
+                    >
+                      {badge}
+                    </span>
+                  </div>
+
+                  <h3 className="text-2xl font-bold mt-6 mb-2">{title}</h3>
+                  <p className="text-secondary">{description}</p>
                 </div>
-
-                <span className="bg-[#DDD6FE] text-[#6D28D9] text-xs font-bold px-4 py-1.5 rounded-full">
-                  Hỏi gì cũng được!
-                </span>
               </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-3 group-hover:text-[#6D28D9] transition-colors">
-                Trợ lý AI
-              </h3>
-              <p className="text-gray-600 text-base leading-relaxed">
-                Có bài khó? Có điều mò mẫm? Hỏi AI ngay để được giải thích thật dễ hiểu và vui hơn.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2: Vừa học vừa chơi */}
-          <div className="bg-[#FEFCE8] border border-yellow-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition-all duration-300 group">
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#FEF08A] text-[#CA8A04] flex items-center justify-center shadow-inner">
-                  <Crown size={26} />
-                </div>
-
-                <span className="bg-[#FEF08A] text-[#A16207] text-xs font-bold px-4 py-1.5 rounded-full">
-                  Học mà vui, chơi mà giỏi!
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-3 group-hover:text-[#A16207] transition-colors">
-                Vừa học vừa chơi
-              </h3>
-              <p className="text-gray-600 text-base leading-relaxed">
-                Thử thách nhỏ, trò chơi hay và nhiệm vụ thú vị đang chờ bạn khám phá.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3: Nguồn tài nguyên */}
-          <div className="bg-[#F0FDF4] border border-emerald-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition-all duration-300 group">
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#BBF7D0] text-[#16A34A] flex items-center justify-center shadow-inner">
-                  <BookOpen size={26} />
-                </div>
-
-                <span className="bg-[#BBF7D0] text-[#15803D] text-xs font-bold px-4 py-1.5 rounded-full">
-                  Kho báu kiến thức đầy rồi!
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-3 group-hover:text-[#15803D] transition-colors">
-                Nguồn tài nguyên
-              </h3>
-              <p className="text-gray-600 text-base leading-relaxed">
-                Tìm sách, bài học, hình ảnh và những điều hay ho để học thêm mỗi ngày.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4: Kết nối cộng đồng */}
-          <div className="bg-[#FDF2F8] border border-pink-100 rounded-3xl p-8 flex flex-col justify-between hover:shadow-lg transition-all duration-300 group">
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#FBCFE8] text-[#DB2777] flex items-center justify-center shadow-inner">
-                  <Users size={26} />
-                </div>
-
-                <span className="bg-[#FBCFE8] text-[#BE185D] text-xs font-bold px-4 py-1.5 rounded-full">
-                  Cùng học, cùng vui!
-                </span>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 mt-8 mb-3 group-hover:text-[#BE185D] transition-colors">
-                Kết nối cộng đồng
-              </h3>
-              <p className="text-gray-600 text-base leading-relaxed">
-                Chia sẻ điều bạn biết, xem thành quả của bạn bè và tìm thêm những người cùng sở thích.
-              </p>
-            </div>
-          </div>
+            )
+          })}
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default ExploreEcosystemSection;
+export default ExploreEcosystemSection

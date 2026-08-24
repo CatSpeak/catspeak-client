@@ -69,7 +69,7 @@ const LandingPage = () => {
   }
 
   return (
-    <div className="flex flex-col w-full max-w-screen-xl mx-auto overflow-hidden">
+    <div className="flex flex-col w-full mx-auto overflow-hidden">
       {/* 1. Hero + Numbers */}
       <div className="relative w-full pt-4 mb-8 lg:mb-12">
         <HeroSection openAuthModal={openAuthModal} />

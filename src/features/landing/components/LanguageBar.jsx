@@ -9,14 +9,24 @@ const LanguageBar = () => {
   const navigate = useNavigate()
   const [isDevModalOpen, setIsDevModalOpen] = useState(false)
 
+  const countries = t?.landing?.hero?.countries || t.home?.countries || {}
+
   const languages = [
     {
       flag: VietNam,
-      name: t.home.countries.vietnam,
+      name: countries.vietnam || "Việt Nam",
       code: "vi",
     },
-    { flag: China, name: t.home.countries.china, code: "zh" },
-    { flag: UK, name: t.home.countries.usa, code: "en" },
+    {
+      flag: China,
+      name: countries.china || "Trung Quốc",
+      code: "zh",
+    },
+    {
+      flag: UK,
+      name: countries.usa || "Anh",
+      code: "en",
+    },
   ]
 
   const handleNavigation = (code) => {

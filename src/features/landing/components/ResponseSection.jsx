@@ -1,8 +1,7 @@
-import { useLanguage } from "@/shared/context/LanguageContext.jsx";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef, useState } from "react";
-import { Element5 } from "../assets";
+import { useLanguage } from "@/shared/context/LanguageContext.jsx"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useRef } from "react"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 
 const AvatarPlaceholder = ({ name, color }) => {
   const initials = name
@@ -10,127 +9,101 @@ const AvatarPlaceholder = ({ name, color }) => {
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase()
 
   return (
     <div
-      className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white"
+      className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white flex-shrink-0"
       style={{ background: color }}
       aria-label={name}
     >
       {initials}
     </div>
-  );
-};
+  )
+}
 
-const avatarColors = ["#f7b2bd", "#b2d8f7", "#b2f7c1", "#f7e4b2"];
+const avatarColors = ["#f7b2bd", "#b2d8f7", "#b2f7c1", "#f7e4b2"]
 
 const ResponseSection = () => {
-  const { t } = useLanguage();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const trackRef = useRef(null);
-  const sectionRef = useRef(null);
+  const { t } = useLanguage()
+  const scrollRef = useRef(null)
 
-  const reviews = t.home?.responseSection?.reviews || [];
+  const respT = t?.landing?.response || t.home?.responseSection || {}
+  const reviews = respT.reviews || []
 
-  // Track scroll progress của section
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start 90%", "center center"], // section vào viewport 10% là bắt đầu hiện
-  });
-
-  // Map scroll progress → clipPath percentage (0% → 100%)
-  // Khi section vào viewport 10% → đường hiện 10%, v.v.
-  const clipPercent = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  const clipPath = useTransform(clipPercent, (v) => `inset(0 ${100 - v}% 0 0)`);
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : reviews.length - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev < reviews.length - 1 ? prev + 1 : 0));
-  };
+  const handleScroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = direction === "left" ? -414 : 414
+      scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" })
+    }
+  }
 
   return (
-    <section ref={sectionRef} className="relative w-full py-40 px-6 ">
-      {/* Background decoration — reveal từ trái qua phải theo scroll */}
-      <motion.img
-        src={Element5}
-        alt=""
-        aria-hidden="true"
-        style={{ clipPath }}
-        className="absolute -bottom-40 left-1/2 -translate-x-1/2 w-[100vw] max-w-none"
-      />
-
-      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10 items-start px-6">
+    <section className="relative w-full py-16 sm:py-20 lg:py-24 overflow-hidden">
+      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start px-4 sm:px-6">
         {/* Left: Title + Navigation */}
-        <div className="lg:col-span-1">
-          <h2 className="text-4xl font-black text-[#990011] mb-3 leading-none">
-            {t.home?.responseSection?.title || "Phản hồi"}
+        <div className="lg:col-span-4 lg:pr-2">
+          <h2 className="text-4xl font-black text-[#990011] mb-2 leading-none">
+            {respT.title || "Phản hồi"}
           </h2>
-          <p className="text-sm text-gray-500 leading-relaxed mb-8">
-            {t.home?.responseSection?.subtitle}
+          <p className="text-secondary leading-relaxed mb-8">
+            {respT.subtitle}
           </p>
 
-          <div className="flex gap-4">
-            <button
-              className="w-10 h-10 flex items-center justify-center border-2 border-[#990011] rounded-full bg-transparent text-[#990011] hover:bg-[#990011] hover:text-white hover:scale-105 transition-all"
-              onClick={handlePrev}
-              aria-label="Previous review"
+          <div className="hidden lg:flex gap-2">
+            <IconButton
+              onClick={() => handleScroll("left")}
+              variant="cathOutline"
+              size="sm"
+              className="cursor-pointer"
+              aria-label={respT.prevReview || "Previous review"}
             >
-              <ChevronLeft size={22} />
-            </button>
-            <button
-              className="w-10 h-10 flex items-center justify-center border-2 border-[#990011] rounded-full bg-transparent text-[#990011] hover:bg-[#990011] hover:text-white hover:scale-105 transition-all"
-              onClick={handleNext}
-              aria-label="Next review"
+              <ChevronLeft />
+            </IconButton>
+            <IconButton
+              onClick={() => handleScroll("right")}
+              variant="cathOutline"
+              size="sm"
+              className="cursor-pointer"
+              aria-label={respT.nextReview || "Next review"}
             >
-              <ChevronRight size={22} />
-            </button>
+              <ChevronRight />
+            </IconButton>
           </div>
         </div>
 
-        {/* Right: Sliding cards */}
-        <div className="lg:col-span-2  ">
-          <div className="overflow-visible lg:overflow-hidden">
-            <div
-              ref={trackRef}
-              className="flex gap-6 transition-transform duration-450 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform"
-              style={{
-                transform: `translateX(calc(-${currentIndex} * (min(360px, 85vw) + 24px)))`,
-              }}
-            >
-              {reviews.map((review, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-[min(360px,85vw)] bg-white border border-[#990011] rounded-xl p-7 flex flex-col gap-5 shadow-sm transition-all"
-                >
-                  <p className="text-sm text-gray-600 leading-relaxed flex-1">
-                    "{review.text}"
-                  </p>
-                  <div className="flex items-start gap-3">
-                    <AvatarPlaceholder
-                      name={review.name}
-                      color={avatarColors[i % avatarColors.length]}
-                    />
-                    <div>
-                      <span className="text-sm font-semibold text-gray-800 block">
-                        {review.name}
-                        <span className="text-xs font-normal text-gray-500 block">
-                          {review.role}
-                        </span>
-                      </span>
-                    </div>
+        {/* Right: Native scrollable cards extending off-screen to the right on desktop and mobile */}
+        <div className="lg:col-span-8 -mx-4 sm:-mx-6 lg:mx-0 lg:-mr-6 xl:-mr-[calc((100vw-1280px)/2+24px)] 2xl:-mr-[calc((100vw-1280px)/2+24px)] overflow-hidden">
+          <div
+            ref={scrollRef}
+            className="flex gap-6 overflow-x-auto scrollbar-none scroll-smooth py-3 px-4 sm:px-6 md:px-8 lg:px-1 snap-x snap-mandatory scroll-pl-4 sm:scroll-pl-6 md:scroll-pl-8 lg:scroll-pl-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {reviews.map((review, i) => (
+              <div
+                key={i}
+                className="flex-shrink-0 w-[min(390px,85vw)] bg-white/80 backdrop-blur-md border border-[#990011] rounded-xl p-4 sm:p-6 flex flex-col gap-6 shadow-sm snap-start transition-all"
+              >
+                <p className="leading-relaxed flex-1">"{review.text}"</p>
+                <div className="flex items-center gap-4">
+                  <AvatarPlaceholder
+                    name={review.name}
+                    color={avatarColors[i % avatarColors.length]}
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-bold">{review.name}</span>
+                    <span className="text-sm text-secondary">
+                      {review.role}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default ResponseSection;
+export default ResponseSection

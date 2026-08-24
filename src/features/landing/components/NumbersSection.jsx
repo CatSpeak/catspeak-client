@@ -1,18 +1,42 @@
-import { Users, Award, Heart, BookOpen } from "lucide-react";
-
-const numbersData = [
-  { value: "50.000+", label: "Học viên đồng hành", icon: Users, sub: "Trên toàn thế giới" },
-  { value: "500+", label: "Giảng viên chất lượng", icon: Award, sub: "Đạt chuẩn quốc tế" },
-  { value: "98%", label: "Tỷ lệ hài lòng", icon: Heart, sub: "Đánh giá 5 sao" },
-  { value: "100+", label: "Khóa học & Chủ đề", icon: BookOpen, sub: "Đa dạng cấp độ" },
-];
+import { Users, Award, Heart, BookOpen } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const NumbersSection = () => {
+  const { t } = useLanguage()
+  const numbersT = t?.landing?.numbers || {}
+
+  const numbersData = [
+    {
+      value: "50.000+",
+      label: numbersT.participants || "Học viên đồng hành",
+      icon: Users,
+      sub: numbersT.participantsSub || "Trên toàn thế giới",
+    },
+    {
+      value: "500+",
+      label: numbersT.instructors || "Giảng viên chất lượng",
+      icon: Award,
+      sub: numbersT.instructorsSub || "Đạt chuẩn quốc tế",
+    },
+    {
+      value: "98%",
+      label: numbersT.satisfaction || "Tỷ lệ hài lòng",
+      icon: Heart,
+      sub: numbersT.satisfactionSub || "Đánh giá 5 sao",
+    },
+    {
+      value: "100+",
+      label: numbersT.courses || "Khóa học & Chủ đề",
+      icon: BookOpen,
+      sub: numbersT.coursesSub || "Đa dạng cấp độ",
+    },
+  ]
+
   return (
     <section className="relative z-30 w-full max-w-6xl mx-auto px-6 pt-10 pb-4">
       <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-rose-100/80 shadow-xl shadow-rose-900/5 p-6 sm:p-8 lg:p-10 grid grid-cols-2 md:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
         {numbersData.map((item, index) => {
-          const IconComponent = item.icon;
+          const IconComponent = item.icon
           return (
             <div
               key={index}
@@ -29,15 +53,13 @@ const NumbersSection = () => {
               <span className="text-sm font-bold text-gray-800 mt-1">
                 {item.label}
               </span>
-              <span className="text-xs text-gray-500 mt-0.5">
-                {item.sub}
-              </span>
+              <span className="text-xs text-gray-500 mt-0.5">{item.sub}</span>
             </div>
-          );
+          )
         })}
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default NumbersSection;
+export default NumbersSection
