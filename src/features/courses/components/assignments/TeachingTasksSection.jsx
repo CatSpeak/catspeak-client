@@ -1,9 +1,11 @@
 import React from "react"
-import { Calendar, Clock, FileText, Award } from "lucide-react"
+import { Calendar, Clock, FileText, Award, ArrowRight } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getTaskStatusClass = (status) => {
-  const norm = String(status || "").trim().toLowerCase()
+  const norm = String(status || "")
+    .trim()
+    .toLowerCase()
   if (norm === "urgent") return "bg-[#FFE4E6] text-[#E11D48]"
   if (norm === "required") return "bg-[#FEF3C7] text-[#D97706]"
   return "bg-[#E8F8F0] text-[#15803D]"
@@ -30,16 +32,20 @@ const TeachingTasksSection = ({
   return (
     <div className="bg-white rounded-3xl border border-border p-6 shadow-xs flex flex-col gap-4 h-fit">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-black text-gray-950 tracking-tight">
+        <h3 className="text-lg font-bold text-gray-950 tracking-tight">
           {resolvedTeachingTasksLabel}
         </h3>
         {hasViewAllAction && (
           <button
             type="button"
             onClick={onViewAll}
-            className="text-xs font-black text-[#b20a1c] hover:underline cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#990011] hover:text-[#7a000e] transition-colors cursor-pointer group"
           >
-            {resolvedViewAllLabel}
+            <span>{resolvedViewAllLabel}</span>
+            <ArrowRight
+              size={14}
+              className="transition-transform group-hover:translate-x-0.5"
+            />
           </button>
         )}
       </div>
@@ -56,22 +62,32 @@ const TeachingTasksSection = ({
         ) : (
           resolvedTasks.map((task) => {
             const badgeText = task.badge || task.status || task.due
-            const badgeClass = task.badgeClass || task.dueColor || getTaskStatusClass(badgeText)
-            const iconClass = task.iconColor || task.bgColor || "bg-gray-100 text-gray-500"
+            const badgeClass =
+              task.badgeClass || task.dueColor || getTaskStatusClass(badgeText)
+            const iconClass =
+              task.iconColor || task.bgColor || "bg-gray-100 text-gray-500"
 
-            const defaultIcon = (task.taskType === "QuizGrading" || task.quizId)
-              ? <Award size={16} />
-              : <FileText size={16} />
+            const defaultIcon =
+              task.taskType === "QuizGrading" || task.quizId ? (
+                <Award size={16} />
+              ) : (
+                <FileText size={16} />
+              )
 
             return (
               <button
                 type="button"
-                key={task.id || `${task.taskType}-${task.assignmentId}-${task.quizId}-${task.classId}`}
+                key={
+                  task.id ||
+                  `${task.taskType}-${task.assignmentId}-${task.quizId}-${task.classId}`
+                }
                 onClick={() => onTaskAction?.(task)}
                 disabled={typeof onTaskAction !== "function"}
                 className="w-full text-left flex items-start gap-3 p-1.5 rounded-2xl transition-all cursor-pointer hover:bg-gray-50/70 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#990011] disabled:cursor-default disabled:hover:bg-transparent disabled:active:scale-100"
               >
-                <span className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${iconClass}`}>
+                <span
+                  className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center ${iconClass}`}
+                >
                   {task.icon || defaultIcon}
                 </span>
                 <div className="flex-1 min-w-0">
@@ -100,7 +116,9 @@ const TeachingTasksSection = ({
                 </div>
                 {badgeText && (
                   <span className="flex items-center gap-2 shrink-0 self-center">
-                    <span className={`${badgeClass} font-bold text-[10px] px-2 py-0.5 rounded`}>
+                    <span
+                      className={`${badgeClass} font-bold text-[10px] px-2 py-0.5 rounded`}
+                    >
                       {badgeText}
                     </span>
                   </span>
