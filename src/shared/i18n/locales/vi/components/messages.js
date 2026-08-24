@@ -13,4 +13,5 @@ export default {
   image: "Ảnh",
   close: "Đóng",
   conversationNotFound: "Không tìm thấy cuộc trò chuyện",
+  seeAllChat: "Xem tất cả cuộc trò chuyện",
 }

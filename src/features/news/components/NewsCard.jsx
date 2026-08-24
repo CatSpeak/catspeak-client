@@ -12,6 +12,8 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import ReactionsPopover, {
   ReactionIcon,
 } from "@/shared/components/ui/ReactionsPopover";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
+import { useAuth } from "@/features/auth";
 
 /**
  * NewsCard — Figma "Card_Bản tin Catspeak" layout.
@@ -28,6 +30,8 @@ const NewsCard = ({ news }) => {
   const currentLang = lang || "en";
   const { t } = useLanguage();
   const newsCard = t.news?.newsCard;
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
   /* ── API mutations & hooks ───────────────────────────────────────── */
   const [reactToPost] = useReactToPostMutation();
@@ -70,9 +74,17 @@ const NewsCard = ({ news }) => {
   };
 
   const handleReact = (e, type) => {
+    e?.preventDefault?.();
     e?.stopPropagation?.();
+
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+
     const id = news?.postId || news?.id;
     if (!id) return;
+
     reactToPost({ postId: id, type });
   };
 
