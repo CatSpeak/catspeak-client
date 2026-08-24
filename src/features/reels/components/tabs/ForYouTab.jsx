@@ -234,13 +234,12 @@ export default function ForYouTab({
             <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
           )}
 
-          {/* End-of-feed indicator */}
-          {!hasMore && allReels.length > 0 && (
+          {/* {!hasMore && allReels.length > 0 && (
             <p className="text-center text-sm text-lighttextGray py-8">
               {t.catSpeak?.reels?.endOfFeed ||
                 "Bạn đã xem hết tất cả nội dung 🎉"}
             </p>
-          )}
+          )} */}
         </>
       )}
     </div>
