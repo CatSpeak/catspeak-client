@@ -17,6 +17,10 @@ export default {
     description:
       "Coming soon: Explore cultures, places, and people from around the world.",
   },
+  reportSuccess: "Report success",
+  reportFailed: "Report failed",
+  storyNotFound: "Story not found",
+  cannotReportOwn: "Cannot report own story",
   reels: {
     title: "Reels",
     description: "Watch short videos from our community.",

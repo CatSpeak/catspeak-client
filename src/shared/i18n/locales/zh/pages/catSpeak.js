@@ -15,6 +15,10 @@ export default {
     title: "探索世界",
     description: "即将推出：探索来自世界各地的文化、地点和人物。",
   },
+  reportSuccess: "举报成功",
+  reportFailed: "举报失败",
+  storyNotFound: "未找到故事",
+  cannotReportOwn: "无法举报自己的故事",
   reels: {
     title: "短视频",
     description: "观看我们社区的短视频。",
