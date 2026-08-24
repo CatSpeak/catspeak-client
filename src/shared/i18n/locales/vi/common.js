@@ -26,8 +26,9 @@ export default {
     },
     languages: {
       vi: "Tiếng Việt",
-      zh: "中文",
-      en: "English",
+      zh: "Tiếng Trung",
+      en: "Tiếng Anh",
+      ja: "Tiếng Nhật",
     },
   },
   pagination: {

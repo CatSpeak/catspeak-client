@@ -1,0 +1,47 @@
+export default {
+  landing: {
+    leadingTeam: {
+      title: "リーディング＆伴走チーム",
+      subtitle: "高品質",
+      viewInstructor: "講師を見る",
+      defaultInstructor: "講師",
+      defaultRole: "CatSpeak講師",
+      prefixLanguage: "の講師",
+      emptyText: "注目の講師はいません。",
+      prevInstructor: "前の講師",
+      nextInstructor: "次の講師",
+      recruitment: {
+        title: "CatSpeakチームの一員になりませんか？",
+        description:
+          "最先端のテックプラットフォームで、知識を共有し、グローバルコミュニティとつながり、時間を柔軟に管理しましょう。",
+        instructorArea: "講師エリア",
+        registerInstructor: "講師に応募",
+      },
+      languages: {
+        en: "英語",
+        vi: "ベトナム語",
+        zh: "中国語",
+        ja: "日本語",
+        ko: "韓国語",
+        fr: "フランス語",
+        de: "ドイツ語",
+        es: "スペイン語",
+        ru: "ロシア語",
+        it: "イタリア語",
+        th: "タイ語",
+        pt: "ポルトガル語",
+      },
+    },
+    news: {
+      subtitle: "最新情報",
+      titlePrefix: "からのニュース",
+      titleSuffix: "Cat Speak",
+      viewAll: "詳細を見る",
+      viewArticle: "記事を読む",
+      newBadge: "新着",
+      emptyText: "ニュース記事はまだありません",
+      prevNews: "前のニュース",
+      nextNews: "次のニュース",
+    },
+  },
+}

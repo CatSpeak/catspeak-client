@@ -1,4 +1,4 @@
-import { VietNam, China, UK } from "@/shared/assets/icons/flags"
+import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
@@ -17,16 +17,9 @@ const LanguageBar = () => {
       name: countries.vietnam || "Việt Nam",
       code: "vi",
     },
-    {
-      flag: China,
-      name: countries.china || "Trung Quốc",
-      code: "zh",
-    },
-    {
-      flag: UK,
-      name: countries.usa || "Anh",
-      code: "en",
-    },
+    { flag: China, name: t.home.countries.china || "Trung Quốc", code: "zh" },
+    { flag: UK, name: t.home.countries.usa || "Anh", code: "en" },
+    { flag: Japan, name: t.home.countries.japan || "Nhật Bản", code: "ja" },
   ]
 
   const handleNavigation = (code) => {

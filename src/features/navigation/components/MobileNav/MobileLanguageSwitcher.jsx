@@ -1,7 +1,7 @@
 import React from "react"
 import { Globe, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { VietNam, China, UK } from "@/shared/assets/icons/flags"
+import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import ListItem from "@/shared/components/ui/ListItem"
 
@@ -9,6 +9,7 @@ const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
   { key: "zh", label: "中文", flag: China },
   { key: "en", label: "English", flag: UK },
+  { key: "ja", label: "日本語", flag: Japan },
 ]
 
 const MobileLanguageSwitcher = () => {
@@ -66,7 +67,7 @@ const MobileLanguageSwitcher = () => {
               className={`text-[15px] flex-1 text-left ${isSelected ? "text-cath-red-800 font-medium" : "text-gray-700"
                 }`}
             >
-              {option.label}
+              {t.header?.languages?.[option.key] || option.label}
             </span>
 
             {/* Radio Button */}

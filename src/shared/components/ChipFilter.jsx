@@ -44,8 +44,18 @@ const ChipFilter = ({
             onClick={() => onChange?.(itemKey)}
             className="shrink-0"
           >
-            {item.label}
-            {typeof item.count === "number" ? ` (${item.count})` : ""}
+            <span>{item.label}</span>
+            {typeof item.count === "number" && (
+              <span
+                className={`ml-1 min-w-5 h-5 px-1 flex items-center justify-center text-xs rounded-full transition-colors ${
+                  isSelected
+                    ? "bg-white/25 text-white"
+                    : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                }`}
+              >
+                {item.count}
+              </span>
+            )}
           </PillButton>
         )
       })}

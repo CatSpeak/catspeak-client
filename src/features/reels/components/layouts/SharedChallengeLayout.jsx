@@ -91,6 +91,7 @@ export default function SharedChallengeLayout({
       if (community === "english") targetLang = "en";
       else if (community === "chinese") targetLang = "zh";
       else if (community === "vietnamese") targetLang = "vi";
+      else if (community === "japanese") targetLang = "ja";
 
       if (targetLang && lang !== targetLang) {
         navigate(`/${targetLang}/cat-speak/reels?challenge=${selectedChallenge.challengeId}`, { replace: true });

@@ -20,7 +20,7 @@ export const LanguageProvider = ({ children }) => {
       setLanguage,
       toggleLanguage: () =>
         setLanguage((prev) => {
-          const nextLang = { vi: "en", en: "zh", zh: "vi" }
+          const nextLang = { vi: "en", en: "zh", zh: "ja", ja: "vi" }
           return nextLang[prev] || "vi"
         }),
       t: translations[language] || translations.vi || {},
