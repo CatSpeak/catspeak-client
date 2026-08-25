@@ -2352,7 +2352,7 @@ teacherQuiz: {
     jumpEnd: "Kết thúc",
     classDayLegend: "Ngày học",
     todayLegend: "Hôm nay",
-    spotsLeft: "{{remaining}}/{{capacity}} chỗ",
+    spotsLeft: "{{enrolled}}/{{capacity}} chỗ",
     spotsSub: "Số người đã đăng ký",
     instructorTitle: "Thông tin giảng viên",
     verifiedTeacher: "Giảng viên được xác minh bởi Catspeak",

@@ -2225,7 +2225,7 @@ teacherQuiz: {
     jumpEnd: "结课",
     classDayLegend: "上课日",
     todayLegend: "今天",
-    spotsLeft: "{{remaining}}/{{capacity}} 名额",
+    spotsLeft: "{{enrolled}}/{{capacity}} 名额",
     spotsSub: "已报名人数",
     instructorTitle: "主讲教师信息",
     verifiedTeacher: "CatSpeak 认证讲师",
