@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { MessageSquare, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { useLanguage } from "@/shared/context/LanguageContext";
@@ -19,31 +19,66 @@ const StoryCardItem = ({ story, onClick }) => {
     storyContent,
     username,
     avatarImageUrl,
-    // commentCount = 0,
     createDate,
   } = story;
 
   const authorAccountId = story.accountId || story.userId || story.authorId;
-
   const relativeCreatedAt = createDate ? formatRelative(createDate) : null;
 
   const CARD_THEMES = [
-    { bg: "bg-[#FFEEF0]" },
-    { bg: "bg-[#FFFCEB]" },
-    { bg: "bg-[#FFF2EA]" },
-    { bg: "bg-[#F1FFF8]" },
-    { bg: "bg-[#F6F2FF]" },
-    { bg: "bg-[#FDF3FF]" },
-    { bg: "bg-[#FFFBFC]" },
+    {
+      bg: "bg-[#FFF2EA]/60",
+      bgHover: "hover:bg-[#FFF2EA]/90",
+      text: "text-[#B34700]",
+      border: "border-[#FFF2EA]/60",
+    },
+    {
+      bg: "bg-[#FFEAED]/60",
+      bgHover: "hover:bg-[#FFEAED]/90",
+      text: "text-[#990011]",
+      border: "border-[#FFEAED]/60",
+    },
+    {
+      bg: "bg-[#FFF9CC]/60",
+      bgHover: "hover:bg-[#FFF9CC]/90",
+      text: "text-[#E2B60A]",
+      border: "border-[#FFF9CC]/60",
+    },
+    {
+      bg: "bg-[#B2FFD6]/50",
+      bgHover: "hover:bg-[#B2FFD6]/80",
+      text: "text-[#16A34A]",
+      border: "border-[#B2FFD6]/60",
+    },
+    {
+      bg: "bg-[#E8F2FF]/60",
+      bgHover: "hover:bg-[#E8F2FF]/90",
+      text: "text-[#1D7DFD]",
+      border: "border-[#E8F2FF]/60",
+    },
+    {
+      bg: "bg-[#F6F2FF]/60",
+      bgHover: "hover:bg-[#F6F2FF]/90",
+      text: "text-[#6D49BF]",
+      border: "border-[#F6F2FF]/60",
+    },
   ];
 
   const themeIndex = (story.storyId || 0) % CARD_THEMES.length;
   const theme = CARD_THEMES[themeIndex];
 
+  const isOwn = story.isOwn;
+  const bgClass = isOwn ? "bg-blue-50/70 hover:bg-blue-100/90" : `${theme.bg} ${theme.bgHover}`;
+  const borderClass = story.isReported
+    ? "border-amber-400/80 ring-1 ring-amber-400/30"
+    : isOwn
+      ? "border-blue-200"
+      : theme.border;
+
   return (
     <div
       onClick={onClick}
-      className={`relative flex md:max-w-[240px] w-full max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all ${theme.bg} ${story.isReported ? "border-amber-400/80" : ""}`}
+      className={`relative flex md:max-w-[240px] w-full max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all backdrop-blur-sm ${bgClass} ${borderClass}`}
     >
       {story.isReported && (
         <span
@@ -81,13 +116,8 @@ const StoryCardItem = ({ story, onClick }) => {
         {storyContent}
       </p>
 
-      {/* Footer: comment count + time */}
+      {/* Footer: time */}
       <div className="flex items-center gap-4 text-xs text-[#9e9e9e] mt-auto">
-        {/* <span className="flex items-center gap-1">
-          <MessageSquare size={13} className="shrink-0" />
-          {commentCount} {t.story?.replies}
-        </span> */}
-
         {relativeCreatedAt && (
           <span className="ml-auto shrink-0">{relativeCreatedAt}</span>
         )}
