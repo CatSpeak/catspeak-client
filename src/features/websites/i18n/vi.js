@@ -30,6 +30,7 @@ export default {
       reading: "Đọc mở rộng",
       dictionary: "Từ điển",
       writing: "Viết chữ Hán",
+      games: "Trò chơi",
       kids: "Dành cho trẻ em",
     },
     results: {

@@ -30,6 +30,7 @@ export default {
       reading: "段階別リーダー",
       dictionary: "辞書",
       writing: "漢字の書き方",
+      games: "ゲーム",
       kids: "子ども向け",
     },
     results: {
