@@ -7,7 +7,7 @@ import {
   Newspaper,
 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPostsQuery } from "@/store/api/social/postsApi"
+import { useGetLandingPostsQuery } from "@/store/api/social/postsApi"
 import { getCommunityName } from "@/features/news/utils/newsUtils"
 import LandingNewsCard from "./LandingNewsCard"
 import LandingNewsSkeletonCard from "./LandingNewsSkeletonCard"
@@ -28,11 +28,7 @@ const NewsSection = () => {
     )
   }, [lang, language])
 
-  const { data, isLoading } = useGetPostsQuery({
-    page: 1,
-    pageSize: 12,
-    postType: "1",
-  })
+  const { data, isLoading } = useGetLandingPostsQuery(12)
 
   const publicPosts = useMemo(() => {
     const rawList = Array.isArray(data?.data)
