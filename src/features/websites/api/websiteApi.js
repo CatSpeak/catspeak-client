@@ -521,5 +521,17 @@ const resources = [
     url: "https://www.kanjipedia.jp/",
   },
 
-  // 9. Dành cho trẻ em / Nhập môn
+  // 9. Trò chơi / Games
+  {
+    id: "xe-tang-hoc-kanji",
+    lang: "ja",
+    url: "https://gametiengnhat.onhat.vn/?nhom=xe-tang-hoc-kanji#games",
+  },
+  {
+    id: "hansha-dojo",
+    lang: "ja",
+    url: "https://gametiengnhat.onhat.vn/games/hansha-dojo/",
+  },
+
+  // 10. Dành cho trẻ em / Nhập môn
 ]
