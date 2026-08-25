@@ -21,7 +21,9 @@ const RoomInformation = ({
         <div className="flex flex-wrap justify-center gap-[11px] mb-3 mt-2">
           {room?.requiredLevel && (
             <span className="rounded-lg bg-cath-red-700 px-[15px] py-2.5 text-[14px] font-bold uppercase tracking-wider leading-none text-white">
-              {room.requiredLevel}
+              {t?.rooms?.filters?.levels?.[
+                room.requiredLevel?.toLowerCase()
+              ] || room.requiredLevel}
             </span>
           )}
           {room?.topic &&

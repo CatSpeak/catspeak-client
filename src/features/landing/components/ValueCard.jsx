@@ -1,27 +1,25 @@
-import { ValueCardBg } from "@/shared/assets/images/home";
-
-const colorConfig = {
-  purple: {
-    solid: "from-white to-purple-500",
-    glass: "from-white/60 to-purple-500/20 text-purple-700",
-    glow: "bg-purple-500/40",
+const colorStyles = {
+  orange: {
+    card: "bg-[#FEFCE8]/85 border-[#FEF08A]/80",
+    badge: "bg-[#FEF08A] text-[#A16207]",
+  },
+  red: {
+    card: "bg-[#FFF1F2]/90 border-[#FECDD3]/80",
+    badge: "bg-[#FFE4E6] text-[#910B09]",
   },
   blue: {
-    solid: "from-white to-blue-400",
-    glass: "from-white/60 to-blue-400/20 text-blue-600",
-    glow: "bg-blue-400/40",
-  },
-  orange: {
-    solid: "from-white to-orange-400",
-    glass: "from-white/60 to-orange-400/20 text-orange-600",
-    glow: "bg-orange-400/40",
+    card: "bg-[#EFF6FF]/85 border-[#BFDBFE]/80",
+    badge: "bg-[#DBEAFE] text-[#1D4ED8]",
   },
   green: {
-    solid: "from-white to-green-500",
-    glass: "from-white/60 to-green-500/20 text-green-600",
-    glow: "bg-green-500/40",
+    card: "bg-[#F0FDF4]/85 border-[#BBF7D0]/80",
+    badge: "bg-[#DCFCE7] text-[#15803D]",
   },
-};
+  purple: {
+    card: "bg-[#FAF5FF]/85 border-[#E9D5FF]/80",
+    badge: "bg-[#F3E8FF] text-[#7E22CE]",
+  },
+}
 
 const ValueCard = ({
   icon,
@@ -30,49 +28,26 @@ const ValueCard = ({
   color = "orange",
   className = "",
 }) => {
-  const styles = colorConfig[color] || colorConfig.orange;
+  const styles = colorStyles[color] || colorStyles.orange
+
   return (
     <div
-      className={`relative flex w-full max-w-[380px] h-auto flex-col transition-transform drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] ${className}`}
+      className={`relative flex flex-col items-center text-center h-full backdrop-blur-md rounded-xl p-4 sm:p-6 border ${styles.card} ${className}`}
     >
-      {/* <img
-        src={ValueCardBg}
-        alt="Background"
-        className="absolute inset-0 w-full h-full pointer-events-none"
-      /> */}
-
-      <div className="relative z-10 w-full h-full p-6 flex flex-col gap-4">
-        {/* Header: Title + Icon */}
-        <div className="flex flex-col  items-center justify-center w-full gap-5">
-          <div className="relative h-14 w-14 flex-shrink-0 mr-6">
-            {/* Glow */}
-            <div
-              className={`absolute inset-0 top-7  m-auto h-14 w-14 rounded-full ${styles.glow} blur-lg`}
-            />
-            {/* Layer 1: Bottom/Back (Top-Left) - Solid Gradient */}
-            <div
-              className={`absolute top-0 left-0 h-12 w-12 rounded-[14px] bg-gradient-to-br ${styles.solid} opacity-80`}
-            />
-
-            {/* Layer 2: Top/Front (Bottom-Right) - Glass Gradient + Icon */}
-            <div
-              className={`absolute bottom-0 right-0 flex h-12 w-12 items-center justify-center rounded-[14px] border border-white/40 bg-gradient-to-br ${styles.glass} backdrop-blur-sm`}
-            >
-              {icon}
-            </div>
-          </div>
-          <h4 className="font-bold leading-tight text-black flex-1 pr-4 text-lg">
-            {title}
-          </h4>
-        </div>
-
-        {/* Description */}
-        <p className="text-gray-600 text-sm bg-white shadow-lg rounded-lg p-4">
-          {description}
-        </p>
+      {/* 1. Icon Top (Centered) */}
+      <div
+        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mb-6 ${styles.badge}`}
+      >
+        {icon}
       </div>
-    </div>
-  );
-};
 
-export default ValueCard;
+      {/* 2. Title Below Icon (Centered) */}
+      <h4 className="text-2xl font-bold mb-2">{title}</h4>
+
+      {/* 3. Description Below Title (Centered) */}
+      <p className="text-secondary flex-1">{description}</p>
+    </div>
+  )
+}
+
+export default ValueCard

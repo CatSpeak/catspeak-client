@@ -170,6 +170,7 @@ export default function BulletinBoardPage() {
   return (
     <div className="min-h-screen space-y-6">
       <Breadcrumb
+        separator=">"
         className="text-[#7B7979] text-xs sm:text-sm flex-wrap"
         items={[
           { label: dict.postDetail.breadcrumbs.home, onClick: () => navigate("/workspace") },
@@ -177,18 +178,24 @@ export default function BulletinBoardPage() {
           { label: dict.postDetail.breadcrumbs.allCourses, onClick: () => navigate(basePath) },
           { label: dict.postDetail.breadcrumbs.courseDetail, onClick: () => navigate(`${basePath}/details/${classData?.courseId || ''}`) },
           { label: dict.postDetail.breadcrumbs.classDetail, onClick: () => navigate(`${basePath}/class/${classId}?tab=lecture-hall`) },
-          { label: dict.postDetail.breadcrumbs.boardDetail, active: true },
+          { label: "Chi tiết bảng tin", active: true },
         ]}
       />
 
-      <CourseTablePageHeader
-        title={title}
-        searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder={dict.bulletinBoard.searchPlaceholder}
-        createLabel={dict.bulletinBoard.addPost}
-        onCreate={!isStudent ? () => navigate(`${basePath}/class/${classId}/bulletin-board/${boardId}/create-post`) : undefined}
-      />
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 py-2">
+        <h1 className="text-[32px] md:text-[40px] font-semibold text-[#191C1D]">
+          Chi tiết bảng tin
+        </h1>
+        {(!isStudent) && (
+          <button
+            type="button"
+            onClick={() => navigate(`${basePath}/class/${classId}/bulletin-board/${boardId}/create-post`)}
+            className="flex items-center justify-center gap-2 bg-[#990011] hover:bg-[#80000e] text-white px-6 py-3 rounded-full font-medium text-base transition-all duration-200 shadow-sm whitespace-nowrap"
+          >
+            {dict.bulletinBoard.addPost || "Thêm bài viết"} <span className="text-xl leading-none ml-1">+</span>
+          </button>
+        )}
+      </div>
 
       {/* Table block */}
       {posts.length > 0 ? (

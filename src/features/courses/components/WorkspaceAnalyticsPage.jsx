@@ -19,6 +19,7 @@ import {
 } from "@/store/api/coursesApi"
 import {
   buildAnalyticsQueryParams,
+  CUSTOM_PERIOD_VALUE,
   getAnalyticsFilterMeta,
   getDrillDownSelection,
   resolveAnalyticsScope,
@@ -121,14 +122,40 @@ const WorkspaceAnalyticsPage = () => {
     (item) => String(item.id) === String(classFilter),
   )
 
+  const selectedPeriodMeta = (filterMeta?.[group]?.periods || []).find((p) => p.value === period)
+
+  let resolvedPeriodParam = period
+  let resolvedStartDate = customStartDate
+  let resolvedEndDate = customEndDate
+
+  if (period === CUSTOM_PERIOD_VALUE) {
+    resolvedStartDate = customStartDate
+    resolvedEndDate = customEndDate
+    resolvedPeriodParam = "custom"
+  } else if (selectedPeriodMeta?.startDate && selectedPeriodMeta?.endDate) {
+    resolvedStartDate = selectedPeriodMeta.startDate
+    resolvedEndDate = selectedPeriodMeta.endDate
+    resolvedPeriodParam = "custom"
+  } else if (group === "month" && /^\d{4}-\d{2}$/.test(period)) {
+    const [yStr, mStr] = period.split("-")
+    const yNum = parseInt(yStr, 10)
+    const mNum = parseInt(mStr, 10)
+    const startM = `${yNum}-${String(mNum).padStart(2, "0")}-01`
+    const endMDate = new Date(yNum, mNum, 0)
+    const endM = `${yNum}-${String(mNum).padStart(2, "0")}-${String(endMDate.getDate()).padStart(2, "0")}`
+    resolvedStartDate = startM
+    resolvedEndDate = endM
+    resolvedPeriodParam = "custom"
+  }
+
   const activeQueryParams = buildAnalyticsQueryParams({
     group,
-    period,
+    period: resolvedPeriodParam,
     compare,
     courseId: selectedCourseObj ? parseInt(selectedCourseObj.id, 10) : undefined,
     classId: selectedClassObj ? parseInt(selectedClassObj.id, 10) : undefined,
-    customStartDate,
-    customEndDate,
+    customStartDate: resolvedStartDate || undefined,
+    customEndDate: resolvedEndDate || undefined,
   })
 
   // Drill-down from month trend to day trend
@@ -170,11 +197,11 @@ const WorkspaceAnalyticsPage = () => {
   const currentTabObj = tabsList.find((tItem) => tItem.key === activeTab) || tabsList[0]
 
   return (
-    <div className="flex flex-col gap-5 text-[#2e2e2e] min-h-full pb-10">
+    <div className="flex flex-col gap-5 text-[#14171F] min-h-full pb-10">
       {/* Breadcrumb Header */}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
           { label: analyticsT.title || "Phân tích" },
         ]}
       />
@@ -182,14 +209,14 @@ const WorkspaceAnalyticsPage = () => {
       {/* Page Title & Icon */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#ffecef] text-[#990011] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#FFEEF0] text-[#B00020] flex items-center justify-center flex-shrink-0">
             <BarChart3 size={24} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-none">
-              {analyticsT.title || "Phân tích"}
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#12141A] tracking-tight leading-none">
+              {analyticsT.title || "Thống kê"}
             </h1>
-            <p className="text-xs text-gray-500 font-medium mt-1">
+            <p className="text-xs text-[#6E788C] font-normal mt-1">
               {currentTabObj.subtitle}
             </p>
           </div>
@@ -197,9 +224,9 @@ const WorkspaceAnalyticsPage = () => {
       </div>
 
       {/* Main Analytics Container */}
-      <div className="w-full flex flex-col">
+      <div className="w-full flex flex-col gap-4">
         {/* Navigation Tabs Bar */}
-        <div className="flex gap-2 border-b border-border bg-white rounded-t-2xl px-3 pt-2 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-4 border-b border-[#DEDEE3] bg-transparent px-1 overflow-x-auto scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {tabsList.map((tab) => {
             const isActive = activeTab === tab.key
             return (
@@ -207,14 +234,15 @@ const WorkspaceAnalyticsPage = () => {
                 key={tab.key}
                 type="button"
                 onClick={() => handleTabChange(tab.key)}
-                className={`px-4 py-3.5 text-sm font-medium transition-all relative whitespace-nowrap cursor-pointer ${isActive
-                  ? "text-[#990011] font-bold"
-                  : "text-gray-500 hover:text-gray-800 font-medium"
-                  }`}
+                className={`pb-3.5 pt-1 text-sm transition-all relative whitespace-nowrap cursor-pointer select-none border-0 outline-none focus:outline-none focus-visible:outline-none focus:ring-0 ${
+                  isActive
+                    ? "text-[#B20514] font-bold"
+                    : "text-[#424A5C] hover:text-[#12141A] font-normal"
+                }`}
               >
                 {tab.label}
                 {isActive && (
-                  <span className="absolute left-3 right-3 bottom-0 h-0.5 bg-[#990011] rounded-t" />
+                  <span className="absolute left-0 right-0 bottom-0 h-[3px] bg-[#BF0514] rounded-t" />
                 )}
               </button>
             )
@@ -264,6 +292,7 @@ const WorkspaceAnalyticsPage = () => {
 
           {activeTab === "courses" && (
             <CoursesTab
+              group={group}
               courseFilter={courseFilter}
               queryParams={activeQueryParams}
             />

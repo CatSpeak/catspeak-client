@@ -100,6 +100,7 @@ export default {
     },
     review: {
       title: "Đánh giá lớp học",
+      subtitle: "Chia sẻ trải nghiệm của bạn để cộng đồng học tập phát triển.",
       shareExperience: "Chia sẻ trải nghiệm của bạn",
       optional: "(không bắt buộc)",
       detailRating: "Đánh giá chi tiết",
@@ -142,6 +143,7 @@ export default {
         later: "Để sau",
         review: "Đánh giá",
         share: "Chia sẻ ngay",
+        completedDate: "Hoàn thành ngày",
       },
     },
     documents: {

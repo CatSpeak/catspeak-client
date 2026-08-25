@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { ShieldCheck, Share2, Check, ArrowLeft, BadgeCheck } from "lucide-react"
 import {
   getSafeMediaUrl,
@@ -17,6 +18,7 @@ const PublicClassHero = ({
   onEnroll,
   onBack,
 }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
   const c = t.courses || {}
   const pc = c.publicClass || {}
@@ -93,24 +95,32 @@ const PublicClassHero = ({
           </h1>
 
           {/* Instructor Badge */}
-          <div className="flex items-center gap-3 pt-1">
+          <div
+            className="group cursor-pointer inline-flex items-center gap-3 pt-1 w-fit transition-all duration-200"
+            onClick={() => {
+              const teacherId = teacher.accountId || teacher.id
+              if (teacherId) {
+                navigate(`/profile/${encodeURIComponent(String(teacherId))}`)
+              }
+            }}
+          >
             {teacherAvatar ? (
               <img
                 src={teacherAvatar}
                 alt={teacherName}
-                className="w-10 h-10 rounded-full object-cover shadow-md"
+                className="w-10 h-10 rounded-full object-cover shadow-md transition-transform duration-200 group-hover:scale-105"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-[#b20a1c] text-white flex items-center justify-center font-bold text-base ring-2 ring-rose-400/40">
+              <div className="w-10 h-10 rounded-full bg-[#b20a1c] text-white flex items-center justify-center font-bold text-base ring-2 ring-rose-400/40 transition-transform duration-200 group-hover:scale-105">
                 {teacherName.charAt(0).toUpperCase()}
               </div>
             )}
             <div className="flex flex-col">
-              <div className="flex items-center gap-1 text-xs text-slate-300 font-medium">
+              <div className="flex items-center gap-1 text-xs text-slate-300 group-hover:text-cath-red-700 font-medium transition-colors">
                 {c.instructorLabel || pc.instructorLabel || "Giảng viên"}
-                <BadgeCheck size={13} className="text-rose-400 inline" />
+                <BadgeCheck size={13} className="text-rose-400 group-hover:text-cath-red-700 transition-colors inline" />
               </div>
-              <span className="text-white font-bold text-sm sm:text-base hover:text-rose-300 transition-colors">
+              <span className="text-white font-bold text-sm sm:text-base group-hover:text-cath-red-700 transition-colors">
                 {teacherName}
               </span>
             </div>

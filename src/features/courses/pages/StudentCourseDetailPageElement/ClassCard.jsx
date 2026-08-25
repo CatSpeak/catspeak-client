@@ -270,17 +270,19 @@ const ClassCard = ({
         >
           {/* Top Specification Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {/* Card 1: Remaining Slots */}
+            {/* Card 1: Registered Students */}
             <div className="bg-white rounded-2xl p-3.5 border border-gray-200 flex items-start gap-3 shadow-sm">
               <Users size={20} className="text-cath-red-700 shrink-0 mt-0.5" />
               <div className="flex flex-col gap-0.5">
                 <span className="text-gray-400 font-medium text-xs">
-                  {scd.remainingSlotsLabel ||
+                  {scd.registeredStudentsLabel ||
+                    scd.remainingSlotsLabel ||
+                    c.student?.registeredStudents ||
                     c.student?.remainingSlots ||
-                    "Số chỗ còn lại"}
+                    "Số người đã đăng ký"}
                 </span>
                 <span className="text-gray-900 font-bold text-base">
-                  {remainingSlots ?? "N/A"}/{totalSlots ?? "N/A"}
+                  {enrolledSeats ?? (totalSlots != null && remainingSlots != null ? Math.max(0, Number(totalSlots) - Number(remainingSlots)) : 0)}/{totalSlots ?? "N/A"}
                 </span>
               </div>
             </div>
@@ -350,7 +352,7 @@ const ClassCard = ({
                 {cls.rawSchedule.map((s, idx) => (
                   <div
                     key={idx}
-                    className="bg-white border border-gray-200 rounded-xl px-3.5 py-1.5 text-sm font-medium text-gray-700 shadow-sm"
+                    className="w-full sm:w-auto bg-white border border-gray-200 rounded-xl px-3.5 py-2 sm:py-1.5 text-sm font-medium text-gray-700 shadow-sm"
                   >
                     <strong className="text-gray-900 font-bold">
                       {formatScheduleDays(

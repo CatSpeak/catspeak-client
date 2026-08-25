@@ -50,4 +50,14 @@ export const LEVELS = {
     { labelKey: "intermediate", label: "Intermediate", value: "Intermediate" },
     { labelKey: "advanced", label: "Advanced", value: "Advanced" },
   ],
+  Japanese: [
+    { label: "N5", value: "N5" },
+    { label: "N4", value: "N4" },
+    { label: "N3", value: "N3" },
+    { label: "N2", value: "N2" },
+    { label: "N1", value: "N1" },
+    { labelKey: "beginner", label: "Beginner", value: "Beginner" },
+    { labelKey: "intermediate", label: "Intermediate", value: "Intermediate" },
+    { labelKey: "advanced", label: "Advanced", value: "Advanced" },
+  ],
 }

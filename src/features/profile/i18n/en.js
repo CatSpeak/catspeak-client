@@ -93,12 +93,14 @@ export default {
       searchPlaceholder: "Search classes...",
       courseLabel: "Course: ",
       exploreMore: "Explore courses",
+      reviewed: "Reviewed",
       reviewedLabel: "Reviewed",
       reviewNow: "Review now",
       completedLabel: "Completed",
     },
     review: {
       title: "Class review",
+      subtitle: "Share your experience to help the learning community grow.",
       shareExperience: "Share your experience",
       optional: "(optional)",
       detailRating: "Detailed rating",
@@ -141,6 +143,7 @@ export default {
         later: "Later",
         review: "Review",
         share: "Share now",
+        completedDate: "Completed on",
       },
     },
     documents: {

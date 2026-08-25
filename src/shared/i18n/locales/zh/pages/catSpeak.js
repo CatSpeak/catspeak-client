@@ -2,6 +2,7 @@ export default {
   anonymous: "匿名",
   connect: "连接",
   pass: "跳过",
+  report: "举报",
   interested: "已发送兴趣！请检查您的消息。",
   hidden: "已隐藏故事。",
   interactionFailed: "互动失败。",
@@ -14,6 +15,10 @@ export default {
     title: "探索世界",
     description: "即将推出：探索来自世界各地的文化、地点和人物。",
   },
+  reportSuccess: "举报成功",
+  reportFailed: "举报失败",
+  storyNotFound: "未找到故事",
+  cannotReportOwn: "无法举报自己的故事",
   reels: {
     title: "短视频",
     description: "观看我们社区的短视频。",
@@ -272,5 +277,7 @@ export default {
     feedback: "发送反馈",
     menu: "菜单",
   },
+  created: "已创建",
+  expiresIn: "即将过期",
   story: "故事",
 };

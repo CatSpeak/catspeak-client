@@ -1724,6 +1724,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 }
 
                 return {
+                  ...item,
                   id: item.id?.toString() || "",
                   itemId: item.itemId?.toString() || "",
                   type,
@@ -1835,6 +1836,7 @@ export const coursesApi = baseApi.injectEndpoints({
                 }
 
                 return {
+                  ...item,
                   id: item.id?.toString() || "",
                   itemId: item.itemId?.toString() || "",
                   type,
@@ -2511,9 +2513,18 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => {
-        const list = Array.isArray(response) ? response : response?.data || []
-        return list
+        if (Array.isArray(response)) return response
+        if (Array.isArray(response?.data)) return response.data
+        if (Array.isArray(response?.items)) return response.items
+        if (Array.isArray(response?.result)) return response.result
+        if (Array.isArray(response?.value)) return response.value
+        if (Array.isArray(response?.data?.items)) return response.data.items
+        if (Array.isArray(response?.data?.tasks)) return response.data.tasks
+        return []
       },
+      providesTags: (result, error, classId) => [
+        { type: "TeachingTasks", id: classId },
+      ],
     }),
 
     getTeacherCourseTeachingTasksCombined: builder.query({
@@ -2522,8 +2533,34 @@ export const coursesApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (response) => {
-        const list = Array.isArray(response) ? response : response?.data || []
-        return list
+        if (Array.isArray(response)) return response
+        if (Array.isArray(response?.data)) return response.data
+        if (Array.isArray(response?.items)) return response.items
+        if (Array.isArray(response?.result)) return response.result
+        if (Array.isArray(response?.value)) return response.value
+        if (Array.isArray(response?.data?.items)) return response.data.items
+        if (Array.isArray(response?.data?.tasks)) return response.data.tasks
+        return []
+      },
+      providesTags: (result, error, courseId) => [
+        { type: "TeachingTasks", id: courseId },
+      ],
+    }),
+
+    getTeacherAllTeachingTasksCombined: builder.query({
+      query: (params) => {
+        const queryStr = new URLSearchParams()
+        if (params?.page) queryStr.append("page", params.page)
+        if (params?.limit) queryStr.append("limit", params.limit)
+        if (params?.status) queryStr.append("status", params.status)
+        return {
+          url: `/teacher/teaching-tasks/combined?${queryStr.toString()}`,
+          method: "GET",
+        }
+      },
+      transformResponse: (response) => {
+        // Return the whole object which contains Items, TotalCount, Page, PageSize, TotalPages
+        return response
       },
     }),
 
@@ -2843,6 +2880,7 @@ export const {
   // Teaching Tasks Hooks
   useGetTeacherClassTeachingTasksCombinedQuery,
   useGetTeacherCourseTeachingTasksCombinedQuery,
+  useGetTeacherAllTeachingTasksCombinedQuery,
   // Analytics Hooks
   useGetAnalyticsCourseClassOverviewQuery,
   useGetAnalyticsCourseClassEffectivenessQuery,
