@@ -13,6 +13,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { useSidebar } from "@/shared/context/SidebarContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { toast } from "react-hot-toast";
 import {
@@ -178,6 +179,7 @@ const SettingToggleRow = ({
 );
 
 const CreateExamForm = ({ id, classData, language, t }) => {
+  const { isDesktopExpanded } = useSidebar();
   const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
@@ -1383,7 +1385,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
 
         {/* ─── Sub-header Row ─── */}
-        <div className="bg-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
+        <div className="bg-white mx-6 px-6 py-4 rounded-3xl border border-border flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
           <div className="flex flex-col gap-1.5">
             <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
               {title || p.unnamedExam}
@@ -1426,7 +1428,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             ) : (
               <div className="bg-white rounded-3xl border border-border p-6 md:p-8 flex flex-col gap-6 shadow-xs">
                 {/* Card Title & Score info */}
-                <div className="flex justify-between items-center border-b border-border pb-4 select-none">
+                <div className="flex justify-between items-center border-b border-cath-red-700 pb-4 select-none">
                   <h2 className="text-lg font-black text-[#990011] tracking-tight">
                     {(ce.questionNumber || "Question {{number}}").replace(
                       "{{number}}",
@@ -1745,7 +1747,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col flex-1 gap-6 text-[#2e2e2e] pb-24 sm:pb-28">
       {isLocallyCreatedQuiz && (isQuizError || hasMalformedQuizResponse) && (
         <div
           role="status"
@@ -1872,7 +1874,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                   ],
                   toolbar:
                     "bold italic underline strikethrough | emoticons link | bullist numlist",
-                  // placeholder: ce.descriptionPlaceholder,
+                  placeholder: ce.descriptionPlaceholder,
                   skin: "oxide",
                   setup: (editor) => {
                     editor.on("focus", () => { });
@@ -1976,7 +1978,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               </div>
             ) : (
               <div
-                className="border-2 border-dashed border-red-200 bg-[#990011]/[0.02] rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] cursor-pointer"
+                className="border-2 border-dashed border-red-200 bg-white hover:bg-red-50/20 rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-[#990011] cursor-pointer"
                 onDragOver={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -2110,7 +2112,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           <button
             type="button"
             onClick={handleAddQuestion}
-            className="border-2 border-dashed border-red-100 hover:border-[#990011] bg-red-50/10 hover:bg-red-50/20 transition-all rounded-3xl p-6 text-center cursor-pointer flex flex-col items-center justify-center gap-2 group"
+            className="border-2 border-dashed border-red-100 hover:border-[#990011] bg-white hover:bg-red-50/20 transition-all rounded-3xl p-6 text-center cursor-pointer flex flex-col items-center justify-center gap-2 group"
           >
             <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#990011] group-hover:scale-110 transition-transform">
               <Plus size={20} />
@@ -2428,23 +2430,26 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
       </form>
 
-      {/* ─── Footer Buttons ─── */}
-      <div className="flex justify-between items-center py-4 border-t border-border mt-4">
+      {/* ─── Footer Buttons (Fixed at Bottom) ─── */}
+      <div
+        className={`fixed bottom-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-border px-4 sm:px-6 py-3.5 flex justify-between items-center transition-[left] duration-200 ${isDesktopExpanded ? "left-0 lg:left-[352px]" : "left-0 lg:left-[72px]"
+          }`}
+      >
         <button
           type="button"
           onClick={handleCancel}
-          className="text-xs font-extrabold text-gray-500 hover:text-gray-700 transition-colors uppercase tracking-wider"
+          className="text-xs font-extrabold text-gray-500 hover:text-gray-700 transition-colors uppercase tracking-wider cursor-pointer py-2"
         >
           {ce.btnCancel || "Hủy"}
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Preview button */}
           <button
             type="button"
             disabled={isSubmitting}
             onClick={handlePreview}
-            className="p-2.5 border border-border hover:bg-gray-50 text-gray-600 rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
+            className="p-2 sm:p-2.5 border border-border hover:bg-gray-50 text-gray-600 rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
             title={ce.previewLabel || "Preview"}
           >
             <Eye size={18} />
@@ -2456,7 +2461,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
               type="button"
               disabled={isSubmitting}
               onClick={handleSaveDraft}
-              className="h-10 px-5 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-9 sm:h-10 px-3 sm:px-5 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-xs disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shrink-0"
             >
               {ce.btnSaveDraft || "Lưu nháp"}
             </button>
@@ -2467,7 +2472,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleSubmit()}
-            className="h-10 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 sm:h-10 px-4 sm:px-6 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-xl transition-all active:scale-95 shadow-md disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer shrink-0"
           >
             {isSubmitting
               ? ce.saving || "Saving..."

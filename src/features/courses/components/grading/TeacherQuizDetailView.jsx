@@ -26,17 +26,13 @@ import {
   Clock,
   Calendar,
   CheckSquare,
-  ChevronRight,
   ChevronUp,
   ChevronDown,
   Flag,
   Play,
   Pause,
   ArrowLeft,
-  Users,
   BarChart2,
-  FileText,
-  Search,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -1241,7 +1237,6 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
     { id: "overview", label: qg.overview },
     { id: "submissions", label: qg.submissions },
     { id: "stats", label: qg.statistics },
-    { id: "edit", label: qg.edit },
   ]
 
   const handleTabChange = (tabId) => {
@@ -1256,7 +1251,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   // Submissions search & modal state
-  const [submissionSearch, setSubmissionSearch] = useState("")
+  const [submissionSearch] = useState("")
   const [submissionPage, setSubmissionPage] = useState(1)
   const [selectedStudentSubmission, setSelectedStudentSubmission] = useState(null)
 
@@ -1562,7 +1557,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">{qg.questionCountLabel}</p>
+              <p className="text-sm text-gray-400 font-medium">{qg.questionCountLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
                 {interpolate(qg.questionCountValue, { count: totalQuestions })}
               </p>
@@ -1575,7 +1570,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">{qg.durationLabel}</p>
+              <p className="text-sm text-gray-400 font-medium">{qg.durationLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
                 {timeLimit !== null && timeLimit !== undefined
                   ? interpolate(qg.minutes, { count: timeLimit })
@@ -1590,7 +1585,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">{qg.deadlineLabel}</p>
+              <p className="text-sm text-gray-400 font-medium">{qg.deadlineLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
                 {formatDateRange(quizDetail.openTime, quizDetail.closeTime, qg, formatDate)}
               </p>
@@ -1603,7 +1598,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <CheckSquare className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-medium">{qg.attemptCountLabel}</p>
+              <p className="text-sm text-gray-400 font-medium">{qg.attemptCountLabel}</p>
               <p className="text-sm font-bold text-gray-900 mt-0.5">
                 {maxAttempts ?? "—"}
               </p>
@@ -1778,27 +1773,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
       {/* TAB CONTENT: Submissions (Danh sách nộp bài) */}
       {activeTab === "submissions" && (
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-border">
-          {/* Header & Search */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <h3 className="text-base font-bold text-gray-900">
-              {qg.submissions}
-            </h3>
-            <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={submissionSearch}
-                onChange={(e) => {
-                  setSubmissionSearch(e.target.value)
-                  setSubmissionPage(1)
-                }}
-                placeholder={qg.searchStudentsPlaceholder}
-                className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-xl border border-border text-xs focus:outline-none focus:border-[#990011]"
-              />
-            </div>
-          </div>
-
+        <>
           {isStudentsLoading || isStudentsFetching ? (
             <div role="status" aria-label={qg.loadingSubmissions} className="py-12 text-center">
               <LoadingSpinner />
@@ -1988,7 +1963,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               )}
             </>
           )}
-        </div>
+        </>
       )}
 
       {/* TAB CONTENT: Stats (Thống kê) */}
