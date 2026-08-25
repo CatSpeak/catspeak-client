@@ -7,24 +7,24 @@ export const profilePostsApi = socialApi.injectEndpoints({
         url: `/Post/user/${accountId}`,
         params: { page, pageSize },
       }),
-      providesTags: (result, error, { accountId }) => [
-        { type: "Post", id: `TIMELINE-${accountId}` },
-      ],
+      providesTags: ["Post"],
       serializeQueryArgs: ({ queryArgs }) => {
         return `getUserTimelinePosts-${queryArgs.accountId}`
       },
       merge: (currentCache, newItems, { arg }) => {
-        if (arg.page === 1) {
-          currentCache.data = newItems.data
+        const page = arg?.page ?? 1
+        if (page === 1) {
+          currentCache.data = newItems?.data || []
         } else {
-          const newPosts = newItems.data.filter(
-            (newPost) => !currentCache.data.some((p) => p.postId === newPost.postId)
+          const newPosts = (newItems?.data || []).filter(
+            (newPost) =>
+              !currentCache.data.some((p) => p.postId === newPost.postId),
           )
           currentCache.data.push(...newPosts)
         }
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.page !== previousArg?.page
+        return (currentArg?.page ?? 1) !== (previousArg?.page ?? 1)
       },
     }),
     getUserWallMedia: builder.query({
@@ -51,10 +51,7 @@ export const profilePostsApi = socialApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: (result, error, formData) => [
-        { type: "Post", id: `TIMELINE-CURRENT_USER` }, // We will invalidate everything to refresh or specifically the timeline of the current user
-        "Post"
-      ],
+      invalidatesTags: ["Post"],
     }),
     updatePost: builder.mutation({
       query: ({ postId, formData }) => ({

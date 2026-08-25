@@ -226,7 +226,10 @@ export const postsApi = socialApi.injectEndpoints({
           (comment) => {
             if (comment.currentUserReaction === type) {
               comment.currentUserReaction = null
-              comment.totalReactions = Math.max(0, (comment.totalReactions || 0) - 1)
+              comment.totalReactions = Math.max(
+                0,
+                (comment.totalReactions || 0) - 1,
+              )
             } else {
               if (!comment.currentUserReaction) {
                 comment.totalReactions = (comment.totalReactions || 0) + 1

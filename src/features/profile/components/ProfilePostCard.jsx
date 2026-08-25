@@ -56,6 +56,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
       setIsEditing(false)
     } catch (error) {
       console.error("Failed to update post:", error)
+      throw error
     }
   }
 
@@ -84,90 +85,92 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
 
   return (
     <>
-      <FluentCard className="space-y-4">
-        <PostHeader
-          post={post}
-          isOwnProfile={isOwnProfile}
-          onEdit={() => setIsEditing(true)}
-          onDelete={handleDeletePost}
-        />
+      <FluentCard padding="p-0" className="overflow-hidden">
+        <div className="p-4 sm:p-6 space-y-4">
+          <PostHeader
+            post={post}
+            isOwnProfile={isOwnProfile}
+            onEdit={() => setIsEditing(true)}
+            onDelete={handleDeletePost}
+          />
 
-        {post.title && post.title !== "Untitled" && (
-          <h4 className="text-2xl font-bold">{post.title}</h4>
-        )}
+          {post.title && post.title !== "Untitled" && (
+            <h4 className="text-2xl font-bold">{post.title}</h4>
+          )}
 
-        {post.content && (
-          <div>
-            <div
-              ref={contentRef}
-              className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
-            >
-              <PostContent html={post.content} className="text-sm text-[#606060]" />
-            </div>
-            {(isOverflowing || isExpanded) && (
-              <button
-                type="button"
-                onClick={() => setIsExpanded((prev) => !prev)}
-                className="inline-flex items-center min-h-[48px] -my-1.5 py-1.5 px-1 -mx-1 text-sm font-semibold text-cath-red-700 hover:text-cath-red-800 hover:underline focus:outline-none cursor-pointer touch-manipulation"
-              >
-                {isExpanded
-                  ? t.profile?.post?.showLess || "Thu gọn"
-                  : t.profile?.post?.seeMore || "Xem thêm"}
-              </button>
-            )}
-          </div>
-        )}
-
-        {post.media && post.media.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
-            {post.media.slice(0, 2).map((m) => (
+          {post.content && (
+            <div>
               <div
-                key={m.postMediaId}
-                className="aspect-square bg-gray-200 rounded-lg overflow-hidden"
+                ref={contentRef}
+                className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
               >
-                {m.mediaType === "Image" ? (
-                  <img
-                    src={m.mediaUrl}
-                    alt="media"
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                  />
-                ) : m.mediaType === "Video" ? (
-                  <video
-                    src={m.mediaUrl}
-                    controls
-                    preload="metadata"
-                    className="w-full h-full object-cover bg-black"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ) : (
-                  <a
-                    href={m.mediaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-full h-full flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors p-4 text-center border border-border"
-                  >
-                    <FileText className="w-10 h-10 text-blue-500 mb-2 shrink-0" />
-                    <span className="text-sm font-semibold text-gray-700 truncate w-full px-2">
-                      {m.fileName || t.profile?.post?.document || "Tài liệu"}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-1">
-                      {m.fileSize
-                        ? `${(m.fileSize / (1024 * 1024)).toFixed(2)} MB`
-                        : ""}
-                    </span>
-                  </a>
-                )}
+                <PostContent html={post.content} className="text-sm text-[#606060]" />
               </div>
-            ))}
-            {post.media.length > 2 && (
-              <div className="aspect-square bg-[#333333] rounded-lg flex items-center justify-center text-white text-xl font-bold">
-                +{post.media.length - 2}
-              </div>
-            )}
-          </div>
-        )}
+              {(isOverflowing || isExpanded) && (
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded((prev) => !prev)}
+                  className="inline-flex items-center min-h-[48px] -my-1.5 py-1.5 px-1 -mx-1 text-sm font-semibold text-cath-red-700 hover:text-cath-red-800 hover:underline focus:outline-none cursor-pointer touch-manipulation"
+                >
+                  {isExpanded
+                    ? t.profile?.post?.showLess || "Thu gọn"
+                    : t.profile?.post?.seeMore || "Xem thêm"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {post.media && post.media.length > 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              {post.media.slice(0, 2).map((m) => (
+                <div
+                  key={m.postMediaId}
+                  className="aspect-square bg-gray-200 rounded-lg overflow-hidden"
+                >
+                  {m.mediaType === "Image" ? (
+                    <img
+                      src={m.mediaUrl}
+                      alt="media"
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : m.mediaType === "Video" ? (
+                    <video
+                      src={m.mediaUrl}
+                      controls
+                      preload="metadata"
+                      className="w-full h-full object-cover bg-black"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <a
+                      href={m.mediaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full h-full flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors p-4 text-center border border-border"
+                    >
+                      <FileText className="w-10 h-10 text-blue-500 mb-2 shrink-0" />
+                      <span className="text-sm font-semibold text-gray-700 truncate w-full px-2">
+                        {m.fileName || t.profile?.post?.document || "Tài liệu"}
+                      </span>
+                      <span className="text-xs text-gray-400 mt-1">
+                        {m.fileSize
+                          ? `${(m.fileSize / (1024 * 1024)).toFixed(2)} MB`
+                          : ""}
+                      </span>
+                    </a>
+                  )}
+                </div>
+              ))}
+              {post.media.length > 2 && (
+                <div className="aspect-square bg-[#333333] rounded-lg flex items-center justify-center text-white text-xl font-bold">
+                  +{post.media.length - 2}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         <PostActionBar
           post={post}
@@ -178,7 +181,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
         />
 
         {isCommentsOpen && (
-          <div className="pt-2">
+          <div className="p-4 sm:p-6 pt-3 border-t border-border">
             <CommentsSection
               postId={post.postId}
               totalComments={post.totalComments || 0}
@@ -197,6 +200,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
         isOpen={isEditing}
         onClose={() => setIsEditing(false)}
         initialTitle={post.title || ""}
+        initialSlug={post.slug || ""}
         initialContent={post.content || ""}
         initialPrivacy={post.privacy || "Public"}
         initialLanguageCommunity={post.languageCommunity || "All"}

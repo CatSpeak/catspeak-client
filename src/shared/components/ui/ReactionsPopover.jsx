@@ -65,13 +65,21 @@ const ReactionsPopover = ({
   reactions = DEFAULT_REACTIONS,
   className = "",
   size = "sm",
+  placement = "center",
   color,
 }) => {
+  const placementClass =
+    placement === "left"
+      ? "left-0 origin-bottom-left"
+      : placement === "right"
+        ? "right-0 origin-bottom-right"
+        : "left-1/2 -translate-x-1/2 origin-bottom";
+
   return (
     <AnimatePresence>
       {show && (
         <div
-          className={`absolute bottom-full left-0 mb-1 z-20 origin-bottom-left group-hover/reactions:block ${className}`}
+          className={`absolute bottom-full mb-1 z-20 group-hover/reactions:block ${placementClass} ${className}`}
         >
           <FluentAnimation direction="up" distance={10} duration={0.2} exit>
             <div className="bg-white rounded-full shadow-lg border border-border p-1 flex items-center">
