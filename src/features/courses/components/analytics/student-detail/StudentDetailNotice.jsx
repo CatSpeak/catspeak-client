@@ -2,10 +2,16 @@ import React from "react"
 import { AlertTriangle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const StudentDetailNotice = ({ message, unmet = 3, total = 6 }) => {
+const StudentDetailNotice = ({ message, unmet = 0, total = 0 }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const sd = c.analytics?.studentDetail || {}
+
+  // Only display notice if there is an explicit warning message OR multiple recent unmet sessions
+  const shouldShow = Boolean(message) || (unmet >= 2 && total >= 2)
+  if (!shouldShow) {
+    return null
+  }
 
   const bannerText = message || (
     sd.warningBanner
