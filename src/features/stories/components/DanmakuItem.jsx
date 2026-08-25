@@ -51,12 +51,6 @@ const DanmakuItem = ({ story, onClick }) => {
       text: "text-[#6D49BF]",
       border: "border-[#F6F2FF]/40",
     },
-    // {
-    //   bg: "bg-[#FFFBFC]/60",
-    //   bgHover: "bg-[#FFFBFC]/80",
-    //   text: "text-[#4D373A]",
-    //   border: "border-[#FFFBFC]/40",
-    // },
   ]
 
   const themeIndex = (story.storyId || 0) % DANMAKU_THEMES.length
