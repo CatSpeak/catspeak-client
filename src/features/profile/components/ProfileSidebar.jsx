@@ -2,7 +2,7 @@ import React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import HorizontalCard from "@/shared/components/ui/HorizontalCard"
+import ListItem from "@/shared/components/ui/ListItem"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { useGetFriendRecommendationsQuery } from "../../../store/api/social/friendshipApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -16,8 +16,8 @@ const getUserRoleLabel = (user, t) => {
       user.level.trim().toLowerCase() === "expert")
 
   return isTeacher
-    ? (t.profile?.friends?.teacher || "Giảng viên")
-    : (t.profile?.friends?.member || "Thành viên")
+    ? t.profile?.friends?.teacher || "Giảng viên"
+    : t.profile?.friends?.member || "Thành viên"
 }
 
 const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
@@ -34,29 +34,42 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
   const recommendations = Array.isArray(recData?.data)
     ? recData.data
     : Array.isArray(recData)
-    ? recData
-    : []
+      ? recData
+      : []
 
   return (
     <div className="lg:col-span-1">
       {/* Suggested Friends Block */}
-      <FluentCard className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">{t.profile?.sidebar?.suggestedFriends || "Đề xuất bạn bè"}</h2>
+      <FluentCard padding="p-0" className="overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="p-4 sm:p-6 flex items-center justify-between">
+          <h2 className="text-lg font-bold">
+            {t.profile?.sidebar?.suggestedFriends || "Đề xuất bạn bè"}
+          </h2>
         </div>
 
-        <div className="space-y-4">
+        {/* Body / ListItems */}
+        <div className="flex flex-col gap-1 px-1">
           {isLoadingRecs ? (
-            <div className="text-sm text-gray-500">{t.profile?.sidebar?.loading || "Đang tải đề xuất..."}</div>
+            <div className="p-4 sm:p-6 text-sm text-gray-500">
+              {t.profile?.sidebar?.loading || "Đang tải đề xuất..."}
+            </div>
           ) : recommendations.length === 0 ? (
-            <div className="text-sm text-gray-500">{t.profile?.sidebar?.noSuggestions || "Không có đề xuất nào."}</div>
+            <div className="p-4 sm:p-6 text-sm text-gray-500">
+              {t.profile?.sidebar?.noSuggestions || "Không có đề xuất nào."}
+            </div>
           ) : (
             recommendations.map((user) => (
-              <HorizontalCard
+              <ListItem
                 key={user.accountId}
+                hoverEffect={true}
+                lines={2}
+                className="rounded-xl overflow-hidden"
                 onClick={() => {
                   const isWorkspace = location.pathname.startsWith("/workspace")
-                  navigate(`${isWorkspace ? "/workspace" : ""}/profile/${user.accountId}`)
+                  navigate(
+                    `${isWorkspace ? "/workspace" : ""}/profile/${user.accountId}`,
+                  )
                 }}
                 leftContent={
                   <Avatar
@@ -67,26 +80,30 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
                   />
                 }
               >
-                <h3 className="font-semibold">
+                <span className="truncate">
                   {user.nickname || user.username}
-                </h3>
+                </span>
 
-                <p className="text-sm text-[#606060]">
+                <span className="text-sm text-[#606060] truncate">
                   {getUserRoleLabel(user, t)}
-                </p>
-              </HorizontalCard>
+                </span>
+              </ListItem>
             ))
           )}
-          {recommendations.length > 0 && onNavigateToFriends && (
+        </div>
+
+        {/* Footer */}
+        {recommendations.length > 0 && onNavigateToFriends && (
+          <div className="p-4 sm:p-6 pt-2">
             <PillButton
               onClick={() => onNavigateToFriends("find")}
               variant="secondary"
-              className="w-full h-10 text-sm mt-2"
+              className="w-full"
             >
               {t.profile?.sidebar?.seeMore || "Xem thêm"}
             </PillButton>
-          )}
-        </div>
+          </div>
+        )}
       </FluentCard>
     </div>
   )

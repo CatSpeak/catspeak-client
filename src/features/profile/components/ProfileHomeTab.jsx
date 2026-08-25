@@ -23,7 +23,7 @@ const ProfileHomeTab = ({
   const { user } = useAuth()
   const { t } = useLanguage()
   const { data: profileResponse } = useGetUserProfileQuery()
-  const currentUser = profileResponse?.data || user
+  const currentUser = profileResponse?.data ?? profileResponse ?? user
 
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [initialFiles, setInitialFiles] = useState([])
@@ -48,6 +48,7 @@ const ProfileHomeTab = ({
       setIsEditorOpen(false)
     } catch (error) {
       console.error("Failed to create post:", error)
+      throw error
     }
   }
 
@@ -72,10 +73,10 @@ const ProfileHomeTab = ({
   }
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-3 pb-20">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* Main Content - Timeline */}
       <div
-        className={`space-y-3 ${isOwnProfile ? "lg:col-span-2" : "lg:col-span-3"}`}
+        className={`space-y-4 ${isOwnProfile ? "lg:col-span-2" : "lg:col-span-3"}`}
       >
         {isOwnProfile && (
           <>
@@ -83,7 +84,7 @@ const ProfileHomeTab = ({
               <div className="flex items-center gap-3 p-4 sm:p-6">
                 <Avatar
                   size={40}
-                  src={currentUser?.avatarImageUrl}
+                  src={currentUser?.avatarImageUrl || currentUser?.avatarUrl}
                   name={currentUser?.nickname || currentUser?.username || "U"}
                 />
                 <button
