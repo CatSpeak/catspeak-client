@@ -523,9 +523,14 @@ const resources = [
 
   // 9. Trò chơi / Games
   {
-    id: "gametiengnhat",
+    id: "xe-tang-hoc-kanji",
     lang: "ja",
-    url: "https://gametiengnhat.onhat.vn/",
+    url: "https://gametiengnhat.onhat.vn/?nhom=xe-tang-hoc-kanji#games",
+  },
+  {
+    id: "hansha-dojo",
+    lang: "ja",
+    url: "https://gametiengnhat.onhat.vn/games/hansha-dojo/",
   },
 
   // 10. Dành cho trẻ em / Nhập môn

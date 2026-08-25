@@ -939,10 +939,20 @@ export const websites = [
     lang: "ja",
     subItems: [
       {
-        key: "gametiengnhat",
-        label: "Game Tiếng Nhật",
-        path: "/resources/gametiengnhat",
-        description: "Học tiếng Nhật qua các trò chơi tương tác thú vị.",
+        key: "xe-tang-hoc-kanji",
+        label: "Xe tăng bắn Kanji",
+        path: "/resources/xe-tang-hoc-kanji",
+        description:
+          "Học tiếng Nhật qua game nhỏ vài phút, có tài liệu từ vựng theo chủ đề, thi đấu cùng đồng nghiệp và leo bảng xếp hạng.",
+        img: "https://gametiengnhat.onhat.vn/favicon.svg",
+        color: "#c73e3a",
+      },
+      {
+        key: "hansha-dojo",
+        label: "Luyện phản xạ nói tiếng Nhật",
+        path: "/resources/hansha-dojo",
+        description:
+          "Đề là câu tiếng Việt. Bạn nói thành tiếng câu tiếng Nhật tương ứng — không gõ gì cả — rồi mở đáp án và tự chấm. 253 mẫu ngữ pháp thông dụng nhất, luyện bằng 256 câu, từ N5 lên N1 — 十級 tới 名人.",
         img: "https://gametiengnhat.onhat.vn/favicon.svg",
         color: "#c73e3a",
       },
