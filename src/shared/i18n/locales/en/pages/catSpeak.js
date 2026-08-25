@@ -22,6 +22,8 @@ export default {
   storyNotFound: "Story not found",
   cannotReportOwn: "Cannot report own story",
   reportedWarning: "Reported",
+  reportedTooltip: "This story has been reported by users",
+  myReportedTooltip: "Your story has been reported by users",
   reels: {
     title: "Reels",
     description: "Watch short videos from our community.",

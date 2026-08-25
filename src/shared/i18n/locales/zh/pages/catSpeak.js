@@ -20,6 +20,8 @@ export default {
   storyNotFound: "未找到故事",
   cannotReportOwn: "无法举报自己的故事",
   reportedWarning: "已被举报",
+  reportedTooltip: "该信件已被用户举报违规",
+  myReportedTooltip: "您的信件已被用户举报",
   reels: {
     title: "短视频",
     description: "观看我们社区的短视频。",

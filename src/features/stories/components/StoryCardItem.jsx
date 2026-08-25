@@ -5,11 +5,13 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { MessageSquare, AlertCircle } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import { useTimezone } from "@/shared/hooks/useTimezone";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 dayjs.extend(relativeTime);
 
 const StoryCardItem = ({ story, onClick }) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { formatRelative } = useTimezone();
   if (!story) return null;
 
@@ -46,7 +48,7 @@ const StoryCardItem = ({ story, onClick }) => {
       {story.isReported && (
         <span
           className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md z-10"
-          title="Báo cáo"
+          title={t.catSpeak?.reportedTooltip || t.catSpeak?.reportedWarning || "Bị báo cáo"}
         >
           <AlertCircle size={13} strokeWidth={2.5} />
         </span>

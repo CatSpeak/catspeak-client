@@ -3,6 +3,7 @@ import { AlertCircle } from "lucide-react"
 import { BubbleButton } from "@/shared/components/ui/buttons"
 import styles from "../styles/danmaku.module.css"
 import colors from "@/shared/utils/colors"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * A single floating danmaku message pill with glassmorphism effect.
@@ -12,6 +13,7 @@ import colors from "@/shared/utils/colors"
  * @param {(story: Object) => void} props.onClick
  */
 const DanmakuItem = ({ story, onClick }) => {
+  const { t } = useLanguage()
   const DANMAKU_THEMES = [
     {
       bg: "bg-[#FFF2EA]/60",
@@ -81,7 +83,7 @@ const DanmakuItem = ({ story, onClick }) => {
       {story.isReported && (
         <span
           className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md z-10"
-          title="Báo cáo"
+          title={t.catSpeak?.reportedTooltip || t.catSpeak?.reportedWarning || "Bị báo cáo"}
         >
           <AlertCircle size={13} strokeWidth={2.5} />
         </span>

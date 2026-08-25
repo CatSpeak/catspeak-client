@@ -22,6 +22,8 @@ export default {
       "近日公開: 世界中の文化、場所、人々を探索します。",
   },
   reportedWarning: "報告済み",
+  reportedTooltip: "このストーリーはユーザーから報告されており",
+  myReportedTooltip: "あなたのストーリーは報告されており",
   reels: {
     title: "リール",
     description: "コミュニティのショート動画を見る。",
