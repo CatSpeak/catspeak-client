@@ -196,7 +196,10 @@ const getVoucherUsagesText = (
 
 const VoucherSection = ({
   classData = {},
+  courseData = {},
   id,
+  classId,
+  courseId,
   navigate: propNavigate,
   cd = {},
   className = "",
@@ -207,17 +210,22 @@ const VoucherSection = ({
   const c = t.courses || {}
   const vt = t.vouchers || {}
 
-  const classTargetId = id || classData?.id
+  const isCourse = Boolean(courseId || courseData?.id)
+  const activeTargetId = isCourse
+    ? courseId || courseData?.id || id
+    : classId || classData?.id || id
 
   const { data: vouchersResponse, isLoading: isLoadingVouchers } =
     useGetVouchersQuery(
       {
-        classId: classTargetId,
+        ...(isCourse
+          ? { courseId: activeTargetId }
+          : { classId: activeTargetId }),
         sponsorType: "Instructor",
         page: 1,
-        pageSize: 10,
+        pageSize: 50,
       },
-      { skip: !classTargetId },
+      { skip: !activeTargetId },
     )
 
   const activeVouchers = useMemo(() => {
@@ -231,13 +239,18 @@ const VoucherSection = ({
       return s === "active" || s === "2" || s === "hoạt động"
     })
     const candidates = activeList.length > 0 ? activeList : list
-    return candidates.slice(0, 2)
+    return candidates
   }, [vouchersResponse])
 
   const handleViewAll = () => {
-    if (classTargetId) {
+    if (!activeTargetId) return
+    if (isCourse) {
       navigate(
-        `/workspace/courses/class/${encodeURIComponent(String(classTargetId))}?tab=vouchers`,
+        `/workspace/courses/details/${encodeURIComponent(String(activeTargetId))}?tab=vouchers`,
+      )
+    } else {
+      navigate(
+        `/workspace/courses/class/${encodeURIComponent(String(activeTargetId))}?tab=vouchers`,
       )
     }
   }
@@ -347,7 +360,9 @@ const VoucherSection = ({
         <div className="text-center py-6 text-gray-400 text-xs font-medium bg-white/60 border border-dashed border-gray-200 rounded-2xl">
           {vt.card?.noAppliedVouchers ||
             cd.noAppliedVouchers ||
-            "Chưa có ưu đãi nào đang áp dụng cho lớp học này."}
+            (isCourse
+              ? "Chưa có ưu đãi nào đang áp dụng cho khóa học này."
+              : "Chưa có ưu đãi nào đang áp dụng cho lớp học này.")}
         </div>
       )}
     </div>

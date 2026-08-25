@@ -1,11 +1,5 @@
 import React, { useRef, useEffect } from "react"
-import { ChevronDown, ChevronLeft } from "lucide-react"
-
-const DISPLAY_NAMES = {
-  en: "English",
-  vi: "Tiếng Việt",
-  zh: "中文",
-}
+import { ChevronLeft } from "lucide-react"
 
 /**
  * Language selection popover.
@@ -17,6 +11,7 @@ const DISPLAY_NAMES = {
  * @param {() => void}     [onClose]        — called when user clicks outside
  * @param {() => void}     [onBack]         — called when the back button is clicked (replaces label)
  * @param {string}         [backLabel]      — text for the back button
+ * @param {Record<string,string>} [languageNames] — localized display names per language code
  */
 const SubtitleLanguagePicker = ({
   languages,
@@ -26,6 +21,7 @@ const SubtitleLanguagePicker = ({
   onClose,
   onBack,
   backLabel = "Back",
+  languageNames,
   className = "w-full rounded-lg border border-border bg-white shadow-lg",
 }) => {
   const ref = useRef(null)
@@ -67,7 +63,7 @@ const SubtitleLanguagePicker = ({
                   : "text-gray-800"
               }`}
             >
-              {DISPLAY_NAMES[lang] ?? lang}
+              {languageNames?.[lang] ?? lang}
             </button>
           ))}
         </div>

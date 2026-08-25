@@ -26,10 +26,11 @@ export default {
       vocabulary: "Từ vựng",
       pronunciation: "Phát âm",
       news: "Tin tức & Bài đọc",
-      exam: "Luyện thi IELTS / HSK",
+      exam: "Luyện thi IELTS / HSK / JLPT",
       reading: "Đọc mở rộng",
       dictionary: "Từ điển",
       writing: "Viết chữ Hán",
+      games: "Trò chơi",
       kids: "Dành cho trẻ em",
     },
     results: {

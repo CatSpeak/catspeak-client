@@ -25,10 +25,11 @@ export default {
       vocabulary: "Vocabulary",
       pronunciation: "Pronunciation",
       news: "News & Articles",
-      exam: "IELTS / HSK Prep",
+      exam: "IELTS / HSK / JLPT Prep",
       reading: "Graded Readers",
       dictionary: "Dictionaries",
       writing: "Hanzi Writing",
+      games: "Games",
       kids: "For Kids",
     },
     results: {

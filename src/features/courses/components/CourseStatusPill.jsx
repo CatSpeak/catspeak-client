@@ -43,7 +43,7 @@ const CourseStatusPill = ({ status, label, labels, className = "" }) => {
   }
 
   return (
-    <span className={`h-6 inline-flex items-center justify-center whitespace-nowrap shrink-0 w-fit text-[11px] font-semibold px-2.5 rounded-full leading-none ${config.bgClass} ${config.textClass} ${className}`}>
+    <span className={`h-6 inline-flex items-center justify-center whitespace-nowrap shrink-0 w-fit text-xs font-semibold px-2.5 rounded-full leading-none ${config.bgClass} ${config.textClass} ${className}`}>
       {label || getCourseStatusLabel(upperStatus, localizedLabels)}
     </span>
   )

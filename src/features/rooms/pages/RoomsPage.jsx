@@ -48,6 +48,7 @@ const RoomsPage = () => {
     en: "English",
     zh: "Chinese",
     vi: "Vietnamese",
+    ja: "Japanese",
   }
   const languageType = lang ? [langMap[lang]] : undefined
 
@@ -64,7 +65,7 @@ const RoomsPage = () => {
   const proceedCreateOneOnOne = async () => {
     const action = () => {
       actions.handleCreateOneOnOneSession(() => {
-        const supportedLangCode = ["zh", "vi", "en"].includes(lang)
+        const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
           ? lang
           : "en"
         const preferences = {

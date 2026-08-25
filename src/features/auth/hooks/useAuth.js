@@ -32,6 +32,8 @@ export const useAuth = () => {
       role,
       status,
       isAdmin: role === "Admin",
+      isTeacher: user?.accountType === "Teacher",
+      accountType: user?.accountType,
       logout: () => {
         dispatch(logout())
         dispatch(baseApi.util.resetApiState())

@@ -34,7 +34,12 @@ export const useSubtitleControls = ({
   })
 
   // Derive the two supported language codes from room metadata
-  const LANG_MAP = { English: "en", Chinese: "zh", Vietnamese: "vi" }
+  const LANG_MAP = {
+    English: "en",
+    Chinese: "zh",
+    Vietnamese: "vi",
+    Japanese: "ja",
+  }
   const roomLangCode = LANG_MAP[room?.languageType] ?? "en"
   const subtitleSupportedLangs =
     roomLangCode === "vi" ? ["vi"] : [roomLangCode, "vi"]
@@ -42,7 +47,7 @@ export const useSubtitleControls = ({
   // Extract community language from URL (e.g., /zh/meet/216 -> "zh")
   const pathParts = window.location.pathname.split("/")
   const communityLang = pathParts[1]
-  const defaultDisplayLang = ["en", "vi", "zh"].includes(communityLang)
+  const defaultDisplayLang = ["en", "vi", "zh", "ja"].includes(communityLang)
     ? communityLang
     : roomLangCode
 

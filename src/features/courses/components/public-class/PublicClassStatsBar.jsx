@@ -59,10 +59,17 @@ const PublicClassStatsBar = ({ classData }) => {
   const scheduleTitle =
     scheduleParts.length > 0 ? scheduleParts.join("\n") : defaultScheduleText
 
-  const remaining = classData?.remainingSlots ?? 0
-  const capacity = classData?.capacity ?? 0
-  const spotsTitle = (pc.spotsLeft || "{{remaining}}/{{capacity}} chỗ")
-    .replace("{{remaining}}", remaining)
+  const capacity = classData?.capacity ?? classData?.slots ?? 0
+  const enrolled =
+    classData?.enrolledCount ??
+    classData?.studentCount ??
+    classData?.enrolledStudents ??
+    (classData?.remainingSlots != null
+      ? Math.max(0, capacity - classData.remainingSlots)
+      : 0)
+  const spotsTitle = (pc.spotsLeft || "{{enrolled}}/{{capacity}} chỗ")
+    .replace("{{enrolled}}", enrolled)
+    .replace("{{remaining}}", enrolled)
     .replace("{{capacity}}", capacity)
 
   const stats = [

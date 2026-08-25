@@ -21,6 +21,7 @@ const LiveMessages = ({ languageCommunity }) => {
     handleCreate,
     handleInteract,
     handleDelete,
+    handleReport,
     loadingStories,
     loadingMyStories,
   } = useStories(languageCommunity);
@@ -77,6 +78,21 @@ const LiveMessages = ({ languageCommunity }) => {
 
   const handlePass = (story) => {
     handleInteract(story.storyId, 2);
+  };
+
+  const handleReportAction = async (story) => {
+    try {
+      await handleReport(story.storyId);
+      toast.success(t.catSpeak?.reportSuccess || "Story reported successfully.");
+    } catch (error) {
+      if (error?.status === 404) {
+        toast.error(t.catSpeak?.storyNotFound || "Story not found or has expired.");
+      } else if (error?.status === 400) {
+        toast.error(t.catSpeak?.cannotReportOwn || "You cannot report your own story.");
+      } else {
+        toast.error(t.catSpeak?.reportFailed || "Failed to report story.");
+      }
+    }
   };
 
   const breadcrumbItems = [
@@ -150,6 +166,7 @@ const LiveMessages = ({ languageCommunity }) => {
           story={selectedStory}
           onConnect={handleConnect}
           onPass={handlePass}
+          onReport={handleReportAction}
           onClose={() => setSelectedStory(null)}
         />
         <MyStoryModal

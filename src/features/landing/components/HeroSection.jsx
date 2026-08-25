@@ -3,33 +3,42 @@ import { Element1, Element4 } from "../assets"
 import { useAuth } from "@/features/auth"
 import { useNavigate } from "react-router-dom"
 import LanguageCard from "./LanguageCard"
+import AnimatedCounter from "./AnimatedCounter"
+import { motion } from "framer-motion"
 import { Users, BookOpen, GraduationCap, ChevronRight } from "lucide-react"
-
-const stats = [
-  {
-    value: "50.000 +",
-    label: "Người tham gia",
-    icon: Users,
-    badgeColor: "bg-rose-50 text-[#910B09] border border-rose-100",
-  },
-  {
-    value: "1.200 +",
-    label: "Tài nguyên học tập",
-    icon: BookOpen,
-    badgeColor: "bg-rose-50 text-[#910B09] border border-rose-100",
-  },
-  {
-    value: "300 +",
-    label: "Giáo viên đăng ký",
-    icon: GraduationCap,
-    badgeColor: "bg-rose-50 text-[#910B09] border border-rose-100",
-  },
-]
 
 const HeroSection = ({ openAuthModal }) => {
   const { t } = useLanguage()
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
+
+  const heroT = t?.landing?.hero || {}
+  const homeT = t?.home || {}
+  const statsT = heroT.stats || {}
+
+  const stats = [
+    {
+      numericValue: 50000,
+      suffix: " +",
+      label: statsT.participants || "Người tham gia",
+      icon: Users,
+      badgeColor: "bg-rose-50 text-[#910B09] border border-rose-100",
+    },
+    {
+      numericValue: 1200,
+      suffix: " +",
+      label: statsT.learningResources || "Tài nguyên học tập",
+      icon: BookOpen,
+      badgeColor: "bg-rose-50 text-[#910B09] border border-rose-100",
+    },
+    {
+      numericValue: 300,
+      suffix: " +",
+      label: statsT.registeredTeachers || "Giáo viên đăng ký",
+      icon: GraduationCap,
+      badgeColor: "bg-rose-50 text-[#910B09] border border-rose-100",
+    },
+  ]
 
   const handleAction = () => {
     const saved = localStorage.getItem("communityLanguage")
@@ -37,16 +46,17 @@ const HeroSection = ({ openAuthModal }) => {
     if (isAuthenticated) {
       navigate(`/${community}/community`)
     } else {
-      openAuthModal("login")
+      openAuthModal?.("login")
     }
   }
 
   return (
-    <div className="relative w-full bg-white px-6 sm:px-8 md:px-10 pt-16 pb-48 lg:pt-24 lg:pb-56">
+    <div className="relative w-full bg-white px-6 sm:px-8 md:px-10 pt-16 pb-12 lg:pt-24 lg:pb-48 overflow-visible">
       {/* Background Element - Full natural hero ribbon height without cut-off */}
       <img
         src={Element1}
-        alt="Background Element"
+        alt=""
+        aria-hidden="true"
         className="absolute -top-10 left-0 w-full h-full object-cover object-top opacity-80 pointer-events-none"
       />
 
@@ -55,59 +65,100 @@ const HeroSection = ({ openAuthModal }) => {
           {/* Left Side - Text Content */}
           <div className="z-20 flex flex-col justify-center gap-6 text-center lg:text-left">
             <div className="space-y-4">
-              <h3 className="font-semibold text-cath-red-600 text-base lg:text-sm tracking-wider uppercase">
-                {t.home?.subtitle}
-              </h3>
-              <h2 className="font-bold text-[#910B09] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl leading-tight">
-                <span className="text-black">{t.home?.heroTitle1}</span>
+              <motion.h3
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="font-semibold text-cath-red-600 text-base lg:text-sm tracking-wider uppercase"
+              >
+                {heroT.subtitle || homeT.subtitle}
+              </motion.h3>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.75, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                className="font-bold text-[#910B09] text-3xl sm:text-4xl lg:text-5xl xl:text-6xl leading-tight"
+              >
+                <span className="text-black">
+                  {heroT.titlePrefix || homeT.heroTitle1}
+                </span>
                 <br />
-                <span className="text-[#910B09]">{t.home?.heroTitle2}</span>
-              </h2>
-              <p className="text-gray-600 text-base sm:text-lg max-w-md sm:max-w-xl lg:max-w-lg xl:max-w-xl mx-auto lg:mx-0">
-                {t.home?.heroSubtitle}
-              </p>
+                <span className="text-[#910B09]">
+                  {heroT.titleHighlight || homeT.heroTitle2}
+                </span>
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.75, delay: 0.36, ease: [0.16, 1, 0.3, 1] }}
+                className="text-gray-600 text-base sm:text-lg max-w-md sm:max-w-xl lg:max-w-lg xl:max-w-xl mx-auto lg:mx-0"
+              >
+                {heroT.description || homeT.heroSubtitle}
+              </motion.p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mt-2 justify-center lg:justify-start">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col sm:flex-row gap-4 mt-2 justify-center lg:justify-start"
+            >
               <button
                 onClick={handleAction}
-                className="group inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-base font-semibold text-white bg-[#910B09] hover:bg-[#7a0907] transition-colors duration-300 w-full sm:w-auto mx-auto lg:mx-0 shadow-lg hover:shadow-xl"
+                className="group inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-base font-semibold text-white bg-[#910B09] hover:bg-[#7a0907] transition-colors duration-300 w-full sm:w-auto mx-auto lg:mx-0 shadow-lg hover:shadow-xl cursor-pointer"
               >
-                <span>{t.home?.ctaButton}</span>
+                <span>{heroT.ctaButton || homeT.ctaButton}</span>
                 <ChevronRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1.5" />
               </button>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Right Side - Screen Image */}
-          <div className="w-full z-10 flex justify-center lg:justify-end xl:justify-center items-center lg:pl-4 xl:pl-8">
+          {/* Right Side - Screen Image bounded to grid column */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.85, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full z-10 flex justify-center lg:justify-end xl:justify-center items-center overflow-visible"
+          >
             <LanguageCard />
-          </div>
+          </motion.div>
         </div>
 
         {/* Premium Numbers Section */}
-        <div className="mt-16 lg:mt-24 mb-10 relative z-20 max-w-3xl mx-auto bg-white/95 backdrop-blur-xl rounded-xl shadow-sm border border-border p-4 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-12 sm:mt-16 lg:mt-24 sm:mb-10 relative z-20 max-w-sm sm:max-w-3xl mx-auto bg-white/95 backdrop-blur-xl rounded-xl shadow-sm border border-border/80 grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/60 hover:shadow-md transition-shadow duration-300"
+        >
           {stats.map((item, idx) => {
             const IconComponent = item.icon
             return (
               <div
                 key={idx}
-                className="flex items-center justify-center"
+                className="flex items-center sm:justify-center p-4 sm:py-2.5 sm:px-4 group/stat hover:bg-rose-50/30 transition-colors duration-200"
               >
-                <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left cursor-default">
+                <div className="flex items-center gap-4 text-left cursor-default w-full max-w-[220px] sm:max-w-none sm:w-auto">
                   {/* Icon Badge */}
                   <div
-                    className={`w-11 h-11 rounded-xl ${item.badgeColor} flex items-center justify-center shadow-inner flex-shrink-0`}
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${item.badgeColor} flex items-center justify-center shadow-sm flex-shrink-0 group-hover/stat:scale-105 transition-transform duration-200`}
                   >
-                    <IconComponent size={20} />
+                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
 
                   {/* Text Details */}
-                  <div>
-                    <div className="text-3xl font-black tracking-tight">
-                      {item.value}
+                  <div className="flex flex-col justify-center">
+                    <div className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight text-gray-900">
+                      <AnimatedCounter
+                        to={item.numericValue}
+                        suffix={item.suffix}
+                        delay={0.3 + idx * 0.12}
+                        duration={1.8}
+                      />
                     </div>
-                    <div className="text-sm font-semibold text-secondary">
+                    <div className="text-xs sm:text-sm text-secondary whitespace-nowrap">
                       {item.label}
                     </div>
                   </div>
@@ -115,7 +166,7 @@ const HeroSection = ({ openAuthModal }) => {
               </div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
 
       {/* Bottom Illustration Line - Positioned completely BELOW the numbers card */}
