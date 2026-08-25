@@ -960,7 +960,8 @@ export default {
       QuizInvalidQuestion: "One or more questions are invalid.",
       QuizInvalidQuestionType: "Please select a valid question type.",
       QuizQuestionContentRequired: "Please enter content for all questions.",
-      QuizInvalidQuestionPoints: "Question points must be non-negative.",
+      QuizInvalidQuestionPoints: "Question points must be greater than 0.",
+      QuizInvalidTotalScore: "Total points of all questions ({{actual}}) must equal the chosen scale ({{expected}}).",
       QuizInvalidQuestionOptions:
         "Each multiple-choice question requires at least 2 non-empty options.",
       QuizInvalidCorrectAnswers: "Please select valid correct answers.",

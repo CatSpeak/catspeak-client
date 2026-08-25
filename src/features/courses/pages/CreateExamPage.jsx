@@ -70,10 +70,54 @@ const CLOSED_QUIZ_RESTRICTED_FIELDS = new Set([
   "resultReleaseMode",
 ]);
 
-const getValidationMessage = (validation, ce) => {
+const getValidationMessage = (validation, ce, form = null) => {
   const firstError = validation?.errors?.[0];
+  if (!firstError) {
+    return (
+      ce?.validation?.invalidForm ||
+      "Quiz information is invalid. Please double check."
+    );
+  }
+
+  const code = firstError.code;
+  let template = ce?.validation?.[code] || firstError.message;
+
+  if (template) {
+    if (code === "QuizInvalidTotalScore" && form) {
+      const scaleChoice = form.scoreScale || form.gradingScale;
+      const targetScore =
+        scaleChoice === "scale100" || scaleChoice === "Hundred" ? 100 : 10;
+      const totalPoints = (form.questions || []).reduce((sum, q) => {
+        const p = Number(q?.score ?? q?.points);
+        return sum + (Number.isFinite(p) ? p : 0);
+      }, 0);
+      const roundedTotal = Math.round(totalPoints * 100) / 100;
+      template = template
+        .replace("{{actual}}", roundedTotal)
+        .replace("{{expected}}", targetScore)
+        .replace("{{scale}}", targetScore);
+    } else {
+      if (firstError.actualTotal !== undefined) {
+        template = template.replace("{{actual}}", firstError.actualTotal);
+      }
+      if (firstError.expectedTotal !== undefined) {
+        template = template.replace("{{expected}}", firstError.expectedTotal);
+      }
+      if (firstError.scale !== undefined) {
+        template = template.replace("{{scale}}", firstError.scale);
+      }
+    }
+
+    if (firstError.questionIndex !== undefined) {
+      template = template.replace(
+        "{{questionNumber}}",
+        firstError.questionIndex + 1,
+      );
+    }
+    return template;
+  }
+
   return (
-    ce?.validation?.[firstError?.code] ||
     ce?.validation?.invalidForm ||
     "Quiz information is invalid. Please double check."
   );
@@ -574,9 +618,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
   const handleScoreChange = useCallback(
     (index, val) => {
-      const num = parseFloat(val) || 0;
+      const parsed = val === "" ? "" : parseFloat(val);
+      const scoreVal = val === "" ? "" : (isNaN(parsed) ? 0 : parsed);
       setFormField("questions", (prev) =>
-        prev.map((q, i) => (i === index ? { ...q, score: num } : q)),
+        prev.map((q, i) => (i === index ? { ...q, score: scoreVal } : q)),
       );
     },
     [setFormField],
@@ -928,7 +973,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   );
 
   // Total score calculation
-  const totalScoreVal = questions.reduce((sum, q) => sum + (q.score || 0), 0);
+  const totalScoreVal = Math.round(
+    questions.reduce((sum, q) => sum + (Number(q.score) || 0), 0) * 100,
+  ) / 100;
+  const targetScale = scoreScale === "scale100" ? 100 : 10;
+  const isScoreMatched = Math.abs(totalScoreVal - targetScale) < 0.001;
 
   // Save/Submit Actions
   const handleCancel = () => {
@@ -1012,7 +1061,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
     const validation = validateQuizForm(form, { mode: "draft" });
     if (!validation.isValid) {
-      toast.error(getValidationMessage(validation, ce));
+      toast.error(getValidationMessage(validation, ce, form));
       return;
     }
 
@@ -1065,10 +1114,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     const shouldPublish =
       wantsPublish && (!effectiveQuizId || currentStatus === "Draft");
     const validation = validateQuizForm(form, {
-      mode: shouldPublish ? "publish" : "draft",
+      mode: wantsPublish ? "publish" : "draft",
     });
     if (!validation.isValid) {
-      toast.error(getValidationMessage(validation, ce));
+      toast.error(getValidationMessage(validation, ce, form));
       return;
     }
 
@@ -1298,10 +1347,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     ).length;
 
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-805 -mx-4 -mt-6">
+      <div className="min-h-screen flex flex-col font-sans text-gray-805 -mx-4 -mt-6">
         {/* ─── Top Yellow/Orange Banner ─── */}
-        <div className="bg-[#f2a93b] text-gray-900 px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm select-none shrink-0">
-          <span className="text-sm font-extrabold tracking-wide flex items-center gap-2">
+        <div className="text-cath-red-700 px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none shrink-0">
+          <span className="text-sm font-bold tracking-wide flex items-center">
+            <span className="w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 shrink-0">
+              <Eye size={18} />
+            </span>
             <span className="w-2.5 h-2.5 bg-red-650 rounded-full animate-pulse" />
             {p.bannerText}
           </span>
@@ -1331,7 +1383,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
 
         {/* ─── Sub-header Row ─── */}
-        <div className="bg-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border shadow-xs shrink-0 select-none">
+        <div className="bg-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
           <div className="flex flex-col gap-1.5">
             <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
               {title || p.unnamedExam}
@@ -1831,7 +1883,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           </div>
 
           {/* Heading: Questions list */}
-          <div className="flex justify-between items-center px-2">
+          <div className="flex flex-wrap justify-between items-center gap-2 px-2">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-gray-800">
                 {ce.questionsList || "Danh sách câu hỏi"}
@@ -1845,10 +1897,25 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 <Info className="w-5 h-5" />
               </IconButton>
             </div>
-            <span className="text-sm font-semibold text-gray-500">
-              {ce.totalScore || "Tổng điểm"}:{" "}
-              <span className="text-[#990011] font-bold">{totalScoreVal}</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm font-semibold text-gray-500 flex items-center gap-1.5">
+                {ce.totalScore || "Tổng điểm"}:
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black transition-all ${questions.length > 0 && isScoreMatched
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs"
+                    : "bg-red-50 text-[#990011] border border-red-200 shadow-2xs"
+                    }`}
+                  title={`${totalScoreVal} / ${targetScale}`}
+                >
+                  <span>{totalScoreVal}</span>
+                  <span className="opacity-40 font-normal">/</span>
+                  <span>{targetScale}</span>
+                  {questions.length > 0 && isScoreMatched && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block ml-0.5" />
+                  )}
+                </span>
+              </span>
+            </div>
           </div>
 
           {/* Questions Container */}

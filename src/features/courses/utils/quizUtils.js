@@ -368,7 +368,7 @@ const QUIZ_ERROR_MESSAGES = {
   },
   Forbidden: {
     en: "You do not have permission to perform this action.",
-      vi: "Bạn không có quyền thực hiện thao tác này.",
+    vi: "Bạn không có quyền thực hiện thao tác này.",
     zh: "您没有权限执行此操作。",
   },
 }
@@ -840,12 +840,12 @@ export const validateQuizForm = (
       }
 
       const points = toFiniteNumber(question.score ?? question.points)
-      if (!Number.isFinite(points) || points < 0) {
+      if (points === undefined || !Number.isFinite(points) || points <= 0) {
         addValidationError(
           errors,
           `${fieldPrefix}.score`,
           "QuizInvalidQuestionPoints",
-          `Enter a non-negative score for question ${questionIndex + 1}.`,
+          `Points for question ${questionIndex + 1} must be greater than 0.`,
           questionIndex
         )
       }
@@ -926,6 +926,25 @@ export const validateQuizForm = (
         }
       }
     })
+
+    if (!isDraft && form.questions.length > 0) {
+      const scaleChoice = form.scoreScale || form.gradingScale
+      const targetScore = (scaleChoice === "scale100" || scaleChoice === "Hundred") ? 100 : 10
+      const totalPoints = form.questions.reduce((sum, q) => {
+        const p = toFiniteNumber(q?.score ?? q?.points)
+        return sum + (Number.isFinite(p) ? p : 0)
+      }, 0)
+      const roundedTotal = Math.round(totalPoints * 100) / 100
+
+      if (Math.abs(roundedTotal - targetScore) > 0.001) {
+        addValidationError(
+          errors,
+          "totalScore",
+          "QuizInvalidTotalScore",
+          `The total points of all questions (${roundedTotal}) must equal the selected scale (${targetScore}).`
+        )
+      }
+    }
   }
 
   return {

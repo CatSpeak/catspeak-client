@@ -960,7 +960,8 @@ export default {
       QuizInvalidQuestion: "Có câu hỏi không hợp lệ.",
       QuizInvalidQuestionType: "Vui lòng chọn loại câu hỏi hợp lệ.",
       QuizQuestionContentRequired: "Vui lòng nhập nội dung cho tất cả câu hỏi.",
-      QuizInvalidQuestionPoints: "Điểm câu hỏi phải là số không âm.",
+      QuizInvalidQuestionPoints: "Điểm cho từng câu hỏi phải lớn hơn 0.",
+      QuizInvalidTotalScore: "Tổng điểm của các câu hỏi ({{actual}}) phải bằng thang điểm đã chọn ({{expected}}).",
       QuizInvalidQuestionOptions:
         "Mỗi câu trắc nghiệm cần ít nhất hai lựa chọn không trống.",
       QuizInvalidCorrectAnswers: "Vui lòng chọn đáp án đúng hợp lệ.",

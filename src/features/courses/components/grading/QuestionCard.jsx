@@ -219,18 +219,20 @@ const QuestionCard = ({
             </label>
 
             {/* Points field */}
-            <div className="flex items-center gap-1 ml-1">
-              <span className="text-xs font-bold text-gray-500">
+            <div className="flex items-center gap-1.5 ml-0.5 sm:ml-1">
+              <span className="text-xs font-bold text-gray-500 shrink-0">
                 {ce.point || "Điểm"}:
               </span>
               <input
                 type="number"
-                step="0.1"
-                value={question.score}
+                min="0.1"
+                step="any"
+                value={question.score ?? ""}
                 onChange={(e) =>
                   handleScoreChange(index, e.target.value)
                 }
-                className="w-12 py-1.5 bg-gray-50 border border-border rounded-xl text-center text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
+                className="w-14 sm:w-16 px-1.5 py-1.5 bg-gray-50 border border-border rounded-xl text-center text-xs font-extrabold text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] transition-all"
+                placeholder="5"
               />
             </div>
           </div>
