@@ -40,6 +40,13 @@ export const postsApi = socialApi.injectEndpoints({
         )
       },
     }),
+    getLandingPosts: builder.query({
+      query: (limit = 12) => ({
+        url: "/Post/landing",
+        params: { limit },
+      }),
+      providesTags: ["Post"],
+    }),
     getPostById: builder.query({
       query: (postId) => `/Post/${postId}`,
       providesTags: (result, error, id) => [{ type: "Post", id }],
@@ -248,6 +255,7 @@ export const postsApi = socialApi.injectEndpoints({
 
 export const {
   useGetPostsQuery,
+  useGetLandingPostsQuery,
   useGetPostByIdQuery,
   useGetPostBySlugQuery,
   useGetSharedPostQuery,

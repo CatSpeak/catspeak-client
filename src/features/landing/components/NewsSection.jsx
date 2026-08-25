@@ -2,7 +2,8 @@ import { useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ArrowRight, Newspaper } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetPostsQuery } from "@/store/api/social/postsApi"
+import { useGetLandingPostsQuery } from "@/store/api/social/postsApi"
+import { getCommunityName } from "@/features/news/utils/newsUtils"
 import { PillButton } from "@/shared/components/ui/buttons"
 import LandingNewsCard from "./LandingNewsCard"
 import LandingNewsSkeletonCard from "./LandingNewsSkeletonCard"
@@ -17,11 +18,7 @@ const NewsSection = () => {
   const navLang =
     lang || (savedLang && savedLang !== "vi" ? savedLang : language) || "zh"
 
-  const { data, isLoading } = useGetPostsQuery({
-    page: 1,
-    pageSize: 10,
-    postType: "1",
-  })
+  const { data, isLoading } = useGetLandingPostsQuery(12)
 
   const publicPosts = useMemo(() => {
     const rawList = Array.isArray(data?.data)
