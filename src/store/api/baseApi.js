@@ -3,6 +3,10 @@ import { setCredentials, logout } from "../slices/authSlice"
 import { setServerDown, setServerUp } from "../slices/serverStatusSlice"
 import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
 import { getBrowserTimeZone } from "@/shared/constants/timezones"
+import {
+  savePendingAutoCrashReport,
+  flushPendingAutoCrashReport,
+} from "@/shared/utils/telemetry/autoCrashSync"
 
 // ─── Helpers ────────────────────────────────────────────────────────
 const AUTH_LOG = "[Auth]"
@@ -294,6 +298,7 @@ export function createReauthBaseQuery(queryResolver) {
     if (!isAborted && isServerError) {
       const isHealthy = await checkIsServerHealthy()
       if (!isHealthy) {
+        savePendingAutoCrashReport({ failedUrl: url, status })
         console.warn(
           AUTH_LOG,
           `Server unreachable for ${url} (health check failed) — not an auth issue, skipping logout`,
@@ -314,6 +319,7 @@ export function createReauthBaseQuery(queryResolver) {
         "Server is reachable again — clearing server-down flag",
       )
       api.dispatch(setServerUp())
+      flushPendingAutoCrashReport()
     }
 
     // ── Global Data Normalization & Unwrapping ───────────────────────

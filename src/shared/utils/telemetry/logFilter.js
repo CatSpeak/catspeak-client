@@ -60,9 +60,9 @@ export function extractRelevantLogs() {
     }
   }
 
-  // 3. Get last 5 network calls & last 5 logs as context breadcrumbs
-  const recentNetworkBreadcrumbs = allNetwork.slice(-5)
-  const recentConsoleBreadcrumbs = allConsole.slice(-5)
+  // 3. Get last 10 network calls & last 10 logs as context breadcrumbs
+  const recentNetworkBreadcrumbs = allNetwork.slice(-10)
+  const recentConsoleBreadcrumbs = allConsole.slice(-10)
 
   // 4. Combine into structured objects
   const networkReport = {
