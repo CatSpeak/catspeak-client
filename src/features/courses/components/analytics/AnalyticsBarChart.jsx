@@ -16,35 +16,36 @@ const AnalyticsBarChart = ({ rows = [], formatter = (val) => numberVi(val) }) =>
   }
 
   return (
-    <div className="flex flex-col gap-3 py-2">
+    <div className="flex flex-col gap-2.5 py-1 w-full min-w-0">
       {rows.map((row, idx) => {
-        const pct = Math.min(Math.max((row.value / max) * 100, 2), 100)
+        const val = row.value ?? 0
+        const pct = Math.min(Math.max((val / max) * 100, 2), 100)
         return (
           <div
             key={idx}
-            className="grid grid-cols-[24px_minmax(120px,1.2fr)_minmax(100px,2fr)_minmax(80px,auto)] gap-2.5 items-center text-xs"
+            className="grid grid-cols-[16px_minmax(50px,1.2fr)_minmax(40px,1.5fr)_minmax(36px,auto)] gap-2 items-center text-xs w-full min-w-0"
           >
             {/* Rank badge */}
-            <span className="w-5 h-5 rounded-full bg-[#fff0d7] text-[#9a5a00] font-bold flex items-center justify-center text-[11px]">
+            <span className="font-semibold text-[#B25905] text-xs text-center">
               {idx + 1}
             </span>
 
             {/* Label */}
-            <span className="font-medium text-gray-800 truncate" title={row.label}>
+            <span className="font-medium text-[#14171F] truncate min-w-0" title={row.label}>
               {row.label}
             </span>
 
             {/* Track & Bar Fill */}
-            <div className="h-2.5 rounded-md bg-[#f0f1f3] overflow-hidden w-full">
+            <div className="h-2 rounded-full bg-[#EDEDF0] overflow-hidden w-full min-w-0">
               <div
-                className="h-full rounded-md bg-gradient-to-r from-[#e11d2e] to-[#f06a77] transition-all duration-500"
+                className="h-full rounded-full bg-[#E51A33] transition-all duration-500"
                 style={{ width: `${pct}%` }}
               />
             </div>
 
             {/* Formatted Value */}
-            <strong className="text-right font-semibold text-gray-900 truncate">
-              {formatter(row.value)}
+            <strong className="text-right font-semibold text-[#14171F] tabular-nums whitespace-nowrap text-[11px] sm:text-xs min-w-0">
+              {formatter(val)}
             </strong>
           </div>
         )

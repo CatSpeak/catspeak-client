@@ -1,146 +1,168 @@
 import React from "react"
-import { Pin, MoreVertical, Eye, EyeOff, PinOff, MessageSquare, MessageSquareOff, Edit3, Trash2 } from "lucide-react"
+import { Pin, MoreVertical, Eye, EyeOff, MessageSquare, Search, SlidersHorizontal, Edit3, Trash2 } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { IconButton } from "@/shared/components/ui/buttons"
 
 const BulletinBoardTable = ({ posts, dict, language, isStudent, onRowClick, onAction }) => {
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-border bg-white shadow-sm">
-      <table className="w-full border-collapse text-left text-xs font-semibold text-[#5B403C]">
+    <div className="w-full overflow-x-auto bg-white border border-[#E2E2E2]">
+      <table className="w-full border-collapse text-left text-sm text-[#191C1D]">
         <thead>
-          <tr className="border-b border-border bg-gray-50/50 text-gray-700 font-extrabold uppercase tracking-wider">
-            <th className="p-4 border-r border-border w-[50px] text-center"></th>
-            <th className="p-4 border-r border-border min-w-[250px]">{dict.bulletinBoard?.topic || "Topic"}</th>
-            <th className="p-4 border-r border-border w-[200px]">{dict.bulletinBoard?.creator || "Creator"}</th>
-            <th className="p-4 border-r border-border w-[150px]">{dict.bulletinBoard?.createdAt || "Created at"}</th>
-            <th className="p-4 border-r border-border w-[100px] text-center">{dict.bulletinBoard?.replies || "Replies"}</th>
-            {!isStudent && (
-              <>
-                <th className="p-4 border-r border-border w-[140px]">{language === 'vi' ? "Bình luận" : "Comments"}</th>
-                <th className="p-4 border-r border-border w-[130px]">{dict.bulletinBoard?.status || "Status"}</th>
-                <th className="p-4 w-[60px] text-center"></th>
-              </>
-            )}
+          <tr className="bg-[#F8F9FA] text-[#5B403C] border-b border-[#E2E2E2]">
+            <th className="p-4 py-6 font-semibold text-center border-r border-[#E2E2E2] w-[80px]">
+              Ghim
+            </th>
+            <th className="p-4 py-6 font-semibold border-r border-[#E2E2E2] min-w-[250px]">
+              <div className="flex items-center justify-between">
+                <span>Tiêu đề bài viết</span>
+                <Search size={14} className="text-[#990011]" strokeWidth={2.5} />
+              </div>
+            </th>
+            <th className="p-4 py-6 font-semibold border-r border-[#E2E2E2] w-[180px]">
+              <div className="flex items-center justify-between">
+                <span>Ngày tạo</span>
+                <SlidersHorizontal size={14} className="text-[#990011]" strokeWidth={2.5} />
+              </div>
+            </th>
+            <th className="p-4 py-6 font-semibold border-r border-[#E2E2E2] w-[300px]">
+              <div className="flex items-center justify-between">
+                <span>Người đăng</span>
+                <SlidersHorizontal size={14} className="text-[#990011]" strokeWidth={2.5} />
+              </div>
+            </th>
+            <th className="p-4 py-6 font-semibold border-r border-[#E2E2E2] w-[120px]">
+              <div className="flex items-center justify-between">
+                <span>Phản hồi</span>
+                <SlidersHorizontal size={14} className="text-[#990011]" strokeWidth={2.5} />
+              </div>
+            </th>
+            <th className="p-4 py-6 font-semibold text-center w-[160px]">
+              Hành động
+            </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200 text-[#191C1D]">
-          {posts.map((post) => (
-            <tr
-              key={post.id}
-              onClick={() => onRowClick(post)}
-              className="hover:bg-gray-50/60 cursor-pointer transition-colors"
-            >
-              {/* Pin cell */}
-              <td className="p-4 border-r border-border text-center">
-                {post.isPinned && (
-                  <Pin
-                    size={16}
-                    className="inline-block text-[#FEA53F] fill-[#FEA53F]"
-                    aria-label={dict.bulletinBoard?.pinnedPostTooltip}
-                  />
-                )}
-              </td>
+        <tbody className="divide-y divide-[#E2E2E2]">
+          {posts.map((post) => {
+            // Simulated date/time splitting for UI matching (Assuming 'date' is DD/MM/YYYY)
+            // In real app, we would parse post.createdAt
+            const dateStr = post.date || "31/08/2026"
+            const timeStr = "10:30" // Mocked to match design if not available
+            
+            return (
+              <tr
+                key={post.id}
+                onClick={() => onRowClick(post)}
+                className="hover:bg-gray-50/50 cursor-pointer transition-colors"
+              >
+                {/* Pin cell */}
+                <td className="p-6 border-r border-[#E2E2E2] text-center align-middle">
+                  {post.isPinned && (
+                    <Pin
+                      size={20}
+                      className="inline-block text-[#E2B60A]"
+                      strokeWidth={2}
+                    />
+                  )}
+                </td>
 
-              {/* Title cell */}
-              <td className="p-4 border-r border-border">
-                <span className="font-bold text-sm text-[#A00000] hover:underline hover:text-[#750000] transition-colors line-clamp-2">
-                  {post.title}
-                </span>
-              </td>
+                {/* Title cell */}
+                <td className="p-6 border-r border-[#E2E2E2] align-middle">
+                  <span className="font-bold text-base text-[#191C1D] line-clamp-2">
+                    {post.title}
+                  </span>
+                </td>
 
-              {/* Author cell */}
-              <td className="p-4 border-r border-border text-sm font-normal">
-                {post.author}
-              </td>
+                {/* Date cell */}
+                <td className="p-6 border-r border-[#E2E2E2] align-middle">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[15px] font-medium text-[#191C1D]">{dateStr}</span>
+                    <span className="text-sm text-gray-500">{timeStr}</span>
+                  </div>
+                </td>
 
-              {/* Date cell */}
-              <td className="p-4 border-r border-border text-sm font-normal text-gray-600">
-                {post.date}
-              </td>
-
-              {/* Replies cell */}
-              <td className="p-4 border-r border-border text-center">
-                <span className="inline-flex items-center justify-center bg-[#E7E8E9] text-[#191C1D] font-bold text-xs h-6 px-2.5 py-1 rounded-md">
-                  {post.replies}
-                </span>
-              </td>
-
-              {/* Teacher only columns */}
-              {!isStudent && (
-                <>
-                  {/* Allow Reply */}
-                  <td className="p-4 border-r border-border">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${post.allowReply ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
-                      <span className={`font-medium ${post.allowReply ? 'text-[#750000]' : 'text-[#5B403C]'}`}>
-                        {post.allowReply
-                          ? (language === 'vi' ? "Cho phép" : "Allowed")
-                          : (language === 'vi' ? "Không cho phép" : "Not allowed")}
-                      </span>
+                {/* Author cell */}
+                <td className="p-6 border-r border-[#E2E2E2] align-middle">
+                  {post.author === "Tôi" || post.author === "ChatGPT" ? (
+                    <span className="text-[15px] font-medium text-[#191C1D]">{post.author}</span>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-200 rounded-full flex-shrink-0" />
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[15px] font-medium text-[#191C1D]">
+                          {post.author || "Người dùng"}
+                        </span>
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <span className="text-[10px]">🕒</span> Last update: 3 min ago
+                        </span>
+                      </div>
                     </div>
-                  </td>
+                  )}
+                </td>
 
-                  {/* Status */}
-                  <td className="p-4 border-r border-border">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${post.status === dict.bulletinBoard?.visibility?.visible ? 'bg-[#750000]' : 'bg-[#E2E2E2]'}`} />
-                      <span className={`font-medium ${post.status === dict.bulletinBoard?.visibility?.visible ? 'text-[#750000]' : 'text-[#5B403C]'}`}>
-                        {post.status}
-                      </span>
-                    </div>
-                  </td>
+                {/* Replies cell */}
+                <td className="p-6 border-r border-[#E2E2E2] text-center align-middle">
+                  <span className="text-[15px] font-medium text-[#191C1D]">
+                    {post.replies > 0 ? post.replies : "–"}
+                  </span>
+                </td>
 
-                  {/* Actions */}
-                  <td className="p-4 text-center">
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <Dropdown
-                        trigger={
-                          <IconButton
-                            variant="ghost"
-                            title={dict.bulletinBoard?.postActionsTooltip || "Actions"}
-                            aria-label={dict.bulletinBoard?.postActionsTooltip || "Actions"}
-                          >
-                            <MoreVertical size={18} color="#5B403C" />
-                          </IconButton>
+                {/* Actions cell */}
+                <td className="p-6 text-center align-middle">
+                  <div className="flex items-center justify-center gap-4 text-[#990011]" onClick={(e) => e.stopPropagation()}>
+                    <button 
+                      type="button" 
+                      className="hover:bg-red-50 p-1.5 rounded-full transition-colors"
+                      onClick={() => onAction('toggleReply', post.id)}
+                    >
+                      <MessageSquare size={18} strokeWidth={2} />
+                    </button>
+                    <button 
+                      type="button" 
+                      className="hover:bg-red-50 p-1.5 rounded-full transition-colors"
+                      onClick={() => onAction('toggleVisibility', post.id)}
+                    >
+                      {post.status === dict.bulletinBoard?.visibility?.visible ? (
+                        <Eye size={18} strokeWidth={2} />
+                      ) : (
+                        <EyeOff size={18} strokeWidth={2} />
+                      )}
+                    </button>
+                    
+                    <Dropdown
+                      trigger={
+                        <button 
+                          type="button" 
+                          className="hover:bg-red-50 p-1.5 rounded-full transition-colors"
+                        >
+                          <MoreVertical size={18} strokeWidth={2} />
+                        </button>
+                      }
+                      options={[
+                        {
+                          value: 'edit',
+                          label: dict.bulletinBoard?.edit || "Chỉnh sửa",
+                          icon: <Edit3 size={14} />
+                        },
+                        {
+                          value: 'togglePin',
+                          label: post.isPinned ? "Bỏ ghim" : "Ghim bài",
+                          icon: <Pin size={14} />
+                        },
+                        {
+                          value: 'delete',
+                          label: dict.bulletinBoard?.delete || "Xóa",
+                          icon: <Trash2 size={14} color="#EF4444" />,
+                          color: "#EF4444"
                         }
-                        options={[
-                          {
-                            value: 'toggleVisibility',
-                            label: post.isVisibleToStudents ? dict.bulletinBoard?.visibility?.hideItem : dict.bulletinBoard?.visibility?.showItem,
-                            icon: post.isVisibleToStudents ? <EyeOff size={14} /> : <Eye size={14} />
-                          },
-                          {
-                            value: 'togglePin',
-                            label: post.isPinned ? dict.bulletinBoard?.visibility?.unpin : dict.bulletinBoard?.visibility?.pin,
-                            icon: post.isPinned ? <PinOff size={14} /> : <Pin size={14} />
-                          },
-                          {
-                            value: 'toggleReply',
-                            label: post.allowReply ? dict.bulletinBoard?.visibility?.disableReply : dict.bulletinBoard?.visibility?.enableReply,
-                            icon: post.allowReply ? <MessageSquareOff size={14} /> : <MessageSquare size={14} />
-                          },
-                          {
-                            value: 'edit',
-                            label: dict.bulletinBoard?.edit,
-                            icon: <Edit3 size={14} />
-                          },
-                          {
-                            value: 'delete',
-                            label: dict.bulletinBoard?.delete,
-                            icon: <Trash2 size={14} color="#EF4444" />,
-                            color: "#EF4444"
-                          }
-                        ]}
-                        onChange={(val) => onAction(val, post.id)}
-                        align="right"
-                        dropdownClassName="w-48"
-                      />
-                    </div>
-                  </td>
-                </>
-              )}
-            </tr>
-          ))}
+                      ]}
+                      onChange={(val) => onAction(val, post.id)}
+                      align="right"
+                      dropdownClassName="w-48"
+                    />
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>

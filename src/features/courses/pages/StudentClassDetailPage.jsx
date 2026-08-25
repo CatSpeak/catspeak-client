@@ -28,7 +28,8 @@ import StudentClassOverviewTab from "../components/overview/StudentClassOverview
 import StudentClassOverview from "./StudentClassOverview"
 
 const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
-const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
+// const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
+const StudentGradingTab = lazy(() => import("../components/grading/StudentGradingTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
 
 const TabLoadingFallback = () => (
@@ -400,12 +401,18 @@ const StudentClassDetailPage = () => {
           />
         )}
 
-        {activeTab === "grading" && isEnrolled && (
+        {/* {activeTab === "grading" && isEnrolled && (
           <ClassGradingTab
             id={id}
             isStudent={true}
             language={language}
             cd={cd}
+          />
+        )} */}
+
+        {activeTab === "grading" && isEnrolled && (
+          <StudentGradingTab
+            id={id}
           />
         )}
       </Suspense>

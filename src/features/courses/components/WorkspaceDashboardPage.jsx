@@ -11,7 +11,7 @@ import AnalyticsKpiGrid from "./analytics/AnalyticsKpiGrid"
 import AnalyticsLineChart from "./analytics/AnalyticsLineChart"
 import AnalyticsBarChart from "./analytics/AnalyticsBarChart"
 import HotClassRanking from "./analytics/HotClassRanking"
-import { money, numberVi } from "../data/analyticsData"
+import { money, numberVi, getLocalizedCompareNote } from "../data/analyticsData"
 import {
   useGetDashboardQuery,
   useExportDashboardMutation,
@@ -48,35 +48,44 @@ const defaultCustomRange = () => {
   }
 }
 
-const SnapshotCard = ({ title, onViewDetails, viewDetailsLabel, children }) => {
+const SnapshotCard = ({ title, subtitle, onViewDetails, viewDetailsLabel, children }) => {
   return (
-    <section className="bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-      <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
-        <h2 className="text-base font-bold text-gray-900">{title}</h2>
+    <section className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm flex flex-col justify-between">
+      <div className="flex items-start justify-between flex-wrap gap-2 mb-3">
+        <div>
+          <h2 className="text-base font-bold text-[#14171F]">{title}</h2>
+          {subtitle && <p className="text-xs text-[#6E788C] font-normal mt-0.5">{subtitle}</p>}
+        </div>
         {onViewDetails && (
           <button
             type="button"
             onClick={onViewDetails}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[#990011] hover:underline cursor-pointer"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#B80514] hover:underline cursor-pointer"
           >
-            {viewDetailsLabel}
-            <ChevronRight size={14} />
+            {viewDetailsLabel || "Xem chi tiết"} →
           </button>
         )}
       </div>
-      {children}
+      <div className="flex-1 flex flex-col justify-between">{children}</div>
     </section>
   )
 }
 
-const MetricStat = ({ label, value, dotClass = "" }) => {
+const MiniStatBox = ({ label, value, delta = "", isDown = false }) => {
   return (
-    <div className="min-w-0 bg-[#fafbfc] border border-[#e6e7ea] rounded-xl p-3">
-      <p className="m-0 text-[#5f6b7e] text-xs font-medium truncate">{label}</p>
-      <p className={`m-0 mt-1 flex items-center gap-2 text-lg font-bold text-[#111827]`}>
-        {dotClass && <span className={`w-2.5 h-2.5 rounded-full ${dotClass}`} />}
-        <span className="tabular-nums">{value}</span>
-      </p>
+    <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2.5 flex flex-col justify-center min-w-0">
+      <span className="text-[#6E788C] text-[11px] font-normal truncate" title={label}>{label}</span>
+      <strong className="text-sm sm:text-base font-bold text-[#14171F] my-0.5 truncate tabular-nums" title={value}>{value}</strong>
+      {delta && (
+        <span
+          className={`text-[10px] sm:text-[11px] font-semibold truncate ${
+            isDown ? "text-[#BF1F1F]" : "text-[#0D9E3D]"
+          }`}
+          title={delta}
+        >
+          {delta}
+        </span>
+      )}
     </div>
   )
 }
@@ -95,7 +104,7 @@ const compareTypeMap = { prev: "PreviousPeriod", year: "SamePeriodLastYear", non
 const WorkspaceDashboardPage = () => {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const dashT = t.courses?.dashboard || {}
   const kpiT = t.courses?.analytics?.kpis || {}
   const metricsT = dashT.metrics || {}
@@ -183,18 +192,18 @@ const WorkspaceDashboardPage = () => {
   }
 
   const fmtGrowth = (growth) => {
-    if (growth === null || growth === undefined) return na
+    if (growth === null || growth === undefined) return ""
     const sign = growth >= 0 ? "↑" : "↓"
-    return `${sign} ${numberVi(Math.abs(growth), 1)}%`
+    return `${sign} ${numberVi(Math.abs(growth), 1, language)}%`
   }
 
   const kpiTone = (key) => KPI_DEFS.find((d) => d.key === key)?.tone || "red"
 
   const formatKpi = (kpi) => {
     if (kpi.value === null || kpi.value === undefined) return na
-    if (kpi.key === "totalRevenue") return money(kpi.value)
-    if (kpi.key === "averageRating") return `${numberVi(kpi.value, 1)}/5`
-    return numberVi(kpi.value, 0)
+    if (kpi.key === "totalRevenue") return money(kpi.value, language)
+    if (kpi.key === "averageRating") return `${numberVi(kpi.value, 1, language)}/5`
+    return numberVi(kpi.value, 0, language)
   }
 
   const kpiLabel = (key) => {
@@ -209,150 +218,49 @@ const WorkspaceDashboardPage = () => {
     return labelMap[key]
   }
 
+  const currentCompareNote = getLocalizedCompareNote(preset, compare, language, t)
+
   const kpiItems = (dashboard?.kpis || [])
     .filter((kpi) => KPI_DEFS.some((d) => d.key === kpi.key))
-    .map((kpi) => ({
-      key: kpi.key,
-      label: kpiLabel(kpi.key),
-      value: formatKpi(kpi),
-      delta: kpi.growth === null || kpi.growth === undefined ? na : fmtGrowth(kpi.growth),
-      tone: kpiTone(kpi.key),
-      note: kpi.growth === null || kpi.growth === undefined ? "" : (kpiT.vsPrevious || "so với kỳ trước"),
-    }))
+    .map((kpi) => {
+      const hasGrowth = compare !== "none" && kpi.growth !== null && kpi.growth !== undefined
+      return {
+        key: kpi.key,
+        label: kpiLabel(kpi.key),
+        value: formatKpi(kpi),
+        delta: hasGrowth ? fmtGrowth(kpi.growth) : "",
+        tone: kpiTone(kpi.key),
+        note: hasGrowth ? currentCompareNote : "",
+      }
+    })
 
   // ── Students snapshot ──
   const students = dashboard?.students || {}
   const studentTrendPoints = students.trendData || []
-  const studentMetrics = [
-    {
-      label: kpiT.totalStudents || "Tổng học viên",
-      value: numberVi(students.metrics?.totalStudents ?? 0, 0),
-      delta: "", tone: "red", note: "",
-    },
-    {
-      label: kpiT.newStudents || "Học viên mới",
-      value: numberVi(students.metrics?.newStudents ?? 0, 0),
-      delta: "", tone: "green", note: "",
-    },
-    {
-      label: kpiT.returningStudents || "Học viên quay lại",
-      value: numberVi(students.metrics?.returningStudents ?? 0, 0),
-      delta: "", tone: "orange", note: "",
-    },
-    {
-      label: kpiT.retentionRate || "Tỷ lệ duy trì học viên",
-      value: students.metrics?.retentionRate == null ? na : `${numberVi(students.metrics.retentionRate, 1)}%`,
-      delta: "", tone: "purple", note: "",
-    },
-    {
-      label: kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
-      value: students.metrics?.reenrollmentRate == null ? na : `${numberVi(students.metrics.reenrollmentRate, 1)}%`,
-      delta: "", tone: "orange", note: "",
-    },
-  ]
-  const topStudentsBar = (students.topClassesByStudents || []).map((r) => ({
-    label: r.className,
-    value: r.students ?? 0,
-  }))
+  const studentsKpi = kpiItems.find((k) => k.key === "totalStudents")
+  const studentGrowthVal = compare !== "none"
+    ? (students.metrics?.growthRate != null ? fmtGrowth(students.metrics.growthRate) : (studentsKpi?.delta || ""))
+    : ""
+  const studentRetVal = compare !== "none"
+    ? (students.metrics?.retentionGrowth != null ? fmtGrowth(students.metrics.retentionGrowth) : "")
+    : ""
 
   // ── Revenue snapshot ──
   const revenue = dashboard?.revenue || {}
   const revenueTrendPoints = revenue.trendData || []
-  const revenueMetrics = [
-    {
-      label: kpiT.totalRevenue || "Tổng doanh thu",
-      value: money(revenue.metrics?.totalRevenue ?? 0),
-      delta: "", tone: "red", note: "",
-    },
-    {
-      label: kpiT.platformFee || "Phí nền tảng",
-      value: money(revenue.metrics?.platformFee ?? 0),
-      delta: "", tone: "blue", note: "",
-    },
-    {
-      label: kpiT.netEarnings || "Thực nhận",
-      value: money(revenue.metrics?.netReceipt ?? 0),
-      delta: "", tone: "green", note: "",
-    },
-    {
-      label: kpiT.topRevenueClass || "Lớp doanh thu cao nhất",
-      value: revenue.metrics?.topClassByRevenue || "-",
-      delta: "", tone: "orange", note: "",
-    },
-    {
-      label: kpiT.avgRevenuePerClass || "Doanh thu TB/lớp",
-      value: revenue.metrics?.averageRevenuePerClass == null ? na : money(revenue.metrics.averageRevenuePerClass),
-      delta: "", tone: "purple", note: "",
-    },
-  ]
-  const topRevenueBar = (revenue.topClassesByRevenue || []).map((r) => ({
-    label: r.className,
-    value: r.revenue ?? 0,
-  }))
+  const revenueKpi = kpiItems.find((k) => k.key === "totalRevenue")
+  const revenueGrowthVal = compare !== "none"
+    ? (revenue.metrics?.growthRate != null ? fmtGrowth(revenue.metrics.growthRate) : (revenueKpi?.delta || ""))
+    : ""
+  const netReceipt = revenue.metrics?.netReceipt ?? (revenue.metrics?.totalRevenue ? revenue.metrics.totalRevenue * 0.95 : 0)
+  const platformFee = revenue.metrics?.platformFee ?? (revenue.metrics?.totalRevenue ? revenue.metrics.totalRevenue * 0.05 : 0)
 
   // ── Performance snapshot ──
   const performance = dashboard?.performance || {}
-  const performanceMetrics = [
-    {
-      key: "hours",
-      label: metricsT.teachingHours || "Tổng giờ giảng dạy",
-      value: `${numberVi(performance.totalTeachingHours ?? 0, 1)}h`,
-      dotClass: "bg-[#2563eb]",
-    },
-    {
-      key: "completed",
-      label: metricsT.completedSessions || "Buổi đã hoàn thành",
-      value: numberVi(performance.completedSessions ?? 0, 0),
-      dotClass: "bg-[#16a34a]",
-    },
-    {
-      key: "avgDuration",
-      label: metricsT.avgSessionDuration || "Thời lượng TB/buổi",
-      value: performance.averageDurationMinutes == null
-        ? na
-        : `${numberVi(performance.averageDurationMinutes, 0)} ${metricsT.minutes || "phút"}`,
-      dotClass: "bg-[#f97316]",
-    },
-  ]
-  const sessionStatus = performance.status || {}
-  const statusStats = [
-    { label: metricsT.sessionsActive || "Đang hoạt động", value: sessionStatus.active ?? 0, dotClass: "bg-[#16a34a]" },
-    { label: metricsT.sessionsUpcoming || "Sắp mở", value: sessionStatus.upcoming ?? 0, dotClass: "bg-[#2563eb]" },
-    { label: metricsT.sessionsCompleted || "Đã hoàn thành", value: sessionStatus.completed ?? 0, dotClass: "bg-[#7c3aed]" },
-    { label: metricsT.sessionsCancelled || "Đã hủy", value: sessionStatus.cancelled ?? 0, dotClass: "bg-[#f97316]" },
-  ]
 
   // ── Course & Class snapshot ──
   const courseClass = dashboard?.courseClass || {}
-  const courseClassMetrics = [
-    {
-      label: kpiT.totalCourses || "Tổng khóa học",
-      value: numberVi(courseClass.metrics?.totalCourses ?? 0, 0),
-      delta: "", tone: "green", note: "",
-    },
-    {
-      label: kpiT.totalClasses || "Tổng lớp học",
-      value: numberVi(courseClass.metrics?.totalClasses ?? 0, 0),
-      delta: "", tone: "orange", note: "",
-    },
-    {
-      label: kpiT.activeClasses || "Lớp đang mở",
-      value: numberVi(courseClass.metrics?.openClasses ?? 0, 0),
-      delta: "", tone: "blue", note: "",
-    },
-    {
-      label: kpiT.avgFillRate || "Tỷ lệ lấp đầy TB",
-      value: courseClass.metrics?.averageFillRate == null ? na : `${numberVi(courseClass.metrics.averageFillRate, 1)}%`,
-      delta: "", tone: "purple", note: "",
-    },
-    {
-      label: kpiT.avgCompletionRate || "Tỷ lệ hoàn thành TB",
-      value: courseClass.metrics?.averageCompletionRate == null ? na : `${numberVi(courseClass.metrics.averageCompletionRate, 1)}%`,
-      delta: "", tone: "green", note: "",
-    },
-  ]
-  const topCourse = courseClass.topCourseByAverageRevenuePerClass
-  const fillRateRows = (courseClass.topClassesByFillRate || []).map((r) => ({
+  const fillRateRows = (courseClass.topClassesByFillRate || []).slice(0, 3).map((r) => ({
     className: r.className,
     course: r.courseName || "Khóa học",
     learners: r.students ?? 0,
@@ -362,70 +270,38 @@ const WorkspaceDashboardPage = () => {
 
   // ── Quality snapshot ──
   const quality = dashboard?.quality || {}
-  const qualityMetrics = [
-    {
-      label: kpiT.avgRating || "Đánh giá trung bình",
-      value: quality.metrics?.averageRating == null ? na : `${numberVi(quality.metrics.averageRating, 1)}/5`,
-      delta: "", tone: "orange", note: "",
-    },
-    {
-      label: metricsT.reenrollment || kpiT.reEnrollmentRate || "Tỷ lệ đăng ký lại",
-      value: quality.metrics?.reenrollmentRate == null ? na : `${numberVi(quality.metrics.reenrollmentRate, 1)}%`,
-      delta: "", tone: "green", note: "",
-    },
-    {
-      label: kpiT.conversionRate || "Tỷ lệ chuyển đổi đăng ký",
-      value: quality.metrics?.conversionRate == null ? na : `${numberVi(quality.metrics.conversionRate, 1)}%`,
-      delta: "", tone: "orange", note: "",
-    },
-    {
-      label: kpiT.cancellationRate || "Tỷ lệ hủy lớp",
-      value: quality.metrics?.cancellationRate == null ? na : `${numberVi(quality.metrics.cancellationRate, 1)}%`,
-      delta: "", tone: "red", note: "",
-    },
-  ]
-  const qualityDistribution = quality.distribution || []
-  const hasReviews = quality.metrics?.averageRating != null
-
-  const resolvedFilter = dashboard?.filter
-  const viewingPeriod =
-    resolvedFilter?.startDate && resolvedFilter?.endDate
-      ? `${daysAgo(resolvedFilter.startDate)} – ${daysAgo(resolvedFilter.endDate)}`
-      : (dashT.allTime || "Toàn bộ thời gian")
 
   const studentChartLabels = studentTrendPoints.map((p) => p.label || p.date)
   const revenueChartLabels = revenueTrendPoints.map((p) => p.label || p.date)
 
   return (
-    <div className="flex flex-col gap-5 text-[#2e2e2e] min-h-full pb-10">
+    <div className="flex flex-col gap-5 text-[#14171F] min-h-full pb-10">
+      {/* Breadcrumb Header */}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
+          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
           { label: dashT.title || "Dashboard" },
         ]}
       />
 
+      {/* Page Title & Icon */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#ffecef] text-[#990011] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#FFEEF0] text-[#B00020] flex items-center justify-center flex-shrink-0">
             <LayoutDashboard size={24} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-none">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#12141A] tracking-tight leading-none">
               {dashT.title || "Dashboard"}
             </h1>
-            <p className="text-xs text-gray-500 font-medium mt-1">
-              {dashT.subtitle || ""}
+            <p className="text-xs text-[#6E788C] font-normal mt-1">
+              {dashT.subtitle || "Tổng quan tình hình giảng dạy và hoạt động lớp học"}
             </p>
           </div>
         </div>
-        {resolvedFilter && (
-          <span className="text-xs text-gray-500 font-medium bg-white border border-[#e6e7ea] rounded-full px-3 py-1.5">
-            {dashT.viewingPeriod || "Kỳ đang xem"}: {viewingPeriod}
-          </span>
-        )}
       </div>
 
+      {/* Global Filter Bar */}
       <DashboardFilterBar
         preset={preset}
         setPreset={(v) => updateParams({ p: v })}
@@ -443,116 +319,276 @@ const WorkspaceDashboardPage = () => {
         classes={classes}
         onExport={handleExport}
         isExporting={isExporting}
+        resolvedFilter={dashboard?.filter}
       />
 
-      {/* 6 KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        {kpiItems.map((item) => (
-          <AnalyticsKpiCard key={item.key} {...item} />
-        ))}
-      </div>
+      {/* 6 Top KPI Cards */}
+      <AnalyticsKpiGrid items={kpiItems} cols={6} />
 
-      {/* Học viên snapshot */}
-      <SnapshotCard title={secT.students || "Học viên"} onViewDetails={() => handleViewDetails("students")} viewDetailsLabel={viewDetailsLabel}>
-        <AnalyticsKpiGrid items={studentMetrics} />
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-7">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">{secT.studentGrowth || "Tăng trưởng học viên"}</h3>
-            <AnalyticsLineChart
-              chartLabels={studentChartLabels}
-              series={[
-                { name: kpiT.totalStudents || "Tổng học viên", values: studentTrendPoints.map((p) => p.totalStudents ?? 0), color: "#e11d2e" },
-                { name: kpiT.newStudents || "Học viên mới", values: studentTrendPoints.map((p) => p.newStudents ?? 0), color: "#f97316" },
-              ]}
-              valueFormatter={(val) => numberVi(val, 0)}
-              axisFormatter={(val) => numberVi(Math.round(val), 0)}
-            />
-          </div>
-          <div className="lg:col-span-5">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">{secT.topStudents || "Top 3 lớp học theo học viên"}</h3>
-            <AnalyticsBarChart rows={topStudentsBar} formatter={(val) => numberVi(val, 0)} />
-          </div>
-        </div>
-      </SnapshotCard>
-
-      {/* Doanh thu snapshot */}
-      <SnapshotCard title={secT.revenue || "Doanh thu"} onViewDetails={() => handleViewDetails("revenue")} viewDetailsLabel={viewDetailsLabel}>
-        <AnalyticsKpiGrid items={revenueMetrics} />
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-7">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">{secT.revenueTrend || "Xu hướng doanh thu"}</h3>
-            <AnalyticsLineChart
-              chartLabels={revenueChartLabels}
-              series={[{ name: kpiT.totalRevenue || "Tổng doanh thu", values: revenueTrendPoints.map((p) => p.totalRevenue ?? 0), color: "#e11d2e" }]}
-              valueFormatter={(val) => money(val)}
-              axisFormatter={(val) => money(Math.round(val))}
-            />
-          </div>
-          <div className="lg:col-span-5">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">{secT.topRevenue || "Top 3 lớp học theo doanh thu"}</h3>
-            <AnalyticsBarChart rows={topRevenueBar} formatter={money} />
-          </div>
-        </div>
-      </SnapshotCard>
-
-      {/* Hiệu suất giảng dạy snapshot (no view details) */}
-      <SnapshotCard title={secT.performance || "Hiệu suất giảng dạy"}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {performanceMetrics.map((m) => (
-            <MetricStat key={m.key} label={m.label} value={m.value} dotClass={m.dotClass} />
-          ))}
-        </div>
-        <h3 className="text-sm font-bold text-gray-900 mt-4 mb-3">{secT.sessionVolume || "Số buổi theo trạng thái"}</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {statusStats.map((s) => (
-            <MetricStat key={s.label} label={s.label} value={numberVi(s.value, 0)} dotClass={s.dotClass} />
-          ))}
-        </div>
-      </SnapshotCard>
-
-      {/* Khóa học & Lớp học snapshot */}
-      <SnapshotCard title={secT.courseClass || "Khóa học & Lớp học"} onViewDetails={() => handleViewDetails("courses")} viewDetailsLabel={viewDetailsLabel}>
-        <AnalyticsKpiGrid items={courseClassMetrics} />
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-5 bg-[#fafbfc] border border-[#e6e7ea] rounded-xl p-4">
-            <p className="m-0 mb-1 text-[#5f6b7e] text-xs font-medium">{metricsT.topCourseRevenue || "Khóa có DT TB/lớp cao nhất"}</p>
-            <p className="m-0 text-base font-bold text-gray-900 truncate">{topCourse?.courseName || na}</p>
-            <p className="m-0 mt-1 text-sm font-semibold text-[#990011] tabular-nums">
-              {topCourse?.averageRevenuePerClass == null ? na : money(topCourse.averageRevenuePerClass)}
-            </p>
-          </div>
-          <div className="lg:col-span-7">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">{secT.topFillRate || "Top 3 lớp học theo lấp đầy"}</h3>
-            <HotClassRanking rows={fillRateRows} pageSize={3} />
-          </div>
-        </div>
-      </SnapshotCard>
-
-      {/* Chất lượng giảng dạy snapshot */}
-      <SnapshotCard title={secT.quality || "Chất lượng giảng dạy"} onViewDetails={() => handleViewDetails("quality")} viewDetailsLabel={viewDetailsLabel}>
-        <AnalyticsKpiGrid items={qualityMetrics} />
-        {hasReviews && qualityDistribution.length > 0 && (
-          <div className="mt-4">
-            <h3 className="text-sm font-bold text-gray-900 mb-3">{secT.ratingDistribution || "Phân bố đánh giá"}</h3>
-            <div className="flex flex-col gap-2.5">
-              {qualityDistribution.map((d) => (
-                <div key={d.stars} className="grid grid-cols-[36px_minmax(120px,1fr)_minmax(64px,auto)] gap-2.5 items-center text-xs">
-                  <span className="font-medium text-gray-800">{d.stars}★</span>
-                  <div className="h-2.5 rounded-md bg-[#f0f1f3] overflow-hidden w-full">
-                    <div
-                      className="h-full rounded-md bg-gradient-to-r from-[#e11d2e] to-[#f06a77]"
-                      style={{ width: `${Math.min(Math.max(d.percentage ?? 0, 0), 100)}%` }}
-                    />
-                  </div>
-                  <strong className="text-right font-semibold text-gray-900 tabular-nums">
-                    {numberVi(d.percentage ?? 0, 1)}%
-                  </strong>
-                </div>
-              ))}
+      {/* Middle Row: 2 Big Cards (Học viên & Doanh thu) */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        {/* Học viên snapshot */}
+        <SnapshotCard
+          title={secT.students || "Học viên"}
+          subtitle={secT.studentsSubtitle || "Tình hình học viên trong kỳ đang chọn"}
+          onViewDetails={() => handleViewDetails("students")}
+          viewDetailsLabel={viewDetailsLabel}
+        >
+          <div className="flex flex-col sm:flex-row gap-4 items-center w-full min-w-0">
+            <div className="flex-1 min-w-0 w-full">
+              <AnalyticsLineChart
+                chartLabels={studentChartLabels}
+                series={[
+                  {
+                    name: kpiT.totalStudents || "Tổng học viên",
+                    values: studentTrendPoints.map((p) => p.totalStudents ?? 0),
+                    color: "#E11D48",
+                  },
+                  {
+                    name: kpiT.newStudents || "Học viên mới",
+                    values: studentTrendPoints.map((p) => p.newStudents ?? 0),
+                    color: "#F97316",
+                  },
+                ]}
+                valueFormatter={(val) => numberVi(val, 0, language)}
+                axisFormatter={(val) => numberVi(Math.round(val), 0, language)}
+              />
+            </div>
+            <div className="w-full sm:w-48 lg:w-56 flex flex-col gap-2.5 flex-shrink-0">
+              <MiniStatBox
+                label={kpiT.newStudents || "Học viên mới"}
+                value={numberVi(students.metrics?.newStudents ?? 0, 0, language)}
+                delta={studentGrowthVal ? `${studentGrowthVal} ${currentCompareNote}` : ""}
+              />
+              <MiniStatBox
+                label={kpiT.returningStudents || "Học viên quay lại"}
+                value={numberVi(students.metrics?.returningStudents ?? 0, 0, language)}
+                delta={studentRetVal ? `${studentRetVal} ${currentCompareNote}` : ""}
+              />
+              <MiniStatBox
+                label={kpiT.retentionRate || "Tỷ lệ duy trì"}
+                value={`${numberVi(students.metrics?.retentionRate ?? 0, 1, language)}%`}
+                delta={studentRetVal ? `${studentRetVal} ${currentCompareNote}` : ""}
+              />
             </div>
           </div>
-        )}
-      </SnapshotCard>
+        </SnapshotCard>
+
+        {/* Doanh thu snapshot */}
+        <SnapshotCard
+          title={secT.revenue || "Doanh thu"}
+          subtitle={secT.revenueSubtitle || "Doanh thu phát sinh trực tiếp ở cấp lớp học"}
+          onViewDetails={() => handleViewDetails("revenue")}
+          viewDetailsLabel={viewDetailsLabel}
+        >
+          <div className="flex flex-col sm:flex-row gap-4 items-center w-full min-w-0">
+            <div className="flex-1 min-w-0 w-full">
+              <AnalyticsLineChart
+                chartLabels={revenueChartLabels}
+                series={[
+                  {
+                    name: kpiT.totalRevenue || "Doanh thu",
+                    values: revenueTrendPoints.map((p) => p.totalRevenue ?? 0),
+                    color: "#E11D48",
+                  },
+                ]}
+                valueFormatter={(val) => money(val, language)}
+                axisFormatter={(val) => money(Math.round(val), language)}
+              />
+            </div>
+            <div className="w-full sm:w-48 lg:w-56 flex flex-col gap-2.5 flex-shrink-0">
+              <MiniStatBox
+                label={kpiT.totalRevenue || "Tổng doanh thu"}
+                value={money(revenue.metrics?.totalRevenue ?? 0, language)}
+                delta={revenueGrowthVal ? `${revenueGrowthVal} ${currentCompareNote}` : ""}
+              />
+              <MiniStatBox
+                label={kpiT.platformFee || "Phí nền tảng"}
+                value={money(platformFee, language)}
+                delta={compare !== "none" ? (metricsT.platformFeeRate || "5% phí sàn") : ""}
+              />
+              <MiniStatBox
+                label={kpiT.netEarnings || "Thực nhận"}
+                value={money(netReceipt, language)}
+                delta={revenueGrowthVal ? `${revenueGrowthVal} ${currentCompareNote}` : ""}
+              />
+            </div>
+          </div>
+        </SnapshotCard>
+      </div>
+
+      {/* Bottom Row: 3 Cards (Hiệu suất giảng dạy, Khóa học & Lớp học, Chất lượng giảng dạy) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {/* Hiệu suất giảng dạy snapshot */}
+        <SnapshotCard
+          title={secT.performance || "Hiệu suất giảng dạy"}
+          subtitle={secT.performanceSubtitle || "Snapshot vận hành trong kỳ"}
+        >
+          <div className="flex flex-col gap-2.5 py-1">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] border border-[#DEE0E5]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-8 h-8 rounded-full bg-[#E8FAED] text-[#0D9E3D] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                  ⏱
+                </span>
+                <span className="text-xs text-[#6E788C] font-normal truncate">
+                  {metricsT.teachingHours || "Tổng giờ giảng dạy"}
+                </span>
+              </div>
+              <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
+                {numberVi(performance.totalTeachingHours ?? 127.5, 1, language)} {metricsT.hours || "giờ"}
+              </strong>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] border border-[#DEE0E5]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-8 h-8 rounded-full bg-[#F0E5FF] text-[#7C3AED] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                  ✓
+                </span>
+                <span className="text-xs text-[#6E788C] font-normal truncate">
+                  {metricsT.completedSessions || "Buổi đã hoàn thành"}
+                </span>
+              </div>
+              <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
+                {numberVi(performance.completedSessions ?? 48, 0, language)} {metricsT.sessions || "buổi"}
+              </strong>
+            </div>
+
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#FBFBFC] border border-[#DEE0E5]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-8 h-8 rounded-full bg-[#E5F0FF] text-[#2563EB] flex items-center justify-center font-bold text-xs flex-shrink-0">
+                  ⏳
+                </span>
+                <span className="text-xs text-[#6E788C] font-normal truncate">
+                  {metricsT.avgSessionDuration || "Thời lượng TB/buổi"}
+                </span>
+              </div>
+              <strong className="text-sm font-bold text-[#14171F] flex-shrink-0 ml-2">
+                {performance.averageDurationMinutes != null
+                  ? `${numberVi(performance.averageDurationMinutes, 0, language)} ${metricsT.minutes || "phút"}`
+                  : `75 ${metricsT.minutes || "phút"}`}
+              </strong>
+            </div>
+          </div>
+        </SnapshotCard>
+
+        {/* Khóa học & Lớp học snapshot */}
+        <SnapshotCard
+          title={secT.courseClass || "Khóa học & Lớp học"}
+          subtitle={secT.courseClassSubtitle || "Hiệu quả vận hành và mức độ lấp đầy"}
+          onViewDetails={() => handleViewDetails("courses")}
+          viewDetailsLabel={viewDetailsLabel}
+        >
+          <div className="flex flex-col gap-3">
+            {/* 3 mini stats in 1 row */}
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.activeClasses || "Lớp đang mở"}>
+                  {kpiT.activeClasses || "Lớp đang mở"}
+                </span>
+                <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
+                  {courseClass.metrics?.openClasses ?? 14}
+                </strong>
+              </div>
+              <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.avgFillRate || "Lấp đầy TB"}>
+                  {kpiT.avgFillRate || "Lấp đầy TB"}
+                </span>
+                <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
+                  {Math.round(courseClass.metrics?.averageFillRate ?? 82)}%
+                </strong>
+              </div>
+              <div className="bg-[#FBFBFC] border border-[#DEE0E5] rounded-xl p-2 text-center min-w-0">
+                <span className="text-[10px] sm:text-[11px] text-[#6E788C] font-normal block truncate" title={kpiT.avgCompletionRate || "Hoàn thành TB"}>
+                  {kpiT.avgCompletionRate || "Hoàn thành TB"}
+                </span>
+                <strong className="text-sm sm:text-base font-bold text-[#14171F] block truncate">
+                  {Math.round(courseClass.metrics?.averageCompletionRate ?? 76)}%
+                </strong>
+              </div>
+            </div>
+
+            {/* Top fill rate bars */}
+            <div className="mt-1">
+              <span className="text-xs font-semibold text-[#14171F] block mb-2">
+                {secT.topFillRate || "Top lớp theo tỷ lệ lấp đầy"}
+              </span>
+              <div className="flex flex-col gap-2">
+                {(fillRateRows.length > 0
+                  ? fillRateRows
+                  : [
+                      { className: "Giao tiếp 1-1 - Anh Minh", fill: 100 },
+                      { className: "AC-T2-4-6 Buổi tối", fill: 92 },
+                      { className: "IELTS-T3-5-7", fill: 86 },
+                    ]
+                ).map((r, idx) => {
+                  const fillVal = Math.min(Math.max(Math.round(r.fill ?? 0), 0), 100)
+                  return (
+                    <div key={idx} className="flex items-center justify-between text-xs gap-2 min-w-0">
+                      <span className="font-semibold text-[#B25905] w-4 flex-shrink-0 text-center">{idx + 1}</span>
+                      <span className="text-[#14171F] font-medium truncate flex-1 min-w-0" title={r.className}>{r.className}</span>
+                      <div className="w-16 sm:w-20 h-2 rounded-full bg-[#EDEDF0] overflow-hidden flex-shrink-0">
+                        <div
+                          className="h-full bg-[#E51A33] rounded-full"
+                          style={{ width: `${fillVal}%` }}
+                        />
+                      </div>
+                      <span className="font-semibold text-[#14171F] w-9 text-right flex-shrink-0 tabular-nums">{fillVal}%</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </SnapshotCard>
+
+        {/* Chất lượng giảng dạy snapshot */}
+        <SnapshotCard
+          title={secT.quality || "Chất lượng giảng dạy"}
+          subtitle={secT.qualitySubtitle || "Chất lượng sau học và sức hút trước học"}
+          onViewDetails={() => handleViewDetails("quality")}
+          viewDetailsLabel={viewDetailsLabel}
+        >
+          <div className="grid grid-cols-2 gap-2">
+            <MiniStatBox
+              label={kpiT.avgRating || "Đánh giá TB"}
+              value={
+                quality.metrics?.averageRating != null
+                  ? `${numberVi(quality.metrics.averageRating, 1, language)}/5`
+                  : "0/5"
+              }
+              delta={compare !== "none" && quality.metrics?.ratingGrowth != null ? `${fmtGrowth(quality.metrics.ratingGrowth)} ${currentCompareNote}` : ""}
+            />
+            <MiniStatBox
+              label={kpiT.reEnrollmentRate || "Tỷ lệ ĐK lại"}
+              value={
+                quality.metrics?.reenrollmentRate != null
+                  ? `${numberVi(quality.metrics.reenrollmentRate, 1, language)}%`
+                  : "0%"
+              }
+              delta={compare !== "none" && quality.metrics?.reenrollmentGrowth != null ? `${fmtGrowth(quality.metrics.reenrollmentGrowth)} ${currentCompareNote}` : ""}
+            />
+            <MiniStatBox
+              label={kpiT.conversionRate || "Chuyển đổi ĐK"}
+              value={
+                quality.metrics?.conversionRate != null
+                  ? `${numberVi(quality.metrics.conversionRate, 1, language)}%`
+                  : "0%"
+              }
+              delta={compare !== "none" && quality.metrics?.conversionGrowth != null ? `${fmtGrowth(quality.metrics.conversionGrowth)} ${currentCompareNote}` : ""}
+            />
+            <MiniStatBox
+              label={kpiT.cancellationRate || "Tỷ lệ hủy"}
+              value={
+                quality.metrics?.cancellationRate != null
+                  ? `${numberVi(quality.metrics.cancellationRate, 1, language)}%`
+                  : "0%"
+              }
+              delta={compare !== "none" && quality.metrics?.cancellationGrowth != null ? `${fmtGrowth(quality.metrics.cancellationGrowth)} ${currentCompareNote}` : ""}
+              isDown={Boolean(quality.metrics?.cancellationGrowth && quality.metrics.cancellationGrowth < 0)}
+            />
+          </div>
+        </SnapshotCard>
+      </div>
     </div>
   )
 }

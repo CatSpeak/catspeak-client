@@ -125,6 +125,9 @@ const VoucherDetailPage = lazy(
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
 );
+const AllTeachingTasksPage = lazy(
+  () => import("@/features/courses/pages/AllTeachingTasksPage"),
+);
 const AllClassesPage = lazy(
   () => import("@/features/courses/pages/AllClassesPage"),
 );
@@ -489,6 +492,16 @@ const routesConfig = [
               },
               {
                 path: "teaching-tasks",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <AllTeachingTasksPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "teaching-tasks/overview",
                 element: (
                   <RoleGuard allowedRoles={["Teacher"]}>
                     <LazyRoute>

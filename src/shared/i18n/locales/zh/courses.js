@@ -17,9 +17,9 @@ export default {
   myCoursesTab: "我的课程",
   myClassesTab: "我的班级",
   teachingTasks: "教学工作",
+  allTeachingTasksTitle: "教学任务",
   gradeAssignment: "批改作业",
   viewAll: "查看全部",
-  allTeachingTasksTitle: "教学工作",
   taskTabUrgent: "紧急",
   taskTabRequired: "必须",
   taskTabLater: "稍后处理",
@@ -363,7 +363,7 @@ export default {
     viewClassDetailsNewTab: "在新标签页中打开班级详情",
     collapse: "收起",
     remainingSlotsText: "剩余 {{remaining}}/{{total}} 名额",
-    remainingSlotsLabel: "剩余名额",
+    remainingSlotsLabel: "已报名人数",
     levelLabel: "级别",
     defaultLevel: "基础",
     enrollmentPeriod: "报名时间",
@@ -1659,7 +1659,7 @@ export default {
       yourEssayAnswer: "你的论述答案：",
       yourSelection: "你的选择："
     },
-    teacherQuiz: {
+teacherQuiz: {
       actions: "操作",
       allCourses: "全部课程",
       allowLateSubmission: "允许迟交",
@@ -1850,7 +1850,7 @@ export default {
       viewAttempt: "查看作答",
       viewMoreQuestions: "再查看 {{count}} 道题",
       yes: "是"
-    }
+    },
   },
   lectureHall: {
     title: "讲堂",
@@ -2210,7 +2210,7 @@ export default {
     instructorLabel: "讲师",
     shareClass: "分享班级",
     sessionsCount: "{{count}} 节课",
-    interactiveSub: "直播授课与 1对1 互动",
+    interactiveSub: "在线",
     allLevels: "所有级别",
     curriculumSub: "系统化培训路线",
     flexibleSchedule: "灵活课表",
@@ -2226,7 +2226,7 @@ export default {
     classDayLegend: "上课日",
     todayLegend: "今天",
     spotsLeft: "{{remaining}}/{{capacity}} 名额",
-    spotsSub: "允许报名该班级的人数",
+    spotsSub: "已报名人数",
     instructorTitle: "主讲教师信息",
     verifiedTeacher: "CatSpeak 认证讲师",
     defaultTeacherTitle: "高级语言讲师",
