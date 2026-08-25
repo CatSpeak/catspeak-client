@@ -88,6 +88,7 @@ const CoursesTab = ({ queryParams = {} }) => {
   // 3. Standalone Classes Table Data
   const saItems = standaloneData?.data || (Array.isArray(standaloneData) ? standaloneData : [])
   const independentClasses = saItems.map((r) => ({
+    classId: r.classId,
     className: r.className,
     students: r.studentCount,
     gross: money(r.revenue || 0),
@@ -101,6 +102,7 @@ const CoursesTab = ({ queryParams = {} }) => {
   // 4. Hot Class Ranking Data
   const hotItems = hotClassesData?.data || (Array.isArray(hotClassesData) ? hotClassesData : [])
   const hotRankingRows = hotItems.map((r) => ({
+    classId: r.classId,
     className: r.className,
     course: r.courseName || "Khóa học",
     learners: r.students,
@@ -144,7 +146,11 @@ const CoursesTab = ({ queryParams = {} }) => {
               render: (val, row) => (
                 <button
                   type="button"
-                  onClick={() => navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId || row.className || "class-b2-sang")}`)}
+                  onClick={() => {
+                    if (row.classId) {
+                      navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
+                    }
+                  }}
                   className="font-bold text-left text-gray-900 hover:text-[#990011] transition-colors cursor-pointer hover:underline"
                 >
                   {val}

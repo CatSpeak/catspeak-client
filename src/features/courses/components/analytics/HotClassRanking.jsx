@@ -42,8 +42,8 @@ const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
                 onClick={() => {
                   if (onRowClick) {
                     onRowClick(row)
-                  } else {
-                    navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId || row.className || "class-b2-sang")}`)
+                  } else if (row.classId) {
+                    navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
                   }
                 }}
                 className="grid grid-cols-1 md:grid-cols-[36px_minmax(200px,1.25fr)_minmax(220px,1.6fr)] gap-3 items-center py-3 px-2 hover:bg-[#fffafb] transition-colors cursor-pointer group"

@@ -18,12 +18,15 @@ const ClassAnalyticsHeader = ({ classData }) => {
     { label: classData?.className || "Chi tiết lớp học" },
   ]
 
-  const subtitleText = cd.metaSubtitle
-    ? cd.metaSubtitle
-        .replace("{{term}}", classData?.term || "Kỳ Hè 2026")
-        .replace("{{students}}", classData?.totalStudents || 4)
-        .replace("{{sessions}}", classData?.totalSessions || 24)
-    : `STB Chi tiết · ${classData?.term || "Kỳ Hè 2026"} · ${classData?.totalStudents || 4} học viên · ${classData?.totalSessions || 24} buổi`
+  const subtitleParts = [
+    classData?.courseName,
+    `${classData?.totalStudents ?? 0} ${cd.studentsCount ? cd.studentsCount.replace("{{count}}", "") : "học viên"}`,
+    `${classData?.totalSessions ?? 0} ${cd.sessionsCount ? cd.sessionsCount.replace("{{count}}", "") : "buổi"}`,
+  ].filter(Boolean)
+
+  const subtitleText = subtitleParts.length > 0
+    ? `STB Chi tiết · ${subtitleParts.join(" · ")}`
+    : `STB Chi tiết · ${classData?.totalStudents || 0} học viên · ${classData?.totalSessions || 0} buổi`
 
   return (
     <div className="flex flex-col gap-3">

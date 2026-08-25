@@ -18,7 +18,12 @@ const StudentDetailHeader = ({ data }) => {
     },
     {
       label: data?.className || "Chi tiết lớp học",
-      onClick: () => navigate(`/workspace/analytics/class/${encodeURIComponent(data?.classId || "class-b2-sang")}`),
+      onClick: () => {
+        const targetId = data?.classId ?? data?.id
+        if (targetId) {
+          navigate(`/workspace/analytics/class/${encodeURIComponent(targetId)}`)
+        }
+      },
     },
     { label: data?.studentName || "Học viên" },
   ]
@@ -27,12 +32,12 @@ const StudentDetailHeader = ({ data }) => {
     ? sd.historyTitle.replace("{{name}}", data?.studentName || "Lê C")
     : `Lịch sử phát biểu — ${data?.studentName || "Lê C"}`
 
-  const subtitleText = sd.historySubtitle
-    ? sd.historySubtitle
-        .replace("{{className}}", data?.className || "Tiếng Anh B2 — Nhóm sáng")
-        .replace("{{term}}", data?.term || "Kỳ Hè 2026")
-        .replace("{{sessions}}", data?.totalSessions || 24)
-    : `${data?.className || "Tiếng Anh B2 — Nhóm sáng"} · ${data?.term || "Kỳ Hè 2026"} · ${data?.totalSessions || 24} buổi tham gia`
+  const subtitleParts = [
+    data?.className,
+    `${data?.totalSessions ?? 0} ${sd.sessionsCount ? sd.sessionsCount.replace("{{count}}", "") : "buổi tham gia"}`,
+  ].filter(Boolean)
+
+  const subtitleText = subtitleParts.join(" · ") || `${data?.className || "Lớp học"} · ${data?.totalSessions || 0} buổi tham gia`
 
   return (
     <div className="flex flex-col gap-3">

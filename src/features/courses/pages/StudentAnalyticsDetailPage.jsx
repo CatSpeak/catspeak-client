@@ -1,6 +1,7 @@
-import React, { useMemo } from "react"
+import React from "react"
 import { useParams } from "react-router-dom"
-import { getStudentAnalyticsData } from "../data/classAnalyticsMockData"
+import { useGetStudentSpeakingHistoryQuery } from "@/store/api/roomsApi"
+import { useGetClassDetailQuery } from "@/store/api/coursesApi"
 import {
   StudentDetailHeader,
   StudentDetailKpis,
@@ -11,11 +12,73 @@ import {
 const StudentAnalyticsDetailPage = () => {
   const { classId, studentId } = useParams()
 
-  // Fetch full mock dataset for this student in this class
-  const studentData = useMemo(
-    () => getStudentAnalyticsData(classId, studentId),
-    [classId, studentId],
+  // Fetch official class metadata from Main API Service (catspeak-api)
+  const { data: mainClassDetail } = useGetClassDetailQuery(classId || "", {
+    skip: !classId,
+  })
+
+  // Fetch real speaking history for this student from AI API Service (catspeak-ai)
+  const { data: apiData, isLoading, isError } = useGetStudentSpeakingHistoryQuery(
+    { classId: classId || "", studentId: studentId || "" },
+    { skip: !classId || !studentId }
   )
+
+  // Find student in official enrolled roster
+  const mainStudent = (
+    mainClassDetail?.students ||
+    mainClassDetail?.members ||
+    mainClassDetail?.enrolledStudents ||
+    []
+  ).find(
+    (s) =>
+      String(s.accountId ?? s.id ?? s.userId) === String(studentId),
+  )
+
+  const resolvedStudentName =
+    mainStudent?.name ||
+    mainStudent?.fullName ||
+    mainStudent?.studentName ||
+    apiData?.studentName ||
+    `Học viên ${studentId || ""}`
+
+  // Combined data object
+  const studentData = {
+    studentId: studentId || "",
+    studentName: resolvedStudentName,
+    avatar: mainStudent?.avatar ?? mainStudent?.avatarUrl ?? mainStudent?.avatarImageUrl,
+    email: mainStudent?.email,
+    classId: classId || "",
+    className:
+      mainClassDetail?.className ||
+      mainClassDetail?.name ||
+      apiData?.className ||
+      classId ||
+      "Lớp học",
+    term: mainClassDetail?.term || apiData?.term || "",
+    totalSessions: apiData?.totalSessions ?? 0,
+    classExpectedRate: apiData?.classExpectedRate ?? 25,
+    avgSpeechPercent: apiData?.avgSpeechPercent ?? 0,
+    metRecentCount: apiData?.metRecentCount ?? 0,
+    recentTotal: apiData?.recentTotal ?? 0,
+    totalWords: apiData?.totalWords ?? 0,
+    avgWordsPerSession: apiData?.avgWordsPerSession ?? 0,
+    trend: apiData?.trend ?? "stable",
+    trendText: apiData?.trendText ?? "Ổn định",
+    recentSessionNumber: apiData?.recentSessionNumber ?? 0,
+    recentSessionPercent: apiData?.recentSessionPercent ?? 0,
+    warningMessage: apiData?.warningMessage ?? null,
+    sessions: apiData?.sessions || [],
+    isError,
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3">
+        <div className="w-8 h-8 border-3 border-gray-200 border-t-[#16a34a] rounded-full animate-spin" />
+        <p className="text-sm font-medium text-gray-500">Đang tải lịch sử phát biểu học viên...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e] min-h-full pb-14 max-w-7xl mx-auto w-full">

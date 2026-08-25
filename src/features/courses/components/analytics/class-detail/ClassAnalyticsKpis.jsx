@@ -57,7 +57,7 @@ const ClassAnalyticsKpis = ({ classData }) => {
           </span>
         </div>
         <span className="text-xs text-[#6b7280] font-normal">
-          {classData?.term || "Kỳ Hè 2026"}
+          {classData?.courseName || cd.allSessionsRecorded || "Dữ liệu toàn bộ buổi học"}
         </span>
       </div>
     </div>

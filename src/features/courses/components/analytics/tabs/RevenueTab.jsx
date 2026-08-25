@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
@@ -13,6 +14,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const RevenueTab = ({ group, queryParams = {} }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
@@ -73,6 +75,7 @@ const RevenueTab = ({ group, queryParams = {} }) => {
   // 2. Bar Chart Data (Top Classes)
   const topItems = topClassesData?.data || (Array.isArray(topClassesData) ? topClassesData : [])
   const barData = topItems.map((r) => ({
+    classId: r.classId,
     label: r.className,
     value: r.grossRevenue ?? r.revenue ?? 0,
   }))
@@ -88,6 +91,7 @@ const RevenueTab = ({ group, queryParams = {} }) => {
   // 4. Detail Table Data
   const tableItems = revenueByClassData?.data || (Array.isArray(revenueByClassData) ? revenueByClassData : [])
   const tableData = tableItems.map((r) => ({
+    classId: r.classId,
     className: r.className,
     course: r.courseName || "Khóa học",
     learners: r.studentCount,
@@ -133,7 +137,23 @@ const RevenueTab = ({ group, queryParams = {} }) => {
         <h2 className="text-base font-bold text-gray-900 mb-3">{secT.revenueDetail || "Chi tiết doanh thu theo lớp học"}</h2>
         <AnalyticsDataTable
           columns={[
-            { key: "className", label: colT.class || "Lớp học" },
+            {
+              key: "className",
+              label: colT.class || "Lớp học",
+              render: (val, row) => (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (row.classId) {
+                      navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
+                    }
+                  }}
+                  className="font-bold text-left text-gray-900 hover:text-[#990011] transition-colors cursor-pointer hover:underline"
+                >
+                  {val}
+                </button>
+              ),
+            },
             { key: "course", label: colT.course || "Khóa học" },
             { key: "learners", label: colT.totalStudents || "Học viên", align: "right" },
             { key: "gross", label: colT.grossRevenue || "Doanh thu", align: "right" },

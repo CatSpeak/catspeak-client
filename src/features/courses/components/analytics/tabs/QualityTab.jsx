@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
@@ -13,6 +14,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const QualityTab = ({ group, queryParams = {} }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
@@ -81,6 +83,7 @@ const QualityTab = ({ group, queryParams = {} }) => {
   // 4. Quality Detail Table
   const qualityItems = qualityByClassData?.data || (Array.isArray(qualityByClassData) ? qualityByClassData : [])
   const qualityTableData = qualityItems.map((r) => ({
+    classId: r.classId,
     className: r.className,
     course: r.courseName || "Khóa học",
     rating: (r.averageRating || 0).toFixed(1),
@@ -126,7 +129,23 @@ const QualityTab = ({ group, queryParams = {} }) => {
         <h2 className="text-base font-bold text-gray-900 mb-3">{secT.qualityByClass || "Chất lượng theo lớp học"}</h2>
         <AnalyticsDataTable
           columns={[
-            { key: "className", label: colT.class || "Lớp học" },
+            {
+              key: "className",
+              label: colT.class || "Lớp học",
+              render: (val, row) => (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (row.classId) {
+                      navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
+                    }
+                  }}
+                  className="font-bold text-left text-gray-900 hover:text-[#990011] transition-colors cursor-pointer hover:underline"
+                >
+                  {val}
+                </button>
+              ),
+            },
             { key: "course", label: colT.course || "Khóa học" },
             { key: "rating", label: colT.rating || "Đánh giá TB", align: "right" },
             { key: "fill", label: colT.fillRate || "Lấp đầy", align: "right" },

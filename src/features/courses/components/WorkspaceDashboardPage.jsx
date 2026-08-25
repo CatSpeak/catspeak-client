@@ -353,6 +353,7 @@ const WorkspaceDashboardPage = () => {
   ]
   const topCourse = courseClass.topCourseByAverageRevenuePerClass
   const fillRateRows = (courseClass.topClassesByFillRate || []).map((r) => ({
+    classId: r.classId,
     className: r.className,
     course: r.courseName || "Khóa học",
     learners: r.students ?? 0,
