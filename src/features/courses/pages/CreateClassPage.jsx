@@ -166,7 +166,7 @@ const CreateClassPage = () => {
     const courses = t.courses || {}
     const createCls = courses.createClass || {}
     if (key === "invalidImage") toast.error(createCls.toastInvalidImage || "Choose a JPG, PNG, or WebP image.")
-    else if (key === "fileTooLarge") toast.error(courses.avatarDesc2 || "File size must be under 50mb")
+    else if (key === "fileTooLarge") toast.error(courses.avatarDesc2 || "File size must be under 5MB")
     else if (key === "imageReadFail") toast.error(createCls.toastImageReadFail || "The selected image could not be read.")
   }, [t.courses])
 
@@ -477,8 +477,8 @@ const CreateClassPage = () => {
         enrollmentStart: toIsoInZone(admissionStart, admissionStartHours || "00:00"),
         enrollmentEnd: toIsoInZone(admissionEnd, admissionEndHours || "00:00"),
         startDate: toIsoInZone(startDate, startDateHours || "00:00"),
-        retentionDays: parseInt(retentionDays, 10) || 7,
-        archiveRetentionDays: parseInt(retentionDays, 10) || 7,
+        retentionDays: isNaN(parseInt(retentionDays, 10)) ? 10 : parseInt(retentionDays, 10),
+        archiveRetentionDays: isNaN(parseInt(retentionDays, 10)) ? 10 : parseInt(retentionDays, 10),
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
@@ -1326,7 +1326,7 @@ const CreateClassPage = () => {
                     </div>
                     <div className="text-xs text-gray-400 font-semibold space-y-1">
                       <p>{c.avatarDesc1 || "Supports PNG, JPEG, and WebP."}</p>
-                      <p>{c.avatarDesc2 || "File size must be under 50mb"}</p>
+                      <p>{c.avatarDesc2 || "File size must be under 5MB"}</p>
                     </div>
                   </div>
                 )}
@@ -1421,31 +1421,33 @@ const CreateClassPage = () => {
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 sm:gap-6 pt-6 border-t border-border mt-auto w-full">
-          {/* Left Side: Fee detail */}
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="w-9 h-9 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D] shrink-0">
-              <Info size={17} />
-            </div>
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
-                {cc.classOpeningFee || "CLASS OPENING FEE"}
-              </span>
-              <div className="flex items-center gap-2 flex-wrap">
-                {feeDetails.openingFee > 0 && (
-                  <span className="text-gray-400 line-through font-bold text-sm leading-none">
-                    {formatCurrencyVND(feeDetails.openingFee)}
+        <div className={`flex flex-col sm:flex-row ${isEditMode ? "justify-end" : "justify-between"} items-stretch sm:items-center gap-4 sm:gap-6 pt-6 border-t border-border mt-auto w-full`}>
+          {/* Left Side: Fee detail (only shown when creating a new class) */}
+          {!isEditMode && (
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="w-9 h-9 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D] shrink-0">
+                <Info size={17} />
+              </div>
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
+                  {cc.classOpeningFee || "CLASS OPENING FEE"}
+                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {feeDetails.openingFee > 0 && (
+                    <span className="text-gray-400 line-through font-bold text-sm leading-none">
+                      {formatCurrencyVND(feeDetails.openingFee)}
+                    </span>
+                  )}
+                  <span className="text-[#15803D] font-black text-xl leading-none">
+                    {formatCurrencyVND(0)}
                   </span>
-                )}
-                <span className="text-[#15803D] font-black text-xl leading-none">
-                  {formatCurrencyVND(0)}
-                </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E8F8F0] text-[#15803D] border border-[#15803D]/20">
-                  {cc.currentlyFreeNote || "Currently free to open classes"}
-                </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E8F8F0] text-[#15803D] border border-[#15803D]/20">
+                    {cc.currentlyFreeNote || "Currently free to open classes"}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Right Side: Action Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">

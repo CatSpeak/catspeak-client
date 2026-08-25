@@ -283,6 +283,7 @@ const transformClass = (cls) => {
     roomId: toText(cls.roomId),
     roomName: toText(cls.roomName),
     thumbnailUrl: toText(cls.thumbnailUrl),
+    retentionDays: toNullableNumber(cls.retentionDays ?? cls.archiveRetentionDays, { nonNegative: true }),
     teacher,
     teacherId:
       teacher?.accountId || toText(cls.teacherId) || toText(cls.accountId),
@@ -589,6 +590,8 @@ const buildCreateClassFormData = (data) =>
     Thumbnail: isFileValue(data.thumbnailUrl) ? data.thumbnailUrl : null,
     Schedule: getClassSchedule(data),
     CommissionPercent: parseNumberOrNull(data.commissionPercent),
+    RetentionDays: parseIntegerOrNull(data.retentionDays ?? data.archiveRetentionDays),
+    ArchiveRetentionDays: parseIntegerOrNull(data.retentionDays ?? data.archiveRetentionDays),
     Status: data.status || null,
     RequireMinimumAttendance: Boolean(data.requireMinimumAttendance ?? data.requireMinAttendance),
     MinimumAttendanceRate: (data.requireMinimumAttendance ?? data.requireMinAttendance)
@@ -1170,6 +1173,8 @@ export const coursesApi = baseApi.injectEndpoints({
           enrollmentStart: data.enrollmentStart || null,
           enrollmentEnd: data.enrollmentEnd || null,
           startDate: data.startDate || null,
+          retentionDays: parseIntegerOrNull(data.retentionDays ?? data.archiveRetentionDays),
+          archiveRetentionDays: parseIntegerOrNull(data.retentionDays ?? data.archiveRetentionDays),
           schedule,
           capacity: parseIntegerOrNull(data.slots ?? data.capacity),
           totalSessions: parseIntegerOrNull(data.totalSessions),
