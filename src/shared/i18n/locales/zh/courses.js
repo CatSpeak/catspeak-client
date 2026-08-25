@@ -363,7 +363,7 @@ export default {
     viewClassDetailsNewTab: "在新标签页中打开班级详情",
     collapse: "收起",
     remainingSlotsText: "剩余 {{remaining}}/{{total}} 名额",
-    remainingSlotsLabel: "剩余名额",
+    remainingSlotsLabel: "已报名人数",
     levelLabel: "级别",
     defaultLevel: "基础",
     enrollmentPeriod: "报名时间",
@@ -1852,7 +1852,7 @@ export default {
       viewAttempt: "查看作答",
       viewMoreQuestions: "再查看 {{count}} 道题",
       yes: "是"
-    }
+    },
   },
   lectureHall: {
     title: "讲堂",

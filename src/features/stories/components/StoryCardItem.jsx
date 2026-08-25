@@ -2,14 +2,16 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, AlertCircle } from "lucide-react";
 import Avatar from "@/shared/components/ui/Avatar";
 import { useTimezone } from "@/shared/hooks/useTimezone";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 dayjs.extend(relativeTime);
 
 const StoryCardItem = ({ story, onClick }) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { formatRelative } = useTimezone();
   if (!story) return null;
 
@@ -41,8 +43,16 @@ const StoryCardItem = ({ story, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`flex md:max-w-[240px] w-full max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all ${theme.bg}`}
+      className={`relative flex md:max-w-[240px] w-full max-h-[164px] cursor-pointer flex-col gap-2 rounded-2xl border p-4 shadow-faq-card transition-all ${theme.bg} ${story.isReported ? "border-amber-400/80" : ""}`}
     >
+      {story.isReported && (
+        <span
+          className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md z-10"
+          title={t.catSpeak?.reportedTooltip || t.catSpeak?.reportedWarning || "Bị báo cáo"}
+        >
+          <AlertCircle size={13} strokeWidth={2.5} />
+        </span>
+      )}
       {/* Header: avatar + username */}
       <div className="flex items-center gap-2.5">
         <Avatar src={avatarImageUrl} name={username || "Anonymous"} size={36} accountId={authorAccountId} />

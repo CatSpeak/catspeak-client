@@ -380,7 +380,7 @@ export default {
     viewClassDetailsNewTab: "Open class details in new tab",
     collapse: "Collapse",
     remainingSlotsText: "{{remaining}}/{{total}} slots left",
-    remainingSlotsLabel: "Remaining Slots",
+    remainingSlotsLabel: "Registered Students",
     levelLabel: "Level",
     defaultLevel: "Beginner",
     enrollmentPeriod: "Registration Period",
