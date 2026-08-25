@@ -65,11 +65,10 @@ const Tabs = memo(
 
                 {tab.badge && (
                   <span
-                    className={`w-4 h-4 rounded-full text-xs flex items-center justify-center transition-colors ${
-                      isActive
-                        ? "bg-[#990011] text-white"
-                        : "bg-primaryBg text-gray-700"
-                    }`}
+                    className={`w-4 h-4 rounded-full text-xs flex items-center justify-center transition-colors ${isActive
+                      ? "bg-[#990011] text-white"
+                      : "bg-primaryBg text-gray-700"
+                      }`}
                   >
                     {tab.badge}
                   </span>
@@ -77,11 +76,10 @@ const Tabs = memo(
 
                 {/* Underline Indicator */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${
-                    isActive
-                      ? "bg-[#990011] scale-x-100"
-                      : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
-                  }`}
+                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${isActive
+                    ? "bg-[#990011] scale-x-100"
+                    : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
+                    }`}
                 />
               </div>
             </button>

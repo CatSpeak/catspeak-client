@@ -759,9 +759,9 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
               </div>
             </div>
 
-            {/* Đăng lên bảng tin lớp học */}
+            {/* Đăng lên giảng đường */}
             <div className="bg-red-50/20 border border-red-100 rounded-2xl p-4 flex justify-between items-center shadow-xs">
-              <span className="text-xs font-bold text-gray-800">{ca.postToFeed || "Đăng lên bảng tin lớp học"}</span>
+              <span className="text-xs font-bold text-gray-800">{ca.postToFeed || "Đăng lên giảng đường"}</span>
               <button
                 type="button"
                 role="switch"

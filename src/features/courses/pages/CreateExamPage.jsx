@@ -1,4 +1,11 @@
-import React, { useState, useRef, useEffect, useReducer } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useReducer,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   useParams,
   useNavigate,
@@ -19,7 +26,7 @@ import {
 } from "@/store/api/coursesApi";
 import { LoadingSpinner } from "@/shared/components/ui/indicators";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
-import { DatePicker } from "@/shared/components/ui/inputs";
+import { DatePicker, Switch } from "@/shared/components/ui/inputs";
 import RenderHTML from "@/shared/components/ui/RenderHTML";
 import { IconButton } from "@/shared/components/ui/buttons";
 import {
@@ -31,92 +38,27 @@ import {
   mapQuizToFormState,
   validateQuizForm,
 } from "@/features/courses/utils/quizUtils";
+import {
+  duplicateQuestion,
+  moveQuestion,
+  reorderQuestion,
+} from "@/features/courses/utils/questionListOps";
 import { Editor } from "@tinymce/tinymce-react";
 import TeacherQuizDetailView from "@/features/courses/components/grading/TeacherQuizDetailView";
 import ImportExcelInstructionModal from "@/features/courses/components/grading/ImportExcelInstructionModal";
+import QuestionCard from "@/features/courses/components/grading/QuestionCard";
 import {
-  Trash2,
-  Copy,
   Plus,
-  X,
   ChevronDown,
-  ChevronUp,
   Eye,
-  Menu,
   Timer,
   LayoutGrid,
   ArrowLeft,
   ArrowRight,
   Flag,
-  Image as ImageIcon,
   Music as MusicIcon,
   Info,
 } from "lucide-react";
-
-const VI_VALIDATION_MESSAGES = {
-  QuizNameRequired: "Vui lòng nhập tên bài kiểm tra.",
-  QuizInvalidTimeLimit: "Thời gian làm bài phải lớn hơn 0.",
-  QuizInvalidMaxAttempts: "Số lượt làm bài phải là số nguyên dương.",
-  QuizInvalidPassPercent: "Tỷ lệ điểm đạt phải từ 0 đến 100.",
-  QuizInvalidOpenTime: "Vui lòng chọn thời gian mở hợp lệ.",
-  QuizOpenTimeRequired: "Vui lòng chọn thời gian mở trước khi đăng.",
-  QuizInvalidCloseTime: "Thời gian đóng phải hợp lệ và sau thời gian mở.",
-  QuizCloseTimeRequired: "Vui lòng chọn thời gian đóng trước khi đăng.",
-  QuizCloseTimeInPast: "Thời gian đóng phải ở trong tương lai.",
-  QuizNoQuestions: "Vui lòng thêm ít nhất một câu hỏi trước khi đăng.",
-  QuizInvalidQuestion: "Có câu hỏi không hợp lệ.",
-  QuizInvalidQuestionType: "Vui lòng chọn loại câu hỏi hợp lệ.",
-  QuizQuestionContentRequired: "Vui lòng nhập nội dung cho tất cả câu hỏi.",
-  QuizInvalidQuestionPoints: "Điểm câu hỏi phải là số không âm.",
-  QuizInvalidQuestionOptions:
-    "Mỗi câu trắc nghiệm cần ít nhất hai lựa chọn không trống.",
-  QuizInvalidCorrectAnswers: "Vui lòng chọn đáp án đúng hợp lệ.",
-  QuizCorrectAnswerRequired: "Vui lòng nhập đáp án đúng.",
-  QuizInvalidMaxWordCount: "Giới hạn từ phải là số nguyên dương.",
-};
-
-const EN_VALIDATION_MESSAGES = {
-  QuizNameRequired: "Please enter the quiz title.",
-  QuizInvalidTimeLimit: "Time limit must be greater than 0.",
-  QuizInvalidMaxAttempts: "Maximum attempts must be a positive integer.",
-  QuizInvalidPassPercent: "Passing percentage must be between 0 and 100.",
-  QuizInvalidOpenTime: "Please select a valid open time.",
-  QuizOpenTimeRequired: "Please select an open time before publishing.",
-  QuizInvalidCloseTime: "Close time must be valid and after open time.",
-  QuizCloseTimeRequired: "Please select a close time before publishing.",
-  QuizCloseTimeInPast: "Close time must be in the future.",
-  QuizNoQuestions: "Please add at least one question before publishing.",
-  QuizInvalidQuestion: "One or more questions are invalid.",
-  QuizInvalidQuestionType: "Please select a valid question type.",
-  QuizQuestionContentRequired: "Please enter content for all questions.",
-  QuizInvalidQuestionPoints: "Question points must be non-negative.",
-  QuizInvalidQuestionOptions:
-    "Each multiple-choice question requires at least 2 non-empty options.",
-  QuizInvalidCorrectAnswers: "Please select valid correct answers.",
-  QuizCorrectAnswerRequired: "Please enter the correct answer.",
-  QuizInvalidMaxWordCount: "Max word count must be a positive integer.",
-};
-
-const ZH_VALIDATION_MESSAGES = {
-  QuizNameRequired: "请输入测试名称。",
-  QuizInvalidTimeLimit: "答题时间限制必须大于0。",
-  QuizInvalidMaxAttempts: "最大尝试次数必须为正整数。",
-  QuizInvalidPassPercent: "及格率必须在0到100之间。",
-  QuizInvalidOpenTime: "请选择有效的开放时间。",
-  QuizOpenTimeRequired: "发布前请选择开放时间。",
-  QuizInvalidCloseTime: "关闭时间必须有效且晚于开放时间。",
-  QuizCloseTimeRequired: "发布前请选择关闭时间。",
-  QuizCloseTimeInPast: "关闭时间必须在将来。",
-  QuizNoQuestions: "发布前请至少添加一道题目。",
-  QuizInvalidQuestion: "存在无效题目。",
-  QuizInvalidQuestionType: "请选择有效的题目类型。",
-  QuizQuestionContentRequired: "请为所有题目填写内容。",
-  QuizInvalidQuestionPoints: "题目分值不能为负数。",
-  QuizInvalidQuestionOptions: "每道选择题至少需要两个非空选项。",
-  QuizInvalidCorrectAnswers: "请选择有效的正确答案。",
-  QuizCorrectAnswerRequired: "请输入正确答案。",
-  QuizInvalidMaxWordCount: "字数限制必须为正整数。",
-};
 
 const CLOSED_QUIZ_RESTRICTED_FIELDS = new Set([
   "openTime",
@@ -128,21 +70,55 @@ const CLOSED_QUIZ_RESTRICTED_FIELDS = new Set([
   "resultReleaseMode",
 ]);
 
-const getValidationMessage = (validation, language) => {
-  const firstError = validation.errors[0];
-  if (language === "vi") {
+const getValidationMessage = (validation, ce, form = null) => {
+  const firstError = validation?.errors?.[0];
+  if (!firstError) {
     return (
-      VI_VALIDATION_MESSAGES[firstError?.code] ||
-      "Thông tin bài kiểm tra chưa hợp lệ. Vui lòng kiểm tra lại."
+      ce?.validation?.invalidForm ||
+      "Quiz information is invalid. Please double check."
     );
   }
-  if (language === "zh") {
-    return (
-      ZH_VALIDATION_MESSAGES[firstError?.code] || "测试信息无效，请检查后重试。"
-    );
+
+  const code = firstError.code;
+  let template = ce?.validation?.[code] || firstError.message;
+
+  if (template) {
+    if (code === "QuizInvalidTotalScore" && form) {
+      const scaleChoice = form.scoreScale || form.gradingScale;
+      const targetScore =
+        scaleChoice === "scale100" || scaleChoice === "Hundred" ? 100 : 10;
+      const totalPoints = (form.questions || []).reduce((sum, q) => {
+        const p = Number(q?.score ?? q?.points);
+        return sum + (Number.isFinite(p) ? p : 0);
+      }, 0);
+      const roundedTotal = Math.round(totalPoints * 100) / 100;
+      template = template
+        .replace("{{actual}}", roundedTotal)
+        .replace("{{expected}}", targetScore)
+        .replace("{{scale}}", targetScore);
+    } else {
+      if (firstError.actualTotal !== undefined) {
+        template = template.replace("{{actual}}", firstError.actualTotal);
+      }
+      if (firstError.expectedTotal !== undefined) {
+        template = template.replace("{{expected}}", firstError.expectedTotal);
+      }
+      if (firstError.scale !== undefined) {
+        template = template.replace("{{scale}}", firstError.scale);
+      }
+    }
+
+    if (firstError.questionIndex !== undefined) {
+      template = template.replace(
+        "{{questionNumber}}",
+        firstError.questionIndex + 1,
+      );
+    }
+    return template;
   }
+
   return (
-    EN_VALIDATION_MESSAGES[firstError?.code] ||
+    ce?.validation?.invalidForm ||
     "Quiz information is invalid. Please double check."
   );
 };
@@ -180,6 +156,26 @@ const formReducer = (state, action) => {
       return state;
   }
 };
+
+const SettingToggleRow = ({
+  label,
+  checked,
+  onChange,
+  ariaLabel,
+  disabled = false,
+}) => (
+  <div className="flex justify-between items-center gap-3">
+    <span className="text-xs font-semibold text-gray-700">{label}</span>
+    <Switch
+      checked={Boolean(checked)}
+      onChange={onChange}
+      disabled={disabled}
+      colorClass="peer-checked:bg-[#990011]"
+      size="sm"
+      aria-label={ariaLabel || label}
+    />
+  </div>
+);
 
 const CreateExamForm = ({ id, classData, language, t }) => {
   const navigate = useNavigate();
@@ -251,8 +247,8 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   const submissionGuardRef = useRef(false);
 
   const { userTimeZone } = useTimezone();
-  const c = t.courses || {};
-  const ce = c.createExam || {};
+  const c = useMemo(() => t.courses || {}, [t]);
+  const ce = useMemo(() => c.createExam || {}, [c]);
 
   // Persisted quiz form state
   const [form, dispatchForm] = useReducer(
@@ -281,25 +277,31 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     postToFeed,
   } = form;
 
-  const setFormField = (field, value) => {
+  const setFormField = useCallback((field, value) => {
     dispatchForm({ type: "SET_FIELD", field, value });
-  };
+  }, []);
 
   // Drag states
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [draggableIndex, setDraggableIndex] = useState(null);
+  // Mirrors draggedIndex so the drag handlers can stay referentially stable.
+  const draggedIndexRef = useRef(null);
+  const setDraggedIndexStable = useCallback((value) => {
+    draggedIndexRef.current = value;
+    setDraggedIndex(value);
+  }, []);
   const lastScrollTimeRef = useRef(0);
   const [importedFileName, setImportedFileName] = useState(null);
 
   // Collapse state
   const [collapsedQuestions, setCollapsedQuestions] = useState({});
 
-  const toggleCollapse = (qId) => {
+  const toggleCollapse = useCallback((qId) => {
     setCollapsedQuestions((prev) => ({
       ...prev,
       [qId]: !prev[qId],
     }));
-  };
+  }, []);
 
   // Preview Mode states
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -522,7 +524,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
   };
 
   // Question management handlers
-  const handleAddQuestion = () => {
+  const handleAddQuestion = useCallback(() => {
     const newId = `q-${Date.now()}`;
     setFormField("questions", (prev) => [
       ...prev,
@@ -536,320 +538,446 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         required: true,
       },
     ]);
-    toast.success(ce.toastQuestionAdded || "New question added");
-  };
+  }, [setFormField]);
 
-  const handleCopyQuestion = (index) => {
-    const qToCopy = questions[index];
-    const newId = `q-${Date.now()}`;
-    const copiedQ = {
-      ...qToCopy,
-      id: newId,
-      questionId: undefined,
-      options: qToCopy.options ? [...qToCopy.options] : undefined,
-      correctAnswers: qToCopy.correctAnswers ? [...qToCopy.correctAnswers] : [],
-    };
-    const updated = [...questions];
-    updated.splice(index + 1, 0, copiedQ);
-    setFormField("questions", updated);
-    toast.success(ce.toastQuestionCopied || "Question copied");
-  };
+  const handleCopyQuestion = useCallback(
+    (index) => {
+      const newId = `q-${Date.now()}`;
+      setFormField("questions", (prev) =>
+        duplicateQuestion(prev, index, newId),
+      );
+      toast.success(ce.toastQuestionCopied || "Question copied");
+    },
+    [ce, setFormField],
+  );
 
-  const handleDeleteQuestion = (index) => {
-    setFormField("questions", (prev) => prev.filter((_, i) => i !== index));
-    toast.success(ce.toastQuestionDeleted || "Question deleted");
-  };
+  const handleDeleteQuestion = useCallback(
+    (index) => {
+      setFormField("questions", (prev) => prev.filter((_, i) => i !== index));
+      toast.success(ce.toastQuestionDeleted || "Question deleted");
+    },
+    [ce, setFormField],
+  );
 
-  const handleQuestionTypeChange = (index, type) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => {
-        if (i !== index) return q;
-        if (type === "Essay") {
-          return {
-            ...q,
-            type: "Essay",
-            options: [],
-            correctAnswers: [],
-            maxWordCount: q.maxWordCount ?? 500,
-          };
-        } else if (type === "FillInBlank") {
-          return {
-            ...q,
-            type: "FillInBlank",
-            options: [],
-            correctAnswers: [],
-          };
-        } else if (type === "TrueFalse") {
-          return {
-            ...q,
-            type: "TrueFalse",
-            options: ["True", "False"],
-            correctAnswers: [],
-          };
-        } else if (type === "MultipleChoiceMultiple") {
-          return {
-            ...q,
-            type: "MultipleChoiceMultiple",
-            options: q.options && q.options.length >= 2 ? q.options : ["", ""],
-            correctAnswers: [],
-          };
-        } else {
-          return {
-            ...q,
-            type: "MultipleChoiceSingle",
-            options: q.options && q.options.length >= 2 ? q.options : ["", ""],
-            correctAnswers: [],
-          };
-        }
-      }),
-    );
-  };
-
-  const handleQuestionContentChange = (index, val) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => (i === index ? { ...q, content: val } : q)),
-    );
-  };
-
-  const handleScoreChange = (index, val) => {
-    const num = parseFloat(val) || 0;
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => (i === index ? { ...q, score: num } : q)),
-    );
-  };
-
-  const handleRequiredToggle = (index) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => (i === index ? { ...q, required: !q.required } : q)),
-    );
-  };
-
-  const handleMediaUpload = (index, file) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error(ce.toastInvalidImage || "Please select a valid image file");
-      return;
-    }
-    const previewUrl = URL.createObjectURL(file);
-    setFormField("questions", (prev) =>
-      prev.map((q, i) =>
-        i === index
-          ? {
-            ...q,
-            mediaFile: file,
-            mediaUrl: previewUrl,
-            clearMedia: false,
+  const handleQuestionTypeChange = useCallback(
+    (index, type) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => {
+          if (i !== index) return q;
+          if (type === "Essay") {
+            return {
+              ...q,
+              type: "Essay",
+              options: [],
+              correctAnswers: [],
+              maxWordCount: q.maxWordCount ?? 500,
+            };
+          } else if (type === "FillInBlank") {
+            return {
+              ...q,
+              type: "FillInBlank",
+              options: [],
+              correctAnswers: [],
+            };
+          } else if (type === "TrueFalse") {
+            return {
+              ...q,
+              type: "TrueFalse",
+              options: ["True", "False"],
+              correctAnswers: [],
+            };
+          } else if (type === "MultipleChoiceMultiple") {
+            return {
+              ...q,
+              type: "MultipleChoiceMultiple",
+              options: q.options && q.options.length >= 2 ? q.options : ["", ""],
+              correctAnswers: [],
+            };
+          } else {
+            return {
+              ...q,
+              type: "MultipleChoiceSingle",
+              options: q.options && q.options.length >= 2 ? q.options : ["", ""],
+              correctAnswers: [],
+            };
           }
-          : q,
-      ),
-    );
-    toast.success(ce.toastImageSelected || "Image selected");
-  };
+        }),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleAudioUpload = (index, file) => {
-    if (!file) return;
-    if (!file.type.startsWith("audio/")) {
-      toast.error(ce.toastInvalidAudio || "Please select a valid audio file");
-      return;
-    }
-    const previewUrl = URL.createObjectURL(file);
-    setFormField("questions", (prev) =>
-      prev.map((q, i) =>
-        i === index
-          ? {
-            ...q,
-            audioFile: file,
-            audioUrl: previewUrl,
-            clearAudio: false,
-          }
-          : q,
-      ),
-    );
-    toast.success(ce.toastAudioSelected || "Audio selected");
-  };
+  const handleQuestionContentChange = useCallback(
+    (index, val) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => (i === index ? { ...q, content: val } : q)),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleRemoveMedia = (index) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) =>
-        i === index
-          ? {
-            ...q,
-            mediaFile: null,
-            mediaUrl: null,
-            clearMedia: true,
-          }
-          : q,
-      ),
-    );
-  };
+  const handleScoreChange = useCallback(
+    (index, val) => {
+      const parsed = val === "" ? "" : parseFloat(val);
+      const scoreVal = val === "" ? "" : (isNaN(parsed) ? 0 : parsed);
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => (i === index ? { ...q, score: scoreVal } : q)),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleRemoveAudio = (index) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) =>
-        i === index
-          ? {
-            ...q,
-            audioFile: null,
-            audioUrl: null,
-            clearAudio: true,
-          }
-          : q,
-      ),
-    );
-  };
+  const handleRequiredToggle = useCallback(
+    (index) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => (i === index ? { ...q, required: !q.required } : q)),
+      );
+    },
+    [setFormField],
+  );
+
+  const handleSkillTagChange = useCallback(
+    (index, val) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => (i === index ? { ...q, skillTag: val } : q)),
+      );
+    },
+    [setFormField],
+  );
+
+  const handleTipTextChange = useCallback(
+    (index, val) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => (i === index ? { ...q, tipText: val } : q)),
+      );
+    },
+    [setFormField],
+  );
+
+  const handleMediaUpload = useCallback(
+    (index, file) => {
+      if (!file) return;
+      if (!file.type.startsWith("image/")) {
+        toast.error(ce.toastInvalidImage || "Please select a valid image file");
+        return;
+      }
+      const previewUrl = URL.createObjectURL(file);
+      setFormField("questions", (prev) =>
+        prev.map((q, i) =>
+          i === index
+            ? {
+              ...q,
+              mediaFile: file,
+              mediaUrl: previewUrl,
+              clearMedia: false,
+            }
+            : q,
+        ),
+      );
+      toast.success(ce.toastImageSelected || "Image selected");
+    },
+    [ce, setFormField],
+  );
+
+  const handleAudioUpload = useCallback(
+    (index, file) => {
+      if (!file) return;
+      if (!file.type.startsWith("audio/")) {
+        toast.error(ce.toastInvalidAudio || "Please select a valid audio file");
+        return;
+      }
+      const previewUrl = URL.createObjectURL(file);
+      setFormField("questions", (prev) =>
+        prev.map((q, i) =>
+          i === index
+            ? {
+              ...q,
+              audioFile: file,
+              audioUrl: previewUrl,
+              clearAudio: false,
+            }
+            : q,
+        ),
+      );
+      toast.success(ce.toastAudioSelected || "Audio selected");
+    },
+    [ce, setFormField],
+  );
+
+  const handleRemoveMedia = useCallback(
+    (index) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) =>
+          i === index
+            ? {
+              ...q,
+              mediaFile: null,
+              mediaUrl: null,
+              clearMedia: true,
+            }
+            : q,
+        ),
+      );
+    },
+    [setFormField],
+  );
+
+  const handleRemoveAudio = useCallback(
+    (index) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) =>
+          i === index
+            ? {
+              ...q,
+              audioFile: null,
+              audioUrl: null,
+              clearAudio: true,
+            }
+            : q,
+        ),
+      );
+    },
+    [setFormField],
+  );
 
   // Options & Answers handlers
-  const handleAddOption = (qIdx) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => {
-        if (i !== qIdx) return q;
-        const currentOpts = q.options || [];
-        return {
-          ...q,
-          options: [...currentOpts, ""],
-        };
-      }),
-    );
-  };
+  const handleAddOption = useCallback(
+    (qIdx) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => {
+          if (i !== qIdx) return q;
+          const currentOpts = q.options || [];
+          return {
+            ...q,
+            options: [...currentOpts, ""],
+          };
+        }),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleRemoveOption = (qIdx, optIdx) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => {
-        if (i !== qIdx) return q;
-        if (q.options.length <= 2) {
-          toast.error(ce.toastMinOptions || "There must be at least 2 options");
-          return q;
-        }
-        const updatedOptions = q.options.filter((_, idx) => idx !== optIdx);
-        const strOptIdx = String(optIdx);
-        const nextCorrect = (q.correctAnswers || [])
-          .filter((idxStr) => idxStr !== strOptIdx)
-          .map((idxStr) => {
-            const num = Number(idxStr);
-            return num > optIdx ? String(num - 1) : String(num);
-          });
-        return {
-          ...q,
-          options: updatedOptions,
-          correctAnswers: nextCorrect,
-        };
-      }),
-    );
-  };
+  const handleRemoveOption = useCallback(
+    (qIdx, optIdx) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => {
+          if (i !== qIdx) return q;
+          if (q.options.length <= 2) {
+            toast.error(
+              ce.toastMinOptions || "There must be at least 2 options",
+            );
+            return q;
+          }
+          const updatedOptions = q.options.filter((_, idx) => idx !== optIdx);
+          const strOptIdx = String(optIdx);
+          const nextCorrect = (q.correctAnswers || [])
+            .filter((idxStr) => idxStr !== strOptIdx)
+            .map((idxStr) => {
+              const num = Number(idxStr);
+              return num > optIdx ? String(num - 1) : String(num);
+            });
+          return {
+            ...q,
+            options: updatedOptions,
+            correctAnswers: nextCorrect,
+          };
+        }),
+      );
+    },
+    [ce, setFormField],
+  );
 
-  const handleOptionTextChange = (qIdx, optIdx, val) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => {
-        if (i !== qIdx) return q;
-        const updatedOptions = [...(q.options || [])];
-        updatedOptions[optIdx] = val;
-        return {
-          ...q,
-          options: updatedOptions,
-        };
-      }),
-    );
-  };
+  const handleOptionTextChange = useCallback(
+    (qIdx, optIdx, val) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => {
+          if (i !== qIdx) return q;
+          const updatedOptions = [...(q.options || [])];
+          updatedOptions[optIdx] = val;
+          return {
+            ...q,
+            options: updatedOptions,
+          };
+        }),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleSingleCorrectAnswer = (qIdx, optIdx) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) =>
-        i === qIdx ? { ...q, correctAnswers: [String(optIdx)] } : q,
-      ),
-    );
-  };
+  const handleSingleCorrectAnswer = useCallback(
+    (qIdx, optIdx) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) =>
+          i === qIdx ? { ...q, correctAnswers: [String(optIdx)] } : q,
+        ),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleMultipleCorrectAnswerToggle = (qIdx, optIdx) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => {
-        if (i !== qIdx) return q;
-        const strIdx = String(optIdx);
-        const current = q.correctAnswers || [];
-        const exists = current.includes(strIdx);
-        let next;
-        if (exists) {
-          next = current.filter((x) => x !== strIdx);
-        } else {
-          next = [...current, strIdx];
-        }
-        return { ...q, correctAnswers: next };
-      }),
-    );
-  };
+  const handleMultipleCorrectAnswerToggle = useCallback(
+    (qIdx, optIdx) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => {
+          if (i !== qIdx) return q;
+          const strIdx = String(optIdx);
+          const current = q.correctAnswers || [];
+          const exists = current.includes(strIdx);
+          let next;
+          if (exists) {
+            next = current.filter((x) => x !== strIdx);
+          } else {
+            next = [...current, strIdx];
+          }
+          return { ...q, correctAnswers: next };
+        }),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleFillInBlankAnswerChange = (qIdx, val) => {
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => (i === qIdx ? { ...q, correctAnswers: [val] } : q)),
-    );
-  };
+  const handleFillInBlankAnswerChange = useCallback(
+    (qIdx, val) => {
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => (i === qIdx ? { ...q, correctAnswers: [val] } : q)),
+      );
+    },
+    [setFormField],
+  );
 
-  const handleMaxWordCountChange = (qIdx, val) => {
-    const num = parseInt(val, 10) || 500;
-    setFormField("questions", (prev) =>
-      prev.map((q, i) => (i === qIdx ? { ...q, maxWordCount: num } : q)),
-    );
-  };
+  const handleMaxWordCountChange = useCallback(
+    (qIdx, val) => {
+      const num = parseInt(val, 10) || 500;
+      setFormField("questions", (prev) =>
+        prev.map((q, i) => (i === qIdx ? { ...q, maxWordCount: num } : q)),
+      );
+    },
+    [setFormField],
+  );
 
   // Move questions up/down
-  const handleMoveQuestion = (index, direction) => {
-    if (direction === "up" && index === 0) return;
-    if (direction === "down" && index === questions.length - 1) return;
-
-    const targetIdx = direction === "up" ? index - 1 : index + 1;
-    const updated = [...questions];
-    const temp = updated[index];
-    updated[index] = updated[targetIdx];
-    updated[targetIdx] = temp;
-    setFormField("questions", updated);
-  };
+  const handleMoveQuestion = useCallback(
+    (index, direction) => {
+      setFormField("questions", (prev) => moveQuestion(prev, index, direction));
+    },
+    [setFormField],
+  );
 
   // Drag and drop handlers
-  const handleDragStart = (e, index) => {
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", index.toString());
-  };
+  const handleDragStart = useCallback(
+    (e, index) => {
+      setDraggedIndexStable(index);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", index.toString());
+    },
+    [setDraggedIndexStable],
+  );
 
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
+  const handleDragOver = useCallback(
+    (e, index) => {
+      e.preventDefault();
 
-    const now = e.timeStamp;
-    if (now - lastScrollTimeRef.current > 50) {
-      const threshold = 120;
-      const clientY = e.clientY;
-      const viewHeight = window.innerHeight;
+      const now = e.timeStamp;
+      if (now - lastScrollTimeRef.current > 50) {
+        const threshold = 120;
+        const clientY = e.clientY;
+        const viewHeight = window.innerHeight;
 
-      if (clientY < threshold) {
-        const distance = threshold - clientY;
-        const speed = Math.max(4, Math.min(20, Math.floor(distance / 6)));
-        window.scrollBy(0, -speed);
-        lastScrollTimeRef.current = now;
-      } else if (viewHeight - clientY < threshold) {
-        const distance = threshold - (viewHeight - clientY);
-        const speed = Math.max(4, Math.min(20, Math.floor(distance / 6)));
-        window.scrollBy(0, speed);
-        lastScrollTimeRef.current = now;
+        if (clientY < threshold) {
+          const distance = threshold - clientY;
+          const speed = Math.max(4, Math.min(20, Math.floor(distance / 6)));
+          window.scrollBy(0, -speed);
+          lastScrollTimeRef.current = now;
+        } else if (viewHeight - clientY < threshold) {
+          const distance = threshold - (viewHeight - clientY);
+          const speed = Math.max(4, Math.min(20, Math.floor(distance / 6)));
+          window.scrollBy(0, speed);
+          lastScrollTimeRef.current = now;
+        }
       }
-    }
 
-    if (draggedIndex === null || draggedIndex === index) return;
+      // Read the source index from the ref so this callback never has to
+      // depend on draggedIndex state and can stay referentially stable.
+      const fromIndex = draggedIndexRef.current;
+      if (fromIndex === null || fromIndex === index) return;
 
-    const updated = [...questions];
-    const draggedItem = updated[draggedIndex];
-    updated.splice(draggedIndex, 1);
-    updated.splice(index, 0, draggedItem);
+      setFormField("questions", (prev) =>
+        reorderQuestion(prev, fromIndex, index),
+      );
+      setDraggedIndexStable(index);
+    },
+    [setDraggedIndexStable, setFormField],
+  );
 
-    setDraggedIndex(index);
-    setFormField("questions", updated);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
+  const handleDragEnd = useCallback(() => {
+    setDraggedIndexStable(null);
     setDraggableIndex(null);
-  };
+  }, [setDraggedIndexStable]);
+
+  // One stable object so <QuestionCard> can be memoized. Every member is a
+  // useCallback, so this identity only changes when the language does.
+  const questionHandlers = useMemo(
+    () => ({
+      handleAddOption,
+      handleAudioUpload,
+      handleCopyQuestion,
+      handleDeleteQuestion,
+      handleDragEnd,
+      handleDragOver,
+      handleDragStart,
+      handleFillInBlankAnswerChange,
+      handleMaxWordCountChange,
+      handleMediaUpload,
+      handleMoveQuestion,
+      handleMultipleCorrectAnswerToggle,
+      handleOptionTextChange,
+      handleQuestionContentChange,
+      handleQuestionTypeChange,
+      handleRemoveAudio,
+      handleRemoveMedia,
+      handleRemoveOption,
+      handleRequiredToggle,
+      handleScoreChange,
+      handleSingleCorrectAnswer,
+      handleSkillTagChange,
+      handleTipTextChange,
+      setDraggableIndex,
+      toggleCollapse,
+    }),
+    [
+      handleAddOption,
+      handleAudioUpload,
+      handleCopyQuestion,
+      handleDeleteQuestion,
+      handleDragEnd,
+      handleDragOver,
+      handleDragStart,
+      handleFillInBlankAnswerChange,
+      handleMaxWordCountChange,
+      handleMediaUpload,
+      handleMoveQuestion,
+      handleMultipleCorrectAnswerToggle,
+      handleOptionTextChange,
+      handleQuestionContentChange,
+      handleQuestionTypeChange,
+      handleRemoveAudio,
+      handleRemoveMedia,
+      handleRemoveOption,
+      handleRequiredToggle,
+      handleScoreChange,
+      handleSingleCorrectAnswer,
+      handleSkillTagChange,
+      handleTipTextChange,
+      toggleCollapse,
+    ],
+  );
 
   // Total score calculation
-  const totalScoreVal = questions.reduce((sum, q) => sum + (q.score || 0), 0);
+  const totalScoreVal = Math.round(
+    questions.reduce((sum, q) => sum + (Number(q.score) || 0), 0) * 100,
+  ) / 100;
+  const targetScale = scoreScale === "scale100" ? 100 : 10;
+  const isScoreMatched = Math.abs(totalScoreVal - targetScale) < 0.001;
 
   // Save/Submit Actions
   const handleCancel = () => {
@@ -933,7 +1061,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
     const validation = validateQuizForm(form, { mode: "draft" });
     if (!validation.isValid) {
-      toast.error(getValidationMessage(validation, language));
+      toast.error(getValidationMessage(validation, ce, form));
       return;
     }
 
@@ -986,10 +1114,10 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     const shouldPublish =
       wantsPublish && (!effectiveQuizId || currentStatus === "Draft");
     const validation = validateQuizForm(form, {
-      mode: shouldPublish ? "publish" : "draft",
+      mode: wantsPublish ? "publish" : "draft",
     });
     if (!validation.isValid) {
-      toast.error(getValidationMessage(validation, language));
+      toast.error(getValidationMessage(validation, ce, form));
       return;
     }
 
@@ -1219,10 +1347,13 @@ const CreateExamForm = ({ id, classData, language, t }) => {
     ).length;
 
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-805 -mx-4 -mt-6">
+      <div className="min-h-screen flex flex-col font-sans text-gray-805 -mx-4 -mt-6">
         {/* ─── Top Yellow/Orange Banner ─── */}
-        <div className="bg-[#f2a93b] text-gray-900 px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm select-none shrink-0">
-          <span className="text-sm font-extrabold tracking-wide flex items-center gap-2">
+        <div className="text-cath-red-700 px-6 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none shrink-0">
+          <span className="text-sm font-bold tracking-wide flex items-center">
+            <span className="w-9 h-9 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-700 shrink-0">
+              <Eye size={18} />
+            </span>
             <span className="w-2.5 h-2.5 bg-red-650 rounded-full animate-pulse" />
             {p.bannerText}
           </span>
@@ -1252,7 +1383,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
         </div>
 
         {/* ─── Sub-header Row ─── */}
-        <div className="bg-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border shadow-xs shrink-0 select-none">
+        <div className="bg-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs shrink-0 select-none">
           <div className="flex flex-col gap-1.5">
             <h1 className="text-xl font-black text-gray-900 tracking-tight leading-tight">
               {title || p.unnamedExam}
@@ -1752,7 +1883,7 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           </div>
 
           {/* Heading: Questions list */}
-          <div className="flex justify-between items-center px-2">
+          <div className="flex flex-wrap justify-between items-center gap-2 px-2">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-gray-800">
                 {ce.questionsList || "Danh sách câu hỏi"}
@@ -1766,10 +1897,25 @@ const CreateExamForm = ({ id, classData, language, t }) => {
                 <Info className="w-5 h-5" />
               </IconButton>
             </div>
-            <span className="text-sm font-semibold text-gray-500">
-              {ce.totalScore || "Tổng điểm"}:{" "}
-              <span className="text-[#990011] font-bold">{totalScoreVal}</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm font-semibold text-gray-500 flex items-center gap-1.5">
+                {ce.totalScore || "Tổng điểm"}:
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black transition-all ${questions.length > 0 && isScoreMatched
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs"
+                    : "bg-red-50 text-[#990011] border border-red-200 shadow-2xs"
+                    }`}
+                  title={`${totalScoreVal} / ${targetScale}`}
+                >
+                  <span>{totalScoreVal}</span>
+                  <span className="opacity-40 font-normal">/</span>
+                  <span>{targetScale}</span>
+                  {questions.length > 0 && isScoreMatched && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block ml-0.5" />
+                  )}
+                </span>
+              </span>
+            </div>
           </div>
 
           {/* Questions Container */}
@@ -1946,568 +2092,17 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             )}
 
             {questions.map((q, idx) => (
-              <div
+              <QuestionCard
                 key={q.id}
-                draggable={draggableIndex === idx}
-                onDragStart={(e) => handleDragStart(e, idx)}
-                onDragOver={(e) => handleDragOver(e, idx)}
-                onDragEnd={handleDragEnd}
-                className={`relative bg-white border rounded-3xl overflow-hidden flex shadow-xs group transition-all duration-200 ${draggedIndex === idx
-                  ? "opacity-40 border-dashed border-[#990011] scale-[0.99] bg-red-50/5"
-                  : "border-border border-solid"
-                  }`}
-              >
-                {/* Left drag-bar */}
-                <div className="w-12 bg-gray-50 border-r border-border flex flex-col items-center py-4 gap-1.5 select-none shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleMoveQuestion(idx, "up")}
-                    disabled={idx === 0}
-                    aria-label={ce.moveQuestionUp || "Move question up"}
-                    className={`p-1 rounded hover:bg-gray-200 transition-colors ${idx === 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-500"}`}
-                  >
-                    <ChevronUp size={16} />
-                  </button>
-                  <div
-                    onMouseDown={() => setDraggableIndex(idx)}
-                    onMouseUp={() => setDraggableIndex(null)}
-                    onMouseLeave={() => setDraggableIndex(null)}
-                    className="text-gray-300 cursor-grab active:cursor-grabbing p-1"
-                    title={ce.dragToReorder || "Drag to reorder"}
-                  >
-                    <Menu size={16} />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleMoveQuestion(idx, "down")}
-                    disabled={idx === questions.length - 1}
-                    aria-label={ce.moveQuestionDown || "Move question down"}
-                    className={`p-1 rounded hover:bg-gray-200 transition-colors ${idx === questions.length - 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-500"}`}
-                  >
-                    <ChevronDown size={16} />
-                  </button>
-                </div>
-
-                {/* Main Card Content */}
-                <div className="flex-1 p-5 md:p-6 flex flex-col gap-4">
-                  {/* Header Row */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      {/* Collapse/Expand Toggle Button */}
-                      <button
-                        type="button"
-                        onClick={() => toggleCollapse(q.id)}
-                        className="p-1 hover:bg-gray-150 rounded-lg text-gray-500 hover:text-gray-700 transition-colors cursor-pointer shrink-0"
-                        title={
-                          collapsedQuestions[q.id]
-                            ? ce.expandQuestion || "Expand question"
-                            : ce.collapseQuestion || "Collapse question"
-                        }
-                      >
-                        {collapsedQuestions[q.id] ? (
-                          <ChevronDown size={18} />
-                        ) : (
-                          <ChevronUp size={18} />
-                        )}
-                      </button>
-
-                      <span className="text-sm font-extrabold text-gray-800 select-none">
-                        {ce.question || "Câu"} {idx + 1}
-                      </span>
-                      {/* Dropdown Type */}
-                      <div className="relative">
-                        <select
-                          value={q.type}
-                          onChange={(e) =>
-                            handleQuestionTypeChange(idx, e.target.value)
-                          }
-                          className="pl-3 pr-8 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011] appearance-none cursor-pointer"
-                        >
-                          <option value="MultipleChoiceSingle">
-                            {ce.mcqSingleOption || "Trắc nghiệm (1 đáp án)"}
-                          </option>
-                          <option value="MultipleChoiceMultiple">
-                            {ce.mcqMultipleOption ||
-                              "Trắc nghiệm (Nhiều đáp án)"}
-                          </option>
-                          <option value="TrueFalse">
-                            {ce.trueFalseOption || "Đúng / Sai"}
-                          </option>
-                          <option value="FillInBlank">
-                            {ce.fillInBlankOption || "Điền vào chỗ trống"}
-                          </option>
-                          <option value="Essay">
-                            {ce.essayOption || "Tự luận"}
-                          </option>
-                        </select>
-                        <ChevronDown
-                          size={12}
-                          className="absolute right-2.5 top-2.5 text-gray-400 pointer-events-none"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Controls & Points & File Upload Icons */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      {/* Media Image Upload Icon Button */}
-                      <label
-                        className="p-1.5 border border-border bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
-                        title={ce.uploadImage || "Upload image"}
-                      >
-                        <ImageIcon size={15} className="text-[#990011]" />
-                        <span className="hidden sm:inline text-[11px]">
-                          {ce.image || "Image"}
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                              handleMediaUpload(idx, e.target.files[0]);
-                            }
-                            e.target.value = "";
-                          }}
-                        />
-                      </label>
-
-                      {/* Audio Upload Icon Button */}
-                      <label
-                        className="p-1.5 border border-border bg-white hover:bg-gray-100 text-gray-600 hover:text-[#990011] rounded-xl cursor-pointer flex items-center gap-1 text-xs font-bold transition-all shadow-xs"
-                        title={ce.uploadAudio || "Upload audio"}
-                      >
-                        <MusicIcon size={15} className="text-[#990011]" />
-                        <span className="hidden sm:inline text-[11px]">
-                          {ce.audio || "Audio"}
-                        </span>
-                        <input
-                          type="file"
-                          accept="audio/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                              handleAudioUpload(idx, e.target.files[0]);
-                            }
-                            e.target.value = "";
-                          }}
-                        />
-                      </label>
-
-                      {/* Points field */}
-                      <div className="flex items-center gap-1 ml-1">
-                        <span className="text-xs font-bold text-gray-500">
-                          {ce.point || "Điểm"}:
-                        </span>
-                        <input
-                          type="number"
-                          step="0.1"
-                          value={q.score}
-                          onChange={(e) =>
-                            handleScoreChange(idx, e.target.value)
-                          }
-                          className="w-16 px-2 py-1.5 bg-gray-50 border border-border rounded-xl text-center text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {collapsedQuestions[q.id] ? (
-                    /* Collapsed summary of question text */
-                    <div className="text-xs font-semibold text-gray-450 truncate max-w-[280px] sm:max-w-md md:max-w-2xl pl-8 leading-tight select-none italic pb-2">
-                      {q.content
-                        ? q.content
-                        : ce.noQuestionContentParenthetical ||
-                        "(No question content yet)"}
-                    </div>
-                  ) : (
-                    /* Expanded full editor fields */
-                    <>
-                      {/* Image Media Preview (Image on top) */}
-                      {q.mediaUrl && !q.clearMedia && (
-                        <div className="relative rounded-2xl overflow-hidden max-h-64 border border-border bg-gray-50 flex items-center justify-center p-2 group/img">
-                          <img
-                            src={q.mediaUrl}
-                            alt={(
-                              ce.questionImageAlt ||
-                              "Illustration for question {{number}}"
-                            ).replace("{{number}}", idx + 1)}
-                            className="max-h-60 max-w-full object-contain rounded-xl"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMedia(idx)}
-                            className="absolute top-3 right-3 p-1.5 bg-black/60 hover:bg-red-600 text-white rounded-full transition-colors cursor-pointer shadow-md"
-                            title={ce.removeImage || "Remove image"}
-                          >
-                            <X size={14} />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Audio Player (Audio play below image) */}
-                      {q.audioUrl && !q.clearAudio && (
-                        <div className="relative p-3 bg-red-50/20 border border-red-100 rounded-2xl flex items-center justify-between gap-3">
-                          <div className="flex-1 flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[#990011] text-white flex items-center justify-center shrink-0">
-                              <MusicIcon size={16} />
-                            </div>
-                            <audio
-                              controls
-                              src={q.audioUrl}
-                              className="w-full h-9 rounded-xl"
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAudio(idx)}
-                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer shrink-0"
-                            title={ce.removeAudio || "Remove audio"}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Content input */}
-                      <textarea
-                        value={q.content}
-                        onChange={(e) =>
-                          handleQuestionContentChange(idx, e.target.value)
-                        }
-                        placeholder={
-                          ce.questionContentPlaceholder ||
-                          "Enter question content..."
-                        }
-                        className="w-full p-3 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] resize-none h-18 transition-all"
-                      />
-
-                      {/* Type-Specific Options Area */}
-                      {q.type === "MultipleChoiceSingle" || q.type === "mcq" ? (
-                        <div className="flex flex-col gap-3 pl-2">
-                          <span className="text-xs font-bold text-gray-500">
-                            {ce.singleChoiceInstruction ||
-                              "Options (select 1 correct answer):"}
-                          </span>
-                          {(q.options || []).map((opt, optIdx) => {
-                            const isCorrect = (q.correctAnswers || []).includes(
-                              String(optIdx),
-                            );
-                            return (
-                              <div
-                                key={optIdx}
-                                className="flex items-center gap-3 group/opt"
-                              >
-                                {/* Radio Selection */}
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleSingleCorrectAnswer(idx, optIdx)
-                                  }
-                                  className={`w-5 h-5 border rounded-full flex items-center justify-center transition-all shrink-0 ${isCorrect
-                                    ? "border-[#990011] bg-red-50/10"
-                                    : "border-gray-300 hover:border-gray-400"
-                                    }`}
-                                >
-                                  {isCorrect && (
-                                    <span className="w-2.5 h-2.5 bg-[#990011] rounded-full" />
-                                  )}
-                                </button>
-
-                                {/* Option Input */}
-                                <input
-                                  type="text"
-                                  value={opt}
-                                  onChange={(e) =>
-                                    handleOptionTextChange(
-                                      idx,
-                                      optIdx,
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder={(
-                                    ce.optionPlaceholder || "Option {{letter}}"
-                                  ).replace(
-                                    "{{letter}}",
-                                    String.fromCharCode(65 + optIdx),
-                                  )}
-                                  className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
-                                    ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                                    : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
-                                    }`}
-                                />
-
-                                {/* Remove option button */}
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleRemoveOption(idx, optIdx)
-                                  }
-                                  className="text-gray-400 hover:text-red-600 transition-colors p-1"
-                                  title={ce.deleteOption || "Delete option"}
-                                >
-                                  <X size={14} />
-                                </button>
-                              </div>
-                            );
-                          })}
-
-                          {/* Add Option Trigger */}
-                          <button
-                            type="button"
-                            role="switch"
-                            aria-checked={q.required}
-                            aria-label={
-                              ce.requiredQuestion || "Required question"
-                            }
-                            onClick={() => handleAddOption(idx)}
-                            className="text-xs font-bold text-[#990011] flex items-center gap-1.5 hover:underline pl-8"
-                          >
-                            <Plus size={14} />
-                            <span>{ce.addOption || "Thêm lựa chọn"}</span>
-                          </button>
-                        </div>
-                      ) : q.type === "MultipleChoiceMultiple" ? (
-                        <div className="flex flex-col gap-3 pl-2">
-                          <span className="text-xs font-bold text-gray-500">
-                            {ce.multipleChoiceInstruction ||
-                              "Options (select 1 or more correct answers):"}
-                          </span>
-                          {(q.options || []).map((opt, optIdx) => {
-                            const isCorrect = (q.correctAnswers || []).includes(
-                              String(optIdx),
-                            );
-                            return (
-                              <div
-                                key={optIdx}
-                                className="flex items-center gap-3 group/opt"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isCorrect}
-                                  onChange={() =>
-                                    handleMultipleCorrectAnswerToggle(
-                                      idx,
-                                      optIdx,
-                                    )
-                                  }
-                                  className="w-5 h-5 rounded border-gray-300 text-[#990011] focus:ring-[#990011] cursor-pointer"
-                                />
-                                <input
-                                  type="text"
-                                  value={opt}
-                                  onChange={(e) =>
-                                    handleOptionTextChange(
-                                      idx,
-                                      optIdx,
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder={(
-                                    ce.optionPlaceholder || "Option {{letter}}"
-                                  ).replace(
-                                    "{{letter}}",
-                                    String.fromCharCode(65 + optIdx),
-                                  )}
-                                  className={`flex-1 px-3 py-2 border rounded-xl text-xs focus:outline-none transition-all ${isCorrect
-                                    ? "border-red-200 bg-red-50/10 focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                                    : "border-border focus:ring-1 focus:ring-red-100 focus:border-gray-300"
-                                    }`}
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleRemoveOption(idx, optIdx)
-                                  }
-                                  className="text-gray-400 hover:text-red-600 transition-colors p-1"
-                                  title={ce.deleteOption || "Delete option"}
-                                >
-                                  <X size={14} />
-                                </button>
-                              </div>
-                            );
-                          })}
-                          <button
-                            type="button"
-                            onClick={() => handleAddOption(idx)}
-                            className="text-xs font-bold text-[#990011] flex items-center gap-1.5 hover:underline pl-8"
-                          >
-                            <Plus size={14} />
-                            <span>{ce.addOption || "Thêm lựa chọn"}</span>
-                          </button>
-                        </div>
-                      ) : q.type === "TrueFalse" ? (
-                        <div className="flex flex-col gap-3 pl-2">
-                          <span className="text-xs font-bold text-gray-500">
-                            {ce.selectCorrectAnswer ||
-                              "Select the correct answer:"}
-                          </span>
-                          <div className="flex items-center gap-6">
-                            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
-                              <input
-                                type="radio"
-                                name={`tf-${q.id}`}
-                                checked={(q.correctAnswers || [])[0] === "0"}
-                                onChange={() =>
-                                  handleSingleCorrectAnswer(idx, 0)
-                                }
-                                className="w-4 h-4 text-[#990011] focus:ring-[#990011]"
-                              />
-                              <span>{ce.trueLabel || "True"}</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
-                              <input
-                                type="radio"
-                                name={`tf-${q.id}`}
-                                checked={(q.correctAnswers || [])[0] === "1"}
-                                onChange={() =>
-                                  handleSingleCorrectAnswer(idx, 1)
-                                }
-                                className="w-4 h-4 text-[#990011] focus:ring-[#990011]"
-                              />
-                              <span>{ce.falseLabel || "False"}</span>
-                            </label>
-                          </div>
-                        </div>
-                      ) : q.type === "FillInBlank" ? (
-                        <div className="flex flex-col gap-2 pl-2">
-                          <label className="text-xs font-bold text-gray-700">
-                            {ce.fillBlankCorrectAnswer ||
-                              "Correct answer for the blank:"}
-                          </label>
-                          <input
-                            type="text"
-                            value={(q.correctAnswers || [""])[0] || ""}
-                            onChange={(e) =>
-                              handleFillInBlankAnswerChange(idx, e.target.value)
-                            }
-                            placeholder={
-                              ce.fillBlankPlaceholder ||
-                              "Enter the correct answer..."
-                            }
-                            className="w-full max-w-md px-3 py-2 border border-border rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                          />
-                        </div>
-                      ) : (
-                        /* Essay View */
-                        <div className="flex flex-col gap-3 pl-2">
-                          <div className="flex items-center gap-3">
-                            <label className="text-xs font-bold text-gray-700">
-                              {ce.maxWordCount || "Maximum word count:"}
-                            </label>
-                            <input
-                              type="number"
-                              value={q.maxWordCount || 500}
-                              onChange={(e) =>
-                                handleMaxWordCountChange(idx, e.target.value)
-                              }
-                              className="w-24 px-3 py-1.5 border border-border rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                            />
-                          </div>
-                          <div className="bg-gray-50 border border-border rounded-2xl p-4 text-xs text-gray-400 font-medium italic">
-                            {ce.essayResponseHelp ||
-                              "Student essay response area."}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Skill Tag & Tip Text Row */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border">
-                        {/* Skill Tag */}
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                            {ce.skillTag || "Skill tag / topic"}
-                          </label>
-                          <input
-                            type="text"
-                            value={q.skillTag || ""}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setFormField("questions", (prev) => {
-                                const next = [...prev];
-                                next[idx] = { ...next[idx], skillTag: val };
-                                return next;
-                              });
-                            }}
-                            placeholder={
-                              ce.skillTagPlaceholder ||
-                              "e.g. Grammar, Vocabulary..."
-                            }
-                            className="w-full px-3 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                          />
-                        </div>
-
-                        {/* Tip Text */}
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
-                            {ce.tipText || "Tip / hint"}
-                          </label>
-                          <input
-                            type="text"
-                            value={q.tipText || ""}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setFormField("questions", (prev) => {
-                                const next = [...prev];
-                                next[idx] = { ...next[idx], tipText: val };
-                                return next;
-                              });
-                            }}
-                            placeholder={
-                              ce.tipTextPlaceholder || "Hint for students..."
-                            }
-                            className="w-full px-3 py-1.5 bg-gray-50 border border-border rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-100 focus:border-[#990011]"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="h-px bg-gray-100 w-full my-1" />
-
-                      {/* Actions footer of card */}
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                          {/* Copy */}
-                          <button
-                            type="button"
-                            onClick={() => handleCopyQuestion(idx)}
-                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-xl transition-all"
-                            title={ce.copyQuestion || "Copy question"}
-                          >
-                            <Copy size={16} />
-                          </button>
-                          {/* Delete */}
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteQuestion(idx)}
-                            className="p-2 text-gray-400 hover:text-red-650 hover:bg-red-55/20 rounded-xl transition-all"
-                            title={ce.deleteQuestion || "Delete question"}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-
-                        {/* Required Switch */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-gray-500">
-                            {ce.requiredLabel || "Bắt buộc"}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label={ce.addOption || "Add option"}
-                            onClick={() => handleRequiredToggle(idx)}
-                            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${q.required ? "bg-[#990011]" : "bg-gray-200"
-                              }`}
-                          >
-                            <span
-                              className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${q.required ? "translate-x-4" : "translate-x-0"
-                                }`}
-                            />
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+                question={q}
+                index={idx}
+                total={questions.length}
+                collapsed={Boolean(collapsedQuestions[q.id])}
+                isDragged={draggedIndex === idx}
+                isDraggable={draggableIndex === idx}
+                ce={ce}
+                handlers={questionHandlers}
+              />
             ))}
           </div>
 
@@ -2647,118 +2242,54 @@ const CreateExamForm = ({ id, classData, language, t }) => {
 
           {/* Advanced Settings */}
           <div className="flex flex-col gap-3">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+            <span className="text-xs font-bold uppercase tracking-wide">
               {ce.advancedSettings || "Cài đặt nâng cao"}
             </span>
 
             {/* Allow Late Submission */}
-            <div className="flex justify-between items-center gap-3">
-              <span className="text-xs font-semibold text-gray-750">
-                {ce.allowLateSubmission || "Allow late submission"}
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={allowLateSubmission}
-                aria-label={ce.allowLateSubmission || "Allow late submission"}
-                onClick={() =>
-                  setFormField("allowLateSubmission", !allowLateSubmission)
-                }
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${allowLateSubmission ? "bg-[#990011]" : "bg-gray-200"
-                  }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${allowLateSubmission ? "translate-x-3.5" : "translate-x-0"
-                    }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              label={ce.allowLateSubmission || "Allow late submission"}
+              checked={allowLateSubmission}
+              onChange={(e) =>
+                setFormField("allowLateSubmission", e.target.checked)
+              }
+            />
 
             {/* Shuffle Questions */}
-            <div className="flex justify-between items-center gap-3">
-              <span className="text-xs font-semibold text-gray-750">
-                {ce.shuffleQuestions || "Xáo trộn câu hỏi"}
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={shuffleQuestions}
-                aria-label={ce.shuffleQuestions || "Shuffle questions"}
-                onClick={() =>
-                  setFormField("shuffleQuestions", !shuffleQuestions)
-                }
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${shuffleQuestions ? "bg-[#990011]" : "bg-gray-200"
-                  }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${shuffleQuestions ? "translate-x-3.5" : "translate-x-0"
-                    }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              label={ce.shuffleQuestions || "Xáo trộn câu hỏi"}
+              checked={shuffleQuestions}
+              onChange={(e) =>
+                setFormField("shuffleQuestions", e.target.checked)
+              }
+            />
 
             {/* Shuffle Answers */}
-            <div className="flex justify-between items-center gap-3">
-              <span className="text-xs font-semibold text-gray-750">
-                {ce.shuffleOptions || "Xáo trộn đáp án"}
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={shuffleOptions}
-                aria-label={ce.shuffleOptions || "Shuffle answer options"}
-                onClick={() => setFormField("shuffleOptions", !shuffleOptions)}
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${shuffleOptions ? "bg-[#990011]" : "bg-gray-200"
-                  }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${shuffleOptions ? "translate-x-3.5" : "translate-x-0"
-                    }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              label={ce.shuffleOptions || "Xáo trộn đáp án"}
+              checked={shuffleOptions}
+              onChange={(e) =>
+                setFormField("shuffleOptions", e.target.checked)
+              }
+            />
 
             {/* Show Answer After Submission */}
-            <div className="flex justify-between items-center gap-3">
-              <span className="text-xs font-semibold text-gray-750">
-                {ce.showAnswers || "Hiển thị đáp án sau khi nộp"}
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={showAnswers}
-                aria-label={ce.showAnswers || "Show answers after submission"}
-                onClick={() => setFormField("showAnswers", !showAnswers)}
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${showAnswers ? "bg-[#990011]" : "bg-gray-200"
-                  }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${showAnswers ? "translate-x-3.5" : "translate-x-0"
-                    }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              label={ce.showAnswers || "Hiển thị đáp án sau khi nộp"}
+              checked={showAnswers}
+              onChange={(e) =>
+                setFormField("showAnswers", e.target.checked)
+              }
+            />
 
             {/* Auto Grade */}
-            <div className="flex justify-between items-center gap-3">
-              <span className="text-xs font-semibold text-gray-750">
-                {ce.autoGrading || "Chấm điểm tự động"}
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={autoGrading}
-                aria-label={ce.autoGrading || "Enable automatic grading"}
-                onClick={() => setFormField("autoGrading", !autoGrading)}
-                className={`relative inline-flex h-4.5 w-8 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${autoGrading ? "bg-[#990011]" : "bg-gray-200"
-                  }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${autoGrading ? "translate-x-3.5" : "translate-x-0"
-                    }`}
-                />
-              </button>
-            </div>
+            <SettingToggleRow
+              label={ce.autoGrading || "Chấm điểm tự động"}
+              checked={autoGrading}
+              onChange={(e) =>
+                setFormField("autoGrading", e.target.checked)
+              }
+            />
 
             {/* Score Scale Dropdown */}
             <div className="flex flex-col gap-1.5 mt-1">
@@ -2884,22 +2415,15 @@ const CreateExamForm = ({ id, classData, language, t }) => {
           {/* Post to Bulletin board */}
           <div className="bg-red-50/20 border border-red-100 rounded-2xl p-4 flex justify-between items-center shadow-xs">
             <span className="text-xs font-bold text-gray-800">
-              {ce.postToFeed || "Đăng lên bảng tin lớp học"}
+              {ce.postToFeed || "Đăng lên giảng đường"}
             </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={postToFeed}
+            <Switch
+              checked={Boolean(postToFeed)}
+              onChange={(e) => setFormField("postToFeed", e.target.checked)}
+              colorClass="peer-checked:bg-[#990011]"
+              size="sm"
               aria-label={ce.postToFeed || "Post to class feed"}
-              onClick={() => setFormField("postToFeed", !postToFeed)}
-              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${postToFeed ? "bg-[#990011]" : "bg-gray-200"
-                }`}
-            >
-              <span
-                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${postToFeed ? "translate-x-4" : "translate-x-0"
-                  }`}
-              />
-            </button>
+            />
           </div>
         </div>
       </form>

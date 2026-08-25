@@ -1292,6 +1292,21 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       return next
     })
   }
+
+  const quizTabs = [
+    { id: "overview", label: qg.overview },
+    { id: "submissions", label: qg.submissions },
+    { id: "stats", label: qg.statistics },
+    { id: "edit", label: qg.edit },
+  ]
+
+  const handleTabChange = (tabId) => {
+    if (tabId === "edit") {
+      onEdit?.()
+      return
+    }
+    setActiveTab(tabId)
+  }
   const [isQuestionsCollapsed, setIsQuestionsCollapsed] = useState(false)
   const [visibleQuestionsCount, setVisibleQuestionsCount] = useState(1)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -2262,7 +2277,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             className="hover:bg-gray-50/60 transition-colors"
                           >
                             {/* Col 1: Student info */}
-                            <td className="py-4 px-5 border-r border-border">
+                            <td className="py-4 px-5 border-r border-border whitespace-nowrap">
                               <div className="flex items-center gap-3">
                                 <QuizStudentAvatar
                                   student={st}
@@ -2282,7 +2297,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 2: Submission status */}
-                            <td className="py-4 px-5 border-r border-border text-center">
+                            <td className="py-4 px-5 border-r border-border text-center whitespace-nowrap">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${subStatus.style}`}
                               >
@@ -2291,7 +2306,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 3: Grading status */}
-                            <td className="py-4 px-5 border-r border-border text-center">
+                            <td className="py-4 px-5 border-r border-border text-center whitespace-nowrap">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${gradStatus.style}`}
                               >
@@ -2300,7 +2315,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 4: Score */}
-                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800">
+                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800 whitespace-nowrap">
                               {displayScore}
                             </td>
 
@@ -2329,7 +2344,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       <tr>
                         <td
                           colSpan={5}
-                          className="py-12 text-center text-gray-400 text-xs font-medium"
+                          className="py-12 text-center text-gray-400 text-xs font-medium whitespace-nowrap"
                         >
                           {submissionSearch || submissionStatusFilter !== "all" || gradingStatusFilter !== "all" || scoreFilter !== "all"
                             ? qg.noMatchingStudents
