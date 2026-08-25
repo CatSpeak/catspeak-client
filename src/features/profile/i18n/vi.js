@@ -99,8 +99,8 @@ export default {
       completedLabel: "Đã hoàn thành",
     },
     review: {
-      title: "Đánh giá khóa học",
-      subtitle: "Chia sẻ trải nghiệm của bạn để giúp cộng đồng học tập tốt hơn.",
+      title: "Đánh giá lớp học",
+      subtitle: "Chia sẻ trải nghiệm của bạn để cộng đồng học tập phát triển.",
       shareExperience: "Chia sẻ trải nghiệm của bạn",
       optional: "(không bắt buộc)",
       detailRating: "Đánh giá chi tiết",
@@ -142,8 +142,8 @@ export default {
         subtitle: "Bạn có thể chia sẻ thành tích này lên trang cá nhân như một chứng thực hoàn thành khóa học.",
         later: "Để sau",
         review: "Đánh giá",
-        share: "Chia sẻ",
-        completedDate: "Ngày hoàn thành",
+        share: "Chia sẻ ngay",
+        completedDate: "Hoàn thành ngày",
       },
     },
     documents: {

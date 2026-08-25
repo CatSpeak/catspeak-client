@@ -17,9 +17,9 @@ const LanguageBar = () => {
       name: countries.vietnam || "Việt Nam",
       code: "vi",
     },
-    { flag: China, name: t.home.countries.china, code: "zh" },
-    { flag: UK, name: t.home.countries.usa, code: "en" },
-    { flag: Japan, name: t.home.countries.japan, code: "ja" },
+    { flag: China, name: t.home.countries.china || "Trung Quốc", code: "zh" },
+    { flag: UK, name: t.home.countries.usa || "Anh", code: "en" },
+    { flag: Japan, name: t.home.countries.japan || "Nhật Bản", code: "ja" },
   ]
 
   const handleNavigation = (code) => {

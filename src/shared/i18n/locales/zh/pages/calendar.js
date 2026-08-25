@@ -22,6 +22,7 @@ export default {
   filterByDate: "按日期筛选",
   clearFilter: "清除筛选",
   eventFilter: "事件筛选",
+  eventDetail: "活动详情",
   filterReset: "重置",
   filterByEventType: "按事件类型筛选",
   noTeachingSchedule: "无教学安排",

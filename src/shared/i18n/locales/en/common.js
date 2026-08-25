@@ -23,6 +23,7 @@ export default {
       vietnam: "Vietnam",
       china: "Chinese",
       english: "English",
+      japan: "Japan",
     },
     languages: {
       vi: "Vietnamese",
@@ -156,6 +157,11 @@ export default {
     of: "of",
     prevPage: "Previous page",
     nextPage: "Next page",
+  },
+  errors: {
+    maxActiveRoomsReached:
+      "You have reached the limit of concurrently active rooms. Please upgrade your plan or close an existing room.",
+    generalFailed: "An error occurred. Please try again.",
   },
   uploadWidget: {
     uploading: "Executing... {{progress}}%",

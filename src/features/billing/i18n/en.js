@@ -204,7 +204,8 @@ export default {
       confirmEnroll: "Enroll Anyway",
       cancel: "Cancel",
       removeVoucherTitle: "Remove discount code?",
-      removeVoucherDesc: "Are you sure you want to remove code {{code}}? Total payment will return to {{totalAmount}}. You will lose the discount of {{discountAmount}}.",
+      removeVoucherDesc:
+        "Are you sure you want to remove code {{code}}? Your total payment will return to {{totalAmount}} and you will lose a {{discountAmount}} discount.",
       removeVoucherConfirm: "Remove code",
 
       // VoucherSection
@@ -245,42 +246,35 @@ export default {
       voucherCountSuffix: "code(s)",
     },
     errorCodes: {
-      // Generic fallback
       COMMON_INTERNAL_SERVER_ERROR: "An internal server error occurred. Please try again.",
       COMMON_EXTERNAL_SERVICE_ERROR: "An external service error occurred. Please try again later.",
       COMMON_BAD_REQUEST: "Invalid request. Please check your input.",
       COMMON_CONFLICT: "A conflict occurred. Please try again.",
-
-      // Payment errors
       PAYMENT_PLAN_NOT_FOUND: "The selected subscription plan is no longer available.",
       PAYMENT_CLASS_NOT_FOUND: "The class was not found or is no longer available.",
-      PAYMENT_LEARNER_NOT_FOUND: "No CatSpeak account found with this email address.",
-      PAYMENT_LEARNER_ALREADY_ENROLLED: "This learner has already enrolled in this class.",
-      PAYMENT_LEARNER_ALREADY_IN_CHECKOUT: "This learner is already in your checkout list.",
-      PAYMENT_CLASS_FULL: "Sorry, this class is now full.",
+      PAYMENT_LEARNER_NOT_FOUND: "No CatSpeak account was found for this email address.",
+      PAYMENT_LEARNER_ALREADY_ENROLLED: "This learner is already enrolled in this class.",
+      PAYMENT_LEARNER_ALREADY_IN_CHECKOUT: "This learner is already in the checkout list.",
+      PAYMENT_CLASS_FULL: "Sorry, this class is currently full.",
       PAYMENT_ENROLLMENT_PERIOD_INACTIVE: "The enrollment period for this class is not active.",
       PAYMENT_CLASS_ALREADY_STARTED: "This class has already started and is no longer accepting enrollments.",
       PAYMENT_VOUCHER_UNAVAILABLE: "Voucher code {{code}} is no longer available and has been removed from your order.",
-      PAYMENT_VOUCHER_DISCOUNT_CHANGED: "The voucher discount amount has changed. Please review your order.",
+      PAYMENT_VOUCHER_DISCOUNT_CHANGED: "The voucher discount has changed. Please review your order.",
       PAYMENT_LINK_FAILED: "Could not create the payment link. Please try again.",
       PAYMENT_ALREADY_PAID: "This transaction has already been paid.",
-      PAYMENT_ALREADY_CANCELLED: "This transaction has been paid and cannot be cancelled.",
+      PAYMENT_ALREADY_CANCELLED: "This transaction has already been paid and cannot be cancelled.",
       PAYMENT_NOT_FOUND: "Payment transaction not found.",
-      PAYMENT_SERVICE_NOT_CONFIGURED: "Payment service is temporarily unavailable.",
+      PAYMENT_SERVICE_NOT_CONFIGURED: "The payment service is temporarily unavailable.",
       PAYMENT_INVALID_TYPE: "Invalid payment type.",
-      PAYMENT_TRANSACTION_FAILED: "Transaction failed. Please try again.",
-
-      // Class enrollment errors
-      CLASS_ENROLLMENT_SCHEDULE_CONFLICT: "Schedule conflict detected.",
-      CLASS_ENROLLMENT_CLASS_FULL: "This class is now full.",
-      CLASS_ENROLLMENT_PERIOD_CLOSED: "The enrollment period for this class has closed.",
+      PAYMENT_TRANSACTION_FAILED: "The transaction failed. Please try again.",
+      CLASS_ENROLLMENT_SCHEDULE_CONFLICT: "A schedule conflict was detected.",
+      CLASS_ENROLLMENT_CLASS_FULL: "This class is currently full.",
+      CLASS_ENROLLMENT_PERIOD_CLOSED: "The enrollment period for this class has ended.",
       CLASS_ENROLLMENT_CLASS_ALREADY_STARTED: "This class has already started.",
-
-      // Learner validation errors (from gRPC)
-      ACCOUNT_NOT_FOUND: "No CatSpeak account found with this email address.",
-      ALREADY_ENROLLED: "This learner has already enrolled in this class.",
-      CLASS_FULL: "Sorry, this class is now full.",
-      VALIDATION_ERROR: "Invalid input. Please check your entry.",
-    }
+      ACCOUNT_NOT_FOUND: "No CatSpeak account was found for this email address.",
+      ALREADY_ENROLLED: "This learner is already enrolled in this class.",
+      CLASS_FULL: "Sorry, this class is currently full.",
+      VALIDATION_ERROR: "Invalid input. Please review your details.",
+    },
   }
 }

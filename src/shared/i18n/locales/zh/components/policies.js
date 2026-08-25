@@ -1,4 +1,5 @@
 import intellectualPropertyPolicy from "./intellectualProperty"
+import termsOfService from "./termsOfService"
 
 export default {
   paymentPolicy: {
@@ -232,4 +233,5 @@ export default {
     },
   },
   intellectualPropertyPolicy,
+  termsOfService,
 }
