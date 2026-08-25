@@ -6,7 +6,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import Avatar from "@/shared/components/ui/Avatar";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import Modal from "@/shared/components/ui/Modal";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, AlertCircle } from "lucide-react";
 
 dayjs.extend(relativeTime);
 
@@ -61,10 +61,21 @@ const PassConfirmationModal = ({ open, story, onConnect, onReport, onClose }) =>
             name={story.username || t.catSpeak?.anonymous || "Anonymous"}
             size={44}
           />
-          <div className="flex flex-col">
-            <span className="font-semibold text-lg text-[#1a1a1a] truncate">
-              {story.username || t.catSpeak?.anonymous || "Anonymous"}
-            </span>
+          <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-lg text-[#1a1a1a] truncate">
+                {story.username || t.catSpeak?.anonymous || "Anonymous"}
+              </span>
+              {story.isReported && (
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-semibold shrink-0 shadow-2xs"
+                  title={t.catSpeak?.reportedWarning || "Bị báo cáo"}
+                >
+                  <AlertCircle size={13} className="text-red-500 shrink-0" />
+                  <span>{t.catSpeak?.reportedWarning || "Bị báo cáo"}</span>
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-4 text-sm text-[#9e9e9e] mt-1">
               {/* <span className="flex items-center gap-1">
                 <MessageSquare size={13} className="shrink-0" />

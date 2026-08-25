@@ -21,6 +21,7 @@ export default {
   reportFailed: "Báo cáo thất bại",
   storyNotFound: "Không tìm thấy câu chuyện",
   cannotReportOwn: "Không thể báo cáo câu chuyện của chính mình",
+  reportedWarning: "Bị báo cáo",
   reels: {
     title: "Reels",
     description: "Xem video từ cộng đồng của chúng tôi.",

@@ -19,6 +19,7 @@ export default {
   reportFailed: "举报失败",
   storyNotFound: "未找到故事",
   cannotReportOwn: "无法举报自己的故事",
+  reportedWarning: "已被举报",
   reels: {
     title: "短视频",
     description: "观看我们社区的短视频。",

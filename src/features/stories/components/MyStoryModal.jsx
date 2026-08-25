@@ -4,7 +4,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
 import Modal from "@/shared/components/ui/Modal";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, AlertCircle } from "lucide-react";
 
 dayjs.extend(relativeTime);
 
@@ -44,12 +44,21 @@ const MyStoryModal = ({ open, story, onClose, onDelete }) => {
       className="md:max-w-[525px]"
     >
       <div className="md:space-y-6 space-y-4">
-        <div className="flex items-center gap-4 text-sm text-[#9e9e9e]">
+        <div className="flex items-center justify-between gap-4 text-sm text-[#9e9e9e]">
           {/* <span className="flex items-center gap-1">
             <MessageSquare size={13} className="shrink-0" />
             {story.commentCount || 0} {t.story?.replies}
           </span> */}
           <span>{dayjs(story.createDate).fromNow()}</span>
+          {!story.isReported && (
+            <span
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 text-xs font-semibold shrink-0 shadow-2xs"
+              title={t.catSpeak?.reportedWarning || "Bị báo cáo"}
+            >
+              <AlertCircle size={13} className="text-red-500 shrink-0" />
+              <span>{t.catSpeak?.reportedWarning || "Bị báo cáo"}</span>
+            </span>
+          )}
         </div>
 
         <div className="min-h-[40px] w-full break-words text-base leading-relaxed whitespace-pre-wrap">

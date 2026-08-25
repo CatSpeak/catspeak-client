@@ -1,4 +1,5 @@
 import React from "react"
+import { AlertCircle } from "lucide-react"
 import { BubbleButton } from "@/shared/components/ui/buttons"
 import styles from "../styles/danmaku.module.css"
 import colors from "@/shared/utils/colors"
@@ -77,6 +78,14 @@ const DanmakuItem = ({ story, onClick }) => {
       }}
       bubbleColor={isOwn ? "#2563eb" : colors.primaryRed}
     >
+      {story.isReported && (
+        <span
+          className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-md z-10"
+          title="Báo cáo"
+        >
+          <AlertCircle size={13} strokeWidth={2.5} />
+        </span>
+      )}
       <span className="line-clamp-3 break-words">{story.storyContent}</span>
     </BubbleButton>
   )

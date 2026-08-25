@@ -21,6 +21,7 @@ export default {
   reportFailed: "Report failed",
   storyNotFound: "Story not found",
   cannotReportOwn: "Cannot report own story",
+  reportedWarning: "Reported",
   reels: {
     title: "Reels",
     description: "Watch short videos from our community.",
