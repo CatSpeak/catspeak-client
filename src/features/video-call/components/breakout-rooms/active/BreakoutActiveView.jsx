@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import {
   useStopBreakoutRoomsMutation,
   useJoinBreakoutRoomMutation,
@@ -32,11 +32,20 @@ const BreakoutActiveView = ({
 }) => {
   const { t } = useLanguage()
   const dispatch = useDispatch()
+  const { callInfo } = useSelector((s) => s.videoCall)
 
   const { breakoutRoomsMap, breakoutRoomsStats } = useBreakoutSpeakingStats(
     sessionId,
     {
-      enabled: Boolean(status?.isBreakoutActive),
+      breakoutRooms: status?.breakoutSessions || [],
+      parentLivekitRoomName:
+        status?.mainRoom?.liveKitRoomName ||
+        callInfo?.roomData?.liveKitRoomName ||
+        "",
+      parentRoomId: callInfo?.roomId || null,
+      enabled: Boolean(
+        status?.isBreakoutActive && (status?.breakoutSessions?.length || 0) > 0,
+      ),
       includeMainRoom: true,
       pollingInterval: 60000,
     },

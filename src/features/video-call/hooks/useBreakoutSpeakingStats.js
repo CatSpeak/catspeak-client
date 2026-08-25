@@ -120,16 +120,51 @@ const parseRoomStats = (roomStats) => {
  *
  * @param {number|string|null} sessionId - Parent video session ID
  * @param {object} options
+ * @param {Array} [options.breakoutRooms=[]] - List of active breakout room objects ({ sessionId, roomName, liveKitRoomName, roomId })
+ * @param {string} [options.parentLivekitRoomName=""] - Parent session LiveKit room name
+ * @param {number|null} [options.parentRoomId=null] - Parent Room ID
  * @param {boolean} [options.enabled=true] - Whether polling/querying is active
  * @param {boolean} [options.includeMainRoom=true] - Whether to include Main Room stats
  * @param {number} [options.pollingInterval=60000] - Polling interval in ms (default 60s)
  */
 export const useBreakoutSpeakingStats = (sessionId, options = {}) => {
   const {
+    breakoutRooms = [],
+    parentLivekitRoomName = "",
+    parentRoomId = null,
     enabled = true,
     includeMainRoom = true,
     pollingInterval = 60000,
   } = options
+
+  // Serialize breakoutRooms to prevent infinite re-fetching on parent re-renders
+  const queryArg = useMemo(() => {
+    if (!sessionId || !enabled) return null
+    return {
+      sessionId,
+      parentRoomId,
+      parentLivekitRoomName,
+      includeMainRoom,
+      breakoutRooms: breakoutRooms.map((r) => ({
+        sessionId: r.sessionId ?? r.session_id,
+        roomId: r.roomId ?? r.room_id ?? null,
+        roomName: r.roomName ?? r.room_name ?? "",
+        liveKitRoomName: r.liveKitRoomName ?? r.livekit_room_name ?? "",
+      })),
+    }
+  }, [
+    sessionId,
+    parentRoomId,
+    parentLivekitRoomName,
+    includeMainRoom,
+    enabled,
+    JSON.stringify(
+      breakoutRooms.map(
+        (r) =>
+          `${r.sessionId ?? r.session_id}-${r.liveKitRoomName ?? r.livekit_room_name}`,
+      ),
+    ),
+  ])
 
   const {
     data: rawData,
@@ -138,14 +173,11 @@ export const useBreakoutSpeakingStats = (sessionId, options = {}) => {
     isFetching,
     isError,
     refetch,
-  } = useGetBreakoutSpeakingStatsQuery(
-    { sessionId, includeMainRoom },
-    {
-      skip: !sessionId || !enabled,
-      pollingInterval: enabled ? pollingInterval : 0,
-      refetchOnMountOrArgChange: true,
-    },
-  )
+  } = useGetBreakoutSpeakingStatsQuery(queryArg, {
+    skip: !queryArg,
+    pollingInterval: enabled ? pollingInterval : 0,
+    refetchOnMountOrArgChange: true,
+  })
 
   const {
     isBreakoutActive,
@@ -162,27 +194,94 @@ export const useBreakoutSpeakingStats = (sessionId, options = {}) => {
       }
     }
 
-    const isBreakoutActive = Boolean(rawData.isBreakoutActive)
-    const mainRoomParsed = rawData.mainRoom ? parseRoomStats(rawData.mainRoom) : null
+    const isBreakoutActive = Boolean(
+      rawData.isBreakoutActive ?? rawData.is_breakout_active,
+    )
+    const mainRoomData = rawData.mainRoom ?? rawData.main_room
+    const mainRoomParsed = mainRoomData
+      ? {
+          sessionId: mainRoomData.sessionId ?? mainRoomData.session_id,
+          roomId: mainRoomData.roomId ?? mainRoomData.room_id,
+          roomName:
+            mainRoomData.roomName ??
+            mainRoomData.room_name ??
+            "Phòng học chính",
+          liveKitRoomName:
+            mainRoomData.liveKitRoomName ??
+            mainRoomData.livekit_room_name ??
+            "",
+          lowSpeakingCount: Number(
+            mainRoomData.lowSpeakingCount ??
+              mainRoomData.low_speaking_count ??
+              mainRoomData.fairShare?.lowSpeakingCount ??
+              mainRoomData.fair_share?.low_speaking_count ??
+              0,
+          ),
+          hasWarning: Boolean(
+            mainRoomData.hasWarning ??
+              mainRoomData.has_warning ??
+              mainRoomData.fairShare?.hasWarning ??
+              mainRoomData.fair_share?.has_warning ??
+              false,
+          ),
+          studentCount: Number(
+            mainRoomData.studentCount ??
+              mainRoomData.student_count ??
+              mainRoomData.overview?.studentCount ??
+              mainRoomData.overview?.student_count ??
+              0,
+          ),
+          hasAnySpeechData: Boolean(
+            mainRoomData.hasAnySpeechData ?? mainRoomData.has_any_speech_data,
+          ),
+        }
+      : null
 
-    const breakoutRoomsList = Array.isArray(rawData.breakoutRooms)
-      ? rawData.breakoutRooms.map((room) => {
+    const rawRoomsList =
+      rawData.breakoutRooms ?? rawData.breakout_rooms ?? []
+    const breakoutRoomsList = Array.isArray(rawRoomsList)
+      ? rawRoomsList.map((room) => {
           const lowSpeakingCount = Number(
-            room.lowSpeakingCount ?? room.fairShare?.lowSpeakingCount ?? 0,
+            room.lowSpeakingCount ??
+              room.low_speaking_count ??
+              room.fairShare?.lowSpeakingCount ??
+              room.fair_share?.low_speaking_count ??
+              0,
           )
           const hasWarning = Boolean(
-            room.hasWarning ?? room.fairShare?.hasWarning ?? lowSpeakingCount > 0,
+            room.hasWarning ??
+              room.has_warning ??
+              room.fairShare?.hasWarning ??
+              room.fair_share?.has_warning ??
+              lowSpeakingCount > 0,
           )
           const studentCount = Number(
-            room.studentCount ?? room.overview?.studentCount ?? 0,
+            room.studentCount ??
+              room.student_count ??
+              room.overview?.studentCount ??
+              room.overview?.student_count ??
+              0,
           )
-          const hasAnySpeechData = Boolean(room.hasAnySpeechData)
+          const hasAnySpeechData = Boolean(
+            room.hasAnySpeechData ?? room.has_any_speech_data,
+          )
+
+          const sId = room.sessionId ?? room.session_id
+          const rId = room.roomId ?? room.room_id
+          const rName =
+            room.roomName ??
+            room.room_name ??
+            room.liveKitRoomName ??
+            room.livekit_room_name ??
+            ""
+          const lkName =
+            room.liveKitRoomName ?? room.livekit_room_name ?? ""
 
           return {
-            sessionId: room.sessionId,
-            roomId: room.roomId,
-            roomName: room.roomName || room.liveKitRoomName,
-            liveKitRoomName: room.liveKitRoomName,
+            sessionId: sId,
+            roomId: rId,
+            roomName: rName,
+            liveKitRoomName: lkName,
             lowSpeakingCount,
             hasWarning,
             studentCount,
@@ -193,9 +292,14 @@ export const useBreakoutSpeakingStats = (sessionId, options = {}) => {
 
     const breakoutMap = {}
     for (const room of breakoutRoomsList) {
-      breakoutMap[String(room.sessionId)] = room
-      if (room.roomId) {
+      if (room.sessionId != null) {
+        breakoutMap[String(room.sessionId)] = room
+      }
+      if (room.roomId != null) {
         breakoutMap[String(room.roomId)] = room
+      }
+      if (room.liveKitRoomName) {
+        breakoutMap[String(room.liveKitRoomName)] = room
       }
     }
 

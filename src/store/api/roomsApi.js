@@ -411,10 +411,16 @@ export const roomsApi = baseApi.injectEndpoints({
     getBreakoutSpeakingStats: builder.query({
       query: (arg) => {
         let sessionId
+        let breakoutRooms = []
+        let parentLivekitRoomName = ""
+        let parentRoomId = null
         let includeMainRoom = true
 
         if (typeof arg === "object" && arg !== null) {
           sessionId = arg.sessionId
+          breakoutRooms = arg.breakoutRooms || []
+          parentLivekitRoomName = arg.parentLivekitRoomName || ""
+          parentRoomId = arg.parentRoomId || null
           if (arg.includeMainRoom !== undefined) {
             includeMainRoom = arg.includeMainRoom
           }
@@ -424,7 +430,18 @@ export const roomsApi = baseApi.injectEndpoints({
 
         return {
           url: `/rooms/${sessionId}/breakout/speaking-stats`,
-          params: { includeMainRoom },
+          method: "POST",
+          body: {
+            parent_room_id: parentRoomId,
+            parent_livekit_room_name: parentLivekitRoomName,
+            breakout_rooms: breakoutRooms.map((r) => ({
+              session_id: r.sessionId ?? r.session_id,
+              room_id: r.roomId ?? r.room_id ?? null,
+              room_name: r.roomName ?? r.room_name ?? "",
+              livekit_room_name: r.liveKitRoomName ?? r.livekit_room_name ?? "",
+            })),
+            include_main_room: includeMainRoom,
+          },
         }
       },
       providesTags: (result, error, arg) => {
