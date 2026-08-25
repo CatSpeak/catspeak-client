@@ -80,13 +80,13 @@ const QuestionCard = ({
         }`}
     >
       {/* Left drag-bar */}
-      <div className="w-9 sm:w-12 bg-gray-50 border-r border-border flex flex-col items-center py-4 gap-1.5 select-none shrink-0">
+      <div className="w-9 sm:w-12 bg-gray-200 border-r border-border flex flex-col items-center py-4 gap-1.5 select-none shrink-0">
         <button
           type="button"
           onClick={() => handleMoveQuestion(index, "up")}
           disabled={index === 0}
           aria-label={ce.moveQuestionUp || "Move question up"}
-          className={`p-1 rounded hover:bg-gray-200 transition-colors ${index === 0 ? "text-gray-300 cursor-not-allowed" : "text-gray-500"}`}
+          className={`p-1 rounded hover:bg-gray-200 transition-colors ${index === 0 ? "text-gray-500 cursor-not-allowed" : "text-gray-500"}`}
         >
           <ChevronUp size={16} />
         </button>
@@ -94,7 +94,7 @@ const QuestionCard = ({
           onMouseDown={() => setDraggableIndex(index)}
           onMouseUp={() => setDraggableIndex(null)}
           onMouseLeave={() => setDraggableIndex(null)}
-          className="text-gray-300 cursor-grab active:cursor-grabbing p-1"
+          className="text-gray-500 cursor-grab active:cursor-grabbing p-1"
           title={ce.dragToReorder || "Drag to reorder"}
         >
           <Menu size={16} />
@@ -104,16 +104,13 @@ const QuestionCard = ({
           onClick={() => handleMoveQuestion(index, "down")}
           disabled={index === total - 1}
           aria-label={ce.moveQuestionDown || "Move question down"}
-          className={`p-1 rounded hover:bg-gray-200 transition-colors ${index === total - 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-500"}`}
+          className={`p-1 rounded hover:bg-gray-200 transition-colors ${index === total - 1 ? "text-gray-500 cursor-not-allowed" : "text-gray-500"}`}
         >
           <ChevronDown size={16} />
         </button>
       </div>
 
       {/* Main Card Content */}
-      {/* min-w-0 lets this column shrink below its content width; without it
-          the type <select> (sized by its longest option) is clipped by the
-          card's overflow-hidden on narrow screens. */}
       <div className="flex-1 min-w-0 p-4 sm:p-5 md:p-6 flex flex-col gap-4">
         {/* Header Row */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
@@ -533,7 +530,7 @@ const QuestionCard = ({
             )}
 
             {/* Skill Tag & Tip Text Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-border">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-border">
               {/* Skill Tag */}
               <div className="flex flex-col gap-1">
                 <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">
