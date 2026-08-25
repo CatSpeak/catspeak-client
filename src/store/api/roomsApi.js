@@ -523,15 +523,6 @@ export const roomsApi = baseApi.injectEndpoints({
           id: String(raw.id ?? raw.class_id ?? raw.classId ?? ""),
           classId: raw.class_id ?? raw.classId ?? null,
           class_id: raw.class_id ?? raw.classId ?? null,
-          roomId: raw.room_id ?? raw.roomId ?? null,
-          room_id: raw.room_id ?? raw.roomId ?? null,
-          className: raw.class_name ?? raw.className ?? "",
-          class_name: raw.class_name ?? raw.className ?? "",
-          courseName: raw.course_name ?? raw.courseName ?? "",
-          course_name: raw.course_name ?? raw.courseName ?? "",
-          term: raw.term ?? "",
-          teacherName: raw.teacher_name ?? raw.teacherName ?? "Instructor",
-          teacher_name: raw.teacher_name ?? raw.teacherName ?? "Instructor",
           totalStudents: raw.total_students ?? raw.totalStudents ?? students.length,
           total_students: raw.total_students ?? raw.totalStudents ?? students.length,
           totalSessions: raw.total_sessions ?? raw.totalSessions ?? sessions.length,
@@ -549,6 +540,104 @@ export const roomsApi = baseApi.injectEndpoints({
       providesTags: (result, error, classId) => [{ type: "Rooms", id: `ClassAnalytics-${classId}` }],
     }),
 
+    // Dedicated Students Speaking Analytics for "Theo học viên" Tab & Class KPIs
+    getClassStudentsSpeakingAnalytics: builder.query({
+      query: (classId) => `/rooms/class/${encodeURIComponent(classId)}/students-speaking-analytics`,
+      transformResponse: (res) => {
+        const raw = res?.data ?? res
+        if (!raw || typeof raw !== "object") return raw
+
+        const students = (raw.students || []).map((s) => ({
+          ...s,
+          id: String(s.id ?? s.account_id ?? s.accountId ?? ""),
+          accountId: s.account_id ?? s.accountId,
+          account_id: s.account_id ?? s.accountId,
+          name: s.name || `Student ${s.account_id ?? s.accountId ?? s.id}`,
+          initial: s.initial || (s.name ? s.name.trim().slice(0, 1).toUpperCase() : "S"),
+          avatarBg: s.avatar_bg ?? s.avatarBg ?? "bg-gray-100 text-gray-700 border border-gray-200",
+          avgStbPercent: s.avg_stb_percent ?? s.avgStbPercent ?? 0,
+          avg_stb_percent: s.avg_stb_percent ?? s.avgStbPercent ?? 0,
+          barLevel: s.bar_level ?? s.barLevel ?? 1,
+          bar_level: s.bar_level ?? s.barLevel ?? 1,
+          barColor: s.bar_color ?? s.barColor ?? "bg-[#16a34a]",
+          bar_color: s.bar_color ?? s.barColor ?? "bg-[#16a34a]",
+          barTrackWidth: s.bar_track_width ?? s.barTrackWidth ?? "40%",
+          bar_track_width: s.bar_track_width ?? s.barTrackWidth ?? "40%",
+          sessionsMet: s.sessions_met ?? s.sessionsMet ?? 0,
+          sessions_met: s.sessions_met ?? s.sessionsMet ?? 0,
+          sessionsUnmet: s.sessions_unmet ?? s.sessionsUnmet ?? 0,
+          sessions_unmet: s.sessions_unmet ?? s.sessionsUnmet ?? 0,
+          trend: s.trend || "stable",
+          status: s.status || "normal",
+          totalWords: s.total_words ?? s.totalWords ?? 0,
+          total_words: s.total_words ?? s.totalWords ?? 0,
+        }))
+
+        return {
+          ...raw,
+          id: String(raw.id ?? raw.class_id ?? raw.classId ?? ""),
+          classId: raw.class_id ?? raw.classId ?? null,
+          class_id: raw.class_id ?? raw.classId ?? null,
+          totalStudents: raw.total_students ?? raw.totalStudents ?? students.length,
+          total_students: raw.total_students ?? raw.totalStudents ?? students.length,
+          totalSessions: raw.total_sessions ?? raw.totalSessions ?? 0,
+          total_sessions: raw.total_sessions ?? raw.totalSessions ?? 0,
+          avgClassStb: raw.avg_class_stb ?? raw.avgClassStb ?? 0,
+          avg_class_stb: raw.avg_class_stb ?? raw.avgClassStb ?? 0,
+          belowThresholdCount: raw.below_threshold_count ?? raw.belowThresholdCount ?? 0,
+          below_threshold_count: raw.below_threshold_count ?? raw.belowThresholdCount ?? 0,
+          thresholdRate: raw.threshold_rate ?? raw.thresholdRate ?? 25,
+          threshold_rate: raw.threshold_rate ?? raw.thresholdRate ?? 25,
+          students,
+        }
+      },
+      providesTags: (result, error, classId) => [{ type: "Rooms", id: `ClassStudentsAnalytics-${classId}` }],
+    }),
+
+    // Dedicated Sessions Speaking Analytics for "Theo buổi" Tab
+    getClassSessionsSpeakingAnalytics: builder.query({
+      query: (classId) => `/rooms/class/${encodeURIComponent(classId)}/sessions-speaking-analytics`,
+      transformResponse: (res) => {
+        const raw = res?.data ?? res
+        if (!raw || typeof raw !== "object") return raw
+
+        const sessions = (raw.sessions || []).map((sess) => ({
+          ...sess,
+          sessionNumber: sess.session_number ?? sess.sessionNumber ?? 1,
+          session_number: sess.session_number ?? sess.sessionNumber ?? 1,
+          sessionId: sess.session_id ?? sess.sessionId ?? "",
+          session_id: sess.session_id ?? sess.sessionId ?? "",
+          createdAt: sess.created_at ?? sess.createdAt ?? null,
+          created_at: sess.created_at ?? sess.createdAt ?? null,
+          updatedAt: sess.updated_at ?? sess.updatedAt ?? null,
+          updated_at: sess.updated_at ?? sess.updatedAt ?? null,
+          teacherSpeechPercent: sess.teacher_speech_percent ?? sess.teacherSpeechPercent ?? 0,
+          teacher_speech_percent: sess.teacher_speech_percent ?? sess.teacherSpeechPercent ?? 0,
+          studentSpeechPercent: sess.student_speech_percent ?? sess.studentSpeechPercent ?? 0,
+          student_speech_percent: sess.student_speech_percent ?? sess.studentSpeechPercent ?? 0,
+          studentCount: sess.student_count ?? sess.studentCount ?? 0,
+          student_count: sess.student_count ?? sess.studentCount ?? 0,
+          lowSpeakingCount: sess.low_speaking_count ?? sess.lowSpeakingCount ?? 0,
+          low_speaking_count: sess.low_speaking_count ?? sess.lowSpeakingCount ?? 0,
+          avgStbScore: sess.avg_stb_score ?? sess.avgStbScore ?? 0,
+          avg_stb_score: sess.avg_stb_score ?? sess.avgStbScore ?? 0,
+          healthStatus: sess.health_status ?? sess.healthStatus ?? "good",
+          health_status: sess.health_status ?? sess.healthStatus ?? "good",
+        }))
+
+        return {
+          ...raw,
+          id: String(raw.id ?? raw.class_id ?? raw.classId ?? ""),
+          classId: raw.class_id ?? raw.classId ?? null,
+          class_id: raw.class_id ?? raw.classId ?? null,
+          totalSessions: raw.total_sessions ?? raw.totalSessions ?? sessions.length,
+          total_sessions: raw.total_sessions ?? raw.totalSessions ?? sessions.length,
+          sessions,
+        }
+      },
+      providesTags: (result, error, classId) => [{ type: "Rooms", id: `ClassSessionsAnalytics-${classId}` }],
+    }),
+
     // Student Speaking History in Class
     getStudentSpeakingHistory: builder.query({
       query: ({ classId, studentId }) =>
@@ -561,8 +650,6 @@ export const roomsApi = baseApi.injectEndpoints({
           studentId: String(raw.student_id ?? raw.studentId ?? ""),
           studentName: raw.student_name ?? raw.studentName ?? "",
           classId: String(raw.class_id ?? raw.classId ?? ""),
-          className: raw.class_name ?? raw.className ?? "",
-          term: raw.term ?? "",
           totalSessions: raw.total_sessions ?? raw.totalSessions ?? 0,
           classExpectedRate: raw.class_expected_rate ?? raw.classExpectedRate ?? 25,
           avgSpeechPercent: raw.avg_speech_percent ?? raw.avgSpeechPercent ?? 0,
@@ -579,13 +666,18 @@ export const roomsApi = baseApi.injectEndpoints({
             ...sess,
             sessionNumber: sess.session_number ?? sess.sessionNumber ?? 1,
             sessionId: sess.session_id ?? sess.sessionId ?? "",
-            topic: sess.topic || `Session ${sess.session_number ?? sess.sessionNumber ?? 1}`,
-            date: sess.date || "",
+            createdAt: sess.created_at ?? sess.createdAt ?? null,
+            created_at: sess.created_at ?? sess.createdAt ?? null,
+            updatedAt: sess.updated_at ?? sess.updatedAt ?? null,
+            updated_at: sess.updated_at ?? sess.updatedAt ?? null,
+            durationSeconds: sess.duration_seconds ?? sess.durationSeconds ?? (sess.duration_minutes ? sess.duration_minutes * 60 : 0),
             durationMinutes: sess.duration_minutes ?? sess.durationMinutes ?? 0,
+            percent: sess.percent ?? sess.speech_percent ?? sess.speechPercent ?? 0,
             speechPercent: sess.speech_percent ?? sess.speechPercent ?? 0,
             words: sess.words ?? 0,
             wpm: sess.wpm ?? 0,
             expectedRate: sess.expected_rate ?? sess.expectedRate ?? 25,
+            expectedPercent: sess.expected_percent ?? sess.expectedRate ?? 25,
             isMet: sess.is_met ?? sess.isMet ?? true,
             status: sess.status ?? "normal",
           })),
@@ -594,6 +686,73 @@ export const roomsApi = baseApi.injectEndpoints({
       providesTags: (result, error, { classId, studentId }) => [
         { type: "Rooms", id: `StudentAnalytics-${classId}-${studentId}` },
       ],
+    }),
+
+    // Single Session Speaking Stats (for SessionAnalyticsDetailPage)
+    getSessionSpeakingStats: builder.query({
+      query: (arg) => {
+        const sessionId = typeof arg === "object" && arg !== null ? (arg.sessionId || arg.session_id) : arg
+        return `/rooms/session/${encodeURIComponent(sessionId)}/speaking-stats`
+      },
+      transformResponse: (res) => {
+        const raw = res?.data ?? res
+        if (!raw || typeof raw !== "object") return raw
+        return {
+          ...raw,
+          sessionId: raw.session_id ?? raw.sessionId ?? "",
+          session_id: raw.session_id ?? raw.sessionId ?? "",
+          roomId: raw.room_id ?? raw.roomId ?? null,
+          room_id: raw.room_id ?? raw.roomId ?? null,
+          classId: raw.class_id ?? raw.classId ?? null,
+          class_id: raw.class_id ?? raw.classId ?? null,
+          hasAnySpeechData: raw.has_any_speech_data ?? raw.hasAnySpeechData ?? false,
+          overview: {
+            totalWords: raw.overview?.total_words ?? raw.overview?.totalWords ?? 0,
+            totalDurationSeconds: raw.overview?.total_duration_seconds ?? raw.overview?.totalDurationSeconds ?? 0,
+            totalStudentWords: raw.overview?.total_student_words ?? raw.overview?.totalStudentWords ?? 0,
+            totalStudentDurationSeconds: raw.overview?.total_student_duration_seconds ?? raw.overview?.totalStudentDurationSeconds ?? 0,
+            studentCount: raw.overview?.student_count ?? raw.overview?.studentCount ?? 0,
+          },
+          teacherTalkRatio: {
+            teacherPercent: raw.teacher_talk_ratio?.teacher_percent ?? raw.teacher_talk_ratio?.teacherPercent ?? 0,
+            studentPercent: raw.teacher_talk_ratio?.student_percent ?? raw.teacher_talk_ratio?.studentPercent ?? 0,
+            status: raw.teacher_talk_ratio?.status ?? "ideal",
+            teacherDurationSeconds: raw.teacher_talk_ratio?.teacher_duration_seconds ?? raw.teacher_talk_ratio?.teacherDurationSeconds ?? 0,
+            teacherWords: raw.teacher_talk_ratio?.teacher_words ?? raw.teacher_talk_ratio?.teacherWords ?? 0,
+          },
+          fairShare: {
+            expectedSharePercent: raw.fair_share?.expected_share_percent ?? raw.fair_share?.expectedSharePercent ?? 0,
+            lowSpeakingCount: raw.fair_share?.low_speaking_count ?? raw.fair_share?.lowSpeakingCount ?? 0,
+            hasWarning: raw.fair_share?.has_warning ?? raw.fair_share?.hasWarning ?? false,
+          },
+          participants: (raw.participants || []).map((p) => ({
+            ...p,
+            participantId: p.participant_id ?? p.participantId ?? "",
+            accountId: p.account_id ?? p.accountId ?? null,
+            name: p.name || `Student ${p.account_id ?? p.accountId ?? ""}`,
+            role: p.role ?? "student",
+            isTeacher: p.is_teacher ?? p.isTeacher ?? false,
+            stats: {
+              words: p.stats?.words ?? 0,
+              durationSeconds: p.stats?.duration_seconds ?? p.stats?.durationSeconds ?? 0,
+              wpm: p.stats?.wpm ?? 0,
+            },
+            balance: {
+              stbScore: p.balance?.stb_score ?? p.balance?.stbScore ?? 0,
+              timePercent: p.balance?.time_percent ?? p.balance?.timePercent ?? 0,
+              wordCountPercent: p.balance?.word_count_percent ?? p.balance?.wordCountPercent ?? 0,
+              sharePercent: p.balance?.share_percent ?? p.balance?.sharePercent ?? 0,
+              ratioOfExpected: p.balance?.ratio_of_expected ?? p.balance?.ratioOfExpected ?? 0,
+              status: p.balance?.status ?? "normal",
+            },
+            isThresholdMet: p.is_threshold_met ?? p.isThresholdMet ?? true,
+          })),
+        }
+      },
+      providesTags: (result, error, arg) => {
+        const sessionId = typeof arg === "object" && arg !== null ? arg.sessionId : arg
+        return [{ type: "Rooms", id: `SessionSpeakingStats-${sessionId}` }]
+      },
     }),
   }),
 });
@@ -632,11 +791,13 @@ export const {
   useGetBreakoutSpeakingStatsQuery,
   useLazyGetBreakoutSpeakingStatsQuery,
   useGetClassSpeakingAnalyticsQuery,
+  useGetClassStudentsSpeakingAnalyticsQuery,
+  useGetClassSessionsSpeakingAnalyticsQuery,
   useGetStudentSpeakingHistoryQuery,
+  useGetSessionSpeakingStatsQuery,
   // My Rooms & Bookmarks & Advanced Room Creation
   useGetMyRoomsQuery,
   useLazyGetMyRoomsQuery,
   useToggleBookmarkRoomMutation,
   useCreateAdvancedRoomMutation,
 } = roomsApi;
-

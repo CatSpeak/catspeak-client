@@ -2,7 +2,31 @@ import React, { useState } from "react"
 import { ChevronLeft, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const ClassAnalyticsSessionList = ({ sessions = [], teacherName = "Minh Hoàng", pageSize = 8 }) => {
+const formatDate = (isoStr) => {
+  if (!isoStr) return "—"
+  const d = new Date(isoStr)
+  if (isNaN(d.getTime())) return isoStr
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, "0")
+  const dd = String(d.getDate()).padStart(2, "0")
+  return `${yyyy}-${mm}-${dd}`
+}
+
+const formatTime = (isoStr) => {
+  if (!isoStr) return ""
+  const d = new Date(isoStr)
+  if (isNaN(d.getTime())) return ""
+  const hh = String(d.getHours()).padStart(2, "0")
+  const min = String(d.getMinutes()).padStart(2, "0")
+  return `${hh}:${min}`
+}
+
+const ClassAnalyticsSessionList = ({
+  sessions = [],
+  teacherName = "Minh Hoàng",
+  pageSize = 10,
+  onSelectSession,
+}) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const cd = c.analytics?.classDetail || {}
@@ -15,71 +39,134 @@ const ClassAnalyticsSessionList = ({ sessions = [], teacherName = "Minh Hoàng",
   const startIdx = (safePage - 1) * pageSize
   const visibleSessions = sessions.slice(startIdx, startIdx + pageSize)
 
-  return (
-    <div className="w-full flex flex-col gap-4 bg-white">
-      {/* Session List */}
-      <div className="flex flex-col border border-gray-200 rounded-2xl overflow-hidden divide-y divide-gray-100">
-        {visibleSessions.map((session) => {
-          const isGood = session.healthStatus === "good"
-          return (
-            <div
-              key={session.sessionNumber}
-              className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 hover:bg-gray-50/70 transition-colors"
-            >
-              {/* Left: Session Number, Date, Topic */}
-              <div className="flex flex-col gap-1 min-w-0 max-w-lg">
-                <div className="flex items-center gap-2.5">
-                  <span className="px-2.5 py-0.5 rounded-lg bg-gray-100 font-bold text-xs text-gray-800">
-                    {cd.session || "Buổi"} {session.sessionNumber}
-                  </span>
-                  <span className="text-xs text-gray-500 font-medium">
-                    {session.date}
-                  </span>
-                  {isGood ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                      <CheckCircle2 size={12} />
-                      {cd.statusNormal || "Cân bằng tốt"}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-                      <AlertCircle size={12} />
-                      {cd.statusAttention || "Chưa cân bằng"}
-                    </span>
-                  )}
-                </div>
-                <h4 className="text-sm font-bold text-gray-900 mt-1 truncate">
-                  {session.topic}
-                </h4>
-                <p className="text-xs text-gray-500">
-                  {cd.teacherTalk || "GV"} {teacherName}: <span className="font-semibold text-gray-700">{session.teacherSpeechPercent}%</span> · {cd.studentTalk || "HV"}: <span className="font-semibold text-gray-700">{session.studentSpeechPercent}%</span>
-                </p>
-              </div>
+  const getStatusBadge = (healthStatus) => {
+    if (healthStatus === "good") {
+      return (
+        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#e6f7ef] text-[#107c41]">
+          <CheckCircle2 size={12} />
+          {cd.statusNormal || "Cân bằng tốt"}
+        </span>
+      )
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-[#fef3c7] text-[#b45309]">
+        <AlertCircle size={12} />
+        {cd.statusAttention || "Chưa cân bằng"}
+      </span>
+    )
+  }
 
-              {/* Right: Student Breakdown Chips / Stats */}
-              <div className="flex flex-wrap items-center gap-2">
-                {session.studentsDetail?.map((st) => (
-                  <div
-                    key={st.name}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium ${
-                      st.isMet
-                        ? "bg-emerald-50/60 border-emerald-200/80 text-emerald-800"
-                        : "bg-amber-50/60 border-amber-200/80 text-amber-900"
-                    }`}
+  return (
+    <div className="w-full flex flex-col bg-white">
+      {/* Responsive Table Container */}
+      <div className="w-full overflow-x-auto">
+        <table className="w-full text-left text-sm border-collapse min-w-[650px]">
+          <thead>
+            <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
+              <th className="py-3 px-4 font-semibold">{cd.session || "Buổi"}</th>
+              <th className="py-3 px-4 font-semibold">Ngày & Giờ</th>
+              <th className="py-3 px-4 font-semibold text-blue-600">Tỷ lệ GV / HV</th>
+              <th className="py-3 px-4 font-semibold">STB TB</th>
+              <th className="py-3 px-4 font-semibold">Trạng thái</th>
+              <th className="py-3 px-4 text-right"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {sessions.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-sm text-gray-500">
+                  Chưa có dữ liệu buổi học nào được ghi nhận.
+                </td>
+              </tr>
+            ) : (
+              visibleSessions.map((session) => {
+                const sessionNum = session.sessionNumber ?? 1
+                const teacherPercent = session.teacherSpeechPercent ?? 0
+                const studentPercent = session.studentSpeechPercent ?? 0
+                const avgStb = session.avgStbScore ?? 0
+                const createdIso = session.createdAt || session.created_at
+                const updatedIso = session.updatedAt || session.updated_at
+                const dateDisplay = formatDate(createdIso)
+                const startTime = formatTime(createdIso)
+                const endTime = formatTime(updatedIso)
+                const timeRange = [startTime, endTime].filter(Boolean).join("–")
+
+                return (
+                  <tr
+                    key={session.sessionNumber || session.sessionId}
+                    onClick={() => onSelectSession && onSelectSession(session)}
+                    className="hover:bg-gray-50/70 transition-colors cursor-pointer group"
                   >
-                    <span className="font-semibold">{st.name}:</span>
-                    <span className="tabular-nums font-bold">{st.percent}%</span>
-                    <span className="text-[10px] opacity-75">({st.words}w)</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        })}
+                    {/* Buổi */}
+                    <td className="py-3.5 px-4">
+                      <span className="font-bold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">
+                        Buổi #{sessionNum}
+                      </span>
+                    </td>
+
+                    {/* Ngày & Giờ */}
+                    <td className="py-3.5 px-4 font-medium text-gray-800 text-sm">
+                      <div className="flex flex-col">
+                        <span>{dateDisplay}</span>
+                        {timeRange && (
+                          <span className="text-xs text-gray-500 font-normal">
+                            {timeRange}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Tỷ lệ GV / HV with split progress bar */}
+                    <td className="py-3.5 px-4">
+                      <div className="flex flex-col gap-1.5 min-w-[130px] max-w-[170px]">
+                        <div className="flex items-center justify-between text-xs font-semibold text-gray-700">
+                          <span>GV: {teacherPercent}%</span>
+                          <span>HV: {studentPercent}%</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden flex">
+                          <div
+                            style={{ width: `${Math.min(100, Math.max(0, teacherPercent))}%` }}
+                            className="bg-sky-500 h-full"
+                          />
+                          <div
+                            style={{ width: `${Math.min(100, Math.max(0, studentPercent))}%` }}
+                            className="bg-emerald-500 h-full"
+                          />
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* STB TB */}
+                    <td className="py-3.5 px-4 font-bold text-gray-900 text-sm tabular-nums">
+                      {avgStb}%
+                    </td>
+
+                    {/* Trạng thái */}
+                    <td className="py-3.5 px-4">
+                      {getStatusBadge(session.healthStatus)}
+                    </td>
+
+                    {/* Action */}
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1 text-xs font-semibold text-blue-600 group-hover:text-blue-700">
+                        <span>Chi tiết</span>
+                        <ChevronRight
+                          size={14}
+                          className="group-hover:translate-x-0.5 transition-all"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination Controls */}
       {sessions.length > pageSize && (
-        <div className="flex items-center justify-between gap-4 pt-2 text-xs text-gray-500">
+        <div className="flex items-center justify-between gap-4 p-4 border-t border-gray-100 text-xs text-gray-500">
           <span>
             {secT.showing || "Hiển thị"} {startIdx + 1}–{Math.min(startIdx + pageSize, sessions.length)} {secT.of || "trong"} {sessions.length} {cd.sessionsCount ? cd.sessionsCount.replace("{{count}}", "") : "buổi"}
           </span>
@@ -98,9 +185,9 @@ const ClassAnalyticsSessionList = ({ sessions = [], teacherName = "Minh Hoàng",
                 type="button"
                 onClick={() => setCurrentPage(pNum)}
                 className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${
-                  pNum === safePage
-                    ? "bg-[#990011] border-[#990011] text-white"
-                    : "bg-white border-gray-200 text-gray-700 hover:border-[#990011] hover:text-[#990011]"
+                  safePage === pNum
+                    ? "bg-[#111827] text-white border-[#111827]"
+                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                 }`}
               >
                 {pNum}

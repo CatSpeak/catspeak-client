@@ -1,5 +1,5 @@
 import React from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useGetStudentSpeakingHistoryQuery } from "@/store/api/roomsApi"
 import { useGetClassDetailQuery } from "@/store/api/coursesApi"
 import {
@@ -10,6 +10,7 @@ import {
 } from "../components/analytics/student-detail"
 
 const StudentAnalyticsDetailPage = () => {
+  const navigate = useNavigate()
   const { classId, studentId } = useParams()
 
   // Fetch official class metadata from Main API Service (catspeak-api)
@@ -54,7 +55,6 @@ const StudentAnalyticsDetailPage = () => {
       apiData?.className ||
       classId ||
       "Lớp học",
-    term: mainClassDetail?.term || apiData?.term || "",
     totalSessions: apiData?.totalSessions ?? 0,
     classExpectedRate: apiData?.classExpectedRate ?? 25,
     avgSpeechPercent: apiData?.avgSpeechPercent ?? 0,
@@ -80,6 +80,13 @@ const StudentAnalyticsDetailPage = () => {
     )
   }
 
+  const handleSessionClick = (sess) => {
+    const targetSessionId = sess?.sessionId || sess?.session_id
+    if (targetSessionId && classId) {
+      navigate(`/workspace/analytics/class/${encodeURIComponent(classId)}/session/${encodeURIComponent(targetSessionId)}`)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e] min-h-full pb-14 max-w-7xl mx-auto w-full">
       {/* 1. Header with Breadcrumbs, Title and Subtitle */}
@@ -97,7 +104,10 @@ const StudentAnalyticsDetailPage = () => {
 
       {/* 4. Session-by-Session History Table */}
       <div className="flex flex-col bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs">
-        <StudentSessionHistoryTable sessions={studentData.sessions} />
+        <StudentSessionHistoryTable
+          sessions={studentData.sessions}
+          onSessionClick={handleSessionClick}
+        />
       </div>
     </div>
   )

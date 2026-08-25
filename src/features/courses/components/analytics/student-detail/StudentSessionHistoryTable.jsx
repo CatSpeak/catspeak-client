@@ -2,6 +2,24 @@ import React, { useState } from "react"
 import { ChevronRight } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
+const formatDuration = (seconds) => {
+  if (!seconds || seconds <= 0) return "00:00"
+  const totalSecs = Math.round(seconds)
+  const mins = Math.floor(totalSecs / 60)
+  const secs = totalSecs % 60
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+}
+
+const formatDate = (isoStr) => {
+  if (!isoStr) return "—"
+  const d = new Date(isoStr)
+  if (isNaN(d.getTime())) return isoStr
+  const dd = String(d.getDate()).padStart(2, "0")
+  const mm = String(d.getMonth() + 1).padStart(2, "0")
+  const yyyy = d.getFullYear()
+  return `${dd}/${mm}/${yyyy}`
+}
+
 const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 6 }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
@@ -34,7 +52,7 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
             <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
               <th className="py-3 px-4 font-semibold">{sd.colSession || "Buổi"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colDate || "Ngày"}</th>
-              <th className="py-3 px-4 font-semibold">{sd.colTime || "Giờ học"}</th>
+              <th className="py-3 px-4 font-semibold">{sd.colDuration || "Tổng thời lượng nói"}</th>
               <th className="py-3 px-4 font-semibold text-blue-600">{sd.colSpeechPercent || "% Phát biểu"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colWords || "Số từ"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colExpected || "Kỳ vọng"}</th>
@@ -45,6 +63,8 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
           <tbody className="divide-y divide-gray-100">
             {visibleSessions.map((sess) => {
               const isMet = sess.isMet
+              const durationSecs = sess.durationSeconds ?? (sess.durationMinutes ? sess.durationMinutes * 60 : 0)
+              const dateDisplay = formatDate(sess.createdAt || sess.created_at || sess.date)
               return (
                 <tr
                   key={sess.sessionNumber}
@@ -58,12 +78,12 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
 
                   {/* Ngày */}
                   <td className="py-3.5 px-4 text-gray-800 font-medium">
-                    {sess.date}
+                    {dateDisplay}
                   </td>
 
-                  {/* Giờ học */}
-                  <td className="py-3.5 px-4 text-gray-600 font-normal">
-                    {sess.time}
+                  {/* Tổng thời lượng nói */}
+                  <td className="py-3.5 px-4 text-gray-700 font-normal tabular-nums">
+                    {formatDuration(durationSecs)}
                   </td>
 
                   {/* % Phát biểu Progress bar */}

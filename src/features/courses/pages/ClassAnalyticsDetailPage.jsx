@@ -1,7 +1,10 @@
 import React, { useState, useMemo } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useGetClassSpeakingAnalyticsQuery } from "@/store/api/roomsApi"
+import {
+  useGetClassStudentsSpeakingAnalyticsQuery,
+  useGetClassSessionsSpeakingAnalyticsQuery,
+} from "@/store/api/roomsApi"
 import { useGetClassDetailQuery } from "@/store/api/coursesApi"
 import {
   ClassAnalyticsHeader,
@@ -18,20 +21,29 @@ const ClassAnalyticsDetailPage = () => {
   const c = t.courses || {}
   const cd = c.analytics?.classDetail || {}
 
-  // Fetch official class metadata from Main API Service (catspeak-api)
+  // Active tab state: "students" | "sessions"
+  const [activeTab, setActiveTab] = useState("students")
+
+  // 1. Fetch official class metadata from Main API Service (catspeak-api)
   const { data: mainClassDetail, isLoading: isClassLoading } = useGetClassDetailQuery(
     classId || "",
     { skip: !classId }
   )
 
-  // Fetch speaking balance & session analytics from AI API Service (catspeak-ai)
+  // 2. Fetch dedicated students speaking analytics for KPIs & "Theo học viên" tab
   const {
-    data: apiData,
-    isLoading: isSpeakingLoading,
-    isError: isSpeakingError,
-  } = useGetClassSpeakingAnalyticsQuery(classId || "", { skip: !classId })
+    data: studentsAnalyticsData,
+    isLoading: isStudentsLoading,
+    isError: isStudentsError,
+  } = useGetClassStudentsSpeakingAnalyticsQuery(classId || "", { skip: !classId })
 
-  const isLoading = isClassLoading && isSpeakingLoading
+  // 3. Fetch dedicated sessions speaking analytics for "Theo buổi" tab (fetched when active or mounted)
+  const {
+    data: sessionsAnalyticsData,
+    isLoading: isSessionsLoading,
+  } = useGetClassSessionsSpeakingAnalyticsQuery(classId || "", { skip: !classId })
+
+  const isLoading = isClassLoading && isStudentsLoading
 
   // Merged student roster: joins Main DB enrolled students with AI speaking metrics
   const mergedStudents = useMemo(() => {
@@ -41,7 +53,7 @@ const ClassAnalyticsDetailPage = () => {
       mainClassDetail?.enrolledStudents ||
       []
 
-    const aiStudents = apiData?.students || []
+    const aiStudents = studentsAnalyticsData?.students || []
 
     // Build lookup map by accountId and id
     const aiStatsMap = new Map()
@@ -96,7 +108,7 @@ const ClassAnalyticsDetailPage = () => {
     })
 
     return merged
-  }, [mainClassDetail, apiData])
+  }, [mainClassDetail, studentsAnalyticsData])
 
   // Combined data merging Main DB metadata with AI speaking metrics
   const classData = {
@@ -104,37 +116,37 @@ const ClassAnalyticsDetailPage = () => {
     className:
       mainClassDetail?.className ||
       mainClassDetail?.name ||
-      apiData?.className ||
+      studentsAnalyticsData?.className ||
       classId ||
       "Lớp học",
     courseName:
       mainClassDetail?.courseName ||
       mainClassDetail?.courseTitle ||
-      apiData?.courseName ||
+      studentsAnalyticsData?.courseName ||
       "",
-    term: mainClassDetail?.term || apiData?.term || "",
     teacherName:
       mainClassDetail?.teacherName ||
       mainClassDetail?.instructorName ||
       mainClassDetail?.instructor?.name ||
-      apiData?.teacherName ||
+      studentsAnalyticsData?.teacherName ||
       "Giảng viên",
     totalStudents:
       mainClassDetail?.studentCount ||
       mergedStudents.length ||
-      apiData?.totalStudents ||
+      studentsAnalyticsData?.totalStudents ||
       0,
-    totalSessions: apiData?.totalSessions ?? (mainClassDetail?.totalSessions || 0),
-    avgClassStb: apiData?.avgClassStb ?? 0,
-    belowThresholdCount: apiData?.belowThresholdCount ?? 0,
-    thresholdRate: apiData?.thresholdRate ?? 25,
+    totalSessions:
+      sessionsAnalyticsData?.totalSessions ??
+      studentsAnalyticsData?.totalSessions ??
+      mainClassDetail?.totalSessions ??
+      0,
+    avgClassStb: studentsAnalyticsData?.avgClassStb ?? 0,
+    belowThresholdCount: studentsAnalyticsData?.belowThresholdCount ?? 0,
+    thresholdRate: studentsAnalyticsData?.thresholdRate ?? 25,
     students: mergedStudents,
-    sessions: apiData?.sessions || [],
-    isSpeakingError,
+    sessions: sessionsAnalyticsData?.sessions || [],
+    isSpeakingError: isStudentsError,
   }
-
-  // Active tab state: "students" | "sessions"
-  const [activeTab, setActiveTab] = useState("students")
 
   const handleStudentClick = (student) => {
     navigate(
@@ -212,6 +224,16 @@ const ClassAnalyticsDetailPage = () => {
             <ClassAnalyticsSessionList
               sessions={classData.sessions}
               teacherName={classData.teacherName}
+              onSelectSession={(session) => {
+                const sessId = session.sessionId || session.session_id || session.sessionNumber
+                if (sessId) {
+                  navigate(
+                    `/workspace/analytics/class/${encodeURIComponent(
+                      classId || ""
+                    )}/session/${encodeURIComponent(sessId)}`
+                  )
+                }
+              }}
             />
           )}
         </div>
