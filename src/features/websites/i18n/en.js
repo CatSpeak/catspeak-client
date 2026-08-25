@@ -29,6 +29,7 @@ export default {
       reading: "Graded Readers",
       dictionary: "Dictionaries",
       writing: "Hanzi Writing",
+      games: "Games",
       kids: "For Kids",
     },
     results: {

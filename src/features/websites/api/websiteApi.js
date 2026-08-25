@@ -521,5 +521,12 @@ const resources = [
     url: "https://www.kanjipedia.jp/",
   },
 
-  // 9. Dành cho trẻ em / Nhập môn
+  // 9. Trò chơi / Games
+  {
+    id: "gametiengnhat",
+    lang: "ja",
+    url: "https://gametiengnhat.onhat.vn/",
+  },
+
+  // 10. Dành cho trẻ em / Nhập môn
 ]

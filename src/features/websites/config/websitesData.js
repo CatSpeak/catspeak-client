@@ -12,6 +12,7 @@ import {
   BookOpenText,
   Library,
   Languages,
+  Gamepad2,
 } from "lucide-react"
 
 export const RESOURCE_CATEGORIES = {
@@ -55,6 +56,7 @@ export const RESOURCE_CATEGORIES = {
     icon: LibraryBig,
   },
   writing: { labelEn: "Hanzi Writing", labelZh: "汉字书写", icon: NotebookPen },
+  games: { labelEn: "Games", labelZh: "游戏", icon: Gamepad2 },
   kids: { labelEn: "For Kids", labelZh: "少儿学习", icon: Baby },
 }
 
@@ -927,6 +929,22 @@ export const websites = [
         label: "Từ Điển Kanji",
         path: "/resources/kanjipedia",
         description: "Web tra cứu kanji của Kanken.",
+      },
+    ],
+  },
+  {
+    key: "ja-games",
+    category: "games",
+    icon: Gamepad2,
+    lang: "ja",
+    subItems: [
+      {
+        key: "gametiengnhat",
+        label: "Game Tiếng Nhật",
+        path: "/resources/gametiengnhat",
+        description: "Học tiếng Nhật qua các trò chơi tương tác thú vị.",
+        img: "https://gametiengnhat.onhat.vn/favicon.svg",
+        color: "#c73e3a",
       },
     ],
   },

@@ -29,6 +29,7 @@ export default {
       reading: "阅读拓展",
       dictionary: "实用词典",
       writing: "汉字书写",
+      games: "游戏",
       kids: "少儿学习",
     },
     results: {
