@@ -8,7 +8,6 @@ import {
   Search,
   ChevronDown,
   Clock,
-  EyeOff,
   Eye,
   FileText,
   Timer,
@@ -16,16 +15,12 @@ import {
   LayoutGrid,
   List,
   CheckCircle2,
-  AlertCircle,
   Award,
   Calendar,
-  Filter,
-  Sparkles,
   ArrowRight,
   X,
-  MoreVertical,
-  Pencil,
   Check,
+  MoreVertical,
 } from "lucide-react"
 import dayjs from "dayjs"
 import { toast } from "react-hot-toast"
@@ -40,9 +35,6 @@ import {
   useGetTeacherQuizzesQuery,
   useGetStudentQuizzesQuery,
   usePublishTeacherQuizMutation,
-  useGetAssignmentSubmissionsQuery,
-  useGetTeacherQuizStatsQuery,
-  useGetTeacherQuizStudentsQuery,
 } from "@/store/api/coursesApi"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import {
@@ -400,25 +392,25 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
   return (
     <div
       onClick={() => onSelect(assignment.id)}
-      className="group relative bg-white border border-border hover:border-amber-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-amber-500 overflow-hidden"
+      className="group relative bg-white border border-border/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden"
     >
       <div>
         {/* Top Header Row */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="bg-amber-50 text-amber-700 border border-amber-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
-            <FileText size={12} className="text-amber-600" />
-            {cg.badgeAssignment}
-          </span>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+              <FileText size={11} />
+              <span>{cg.badgeAssignment}</span>
+            </span>
 
-          <div className="flex items-center gap-1.5 flex-wrap justify-end">
             {isLoading && !hasEmbeddedSubmission ? (
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">...</span>
             ) : (
               <>
                 {displayStatus === "not_submitted" && (
-                  <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border uppercase tracking-wider ${isExpired
-                    ? "bg-red-50 text-red-655 border-red-200"
-                    : "bg-amber-50 text-amber-700 border-amber-200"
+                  <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${isExpired
+                    ? "bg-rose-50 text-rose-600"
+                    : "bg-amber-50 text-amber-700"
                     }`}>
                     {isExpired
                       ? cg.badgeExpired
@@ -426,14 +418,14 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
                   </span>
                 )}
                 {(displayStatus === "submitted" || displayStatus === "late") && (
-                  <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-blue-50 text-blue-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
                     {displayStatus === "late"
                       ? cg.filterLate
                       : cd.statusNeedsGrading}
                   </span>
                 )}
                 {displayStatus === "returned" && (
-                  <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
                     {cg.filterReturned}
                   </span>
                 )}
@@ -443,22 +435,27 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
         </div>
 
         {/* Title */}
-        <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
+        <h4 className="text-base font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mt-2 mb-1">
           {getAssignmentTitle(assignment, cg.untitledAssignment)}
         </h4>
 
+        {/* Subtitle */}
+        <p className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5 mb-3">
+          {assignment.subtitle || assignment.category || cg.badgeAssignment}
+        </p>
+
         {/* Info badges / Due date */}
-        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 mb-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Clock size={13} className={isExpired && displayStatus === "not_submitted" ? "text-red-500 shrink-0" : "text-gray-400 shrink-0"} />
+        <div className="flex items-center justify-between text-xs text-gray-700 font-semibold mb-4">
+          <div className="flex items-center gap-1.5">
+            <Clock size={14} className={isExpired && displayStatus === "not_submitted" ? "text-red-500 shrink-0" : "text-gray-500 shrink-0"} />
             <span className={`truncate text-xs ${isExpired && displayStatus === "not_submitted" ? "text-red-600 font-extrabold" : ""}`}>
-              {cg.dueDateLabel}{dueLabel}
+              {dueLabel}
             </span>
           </div>
 
           {maxScore !== null && (
-            <div className="flex items-center gap-2 text-gray-500">
-              <Award size={13} className="text-amber-500 shrink-0" />
+            <div className="flex items-center gap-1 text-gray-500">
+              <Award size={14} className="text-amber-500 shrink-0" />
               <span>{interpolate(cg.maxScoreLabel, { score: maxScore })}</span>
             </div>
           )}
@@ -468,7 +465,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
       {/* Grade Banner or Action Footer */}
       <div>
         {gradeLabel && (
-          <div className="bg-emerald-50 border border-emerald-200/60 rounded-xl p-2.5 mb-3 flex items-center justify-between text-xs">
+          <div className="bg-emerald-50 border border-emerald-200/60 rounded-2xl p-2.5 mb-3 flex items-center justify-between text-xs">
             <span className="font-extrabold text-emerald-800 flex items-center gap-1.5">
               <Award size={14} className="text-emerald-600" />
               {cg.scoreLabel}
@@ -485,7 +482,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
             e.stopPropagation()
             onSelect(assignment.id)
           }}
-          className={`w-full py-2.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer ${displayStatus === "returned"
+          className={`w-full py-2.5 px-4 rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer group/btn ${displayStatus === "returned"
             ? "bg-gray-100 hover:bg-gray-200 text-gray-700 border border-border"
             : displayStatus === "submitted" || displayStatus === "late"
               ? "bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200"
@@ -501,7 +498,7 @@ const StudentAssignmentCard = ({ assignment, classId, cd, cg, onSelect, nowMs })
                 ? cg.viewSubmissionBtn
                 : cg.submitAssignmentBtn}
           </span>
-          <ArrowRight size={13} />
+          <ArrowRight size={14} className="transition-transform group-hover/btn:translate-x-1" />
         </button>
       </div>
     </div>
@@ -544,28 +541,28 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
   return (
     <div
       onClick={() => onSelect && onSelect(quiz.id)}
-      className="group relative bg-white border border-border hover:border-red-400/70 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer border-t-4 border-t-[#990011] overflow-hidden"
+      className="group relative bg-white border border-border/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between cursor-pointer overflow-hidden"
     >
       <div>
         {/* Top Header Row */}
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="bg-red-50 text-[#990011] border border-red-200/80 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1.5 shrink-0">
-            <Timer size={12} className="text-[#990011]" />
-            {cg.badgeQuiz}
-          </span>
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+              <Timer size={11} />
+              <span>{cg.badgeQuiz}</span>
+            </span>
 
-          <div className="flex items-center gap-1.5">
             {recordStatus === "submitted" ? (
-              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+              <span className="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
                 {cg.quizStatusSubmitted}
               </span>
             ) : recordStatus === "inprogress" ? (
-              <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+              <span className="bg-amber-50 text-amber-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
                 {cg.quizStatusInProgress}
               </span>
             ) : (
-              <span className="bg-red-50 text-red-655 border border-red-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+              <span className="bg-rose-50 text-rose-600 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
                 {cg.quizStatusToDo}
               </span>
             )}
@@ -573,26 +570,31 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
         </div>
 
         {/* Title */}
-        <h4 className="text-sm font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mb-3">
+        <h4 className="text-base font-extrabold text-gray-900 group-hover:text-[#990011] transition-colors leading-snug line-clamp-2 mt-2 mb-1">
           {quiz.name || quiz.title || cg.untitledQuiz}
         </h4>
 
+        {/* Subtitle */}
+        <p className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5 mb-3">
+          {quiz.subtitle || quiz.category || cg.badgeQuiz}
+        </p>
+
         {/* Info Grid */}
-        <div className="flex flex-col gap-2 text-xs font-semibold text-gray-500 mb-4">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Clock size={13} className="text-gray-400 shrink-0" />
-            <span className="truncate">{interpolate(cg.closesLabel, { time: closeTimeFormatted })}</span>
+        <div className="flex items-center justify-between text-xs text-gray-700 font-semibold mb-4">
+          <div className="flex items-center gap-1.5 text-gray-700">
+            <Clock size={14} className="text-gray-500 shrink-0" />
+            <span className="truncate">{closeTimeFormatted}</span>
           </div>
 
-          <div className="flex items-center gap-4 text-gray-500 text-xs">
+          <div className="flex items-center gap-3 text-gray-500 text-xs">
             {hasTimeLimit && (
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1">
                 <Timer size={13} className="text-red-500 shrink-0" />
                 {interpolate(cg.minsLabel, { mins: quiz.timeLimitMinutes })}
               </span>
             )}
             {questionCount !== null && (
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1">
                 <FileText size={13} className="text-blue-500 shrink-0" />
                 {interpolate(cg.questionsLabel, { count: questionCount })}
               </span>
@@ -611,7 +613,7 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
                 e.stopPropagation()
                 onSelect?.(quiz.id, "result")
               }}
-              className={`w-full py-2.5 px-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs ${!hasRemainingAttempts ? "col-span-2" : ""}`}
+              className={`w-full py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.99] cursor-pointer shadow-2xs ${!hasRemainingAttempts ? "col-span-2" : ""}`}
             >
               <Eye size={13} />
               <span>{cg.seeQuizResultBtn}</span>
@@ -623,7 +625,7 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
                   e.stopPropagation()
                   onSelect?.(quiz.id, "intro")
                 }}
-                className="w-full py-2.5 px-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
+                className="w-full py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.99] cursor-pointer shadow-2xs"
               >
                 <RotateCcw size={13} />
                 <span>{cg.retakeQuizBtn || "Retake Quiz"}</span>
@@ -637,9 +639,9 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
               e.stopPropagation()
               onSelect?.(quiz.id)
             }}
-            className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
+            className="w-full py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
           >
-            <RotateCcw size={13} />
+            <RotateCcw size={14} />
             <span>{cg.continueQuizBtn || "Continue Quiz"}</span>
           </button>
         ) : (
@@ -649,10 +651,10 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
               e.stopPropagation()
               onSelect?.(quiz.id)
             }}
-            className="w-full py-2.5 px-4 bg-[#990011] hover:bg-[#80000e] text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs"
+            className="w-full py-2.5 px-4 bg-[#990011] hover:bg-[#80000e] text-white rounded-full text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer shadow-xs group/btn"
           >
             <span>{cg.startQuizBtn}</span>
-            <ArrowRight size={13} />
+            <ArrowRight size={14} className="transition-transform group-hover/btn:translate-x-1" />
           </button>
         )}
       </div>
@@ -660,90 +662,50 @@ const StudentQuizCard = ({ quiz, cg, onSelect }) => {
   )
 }
 
-const QuizCard = ({
-  quiz,
-  classId,
-  cg,
-  language,
-  navigate,
-  nowMs = Date.now(),
-  classEnrolledCount = 0,
-}) => {
-  const { formatDate, formatTime, userTimeZone } = useTimezone()
+// ─── Teacher Quiz Card (Figma Design) ──────────────────────────────────
+const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
+  const { formatTime, formatDate, formatCustom } = useTimezone()
   const [publishTeacherQuiz, { isLoading: isPublishing }] = usePublishTeacherQuizMutation()
   const publishGuardRef = useRef(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false)
+      }
+    }
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isMenuOpen])
 
   const statusStr = String(quiz.status || "").toLowerCase()
   const isDraft = statusStr === "draft"
   const isClosed = statusStr === "closed"
-  const isPublished = !isDraft && !isClosed
-  const openTimestamp = quiz.openTime ? new Date(quiz.openTime).getTime() : 0
-  const closeTimestamp = quiz.closeTime ? new Date(quiz.closeTime).getTime() : 0
-  const isUpcomingOpen = isPublished && openTimestamp > 0 && openTimestamp > nowMs
-  const isExpired = isClosed || (closeTimestamp > 0 && closeTimestamp < nowMs)
-  const isDueSoon = isPublished && !isExpired && closeTimestamp > 0 && (closeTimestamp - nowMs <= 3 * 24 * 60 * 60 * 1000)
-  const isOpen = isPublished && !isUpcomingOpen && !isExpired
 
-  const { data: studentsResponse } = useGetTeacherQuizStudentsQuery(
-    { classId, quizId: quiz?.id, pageSize: 100 },
-    { skip: !classId || !quiz?.id || isDraft }
-  )
+  const dateObj = quiz.closeTime || quiz.dueDate || quiz.openTime
+  const formattedDate = dateObj
+    ? (formatCustom ? formatCustom(dateObj, { month: "short", day: "numeric", weekday: "short" }) : formatDate(dateObj))
+    : "—"
+  const formattedTime = dateObj
+    ? (formatTime ? formatTime(dateObj) : "—")
+    : "—"
 
-  const rawItemEnrolled = Number(
-    quiz.enrolledCount ?? quiz.studentCount ?? quiz.totalStudents ?? quiz.enrolledStudents ?? quiz.memberCount ?? 0
-  )
-
-  const rawStudents = studentsResponse?.data?.students
-    ?? studentsResponse?.students
-    ?? studentsResponse?.data?.items
-    ?? studentsResponse?.items
-    ?? (Array.isArray(studentsResponse?.data) ? studentsResponse.data : (Array.isArray(studentsResponse) ? studentsResponse : null))
-
-  const actualQuizSubmitted = Array.isArray(rawStudents)
-    ? rawStudents.filter((st) => {
-        if (!st) return false
-        const s = String(st.status || st.submissionStatus || "").toLowerCase()
-        return (
-          s.includes("nộp") ||
-          s.includes("submitted") ||
-          s.includes("muộn") ||
-          s.includes("late") ||
-          s.includes("graded") ||
-          s.includes("chấm") ||
-          (st.score !== null && st.score !== undefined && st.score !== "" && st.score !== "–")
-        )
-      }).length
-    : null
-
-  const totalStudentsCount = Array.isArray(rawStudents) && rawStudents.length > 0
-    ? rawStudents.length
-    : (rawItemEnrolled > 0 ? rawItemEnrolled : classEnrolledCount)
-
-  const enrolledCount = totalStudentsCount > 0 ? totalStudentsCount : classEnrolledCount
-
-  const submittedCount = actualQuizSubmitted ?? (Number(
+  const submittedCount = Number(
     quiz.submittedCount ?? quiz.submissionCount ?? quiz.submissionsCount ?? quiz.totalSubmissions ?? 0
-  ) || 0)
+  )
+  const enrolledCount = Number(
+    quiz.enrolledCount ?? quiz.studentCount ?? quiz.totalStudents ?? quiz.totalEnrolled ?? 0
+  )
+  const hasEnrolled = enrolledCount > 0
+  const progressPercent = hasEnrolled
+    ? Math.min(100, Math.round((submittedCount / enrolledCount) * 100))
+    : (submittedCount > 0 ? 100 : 0)
 
-  const statsPercentage = enrolledCount > 0 ? Math.min(100, Math.round((submittedCount / enrolledCount) * 100)) : 0
-
-  const title = quiz.name || quiz.title || cg.untitledQuiz || "Untitled Quiz"
-  const subtitle = quiz.courseTitle || quiz.className || cg.badgeQuiz || "Bài kiểm tra"
-
-  const formatCardDate = (dateVal) => {
-    if (!dateVal) return "—"
-    try {
-      const d = ensureDate(dateVal)
-      if (!d) return "—"
-      return dayjs(d).tz(userTimeZone || "Asia/Ho_Chi_Minh").format("DD/MM/YYYY")
-    } catch {
-      return formatDate ? formatDate(dateVal) : "—"
-    }
-  }
-
-  const targetDate = quiz.closeTime || quiz.dueDate || quiz.openTime
-  const dateStr = targetDate ? formatCardDate(targetDate) : null
-  const timeStr = targetDate ? formatTime(targetDate) : null
+  const subtitle = quiz.subtitle || quiz.category || quiz.className || quiz.courseName || cg.badgeQuiz
 
   const handlePublishDirectly = async () => {
     if (publishGuardRef.current) return
@@ -775,372 +737,178 @@ const QuizCard = ({
   }
 
   return (
-    <div className="bg-white border border-gray-100/90 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between min-h-[300px]">
+    <div
+      key={`quiz-${quiz.id}`}
+      className="bg-white border border-border/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative"
+    >
       <div>
-        {/* Header Row: Badges & 3-dot Menu */}
-        <div className="flex items-center justify-between gap-2">
+        {/* Top Header Row with Badges & Ellipsis */}
+        <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
-            {/* 1. Main Publish Status Badge */}
-            {isDraft && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
-                <Pencil size={9} />
-                <span>{cg.badgeDraft || "NHÁP"}</span>
+            {/* Primary Status Pill */}
+            {isClosed ? (
+              <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                <X size={11} className="stroke-[3]" />
+                <span>{cg.badgeClosed || "Đã đóng"}</span>
               </span>
-            )}
-            {isPublished && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
-                <Check size={10} strokeWidth={2.5} />
-                <span>{cg.badgePublished || "ĐÃ ĐĂNG"}</span>
+            ) : isOpen ? (
+              <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                <Check size={11} className="stroke-[3]" />
+                <span>{cg.badgePublished || "Đã đăng"}</span>
               </span>
-            )}
-            {isClosed && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
-                <X size={10} strokeWidth={2.5} />
-                <span>{cg.badgeClosed || "ĐÃ ĐÓNG"}</span>
+            ) : isDraft ? (
+              <span className="bg-gray-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                <FileText size={11} />
+                <span>{cg.badgeDraft || "Bản nháp"}</span>
+              </span>
+            ) : (
+              <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                <Clock size={11} />
+                <span>{cg.badgeUpcoming || "Sắp mở"}</span>
               </span>
             )}
 
-            {/* 2. Secondary Tag (chỉ hiển thị 1 tag duy nhất: HẾT HẠN > SẮP ĐẾN HẠN > SẮP MỞ > ĐANG MỞ) */}
-            {!isDraft && !isClosed && (
-              <>
-                {isExpired ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
-                    {cg.badgeExpired || "HẾT HẠN"}
-                  </span>
-                ) : isDueSoon ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
-                    {cg.badgeUpcoming || "SẮP ĐẾN HẠN"}
-                  </span>
-                ) : isUpcomingOpen ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e0f2fe] text-[#0369a1]">
-                    {cg.badgeUpcomingOpen || "SẮP MỞ"}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] text-[#2e7d32]">
-                    {cg.badgeOpen || "ĐANG MỞ"}
-                  </span>
-                )}
-              </>
-            )}
+            {/* Secondary Timeline Pill */}
+            {isClosed ? (
+              <span className="bg-rose-50 text-rose-600 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                {cg.badgeExpired || "Hết hạn"}
+              </span>
+            ) : isUpcoming ? (
+              <span className="bg-amber-50 text-amber-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                {cg.badgeUpcoming || "Sắp đến hạn"}
+              </span>
+            ) : isOpen ? (
+              <span className="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                {cg.badgeOpen || "Đang mở"}
+              </span>
+            ) : null}
           </div>
 
-          {/* 3-dots Menu */}
-          <Dropdown
-            align="right"
-            dropdownClassName="min-w-[150px] p-1.5 shadow-xl border border-border/80 rounded-2xl bg-white z-50"
-            trigger={(isOpen, _, toggle) => (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggle()
-                }}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                <MoreVertical size={16} />
-              </button>
+          {/* Ellipsis Menu Button */}
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsMenuOpen(!isMenuOpen)
+              }}
+              className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+              title={cg.moreOptions || "Options"}
+            >
+              <MoreVertical size={16} />
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute right-0 mt-1 w-44 bg-white rounded-2xl shadow-xl border border-border py-1.5 z-30 text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsMenuOpen(false)
+                    navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`)
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 cursor-pointer"
+                >
+                  <Eye size={14} className="text-gray-500" />
+                  <span>{cg.viewQuizDetails || "Xem chi tiết"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setIsMenuOpen(false)
+                    navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`)
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 cursor-pointer"
+                >
+                  <FileText size={14} className="text-gray-500" />
+                  <span>{cg.editQuiz || "Chỉnh sửa"}</span>
+                </button>
+              </div>
             )}
-            options={menuOptions}
-            onChange={handleMenuAction}
-          />
+          </div>
         </div>
 
         {/* Title */}
+        {/* Title */}
         <h4
-          onClick={() => {
-            if (isDraft) {
-              navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`)
-            } else {
-              navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`)
-            }
-          }}
-          className="text-lg font-bold text-gray-900 line-clamp-2 leading-snug mt-4 mb-1 hover:text-[#990011] transition-colors cursor-pointer"
+          onClick={() => navigate(
+            `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
+          )}
+          className="text-base font-extrabold text-gray-900 leading-snug line-clamp-2 mt-2 group-hover:text-[#990011] transition-colors cursor-pointer"
+          title={quiz.name || quiz.title || cg.untitledQuiz}
         >
           {title}
         </h4>
 
         {/* Subtitle */}
-        <p className="text-xs text-gray-400 font-medium mb-3">{subtitle}</p>
+        <p className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5 mb-3">
+          {subtitle}
+        </p>
 
-        {/* Date & Time Row (for Non-Draft) */}
-        {!isDraft && dateStr && (
-          <div className="flex items-center justify-between text-xs text-gray-700 font-semibold my-3">
-            <div className="flex items-center gap-1.5">
-              <Calendar size={14} className="text-gray-400 shrink-0" />
-              <span>{dateStr}</span>
-            </div>
-            {timeStr && (
-              <div className="flex items-center gap-1.5">
-                <Clock size={14} className="text-gray-400 shrink-0" />
-                <span>{timeStr}</span>
-              </div>
-            )}
+        {/* Meta Info (Calendar & Clock) */}
+        <div className="flex items-center justify-between text-xs text-gray-700 font-semibold mb-4">
+          <div className="flex items-center gap-1.5">
+            <Calendar size={14} className="text-gray-500 shrink-0" />
+            <span>{formattedDate}</span>
           </div>
-        )}
+          <div className="flex items-center gap-1.5">
+            <Clock size={14} className="text-gray-500 shrink-0" />
+            <span>{formattedTime}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Progress & Bottom Action */}
-      <div className="mt-auto pt-3">
-        {!isDraft && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-gray-600">{cg.submittedLabel || "Đã nộp"}</span>
-              <span className="font-bold text-gray-900">
-                {submittedCount} <span className="font-normal text-gray-400">/ {enrolledCount}</span>
-              </span>
-            </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#990011] transition-all duration-300"
-                style={{ width: `${statsPercentage}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {isDraft ? (
-          <button
-            type="button"
-            onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`)}
-            className="w-full py-2.5 bg-white border border-[#990011] hover:bg-rose-50/40 text-[#990011] font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
-          >
-            <span>{cg.btnContinueEditing || "Tiếp tục chỉnh sửa"}</span>
-            <Pencil size={13} />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`)}
-            className="w-full py-2.5 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-98 cursor-pointer"
-          >
-            <span>{cg.btnViewSubmissions || "Xem bài nộp"}</span>
-            <ArrowRight size={14} />
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─── Teacher Assignment Card ──────────────────────────────────────────
-const TeacherAssignmentCard = ({
-  assignment,
-  classId,
-  cg,
-  nowMs,
-  onViewSubmissions,
-  navigate,
-  classEnrolledCount = 0,
-}) => {
-  const { formatDate, formatTime, userTimeZone } = useTimezone()
-  const status = getAssignmentStatus(assignment)
-  const isDraft = status === "draft"
-  const isClosed = status === "closed"
-  const isPublished = !isDraft && !isClosed
-
-  const { isExpired } = getAssignmentTimeline(assignment, nowMs)
-  const dueTime = assignment?.dueDate ? new Date(assignment.dueDate).getTime() : null
-  const isDueSoon = isPublished && !isExpired && dueTime && (dueTime - nowMs <= 3 * 24 * 60 * 60 * 1000)
-  const isOpen = isPublished && !isExpired
-
-  const { data: submissionsResponse } = useGetAssignmentSubmissionsQuery(
-    { classId, assignmentId: assignment?.id },
-    { skip: !classId || !assignment?.id || isDraft }
-  )
-
-  const rawItemEnrolled = getAssignmentCount(assignment, [
-    "enrolledCount",
-    "studentCount",
-    "totalStudents",
-    "enrolledStudents",
-    "memberCount",
-    "studentsCount",
-  ])
-  const enrolledCount = (rawItemEnrolled !== null && rawItemEnrolled > 0) ? rawItemEnrolled : classEnrolledCount
-
-  const rawSubmissions = submissionsResponse?.data ?? submissionsResponse
-  const actualSubmissionsCount = Array.isArray(rawSubmissions)
-    ? rawSubmissions.filter((s) => s && s.status !== "not_submitted").length
-    : null
-
-  const submittedCount = actualSubmissionsCount ?? (getAssignmentCount(assignment, [
-    "submittedCount",
-    "submissionCount",
-    "submissionsCount",
-    "totalSubmissions",
-    "submittedStudents",
-  ]) ?? 0)
-  const statsPercentage = enrolledCount > 0 ? Math.min(100, Math.round((submittedCount / enrolledCount) * 100)) : 0
-
-  const title = getAssignmentTitle(assignment, cg.untitledAssignment || "Untitled Assignment")
-  const subtitle = assignment.orderIndex
-    ? `Bài tập số ${assignment.orderIndex}`
-    : (assignment.courseTitle || assignment.className || cg.badgeAssignment || "Bài tập")
-
-  const formatCardDate = (dateVal) => {
-    if (!dateVal) return "—"
-    try {
-      const d = ensureDate(dateVal)
-      if (!d) return "—"
-      return dayjs(d).tz(userTimeZone || "Asia/Ho_Chi_Minh").format("DD/MM/YYYY")
-    } catch {
-      return formatDate ? formatDate(dateVal) : "—"
-    }
-  }
-
-  const dateStr = assignment.dueDate ? formatCardDate(assignment.dueDate) : null
-  const timeStr = assignment.dueDate ? formatTime(assignment.dueDate) : null
-
-  const menuOptions = [
-    { value: "edit", label: cg.editBtn || "Chỉnh sửa", icon: <Pencil size={14} /> },
-    ...(!isDraft ? [{ value: "view", label: cg.btnViewSubmissions || "Xem bài nộp", icon: <Eye size={14} /> }] : []),
-  ]
-
-  const handleMenuAction = (action) => {
-    if (action === "edit") {
-      navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}`)
-    } else if (action === "view") {
-      onViewSubmissions(assignment.id)
-    }
-  }
-
-  return (
-    <div className="bg-white border border-gray-100/90 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between min-h-[300px]">
+      {/* Progress / Stats & Action Button */}
       <div>
-        {/* Header Row: Badges & 3-dot Menu */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* 1. Main Publish Status Badge */}
-            {isDraft && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
-                <Pencil size={9} />
-                <span>{cg.badgeDraft || "NHÁP"}</span>
-              </span>
-            )}
-            {isPublished && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
-                <Check size={10} strokeWidth={2.5} />
-                <span>{cg.badgePublished || "ĐÃ ĐĂNG"}</span>
-              </span>
-            )}
-            {isClosed && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#7B7979] text-white">
-                <X size={10} strokeWidth={2.5} />
-                <span>{cg.badgeClosed || "ĐÃ ĐÓNG"}</span>
-              </span>
-            )}
-
-            {/* 2. Secondary Tag (chỉ hiển thị 1 tag duy nhất: HẾT HẠN > SẮP ĐẾN HẠN > ĐANG MỞ) */}
-            {!isDraft && !isClosed && (
-              <>
-                {isExpired ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#ffebee] text-[#d32f2f]">
-                    {cg.badgeExpired || "HẾT HẠN"}
-                  </span>
-                ) : isDueSoon ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#fef3c7] text-[#d97706]">
-                    {cg.badgeUpcoming || "SẮP ĐẾN HẠN"}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#e8f5e9] text-[#2e7d32]">
-                    {cg.badgeOpen || "ĐANG MỞ"}
-                  </span>
-                )}
-              </>
-            )}
+        {/* Progress bar */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+            <span className="text-gray-600">{cg.submittedLabel || "Đã nộp"}</span>
+            <span className="text-gray-900 font-extrabold">
+              {hasEnrolled ? `${submittedCount} / ${enrolledCount}` : `${submittedCount}`}
+            </span>
           </div>
-
-          {/* 3-dots Menu */}
-          <Dropdown
-            align="right"
-            dropdownClassName="min-w-[150px] p-1.5 shadow-xl border border-border/80 rounded-2xl bg-white z-50"
-            trigger={(isOpen, _, toggle) => (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggle()
-                }}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                <MoreVertical size={16} />
-              </button>
-            )}
-            options={menuOptions}
-            onChange={handleMenuAction}
-          />
+          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#990011] rounded-full transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
 
-        {/* Title */}
-        <h4
-          onClick={() => {
-            if (isDraft) {
-              navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}`)
-            } else {
-              onViewSubmissions(assignment.id)
-            }
-          }}
-          className="text-lg font-bold text-gray-900 line-clamp-2 leading-snug mt-4 mb-1 hover:text-[#990011] transition-colors cursor-pointer"
-        >
-          {title}
-        </h4>
-
-        {/* Subtitle */}
-        <p className="text-xs text-gray-400 font-medium mb-3">{subtitle}</p>
-
-        {/* Date & Time Row (for Non-Draft) */}
-        {!isDraft && dateStr && (
-          <div className="flex items-center justify-between text-xs text-gray-700 font-semibold my-3">
-            <div className="flex items-center gap-1.5">
-              <Calendar size={14} className="text-gray-400 shrink-0" />
-              <span>{dateStr}</span>
-            </div>
-            {timeStr && (
-              <div className="flex items-center gap-1.5">
-                <Clock size={14} className="text-gray-400 shrink-0" />
-                <span>{timeStr}</span>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Progress & Bottom Action */}
-      <div className="mt-auto pt-3">
-        {!isDraft && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-gray-600">{cg.submittedLabel || "Đã nộp"}</span>
-              <span className="font-bold text-gray-900">
-                {submittedCount} <span className="font-normal text-gray-400">/ {enrolledCount}</span>
-              </span>
-            </div>
-            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-[#990011] transition-all duration-300"
-                style={{ width: `${statsPercentage}%` }}
-              />
-            </div>
-          </div>
-        )}
-
+        {/* Action Button */}
         {isDraft ? (
-          <button
-            type="button"
-            onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}`)}
-            className="w-full py-2.5 bg-white border border-[#990011] hover:bg-rose-50/40 text-[#990011] font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-98 cursor-pointer"
-          >
-            <span>{cg.btnContinueEditing || "Tiếp tục chỉnh sửa"}</span>
-            <Pencil size={13} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate(
+                `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`
+              )}
+              className="flex-1 py-2.5 border border-border hover:bg-gray-50 text-gray-700 font-bold text-xs rounded-full text-center transition-all cursor-pointer"
+            >
+              {cg.btnContinueEditing || "Chỉnh sửa"}
+            </button>
+            <button
+              type="button"
+              onClick={handlePublishDirectly}
+              disabled={isPublishing}
+              aria-busy={isPublishing}
+              className="flex-1 py-2.5 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full text-center transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isPublishing ? cg.publishingQuiz : cg.publishQuiz}
+            </button>
+          </div>
         ) : (
           <button
             type="button"
-            onClick={() => onViewSubmissions(assignment.id)}
-            className="w-full py-2.5 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-98 cursor-pointer"
+            onClick={() => navigate(
+              `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
+            )}
+            className="w-full py-2.5 px-4 bg-[#990011] hover:bg-[#80000e] text-white rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-xs cursor-pointer group/btn"
           >
-            <span>{cg.btnViewSubmissions || "Xem bài nộp"}</span>
-            <ArrowRight size={14} />
+            <span>{cg.viewQuizDetails || "Xem bài kiểm tra"}</span>
+            <ArrowRight size={14} className="transition-transform group-hover/btn:translate-x-1" />
           </button>
         )}
       </div>
@@ -1150,7 +918,7 @@ const TeacherAssignmentCard = ({
 
 const ClassGradingTab = ({ id: classId, isStudent }) => {
   const { language, t } = useLanguage()
-  const { formatDateTime } = useTimezone()
+  const { formatTime, formatDate, formatCustom } = useTimezone()
   const c = t.courses || {}
   const cd = c.classDetail || {}
   const cg = c.grading || {}
@@ -2018,41 +1786,173 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             : cg.noDataLabel}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-          {visibleTeacherItems.map((item) => (
-            item.type === "quiz" ? (
-              <QuizCard
-                key={`quiz-${item.data.id}`}
-                quiz={item.data}
-                classId={classId}
-                cg={cg}
-                language={language}
-                navigate={navigate}
-                nowMs={nowMs}
-                classEnrolledCount={classEnrolledCount}
-              />
-            ) : (
-              <TeacherAssignmentCard
-                key={`assign-${item.data.id}`}
-                assignment={item.data}
-                classId={classId}
-                cg={cg}
-                nowMs={nowMs}
-                onViewSubmissions={(id) => setSearchParams({ tab: "grading", assignmentId: id })}
-                navigate={navigate}
-                classEnrolledCount={classEnrolledCount}
-              />
-            )
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          {/* Render Quiz Cards */}
+          {showQuizzes && filteredQuizzes.map((quiz) => (
+            <QuizCard
+              key={`quiz-${quiz.id}`}
+              quiz={quiz}
+              classId={classId}
+              cg={cg}
+              language={language}
+              navigate={navigate}
+            />
           ))}
+
+          {/* Render Assignment Cards */}
+          {showAssignments && filteredAssignments.map((assignment) => {
+            const status = getAssignmentStatus(assignment)
+            const isDraft = status === "draft"
+            const isClosed = status === "closed"
+            const isPublished = status === "published"
+            const submittedCount = getAssignmentCount(assignment, ["submittedCount", "submissionCount", "submissionsCount"]) ?? 0
+            const enrolledCount = getAssignmentCount(assignment, ["enrolledCount", "studentCount", "totalStudents"]) ?? 0
+            const hasEnrolled = enrolledCount > 0
+            const statsPercentage = hasEnrolled
+              ? Math.min(100, Math.round((submittedCount / enrolledCount) * 100))
+              : (submittedCount > 0 ? 100 : 0)
+            const { isExpired, isUpcoming } = getAssignmentTimeline(assignment, nowMs)
+            const title = getAssignmentTitle(assignment, cg.untitledAssignment)
+            const dateObj = assignment.dueDate || assignment.openDate
+            const formattedDate = dateObj
+              ? (formatCustom ? formatCustom(dateObj, { month: "short", day: "numeric", weekday: "short" }) : formatDate(dateObj))
+              : "—"
+            const formattedTime = dateObj
+              ? (formatTime ? formatTime(dateObj) : "—")
+              : "—"
+            const subtitle = assignment.subtitle || assignment.category || assignment.className || cg.badgeAssignment
+
+            return (
+              <div
+                key={`assign-${assignment.id}`}
+                className="bg-white border border-border/80 rounded-3xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative"
+              >
+                {/* Header & Body Info */}
+                <div>
+                  {/* Top Header Row */}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Primary Status Pill */}
+                      {isClosed ? (
+                        <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <X size={11} className="stroke-[3]" />
+                          <span>{cg.badgeClosed || "Đã đóng"}</span>
+                        </span>
+                      ) : isPublished ? (
+                        <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <Check size={11} className="stroke-[3]" />
+                          <span>{cg.badgePublished || "Đã đăng"}</span>
+                        </span>
+                      ) : isDraft ? (
+                        <span className="bg-gray-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <FileText size={11} />
+                          <span>{cg.badgeDraft || "Bản nháp"}</span>
+                        </span>
+                      ) : (
+                        <span className="bg-gray-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <Clock size={11} />
+                          <span>{cg.badgeUpcoming || "Sắp mở"}</span>
+                        </span>
+                      )}
+
+                      {/* Secondary Timeline Pill */}
+                      {isExpired ? (
+                        <span className="bg-rose-50 text-rose-600 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                          {cg.badgeExpired || "Hết hạn"}
+                        </span>
+                      ) : isUpcoming ? (
+                        <span className="bg-amber-50 text-amber-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                          {cg.badgeUpcoming || "Sắp đến hạn"}
+                        </span>
+                      ) : isPublished ? (
+                        <span className="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                          {cg.badgeOpen || "Đang mở"}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {/* Ellipsis / More Button */}
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}`)}
+                      className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+                      title={cg.viewAssignmentDetails || "Details"}
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                  </div>
+
+                  {/* Title */}
+                  <h4
+                    onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}`)}
+                    className="text-base font-extrabold text-gray-900 leading-snug line-clamp-2 mt-2 group-hover:text-[#990011] transition-colors cursor-pointer"
+                    title={title}
+                  >
+                    {title}
+                  </h4>
+
+                  {/* Subtitle */}
+                  <p className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5 mb-3">
+                    {subtitle}
+                  </p>
+
+                  {/* Meta Info (Calendar & Clock) */}
+                  <div className="flex items-center justify-between text-xs text-gray-700 font-semibold mb-4">
+                    <div className="flex items-center gap-1.5">
+                      <Calendar size={14} className="text-gray-500 shrink-0" />
+                      <span>{formattedDate}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock size={14} className="text-gray-500 shrink-0" />
+                      <span>{formattedTime}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress / Stats & Action Button */}
+                <div>
+                  {/* Progress bar */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                      <span className="text-gray-600">{cg.submittedLabel || "Đã nộp"}</span>
+                      <span className="text-gray-900 font-extrabold">
+                        {hasEnrolled ? `${submittedCount} / ${enrolledCount}` : `${submittedCount}`}
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#990011] rounded-full transition-all duration-300"
+                        style={{ width: `${statsPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  {isDraft ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}/edit`)}
+                      className="w-full py-2.5 px-4 border border-border hover:bg-gray-50 text-gray-700 font-bold text-xs sm:text-sm rounded-full text-center transition-all cursor-pointer"
+                    >
+                      {cg.btnContinueEditing || "Chỉnh sửa bài tập"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/assignment/${encodeURIComponent(assignment.id)}`)}
+                      className="w-full py-2.5 px-4 bg-[#990011] hover:bg-[#80000e] text-white rounded-full font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-xs cursor-pointer group/btn"
+                    >
+                      <span>{cg.viewAssignmentDetails || "Xem bài tập"}</span>
+                      <ArrowRight size={14} className="transition-transform group-hover/btn:translate-x-1" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
-
-      {/* ─── Pagination ─── */}
-      <Pagination
-        page={activeTeacherPage}
-        totalPages={teacherTotalPages}
-        onChangePage={setTeacherPage}
-      />
 
     </div>
   )

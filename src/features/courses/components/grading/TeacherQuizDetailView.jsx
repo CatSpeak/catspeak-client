@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -39,7 +39,7 @@ const QuizStudentAvatar = ({ student, size = "md", fallbackInitials = "HV" }) =>
   const targetId =
     student?.studentId ||
     (typeof student?.id === "number" ||
-    (typeof student?.id === "string" && !student?.id.startsWith("submission-"))
+      (typeof student?.id === "string" && !student?.id.startsWith("submission-"))
       ? student.id
       : null)
 
@@ -91,16 +91,13 @@ import {
   Clock,
   Calendar,
   CheckSquare,
-  ChevronRight,
   ChevronUp,
   ChevronDown,
   Flag,
   Play,
   Pause,
   ArrowLeft,
-  Users,
   BarChart2,
-  FileText,
   Search,
   CheckCircle2,
   XCircle,
@@ -483,23 +480,23 @@ const TeacherAttemptState = ({
           {title}
         </h1>
       </div>
-    <div className="min-h-[360px] bg-white rounded-3xl border border-border flex flex-col items-center justify-center gap-4 p-8 text-center">
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : (
-        <AlertCircle className="w-10 h-10 text-amber-500" />
-      )}
-      <p className="max-w-md text-sm font-semibold text-gray-600">{message}</p>
-      {!isLoading && onRetry && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e]"
-        >
-          {qg.retry}
-        </button>
-      )}
-    </div>
+      <div className="min-h-[360px] bg-white rounded-3xl border border-border flex flex-col items-center justify-center gap-4 p-8 text-center">
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <AlertCircle className="w-10 h-10 text-amber-500" />
+        )}
+        <p className="max-w-md text-sm font-semibold text-gray-600">{message}</p>
+        {!isLoading && onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e]"
+          >
+            {qg.retry}
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -1687,8 +1684,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate">{qg.questionCountLabel}</p>
-              <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.questionCountLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
                 {interpolate(qg.questionCountValue, { count: totalQuestions })}
               </p>
             </div>
@@ -1700,8 +1697,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate">{qg.durationLabel}</p>
-              <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.durationLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
                 {timeLimit !== null && timeLimit !== undefined
                   ? interpolate(qg.minutes, { count: timeLimit })
                   : qg.noTimeLimit}
@@ -1715,8 +1712,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate">{qg.deadlineLabel}</p>
-              <div className="text-[11px] sm:text-xs font-bold text-gray-900 mt-0.5 leading-snug break-words">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.deadlineLabel}</p>
+              <div className="text-[11px] sm:text-sm font-bold text-gray-900 mt-0.5 leading-snug break-words">
                 {formatDateRange(quizDetail.openTime, quizDetail.closeTime, qg, formatDate)}
               </div>
             </div>
@@ -1728,8 +1725,8 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate">{qg.attemptCountLabel}</p>
-              <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.attemptCountLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
                 {maxAttempts ?? "—"}
               </p>
             </div>
@@ -1768,16 +1765,6 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             }`}
         >
           {qg.statistics}
-        </button>
-        <button
-          type="button"
-          onClick={onEdit}
-          className={`pb-3 px-1 text-xs sm:text-sm transition-colors cursor-pointer font-bold shrink-0 whitespace-nowrap ${activeTab === "edit"
-            ? "border-b-2 border-[#990011] text-[#990011]"
-            : "text-gray-500 hover:text-gray-700"
-            }`}
-        >
-          {qg.edit}
         </button>
       </div>
 
@@ -1938,49 +1925,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
 
       {/* TAB CONTENT: Submissions (Danh sách nộp bài) */}
       {activeTab === "submissions" && (
-        <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-border">
-          {/* Header & Search */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
-            <h3 className="text-base font-bold text-gray-900">
-              {qg.submissions}
-            </h3>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  value={submissionSearch}
-                  onChange={(e) => {
-                    setSubmissionSearch(e.target.value)
-                    setSubmissionPage(1)
-                  }}
-                  placeholder={qg.searchStudentsPlaceholder}
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 rounded-xl border border-border text-xs focus:outline-none focus:border-[#990011]"
-                />
-              </div>
-
-              {/* Mobile Filter Button */}
-              <button
-                type="button"
-                onClick={() => setIsMobileFilterOpen(true)}
-                className={`flex sm:hidden items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer shrink-0 shadow-2xs ${
-                  activeFiltersCount > 0
-                    ? "border-[#990011] bg-red-50 text-[#990011]"
-                    : "border-border bg-gray-50 text-gray-700 hover:bg-gray-100"
-                }`}
-                title={qg.filter || "Lọc"}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-                <span>{qg.filter || "Lọc"}</span>
-                {activeFiltersCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-[#990011] text-white text-[10px] flex items-center justify-center font-bold">
-                    {activeFiltersCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-
+        <>
           {/* Active Filter Chips (Mobile only) */}
           {activeFiltersCount > 0 && (
             <div className="flex md:hidden items-center gap-1.5 flex-wrap pb-3">
@@ -2349,7 +2294,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
               />
             </>
           )}
-        </div>
+        </>
       )}
 
       {/* TAB CONTENT: Stats (Thống kê) */}
