@@ -34,6 +34,9 @@ const PostActionBar = ({
         className="group/reactions relative flex items-center justify-center"
         onMouseEnter={() => setShowReactions(true)}
         onMouseLeave={() => setShowReactions(false)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchEnd}
       >
         <button
           type="button"
@@ -53,15 +56,6 @@ const PostActionBar = ({
           onClose={() => setShowReactions(false)}
           onSelect={(e, type) => onReact(e, type)}
           iconSize={18}
-        />
-
-        {/* Touch hold for mobile reactions */}
-        <div
-          className="hidden"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onTouchMove={handleTouchEnd}
-          onMouseLeave={() => setShowReactions(false)}
         />
       </div>
 

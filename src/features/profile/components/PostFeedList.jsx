@@ -19,7 +19,7 @@ const PostFeedList = ({
   emptyVariant = "card", // "card" | "page"
   isOwnProfile = false,
   lastPostRef = null,
-  className = "space-y-3",
+  className = "space-y-4",
 }) => {
   // Initial Loading State
   if (isLoading && posts.length === 0) {
@@ -36,9 +36,7 @@ const PostFeedList = ({
   if (error && posts.length === 0) {
     return (
       <div className={className}>
-        <ErrorMessage
-          message={errorMessage || "Không thể tải bài viết."}
-        />
+        <ErrorMessage message={errorMessage || "Không thể tải bài viết."} />
       </div>
     )
   }
@@ -48,11 +46,7 @@ const PostFeedList = ({
     if (emptyVariant === "page") {
       return (
         <div className="flex-1 flex flex-col items-center justify-center w-full my-auto">
-          <EmptyState
-            message={emptyMessage}
-            icon={EmptyIcon}
-            variant="page"
-          >
+          <EmptyState message={emptyMessage} icon={EmptyIcon} variant="page">
             {emptyDescription && (
               <p className="text-sm text-[#606060] mt-1 text-center max-w-sm">
                 {emptyDescription}
@@ -66,11 +60,7 @@ const PostFeedList = ({
     return (
       <div className={className}>
         <FluentCard>
-          <EmptyState
-            message={emptyMessage}
-            icon={EmptyIcon}
-            variant="simple"
-          >
+          <EmptyState message={emptyMessage} icon={EmptyIcon} variant="simple">
             {emptyDescription && (
               <p className="text-sm text-[#606060] mt-1 text-center max-w-sm">
                 {emptyDescription}
@@ -95,9 +85,7 @@ const PostFeedList = ({
       })}
 
       {/* Pagination Fetching Skeleton */}
-      {isFetching && (
-        <ProfilePostCardSkeleton />
-      )}
+      {isFetching && <ProfilePostCardSkeleton />}
     </div>
   )
 }

@@ -25,17 +25,17 @@ const PillButton = ({
 
   // Default variant styles applied to inner div
   const variantStyles = isSnackbar
-    ? "bg-transparent border-none text-[#FF6B6B] group-hover:text-[#FF9999] hover:text-[#FF9999] hover:bg-transparent active:bg-transparent p-0 h-auto font-semibold cursor-pointer transition-colors duration-150"
+    ? "bg-transparent border-none text-[#FF6B6B] group-hover/pill:text-[#FF9999] hover:text-[#FF9999] hover:bg-transparent active:bg-transparent p-0 h-auto font-semibold cursor-pointer transition-colors duration-150"
     : isOutline
-      ? "bg-transparent group-hover:bg-primaryBg group-active:bg-[#e5e5e5]"
+      ? "bg-transparent group-hover/pill:bg-primaryBg group-active/pill:bg-[#e5e5e5]"
       : isSecondary
-        ? "bg-white border border-[#e5e5e5] text-black group-hover:bg-primaryBg group-active:bg-[#e0e0e0]"
+        ? "bg-white border border-[#e5e5e5] text-black group-hover/pill:bg-primaryBg group-active/pill:bg-[#e0e0e0]"
         : isSecondaryNoOutline
-          ? "bg-transparent border border-transparent text-black group-hover:bg-[#E5E5E5] group-active:bg-[#e0e0e0]"
-          : "bg-cath-red-700 border border-transparent text-white group-hover:brightness-90 group-active:brightness-75"
+          ? "bg-transparent border border-transparent text-black group-hover/pill:bg-[#E5E5E5] group-active/pill:bg-[#e0e0e0]"
+          : "bg-cath-red-700 border border-transparent text-white group-hover/pill:brightness-90 group-active/pill:brightness-75"
 
   const disabledStyles =
-    "group-disabled:bg-[#BFBFBF] group-disabled:text-white group-disabled:brightness-100 group-disabled:border-transparent group-disabled:cursor-not-allowed cursor-pointer"
+    "group-disabled/pill:bg-[#BFBFBF] group-disabled/pill:text-white group-disabled/pill:brightness-100 group-disabled/pill:border-transparent group-disabled/pill:cursor-not-allowed cursor-pointer"
 
   const variantCustomStyle = isOutline
     ? {
@@ -68,7 +68,7 @@ const PillButton = ({
     <button
       onClick={onClick}
       disabled={isActuallyDisabled}
-      className={`group relative outline-none flex items-center justify-center h-12 disabled:cursor-not-allowed ${className}`}
+      className={`group/pill relative outline-none flex items-center justify-center h-12 disabled:cursor-not-allowed ${className}`}
       {...props}
     >
       <div

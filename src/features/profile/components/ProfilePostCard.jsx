@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from "react"
-import { Video, FileText } from "lucide-react"
-
 import {
   useUpdatePostMutation,
   useDeletePostMutation,
@@ -9,6 +7,7 @@ import { useReactToPostMutation } from "@/store/api/social/postsApi"
 import useSharePost from "@/shared/hooks/useSharePost"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PostEditorModal from "./PostEditorModal"
+import PostMediaGallery from "./PostMediaGallery"
 import ShareModal from "@/features/news/components/ShareModal"
 import CommentsSection from "@/features/news/components/CommentsSection"
 import PostContent from "@/features/news/components/PostContent"
@@ -51,13 +50,8 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   const [reactToPost] = useReactToPostMutation()
 
   const handleUpdatePost = async (formData) => {
-    try {
-      await updatePost({ postId: post.postId, formData }).unwrap()
-      setIsEditing(false)
-    } catch (error) {
-      console.error("Failed to update post:", error)
-      throw error
-    }
+    await updatePost({ postId: post.postId, formData }).unwrap()
+    setIsEditing(false)
   }
 
   const handleDeletePost = async () => {
@@ -85,7 +79,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
 
   return (
     <>
-      <FluentCard padding="p-0" className="overflow-hidden">
+      <FluentCard padding="p-0">
         <div className="p-4 sm:p-6 space-y-4">
           <PostHeader
             post={post}
@@ -120,56 +114,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
             </div>
           )}
 
-          {post.media && post.media.length > 0 && (
-            <div className="grid grid-cols-2 gap-2">
-              {post.media.slice(0, 2).map((m) => (
-                <div
-                  key={m.postMediaId}
-                  className="aspect-square bg-gray-200 rounded-lg overflow-hidden"
-                >
-                  {m.mediaType === "Image" ? (
-                    <img
-                      src={m.mediaUrl}
-                      alt="media"
-                      loading="lazy"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : m.mediaType === "Video" ? (
-                    <video
-                      src={m.mediaUrl}
-                      controls
-                      preload="metadata"
-                      className="w-full h-full object-cover bg-black"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  ) : (
-                    <a
-                      href={m.mediaUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-full h-full flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors p-4 text-center border border-border"
-                    >
-                      <FileText className="w-10 h-10 text-blue-500 mb-2 shrink-0" />
-                      <span className="text-sm font-semibold text-gray-700 truncate w-full px-2">
-                        {m.fileName || t.profile?.post?.document || "Tài liệu"}
-                      </span>
-                      <span className="text-xs text-gray-400 mt-1">
-                        {m.fileSize
-                          ? `${(m.fileSize / (1024 * 1024)).toFixed(2)} MB`
-                          : ""}
-                      </span>
-                    </a>
-                  )}
-                </div>
-              ))}
-              {post.media.length > 2 && (
-                <div className="aspect-square bg-[#333333] rounded-lg flex items-center justify-center text-white text-xl font-bold">
-                  +{post.media.length - 2}
-                </div>
-              )}
-            </div>
-          )}
+          <PostMediaGallery media={post.media} />
         </div>
 
         <PostActionBar

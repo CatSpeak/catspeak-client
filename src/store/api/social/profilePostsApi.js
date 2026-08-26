@@ -1,4 +1,5 @@
 import { socialApi } from "./socialApi"
+import { updatePostInCaches } from "./utils/postsCacheUtils"
 
 export const profilePostsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -51,7 +52,7 @@ export const profilePostsApi = socialApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post", "PostMedia"],
     }),
     updatePost: builder.mutation({
       query: ({ postId, formData }) => ({
@@ -59,14 +60,61 @@ export const profilePostsApi = socialApi.injectEndpoints({
         method: "PUT",
         body: formData,
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post", "PostMedia"],
+      async onQueryStarted(
+        { postId },
+        { dispatch, getState, queryFulfilled },
+      ) {
+        try {
+          const { data: res } = await queryFulfilled
+          const updatedPost = res?.data || res
+          if (updatedPost && typeof updatedPost === "object") {
+            updatePostInCaches(getState(), dispatch, postId, (post) => {
+              Object.assign(post, updatedPost)
+            })
+          }
+        } catch {
+          // Tag invalidation handles errors / refetches
+        }
+      },
     }),
     deletePost: builder.mutation({
       query: (postId) => ({
         url: `/Post/${postId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post", "PostMedia"],
+      async onQueryStarted(postId, { dispatch, getState, queryFulfilled }) {
+        try {
+          await queryFulfilled
+          const queries =
+            getState().socialApi?.queries || getState().api?.queries || {}
+          for (const [, query] of Object.entries(queries)) {
+            if (query.status !== "fulfilled") continue
+            const endpoint = query.endpointName
+            if (
+              endpoint === "getPosts" ||
+              endpoint === "getUserTimelinePosts"
+            ) {
+              dispatch(
+                socialApi.util.updateQueryData(
+                  endpoint,
+                  query.originalArgs,
+                  (draft) => {
+                    if (draft?.data && Array.isArray(draft.data)) {
+                      draft.data = draft.data.filter(
+                        (p) => String(p.postId) !== String(postId),
+                      )
+                    }
+                  },
+                ),
+              )
+            }
+          }
+        } catch {
+          // Tag invalidation handles errors / refetches
+        }
+      },
     }),
   }),
   overrideExisting: false,

@@ -29,8 +29,8 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
           : post.privacy
 
   return (
-    <div className="flex gap-4 justify-between">
-      <div className="flex gap-4">
+    <div className="flex items-center gap-2 justify-between">
+      <div className="flex items-center gap-4">
         <Avatar
           size={40}
           src={post.avatarUrl}
@@ -52,19 +52,20 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
           >
             {post.authorName || "User"}
           </h3>
-          <p className="text-sm text-[#606060] flex items-center gap-2">
-            <span>{formattedTime}</span>
+          <div className="text-sm text-secondary flex items-center flex-wrap gap-x-2">
+            <span className="whitespace-nowrap">{formattedTime}</span>
             {privacyText && (
               <>
-                <span className="w-1 h-1 rounded-full bg-[#606060]"></span>
-                <span>{privacyText}</span>
+                <span className="w-1 h-1 rounded-full bg-secondary shrink-0" />
+                <span className="whitespace-nowrap">{privacyText}</span>
               </>
             )}
-            <span className="w-1 h-1 rounded-full bg-[#606060]"></span>
-            <span>
-              {post.viewCount || 0} {t.profile?.post?.header?.views || "lượt xem"}
+            <span className="w-1 h-1 rounded-full bg-[#606060] shrink-0" />
+            <span className="whitespace-nowrap">
+              {post.viewCount || 0}{" "}
+              {t.profile?.post?.header?.views || "lượt xem"}
             </span>
-          </p>
+          </div>
         </div>
       </div>
 

@@ -4,10 +4,66 @@ import {
 } from "@/shared/constants/timezones"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import updateLocale from "dayjs/plugin/updateLocale"
 import "dayjs/locale/vi"
 import "dayjs/locale/zh-cn"
 
 dayjs.extend(relativeTime)
+dayjs.extend(updateLocale)
+
+dayjs.updateLocale("vi", {
+  relativeTime: {
+    future: "%s tới",
+    past: "%s trước",
+    s: "vài giây",
+    m: "1 phút",
+    mm: "%d phút",
+    h: "1 giờ",
+    hh: "%d giờ",
+    d: "1 ngày",
+    dd: "%d ngày",
+    M: "1 tháng",
+    MM: "%d tháng",
+    y: "1 năm",
+    yy: "%d năm",
+  },
+})
+
+dayjs.updateLocale("en", {
+  relativeTime: {
+    future: "in %s",
+    past: "%s ago",
+    s: "a few seconds",
+    m: "1 minute",
+    mm: "%d minutes",
+    h: "1 hour",
+    hh: "%d hours",
+    d: "1 day",
+    dd: "%d days",
+    M: "1 month",
+    MM: "%d months",
+    y: "1 year",
+    yy: "%d years",
+  },
+})
+
+dayjs.updateLocale("zh-cn", {
+  relativeTime: {
+    future: "%s内",
+    past: "%s前",
+    s: "几秒",
+    m: "1 分钟",
+    mm: "%d 分钟",
+    h: "1 小时",
+    hh: "%d 小时",
+    d: "1 天",
+    dd: "%d 天",
+    M: "1 个月",
+    MM: "%d 个月",
+    y: "1 年",
+    yy: "%d 年",
+  },
+})
 
 /**
  * Get the user's locale from the browser (fallback to 'en-US')

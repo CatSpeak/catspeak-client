@@ -29,8 +29,8 @@ const ProfileHomeTab = ({
   const [initialFiles, setInitialFiles] = useState([])
 
   const triggerImageRef = useRef(null)
-  // const triggerVideoRef = useRef(null)
-  // const triggerFileRef = useRef(null)
+  const triggerVideoRef = useRef(null)
+  const triggerFileRef = useRef(null)
 
   const { data: postsData, isLoading: isLoadingPosts } =
     useGetUserTimelinePostsQuery(
@@ -43,13 +43,8 @@ const ProfileHomeTab = ({
   const timelinePosts = postsData?.data || []
 
   const handleCreatePost = async (formData) => {
-    try {
-      await createPost(formData).unwrap()
-      setIsEditorOpen(false)
-    } catch (error) {
-      console.error("Failed to create post:", error)
-      throw error
-    }
+    await createPost(formData).unwrap()
+    setIsEditorOpen(false)
   }
 
   const handleTriggerFileChange = (e) => {
@@ -81,7 +76,7 @@ const ProfileHomeTab = ({
         {isOwnProfile && (
           <>
             <FluentCard padding="p-0" className="flex flex-col overflow-hidden">
-              <div className="flex items-center gap-3 p-4 sm:p-6">
+              <div className="flex items-center gap-4 p-4 sm:p-6">
                 <Avatar
                   size={40}
                   src={currentUser?.avatarImageUrl || currentUser?.avatarUrl}
@@ -115,7 +110,6 @@ const ProfileHomeTab = ({
                   <span>{t.profile?.home?.photo || "Ảnh"}</span>
                 </button>
 
-                {/* Temporarily hidden
                 <input
                   type="file"
                   multiple
@@ -127,10 +121,10 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerVideoRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 text-sm font-medium text-[#e11d48] hover:bg-rose-50 active:bg-rose-100 transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#e11d48] hover:bg-primaryBg active:bg-rose-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <Video size={20} className="text-[#e11d48]" />
-                  <span>Video</span>
+                  <span>{t.profile?.home?.video || t.profile?.post?.editor?.video || "Video"}</span>
                 </button>
 
                 <input
@@ -144,12 +138,11 @@ const ProfileHomeTab = ({
                 <button
                   type="button"
                   onClick={() => triggerFileRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 h-11 px-4 text-sm font-medium text-[#2563eb] hover:bg-blue-50 active:bg-blue-100 transition-colors duration-200 outline-none cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 h-12 px-4 text-sm font-medium text-[#2563eb] hover:bg-primaryBg active:bg-blue-100 transition-colors duration-200 outline-none cursor-pointer"
                 >
                   <FileText size={20} className="text-[#2563eb]" />
-                  <span>Tài liệu</span>
+                  <span>{t.profile?.home?.document || t.profile?.post?.editor?.document || "Tài liệu"}</span>
                 </button>
-                */}
               </div>
             </FluentCard>
 
