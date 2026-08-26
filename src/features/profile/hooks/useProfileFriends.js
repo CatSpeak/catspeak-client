@@ -128,6 +128,10 @@ export const useProfileFriends = ({
   }, [isOwnProfile, pendingRequests.length, t])
 
   // Compute active list & loading state
+  const isSearchingRecs =
+    activeSubTab === "find" &&
+    (searchQuery !== debouncedSearchQuery || (fetchingRecs && recPage === 1))
+
   const { list, isLoading, emptyMessage } = useMemo(() => {
     let raw = []
     let loading = false
@@ -157,18 +161,24 @@ export const useProfileFriends = ({
         t.profile?.friends?.empty?.noPending || "Không có yêu cầu kết nối nào."
     } else if (activeSubTab === "find") {
       raw = getArray(recRes)
-      loading = loadingRecs && recPage === 1
+      loading = (loadingRecs && recPage === 1) || isSearchingRecs
       empty =
         t.profile?.friends?.empty?.noRecommendations || "Không có gợi ý nào."
     }
 
-    if (searchQuery && activeSubTab !== "find") {
+    if (searchQuery.trim() && activeSubTab !== "find") {
       const q = normalize(searchQuery)
       raw = raw.filter(
         (u) =>
           normalize(u.username).includes(q) ||
           normalize(u.nickname).includes(q),
       )
+    }
+
+    if (searchQuery.trim() && raw.length === 0 && !loading) {
+      empty =
+        t.profile?.friends?.empty?.noSearchResults ||
+        `Không tìm thấy kết quả phù hợp cho "${searchQuery}".`
     }
 
     return { list: raw, isLoading: loading, emptyMessage: empty }
@@ -184,6 +194,7 @@ export const useProfileFriends = ({
     loadingPending,
     recRes,
     loadingRecs,
+    isSearchingRecs,
     recPage,
     searchQuery,
     t,

@@ -1,5 +1,5 @@
 import React, { useCallback } from "react"
-import { User } from "lucide-react"
+import { User, Search } from "lucide-react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
@@ -82,31 +82,37 @@ const ProfileFriendsTab = ({
         </div>
       </div>
 
-      {/* Grid Content */}
+      {/* Grid / List Content */}
       <div className="w-full">
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="flex flex-col overflow-hidden rounded-xl bg-white border border-border/80 p-0"
+                className="flex flex-row sm:flex-col items-center sm:items-stretch p-3 sm:p-0 gap-3.5 sm:gap-0 overflow-hidden rounded-xl bg-white border border-border/80"
               >
-                <Skeleton className="aspect-square w-full rounded-none" />
-                <div className="p-4 space-y-2">
+                <Skeleton className="w-12 h-12 shrink-0 rounded-full sm:w-full sm:h-auto sm:aspect-square sm:rounded-none" />
+                <div className="flex-1 min-w-0 sm:p-4 space-y-2">
                   <Skeleton className="h-4 w-3/4 rounded-md" />
                   <Skeleton className="h-3 w-1/2 rounded-md" />
-                  <Skeleton className="h-8 w-full rounded-lg mt-2" />
+                  <Skeleton className="hidden sm:block h-8 w-full rounded-lg mt-2" />
+                </div>
+                <div className="sm:hidden shrink-0">
+                  <Skeleton className="w-8 h-8 rounded-full" />
                 </div>
               </div>
             ))}
           </div>
         ) : list.length === 0 ? (
           <FluentCard>
-            <EmptyState message={emptyMessage} icon={User} />
+            <EmptyState
+              message={emptyMessage}
+              icon={searchQuery.trim() ? Search : User}
+            />
           </FluentCard>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
               {list.map((user) => (
                 <ProfileFriendCard
                   key={user.accountId || user.friendshipId}
@@ -124,13 +130,16 @@ const ProfileFriendsTab = ({
                 [1, 2, 3, 4].map((i) => (
                   <div
                     key={`loading-more-${i}`}
-                    className="flex flex-col overflow-hidden rounded-xl bg-white border border-border/80 p-0"
+                    className="flex flex-row sm:flex-col items-center sm:items-stretch p-3 sm:p-0 gap-3.5 sm:gap-0 overflow-hidden rounded-xl bg-white border border-border/80"
                   >
-                    <Skeleton className="aspect-square w-full rounded-none" />
-                    <div className="p-4 space-y-2">
+                    <Skeleton className="w-12 h-12 shrink-0 rounded-full sm:w-full sm:h-auto sm:aspect-square sm:rounded-none" />
+                    <div className="flex-1 min-w-0 sm:p-4 space-y-2">
                       <Skeleton className="h-4 w-3/4 rounded-md" />
                       <Skeleton className="h-3 w-1/2 rounded-md" />
-                      <Skeleton className="h-8 w-full rounded-lg mt-2" />
+                      <Skeleton className="hidden sm:block h-8 w-full rounded-lg mt-2" />
+                    </div>
+                    <div className="sm:hidden shrink-0">
+                      <Skeleton className="w-8 h-8 rounded-full" />
                     </div>
                   </div>
                 ))}

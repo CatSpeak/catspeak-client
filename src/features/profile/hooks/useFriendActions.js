@@ -42,9 +42,6 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await sendFriendRequest(targetId).unwrap()
-      toast.success(
-        t.profile?.friends?.actions?.requestSent || "Đã gửi lời mời kết bạn",
-      )
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -104,9 +101,6 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await respondFriendRequest({ friendshipId, action: "accept" }).unwrap()
-      toast.success(
-        t.profile?.friends?.actions?.acceptSuccess || "Đã đồng ý kết bạn",
-      )
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -116,9 +110,6 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await respondFriendRequest({ friendshipId, action: "decline" }).unwrap()
-      toast.success(
-        t.profile?.friends?.actions?.declineSuccess || "Đã từ chối lời mời",
-      )
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
