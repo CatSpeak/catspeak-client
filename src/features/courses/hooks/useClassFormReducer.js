@@ -10,7 +10,7 @@ import {
   formatToYYYYMMDD,
   getSafeMediaUrl,
 } from "../utils/courseUtils"
-import { convertTimeStrToTz } from "@/shared/utils/dateUtils"
+import { convertTimeStrToTz, getShiftedDayOfWeek } from "@/shared/utils/dateUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
 // ─── Defaults ───
@@ -46,6 +46,7 @@ const createInitialState = (initialCourseId) => ({
   admissionEndHours: "",
   startDate: "",
   startDateHours: "",
+  retentionDays: 10,
   sessions: 24,
   capacity: 6,
   description: "",
@@ -99,23 +100,25 @@ function parseScheduleFromApi(cls, userTimeZone = null) {
 
   if (scheduleEntries.length > 0) {
     scheduleEntries.forEach((item) => {
-      const key = API_DAYS_TO_LOCAL_KEYS[item.dayOfWeek]
+      const shiftedDay = getShiftedDayOfWeek(item.dayOfWeek, item.startTime, userTimeZone, "UTC")
+      const key = API_DAYS_TO_LOCAL_KEYS[shiftedDay] || API_DAYS_TO_LOCAL_KEYS[item.dayOfWeek]
       if (key) {
         checkedDays[key] = true
         timeSlots[key] = {
-          start: convertTimeStrToTz(item.startTime, userTimeZone) || item.startTime || "",
-          end: convertTimeStrToTz(item.endTime, userTimeZone) || item.endTime || "",
+          start: convertTimeStrToTz(item.startTime, userTimeZone, "UTC") || item.startTime || "",
+          end: convertTimeStrToTz(item.endTime, userTimeZone, "UTC") || item.endTime || "",
         }
       }
     })
   } else if (days) {
     days.forEach((day) => {
-      const key = API_DAYS_TO_LOCAL_KEYS[day]
+      const shiftedDay = getShiftedDayOfWeek(day, startTime, userTimeZone, "UTC")
+      const key = API_DAYS_TO_LOCAL_KEYS[shiftedDay] || API_DAYS_TO_LOCAL_KEYS[day]
       if (key) {
         checkedDays[key] = true
         timeSlots[key] = {
-          start: convertTimeStrToTz(startTime, userTimeZone) || startTime || "",
-          end: convertTimeStrToTz(endTime, userTimeZone) || endTime || "",
+          start: convertTimeStrToTz(startTime, userTimeZone, "UTC") || startTime || "",
+          end: convertTimeStrToTz(endTime, userTimeZone, "UTC") || endTime || "",
         }
       }
     })
@@ -165,6 +168,7 @@ function classFormReducer(state, action) {
         admissionEndHours,
         startDate,
         startDateHours,
+        retentionDays: cls.retentionDays ?? cls.archiveRetentionDays ?? 10,
         sessions: cls.totalSessions ?? "",
         capacity: cls.slots ?? "",
         description: cls.description || "",
@@ -191,16 +195,12 @@ function classFormReducer(state, action) {
         return {
           ...state,
           courseId,
-          thumbnailFile: null,
-          thumbnailPreview: "",
           errors: { ...state.errors, courseId: false },
         }
       }
 
       const updates = {
         courseId,
-        thumbnailFile: null,
-        thumbnailPreview: getSafeMediaUrl(course.thumbnailUrl) || "",
         admissionStart: formatToYYYYMMDD(course.enrollmentStart),
         admissionEnd: formatToYYYYMMDD(course.enrollmentEnd),
         errors: { ...state.errors, courseId: false },
@@ -519,7 +519,7 @@ export function useClassFormReducer({
       return
     }
 
-    if (file.size > 50 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       toastErrorRef.current?.("fileTooLarge")
       e.target.value = ""
       return

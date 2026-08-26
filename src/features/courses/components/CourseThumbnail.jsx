@@ -8,11 +8,23 @@ const CourseThumbnail = ({
   imageClassName = "w-full h-full object-cover",
   children,
 }) => {
-  const thumbnailUrl = getSafeMediaUrl(item?.thumbnailUrl) || defaultCourseThumbnail
+  const initialUrl = getSafeMediaUrl(item?.thumbnailUrl) || defaultCourseThumbnail
+  const [imgSrc, setImgSrc] = React.useState(initialUrl)
+
+  React.useEffect(() => {
+    setImgSrc(getSafeMediaUrl(item?.thumbnailUrl) || defaultCourseThumbnail)
+  }, [item?.thumbnailUrl])
 
   return (
     <div className={`relative flex items-center justify-center shrink-0 overflow-hidden ${className}`}>
-      <img src={thumbnailUrl} alt={title || item?.title || ""} className={imageClassName} loading="lazy" decoding="async" />
+      <img
+        src={imgSrc}
+        alt={title || item?.title || ""}
+        onError={() => setImgSrc(defaultCourseThumbnail)}
+        className={imageClassName}
+        loading="lazy"
+        decoding="async"
+      />
       {children}
     </div>
   )

@@ -8,6 +8,7 @@ export default {
     vietnam: "越南",
     china: "中国",
     usa: "英国",
+    japan: "日本",
   },
   ctaButton: "了解更多关于 Cat Speak 的信息",
   whyChooseUs: "为什么选择我们？",

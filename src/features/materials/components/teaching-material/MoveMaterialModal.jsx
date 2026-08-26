@@ -158,7 +158,9 @@ const MoveMaterialModal = ({ open, onClose, onSuccess, items = [], currentFolder
       onSuccess ? onSuccess() : onClose();
     } catch (error) {
       console.error("Failed to move material", error);
-      toast.error(t.materials.moveError);
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.moveError;
+      toast.error(errMsg);
     }
   };
 

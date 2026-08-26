@@ -30,7 +30,7 @@ import {
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
-import TimeDropdown from "@/features/calendar/components/ui/TimeDropdown"
+import Dropdown from "@/shared/components/ui/Dropdown"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import {
@@ -46,6 +46,7 @@ import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 import { useClassFormReducer } from "../hooks/useClassFormReducer"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import ClassScheduleCalendarPreview from "../components/ClassScheduleCalendarPreview"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -165,7 +166,7 @@ const CreateClassPage = () => {
     const courses = t.courses || {}
     const createCls = courses.createClass || {}
     if (key === "invalidImage") toast.error(createCls.toastInvalidImage || "Choose a JPG, PNG, or WebP image.")
-    else if (key === "fileTooLarge") toast.error(courses.avatarDesc2 || "File size must be under 50mb")
+    else if (key === "fileTooLarge") toast.error(courses.avatarDesc2 || "File size must be under 5MB")
     else if (key === "imageReadFail") toast.error(createCls.toastImageReadFail || "The selected image could not be read.")
   }, [t.courses])
 
@@ -213,6 +214,7 @@ const CreateClassPage = () => {
     admissionEndHours,
     startDate,
     startDateHours,
+    retentionDays = 10,
     sessions,
     capacity,
     description,
@@ -284,6 +286,39 @@ const CreateClassPage = () => {
   const handleThumbnailClick = () => {
     fileInputRef.current?.click()
   }
+
+  const lockedClass = (isEditMode ? classDetailResponse : recoverClassResponse)?.data
+    || (isEditMode ? classDetailResponse : recoverClassResponse)
+  const lockedCourseTitle = lockedClass?.courseName || lockedClass?.courseTitle || courseId
+
+  const courseOptions = useMemo(() => {
+    if (isEditMode || isRecoverMode) {
+      return courseId
+        ? [{ value: courseId, label: lockedCourseTitle }]
+        : [{ value: "", label: cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --" }]
+    }
+    return [
+      { value: "", label: cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --" },
+      ...coursesList.map((course) => ({ value: course.id, label: course.title }))
+    ]
+  }, [isEditMode, isRecoverMode, courseId, lockedCourseTitle, coursesList, cc])
+
+  const languageOptions = useMemo(() => {
+    return languagesList.map((lang) => ({
+      value: lang.name,
+      label: getLocalizedLanguageName(lang.name, t),
+    }))
+  }, [languagesList, t])
+
+  const levelOptions = useMemo(() => {
+    return levelsList.map((lvl) => {
+      const lvlName = typeof lvl === "object" && lvl !== null ? (lvl.name || String(lvl)) : String(lvl)
+      return {
+        value: lvlName,
+        label: lvlName,
+      }
+    })
+  }, [levelsList])
 
   const labelCommissionNote = (cc.commissionNote || "The platform will withhold a {{commission}}% commission fee on each successful student enrollment.")
     .replace("{{commission}}", feeDetails.commissionRate)
@@ -442,6 +477,8 @@ const CreateClassPage = () => {
         enrollmentStart: toIsoInZone(admissionStart, admissionStartHours || "00:00"),
         enrollmentEnd: toIsoInZone(admissionEnd, admissionEndHours || "00:00"),
         startDate: toIsoInZone(startDate, startDateHours || "00:00"),
+        retentionDays: isNaN(parseInt(retentionDays, 10)) ? 10 : parseInt(retentionDays, 10),
+        archiveRetentionDays: isNaN(parseInt(retentionDays, 10)) ? 10 : parseInt(retentionDays, 10),
         schedule,
         slots: classCapacity,
         tuitionFee: parseFloat(fee) || 0,
@@ -562,8 +599,21 @@ const CreateClassPage = () => {
           errMsg.includes("PAYOS_ERROR")
         ))
 
+      const dateMismatchMatch = typeof errMsg === "string" && errMsg.match(/Class start date \((.*?)\) does not match the first scheduled session date \((.*?)\)/i)
+      const isStartDateMismatch = Boolean(dateMismatchMatch) || (typeof errMsg === "string" && errMsg.includes("does not match the first scheduled session date"))
+
       let displayMessage
-      if (isScheduleConflict) {
+      if (isStartDateMismatch) {
+        const startD = dateMismatchMatch ? dateMismatchMatch[1] : ""
+        const firstSessionD = dateMismatchMatch ? dateMismatchMatch[2] : ""
+        if (startD && firstSessionD && cc.toastStartDateMismatchFirstSession) {
+          displayMessage = cc.toastStartDateMismatchFirstSession
+            .replace("{{startDate}}", startD)
+            .replace("{{firstSessionDate}}", firstSessionD)
+        } else {
+          displayMessage = cc.toastStartDateMismatchFirstSessionDefault || "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!"
+        }
+      } else if (isScheduleConflict) {
         displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT") && !errMsg.includes("PAYOS_ERROR"))
           ? errMsg
           : (cc.toastScheduleConflictDefault || "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.")
@@ -641,9 +691,6 @@ const CreateClassPage = () => {
     }
   }
 
-  const lockedClass = (isEditMode ? classDetailResponse : recoverClassResponse)?.data
-    || (isEditMode ? classDetailResponse : recoverClassResponse)
-  const lockedCourseTitle = lockedClass?.courseName || lockedClass?.courseTitle || courseId
   const isFormBusy = isCreating || isUpdating || isDeleting
 
   if (
@@ -756,24 +803,29 @@ const CreateClassPage = () => {
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
                 {cc.belongsToCourseOptional || cc.belongsToCourse || "Belongs to Course (Optional)"}
               </label>
-              <div className="relative">
-                <select
-                  value={courseId}
-                  onChange={(e) => handleCourseChange(e.target.value)}
-                  disabled={isEditMode || isRecoverMode || !!initialCourseId}
-                  className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
-                >
-                  <option value="">{cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}</option>
-                  {isEditMode || isRecoverMode ? (
-                    courseId && <option value={courseId}>{lockedCourseTitle}</option>
-                  ) : (
-                    coursesList.map((course) => (
-                      <option key={course.id} value={course.id}>{course.title}</option>
-                    ))
-                  )}
-                </select>
-                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <Dropdown
+                options={courseOptions}
+                value={courseId}
+                onChange={(val) => handleCourseChange(val)}
+                disabled={isEditMode || isRecoverMode || !!initialCourseId}
+                placeholder={cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"}
+                dropdownClassName="w-full"
+                trigger={(isOpen, selectedOption, toggle) => (
+                  <button
+                    type="button"
+                    onClick={toggle}
+                    disabled={isEditMode || isRecoverMode || !!initialCourseId}
+                    className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
+                      errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                    }`}
+                  >
+                    <span className={courseId ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
+                      {selectedOption?.label || (courseId ? lockedCourseTitle : (cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"))}
+                    </span>
+                    <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                )}
+              />
             </div>
 
             {/* Class Name */}
@@ -796,117 +848,65 @@ const CreateClassPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.language} <span className="text-[#990011]">*</span></label>
-                <div className="relative">
-                  <select
-                    value={selectedLanguage}
-                    onChange={(e) => {
-                      setField("selectedLanguage", e.target.value)
-                      setField("level", "")
-                      clearError("selectedLanguage")
-                    }}
-                    disabled={isRecoverMode || !!initialCourseId || !!courseId}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
-                  >
-                    <option value="" disabled hidden>{c.languagePlaceholder || "Eg. English, Chinese..."}</option>
-                    {languagesList.map((lang) => (
-                      <option key={lang.id} value={lang.name}>
-                        {getLocalizedLanguageName(lang.name, t)}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
+                <Dropdown
+                  options={languageOptions}
+                  value={selectedLanguage}
+                  onChange={(val) => {
+                    setField("selectedLanguage", val)
+                    setField("level", "")
+                    clearError("selectedLanguage")
+                  }}
+                  disabled={isRecoverMode || !!initialCourseId || !!courseId}
+                  placeholder={c.languagePlaceholder || "Eg. English, Chinese..."}
+                  dropdownClassName="w-full"
+                  trigger={(isOpen, selectedOption, toggle) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      disabled={isRecoverMode || !!initialCourseId || !!courseId}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
+                        errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                      }`}
+                    >
+                      <span className={selectedLanguage ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
+                        {selectedOption?.label || (selectedLanguage ? getLocalizedLanguageName(selectedLanguage, t) : (c.languagePlaceholder || "Eg. English, Chinese..."))}
+                      </span>
+                      <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                />
               </div>
 
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.level} <span className="text-[#990011]">*</span></label>
-                <div className="relative">
-                  <select
-                    value={level}
-                    onChange={(e) => {
-                      setField("level", e.target.value)
-                      clearError("level")
-                    }}
-                    disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
-                    className={`w-full h-11 pl-4 pr-10 bg-white border ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border hover:border-gray-300 focus:border-[#990011]"} outline-none rounded-xl text-sm font-semibold text-gray-800 transition-all appearance-none cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70`}
-                  >
-                    <option value="" disabled hidden>{c.levelPlaceholder || "Eg. A1, B2..."}</option>
-                    {levelsList.map((lvl) => {
-                      const lvlName = typeof lvl === "object" && lvl !== null ? (lvl.name || String(lvl)) : String(lvl)
-                      const lvlKey = typeof lvl === "object" && lvl !== null ? (lvl.id || lvl.name) : String(lvl)
-                      return (
-                        <option key={lvlKey} value={lvlName}>
-                          {lvlName}
-                        </option>
-                      )
-                    })}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            {/* Admission Period & Start Date — 3 inputs on 1 single row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              {/* Col 1: Thời hạn đăng ký (Từ) */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                  {cc.admissionPeriod || "Thời hạn đăng ký"}<span className="text-[#990011]">*</span>
-                </label>
-                <DateTimePicker
-                  dateValue={admissionStart}
-                  timeValue={admissionStartHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("admissionStart", dateStr)
-                    setField("admissionStartHours", timeStr)
-                    clearError("admissionStart")
+                <Dropdown
+                  options={levelOptions}
+                  value={level}
+                  onChange={(val) => {
+                    setField("level", val)
+                    clearError("level")
                   }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.admissionStart)}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Col 2: Thời hạn đăng ký (Đến) */}
-              <div className="flex flex-col gap-1">
-                <DateTimePicker
-                  dateValue={admissionEnd}
-                  timeValue={admissionEndHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("admissionEnd", dateStr)
-                    setField("admissionEndHours", timeStr)
-                    clearError("admissionEnd")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.admissionEnd)}
-                  className="w-full"
-                />
-              </div>
-
-              {/* Col 3: Ngày bắt đầu */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
-                  {cc.startDate} <span className="text-[#990011]">*</span>
-                </label>
-                <DateTimePicker
-                  dateValue={startDate}
-                  timeValue={startDateHours}
-                  onChange={(dateStr, timeStr) => {
-                    setField("startDate", dateStr)
-                    setField("startDateHours", timeStr)
-                    clearError("startDate")
-                  }}
-                  color="#990011"
-                  minDate={isEditMode ? null : today}
-                  error={Boolean(errors.startDate)}
-                  className="w-full"
+                  disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
+                  placeholder={c.levelPlaceholder || "Eg. A1, B2..."}
+                  dropdownClassName="w-full"
+                  trigger={(isOpen, selectedOption, toggle) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
+                        errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                      }`}
+                    >
+                      <span className={level ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
+                        {selectedOption?.label || level || (c.levelPlaceholder || "Eg. A1, B2...")}
+                      </span>
+                      <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
                 />
               </div>
             </div>
-
-
 
             {/* Number of Sessions & Capacity Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -928,7 +928,7 @@ const CreateClassPage = () => {
                       setField("sessions", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("sessions")
                     }}
-                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
+                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <button
                     type="button"
@@ -958,7 +958,7 @@ const CreateClassPage = () => {
                       setField("capacity", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("capacity")
                     }}
-                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white"
+                    className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   <button
                     type="button"
@@ -972,7 +972,7 @@ const CreateClassPage = () => {
             </div>
 
             {/* Attendance Requirements Block */}
-            <div className={`bg-white rounded-2xl p-4 border border-border flex flex-col md:flex-row gap-5 md:gap-8 items-stretch justify-between ${isEditMode ? "opacity-75 bg-slate-50/50" : ""}`}>
+            <div className={`bg-white rounded-2xl p-4 sm:p-5 border border-border flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 items-stretch justify-between ${isEditMode ? "opacity-75 bg-slate-50/50" : ""}`}>
               {/* Left Column: Minimum Attendance Rate */}
               <div className="flex-1 flex flex-col gap-3 justify-center">
                 {/* Header row */}
@@ -988,7 +988,7 @@ const CreateClassPage = () => {
                         setField("requireMinAttendance", !requireMinAttendance)
                       }
                     }}
-                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isEditMode
+                    className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-all ${isEditMode
                       ? "cursor-not-allowed opacity-60 bg-gray-100 border-gray-300 text-gray-500"
                       : requireMinAttendance
                         ? "bg-[#990011] border-[#990011] text-white cursor-pointer"
@@ -999,7 +999,7 @@ const CreateClassPage = () => {
                   </div>
                   <span
                     onClick={() => !isEditMode && setField("requireMinAttendance", !requireMinAttendance)}
-                    className={`font-bold text-sm text-gray-800 select-none ${isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
+                    className={`font-bold text-sm text-gray-800 select-none flex-1 ${isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"}`}
                   >
                     {cc.requireMinAttendanceLabel || "Yêu cầu tỷ lệ tham dự tối thiểu"}
                   </span>
@@ -1007,11 +1007,11 @@ const CreateClassPage = () => {
                 </div>
 
                 {/* Content row */}
-                <div className="flex items-center justify-between sm:justify-start gap-4 pt-1">
+                <div className="flex flex-row items-center justify-between sm:justify-start gap-3 sm:gap-4 pt-1">
                   <span className="text-sm font-medium text-gray-700">
                     {cc.minAttendanceRateLabel || "Tỷ lệ tham dự tối thiểu"}
                   </span>
-                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-32 transition-all ${(!isEditMode && requireMinAttendance) ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
+                  <div className={`flex items-center border rounded-xl overflow-hidden bg-white h-10 w-28 sm:w-32 shrink-0 transition-all ${(!isEditMode && requireMinAttendance) ? "border-gray-300 hover:border-gray-400 focus-within:border-[#990011]" : "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
                     }`}>
                     <input
                       type="number"
@@ -1024,7 +1024,7 @@ const CreateClassPage = () => {
                         const val = Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0))
                         setField("minAttendanceRate", val)
                       }}
-                      className="w-full h-full px-3 text-center font-bold text-sm text-gray-800 outline-none bg-transparent disabled:cursor-not-allowed"
+                      className="w-full h-full px-3 text-center font-bold text-sm text-gray-800 outline-none bg-transparent disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <div className="h-full bg-gray-50 border-l border-gray-200 px-3 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0 select-none">
                       %
@@ -1033,14 +1033,15 @@ const CreateClassPage = () => {
                 </div>
               </div>
 
-              {/* Vertical Divider for md screens */}
+              {/* Divider for md screens and mobile */}
               <div className="hidden md:block w-px bg-border self-stretch" />
+              <div className="block md:hidden border-t border-border/80 my-0.5" />
 
               {/* Right Column: Attendance Calculation Type */}
               <div className="flex-1 flex flex-col gap-3 justify-center">
                 {/* Header row */}
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-sm text-gray-800">
+                  <span className="font-bold text-sm text-gray-800 flex-1">
                     {cc.requireAttendanceTypeLabel || "Yêu cầu Lần tham dự"}
                   </span>
                   <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
@@ -1056,7 +1057,7 @@ const CreateClassPage = () => {
                     }}
                     className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                   >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "CountLate" || includeLateAttendance)
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${(lateAttendancePolicy === "CountLate" || includeLateAttendance)
                       ? "border-[#990011] bg-white"
                       : "border-gray-300 group-hover:border-gray-400 bg-white"
                       }`}>
@@ -1075,7 +1076,7 @@ const CreateClassPage = () => {
                     }}
                     className={`flex items-center gap-2.5 select-none group ${isEditMode ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
                   >
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance)
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${(lateAttendancePolicy === "IgnoreLate" || !includeLateAttendance)
                       ? "border-[#990011] bg-white"
                       : "border-gray-300 group-hover:border-gray-400 bg-white"
                       }`}>
@@ -1085,6 +1086,113 @@ const CreateClassPage = () => {
                       {cc.excludeLateAttendanceOption || "Không tính lần tham dự muộn"}
                     </span>
                   </label>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 1: Thời gian tuyển sinh (Admission Period) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                {cc.admissionPeriod || "Thời gian tuyển sinh"} <span className="text-[#990011]">*</span>
+              </label>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="flex-1 min-w-0">
+                  <DateTimePicker
+                    dateValue={admissionStart}
+                    timeValue={admissionStartHours}
+                    onChange={(dateStr, timeStr) => {
+                      setField("admissionStart", dateStr)
+                      setField("admissionStartHours", timeStr)
+                      clearError("admissionStart")
+                    }}
+                    color="#990011"
+                    minDate={isEditMode ? null : today}
+                    error={Boolean(errors.admissionStart)}
+                    className="w-full"
+                  />
+                </div>
+                <span className="text-gray-400 font-bold select-none text-base shrink-0 px-0.5">—</span>
+                <div className="flex-1 min-w-0">
+                  <DateTimePicker
+                    dateValue={admissionEnd}
+                    timeValue={admissionEndHours}
+                    onChange={(dateStr, timeStr) => {
+                      setField("admissionEnd", dateStr)
+                      setField("admissionEndHours", timeStr)
+                      clearError("admissionEnd")
+                    }}
+                    color="#990011"
+                    minDate={isEditMode ? null : today}
+                    error={Boolean(errors.admissionEnd)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: Thời gian bắt đầu & Thời gian lưu trữ lớp sau kết thúc */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-2 sm:gap-3">
+              {/* Col 1: Thời gian bắt đầu */}
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.startDate || "Thời gian bắt đầu"} <span className="text-[#990011]">*</span>
+                </label>
+                <DateTimePicker
+                  dateValue={startDate}
+                  timeValue={startDateHours}
+                  onChange={(dateStr, timeStr) => {
+                    setField("startDate", dateStr)
+                    setField("startDateHours", timeStr)
+                    clearError("startDate")
+                  }}
+                  color="#990011"
+                  minDate={isEditMode ? null : today}
+                  error={Boolean(errors.startDate)}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Invisible spacer to match the dash in Row 1 */}
+              <span className="hidden sm:flex invisible font-bold select-none text-base shrink-0 px-0.5 pointer-events-none">—</span>
+
+              {/* Col 2: Thời gian lưu trữ lớp sau kết thúc */}
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  {cc.retentionPeriod || "Thời gian lưu trữ lớp sau kết thúc"}
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 flex items-center bg-white border border-border hover:border-gray-300 focus-within:border-[#990011] rounded-xl overflow-hidden h-11 transition-all">
+                    <button
+                      type="button"
+                      disabled={(parseInt(retentionDays, 10) || 0) <= 0}
+                      onClick={() => setField("retentionDays", Math.max(0, (parseInt(retentionDays, 10) || 0) - 1))}
+                      className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      value={retentionDays ?? 10}
+                      onChange={(e) => {
+                        const val = Math.min(10, Math.max(0, parseInt(e.target.value, 10) || 0))
+                        setField("retentionDays", val)
+                      }}
+                      className="flex-1 h-full text-center bg-transparent border-none outline-none font-bold text-sm text-gray-800 focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={(parseInt(retentionDays, 10) || 0) >= 10}
+                      onClick={() => setField("retentionDays", Math.min(10, (parseInt(retentionDays, 10) || 0) + 1))}
+                      className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700 select-none shrink-0">
+                    {cc.daysUnit || "ngày"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1099,26 +1207,26 @@ const CreateClassPage = () => {
                   {cc.chooseDays || "Choose days of the week"}
                 </span>
 
-                {/* Weekdays selection grid inside */}
-                <div className="grid grid-cols-7 border border-border rounded-xl overflow-hidden text-center divide-x divide-gray-200 bg-white">
+                {/* Day selector boxes */}
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-2 text-center bg-gray-50/50 p-1.5 rounded-xl border border-border">
                   {DAYS_OF_WEEK.map((day) => {
                     const isChecked = checkedDays[day.key]
                     return (
                       <div
                         key={day.key}
                         onClick={() => handleToggleDay(day.key)}
-                        className={`flex flex-col gap-2.5 py-2.5 cursor-pointer select-none transition-all ${isChecked ? "bg-[#990011]/5" : "hover:bg-gray-50/50"
+                        className={`flex flex-col gap-1.5 sm:gap-2 py-2 cursor-pointer select-none transition-all rounded-lg ${isChecked ? "bg-[#990011] text-white" : "bg-transparent hover:bg-white"
                           }`}
                       >
-                        <span className={`text-[10px] font-black uppercase tracking-wider ${isChecked ? "text-[#990011]" : "text-gray-400"}`}>
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${isChecked ? "text-white" : "text-gray-400"}`}>
                           {cc.days?.[day.key]?.short || cc.days?.[day.key]?.code || day.label}
                         </span>
                         <div className="flex justify-center">
-                          <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${isChecked
-                            ? "bg-[#990011] border-[#990011] text-white"
+                          <div className={`w-3 h-3 rounded-full border flex items-center justify-center transition-all ${isChecked
+                            ? "bg-white border-white"
                             : "border-gray-300 bg-white"
                             }`}>
-                            {isChecked && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                            {isChecked && <div className="w-1 h-1 rounded-full bg-[#990011]" />}
                           </div>
                         </div>
                       </div>
@@ -1218,7 +1326,7 @@ const CreateClassPage = () => {
                     </div>
                     <div className="text-xs text-gray-400 font-semibold space-y-1">
                       <p>{c.avatarDesc1 || "Supports PNG, JPEG, and WebP."}</p>
-                      <p>{c.avatarDesc2 || "File size must be under 50mb"}</p>
+                      <p>{c.avatarDesc2 || "File size must be under 5MB"}</p>
                     </div>
                   </div>
                 )}
@@ -1297,61 +1405,80 @@ const CreateClassPage = () => {
                 </span>
               </div>
             )}
+
+            {/* Calendar & Schedule Preview (Only show in edit mode) */}
+            {isEditMode && (
+              <ClassScheduleCalendarPreview
+                startDate={startDate}
+                sessions={sessions}
+                checkedDays={checkedDays}
+                timeSlots={timeSlots}
+                editingClassId={id}
+                isEditMode={isEditMode}
+              />
+            )}
           </div>
         </div>
 
         {/* BOTTOM ACTION BAR */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-border mt-auto">
-          {/* Left Side: Fee detail */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D]">
-              <Info size={16} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-bold text-gray-400 uppercase tracking-widest leading-none">
-                {cc.classOpeningFee || "CLASS OPENING FEE"}
-              </span>
-              <div className="flex items-center gap-2 flex-wrap">
-                {feeDetails.openingFee > 0 && (
-                  <span className="text-gray-400 line-through font-bold text-sm leading-none">
-                    {formatCurrencyVND(feeDetails.openingFee)}
+        <div className={`flex flex-col sm:flex-row ${isEditMode ? "justify-end" : "justify-between"} items-stretch sm:items-center gap-4 sm:gap-6 pt-6 border-t border-border mt-auto w-full`}>
+          {/* Left Side: Fee detail (only shown when creating a new class) */}
+          {!isEditMode && (
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="w-9 h-9 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D] shrink-0">
+                <Info size={17} />
+              </div>
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
+                  {cc.classOpeningFee || "CLASS OPENING FEE"}
+                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {feeDetails.openingFee > 0 && (
+                    <span className="text-gray-400 line-through font-bold text-sm leading-none">
+                      {formatCurrencyVND(feeDetails.openingFee)}
+                    </span>
+                  )}
+                  <span className="text-[#15803D] font-black text-xl leading-none">
+                    {formatCurrencyVND(0)}
                   </span>
-                )}
-                <span className="text-[#15803D] font-black text-xl leading-none">
-                  {formatCurrencyVND(0)}
-                </span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E8F8F0] text-[#15803D] border border-[#15803D]/20">
-                  {cc.currentlyFreeNote || "Currently free to open classes"}
-                </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E8F8F0] text-[#15803D] border border-[#15803D]/20">
+                    {cc.currentlyFreeNote || "Currently free to open classes"}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Right Side: Cancel & Confirm */}
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {isEditMode && (
+          {/* Right Side: Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            {/* Secondary actions on mobile: Delete & Cancel in a row */}
+            <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+              {isEditMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(true)}
+                  disabled={isFormBusy}
+                  className="flex-1 sm:flex-initial h-11 px-5 bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-1.5 justify-center disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  <Trash2 size={13} />
+                  <span>{cc.deleteClass || "Delete Class"}</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setShowDeleteModal(true)}
+                onClick={() => navigate("/workspace/classes/all-classes")}
                 disabled={isFormBusy}
-                className="h-11 px-6 bg-[#e11d48] hover:bg-[#be123c] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center gap-1.5 justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap"
               >
-                <Trash2 size={13} />
-                <span>{cc.deleteClass || "Delete Class"}</span>
+                {cc.cancel}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => navigate("/workspace/classes/all-classes")}
-              disabled={isFormBusy}
-              className="flex-1 sm:flex-initial h-11 px-6 border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full transition-all active:scale-95 flex items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {cc.cancel}
-            </button>
+            </div>
+
+            {/* Primary Action Button: full-width on bottom for mobile */}
             <button
               type="submit"
               disabled={isFormBusy}
-              className="flex-1 sm:flex-initial h-11 px-6 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto h-11 px-7 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isEditMode ? (cc.saveChanges || "Save Changes") : (cc.confirmPay || "Confirm & Pay")}
             </button>

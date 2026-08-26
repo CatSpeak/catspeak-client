@@ -159,7 +159,7 @@ export const getFallbackAvatarByGender = (gender) => {
   return null
 }
 
-export const getLocalizedLanguageName = (rawLang, t, language = "vi") => {
+export const getLocalizedLanguageName = (rawLang, t) => {
   if (!rawLang) return ""
   const str = String(rawLang).trim()
   const lower = str.toLowerCase()
@@ -202,7 +202,7 @@ export const getInstructorRole = (languages, t, language = "vi") => {
   const names = languages
     .map((l) => {
       const raw = typeof l === "object" ? l.language || l.name : l
-      return getLocalizedLanguageName(raw, t, language)
+      return getLocalizedLanguageName(raw, t)
     })
     .filter(Boolean)
 

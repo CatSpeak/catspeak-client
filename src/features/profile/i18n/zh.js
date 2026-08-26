@@ -93,6 +93,7 @@ export default {
       searchPlaceholder: "搜索班级...",
       courseLabel: "课程：",
       exploreMore: "探索课程",
+      reviewed: "已评价",
       reviewedLabel: "已评价",
       reviewNow: "立即评价",
       completedLabel: "已完成",

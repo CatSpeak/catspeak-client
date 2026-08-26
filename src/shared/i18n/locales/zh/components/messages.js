@@ -13,4 +13,5 @@ export default {
   image: "图片",
   close: "关闭",
   conversationNotFound: "未找到对话",
+  seeAllChat: "查看所有聊天",
 }

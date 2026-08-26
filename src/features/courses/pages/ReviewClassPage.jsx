@@ -11,6 +11,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getSafeMediaUrl } from "../utils/courseUtils"
+import { getLocalizedLanguageName } from "../data/courseFormOptions"
 
 const UNKNOWN = "—"
 

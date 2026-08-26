@@ -48,7 +48,9 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
       onClose();
     } catch (error) {
       console.error("Failed to rename", error);
-      toast.error(t.materials.renameError);
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.renameError;
+      toast.error(errMsg);
     }
   };
 

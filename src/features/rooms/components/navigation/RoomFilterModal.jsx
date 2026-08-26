@@ -26,7 +26,7 @@ const RoomFilterModal = ({ open, onClose }) => {
   }, [open, searchParams])
 
   // Map levels based on current language
-  const langMap = { en: "English", zh: "Chinese", vi: "Vietnamese" }
+  const langMap = { en: "English", zh: "Chinese", vi: "Vietnamese", ja: "Japanese" }
   const currentLanguage = lang ? langMap[lang] : "English"
   
   const baseLevels = LEVELS[currentLanguage] || LEVELS.English

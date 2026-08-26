@@ -258,24 +258,24 @@ const CreatePostPage = () => {
 
       <div className="w-full space-y-6">
         {/* ─── Page Title ─────────────────────────────────────────────── */}
-        <h1 className="text-[40px] font-semibold text-[#1A1A1A]">
-          {isEditMode ? dict.createPost.editTitle : dict.createPost.title}
+        <h1 className="text-[28px] font-semibold text-[#191C1D]">
+          {isEditMode ? "Sửa bài viết" : "Thêm bài viết"}
         </h1>
 
         {/* ─── Form Card ──────────────────────────────────────────────── */}
-        <div className="bg-white rounded-3xl p-6 space-y-6 shadow-faq-card">
-          <h2 className="text-xl font-semibold text-[#1A1A1A]">
+        <div className="bg-white rounded-3xl p-6 md:p-8 space-y-8 shadow-sm">
+          <h2 className="text-xl font-semibold text-[#191C1D]">
             {dict.createPost.postInfo}
           </h2>
 
           {/* ── Avatar upload (pattern from CreateCoursePage) ── */}
           <div className="space-y-3">
-            <label className="block text-base font-medium text-[#191C1D]">
+            <label className="block text-sm font-semibold text-[#374151]">
               {dict.createPost.avatar}
             </label>
             <div
               onClick={handleAvatarClick}
-              className="group relative border border-[#E2E2E2] rounded-xl bg-[#F8F9FA] hover:bg-primaryBg flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[294px]"
+              className="group relative rounded-xl bg-[#F3F4F5] flex flex-col items-center justify-center cursor-pointer transition-colors min-h-[294px]"
             >
               <input
                 ref={avatarInputRef}
@@ -306,12 +306,12 @@ const CreatePostPage = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3 py-10">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#5B403C]">
-                    <Upload size={24} />
+                  <div className="flex items-center justify-center text-[#9CA3AF]">
+                    <Upload size={32} strokeWidth={2} />
                   </div>
-                  <div className="text-center text-xs text-[#5B403C] space-y-1">
-                    <p>{dict.createPost.avatarDesc1}</p>
-                    <p>{dict.createPost.avatarDesc2}</p>
+                  <div className="text-center text-xs text-[#9CA3AF] space-y-1 font-medium">
+                    <p>{dict.createPost.avatarDesc1 || "Hỗ trợ định dạng png, jpeg và svg."}</p>
+                    <p>{dict.createPost.avatarDesc2 || "Kích cỡ dưới 50mb"}</p>
                   </div>
                 </div>
               )}
@@ -320,8 +320,8 @@ const CreatePostPage = () => {
 
           {/* ── Title input ── */}
           <div className="space-y-2">
-            <label className="block text-base font-medium text-[#191C1D]">
-              {dict.createPost.postName}
+            <label className="block text-sm font-semibold text-[#374151]">
+              Tiêu đề
             </label>
             <TextInput
               value={title}
@@ -331,46 +331,40 @@ const CreatePostPage = () => {
                 if (errors.title) setErrors((prev) => ({ ...prev, title: false }))
               }}
               error={errors.title}
-              placeholder={dict.createPost.postNamePlaceholder}
-              className={`rounded-xl !h-[50px] px-4 text-sm ${errors.title ? "border-red-500 ring-2 ring-red-200" : ""}`}
+              placeholder={"Nhập tiêu đề"}
+              className={`rounded-xl !h-[50px] px-4 text-sm bg-[#F3F4F5] border-0 focus:ring-1 focus:ring-gray-300 ${errors.title ? "ring-2 ring-red-400" : ""}`}
             />
           </div>
 
           {/* ── Content input ── */}
           <div className="space-y-2">
-            <label className="block text-base font-medium text-[#191C1D]">
-              {dict.createPost.content}
+            <label className="block text-sm font-semibold text-[#374151]">
+              Mô tả
             </label>
-            <div className={errors.content ? "border border-red-500 ring-2 ring-red-200 rounded-xl" : ""}>
-              <Editor
-                tinymceScriptSrc="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js"
-                value={content}
-                onEditorChange={(newContent) => {
-                  setContent(newContent)
-                  if (errors.content) setErrors((prev) => ({ ...prev, content: false }))
-                }}
-                init={{
-                  height: 300,
-                  menubar: false,
-                  statusbar: false,
-                  plugins: ["autolink", "lists", "link", "charmap", "emoticons"],
-                  toolbar:
-                    "bold italic underline strikethrough | emoticons link | bullist numlist",
-                  placeholder: dict.createPost.contentPlaceholder,
-                  skin: "oxide",
-                }}
-              />
+            <TextInput
+              value={content}
+              required
+              onChange={(e) => {
+                setContent(e.target.value)
+                if (errors.content) setErrors((prev) => ({ ...prev, content: false }))
+              }}
+              error={errors.content}
+              placeholder={"Nhập mô tả"}
+              className={`rounded-xl !h-[50px] px-4 text-sm bg-[#F3F4F5] border-0 focus:ring-1 focus:ring-gray-300 ${errors.content ? "ring-2 ring-red-400" : ""}`}
+            />
+            <div className="flex justify-end pt-1">
+              <span className="text-[11px] text-gray-400">Tối đa 250 từ</span>
             </div>
           </div>
 
           {/* ── Attachments upload (pattern from CreatePostModal / AddMaterialModal) ── */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="block text-base font-medium text-[#191C1D]">
-                {dict.createPost.attachments}
+              <label className="block text-sm font-semibold text-[#374151]">
+                {dict.createPost.attachments || "Tài liệu đính kèm"}
               </label>
-              <span className="text-xs text-[#5B403C]">
-                {dict.createPost.maxAttachments.replace("{{count}}", String(MAX_ATTACHMENTS))}
+              <span className="text-[11px] text-gray-400">
+                {(dict.createPost.maxAttachments || "Tối đa {{count}} file").replace("{{count}}", String(MAX_ATTACHMENTS))}
               </span>
             </div>
 
@@ -400,20 +394,20 @@ const CreatePostPage = () => {
                 role="button"
                 tabIndex={0}
                 aria-label={dict.createPost.attachmentsDesc}
-                className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all space-y-3 ${attachDragActive
-                  ? "border-[#750000] bg-red-50/40"
-                  : "border-[#E2E2E2] hover:border-[#C6C6C6] bg-[#F8F9FA]"
+                className={`border border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all space-y-3 ${attachDragActive
+                  ? "border-[#990011] bg-red-50/40"
+                  : "border-[#990011]/60 hover:border-[#990011] bg-white"
                   }`}
               >
-                <div className="w-12 h-12 bg-white text-[#750000] rounded-full flex items-center justify-center mx-auto shadow-sm">
-                  <CloudUpload size={24} />
+                <div className="w-12 h-12 text-[#990011] flex items-center justify-center mx-auto">
+                  <CloudUpload size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <p className="text-sm text-[#750000] font-bold mb-1">
-                    {dict.createPost.attachmentsDesc}
+                  <p className="text-sm text-[#990011] font-bold mb-1">
+                    {dict.createPost.attachmentsDesc || "Nhấn để tải lên hoặc kéo thả file vào đây"}
                   </p>
-                  <p className="text-[11px] text-[#5B403C]">
-                    {dict.createPost.supportedFiles}
+                  <p className="text-[11px] text-gray-400 font-medium">
+                    {dict.createPost.supportedFiles || "Hỗ trợ PDF, DOCX, XLSX, PPTX, JPG, PNG (Max 50MB/file)"}
                   </p>
                 </div>
               </div>
@@ -435,7 +429,7 @@ const CreatePostPage = () => {
           </div>
 
           {/* ── Toggle options (pattern from CreatePostModal) ── */}
-          <div className="space-y-3">
+          <div className="space-y-4 pt-4">
             {/* Pin */}
             <ToggleOption
               icon={<Pin size={20} className="text-[#E2B60A]" />}
@@ -444,6 +438,7 @@ const CreatePostPage = () => {
               description={dict.createPost.pinDesc}
               checked={isPinned}
               onChange={(e) => setIsPinned(e.target.checked)}
+              className="border-none bg-[#F8F9FA] rounded-[16px] p-4"
             />
 
             {/* Allow reply */}
@@ -454,6 +449,7 @@ const CreatePostPage = () => {
               description={dict.createPost.allowReplyDesc}
               checked={allowReply}
               onChange={(e) => setAllowReply(e.target.checked)}
+              className="border-none bg-[#F8F9FA] rounded-[16px] p-4"
             />
 
             {/* Visible */}
@@ -464,33 +460,30 @@ const CreatePostPage = () => {
               description={dict.createPost.visibleDesc}
               checked={visibleToStudents}
               onChange={(e) => setVisibleToStudents(e.target.checked)}
+              className="border-none bg-[#F8F9FA] rounded-[16px] p-4"
             />
           </div>
         </div>
 
         {/* ─── Action Buttons ─────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-4 mt-8">
-          <PillButton
-            variant="outline"
+        <div className="grid grid-cols-2 gap-4 mt-8 pb-10">
+          <button
+            type="button"
             onClick={cancelEdit}
-            bgColor="white"
-            textColor="#750000"
-            borderColor="#750000"
+            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
           >
-            <X size={16} className="mr-2" /> {dict.createPost.cancel}
-          </PillButton>
-
-          <PillButton
+            {dict.createPost.delete || "Xóa"} <Trash2 size={18} strokeWidth={2} />
+          </button>
+          <button
+            type="button"
             onClick={handleSubmit}
             disabled={isLoading}
-            bgColor="#750000"
-            textColor="white"
-            className="!rounded-xl !h-12 font-semibold text-sm w-full justify-center disabled:opacity-50"
+            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
           >
             {isLoading ? dict.createPost.saving : (
-              <>{isEditMode ? dict.createPost.save : dict.createPost.post} <Send size={16} className="ml-2" /></>
+              <>{isEditMode ? dict.createPost.save : (dict.createPost.post || "Đăng bảng tin")} <Send size={18} strokeWidth={2} /></>
             )}
-          </PillButton>
+          </button>
         </div>
       </div>
     </div>

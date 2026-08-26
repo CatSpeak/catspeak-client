@@ -81,29 +81,30 @@ const AnalyticsDataTable = ({
   return (
     <div className="w-full flex flex-col min-w-0">
       {/* Scrollable Table Area */}
-      <div className="w-full overflow-x-auto border border-border rounded-xl">
-        <table className="w-full text-left text-xs border-collapse min-w-[600px]">
+      <div className="w-full overflow-x-auto border border-[#DEE0E5] rounded-xl scrollbar-thin">
+        <table className="w-full text-left text-xs border-collapse min-w-[480px]">
           <thead>
-            <tr className="bg-[#fafbfc] border-b border-[#edf0f3]">
+            <tr className="bg-[#FBFBFC] border-b border-[#E8EBED]">
               {columns.map((col) => {
                 const isSorted = sortKey === col.key
                 return (
                   <th
                     key={col.key}
-                    className={`p-2.5 font-bold text-[#5e687a] ${col.align === "right" ? "text-right" : "text-left"
-                      }`}
+                    className={`p-2.5 font-semibold text-[#616B80] whitespace-nowrap ${
+                      col.align === "right" ? "text-right" : "text-left"
+                    }`}
                   >
                     <button
                       type="button"
                       onClick={() => handleSort(col.key)}
-                      className="inline-flex items-center gap-1 font-bold text-inherit hover:text-[#990011] transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 font-semibold text-inherit hover:text-[#B20514] transition-colors cursor-pointer"
                     >
                       {col.label}
                       {isSorted ? (
                         sortDirection === "asc" ? (
-                          <ChevronUp size={14} className="text-[#990011]" />
+                          <ChevronUp size={14} className="text-[#B20514]" />
                         ) : (
-                          <ChevronDown size={14} className="text-[#990011]" />
+                          <ChevronDown size={14} className="text-[#B20514]" />
                         )
                       ) : null}
                     </button>
@@ -117,13 +118,14 @@ const AnalyticsDataTable = ({
               visibleRows.map((row, rIdx) => (
                 <tr
                   key={rIdx}
-                  className="border-b border-[#edf0f3] hover:bg-[#fffafb] transition-colors"
+                  className="border-b border-[#E8EBED] hover:bg-[#FBFBFC] transition-colors"
                 >
                   {columns.map((col) => (
                     <td
                       key={col.key}
-                      className={`p-2.5 text-gray-800 ${col.align === "right" ? "text-right" : "text-left"
-                        }`}
+                      className={`p-2.5 text-[#333B47] whitespace-nowrap ${
+                        col.align === "right" ? "text-right" : "text-left"
+                      }`}
                     >
                       {row[col.key]}
                     </td>
@@ -155,7 +157,7 @@ const AnalyticsDataTable = ({
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              className="w-7 h-7 rounded-lg border border-border bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-border disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-7 h-7 rounded-lg border border-[#D6D9E0] bg-white hover:border-[#B20514] hover:text-[#B20514] disabled:opacity-40 disabled:hover:border-[#D6D9E0] disabled:hover:text-gray-400 flex items-center justify-center transition-all cursor-pointer"
             >
               <ChevronLeft size={14} />
             </button>
@@ -169,10 +171,11 @@ const AnalyticsDataTable = ({
                   <button
                     type="button"
                     onClick={() => setCurrentPage(pNum)}
-                    className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${pNum === safePage
-                        ? "bg-[#990011] border-[#990011] text-white"
-                        : "bg-white border-border text-gray-700 hover:border-[#990011] hover:text-[#990011]"
-                      }`}
+                    className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${
+                      pNum === safePage
+                        ? "bg-[#B20514] border-[#B20514] text-white"
+                        : "bg-white border-[#D6D9E0] text-[#14171F] hover:border-[#B20514] hover:text-[#B20514]"
+                    }`}
                   >
                     {pNum}
                   </button>
@@ -184,7 +187,7 @@ const AnalyticsDataTable = ({
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              className="w-7 h-7 rounded-lg border border-border bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-border disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-7 h-7 rounded-lg border border-[#D6D9E0] bg-white hover:border-[#B20514] hover:text-[#B20514] disabled:opacity-40 disabled:hover:border-[#D6D9E0] disabled:hover:text-gray-400 flex items-center justify-center transition-all cursor-pointer"
             >
               <ChevronRight size={14} />
             </button>

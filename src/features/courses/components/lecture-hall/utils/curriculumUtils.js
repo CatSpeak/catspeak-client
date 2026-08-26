@@ -56,7 +56,7 @@ export const getDisplayData = (item, labels, locale, formatDateTime) => {
       metaType = "time"
     }
   } else if (item.itemType === "Quiz" && item.quiz) {
-    type = "assignment" // Map to assignment icon
+    type = "quiz" // Fixed to use proper quiz type for rendering
     title = item.quiz.name
     if (item.quiz.closeTime) {
       const date = formatFn(item.quiz.closeTime)

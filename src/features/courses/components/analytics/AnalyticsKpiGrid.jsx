@@ -1,9 +1,14 @@
 import React from "react"
 import AnalyticsKpiCard from "./AnalyticsKpiCard"
 
-const AnalyticsKpiGrid = ({ items = [] }) => {
+const AnalyticsKpiGrid = ({ items = [], cols = 5 }) => {
+  const gridColsClass =
+    cols === 6
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 mb-4"
+      : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 gap-3 mb-4"
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 mb-4">
+    <div className={gridColsClass}>
       {items.map((item, index) => (
         <AnalyticsKpiCard
           key={index}

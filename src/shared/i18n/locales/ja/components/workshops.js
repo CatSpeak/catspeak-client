@@ -1,0 +1,183 @@
+export default {
+  heroCarousel: {
+    comingSoonTitle: "近日公開",
+  },
+  chinaWorkshop: {
+    title: "ワークショップ - 専門家シェア",
+    cta: "今すぐ登録",
+    expertSharing: "[[ ワークショップ - 専門家シェア ]]",
+    introText:
+      "10年は単なる時間ではなく、直接聞く機会がほとんどない経験、視点、教訓でもあります。あなたは気になりませんか、",
+    introHighlight: "中国での生活、仕事環境、そしてチャンスについて",
+    introClosing: "？",
+    bulletPoints: [
+      "人について",
+      "文化について",
+      "美しさと知られざることについて",
+    ],
+    workshopTitlePrefix: "すべてはワークショップでシェアされます: ",
+    workshopTitle:
+      "「中国で10年間生活し働いた後、あなたは何を学ぶのでしょうか？」",
+    descriptionText: "率直な対談、それは",
+    descriptionHighlight:
+      "Cat Speakのスペシャルゲストによる、中国での10年以上の生活と仕事の経験、仕事、教訓について",
+    descriptionClosing: "。",
+    timeLabel: "時間:",
+    time: "20:00、土曜日の夜 - 2026年3月21日",
+    locationLabel: "場所:",
+    location: "Zoomプラットフォーム",
+    joinLinkNote:
+      "ワークショップの登録リンクは、イベント開始直前に送信されます。",
+    registerLinkLabel: "登録リンク:",
+    registerLinkText: "登録フォーム",
+    followPrompt:
+      "Cat Speakファンページをフォローして、中国語コミュニケーショングループに参加して、このワークショップを見逃さないようにしましょう！",
+    zaloGroupName: 'Cat-speakグループ「中国語コミュニケーションコミュニティ」:',
+    zaloLink: "https://zalo.me/g/gffkqu214",
+    inboxPrompt: "ファンページに直接メッセージ、またはメール: ",
+    email: "catspeak.vn@gmail.com",
+    closing:
+      "ご質問、ご提案、またはCat Speakの発展の旅に一緒に加わりたい場合は、お気軽にご連絡ください！",
+    hashtags:
+      "#CatSpeak #CatSpeak2026 #StartUp #LanguageJourney #LanguageCommunity #SpeakChineseDaily #PracticeChinese #ExpertSharing",
+    closeButton: "閉じる",
+  },
+  hskWorkshop: {
+    title: "ワークショップ - 専門家シェア: HSK学習方法＆効果的な試験対策ロードマップ",
+    cta: "今すぐ登録",
+    introText1: "中国語を勉強しているのに、まだ「迷っていて」何から始めたらいいかわからない？",
+    introText2: "HSKを受けたいけど、効率的に復習して時間を節約する方法がわからない？ 👀",
+    workshopBenefitsIntro: "🔥 このCat Speakワークショップで学べること:",
+    bulletPoints: [
+      "HSKを正しく学ぶための構造と考え方の理解",
+      "ゼロから上級までの適切な学習ロードマップの構築",
+      "効果的な語彙・文法の記憶方法の共有",
+      "リスニング、読解、作文の練習と中国語の反射力向上のコツ",
+      "HSK試験準備でよくある悩みへの回答",
+    ],
+    closingText:
+      "💡 単なる知識共有セッションではなく、将来の中国語学習の道筋をより良く形作る機会でもあります。",
+    timeLabel: "時間:",
+    time: "21:00、土曜日の夜 - 2026年5月23日",
+    locationLabel: "場所:",
+    location: "Cat Speakプラットフォーム",
+    targetLabel: "🎯 対象者:",
+    target: "あらゆるレベルの中国語学習者",
+    joinLinkNote:
+      "📩 HSK学習・対策の実践経験を持つスピーカーと交流できるチャンスをお見逃しなく！",
+    registerLinkLabel: "登録リンク:",
+    registerLinkText: "登録フォーム",
+    registerLinkUrl: "https://docs.google.com/forms/d/e/1FAIpQLScvc9AERUXZO4VjJuCMJ0HqzhqRLl_s_Ii-p8S8AXS41nxp8w/viewform",
+    followPrompt:
+      "Cat Speakファンページをフォローして、中国語コミュニケーショングループに参加して、役立つ情報を見逃さないようにしましょう！",
+    websiteLabel: "🌐 ウェブサイト:",
+    website: "https://www.catspeak.com.vn/",
+    zaloGroupName: "👉 Cat Speakグループ - 中国語コミュニケーションコミュニティ:",
+    zaloLink: "https://zalo.me/g/gffkqu214",
+    inboxPrompt: "📩 ファンページに直接メッセージ、またはメール: ",
+    email: "catspeak.vn@gmail.com",
+    closing:
+      "ご質問、ご提案、またはCat Speakのコミュニティ発展の旅に一緒に加わりたい場合は、お気軽にご連絡ください！",
+    hashtags: "#CatSpeak #CatSpeak2026 #HSK #ChineseWorkshop #ConquerHSK #HSKPreparation #SpeakChineseDaily #PracticeChinese #ExpertSharing",
+    closeButton: "閉じる",
+  },
+  englishWorkshop: {
+    title: "専門家シェア: IELTSを超えて – あなたの未来に合った道を選ぶ",
+    cta: "詳細を見る",
+    introText1: "目標のIELTSスコアを達成した後、次の質問は通常こうです:",
+    question1: "❓「スコアを上げるにはどうすればいい？」",
+    question2: "❓「次に何をすればいい？」",
+    speakerIntro1: "今週、Cat Speakはスピーカー",
+    speakerName: "Theia Châu Nguyễn",
+    speakerIntro2:
+      "さんを専門家シェアプログラムにお迎えします。彼女は:",
+    speakerTitles: [
+      "🌟 Light Learningの創設者",
+      "🌟 Speak Up Globalのプロジェクトディレクター",
+      "🌟 2026 JCI Trevi事務総長",
+      "🌟 IELTS Speaking 8.0",
+      "🌟 英語教育とカリキュラム開発で4年以上の経験",
+    ],
+    sharingIntro:
+      "英語学習者から教育者・コミュニティビルダーへの道のりを通じて、彼女は実践的な視点を共有します:",
+    sharingPoints: [
+      "✨ IELTSはスコアを超えて何をもたらすのか？",
+      "✨ あなたの目標に合う英語資格はどれか？",
+      "✨ 学業、仕事、自己成長に英語をどう活かすか？",
+      "✨ 若者が今アクセスできる国際的な機会と学習コミュニティ。",
+    ],
+    notTipsText: "これはIELTSのテクニック紹介セッションではありません。",
+    beyondText:
+      "これは、資格を超えて、英語をツールとして未来を広げる方法を理解したい人のための対談です。",
+    timeLabel: "時間:",
+    time: "20:00 | 2026年6月12日（金）",
+    formatLabel: "形式:",
+    format: "Cat Speakプラットフォーム上でオンライン",
+    registerLinkLabel: "📝 登録:",
+    registerLinkText: "登録リンク",
+    registerLinkUrl: "https://forms.gle/jYyaisj6zcTVXFSX7",
+    followPrompt:
+      "==================\nファンページをフォローしてコミュニティに参加し、毎週のスピーキングセッション、ワークショップ、交流イベントを見逃さないようにしましょう。",
+    websiteLabel: "ウェブサイト:",
+    website: "https://www.catspeak.com.vn/",
+    zaloGroupName: "👉 英語コミュニティ:",
+    zaloLink: "https://zalo.me/g/zsyupiuky9t5hfnhzmxh",
+    inboxPrompt: "メール:",
+    email: "catspeak.vn@gmail.com",
+    closing:
+      "✨ 試験のためだけに英語を学ばず、Cat Speakで英語を活用してチャンスを広げましょう！",
+    hashtags: "#CatSpeak #SpeakUpGlobal #LightLearning #BeyondIELTS #ExpertSharing #EnglishLearning #IELTSJourney #FutureReady",
+    closeButton: "閉じる",
+  },
+  scholarshipWorkshop: {
+    title:
+      "専門家シェア | ベトナムから世界へ – 中国大学奨学金獲得への道のり",
+    cta: "今すぐ登録",
+    expertSharing: "[[ 専門家シェア ]]",
+    introText:
+      "この特別な専門家シェアワークショップのスピーカーは、Intracom大学副学長のNguyen Quoc Tu博士です。彼は教育、外国語トレーニング、国際協力において長年の経験を持っています。",
+    contentLabel: "ワークショップの主な内容:",
+    bulletPoints: [
+      "ベトナム人学生向け中国大学奨学金の種類",
+      "条件、申請書類、奨学金申請プロセス",
+      "留学目標達成のための効果的な中国語学習ロードマップ",
+      "中国での留学・研究の実践的経験",
+      "奨学金、留学、キャリア形成に関する質問への直接Q&A",
+    ],
+    specialGiftsIntro:
+      "SPECIAL: ワークショップに参加すると、魅力的なギフトを受け取るチャンスも:",
+    specialGifts: [
+      "トレーニングプログラムからの奨学金",
+      "参加者向けの学習バウチャーと価値あるギフト",
+      "プログラム中に明かされる秘密のギフト",
+    ],
+    speakerLabel: "👨\u200d🏫 スピーカー: ",
+    speakerName: "Nguyen Quoc Tu博士",
+    speakerTitles: [
+      "Intracom大学副学長・外国語学部長",
+      "QTEDU中文理事会会長",
+      "北京語言大学博士（中国）",
+      "吉林大学修士（中国）",
+      "Dong Do大学中国語学科元学科長",
+    ],
+    timeLabel: "⏰ 時間:",
+    time: "20:00 – 2026年6月27日（土）",
+    formatLabel: "💻 形式:",
+    format: "Cat Speakプラットフォーム上でオンライン",
+    registerLinkLabel: "📌 今すぐ登録:",
+    registerLinkText: "登録フォーム",
+    registerLinkUrl: "https://forms.gle/XtycWYjWbstJqgtB8",
+    followPrompt:
+      "==============================\nCat Speakファンページをフォローして、中国語コミュニケーショングループに参加して、役立つ情報を見逃さないようにしましょう！",
+    websiteLabel: "🌐 ウェブサイト:",
+    website: "https://www.catspeak.com.vn/",
+    zaloGroupName: "👉 Cat Speakグループ – 中国語コミュニケーションコミュニティ:",
+    zaloLink: "https://zalo.me/g/gffkqu214",
+    inboxPrompt: "📩 ファンページに直接メッセージ、またはメール: ",
+    email: "catspeak.vn@gmail.com",
+    closing:
+      "ご質問、ご提案、またはCat Speakのコミュニティ発展の旅に一緒に加わりたい場合は、お気軽にご連絡ください！",
+    hashtags: "#CatSpeak #ExpertSharing #ChineseScholarship #StudyInChina #LearnChinese #Scholarship #IntracomUniversity",
+    closeButton: "閉じる",
+  },
+}

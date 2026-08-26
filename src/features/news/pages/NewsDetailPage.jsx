@@ -20,6 +20,8 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import { getImageUrl } from "@/shared/utils/imageUtils";
 import FluentCard from "@/shared/components/ui/FluentCard";
 import { Skeleton } from "@/shared/components/ui/indicators";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
+import { useAuth } from "@/features/auth";
 
 const NewsDetailSkeleton = () => (
   <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
@@ -79,28 +81,26 @@ const NewsDetailSkeleton = () => (
         </div>
 
         {/* Right Column: Comments Sidebar Skeleton Island */}
-        <div className="w-full min-w-0">
-          <div className="lg:sticky lg:top-[76px]">
-            <FluentCard
-              padding="p-3.5 sm:p-4"
-              rounded="rounded-2xl"
-              className="shadow-sm border-[#e5e7eb]"
-            >
-              <Skeleton className="h-6 w-32 mb-4" />
-              <div className="flex flex-col gap-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-3">
-                    <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-                    <div className="flex-1 flex flex-col gap-2">
-                      <Skeleton className="h-3.5 w-28" />
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-3/4" />
-                    </div>
+        <div className="w-full min-w-0 lg:sticky lg:top-[76px] lg:self-start">
+          <FluentCard
+            padding="p-3.5 sm:p-4"
+            rounded="rounded-2xl"
+            className="shadow-sm border-[#e5e7eb]"
+          >
+            <Skeleton className="h-6 w-32 mb-4" />
+            <div className="flex flex-col gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                  <div className="flex-1 flex flex-col gap-2">
+                    <Skeleton className="h-3.5 w-28" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-3/4" />
                   </div>
-                ))}
-              </div>
-            </FluentCard>
-          </div>
+                </div>
+              ))}
+            </div>
+          </FluentCard>
         </div>
       </div>
     </div>
@@ -109,6 +109,9 @@ const NewsDetailSkeleton = () => (
 
 const NewsDetailPage = () => {
   const { lang: paramLang, slug } = useParams();
+  const { isAuthenticated } = useAuth();
+  const { openAuthModal } = useAuthModal();
+
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const lang = paramLang || language || "vi";
@@ -170,9 +173,19 @@ const NewsDetailPage = () => {
   const [reactToPost] = useReactToPostMutation();
   const newsItem = data?.data ?? data ?? null;
   const handleReact = (type) => {
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+
     if (!newsItem?.postId) return;
-    reactToPost({ postId: newsItem.postId, type });
+
+    reactToPost({
+      postId: newsItem.postId,
+      type,
+    });
   };
+
   const [sharePost] = useSharePostMutation();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
@@ -303,20 +316,18 @@ const NewsDetailPage = () => {
           </div>
 
           {/* ── Right Column: Comments Sidebar Island ───────────── */}
-          <div className="w-full min-w-0">
-            <div className="lg:sticky lg:top-[76px]">
-              <FluentCard
-                padding="p-3.5 sm:p-4"
-                rounded="rounded-2xl"
-                className="shadow-sm border-[#e5e7eb] lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto"
-              >
-                <CommentsSection
-                  ref={commentsRef}
-                  postId={newsItem.postId}
-                  totalComments={newsItem.totalComments || 0}
-                />
-              </FluentCard>
-            </div>
+          <div className="w-full min-w-0 lg:sticky lg:top-[76px] lg:self-start">
+            <FluentCard
+              padding="p-3.5 sm:p-4"
+              rounded="rounded-2xl"
+              className="shadow-sm border-[#e5e7eb] lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto"
+            >
+              <CommentsSection
+                ref={commentsRef}
+                postId={newsItem.postId}
+                totalComments={newsItem.totalComments || 0}
+              />
+            </FluentCard>
           </div>
         </div>
 

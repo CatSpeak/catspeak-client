@@ -136,6 +136,7 @@ const MobileNavItems = ({
         "analytics",
         "schedule",
         "teachingTasks",
+        "manageMaterials",
       ]
       if (teacherTabs.includes(sub.key) && !isTeacher) return false
       return true
@@ -169,6 +170,7 @@ const MobileNavItems = ({
                 "analytics",
                 "schedule",
                 "teachingTasks",
+                "manageMaterials",
               ]
               if (teacherTabs.includes(item.key) && !isTeacher) return false
               return true

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react"
 import { MoreVertical, EyeOff, ChevronUp, ChevronDown, Inbox } from "lucide-react"
 import LessonItemRow from "./LessonItemRow"
+import StudentLessonRow from "./StudentLessonRow"
 import { IconButton } from "@/shared/components/ui/buttons"
 import SectionActionMenu from "./SectionActionMenu"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -16,6 +17,7 @@ const SectionCard = ({
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
+  onSelectLesson = () => { },
   className = "",
 }) => {
   const { t } = useLanguage()
@@ -28,14 +30,14 @@ const SectionCard = ({
 
   return (
     <div
-      className={`bg-[#F3F4F5] border border-[#E2E2E2] rounded-xl ${className}`}
+      className={`bg-white border border-[#E2E2E2] rounded-2xl md:rounded-3xl shadow-sm ${className}`}
     >
       {/* Section Header */}
-      <div className={`flex items-center justify-between gap-4 px-6 py-4 bg-[#F3F4F5] w-full ${isExpanded ? "rounded-t-xl border-b border-[#E2E2E2]" : "rounded-xl"}`}>
-        <div className="space-y-1">
-          <div className="flex items-center gap-3 flex-wrap">
+      <div className={`flex items-center justify-between gap-3 md:gap-4 px-4 md:px-6 py-4 md:py-5 bg-white w-full ${isExpanded ? "rounded-t-2xl md:rounded-t-3xl border-b border-[#E2E2E2]" : "rounded-2xl md:rounded-3xl"}`}>
+        <div className="space-y-1 w-full min-w-0">
+          <div className="flex items-center gap-2 md:gap-3 flex-wrap">
             <span
-              className="text-lg font-bold text-[#191C1D]"
+              className="text-base md:text-lg font-bold text-[#191C1D]"
             >
               {section.name}
             </span>
@@ -79,18 +81,27 @@ const SectionCard = ({
 
       {/* List of Lessons inside Section */}
       {isExpanded && (
-        <div className="space-y-4 bg-white w-full rounded-b-xl p-6">
+        <div className="bg-white w-full rounded-b-2xl md:rounded-b-3xl p-4 md:p-6 pt-2 md:pt-4">
           {section.items && section.items.length > 0 ? (
             section.items.map((item) => (
-              <LessonItemRow
-                key={item.id}
-                item={item}
-                isEdit={isEdit}
-                isStudent={isStudent}
-                onEditItem={(it) => onEditItem(section.id, it)}
-                onToggleItemVisibility={(itemId) => onToggleItemVisibility(section.id, itemId)}
-                onDeleteItem={(itemId) => onDeleteItem(section.id, itemId)}
-              />
+              isStudent ? (
+                <StudentLessonRow
+                  key={item.id}
+                  item={item}
+                  onSelectLesson={onSelectLesson}
+                />
+              ) : (
+                <LessonItemRow
+                  key={item.id}
+                  item={item}
+                  isEdit={isEdit}
+                  isStudent={isStudent}
+                  onEditItem={(it) => onEditItem(section.id, it)}
+                  onToggleItemVisibility={(itemId) => onToggleItemVisibility(section.id, itemId)}
+                  onDeleteItem={(itemId) => onDeleteItem(section.id, itemId)}
+                  onSelectLesson={onSelectLesson}
+                />
+              )
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-6 text-sm text-[#5B403C] border border-dashed border-[#E2E2E2] rounded-xl">
