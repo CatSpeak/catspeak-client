@@ -88,6 +88,11 @@ export default {
     },
     media: {
       noMedia: "Chưa có phương tiện nào",
+      all: "Tất cả",
+      photos: "Ảnh",
+      videos: "Video",
+      noPhotos: "Không có ảnh nào",
+      noVideos: "Không có video nào",
     },
     completedClass: {
       title: "Lớp học đã hoàn thành",

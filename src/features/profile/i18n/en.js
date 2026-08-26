@@ -88,6 +88,11 @@ export default {
     },
     media: {
       noMedia: "No media yet",
+      all: "All",
+      photos: "Photos",
+      videos: "Videos",
+      noPhotos: "No photos found",
+      noVideos: "No videos found",
     },
     completedClass: {
       title: "Completed Classes",
