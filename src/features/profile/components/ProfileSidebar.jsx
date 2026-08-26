@@ -4,6 +4,7 @@ import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import ListItem from "@/shared/components/ui/ListItem"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import TeacherBadge from "@/shared/components/ui/TeacherBadge"
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import {
   useGetFriendRecommendationsQuery,
@@ -12,14 +13,7 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getUserRoleLabel = (user, t) => {
-  const isTeacher =
-    user?.isTeacher === true ||
-    user?.isTeacher === 1 ||
-    user?.isTeacher === "true" ||
-    (typeof user?.level === "string" &&
-      user.level.trim().toLowerCase() === "expert")
-
-  return isTeacher
+  return user?.isTeacher
     ? t.profile?.friends?.teacher || "Giảng viên"
     : t.profile?.friends?.member || "Thành viên"
 }
@@ -145,9 +139,12 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
                   )
                 }
               >
-                <span className="truncate">
-                  {user.nickname || user.username}
-                </span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="truncate">
+                    {user.nickname || user.username}
+                  </span>
+                  {user?.isTeacher && <TeacherBadge />}
+                </div>
 
                 <span className="text-sm text-[#606060] truncate">
                   {getUserRoleLabel(user, t)}

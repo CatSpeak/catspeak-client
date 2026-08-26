@@ -5,8 +5,12 @@ import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import TeacherBadge from "@/shared/components/ui/TeacherBadge"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+
+const isUserTeacher = (user) =>
+  Boolean(user?.isTeacher ?? user?.authorIsTeacher)
 
 const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
   const { t } = useLanguage()
@@ -14,6 +18,7 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const authorAccountId = post.accountId || post.authorId || post.userId
+  const isTeacher = isUserTeacher(post)
 
   const formattedTime = post.createDate
     ? formatTimeAgo(post.createDate)
@@ -38,20 +43,23 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
           accountId={authorAccountId}
         />
         <div>
-          <h3
-            onClick={(e) => {
-              if (authorAccountId) {
-                e.stopPropagation()
-                const isWorkspace = location.pathname.startsWith("/workspace")
-                navigate(
-                  `${isWorkspace ? "/workspace" : ""}/profile/${authorAccountId}`,
-                )
-              }
-            }}
-            className={`font-semibold ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
-          >
-            {post.authorName || "User"}
-          </h3>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3
+              onClick={(e) => {
+                if (authorAccountId) {
+                  e.stopPropagation()
+                  const isWorkspace = location.pathname.startsWith("/workspace")
+                  navigate(
+                    `${isWorkspace ? "/workspace" : ""}/profile/${authorAccountId}`,
+                  )
+                }
+              }}
+              className={`font-semibold truncate ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+            >
+              {post.authorName || "User"}
+            </h3>
+            {isTeacher && <TeacherBadge />}
+          </div>
           <div className="text-sm text-secondary flex items-center flex-wrap gap-x-2">
             <span className="whitespace-nowrap">{formattedTime}</span>
             {privacyText && (

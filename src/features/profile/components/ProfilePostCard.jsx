@@ -11,6 +11,7 @@ import PostMediaGallery from "./PostMediaGallery"
 import ShareModal from "@/features/news/components/ShareModal"
 import CommentsSection from "@/features/news/components/CommentsSection"
 import PostContent from "@/features/news/components/PostContent"
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import PostHeader from "./PostHeader"
 import PostActionBar from "./PostActionBar"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -18,6 +19,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 const ProfilePostCard = ({ post, isOwnProfile }) => {
   const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [isOverflowing, setIsOverflowing] = useState(false)
@@ -46,7 +48,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   } = useSharePost()
 
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation()
-  const [deletePost] = useDeletePostMutation()
+  const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
   const [reactToPost] = useReactToPostMutation()
 
   const handleUpdatePost = async (formData) => {
@@ -54,17 +56,12 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
     setIsEditing(false)
   }
 
-  const handleDeletePost = async () => {
-    if (
-      window.confirm(
-        t.profile?.post?.deleteConfirm || "Bạn có chắc muốn xóa bài viết này?",
-      )
-    ) {
-      try {
-        await deletePost(post.postId).unwrap()
-      } catch (error) {
-        console.error("Failed to delete post:", error)
-      }
+  const handleConfirmDelete = async () => {
+    try {
+      await deletePost(post.postId).unwrap()
+      setIsDeleteModalOpen(false)
+    } catch (error) {
+      console.error("Failed to delete post:", error)
     }
   }
 
@@ -85,7 +82,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
             post={post}
             isOwnProfile={isOwnProfile}
             onEdit={() => setIsEditing(true)}
-            onDelete={handleDeletePost}
+            onDelete={() => setIsDeleteModalOpen(true)}
           />
 
           {post.title && post.title !== "Untitled" && (
@@ -153,6 +150,29 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
         isEditMode={true}
         isSubmitting={isUpdating}
         onSubmit={handleUpdatePost}
+      />
+
+      <ConfirmationModal
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title={
+          t.profile?.post?.deleteTitle ||
+          t.profile?.post?.header?.delete ||
+          "Xóa bài viết"
+        }
+        message={
+          t.profile?.post?.deleteConfirm ||
+          "Bạn có chắc muốn xóa bài viết này?"
+        }
+        confirmText={
+          t.profile?.post?.deleteBtn ||
+          t.profile?.post?.header?.delete ||
+          "Xóa"
+        }
+        cancelText={t.profile?.post?.editor?.cancel || "Hủy"}
+        confirmVariant="destructive"
+        isPending={isDeleting}
       />
     </>
   )
