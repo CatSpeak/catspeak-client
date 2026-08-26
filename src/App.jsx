@@ -21,6 +21,7 @@ import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTask
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 import CompletionReviewPrompt from "@/features/courses/components/CompletionReviewPrompt"
 import BugReportButton from "@/features/bug-report/components/BugReportButton"
+import AutoCrashReporterSync from "@/shared/components/AutoCrashReporterSync"
 // import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
 
 import GlobalErrorBoundary from "@/shared/components/GlobalErrorBoundary"
@@ -48,6 +49,7 @@ function App() {
                     <GlobalTaskProgressWidget />
                     <RecordingPoller />
                     <GlobalTaskSync />
+                    <AutoCrashReporterSync />
                     <BugReportButton />
                   </GlobalPresenceProvider>
                 </ConversationSignalRProvider>
