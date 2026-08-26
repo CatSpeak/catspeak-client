@@ -81,6 +81,11 @@ export default {
     },
     media: {
       noMedia: "暂无媒体",
+      all: "全部",
+      photos: "图片",
+      videos: "视频",
+      noPhotos: "暂无图片",
+      noVideos: "暂无视频",
     },
     completedClass: {
       title: "已完成的班级",
