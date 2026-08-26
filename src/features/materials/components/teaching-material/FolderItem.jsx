@@ -56,7 +56,7 @@ const FolderItem = ({
             {isBookmarked && <Star className="w-4 h-4 text-[#FF9C4F] fill-[#FF9C4F]" />}
           </div>
           <p className="text-sm text-[#5B403E]">
-            {totalItems} {updatedAt ? `• ${updatedAt}` : ''}
+            {totalItems ? `${totalItems} ${updatedAt ? `• ${updatedAt}` : ''}` : updatedAt}
           </p>
 
         </div>

@@ -305,8 +305,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
             ...(pwdParam ? { password: pwdParam } : {}),
           }
           const result = await verifyJoinRoom(payload).unwrap()
-          if (result.authorized) {
+          const isAuthorized = result?.authorized ?? result?.data?.authorized
+          if (isAuthorized) {
             setPhase("waiting")
+          } else {
+            setPhase("password-required")
           }
         } catch {
           // 403 = no grant yet → show password screen
@@ -588,7 +591,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // ---- PHASE: VERIFYING (silent check for private room grant) ----
   if (phase === "verifying") {
-    return <div className="h-screen w-full bg-gray-50"></div>
+    return (
+      <VideoCallLoading
+        message={t?.rooms?.waitingScreen?.loadingRoom || "Loading room..."}
+      />
+    )
   }
 
   // ---- PHASE: PASSWORD REQUIRED ----

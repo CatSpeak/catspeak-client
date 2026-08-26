@@ -8,6 +8,7 @@ export default {
     vietnam: "Vietnam",
     china: "China",
     usa: "English",
+    japan: "Japan",
   },
   ctaButton: "Learn more about Cat Speak",
   whyChooseUs: "Why choose us?",

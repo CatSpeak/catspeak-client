@@ -169,10 +169,11 @@ const ModalContent = ({
   )
 }
 
-const Modal = ({ open, ...props }) => {
+const Modal = ({ open, isOpen, ...props }) => {
+  const isModalOpen = open ?? isOpen
   return createPortal(
     <AnimatePresence>
-      {open && <ModalContent onClose={props.onClose} {...props} />}
+      {isModalOpen && <ModalContent onClose={props.onClose} {...props} />}
     </AnimatePresence>,
     document.body,
   )

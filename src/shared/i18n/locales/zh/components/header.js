@@ -14,15 +14,17 @@ export default {
   newNotificationBody: "您有一个新通知需要查看。",
   searchPlaceholder: "搜索房间",
   languages: {
-    vi: "越南语 (国语)",
+    vi: "越南语",
     viNom: "越南语 (喃字) - 即将推出",
     zh: "中文",
     en: "英语",
+    ja: "日语",
   },
   countries: {
     vietnam: "越南",
     china: "中国",
     english: "英语",
+    japan: "日本",
   },
   switchRole: "切换角色",
   studentRole: "学生",

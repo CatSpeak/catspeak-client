@@ -1,4 +1,4 @@
-import { VietNam, China, UK } from "@/shared/assets/icons/flags"
+import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 
 export const LANGUAGE_CONFIG = [
   // {
@@ -11,13 +11,19 @@ export const LANGUAGE_CONFIG = [
   {
     code: "zh",
     labelKey: "china",
-    fallbackLabel: "Trung Quốc",
+    fallbackLabel: "China",
     flag: China,
   },
   {
     code: "en",
     labelKey: "english",
-    fallbackLabel: "Anh",
+    fallbackLabel: "English",
     flag: UK,
+  },
+  {
+    code: "ja",
+    labelKey: "japan",
+    fallbackLabel: "Japan",
+    flag: Japan,
   },
 ]

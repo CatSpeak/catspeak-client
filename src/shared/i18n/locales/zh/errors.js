@@ -3,6 +3,15 @@ export default {
     noRoomFound: "未找到房间。请更改设置重试或创建新房间！",
     genericJoinError: "加入房间失败。请重试。",
   },
+  pageNotFound: {
+    title: "页面未找到",
+    description: "您要查找的页面不存在或已被移动，请检查网址。",
+  },
+  forbidden: {
+    title: "您没有访问权限",
+    description:
+      "请使用已授权的账户登录，或联系管理员申请权限。系统已记录您的请求。",
+  },
   serverDown: {
     title: "服务器不可用",
     message:

@@ -12,7 +12,8 @@ import {
   BookOpenText,
   Library,
   Languages,
-} from "lucide-react";
+  Gamepad2,
+} from "lucide-react"
 
 export const RESOURCE_CATEGORIES = {
   all: { labelEn: "All Resources", labelZh: "全部资源" },
@@ -40,7 +41,7 @@ export const RESOURCE_CATEGORIES = {
     icon: Newspaper,
   },
   exam: {
-    labelEn: "IELTS / HSK Prep",
+    labelEn: "IELTS / HSK / JLPT Prep",
     labelZh: "备考专区",
     icon: BookOpenCheck,
   },
@@ -55,8 +56,28 @@ export const RESOURCE_CATEGORIES = {
     icon: LibraryBig,
   },
   writing: { labelEn: "Hanzi Writing", labelZh: "汉字书写", icon: NotebookPen },
+  games: { labelEn: "Games", labelZh: "游戏", icon: Gamepad2 },
   kids: { labelEn: "For Kids", labelZh: "少儿学习", icon: Baby },
-};
+}
+
+/**
+ * Get total number of websites for a given language and optional category.
+ * If category is not provided (or undefined / "all"), counts all websites for that language.
+ *
+ * @param {"ja" | "zh" | "en"} [lang] - Language code
+ * @param {string} [category] - Optional category key (e.g. "test", "platform", "listening", etc.)
+ * @returns {number} Total count of matching websites
+ */
+export const getWebsiteCount = (lang, category) => {
+  let count = 0
+  websites.forEach((group) => {
+    if (lang && group.lang !== lang) return
+    const groupCategory = group.category || group.key
+    if (category && category !== "all" && groupCategory !== category) return
+    count += group.subItems?.length || 0
+  })
+  return count
+}
 
 export const websites = [
   {
@@ -99,6 +120,69 @@ export const websites = [
         color: "#f7ca14",
         description:
           "A journey to enhance knowledge about your favorite brands.",
+      },
+      {
+        key: "eflnet",
+        label: "Eflnet",
+        path: "/resources/eflnet",
+        color: "#c7420e",
+        description: "Free, focused practice for every part of your English.",
+      },
+      {
+        key: "agenda-web",
+        label: "Agenda Web",
+        path: "/resources/agenda-web",
+        description:
+          "English exercises online to practise grammar, vocabulary, verbs, listening, reading and phonetics. Interactive ESL activities and practice tests for all levels.",
+      },
+      {
+        key: "free-daily-english",
+        label: "Free Daily English",
+        path: "/resources/free-daily-english",
+        color: "#ba652d",
+        description:
+          "Get FREE daily English lessons for all CEFR levels (A1-B2). Master vocabulary, grammar, phrasal verbs & idioms with audio examples. Join thousands of learners improving daily. Start learning English for free now!",
+      },
+      {
+        key: "esl-tests",
+        label: "ESL Tests",
+        path: "/resources/esl-tests",
+        color: "#3aafba",
+        img: "https://www.esl-tests.com/logotip.svg",
+        description:
+          "Free English practice tests for every CEFR level — A1 to C2. Grammar, reading, listening and vocabulary. Find your exact level and start improving today. No sign-up.",
+      },
+      {
+        key: "english-maven",
+        label: "EnglishMaven",
+        path: "/resources/english-maven",
+        color: "#048cc7",
+        description:
+          "Take free online English lessons and exercises here. English Maven offers hundreds of English grammar and vocabulary lessons to help you study English online.",
+      },
+      {
+        key: "talkdrill",
+        label: "TalkDrill",
+        path: "/resources/talkdrill",
+        color: "#4d40e3",
+        img: "https://www.talkdrill.com/favicon.ico",
+        description: "Master English conversations Anytime, Anywhere.",
+      },
+      {
+        key: "englishpage",
+        label: "Englishpage",
+        path: "/resources/englishpage",
+        color: "#326699",
+        img: "https://www.englishpage.com/image/englishpage-logo.gif",
+        description: "Quality Resources for English Learners.",
+      },
+      {
+        key: "learnenglishfeelgood",
+        label: "Learn English Feel Good",
+        path: "/resources/learnenglishfeelgood",
+        color: "#006699",
+        img: "https://www.learnenglishfeelgood.com/favicon.png",
+        description: "Free ESL Grammar, Vocabulary & Listening Exercises.",
       },
     ],
   },
@@ -159,6 +243,14 @@ export const websites = [
         color: "#1d73bf",
         description:
           "Online dictation exercises for learners to improve English listening skills quickly. All levels from basic, intermediate to advanced. 100% Free.",
+      },
+      {
+        key: "levelupesl",
+        label: "LevelUpESL",
+        path: "/resources/levelupesl",
+        color: "#4f47e6",
+        img: "https://www.levelupesl.com/favicon.svg",
+        description: "Master English by Playing.",
       },
     ],
   },
@@ -245,6 +337,14 @@ export const websites = [
         description:
           "Audio pronunciation dictionary featuring global accents and audio recordings.",
       },
+      {
+        key: "shadola",
+        label: "Shadola",
+        path: "/resources/shadola",
+        img: "https://shadola.com/icon.svg",
+        color: "#6d5ef7",
+        description: "Master spoken English with the Shadowing technique.",
+      },
     ],
   },
   {
@@ -267,6 +367,22 @@ export const websites = [
         path: "/resources/breaking-news-english",
         description:
           "Free interactive lessons on current events with 7 levels of difficulty.",
+      },
+      {
+        key: "read-in-levels",
+        label: "Read in Levels",
+        path: "/resources/read-in-levels",
+        img: "https://readinlevels.com/favicon.ico?favicon.16c-1ygoukkmw.ico",
+        color: "#ffb833",
+        description: "One story a day, hand-adapted from A1 to C1.",
+      },
+      {
+        key: "newslish",
+        label: "Newslish",
+        path: "/resources/newslish",
+        img: "https://www.newslish.com/favicon.ico",
+        color: "#f7f5f0",
+        description: "Learn English with real news. 10 minutes a day.",
       },
     ],
   },
@@ -423,14 +539,6 @@ export const websites = [
     lang: "zh",
     subItems: [
       {
-        key: "improve-mandarin-hsk-practice-tests",
-        label: "ImproveMandarin – HSK Tests",
-        path: "/resources/improve-mandarin-hsk-practice-tests",
-        img: "https://improvemandarin.com/wp-content/uploads/cropped-improvemandarin-favicon-1-192x192.png",
-        description:
-          "Complete online HSK 1–6 practice tests with answers and listening audio.",
-      },
-      {
         key: "mandarin-bean-hsk-test",
         label: "HSK Test - MandarinBean",
         path: "/resources/mandarin-bean-hsk-test",
@@ -444,14 +552,6 @@ export const websites = [
         img: "https://hskmocktest.com/img/favicon.png",
         description:
           "Simulated HSK exam environment to practice timing and scoring.",
-      },
-      {
-        key: "hsk-course-free-hsk-mock-tests",
-        label: "HSKCourse.com Mock Tests",
-        path: "/resources/hsk-course-free-hsk-mock-tests",
-        img: "https://www.hskcourse.com/wp-content/uploads/2026/03/hskcourse-dark.jpg",
-        description:
-          "Free official sample test papers for all HSK proficiency levels.",
       },
     ],
   },
@@ -468,14 +568,6 @@ export const websites = [
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description:
           "Comprehensive Chinese learning portal covering grammar, reading, and listening.",
-      },
-      {
-        key: "improve-mandarin-chinese-lessons",
-        label: "ImproveMandarin Lessons",
-        path: "/resources/improve-mandarin-chinese-lessons",
-        img: "https://improvemandarin.com/wp-content/uploads/cropped-improvemandarin-favicon-1-192x192.png",
-        description:
-          "Bite-sized Chinese grammar guides, pinyin tips, and culture articles.",
       },
     ],
   },
@@ -549,14 +641,6 @@ export const websites = [
     icon: MicVocal,
     lang: "zh",
     subItems: [
-      {
-        key: "chinese-pronunciation-wiki",
-        label: "Chinese Pronunciation Wiki",
-        path: "/resources/chinese-pronunciation-wiki",
-        img: "https://resources.allsetlearning.com/favicon.ico",
-        description:
-          "Complete guide to Pinyin, initials, finals, and tone change rules.",
-      },
       {
         key: "ut-austin-pinyin-pronunciation-practice",
         label: "UT Austin – Pinyin Practice",
@@ -644,6 +728,53 @@ export const websites = [
         img: "https://mandarinbean.com/wp-content/uploads/2019/06/mb_2.png",
         description: "Short Chinese stories categorized from HSK 1 to HSK 6.",
       },
+      {
+        key: "pandaist",
+        label: "Pandaist",
+        path: "/resources/pandaist",
+        img: "https://pandaist.com/favicon.ico",
+        color: "#e381a2",
+        description: "Master Chinese through immersive reading.",
+      },
+      {
+        key: "hskatlas",
+        label: "HSK Atlas",
+        path: "/resources/hskatlas",
+        img: "https://hskatlas.com/favicon.svg",
+        color: "#18403b",
+        description: "Learn Chinese through the HSK 3.0 level system.",
+      },
+      {
+        key: "hskheadlines",
+        label: "HSK Headlines",
+        path: "/resources/hskheadlines",
+        img: "https://hskheadlines.com/favicons/favicon-32x32.png",
+        color: "#0c9bab",
+        description: "Learn Mandarin through live news.",
+      },
+      {
+        key: "readchinese",
+        label: "Read Chinese",
+        path: "/resources/readchinese",
+        img: "https://www.readchinese.org/logo-trans-56.webp",
+        color: "#e68483",
+        description:
+          "Daily Mandarin reading challenges, audio, and quizzes that keep beginners and intermediate learners progressing through stories curated for every HSK level.",
+      },
+      {
+        key: "realhsk",
+        label: "Real HSK",
+        path: "/resources/realhsk",
+        color: "#1d4f4b",
+        description: "Read Chinese at the level that is right for you.",
+      },
+      {
+        key: "chinesehskreading",
+        label: "Chinese HSK Reading",
+        path: "/resources/chinesehskreading",
+        description:
+          "Welcome to ChineseHSKreading.com, your go-to free resource for Mandarin reading practices! Please select your current Mandarin level below.",
+      },
     ],
   },
   {
@@ -671,4 +802,169 @@ export const websites = [
       },
     ],
   },
-];
+  {
+    key: "ja-exam",
+    category: "exam",
+    icon: BookOpenCheck,
+    lang: "ja",
+    subItems: [
+      {
+        key: "on-jlpt",
+        label: "Ôn JLPT",
+        path: "/resources/on-jlpt",
+        description: "Đủ kiến thức tổng hợp các trình độ từ N5 tới N1.",
+        color: "#145efc",
+        img: "https://onjlpt.com/favicon.ico",
+      },
+    ],
+  },
+  {
+    key: "ja-platform",
+    category: "platform",
+    icon: LibraryBig,
+    lang: "ja",
+    subItems: [
+      {
+        key: "mlc-japanese",
+        label: "MLC Japanese",
+        path: "/resources/mlc-japanese",
+        description: "Giáo trình học tiếng Nhật bằng tiếng Nhật N5 - N1.",
+      },
+    ],
+  },
+  // {
+  //   key: "ja-reading",
+  //   category: "reading",
+  //   icon: BookOpenText,
+  //   lang: "ja",
+  //   subItems: [
+  //   ],
+  // },
+  {
+    key: "ja-grammar",
+    category: "grammar",
+    icon: Puzzle,
+    lang: "ja",
+    subItems: [
+      {
+        key: "tufs-grammar-module",
+        label: "Ôn tiếng Nhật của Trường Đại Học Ngoại Ngữ Tokyo",
+        path: "/resources/tufs-grammar-module",
+        description: "Tham khảo ngữ pháp bằng tiếng Nhật.",
+        color: "#c7819a",
+      },
+    ],
+  },
+  {
+    key: "ja-listening",
+    category: "listening",
+    icon: Headphones,
+    lang: "ja",
+    subItems: [
+      {
+        key: "nhk-world-japan",
+        label: "NHK World Japan",
+        path: "/resources/nhk-world-japan",
+        description:
+          "Web của NHK. Bạn sẽ được hướng dẫn về nội dung đoạn video, sau đó luyện tập các mẫu câu quan trọng. Học xong 1 video là vận dụng được luôn mẫu câu đó vào đời sống.",
+        img: "https://www3.nhk.or.jp/nhkworld/common/site_images/nw_webapp_152x152.png",
+      },
+    ],
+  },
+  {
+    key: "ja-pronunciation",
+    category: "pronunciation",
+    icon: MicVocal,
+    lang: "ja",
+    subItems: [
+      {
+        key: "ojad-search",
+        label: "Từ Điển Các Thể Trong Tiếng Nhật",
+        path: "/resources/ojad-search",
+        description:
+          "Web giúp luyện và kiểm tra phát âm, trọng âm, trường âm các từ vựng tiếng Nhật. Rất hữu ích để luyện phát âm chuẩn.",
+        color: "#ffd06b",
+      },
+      {
+        key: "ojad-phrasing",
+        label: "Đọc Ngữ Điệu",
+        path: "/resources/ojad-phrasing",
+        description: "Web tra accent (cách đọc từ & câu tiếng Nhật).",
+        color: "#ffd06b",
+      },
+    ],
+  },
+  {
+    key: "ja-vocabulary",
+    category: "vocabulary",
+    icon: NotebookPen,
+    lang: "ja",
+    subItems: [
+      {
+        key: "kanjieasy",
+        label: "KanjiEasy",
+        path: "/resources/kanjieasy",
+        description: "Mindmap Kanji N5 - N3.",
+        img: "https://kanjieasy.vercel.app/favicon.svg",
+        color: "#152238",
+      },
+    ],
+  },
+  {
+    key: "ja-dictionary",
+    category: "dictionary",
+    icon: LibraryBig,
+    lang: "ja",
+    subItems: [
+      {
+        key: "takoboto",
+        label: "TAKOBOTO",
+        path: "/resources/takoboto",
+        description: "Tra cứu từ điển tiếng Nhật.",
+        img: "https://takoboto.jp/takoboto_48x48.png",
+        color: "#fa0000",
+      },
+      {
+        key: "kanjipedia",
+        label: "Từ Điển Kanji",
+        path: "/resources/kanjipedia",
+        description: "Web tra cứu kanji của Kanken.",
+      },
+    ],
+  },
+  {
+    key: "ja-games",
+    category: "games",
+    icon: Gamepad2,
+    lang: "ja",
+    subItems: [
+      {
+        key: "xe-tang-hoc-kanji",
+        label: "Xe tăng bắn Kanji",
+        path: "/resources/xe-tang-hoc-kanji",
+        description:
+          "Học tiếng Nhật qua game nhỏ vài phút, có tài liệu từ vựng theo chủ đề, thi đấu cùng đồng nghiệp và leo bảng xếp hạng.",
+        img: "https://gametiengnhat.onhat.vn/favicon.svg",
+        color: "#c73e3a",
+      },
+      {
+        key: "hansha-dojo",
+        label: "Luyện phản xạ nói tiếng Nhật",
+        path: "/resources/hansha-dojo",
+        description:
+          "Đề là câu tiếng Việt. Bạn nói thành tiếng câu tiếng Nhật tương ứng — không gõ gì cả — rồi mở đáp án và tự chấm. 253 mẫu ngữ pháp thông dụng nhất, luyện bằng 256 câu, từ N5 lên N1 — 十級 tới 名人.",
+        img: "https://gametiengnhat.onhat.vn/favicon.svg",
+        color: "#c73e3a",
+      },
+    ],
+  },
+  // {
+  //   key: "ja-kids",
+  //   category: "kids",
+  //   icon: Baby,
+  //   lang: "ja",
+  //   subItems: [
+
+  //   ],
+  // },
+]

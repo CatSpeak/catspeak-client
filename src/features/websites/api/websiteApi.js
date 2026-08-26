@@ -1,18 +1,19 @@
-import { baseApi } from "@/store/api/baseApi";
+import { baseApi } from "@/store/api/baseApi"
+import { getWebsiteCount } from "../config/websitesData"
 
 export const websiteApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Mock fetcher: looks up a single resource by lang and id instead of hitting a real endpoint
     getWebsiteById: builder.query({
       queryFn: (params) => {
-        const id = typeof params === "object" ? params?.id : params;
-        const lang = typeof params === "object" ? params?.lang : undefined;
+        const id = typeof params === "object" ? params?.id : params
+        const lang = typeof params === "object" ? params?.lang : undefined
 
         let website = lang
           ? resources.find((item) => item.id === id && item.lang === lang)
-          : null;
+          : null
         if (!website) {
-          website = resources.find((item) => item.id === id);
+          website = resources.find((item) => item.id === id)
         }
 
         if (!website) {
@@ -25,29 +26,61 @@ export const websiteApi = baseApi.injectEndpoints({
                   : `Website with id "${id}" not found`,
               },
             },
-          };
+          }
         }
 
-        return { data: website };
+        return { data: website }
       },
       providesTags: (result, error, params) => {
-        const id = typeof params === "object" ? params?.id : params;
-        const lang = typeof params === "object" ? params?.lang : undefined;
-        return [{ type: "Website", id: lang ? `${lang}-${id}` : id }];
+        const id = typeof params === "object" ? params?.id : params
+        const lang = typeof params === "object" ? params?.lang : undefined
+        return [{ type: "Website", id: lang ? `${lang}-${id}` : id }]
+      },
+    }),
+
+    // Get count of websites by lang ("ja" | "zh" | "en") and optional category
+    getWebsiteCount: builder.query({
+      queryFn: (params) => {
+        let lang, category
+        if (typeof params === "object" && params !== null) {
+          lang = params.lang
+          category = params.category
+        } else if (typeof params === "string") {
+          lang = params
+        }
+        const count = getWebsiteCount(lang, category)
+        return { data: count }
+      },
+      providesTags: (result, error, params) => {
+        const lang = typeof params === "object" ? params?.lang : params
+        const category =
+          typeof params === "object" ? params?.category : undefined
+        return [
+          {
+            type: "Website",
+            id: `count-${lang || "all"}-${category || "all"}`,
+          },
+        ]
       },
     }),
 
     // Bonus: list resources
     getWebsites: builder.query({
       queryFn: () => {
-        return { data: resources };
+        return { data: resources }
       },
       providesTags: ["Website"],
     }),
   }),
-});
+})
 
-export const { useGetWebsiteByIdQuery, useGetWebsitesQuery } = websiteApi;
+export { getWebsiteCount }
+
+export const {
+  useGetWebsiteByIdQuery,
+  useGetWebsiteCountQuery,
+  useGetWebsitesQuery,
+} = websiteApi
 
 const resources = [
   // 1. Test trình độ tiếng Anh miễn phí
@@ -66,6 +99,46 @@ const resources = [
     id: "questsme",
     lang: "en",
     url: "https://play.questsme.com/",
+  },
+  {
+    id: "eflnet",
+    lang: "en",
+    url: "https://www.eflnet.com/",
+  },
+  {
+    id: "agenda-web",
+    lang: "en",
+    url: "https://agendaweb.org/",
+  },
+  {
+    id: "free-daily-english",
+    lang: "en",
+    url: "https://www.freedailyenglish.com/",
+  },
+  {
+    id: "esl-tests",
+    lang: "en",
+    url: "https://www.esl-tests.com/",
+  },
+  {
+    id: "english-maven",
+    lang: "en",
+    url: "https://www.englishmaven.org/",
+  },
+  {
+    id: "talkdrill",
+    lang: "en",
+    url: "https://www.talkdrill.com/",
+  },
+  {
+    id: "englishpage",
+    lang: "en",
+    url: "https://www.englishpage.com/",
+  },
+  {
+    id: "learnenglishfeelgood",
+    lang: "en",
+    url: "https://www.learnenglishfeelgood.com/",
   },
   // 3. Luyện nghe
   {
@@ -97,6 +170,11 @@ const resources = [
     id: "dailydictation",
     lang: "en",
     url: "https://dailydictation.com/",
+  },
+  {
+    id: "levelupesl",
+    lang: "en",
+    url: "https://www.levelupesl.com/",
   },
 
   // 4. Luyện ngữ pháp
@@ -139,6 +217,11 @@ const resources = [
     lang: "en",
     url: "https://www.howtopronounce.com/",
   },
+  {
+    id: "shadola",
+    lang: "en",
+    url: "https://shadola.com/english",
+  },
 
   // 7. Đọc tin tức theo trình độ
   {
@@ -150,6 +233,16 @@ const resources = [
     id: "breaking-news-english",
     lang: "en",
     url: "https://breakingnewsenglish.com/",
+  },
+  {
+    id: "read-in-levels",
+    lang: "en",
+    url: "https://readinlevels.com/",
+  },
+  {
+    id: "newslish",
+    lang: "en",
+    url: "https://www.newslish.com/",
   },
 
   // 8. Luyện thi IELTS/TOEFL
@@ -225,11 +318,6 @@ const resources = [
   },
   // 2. Luyện thi HSK miễn phí
   {
-    id: "improve-mandarin-hsk-practice-tests",
-    lang: "zh",
-    url: "https://improvemandarin.com/hsk-practice-test/",
-  },
-  {
     id: "mandarin-bean-hsk-test",
     lang: "zh",
     url: "https://mandarinbean.com/hsk-chinese-test-online/",
@@ -239,22 +327,12 @@ const resources = [
     lang: "zh",
     url: "https://hskmocktest.com/",
   },
-  {
-    id: "hsk-course-free-hsk-mock-tests",
-    lang: "zh",
-    url: "https://www.hskcourse.com/hsk-sample-test/",
-  },
 
   // 3. Nền tảng học tổng hợp miễn phí
   {
     id: "mandarin-bean",
     lang: "zh",
     url: "https://mandarinbean.com/",
-  },
-  {
-    id: "improve-mandarin-chinese-lessons",
-    lang: "zh",
-    url: "https://improvemandarin.com/chinese-lessons/",
   },
 
   // 4. Luyện nghe
@@ -292,11 +370,6 @@ const resources = [
   },
 
   // 6. Phát âm — Pinyin & Thanh điệu
-  {
-    id: "chinese-pronunciation-wiki",
-    lang: "zh",
-    url: "https://resources.allsetlearning.com/chinese/pronunciation/",
-  },
   {
     id: "ut-austin-pinyin-pronunciation-practice",
     lang: "zh",
@@ -343,6 +416,36 @@ const resources = [
     lang: "zh",
     url: "https://mandarinbean.com/",
   },
+  {
+    id: "pandaist",
+    lang: "zh",
+    url: "https://pandaist.com/",
+  },
+  {
+    id: "hskatlas",
+    lang: "zh",
+    url: "https://hskatlas.com/",
+  },
+  {
+    id: "hskheadlines",
+    lang: "zh",
+    url: "https://hskheadlines.com/",
+  },
+  {
+    id: "readchinese",
+    lang: "zh",
+    url: "https://www.readchinese.org/",
+  },
+  {
+    id: "realhsk",
+    lang: "zh",
+    url: "https://realhsk.com/",
+  },
+  {
+    id: "chinesehskreading",
+    lang: "zh",
+    url: "https://chinesehskreading.com/",
+  },
 
   // 11. Website tự học tiếng Trung nội địa (giao diện tiếng Việt)
   {
@@ -355,4 +458,80 @@ const resources = [
     lang: "zh",
     url: "https://tiengtrungthuonghai.vn/",
   },
-];
+
+  // --- Tiếng Nhật (ja) ---
+  // 1. Luyện thi JLPT
+  {
+    id: "on-jlpt",
+    lang: "ja",
+    url: "https://onjlpt.com/",
+  },
+
+  // 2. Nền tảng học tổng hợp
+  {
+    id: "mlc-japanese",
+    lang: "ja",
+    url: "https://www.mlcjapanese.co.jp/",
+  },
+
+  // 3. Luyện đọc hiểu & Dokkai
+
+  // 4. Ngữ pháp
+  {
+    id: "tufs-grammar-module",
+    lang: "ja",
+    url: "https://www.coelang.tufs.ac.jp/mt/ja/gmod/",
+  },
+
+  // 5. Luyện nghe
+  {
+    id: "nhk-world-japan",
+    lang: "ja",
+    url: "https://www3.nhk.or.jp/nhkworld/lesson/vi/lessons/",
+  },
+
+  // 6. Phát âm & Ngữ điệu
+  {
+    id: "ojad-search",
+    lang: "ja",
+    url: "https://www.gavo.t.u-tokyo.ac.jp/ojad/search",
+  },
+  {
+    id: "ojad-phrasing",
+    lang: "ja",
+    url: "https://www.gavo.t.u-tokyo.ac.jp/ojad/phrasing/index",
+  },
+
+  // 7. Từ vựng & Kanji
+  {
+    id: "kanjieasy",
+    lang: "ja",
+    url: "https://kanjieasy.vercel.app/",
+  },
+
+  // 8. Từ điển
+  {
+    id: "takoboto",
+    lang: "ja",
+    url: "https://takoboto.jp/?w=1362530",
+  },
+  {
+    id: "kanjipedia",
+    lang: "ja",
+    url: "https://www.kanjipedia.jp/",
+  },
+
+  // 9. Trò chơi / Games
+  {
+    id: "xe-tang-hoc-kanji",
+    lang: "ja",
+    url: "https://gametiengnhat.onhat.vn/?nhom=xe-tang-hoc-kanji#games",
+  },
+  {
+    id: "hansha-dojo",
+    lang: "ja",
+    url: "https://gametiengnhat.onhat.vn/games/hansha-dojo/",
+  },
+
+  // 10. Dành cho trẻ em / Nhập môn
+]

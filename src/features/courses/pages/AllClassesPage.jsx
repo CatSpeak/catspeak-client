@@ -4,12 +4,9 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import { useGetAllClassesQuery } from "@/store/api/coursesApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
-
+import { Breadcrumb, Pagination, Tabs } from "@/shared/components/ui/navigation"
 import ClassTable from "../components/ClassTable"
 import CourseTablePageHeader from "../components/CourseTablePageHeader"
-import CourseTabs from "../components/CourseTabs"
-import TablePagination from "../components/shared/TablePagination"
 import { usePaginatedSearch } from "../hooks/usePaginatedSearch"
 import { mapClassTableRow } from "../utils/courseTransforms"
 import { useTimezone } from "@/shared/hooks/useTimezone"
@@ -50,6 +47,7 @@ const AllClassesPage = () => {
       index,
       {
         studentsRatio: ac.studentsRatio,
+        free: c.free || "Miễn phí",
         tba: c.workspaceUi?.tba,
       },
       formatDate,
@@ -65,8 +63,8 @@ const AllClassesPage = () => {
     { value: "all", label: ac.tabAll || "All" },
     { value: "teaching", label: ac.tabTeaching || "Teaching" },
     { value: "open", label: ac.tabOpen || "Open Enrollment" },
-    { value: "not_started", label: ac.tabNotStarted || "Not Started" },
     { value: "archived", label: ac.tabArchived || "Archived" },
+    { value: "not_started", label: ac.tabNotStarted || "Coming Soon" },
   ]
 
   const handleTabChange = (tab) => {
@@ -106,12 +104,15 @@ const AllClassesPage = () => {
         onCreate={() => navigate("/workspace/classes/create-class")}
       />
 
-      <CourseTabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onChange={handleTabChange}
-        className="gap-6 border-b border-border pb-px"
-      />
+      <div className="w-full overflow-x-auto scrollbar-hidden -mb-2">
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          fullWidth={false}
+          className="min-w-max border-b border-border"
+        />
+      </div>
 
       {error && data !== undefined && (
         <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
@@ -136,13 +137,10 @@ const AllClassesPage = () => {
             onEdit={(item) => navigate(`/workspace/courses/edit-class/${encodeURIComponent(String(item.id))}`)}
           />
 
-          <TablePagination
-            currentPage={currentPage}
+          <Pagination
+            page={currentPage}
             totalPages={pagination.totalPages}
-            totalCount={pagination.totalItems}
-            limit={pagination.pageSize}
-            onPageChange={setCurrentPage}
-            t={t}
+            onChangePage={setCurrentPage}
           />
         </div>
       ) : (

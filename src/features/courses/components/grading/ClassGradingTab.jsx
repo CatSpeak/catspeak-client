@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useSearchParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import StudentAssignmentDetailView from "../assignments/StudentAssignmentDetailView"
 import AssignmentSubmissionsView from "../assignments/submissions/AssignmentSubmissionsView"
-import TablePagination from "../shared/TablePagination"
+import Pagination from "@/shared/components/ui/navigation/Pagination"
 import {
   Search,
   ChevronDown,
@@ -22,9 +22,13 @@ import {
   Check,
   MoreVertical,
 } from "lucide-react"
+import dayjs from "dayjs"
 import { toast } from "react-hot-toast"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { ensureDate } from "@/shared/utils/dateUtils"
+import Dropdown from "@/shared/components/ui/Dropdown"
 import {
+  useGetClassDetailQuery,
   useGetTeacherAssignmentsQuery,
   useGetStudentAssignmentsQuery,
   useGetMyAssignmentSubmissionQuery,
@@ -46,6 +50,7 @@ import {
 } from "../../utils/quizUtils"
 
 const STUDENT_PAGE_SIZE = 10
+const TEACHER_PAGE_SIZE = 9
 const interpolate = (template, values) => Object.entries(values).reduce(
   (message, [key, value]) => message.replace(`{{${key}}}`, String(value)),
   template || "",
@@ -679,8 +684,6 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
 
   const statusStr = String(quiz.status || "").toLowerCase()
   const isDraft = statusStr === "draft"
-  const isOpen = statusStr === "open"
-  const isUpcoming = statusStr === "upcoming"
   const isClosed = statusStr === "closed"
 
   const dateObj = quiz.closeTime || quiz.dueDate || quiz.openTime
@@ -704,22 +707,32 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
 
   const subtitle = quiz.subtitle || quiz.category || quiz.className || quiz.courseName || cg.badgeQuiz
 
-  const handlePublishDirectly = async (e) => {
-    e.stopPropagation()
+  const handlePublishDirectly = async () => {
     if (publishGuardRef.current) return
-
     publishGuardRef.current = true
     try {
       await publishTeacherQuiz({ classId, quizId: quiz.id }).unwrap()
       toast.success(cg.quizPublishedToast)
     } catch (err) {
-      toast.error(getQuizErrorMessage(
-        err,
-        language,
-        cg.quizPublishErrorToast,
-      ))
+      toast.error(getQuizErrorMessage(err, language, cg.quizPublishErrorToast))
     } finally {
       publishGuardRef.current = false
+    }
+  }
+
+  const menuOptions = [
+    { value: "edit", label: cg.editBtn || "Chỉnh sửa", icon: <Pencil size={14} /> },
+    ...(isDraft ? [{ value: "publish", label: cg.publishQuiz || "Xuất bản", icon: <Check size={14} /> }] : []),
+    { value: "view", label: cg.viewQuizDetails || "Xem chi tiết", icon: <Eye size={14} /> },
+  ]
+
+  const handleMenuAction = (action) => {
+    if (action === "edit") {
+      navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}/edit`)
+    } else if (action === "publish") {
+      handlePublishDirectly()
+    } else if (action === "view") {
+      navigate(`/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`)
     }
   }
 
@@ -817,6 +830,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
         </div>
 
         {/* Title */}
+        {/* Title */}
         <h4
           onClick={() => navigate(
             `/workspace/courses/class/${encodeURIComponent(classId)}/quiz/${encodeURIComponent(quiz.id)}`
@@ -824,7 +838,7 @@ const QuizCard = ({ quiz, classId, cg, language, navigate }) => {
           className="text-base font-extrabold text-gray-900 leading-snug line-clamp-2 mt-2 group-hover:text-[#990011] transition-colors cursor-pointer"
           title={quiz.name || quiz.title || cg.untitledQuiz}
         >
-          {quiz.name || quiz.title || cg.untitledQuiz}
+          {title}
         </h4>
 
         {/* Subtitle */}
@@ -921,12 +935,66 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const [contentType, setContentType] = useState("all") // "all" | "assignments" | "quizzes"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
   const [studentPage, setStudentPage] = useState(1)
+  const [teacherPage, setTeacherPage] = useState(1)
   const [nowMs, setNowMs] = useState(() => Date.now())
 
   useEffect(() => {
     const timerId = window.setInterval(() => setNowMs(Date.now()), 30_000)
     return () => window.clearInterval(timerId)
   }, [])
+
+  const teacherStatusOptions = useMemo(() => [
+    { value: "all", label: cg.statusFilter || "Trạng thái bài nộp" },
+    { value: "published", label: cg.badgePublished || "ĐÃ ĐĂNG" },
+    { value: "draft", label: cg.badgeDraft || "NHÁP" },
+    { value: "closed", label: cg.badgeClosed || "ĐÃ ĐÓNG" },
+  ], [cg])
+
+  const teacherSortOptions = useMemo(() => [
+    { value: "newest", label: cg.sortNewest || "Sắp xếp: Mới nhất" },
+    { value: "oldest", label: cg.sortOldest || "Sắp xếp: Cũ nhất" },
+  ], [cg])
+
+  const studentStatusOptions = useMemo(() => [
+    { value: "all", label: cg.statusAllOptions || "Tất cả trạng thái" },
+    { value: "pending", label: cg.statusPendingOption || "Chờ nộp bài" },
+    { value: "submitted", label: cg.statusSubmittedOption || "Đã nộp" },
+    { value: "graded", label: cg.statusGradedOption || "Đã chấm" },
+    { value: "overdue", label: cg.statusOverdueOption || "Quá hạn" },
+  ], [cg])
+
+  const studentSortOptions = useMemo(() => [
+    { value: "dueSoon", label: cg.sortDueSoon || "Sắp đến hạn" },
+    { value: "newest", label: cg.sortNewest || "Mới nhất" },
+    { value: "oldest", label: cg.sortOldest || "Cũ nhất" },
+  ], [cg])
+
+  // Fetch Class Detail for accurate enrolled student count
+  const { currentData: classDetail } = useGetClassDetailQuery(classId, { skip: !classId })
+
+  const classEnrolledCount = useMemo(() => {
+    if (!classDetail) return 0
+    const rawList = [
+      classDetail.students,
+      classDetail.members,
+      classDetail.enrollments,
+    ].find(Array.isArray)
+    if (rawList) {
+      const studentOnly = rawList.filter((person) => {
+        const role = String(person?.role ?? "").toLowerCase()
+        return role !== "teacher" && role !== "instructor"
+      })
+      if (studentOnly.length > 0) return studentOnly.length
+      if (rawList.length > 0) return rawList.length
+    }
+    const directCount = Number(
+      classDetail.studentCount
+      ?? classDetail.enrolledStudents
+      ?? classDetail.enrolledCount
+      ?? 0
+    )
+    return Number.isFinite(directCount) && directCount >= 0 ? directCount : 0
+  }, [classDetail])
 
   // Fetch Assignments
   const teacherAssignmentsQuery = useGetTeacherAssignmentsQuery(
@@ -1044,6 +1112,19 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
 
   const showAssignments = contentType === "all" || contentType === "assignments"
   const showQuizzes = contentType === "all" || contentType === "quizzes"
+
+  const teacherCombinedItems = useMemo(() => {
+    const items = []
+    if (showQuizzes) {
+      filteredQuizzes.forEach((quiz) => items.push({ type: "quiz", data: quiz, createdAt: getTimestamp(quiz.createdAt) }))
+    }
+    if (showAssignments) {
+      filteredAssignments.forEach((assignment) => items.push({ type: "assignment", data: assignment, createdAt: getTimestamp(assignment.createdAt) }))
+    }
+    return items.sort((a, b) => {
+      return sortBy === "newest" ? b.createdAt - a.createdAt : a.createdAt - b.createdAt
+    })
+  }, [showQuizzes, showAssignments, filteredQuizzes, filteredAssignments, sortBy])
 
   // Student Metrics Computation
   const totalAssignmentsCount = assignments.length
@@ -1188,21 +1269,25 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   const selectContentType = (value) => {
     setContentType(value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   const selectStatusOption = (value) => {
     setStatusFilter(value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   const selectSortOption = (value) => {
     setSortBy(value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value)
     setStudentPage(1)
+    setTeacherPage(1)
   }
 
   // Deep links are backed by detail endpoints; avoid fetching the full list first.
@@ -1400,33 +1485,27 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
             </div>
 
             {/* Status Filter */}
-            <div className="relative">
-              <select
+            <div className="w-full sm:w-auto">
+              <Dropdown
+                options={studentStatusOptions}
                 value={statusFilter}
-                onChange={(e) => selectStatusOption(e.target.value)}
-                className="bg-gray-50 border border-border rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
-              >
-                <option value="all">{cg.statusAllOptions}</option>
-                <option value="pending">{cg.statusPendingOption}</option>
-                <option value="submitted">{cg.statusSubmittedOption}</option>
-                <option value="graded">{cg.statusGradedOption}</option>
-                <option value="overdue">{cg.statusOverdueOption}</option>
-              </select>
-              <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                onChange={(val) => selectStatusOption(val)}
+                placeholder={cg.statusAllOptions || "Tất cả trạng thái"}
+                triggerClassName="w-full sm:!min-w-[150px] text-xs font-bold"
+                dropdownClassName="min-w-[170px]"
+              />
             </div>
 
             {/* Sort Selection */}
-            <div className="relative">
-              <select
+            <div className="w-full sm:w-auto">
+              <Dropdown
+                options={studentSortOptions}
                 value={sortBy}
-                onChange={(e) => selectSortOption(e.target.value)}
-                className="bg-gray-50 border border-border rounded-xl pl-3 pr-8 py-2 text-xs font-bold text-gray-700 appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
-              >
-                <option value="dueSoon">{cg.sortDueSoon}</option>
-                <option value="newest">{cg.sortNewest}</option>
-                <option value="oldest">{cg.sortOldest}</option>
-              </select>
-              <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                onChange={(val) => selectSortOption(val)}
+                placeholder={cg.sortDueSoon || "Sắp xếp"}
+                triggerClassName="w-full sm:!min-w-[140px] text-xs font-bold"
+                dropdownClassName="min-w-[160px]"
+              />
             </div>
 
             {/* View Mode Toggle Switcher */}
@@ -1588,7 +1667,14 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
   }
 
   // ─── Main View: Teacher Cards Grid ───
-  const hasNoItems = (showAssignments ? filteredAssignments.length : 0) === 0 && (showQuizzes ? filteredQuizzes.length : 0) === 0
+  const totalTeacherItems = teacherCombinedItems.length
+  const teacherTotalPages = Math.max(1, Math.ceil(totalTeacherItems / TEACHER_PAGE_SIZE))
+  const activeTeacherPage = Math.min(teacherPage, teacherTotalPages)
+  const visibleTeacherItems = teacherCombinedItems.slice(
+    (activeTeacherPage - 1) * TEACHER_PAGE_SIZE,
+    activeTeacherPage * TEACHER_PAGE_SIZE,
+  )
+  const hasNoItems = totalTeacherItems === 0
 
   return (
     <div className="flex flex-col gap-5">
@@ -1644,31 +1730,27 @@ const ClassGradingTab = ({ id: classId, isStudent }) => {
         {/* Right: Filters */}
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
           {/* Status Filter */}
-          <div className="relative w-full sm:w-auto min-w-[150px]">
-            <select
+          <div className="w-full sm:w-auto">
+            <Dropdown
+              options={teacherStatusOptions}
               value={statusFilter}
-              onChange={(e) => selectStatusOption(e.target.value)}
-              className="w-full bg-white border border-border rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
-            >
-              <option value="all">{cg.statusFilter}</option>
-              <option value="published">{cg.badgePublished}</option>
-              <option value="draft">{cg.badgeDraft}</option>
-              <option value="closed">{cg.badgeClosed}</option>
-            </select>
-            <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              onChange={(val) => selectStatusOption(val)}
+              placeholder={cg.statusFilter || "Trạng thái bài nộp"}
+              triggerClassName="w-full sm:!min-w-[160px] text-xs font-bold"
+              dropdownClassName="min-w-[180px]"
+            />
           </div>
 
           {/* Sort Selection */}
-          <div className="relative w-full sm:w-auto min-w-[150px]">
-            <select
+          <div className="w-full sm:w-auto">
+            <Dropdown
+              options={teacherSortOptions}
               value={sortBy}
-              onChange={(e) => selectSortOption(e.target.value)}
-              className="w-full bg-white border border-border rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold text-gray-700 appearance-none focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-[#990011] cursor-pointer transition-all"
-            >
-              <option value="newest">{cg.sortNewest}</option>
-              <option value="oldest">{cg.sortOldest}</option>
-            </select>
-            <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              onChange={(val) => selectSortOption(val)}
+              placeholder={cg.sortNewest || "Sắp xếp"}
+              triggerClassName="w-full sm:!min-w-[150px] text-xs font-bold"
+              dropdownClassName="min-w-[170px]"
+            />
           </div>
         </div>
 

@@ -93,12 +93,14 @@ export default {
       searchPlaceholder: "搜索班级...",
       courseLabel: "课程：",
       exploreMore: "探索课程",
+      reviewed: "已评价",
       reviewedLabel: "已评价",
       reviewNow: "立即评价",
       completedLabel: "已完成",
     },
     review: {
       title: "班级评价",
+      subtitle: "分享您的体验，帮助学习社区成长。",
       shareExperience: "分享你的体验",
       optional: "（可选）",
       detailRating: "详细评分",
@@ -141,6 +143,7 @@ export default {
         later: "稍后再说",
         review: "评价",
         share: "立即分享",
+        completedDate: "完成日期",
       },
     },
     documents: {

@@ -2,7 +2,11 @@ import React, { useState, useMemo } from "react";
 import { Compass } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink";
-import { websites, RESOURCE_CATEGORIES } from "../config/websitesData";
+import {
+  websites,
+  RESOURCE_CATEGORIES,
+  getWebsiteCount,
+} from "../config/websitesData";
 import ResourceSearchInput from "../components/ResourceSearchInput";
 import ChipFilter from "@/shared/components/ChipFilter";
 import EmptyState from "@/shared/components/ui/indicators/EmptyState";
@@ -35,11 +39,20 @@ const ResourcesHubPage = () => {
     if (!currentLang) return "en";
     if (currentLang.startsWith("zh")) return "zh";
     if (currentLang.startsWith("vi")) return "vi";
+    if (currentLang.startsWith("ja")) return "ja";
     return "en";
   }, [currentLang]);
 
   const heroTitles = useMemo(() => {
     const baseTitle = t.websites?.hero?.title || "Resource Hub";
+    if (activeLang === "ja") {
+      return [
+        baseTitle,
+        "AI学習ツール",
+        "模擬試験シミュレーター",
+        "辞書・総合ポータル",
+      ];
+    }
     if (activeLang === "zh") {
       return [baseTitle, "AI 语言工具", "互动测试模拟器", "在线词典与平台"];
     }
@@ -103,30 +116,24 @@ const ResourcesHubPage = () => {
     });
   }, [allResourceItems, activeLang, selectedCategory, appliedSearchQuery]);
 
-  // Compute category counts for active language
-  const categoryCounts = useMemo(() => {
-    const counts = { all: 0 };
-    allResourceItems.forEach((item) => {
-      if (activeLang && item.groupLang && item.groupLang !== activeLang) return;
-      counts.all = (counts.all || 0) + 1;
-      counts[item.category] = (counts[item.category] || 0) + 1;
-    });
-    return counts;
-  }, [allResourceItems, activeLang]);
-
-  // Compute category items for ChipFilter
+  // Compute category items with counts for ChipFilter
   const categoryItems = useMemo(() => {
     return Object.entries(RESOURCE_CATEGORIES)
-      .filter(
-        ([catKey]) => catKey === "all" || (categoryCounts[catKey] || 0) > 0,
-      )
-      .map(([catKey, catMeta]) => ({
-        key: catKey,
-        label:
-          t.websites?.category?.[catKey] ||
-          (activeLang === "zh" ? catMeta.labelZh : catMeta.labelEn),
-      }));
-  }, [categoryCounts, t.websites?.category, activeLang]);
+      .map(([catKey, catMeta]) => {
+        const count = getWebsiteCount(
+          activeLang,
+          catKey === "all" ? undefined : catKey
+        );
+        return {
+          key: catKey,
+          label:
+            t.websites?.category?.[catKey] ||
+            (activeLang === "zh" ? catMeta.labelZh : catMeta.labelEn),
+          count,
+        };
+      })
+      .filter((item) => item.key === "all" || item.count > 0);
+  }, [activeLang, t.websites?.category]);
 
   return (
     <FluentAnimation className="min-h-screen bg-primaryBg flex flex-col p-0 sm:p-6 gap-4 sm:gap-6">

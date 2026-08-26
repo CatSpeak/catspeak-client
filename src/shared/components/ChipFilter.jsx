@@ -27,7 +27,7 @@ const ChipFilter = ({
 
   const containerClasses = className
     ? className
-    : `flex items-center gap-2 overflow-x-auto scrollbar-hidden -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 ${
+    : `flex flex-nowrap items-center gap-2 overflow-x-auto scrollbar-hidden -mx-4 px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 ${
         wrapDesktop ? "lg:flex-wrap" : ""
       }`
 
@@ -42,10 +42,20 @@ const ChipFilter = ({
             key={itemKey}
             variant={isSelected ? "primary" : "secondary"}
             onClick={() => onChange?.(itemKey)}
-            className="shrink-0"
+            className="shrink-0 flex-nowrap whitespace-nowrap"
           >
-            {item.label}
-            {typeof item.count === "number" ? ` (${item.count})` : ""}
+            <span className="whitespace-nowrap shrink-0">{item.label}</span>
+            {typeof item.count === "number" && (
+              <span
+                className={`ml-1 min-w-5 h-5 px-1.5 shrink-0 inline-flex items-center justify-center text-xs font-semibold rounded-full transition-colors whitespace-nowrap ${
+                  isSelected
+                    ? "bg-white/25 text-white"
+                    : "bg-slate-100 text-slate-600 group-hover:bg-slate-200"
+                }`}
+              >
+                {item.count}
+              </span>
+            )}
           </PillButton>
         )
       })}

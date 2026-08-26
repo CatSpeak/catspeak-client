@@ -125,6 +125,9 @@ const VoucherDetailPage = lazy(
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
 );
+const AllTeachingTasksPage = lazy(
+  () => import("@/features/courses/pages/AllTeachingTasksPage"),
+);
 const AllClassesPage = lazy(
   () => import("@/features/courses/pages/AllClassesPage"),
 );
@@ -250,17 +253,17 @@ const routesConfig = [
           {
             path: "resources",
             element: (
-              <AuthGuard>
+              <LazyRoute>
                 <ResourcesHubPage />
-              </AuthGuard>
+              </LazyRoute>
             ),
           },
           {
             path: "resources/:id",
             element: (
-              <AuthGuard>
+              <LazyRoute>
                 <WebsitePage />
-              </AuthGuard>
+              </LazyRoute>
             ),
           },
           { path: "*", element: <PageNotFound /> },
@@ -492,6 +495,16 @@ const routesConfig = [
                 element: (
                   <RoleGuard allowedRoles={["Teacher"]}>
                     <LazyRoute>
+                      <AllTeachingTasksPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "teaching-tasks/overview",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
                       <WorkspaceCalendarPage />
                     </LazyRoute>
                   </RoleGuard>
@@ -500,17 +513,21 @@ const routesConfig = [
               {
                 path: "materials",
                 element: (
-                  <LazyRoute>
-                    <TeachingMaterialPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <TeachingMaterialPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "materials/:folderId",
                 element: (
-                  <LazyRoute>
-                    <TeachingMaterialPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <TeachingMaterialPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {

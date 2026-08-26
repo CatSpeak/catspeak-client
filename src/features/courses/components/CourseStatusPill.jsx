@@ -10,27 +10,41 @@ const getCourseStatusLabel = (status, labels = {}) => {
 const CourseStatusPill = ({ status, label, labels, className = "" }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
+  const upperStatus = String(status || "").toUpperCase()
   const localizedLabels = {
-    LIVE: c.liveStatus,
-    TEACHING: c.teachingStatus,
-    OPEN: c.openEnrollmentStatus,
-    OPEN_ENROLLMENT: c.openEnrollmentStatus,
-    OPEN_FOR_ENROLLMENT: c.openEnrollmentStatus,
-    UPCOMING: c.upcomingStatus,
-    NOT_STARTED: c.notStartedStatus,
-    ARCHIVED: c.archivedStatus || c.archive,
-    COMPLETED: c.completedStatus || c.student?.completed,
-    default: c.statusUnknown,
+    LIVE: c.liveStatus || "Live",
+    TEACHING: c.teachingStatus || "Teaching",
+    OPEN: c.openEnrollmentStatus || "Open Enrollment",
+    OPEN_ENROLLMENT: c.openEnrollmentStatus || "Open Enrollment",
+    OPEN_FOR_ENROLLMENT: c.openEnrollmentStatus || "Open Enrollment",
+    UPCOMING: c.upcomingStatus || "Upcoming",
+    NOT_STARTED: c.notStartedStatus || "Not Started",
+    ARCHIVED: c.archivedStatus || c.archive || "Archived",
+    COMPLETED: c.completedStatus || c.student?.completed || "Completed",
+    default: c.statusUnknown || "Status",
     ...labels,
   }
-  const config = CLASS_STATUS_CONFIG[status] || {
+
+  const statusConfigMap = {
+    TEACHING: { bgClass: "bg-[#DCFCE7]", textClass: "text-[#16A34A]" },
+    OPEN: { bgClass: "bg-[#DBEAFE]", textClass: "text-[#2563EB]" },
+    OPEN_ENROLLMENT: { bgClass: "bg-[#DBEAFE]", textClass: "text-[#2563EB]" },
+    OPEN_FOR_ENROLLMENT: { bgClass: "bg-[#DBEAFE]", textClass: "text-[#2563EB]" },
+    LIVE: { bgClass: "bg-[#FEE2E2]", textClass: "text-[#EF4444]" },
+    ARCHIVED: { bgClass: "bg-[#F3F4F6]", textClass: "text-[#6B7280]" },
+    FINISHED: { bgClass: "bg-[#F3F4F6]", textClass: "text-[#6B7280]" },
+    NOT_STARTED: { bgClass: "bg-[#FEF3C7]", textClass: "text-[#D97706]" },
+    UPCOMING: { bgClass: "bg-[#EEF2FF]", textClass: "text-[#4F46E5]" },
+  }
+
+  const config = statusConfigMap[upperStatus] || CLASS_STATUS_CONFIG[upperStatus] || {
     bgClass: "bg-[#F3F4F6]",
     textClass: "text-[#6B7280]",
   }
 
   return (
-    <span className={`inline-flex items-center text-[10px] font-black px-3 py-1 rounded-full ${config.bgClass} ${config.textClass} ${className}`}>
-      {label || getCourseStatusLabel(status, localizedLabels)}
+    <span className={`h-6 inline-flex items-center justify-center whitespace-nowrap shrink-0 w-fit text-xs font-semibold px-2.5 rounded-full leading-none ${config.bgClass} ${config.textClass} ${className}`}>
+      {label || getCourseStatusLabel(upperStatus, localizedLabels)}
     </span>
   )
 }

@@ -8,6 +8,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { ServerCrash } from "lucide-react"
 import toast from "react-hot-toast"
 import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
+import { flushPendingAutoCrashReport } from "@/shared/utils/telemetry/autoCrashSync"
 
 const POLLING_INTERVAL_MS = 5000 // 5 seconds
 
@@ -29,6 +30,7 @@ const ServerDownScreen = () => {
     const isHealthy = await checkIsServerHealthy(0)
     if (isHealthy) {
       dispatch(setServerUp())
+      flushPendingAutoCrashReport()
       toast.success(t?.auth?.serverConnectionRestored || "Server connection restored!", { duration: 4000 })
     }
   }, [dispatch, t])

@@ -313,3 +313,15 @@ input[type="password"]::-webkit-reveal {
 .tox .tox-toolbar-overlord {
   box-shadow: none !important;
 }
+
+/* Hide number input default spinners across all browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

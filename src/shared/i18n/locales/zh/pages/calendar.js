@@ -22,6 +22,7 @@ export default {
   filterByDate: "按日期筛选",
   clearFilter: "清除筛选",
   eventFilter: "事件筛选",
+  eventDetail: "活动详情",
   filterReset: "重置",
   filterByEventType: "按事件类型筛选",
   noTeachingSchedule: "无教学安排",
@@ -250,5 +251,9 @@ export default {
   workspaceSingleEvent: "单次活动",
   workspaceOccurrence: "场次",
   workspaceOccurrences: "场次",
+  eventType: "日程类型",
+  classOrCourse: "班级/课程",
+  selectClass: "选择班级",
+  prevWeek: "上周",
+  nextWeek: "下周",
 };
-

@@ -48,6 +48,15 @@ export const storiesApi = socialApi.injectEndpoints({
       }),
       invalidatesTags: ["Stories", "MyStories"],
     }),
+
+    // Report a story
+    reportStory: builder.mutation({
+      query: (storyId) => ({
+        url: `/stories/${storyId}/report`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Stories"],
+    }),
   }),
 })
 
@@ -57,4 +66,5 @@ export const {
   useGetMyStoriesQuery,
   useInteractWithStoryMutation,
   useDeleteStoryMutation,
+  useReportStoryMutation
 } = storiesApi

@@ -1,0 +1,48 @@
+export default {
+  bankAccounts: {
+    title: "支払い受取用銀行口座",
+    addButton: "口座を追加",
+    addFirstAccount: "今すぐ口座を追加",
+    loading: "銀行口座を読み込み中...",
+    emptyTitle: "銀行口座はまだ追加されていません",
+    emptyDescription:
+      "銀行口座を追加すると、システムから直接支払いを受け取れます。",
+    verified: "確認済み",
+    unverified: "未確認",
+    accountNumber: "口座番号",
+    accountHolder: "口座名義人",
+    deleteTooltip: "口座を削除",
+    deleteTitle: "銀行口座を削除",
+    deleteConfirmMessage:
+      "銀行口座 {bank}（{accountNumber}）を削除してもよろしいですか？",
+    deleteConfirmBtn: "口座を削除",
+    cancelBtn: "キャンセル",
+    defaultBankFallback: "銀行",
+    errorSetDefault: "デフォルト設定に失敗しました",
+    errorDelete: "銀行口座の削除に失敗しました",
+    instructorProfileRequiredTitle: "講師プロフィールが必要です",
+    instructorProfileRequiredDesc:
+      "銀行口座を連携して支払い報酬を受け取るには、承認済みの講師プロフィールが必要です。",
+    registerInstructorBtn: "今すぐ講師として登録",
+    errorLoadList: "銀行口座リストの読み込みに失敗しました",
+    retryBtn: "再試行",
+    modal: {
+      title: "銀行口座を追加",
+      searchPlaceholder: "銀行名またはコードを検索...",
+      notFound: '「{query}」に一致する結果が見つかりません',
+      noBanks: "銀行リストがありません",
+      backBtn: "戻る",
+      addBtn: "口座を追加",
+      accountNumberLabel: "銀行口座番号",
+      accountNumberPlaceholder: "口座番号を入力（例: 1028681234）",
+      verifiedOwnerTitle: "確認済みの口座名義人名",
+      helperErrorText:
+        "現在、口座名義人名を自動で照会できません。口座の追加はそのまま続行できます。",
+      defaultCheckboxLabel: "デフォルトの支払い受取口座に設定",
+      errorSelectBank: "銀行を選択してください",
+      errorMinLength: "口座番号は6桁以上である必要があります",
+      errorAdd: "銀行口座の追加に失敗しました",
+      autoVerifyError: "口座番号を確認できませんでした。もう一度確認してください。",
+    },
+  },
+}
