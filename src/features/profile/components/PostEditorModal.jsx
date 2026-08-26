@@ -15,6 +15,7 @@ import Dropdown from "@/shared/components/ui/Dropdown"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Modal from "@/shared/components/ui/Modal"
+import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import PostEditorPreviews from "./PostEditorPreviews"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -87,8 +88,8 @@ const PostEditorModal = ({
   })
   const [files, setFiles] = useState([])
   const imageInputRef = useRef(null)
-  // const videoInputRef = useRef(null)
-  // const documentInputRef = useRef(null)
+  const videoInputRef = useRef(null)
+  const documentInputRef = useRef(null)
 
   // Track files in a ref to clean up object URLs on unmount
   const filesRef = useRef(files)
@@ -189,6 +190,8 @@ const PostEditorModal = ({
   }
 
   const handleCancelClick = () => {
+    if (isSubmitting) return
+
     // Clean up object URLs
     files.forEach((item) => {
       if (item.previewUrl) {
@@ -211,7 +214,7 @@ const PostEditorModal = ({
       .replace(/&nbsp;/g, " ")
       .trim()
 
-    if (!strippedContent && files.length === 0 && existingMedias.length === 0) {
+    if (!strippedContent) {
       validationErrors.Content =
         t.profile?.post?.editor?.contentRequired ||
         "Nội dung bài viết không được để trống."
@@ -226,7 +229,10 @@ const PostEditorModal = ({
 
     const formData = new FormData()
     formData.append("Title", title.trim() || "Untitled")
-    formData.append("Slug", (isEditMode && initialSlug) ? initialSlug : "post-" + Date.now())
+    formData.append(
+      "Slug",
+      isEditMode && initialSlug ? initialSlug : "post-" + Date.now(),
+    )
     formData.append("Content", content)
     formData.append("Privacy", privacy)
     formData.append("LanguageCommunity", languageCommunity)
@@ -248,26 +254,35 @@ const PostEditorModal = ({
       console.error("Post submit error:", err)
       // Parse RFC 9110 / ASP.NET validation errors
       const apiErrors = err?.data?.errors || err?.errors
+      let hasFieldErrors = false
+
       if (apiErrors && typeof apiErrors === "object") {
         const fieldErrors = {}
         for (const [key, msgs] of Object.entries(apiErrors)) {
           fieldErrors[key] = Array.isArray(msgs) ? msgs[0] : msgs
         }
-        setErrors(fieldErrors)
+        if (Object.keys(fieldErrors).length > 0) {
+          setErrors(fieldErrors)
+          hasFieldErrors = true
+        }
       }
-      const msg =
-        err?.data?.title ||
-        err?.data?.message ||
-        err?.message ||
-        t.profile?.post?.editor?.submitError ||
-        "Đã có lỗi xảy ra. Vui lòng kiểm tra lại thông tin."
-      setSubmitError(msg)
+
+      // Only display the top banner if there are no specific field-level validation errors
+      if (!hasFieldErrors) {
+        const msg =
+          err?.data?.title ||
+          err?.data?.message ||
+          err?.message ||
+          t.profile?.post?.editor?.submitError ||
+          "Đã có lỗi xảy ra. Vui lòng kiểm tra lại thông tin."
+        setSubmitError(msg)
+      }
     }
   }
 
   const renderFooter = () => (
-    <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-2">
+    <div className="flex items-center justify-between w-full flex-wrap gap-2">
+      <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
         <input
           type="file"
           multiple
@@ -281,27 +296,47 @@ const PostEditorModal = ({
           variant="secondary-no-outline"
           textColor="#16a34a"
           startIcon={<Image className="w-5 h-5 text-[#16a34a]" />}
-          disabled={isSubmitting}
         >
           {t.profile?.post?.editor?.photo || "Ảnh"}
+        </PillButton>
+
+        <input
+          type="file"
+          multiple
+          accept="video/*"
+          className="hidden"
+          ref={videoInputRef}
+          onChange={handleFileChange}
+        />
+        <PillButton
+          onClick={() => videoInputRef.current?.click()}
+          variant="secondary-no-outline"
+          textColor="#e11d48"
+          startIcon={<Video className="w-5 h-5 text-[#e11d48]" />}
+        >
+          {t.profile?.post?.editor?.video || "Video"}
+        </PillButton>
+
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.txt,.csv"
+          className="hidden"
+          ref={documentInputRef}
+          onChange={handleFileChange}
+        />
+        <PillButton
+          onClick={() => documentInputRef.current?.click()}
+          variant="secondary-no-outline"
+          textColor="#2563eb"
+          startIcon={<FileText className="w-5 h-5 text-[#2563eb]" />}
+        >
+          {t.profile?.post?.editor?.document || "Tài liệu"}
         </PillButton>
       </div>
 
       <div className="flex items-center gap-2">
-        <PillButton
-          onClick={handleCancelClick}
-          variant="secondary"
-          disabled={isSubmitting}
-        >
-          {t.profile?.post?.editor?.cancel || "Hủy"}
-        </PillButton>
-        <PillButton
-          onClick={handleSubmit}
-          variant="primary"
-          loading={isSubmitting}
-          loadingText={t.profile?.post?.editor?.processing || "Đang xử lý..."}
-          disabled={isSubmitting}
-        >
+        <PillButton onClick={handleSubmit} variant="primary">
           {isEditMode
             ? t.profile?.post?.editor?.saveChanges || "Lưu thay đổi"
             : t.profile?.post?.editor?.post || "Đăng"}
@@ -314,13 +349,29 @@ const PostEditorModal = ({
     <Modal
       open={isOpen}
       onClose={handleCancelClick}
-      title={isEditMode
-        ? t.profile?.post?.editor?.editTitle || "Chỉnh sửa bài viết"
-        : t.profile?.post?.editor?.createTitle || "Tạo bài viết"}
-      className="md:max-w-2xl w-full bg-white"
+      title={
+        isEditMode
+          ? t.profile?.post?.editor?.editTitle || "Chỉnh sửa bài viết"
+          : t.profile?.post?.editor?.createTitle || "Tạo bài viết"
+      }
+      className="md:max-w-2xl w-full bg-white relative"
+      bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
       fullScreenOnMobile={true}
       footer={renderFooter()}
     >
+      {/* Full Modal Loading Overlay */}
+      {isSubmitting && (
+        <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-[2px] flex flex-col items-center justify-center gap-3">
+          <LoadingSpinner
+            text={
+              isEditMode
+                ? t.profile?.post?.editor?.savingChanges || "Đang lưu thay đổi..."
+                : t.profile?.post?.editor?.uploadingPost || "Đang đăng bài viết..."
+            }
+          />
+        </div>
+      )}
+
       <div className="flex flex-col gap-6">
         {submitError && (
           <div className="flex items-start gap-2.5 p-3.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl text-red-600 dark:text-red-400 text-sm animate-shake">
@@ -349,7 +400,10 @@ const PostEditorModal = ({
                   />
                 }
               >
-                {selectedOption ? selectedOption.label : t.profile?.post?.editor?.selectPrivacy || "Chọn quyền riêng tư"}
+                {selectedOption
+                  ? selectedOption.label
+                  : t.profile?.post?.editor?.selectPrivacy ||
+                    "Chọn quyền riêng tư"}
               </PillButton>
             )}
           />
@@ -357,19 +411,26 @@ const PostEditorModal = ({
 
         <TextInput
           label={t.profile?.post?.editor?.titleLabel || "Tiêu đề bài viết"}
+          placeholder={
+            t.profile?.post?.editor?.titlePlaceholder ||
+            "Nhập tiêu đề bài viết..."
+          }
           value={title}
           onChange={handleTitleChange}
           error={errors.Title || errors.title}
           variant="square"
-          floatingLabel
         />
 
         <div className="flex flex-col gap-1">
+          <span className="text-xs">
+            {t.profile?.post?.editor?.contentLabel || "Nội dung bài viết"}
+            <span className="text-red-500 ml-0.5">*</span>
+          </span>
           <div
-            className={`rounded-lg overflow-hidden transition-all duration-200 ${
+            className={`transition-all duration-200 ${
               errors.Content || errors.content
-                ? "border border-red-500 ring-1 ring-red-500"
-                : "border border-transparent"
+                ? "[&_.tox-tinymce]:!border-red-500 [&_.tox-tinymce]:!ring-1 [&_.tox-tinymce]:!ring-red-500"
+                : ""
             }`}
           >
             <Editor
@@ -384,7 +445,8 @@ const PostEditorModal = ({
                 toolbar:
                   "bold italic underline strikethrough | emoticons link | bullist numlist",
                 placeholder: isEditMode
-                  ? t.profile?.post?.editor?.editPlaceholder || "Chỉnh sửa bài viết..."
+                  ? t.profile?.post?.editor?.editPlaceholder ||
+                    "Chỉnh sửa bài viết..."
                   : t.profile?.post?.editor?.placeholder || "Bạn đang nghĩ gì?",
                 skin: "oxide",
                 setup: (editor) => {
@@ -400,12 +462,19 @@ const PostEditorModal = ({
           )}
         </div>
 
-        <PostEditorPreviews
-          files={files}
-          existingMedias={existingMedias}
-          removeFile={removeFile}
-          removeExistingMedia={removeExistingMedia}
-        />
+        {(files.length > 0 || existingMedias.length > 0) && (
+          <div className="flex flex-col gap-2">
+            <span className="text-xs">
+              {t.profile?.post?.editor?.attachmentsLabel || "Tệp đính kèm"}
+            </span>
+            <PostEditorPreviews
+              files={files}
+              existingMedias={existingMedias}
+              removeFile={removeFile}
+              removeExistingMedia={removeExistingMedia}
+            />
+          </div>
+        )}
       </div>
     </Modal>
   )

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState, useLayoutEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ThumbsUp, Heart, Smile } from "lucide-react";
 import IconButton from "@/shared/components/ui/buttons/IconButton";
@@ -68,18 +68,56 @@ const ReactionsPopover = ({
   placement = "center",
   color,
 }) => {
-  const placementClass =
-    placement === "left"
-      ? "left-0 origin-bottom-left"
-      : placement === "right"
-        ? "right-0 origin-bottom-right"
-        : "left-1/2 -translate-x-1/2 origin-bottom";
+  const popoverRef = useRef(null);
+  const [shiftX, setShiftX] = useState(0);
+
+  // Smart viewport edge detection & auto-clamping
+  useLayoutEffect(() => {
+    if (!show) {
+      setShiftX(0);
+      return;
+    }
+
+    const updatePosition = () => {
+      const el = popoverRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const margin = 8;
+
+      let offset = 0;
+      if (rect.left < margin) {
+        offset = margin - rect.left;
+      } else if (rect.right > viewportWidth - margin) {
+        offset = viewportWidth - margin - rect.right;
+      }
+
+      setShiftX(offset);
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    return () => window.removeEventListener("resize", updatePosition);
+  }, [show]);
+
+  const getPlacementClass = () => {
+    if (placement === "left") return "left-0 origin-bottom-left";
+    if (placement === "right") return "right-0 origin-bottom-right";
+    return "left-1/2 -translate-x-1/2 origin-bottom";
+  };
+
+  const dynamicTransform =
+    placement === "center" && shiftX
+      ? `translateX(calc(-50% + ${shiftX}px))`
+      : undefined;
 
   return (
     <AnimatePresence>
       {show && (
         <div
-          className={`absolute bottom-full mb-1 z-20 group-hover/reactions:block ${placementClass} ${className}`}
+          ref={popoverRef}
+          className={`absolute bottom-full mb-1 z-20 group-hover/reactions:block ${getPlacementClass()} ${className}`}
+          style={dynamicTransform ? { transform: dynamicTransform } : undefined}
         >
           <FluentAnimation direction="up" distance={10} duration={0.2} exit>
             <div className="bg-white rounded-full shadow-lg border border-border p-1 flex items-center">

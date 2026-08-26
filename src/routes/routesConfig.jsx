@@ -43,6 +43,7 @@ import CreatePostPage from "@/features/courses/components/lecture-hall/pages/Cre
 import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage";
 import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage";
 
+import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton";
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
@@ -899,7 +900,7 @@ const routesConfig = [
               {
                 path: "profile/:accountId?",
                 element: (
-                  <LazyRoute>
+                  <LazyRoute fallback={<ProfilePageSkeleton />}>
                     <Profile />
                   </LazyRoute>
                 ),
@@ -920,7 +921,7 @@ const routesConfig = [
           {
             path: "profile/:accountId?",
             element: (
-              <LazyRoute>
+              <LazyRoute fallback={<ProfilePageSkeleton />}>
                 <Profile />
               </LazyRoute>
             ),

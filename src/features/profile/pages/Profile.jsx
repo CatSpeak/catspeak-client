@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react"
-import { useParams, useNavigate, useLocation, useSearchParams } from "react-router-dom"
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import {
-  useGetUserProfileQuery,
-  useGetPublicProfileQuery,
-} from "@/store/api/userApi"
-import { useProfileState } from "@/features/settings/hooks/useProfileState"
-import { useProfileMutations } from "@/features/settings/hooks/useProfileMutations"
+import { useGetPublicProfileQuery } from "@/store/api/userApi"
 import {
   useGetFriendsQuery,
   useGetFollowersQuery,
@@ -16,11 +16,12 @@ import {
 
 import SocialProfileHeader from "../components/SocialProfileHeader"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import ProfilePageSkeleton from "../components/ProfilePageSkeleton"
 import ProfileHomeTab from "../components/ProfileHomeTab"
 import ProfileMediaTab from "../components/ProfileMediaTab"
 import ProfileFriendsTab from "../components/ProfileFriendsTab"
 import ProfileMaterialsTab from "../components/ProfileMaterialsTab"
-import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
 import CompletedClass from "../components/CompletedClass"
 
 const Profile = () => {
@@ -39,21 +40,20 @@ const Profile = () => {
   useEffect(() => {
     if (!urlAccountId && user?.accountId) {
       const isWorkspace = location.pathname.startsWith("/workspace")
-      navigate(`${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}${location.search}`, { replace: true })
+      navigate(
+        `${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}${location.search}`,
+        { replace: true },
+      )
     }
   }, [urlAccountId, user, navigate, location.pathname, location.search])
 
-  // Fetch private profile if own profile, otherwise skip
-  const { data: privateProfileData, isLoading: loadingPrivate } =
-    useGetUserProfileQuery(undefined, { skip: !isOwnProfile })
-  // Fetch public profile if viewing someone else
-  const { data: publicProfileResponse, isLoading: loadingPublic } =
-    useGetPublicProfileQuery(targetAccountId, { skip: isOwnProfile })
+  // Single centralized query for social profile (/api/Account/{id})
+  const { data: publicProfileResponse, isLoading } = useGetPublicProfileQuery(
+    targetAccountId,
+    { skip: !targetAccountId },
+  )
 
-  // Normalize profile data (handle both raw object and wrapped response { data: ... })
-  const rawProfileData = isOwnProfile ? privateProfileData : publicProfileResponse
-  const profile = rawProfileData?.data ?? rawProfileData ?? null
-  const isLoading = isOwnProfile ? loadingPrivate : loadingPublic
+  const profile = publicProfileResponse?.data ?? publicProfileResponse ?? null
 
   // Fetch Friendship Data
   const { data: friendsResponse } = useGetFriendsQuery(targetAccountId, {
@@ -80,11 +80,11 @@ const Profile = () => {
   const [searchParams] = useSearchParams()
   const currentToken = searchParams.get("sharedMaterialToken")
 
-  const [activeTab, setActiveTab] = useState(currentToken ? "documents" : "home")
+  const [activeTab, setActiveTab] = useState(
+    currentToken ? "documents" : "home",
+  )
   const [friendsSubTab, setFriendsSubTab] = useState(null)
 
-  const stateHooks = useProfileState(profile)
-  const mutationHooks = useProfileMutations(t, profile, stateHooks)
   const [prevToken, setPrevToken] = useState(currentToken)
   if (currentToken !== prevToken) {
     setPrevToken(currentToken)
@@ -93,35 +93,7 @@ const Profile = () => {
     }
   }
 
-  const {
-    formData,
-    editingField,
-    errors,
-    isOtpModalOpen,
-    setIsOtpModalOpen,
-    handleEdit,
-    handleCancel,
-    handleChange,
-  } = stateHooks
-
-  const {
-    isUpdating,
-    isUpdatingPhone,
-    isSendingOtp,
-    isSendingPhoneOtp,
-    handleSave,
-    handleOtpVerify,
-    handleOtpResend,
-    handleCountryChange,
-    handleUpdateAvatarFile,
-  } = mutationHooks
-
-  if (isLoading) return <div>Loading...</div>
-
-  // Use avatarImageUrl as the primary avatar for the profile
-  const displayAvatarUrl = isOwnProfile
-    ? formData.avatarImageUrl
-    : profile?.avatarImageUrl
+  if (isLoading) return <ProfilePageSkeleton />
 
   const tabs = [
     { id: "home", label: t.profile?.tabs?.home || "Nhà" },
@@ -132,28 +104,23 @@ const Profile = () => {
     },
     { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
     { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },
-    { id: "completedClass", label: t.profile?.tabs?.completedClass || "Lớp học đã hoàn thành" }
+    {
+      id: "completedClass",
+      label: t.profile?.tabs?.completedClass || "Lớp học đã hoàn thành",
+    },
   ]
-
-  // Prepare normalized data for header
-  const headerData = isOwnProfile
-    ? {
-      ...profile,
-      ...formData,
-      location: formData.location || formData.address || profile?.location || profile?.address,
-    }
-    : {
-      ...profile,
-      location: profile?.location || profile?.address,
-    }
 
   return (
     <div className="w-full min-h-[calc(100vh-70px)] bg-primaryBg">
-      <div className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10">
+      <FluentAnimation
+        duration={0.28}
+        direction="up"
+        distance={12}
+        className="w-full max-w-[1200px] mx-auto flex flex-col relative z-10"
+      >
         {/* Top Header Section */}
         <SocialProfileHeader
-          user={profile}
-          formData={headerData}
+          profile={profile}
           t={t}
           targetAccountId={targetAccountId}
           isOwnProfile={isOwnProfile}
@@ -201,37 +168,14 @@ const Profile = () => {
               isOwnProfile={isOwnProfile}
             />
           )}
-          {
-            activeTab === "completedClass" && (
-              <CompletedClass
-                targetAccountId={targetAccountId}
-                isOwnProfile={isOwnProfile}
-              />
-            )
-          }
+          {activeTab === "completedClass" && (
+            <CompletedClass
+              targetAccountId={targetAccountId}
+              isOwnProfile={isOwnProfile}
+            />
+          )}
         </div>
-
-        <ProfileOtpModal
-          open={isOtpModalOpen}
-          onClose={() => setIsOtpModalOpen(false)}
-          email={profile?.email}
-          title={
-            editingField === "phoneNumber"
-              ? t.profile?.personalInfo?.verifyPhoneTitle ||
-              "Xác nhận thay đổi số điện thoại"
-              : editingField === "email"
-                ? t.profile?.personalInfo?.verifyEmailTitle ||
-                "Xác nhận thay đổi Email"
-                : t.profile?.personalInfo?.verifyChangesTitle ||
-                "Xác minh thay đổi"
-          }
-          onVerify={handleOtpVerify}
-          isVerifying={isUpdating || isUpdatingPhone}
-          onResend={handleOtpResend}
-          isResending={isSendingOtp || isSendingPhoneOtp}
-          t={t}
-        />
-      </div>
+      </FluentAnimation>
     </div>
   )
 }

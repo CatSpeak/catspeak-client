@@ -299,7 +299,8 @@ input[type="password"]::-webkit-reveal {
 /* TinyMCE Editor Custom Styling */
 .tox.tox-tinymce {
   border: 1px solid hsl(var(--border)) !important;
-  border-radius: 1rem;
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
 }
 
 .tox .tox-editor-header {

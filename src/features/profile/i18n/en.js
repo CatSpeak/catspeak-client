@@ -154,6 +154,9 @@ export default {
     post: {
       editor: {
         titleLabel: "Post title",
+        titlePlaceholder: "Enter post title...",
+        contentLabel: "Post content",
+        attachmentsLabel: "Attachments",
         editTitle: "Edit Post",
         createTitle: "Create Post",
         placeholder: "What's on your mind?",
@@ -161,11 +164,14 @@ export default {
         cancel: "Cancel",
         post: "Post",
         saveChanges: "Save Changes",
+        savingChanges: "Saving changes...",
+        uploadingPost: "Posting...",
         processing: "Processing...",
         selectPrivacy: "Select privacy",
         photo: "Photo",
         video: "Video",
         document: "Document",
+        contentRequired: "Post content cannot be empty.",
         privacy: {
           public: "Public",
           friendsOnly: "Friends",

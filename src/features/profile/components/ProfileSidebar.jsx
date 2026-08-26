@@ -1,10 +1,14 @@
-import React from "react"
+import React, { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import Avatar from "@/shared/components/ui/Avatar"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import ListItem from "@/shared/components/ui/ListItem"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
-import { useGetFriendRecommendationsQuery } from "../../../store/api/social/friendshipApi"
+import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
+import {
+  useGetFriendRecommendationsQuery,
+  useSendFriendRequestMutation,
+} from "../../../store/api/social/friendshipApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getUserRoleLabel = (user, t) => {
@@ -24,11 +28,17 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useLanguage()
+  const [sentRequests, setSentRequests] = useState(new Set())
+  const [loadingIds, setLoadingIds] = useState(new Set())
+
   const { data: recData, isLoading: isLoadingRecs } =
     useGetFriendRecommendationsQuery(
       { Page: 1, PageSize: 5 },
       { skip: !isOwnProfile },
     )
+
+  const [sendFriendRequest] = useSendFriendRequestMutation()
+
   if (!isOwnProfile) return null
 
   const recommendations = Array.isArray(recData?.data)
@@ -37,13 +47,36 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
       ? recData
       : []
 
+  const handleAddFriend = async (e, accountId) => {
+    e.stopPropagation()
+    setLoadingIds((prev) => new Set(prev).add(accountId))
+    setSentRequests((prev) => new Set(prev).add(accountId))
+
+    try {
+      await sendFriendRequest(accountId).unwrap()
+    } catch (err) {
+      console.error("Failed to send friend request:", err)
+      setSentRequests((prev) => {
+        const next = new Set(prev)
+        next.delete(accountId)
+        return next
+      })
+    } finally {
+      setLoadingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(accountId)
+        return next
+      })
+    }
+  }
+
   return (
     <div className="lg:col-span-1">
       {/* Suggested Friends Block */}
       <FluentCard padding="p-0" className="overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-4 sm:p-6 flex items-center justify-between">
-          <h2 className="text-lg font-bold">
+        <div className="h-14 px-4 sm:px-6 flex items-center justify-between">
+          <h2 className="font-bold">
             {t.profile?.sidebar?.suggestedFriends || "Đề xuất bạn bè"}
           </h2>
         </div>
@@ -51,12 +84,29 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
         {/* Body / ListItems */}
         <div className="flex flex-col gap-1 px-1">
           {isLoadingRecs ? (
-            <div className="p-4 sm:p-6 text-sm text-gray-500">
-              {t.profile?.sidebar?.loading || "Đang tải đề xuất..."}
+            <div className="flex flex-col gap-1 px-1 py-1">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-[72px] px-4 flex items-center gap-4 rounded-xl"
+                >
+                  <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                  <div className="flex flex-col gap-2 flex-1 min-w-0">
+                    <Skeleton className="h-4 w-28 rounded" />
+                    <Skeleton className="h-3 w-16 rounded" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : recommendations.length === 0 ? (
-            <div className="p-4 sm:p-6 text-sm text-gray-500">
-              {t.profile?.sidebar?.noSuggestions || "Không có đề xuất nào."}
+            <div className="py-6 px-4">
+              <EmptyState
+                message={
+                  t.profile?.sidebar?.noSuggestions || "Không có đề xuất nào."
+                }
+                variant="simple"
+                className="p-0"
+              />
             </div>
           ) : (
             recommendations.map((user) => (
@@ -78,6 +128,21 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
                     name={user.nickname || user.username}
                     accountId={user.accountId}
                   />
+                }
+                rightContent={
+                  sentRequests.has(user.accountId) ? (
+                    <PillButton variant="secondary" disabled>
+                      {t.profile?.social?.requestSent || "Đã gửi"}
+                    </PillButton>
+                  ) : (
+                    <PillButton
+                      variant="primary"
+                      onClick={(e) => handleAddFriend(e, user.accountId)}
+                      loading={loadingIds.has(user.accountId)}
+                    >
+                      {t.profile?.social?.addFriend || "Kết bạn"}
+                    </PillButton>
+                  )
                 }
               >
                 <span className="truncate">

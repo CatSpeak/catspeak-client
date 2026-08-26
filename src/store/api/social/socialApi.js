@@ -32,6 +32,8 @@ export const socialApi = createApi({
   baseQuery: createReauthBaseQuery(socialRawBaseQuery),
   tagTypes: [
     "Post",
+    "PostComment",
+    "PostMedia",
     "Conversations",
     "Messages",
     "Friendship",
