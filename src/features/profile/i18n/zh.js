@@ -82,6 +82,8 @@ export default {
     home: {
       whatOnYourMind: "你在想什么？",
       photo: "图片",
+      video: "视频",
+      document: "文件",
       noPosts: "暂无帖子。",
     },
     media: {
@@ -192,11 +194,14 @@ export default {
         },
         edit: "编辑",
         delete: "删除帖子",
+        views: "次浏览",
       },
       actions: {
         share: "分享",
       },
+      deleteTitle: "删除帖子",
       deleteConfirm: "确定要删除这篇帖子吗？",
+      deleteBtn: "删除",
       document: "文件",
       seeMore: "查看更多",
       showLess: "收起",
