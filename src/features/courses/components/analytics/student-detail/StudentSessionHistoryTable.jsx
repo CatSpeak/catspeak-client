@@ -20,6 +20,15 @@ const formatDate = (isoStr) => {
   return `${dd}/${mm}/${yyyy}`
 }
 
+const formatTime = (isoStr) => {
+  if (!isoStr) return ""
+  const d = new Date(isoStr)
+  if (isNaN(d.getTime())) return ""
+  const hh = String(d.getHours()).padStart(2, "0")
+  const min = String(d.getMinutes()).padStart(2, "0")
+  return `${hh}:${min}`
+}
+
 const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 6 }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
@@ -50,8 +59,8 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
         <table className="w-full text-left text-sm border-collapse min-w-[720px]">
           <thead>
             <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
-              <th className="py-3 px-4 font-semibold">{sd.colSession || "Buổi"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colDate || "Ngày"}</th>
+              <th className="py-3 px-4 font-semibold">{sd.colEndTime || "Giờ kết thúc"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colDuration || "Tổng thời lượng nói"}</th>
               <th className="py-3 px-4 font-semibold text-blue-600">{sd.colSpeechPercent || "% Phát biểu"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colWords || "Số từ"}</th>
@@ -64,21 +73,24 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
             {visibleSessions.map((sess) => {
               const isMet = sess.isMet
               const durationSecs = sess.durationSeconds ?? (sess.durationMinutes ? sess.durationMinutes * 60 : 0)
-              const dateDisplay = formatDate(sess.createdAt || sess.created_at || sess.date)
+              const createdIso = sess.createdAt || sess.created_at || sess.date
+              const dateDisplay = formatDate(createdIso)
+              const timeDisplay = formatTime(createdIso)
+
               return (
                 <tr
-                  key={sess.sessionNumber}
+                  key={sess.sessionId || sess.session_id || sess.sessionNumber || dateDisplay}
                   onClick={() => onSessionClick && onSessionClick(sess)}
                   className="hover:bg-gray-50/70 transition-colors cursor-pointer group"
                 >
-                  {/* Buổi */}
-                  <td className="py-3.5 px-4 font-semibold text-gray-900">
-                    {sess.formattedSession || `#${sess.sessionNumber}`}
+                  {/* Ngày */}
+                  <td className="py-3.5 px-4 font-bold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">
+                    {dateDisplay || "—"}
                   </td>
 
-                  {/* Ngày */}
-                  <td className="py-3.5 px-4 text-gray-800 font-medium">
-                    {dateDisplay}
+                  {/* Giờ kết thúc */}
+                  <td className="py-3.5 px-4 font-medium text-gray-700 text-sm">
+                    {timeDisplay || "—"}
                   </td>
 
                   {/* Tổng thời lượng nói */}

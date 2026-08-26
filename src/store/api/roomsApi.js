@@ -705,6 +705,10 @@ export const roomsApi = baseApi.injectEndpoints({
           room_id: raw.room_id ?? raw.roomId ?? null,
           classId: raw.class_id ?? raw.classId ?? null,
           class_id: raw.class_id ?? raw.classId ?? null,
+          createdAt: raw.created_at ?? raw.createdAt ?? null,
+          created_at: raw.created_at ?? raw.createdAt ?? null,
+          updatedAt: raw.updated_at ?? raw.updatedAt ?? null,
+          updated_at: raw.updated_at ?? raw.updatedAt ?? null,
           hasAnySpeechData: raw.has_any_speech_data ?? raw.hasAnySpeechData ?? false,
           overview: {
             totalWords: raw.overview?.total_words ?? raw.overview?.totalWords ?? 0,

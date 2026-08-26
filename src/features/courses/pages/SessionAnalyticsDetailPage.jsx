@@ -1,9 +1,7 @@
 import React from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import {
-  useGetClassSpeakingAnalyticsQuery,
-  useGetSessionSpeakingStatsQuery,
-} from "@/store/api/roomsApi"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { useGetSessionSpeakingStatsQuery } from "@/store/api/roomsApi"
 import { useGetClassDetailQuery } from "@/store/api/coursesApi"
 import {
   SessionDetailHeader,
@@ -15,19 +13,16 @@ import ClassAnalyticsNotice from "../components/analytics/class-detail/ClassAnal
 const SessionAnalyticsDetailPage = () => {
   const { classId, sessionId } = useParams()
   const navigate = useNavigate()
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const sessT = c.analytics?.sessionDetail || {}
 
   // 1. Fetch official class metadata from Main API (catspeak-api)
-  const { data: mainClassDetail } = useGetClassDetailQuery(classId || "", {
+  const { data: mainClassDetail, isLoading: isClassLoading } = useGetClassDetailQuery(classId || "", {
     skip: !classId,
   })
 
-  // 2. Fetch class-wide speaking analytics (contains session list with topics, dates, etc.)
-  const { data: classAnalyticsData, isLoading: isClassLoading } = useGetClassSpeakingAnalyticsQuery(
-    classId || "",
-    { skip: !classId }
-  )
-
-  // 3. Fetch specific session speaking statistics from AI API
+  // 2. Fetch specific session speaking statistics from AI API
   const {
     data: sessionStatsData,
     isLoading: isSessionLoading,
@@ -38,19 +33,8 @@ const SessionAnalyticsDetailPage = () => {
 
   const isLoading = isClassLoading || isSessionLoading
 
-  // Find matching session in class session list
-  const matchingSession = (classAnalyticsData?.sessions || []).find(
-    (s) =>
-      s.sessionId === sessionId ||
-      s.session_id === sessionId ||
-      String(s.sessionNumber) === String(sessionId)
-  )
-
-  // Resolve students list
-  const rawParticipants =
-    sessionStatsData?.participants?.length > 0
-      ? sessionStatsData.participants
-      : matchingSession?.studentsDetail || []
+  // Resolve students list from session speech stats
+  const rawParticipants = sessionStatsData?.participants || []
 
   const enrolledStudents =
     mainClassDetail?.students ||
@@ -76,15 +60,11 @@ const SessionAnalyticsDetailPage = () => {
       const matchedRoster = enrolledStudents.find(
         (s) => String(s.accountId ?? s.id ?? s.userId) === String(accId)
       )
-      const matchedAnalytics = (classAnalyticsData?.students || []).find(
-        (s) => String(s.accountId ?? s.id) === String(accId)
-      )
 
       const resolvedName =
         matchedRoster?.name ||
         matchedRoster?.fullName ||
         matchedRoster?.studentName ||
-        matchedAnalytics?.name ||
         p.name ||
         `Student ${accId || ""}`
 
@@ -101,25 +81,17 @@ const SessionAnalyticsDetailPage = () => {
       }
     })
 
-  // Build unified session data object
+  // Build unified session data object (self-contained from sessionStatsData)
   const sessionData = {
-    sessionId: sessionId || sessionStatsData?.sessionId || matchingSession?.sessionId || "",
-    sessionNumber: matchingSession?.sessionNumber ?? 1,
-    title: matchingSession?.title || `Buổi ${matchingSession?.sessionNumber ?? 1}`,
-    date: matchingSession?.date || "",
-    startTime: matchingSession?.startTime || matchingSession?.start_time || "",
-    endTime: matchingSession?.endTime || matchingSession?.end_time || "",
+    sessionId: sessionId || sessionStatsData?.sessionId || "",
+    createdAt: sessionStatsData?.createdAt || sessionStatsData?.created_at || null,
+    updatedAt: sessionStatsData?.updatedAt || sessionStatsData?.updated_at || null,
     teacherSpeechPercent:
-      sessionStatsData?.teacherTalkRatio?.teacherPercent ??
-      matchingSession?.teacherSpeechPercent ??
-      45,
+      sessionStatsData?.teacherTalkRatio?.teacherPercent ?? 45,
     studentSpeechPercent:
-      sessionStatsData?.teacherTalkRatio?.studentPercent ??
-      matchingSession?.studentSpeechPercent ??
-      55,
+      sessionStatsData?.teacherTalkRatio?.studentPercent ?? 55,
     teacherStatus:
-      sessionStatsData?.teacherTalkRatio?.status ??
-      "ideal",
+      sessionStatsData?.teacherTalkRatio?.status ?? "ideal",
     totalWords:
       sessionStatsData?.overview?.totalStudentWords ??
       participants.reduce((acc, p) => acc + (p.words || 0), 0) ??
@@ -139,11 +111,9 @@ const SessionAnalyticsDetailPage = () => {
     studentCount:
       participants.length ||
       sessionStatsData?.overview?.studentCount ||
-      matchingSession?.studentCount ||
       0,
     lowSpeakingCount:
       sessionStatsData?.fairShare?.lowSpeakingCount ??
-      matchingSession?.lowSpeakingCount ??
       participants.filter((p) => !p.isMet).length ??
       0,
     participants,
@@ -155,16 +125,14 @@ const SessionAnalyticsDetailPage = () => {
     className:
       mainClassDetail?.className ||
       mainClassDetail?.name ||
-      classAnalyticsData?.className ||
       classId ||
       "Lớp học",
     courseName:
       mainClassDetail?.courseName ||
-      classAnalyticsData?.courseName ||
       "",
     teacherName:
       mainClassDetail?.teacherName ||
-      classAnalyticsData?.teacherName ||
+      mainClassDetail?.instructorName ||
       "Giảng viên",
   }
 
@@ -183,7 +151,7 @@ const SessionAnalyticsDetailPage = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3">
         <div className="w-8 h-8 border-3 border-gray-200 border-t-[#16a34a] rounded-full animate-spin" />
-        <p className="text-sm font-medium text-gray-500">Đang tải dữ liệu phân tích buổi học...</p>
+        <p className="text-sm font-medium text-gray-500">{sessT.loading || "Đang tải dữ liệu phân tích buổi học..."}</p>
       </div>
     )
   }
@@ -206,10 +174,10 @@ const SessionAnalyticsDetailPage = () => {
       <div className="flex flex-col bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs overflow-hidden">
         <div className="mb-4">
           <h3 className="text-base font-bold text-gray-900">
-            Dữ liệu phát biểu học viên
+            {sessT.tableTitle || "Dữ liệu phát biểu học viên"}
           </h3>
           <p className="text-xs text-gray-500">
-            Thống kê chi tiết thời lượng, số từ và trạng thái phát biểu của từng học viên trong buổi học.
+            {sessT.tableDesc || "Thống kê chi tiết thời lượng, số từ và trạng thái phát biểu của từng học viên trong buổi học."}
           </p>
         </div>
 

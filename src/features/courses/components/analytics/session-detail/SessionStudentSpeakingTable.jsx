@@ -1,5 +1,6 @@
 import React from "react"
 import { ChevronRight } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const formatDuration = (seconds) => {
   if (!seconds || seconds <= 0) return "00:00"
@@ -13,6 +14,10 @@ const SessionStudentSpeakingTable = ({
   participants = [],
   onSelectStudent,
 }) => {
+  const { t } = useLanguage()
+  const c = t.courses || {}
+  const sessT = c.analytics?.sessionDetail || {}
+
   const studentList = participants.filter((p) => {
     return !(
       p.isTeacher === true ||
@@ -29,13 +34,13 @@ const SessionStudentSpeakingTable = ({
     if (isMet) {
       return (
         <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-[#e6f7ef] text-[#107c41]">
-          ✓ Đạt
+          {sessT.statusMet || "✓ Đạt"}
         </span>
       )
     }
     return (
       <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold bg-[#fef3c7] text-[#b45309]">
-        Chưa đạt
+        {sessT.statusUnmet || "Chưa đạt"}
       </span>
     )
   }
@@ -53,12 +58,12 @@ const SessionStudentSpeakingTable = ({
         <table className="w-full text-left text-sm border-collapse min-w-[650px]">
           <thead>
             <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
-              <th className="py-3 px-4 font-semibold">Học viên</th>
-              <th className="py-3 px-4 font-semibold text-blue-600">% Phát biểu (STB)</th>
-              <th className="py-3 px-4 font-semibold">Thời lượng nói</th>
-              <th className="py-3 px-4 font-semibold">Số từ</th>
-              <th className="py-3 px-4 font-semibold">Tốc độ nói</th>
-              <th className="py-3 px-4 font-semibold">Trạng thái</th>
+              <th className="py-3 px-4 font-semibold">{sessT.colStudent || "Học viên"}</th>
+              <th className="py-3 px-4 font-semibold text-blue-600">{sessT.colSpeechPercent || "% Phát biểu (STB)"}</th>
+              <th className="py-3 px-4 font-semibold">{sessT.colSpeakingDuration || "Thời lượng nói"}</th>
+              <th className="py-3 px-4 font-semibold">{sessT.colWords || "Số từ"}</th>
+              <th className="py-3 px-4 font-semibold">{sessT.colPace || "Tốc độ nói"}</th>
+              <th className="py-3 px-4 font-semibold">{sessT.colStatus || "Trạng thái"}</th>
               <th className="py-3 px-2 text-right w-10"></th>
             </tr>
           </thead>
@@ -66,7 +71,7 @@ const SessionStudentSpeakingTable = ({
             {studentList.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-8 text-center text-sm text-gray-500">
-                  Chưa có dữ liệu phát biểu của học viên trong buổi học này.
+                  {sessT.noStudentData || "Chưa có dữ liệu phát biểu của học viên trong buổi học này."}
                 </td>
               </tr>
             ) : (
@@ -119,7 +124,7 @@ const SessionStudentSpeakingTable = ({
 
                     {/* Số từ */}
                     <td className="py-3.5 px-4 font-semibold text-gray-800 text-sm tabular-nums">
-                      {words.toLocaleString()} <span className="text-xs font-normal text-gray-500">từ</span>
+                      {words.toLocaleString()} <span className="text-xs font-normal text-gray-500">{sessT.wordsUnit || "từ"}</span>
                     </td>
 
                     {/* Tốc độ nói (WPM) */}

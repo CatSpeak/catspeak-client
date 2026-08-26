@@ -225,7 +225,7 @@ const ClassAnalyticsDetailPage = () => {
               sessions={classData.sessions}
               teacherName={classData.teacherName}
               onSelectSession={(session) => {
-                const sessId = session.sessionId || session.session_id || session.sessionNumber
+                const sessId = session.sessionId || session.session_id
                 if (sessId) {
                   navigate(
                     `/workspace/analytics/class/${encodeURIComponent(

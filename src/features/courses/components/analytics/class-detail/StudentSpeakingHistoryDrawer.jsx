@@ -87,7 +87,7 @@ const StudentSpeakingHistoryDrawer = ({ student, open, onClose, thresholdRate = 
             const isMet = sess.percent >= thresholdRate
             return (
               <div
-                key={sess.sessionNumber}
+                key={sess.sessionId || sess.session_id || sess.sessionNumber || sess.date}
                 className="p-3 rounded-xl border border-gray-100 hover:border-gray-200 bg-white hover:bg-gray-50/60 transition-all flex items-center justify-between gap-3 text-xs"
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -101,10 +101,7 @@ const StudentSpeakingHistoryDrawer = ({ student, open, onClose, thresholdRate = 
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-gray-900">
-                        {cd.session || "Buổi"} {sess.sessionNumber}
-                      </span>
-                      <span className="text-[11px] text-gray-400">
-                        {sess.date}
+                        {sess.date ? `${cd.session || "Buổi học"} · ${sess.date}` : (cd.session || "Buổi học")}
                       </span>
                     </div>
                     <span className="text-[11px] text-gray-500 truncate">

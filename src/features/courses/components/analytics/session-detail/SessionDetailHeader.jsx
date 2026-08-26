@@ -27,10 +27,15 @@ const SessionDetailHeader = ({ sessionData, classData }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
   const cd = c.analytics?.classDetail || {}
+  const sessT = c.analytics?.sessionDetail || {}
 
   const classId = classData?.classId ?? classData?.id
-  const className = classData?.className || classData?.courseName || "Chi tiết lớp học"
-  const sessionNum = sessionData?.sessionNumber ?? 1
+  const className = classData?.className || classData?.courseName || (cd.breadcrumbClass || "Chi tiết lớp học")
+
+  const createdIso = sessionData?.createdAt || sessionData?.created_at
+  const dateDisplay = formatDate(createdIso)
+  const timeDisplay = formatTime(createdIso)
+  const sessionName = [dateDisplay, timeDisplay].filter(Boolean).join(" · ") || (sessT.sessionDetail || "Chi tiết buổi học")
 
   const breadcrumbItems = [
     { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
@@ -46,35 +51,19 @@ const SessionDetailHeader = ({ sessionData, classData }) => {
         }
       },
     },
-    { label: `Buổi ${sessionNum}` },
+    { label: sessionName },
   ]
-
-  const createdIso = sessionData?.createdAt || sessionData?.created_at
-  const updatedIso = sessionData?.updatedAt || sessionData?.updated_at
-  const dateDisplay = formatDate(createdIso)
-  const startTime = formatTime(createdIso)
-  const endTime = formatTime(updatedIso)
-  const timeRange = [startTime, endTime].filter(Boolean).join(" – ")
-  const subtitleParts = [
-    dateDisplay,
-    timeRange,
-  ].filter(Boolean)
 
   return (
     <div className="flex flex-col gap-3">
       {/* Breadcrumbs */}
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Title & Subtitle */}
+      {/* Title */}
       <div className="flex flex-col gap-1 mt-1">
         <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-tight">
-          Buổi {sessionNum}
+          {sessionName}
         </h1>
-        {subtitleParts.length > 0 && (
-          <p className="text-xs sm:text-sm text-gray-500 font-medium">
-            {subtitleParts.join(" · ")}
-          </p>
-        )}
       </div>
     </div>
   )

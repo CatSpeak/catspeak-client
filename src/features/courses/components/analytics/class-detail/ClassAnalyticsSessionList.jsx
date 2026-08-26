@@ -63,11 +63,11 @@ const ClassAnalyticsSessionList = ({
         <table className="w-full text-left text-sm border-collapse min-w-[650px]">
           <thead>
             <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
-              <th className="py-3 px-4 font-semibold">{cd.session || "Buổi"}</th>
-              <th className="py-3 px-4 font-semibold">Ngày & Giờ</th>
-              <th className="py-3 px-4 font-semibold text-blue-600">Tỷ lệ GV / HV</th>
-              <th className="py-3 px-4 font-semibold">STB TB</th>
-              <th className="py-3 px-4 font-semibold">Trạng thái</th>
+              <th className="py-3 px-4 font-semibold">{cd.colDate || "Ngày"}</th>
+              <th className="py-3 px-4 font-semibold">{cd.colEndTime || "Giờ kết thúc"}</th>
+              <th className="py-3 px-4 font-semibold text-blue-600">{cd.colRatio || "Tỷ lệ GV / HV"}</th>
+              <th className="py-3 px-4 font-semibold">{cd.colAvgStb || "STB TB"}</th>
+              <th className="py-3 px-4 font-semibold">{cd.colStatus || "Trạng thái"}</th>
               <th className="py-3 px-4 text-right"></th>
             </tr>
           </thead>
@@ -75,53 +75,42 @@ const ClassAnalyticsSessionList = ({
             {sessions.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-8 text-center text-sm text-gray-500">
-                  Chưa có dữ liệu buổi học nào được ghi nhận.
+                  {cd.noSessions || "Chưa có dữ liệu buổi học nào được ghi nhận."}
                 </td>
               </tr>
             ) : (
               visibleSessions.map((session) => {
-                const sessionNum = session.sessionNumber ?? 1
                 const teacherPercent = session.teacherSpeechPercent ?? 0
                 const studentPercent = session.studentSpeechPercent ?? 0
                 const avgStb = session.avgStbScore ?? 0
                 const createdIso = session.createdAt || session.created_at
-                const updatedIso = session.updatedAt || session.updated_at
                 const dateDisplay = formatDate(createdIso)
-                const startTime = formatTime(createdIso)
-                const endTime = formatTime(updatedIso)
-                const timeRange = [startTime, endTime].filter(Boolean).join("–")
+                const timeDisplay = formatTime(createdIso)
 
                 return (
                   <tr
-                    key={session.sessionNumber || session.sessionId}
+                    key={session.sessionId || session.session_id || session.sessionNumber}
                     onClick={() => onSelectSession && onSelectSession(session)}
                     className="hover:bg-gray-50/70 transition-colors cursor-pointer group"
                   >
-                    {/* Buổi */}
+                    {/* Ngày */}
                     <td className="py-3.5 px-4">
                       <span className="font-bold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">
-                        Buổi #{sessionNum}
+                        {dateDisplay || "—"}
                       </span>
                     </td>
 
-                    {/* Ngày & Giờ */}
-                    <td className="py-3.5 px-4 font-medium text-gray-800 text-sm">
-                      <div className="flex flex-col">
-                        <span>{dateDisplay}</span>
-                        {timeRange && (
-                          <span className="text-xs text-gray-500 font-normal">
-                            {timeRange}
-                          </span>
-                        )}
-                      </div>
+                    {/* Giờ kết thúc */}
+                    <td className="py-3.5 px-4 font-medium text-gray-700 text-sm">
+                      {timeDisplay || "—"}
                     </td>
 
                     {/* Tỷ lệ GV / HV with split progress bar */}
                     <td className="py-3.5 px-4">
                       <div className="flex flex-col gap-1.5 min-w-[130px] max-w-[170px]">
                         <div className="flex items-center justify-between text-xs font-semibold text-gray-700">
-                          <span>GV: {teacherPercent}%</span>
-                          <span>HV: {studentPercent}%</span>
+                          <span>{cd.teacherTalk || "GV"}: {teacherPercent}%</span>
+                          <span>{cd.studentTalk || "HV"}: {studentPercent}%</span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden flex">
                           <div
@@ -149,7 +138,7 @@ const ClassAnalyticsSessionList = ({
                     {/* Action */}
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1 text-xs font-semibold text-blue-600 group-hover:text-blue-700">
-                        <span>Chi tiết</span>
+                        <span>{cd.details || "Chi tiết"}</span>
                         <ChevronRight
                           size={14}
                           className="group-hover:translate-x-0.5 transition-all"

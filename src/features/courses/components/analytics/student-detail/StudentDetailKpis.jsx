@@ -51,9 +51,11 @@ const StudentDetailKpis = ({ data }) => {
       ? "text-[#6b7280]"
       : "text-[#be123c]"
 
-  const recentResultText = data?.recentSessionNumber
-    ? `Buổi ${data.recentSessionNumber}: đạt ${data.recentSessionPercent ?? 0}%`
-    : `Buổi gần nhất: ${data?.avgSpeechPercent ?? 0}%`
+  const recentResultText = data?.recentSessionDate
+    ? `Buổi ${data.recentSessionDate}: đạt ${data.recentSessionPercent ?? 0}%`
+    : data?.recentSessionNumber
+      ? `Buổi gần nhất: đạt ${data.recentSessionPercent ?? 0}%`
+      : `Buổi gần nhất: ${data?.avgSpeechPercent ?? 0}%`
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
