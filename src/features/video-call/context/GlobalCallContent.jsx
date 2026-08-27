@@ -19,6 +19,7 @@ import { useVideoCallSignaling } from "@/features/video-call/hooks/useVideoCallS
 
 import { useVideoCall } from "@/features/video-call/hooks/useVideoCall"
 import { useScreenShare } from "@/features/video-call/hooks/useScreenShare"
+import { useWatchTogether } from "@/features/video-call/hooks/useWatchTogether"
 import { useRecording } from "@/features/video-call/hooks/useRecording"
 import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -116,8 +117,7 @@ const GlobalCallContent = ({
     }
     return 16
   })
-  const [hideEmptyTiles, setHideEmptyTiles] = useState(() => {
-    try {
+  const [hideEmptyTiles, setHideEmptyTiles] = useState(() => {    try {
       const saved = localStorage.getItem("catspeak_video_layout_settings")
       if (saved) {
         const parsed = JSON.parse(saved)
@@ -397,6 +397,11 @@ const GlobalCallContent = ({
     isHost: isHostUser,
     t,
   })
+  const watchTogether = useWatchTogether({
+    sessionId,
+    isHost: isHostUser,
+    t,
+  })
   const recordingState = useRecording(lkRoom, {
     isRecording,
     setIsRecording,
@@ -478,7 +483,7 @@ const GlobalCallContent = ({
   })
 
   const [showLeaveModal, setShowLeaveModal] = useState(false)
-
+  const [showWatchTogether, setShowWatchTogether] = useState(false)
   const promptLeaveCall = () => {
     if (isPiP) {
       actions.returnToCall()
@@ -911,6 +916,18 @@ const GlobalCallContent = ({
     presenterDisplayName: screenShareState.presenterDisplayName,
     handleToggleScreenShare: actions.handleToggleScreenShare,
     isTogglingScreenShare: screenShareState.isTogglingScreenShare,
+    // Watch together (YouTube)
+    mediaActive: watchTogether.isMediaActive,
+    mediaParticipant: watchTogether.mediaParticipant,
+    mediaTrackRef: watchTogether.mediaTrackRef,
+    mediaTitle: watchTogether.mediaTitle,
+    isMediaHost: watchTogether.isMediaHost,
+    isStartingMedia: watchTogether.isStarting,
+    isStoppingMedia: watchTogether.isStopping,
+    startMedia: watchTogether.startMedia,
+    stopMedia: watchTogether.stopMedia,
+    showWatchTogether,
+    setShowWatchTogether,
     // Recording
     isRecording: isRecording,
     isTogglingRecording: recordingState.isTogglingRecording,

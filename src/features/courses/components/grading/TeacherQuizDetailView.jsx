@@ -17,6 +17,7 @@ import {
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useGetPublicProfileQuery } from "@/store/api/userApi"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import Pagination from "@/shared/components/ui/navigation/Pagination"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import { IconButton } from "@/shared/components/ui/buttons"
 import { getQuizObjectFromResponse } from "@/features/courses/utils/quizUtils"
@@ -97,6 +98,7 @@ import {
   Pause,
   ArrowLeft,
   BarChart2,
+  Search,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -1268,9 +1270,9 @@ const QuestionDetailCard = ({ question, index }) => {
 const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
   const { t } = useLanguage()
   const { formatDate } = useTimezone()
-  const c = useMemo(() => t?.courses || {}, [t])
-  const cg = useMemo(() => c?.grading || {}, [c])
-  const qg = useMemo(() => cg?.teacherQuiz || {}, [cg])
+  const c = t?.courses || {}
+  const cg = c?.grading || {}
+  const qg = cg.teacherQuiz || {}
   const navigate = useNavigate()
   const routeParams = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -1287,13 +1289,12 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       return next
     })
   }
-
   const [isQuestionsCollapsed, setIsQuestionsCollapsed] = useState(false)
   const [visibleQuestionsCount, setVisibleQuestionsCount] = useState(1)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  // Submissions search & modal state
-  const [submissionSearch] = useState("")
+  // Submissions search, filter & modal state
+  const [submissionSearch, setSubmissionSearch] = useState("")
   const [submissionPage, setSubmissionPage] = useState(1)
   const [selectedStudentSubmission, setSelectedStudentSubmission] = useState(null)
   const [submissionStatusFilter, setSubmissionStatusFilter] = useState("all")
@@ -1360,10 +1361,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
   const [deleteQuiz, { isLoading: isDeleting }] = useDeleteTeacherQuizMutation()
 
   // Extract student submission list and pagination from supported API envelopes.
-  const studentsPageData = useMemo(
-    () => getStudentsPageFromResponse(studentsResponse, submissionPage),
-    [studentsResponse, submissionPage],
-  )
+  const studentsPageData = getStudentsPageFromResponse(studentsResponse, submissionPage)
   const studentsList = studentsPageData.students
 
   const filteredStudentsList = useMemo(() => {
@@ -1685,9 +1683,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
               <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">{qg.questionCountLabel}</p>
-              <p className="text-sm font-bold text-gray-900 mt-0.5">
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.questionCountLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
                 {interpolate(qg.questionCountValue, { count: totalQuestions })}
               </p>
             </div>
@@ -1698,9 +1696,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">{qg.durationLabel}</p>
-              <p className="text-sm font-bold text-gray-900 mt-0.5">
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.durationLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
                 {timeLimit !== null && timeLimit !== undefined
                   ? interpolate(qg.minutes, { count: timeLimit })
                   : qg.noTimeLimit}
@@ -1713,11 +1711,11 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">{qg.deadlineLabel}</p>
-              <p className="text-sm font-bold text-gray-900 mt-0.5">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.deadlineLabel}</p>
+              <div className="text-[11px] sm:text-sm font-bold text-gray-900 mt-0.5 leading-snug break-words">
                 {formatDateRange(quizDetail.openTime, quizDetail.closeTime, qg, formatDate)}
-              </p>
+              </div>
             </div>
           </div>
 
@@ -1726,9 +1724,9 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-[#990011] flex items-center justify-center shrink-0 shadow-2xs border border-gray-200/50">
               <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">{qg.attemptCountLabel}</p>
-              <p className="text-sm font-bold text-gray-900 mt-0.5">
+            <div className="min-w-0">
+              <p className="text-[11px] sm:text-sm text-gray-500 font-medium truncate">{qg.attemptCountLabel}</p>
+              <p className="text-sm sm:text-sm font-bold text-gray-900 mt-0.5 truncate">
                 {maxAttempts ?? "—"}
               </p>
             </div>
@@ -1928,6 +1926,80 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
       {/* TAB CONTENT: Submissions (Danh sách nộp bài) */}
       {activeTab === "submissions" && (
         <>
+          {/* Active Filter Chips (Mobile only) */}
+          {activeFiltersCount > 0 && (
+            <div className="flex md:hidden items-center gap-1.5 flex-wrap pb-3">
+              {submissionStatusFilter !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-[#990011] text-xs font-semibold border border-red-100">
+                  <span>{submissionStatusOptions.find((o) => o.value === submissionStatusFilter)?.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSubmissionStatusFilter("all")}
+                    className="p-0.5 hover:bg-red-100 rounded-full cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {gradingStatusFilter !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-[#990011] text-xs font-semibold border border-red-100">
+                  <span>{gradingStatusOptions.find((o) => o.value === gradingStatusFilter)?.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => setGradingStatusFilter("all")}
+                    className="p-0.5 hover:bg-red-100 rounded-full cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {scoreFilter !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-50 text-[#990011] text-xs font-semibold border border-red-100">
+                  <span>{scoreOptions.find((o) => o.value === scoreFilter)?.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => setScoreFilter("all")}
+                    className="p-0.5 hover:bg-red-100 rounded-full cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmissionStatusFilter("all")
+                  setGradingStatusFilter("all")
+                  setScoreFilter("all")
+                }}
+                className="text-[11px] font-bold text-gray-500 hover:text-[#990011] underline px-1 cursor-pointer"
+              >
+                {qg.clearFilter || "Xóa tất cả"}
+              </button>
+            </div>
+          )}
+
+          {/* Mobile Filter Modal */}
+          <MobileSubmissionsFilterModal
+            isOpen={isMobileFilterOpen}
+            onClose={() => setIsMobileFilterOpen(false)}
+            submissionStatusFilter={submissionStatusFilter}
+            onSelectSubmissionStatus={setSubmissionStatusFilter}
+            gradingStatusFilter={gradingStatusFilter}
+            onSelectGradingStatus={setGradingStatusFilter}
+            scoreFilter={scoreFilter}
+            onSelectScore={setScoreFilter}
+            submissionStatusOptions={submissionStatusOptions}
+            gradingStatusOptions={gradingStatusOptions}
+            scoreOptions={scoreOptions}
+            onReset={() => {
+              setSubmissionStatusFilter("all")
+              setGradingStatusFilter("all")
+              setScoreFilter("all")
+            }}
+            qg={qg}
+          />
+
           {isStudentsLoading || isStudentsFetching ? (
             <div role="status" aria-label={qg.loadingSubmissions} className="py-12 text-center">
               <LoadingSpinner />
@@ -1948,31 +2020,6 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
             </div>
           ) : (
             <>
-              {/* Mobile Filter Button Bar */}
-              <div className="flex md:hidden items-center justify-between gap-2 pb-2">
-                <span className="text-xs font-bold text-gray-700">
-                  {qg.submissions || "Danh sách nộp bài"} ({filteredStudentsList.length})
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsMobileFilterOpen(true)}
-                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shrink-0 cursor-pointer ${activeFiltersCount > 0
-                    ? "border-[#990011] bg-red-50 text-[#990011]"
-                    : "border-border bg-white text-gray-600 hover:bg-gray-50"
-                    }`}
-                  aria-label={qg.filter || "Bộ lọc"}
-                  title={qg.filter || "Bộ lọc"}
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>{qg.filter || "Bộ lọc"}</span>
-                  {activeFiltersCount > 0 && (
-                    <span className="w-4 h-4 rounded-full bg-[#990011] text-white text-[10px] font-bold flex items-center justify-center">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </button>
-              </div>
-
               {/* MOBILE VIEW: Card List (< md) */}
               <div className="block md:hidden space-y-3">
                 {filteredStudentsList.length > 0 ? (
@@ -1982,6 +2029,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                     const hasSubmitted = subStatus.label !== qg.submissionNotSubmitted
                     const studentNumber = ((submissionPage - 1) * SUBMISSIONS_PAGE_SIZE) + idx + 1
                     const studentName = st.studentName || st.name || interpolate(qg.studentNumber, { number: studentNumber })
+                    const initials = getStudentInitials(studentName, qg.studentInitials)
                     const timeAgo = formatTimeAgo(st.updatedAt || st.submittedAt, qg)
                     const targetStudentId = st.studentId ?? st.id
                     const displayScore =
@@ -2145,6 +2193,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                         const hasSubmitted = subStatus.label !== qg.submissionNotSubmitted
                         const studentNumber = ((submissionPage - 1) * SUBMISSIONS_PAGE_SIZE) + idx + 1
                         const studentName = st.studentName || st.name || interpolate(qg.studentNumber, { number: studentNumber })
+                        const initials = getStudentInitials(studentName, qg.studentInitials)
                         const timeAgo = formatTimeAgo(st.updatedAt || st.submittedAt, qg)
                         const targetStudentId = st.studentId ?? st.id
                         const displayScore =
@@ -2158,7 +2207,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             className="hover:bg-gray-50/60 transition-colors"
                           >
                             {/* Col 1: Student info */}
-                            <td className="py-4 px-5 border-r border-border whitespace-nowrap">
+                            <td className="py-4 px-5 border-r border-border">
                               <div className="flex items-center gap-3">
                                 <QuizStudentAvatar
                                   student={st}
@@ -2178,7 +2227,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 2: Submission status */}
-                            <td className="py-4 px-5 border-r border-border text-center whitespace-nowrap">
+                            <td className="py-4 px-5 border-r border-border text-center">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${subStatus.style}`}
                               >
@@ -2187,7 +2236,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 3: Grading status */}
-                            <td className="py-4 px-5 border-r border-border text-center whitespace-nowrap">
+                            <td className="py-4 px-5 border-r border-border text-center">
                               <span
                                 className={`text-xs font-semibold px-3.5 py-1.5 rounded-full inline-block ${gradStatus.style}`}
                               >
@@ -2196,7 +2245,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                             </td>
 
                             {/* Col 4: Score */}
-                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800 whitespace-nowrap">
+                            <td className="py-4 px-5 border-r border-border text-center text-sm font-semibold text-gray-800">
                               {displayScore}
                             </td>
 
@@ -2225,7 +2274,7 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                       <tr>
                         <td
                           colSpan={5}
-                          className="py-12 text-center text-gray-400 text-xs font-medium whitespace-nowrap"
+                          className="py-12 text-center text-gray-400 text-xs font-medium"
                         >
                           {submissionSearch || submissionStatusFilter !== "all" || gradingStatusFilter !== "all" || scoreFilter !== "all"
                             ? qg.noMatchingStudents
@@ -2237,57 +2286,11 @@ const TeacherQuizDetailView = ({ classId, quizId, onEdit, onBack }) => {
                 </table>
               </div>
 
-              {(submissionPage > 1 || studentsPageData.hasNextPage || (studentsPageData.totalPages ?? 0) > 1) && (
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs font-medium text-gray-500">
-                    {interpolate(qg.pageLabel, { page: studentsPageData.page })}
-                    {studentsPageData.totalPages
-                      ? interpolate(qg.totalPagesSuffix, { totalPages: studentsPageData.totalPages })
-                      : ""}
-                    {studentsPageData.totalItems !== null
-                      ? interpolate(qg.studentsTotalSuffix, { count: studentsPageData.totalItems })
-                      : ""}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={submissionPage <= 1}
-                      onClick={() => setSubmissionPage((page) => Math.max(1, page - 1))}
-                      className="rounded-xl border border-border px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {qg.previousPage}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={!studentsPageData.hasNextPage}
-                      onClick={() => setSubmissionPage((page) => page + 1)}
-                      className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white hover:bg-[#80000e] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {qg.nextPage}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Mobile Submissions Filter Modal */}
-              <MobileSubmissionsFilterModal
-                isOpen={isMobileFilterOpen}
-                onClose={() => setIsMobileFilterOpen(false)}
-                submissionStatusFilter={submissionStatusFilter}
-                onSelectSubmissionStatus={setSubmissionStatusFilter}
-                gradingStatusFilter={gradingStatusFilter}
-                onSelectGradingStatus={setGradingStatusFilter}
-                scoreFilter={scoreFilter}
-                onSelectScore={setScoreFilter}
-                submissionStatusOptions={submissionStatusOptions}
-                gradingStatusOptions={gradingStatusOptions}
-                scoreOptions={scoreOptions}
-                onReset={() => {
-                  setSubmissionStatusFilter("all")
-                  setGradingStatusFilter("all")
-                  setScoreFilter("all")
-                }}
-                qg={qg}
+              <Pagination
+                page={submissionPage}
+                totalPages={studentsPageData.totalPages || (studentsPageData.hasNextPage ? submissionPage + 1 : 1)}
+                onChangePage={setSubmissionPage}
+                className="pt-4 border-t border-gray-100"
               />
             </>
           )}

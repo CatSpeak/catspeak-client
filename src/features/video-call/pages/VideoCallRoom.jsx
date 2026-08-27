@@ -25,6 +25,9 @@ import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBac
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
+import MediaSpotlightTile from "@/features/video-call/components/MediaSpotlightTile"
+import MediaParticipantStrip from "@/features/video-call/components/MediaParticipantStrip"
+import WatchTogetherPanel from "@/features/video-call/components/WatchTogetherPanel"
 
 import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
@@ -74,6 +77,17 @@ const VideoCallRoomContent = () => {
     confirmStopRecording,
     participants,
     isHost: isHostFromContext,
+    // Watch together (YouTube)
+    mediaActive,
+    mediaTrackRef,
+    mediaTitle,
+    isMediaHost,
+    isStartingMedia,
+    isStoppingMedia,
+    startMedia,
+    stopMedia,
+    showWatchTogether,
+    setShowWatchTogether,
   } = useVideoCallContext()
 
   const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
@@ -230,10 +244,32 @@ const VideoCallRoomContent = () => {
             />
           )}
           <div className="flex flex-1 min-h-0 relative">
-            <VideoGrid />
+            {mediaActive && mediaTrackRef ? (
+              <div className="relative h-full w-full">
+                <MediaSpotlightTile
+                  trackRef={mediaTrackRef}
+                  title={mediaTitle}
+                  onStop={isMediaHost ? stopMedia : undefined}
+                />
+                <MediaParticipantStrip participants={participants} />
+              </div>
+            ) : (
+              <VideoGrid />
+            )}
             {/* AI Floating Widget */}
             {isAISession && <AIFloatingWidget />}
           </div>
+          {/* Watch Together host panel */}
+          <WatchTogetherPanel
+            open={showWatchTogether}
+            onClose={() => setShowWatchTogether(false)}
+            sessionId={sessionId}
+            isHost={isMediaHost}
+            isStarting={isStartingMedia}
+            isStopping={isStoppingMedia}
+            onStart={startMedia}
+            onStop={stopMedia}
+          />
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
           {/* Non-AI Room subtitles — only show in non-AI rooms when enabled */}
