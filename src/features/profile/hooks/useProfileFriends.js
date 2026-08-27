@@ -176,9 +176,11 @@ export const useProfileFriends = ({
     }
 
     if (searchQuery.trim() && raw.length === 0 && !loading) {
-      empty =
+      const template =
         t.profile?.friends?.empty?.noSearchResults ||
-        `Không tìm thấy kết quả phù hợp cho "${searchQuery}".`
+        t.friends?.empty?.noSearchResults ||
+        'Không tìm thấy kết quả phù hợp cho "{query}".'
+      empty = template.replace("{query}", searchQuery.trim())
     }
 
     return { list: raw, isLoading: loading, emptyMessage: empty }
