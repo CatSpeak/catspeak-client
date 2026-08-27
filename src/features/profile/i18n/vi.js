@@ -144,6 +144,11 @@ export default {
         review: "Đánh giá",
         share: "Chia sẻ",
         completedDate: "Ngày hoàn thành",
+        shareText: "Tôi đã hoàn thành khóa học {courseName} trên CatSpeak!",
+        copySuccess: "Đã sao chép liên kết chứng nhận hoàn thành khóa học!",
+        copyError: "Không thể sao chép liên kết",
+        defaultCourseName: "Khóa học",
+        defaultStudentName: "Học viên",
       },
     },
     documents: {

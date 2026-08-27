@@ -143,6 +143,11 @@ export default {
         review: "Review",
         share: "Share",
         completedDate: "Completion date",
+        shareText: "I completed the course {courseName} on CatSpeak!",
+        copySuccess: "Course completion certificate link copied!",
+        copyError: "Failed to copy link",
+        defaultCourseName: "Course",
+        defaultStudentName: "Student",
       },
     },
     documents: {

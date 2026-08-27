@@ -127,13 +127,15 @@ const CompletionReviewPrompt = () => {
     }
   }
 
-  const courseDisplayName = pending?.courseName || pending?.className || "Khóa học"
+  const courseDisplayName =
+    pending?.courseName || pending?.className || popupT.defaultCourseName || "Khóa học"
 
   const displayName =
     currentUser?.fullName ||
     currentUser?.name ||
     currentUser?.displayName ||
     currentUser?.username ||
+    popupT.defaultStudentName ||
     "Học viên"
 
   const userAvatarUrl =
@@ -158,11 +160,15 @@ const CompletionReviewPrompt = () => {
 
   const handleShare = async () => {
     const profileUrl = `${window.location.origin}/profile/${userId}`
+    const shareText = (
+      popupT.shareText || "Tôi đã hoàn thành khóa học {courseName} trên CatSpeak!"
+    ).replace("{courseName}", courseDisplayName)
+
     if (navigator.share) {
       try {
         await navigator.share({
           title: courseDisplayName,
-          text: `Tôi đã hoàn thành khóa học ${courseDisplayName} trên CatSpeak!`,
+          text: shareText,
           url: profileUrl,
         })
         return
@@ -172,7 +178,9 @@ const CompletionReviewPrompt = () => {
     }
     await copyShareLink({
       url: profileUrl,
-      successMessage: "Đã sao chép liên kết chứng nhận hoàn thành khóa học!",
+      successMessage:
+        popupT.copySuccess || "Đã sao chép liên kết chứng nhận hoàn thành khóa học!",
+      errorMessage: popupT.copyError || "Không thể sao chép liên kết",
     })
   }
 

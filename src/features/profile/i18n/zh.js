@@ -143,6 +143,11 @@ export default {
         review: "评价",
         share: "分享",
         completedDate: "完成日期",
+        shareText: "我已在 CatSpeak 上完成了《{courseName}》课程！",
+        copySuccess: "已复制课程完成认证链接！",
+        copyError: "复制链接失败",
+        defaultCourseName: "课程",
+        defaultStudentName: "学员",
       },
     },
     documents: {
