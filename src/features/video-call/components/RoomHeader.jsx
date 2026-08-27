@@ -76,7 +76,9 @@ const RoomHeader = () => {
             </IconButton>
             {room?.requiredLevel && (
               <span className="rounded-full bg-cath-red-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                {room.requiredLevel}
+                {t?.rooms?.filters?.levels?.[
+                  room.requiredLevel?.toLowerCase()
+                ] || room.requiredLevel}
               </span>
             )}
             {room?.topic &&

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
+import { Info } from "lucide-react"
 import { toast } from "react-hot-toast"
 import {
   useSetupBreakoutGroupsMutation,
@@ -41,6 +42,25 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
       setAllocations(initial)
     }
   }, [roomCount, status?.isBreakoutActive])
+
+  // Automatically prune disconnected / left students from allocations
+  useEffect(() => {
+    const liveStudentIds = new Set(
+      students.map((s) => Number(s.accountId || s.id || s.identity)).filter(Boolean)
+    )
+    setAllocations((prev) => {
+      let changed = false
+      const updated = prev.map((room) => {
+        const filtered = room.accountIds.filter((id) => liveStudentIds.has(Number(id)))
+        if (filtered.length !== room.accountIds.length) {
+          changed = true
+          return { ...room, accountIds: filtered }
+        }
+        return room
+      })
+      return changed ? updated : prev
+    })
+  }, [students])
 
   // Auto-allocate students to rooms
   const handleShuffle = () => {
@@ -95,6 +115,11 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
         }
       }),
     )
+
+    toast.success(
+      t.rooms.breakoutRooms.setupStageHint || "Đã phân bổ học viên vào phòng. Nhấn 'Mở phòng' bên dưới để áp dụng.",
+      { id: "setup-stage-hint", duration: 3000 }
+    )
   }
 
   // Start Breakout Rooms
@@ -133,20 +158,35 @@ const BreakoutSetupView = ({ sessionId, students, status, refetchStatus, roomCre
   }
 
   // Unassigned students logic
-  const assignedIds = allocations.reduce(
-    (acc, curr) => [...acc, ...curr.accountIds],
-    [],
-  )
-  const unassignedStudents = students.filter(
-    (s) => !assignedIds.includes(Number(s.accountId || s.id || s.identity)),
-  )
+  const assignedIds = useMemo(() => {
+    return allocations.reduce(
+      (acc, curr) => [...acc, ...curr.accountIds],
+      [],
+    )
+  }, [allocations])
 
-  const hostStudent = allLiveStudents?.find(
-    (s) => String(s.accountId) === String(roomCreatorId)
-  )
+  const unassignedStudents = useMemo(() => {
+    return students.filter(
+      (s) => !assignedIds.includes(Number(s.accountId || s.id || s.identity)),
+    )
+  }, [students, assignedIds])
+
+  const hostStudent = useMemo(() => {
+    return allLiveStudents?.find(
+      (s) => String(s.accountId) === String(roomCreatorId)
+    )
+  }, [allLiveStudents, roomCreatorId])
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
+      {/* Informative Guidance Banner for Setup Mode */}
+      <div className="bg-amber-50/90 border-b border-amber-200/80 px-3.5 py-2.5 flex items-start gap-2 text-xs text-amber-900 leading-relaxed shrink-0">
+        <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+        <span>
+          {t.rooms.breakoutRooms.setupModeTip || "Chế độ phân bổ phòng: Xếp nhóm học viên rồi nhấn nút \"Mở phòng\" bên dưới để chính thức đưa các thành viên vào phòng."}
+        </span>
+      </div>
+
       <div
         ref={containerRef}
         onDragOver={handleDragOverScroll}

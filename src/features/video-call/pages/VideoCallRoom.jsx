@@ -88,9 +88,13 @@ const VideoCallRoomContent = () => {
     if (isHost && parentSessionId) {
       stopBreakoutRooms(parentSessionId).unwrap().catch(console.error)
       dispatch(exitBreakout())
-      toast.success("Hết thời gian! Đã tự động đóng phòng nhóm.")
+      toast.success(
+        t?.rooms?.breakoutRooms?.timerEndToast ??
+          "Hết thời gian! Đã tự động đóng phòng nhóm.",
+        { id: "breakout-timer-end" },
+      )
     }
-  }, [isHost, parentSessionId, stopBreakoutRooms, dispatch])
+  }, [isHost, parentSessionId, stopBreakoutRooms, dispatch, t])
 
   const {
     countdownSeconds,
@@ -114,18 +118,18 @@ const VideoCallRoomContent = () => {
 
   const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
-    ? t.rooms.videoCall.participantList.title
+    ? (t?.rooms?.videoCall?.participantList?.title ?? "Participants")
     : showVirtualBackground
-      ? t.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"
+      ? (t?.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects")
       : showAvatarPicker
-        ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
+        ? (t?.rooms?.avatarPicker?.title || "Meeting Avatar")
         : showTroubleshoot
-          ? t.rooms?.videoCall?.reconnect || "Troubleshoot connection"
+          ? (t?.rooms?.videoCall?.reconnect || "Troubleshoot connection")
           : showBreakout
             ? isBreakoutActive
               ? "Phòng thảo luận"
               : "Phòng họp nhóm"
-            : t.rooms.chatBox.title
+            : (t?.rooms?.chatBox?.title ?? "Chat")
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -189,7 +193,7 @@ const VideoCallRoomContent = () => {
     }
     return (
       <VideoCallLoading
-        message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
+        message={t?.rooms?.videoCall?.provider?.connecting ?? "Connecting..."}
       />
     )
   }
@@ -399,7 +403,7 @@ const VideoCallRoomWrapper = () => {
   const { lang } = useParams()
   return (
     <VideoCallProvider>
-      <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
+      <GameProvider roomLanguage={lang === "zh" ? "zh" : lang === "ja" ? "ja" : "en"}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>

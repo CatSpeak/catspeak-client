@@ -66,8 +66,25 @@ const createSubmittedStudent = ({
 }) => {
   const submissionId = submission.id
   const resolvedStudentId = studentId || getId(submission.studentId)
-  const memberAvatar = member?.avatarUrl || member?.avatar
-  const submissionAvatar = submission.studentAvatarUrl || submission.avatarUrl
+  const memberAvatar =
+    member?.avatarUrl ||
+    member?.avatar ||
+    member?.studentAvatarUrl ||
+    member?.userAvatar ||
+    member?.user?.avatarUrl ||
+    member?.user?.avatar ||
+    member?.photo ||
+    member?.picture
+  const submissionAvatar =
+    submission?.studentAvatarUrl ||
+    submission?.avatarUrl ||
+    submission?.studentAvatar ||
+    submission?.userAvatar ||
+    submission?.avatar ||
+    submission?.user?.avatarUrl ||
+    submission?.user?.avatar ||
+    submission?.student?.avatarUrl ||
+    submission?.student?.avatar
 
   return {
     id: resolvedStudentId || `submission-${getId(submissionId)}`,
@@ -80,7 +97,7 @@ const createSubmittedStudent = ({
       submission.studentEmail,
       submission.email,
     ]),
-    avatar: getSafeFileUrl(memberAvatar || submissionAvatar),
+    avatar: getSafeFileUrl(memberAvatar || submissionAvatar) || memberAvatar || submissionAvatar || null,
     status: getSubmissionStatus(submission.status),
     time: getSubmittedTime(submission.submittedAt, formatFn),
     score: getScore(submission.grade),
@@ -95,21 +112,33 @@ const createSubmittedStudent = ({
   }
 }
 
-const createNotSubmittedStudent = (member, studentId, fallbackName) => ({
-  id: studentId,
-  studentId,
-  submissionId: null,
-  name: getPersonName(member) || fallbackName,
-  email: getDisplayText([member.email, member.studentEmail]),
-  avatar: getSafeFileUrl(member.avatarUrl || member.avatar),
-  status: "not_submitted",
-  time: "—",
-  score: null,
-  submissionText: "",
-  feedback: "",
-  files: [],
-  submittedAt: null,
-})
+const createNotSubmittedStudent = (member, studentId, fallbackName) => {
+  const memberAvatar =
+    member?.avatarUrl ||
+    member?.avatar ||
+    member?.studentAvatarUrl ||
+    member?.userAvatar ||
+    member?.user?.avatarUrl ||
+    member?.user?.avatar ||
+    member?.photo ||
+    member?.picture
+
+  return {
+    id: studentId,
+    studentId,
+    submissionId: null,
+    name: getPersonName(member) || fallbackName,
+    email: getDisplayText([member.email, member.studentEmail]),
+    avatar: getSafeFileUrl(memberAvatar) || memberAvatar || null,
+    status: "not_submitted",
+    time: "—",
+    score: null,
+    submissionText: "",
+    feedback: "",
+    files: [],
+    submittedAt: null,
+  }
+}
 
 export const getValidDateMs = (value) => {
   if (value === undefined || value === null || value === "") return null

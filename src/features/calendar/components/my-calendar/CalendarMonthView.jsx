@@ -1,6 +1,15 @@
 import React from 'react'
 import dayjs from 'dayjs'
 import { useTimezone } from '@/shared/hooks/useTimezone'
+import { useLanguage } from '@/shared/context/LanguageContext'
+
+const EVENT_COLORS = {
+  'teaching-schedule': '#34ce56',
+  'student-schedule': '#0e6eec',
+  'my-event': '#f83b4f',
+  'registered-event': '#e2b60a',
+  'other': '#888888'
+}
 
 const CalendarMonthView = ({
   currentDate,
@@ -8,7 +17,8 @@ const CalendarMonthView = ({
   onSelectDate,
   events
 }) => {
-  const { userTimeZone, formatScheduleDays } = useTimezone()
+  const { formatScheduleDays, getZoneDateStr } = useTimezone()
+  const { t } = useLanguage()
 
   // Use formatScheduleDays to translate each day correctly according to language/timezone shifts
   const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(day =>
@@ -46,9 +56,10 @@ const CalendarMonthView = ({
     <div className="w-full h-full flex flex-col min-h-0 overflow-y-auto scrollbar-app pr-2">
       {/* Days Header */}
       <div className="grid grid-cols-7 gap-1 text-center border-b border-border pb-4 mb-4">
-        {DAY_LABELS.map((label) => (
+        {DAY_LABELS.map((label, idx) => (
           <div key={label} className="text-base text-[#1A1A1A] font-medium tracking-wider">
-            {label}
+            <span className="hidden sm:inline">{label}</span>
+            <span className="sm:hidden">{t.calendar?.weekDaysShort?.[idx] || label}</span>
           </div>
         ))}
       </div>
@@ -60,8 +71,8 @@ const CalendarMonthView = ({
 
           if (!isCurrentMonth) {
             return (
-              <div key={`empty-${idx}`} className="h-15 flex flex-col items-center justify-start pt-2">
-                <div className="w-10 h-10 flex items-center justify-center text-base text-gray-300 font-medium">
+              <div key={`empty-${idx}`} className="min-h-[64px] flex flex-col items-center justify-start pt-2">
+                <div className="w-10 h-10 flex shrink-0 items-center justify-center text-base text-gray-300 font-medium">
                   {String(day).padStart(2, '0')}
                 </div>
               </div>
@@ -72,26 +83,35 @@ const CalendarMonthView = ({
           const isSelected = day === selectedDate
           const dayEvents = events.filter((ev) => {
             if (!ev.startTime) return false
-            const evStart = dayjs(ev.startTime).tz(userTimeZone)
-            const evDateStr = evStart.format('YYYY-MM-DD')
+            const evDateStr = getZoneDateStr(ev.startTime)
             return evDateStr === dateObj.dateStr
           })
+          
+          const uniqueTypes = [...new Set(dayEvents.map(ev => ev.eventType || 'other'))]
 
           return (
-            <div key={`day-${idx}`} className="h-15 flex flex-col items-center justify-start pt-2 gap-2 relative">
+            <div key={`day-${idx}`} className="min-h-[64px] flex flex-col items-center justify-start pt-2 gap-1">
               <button
                 onClick={() => onSelectDate(day)}
                 className={`
-                  w-10 h-10 flex items-center justify-center rounded-full text-base font-medium transition-all
+                  w-10 h-10 flex shrink-0 items-center justify-center rounded-full text-base font-medium transition-all
                   ${isSelected ? 'bg-[#990011] text-white border border-[#990011]' :
                     isToday ? 'text-[#1A1A1A] border border-[#990011]' : 'text-[#1A1A1A] hover:bg-[#F5F5F5]'}
                 `}
               >
                 {String(day).padStart(2, '0')}
-                {dayEvents.length > 0 && (
-                  <div className={`absolute rounded-full w-1 h-1 bottom-1 ${isSelected ? 'bg-white' : 'bg-[#990011]'}`} />
-                )}
               </button>
+              {uniqueTypes.length > 0 && (
+                <div className="flex justify-center items-center gap-1 flex-wrap px-1">
+                  {uniqueTypes.map(type => (
+                    <div 
+                      key={type}
+                      className="rounded-full w-1.5 h-1.5" 
+                      style={{ backgroundColor: EVENT_COLORS[type] || EVENT_COLORS['other'] }} 
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )
         })}

@@ -83,7 +83,7 @@ const PillButton = ({
         ) : (
           <>
             {renderIcon(startIcon)}
-            {children}
+            <span>{children}</span>
             {renderIcon(endIcon)}
           </>
         )}

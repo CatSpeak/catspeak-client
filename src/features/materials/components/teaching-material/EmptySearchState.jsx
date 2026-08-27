@@ -1,11 +1,19 @@
 import { PillButton } from '@/shared/components/ui/buttons';
 import React from 'react';
 import { useLanguage } from '@/shared/context/LanguageContext';
+import CannotFoundMaterialImg from '../../assets/Cannot_found_material.png';
 
 const EmptySearchState = ({ searchQuery, onClearFilters }) => {
   const { t } = useLanguage();
   return (
     <div className="w-full flex flex-col items-center justify-center py-10 px-4">
+      {/* Image */}
+      <img 
+        src={CannotFoundMaterialImg} 
+        alt="Cannot found material" 
+        className="w-48 h-auto mb-6 object-contain" 
+      />
+
       {/* Text Content */}
       <h3 className="text-3xl font-bold text-[#1A1C1C] mb-4 text-center">
         {t.materials.emptySearchTitle}

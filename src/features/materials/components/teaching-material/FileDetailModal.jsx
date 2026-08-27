@@ -63,9 +63,11 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
       }
 
       toast.success(t.materials.updateShareStatusSuccess);
-    } catch {
+    } catch (error) {
       setIsPublic(!checked); // revert
-      toast.error(t.materials.updateShareStatusError);
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.updateShareStatusError;
+      toast.error(errMsg);
     }
   };
 
@@ -74,9 +76,11 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
     try {
       await updateSettings({ id: item.id, isPublic, allowDownload: checked }).unwrap();
       toast.success(t.materials.updateDownloadPermSuccess);
-    } catch {
+    } catch (error) {
       setAllowDownload(!checked); // revert
-      toast.error(t.materials.updateDownloadPermError);
+      const errCode = error?.data?.message;
+      const errMsg = errCode ? (t.materials.errors?.[errCode] || errCode) : t.materials.updateDownloadPermError;
+      toast.error(errMsg);
     }
   };
 
@@ -190,11 +194,11 @@ const FileDetailModal = ({ open, onClose, item, onDelete, onMove }) => {
 
             <div className="mb-1">
               <span className="text-xs md:text-sm text-[#5B403E] mb-1 block font-medium">{t.materials.shareLink}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center ">
                 <TextInput
                   readOnly
                   value={shareLink || t.materials.noLink}
-                  className="!h-10 text-xs md:text-sm bg-[#F9F9F9] border-[#E3BEBA] !rounded-xl"
+                  className="!h-10 text-xs px-3 md:text-sm bg-[#F9F9F9] border-[#E3BEBA] !rounded-xl"
                   containerClassName="flex-1"
                 />
                 <PillButton

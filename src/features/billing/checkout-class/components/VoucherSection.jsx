@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Tag, ChevronDown, Check, Search, Loader2 } from 'lucide-react'
+import { Tag, ChevronDown, Check, Search, Loader2, X } from 'lucide-react'
 import TextInput from '@/shared/components/ui/inputs/TextInput'
 import Checkbox from '@/shared/components/ui/inputs/Checkbox'
 import Popover from '@/shared/components/ui/Popover'
@@ -12,6 +12,7 @@ const VoucherSection = ({
   suggestedTags, // array of strings (codes)
   selectedVouchers,
   onToggleVoucher,
+  onRemoveVoucher,
   onOpenModal,
   isLoading,
   t
@@ -103,20 +104,24 @@ const VoucherSection = ({
           {isLoading && <Loader2 size={16} className="animate-spin text-[#B20000]" />}
         </div>
         <div className="bg-[#E8F8F0] border border-[#A7E3C3] rounded-xl p-4">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-2 text-[#00A854] font-bold">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center gap-2 text-[#00A854] font-bold mt-0.5">
               <Check size={18} />
               <span>{tc.appliedCount.replace('{{count}}', selectedVouchers.length)}</span>
             </div>
-            <Popover
-              placement="top-right"
-              trigger={
-                <span className="text-[#B20000] text-sm font-semibold hover:underline">
-                  {tc.change}
-                </span>
-              }
-              content={renderDropdownContent}
-            />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Pass the first selected voucher to be removed
+                onRemoveVoucher(selectedVouchers[0]);
+              }}
+              className="text-gray-400 hover:text-[#B20000] transition-colors p-1"
+              title={tc.removeVoucher}
+            >
+              <X size={16} />
+            </button>
           </div>
 
           <div className="space-y-3">
@@ -126,9 +131,11 @@ const VoucherSection = ({
                   <span className="font-bold text-[#111827] mr-2">{voucher.code}</span>
                   <span className="text-[#6B7280]">({voucher.sponsorType === 'CatSpeak' ? 'CatSpeak' : tc.sponsorInstructor})</span>
                 </div>
-                <span className="text-[#111827]">
-                  - {voucher.discountType?.toLowerCase() === 'percentage' ? `${voucher.discountValue}%` : `${voucher.discountValue / 1000}k`}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[#111827]">
+                    - {voucher.discountType?.toLowerCase() === 'percentage' ? `${voucher.discountValue}%` : `${voucher.discountValue / 1000}k`}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

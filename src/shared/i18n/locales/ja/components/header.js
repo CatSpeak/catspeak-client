@@ -1,0 +1,43 @@
+export default {
+  profile: "プロフィール",
+  personalPage: "マイプロフィール",
+  settings: "設定",
+  generalInfo: "プロフィール編集",
+  logout: "ログアウト",
+  soon: "近日公開",
+  language: "言語",
+  community: "コミュニティ",
+  notifications: "通知",
+  noNewNotifications: "新しい通知はありません",
+  markAllRead: "すべて既読にする",
+  newNotificationTitle: "新しい通知",
+  newNotificationBody: "閲覧できる新しい通知があります。",
+  searchPlaceholder: "ルームを検索",
+  languages: {
+    vi: "ベトナム語",
+    viNom: "ベトナム語（ノム文字） - 近日公開",
+    zh: "中国語",
+    en: "英語",
+    ja: "日本語",
+  },
+  countries: {
+    vietnam: "ベトナム",
+    china: "中国",
+    english: "英語",
+    japan: "日本",
+  },
+  switchRole: "役割を切り替え",
+  studentRole: "生徒",
+  teacherRole: "講師",
+  noPermissionTeacher:
+    "講師役割に切り替える権限がありません！",
+  switchRoleSuccess: "役割を切り替えました！",
+  switchRoleFail: "役割の切り替えに失敗しました！",
+  logoutWarning: {
+    title: "通話を終了してログアウト",
+    message:
+      "現在通話中です。ログアウトすると接続が切断されます。ログアウトしますか？",
+    cancel: "キャンセル",
+    confirm: "ログアウト",
+  },
+}

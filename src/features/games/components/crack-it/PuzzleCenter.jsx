@@ -3,7 +3,7 @@ import { useGame } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PuzzleCenter = () => {
-  const { puzzle, currentRound } = useGame()
+  const { puzzle, currentRound, gameLanguage } = useGame()
   const { t, language } = useLanguage()
 
   const [displayMask, setDisplayMask] = useState("")
@@ -96,6 +96,12 @@ const PuzzleCenter = () => {
   }
 
   const hintContent = (() => {
+    if (gameLanguage === "ja") {
+      return puzzle.hint_ja ? (
+        <div className="text-2xl font-medium text-slate-800">{puzzle.hint_ja}</div>
+      ) : puzzle.hint_en
+    }
+
     if (language === "zh") {
       return puzzle.hint_zh ? (
         <div className="flex flex-col gap-2">

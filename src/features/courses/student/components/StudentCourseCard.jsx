@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { BookOpen, Clock, Languages, ArrowRight, User, Users, ShieldCheck, Calendar, Share2, Check, AlertTriangle } from "lucide-react"
+import { BookOpen, Clock, Medal, Users, Share2, Check, ArrowRight } from "lucide-react"
 import {
   getCourseGradientAndIcon,
   formatCurrencyVND,
@@ -9,7 +9,6 @@ import {
 } from "../../utils/courseUtils"
 import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const StudentCourseCard = ({
   course,
@@ -19,26 +18,36 @@ const StudentCourseCard = ({
   onJoin,
   onShare,
   t: propsT,
-  index
+  index,
 }) => {
   const { t: contextT } = useLanguage()
-  const { formatDateMonth } = useTimezone()
   const t = propsT || contextT
-  const sc = t?.courses?.student || {}
-  const ui = t?.courses?.workspaceUi || {}
+  const c = t?.courses || {}
+  const sc = c?.student || {}
   const { gradient, icon: Icon } = getCourseGradientAndIcon(index)
   const thumbnailUrl = getSafeMediaUrl(course.thumbnailUrl)
 
   // Teacher Info
   const teacher = course.teacher || {}
-  const teacherName = teacher.name || teacher.fullName || course.instructorName || sc.defaultInstructor || "Giảng viên CatSpeak"
-  const teacherAvatar = getSafeMediaUrl(teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl)
+  const teacherName =
+    teacher.name ||
+    teacher.fullName ||
+    course.instructorName ||
+    sc.defaultInstructor ||
+    "Giảng viên CatSpeak"
+  const teacherAvatar = getSafeMediaUrl(
+    teacher.avatarImageUrl || teacher.avatar || teacher.avatarUrl,
+  )
 
   // Pricing Logic
   const minPrice = course.priceMin ?? course.priceRange?.min ?? course.price
   const maxPrice = course.priceMax ?? course.priceRange?.max ?? course.price
-  const hasMinPrice = minPrice != null && Number.isFinite(Number(minPrice)) && Number(minPrice) >= 0
-  const hasMaxPrice = maxPrice != null && Number.isFinite(Number(maxPrice)) && Number(maxPrice) >= Number(minPrice)
+  const hasMinPrice =
+    minPrice != null && Number.isFinite(Number(minPrice)) && Number(minPrice) >= 0
+  const hasMaxPrice =
+    maxPrice != null &&
+    Number.isFinite(Number(maxPrice)) &&
+    Number(maxPrice) >= Number(minPrice)
 
   let priceText = sc.toBeAnnounced || "TBA"
   if (hasMinPrice && hasMaxPrice) {
@@ -54,37 +63,49 @@ const StudentCourseCard = ({
   }
 
   // Counts & Stats
-  const openClassCount = course.openClassCount != null ? Number(course.openClassCount) : null
-  const classCount = course.classCount != null ? Number(course.classCount) : openClassCount
-  const studentCount = course.studentCount != null ? Number(course.studentCount) : null
-  const remainingSlots = course.remainingSlots != null ? Number(course.remainingSlots) : null
+  const openClassCount =
+    course.openClassCount != null ? Number(course.openClassCount) : null
+  const classCount =
+    course.classCount != null ? Number(course.classCount) : openClassCount
+  const studentCount =
+    course.studentCount != null ? Number(course.studentCount) : null
+  const remainingSlots =
+    course.remainingSlots != null ? Number(course.remainingSlots) : null
   const minEnrollmentEnd = course.minEnrollmentEnd || course.enrollmentEnd
 
   const [linkCopied, setLinkCopied] = useState(false)
 
-  const closingSoon = isClosingSoon(minEnrollmentEnd)
+  const languageLabel =
+    getLocalizedLanguageName(course.language, t) || course.language || ""
 
-  const handleCardAction = (e) => {
-    e.stopPropagation()
-    if (isEnrolled) {
-      onViewDetails()
-    } else if (onJoin) {
-      onJoin()
-    } else {
-      onViewDetails()
-    }
-  }
+  const levelsText = Array.isArray(course.levels)
+    ? course.levels.filter(Boolean).join(", ")
+    : course.levels || ""
+
+  // Do not display minEnrollmentEnd in StudentCourseCard
+  const scheduleText = course.duration
+    ? `${course.duration} ${c.hoursUnit || "giờ"}`
+    : null
+
+  const closingSoon = isClosingSoon(minEnrollmentEnd, Date.now(), 1)
+
+  const slotsText =
+    remainingSlots != null
+      ? (sc.slotsRemaining || c.slotsRemaining
+        ? (sc.slotsRemaining || c.slotsRemaining).replace("{{count}}", remainingSlots)
+        : `Còn ${remainingSlots} chỗ`)
+      : sc.slotsAvailable || c.slotsAvailable || "Còn chỗ"
 
   // --- List View Mode ---
   if (viewMode === "list") {
     return (
       <div
         onClick={onViewDetails}
-        className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+        className="bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 p-3.5 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 hover:shadow-lg transition-all duration-300 cursor-pointer group"
       >
-        <div className="flex items-center gap-5 flex-1 min-w-0">
+        <div className="flex items-center gap-4 sm:gap-5 flex-1 min-w-0">
           {/* Thumbnail */}
-          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-sm border border-border group-hover:scale-[1.02] transition-transform duration-300">
+          <div className="h-20 w-32 shrink-0 rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center relative shadow-xs border border-border">
             {thumbnailUrl ? (
               <img
                 src={thumbnailUrl}
@@ -94,7 +115,9 @@ const StudentCourseCard = ({
                 decoding="async"
               />
             ) : (
-              <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+              <div
+                className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}
+              >
                 <Icon size={28} className="stroke-[1.5] text-white" />
               </div>
             )}
@@ -119,76 +142,107 @@ const StudentCourseCard = ({
             )}
           </div>
 
-          <div className="flex-1 min-w-0">
-            {/* Top Badges */}
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="bg-[#b20a1c]/10 text-[#b20a1c] border border-rose-200/60 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                <BookOpen size={10} />
-                {sc.courseBadge || "Khóa học"}
+          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+            {/* Row 1: Badges (Course badge & Language badge) */}
+            <div className="flex items-center gap-2">
+              <span className="bg-[#FFF0F2] text-[#b20a1c] text-[11px] font-extrabold px-2.5 py-0.5 rounded-xl border border-rose-200/60 shrink-0">
+                {sc.courseBadge || c.courseBadge || "Khóa học"}
               </span>
-              <span className="bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-border">
-                {getLocalizedLanguageName(course.language, t)}
-              </span>
-              {openClassCount != null && openClassCount > 0 && (
-                <span className="bg-emerald-50 text-emerald-700 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase border border-emerald-200/60 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  {openClassCount} {sc.classesOpen || "lớp mở"}
+              {languageLabel && (
+                <span className="bg-[#b20a1c] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-xs shrink-0">
+                  {languageLabel}
                 </span>
               )}
             </div>
 
-            <h3 className="font-black text-lg text-slate-950 truncate leading-snug group-hover:text-[#b20a1c] transition-colors">
+            {/* Row 2: Title */}
+            <h3 className="font-black text-base text-slate-950 truncate group-hover:text-[#b20a1c] transition-colors">
               {course.name || course.title}
             </h3>
 
-            {/* Teacher info */}
-            <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-500 font-semibold">
+            {/* Row 3: Teacher info (No "Giảng viên" text) */}
+            <div className="flex items-center gap-2 min-w-0">
               {teacherAvatar ? (
-                <img src={teacherAvatar} alt={teacherName} className="w-5 h-5 rounded-full object-cover ring-1 ring-slate-200" />
+                <img
+                  src={teacherAvatar}
+                  alt={teacherName}
+                  className="w-5 h-5 rounded-full object-cover ring-1 ring-slate-200 shrink-0"
+                />
               ) : (
-                <User size={14} className="text-slate-400" />
+                <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                  {teacherName.charAt(0).toUpperCase()}
+                </div>
               )}
-              <span className="text-slate-700 font-bold">{teacherName}</span>
+              <span className="text-xs font-semibold text-slate-700 truncate" title={teacherName}>
+                {teacherName}
+              </span>
+            </div>
+
+            {/* Row 4: Metrics (No yellow parent) */}
+            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-800">
+              {scheduleText && (
+                <div className="flex items-center gap-1.5">
+                  <Clock size={13} className="text-amber-500 shrink-0" />
+                  <span>{scheduleText}</span>
+                </div>
+              )}
+              {levelsText && (
+                <div className="flex items-center gap-1.5">
+                  <Medal size={13} className="text-amber-500 shrink-0" />
+                  <span>{levelsText}</span>
+                </div>
+              )}
+              {studentCount != null && (
+                <div className="flex items-center gap-1.5">
+                  <Users size={13} className="text-amber-500 shrink-0" />
+                  <span>{studentCount} {c.studentsUnit || sc.studentsUnit || "học viên"}</span>
+                </div>
+              )}
+              {(openClassCount != null || classCount != null) && (
+                <div className="flex items-center gap-1.5">
+                  <BookOpen size={13} className="text-amber-500 shrink-0" />
+                  <span>
+                    {openClassCount != null
+                      ? `${openClassCount} ${sc.classesOpen || "lớp mở"}`
+                      : `${classCount} ${sc.classesUnit || "lớp"}`}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right Stats & Actions */}
-        <div className="flex flex-wrap md:flex-nowrap items-center gap-6 justify-between w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 border-slate-150 shrink-0">
-          <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
-            {studentCount != null && (
-              <div className="flex items-center gap-1">
-                <Users size={14} className="text-slate-400" />
-                <span>{studentCount} {sc.studentsUnit || "học viên"}</span>
-              </div>
-            )}
+        {/* Right Stats, Slots & Action Button */}
+        <div className="flex items-center gap-6 justify-between md:justify-end w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-slate-150 shrink-0">
+          <div className="flex flex-col items-center justify-center text-center">
+            <span className="text-[10px] font-bold text-slate-400 leading-none mb-1">
+              {sc.tuition || "Học phí"}
+            </span>
+            <span className="text-base font-black text-[#b20a1c] leading-none mb-1">
+              {priceText}
+            </span>
             {closingSoon ? (
-              <div className="flex items-center gap-1 text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60">
-                <AlertTriangle size={12} />
-                <span>{sc.closingSoon || "Sắp đóng tuyển sinh"}</span>
-              </div>
-            ) : remainingSlots != null && (
-              <div className="flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60">
-                <Clock size={12} />
-                <span>{sc.slotsRemaining ? sc.slotsRemaining.replace("{{count}}", remainingSlots) : `Còn ${remainingSlots} chỗ`}</span>
-              </div>
+              <span className="text-amber-600 font-bold text-xs shrink-0">
+                {sc.closingSoon || c.closingSoon || "Sắp đóng tuyển sinh"}
+              </span>
+            ) : (
+              <span className="text-emerald-600 font-bold text-xs shrink-0">
+                {slotsText}
+              </span>
             )}
           </div>
 
-          <div className="flex items-center gap-4 w-full md:w-auto justify-end">
-            <div className="flex flex-col text-right">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{sc.tuition || "Học phí"}</span>
-              <span className="text-base font-black text-[#b20a1c] leading-none">{priceText}</span>
-            </div>
-            <button
-              type="button"
-              onClick={handleCardAction}
-              className="h-10 px-5 text-xs font-extrabold rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95 whitespace-nowrap cursor-pointer"
-            >
-              <span>{isEnrolled ? (sc.details || "Chi tiết") : (sc.viewCourse || "Xem Khóa Học")}</span>
-              <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onViewDetails?.()
+            }}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-xs font-bold transition-all shrink-0 cursor-pointer shadow-xs active:scale-95"
+          >
+            <span>{sc.details || "Xem chi tiết"}</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
       </div>
     )
@@ -198,17 +252,24 @@ const StudentCourseCard = ({
   return (
     <div
       onClick={onViewDetails}
-      className="relative bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group"
+      className="relative bg-white rounded-3xl border border-border hover:border-[#b20a1c]/30 shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between group overflow-visible"
     >
-      {/* Thumbnail Area */}
-      <div className="relative h-52 w-full bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border-b border-slate-100">
+      {/* Thumbnail Area (-25% height: h-36 instead of h-48) */}
+      <div className="relative h-36 w-full bg-slate-100 flex items-center justify-center shrink-0 rounded-t-3xl overflow-visible border-b border-slate-100">
         <img
           src={thumbnailUrl || defaultCourseThumbnail}
           alt={course.name || course.title || ""}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover rounded-t-3xl"
           loading="lazy"
           decoding="async"
         />
+
+        {/* Language Badge centered at bottom edge of thumbnail */}
+        {languageLabel && (
+          <span className="absolute -bottom-3.5 left-5 z-10 bg-[#b20a1c] text-white text-xs font-bold px-3.5 py-1 rounded-full shadow-md">
+            {languageLabel}
+          </span>
+        )}
 
         {onShare && (
           <button
@@ -232,90 +293,107 @@ const StudentCourseCard = ({
       </div>
 
       {/* Content Details */}
-      <div className="p-5 flex flex-col flex-1 justify-between gap-5">
+      <div className="p-3.5 pt-5 flex flex-col flex-1 justify-between gap-3">
         <div className="flex flex-col gap-2.5">
-          <h3 className="font-black text-lg text-slate-950 leading-snug line-clamp-2 group-hover:text-[#b20a1c] transition-colors" title={course.name || course.title}>
+          {/* Hàng 1: Avatar & Teacher Name (Left) + Soft Red Badge (Right) */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              {teacherAvatar ? (
+                <img
+                  src={teacherAvatar}
+                  alt={teacherName}
+                  className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-200 shrink-0 shadow-2xs"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
+                  {teacherName.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-bold text-slate-400 leading-none">
+                  {sc.instructor || c.instructorLabel || "Giảng viên"}
+                </span>
+                <span className="text-xs font-bold text-slate-800 truncate leading-tight mt-0.5" title={teacherName}>
+                  {teacherName}
+                </span>
+              </div>
+            </div>
+
+            <span className="bg-[#FFF0F2] text-[#b20a1c] text-[11px] font-extrabold px-2.5 py-1 rounded-xl border border-rose-200/60 shrink-0">
+              {sc.courseBadge || c.courseBadge || "Khóa học"}
+            </span>
+          </div>
+
+          {/* Hàng 2: Tên khóa học (multiline wrap) */}
+          <h3
+            className="font-black text-base text-slate-950 leading-snug line-clamp-2 group-hover:text-[#b20a1c] transition-colors break-words"
+            title={course.name || course.title}
+          >
             {course.name || course.title}
           </h3>
 
-          {/* Instructor Profile */}
-          <div className="flex items-center gap-2.5 pt-1">
-            {teacherAvatar ? (
-              <img src={teacherAvatar} alt={teacherName} className="w-7 h-7 rounded-full object-cover ring-2 ring-rose-100 shadow-2xs" />
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs">
-                {teacherName.charAt(0).toUpperCase()}
+          {/* Hàng 3: Ô vàng nhạt, bo góc, không viền, 4 dòng theo thứ tự */}
+          <div className="bg-amber-50/90 rounded-2xl p-2.5 flex flex-col gap-1.5">
+            {/* 1. <Clock /> {schedule} (Only duration, no minEnrollmentEnd) */}
+            {scheduleText && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 min-w-0">
+                <Clock size={14} className="text-amber-500 shrink-0" />
+                <span className="truncate">{scheduleText}</span>
               </div>
             )}
-            <div className="flex flex-col">
-              <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-none">
-                {sc.instructor || "Giảng viên"}
-              </span>
-              <span className="text-xs font-bold text-slate-800 line-clamp-1 flex items-center gap-1">
-                {teacherName}
-                <ShieldCheck size={12} className="text-rose-500 inline shrink-0" />
-              </span>
-            </div>
-          </div>
 
-          {/* Class Metrics */}
-          <div className="mt-2 text-xs font-bold text-slate-700 bg-slate-50/80 p-3 rounded-2xl border border-slate-100">
-            <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
-              {/* 1. Language */}
-              <div className="flex items-center gap-1.5 min-w-0" title={getLocalizedLanguageName(course.language, t)}>
-                <Languages size={13} className="text-indigo-500 shrink-0" />
-                <span className="truncate text-slate-800">{getLocalizedLanguageName(course.language, t)}</span>
+            {/* 2. <Medal /> {levels} */}
+            {levelsText && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 min-w-0">
+                <Medal size={14} className="text-amber-500 shrink-0" />
+                <span className="truncate">{levelsText}</span>
               </div>
+            )}
 
-              {/* 2. Students */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Users size={13} className="text-sky-500 shrink-0" />
-                <span className="truncate text-slate-800">{studentCount != null ? `${studentCount} ${sc.studentsUnit || "học viên"}` : `0 ${sc.studentsUnit || "học viên"}`}</span>
-              </div>
-
-              {/* 3. Open Classes */}
-              <div className="flex items-center gap-1.5 min-w-0">
-                <BookOpen size={13} className="text-purple-500 shrink-0" />
-                <span className="truncate text-slate-800">
-                  {openClassCount != null ? `${openClassCount} ${sc.classesOpen || "lớp mở"}` : `${classCount != null && classCount !== "—" ? classCount : 0} ${sc.classesUnit || "lớp"}`}
+            {/* 3. <Users /> {studentCount} học viên */}
+            {studentCount != null && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 min-w-0">
+                <Users size={14} className="text-amber-500 shrink-0" />
+                <span className="truncate">
+                  {studentCount} {c.studentsUnit || sc.studentsUnit || "học viên"}
                 </span>
               </div>
+            )}
 
-              {/* 4. Registration Deadline / Closing Soon */}
-              {closingSoon ? (
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <AlertTriangle size={13} className="text-rose-500 shrink-0" />
-                  <span className="truncate text-rose-700 font-black">{sc.closingSoon || "Sắp đóng tuyển sinh"}</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <Calendar size={13} className="text-amber-500 shrink-0" />
-                  <span className="truncate text-slate-800">
-                    {minEnrollmentEnd
-                      ? `${sc.registrationDeadline || "Hạn ĐK"}: ${formatDateMonth(minEnrollmentEnd, ui.tba || "TBA")}`
-                      : (ui.tba || "TBA")}
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* 4. <BookOpen /> {openClassCount} lớp mở */}
+            {(openClassCount != null || classCount != null) && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-900 min-w-0">
+                <BookOpen size={14} className="text-amber-500 shrink-0" />
+                <span className="truncate">
+                  {openClassCount != null
+                    ? `${openClassCount} ${sc.classesOpen || "lớp mở"}`
+                    : `${classCount} ${sc.classesUnit || "lớp"}`}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Footer Pricing & CTA */}
-        <div className="pt-3.5 border-t border-slate-150 flex items-center justify-between gap-3">
+        {/* Footer: Học phí (Left) + Còn {remainingSlots} chỗ / Sắp đóng tuyển sinh (Right) */}
+        <div className="pt-2.5 border-t border-slate-150 flex items-center justify-between gap-3">
           <div className="flex flex-col">
-            <span className="text-slate-400 text-[10px] leading-none mb-1 uppercase tracking-wider font-extrabold">{sc.tuition || "Học phí"}</span>
-            <span className="text-[#b20a1c] font-black text-sm sm:text-base leading-none">{priceText}</span>
+            <span className="text-slate-400 text-[10px] leading-none mb-1 font-bold">
+              {sc.tuition || "Học phí"}
+            </span>
+            <span className="text-[#b20a1c] font-black text-sm sm:text-base leading-none">
+              {priceText}
+            </span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCardAction}
-            className="h-9 px-4 bg-[#b20a1c] hover:bg-[#960817] text-white text-xs font-extrabold rounded-full flex items-center justify-center gap-1 transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer"
-          >
-            <span>{sc.explore || "Khám Phá"}</span>
-            <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
-          </button>
+          {closingSoon ? (
+            <span className="text-amber-600 font-bold text-xs shrink-0">
+              {sc.closingSoon || c.closingSoon || "Sắp đóng tuyển sinh"}
+            </span>
+          ) : (
+            <span className="text-emerald-600 font-bold text-xs shrink-0">
+              {slotsText}
+            </span>
+          )}
         </div>
       </div>
     </div>

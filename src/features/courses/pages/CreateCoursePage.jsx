@@ -21,7 +21,7 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { getInstructorFormLanguages } from "../data/courseFormOptions"
+import { getInstructorFormLanguages, getLocalizedLanguageName } from "../data/courseFormOptions"
 import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
@@ -161,8 +161,8 @@ const CreateCoursePage = () => {
         e.target.value = ""
         return
       }
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error(cc.avatarDesc2 || c.avatarDesc2 || "Kích cỡ dưới 50MB")
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(cc.avatarDesc2 || c.avatarDesc2 || "Kích cỡ dưới 5MB")
         e.target.value = ""
         return
       }
@@ -425,7 +425,7 @@ const CreateCoursePage = () => {
                       {cc.avatarDesc1 || c.avatarDesc1 || "Kéo & thả hoặc bấm để chọn ảnh"}
                     </p>
                     <p className="text-[11px] text-gray-400 font-medium">
-                      {cc.avatarDesc2 || c.avatarDesc2 || "PNG, JPG, WEBP (tối đa 50MB)"}
+                      {cc.avatarDesc2 || c.avatarDesc2 || "PNG, JPG, WEBP (tối đa 5MB)"}
                     </p>
                   </div>
                 </div>
@@ -465,7 +465,7 @@ const CreateCoursePage = () => {
               <Dropdown
                 options={languagesList.map((lang) => ({
                   value: lang.name,
-                  label: lang.name,
+                  label: getLocalizedLanguageName(lang.name, t),
                 }))}
                 value={selectedLanguage}
                 onChange={(val) => {
@@ -527,30 +527,37 @@ const CreateCoursePage = () => {
         </div>
 
         {/* ─── Action Buttons ─── */}
-        <div className="flex items-center justify-end gap-3 pt-6 border-t border-border mt-auto w-full">
-          {isEditMode && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-border mt-auto w-full">
+          {/* Secondary / auxiliary actions (Delete & Clear) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+            {isEditMode && (
+              <PillButton
+                type="button"
+                variant="outline"
+                onClick={() => setShowDeleteModal(true)}
+                disabled={isDeleting}
+                className="flex-1 sm:flex-initial !border-red-500 !text-red-600 hover:!bg-red-50 whitespace-nowrap"
+              >
+                <Trash2 size={16} />
+                <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>
+              </PillButton>
+            )}
             <PillButton
               type="button"
-              variant="outline"
-              onClick={() => setShowDeleteModal(true)}
-              disabled={isDeleting}
-              className="mr-auto !border-red-500 !text-red-600 hover:!bg-red-50"
+              variant="secondary"
+              onClick={handleClear}
+              className={`${isEditMode ? "flex-1 sm:flex-initial" : "w-full sm:w-auto"} whitespace-nowrap`}
             >
-              <Trash2 size={16} />
-              <span>{c.courseDetail?.deleteCourse || "Xóa khóa học"}</span>
+              {cc.clear || c.clearBtn || "Làm mới"}
             </PillButton>
-          )}
-          <PillButton
-            type="button"
-            variant="secondary"
-            onClick={handleClear}
-          >
-            {cc.clear || c.clearBtn || "Làm mới"}
-          </PillButton>
+          </div>
+
+          {/* Primary Action Button (Bottom on mobile) */}
           <PillButton
             type="submit"
             variant="primary"
             disabled={isCreating || isUpdating}
+            className="w-full sm:w-auto whitespace-nowrap"
           >
             {labelCourseAction}
           </PillButton>

@@ -13,6 +13,7 @@ import { useToggleBookmarkRoomMutation } from "@/store/api/roomsApi";
 import RoomFullModal from "./RoomFullModal";
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png";
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png";
+import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg";
 import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon";
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
 
@@ -43,7 +44,12 @@ const RoomCard = ({ room }) => {
       ? localStorage.getItem("communityLanguage")
       : null) ||
     "en"
-  const fallbackThumbnail = currentLang === "zh" ? ZHThumbnail : ENThumbnail
+  const fallbackThumbnail =
+    currentLang === "ja"
+      ? JPThumbnail
+      : "zh" === currentLang
+        ? ZHThumbnail
+        : ENThumbnail
   const [imageError, setImageError] = useState(false)
   const displayThumbnail =
     imageError || !room.thumbnailUrl ? fallbackThumbnail : room.thumbnailUrl
@@ -218,7 +224,9 @@ const RoomCard = ({ room }) => {
                   `${t?.rooms?.filters?.levelLabel || "Trình độ"}: ${room.requiredLevel}`
                 }
               >
-                {room.requiredLevel}
+                {t?.rooms?.filters?.levels?.[
+                  room.requiredLevel?.toLowerCase()
+                ] || room.requiredLevel}
               </div>
             )}
             {(() => {

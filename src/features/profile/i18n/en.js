@@ -93,6 +93,7 @@ export default {
       searchPlaceholder: "Search classes...",
       courseLabel: "Course: ",
       exploreMore: "Explore courses",
+      reviewed: "Reviewed",
       reviewedLabel: "Reviewed",
       reviewNow: "Review now",
       completedLabel: "Completed",
