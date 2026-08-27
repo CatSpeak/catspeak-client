@@ -13,7 +13,9 @@ const ShareModal = ({ open, onClose, shareUrl }) => {
     if (isCopied) return
     try {
       await navigator.clipboard.writeText(shareUrl)
-      toast.success(t.news?.newsDetail?.linkCopied || "Link copied to clipboard!")
+      toast.success(
+        t.news?.newsDetail?.linkCopied || "Link copied to clipboard!",
+      )
       setIsCopied(true)
       setTimeout(() => setIsCopied(false), 1000)
     } catch (e) {
@@ -28,24 +30,25 @@ const ShareModal = ({ open, onClose, shareUrl }) => {
       onClose={onClose}
       title={t.news?.newsDetail?.share || "Share"}
       showCloseButton={true}
-      className="max-w-md rounded-xl p-6 shadow-2xl"
+      className="rounded-xl max-w-md"
+      bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
+      footer={
+        <div className="flex justify-end gap-2">
+          <PillButton
+            type="button"
+            variant={isCopied ? "secondary" : "primary"}
+            onClick={handleCopy}
+            disabled={isCopied}
+            className="w-full sm:w-auto"
+          >
+            {isCopied
+              ? t.news?.newsDetail?.copied || "Copied!"
+              : t.news?.newsDetail?.copy || "Copy"}
+          </PillButton>
+        </div>
+      }
     >
-      <div className="flex flex-col gap-4 mt-4">
-        <TextInput
-          id="share-url"
-          value={shareUrl}
-          readOnly
-        />
-        <PillButton
-          type="button"
-          variant={isCopied ? "secondary" : "primary"}
-          onClick={handleCopy}
-          disabled={isCopied}
-          className="w-full"
-        >
-          {isCopied ? (t.news?.newsDetail?.copied || "Copied!") : (t.news?.newsDetail?.copy || "Copy")}
-        </PillButton>
-      </div>
+      <TextInput id="share-url" value={shareUrl} readOnly />
     </Modal>
   )
 }

@@ -82,6 +82,8 @@ export default {
     home: {
       whatOnYourMind: "Bạn đang nghĩ gì?",
       photo: "Ảnh",
+      video: "Video",
+      document: "Tài liệu",
       noPosts: "Chưa có bài viết nào.",
     },
     media: {
@@ -169,6 +171,9 @@ export default {
     post: {
       editor: {
         titleLabel: "Tiêu đề bài viết",
+        titlePlaceholder: "Nhập tiêu đề bài viết...",
+        contentLabel: "Nội dung bài viết",
+        attachmentsLabel: "Tệp đính kèm",
         editTitle: "Chỉnh sửa bài viết",
         createTitle: "Tạo bài viết",
         placeholder: "Bạn đang nghĩ gì?",
@@ -176,11 +181,14 @@ export default {
         cancel: "Hủy",
         post: "Đăng",
         saveChanges: "Lưu thay đổi",
+        savingChanges: "Đang lưu thay đổi...",
+        uploadingPost: "Đang đăng bài viết...",
         processing: "Đang xử lý...",
         selectPrivacy: "Chọn quyền riêng tư",
         photo: "Ảnh",
         video: "Video",
         document: "Tài liệu",
+        contentRequired: "Nội dung bài viết không được để trống.",
         privacy: {
           public: "Công khai",
           friendsOnly: "Bạn bè",
@@ -196,11 +204,14 @@ export default {
         },
         edit: "Chỉnh sửa",
         delete: "Xóa bài viết",
+        views: "lượt xem",
       },
       actions: {
         share: "Chia sẻ",
       },
+      deleteTitle: "Xóa bài viết",
       deleteConfirm: "Bạn có chắc muốn xóa bài viết này?",
+      deleteBtn: "Xóa",
       document: "Tài liệu",
       seeMore: "Xem thêm",
       showLess: "Thu gọn",

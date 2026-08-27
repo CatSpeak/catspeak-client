@@ -18,14 +18,14 @@ const LocalVideoPreview = ({ url }) => {
   }
 
   return (
-    <div className="w-full h-full relative bg-black flex items-center justify-center min-h-[180px] max-h-[300px]">
+    <div className="w-full aspect-video relative bg-black flex items-center justify-center min-h-[180px] max-h-[300px]">
       <video
         ref={videoRef}
         src={url}
         controls={hasStarted}
         playsInline
         preload="metadata"
-        className="w-full max-h-[300px] object-contain"
+        className="w-full h-full object-contain"
         onEnded={handleEnded}
         onClick={(e) => {
           if (hasStarted) e.stopPropagation()

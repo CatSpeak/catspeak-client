@@ -1,30 +1,41 @@
 import React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import dayjs from "dayjs"
-import relativeTime from "dayjs/plugin/relativeTime"
-import "dayjs/locale/vi"
-import "dayjs/locale/zh-cn"
-import { Globe, Users, Lock, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
+import { MoreHorizontal, Edit, Trash2 } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
+import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import TeacherBadge from "@/shared/components/ui/TeacherBadge"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 
-dayjs.extend(relativeTime)
+const isUserTeacher = (user) =>
+  Boolean(user?.isTeacher ?? user?.authorIsTeacher)
 
 const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
-  const { t, language } = useLanguage()
-  const { formatRelative } = useTimezone()
+  const { t } = useLanguage()
+  const { formatTimeAgo } = useTimezone()
   const navigate = useNavigate()
   const location = useLocation()
-  // Map app language to dayjs locale identifier (zh → zh-cn, others match directly)
-  const dayjsLocale = language === "zh" ? "zh-cn" : language
   const authorAccountId = post.accountId || post.authorId || post.userId
+  const isTeacher = isUserTeacher(post)
+
+  const formattedTime = post.createDate
+    ? formatTimeAgo(post.createDate)
+    : t.profile?.post?.header?.justNow || "Vừa xong"
+
+  const privacyText =
+    post.privacy === "Public"
+      ? t.profile?.post?.header?.privacy?.public || "Công khai"
+      : post.privacy === "FriendsOnly"
+        ? t.profile?.post?.header?.privacy?.friendsOnly || "Bạn bè"
+        : post.privacy === "Private"
+          ? t.profile?.post?.header?.privacy?.private || "Chỉ mình tôi"
+          : post.privacy
 
   return (
-    <div className="flex gap-4 justify-between">
-      <div className="flex gap-4">
+    <div className="flex items-center gap-2 justify-between">
+      <div className="flex items-center gap-4">
         <Avatar
           size={40}
           src={post.avatarUrl}
@@ -32,55 +43,37 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
           accountId={authorAccountId}
         />
         <div>
-          <h3
-            onClick={(e) => {
-              if (authorAccountId) {
-                e.stopPropagation()
-                const isWorkspace = location.pathname.startsWith("/workspace")
-                navigate(`${isWorkspace ? "/workspace" : ""}/profile/${authorAccountId}`)
-              }
-            }}
-            className={`font-semibold ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
-          >
-            {post.authorName || "User"}
-          </h3>
-          <p className="text-sm text-[#606060] flex items-center gap-2">
-            <span className="inline-flex items-center gap-1">
-              <Eye size={14} className="text-[#606060]" />
-              <span>{post.viewCount || 0}</span>
-            </span>
-            <span className="w-1 h-1 rounded-full bg-[#606060]"></span>
-            <span>
-              {post.createDate
-                ? formatRelative(post.createDate)
-                : t.profile?.post?.header?.justNow || "Vừa xong"}
-            </span>
-            {post.privacy && (
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h3
+              onClick={(e) => {
+                if (authorAccountId) {
+                  e.stopPropagation()
+                  const isWorkspace = location.pathname.startsWith("/workspace")
+                  navigate(
+                    `${isWorkspace ? "/workspace" : ""}/profile/${authorAccountId}`,
+                  )
+                }
+              }}
+              className={`font-semibold truncate ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
+            >
+              {post.authorName || "User"}
+            </h3>
+            {isTeacher && <TeacherBadge />}
+          </div>
+          <div className="text-sm text-secondary flex items-center flex-wrap gap-x-2">
+            <span className="whitespace-nowrap">{formattedTime}</span>
+            {privacyText && (
               <>
-                <span className="w-1 h-1 rounded-full bg-[#606060]"></span>
-                <span
-                  title={
-                    post.privacy === "Public"
-                      ? t.profile?.post?.header?.privacy?.public || "Công khai"
-                      : post.privacy === "FriendsOnly"
-                        ? t.profile?.post?.header?.privacy?.friendsOnly || "Bạn bè"
-                        : t.profile?.post?.header?.privacy?.private || "Chỉ mình tôi"
-                  }
-                  className="inline-flex items-center"
-                >
-                  {post.privacy === "Public" && (
-                    <Globe size={14} className="text-[#606060]" />
-                  )}
-                  {post.privacy === "FriendsOnly" && (
-                    <Users size={14} className="text-[#606060]" />
-                  )}
-                  {post.privacy === "Private" && (
-                    <Lock size={14} className="text-[#606060]" />
-                  )}
-                </span>
+                <span className="w-1 h-1 rounded-full bg-secondary shrink-0" />
+                <span className="whitespace-nowrap">{privacyText}</span>
               </>
             )}
-          </p>
+            <span className="w-1 h-1 rounded-full bg-[#606060] shrink-0" />
+            <span className="whitespace-nowrap">
+              {post.viewCount || 0}{" "}
+              {t.profile?.post?.header?.views || "lượt xem"}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -93,26 +86,29 @@ const PostHeader = ({ post, isOwnProfile, onEdit, onDelete }) => {
             </IconButton>
           }
           content={(close) => (
-            <div className="w-48 bg-white border border-border rounded-xl shadow-lg overflow-hidden py-1">
-              <button
+            <MenuList className="w-48">
+              <MenuItem
+                icon={<Edit />}
+                label={t.profile?.post?.header?.edit || "Chỉnh sửa"}
                 onClick={() => {
                   onEdit()
                   close()
                 }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <Edit className="w-4 h-4" /> {t.profile?.post?.header?.edit || "Chỉnh sửa"}
-              </button>
-              <button
+              />
+              <MenuItem
+                icon={<Trash2 className="text-red-600" />}
+                label={
+                  <span className="text-red-600">
+                    {t.profile?.post?.header?.delete || "Xóa bài viết"}
+                  </span>
+                }
+                hoverBg="hover:bg-red-50 group-hover:bg-red-50"
                 onClick={() => {
                   onDelete()
                   close()
                 }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" /> {t.profile?.post?.header?.delete || "Xóa bài viết"}
-              </button>
-            </div>
+              />
+            </MenuList>
           )}
         />
       )}
