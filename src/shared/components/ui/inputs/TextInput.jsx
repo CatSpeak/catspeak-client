@@ -26,6 +26,7 @@ const TextInput = ({
   leftContentWidthClass = "pl-14",
   rightContent,
   rightContentWidthClass = "!pr-12",
+  rightContentClassName = "right-4",
   multiline = false,
   floatingLabel = false,
   required = false,
@@ -156,7 +157,9 @@ const TextInput = ({
           </IconButton>
         )}
         {rightContent && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs">
+          <div
+            className={`absolute ${rightContentClassName} top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs`}
+          >
             {rightContent}
           </div>
         )}
