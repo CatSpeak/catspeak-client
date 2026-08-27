@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useParams, Navigate, Outlet } from "react-router-dom"
 import { useGlobalPresence } from "@/shared/context/GlobalPresenceContext"
 
-const DEFAULT_SUPPORTED_LANGUAGES = ["zh", "en"]
+const DEFAULT_SUPPORTED_LANGUAGES = ["zh", "en", "ja"]
 
 const LanguageLayout = ({ supportedLanguages = DEFAULT_SUPPORTED_LANGUAGES }) => {
   const { lang } = useParams()

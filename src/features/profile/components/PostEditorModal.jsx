@@ -78,6 +78,7 @@ const PostEditorModal = ({
     const localLang = localStorage.getItem("communityLanguage")
     if (localLang === "zh") return "Chinese"
     if (localLang === "en") return "English"
+    if (localLang === "ja") return "Japanese"
     return "All"
   })
   const [files, setFiles] = useState([])

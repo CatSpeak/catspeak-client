@@ -253,17 +253,17 @@ const routesConfig = [
           {
             path: "resources",
             element: (
-              <AuthGuard>
+              <LazyRoute>
                 <ResourcesHubPage />
-              </AuthGuard>
+              </LazyRoute>
             ),
           },
           {
             path: "resources/:id",
             element: (
-              <AuthGuard>
+              <LazyRoute>
                 <WebsitePage />
-              </AuthGuard>
+              </LazyRoute>
             ),
           },
           { path: "*", element: <PageNotFound /> },

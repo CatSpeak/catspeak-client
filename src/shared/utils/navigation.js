@@ -32,17 +32,19 @@ const CLASS_LANGUAGE_CODE_MAP = {
   english: "en",
   zh: "zh",
   chinese: "zh",
+  ja: "ja",
+  japanese: "ja",
 }
 
 /**
- * Maps a class language name/code (e.g. "English", "Chinese", "en") to the
- * language code used in the /:lang/meet room URL. The system does not support
- * Vietnamese classes or communities, so Vietnamese is intentionally never
+ * Maps a class language name/code (e.g. "English", "Chinese", "Japanese", "en")
+ * to the language code used in the /:lang/meet room URL. The system does not
+ * support Vietnamese classes or communities, so Vietnamese is intentionally never
  * returned. Returns undefined when the language cannot be resolved so callers
  * can fall back to their own default.
  *
  * @param {string} [classLanguage]
- * @returns {string|undefined} e.g. "en", "zh"
+ * @returns {string|undefined} e.g. "en", "zh", "ja"
  */
 export const getClassLanguageCode = (classLanguage) => {
   if (!classLanguage) return undefined

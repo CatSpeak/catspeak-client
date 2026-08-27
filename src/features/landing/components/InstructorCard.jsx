@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { UserRound } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getImageUrl } from "@/shared/utils/imageUtils"
@@ -8,9 +8,17 @@ import {
   getInstructorRole,
 } from "../utils/instructorUtils"
 
-const InstructorCard = ({ teacher, onExplore }) => {
+const InstructorCard = ({ teacher, onClick, onExplore }) => {
   const { t, language } = useLanguage()
   const [imgError, setImgError] = useState(false)
+
+  const handleClick = (e) => {
+    if (onClick) {
+      onClick(e)
+    } else if (onExplore) {
+      onExplore(e)
+    }
+  }
 
   const languages = useMemo(
     () => parseLanguages(teacher.languagesTeach),
@@ -32,13 +40,12 @@ const InstructorCard = ({ teacher, onExplore }) => {
     t?.landing?.leadingTeam?.defaultInstructor ||
     "Giảng viên"
 
-  const viewText =
-    t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"
+  const viewText = t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"
 
   return (
     <div
-      onClick={onExplore}
-      className="flex-shrink-0 w-[210px] sm:w-[230px] lg:w-[245px] flex flex-col items-center group/card cursor-pointer"
+      onClick={handleClick}
+      className="flex-shrink-0 w-[210px] sm:w-[230px] lg:w-[245px] flex flex-col items-center group/card cursor-pointer snap-start"
     >
       {/* Top Image / Avatar Showcase Frame with rounded-xl */}
       <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100 flex items-center justify-center">
@@ -77,7 +84,7 @@ const InstructorCard = ({ teacher, onExplore }) => {
       </div>
 
       {/* Info Section beneath the image */}
-      <div className="mt-4 text-center w-full px-2">
+      <div className="mt-4 text-center w-full px-4">
         <h3 className="text-base font-bold">{displayName}</h3>
         <p className="text-sm text-secondary">{roleText}</p>
       </div>

@@ -17,13 +17,14 @@ import dayjs from 'dayjs'
 import { Calendar, BookOpen } from 'lucide-react'
 import { useLanguage } from '@/shared/context/LanguageContext'
 
-const MyLearningOverview = ({ onShowAll }) => {
+const MyLearningOverview = () => {
   const navigate = useNavigate()
   const { formatDate, formatScheduleTime, formatScheduleDays } = useTimezone()
   const { t } = useLanguage()
   const lo = t.courses?.student?.myLearningOverview || {}
 
   const [activeTab, setActiveTab] = useState("registered")
+  const [showAll, setShowAll] = useState(false)
 
   // Get sessions from today to next 30 days
   const dateParams = useMemo(() => {
@@ -48,7 +49,12 @@ const MyLearningOverview = ({ onShowAll }) => {
   const joinedClasses = useMemo(() => {
     if (!joinedRes) return []
     const items = joinedRes.data || joinedRes
-    return Array.isArray(items) ? items : []
+    const classes = Array.isArray(items) ? items : []
+
+    return classes.filter(cls => {
+      const status = (cls.status || "").toUpperCase()
+      return status !== "FINISHED" && status !== "ARCHIVED"
+    })
   }, [joinedRes])
 
   const completedClasses = useMemo(() => {
@@ -80,70 +86,78 @@ const MyLearningOverview = ({ onShowAll }) => {
         ]}
       />
 
-      <PageTitle className="text-[#1A1A1A]">
-        {lo.upcomingSessions || "Buổi học sắp diễn ra"}
-      </PageTitle>
+      {joinedClasses.length > 0 && (
+        <>
+          <PageTitle className="text-[#1A1A1A]">
+            {lo.upcomingSessions || "Buổi học sắp diễn ra"}
+          </PageTitle>
 
-      {isSessionsLoading ? (
-        <div className="flex justify-center p-6"><LoadingSpinner /></div>
-      ) : sessions.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {sessions.slice(0, 3).map((session, index) => {
-            const classInfo = session.class || {}
+          {isSessionsLoading ? (
+            <div className="flex justify-center p-6"><LoadingSpinner /></div>
+          ) : sessions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {sessions.slice(0, 3).map((session, index) => {
+                const classInfo = session.class || {}
 
-            const sessionDate = session.date || session.startTime || dateParams.from
-            const formattedDate = formatDate ? formatDate(sessionDate) : sessionDate
+                const sessionDate = session.date || session.startTime || dateParams.from
+                const formattedDate = formatDate ? formatDate(sessionDate) : sessionDate
 
-            const startFormatted = formatScheduleTime && session.rawStartTime
-              ? formatScheduleTime(session.rawStartTime)
-              : session.startTime
+                const startFormatted = formatScheduleTime && session.rawStartTime
+                  ? formatScheduleTime(session.rawStartTime)
+                  : session.startTime
 
-            const endFormatted = formatScheduleTime && session.rawEndTime
-              ? formatScheduleTime(session.rawEndTime)
-              : session.endTime
+                const endFormatted = formatScheduleTime && session.rawEndTime
+                  ? formatScheduleTime(session.rawEndTime)
+                  : session.endTime
 
-            const timeDisplay = startFormatted && endFormatted
-              ? `${startFormatted} - ${endFormatted}`
-              : (lo.noTime || "Chưa có giờ")
+                const timeDisplay = startFormatted && endFormatted
+                  ? `${startFormatted} - ${endFormatted}`
+                  : (lo.noTime || "Chưa có giờ")
 
-            const now = dayjs();
-            const startRaw = dayjs(session.rawStartTime || session.startTime);
-            const endRaw = dayjs(session.rawEndTime || session.endTime);
-            const isLive = now >= startRaw.subtract(15, 'minute') && now <= endRaw;
+                const now = dayjs();
+                const startRaw = dayjs(session.rawStartTime || session.startTime);
+                const endRaw = dayjs(session.rawEndTime || session.endTime);
+                const isLive = now >= startRaw.subtract(15, 'minute') && now <= endRaw;
 
-            return (
-              <NextSessionCard
-                key={session.id || index}
-                title={classInfo.title || classInfo.name || lo.defaultClassTitle || "Lớp học"}
-                language={classInfo.language || "Tiếng Anh"}
-                date={formattedDate}
-                time={timeDisplay}
-                tags={classInfo.levels || []}
-                status={isLive}
-                onAction={() => {
-                  if (isLive) {
-                    navigate(`/${getClassLanguageCode(classInfo.language) || "en"}/meet/${encodeURIComponent(`class-${classInfo.id}`)}`)
-                  } else {
-                    navigate(`/workspace/learning/class/${classInfo.id}`)
-                  }
-                }}
-              />
-            )
-          })}
-        </div>
-      ) : (
-        <div className='col-span-full w-full flex-1'>
-          <EmptyState variant="page"
-            icon={Calendar}
-            iconClassName="w-10 h-10 mb-3 text-gray-300"
-            message={lo.noUpcomingSessions || "Không có lớp học nào sắp diễn ra"} />
-        </div>
+                return (
+                  <NextSessionCard
+                    key={session.id || index}
+                    title={classInfo.title || classInfo.name || lo.defaultClassTitle || "Lớp học"}
+                    language={classInfo.language || "Tiếng Anh"}
+                    date={formattedDate}
+                    time={timeDisplay}
+                    tags={classInfo.levels || []}
+                    status={isLive}
+                    classStatus={classInfo.status}
+                    onAction={() => {
+                      if (isLive) {
+                        navigate(`/${getClassLanguageCode(classInfo.language) || "en"}/meet/${encodeURIComponent(`class-${classInfo.id}`)}`)
+                      } else {
+                        navigate(`/workspace/learning/class/${classInfo.id}`)
+                      }
+                    }}
+                  />
+                )
+              })}
+            </div>
+          ) : (
+            <div className='col-span-full w-full flex-1'>
+              <EmptyState variant="page"
+                icon={Calendar}
+                iconClassName="w-10 h-10 mb-3 text-gray-300"
+                message={lo.noUpcomingSessions || "Không có lớp học nào sắp diễn ra"} />
+            </div>
+          )}
+        </>
       )}
 
       <Tabs
         tabs={tabs}
         activeTab={activeTab}
-        onChange={setActiveTab}
+        onChange={(tabId) => {
+          setActiveTab(tabId)
+          setShowAll(false)
+        }}
         fullWidth={false}
       />
 
@@ -152,7 +166,7 @@ const MyLearningOverview = ({ onShowAll }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {displayClasses.length > 0 ? (
-            displayClasses.slice(0, 3).map((cls) => {
+            displayClasses.slice(0, showAll ? displayClasses.length : 3).map((cls) => {
               const progress = (cls.progress?.completedSessions && cls.progress?.totalSessions)
                 ? Math.round((cls.progress.completedSessions / cls.progress.totalSessions) * 100)
                 : 0
@@ -199,6 +213,7 @@ const MyLearningOverview = ({ onShowAll }) => {
               return (
                 <ClassCard
                   key={cls.id}
+                  instructorId={cls.teacher?.accountId}
                   title={cls.title || cls.name || lo.defaultClassTitle || "Lớp học"}
                   subtitle={cls.courseTitle || cls.courseName || lo.defaultCourseTitle || "-"}
                   instructorName={cls.teacher?.name || lo.unassigned || "Chưa phân công"}
@@ -245,11 +260,13 @@ const MyLearningOverview = ({ onShowAll }) => {
         </div>
       )}
 
-      <div className='flex justify-center items-end'>
-        <PillButton variant='secondary-no-outline' textColor={"#990011"} onClick={onShowAll}>
-          {lo.viewAll || "Xem tất cả"}
-        </PillButton>
-      </div>
+      {displayClasses.length > 3 && (
+        <div className='flex justify-center items-end'>
+          <PillButton variant='secondary-no-outline' textColor={"#990011"} onClick={() => setShowAll(!showAll)}>
+            {showAll ? (lo.showLess || "Thu gọn") : (lo.viewAll || "Xem tất cả")}
+          </PillButton>
+        </div>
+      )}
     </div>
   )
 }

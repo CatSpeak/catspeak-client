@@ -181,7 +181,7 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
   }
 
   return (
-    <div className="w-full animate-fade-in space-y-6">
+    <div className="w-full animate-fade-in">
 
       <PillButton
         startIcon={<ArrowLeft size={16} />}
@@ -193,201 +193,203 @@ const AssignmentDetailView = ({ itemData, onBack, sectionData }) => {
       </PillButton>
 
 
-      {/* Assignment Info Card */}
-      <FluentCard className="p-4 sm:p-6">
-        <div className="flex items-center gap-3 mb-3 flex-wrap">
-          <h1 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A]">{title}</h1>
-          <AssignmentStatusBadge
-            classId={classId}
-            assignmentId={targetAssignmentId}
-            assignment={{ dueDate: deadline, ...assignmentData }}
-            submission={apiSubmission}
-            isCompleted={itemData?.isCompleted}
-          />
-        </div>
-
-        <div className="flex flex-col items-start gap-2 text-sm text-[#7B7979] mb-6 flex-wrap">
-          <span className='font-semibold'>{dict.belongsTo || "Thuộc"}: {sectionData?.name || dict.generalSection || "Mục chung"}</span>
-          {formattedDeadline && (
-            <div className="flex items-center gap-1">
-              <Clock size={14} />
-              <span>{dict.dueDateMeta ? dict.dueDateMeta.replace("{{date}}", formattedDeadline) : `Hạn nộp ${formattedDeadline}`}</span>
-            </div>
-          )}
-        </div>
-
-        {description && (
-          <div
-            className="text-[#5B403C] text-sm mb-6 whitespace-pre-wrap assignment-description-html"
-            dangerouslySetInnerHTML={{ __html: description }}
-          />
-        )}
-
-        {attachments.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {attachments.map((att, idx) => (
-              <div
-                key={idx}
-                onClick={() => handleDownloadAttachment(att.fileUrl || att.url, att.title || att.fileName)}
-                className="flex items-center gap-2 bg-[#FEF6E7] border border-[#FDE1AB] rounded-lg px-3 py-2 cursor-pointer hover:bg-[#FDE1AB] transition-colors"
-              >
-                <FileText size={16} className="text-[#F59E0B]" />
-                <span className="text-sm text-[#5B403C] truncate w-full">
-                  {att.title || att.fileName || (dict.unnamedMaterial ? `${dict.unnamedMaterial} ${idx + 1}` : `Tài liệu ${idx + 1}`)}
-                </span>
-              </div>
-            ))}
+      <div className='space-y-6'>
+        {/* Assignment Info Card */}
+        <FluentCard className="p-4 sm:p-6">
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-semibold text-[#1A1A1A]">{title}</h1>
+            <AssignmentStatusBadge
+              classId={classId}
+              assignmentId={targetAssignmentId}
+              assignment={{ dueDate: deadline, ...assignmentData }}
+              submission={apiSubmission}
+              isCompleted={itemData?.isCompleted}
+            />
           </div>
-        )}
-      </FluentCard>
 
-      {/* Submission Status & Grading */}
-      {(isDone && !isResubmitting) ? (
-        <>
-          {!showGrading && (
-            <FluentCard className="p-4 sm:p-6 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-[#e7effb] flex items-center justify-center shrink-0">
-                    <Check size={24} className="text-[#1c6dd7]" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#1A1A1A]">{sa.submittedHeading || "Đã nộp bài"}</h3>
-                    <p className="text-sm text-[#7B7979] mt-0.5">
-                      {t.courses?.grading?.submittedAtLabel || "Nộp lúc: "} {submittedAt ? formatDateTime(submittedAt) : (t.courses?.grading?.justNow || "Vừa xong")}
-                    </p>
-                    <a href={submissionFileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[#7B7979] mt-0.5 hover:underline">
-                      {submissionFileName}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <PillButton
-                    variant='outline'
-                    borderColor={"#1A1C1C"}
-                    textColor={"#1A1C1C"}
-                    roundedClass='rounded-xl'
-                    onClick={() => handleDownloadAttachment(submissionFileUrl, submissionFileName)}
-                    startIcon={<FileText size={14} />}
-                  >
-                    {t.courses?.grading?.mySubmission || "Bài đã nộp"}
-                  </PillButton>
-                  <PillButton
-                    onClick={() => setIsResubmitting(true)}
-                    roundedClass='rounded-xl'
-                    variant='outline'
-                    startIcon={<RefreshCcw size={14} />}
-                  >
-                    {sa.resubmitButton || "Nộp lại"}
-                  </PillButton>
-                </div>
+          <div className="flex flex-col items-start gap-2 text-sm text-[#7B7979] mb-6 flex-wrap">
+            <span className='font-semibold'>{dict.belongsTo || "Thuộc"}: {sectionData?.name || dict.generalSection || "Mục chung"}</span>
+            {formattedDeadline && (
+              <div className="flex items-center gap-1">
+                <Clock size={14} />
+                <span>{dict.dueDateMeta ? dict.dueDateMeta.replace("{{date}}", formattedDeadline) : `Hạn nộp ${formattedDeadline}`}</span>
               </div>
-            </FluentCard>
-          )}
-
-          {showGrading && (
-            <FluentCard className="p-4 sm:p-6 mb-6">
-              <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">{t.courses?.grading?.examResult || "Kết quả"}</h3>
-
-              <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-                <div className="bg-[#faf0f1] rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shrink-0">
-                  <span className="text-3xl font-bold text-[#c8402e]">{score}</span>
-                  <span className="text-sm font-medium text-[#c8402e]/50">/ 10</span>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold text-[#7B7979] uppercase tracking-wider">{t.courses?.grading?.generalFeedback || "Nhận xét của giảng viên"}</span>
-                  <p className="text-sm text-[#1A1C1C]">
-                    {feedback}
-                  </p>
-                </div>
-              </div>
-            </FluentCard>
-          )}
-        </>
-      ) : (
-        <FluentCard className="p-4 sm:p-6 mb-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg sm:text-xl font-semibold text-[#1A1A1A]">
-              {isResubmitting ? (sa.resubmitHeading || "Nộp lại bài") : (sa.submitHeading || "Nộp bài của bạn")}
-            </h2>
-            {isResubmitting && (
-              <button
-                onClick={() => setIsResubmitting(false)}
-                className="text-sm text-[#4B5563] hover:text-[#1A1A1A] transition-colors"
-              >
-                {sa.cancel || t.courses?.grading?.studentQuiz?.cancel || "Hủy"}
-              </button>
             )}
           </div>
 
-          {selectedFiles.length > 0 && (
-            <div className="space-y-3">
-              {selectedFiles.map((file, idx) => (
-                <HorizontalCard
+          {description && (
+            <div
+              className="text-[#5B403C] text-sm mb-6 whitespace-pre-wrap assignment-description-html"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
+          )}
+
+          {attachments.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attachments.map((att, idx) => (
+                <div
                   key={idx}
-                  leftContent={<FileText size={24} className="text-[#DC2626]" />}
-                  rightContent={
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveFile(idx);
-                      }}
-                      className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors"
-                    >
-                      <X size={18} />
-                    </button>
-                  }
-                  className="w-full !p-4 !min-h-0"
+                  onClick={() => handleDownloadAttachment(att.fileUrl || att.url, att.title || att.fileName)}
+                  className="flex items-center gap-2 bg-[#FEF6E7] border border-[#FDE1AB] rounded-lg px-3 py-2 cursor-pointer hover:bg-[#FDE1AB] transition-colors"
                 >
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-sm font-medium text-[#1A1A1A] truncate">{file.name}</span>
-                    <span className="text-xs text-[#7B7979]">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
-                  </div>
-                </HorizontalCard>
+                  <FileText size={16} className="text-[#F59E0B]" />
+                  <span className="text-sm text-[#5B403C] truncate w-full">
+                    {att.title || att.fileName || (dict.unnamedMaterial ? `${dict.unnamedMaterial} ${idx + 1}` : `Tài liệu ${idx + 1}`)}
+                  </span>
+                </div>
               ))}
             </div>
           )}
-
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept=".doc,.docx,.pdf"
-            multiple={maxFiles > 1}
-            onChange={handleFileChange}
-          />
-
-          {selectedFiles.length < maxFiles && (
-            <FluentCard
-              className="h-[150px] flex flex-col items-center justify-center transition-colors bg-[#f5f5f5] cursor-pointer hover:bg-gray-100 mt-4"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload size={28} className="text-[#9CA3AF] mb-3" />
-              <p className="text-sm text-[#9CA3AF] mb-1 text-center">
-                {sa.supportedFilesSummary
-                  ? sa.supportedFilesSummary.replace("{{formats}}", "doc, pdf").replace("{{maxFiles}}", maxFiles)
-                  : `Hỗ trợ định dạng doc, pdf, tối đa ${maxFiles} tệp`}
-              </p>
-              <p className="text-sm text-[#9CA3AF] text-center">{sa.fileExceedsLimit?.replace("{{fileName}}", "Total").replace("50 MB", "25MB") || "Tổng kích cỡ dưới <= 25mb"}</p>
-            </FluentCard>
-          )}
-
-
-          <div className="flex items-center justify-between w-full">
-            <p className="text-base text-[#7B7979]">
-              {sa.allowLateSubmission || "Cho phép nộp muộn"}: {isAllowLate ? (dict.yes || "Có") : (dict.no || "Không")}
-            </p>
-            <PillButton
-              onClick={handleSubmit}
-              disabled={isSubmitting || selectedFiles.length === 0}
-            >
-              {isSubmitting ? (sa.submittingAssignment || "Đang nộp...") : (sa.submitButton || "Nộp bài")}
-            </PillButton>
-          </div>
         </FluentCard>
-      )}
+
+        {/* Submission Status & Grading */}
+        {(isDone && !isResubmitting) ? (
+          <>
+            {!showGrading && (
+              <FluentCard className="p-4 sm:p-6 mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-xl bg-[#e7effb] flex items-center justify-center shrink-0">
+                      <Check size={24} className="text-[#1c6dd7]" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#1A1A1A]">{sa.submittedHeading || "Đã nộp bài"}</h3>
+                      <p className="text-sm text-[#7B7979] mt-0.5">
+                        {t.courses?.grading?.submittedAtLabel || "Nộp lúc: "} {submittedAt ? formatDateTime(submittedAt) : (t.courses?.grading?.justNow || "Vừa xong")}
+                      </p>
+                      <a href={submissionFileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[#7B7979] mt-0.5 hover:underline">
+                        {submissionFileName}
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <PillButton
+                      variant='outline'
+                      borderColor={"#1A1C1C"}
+                      textColor={"#1A1C1C"}
+                      roundedClass='rounded-xl'
+                      onClick={() => handleDownloadAttachment(submissionFileUrl, submissionFileName)}
+                      startIcon={<FileText size={14} />}
+                    >
+                      {t.courses?.grading?.mySubmission || "Bài đã nộp"}
+                    </PillButton>
+                    <PillButton
+                      onClick={() => setIsResubmitting(true)}
+                      roundedClass='rounded-xl'
+                      variant='outline'
+                      startIcon={<RefreshCcw size={14} />}
+                    >
+                      {sa.resubmitButton || "Nộp lại"}
+                    </PillButton>
+                  </div>
+                </div>
+              </FluentCard>
+            )}
+
+            {showGrading && (
+              <FluentCard className="p-4 sm:p-6 mb-6">
+                <h3 className="text-lg font-semibold text-[#1A1A1A] mb-4">{t.courses?.grading?.examResult || "Kết quả"}</h3>
+
+                <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+                  <div className="bg-[#faf0f1] rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shrink-0">
+                    <span className="text-3xl font-bold text-[#c8402e]">{score}</span>
+                    <span className="text-sm font-medium text-[#c8402e]/50">/ 10</span>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-xs font-semibold text-[#7B7979] uppercase tracking-wider">{t.courses?.grading?.generalFeedback || "Nhận xét của giảng viên"}</span>
+                    <p className="text-sm text-[#1A1C1C]">
+                      {feedback}
+                    </p>
+                  </div>
+                </div>
+              </FluentCard>
+            )}
+          </>
+        ) : (
+          <FluentCard className="p-4 sm:p-6 mb-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg sm:text-xl font-semibold text-[#1A1A1A]">
+                {isResubmitting ? (sa.resubmitHeading || "Nộp lại bài") : (sa.submitHeading || "Nộp bài của bạn")}
+              </h2>
+              {isResubmitting && (
+                <button
+                  onClick={() => setIsResubmitting(false)}
+                  className="text-sm text-[#4B5563] hover:text-[#1A1A1A] transition-colors"
+                >
+                  {sa.cancel || t.courses?.grading?.studentQuiz?.cancel || "Hủy"}
+                </button>
+              )}
+            </div>
+
+            {selectedFiles.length > 0 && (
+              <div className="space-y-3">
+                {selectedFiles.map((file, idx) => (
+                  <HorizontalCard
+                    key={idx}
+                    leftContent={<FileText size={24} className="text-[#DC2626]" />}
+                    rightContent={
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFile(idx);
+                        }}
+                        className="p-1.5 hover:bg-gray-100 rounded-md text-gray-500 transition-colors"
+                      >
+                        <X size={18} />
+                      </button>
+                    }
+                    className="w-full !p-4 !min-h-0"
+                  >
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-sm font-medium text-[#1A1A1A] truncate">{file.name}</span>
+                      <span className="text-xs text-[#7B7979]">{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
+                    </div>
+                  </HorizontalCard>
+                ))}
+              </div>
+            )}
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept=".doc,.docx,.pdf"
+              multiple={maxFiles > 1}
+              onChange={handleFileChange}
+            />
+
+            {selectedFiles.length < maxFiles && (
+              <FluentCard
+                className="h-[150px] flex flex-col items-center justify-center transition-colors bg-[#f5f5f5] cursor-pointer hover:bg-gray-100 mt-4"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={28} className="text-[#9CA3AF] mb-3" />
+                <p className="text-sm text-[#9CA3AF] mb-1 text-center">
+                  {sa.supportedFilesSummary
+                    ? sa.supportedFilesSummary.replace("{{formats}}", "doc, pdf").replace("{{maxFiles}}", maxFiles)
+                    : `Hỗ trợ định dạng doc, pdf, tối đa ${maxFiles} tệp`}
+                </p>
+                <p className="text-sm text-[#9CA3AF] text-center">{sa.fileExceedsLimit?.replace("{{fileName}}", "Total").replace("50 MB", "25MB") || "Tổng kích cỡ dưới <= 25mb"}</p>
+              </FluentCard>
+            )}
+
+
+            <div className="flex items-center justify-between w-full">
+              <p className="text-base text-[#7B7979]">
+                {sa.allowLateSubmission || "Cho phép nộp muộn"}: {isAllowLate ? (dict.yes || "Có") : (dict.no || "Không")}
+              </p>
+              <PillButton
+                onClick={handleSubmit}
+                disabled={isSubmitting || selectedFiles.length === 0}
+              >
+                {isSubmitting ? (sa.submittingAssignment || "Đang nộp...") : (sa.submitButton || "Nộp bài")}
+              </PillButton>
+            </div>
+          </FluentCard>
+        )}
+      </div>
     </div>
   )
 }

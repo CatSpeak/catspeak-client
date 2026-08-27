@@ -129,15 +129,17 @@ const Dropdown = ({
         const forceAlignRight = rect.left + 260 > window.innerWidth && rect.right >= 260
         const forceAlignLeft = rect.right < 260 || rect.left < 50
 
-        setPortalCoords((prev) => {
-          const newTop = rect.top + window.scrollY
-          const newLeft = rect.left + window.scrollX
+        const newTop = rect.top + window.scrollY
+        const winWidth = typeof window !== "undefined" ? window.innerWidth : 360
+        const newWidth = Math.min(rect.width, winWidth - 16)
+        const newLeft = Math.max(8, Math.min(rect.left + window.scrollX, winWidth - newWidth - 8))
 
+        setPortalCoords((prev) => {
           if (
             prev &&
             prev.top === newTop &&
             prev.left === newLeft &&
-            prev.width === rect.width &&
+            prev.width === newWidth &&
             prev.height === rect.height &&
             prev.flipUp === flipUp &&
             prev.forceAlignRight === forceAlignRight &&
@@ -149,7 +151,7 @@ const Dropdown = ({
           return {
             top: newTop,
             left: newLeft,
-            width: rect.width,
+            width: newWidth,
             height: rect.height,
             flipUp,
             forceAlignRight,
@@ -371,6 +373,7 @@ const Dropdown = ({
                   top: portalCoords.top,
                   left: portalCoords.left,
                   width: portalCoords.width,
+                  maxWidth: "calc(100vw - 16px)",
                   height: portalCoords.height,
                   zIndex: 9999,
                   pointerEvents: "none",

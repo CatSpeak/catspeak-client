@@ -14,6 +14,10 @@ const LANG_TO_COMMUNITY = {
   cn: "Chinese",
   china: "Chinese",
   chinese: "Chinese",
+  ja: "Japanese",
+  jp: "Japanese",
+  japan: "Japanese",
+  japanese: "Japanese",
 }
 
 const MailPage = () => {

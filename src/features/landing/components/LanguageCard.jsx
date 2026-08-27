@@ -1,45 +1,51 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { China, UK } from "@/shared/assets/icons/flags"
+import { China, UK, Japan } from "@/shared/assets/icons/flags"
 import { MainLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 
 const languages = [
   {
     code: "zh",
-    name: "Trung Quốc",
+    name: "China",
     labelKey: "china",
     flag: China,
     className: "left-[10%] top-[44%]",
   },
   {
     code: "en",
-    name: "Anh",
+    name: "English",
     labelKey: "english",
     flag: UK,
     className: "left-[53%] top-[44%]",
+  },
+  {
+    code: "ja",
+    name: "Japan",
+    labelKey: "japan",
+    flag: Japan,
+    className: "left-[31.5%] top-[70%]",
   },
 ]
 
 export default function LanguageCard({ onCommunityChange }) {
   const navigate = useNavigate()
   const { t } = useLanguage()
-  const [activeCommunity, setActiveCommunity] = useState("zh")
 
-  useEffect(() => {
+  const [activeCommunity, setActiveCommunity] = useState(() => {
+    if (typeof window === "undefined") return "zh"
     const saved = localStorage.getItem("communityLanguage")
     if (saved && saved !== "vi") {
-      setActiveCommunity(saved)
-    } else {
-      setActiveCommunity("zh")
-      if (saved === "vi") {
-        localStorage.setItem("communityLanguage", "zh")
-      }
+      return saved
     }
-  }, [])
+    if (saved === "vi") {
+      localStorage.setItem("communityLanguage", "zh")
+    }
+    return "zh"
+  })
 
   const handleSelect = (code) => {
-    const target = code === "en" || code === "zh" ? code : "zh"
+    const target = code === "en" || code === "zh" || code === "ja" ? code : "zh"
     setActiveCommunity(target)
     localStorage.setItem("communityLanguage", target)
     if (onCommunityChange) onCommunityChange(target)
@@ -47,13 +53,13 @@ export default function LanguageCard({ onCommunityChange }) {
   }
 
   return (
-    <div className="flex justify-center items-center py-6 sm:py-10 md:py-14 h-[320px] sm:h-[380px] md:h-[420px] lg:h-[440px] overflow-visible select-none">
+    <div className="flex justify-center items-center py-2 sm:py-6 md:py-8 lg:py-4 min-[1280px]:py-8 h-[280px] sm:h-[340px] md:h-[380px] lg:h-[420px] min-[1280px]:h-[480px] w-full max-w-full overflow-visible select-none">
       {/* Ambient background glow */}
-      <div className="absolute w-[520px] lg:w-[580px] h-[320px] lg:h-[350px] bg-rose-500/5 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute w-[320px] sm:w-[420px] lg:w-[460px] min-[1280px]:w-[580px] h-[220px] sm:h-[280px] lg:h-[300px] min-[1280px]:h-[380px] bg-rose-500/5 blur-[80px] sm:blur-[100px] rounded-full pointer-events-none" />
 
       {/* 3D Perspective Viewport */}
       <div
-        className="relative scale-[0.52] sm:scale-[0.68] md:scale-[0.8] lg:scale-[0.78] xl:scale-[0.88] 2xl:scale-[0.96] lg:translate-x-4 xl:translate-x-8 transition-transform duration-300 origin-center"
+        className="relative scale-[0.48] sm:scale-[0.6] md:scale-[0.7] lg:scale-[0.68] min-[1280px]:scale-[0.85] min-[1440px]:scale-[0.95] min-[1600px]:scale-[1] transition-transform duration-300 origin-center"
         style={{ perspective: "1400px" }}
       >
         {/* ═══════════════════════════════════════════════════ */}
@@ -176,7 +182,9 @@ export default function LanguageCard({ onCommunityChange }) {
           {languages.map((item) => {
             const isSelected = activeCommunity === item.code
             const label =
-              t?.header?.countries?.[item.labelKey] || item.name
+              t?.header?.countries?.[item.labelKey] ||
+              t?.landing?.hero?.countries?.[item.labelKey] ||
+              item.name
 
             return (
               <div
@@ -195,16 +203,9 @@ export default function LanguageCard({ onCommunityChange }) {
                       : "bg-gradient-to-b from-[#ffffff] to-[#f8fafc] border border-slate-200/90 hover:brightness-[1.02]"
                   }`}
                   style={{
-                    /* 
-                       Unselected: Raised in 3D (translateZ 8px).
-                       Selected / Active: Slightly pressed in 3D (translateZ 3px).
-                    */
                     transform: isSelected
                       ? "translateZ(3px)"
                       : "translateZ(8px)",
-                    /* 
-                       Solid 3D sides + Soft ambient shadow halo around the button base
-                    */
                     boxShadow: isSelected
                       ? `
                         -0.5px 0.5px 0 #b31614,

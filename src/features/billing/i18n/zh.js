@@ -204,7 +204,8 @@ export default {
       confirmEnroll: "继续注册",
       cancel: "取消",
       removeVoucherTitle: "删除优惠码？",
-      removeVoucherDesc: "您确定要删除优惠码 {{code}} 吗？总付款金额将恢复为 {{totalAmount}}。您将失去 {{discountAmount}} 的折扣优惠。",
+      removeVoucherDesc:
+        "确定要删除代码 {{code}} 吗？付款总额将恢复为 {{totalAmount}}，您将失去 {{discountAmount}} 的折扣。",
       removeVoucherConfirm: "删除优惠码",
 
       // VoucherSection
@@ -245,42 +246,35 @@ export default {
       voucherCountSuffix: "个",
     },
     errorCodes: {
-      // 通用错误
-      COMMON_INTERNAL_SERVER_ERROR: "服务器内部错误，请重试。",
-      COMMON_EXTERNAL_SERVICE_ERROR: "外部服务错误，请稍后重试。",
-      COMMON_BAD_REQUEST: "请求无效，请检查您的输入。",
+      COMMON_INTERNAL_SERVER_ERROR: "发生内部服务器错误，请重试。",
+      COMMON_EXTERNAL_SERVICE_ERROR: "发生外部服务错误，请稍后重试。",
+      COMMON_BAD_REQUEST: "无效请求，请检查输入。",
       COMMON_CONFLICT: "发生冲突，请重试。",
-
-      // 支付错误
-      PAYMENT_PLAN_NOT_FOUND: "所选订阅计划已不再可用。",
-      PAYMENT_CLASS_NOT_FOUND: "未找到该班级或该班级已不再可用。",
-      PAYMENT_LEARNER_NOT_FOUND: "未找到使用该邮笱的 CatSpeak 账户。",
-      PAYMENT_LEARNER_ALREADY_ENROLLED: "该学员已经报名了该班级。",
-      PAYMENT_LEARNER_ALREADY_IN_CHECKOUT: "该学员已在您的结账列表中。",
-      PAYMENT_CLASS_FULL: "该班级已报满。",
-      PAYMENT_ENROLLMENT_PERIOD_INACTIVE: "该班级的报名期尚未开始或已结束。",
+      PAYMENT_PLAN_NOT_FOUND: "所选的订阅方案已不可用。",
+      PAYMENT_CLASS_NOT_FOUND: "未找到该班级，或该班级已不可用。",
+      PAYMENT_LEARNER_NOT_FOUND: "未找到该邮箱对应的 CatSpeak 账号。",
+      PAYMENT_LEARNER_ALREADY_ENROLLED: "该学员已报名此班级。",
+      PAYMENT_LEARNER_ALREADY_IN_CHECKOUT: "该学员已在结算列表中。",
+      PAYMENT_CLASS_FULL: "抱歉，该班级目前已经满员。",
+      PAYMENT_ENROLLMENT_PERIOD_INACTIVE: "该班级的报名时间尚未开放。",
       PAYMENT_CLASS_ALREADY_STARTED: "该班级已开课，不再接受报名。",
-      PAYMENT_VOUCHER_UNAVAILABLE: "优惠码 {{code}} 已不可用，已自动从订单中移除。",
-      PAYMENT_VOUCHER_DISCOUNT_CHANGED: "优惠码折扣金额已变更，请重新检查您的订单。",
-      PAYMENT_LINK_FAILED: "无法创建支付链接，请重试。",
-      PAYMENT_ALREADY_PAID: "该交易已成功支付。",
+      PAYMENT_VOUCHER_UNAVAILABLE: "优惠码 {{code}} 已不可用，已从订单中移除。",
+      PAYMENT_VOUCHER_DISCOUNT_CHANGED: "优惠折扣已变更，请确认您的订单。",
+      PAYMENT_LINK_FAILED: "无法创建付款链接，请重试。",
+      PAYMENT_ALREADY_PAID: "该交易已支付。",
       PAYMENT_ALREADY_CANCELLED: "该交易已支付，无法取消。",
-      PAYMENT_NOT_FOUND: "未找到支付交易。",
-      PAYMENT_SERVICE_NOT_CONFIGURED: "支付服务暂时不可用。",
-      PAYMENT_INVALID_TYPE: "支付类型无效。",
+      PAYMENT_NOT_FOUND: "未找到付款交易。",
+      PAYMENT_SERVICE_NOT_CONFIGURED: "付款服务暂时不可用。",
+      PAYMENT_INVALID_TYPE: "付款类型无效。",
       PAYMENT_TRANSACTION_FAILED: "交易失败，请重试。",
-
-      // 班级报名错误
-      CLASS_ENROLLMENT_SCHEDULE_CONFLICT: "检测到日程冲突。",
-      CLASS_ENROLLMENT_CLASS_FULL: "该班级已报满。",
-      CLASS_ENROLLMENT_PERIOD_CLOSED: "该班级的报名期已结束。",
-      CLASS_ENROLLMENT_CLASS_ALREADY_STARTED: "该班级已开课。",
-
-      // 学员验证错误（来自 gRPC）
-      ACCOUNT_NOT_FOUND: "未找到使用该邮笱的 CatSpeak 账户。",
-      ALREADY_ENROLLED: "该学员已经报名了该班级。",
-      CLASS_FULL: "该班级已报满。",
-      VALIDATION_ERROR: "输入无效，请检查您的输入。",
-    }
+      CLASS_ENROLLMENT_SCHEDULE_CONFLICT: "检测到时间冲突。",
+      CLASS_ENROLLMENT_CLASS_FULL: "该班级目前已经满员。",
+      CLASS_ENROLLMENT_PERIOD_CLOSED: "该班级的报名时间已结束。",
+      CLASS_ENROLLMENT_CLASS_ALREADY_STARTED: "该班级已开始上课。",
+      ACCOUNT_NOT_FOUND: "未找到该邮箱对应的 CatSpeak 账号。",
+      ALREADY_ENROLLED: "该学员已报名此班级。",
+      CLASS_FULL: "抱歉，该班级目前已经满员。",
+      VALIDATION_ERROR: "输入无效，请检查内容。",
+    },
   }
 }

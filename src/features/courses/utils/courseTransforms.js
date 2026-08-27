@@ -468,39 +468,145 @@ export const filterStudentClasses = (classes, filters) => (
   ))
 )
 
+export const formatTaskDueText = (task, options = {}) => {
+  const dueDate = task?.dueDate || task?.DueDate
+  const daysSinceDue = task?.daysSinceDue ?? task?.DaysSinceDue
+  const lang = options.language || "vi"
+
+  if (!dueDate && typeof daysSinceDue !== "number") {
+    return lang === "vi" ? "Chưa có hạn" : lang === "zh" ? "无截止日期" : "No due date"
+  }
+
+  let daysDiff = null
+  if (dueDate) {
+    const dueTime = new Date(dueDate).getTime()
+    if (!isNaN(dueTime)) {
+      const now = new Date().getTime()
+      const diffMs = dueTime - now
+      daysDiff = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+    }
+  }
+
+  if (daysDiff === null && typeof daysSinceDue === "number") {
+    daysDiff = -daysSinceDue
+  }
+
+  if (lang === "vi") {
+    if (daysDiff === null) return "Hạn hôm nay"
+    if (daysDiff < 0) {
+      const absDays = Math.abs(daysDiff)
+      return absDays === 0 ? "Quá hạn hôm nay" : `Quá hạn ${absDays} ngày`
+    }
+    if (daysDiff === 0) return "Hôm nay"
+    if (daysDiff === 1) return "Còn 1 ngày nữa"
+    return `Còn ${daysDiff} ngày nữa`
+  }
+
+  if (lang === "zh") {
+    if (daysDiff === null) return "今天截止"
+    if (daysDiff < 0) {
+      const absDays = Math.abs(daysDiff)
+      return absDays === 0 ? "今天已逾期" : `已逾期 ${absDays} 天`
+    }
+    if (daysDiff === 0) return "今天截止"
+    return `还剩 ${daysDiff} 天`
+  }
+
+  // en
+  if (daysDiff === null) return "Due today"
+  if (daysDiff < 0) {
+    const absDays = Math.abs(daysDiff)
+    return absDays === 0 ? "Overdue today" : `Overdue by ${absDays} days`
+  }
+  if (daysDiff === 0) return "Due today"
+  if (daysDiff === 1) return "1 day left"
+  return `${daysDiff} days left`
+}
+
 export const mapTeachingTask = (task, labels = {}) => {
   if (!task || typeof task !== "object") return null
-  const isQuiz = task.taskType === "QuizGrading" || Boolean(task.quizId)
 
-  const pendingText = task.pendingCount
-    ? fillTemplate(labels.pendingCount, { count: task.pendingCount })
+  const taskType = task.taskType || task.TaskType || "Grading"
+  const assignmentId = task.assignmentId ?? task.AssignmentId ?? null
+  const quizId = task.quizId ?? task.QuizId ?? null
+  const isQuiz = taskType === "QuizGrading" || Boolean(quizId)
+  const taskName = task.taskName || task.TaskName || task.title || task.Title
+  const className = task.className || task.ClassName || task.subtitle || task.Subtitle || ""
+  const classId = task.classId ?? task.ClassId ?? null
+  const courseId = task.courseId ?? task.CourseId ?? null
+  const pendingCount = task.pendingCount ?? task.PendingCount ?? null
+  const totalCount = task.totalCount ?? task.TotalCount ?? null
+  const progressPercent = task.progressPercent ?? task.ProgressPercent ?? 0
+  const rawStatus = String(task.status || task.Status || "Urgent").trim()
+  const daysSinceDue = task.daysSinceDue ?? task.DaysSinceDue ?? null
+  const dueDate = task.dueDate || task.DueDate || null
+  const createdAt = task.createdAt || task.CreatedAt || null
+  const thumbnailUrl = task.thumbnailUrl || task.ThumbnailUrl || null
+
+  const pendingText = pendingCount != null
+    ? fillTemplate(labels.pendingCount, { count: pendingCount })
     : ""
-  const subtitleParts = [task.className, pendingText].filter(Boolean)
-  const rawStatus = String(task.status || "urgent").trim()
+
   const normalizedStatus = rawStatus.toLowerCase()
-  const displayStatus = normalizedStatus === "urgent"
-    ? labels.urgent
-    : normalizedStatus === "required"
-      ? labels.required
-      : labels.unknown
+
+  const displayStatus =
+    normalizedStatus === "urgent"
+      ? labels.urgent || "Urgent"
+      : normalizedStatus === "required"
+        ? labels.required || "Required"
+        : normalizedStatus === "later"
+          ? labels.later || "Later"
+          : labels.unknown || rawStatus
+
+  const badgeClass =
+    normalizedStatus === "urgent"
+      ? "bg-[#FEE2E2] text-[#DC2626]"
+      : normalizedStatus === "required"
+        ? "bg-[#FEF3C7] text-[#B45309]"
+        : "bg-[#EFF6FF] text-[#2563EB]"
+
+  const accentColor =
+    normalizedStatus === "urgent"
+      ? "#E11D48"
+      : normalizedStatus === "required"
+        ? "#F59E0B"
+        : "#3B82F6"
+
+  const title =
+    taskName ||
+    (isQuiz
+      ? labels.gradeQuiz || "Chấm bài kiểm tra"
+      : labels.gradeAssignment || "Chấm bài nộp")
 
   return {
-    id: `${task.taskType || "task"}-${task.assignmentId || 0}-${task.quizId || 0}-${task.classId || 0}-${task.createdAt || ""}`,
-    title: task.taskName || (isQuiz ? labels.gradeQuiz : labels.gradeAssignment),
-    subtitle: subtitleParts.join(" • "),
-    status: displayStatus,
+    ...task,
+    id:
+      task.id ||
+      task.Id ||
+      `${taskType}-${assignmentId || 0}-${quizId || 0}-${classId || 0}-${createdAt || dueDate || Math.random()}`,
+    title,
+    taskName: title,
+    subtitle: className,
+    className,
+    status: rawStatus,
+    displayStatus,
     badge: displayStatus,
-    badgeClass: normalizedStatus === "urgent"
-      ? "bg-[#FFE4E6] text-[#E11D48]"
-      : normalizedStatus === "required"
-        ? "bg-[#FEF3C7] text-[#D97706]"
-        : "bg-[#E8F8F0] text-[#15803D]",
-    iconColor: isQuiz ? "bg-purple-100 text-purple-600" : "bg-blue-100 text-blue-600",
-    taskType: task.taskType,
-    assignmentId: task.assignmentId,
-    quizId: task.quizId,
-    classId: task.classId,
-    courseId: task.courseId,
+    badgeClass,
+    accentColor,
+    pendingText,
+    iconColor: isQuiz ? "text-purple-600" : "text-[#990011]",
+    taskType,
+    assignmentId,
+    quizId,
+    classId,
+    courseId,
+    dueDate,
+    daysSinceDue,
+    pendingCount,
+    totalCount,
+    progressPercent,
+    thumbnailUrl,
+    createdAt,
     rawTask: task,
   }
 }
