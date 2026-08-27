@@ -40,18 +40,12 @@ const Tabs = memo(
               key={tabKey}
               type="button"
               onClick={() => onChange(tabKey)}
-              className={`h-11 shrink-0 group relative flex items-center justify-center transition-colors cursor-pointer ${
-                isResponsive
-                  ? "flex-1 sm:flex-initial px-3 sm:px-4 min-w-fit"
-                  : isFull
-                    ? "flex-1 min-w-fit sm:min-w-[120px]"
-                    : "flex-none px-2.5 sm:px-3.5"
-              }`}
+              className={`h-10 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
+                }`}
             >
               <div
-                className={`relative h-full flex items-center justify-center gap-2 text-sm transition-colors w-full px-2 ${
-                  isActive ? activeClassName : inactiveClassName
-                }`}
+                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${isActive ? activeClassName : inactiveClassName
+                  }`}
               >
                 {Icon && <Icon size={18} className="hidden sm:block" />}
 

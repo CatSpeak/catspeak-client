@@ -15,6 +15,7 @@ import {
   Hand,
   Split,
   LayoutGrid,
+  Clapperboard,
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
@@ -73,6 +74,9 @@ const VideoCallControlBar = () => {
     participants,
     isAISession,
     isHost: isHostFromContext,
+    showWatchTogether,
+    setShowWatchTogether,
+    mediaActive,
   } = useVideoCallContext()
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall)
@@ -189,6 +193,18 @@ const VideoCallControlBar = () => {
           title={isHandRaised ? "Lower hand" : "Raise hand"}
           iconActive={<Hand className={iconClass} />}
           iconInactive={<Hand className={iconClass} />}
+          inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
+        />
+
+        <ControlButton
+          isActive={showWatchTogether}
+          onClick={() => setShowWatchTogether(!showWatchTogether)}
+          title={
+            t?.rooms?.videoCall?.watchTogether?.toggleButton ??
+            "Watch together"
+          }
+          iconActive={<Clapperboard className={iconClass} />}
+          iconInactive={<Clapperboard className={iconClass} />}
           inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
         />
 
