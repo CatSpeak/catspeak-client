@@ -388,6 +388,7 @@ export const baseApi = createApi({
     "PostComment",
     "Recordings",
     "Storage",
+    "Media",
     "InstructorProfile",
     "Locations",
     "Reels",
