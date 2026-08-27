@@ -6,6 +6,7 @@ import ChipFilter from "@/shared/components/ChipFilter"
 import ProfileFolderItem from "./ProfileFolderItem"
 import ProfileFileItem from "./ProfileFileItem"
 import ProfileMaterialsSkeleton from "./ProfileMaterialsSkeleton"
+import FluentCard from "@/shared/components/ui/FluentCard"
 import { EmptyState } from "@/shared/components/ui/indicators"
 import {
   useGetPersonalMaterialsQuery,
@@ -150,10 +151,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
 
   // Fetch API for owner
   const { data: materialsData, isLoading: isLoadingMaterials } =
-    useGetPersonalMaterialsQuery(
-      { keyword: searchQuery },
-      { skip: !isOwnProfile },
-    )
+    useGetPersonalMaterialsQuery(undefined, { skip: !isOwnProfile })
   const { data: treeData, isLoading: isLoadingTree } = useGetFolderTreeQuery(
     undefined,
     { skip: !isOwnProfile },
@@ -162,7 +160,7 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   // Fetch API for guest
   const { data: publicMaterialsData, isLoading: isLoadingPublicMaterials } =
     useGetPublicMaterialsByUserIdQuery(
-      { targetAccountId, keyword: searchQuery },
+      { targetAccountId },
       { skip: isOwnProfile || !targetAccountId },
     )
 
@@ -289,26 +287,15 @@ const ProfileMaterialsTab = ({ targetAccountId, isOwnProfile }) => {
   const filterTabs = [
     {
       id: "all",
-      label: t.materials.allTab.replace(
-        "{{count}}",
-        baseFolders.length + baseFiles.length,
-      ),
+      label: t.materials.allTab,
     },
     {
       id: "public",
-      label: t.materials.publicTab.replace(
-        "{{count}}",
-        baseFolders.filter((f) => f.isPublic).length +
-          baseFiles.filter((f) => f.isPublic).length,
-      ),
+      label: t.materials.publicTab,
     },
     {
       id: "private",
-      label: t.materials.privateTab.replace(
-        "{{count}}",
-        baseFolders.filter((f) => !f.isPublic).length +
-          baseFiles.filter((f) => !f.isPublic).length,
-      ),
+      label: t.materials.privateTab,
     },
   ]
 

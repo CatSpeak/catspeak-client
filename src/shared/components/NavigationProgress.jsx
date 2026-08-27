@@ -60,7 +60,10 @@ const NavigationProgress = () => {
         query?.endpointName === "getBreakoutStatus" ||
         query?.endpointName === "getPostComments" ||
         query?.endpointName === "setDefaultInstructorBankAccount" ||
-        query?.endpointName === "getInstructorBankAccounts"
+        query?.endpointName === "getInstructorBankAccounts" ||
+        query?.endpointName === "getPersonalMaterials" ||
+        query?.endpointName === "getFolderTree" ||
+        query?.endpointName === "getPublicMaterialsByUserId"
       ) {
         return false
       }
