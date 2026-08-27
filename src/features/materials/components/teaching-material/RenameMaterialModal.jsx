@@ -67,10 +67,7 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
   const currentName = item?.fileName || item?.folderName || item?.name || ""
 
   const footer = (
-    <div className="flex items-center justify-end gap-2">
-      <PillButton onClick={onClose} variant="secondary">
-        {t.materials.cancel}
-      </PillButton>
+    <div className="flex items-center justify-end">
       <PillButton
         onClick={handleRename}
         loading={isRenaming}
@@ -90,6 +87,7 @@ const RenameMaterialModal = ({ open, onClose, item }) => {
       footer={footer}
     >
       <TextInput
+        variant="square"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder={t.materials.enterNewName}
