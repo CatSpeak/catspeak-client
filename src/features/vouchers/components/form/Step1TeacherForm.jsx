@@ -31,17 +31,11 @@ const Step1TeacherForm = ({
 
   const [classSearch, setClassSearch] = useState("")
   // Sub-selection mode when inside Course Scope: "all_classes" | "specific_classes"
-  const [courseClassMode, setCourseClassMode] = useState(() => {
-    if (
-      form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES &&
-      !isInitialClassContext
-    ) {
-      return "specific_classes"
-    }
-    return form.classIds && form.classIds.length > 0 && !isInitialClassContext
+  const courseClassMode =
+    form.courseClassMode ||
+    (form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES && !isInitialClassContext
       ? "specific_classes"
-      : "all_classes"
-  })
+      : "all_classes")
 
   // Selected or active course name & info
   const selectedCourseId = form.courseIds?.[0] || courseIdParam
@@ -192,7 +186,7 @@ const Step1TeacherForm = ({
   }
 
   const handleSelectCourseScope = (mode = "all_classes") => {
-    setCourseClassMode(mode)
+    onChange("courseClassMode", mode)
     if (mode === "all_classes") {
       onChange("scopeType", SCOPE_TYPES.SPECIFIC_COURSES)
       onChange("discountType", DISCOUNT_TYPES.FIXED_AMOUNT)

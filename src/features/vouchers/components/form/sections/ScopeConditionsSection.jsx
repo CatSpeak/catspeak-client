@@ -4,6 +4,7 @@ import Banner from "@/shared/components/ui/Banner"
 import ListItem from "@/shared/components/ui/ListItem"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { Radio, Checkbox, SearchInput } from "@/shared/components/ui/inputs"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { SCOPE_TYPES } from "../../../constants/voucherConstants"
 import { formatCurrency } from "../../../utils/voucherTransforms"
 
@@ -23,11 +24,15 @@ export const ScopeConditionsSection = ({
   setClassSearch,
   lowestTuition,
 }) => {
+  const { t } = useLanguage()
+  const vf = t?.vouchers?.form || {}
   const isCourseScope = form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
 
   return (
     <FluentCard className="space-y-4">
-      <h4 className="font-bold">Điều kiện áp dụng</h4>
+      <h4 className="font-bold">
+        {vf.scopeConditions || "Điều kiện áp dụng"}
+      </h4>
 
       {(errors?.classIds || errors?.courseIds || errors?.discountType) && (
         <Banner variant="danger">
@@ -36,10 +41,7 @@ export const ScopeConditionsSection = ({
       )}
 
       {/* Context 1: When inside Class Scope context */}
-      {isInitialClassContext ||
-      (form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES &&
-        !isCourseScope &&
-        courseClassMode !== "specific_classes") ? (
+      {isInitialClassContext ? (
         <div className="space-y-1">
           {/* Option: Lớp học này */}
           <ListItem
@@ -55,10 +57,12 @@ export const ScopeConditionsSection = ({
             className="rounded-xl"
           >
             <span>
-              Lớp học này {classNameParam ? `(${classNameParam})` : ""}
+              {vf.scopeClass || "Áp dụng theo Lớp học"}{" "}
+              {classNameParam ? `(${classNameParam})` : ""}
             </span>
             <span>
-              Voucher chỉ áp dụng cho học viên đăng ký lớp học hiện tại.
+              {vf.scopeClassDesc ||
+                "Voucher chỉ áp dụng cho học viên đăng ký lớp học hiện tại."}
             </span>
           </ListItem>
 
@@ -77,18 +81,22 @@ export const ScopeConditionsSection = ({
           >
             <span>
               {courseDisplayName
-                ? `Tất cả lớp trong khóa ${courseDisplayName}`
-                : "Tất cả lớp trong khóa học"}
+                ? `${vf.allClassesInCourse || "Tất cả lớp trong khóa"} ${courseDisplayName}`
+                : vf.allClassesInCourse || "Tất cả lớp trong khóa"}
             </span>
-            <span>Voucher áp dụng cho mọi lớp học thuộc khóa học này.</span>
+            <span>
+              {vf.scopeCourseDesc ||
+                "Voucher áp dụng cho mọi lớp học thuộc khóa học này."}
+            </span>
           </ListItem>
         </div>
       ) : (
-        /* Context 2: When inside Course Scope context (Image 1 & Image 3) */
+        /* Context 2: When inside Course Scope context */
         <div className="space-y-4">
           <div className="flex flex-col gap-1">
             <span className="text-xs">
-              Áp dụng cho<span className="text-red-500 ml-0.5">*</span>
+              {vf.scopeLabel || "Phạm vi áp dụng"}
+              <span className="text-red-500 ml-0.5">*</span>
             </span>
             <div className="space-y-1">
               <ListItem
@@ -98,7 +106,9 @@ export const ScopeConditionsSection = ({
                 leftContent={<Radio checked={false} disabled={true} />}
                 className="rounded-xl opacity-40 cursor-not-allowed text-secondary"
               >
-                <span>Tất cả khóa học</span>
+                <span>
+                  {vf.scopeAll || "Tất cả khóa/lớp của tôi"}
+                </span>
               </ListItem>
 
               <ListItem
@@ -107,13 +117,16 @@ export const ScopeConditionsSection = ({
                 leftContent={<Radio checked={true} />}
                 className="rounded-xl cursor-default"
               >
-                <span>Khóa học cụ thể ({courseDisplayName})</span>
+                <span>
+                  {vf.scopeCourses || "Khóa học cụ thể"} (
+                  {courseDisplayName})
+                </span>
               </ListItem>
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs">Phạm vi áp dụng trong khóa</span>
+            <span className="text-xs">{vf.scopeInCourse || "Phạm vi áp dụng trong khóa"}</span>
             <div className="space-y-1">
               <ListItem
                 lines={1}
@@ -128,7 +141,8 @@ export const ScopeConditionsSection = ({
                 className="rounded-xl"
               >
                 <span>
-                  Tất cả lớp trong khóa ({courseClasses?.length || 0} lớp)
+                  {vf.allClassesInCourse || "Toàn bộ lớp trong khóa"}{" "}
+                  ({courseClasses?.length || 0} lớp)
                 </span>
               </ListItem>
 
@@ -144,7 +158,10 @@ export const ScopeConditionsSection = ({
                 }
                 className="rounded-xl"
               >
-                <span>Chọn lớp cụ thể</span>
+                <span>
+                  {vf.specificClassesInCourse ||
+                    "Chỉ một số lớp trong khóa"}
+                </span>
               </ListItem>
             </div>
           </div>
@@ -156,7 +173,9 @@ export const ScopeConditionsSection = ({
               <SearchInput
                 value={classSearch}
                 onChange={setClassSearch}
-                placeholder="Tìm lớp theo tên..."
+                placeholder={
+                  vf.searchClasses || "Tìm kiếm lớp học..."
+                }
               />
 
               {/* Checkbox list */}
@@ -166,7 +185,8 @@ export const ScopeConditionsSection = ({
               >
                 {filteredClasses.length === 0 ? (
                   <p className="text-xs text-secondary text-center py-4">
-                    Không tìm thấy lớp học nào trong khóa.
+                    {vf.noClassesFoundInCourse ||
+                      "Không tìm thấy lớp học nào trong khóa."}
                   </p>
                 ) : (
                   filteredClasses.map((cls) => {
@@ -211,14 +231,21 @@ export const ScopeConditionsSection = ({
               </FluentCard>
 
               <div className="flex items-start justify-between text-xs text-secondary">
-                <span>Đã chọn: {form.classIds?.length || 0} lớp</span>
+                <span>
+                  {vf.selectedClassesCount
+                    ? vf.selectedClassesCount.replace(
+                        "{{count}}",
+                        form.classIds?.length || 0,
+                      )
+                    : `Đã chọn ${form.classIds?.length || 0} lớp`}
+                </span>
                 {form.classIds?.length > 0 && (
                   <PillButton
                     variant="secondary-no-outline"
                     textColor="#990011"
                     onClick={() => onChange("classIds", [])}
                   >
-                    <span>Xóa tất cả</span>
+                    <span>{vf.clearAll || "Xóa tất cả"}</span>
                   </PillButton>
                 )}
               </div>

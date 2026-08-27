@@ -10,6 +10,10 @@ export {
   useLazyGenerateVoucherCodeQuery,
   useGenerateVoucherCodeQuery,
   useGetVouchersByClassIdQuery,
+  useGetVoucherDepositInfoQuery,
+  useLazyGetVoucherDepositInfoQuery,
+  useSubmitVoucherDepositMutation,
+  useStopVoucherMutation,
 } from "./api/vouchersApi"
 
 
