@@ -8,6 +8,7 @@ import {
   useStopMediaMutation,
   useGetMediaStatusQuery,
 } from "@/store/api/mediaApi"
+import { useGlobalTask } from "@/shared/hooks/useGlobalTask"
 
 /**
  * Orchestrates the "watch together" (server-broadcast YouTube) feature.
@@ -53,6 +54,9 @@ export const useWatchTogether = ({ sessionId, isHost, t }) => {
     useStartMediaMutation()
   const [stopMediaMutation, { isLoading: isStopping }] = useStopMediaMutation()
 
+  // Global task progress for download progress bar
+  const { startTask } = useGlobalTask()
+
   const startMedia = useCallback(
     async (url) => {
       if (!sessionId) return
@@ -63,22 +67,69 @@ export const useWatchTogether = ({ sessionId, isHost, t }) => {
         )
         return
       }
-      try {
-        const res = await startMediaMutation({ sessionId, url }).unwrap()
-        toast.success(
-          t?.rooms?.videoCall?.watchTogether?.startSuccess ||
-            "Đang phát video chung...",
-        )
-        return res
-      } catch (err) {
-        toast.error(
-          t?.rooms?.videoCall?.watchTogether?.startError ||
-            "Không thể phát video. Vui lòng thử lại.",
-        )
-        throw err
-      }
+
+      // Start with global task progress tracking
+      const result = await startTask({
+        title: t?.rooms?.videoCall?.watchTogether?.downloading || "Đang tải video...",
+        taskType: "WatchTogether",
+        taskFn: async (taskId, reportProgress) => {
+          // Start the API call
+          const apiResult = await startMediaMutation({ sessionId, url }).unwrap()
+
+          // Poll for progress from backend
+          const pollInterval = setInterval(async () => {
+            try {
+              const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL || "/api"}/livekit/media/progress/${sessionId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                },
+              )
+              const data = await response.json()
+              const progress = data?.data
+
+              if (progress) {
+                reportProgress(
+                  Math.max(0, Math.min(99, progress.progress)),
+                  progress.stepName || "Đang tải video...",
+                )
+
+                // If completed or failed, stop polling
+                if (progress.status === 2 || progress.status === 3) {
+                  clearInterval(pollInterval)
+                }
+              }
+            } catch {
+              // Ignore polling errors
+            }
+          }, 1000)
+
+          // Wait for the API call to complete (ingress created)
+          // Then wait a bit more for backend to mark as completed
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          clearInterval(pollInterval)
+
+          return apiResult
+        },
+        onSuccess: () => {
+          toast.success(
+            t?.rooms?.videoCall?.watchTogether?.startSuccess ||
+              "Đang phát video chung...",
+          )
+        },
+        onError: () => {
+          toast.error(
+            t?.rooms?.videoCall?.watchTogether?.startError ||
+              "Không thể phát video. Vui lòng thử lại.",
+          )
+        },
+      })
+
+      return result
     },
-    [sessionId, isHost, startMediaMutation, t],
+    [sessionId, isHost, startMediaMutation, startTask, t],
   )
 
   const stopMedia = useCallback(async () => {
