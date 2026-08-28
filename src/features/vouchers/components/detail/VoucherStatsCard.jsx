@@ -1,6 +1,6 @@
 import React from "react"
-import { TrendingUp } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import ProgressBar from "@/shared/components/ui/ProgressBar"
 import { formatCurrency } from "../../utils/voucherTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -19,7 +19,9 @@ const VoucherStatsCard = ({ voucher = {}, usages = [] }) => {
 
   // Calculate usage percentage
   const usagePercentage =
-    totalLimit > 0 ? Math.min(100, Math.round((usedCount / totalLimit) * 100)) : 0
+    totalLimit > 0
+      ? Math.min(100, Math.round((usedCount / totalLimit) * 100))
+      : 0
 
   // Calculate successful orders count & total discount given
   const successfulOrdersCount = Number(
@@ -29,8 +31,8 @@ const VoucherStatsCard = ({ voucher = {}, usages = [] }) => {
         (u) =>
           u.status === "Success" ||
           u.status === 2 ||
-          u.orderStatus === "Success"
-      ).length
+          u.orderStatus === "Success",
+      ).length,
   )
 
   const totalDiscountGiven = Number(
@@ -41,64 +43,46 @@ const VoucherStatsCard = ({ voucher = {}, usages = [] }) => {
           (u) =>
             u.status === "Success" ||
             u.status === 2 ||
-            u.orderStatus === "Success"
+            u.orderStatus === "Success",
         )
-        .reduce((sum, u) => sum + Number(u.discountAmount || 0), 0)
+        .reduce((sum, u) => sum + Number(u.discountAmount || 0), 0),
   )
 
   return (
-    <FluentCard className="space-y-5">
-      <h4 className="font-bold text-primary">
-        {vd.statsTitle || "Thống kê nhanh"}
-      </h4>
+    <FluentCard className="space-y-6">
+      <h4 className="font-bold">{vd.statsTitle || "Thống kê nhanh"}</h4>
 
       {/* ─── Usage Count & Progress Bar ─── */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs sm:text-sm">
-          <span className="text-secondary font-medium">
-            {vd.usedCount || "Đã sử dụng"}
-          </span>
-          <span className="font-bold text-primary">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-secondary">{vd.usedCount || "Đã sử dụng"}</span>
+          <span>
             {usedCount}/{limitDisplay} {dep.usagesUnit || "lượt"}
           </span>
         </div>
 
         {/* Progress Bar Container */}
-        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-cath-red-700 h-2 rounded-full transition-all duration-500"
-            style={{ width: `${usagePercentage}%` }}
-          />
-        </div>
+        <ProgressBar progress={usagePercentage} heightClass="h-2" />
       </div>
 
-      {/* ─── 3 Metric Cards ─── */}
-      <div className="grid grid-cols-3 gap-3 pt-2">
+      {/* ─── 2 Metric Cards ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
         {/* Box 1: Tổng tiền đã giảm */}
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex flex-col justify-center">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-secondary leading-tight block mb-1">
+        <div className="p-4 rounded-xl bg-slate-50 border border-border flex flex-col gap-1">
+          <span className="text-sm text-secondary">
             {vd.totalDiscountGiven || "Tổng tiền đã giảm"}
           </span>
-          <span className="text-sm sm:text-base md:text-lg font-black text-cath-red-700 truncate">
+          <span className="text-2xl font-bold text-cath-red-700">
             {formatCurrency(totalDiscountGiven)}
           </span>
         </div>
 
         {/* Box 2: Đơn thành công */}
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex flex-col justify-center">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-secondary leading-tight block mb-1">
+        <div className="p-4 rounded-xl bg-slate-50 border border-border flex flex-col gap-1">
+          <span className="text-sm text-secondary">
             {vd.successOrders || "Đơn thành công"}
           </span>
-          <span className="text-sm sm:text-base md:text-lg font-black text-primary">
-            {successfulOrdersCount}
-          </span>
-        </div>
-
-        {/* Box 3: Trending chart indicator */}
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-xl bg-white shadow-xs flex items-center justify-center text-cath-red-700">
-            <TrendingUp className="w-5 h-5 stroke-[2.5]" />
-          </div>
+          <span className="text-2xl font-bold">{successfulOrdersCount}</span>
         </div>
       </div>
     </FluentCard>

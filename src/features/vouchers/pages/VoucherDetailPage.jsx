@@ -5,7 +5,6 @@ import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import {
   useGetVoucherByIdQuery,
@@ -17,6 +16,7 @@ import VoucherConfigCard from "../components/detail/VoucherConfigCard"
 import VoucherStatsCard from "../components/detail/VoucherStatsCard"
 import VoucherRefundCard from "../components/detail/VoucherRefundCard"
 import VoucherUsagesTable from "../components/detail/VoucherUsagesTable"
+import VoucherDetailSkeleton from "../components/detail/VoucherDetailSkeleton"
 import StopVoucherModal from "../components/detail/StopVoucherModal"
 
 const VoucherDetailPage = () => {
@@ -83,35 +83,28 @@ const VoucherDetailPage = () => {
   }
 
   const isActive = voucher?.status === "Active" || voucher?.status === 2
+  const isDraft =
+    voucher?.status === "Draft" ||
+    voucher?.status === 1 ||
+    voucher?.status === "BẢN NHÁP"
 
   if (isLoadingVoucher) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <LoadingSpinner className="w-8 h-8 text-cath-red-700" />
-        <p className="text-xs text-secondary mt-2 font-medium">
-          {t?.vouchers?.loading || "Đang tải thông tin voucher..."}
-        </p>
-      </div>
-    )
+    return <VoucherDetailSkeleton />
   }
 
   if (isVoucherError && !voucher) {
     return (
       <div className="flex-1 w-full flex items-center justify-center py-12 px-4 my-auto animate-in fade-in zoom-in-95 duration-200">
-        <FluentCard className="w-full max-w-md text-center flex flex-col items-center justify-center shadow-xs">
+        <FluentCard className="w-full max-w-md text-center flex flex-col items-center justify-center shadow-xs p-6">
           <AlertCircle className="w-12 h-12 text-rose-500 mb-4" />
-          <h2 className="font-bold text-xl text-primary tracking-tight mb-2">
+          <h2 className="font-bold text-2xl text-primary tracking-tight mb-2">
             {t?.vouchers?.notFound || "Không tìm thấy thông tin voucher"}
           </h2>
-          <p className="text-sm text-secondary mb-6 max-w-sm">
+          <p className="text-base text-secondary mb-6 max-w-sm">
             {t?.vouchers?.notFoundDesc ||
               "Voucher không tồn tại hoặc bạn không có quyền truy cập."}
           </p>
-          <PillButton
-            type="button"
-            variant="primary"
-            onClick={handleGoBack}
-          >
+          <PillButton type="button" variant="primary" onClick={handleGoBack}>
             {t?.vouchers?.back || "Quay lại"}
           </PillButton>
         </FluentCard>
@@ -120,7 +113,7 @@ const VoucherDetailPage = () => {
   }
 
   return (
-    <div className="w-full space-y-6 pb-28 animate-in fade-in duration-300">
+    <div className="w-full space-y-6 text-base animate-in fade-in duration-300">
       {/* Back Button */}
       <PillButton
         variant="secondary"
@@ -133,26 +126,38 @@ const VoucherDetailPage = () => {
 
       {/* Header: Title + Status Badge + Action Button */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 min-w-0">
-          <PageTitle className="font-mono tracking-tight">
-            {voucher?.code || id}
-          </PageTitle>
+        <div className="flex flex-wrap items-center gap-4 min-w-0">
+          <PageTitle>{voucher?.code || id}</PageTitle>
           {voucher && <VoucherStatusBadge status={voucher.status} />}
         </div>
 
-        {/* Right: [Dừng sớm] Button (Only visible when Active - BR-VC-GV-23) */}
-        {isActive && (
-          <div className="flex items-center justify-end">
+        {/* Actions on Header */}
+        <div className="flex items-center justify-end gap-2">
+          {/* Active: Dừng sớm (BR-VC-GV-23) */}
+          {isActive && (
             <PillButton
               type="button"
-              variant="secondary-no-outline"
-              textColor="#990011"
+              variant="secondary"
+              textColor="#dc2626"
               onClick={() => setIsStopModalOpen(true)}
             >
               {t?.vouchers?.actions?.stopEarly || "Dừng sớm"}
             </PillButton>
-          </div>
-        )}
+          )}
+
+          {/* Draft: Chỉnh sửa */}
+          {isDraft && (
+            <PillButton
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                navigate(`/workspace/vouchers/edit/${voucher?.id || id}`)
+              }
+            >
+              {t?.vouchers?.actions?.edit || "Chỉnh sửa"}
+            </PillButton>
+          )}
+        </div>
       </div>
 
       {/* Top 2-Column Grid: Config & Deposit (Left) vs Stats & Refund (Right) */}

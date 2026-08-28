@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { useGetVouchersQuery } from "../api/vouchersApi"
 import VoucherTable from "./VoucherTable"
+import VoucherTableSkeleton from "./VoucherTableSkeleton"
 import VoucherUsagesModal from "./VoucherUsagesModal"
 import Banner from "@/shared/components/ui/Banner"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { SearchInput } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
@@ -42,8 +42,14 @@ const VouchersTab = ({
       { value: "all", label: vt.allStatuses || "Tất cả trạng thái" },
       { value: "Active", label: vt.status?.Active || "Đang hoạt động" },
       { value: "Draft", label: vt.status?.Draft || "Bản nháp" },
-      { value: "PendingDeposit", label: vt.status?.PendingDeposit || "Chờ đặt cọc" },
-      { value: "PendingApproval", label: vt.status?.PendingApproval || "Chờ duyệt" },
+      {
+        value: "PendingDeposit",
+        label: vt.status?.PendingDeposit || "Chờ đặt cọc",
+      },
+      {
+        value: "PendingApproval",
+        label: vt.status?.PendingApproval || "Chờ duyệt",
+      },
       { value: "Expired", label: vt.status?.Expired || "Hết hạn" },
       { value: "Disabled", label: vt.status?.Disabled || "Vô hiệu hóa" },
     ],
@@ -168,12 +174,7 @@ const VouchersTab = ({
 
       {/* ─── Table Content ─── */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200/80">
-          <LoadingSpinner className="w-8 h-8 text-cath-red-700" />
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            {vt.loadingList || "Đang tải danh sách ưu đãi..."}
-          </p>
-        </div>
+        <VoucherTableSkeleton rows={5} />
       ) : (
         <VoucherTable
           vouchers={vouchersList}

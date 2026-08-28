@@ -1,15 +1,14 @@
 import React, { useState, useMemo } from "react"
-import {
-  Search,
-  SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  User,
-} from "lucide-react"
-import Popover from "@/shared/components/ui/Popover"
-import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
+import { ChevronLeft, ChevronRight, User } from "lucide-react"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import { formatCurrency, formatVoucherDate } from "../../utils/voucherTransforms"
+import {
+  formatCurrency,
+  formatVoucherDate,
+} from "../../utils/voucherTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 // User Avatar with initials fallback (e.g. "NT" for "Nguyễn Văn A")
@@ -28,13 +27,13 @@ const UserAvatar = ({ name = "", avatarUrl = "" }) => {
       <img
         src={avatarUrl}
         alt={name}
-        className="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
+        className="w-8 h-8 rounded-full object-cover border border-border shrink-0"
       />
     )
   }
 
   return (
-    <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center text-xs font-bold shrink-0">
+    <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 border border-border flex items-center justify-center text-xs font-bold shrink-0">
       {getInitials(name)}
     </div>
   )
@@ -56,10 +55,31 @@ const VoucherUsagesTable = ({
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 5
 
+  // Status Filter Options for Dropdown
+  const statusOptions = useMemo(
+    () => [
+      { value: "all", label: vu.allStatuses || "Tất cả trạng thái" },
+      { value: "Success", label: vu.orderStatusSuccess || "Thành công" },
+      {
+        value: "Pending",
+        label:
+          vu.orderStatusWaitingPayment ||
+          vu.orderStatusPending ||
+          "Chờ thanh toán",
+      },
+      { value: "Cancelled", label: vu.orderStatusCancelled || "Đã hủy" },
+    ],
+    [vu],
+  )
+
   // Status Badge Helper
   const renderUsageStatusBadge = (status) => {
     const normalized = String(status || "").toLowerCase()
-    if (normalized === "success" || normalized === "2" || normalized === "thành công") {
+    if (
+      normalized === "success" ||
+      normalized === "2" ||
+      normalized === "thành công"
+    ) {
       return (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 tracking-wide">
           {vu.orderStatusSuccess?.toUpperCase() || "THÀNH CÔNG"}
@@ -74,7 +94,9 @@ const VoucherUsagesTable = ({
     ) {
       return (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 tracking-wide">
-          {vu.orderStatusWaitingPayment?.toUpperCase() || vu.orderStatusPending?.toUpperCase() || "CHỜ THANH TOÁN"}
+          {vu.orderStatusWaitingPayment?.toUpperCase() ||
+            vu.orderStatusPending?.toUpperCase() ||
+            "CHỜ THANH TOÁN"}
         </span>
       )
     }
@@ -113,13 +135,28 @@ const VoucherUsagesTable = ({
       if (statusFilter !== "all") {
         const itemStatus = String(item.status || "").toLowerCase()
         const filterNormalized = statusFilter.toLowerCase()
-        if (filterNormalized === "success" && !itemStatus.includes("success") && itemStatus !== "2" && itemStatus !== "thành công") {
+        if (
+          filterNormalized === "success" &&
+          !itemStatus.includes("success") &&
+          itemStatus !== "2" &&
+          itemStatus !== "thành công"
+        ) {
           return false
         }
-        if (filterNormalized === "pending" && !itemStatus.includes("pending") && itemStatus !== "1" && !itemStatus.includes("chờ")) {
+        if (
+          filterNormalized === "pending" &&
+          !itemStatus.includes("pending") &&
+          itemStatus !== "1" &&
+          !itemStatus.includes("chờ")
+        ) {
           return false
         }
-        if (filterNormalized === "cancelled" && !itemStatus.includes("cancel") && itemStatus !== "3" && !itemStatus.includes("hủy")) {
+        if (
+          filterNormalized === "cancelled" &&
+          !itemStatus.includes("cancel") &&
+          itemStatus !== "3" &&
+          !itemStatus.includes("hủy")
+        ) {
           return false
         }
       }
@@ -140,7 +177,7 @@ const VoucherUsagesTable = ({
   const startRecord = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
   const endRecord = Math.min(currentPage * pageSize, totalCount)
 
-  // Generate pagination page numbers
+  // Generate pagination page numbers matching IconButton styling
   const renderPaginationButtons = () => {
     const pages = []
     if (totalPages <= 5) {
@@ -162,27 +199,24 @@ const VoucherUsagesTable = ({
         return (
           <span
             key={`ellipsis-${idx}`}
-            className="w-8 h-8 flex items-center justify-center text-xs text-slate-400"
+            className="px-1 text-sm text-slate-400 font-semibold select-none shrink-0"
           >
-            ...
+            …
           </span>
         )
       }
 
       const isActive = p === currentPage
       return (
-        <button
+        <IconButton
           key={`page-${p}`}
-          type="button"
+          size="sm"
+          variant={isActive ? "primary" : "ghost"}
           onClick={() => setCurrentPage(p)}
-          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            isActive
-              ? "bg-cath-red-700 text-white shadow-xs"
-              : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/80"
-          }`}
+          title={`Trang ${p}`}
         >
-          {p}
-        </button>
+          <span className="text-sm font-semibold">{p}</span>
+        </IconButton>
       )
     })
   }
@@ -195,103 +229,65 @@ const VoucherUsagesTable = ({
     : `Hiển thị ${startRecord} đến ${endRecord} trong ${totalCount} kết quả`
 
   return (
-    <FluentCard className="space-y-5">
+    <FluentCard className="space-y-4">
       {/* ─── Header: Title & Search/Filter ─── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <h4 className="font-bold text-primary">
-          {vu.title || "Lịch sử sử dụng"}
-        </h4>
+        <h4 className="font-bold">{vu.title || "Lịch sử sử dụng"}</h4>
 
         <div className="flex items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
+          <div className="w-full sm:w-64">
+            <SearchInput
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
+              onChange={(val) => {
+                setSearchTerm(val)
                 setCurrentPage(1)
               }}
               placeholder={vu.searchUserPlaceholder || "Tìm người dùng..."}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cath-red-500/20 focus:border-cath-red-500 transition-all"
             />
           </div>
 
-          {/* Filter Popover */}
-          <Popover
-            placement="bottom-right"
-            trigger={
-              <button
-                type="button"
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  statusFilter !== "all"
-                    ? "border-cath-red-300 bg-cath-red-50 text-cath-red-700"
-                    : "border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-800"
-                }`}
-                title={vu.filterStatus || "Lọc trạng thái"}
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-              </button>
-            }
-            content={(close) => (
-              <MenuList className="w-44 p-1">
-                <MenuItem
-                  label={vu.allStatuses || "Tất cả trạng thái"}
-                  active={statusFilter === "all"}
-                  onClick={() => {
-                    setStatusFilter("all")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-                <MenuItem
-                  label={vu.orderStatusSuccess || "Thành công"}
-                  active={statusFilter === "Success"}
-                  onClick={() => {
-                    setStatusFilter("Success")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-                <MenuItem
-                  label={vu.orderStatusWaitingPayment || vu.orderStatusPending || "Chờ thanh toán"}
-                  active={statusFilter === "Pending"}
-                  onClick={() => {
-                    setStatusFilter("Pending")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-                <MenuItem
-                  label={vu.orderStatusCancelled || "Đã hủy"}
-                  active={statusFilter === "Cancelled"}
-                  onClick={() => {
-                    setStatusFilter("Cancelled")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-              </MenuList>
-            )}
-          />
+          {/* Filter Dropdown */}
+          <div className="w-full sm:w-auto">
+            <Dropdown
+              options={statusOptions}
+              value={statusFilter}
+              onChange={(val) => {
+                setStatusFilter(val)
+                setCurrentPage(1)
+              }}
+              placeholder={vu.allStatuses || "Tất cả trạng thái"}
+              triggerClassName="w-full sm:!min-w-[160px] text-xs"
+              dropdownClassName="min-w-[170px]"
+            />
+          </div>
         </div>
       </div>
 
       {/* ─── Table Content ─── */}
       <div className="overflow-x-auto -mx-6 px-6">
-        <table className="w-full text-left text-xs sm:text-sm">
+        <table className="w-full text-left text-sm sm:text-base">
           <thead>
-            <tr className="text-[11px] uppercase tracking-wider font-bold text-secondary border-b border-slate-100">
-              <th className="py-3 px-3 w-[18%] font-semibold">{vu.timeHeader || "THỜI GIAN"}</th>
-              <th className="py-3 px-3 w-[26%] font-semibold">{vu.userHeader || "NGƯỜI DÙNG"}</th>
-              <th className="py-3 px-3 w-[24%] font-semibold">{vu.classHeader || "LỚP HỌC"}</th>
-              <th className="py-3 px-3 w-[16%] font-semibold">{vu.discountHeader || "SỐ TIỀN GIẢM"}</th>
-              <th className="py-3 px-3 w-[16%] text-center font-semibold">{vu.statusHeader || "TRẠNG THÁI"}</th>
+            <tr className="text-xs uppercase tracking-wider font-bold text-secondary border-b border-border">
+              <th className="py-3 px-3 w-[18%] font-semibold">
+                {vu.timeHeader || "THỜI GIAN"}
+              </th>
+              <th className="py-3 px-3 w-[26%] font-semibold">
+                {vu.userHeader || "NGƯỜI DÙNG"}
+              </th>
+              <th className="py-3 px-3 w-[24%] font-semibold">
+                {vu.classHeader || "LỚP HỌC"}
+              </th>
+              <th className="py-3 px-3 w-[16%] font-semibold">
+                {vu.discountHeader || "SỐ TIỀN GIẢM"}
+              </th>
+              <th className="py-3 px-3 w-[16%] text-center font-semibold">
+                {vu.statusHeader || "TRẠNG THÁI"}
+              </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
                 <td colSpan={5} className="py-12 text-center text-slate-400">
@@ -300,11 +296,15 @@ const VoucherUsagesTable = ({
               </tr>
             ) : paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center">
-                  <User className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                  <p className="text-xs text-slate-400 font-medium">
-                    {vu.noUsagesFound || "Không tìm thấy lịch sử sử dụng phù hợp."}
-                  </p>
+                <td colSpan={5} className="py-4">
+                  <EmptyState
+                    variant="component"
+                    icon={User}
+                    title={
+                      vu.noUsagesFound ||
+                      "Không tìm thấy lịch sử sử dụng phù hợp."
+                    }
+                  />
                 </td>
               </tr>
             ) : (
@@ -314,7 +314,7 @@ const VoucherUsagesTable = ({
                   className="hover:bg-slate-50/60 transition-colors"
                 >
                   {/* Thời gian */}
-                  <td className="py-4 px-3 text-slate-600 text-xs whitespace-nowrap">
+                  <td className="py-4 px-3 text-slate-600 text-sm whitespace-nowrap">
                     {formatVoucherDate(usage.usedAt || usage.createdAt, true)}
                   </td>
 
@@ -322,7 +322,9 @@ const VoucherUsagesTable = ({
                   <td className="py-4 px-3">
                     <div className="flex items-center gap-2.5">
                       <UserAvatar
-                        name={usage.userName || vu.studentFallback || "Học viên"}
+                        name={
+                          usage.userName || vu.studentFallback || "Học viên"
+                        }
                         avatarUrl={usage.userAvatar}
                       />
                       <span className="font-bold text-slate-900 truncate max-w-[150px] sm:max-w-[200px]">
@@ -355,35 +357,35 @@ const VoucherUsagesTable = ({
       </div>
 
       {/* ─── Footer Pagination ─── */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs text-secondary">
-        <div>
-          {paginationShowingText}
-        </div>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border text-sm text-secondary">
+        <div>{paginationShowingText}</div>
 
         {totalPages > 1 && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {/* Prev Page Button */}
-            <button
-              type="button"
+            <IconButton
+              size="sm"
+              variant="ghost"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="w-8 h-8 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all cursor-pointer"
+              title="Trang trước"
             >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+              <ChevronLeft />
+            </IconButton>
 
             {/* Numeric Page Buttons */}
             {renderPaginationButtons()}
 
             {/* Next Page Button */}
-            <button
-              type="button"
+            <IconButton
+              size="sm"
+              variant="ghost"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="w-8 h-8 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all cursor-pointer"
+              title="Trang sau"
             >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+              <ChevronRight />
+            </IconButton>
           </div>
         )}
       </div>

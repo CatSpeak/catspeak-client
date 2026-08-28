@@ -281,8 +281,8 @@ const CourseDetailPage = () => {
   }
 
   const courseTabs = [
-    { value: "overview", label: c.courseDetail?.overview || "Tổng quan" },
-    ...(isCourseTeacher ? [{ value: "vouchers", label: c.courseDetail?.vouchers || "Ưu đãi" }] : []),
+    { value: "overview", label: c.courseDetail?.overview || "Overview" },
+    ...(isCourseTeacher ? [{ value: "vouchers", label: c.courseDetail?.vouchers || "Vouchers" }] : []),
   ]
 
   return (

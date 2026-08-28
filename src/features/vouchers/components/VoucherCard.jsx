@@ -1,34 +1,29 @@
-import React from "react"
-import {
-  Copy,
-  Check,
-  Eye,
-  Edit3,
-} from "lucide-react"
+import React, { useState } from "react"
+import { Copy, Check } from "lucide-react"
 import { toast } from "react-hot-toast"
 import VoucherStatusBadge from "./VoucherStatusBadge"
-import {
-  formatCurrency,
-  formatDiscountBadgeText,
-  formatScopeLabel,
-} from "../utils/voucherTransforms"
+import Divider from "@/shared/components/ui/Divider"
+import { PillButton, IconButton } from "@/shared/components/ui/buttons"
+import { formatDiscountBadgeText } from "../utils/voucherTransforms"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useTimezone } from "@/shared/hooks/useTimezone"
 
 const VoucherCard = ({
-  voucher,
+  voucher = {},
   onViewDetails,
   onEditDraft,
   onOpenTransfer,
   onOpenRejection,
   onOpenStop,
-  onOpenCancel,
 }) => {
   const { t } = useLanguage()
   const vt = t.vouchers || {}
-  const [copied, setCopied] = React.useState(false)
+  const { formatDate } = useTimezone()
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = (e) => {
     e.stopPropagation()
+    if (!voucher.code) return
     navigator.clipboard.writeText(voucher.code)
     setCopied(true)
     toast.success(vt.actions?.copied || "Đã sao chép mã voucher!")
@@ -37,8 +32,6 @@ const VoucherCard = ({
 
   const used = voucher.usedCount || 0
   const limit = voucher.totalUsageLimit || 0
-  const usagePercent = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0
-  const depositAmount = voucher.depositAmount ?? voucher.depositRequired ?? 0
 
   const status = voucher.status
   const isActive = status === "Active" || status === 2 || status === "HOẠT ĐỘNG"
@@ -50,168 +43,157 @@ const VoucherCard = ({
   const isRejected = status === "Rejected" || status === 8
   const isDraft = status === "Draft" || status === 1
 
+  // Format validity matching VoucherTable
+  const renderValidity = () => {
+    if (voucher.isNeverExpired) {
+      return vt.table?.neverExpired || "Không giới hạn"
+    }
+    const from = voucher.validFrom ? formatDate(voucher.validFrom) : null
+    const to = voucher.validTo ? formatDate(voucher.validTo) : null
+
+    if (from && to) {
+      return `${from} - ${to}`
+    }
+    if (from) {
+      return `${vt.table?.from || "Từ"} ${from}`
+    }
+    if (to) {
+      return `${vt.table?.to || "Đến"} ${to}`
+    }
+    return "-"
+  }
+
+  const hasActions =
+    (isActive && onOpenStop) ||
+    (isPendingDeposit && onOpenTransfer) ||
+    (isRejected && onOpenRejection) ||
+    (isDraft && onEditDraft)
+
   return (
     <div
-      onClick={() => onViewDetails(voucher)}
-      className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all cursor-pointer space-y-3"
+      onClick={() => onViewDetails?.(voucher)}
+      className="rounded-xl bg-white border border-border cursor-pointer"
     >
-      {/* Header: Code & Status */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 font-mono font-bold text-xs text-slate-900">
-          <span>{voucher.code}</span>
-          <button
-            type="button"
+      {/* Header: Code & Status Badge */}
+      <div className="h-[56px] px-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="font-bold">{voucher.code || "-"}</span>
+          <IconButton
+            size="sm"
+            variant="ghost"
             onClick={handleCopy}
-            className="text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer"
+            title={vt.actions?.copy || "Sao chép"}
           >
-            {copied ? (
-              <Check className="w-3 h-3 text-emerald-600" />
-            ) : (
-              <Copy className="w-3 h-3" />
-            )}
-          </button>
+            {copied ? <Check className="text-emerald-600" /> : <Copy />}
+          </IconButton>
         </div>
+
         <VoucherStatusBadge status={voucher.status} />
       </div>
 
-      {/* Title & Description */}
-      <div>
-        <h4 className="font-bold text-sm text-slate-900 line-clamp-1">
-          {voucher.title}
-        </h4>
-        {voucher.description && (
-          <p className="text-xs text-slate-400 line-clamp-2 mt-0.5">
-            {voucher.description}
-          </p>
-        )}
-      </div>
-
-      {/* Discount & Scope Meta */}
-      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-        <div>
-          <span className="text-[11px] text-slate-400 block">
-            {vt.table?.discount ? `${vt.table.discount}:` : "Mức giảm:"}
+      {/* Stacked Key-Value List matching Table columns */}
+      <div className="px-4 flex flex-col gap-1">
+        {/* Tên voucher */}
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-secondary shrink-0">
+            {vt.table?.title || "Tên voucher"}
           </span>
-          <span className="font-bold text-cath-red-700">
+          <span className="text-right truncate">{voucher.title}</span>
+        </div>
+
+        {/* Mức giảm */}
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-secondary shrink-0">
+            {vt.table?.discount || "Mức giảm"}
+          </span>
+          <span className="text-cath-red-700 text-right truncate">
             {formatDiscountBadgeText(voucher)}
           </span>
         </div>
-        <div>
-          <span className="text-[11px] text-slate-400 block">
-            {vt.table?.scope || "Phạm vi:"}
+
+        {/* Hiệu lực */}
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-secondary shrink-0">
+            {vt.table?.validity || "Hiệu lực"}
           </span>
-          <span className="font-medium text-slate-700 line-clamp-1">
-            {formatScopeLabel(voucher.scopeType, t)}
+          <span className="text-right truncate">{renderValidity()}</span>
+        </div>
+
+        {/* Đã dùng */}
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-secondary shrink-0">
+            {vt.table?.usage || "Đã dùng"}
+          </span>
+          <span className="text-right truncate">
+            {used} / {limit > 0 ? limit : "∞"}
           </span>
         </div>
       </div>
 
-      {/* Usage Progress & Deposit */}
-      <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="text-slate-400">
-            {vt.table?.usage ? `${vt.table.usage}:` : "Lượt dùng:"}
-          </span>
-          <span className="font-semibold text-slate-700">
-            {used} / {limit > 0 ? limit : "∞"} ({usagePercent}%)
-          </span>
+      {/* Footer Actions */}
+      {hasActions && (
+        <div
+          className="p-4 flex items-center justify-end gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Active: Dừng sớm */}
+          {isActive && onOpenStop && (
+            <PillButton
+              type="button"
+              variant="secondary"
+              textColor="#dc2626"
+              onClick={(e) => {
+                e.stopPropagation()
+                onOpenStop(voucher)
+              }}
+            >
+              {vt.actions?.stopEarly || "Dừng sớm"}
+            </PillButton>
+          )}
+
+          {/* Chờ nạp cọc: Xem thông tin chuyển khoản */}
+          {isPendingDeposit && onOpenTransfer && (
+            <PillButton
+              type="button"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation()
+                onOpenTransfer(voucher)
+              }}
+            >
+              {vt.actions?.viewTransferInfo || "Thông tin CK"}
+            </PillButton>
+          )}
+
+          {/* Bị từ chối: Xem lý do từ chối */}
+          {isRejected && onOpenRejection && (
+            <PillButton
+              type="button"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation()
+                onOpenRejection(voucher)
+              }}
+            >
+              {vt.actions?.viewRejectionReason || "Lý do từ chối"}
+            </PillButton>
+          )}
+
+          {/* Bản nháp: Chỉnh sửa */}
+          {isDraft && onEditDraft && (
+            <PillButton
+              type="button"
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEditDraft(voucher)
+              }}
+            >
+              {vt.actions?.edit || "Chỉnh sửa"}
+            </PillButton>
+          )}
         </div>
-        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-          <div
-            className="bg-cath-red-600 h-1.5 rounded-full"
-            style={{ width: `${usagePercent}%` }}
-          />
-        </div>
-        <div className="flex items-center justify-between text-[11px] pt-1">
-          <span className="text-slate-400">
-            {vt.deposit?.depositRequired || "Cọc yêu cầu:"}
-          </span>
-          <span className="font-semibold text-slate-800">
-            {formatCurrency(depositAmount)}
-          </span>
-        </div>
-      </div>
-
-      {/* Footer Actions according to status */}
-      <div
-        className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Hoạt động */}
-        {isActive && onOpenStop && (
-          <button
-            type="button"
-            onClick={onOpenStop}
-            className="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-          >
-            {vt.actions?.stopEarly || "Dừng sớm"}
-          </button>
-        )}
-
-        {/* Chờ nạp cọc */}
-        {isPendingDeposit && onOpenTransfer && (
-          <button
-            type="button"
-            onClick={onOpenTransfer}
-            className="px-2.5 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-          >
-            {vt.actions?.viewTransferInfo || "Thông tin CK"}
-          </button>
-        )}
-        {isPendingDeposit && onOpenCancel && (
-          <button
-            type="button"
-            onClick={onOpenCancel}
-            className="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-          >
-            {vt.actions?.cancelRequest || "Hủy yêu cầu"}
-          </button>
-        )}
-
-        {/* Bị từ chối */}
-        {isRejected && onOpenRejection && (
-          <button
-            type="button"
-            onClick={onOpenRejection}
-            className="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-          >
-            {vt.actions?.viewRejectionReason || "Lý do từ chối"}
-          </button>
-        )}
-
-        {/* Bản nháp */}
-        {isDraft && onEditDraft && (
-          <button
-            type="button"
-            onClick={() => onEditDraft(voucher)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>{vt.actions?.edit || "Chỉnh sửa"}</span>
-          </button>
-        )}
-        {isDraft && onOpenCancel && (
-          <button
-            type="button"
-            onClick={onOpenCancel}
-            className="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-          >
-            {vt.actions?.deleteDraft || "Xóa nháp"}
-          </button>
-        )}
-
-        {/* Xem chi tiết */}
-        {!isPendingDeposit && !isRejected && (
-          <button
-            type="button"
-            onClick={() => onViewDetails(voucher)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>{vt.actions?.viewDetails || "Chi tiết"}</span>
-          </button>
-        )}
-      </div>
+      )}
     </div>
   )
 }

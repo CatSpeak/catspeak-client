@@ -67,10 +67,13 @@ const VoucherConfigCard = ({ voucher = {} }) => {
 
   // 4. Deposit calculations (BR-VC-GV-25)
   const depositPaid = Number(
-    voucher.depositPaid ?? voucher.depositAmount ?? voucher.depositRequired ?? 0
+    voucher.depositPaid ??
+      voucher.depositAmount ??
+      voucher.depositRequired ??
+      0,
   )
   const depositUsed = Number(
-    voucher.depositUsed ?? voucher.totalDiscountGiven ?? 0
+    voucher.depositUsed ?? voucher.totalDiscountGiven ?? 0,
   )
   const depositRemaining = Math.max(0, depositPaid - depositUsed)
 
@@ -78,72 +81,52 @@ const VoucherConfigCard = ({ voucher = {} }) => {
     <FluentCard className="space-y-6">
       {/* ─── Khối Thông tin cấu hình ─── */}
       <div className="space-y-4">
-        <h4 className="font-bold text-primary">
-          {vd.configTitle || "Thông tin cấu hình"}
-        </h4>
+        <h4 className="font-bold">{vd.configTitle || "Thông tin cấu hình"}</h4>
 
-        <div className="space-y-3 text-xs sm:text-sm">
-          <div className="flex items-center justify-between py-1">
-            <span className="text-secondary">
-              {vd.code || "Mã:"}
-            </span>
-            <span className="font-bold text-primary tracking-wide font-mono">
-              {voucher.code || "-"}
-            </span>
+        <div className="flex flex-col gap-1 text-base">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.code || "Mã"}</span>
+            <span>{voucher.code || "-"}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-secondary">
-              {vd.type || "Loại:"}
-            </span>
-            <span className="font-medium text-primary">
-              {discountTypeLabel}
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.type || "Loại"}</span>
+            <span>{discountTypeLabel}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-secondary">
-              {vd.value || "Giá trị:"}
-            </span>
-            <span className="font-bold text-cath-red-700">
-              {discountValueDisplay}
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.value || "Giá trị"}</span>
+            <span className="text-cath-red-700">{discountValueDisplay}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
+          <div className="flex items-center justify-between">
             <span className="text-secondary">
-              {vd.maxDiscount || "Giảm tối đa:"}
+              {vd.maxDiscount || "Giảm tối đa"}
             </span>
-            <span className="font-medium text-primary">
+            <span>
               {voucher.maxDiscountAmount
                 ? formatCurrency(voucher.maxDiscountAmount)
                 : vf.unlimited || "Không giới hạn"}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
+          <div className="flex items-center justify-between">
             <span className="text-secondary">
-              {vd.minOrder || "Đơn tối thiểu:"}
+              {vd.minOrder || "Đơn tối thiểu"}
             </span>
-            <span className="font-medium text-primary">
-              {formatCurrency(voucher.minOrderAmount || 0)}
-            </span>
+            <span>{formatCurrency(voucher.minOrderAmount || 0)}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-secondary">
-              {vd.validity || "Hiệu lực:"}
-            </span>
-            <span className="font-medium text-primary">
-              {validityDisplay}
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.validity || "Hiệu lực"}</span>
+            <span>{validityDisplay}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
+          <div className="flex items-center justify-between">
             <span className="text-secondary">
-              {vd.appliedScope || "Áp dụng:"}
+              {vd.appliedScope || "Áp dụng"}
             </span>
-            <span className="font-semibold text-primary text-right max-w-[200px] sm:max-w-[260px] truncate">
+            <span className="text-right max-w-[200px] sm:max-w-[260px] truncate">
               {getAppliedScopeDisplay()}
             </span>
           </div>
@@ -154,36 +137,28 @@ const VoucherConfigCard = ({ voucher = {} }) => {
 
       {/* ─── Khối Tiền cọc ─── */}
       <div className="space-y-4">
-        <h4 className="font-bold text-primary">
-          {vd.depositTitle || "Tiền cọc"}
-        </h4>
+        <h4 className="font-bold">{vd.depositTitle || "Tiền cọc"}</h4>
 
-        <div className="space-y-3 text-xs sm:text-sm">
-          <div className="flex items-center justify-between py-1">
-            <span className="text-secondary">
-              {vd.depositPaid ? `${vd.depositPaid}:` : "Đã nạp:"}
-            </span>
-            <span className="font-bold text-primary">
-              {formatCurrency(depositPaid)}
-            </span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.depositPaid || "Đã nạp"}</span>
+            <span>{formatCurrency(depositPaid)}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
+          <div className="flex items-center justify-between">
             <span className="text-secondary">
-              {vd.depositUsed ? `${vd.depositUsed}:` : "Đã dùng:"}
+              {vd.depositUsed || "Đã dùng"}
             </span>
-            <span className="font-bold text-cath-red-700">
+            <span className="text-cath-red-700">
               {formatCurrency(depositUsed)}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
+          <div className="flex items-center justify-between">
             <span className="text-secondary">
-              {vd.depositRemaining ? `${vd.depositRemaining}:` : "Còn lại:"}
+              {vd.depositRemaining || "Còn lại"}
             </span>
-            <span className="font-bold text-emerald-600">
-              {formatCurrency(depositRemaining)}
-            </span>
+            <span>{formatCurrency(depositRemaining)}</span>
           </div>
         </div>
       </div>
