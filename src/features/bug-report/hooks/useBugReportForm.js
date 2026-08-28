@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { parseApiError } from "@/shared/utils/apiError"
 import { extractRelevantLogs } from "@/shared/utils/telemetry/logFilter"
 import {
   useSubmitBugReportMutation,
@@ -29,6 +30,23 @@ export function useBugReportForm({
   const [submitBugReport, { isLoading }] = useSubmitBugReportMutation()
   const [uploadScreenshot] = useUploadBugScreenshotMutation()
 
+  const resolveErrorMessage = (err, fallback) => {
+    const { errorCode, message, validationErrors } = parseApiError(err)
+    if (errorCode && lang.errorCodes?.[errorCode]) {
+      return lang.errorCodes[errorCode]
+    }
+    if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+      const firstValErr = validationErrors[0]
+      if (firstValErr?.errorCode && lang.errorCodes?.[firstValErr.errorCode]) {
+        return lang.errorCodes[firstValErr.errorCode]
+      }
+      if (firstValErr?.message) {
+        return firstValErr.message
+      }
+    }
+    return message || fallback
+  }
+
   // Reset or initialize state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
@@ -44,7 +62,7 @@ export function useBugReportForm({
     if (!file || !file.type.startsWith("image/")) return
 
     if (file.size > MAX_BUG_FILE_SIZE) {
-      toast.error(lang.imageTooLarge || "Dung lượng ảnh vượt quá giới hạn 5MB")
+      toast.error(lang.errorCodes?.BUG_REPORT_IMAGE_TOO_LARGE || lang.imageTooLarge || "Dung lượng ảnh vượt quá giới hạn 5MB")
       return
     }
 
@@ -62,13 +80,14 @@ export function useBugReportForm({
       const uploadedUrl = res?.data?.url || res?.url
       if (uploadedUrl) {
         setScreenshots((prev) => [...prev, uploadedUrl])
-        toast.success("Đã tải ảnh lên thành công!")
+        toast.success(lang.uploadSuccess || "Đã tải ảnh lên thành công!")
       } else {
-        toast.error("Không nhận được đường dẫn ảnh từ máy chủ.")
+        toast.error(lang.uploadError || "Không nhận được đường dẫn ảnh từ máy chủ.")
       }
     } catch (err) {
       console.error("Failed to upload screenshot:", err)
-      toast.error("Không thể tải ảnh lên kho lưu trữ. Vui lòng thử lại.")
+      const errMsg = resolveErrorMessage(err, lang.uploadError || "Không thể tải ảnh lên kho lưu trữ. Vui lòng thử lại.")
+      toast.error(errMsg)
     } finally {
       setIsUploadingImage(false)
     }
@@ -114,11 +133,11 @@ export function useBugReportForm({
   const handleSubmit = async (e) => {
     e?.preventDefault()
     if (!title.trim()) {
-      toast.error(lang.titleRequired || "Vui lòng nhập tiêu đề sự cố")
+      toast.error(lang.errorCodes?.BUG_REPORT_TITLE_REQUIRED || lang.titleRequired || "Vui lòng nhập tiêu đề sự cố")
       return
     }
     if (!description.trim()) {
-      toast.error(lang.descRequired || "Vui lòng nhập mô tả sự cố")
+      toast.error(lang.errorCodes?.BUG_REPORT_DESCRIPTION_REQUIRED || lang.descRequired || "Vui lòng nhập mô tả sự cố")
       return
     }
 
@@ -145,7 +164,8 @@ export function useBugReportForm({
       onClose?.()
     } catch (err) {
       console.error("Bug report submission failed:", err)
-      toast.error(lang.submitError || "Không thể gửi báo cáo sự cố. Vui lòng thử lại sau.")
+      const errMsg = resolveErrorMessage(err, lang.submitError || "Không thể gửi báo cáo sự cố. Vui lòng thử lại sau.")
+      toast.error(errMsg)
     }
   }
 
