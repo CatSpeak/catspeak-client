@@ -405,6 +405,7 @@ export default {
       stopError: "動画を停止できませんでした。",
       hostWatching: "ホストが共有動画を再生しています。",
       notPlaying: "部屋では現在動画が再生されていません。",
+      ended: "共有動画は終了しました。",
     },
     subtitles: "字幕（CC）",
     reconnect: "接続のトラブルシューティング",

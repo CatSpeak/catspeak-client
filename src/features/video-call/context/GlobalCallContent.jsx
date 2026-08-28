@@ -362,6 +362,14 @@ const GlobalCallContent = ({
           "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
         { icon: "⚠️", duration: 6000 },
       )
+    } else if (event === "MediaEnded") {
+      toast.info(
+        t?.rooms?.videoCall?.watchTogether?.ended ||
+          "Video chung đã kết thúc.",
+        { duration: 5000 },
+      )
+      // The media ingress participant leaves the room; the spotlight auto-hides
+      // once the track is gone, and the media status query re-fetches.
     }
   })
 
