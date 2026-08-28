@@ -1,55 +1,15 @@
 import React, { useState, useMemo } from "react"
+import { ChevronLeft, ChevronRight, User } from "lucide-react"
+import SearchInput from "@/shared/components/ui/inputs/SearchInput"
+import Dropdown from "@/shared/components/ui/Dropdown"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
+import EmptyState from "@/shared/components/ui/indicators/EmptyState"
+import FluentCard from "@/shared/components/ui/FluentCard"
 import {
-  Search,
-  SlidersHorizontal,
-  ChevronLeft,
-  ChevronRight,
-  User,
-} from "lucide-react"
-import Popover from "@/shared/components/ui/Popover"
-import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
-import { formatCurrency, formatVoucherDate } from "../../utils/voucherTransforms"
-
-// Status Badge Helper according to specification 6
-const renderUsageStatusBadge = (status) => {
-  const normalized = String(status || "").toLowerCase()
-  if (normalized === "success" || normalized === "2" || normalized === "thành công") {
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 tracking-wide">
-        THÀNH CÔNG
-      </span>
-    )
-  }
-  if (
-    normalized === "pending" ||
-    normalized === "1" ||
-    normalized === "chờ thanh toán" ||
-    normalized === "đang xử lý"
-  ) {
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 tracking-wide">
-        CHỜ THANH TOÁN
-      </span>
-    )
-  }
-  if (
-    normalized === "cancelled" ||
-    normalized === "canceled" ||
-    normalized === "3" ||
-    normalized === "đã hủy"
-  ) {
-    return (
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700 tracking-wide">
-        ĐÃ HỦY
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
-      {status}
-    </span>
-  )
-}
+  formatCurrency,
+  formatVoucherDate,
+} from "../../utils/voucherTransforms"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // User Avatar with initials fallback (e.g. "NT" for "Nguyễn Văn A")
 const UserAvatar = ({ name = "", avatarUrl = "" }) => {
@@ -67,13 +27,13 @@ const UserAvatar = ({ name = "", avatarUrl = "" }) => {
       <img
         src={avatarUrl}
         alt={name}
-        className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-zinc-700 shrink-0"
+        className="w-8 h-8 rounded-full object-cover border border-border shrink-0"
       />
     )
   }
 
   return (
-    <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 flex items-center justify-center text-xs font-bold shrink-0">
+    <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 border border-border flex items-center justify-center text-xs font-bold shrink-0">
       {getInitials(name)}
     </div>
   )
@@ -88,10 +48,76 @@ const VoucherUsagesTable = ({
   isLoading = false,
   totalItemsCount,
 }) => {
+  const { t } = useLanguage()
+  const vu = t?.vouchers?.usages || {}
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all") // all | Success | Pending | Cancelled
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 5
+
+  // Status Filter Options for Dropdown
+  const statusOptions = useMemo(
+    () => [
+      { value: "all", label: vu.allStatuses || "Tất cả trạng thái" },
+      { value: "Success", label: vu.orderStatusSuccess || "Thành công" },
+      {
+        value: "Pending",
+        label:
+          vu.orderStatusWaitingPayment ||
+          vu.orderStatusPending ||
+          "Chờ thanh toán",
+      },
+      { value: "Cancelled", label: vu.orderStatusCancelled || "Đã hủy" },
+    ],
+    [vu],
+  )
+
+  // Status Badge Helper
+  const renderUsageStatusBadge = (status) => {
+    const normalized = String(status || "").toLowerCase()
+    if (
+      normalized === "success" ||
+      normalized === "2" ||
+      normalized === "thành công"
+    ) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 tracking-wide">
+          {vu.orderStatusSuccess?.toUpperCase() || "THÀNH CÔNG"}
+        </span>
+      )
+    }
+    if (
+      normalized === "pending" ||
+      normalized === "1" ||
+      normalized === "chờ thanh toán" ||
+      normalized === "đang xử lý"
+    ) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 tracking-wide">
+          {vu.orderStatusWaitingPayment?.toUpperCase() ||
+            vu.orderStatusPending?.toUpperCase() ||
+            "CHỜ THANH TOÁN"}
+        </span>
+      )
+    }
+    if (
+      normalized === "cancelled" ||
+      normalized === "canceled" ||
+      normalized === "3" ||
+      normalized === "đã hủy"
+    ) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 tracking-wide">
+          {vu.orderStatusCancelled?.toUpperCase() || "ĐÃ HỦY"}
+        </span>
+      )
+    }
+    return (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+        {status}
+      </span>
+    )
+  }
 
   // Filter usages client-side if full list is passed
   const filteredUsages = useMemo(() => {
@@ -109,13 +135,28 @@ const VoucherUsagesTable = ({
       if (statusFilter !== "all") {
         const itemStatus = String(item.status || "").toLowerCase()
         const filterNormalized = statusFilter.toLowerCase()
-        if (filterNormalized === "success" && !itemStatus.includes("success") && itemStatus !== "2" && itemStatus !== "thành công") {
+        if (
+          filterNormalized === "success" &&
+          !itemStatus.includes("success") &&
+          itemStatus !== "2" &&
+          itemStatus !== "thành công"
+        ) {
           return false
         }
-        if (filterNormalized === "pending" && !itemStatus.includes("pending") && itemStatus !== "1" && !itemStatus.includes("chờ")) {
+        if (
+          filterNormalized === "pending" &&
+          !itemStatus.includes("pending") &&
+          itemStatus !== "1" &&
+          !itemStatus.includes("chờ")
+        ) {
           return false
         }
-        if (filterNormalized === "cancelled" && !itemStatus.includes("cancel") && itemStatus !== "3" && !itemStatus.includes("hủy")) {
+        if (
+          filterNormalized === "cancelled" &&
+          !itemStatus.includes("cancel") &&
+          itemStatus !== "3" &&
+          !itemStatus.includes("hủy")
+        ) {
           return false
         }
       }
@@ -136,7 +177,7 @@ const VoucherUsagesTable = ({
   const startRecord = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
   const endRecord = Math.min(currentPage * pageSize, totalCount)
 
-  // Generate pagination page numbers
+  // Generate pagination page numbers matching IconButton styling
   const renderPaginationButtons = () => {
     const pages = []
     if (totalPages <= 5) {
@@ -158,152 +199,122 @@ const VoucherUsagesTable = ({
         return (
           <span
             key={`ellipsis-${idx}`}
-            className="w-8 h-8 flex items-center justify-center text-xs text-slate-400"
+            className="px-1 text-sm text-slate-400 font-semibold select-none shrink-0"
           >
-            ...
+            …
           </span>
         )
       }
 
       const isActive = p === currentPage
       return (
-        <button
+        <IconButton
           key={`page-${p}`}
-          type="button"
+          size="sm"
+          variant={isActive ? "primary" : "ghost"}
           onClick={() => setCurrentPage(p)}
-          className={`w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            isActive
-              ? "bg-cath-red-700 text-white shadow-xs"
-              : "bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-700 border border-slate-200/80 dark:border-zinc-700"
-          }`}
+          title={`Trang ${p}`}
         >
-          {p}
-        </button>
+          <span className="text-sm font-semibold">{p}</span>
+        </IconButton>
       )
     })
   }
 
+  const paginationShowingText = vu.showingResults
+    ? vu.showingResults
+        .replace("{{start}}", startRecord)
+        .replace("{{end}}", endRecord)
+        .replace("{{total}}", totalCount)
+    : `Hiển thị ${startRecord} đến ${endRecord} trong ${totalCount} kết quả`
+
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-xs space-y-5">
+    <FluentCard className="space-y-4">
       {/* ─── Header: Title & Search/Filter ─── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">
-          Lịch sử sử dụng
-        </h3>
+        <h4 className="font-bold">{vu.title || "Lịch sử sử dụng"}</h4>
 
         <div className="flex items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 sm:w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
+          <div className="w-full sm:w-64">
+            <SearchInput
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
+              onChange={(val) => {
+                setSearchTerm(val)
                 setCurrentPage(1)
               }}
-              placeholder="Tìm người dùng..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-50/80 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-cath-red-500/20 focus:border-cath-red-500 transition-all"
+              placeholder={vu.searchUserPlaceholder || "Tìm người dùng..."}
             />
           </div>
 
-          {/* Filter Popover */}
-          <Popover
-            placement="bottom-right"
-            trigger={
-              <button
-                type="button"
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  statusFilter !== "all"
-                    ? "border-cath-red-300 bg-cath-red-50 text-cath-red-700 dark:bg-cath-red-950/40"
-                    : "border-slate-200 dark:border-zinc-700 bg-slate-50/80 dark:bg-zinc-800 text-slate-500 hover:text-slate-800 dark:text-zinc-400"
-                }`}
-                title="Lọc trạng thái"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-              </button>
-            }
-            content={(close) => (
-              <MenuList className="w-44 p-1">
-                <MenuItem
-                  label="Tất cả trạng thái"
-                  active={statusFilter === "all"}
-                  onClick={() => {
-                    setStatusFilter("all")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-                <MenuItem
-                  label="Thành công"
-                  active={statusFilter === "Success"}
-                  onClick={() => {
-                    setStatusFilter("Success")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-                <MenuItem
-                  label="Chờ thanh toán"
-                  active={statusFilter === "Pending"}
-                  onClick={() => {
-                    setStatusFilter("Pending")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-                <MenuItem
-                  label="Đã hủy"
-                  active={statusFilter === "Cancelled"}
-                  onClick={() => {
-                    setStatusFilter("Cancelled")
-                    setCurrentPage(1)
-                    close()
-                  }}
-                />
-              </MenuList>
-            )}
-          />
+          {/* Filter Dropdown */}
+          <div className="w-full sm:w-auto">
+            <Dropdown
+              options={statusOptions}
+              value={statusFilter}
+              onChange={(val) => {
+                setStatusFilter(val)
+                setCurrentPage(1)
+              }}
+              placeholder={vu.allStatuses || "Tất cả trạng thái"}
+              triggerClassName="w-full sm:!min-w-[160px] text-xs"
+              dropdownClassName="min-w-[170px]"
+            />
+          </div>
         </div>
       </div>
 
       {/* ─── Table Content ─── */}
       <div className="overflow-x-auto -mx-6 px-6">
-        <table className="w-full text-left text-xs sm:text-sm">
+        <table className="w-full text-left text-sm sm:text-base">
           <thead>
-            <tr className="text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-zinc-400 border-b border-slate-100 dark:border-zinc-800">
-              <th className="py-3 px-3 w-[18%] font-semibold">THỜI GIAN</th>
-              <th className="py-3 px-3 w-[26%] font-semibold">NGƯỜI DÙNG</th>
-              <th className="py-3 px-3 w-[24%] font-semibold">LỚP HỌC</th>
-              <th className="py-3 px-3 w-[16%] font-semibold">SỐ TIỀN GIẢM</th>
-              <th className="py-3 px-3 w-[16%] text-center font-semibold">TRẠNG THÁI</th>
+            <tr className="text-xs uppercase tracking-wider font-bold text-secondary border-b border-border">
+              <th className="py-3 px-3 w-[18%] font-semibold">
+                {vu.timeHeader || "THỜI GIAN"}
+              </th>
+              <th className="py-3 px-3 w-[26%] font-semibold">
+                {vu.userHeader || "NGƯỜI DÙNG"}
+              </th>
+              <th className="py-3 px-3 w-[24%] font-semibold">
+                {vu.classHeader || "LỚP HỌC"}
+              </th>
+              <th className="py-3 px-3 w-[16%] font-semibold">
+                {vu.discountHeader || "SỐ TIỀN GIẢM"}
+              </th>
+              <th className="py-3 px-3 w-[16%] text-center font-semibold">
+                {vu.statusHeader || "TRẠNG THÁI"}
+              </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+          <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
                 <td colSpan={5} className="py-12 text-center text-slate-400">
-                  Đang tải lịch sử sử dụng...
+                  {vu.loading || "Đang tải lịch sử sử dụng..."}
                 </td>
               </tr>
             ) : paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center">
-                  <User className="w-8 h-8 text-slate-300 dark:text-zinc-600 mx-auto mb-2" />
-                  <p className="text-xs text-slate-400 font-medium">
-                    Không tìm thấy lịch sử sử dụng phù hợp.
-                  </p>
+                <td colSpan={5} className="py-4">
+                  <EmptyState
+                    variant="component"
+                    icon={User}
+                    title={
+                      vu.noUsagesFound ||
+                      "Không tìm thấy lịch sử sử dụng phù hợp."
+                    }
+                  />
                 </td>
               </tr>
             ) : (
               paginatedItems.map((usage, idx) => (
                 <tr
                   key={usage.id || `usage-${idx}`}
-                  className="hover:bg-slate-50/60 dark:hover:bg-zinc-800/40 transition-colors"
+                  className="hover:bg-slate-50/60 transition-colors"
                 >
                   {/* Thời gian */}
-                  <td className="py-4 px-3 text-slate-600 dark:text-zinc-400 text-xs whitespace-nowrap">
+                  <td className="py-4 px-3 text-slate-600 text-sm whitespace-nowrap">
                     {formatVoucherDate(usage.usedAt || usage.createdAt, true)}
                   </td>
 
@@ -311,24 +322,26 @@ const VoucherUsagesTable = ({
                   <td className="py-4 px-3">
                     <div className="flex items-center gap-2.5">
                       <UserAvatar
-                        name={usage.userName || "Học viên"}
+                        name={
+                          usage.userName || vu.studentFallback || "Học viên"
+                        }
                         avatarUrl={usage.userAvatar}
                       />
-                      <span className="font-bold text-slate-900 dark:text-zinc-100 truncate max-w-[150px] sm:max-w-[200px]">
-                        {usage.userName || "Học viên"}
+                      <span className="font-bold text-slate-900 truncate max-w-[150px] sm:max-w-[200px]">
+                        {usage.userName || vu.studentFallback || "Học viên"}
                       </span>
                     </div>
                   </td>
 
                   {/* Lớp học */}
-                  <td className="py-4 px-3 text-slate-700 dark:text-zinc-300 font-medium">
+                  <td className="py-4 px-3 text-slate-700 font-medium">
                     <span className="truncate block max-w-[180px] sm:max-w-[240px]">
                       {usage.className || `Lớp học #${usage.classId || 1}`}
                     </span>
                   </td>
 
                   {/* Số tiền giảm */}
-                  <td className="py-4 px-3 font-bold text-cath-red-700 dark:text-cath-red-400 whitespace-nowrap">
+                  <td className="py-4 px-3 font-bold text-cath-red-700 whitespace-nowrap">
                     {formatCurrency(usage.discountAmount || 0)}
                   </td>
 
@@ -344,41 +357,39 @@ const VoucherUsagesTable = ({
       </div>
 
       {/* ─── Footer Pagination ─── */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-zinc-800 text-xs text-slate-500 dark:text-zinc-400">
-        <div>
-          Hiển thị <strong className="text-slate-900 dark:text-zinc-200">{startRecord}</strong> đến{" "}
-          <strong className="text-slate-900 dark:text-zinc-200">{endRecord}</strong> trong{" "}
-          <strong className="text-slate-900 dark:text-zinc-200">{totalCount}</strong> kết quả
-        </div>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border text-sm text-secondary">
+        <div>{paginationShowingText}</div>
 
         {totalPages > 1 && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {/* Prev Page Button */}
-            <button
-              type="button"
+            <IconButton
+              size="sm"
+              variant="ghost"
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex items-center justify-center text-slate-600 dark:text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-zinc-700 transition-all cursor-pointer"
+              title="Trang trước"
             >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+              <ChevronLeft />
+            </IconButton>
 
             {/* Numeric Page Buttons */}
             {renderPaginationButtons()}
 
             {/* Next Page Button */}
-            <button
-              type="button"
+            <IconButton
+              size="sm"
+              variant="ghost"
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              className="w-8 h-8 rounded-lg border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 flex items-center justify-center text-slate-600 dark:text-zinc-400 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-zinc-700 transition-all cursor-pointer"
+              title="Trang sau"
             >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+              <ChevronRight />
+            </IconButton>
           </div>
         )}
       </div>
-    </div>
+    </FluentCard>
   )
 }
 

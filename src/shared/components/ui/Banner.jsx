@@ -3,6 +3,10 @@ import { Link } from "react-router-dom"
 import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from "lucide-react"
 
 const variantStyles = {
+  neutral: {
+    container: "bg-[#F5F5F7] text-secondary border-border",
+    icon: Info,
+  },
   danger: {
     container: "bg-red-50 text-red-700 border-red-200",
     icon: AlertCircle,
@@ -39,7 +43,7 @@ const Banner = ({
 
   return (
     <div
-      className={`flex items-center gap-4 px-4 min-h-12 shrink-0 rounded-xl border transition-all ${currentVariant.container} ${className}`}
+      className={`flex items-center gap-2 p-3 min-h-12 shrink-0 rounded-xl border text-sm transition-all ${currentVariant.container} ${className}`}
       role="alert"
     >
       {icon !== null && (
@@ -48,22 +52,20 @@ const Banner = ({
             React.isValidElement(icon) ? (
               icon
             ) : (
-              React.createElement(icon, { size: 24, className: "shrink-0" })
+              React.createElement(icon, { size: 20, className: "shrink-0" })
             )
           ) : (
-            <DefaultIcon className="shrink-0" />
+            <DefaultIcon size={20} className="shrink-0" />
           )}
         </div>
       )}
       <div className="flex-1 min-w-0 flex flex-col justify-center">
         {title && (
-          <div
-            className={`font-semibold leading-snug ${children ? "mb-0.5" : ""}`}
-          >
+          <div className={`font-semibold ${children ? "mb-0.5" : ""}`}>
             {title}
           </div>
         )}
-        {children ? <div className="leading-snug">{children}</div> : null}
+        {children ? <div>{children}</div> : null}
       </div>
       {action &&
         (action.to ? (

@@ -98,7 +98,7 @@ const TextInput = ({
           </div>
         )}
         {Icon && !leftContent && (
-          <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7574]" />
+          <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary" />
         )}
         {multiline ? (
           <textarea
@@ -140,7 +140,7 @@ const TextInput = ({
           <button
             type="button"
             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A7574] hover:text-[#333] transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-[#333] transition-colors"
             tabIndex={-1}
           >
             {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -172,7 +172,7 @@ const TextInput = ({
                 color || "var(--tw-colors-cath-red-700, #8e0000)",
             }}
             className={`absolute transition-all duration-200 pointer-events-none origin-left scale-100
-              top-1/2 -translate-y-1/2 text-[#7A7574]
+              top-1/2 -translate-y-1/2 text-secondary
               peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:scale-75 peer-focus:text-[var(--focus-color)] peer-focus:bg-white peer-focus:px-1
               peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1
               ${Icon || leftContent ? "left-10" : "left-4"}
@@ -193,7 +193,7 @@ const TextInput = ({
             ) : helperText ? (
               <span
                 className={`text-xs block ${
-                  helperTextClassName || "text-[#7A7574] dark:text-neutral-400"
+                  helperTextClassName || "text-secondary"
                 }`}
               >
                 {helperText}
@@ -201,7 +201,7 @@ const TextInput = ({
             ) : null}
           </div>
           {showCount && props.maxLength && (
-            <span className="text-xs text-[#7A7574] ml-2 whitespace-nowrap">
+            <span className="text-xs text-secondary ml-2 whitespace-nowrap">
               {String(value || "").length} / {props.maxLength}
             </span>
           )}

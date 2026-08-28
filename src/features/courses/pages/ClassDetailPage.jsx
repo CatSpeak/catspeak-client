@@ -182,7 +182,9 @@ const ClassDetailPage = () => {
     ...(isClassTeacher
       ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }]
       : []),
-    // ...(isClassTeacher ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }] : []),
+    ...(isClassTeacher
+      ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }]
+      : []),
   ]
 
   const getWeeklyScheduleText = () =>

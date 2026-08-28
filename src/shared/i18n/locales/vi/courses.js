@@ -455,6 +455,8 @@ export default {
     cancel: "Hủy",
   },
   courseDetail: {
+    overview: "Tổng quan",
+    vouchers: "Ưu đãi",
     information: "Thông tin chi tiết",
     language: "Ngôn ngữ",
     level: "Trình độ",
@@ -495,6 +497,7 @@ export default {
     feed: "Bảng tin",
     lectureHall: "Giảng đường",
     grading: "Chấm điểm",
+    vouchers: "Ưu đãi",
     classOverview: "Tổng quan lớp học",
     classInformation: "Thông tin lớp học",
     tuitionFee: "HỌC PHÍ",

@@ -96,6 +96,40 @@ export const vouchersApi = baseApi.injectEndpoints({
         { type: "Vouchers", id: `CLASS_${classId}` },
       ],
     }),
+
+    // 9. GET /api/vouchers/{id}/deposit-info - Get voucher bank deposit details & VietQR image URL
+    getVoucherDepositInfo: builder.query({
+      query: (id) => `/vouchers/${id}/deposit-info`,
+      providesTags: (result, error, id) => [{ type: "VoucherDetail", id }],
+    }),
+
+    // 10. POST /api/vouchers/{id}/submit-deposit - Teacher confirms manual deposit transfer (PendingDeposit -> PendingApproval)
+    submitVoucherDeposit: builder.mutation({
+      query: (id) => ({
+        url: `/vouchers/${id}/submit-deposit`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Vouchers", id: "LIST" },
+        { type: "Vouchers", id },
+        { type: "VoucherDetail", id },
+        "VoucherStats",
+      ],
+    }),
+
+    // 11. POST /api/vouchers/{id}/stop - Forcefully stop active voucher campaign early (Active -> Stopped)
+    stopVoucher: builder.mutation({
+      query: (id) => ({
+        url: `/vouchers/${id}/stop`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Vouchers", id: "LIST" },
+        { type: "Vouchers", id },
+        { type: "VoucherDetail", id },
+        "VoucherStats",
+      ],
+    }),
   }),
   overrideExisting: false,
 })
@@ -110,6 +144,10 @@ export const {
   useLazyGenerateVoucherCodeQuery,
   useGenerateVoucherCodeQuery,
   useGetVouchersByClassIdQuery,
+  useGetVoucherDepositInfoQuery,
+  useLazyGetVoucherDepositInfoQuery,
+  useSubmitVoucherDepositMutation,
+  useStopVoucherMutation,
 } = vouchersApi
 
 

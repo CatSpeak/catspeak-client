@@ -38,24 +38,25 @@ const ListItem = ({
     3: "h-[88px]",
     auto: "min-h-[56px] py-3 h-auto",
   }
-  const heightClass = linesClasses[lines] || (lines === "auto" ? "min-h-[56px] py-3 h-auto" : "h-14")
+  const heightClass =
+    linesClasses[lines] ||
+    (lines === "auto" ? "min-h-[56px] py-3 h-auto" : "h-14")
 
   const effectiveRightContent =
-    variant === "radio" ? (
-      <Radio checked={selected} />
-    ) : (
-      rightContent
-    )
+    variant === "radio" ? <Radio checked={selected} /> : rightContent
 
-  const baseBgClass = selected ? "bg-primaryBg dark:bg-neutral-800" : ""
+  const baseBgClass = selected ? "bg-[#F2F2F2]" : ""
 
   const defaultHoverClasses = selected
-    ? "hover:bg-[#E6E6E6] group-hover:bg-[#E6E6E6] dark:hover:bg-neutral-200 dark:group-hover:bg-neutral-200"
-    : "hover:bg-primaryBg group-hover:bg-primaryBg dark:hover:bg-neutral-100 dark:group-hover:bg-neutral-100"
+    ? "hover:bg-[#E6E6E6] group-hover:bg-[#E6E6E6]"
+    : "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2]"
 
   const hoverClasses = hoverBgColor
     ? `hover:${hoverBgColor} group-hover:${hoverBgColor}`
     : defaultHoverClasses
+
+  const shouldHover = hoverEffect || isClickable || selected
+  const innerHoverClasses = shouldHover ? hoverClasses : ""
 
   return (
     <Wrapper
@@ -66,9 +67,7 @@ const ListItem = ({
       {...props}
     >
       <div
-        className={`w-full ${heightClass} px-4 flex items-center justify-between transition-colors rounded-[inherit] ${
-          hoverEffect || selected ? hoverClasses : ""
-        } ${contentClassName}`}
+        className={`w-full ${heightClass} px-4 flex items-center justify-between transition-colors rounded-[inherit] ${innerHoverClasses} ${contentClassName}`}
       >
         <div className="flex items-center gap-4 min-w-0 flex-1 my-auto">
           {leftContent && (

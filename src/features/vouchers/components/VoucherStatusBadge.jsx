@@ -7,7 +7,7 @@ const VoucherStatusBadge = ({ status, className = "" }) => {
   const vt = t.vouchers || {}
 
   const config = VOUCHER_STATUS_CONFIG[status] || {
-    badgeClass: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700",
+    badgeClass: "bg-gray-100 text-gray-700 border-gray-200",
     dotClass: "bg-gray-400",
     defaultLabel: status || "Unknown",
   }

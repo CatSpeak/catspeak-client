@@ -1,13 +1,20 @@
 import React from "react"
+import FluentCard from "@/shared/components/ui/FluentCard"
+import Divider from "@/shared/components/ui/Divider"
 import { formatCurrency } from "../../utils/voucherTransforms"
 import { DISCOUNT_TYPES } from "../../constants/voucherConstants"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * VoucherConfigCard - Khối thông tin cấu hình & Tiền cọc của voucher
  * Readonly display according to specifications 2 & 3.
  */
 const VoucherConfigCard = ({ voucher = {} }) => {
+  const { t } = useLanguage()
+  const vd = t?.vouchers?.detail || {}
+  const vf = t?.vouchers?.form || {}
+  const vt = t?.vouchers?.table || {}
   const { formatDate } = useTimezone()
 
   // 1. Discount type & value formatting
@@ -17,24 +24,24 @@ const VoucherConfigCard = ({ voucher = {} }) => {
     voucher.discountType === "Percentage"
 
   const discountTypeLabel = isPercent
-    ? "Phần trăm (%)"
-    : "Số tiền cố định (₫)"
+    ? vt.percent || "Phần trăm (%)"
+    : vt.fixed || "Số tiền cố định (₫)"
 
   const discountValueDisplay = isPercent
     ? `${voucher.discountValue}%`
     : formatCurrency(voucher.discountValue)
 
   // 2. Validity date range
-  let validityDisplay = "Không giới hạn"
+  let validityDisplay = vt.neverExpired || "Không giới hạn"
   if (!voucher.isNeverExpired) {
     const from = voucher.validFrom ? formatDate(voucher.validFrom) : null
     const to = voucher.validTo ? formatDate(voucher.validTo) : null
     if (from && to) {
       validityDisplay = `${from} - ${to}`
     } else if (from) {
-      validityDisplay = `Từ ${from}`
+      validityDisplay = `${vt.from || "Từ"} ${from}`
     } else if (to) {
-      validityDisplay = `Đến ${to}`
+      validityDisplay = `${vt.to || "Đến"} ${to}`
     }
   }
 
@@ -47,118 +54,115 @@ const VoucherConfigCard = ({ voucher = {} }) => {
       return voucher.courses.map((c) => c.name || `Khóa #${c.id}`).join(", ")
     }
     if (voucher.scopeType === "SpecificClasses" || voucher.scopeType === 3) {
-      return voucher.targetName || "Lớp học chỉ định"
+      return voucher.targetName || vd.specificClass || "Lớp học chỉ định"
     }
     if (voucher.scopeType === "SpecificCourses" || voucher.scopeType === 2) {
-      return voucher.targetName || "Khóa học chỉ định"
+      return voucher.targetName || vd.specificCourse || "Khóa học chỉ định"
     }
     if (voucher.targetName) {
       return voucher.targetName
     }
-    return "Toàn bộ lớp / khóa học"
+    return vd.allClassesOrCourses || "Toàn bộ lớp / khóa học"
   }
 
   // 4. Deposit calculations (BR-VC-GV-25)
   const depositPaid = Number(
-    voucher.depositPaid ?? voucher.depositAmount ?? voucher.depositRequired ?? 0
+    voucher.depositPaid ??
+      voucher.depositAmount ??
+      voucher.depositRequired ??
+      0,
   )
   const depositUsed = Number(
-    voucher.depositUsed ?? voucher.totalDiscountGiven ?? 0
+    voucher.depositUsed ?? voucher.totalDiscountGiven ?? 0,
   )
   const depositRemaining = Math.max(0, depositPaid - depositUsed)
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800 shadow-xs space-y-6">
+    <FluentCard className="space-y-6">
       {/* ─── Khối Thông tin cấu hình ─── */}
       <div className="space-y-4">
-        <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">
-          Thông tin cấu hình
-        </h3>
+        <h4 className="font-bold">{vd.configTitle || "Thông tin cấu hình"}</h4>
 
-        <div className="space-y-3 text-xs sm:text-sm">
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Mã:</span>
-            <span className="font-bold text-slate-900 dark:text-zinc-100 tracking-wide font-mono">
-              {voucher.code || "-"}
-            </span>
+        <div className="flex flex-col gap-1 text-base">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.code || "Mã"}</span>
+            <span>{voucher.code || "-"}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Loại:</span>
-            <span className="font-medium text-slate-900 dark:text-zinc-200">
-              {discountTypeLabel}
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.type || "Loại"}</span>
+            <span>{discountTypeLabel}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Giá trị:</span>
-            <span className="font-bold text-cath-red-700 dark:text-cath-red-400">
-              {discountValueDisplay}
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.value || "Giá trị"}</span>
+            <span className="text-cath-red-700">{discountValueDisplay}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Giảm tối đa:</span>
-            <span className="font-medium text-slate-900 dark:text-zinc-200">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">
+              {vd.maxDiscount || "Giảm tối đa"}
+            </span>
+            <span>
               {voucher.maxDiscountAmount
                 ? formatCurrency(voucher.maxDiscountAmount)
-                : "Không giới hạn"}
+                : vf.unlimited || "Không giới hạn"}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Đơn tối thiểu:</span>
-            <span className="font-medium text-slate-900 dark:text-zinc-200">
-              {formatCurrency(voucher.minOrderAmount || 0)}
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">
+              {vd.minOrder || "Đơn tối thiểu"}
             </span>
+            <span>{formatCurrency(voucher.minOrderAmount || 0)}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Hiệu lực:</span>
-            <span className="font-medium text-slate-900 dark:text-zinc-200">
-              {validityDisplay}
-            </span>
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.validity || "Hiệu lực"}</span>
+            <span>{validityDisplay}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Áp dụng:</span>
-            <span className="font-semibold text-slate-900 dark:text-zinc-100 text-right max-w-[200px] sm:max-w-[260px] truncate">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">
+              {vd.appliedScope || "Áp dụng"}
+            </span>
+            <span className="text-right max-w-[200px] sm:max-w-[260px] truncate">
               {getAppliedScopeDisplay()}
             </span>
           </div>
         </div>
       </div>
 
-      {/* ─── Khối Tiền cọc ─── */}
-      <div className="pt-5 border-t border-slate-100 dark:border-zinc-800 space-y-4">
-        <h4 className="text-sm font-bold text-slate-900 dark:text-zinc-100">
-          Tiền cọc
-        </h4>
+      <Divider />
 
-        <div className="space-y-3 text-xs sm:text-sm">
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Đã nạp:</span>
-            <span className="font-bold text-slate-900 dark:text-zinc-100">
-              {formatCurrency(depositPaid)}
-            </span>
+      {/* ─── Khối Tiền cọc ─── */}
+      <div className="space-y-4">
+        <h4 className="font-bold">{vd.depositTitle || "Tiền cọc"}</h4>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">{vd.depositPaid || "Đã nạp"}</span>
+            <span>{formatCurrency(depositPaid)}</span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Đã dùng:</span>
-            <span className="font-bold text-cath-red-700 dark:text-cath-red-400">
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">
+              {vd.depositUsed || "Đã dùng"}
+            </span>
+            <span className="text-cath-red-700">
               {formatCurrency(depositUsed)}
             </span>
           </div>
 
-          <div className="flex items-center justify-between py-1">
-            <span className="text-slate-500 dark:text-zinc-400">Còn lại:</span>
-            <span className="font-bold text-emerald-600 dark:text-emerald-400">
-              {formatCurrency(depositRemaining)}
+          <div className="flex items-center justify-between">
+            <span className="text-secondary">
+              {vd.depositRemaining || "Còn lại"}
             </span>
+            <span>{formatCurrency(depositRemaining)}</span>
           </div>
         </div>
       </div>
-    </div>
+    </FluentCard>
   )
 }
 

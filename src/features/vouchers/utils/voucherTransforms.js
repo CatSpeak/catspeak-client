@@ -22,27 +22,28 @@ export const formatDiscountBadgeText = (voucher) => {
   const isPercent =
     voucher.discountType === "Percentage" || voucher.discountType === 1
   if (isPercent) {
-    return `Giảm ${voucher.discountValue}%`
+    return `-${voucher.discountValue}%`
   }
-  return `Giảm ${formatCurrency(voucher.discountValue)}`
+  return `-${formatCurrency(voucher.discountValue)}`
 }
 
 /**
  * Format scope label
  */
-export const formatScopeLabel = (scopeType) => {
+export const formatScopeLabel = (scopeType, t = null) => {
+  const d = t?.vouchers?.detail || {}
   switch (scopeType) {
     case "SpecificCourses":
     case 2:
-      return "Khóa học chỉ định"
+      return d.specificCourse || "Khóa học chỉ định"
     case "SpecificClasses":
     case 3:
-      return "Lớp học chỉ định"
+      return d.specificClass || "Lớp học chỉ định"
     case "All":
     case 1:
-      return "Toàn bộ lớp / khóa"
+      return d.allClassesOrCourses || "Toàn bộ lớp / khóa"
     default:
-      return "Không xác định"
+      return "-"
   }
 }
 
