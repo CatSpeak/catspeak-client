@@ -39,25 +39,22 @@ const RouteErrorBoundary = () => {
         <PillButton
           onClick={() => window.location.reload()}
           variant="secondary"
-          className="flex items-center gap-2"
+          startIcon={<RefreshCw size={16} />}
         >
-          <RefreshCw size={16} />
           {lang.reload || "Tải lại trang"}
         </PillButton>
         <PillButton
           onClick={() => setIsReportOpen(true)}
           variant="primary"
-          className="flex items-center gap-2"
+          startIcon={<Bug size={16} />}
         >
-          <Bug size={16} />
           {lang.reportIssue || "Báo cáo sự cố này"}
         </PillButton>
         <PillButton
           onClick={() => navigate("/")}
           variant="secondary"
-          className="flex items-center gap-2"
+          startIcon={<Home size={16} />}
         >
-          <Home size={16} />
           {lang.goHome || "Về trang chủ"}
         </PillButton>
       </div>
