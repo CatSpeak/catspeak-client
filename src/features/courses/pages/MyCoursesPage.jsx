@@ -17,6 +17,8 @@ import CourseManagementCard from "../components/CourseManagementCard"
 import CourseSelectFilter from "../components/CourseSelectFilter"
 import EmptyCoursesState from "../components/EmptyCoursesState"
 import ViewModeToggle from "../components/shared/ViewModeToggle"
+import UpcomingClassesSection from "../components/overview/UpcomingClassesSection"
+import TeachingTasksSection from "../components/assignments/TeachingTasksSection"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import {
   filterByStatus,
@@ -311,6 +313,16 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
             <span>{c.createClass?.createClass || "Create Class"}</span>
           </button>
         )}
+      </div>
+
+      {/* ─── Overview Section: Upcoming Classes (3/5) & Teaching Tasks (2/5) ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
+        <div className="lg:col-span-3">
+          <UpcomingClassesSection />
+        </div>
+        <div className="lg:col-span-2">
+          <TeachingTasksSection />
+        </div>
       </div>
 
       {/* ─── Navigation Tabs & Controls ─── */}

@@ -1,8 +1,11 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { Calendar, Clock, ArrowRight, SquarePen, Puzzle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { formatTaskDueText } from "../../utils/courseTransforms"
+import {
+  useGetTeacherAllTeachingTasksCombinedQuery,
+} from "@/store/api/coursesApi"
+import { formatTaskDueText, mapTeachingTask } from "../../utils/courseTransforms"
 
 const getStatusConfig = (status, labels = {}) => {
   const norm = String(status || "")
@@ -54,8 +57,8 @@ const getStatusConfig = (status, labels = {}) => {
 const TeachingTasksSection = ({
   teachingTasksLabel,
   viewAllLabel,
-  tasks,
-  isLoading = false,
+  tasks: propTasks,
+  isLoading: propIsLoading,
   onTaskAction,
   emptyLabel,
   language: propLanguage,
@@ -66,19 +69,82 @@ const TeachingTasksSection = ({
   const courses = t.courses || {}
   const grading = courses.grading || {}
 
-  const resolvedTasks = Array.isArray(tasks)
-    ? tasks
-    : Array.isArray(tasks?.items)
-      ? tasks.items
-      : Array.isArray(tasks?.data?.items)
-        ? tasks.data.items
-        : Array.isArray(tasks?.data)
-          ? tasks.data
-          : Array.isArray(tasks?.result)
-            ? tasks.result
-            : Array.isArray(tasks?.value)
-              ? tasks.value
-              : []
+  // Fetch teaching tasks if not provided from parent
+  const { data: rawTasks, isLoading: isFetchingTasks } =
+    useGetTeacherAllTeachingTasksCombinedQuery(
+      { page: 1, limit: 3 },
+      { skip: propTasks !== undefined },
+    )
+
+  const isLoading = propIsLoading !== undefined ? propIsLoading : isFetchingTasks
+
+  const resolvedTasks = useMemo(() => {
+    if (propTasks !== undefined) {
+      const list = Array.isArray(propTasks)
+        ? propTasks
+        : Array.isArray(propTasks?.items)
+          ? propTasks.items
+          : Array.isArray(propTasks?.data?.items)
+            ? propTasks.data.items
+            : Array.isArray(propTasks?.data)
+              ? propTasks.data
+              : Array.isArray(propTasks?.result)
+                ? propTasks.result
+                : Array.isArray(propTasks?.value)
+                  ? propTasks.value
+                  : []
+      return list
+    }
+
+    const list = Array.isArray(rawTasks)
+      ? rawTasks
+      : Array.isArray(rawTasks?.items)
+        ? rawTasks.items
+        : Array.isArray(rawTasks?.data?.items)
+          ? rawTasks.data.items
+          : Array.isArray(rawTasks?.data)
+            ? rawTasks.data
+            : []
+
+    return list
+      .map((task) =>
+        mapTeachingTask(task, {
+          pendingCount: grading.teachingTaskPendingCount,
+          urgent: grading.teachingTaskUrgent,
+          required: grading.teachingTaskRequired,
+          later: grading.teachingTaskLater,
+          gradeQuiz: grading.teachingTaskGradeQuiz,
+          gradeAssignment: grading.teachingTaskGradeAssignment,
+          unknown: grading.statusUnknown,
+        }),
+      )
+      .filter(Boolean)
+  }, [
+    propTasks,
+    rawTasks,
+    grading.teachingTaskPendingCount,
+    grading.teachingTaskUrgent,
+    grading.teachingTaskRequired,
+    grading.teachingTaskLater,
+    grading.teachingTaskGradeQuiz,
+    grading.teachingTaskGradeAssignment,
+    grading.statusUnknown,
+  ])
+
+  const handleTaskClick = (task) => {
+    if (onTaskAction) {
+      onTaskAction(task)
+      return
+    }
+    if (!task?.classId) return
+    let targetUrl = `/workspace/courses/class/${encodeURIComponent(String(task.classId))}?tab=grading`
+    if (task.assignmentId) {
+      targetUrl += `&assignmentId=${encodeURIComponent(String(task.assignmentId))}`
+    } else if (task.quizId) {
+      targetUrl += `&quizId=${encodeURIComponent(String(task.quizId))}`
+    }
+    navigate(targetUrl)
+  }
 
   const resolvedTeachingTasksLabel =
     teachingTasksLabel || courses.teachingTasks || "Việc giảng dạy"
@@ -208,10 +274,9 @@ const TeachingTasksSection = ({
               <button
                 type="button"
                 key={taskKey}
-                onClick={() => onTaskAction?.(task)}
-                disabled={typeof onTaskAction !== "function"}
+                onClick={() => handleTaskClick(task)}
                 title={`${taskTitle} - ${taskSubtitle}`}
-                className="rounded-xl relative overflow-hidden w-full text-left bg-white p-2.5 sm:p-3 pl-3.5 sm:pl-4 transition-all cursor-pointer flex flex-col justify-between gap-2 group active:scale-[0.99] focus-visible:outline-none disabled:cursor-default hover:bg-gray-50/60 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
+                className="rounded-xl relative overflow-hidden w-full text-left bg-white p-2.5 sm:p-3 pl-3.5 sm:pl-4 transition-all cursor-pointer flex flex-col justify-between gap-2 group active:scale-[0.99] focus-visible:outline-none hover:bg-gray-50/60 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.1)]"
               >
                 {/* Left status indicator accent bar (Không bo góc) */}
                 <span
