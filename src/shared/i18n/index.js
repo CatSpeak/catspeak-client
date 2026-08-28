@@ -93,6 +93,7 @@ export const translations = {
     materialsTranslations.ja,
     landingTranslations.ja,
     voucherTranslations.ja,
+    bugReportTranslations.ja,
   ),
 }
 
