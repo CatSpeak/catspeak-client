@@ -11,22 +11,50 @@ export const formatFileSize = (bytes) => {
 }
 
 // Helper function to resolve dynamic file icon based on file extension
+export const getFileStyle = (fileName) => {
+  if (!fileName) {
+    return { bg: "bg-gray-500", label: "FILE" }
+  }
+  const ext = fileName.split(".").pop().toLowerCase()
+  const label = ext.substring(0, 4).toUpperCase()
+
+  if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext)) {
+    return { bg: "bg-[#F59E0B]", label } // amber-500
+  }
+  if (["pdf"].includes(ext)) {
+    return { bg: "bg-[#DC2626]", label } // red-600
+  }
+  if (["doc", "docx"].includes(ext)) {
+    return { bg: "bg-[#2563EB]", label } // blue-600
+  }
+  if (["pptx", "ppt"].includes(ext)) {
+    return { bg: "bg-[#F97316]", label } // orange-500
+  }
+  if (["xlsx", "xls", "csv"].includes(ext)) {
+    return { bg: "bg-[#16A34A]", label } // green-600
+  }
+  return { bg: "bg-gray-500", label }
+}
+
 export const getFileIcon = (fileName) => {
-  if (!fileName) return <FileText size={20} className="text-[#72000d]" />
+  if (!fileName) return <FileText size={20} className="text-gray-500" />
   const ext = fileName.split(".").pop().toLowerCase()
   if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext)) {
-    return <ImageIcon size={20} className="text-amber-600" />
+    return <ImageIcon size={20} className="text-[#F59E0B]" />
   }
-  if (["pdf", "doc", "docx"].includes(ext)) {
-    return <FileText size={20} className="text-[#72000d]" />
+  if (["pdf"].includes(ext)) {
+    return <FileText size={20} className="text-[#DC2626]" />
   }
-  if (["pptx", "ppt", "xlsx", "xls"].includes(ext)) {
-    return <FileCode size={20} className="text-blue-600" />
+  if (["doc", "docx"].includes(ext)) {
+    return <FileText size={20} className="text-[#2563EB]" />
   }
-  if (["js", "ts", "json", "html", "css"].includes(ext)) {
-    return <FileCode size={20} className="text-blue-600" />
+  if (["pptx", "ppt"].includes(ext)) {
+    return <FileText size={20} className="text-[#F97316]" />
   }
-  return <FileIcon size={20} className="text-gray-600" />
+  if (["xlsx", "xls", "csv"].includes(ext)) {
+    return <FileText size={20} className="text-[#16A34A]" />
+  }
+  return <FileText size={20} className="text-gray-500" />
 }
 
 export const MAX_MATERIAL_SIZE = 50 * 1024 * 1024

@@ -5,8 +5,14 @@ import { useRegisterNavigate } from "@/features/video-call/context/GlobalVideoCa
 import BottomRightStack from "@/shared/components/BottomRightStack"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
-export const LazyRoute = ({ children }) => (
-  <Suspense fallback={<LoadingSpinner className="flex min-h-[320px] items-center justify-center" />}>
+export const LazyRoute = ({ children, fallback }) => (
+  <Suspense
+    fallback={
+      fallback || (
+        <LoadingSpinner className="flex min-h-[320px] items-center justify-center" />
+      )
+    }
+  >
     {children}
   </Suspense>
 )

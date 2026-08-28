@@ -1,22 +1,22 @@
-import { useState } from "react";
-import Checkbox from "@/shared/components/ui/inputs/Checkbox";
-import PolicyModal from "../PolicyModal";
+import { useState } from "react"
+import Checkbox from "@/shared/components/ui/inputs/Checkbox"
+import PolicyModal from "../PolicyModal"
 
 const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
-  const [policyModal, setPolicyModal] = useState({ open: false, title: "" });
+  const [policyModal, setPolicyModal] = useState({ open: false, title: "" })
 
   const handleOpenPolicy = (title) => (e) => {
-    e.preventDefault();
-    setPolicyModal({ open: true, title });
-  };
+    e.preventDefault()
+    setPolicyModal({ open: true, title })
+  }
 
   const handleClosePolicy = () => {
-    setPolicyModal({ open: false, title: "" });
-  };
+    setPolicyModal({ open: false, title: "" })
+  }
 
   return (
     <>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {/* Terms and Privacy */}
         <div>
           <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -28,7 +28,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.agreePrefix}{" "}
               <button
                 type="button"
-                className="font-semibold text-[#8f0d15] hover:underline"
+                className="font-semibold text-primary hover:underline"
                 onClick={handleOpenPolicy(authText.serviceTerms)}
               >
                 {authText.serviceTerms}
@@ -36,7 +36,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.and}{" "}
               <button
                 type="button"
-                className="font-semibold text-[#8f0d15] hover:underline"
+                className="font-semibold text-primary hover:underline"
                 onClick={handleOpenPolicy(authText.privacyPolicy)}
               >
                 {authText.privacyPolicy}
@@ -60,7 +60,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.agreePrefix}{" "}
               <button
                 type="button"
-                className="font-semibold text-[#8f0d15] hover:underline"
+                className="font-semibold text-primary hover:underline"
                 onClick={handleOpenPolicy(authText.paymentPolicy)}
               >
                 {authText.paymentPolicy}
@@ -68,7 +68,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               {authText.and}{" "}
               <button
                 type="button"
-                className="font-semibold text-[#8f0d15] hover:underline"
+                className="font-semibold text-primary hover:underline"
                 onClick={handleOpenPolicy(authText.ipPolicy)}
               >
                 {authText.ipPolicy}
@@ -90,8 +90,9 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               checked={formData.isEmailNotificationEnabled ?? true}
               onChange={onChange("isEmailNotificationEnabled")}
             />
-            <span className="text-sm text-gray-700 font-medium">
-              {authText.emailOptIn || "Tôi muốn nhận email thông báo & tin tức cập nhật từ CatSpeak"}
+            <span className="text-sm text-secondary font-medium">
+              {authText.emailOptIn ||
+                "Tôi muốn nhận email thông báo & tin tức cập nhật từ CatSpeak"}
             </span>
           </label>
         </div>
@@ -103,7 +104,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
         title={policyModal.title}
       />
     </>
-  );
-};
+  )
+}
 
-export default AgreementSection;
+export default AgreementSection

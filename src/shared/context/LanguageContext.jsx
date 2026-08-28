@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from "react"
+import { createContext, useContext, useMemo, useState, useEffect } from "react"
 import { translations, languageNames } from "@/shared/i18n"
 
 const defaultContextValue = {
@@ -14,13 +14,17 @@ export const LanguageContext = createContext(defaultContextValue)
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState("vi")
 
+  useEffect(() => {
+    document.documentElement.lang = language
+  }, [language])
+
   const value = useMemo(
     () => ({
       language,
       setLanguage,
       toggleLanguage: () =>
         setLanguage((prev) => {
-          const nextLang = { vi: "en", en: "zh", zh: "vi" }
+          const nextLang = { vi: "en", en: "zh", zh: "ja", ja: "vi" }
           return nextLang[prev] || "vi"
         }),
       t: translations[language] || translations.vi || {},

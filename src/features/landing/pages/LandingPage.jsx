@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { motion } from "framer-motion"
 import { LoginPopup, RegisterPopup, VerifyEmailOtpPopup } from "@/features/auth"
 import HeroSection from "@/features/landing/components/HeroSection"
 import LeadingTeamSection from "@/features/landing/components/LeadingTeamSection"
@@ -69,11 +70,16 @@ const LandingPage = () => {
   }
 
   return (
-    <div className="flex flex-col w-full max-w-screen-xl mx-auto overflow-hidden">
+    <div className="flex flex-col w-full mx-auto overflow-hidden">
       {/* 1. Hero + Numbers */}
-      <div className="relative w-full pt-4 mb-8 lg:mb-12">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full pt-4 mb-8 lg:mb-12"
+      >
         <HeroSection openAuthModal={openAuthModal} />
-      </div>
+      </motion.div>
 
       {/* 2. Leading Team */}
       <LeadingTeamSection openAuthModal={openAuthModal} />

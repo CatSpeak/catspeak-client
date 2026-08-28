@@ -1,4 +1,3 @@
-import React from "react";
 import MobileCommunityDropdown from "./MobileCommunityDropdown";
 import MobileCatSpeakDropdown from "./MobileCatSpeakDropdown";
 import MobileWorkspaceDropdown from "./MobileWorkspaceDropdown";

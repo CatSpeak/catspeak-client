@@ -40,6 +40,13 @@ export const postsApi = socialApi.injectEndpoints({
         )
       },
     }),
+    getLandingPosts: builder.query({
+      query: (limit = 12) => ({
+        url: "/Post/landing",
+        params: { limit },
+      }),
+      providesTags: ["Post"],
+    }),
     getPostById: builder.query({
       query: (postId) => `/Post/${postId}`,
       providesTags: (result, error, id) => [{ type: "Post", id }],
@@ -226,7 +233,10 @@ export const postsApi = socialApi.injectEndpoints({
           (comment) => {
             if (comment.currentUserReaction === type) {
               comment.currentUserReaction = null
-              comment.totalReactions = Math.max(0, (comment.totalReactions || 0) - 1)
+              comment.totalReactions = Math.max(
+                0,
+                (comment.totalReactions || 0) - 1,
+              )
             } else {
               if (!comment.currentUserReaction) {
                 comment.totalReactions = (comment.totalReactions || 0) + 1
@@ -248,6 +258,7 @@ export const postsApi = socialApi.injectEndpoints({
 
 export const {
   useGetPostsQuery,
+  useGetLandingPostsQuery,
   useGetPostByIdQuery,
   useGetPostBySlugQuery,
   useGetSharedPostQuery,

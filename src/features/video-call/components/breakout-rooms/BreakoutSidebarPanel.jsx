@@ -47,7 +47,7 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
     if (sessionId) {
       refetchStatus()
     }
-  }, [sessionId, refetchStatus])
+  }, [sessionId, liveParticipants.length, refetchStatus])
 
   const [joinBreakoutRoom] = useJoinBreakoutRoomMutation()
 
@@ -82,24 +82,30 @@ const BreakoutSidebarPanel = ({ sessionId, onClose }) => {
     }
   }
 
-  const allLiveStudents = liveParticipants.map((p) => {
-    const meta = parseMetadata(p.metadata)
-    return {
-      accountId:
+  const allLiveStudents = React.useMemo(() => {
+    return liveParticipants.map((p) => {
+      const meta = parseMetadata(p.metadata)
+      const parsedId = Number(p.identity)
+      const accountId =
         meta.accountId ||
-        (p.isLocal ? Number(callInfo?.user?.accountId) : null),
-      username: p.name || meta.name || p.identity,
-      identity: p.identity,
-      avatarUrl: meta.avatarImageUrl,
-      participant: p,
-    }
-  })
+        (!isNaN(parsedId) && parsedId > 0 ? parsedId : null) ||
+        (p.isLocal ? Number(callInfo?.user?.accountId) : null)
 
-  const students = allLiveStudents.filter(
-    (s) => s.accountId && String(s.accountId) !== String(roomCreatorId),
-  )
+      return {
+        accountId,
+        username: p.name || meta.name || meta.username || p.identity,
+        identity: p.identity,
+        avatarUrl: meta.avatarImageUrl || meta.avatarUrl,
+        participant: p,
+      }
+    })
+  }, [liveParticipants, callInfo?.user?.accountId])
 
-
+  const students = React.useMemo(() => {
+    return allLiveStudents.filter(
+      (s) => s.accountId && String(s.accountId) !== String(roomCreatorId),
+    )
+  }, [allLiveStudents, roomCreatorId])
 
   const isStarted = status?.isBreakoutActive
 

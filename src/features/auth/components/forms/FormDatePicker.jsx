@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import dayjs from "dayjs";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
-import { FluentAnimation } from "@/shared/components/ui/animations";
+import React, { useState, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
+import dayjs from "dayjs"
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react"
+import { AnimatePresence } from "framer-motion"
+import { FluentAnimation } from "@/shared/components/ui/animations"
 
 const FormDatePicker = ({
   value,
@@ -15,19 +15,21 @@ const FormDatePicker = ({
   className = "",
   disabled = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [view, setView] = useState("days"); // "days" | "years"
-  const dropdownRef = useRef(null);
-  const portalRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const [view, setView] = useState("days") // "days" | "years"
+  const dropdownRef = useRef(null)
+  const portalRef = useRef(null)
 
-  const [date, setDate] = useState(value ? dayjs(value) : null);
-  const [inputValue, setInputValue] = useState(value ? dayjs(value).format("DD/MM/YYYY") : "");
+  const [date, setDate] = useState(value ? dayjs(value) : null)
+  const [inputValue, setInputValue] = useState(
+    value ? dayjs(value).format("DD/MM/YYYY") : "",
+  )
   const [currentViewDate, setCurrentViewDate] = useState(
     value ? dayjs(value).startOf("month") : dayjs().startOf("month"),
-  );
+  )
   const [yearBlockStart, setYearBlockStart] = useState(
     Math.floor((value ? dayjs(value).year() : dayjs().year()) / 12) * 12,
-  );
+  )
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -36,50 +38,50 @@ const FormDatePicker = ({
         !dropdownRef.current.contains(event.target) &&
         (!portalRef.current || !portalRef.current.contains(event.target))
       ) {
-        setIsOpen(false);
-        setView("days");
+        setIsOpen(false)
+        setView("days")
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-  const [prevValue, setPrevValue] = useState(value);
+  const [prevValue, setPrevValue] = useState(value)
 
   if (value !== prevValue) {
-    setPrevValue(value);
+    setPrevValue(value)
     if (value) {
-      const newDate = dayjs(value);
-      setDate(newDate);
-      setCurrentViewDate(newDate.startOf("month"));
-      setYearBlockStart(Math.floor(newDate.year() / 12) * 12);
-      setInputValue(newDate.format("DD/MM/YYYY"));
+      const newDate = dayjs(value)
+      setDate(newDate)
+      setCurrentViewDate(newDate.startOf("month"))
+      setYearBlockStart(Math.floor(newDate.year() / 12) * 12)
+      setInputValue(newDate.format("DD/MM/YYYY"))
     } else {
-      setDate(null);
-      setInputValue("");
+      setDate(null)
+      setInputValue("")
     }
   }
 
-  const [portalCoords, setPortalCoords] = useState(null);
+  const [portalCoords, setPortalCoords] = useState(null)
 
   useEffect(() => {
     const handleClose = () => {
-      setIsOpen(false);
-      setView("days");
-    };
+      setIsOpen(false)
+      setView("days")
+    }
     const handleScroll = (e) => {
-      if (portalRef.current && portalRef.current.contains(e.target)) return;
-      handleClose();
-    };
+      if (portalRef.current && portalRef.current.contains(e.target)) return
+      handleClose()
+    }
 
     const updateCoords = () => {
       if (isOpen && dropdownRef.current) {
-        const rect = dropdownRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const spaceAbove = rect.top;
+        const rect = dropdownRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        const spaceAbove = rect.top
 
-        const flipUp = spaceBelow < 360 && spaceAbove > spaceBelow;
-        const forceAlignRight = rect.left + 280 > window.innerWidth;
+        const flipUp = spaceBelow < 360 && spaceAbove > spaceBelow
+        const forceAlignRight = rect.left + 280 > window.innerWidth
 
         setPortalCoords({
           top: rect.top + window.scrollY,
@@ -88,64 +90,71 @@ const FormDatePicker = ({
           height: rect.height,
           flipUp,
           forceAlignRight,
-        });
+        })
       }
-    };
+    }
 
     if (isOpen) {
-      updateCoords();
-      window.addEventListener("resize", handleClose);
-      window.addEventListener("scroll", handleScroll, true);
+      updateCoords()
+      window.addEventListener("resize", handleClose)
+      window.addEventListener("scroll", handleScroll, true)
       return () => {
-        window.removeEventListener("resize", handleClose);
-        window.removeEventListener("scroll", handleScroll, true);
-      };
+        window.removeEventListener("resize", handleClose)
+        window.removeEventListener("scroll", handleScroll, true)
+      }
     }
-  }, [isOpen]);
+  }, [isOpen])
 
   const handleInputChange = (e) => {
-    let val = e.target.value.replace(/[^0-9/]/g, "");
+    let val = e.target.value.replace(/[^0-9/]/g, "")
 
     // Auto-format DD/MM/YYYY
     if (e.nativeEvent.inputType !== "deleteContentBackward") {
-      let clean = val.replace(/\D/g, "");
-      if (clean.length > 8) clean = clean.slice(0, 8);
+      let clean = val.replace(/\D/g, "")
+      if (clean.length > 8) clean = clean.slice(0, 8)
 
       if (clean.length >= 5) {
-        val = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4)}`;
+        val = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4)}`
       } else if (clean.length >= 3) {
-        val = `${clean.slice(0, 2)}/${clean.slice(2)}`;
+        val = `${clean.slice(0, 2)}/${clean.slice(2)}`
       } else if (clean.length === 2) {
-        val = `${clean}/`;
+        val = `${clean}/`
       } else {
-        val = clean;
+        val = clean
       }
     }
 
-    setInputValue(val);
+    setInputValue(val)
 
-    const parts = val.split("/");
+    const parts = val.split("/")
     if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
+      const day = parseInt(parts[0], 10)
+      const month = parseInt(parts[1], 10) - 1
+      const year = parseInt(parts[2], 10)
 
-      if (year >= 1900 && year <= 2100 && month >= 0 && month < 12 && day > 0 && day <= 31) {
-        const newD = dayjs(new Date(year, month, day));
+      if (
+        year >= 1900 &&
+        year <= 2100 &&
+        month >= 0 &&
+        month < 12 &&
+        day > 0 &&
+        day <= 31
+      ) {
+        const newD = dayjs(new Date(year, month, day))
         if (newD.isValid()) {
-          setDate(newD);
-          setCurrentViewDate(newD.startOf("month"));
-          setYearBlockStart(Math.floor(newD.year() / 12) * 12);
-          emitChange(newD);
+          setDate(newD)
+          setCurrentViewDate(newD.startOf("month"))
+          setYearBlockStart(Math.floor(newD.year() / 12) * 12)
+          emitChange(newD)
         }
       }
     } else if (val === "") {
-      setDate(null);
+      setDate(null)
       if (onChange) {
-        onChange({ target: { value: "", type: "text" } });
+        onChange({ target: { value: "", type: "text" } })
       }
     }
-  };
+  }
 
   const emitChange = (selectedDate) => {
     if (onChange) {
@@ -154,68 +163,68 @@ const FormDatePicker = ({
           value: selectedDate.format("YYYY-MM-DD"),
           type: "text",
         },
-      });
+      })
     }
-  };
+  }
 
   const handleSelectDate = (dayNumber) => {
-    const selectedDate = currentViewDate.date(dayNumber);
-    setDate(selectedDate);
-    setIsOpen(false);
-    setView("days");
-    emitChange(selectedDate);
-  };
+    const selectedDate = currentViewDate.date(dayNumber)
+    setDate(selectedDate)
+    setIsOpen(false)
+    setView("days")
+    emitChange(selectedDate)
+  }
 
   const handlePreviousMonth = (e) => {
-    e.stopPropagation();
-    setCurrentViewDate(currentViewDate.subtract(1, "month"));
-  };
+    e.stopPropagation()
+    setCurrentViewDate(currentViewDate.subtract(1, "month"))
+  }
 
   const handleNextMonth = (e) => {
-    e.stopPropagation();
-    setCurrentViewDate(currentViewDate.add(1, "month"));
-  };
+    e.stopPropagation()
+    setCurrentViewDate(currentViewDate.add(1, "month"))
+  }
 
   const openYearPicker = (e) => {
-    e.stopPropagation();
-    setYearBlockStart(Math.floor(currentViewDate.year() / 12) * 12);
-    setView("years");
-  };
+    e.stopPropagation()
+    setYearBlockStart(Math.floor(currentViewDate.year() / 12) * 12)
+    setView("years")
+  }
 
   const handleSelectYear = (year) => {
-    setCurrentViewDate(currentViewDate.year(year));
-    setView("days");
-  };
+    setCurrentViewDate(currentViewDate.year(year))
+    setView("days")
+  }
 
   const handlePreviousYearBlock = (e) => {
-    e.stopPropagation();
-    setYearBlockStart((prev) => prev - 12);
-  };
+    e.stopPropagation()
+    setYearBlockStart((prev) => prev - 12)
+  }
 
   const handleNextYearBlock = (e) => {
-    e.stopPropagation();
-    setYearBlockStart((prev) => prev + 12);
-  };
+    e.stopPropagation()
+    setYearBlockStart((prev) => prev + 12)
+  }
 
-  const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+  const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
 
   const generateDays = () => {
-    const days = [];
-    const startDay = currentViewDate.startOf("month").day();
-    const adjustedStartDay = startDay === 0 ? 6 : startDay - 1;
-    const daysInMonth = currentViewDate.daysInMonth();
+    const days = []
+    const startDay = currentViewDate.startOf("month").day()
+    const adjustedStartDay = startDay === 0 ? 6 : startDay - 1
+    const daysInMonth = currentViewDate.daysInMonth()
 
     for (let i = 0; i < adjustedStartDay; i++) {
-      days.push({ isEmpty: true, key: `empty-${i}` });
+      days.push({ isEmpty: true, key: `empty-${i}` })
     }
     for (let i = 1; i <= daysInMonth; i++) {
-      days.push({ isEmpty: false, day: i, key: `day-${i}` });
+      days.push({ isEmpty: false, day: i, key: `day-${i}` })
     }
-    return days;
-  };
+    return days
+  }
 
-  const days = generateDays();
-  const years = Array.from({ length: 12 }, (_, i) => yearBlockStart + i);
+  const days = generateDays()
+  const years = Array.from({ length: 12 }, (_, i) => yearBlockStart + i)
 
   return (
     <div
@@ -223,11 +232,11 @@ const FormDatePicker = ({
       className={`relative inline-block w-full ${className}`}
     >
       <div
-        className={`h-[56px] w-full flex items-center justify-between rounded-2xl border px-4 text-sm text-left transition-colors focus-within:border-[${color}] hover:border-[${color}]
-        ${error ? "border-red-500 focus-within:border-red-500" : "border-border"}
+        className={`h-14 w-full flex items-center justify-between rounded-md border px-4 text-left transition-colors focus-within:border-primary hover:border-primary
+        ${error ? "!border-red-500 focus-within:!border-red-500 animate-shake" : "border-border"}
         ${disabled ? "cursor-not-allowed opacity-80 bg-gray-50" : "bg-white"}`}
         onClick={() => {
-          if (!disabled && !isOpen) setIsOpen(true);
+          if (!disabled && !isOpen) setIsOpen(true)
         }}
       >
         <input
@@ -235,7 +244,7 @@ const FormDatePicker = ({
           value={inputValue}
           onChange={handleInputChange}
           onFocus={() => {
-            if (!disabled) setIsOpen(true);
+            if (!disabled) setIsOpen(true)
           }}
           placeholder={`${placeholder} (dd/mm/yyyy)`}
           disabled={disabled}
@@ -244,8 +253,8 @@ const FormDatePicker = ({
         <button
           type="button"
           onClick={(e) => {
-            e.stopPropagation();
-            if (!disabled) setIsOpen(!isOpen);
+            e.stopPropagation()
+            if (!disabled) setIsOpen(!isOpen)
           }}
           className="p-1 outline-none"
         >
@@ -328,19 +337,19 @@ const FormDatePicker = ({
                           {/* Days Grid */}
                           <div className="grid grid-cols-7 gap-y-2 gap-x-1">
                             {days.map((item) => {
-                              if (item.isEmpty) return <div key={item.key} />;
+                              if (item.isEmpty) return <div key={item.key} />
 
                               const isSelected =
                                 date &&
                                 item.day === date.date() &&
                                 currentViewDate.month() === date.month() &&
-                                currentViewDate.year() === date.year();
+                                currentViewDate.year() === date.year()
 
-                              const today = dayjs();
+                              const today = dayjs()
                               const isToday =
                                 item.day === today.date() &&
                                 currentViewDate.month() === today.month() &&
-                                currentViewDate.year() === today.year();
+                                currentViewDate.year() === today.year()
 
                               return (
                                 <button
@@ -357,15 +366,15 @@ const FormDatePicker = ({
                                       : {}),
                                     ...(isToday && !isSelected
                                       ? {
-                                        border: `1px solid ${color}`,
-                                        color: color,
-                                      }
+                                          border: `1px solid ${color}`,
+                                          color: color,
+                                        }
                                       : {}),
                                   }}
                                 >
                                   {item.day}
                                 </button>
-                              );
+                              )
                             })}
                           </div>
                         </>
@@ -401,7 +410,7 @@ const FormDatePicker = ({
                           <div className="grid grid-cols-3 gap-2">
                             {years.map((year) => {
                               const isSelectedYear =
-                                currentViewDate.year() === year;
+                                currentViewDate.year() === year
                               return (
                                 <button
                                   type="button"
@@ -417,7 +426,7 @@ const FormDatePicker = ({
                                 >
                                   {year}
                                 </button>
-                              );
+                              )
                             })}
                           </div>
                         </>
@@ -431,7 +440,7 @@ const FormDatePicker = ({
           document.body,
         )}
     </div>
-  );
-};
+  )
+}
 
-export default FormDatePicker;
+export default FormDatePicker

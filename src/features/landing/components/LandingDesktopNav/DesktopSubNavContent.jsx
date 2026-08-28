@@ -1,32 +1,17 @@
-import React, { useMemo } from "react"
-import { NavLink, useParams, useLocation, useNavigate } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { useAuth } from "@/features/auth"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
-import { getSwitchCommunityPath } from "@/shared/utils/navigation"
 
 export const DesktopSubNavContent = ({ item, onItemClick }) => {
   const { subItems = [], groups = [] } = item || {}
   const { t } = useLanguage()
-  const { checkIsActive, resolvePath, currentLang } = useActiveLink()
+  const { resolvePath, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
   const { isTeacher } = useRoleOverride()
-  const { lang } = useParams()
-  const location = useLocation()
   const navigate = useNavigate()
-
-  // Community language switcher logic
-  const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), [])
-
-  const currentCommunity = useMemo(() => {
-    if (supportedCodes.includes(lang)) {
-      localStorage.setItem("communityLanguage", lang)
-      return lang
-    }
-    return localStorage.getItem("communityLanguage") || "zh"
-  }, [lang, supportedCodes])
 
   const handleCommunitySelect = (newCode) => {
     localStorage.setItem("communityLanguage", newCode)
@@ -35,25 +20,22 @@ export const DesktopSubNavContent = ({ item, onItemClick }) => {
   }
 
   // Filter groups for role visibility & active language
-  const visibleGroups = useMemo(() => {
-    if (!groups || groups.length === 0) return []
-    return groups
-      .filter((group) => {
-        if (group.roles && group.roles.includes("Teacher") && !isTeacher) {
-          return false
-        }
+  const visibleGroups = groups
+    .filter((group) => {
+      if (group.roles && group.roles.includes("Teacher") && !isTeacher) {
+        return false
+      }
+      return true
+    })
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((sub) => {
+        if (sub.lang && sub.lang !== currentLang) return false
+        if (sub.isPrivate && !isAuthenticated) return false
         return true
-      })
-      .map((group) => ({
-        ...group,
-        items: group.items.filter((sub) => {
-          if (sub.lang && sub.lang !== currentLang) return false
-          if (sub.isPrivate && !isAuthenticated) return false
-          return true
-        }),
-      }))
-      .filter((group) => group.items.length > 0)
-  }, [groups, isTeacher, currentLang, isAuthenticated])
+      }),
+    }))
+    .filter((group) => group.items.length > 0)
 
   const renderNavLink = (sub) => {
     const Icon = sub.icon

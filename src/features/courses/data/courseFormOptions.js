@@ -14,6 +14,11 @@ export const COURSE_FORM_LANGUAGES = [
     name: "Vietnamese",
     levels: ["A1", "A2", "B1", "B2"].map((name, index) => ({ id: index + 1, name })),
   },
+  {
+    id: 4,
+    name: "Japanese",
+    levels: ["N5", "N4", "N3", "N2", "N1"].map((name, index) => ({ id: index + 1, name })),
+  },
 ]
 
 export const DEFAULT_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"]
@@ -34,6 +39,10 @@ export function getLevelsForLanguage(langName) {
 
   if (norm.includes("chinese") || norm.includes("zh") || norm.includes("trung")) {
     return COURSE_FORM_LANGUAGES.find((l) => l.name === "Chinese")?.levels || DEFAULT_LEVELS
+  }
+
+  if (norm === "ja" || norm.includes("japan") || norm.includes("nhật") || norm.includes("nhat")) {
+    return COURSE_FORM_LANGUAGES.find((l) => l.name === "Japanese")?.levels || DEFAULT_LEVELS
   }
 
   return DEFAULT_LEVELS

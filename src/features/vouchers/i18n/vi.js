@@ -61,13 +61,33 @@ export const vi = {
     status: {
       Draft: "Bản nháp",
       Active: "Đang hoạt động",
-      Disabled: "Đã tắt",
-      Expired: "Hết hạn",
-      Exhausted: "Hết lượt",
+      Disabled: "Đã vô hiệu hóa",
+      Expired: "Đã hết hạn",
+      Exhausted: "Hết lượt dùng",
       PendingDeposit: "Chờ nạp cọc",
       PendingApproval: "Chờ duyệt",
       Rejected: "Bị từ chối",
       Stopped: "Đã dừng",
+      expiringSoon: "Sắp hết hạn",
+    },
+
+    // Scopes
+    scope: {
+      All: "Cat Speak",
+      SpecificCourses: "Khóa học",
+      SpecificClasses: "Lớp học",
+    },
+
+    // Voucher Card & Section
+    card: {
+      appliedTitle: "Ưu đãi đang áp dụng",
+      noAppliedVouchers: "Chưa có ưu đãi nào đang áp dụng cho lớp học này.",
+      viewAll: "Xem tất cả",
+      discount: "Giảm",
+      exp: "HSD",
+      neverExpired: "Vô thời hạn",
+      remainingUsages: "Còn {{remaining}}/{{limit}} lượt",
+      unlimitedUsages: "Không giới hạn lượt",
     },
 
     // Actions

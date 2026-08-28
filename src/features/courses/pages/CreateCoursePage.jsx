@@ -21,7 +21,7 @@ import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { getInstructorFormLanguages } from "../data/courseFormOptions"
+import { getInstructorFormLanguages, getLocalizedLanguageName } from "../data/courseFormOptions"
 import { getSafeMediaUrl } from "../utils/courseUtils"
 
 const CreateCoursePage = () => {
@@ -161,8 +161,8 @@ const CreateCoursePage = () => {
         e.target.value = ""
         return
       }
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error(cc.avatarDesc2 || c.avatarDesc2 || "Kích cỡ dưới 50MB")
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(cc.avatarDesc2 || c.avatarDesc2 || "Kích cỡ dưới 5MB")
         e.target.value = ""
         return
       }
@@ -425,7 +425,7 @@ const CreateCoursePage = () => {
                       {cc.avatarDesc1 || c.avatarDesc1 || "Kéo & thả hoặc bấm để chọn ảnh"}
                     </p>
                     <p className="text-[11px] text-gray-400 font-medium">
-                      {cc.avatarDesc2 || c.avatarDesc2 || "PNG, JPG, WEBP (tối đa 50MB)"}
+                      {cc.avatarDesc2 || c.avatarDesc2 || "PNG, JPG, WEBP (tối đa 5MB)"}
                     </p>
                   </div>
                 </div>
@@ -465,7 +465,7 @@ const CreateCoursePage = () => {
               <Dropdown
                 options={languagesList.map((lang) => ({
                   value: lang.name,
-                  label: lang.name,
+                  label: getLocalizedLanguageName(lang.name, t),
                 }))}
                 value={selectedLanguage}
                 onChange={(val) => {

@@ -26,6 +26,7 @@ const TextInput = ({
   leftContentWidthClass = "pl-14",
   rightContent,
   rightContentWidthClass = "!pr-12",
+  rightContentClassName = "right-4",
   multiline = false,
   floatingLabel = false,
   required = false,
@@ -60,12 +61,20 @@ const TextInput = ({
   const hasCustomHeight = className
     .split(" ")
     .some((c) => c.startsWith("h-") || c.startsWith("!h-"))
+  const hasCustomPadding = className
+    .split(" ")
+    .some((c) => c.startsWith("px-") || c.startsWith("!px-") || c.startsWith("p-") || c.startsWith("!p-"))
   const heightClass = multiline
-    ? "min-h-14 px-4 py-[15px]"
+    ? "min-h-14"
     : hasCustomHeight
       ? ""
-      : "h-14 px-4"
-  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+      : "h-14"
+  const paddingClass = multiline
+    ? hasCustomPadding ? "" : "px-4 py-[15px]"
+    : hasCustomPadding
+      ? ""
+      : "px-4"
+  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${paddingClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {
@@ -102,7 +111,7 @@ const TextInput = ({
               "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
-            className={`${finalClassName} resize-none overflow-hidden scrollbar-hide`}
+            className={`${finalClassName} resize-none overflow-y-auto`}
             value={value}
             onChange={onChange}
             onInput={handleInput}
@@ -148,7 +157,9 @@ const TextInput = ({
           </IconButton>
         )}
         {rightContent && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs">
+          <div
+            className={`absolute ${rightContentClassName} top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs`}
+          >
             {rightContent}
           </div>
         )}

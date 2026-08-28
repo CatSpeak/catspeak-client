@@ -1,49 +1,51 @@
-import React, { useState, useRef, useEffect, useContext, useMemo } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { useAuth } from "@/features/auth"
-import { useGetUserProfileQuery } from "@/store/api/userApi"
-import AuthModalContext from "@/shared/context/AuthModalContext"
+import React, { useState, useRef, useEffect, useContext, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useAuth } from "@/features/auth";
+import { useGetUserProfileQuery } from "@/store/api/userApi";
+import AuthModalContext from "@/shared/context/AuthModalContext";
 import {
   useGetConversationsQuery,
   useGetConversationMessagesQuery,
   useMarkConversationAsReadMutation,
   conversationsApi,
-} from "@/store/api/social/conversationsApi"
-import useMessageSignalR from "../../hooks/useMessageSignalR"
-import useChatMessageActions from "@/features/chat/hooks/useChatMessageActions"
-import useClickOutside from "@/shared/hooks/useClickOutside"
-import IconButton from "@/shared/components/ui/buttons/IconButton"
+} from "@/store/api/social/conversationsApi";
+import useMessageSignalR from "../../hooks/useMessageSignalR";
+import useChatMessageActions from "@/features/chat/hooks/useChatMessageActions";
+import useClickOutside from "@/shared/hooks/useClickOutside";
+import IconButton from "@/shared/components/ui/buttons/IconButton";
 import {
   closeWidget,
   openWidget,
   setActiveConversation,
   toggleWidget,
   setView,
-} from "@/store/slices/messageWidgetSlice"
+} from "@/store/slices/messageWidgetSlice";
 import {
   selectTotalUnread,
   clearUnread,
-} from "@/store/slices/notificationSlice"
-import { MessageCircle, ExternalLink } from "lucide-react"
-import { Link } from "react-router-dom"
-import MessageModal from "./MessageModal"
-import ConversationListHeader from "./ConversationListHeader"
-import ConversationDetailHeader from "./ConversationDetailHeader"
-import ConversationList from "./ConversationList"
-import ConversationDetail from "./ConversationDetail"
-import FileSizeLimitModal from "../modals/FileSizeLimitModal"
+} from "@/store/slices/notificationSlice";
+import { MessageCircle, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
+import MessageModal from "./MessageModal";
+import ConversationListHeader from "./ConversationListHeader";
+import ConversationDetailHeader from "./ConversationDetailHeader";
+import ConversationList from "./ConversationList";
+import ConversationDetail from "./ConversationDetail";
+import FileSizeLimitModal from "../modals/FileSizeLimitModal";
+import { useLanguage } from "@/shared/context/LanguageContext";
 
 const MessageWidget = () => {
-  const dispatch = useDispatch()
-  const { user: authUser, isAuthenticated } = useAuth()
+  const dispatch = useDispatch();
+  const { t } = useLanguage();
+  const { user: authUser, isAuthenticated } = useAuth();
   const { data: userProfile } = useGetUserProfileQuery(undefined, {
     skip: !isAuthenticated,
-  })
-  const { openAuthModal } = useContext(AuthModalContext)
+  });
+  const { openAuthModal } = useContext(AuthModalContext);
   const { isOpen, activeConversationId, view } = useSelector(
     (state) => state.messageWidget,
-  )
-  const [input, setInput] = useState("")
+  );
+  const [input, setInput] = useState("");
 
   // ── Chat Message Actions Hook ──────────────────────────
   const {
@@ -59,55 +61,55 @@ const MessageWidget = () => {
     handleDeleteForMe,
     handleRecall,
     isSending,
-  } = useChatMessageActions(activeConversationId)
+  } = useChatMessageActions(activeConversationId);
 
-  const totalUnreadCountRedux = useSelector(selectTotalUnread)
+  const totalUnreadCountRedux = useSelector(selectTotalUnread);
   const friendOnlineStatus = useSelector(
     (state) => state.notification?.friendOnlineStatus || {},
-  )
-  const widgetRef = useRef(null)
+  );
+  const widgetRef = useRef(null);
 
   const currentUser = useMemo(() => {
     return {
       id: authUser?.accountId,
       name: userProfile?.username || authUser?.username || "Me",
       avatar: userProfile?.avatarImageUrl || null,
-    }
-  }, [authUser, userProfile])
+    };
+  }, [authUser, userProfile]);
 
   // Handle click outside to close
   useClickOutside(
     widgetRef,
     () => {
-      dispatch(closeWidget())
+      dispatch(closeWidget());
     },
     {
       enabled: isOpen,
       ignoreSelector: "[data-message-widget-portal]",
     },
-  )
+  );
 
   // Fetch conversations from API
   const {
     data: conversations = [],
     isLoading,
     isError,
-  } = useGetConversationsQuery(undefined, { skip: !isAuthenticated })
+  } = useGetConversationsQuery(undefined, { skip: !isAuthenticated });
 
   const totalUnreadCountServer = conversations.reduce(
     (sum, c) => sum + (c.unreadCount || 0),
     0,
-  )
+  );
   // Use server total since it survives reload. Fallback to redux if empty (optional safety)
-  const totalUnreadCount = totalUnreadCountServer || totalUnreadCountRedux
+  const totalUnreadCount = totalUnreadCountServer || totalUnreadCountRedux;
 
   // Find active conversation object
   const selected = conversations.find(
     (c) => c.conversationId === activeConversationId,
-  )
+  );
 
   const activeConversation = useMemo(() => {
-    if (!selected) return null
+    if (!selected) return null;
     return {
       id: selected.conversationId,
       type: selected.isGroup ? "group" : "direct",
@@ -120,19 +122,19 @@ const MessageWidget = () => {
       isGroup: selected.isGroup,
       groupName: selected.groupName,
       groupAvatar: selected.groupAvatar,
-    }
-  }, [selected])
+    };
+  }, [selected]);
 
   // Fetch messages for selected conversation
   const { data: messagesResponse = [], isLoading: messagesLoading } =
     useGetConversationMessagesQuery(activeConversationId, {
       skip: !activeConversationId,
-    })
+    });
 
   const activeMessages = useMemo(() => {
     const rawList = Array.isArray(messagesResponse)
       ? messagesResponse
-      : messagesResponse?.data || []
+      : messagesResponse?.data || [];
     return rawList.map((msg) => ({
       id: msg.messageId,
       conversationId: msg.conversationId,
@@ -149,100 +151,100 @@ const MessageWidget = () => {
       mediaUrl: msg.mediaUrl || msg.fileUrl || msg.attachmentUrl,
       isRecalled: msg.isRecalled,
       isDeleted: msg.isDeleted,
-    }))
-  }, [messagesResponse])
+    }));
+  }, [messagesResponse]);
 
   // -- SignalR Integration --
   const { startTyping, stopTyping, typingUsers } = useMessageSignalR({
     activeConversationId,
-  })
+  });
 
-  const [markConversationAsRead] = useMarkConversationAsReadMutation()
+  const [markConversationAsRead] = useMarkConversationAsReadMutation();
 
   // Clear unread logic
   const clearUnreadLogic = (convId) => {
-    dispatch(clearUnread(convId))
+    dispatch(clearUnread(convId));
     dispatch(
       conversationsApi.util.updateQueryData(
         "getConversations",
         undefined,
         (draft) => {
-          const cachedConv = draft.find((c) => c.conversationId === convId)
+          const cachedConv = draft.find((c) => c.conversationId === convId);
           if (cachedConv) {
-            cachedConv.unreadCount = 0
+            cachedConv.unreadCount = 0;
           }
         },
       ),
-    )
+    );
 
     // Notify server to mark as read
     markConversationAsRead(convId).catch((err) =>
       console.error("Failed to mark conversation as read:", err),
-    )
-  }
+    );
+  };
 
   // Handle conversation selection
   const handleSelectConversation = (conv) => {
-    dispatch(setActiveConversation(conv.conversationId))
-    handleCancelReply()
-    clearUnreadLogic(conv.conversationId)
-  }
+    dispatch(setActiveConversation(conv.conversationId));
+    handleCancelReply();
+    clearUnreadLogic(conv.conversationId);
+  };
 
   // Handle programmatically opened conversations or updates to active conversation
   useEffect(() => {
-    if (!activeConversationId) return
+    if (!activeConversationId) return;
 
     const currentCached = conversations.find(
       (c) =>
         Number(c.conversationId ?? c.id) === Number(activeConversationId) ||
         String(c.conversationId ?? c.id) === String(activeConversationId),
-    )
+    );
 
     if (!currentCached || currentCached.unreadCount > 0) {
-      clearUnreadLogic(activeConversationId)
+      clearUnreadLogic(activeConversationId);
     }
-  }, [activeConversationId, conversations])
+  }, [activeConversationId, conversations]);
 
   // Handle back to list
   const handleBackToList = () => {
-    dispatch(setView("list"))
-    dispatch(setActiveConversation(null)) // Optional: clear selection
-    handleCancelReply()
-  }
+    dispatch(setView("list"));
+    dispatch(setActiveConversation(null)); // Optional: clear selection
+    handleCancelReply();
+  };
 
   // Handle send message
   const handleSendMessage = async (text, file) => {
-    if (stopTyping) stopTyping()
-    await sendAction(text, file)
-    setInput("")
-  }
+    if (stopTyping) stopTyping();
+    await sendAction(text, file);
+    setInput("");
+  };
 
   // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage(input)
+      e.preventDefault();
+      handleSendMessage(input);
     }
-  }
+  };
 
   // Filter out empty 1:1 conversations (unless active) and sort by latest timestamp matching ChatSidebar
   const filteredConversations = useMemo(() => {
-    let result = [...conversations]
+    let result = [...conversations];
 
     result = result.filter((c) => {
-      if (c.conversationId === activeConversationId) return true
-      if (c.isGroup) return true
-      return Boolean(c.lastMessage || c.lastMessageType || c.lastMessageTime)
-    })
+      if (c.conversationId === activeConversationId) return true;
+      if (c.isGroup) return true;
+      return Boolean(c.lastMessage || c.lastMessageType || c.lastMessageTime);
+    });
 
     result.sort((a, b) => {
-      const aTime = a.lastMessageTime || a.createDate || ""
-      const bTime = b.lastMessageTime || b.createDate || ""
-      return new Date(bTime) - new Date(aTime)
-    })
+      const aTime = a.lastMessageTime || a.createDate || "";
+      const bTime = b.lastMessageTime || b.createDate || "";
+      return new Date(bTime) - new Date(aTime);
+    });
 
-    return result
-  }, [conversations, activeConversationId])
+    return result;
+  }, [conversations, activeConversationId]);
 
   return (
     <div className="relative flex items-center" ref={widgetRef}>
@@ -274,12 +276,14 @@ const MessageWidget = () => {
             />
             {/* Link to full chat page */}
             <Link
-              to={activeConversationId ? `/chat/${activeConversationId}` : "/chat"}
+              to={
+                activeConversationId ? `/chat/${activeConversationId}` : "/chat"
+              }
               onClick={() => dispatch(closeWidget())}
               className="h-12 flex items-center justify-center gap-2 border-t border-border px-4 text-sm text-[#990011] hover:bg-[#F8F8F8] transition-colors shrink-0"
             >
               <ExternalLink size={20} />
-              See all in Chat
+              {t.messages.seeAllChat}
             </Link>
           </>
         ) : (
@@ -290,12 +294,12 @@ const MessageWidget = () => {
             isLoading={messagesLoading}
             input={input}
             onInputChange={(e) => {
-              const val = typeof e === "string" ? e : e?.target?.value ?? ""
-              setInput(val)
+              const val = typeof e === "string" ? e : (e?.target?.value ?? "");
+              setInput(val);
               if (val.trim().length > 0) {
-                if (startTyping) startTyping()
+                if (startTyping) startTyping();
               } else {
-                if (stopTyping) stopTyping()
+                if (stopTyping) stopTyping();
               }
             }}
             onSendMessage={handleSendMessage}
@@ -319,10 +323,10 @@ const MessageWidget = () => {
       <IconButton
         onClick={() => {
           if (!isAuthenticated) {
-            openAuthModal("login")
-            return
+            openAuthModal("login");
+            return;
           }
-          dispatch(toggleWidget())
+          dispatch(toggleWidget());
         }}
         variant="filled"
         className="relative"
@@ -342,7 +346,7 @@ const MessageWidget = () => {
         onClose={closeFileSizeModal}
       />
     </div>
-  )
-}
+  );
+};
 
-export default MessageWidget
+export default MessageWidget;

@@ -62,7 +62,10 @@ const NavigationProgress = () => {
         query?.endpointName === "setDefaultInstructorBankAccount" ||
         query?.endpointName === "getInstructorBankAccounts" ||
         query?.endpointName === "generateVoucherCode" ||
-        query?.endpointName === "getVoucherDepositInfo"
+        query?.endpointName === "getVoucherDepositInfo" ||
+        query?.endpointName === "getPersonalMaterials" ||
+        query?.endpointName === "getFolderTree" ||
+        query?.endpointName === "getPublicMaterialsByUserId"
       ) {
         return false
       }

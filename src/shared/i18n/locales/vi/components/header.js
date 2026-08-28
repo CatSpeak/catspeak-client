@@ -18,11 +18,13 @@ export default {
     viNom: "Tiếng Việt (Nôm) - Sắp ra mắt",
     zh: "Tiếng Trung",
     en: "Tiếng Anh",
+    ja: "Tiếng Nhật",
   },
   countries: {
     vietnam: "Việt Nam",
     china: "Trung Quốc",
     english: "Anh",
+    japan: "Nhật Bản",
   },
   switchRole: "Chuyển vai trò",
   studentRole: "Học viên",

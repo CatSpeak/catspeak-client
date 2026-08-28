@@ -27,7 +27,7 @@ const CustomRoomsPage = () => {
   const ct = t.rooms?.customRooms || {};
   const { limits, isLoading: isPlanLoading } = usePlanFeatures();
 
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en";
+  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang) ? lang : "en";
 
   // API hooks
   const { data: customRoomsData, isLoading } = useGetMyCustomRoomsQuery();

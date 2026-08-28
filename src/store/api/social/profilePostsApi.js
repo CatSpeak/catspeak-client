@@ -1,4 +1,5 @@
 import { socialApi } from "./socialApi"
+import { updatePostInCaches } from "./utils/postsCacheUtils"
 
 export const profilePostsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -7,24 +8,24 @@ export const profilePostsApi = socialApi.injectEndpoints({
         url: `/Post/user/${accountId}`,
         params: { page, pageSize },
       }),
-      providesTags: (result, error, { accountId }) => [
-        { type: "Post", id: `TIMELINE-${accountId}` },
-      ],
+      providesTags: ["Post"],
       serializeQueryArgs: ({ queryArgs }) => {
         return `getUserTimelinePosts-${queryArgs.accountId}`
       },
       merge: (currentCache, newItems, { arg }) => {
-        if (arg.page === 1) {
-          currentCache.data = newItems.data
+        const page = arg?.page ?? 1
+        if (page === 1) {
+          currentCache.data = newItems?.data || []
         } else {
-          const newPosts = newItems.data.filter(
-            (newPost) => !currentCache.data.some((p) => p.postId === newPost.postId)
+          const newPosts = (newItems?.data || []).filter(
+            (newPost) =>
+              !currentCache.data.some((p) => p.postId === newPost.postId),
           )
           currentCache.data.push(...newPosts)
         }
       },
       forceRefetch({ currentArg, previousArg }) {
-        return currentArg?.page !== previousArg?.page
+        return (currentArg?.page ?? 1) !== (previousArg?.page ?? 1)
       },
     }),
     getUserWallMedia: builder.query({
@@ -51,10 +52,7 @@ export const profilePostsApi = socialApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: (result, error, formData) => [
-        { type: "Post", id: `TIMELINE-CURRENT_USER` }, // We will invalidate everything to refresh or specifically the timeline of the current user
-        "Post"
-      ],
+      invalidatesTags: ["Post", "PostMedia"],
     }),
     updatePost: builder.mutation({
       query: ({ postId, formData }) => ({
@@ -62,14 +60,61 @@ export const profilePostsApi = socialApi.injectEndpoints({
         method: "PUT",
         body: formData,
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post", "PostMedia"],
+      async onQueryStarted(
+        { postId },
+        { dispatch, getState, queryFulfilled },
+      ) {
+        try {
+          const { data: res } = await queryFulfilled
+          const updatedPost = res?.data || res
+          if (updatedPost && typeof updatedPost === "object") {
+            updatePostInCaches(getState(), dispatch, postId, (post) => {
+              Object.assign(post, updatedPost)
+            })
+          }
+        } catch {
+          // Tag invalidation handles errors / refetches
+        }
+      },
     }),
     deletePost: builder.mutation({
       query: (postId) => ({
         url: `/Post/${postId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post", "PostMedia"],
+      async onQueryStarted(postId, { dispatch, getState, queryFulfilled }) {
+        try {
+          await queryFulfilled
+          const queries =
+            getState().socialApi?.queries || getState().api?.queries || {}
+          for (const [, query] of Object.entries(queries)) {
+            if (query.status !== "fulfilled") continue
+            const endpoint = query.endpointName
+            if (
+              endpoint === "getPosts" ||
+              endpoint === "getUserTimelinePosts"
+            ) {
+              dispatch(
+                socialApi.util.updateQueryData(
+                  endpoint,
+                  query.originalArgs,
+                  (draft) => {
+                    if (draft?.data && Array.isArray(draft.data)) {
+                      draft.data = draft.data.filter(
+                        (p) => String(p.postId) !== String(postId),
+                      )
+                    }
+                  },
+                ),
+              )
+            }
+          }
+        } catch {
+          // Tag invalidation handles errors / refetches
+        }
+      },
     }),
   }),
   overrideExisting: false,

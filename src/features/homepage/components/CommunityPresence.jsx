@@ -14,6 +14,8 @@ const CommunityPresence = () => {
         return "vietnamese"
       case "zh":
         return "chinese"
+      case "ja":
+        return "japanese"
       default:
         return "english"
     }

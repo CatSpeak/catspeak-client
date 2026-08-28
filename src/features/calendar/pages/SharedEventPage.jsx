@@ -35,11 +35,12 @@ const SharedEventPage = () => {
         chinese: "zh",
         vietnamese: "vi",
         english: "en",
+        japanese: "ja",
       }
 
       let targetLanguage = langMap[rawLang] || rawLang
 
-      if (!["en", "zh", "vi"].includes(targetLanguage)) {
+      if (!["en", "zh", "vi", "ja"].includes(targetLanguage)) {
         targetLanguage = "en"
       }
 

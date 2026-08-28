@@ -22,28 +22,39 @@ const getItemConfig = (type) => {
   switch (type) {
     case "bulletinBoard":
       return {
-        leftBorder: "border-l-4 border-l-[#750000]",
-        iconBg: "bg-red-100/70 text-[#750000]",
+        leftBorder: "",
+        iconBg: "bg-[#FDE7E7] text-[#750000]",
         Icon: MessageSquare,
       }
     case "material":
       return {
-        leftBorder: "border-l-4 border-l-[#fea53f]",
-        iconBg: "bg-amber-100/70 text-[#fea53f]",
+        leftBorder: "",
+        iconBg: "bg-[#FFE8D6] text-[#E85D04]",
         Icon: Folder,
       }
     case "link":
       return {
-        leftBorder: "border-l-4 border-l-[#750000]",
-        iconBg: "bg-red-100/70 text-[#750000]",
+        leftBorder: "",
+        iconBg: "bg-[#E0F2FE] text-[#0284C7]",
         Icon: Link2,
       }
     case "assignment":
+      return {
+        leftBorder: "",
+        iconBg: "bg-[#D6E4FF] text-[#1E70F6]",
+        Icon: ClipboardList,
+      }
+    case "quiz":
+      return {
+        leftBorder: "",
+        iconBg: "bg-[#FCE7F3] text-[#EC4899]",
+        Icon: FileText,
+      }
     default:
       return {
-        leftBorder: "border-l-4 border-l-[#fea53f]",
-        iconBg: "bg-amber-100/70 text-[#fea53f]",
-        Icon: ClipboardList,
+        leftBorder: "",
+        iconBg: "bg-[#FCE7F3] text-[#EC4899]",
+        Icon: FileText,
       }
   }
 }
@@ -55,6 +66,7 @@ const LessonItemRow = ({
   onEditItem = () => { },
   onToggleItemVisibility = () => { },
   onDeleteItem = () => { },
+  onSelectLesson = () => { },
   className = "",
 }) => {
   const { t, language } = useLanguage()
@@ -63,8 +75,6 @@ const LessonItemRow = ({
 
   const navigate = useNavigate()
   const { id: classId } = useParams()
-
-
 
   const locale = language === "vi" ? "vi-VN" : language === "zh" ? "zh-CN" : "en-US"
   const displayData = getDisplayData(
@@ -119,20 +129,42 @@ const LessonItemRow = ({
 
   const isHidden = item.isVisibleToStudents === false
 
+  const isClickable = ["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type);
+
+  const handleRowClick = () => {
+    const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
+    if (displayData.type === "bulletinBoard") {
+      navigate(`${basePath}/bulletin-board/${displayData.itemId}`, { state: { displayData } })
+    } else if (isYoutubeLink) {
+      onSelectLesson(item, "link")
+    } else if (displayData.type === "link") {
+      onSelectLesson(item, "link")
+    } else if (displayData.type === "assignment") {
+      navigate(`${basePath}?tab=grading&assignmentId=${displayData.itemId}`)
+    } else if (displayData.type === "quiz") {
+      if (isStudent) {
+        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}/take`)
+      } else {
+        navigate(`/workspace/courses/class/${classId}/quiz/${displayData.itemId}`)
+      }
+    } else if (displayData.type === "material") {
+      onSelectLesson(item, "material")
+    }
+  }
+
   return (
     <div
-      className={`rounded-xl p-4 flex flex-col relative transition-all ${isHidden
-        ? "bg-[#fbfbfc] border border-[#edeeef] border-l-4 border-l-[#d1d5db] opacity-75"
-        : `bg-[#F8F9FA] border border-[#E2E2E2] hover:border-cath-red-700 ${config.leftBorder}`
+      className={`rounded-xl md:rounded-2xl p-3 md:p-5 mb-3 md:mb-4 flex flex-col relative transition-all shadow-sm ${isHidden
+        ? "bg-[#7B7979] border border-[#7B7979]"
+        : "bg-white border border-[#E2E2E2] hover:border-gray-300"
         } ${className}`}
     >
-      <div className="flex items-center justify-between gap-4 w-full">
+      <div className="flex items-center justify-between gap-3 md:gap-4 w-full">
         {/* Left section: Drag Handle + Type Icon + Title & Meta */}
-        <div className="flex items-center gap-4 flex-1 min-w-0">
+        <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
           {/* Type Icon Circle */}
           <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isHidden ? "bg-[#F3F4F5] text-[#9E9E9E]" : config.iconBg
-              }`}
+            className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 ${config.iconBg}`}
           >
             <IconComponent size={20} />
           </div>
@@ -141,7 +173,7 @@ const LessonItemRow = ({
           <div className="min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <h4
-                className={`text-base font-semibold truncate max-w-full ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "text-[#191C1D] cursor-pointer hover:underline" : "text-[#191C1D]"}`}
+                className={`text-[15px] font-semibold truncate max-w-full ${isHidden ? "text-white" : "text-[#191C1D]"} ${["bulletinBoard", "link", "assignment", "quiz", "material"].includes(displayData.type) ? "cursor-pointer hover:underline" : ""}`}
                 onClick={() => {
                   const basePath = `/workspace/${isStudent ? 'learning' : 'courses'}/class/${classId}`;
                   if (displayData.type === "bulletinBoard") {
@@ -172,46 +204,58 @@ const LessonItemRow = ({
               >
                 {displayData.title}
               </h4>
-              {item.isVisibleToStudents === false && (
-                <span className="inline-flex items-center gap-1 bg-[#E1E3E4] text-[#5B403C] text-xs px-2 py-0.5 rounded-full font-medium">
-                  <EyeOff size={12} /> <span className="font-medium">{dict.hiddenStatus}</span>
-                </span>
-              )}
             </div>
 
-            {displayData.meta && (
-              <div className="flex items-start gap-1 text-xs text-[#5B403C] font-normal">
-                {displayData.metaType === "file" ? (
-                  <FileText size={13} className="text-stone-500 shrink-0 mt-0.5" />
-                ) : displayData.metaType === "none" ? null : (
-                  <Clock size={13} className="text-stone-500 shrink-0 mt-0.5" />
+            {(displayData.meta || isHidden) && (
+              <div className={`flex items-center gap-1 text-[13px] font-normal ${isHidden ? "text-gray-200" : "text-[#7B7979]"}`}>
+                {isHidden && (
+                  <span className="inline-flex items-center gap-1 bg-white text-[#7B7979] text-[10px] px-2.5 py-0.5 rounded-full font-bold mr-2">
+                    <span className="font-bold">{dict.hiddenStatus || "Đang ẩn"}</span>
+                    <EyeOff size={10} strokeWidth={3} />
+                  </span>
                 )}
-                <div
-                  className="line-clamp-2"
-                  dangerouslySetInnerHTML={{ __html: displayData.meta }}
-                />
+                {displayData.meta && (
+                  <>
+                    {displayData.metaType === "file" ? (
+                      <FileText size={13} className="shrink-0" />
+                    ) : displayData.metaType === "none" ? null : (
+                      <Clock size={13} className="shrink-0" />
+                    )}
+                    <div
+                      className="line-clamp-1"
+                      dangerouslySetInnerHTML={{ __html: displayData.meta }}
+                    />
+                  </>
+                )}
               </div>
             )}
           </div>
         </div>
 
         {/* Right section: Expand Button & 3-dots Menu Button */}
-        <div className="shrink-0 flex items-center gap-1">
+        <div className="shrink-0 flex items-center gap-1 text-gray-500">
           {isYoutubeLink && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1.5 hover:text-[#D94C38] hover:bg-white rounded-full transition-colors"
+              className={`p-1.5 rounded-full transition-colors ${isHidden ? "hover:bg-gray-600 text-white" : "hover:text-[#D94C38] hover:bg-gray-100"}`}
             >
               {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </button>
           )}
+          {isHidden && (
+            <div className="mr-2 text-white opacity-80">
+              <EyeOff size={20} />
+            </div>
+          )}
           {!isStudent && (
-            <LessonActionMenu
-              item={item}
-              onEdit={onEditItem}
-              onToggleItemVisibility={onToggleItemVisibility}
-              onDeleteItem={onDeleteItem}
-            />
+            <div className={isHidden ? "text-white" : ""}>
+              <LessonActionMenu
+                item={item}
+                onEdit={onEditItem}
+                onToggleItemVisibility={onToggleItemVisibility}
+                onDeleteItem={onDeleteItem}
+              />
+            </div>
           )}
         </div>
       </div>

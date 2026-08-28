@@ -54,6 +54,7 @@ export const zh = {
       fixed: "固定金额 (₫)",
     },
 
+    // Statuses
     status: {
       Draft: "草稿",
       Active: "生效中",
@@ -64,6 +65,26 @@ export const zh = {
       PendingApproval: "待审核",
       Rejected: "已拒绝",
       Stopped: "已停止",
+      expiringSoon: "即将过期",
+    },
+
+    // Scopes
+    scope: {
+      All: "Cat Speak",
+      SpecificCourses: "指定课程",
+      SpecificClasses: "指定班级",
+    },
+
+    // Voucher Card & Section
+    card: {
+      appliedTitle: "生效中的优惠",
+      noAppliedVouchers: "暂无适用于此班级的有效优惠券。",
+      viewAll: "查看全部",
+      discount: "优惠",
+      exp: "有效期至",
+      neverExpired: "永久有效",
+      remainingUsages: "剩余 {{remaining}}/{{limit}} 次",
+      unlimitedUsages: "无使用次数限制",
     },
 
     actions: {
