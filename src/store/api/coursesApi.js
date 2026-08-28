@@ -1585,6 +1585,30 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: ["Schedule"],
     }),
 
+    getTeacherScheduleSessionsLeft: builder.query({
+      query: (params = {}) => {
+        const pageSize = typeof params === "number" ? params : params?.pageSize
+        return {
+          url: "/teacher/schedule/sessions/left",
+          method: "GET",
+          params: pageSize ? { pageSize } : undefined,
+        }
+      },
+      transformResponse: (response) => {
+        const responseRecord = isRecord(response) ? response : {}
+        const rawSessions = Array.isArray(responseRecord.data)
+          ? responseRecord.data
+          : Array.isArray(response)
+            ? response
+            : []
+        return {
+          totalSessionsRemaining: Number(responseRecord.totalSessionsRemaining ?? rawSessions.length) || 0,
+          data: rawSessions,
+        }
+      },
+      providesTags: ["Schedule"],
+    }),
+
     getStudentScheduleSessions: builder.query({
       query: ({ from, to, classId, language, status } = {}) => ({
         url: "/student/schedule/sessions",
@@ -2814,6 +2838,7 @@ export const {
   useDeleteClassMaterialMutation,
   useGetScheduleDatesQuery,
   useGetScheduleSessionsQuery,
+  useGetTeacherScheduleSessionsLeftQuery,
   useGetStudentScheduleSessionsQuery,
   useGetCommissionQuery,
   useJoinClassRoomMutation,
