@@ -97,6 +97,7 @@ export default {
       reviewedLabel: "レビュー済み",
       reviewNow: "今すぐレビュー",
       completedLabel: "完了",
+      untitledClass: "無題のクラス",
     },
     review: {
       title: "コースレビュー",
