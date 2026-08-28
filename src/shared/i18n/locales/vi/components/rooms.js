@@ -407,6 +407,7 @@ export default {
       stopError: "Không thể dừng video.",
       hostWatching: "Chủ phòng đang phát video chung.",
       notPlaying: "Chưa có video nào được phát trong phòng.",
+      ended: "Đã kết thúc.",
     },
     subtitles: "Phụ đề (CC)",
     reconnect: "Khắc phục sự cố kết nối",

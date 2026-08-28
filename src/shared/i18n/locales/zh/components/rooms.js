@@ -392,6 +392,7 @@ export default {
       stopError: "无法停止视频。",
       hostWatching: "主持人正在播放共享视频。",
       notPlaying: "房间内当前没有正在播放的视频。",
+      ended: "共享视频已结束。",
     },
     subtitles: "字幕 (CC)",
     reconnect: "重新连接",

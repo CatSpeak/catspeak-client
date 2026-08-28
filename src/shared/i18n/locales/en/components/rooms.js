@@ -429,6 +429,7 @@ export default {
       stopError: "Could not stop the video.",
       hostWatching: "The host is playing a shared video.",
       notPlaying: "No video is currently playing in the room.",
+      ended: "Shared video has ended.",
     },
     subtitles: "Subtitles (CC)",
     reconnect: "Troubleshoot connection",
