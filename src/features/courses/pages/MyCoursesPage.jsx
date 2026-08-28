@@ -321,7 +321,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
             tabs={mainTabs}
             activeTab={activeTab}
             onChange={handleTabChange}
-            fullWidth="responsive"
+            fullWidth={false}
             className="w-full sm:w-auto border-b-0"
           />
         </div>
