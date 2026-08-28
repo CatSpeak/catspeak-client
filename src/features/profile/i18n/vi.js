@@ -97,6 +97,7 @@ export default {
       reviewNow: "Đánh giá ngay",
       reviewedLabel: "Đã đánh giá",
       completedLabel: "Đã hoàn thành",
+      untitledClass: "Lớp học chưa đặt tên",
     },
     review: {
       title: "Đánh giá khóa học",

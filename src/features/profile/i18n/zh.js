@@ -97,6 +97,7 @@ export default {
       reviewedLabel: "已评价",
       reviewNow: "立即评价",
       completedLabel: "已完成",
+      untitledClass: "未命名班级",
     },
     review: {
       title: "课程评价",

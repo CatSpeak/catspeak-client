@@ -97,6 +97,7 @@ export default {
       reviewedLabel: "Reviewed",
       reviewNow: "Review now",
       completedLabel: "Completed",
+      untitledClass: "Untitled class",
     },
     review: {
       title: "Course Review",
