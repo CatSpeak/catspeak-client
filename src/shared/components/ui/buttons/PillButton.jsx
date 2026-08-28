@@ -58,7 +58,7 @@ const PillButton = ({
   const renderIcon = (icon) => {
     if (!icon) return null
     return (
-      <span className="w-5 h-5 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full shrink-0">
+      <span className="flex items-center justify-center shrink-0">
         {icon}
       </span>
     )
