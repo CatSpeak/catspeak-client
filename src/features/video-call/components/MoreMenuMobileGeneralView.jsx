@@ -143,7 +143,7 @@ const MoreMenuMobileGeneralView = ({
           )}
         </button>
 
-        {!isAISession && isBreakoutSupported(room?.roomType) && isHost && (
+        {!isAISession && isHost && (
           <button
             onClick={() => {
               setShowWatchTogether(!showWatchTogether)
