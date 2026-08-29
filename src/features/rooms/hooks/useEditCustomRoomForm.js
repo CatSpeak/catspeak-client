@@ -48,7 +48,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
       const topicsList = Array.isArray(room.topics)
         ? room.topics
         : room.topic
-          ? [room.topic]
+          ? room.topic.split(",").map((t) => t.trim()).filter(Boolean)
           : []
 
       const isPrivate = Boolean(room.hasPassword || room.privacy === "Private")
