@@ -147,6 +147,8 @@ export default {
     passwordLabel: "Mật khẩu",
     passwordPlaceholder: "Nhập mật khẩu phòng",
     passwordRequiredMessage: "Phòng riêng tư yêu cầu phải có mật khẩu.",
+    maxParticipantsLabel: "Số người tối đa",
+    maxParticipantsLimit: "Tối đa: {max} người",
     cancel: "Hủy",
     join: "Tham gia phòng",
     joining: "Đang tham gia...",

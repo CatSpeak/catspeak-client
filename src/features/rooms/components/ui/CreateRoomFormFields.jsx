@@ -139,7 +139,7 @@ const CreateRoomFormFields = ({
             {/* Max Participants Selection */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-800">
-                {t.rooms?.createRoom?.maxParticipantsLabel || "Số người tối đa (Max Participants)"}
+                {ct.maxParticipantsLabel || "Max Participants"}
               </label>
               <div className="flex flex-col gap-3 rounded-xl border border-border px-4 py-3 bg-white">
                 <div className="flex items-center justify-between">
@@ -147,7 +147,7 @@ const CreateRoomFormFields = ({
                     {formData.maxParticipants || 10}
                   </span>
                   <span className="text-sm text-gray-500">
-                    {t.rooms?.createRoom?.maxParticipantsLimit?.replace("{max}", maxParticipantsLimit) || `Max: ${maxParticipantsLimit} participants`}
+                    {ct.maxParticipantsLimit?.replace("{max}", maxParticipantsLimit) || `Max: ${maxParticipantsLimit} participants`}
                   </span>
                 </div>
                 <input
