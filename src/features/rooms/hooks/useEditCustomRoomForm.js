@@ -36,6 +36,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     selectedLevel: "",
     isPrivate: false,
     password: "",
+    maxParticipants: 10,
   })
   const [thumbnailFile, setThumbnailFile] = useState(null)
   const [nameError, setNameError] = useState("")
@@ -58,6 +59,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
         selectedLevel: room.requiredLevel || "",
         isPrivate: isPrivate,
         password: room.password || "",
+        maxParticipants: room.maxParticipants || 10,
       })
       setThumbnailFile(room.thumbnailUrl || null)
       setNameError("")
