@@ -146,6 +146,8 @@ export default {
     passwordLabel: "パスワード",
     passwordPlaceholder: "ルームのパスワードを入力",
     passwordRequiredMessage: "プライベートルームにはパスワードが必要です。",
+    maxParticipantsLabel: "最大参加人数",
+    maxParticipantsLimit: "最大: {max}人",
     cancel: "キャンセル",
     join: "ルームに参加",
     joining: "参加中...",

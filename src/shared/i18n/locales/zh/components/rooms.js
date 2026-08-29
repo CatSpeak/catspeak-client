@@ -144,6 +144,8 @@ export default {
     passwordLabel: "密码",
     passwordPlaceholder: "输入房间密码",
     passwordRequiredMessage: "私密房间必须设置密码。",
+    maxParticipantsLabel: "最大参与人数",
+    maxParticipantsLimit: "最大: {max} 人",
     cancel: "取消",
     join: "加入房间",
     joining: "正在加入...",

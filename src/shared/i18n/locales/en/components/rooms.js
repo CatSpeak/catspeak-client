@@ -172,6 +172,8 @@ export default {
     passwordLabel: "Password",
     passwordPlaceholder: "Enter room password",
     passwordRequiredMessage: "Private room requires a password.",
+    maxParticipantsLabel: "Max Participants",
+    maxParticipantsLimit: "Max: {max} participants",
     cancel: "Cancel",
     join: "Join Room",
     joining: "Joining...",
