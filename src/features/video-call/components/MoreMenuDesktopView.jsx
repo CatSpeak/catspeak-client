@@ -125,7 +125,6 @@ const MoreMenuDesktopView = ({
         )}
 
       {!isAISession &&
-        isBreakoutSupported(room?.roomType) &&
         isHost && (
           <MenuItem
             onClick={() => {
