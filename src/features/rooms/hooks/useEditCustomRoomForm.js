@@ -121,7 +121,6 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
       }
 
       data.append("Privacy", formData.isPrivate ? "Private" : "Public")
-      data.append("MaxParticipants", formData.maxParticipants)
 
       // Only append Password if private and user actually entered a new password
       if (formData.isPrivate && formData.password.trim()) {
