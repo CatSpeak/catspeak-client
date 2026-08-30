@@ -852,7 +852,7 @@ export const coursesApi = baseApi.injectEndpoints({
       query: ({ classId, isShared = true }) => ({
         url: `/student/classes/${encodePathSegment(classId)}/share`,
         method: "PUT",
-        body: { isShared },
+        body: { isShared: Boolean(isShared) },
       }),
       invalidatesTags: ["StudentClasses"],
     }),
