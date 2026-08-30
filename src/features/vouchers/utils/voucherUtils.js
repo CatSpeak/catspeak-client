@@ -227,6 +227,36 @@ export const validateInstructorVoucherForm = (
       }
     }
 
+    // 6b. Per User Limit (Required, default 1)
+    const perUser = Number(values.perUserLimit)
+    if (
+      values.perUserLimit === undefined ||
+      values.perUserLimit === "" ||
+      values.perUserLimit === null
+    ) {
+      errors.perUserLimit =
+        errT.perUserLimitRequired ||
+        "Vui lòng nhập số lượt dùng tối đa cho mỗi học viên (≥ 1)"
+    } else if (isNaN(perUser) || perUser < 1 || !Number.isInteger(perUser)) {
+      errors.perUserLimit =
+        errT.perUserLimitInvalid ||
+        "Lượt dùng cho mỗi học viên phải là số nguyên dương (≥ 1)"
+    }
+
+    // 6c. Daily Limit
+    if (
+      values.dailyLimit !== undefined &&
+      values.dailyLimit !== "" &&
+      values.dailyLimit !== null
+    ) {
+      const daily = Number(values.dailyLimit)
+      if (isNaN(daily) || daily < 1 || !Number.isInteger(daily)) {
+        errors.dailyLimit =
+          errT.dailyLimitInvalid ||
+          "Giới hạn lượt dùng theo ngày phải là số nguyên dương (≥ 1)"
+      }
+    }
+
     // 7. Validity Dates (BR-VC-GV-10)
     if (!values.validFrom) {
       errors.validFrom =

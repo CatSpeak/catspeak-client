@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import ListItem from "@/shared/components/ui/ListItem"
-import { TextInput, Radio } from "@/shared/components/ui/inputs"
+import { TextInput, CurrencyInput, Radio } from "@/shared/components/ui/inputs"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   DISCOUNT_TYPES,
@@ -10,13 +10,13 @@ import {
 import {
   formatCurrency,
   formatNumberWithDots,
-  parseFormattedNumber,
 } from "../../../utils/voucherTransforms"
 
 export const DiscountConfigSection = ({
   form,
   errors,
   onChange,
+  onBlur,
   isCourseScope,
   lowestTuition,
   lowestTuitionClassName,
@@ -53,9 +53,7 @@ export const DiscountConfigSection = ({
 
   // Auto-fill maxDiscountAmount based on percentage and class tuition
   const handleDiscountValueChange = (e) => {
-    const raw = isPercent
-      ? e.target.value
-      : parseFormattedNumber(e.target.value)
+    const raw = e.target.value
     onChange("discountValue", raw)
 
     if (isPercent && lowestTuition > 0) {
@@ -159,61 +157,67 @@ export const DiscountConfigSection = ({
         }
       >
         {/* Giá trị giảm */}
-        <TextInput
-          type={isPercent ? "number" : "text"}
-          inputMode="numeric"
-          label={vf.discountValueLabel || "Mức giảm"}
-          required
-          min={isPercent ? 1 : 2000}
-          step={isPercent ? 1 : 1000}
-          value={
-            isPercent
-              ? form.discountValue
-              : formatNumberWithDots(form.discountValue)
-          }
-          onChange={handleDiscountValueChange}
-          placeholder={isPercent ? "20" : "200.000"}
-          rightContent={isPercent ? "%" : "₫"}
-          helperText={
-            isPercent
-              ? ve.percentRange ||
-                "Giáo viên chỉ được tạo voucher giảm từ 1% đến 50%"
-              : lowestTuition
+        {isPercent ? (
+          <TextInput
+            type="number"
+            inputMode="numeric"
+            label={vf.discountValueLabel || "Mức giảm"}
+            required
+            min={1}
+            max={50}
+            step={1}
+            value={form.discountValue}
+            onChange={handleDiscountValueChange}
+            onBlur={() => onBlur?.("discountValue")}
+            placeholder="20"
+            rightContent="%"
+            helperText={
+              ve.percentRange ||
+              "Giáo viên chỉ được tạo voucher giảm từ 1% đến 50%"
+            }
+            error={errors.discountValue}
+          />
+        ) : (
+          <CurrencyInput
+            label={vf.discountValueLabel || "Mức giảm"}
+            required
+            value={form.discountValue}
+            onChange={(e) => onChange("discountValue", e.target.value)}
+            onBlur={() => onBlur?.("discountValue")}
+            placeholder="200.000"
+            rightContent="₫"
+            helperText={
+              lowestTuition
                 ? vf.lowestTuitionHint
                   ? vf.lowestTuitionHint
                       .replace("{{amount}}", formatCurrency(lowestTuition))
                       .replace("{{className}}", lowestTuitionClassName)
                   : `Tối thiểu 2.000 ₫ và nhỏ hơn ${formatCurrency(lowestTuition)} (học phí lớp ${lowestTuitionClassName})`
                 : vf.minTwoThousand || "Tối thiểu 2.000 ₫"
-          }
-          error={
-            errors.discountValue ||
-            (isFixedAmountExceeded
-              ? ve.fixedExceeded ||
-                "Mức giảm cố định không được lớn hơn hoặc bằng học phí lớp học"
-              : undefined)
-          }
-        />
+            }
+            error={
+              errors.discountValue ||
+              (isFixedAmountExceeded
+                ? ve.fixedExceeded ||
+                  "Mức giảm cố định không được lớn hơn hoặc bằng học phí lớp học"
+                : undefined)
+            }
+          />
+        )}
 
         {/* Tối đa (When Percentage) */}
         {isPercent && (
-          <TextInput
-            type="text"
-            inputMode="numeric"
+          <CurrencyInput
             label={
               vf.maxDiscountAmountLabel ||
               "Mức giảm tối đa (VNĐ)"
             }
             required
-            min={2000}
-            step={1000}
-            value={formatNumberWithDots(form.maxDiscountAmount)}
+            value={form.maxDiscountAmount}
             onChange={(e) =>
-              onChange(
-                "maxDiscountAmount",
-                parseFormattedNumber(e.target.value),
-              )
+              onChange("maxDiscountAmount", e.target.value)
             }
+            onBlur={() => onBlur?.("maxDiscountAmount")}
             placeholder={
               nominalDiscountAmount > 0
                 ? formatNumberWithDots(nominalDiscountAmount)
@@ -241,20 +245,17 @@ export const DiscountConfigSection = ({
 
       {/* Ngân sách tối đa (When Course Scope) */}
       {isCourseScope && (
-        <TextInput
-          type="text"
-          inputMode="numeric"
+        <CurrencyInput
           label={
             vf.maxBudgetLabel || "Ngân sách tối đa (VNĐ)"
           }
           required
-          min={2000}
-          step={1000}
-          value={formatNumberWithDots(form.maxBudget)}
+          value={form.maxBudget}
           onChange={(e) =>
-            onChange("maxBudget", parseFormattedNumber(e.target.value))
+            onChange("maxBudget", e.target.value)
           }
-          placeholder="10.000.000"
+          onBlur={() => onBlur?.("maxBudget")}
+          placeholder="5.000.000"
           rightContent="₫"
           helperText={
             vf.maxBudgetHelper ||

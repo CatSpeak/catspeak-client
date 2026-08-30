@@ -14,6 +14,7 @@ const Step1TeacherForm = ({
   form,
   errors,
   onChange,
+  onBlur,
   onAutoGenerateCode,
   isGeneratingCode,
   teacherCourses = [],
@@ -140,6 +141,7 @@ const Step1TeacherForm = ({
           form={form}
           errors={errors}
           onChange={onChange}
+          onBlur={onBlur}
           onAutoGenerateCode={onAutoGenerateCode}
           isGeneratingCode={isGeneratingCode}
         />
@@ -148,27 +150,35 @@ const Step1TeacherForm = ({
           form={form}
           errors={errors}
           onChange={onChange}
+          onBlur={onBlur}
           isCourseScope={isCourseScope}
           lowestTuition={lowestTuition}
           lowestTuitionClassName={lowestTuitionClassName}
           isFixedAmountExceeded={isFixedAmountExceeded}
         />
 
-        <OtherConfigSection
-          form={form}
-          errors={errors}
-          onChange={onChange}
+        <OtherConfigSection 
+          form={form} 
+          errors={errors} 
+          onChange={onChange} 
+          onBlur={onBlur} 
         />
       </div>
 
       {/* RIGHT COLUMN (4 cols): Thời gian hiệu lực, Giới hạn sử dụng, Ước tính (1 học viên) */}
       <div className="lg:col-span-4 space-y-6">
-        <ValiditySection form={form} errors={errors} onChange={onChange} />
+        <ValiditySection 
+          form={form} 
+          errors={errors} 
+          onChange={onChange} 
+          onBlur={onBlur} 
+        />
 
         <UsageLimitsSection
           form={form}
           errors={errors}
           onChange={onChange}
+          onBlur={onBlur}
           estimatedDeposit={estimatedDeposit}
           isCourseScope={isCourseScope}
         />

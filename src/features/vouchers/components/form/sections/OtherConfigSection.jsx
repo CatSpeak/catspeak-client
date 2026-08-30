@@ -3,7 +3,7 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 import { TextInput, Checkbox } from "@/shared/components/ui/inputs"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-export const OtherConfigSection = ({ form, errors = {}, onChange }) => {
+export const OtherConfigSection = ({ form, errors = {}, onChange, onBlur }) => {
   const { t } = useLanguage()
 
   return (
@@ -29,6 +29,7 @@ export const OtherConfigSection = ({ form, errors = {}, onChange }) => {
         min={1}
         value={form.minLearners ?? ""}
         onChange={(e) => onChange("minLearners", e.target.value)}
+        onBlur={() => onBlur?.("minLearners")}
         error={errors?.minLearners}
         placeholder="1"
       />

@@ -64,6 +64,8 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     return initial
   })
   const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
   const [isSavingDraft, setIsSavingDraft] = useState(false)
 
   const [createVoucher, { isLoading: isCreating }] = useCreateVoucherMutation()
@@ -77,6 +79,26 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
       setCurrentVoucherId(voucherId)
     }
   }, [voucherId])
+
+  // Handle Field Blur - triggers validation for this field (Punish Late)
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+    const { errors: allErrors } = validateInstructorVoucherForm(
+      form,
+      false,
+      t,
+    )
+    if (allErrors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: allErrors[field] }))
+    } else {
+      setErrors((prev) => {
+        if (!prev[field]) return prev
+        const updated = { ...prev }
+        delete updated[field]
+        return updated
+      })
+    }
+  }
 
   // Pre-fill form when editing
   useEffect(() => {
@@ -122,7 +144,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     }
   }, [initialData])
 
-  // Handle Field Change
+  // Handle Field Change (Reward Early / Clear on Fix)
   const handleChange = (field, value) => {
     setForm((prev) => {
       const next = { ...prev, [field]: value }
@@ -140,12 +162,61 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
           next.totalUsageLimit = ""
         }
       }
+
+      // Live validation for clearing errors (Reward early) or updating submitted form
+      const { errors: allErrors } = validateInstructorVoucherForm(
+        next,
+        false,
+        t,
+      )
+
+      if (hasAttemptedSubmit) {
+        setErrors(allErrors)
+      } else {
+        setErrors((prevErrors) => {
+          const nextErrors = { ...prevErrors }
+
+          // 1. If this field currently has an error shown, update or clear it
+          if (prevErrors[field]) {
+            if (allErrors[field]) {
+              nextErrors[field] = allErrors[field]
+            } else {
+              delete nextErrors[field]
+            }
+          }
+
+          // 2. Interdependent field clearing:
+          if (field === "validFrom" || field === "validTo") {
+            if (prevErrors.validTo && !allErrors.validTo) {
+              delete nextErrors.validTo
+            }
+            if (prevErrors.validFrom && !allErrors.validFrom) {
+              delete nextErrors.validFrom
+            }
+          }
+
+          if (
+            field === "discountValue" &&
+            prevErrors.maxDiscountAmount &&
+            !allErrors.maxDiscountAmount
+          ) {
+            delete nextErrors.maxDiscountAmount
+          }
+
+          if (
+            field === "discountValue" &&
+            prevErrors.maxBudget &&
+            !allErrors.maxBudget
+          ) {
+            delete nextErrors.maxBudget
+          }
+
+          return nextErrors
+        })
+      }
+
       return next
     })
-
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
   }
 
   // Handle Auto Code Generation
@@ -235,6 +306,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     )
 
     if (!isDraft && !isValid) {
+      setHasAttemptedSubmit(true)
       setErrors(validationErrors)
       const errorKeys = Object.keys(validationErrors)
       const firstError = validationErrors[errorKeys[0]]
@@ -288,6 +360,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     )
 
     if (!isValid) {
+      setHasAttemptedSubmit(true)
       setErrors(validationErrors)
       const errorKeys = Object.keys(validationErrors)
       const firstError = validationErrors[errorKeys[0]]
@@ -334,6 +407,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     currentVoucherId,
     setCurrentVoucherId,
     handleChange,
+    handleBlur,
     handleNextStep,
     handleSaveDraft,
     handleAutoGenerateCode,

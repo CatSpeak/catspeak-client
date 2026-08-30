@@ -75,6 +75,7 @@ const CreateVoucherPage = () => {
     errors,
     currentVoucherId,
     handleChange,
+    handleBlur,
     handleNextStep,
     handleSaveDraft,
     saveVoucher,
@@ -86,25 +87,33 @@ const CreateVoucherPage = () => {
   } = useVoucherFormState(voucherDetail, id)
 
   // Resolve whether this is a Course-level voucher vs a Single-Class voucher
-  const courseList = form.courseIds?.length ? form.courseIds : (voucherDetail?.courses || [])
-  const classList = form.classIds?.length ? form.classIds : (voucherDetail?.classes || [])
+  const courseList = form.courseIds?.length
+    ? form.courseIds
+    : voucherDetail?.courses || []
+  const classList = form.classIds?.length
+    ? form.classIds
+    : voucherDetail?.classes || []
 
   const isCourseVoucher = Boolean(
     (!classIdParam && courseIdParam) ||
     form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES ||
-    (courseList.length > 0 && classList.length === 0)
+    (courseList.length > 0 && classList.length === 0),
   )
   const isSingleClassVoucher = !isCourseVoucher
 
   const firstClassObj = classList[0]
-  const firstClassId = typeof firstClassObj === "object" ? firstClassObj?.id : firstClassObj
+  const firstClassId =
+    typeof firstClassObj === "object" ? firstClassObj?.id : firstClassObj
   const firstCourseObj = courseList[0]
-  const firstCourseId = typeof firstCourseObj === "object" ? firstCourseObj?.id : firstCourseObj
+  const firstCourseId =
+    typeof firstCourseObj === "object" ? firstCourseObj?.id : firstCourseObj
 
-  const targetClassId = isSingleClassVoucher ? (classIdParam || firstClassId) : null
+  const targetClassId = isSingleClassVoucher
+    ? classIdParam || firstClassId
+    : null
 
   const matchedClass = teacherClasses.find(
-    (c) => String(c.id) === String(classIdParam || firstClassId)
+    (c) => String(c.id) === String(classIdParam || firstClassId),
   )
   const targetCourseId =
     courseIdParam ||
@@ -113,7 +122,7 @@ const CreateVoucherPage = () => {
     voucherDetail?.courseId
 
   const matchedCourse = teacherCourses.find(
-    (c) => String(c.id) === String(targetCourseId)
+    (c) => String(c.id) === String(targetCourseId),
   )
 
   const resolvedClassName =
@@ -149,12 +158,14 @@ const CreateVoucherPage = () => {
       }
       items.push({
         label: resolvedClassName || "Lớp học",
-        onClick: () => navigate(`/workspace/courses/class/${targetClassId}?tab=vouchers`),
+        onClick: () =>
+          navigate(`/workspace/courses/class/${targetClassId}?tab=vouchers`),
       })
     } else if (targetCourseId) {
       items.push({
         label: resolvedCourseName || "Khóa học",
-        onClick: () => navigate(`/workspace/courses/details/${targetCourseId}?tab=vouchers`),
+        onClick: () =>
+          navigate(`/workspace/courses/details/${targetCourseId}?tab=vouchers`),
       })
     }
 
@@ -231,11 +242,7 @@ const CreateVoucherPage = () => {
 
   // Prevent editing non-draft vouchers (BR-VC-18)
   if (isEditing && !isDraftStatus) {
-    return (
-      <CannotEditVoucher
-        voucher={voucherDetail}
-      />
-    )
+    return <CannotEditVoucher voucher={voucherDetail} />
   }
 
   // If submitted from Step 2, show Pending Deposit screen
@@ -293,6 +300,7 @@ const CreateVoucherPage = () => {
             form={form}
             errors={errors}
             onChange={handleChange}
+            onBlur={handleBlur}
             onAutoGenerateCode={handleAutoGenerateCode}
             isGeneratingCode={isGeneratingCode}
             teacherCourses={teacherCourses}
