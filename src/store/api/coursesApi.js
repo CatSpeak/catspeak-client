@@ -848,6 +848,15 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: ["StudentClasses"],
     }),
 
+    shareStudentClass: builder.mutation({
+      query: ({ classId, isShared = true }) => ({
+        url: `/student/classes/${encodePathSegment(classId)}/share`,
+        method: "PUT",
+        body: { isShared },
+      }),
+      invalidatesTags: ["StudentClasses"],
+    }),
+
     getExploreCourseDetail: builder.query({
       query: (id) => ({
         url: `/explore/courses/${encodePathSegment(id)}`,
@@ -2779,6 +2788,7 @@ export const {
   useGetStudentAvailableClassesQuery,
   useGetStudentJoinedClassesQuery,
   useGetStudentCompletedClassesQuery,
+  useShareStudentClassMutation,
   useGetStudentCourseDetailQuery,
   useGetStudentClassDetailQuery,
   useEnrollInCourseMutation,
