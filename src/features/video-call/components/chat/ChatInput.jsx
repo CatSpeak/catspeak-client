@@ -1,12 +1,10 @@
 import React, { useState, useRef, useCallback } from "react"
-import { Send, Smile, Sparkles, Plus, X, Check } from "lucide-react"
+import { Send, Smile, Sparkles } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { AI_MODES, getAiModeConfig } from "@/features/video-call/config/aiModes"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
-import MenuList from "@/shared/components/ui/MenuList"
 import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
 import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
@@ -36,50 +34,11 @@ const ChatInput = ({
   const savedSelectionRef = useRef(null)  // saves caret when editable loses focus
   const textareaRef = editableRef // alias kept for emoji hook compat
   const { t } = useLanguage()
-  const { aiMode, setAiMode } = useGlobalVideoCall()
   const { sendAiMessage, isBlocked: isAiBlocked } = useAiSend()
   const { insertEmoji, addRecent } = useEmojiPicker()
   const { room, id: roomIdFromContext, user, participants = [], isHost: isHostFromContext } = useGlobalVideoCall()
   const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
-
-  const activeAmenityConfig = getAiModeConfig(aiMode)
-  const ActiveAmenityIcon = activeAmenityConfig?.icon
-
-  const amenitiesMenuPopover = (close) => (
-    <MenuList className="w-[260px] p-1.5 flex flex-col gap-1">
-      {AI_MODES.map((mode) => {
-        const Icon = mode.icon
-        const isSelected = aiMode === mode.id
-        return (
-          <button
-            key={mode.id}
-            type="button"
-            onClick={() => {
-              setAiMode(isSelected ? "general" : mode.id)
-              close()
-            }}
-            className={`w-full flex items-start justify-between p-2 rounded-lg text-left transition-all ${
-              isSelected
-                ? "bg-purple-50 text-purple-900 font-medium"
-                : "hover:bg-gray-50 text-gray-700"
-            }`}
-          >
-            <div className="flex items-start gap-2.5">
-              <Icon size={16} className={`mt-0.5 ${isSelected ? "text-purple-600" : "text-gray-400"}`} />
-              <div>
-                <div className="text-xs font-semibold">{mode.label}</div>
-                <div className="text-[10px] text-gray-400 font-normal leading-tight mt-0.5">
-                  {mode.description}
-                </div>
-              </div>
-            </div>
-            {isSelected && <Check size={16} className="text-purple-600 shrink-0 mt-0.5" />}
-          </button>
-        )
-      })}
-    </MenuList>
-  )
 
   // ── Mention Autocomplete State ──
   const [mentionState, setMentionState] = useState({
@@ -517,27 +476,6 @@ const ChatInput = ({
         />
       )}
 
-      {/* Active Amenity Tag Bar above input box (only when an amenity is selected) */}
-      {isAiInput && activeAmenityConfig && (
-        <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs">
-          <div className="group relative flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-purple-50 text-purple-700 border-purple-200 transition-all shadow-xs">
-            <ActiveAmenityIcon size={12} className="text-purple-600 shrink-0" />
-            <span>{activeAmenityConfig.label}</span>
-            <button
-              type="button"
-              title="Remove amenity tag"
-              onClick={(e) => {
-                e.stopPropagation()
-                setAiMode("general")
-              }}
-              className="max-w-0 opacity-0 overflow-hidden group-hover:max-w-6 group-hover:opacity-100 group-hover:ml-1 transition-all duration-200 p-0.5 rounded-full hover:bg-purple-200/80 text-purple-700 flex items-center justify-center cursor-pointer shrink-0"
-            >
-              <X size={11} />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Unified Input Box */}
       <div
         onClick={() => editableRef.current?.focus()}
@@ -551,7 +489,7 @@ const ChatInput = ({
             : "border-border bg-gray-50/60"
         }`}
       >
-        {/* Left AI Controls: Sparkles + Switch + (+) Button when no amenity selected */}
+        {/* Left AI Switch Control */}
         {isAiInput && (
           <div
             className={`flex items-center gap-1.5 pr-1 shrink-0 ${
@@ -578,23 +516,6 @@ const ChatInput = ({
                 colorClass="peer-checked:bg-red-700"
               />
             </div>
-
-            {/* When NO amenity selected → (+) Add Amenity button INSIDE input bar */}
-            {!activeAmenityConfig && (
-              <Popover
-                trigger={
-                  <button
-                    type="button"
-                    title="Add AI amenity or mode"
-                    className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 hover:text-gray-900 transition-all flex items-center justify-center cursor-pointer shadow-xs ml-0.5"
-                  >
-                    <Plus size={13} />
-                  </button>
-                }
-                content={amenitiesMenuPopover}
-                placement="top-start"
-              />
-            )}
           </div>
         )}
 

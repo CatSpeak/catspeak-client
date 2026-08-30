@@ -81,8 +81,6 @@ const GlobalCallContent = ({
   const currentRoomId = callInfo?.roomId || roomData?.id
   const isAISession = callInfo?.isAISession ?? false
 
-  const [aiMode, setAiMode] = useState("room-context")
-
   // ── UI state ──
   const [showCC, setShowCC] = useState(false)
   const [showRoomSubtitles, setShowRoomSubtitles] = useState(false)
@@ -1033,8 +1031,6 @@ const GlobalCallContent = ({
     addOptimisticAiMessage,
     chatPublicAi,
     chatPrivateAi,
-    aiMode,
-    setAiMode,
     receiveSystemMsgs,
     setReceiveSystemMsgs,
     showAiSuggestions,

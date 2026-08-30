@@ -1,18 +1,19 @@
-import React from "react"
-import DataTable from "@/shared/components/ui/DataTable"
-import Popover from "@/shared/components/ui/Popover"
-import MenuItem from "@/shared/components/ui/MenuItem"
-import MenuList from "@/shared/components/ui/MenuList"
-import { IconButton } from "@/shared/components/ui/buttons"
-import { useTimezone } from "@/shared/hooks/useTimezone"
-import BillingMobileCard from "./BillingMobileCard"
+import React from "react";
+import DataTable from "@/shared/components/ui/DataTable";
+import Popover from "@/shared/components/ui/Popover";
+import MenuItem from "@/shared/components/ui/MenuItem";
+import MenuList from "@/shared/components/ui/MenuList";
+import { IconButton } from "@/shared/components/ui/buttons";
+import { useTimezone } from "@/shared/hooks/useTimezone";
+import BillingMobileCard from "./BillingMobileCard";
 import {
   RotateCcw,
   AlertCircle,
   Loader2,
   Undo2,
   MoreVertical,
-} from "lucide-react"
+} from "lucide-react";
+
 
 const BillingTable = ({
   invoices,
@@ -23,23 +24,23 @@ const BillingTable = ({
   repayingId,
   t,
 }) => {
-  const { formatDateTime } = useTimezone()
-  const hist = t.billing?.history || {}
-  const cols = hist.columns || {}
-  const actionsText = hist.actions || {}
+  const { formatDateTime } = useTimezone();
+  const hist = t.billing?.history || {};
+  const cols = hist.columns || {};
+  const actionsText = hist.actions || {};
 
   const formatAmount = (amount) =>
     new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
-    }).format(amount)
+    }).format(amount);
 
   const columns = [
     {
       key: "createDate",
       label: cols.date || "Date",
-      headerClassName: "w-[22%]",
-      className: "w-[22%]",
+      headerClassName: "!py-2.5 !px-4 w-[22%]",
+      className: "!py-2.5 !px-4 w-[22%]",
       render: (row) => formatDateTime(row.createDate),
     },
     {
@@ -71,14 +72,14 @@ const BillingTable = ({
         const statusInfo = statusMap[row.status] || {
           label: hist.statuses?.unknown || "Unknown",
           styles: "bg-gray-100 text-gray-700",
-        }
+        };
         return (
           <span
             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusInfo.styles}`}
           >
             {statusInfo.label}
           </span>
-        )
+        );
       },
     },
     {
@@ -90,12 +91,12 @@ const BillingTable = ({
         const isPending =
           row.status === 3 ||
           row.status === "3" ||
-          String(row.status).toLowerCase() === "pending"
+          String(row.status).toLowerCase() === "pending";
         const isSuccess =
           row.status === 1 ||
           row.status === "1" ||
-          String(row.status).toLowerCase() === "success"
-        const isRepayingThis = repayingId === row.paymentId
+          String(row.status).toLowerCase() === "success";
+        const isRepayingThis = repayingId === row.paymentId;
 
         return (
           <div className="flex items-center justify-end">
@@ -156,10 +157,10 @@ const BillingTable = ({
               )}
             />
           </div>
-        )
+        );
       },
     },
-  ]
+  ];
 
   return (
     <DataTable
@@ -175,7 +176,7 @@ const BillingTable = ({
         const statusInfo = statusMap[invoice.status] || {
           label: "Unknown",
           styles: "bg-gray-100 text-gray-700",
-        }
+        };
         return (
           <BillingMobileCard
             invoice={invoice}
@@ -189,10 +190,10 @@ const BillingTable = ({
             onRefund={onRefund}
             repayingId={repayingId}
           />
-        )
+        );
       }}
     />
-  )
-}
+  );
+};
 
-export default BillingTable
+export default BillingTable;

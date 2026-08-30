@@ -94,7 +94,12 @@ const ProfileDropdown = () => {
 
   const handleProfileClick = () => {
     handleCloseMenu()
-    navigate("/profile")
+    navigate(`/workspace/profile/${user?.accountId || user?.id || ""}`)
+  }
+
+  const handlePricingClick = () => {
+    handleCloseMenu()
+    navigate("/pricing")
   }
 
   const handleSettingsClick = () => {

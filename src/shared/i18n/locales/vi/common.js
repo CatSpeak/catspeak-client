@@ -79,8 +79,7 @@ export default {
     accountInfo: "Thông tin tài khoản",
     systemConfig: "Thiết lập hệ thống",
     emailNotifyTitle: "Nhận email thông báo & tin tức từ CatSpeak",
-    emailNotifyDesc:
-      "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
+    emailNotifyDesc: "Cho phép hệ thống gửi các cập nhật quan trọng, tính năng mới và thông báo tài khoản qua email.",
     timezoneTitle: "Múi giờ",
     timezoneDesc:
       "Điều chỉnh lịch hẹn, lịch sử trò chuyện và thống kê theo múi giờ của bạn.",
