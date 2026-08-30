@@ -228,21 +228,13 @@ const ClassDetailPage = () => {
           <Breadcrumb
             items={[
               {
-                label: t.nav?.home || "Trang chủ",
-                onClick: () => navigate("/workspace"),
-              },
-              {
-                label: c.allClasses?.title || "Toàn bộ lớp học",
-                onClick: () => navigate("/workspace/classes/all-classes"),
+                label: c.title || "Khóa học của tôi",
+                onClick: () => navigate("/workspace/courses"),
               },
               ...(classData.courseId
                 ? [
                     {
-                      label:
-                        classData.courseName ||
-                        classData.courseTitle ||
-                        c.student?.courseDetails ||
-                        "Course Details",
+                      label: classData.courseName || "Khóa học",
                       onClick: () =>
                         navigate(
                           `/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`,
@@ -250,14 +242,16 @@ const ClassDetailPage = () => {
                     },
                   ]
                 : []),
-              { label: c.student?.classDetails || "Class Details" },
+              {
+                label: classData.name || "Chi tiết lớp học",
+              },
             ]}
           />
 
           {/* ─── Page Heading & Header Actions ─── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-              {c.student?.classDetails || "Class Details"}
+              {classData.name || "Chi tiết lớp học"}
             </h1>
 
             <div className="flex items-center gap-3">
@@ -376,7 +370,11 @@ const ClassDetailPage = () => {
         )}
 
         {activeTab === "vouchers" && isClassTeacher && (
-          <VouchersTab scope="class" classId={id} />
+          <VouchersTab
+            scope="class"
+            classId={id}
+            courseId={classData?.courseId || classData?.course?.id}
+          />
         )}
       </Suspense>
 

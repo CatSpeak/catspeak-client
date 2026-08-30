@@ -31,6 +31,7 @@ export const ja = {
 
     table: {
       code: "バウチャーコード",
+      title: "バウチャー名",
       discountType: "割引タイプ",
       discount: "割引額",
       validity: "有効期間",
@@ -130,6 +131,7 @@ export const ja = {
 
     detail: {
       title: "バウチャーの詳細",
+      name: "バウチャー名",
       overview: "設定の概要",
       depositInfo: "預託 ＆ エスクローの詳細",
       depositPaid: "支払済み預託",
@@ -152,6 +154,18 @@ export const ja = {
       usedAt: "利用日時",
       orderStatus: "注文ステータス",
       empty: "このバウチャーを利用した生徒はまだいません。",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "割引クーポンを作成",
+      singleClassBody: "コース {{courseName}} には現在 1 つのクラス「{{className}}」しかありません。このクラス用のクラスクーポン作成画面にリダイレクトします。",
+      singleClassButton: "クラスクーポンを作成",
+      noClassesTitle: "クラスがありません",
+      noClassesBody: "コース {{courseName}} には現在クラスがありません。クーポンを作成する前に、少なくとも1つのクラスを作成してください。",
+      createClassButton: "新しいクラスを作成",
+      closeButton: "閉じる",
+      cancelButton: "キャンセル",
     },
   },
 }

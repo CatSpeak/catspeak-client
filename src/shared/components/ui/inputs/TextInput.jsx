@@ -107,7 +107,7 @@ const TextInput = ({
             required={required}
             style={{
               "--border-color": colors.border,
-              "--placeholder-color": colors.subtext,
+              "--placeholder-color": colors.placeholder || "#9CA3AF",
               "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
@@ -126,7 +126,7 @@ const TextInput = ({
             required={required}
             style={{
               "--border-color": colors.border,
-              "--placeholder-color": colors.subtext,
+              "--placeholder-color": colors.placeholder || "#9CA3AF",
               "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}

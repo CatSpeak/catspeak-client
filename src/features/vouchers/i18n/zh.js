@@ -40,6 +40,7 @@ export const zh = {
 
     table: {
       code: "优惠码",
+      title: "优惠券名称",
       discountType: "折扣类型",
       discount: "折扣额度",
       validity: "有效期",
@@ -242,6 +243,7 @@ export const zh = {
       title: "优惠券详情",
       overview: "配置概览",
       configTitle: "配置信息",
+      name: "优惠券名称",
       code: "代码",
       type: "类型",
       value: "价值",
@@ -322,6 +324,8 @@ export const zh = {
       minMaxDiscount: "最低最高减免为 2,000 ₫",
       minMaxBudget: "最低最高预算为 2,000 ₫",
       fixedExceeded: "固定折扣金额不能大于或等于班级学费",
+      maxDiscountExceedFifty: "最高减免金额不能超过课程学费的50%（{{amount}}）",
+      maxDiscountExceedNominal: "最高减免金额不能超过{{amount}}（学费的{{percent}}%）",
       scopeCourseDiscountFixedOnly: "课程优惠券必须选择固定金额折扣",
       maxBudgetRequired: "课程优惠券必须输入最高预算 (VND)",
       selectAtLeastOneCourse: "请至少选择 1 门课程",
@@ -330,6 +334,18 @@ export const zh = {
       validFromRequired: "请选择生效开始日期",
       validToRequired: "请选择生效结束日期",
       validToAfterValidFrom: "结束日期必须晚于开始日期",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "创建优惠券",
+      singleClassBody: "课程 {{courseName}} 目前只有 1 个班级：“{{className}}”。系统将跳转至为该班级创建班级优惠券。",
+      singleClassButton: "创建班级优惠券",
+      noClassesTitle: "暂无班级",
+      noClassesBody: "课程 {{courseName}} 目前没有任何班级。请在创建优惠券之前先创建至少 1 个班级。",
+      createClassButton: "创建新班级",
+      closeButton: "关闭",
+      cancelButton: "取消",
     },
   },
 }

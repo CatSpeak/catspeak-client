@@ -40,6 +40,7 @@ export const en = {
 
     table: {
       code: "Voucher code",
+      title: "Voucher name",
       discountType: "Discount type",
       discount: "Discount value",
       validity: "Validity",
@@ -242,6 +243,7 @@ export const en = {
       title: "Voucher details",
       overview: "Configuration overview",
       configTitle: "Configuration info",
+      name: "Voucher name",
       code: "Code",
       type: "Type",
       value: "Value",
@@ -322,6 +324,8 @@ export const en = {
       minMaxDiscount: "Minimum max discount is 2,000 ₫",
       minMaxBudget: "Minimum max budget is 2,000 ₫",
       fixedExceeded: "Fixed discount cannot exceed or equal class tuition fee",
+      maxDiscountExceedFifty: "Maximum discount cannot exceed 50% of the class tuition ({{amount}})",
+      maxDiscountExceedNominal: "Maximum discount cannot exceed {{amount}} ({{percent}}% of tuition)",
       scopeCourseDiscountFixedOnly: "Course vouchers must use fixed amount discount",
       maxBudgetRequired: "Course vouchers must specify a maximum budget (VND)",
       selectAtLeastOneCourse: "Please select at least 1 course",
@@ -330,6 +334,18 @@ export const en = {
       validFromRequired: "Please select a start date",
       validToRequired: "Please select an end date",
       validToAfterValidFrom: "End date must be after start date",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "Create promotional voucher",
+      singleClassBody: "Course {{courseName}} currently only has 1 class: \"{{className}}\". The system will redirect to creating a class voucher for this class.",
+      singleClassButton: "Create class voucher",
+      noClassesTitle: "No classes available",
+      noClassesBody: "Course {{courseName}} currently has no classes. Please create at least 1 class before creating promotional vouchers.",
+      createClassButton: "Create new class",
+      closeButton: "Close",
+      cancelButton: "Cancel",
     },
   },
 }

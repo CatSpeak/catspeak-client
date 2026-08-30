@@ -1771,22 +1771,17 @@ const CreateExamForm = ({ id, classData, language, t }) => {
       <Breadcrumb
         items={[
           {
-            label: t.nav?.home || "Trang chủ",
-            onClick: () => navigate("/workspace"),
-          },
-          {
             label: c.title || "Khóa học của tôi",
             onClick: () => navigate("/workspace/courses"),
-          },
-          {
-            label: c.allCourses?.title || "Toàn bộ khóa học",
-            onClick: () => navigate("/workspace/courses/all"),
           },
           ...(classData.courseId
             ? [
               {
                 label:
-                  t.courses?.student?.courseDetails || "Chi tiết khóa học",
+                  classData.courseName ||
+                  classData.courseTitle ||
+                  t.courses?.student?.courseDetails ||
+                  "Khóa học",
                 onClick: () =>
                   navigate(
                     `/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`,
@@ -1795,7 +1790,11 @@ const CreateExamForm = ({ id, classData, language, t }) => {
             ]
             : []),
           {
-            label: t.courses?.student?.classDetails || "Chi tiết lớp học",
+            label:
+              classData.name ||
+              classData.title ||
+              t.courses?.student?.classDetails ||
+              "Lớp học",
             onClick: () =>
               navigate(
                 `/workspace/courses/class/${encodeURIComponent(String(id))}`,

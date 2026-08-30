@@ -26,7 +26,8 @@ export const OtherConfigSection = ({ form, errors = {}, onChange }) => {
         type="number"
         label={t?.vouchers?.form?.minLearnersLabel || "Số người học tối thiểu"}
         required
-        value={form.minLearners || 1}
+        min={1}
+        value={form.minLearners ?? ""}
         onChange={(e) => onChange("minLearners", e.target.value)}
         error={errors?.minLearners}
         placeholder="1"

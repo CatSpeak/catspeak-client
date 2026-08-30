@@ -2,9 +2,14 @@ import React, { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { useGetVouchersQuery } from "../api/vouchersApi"
+import { useGetCourseDetailQuery } from "@/store/api/coursesApi"
 import VoucherTable from "./VoucherTable"
 import VoucherTableSkeleton from "./VoucherTableSkeleton"
 import VoucherUsagesModal from "./VoucherUsagesModal"
+import {
+  SingleClassVoucherNoticeModal,
+  NoClassesWarningModal,
+} from "./CourseVoucherNoticeModal"
 import Banner from "@/shared/components/ui/Banner"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { SearchInput } from "@/shared/components/ui/inputs"
@@ -32,6 +37,9 @@ const VouchersTab = ({
   const vt = t.vouchers || {}
   const navigate = useNavigate()
   const [selectedVoucherForUsages, setSelectedVoucherForUsages] = useState(null)
+  const [showSingleClassNoticeModal, setShowSingleClassNoticeModal] =
+    useState(false)
+  const [showNoClassesModal, setShowNoClassesModal] = useState(false)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -79,17 +87,29 @@ const VouchersTab = ({
   const effectiveCourseId =
     courseId || (effectiveScope === "course" ? targetId : null)
 
-  // Query vouchers filtered by classId or courseId + search & status
-  const queryParams = {
-    page: 1,
-    pageSize: 50,
-    sponsorType: "Instructor",
-    search: debouncedSearch.trim() || undefined,
-    status: statusFilter !== "all" ? statusFilter : undefined,
-    discountType: discountTypeFilter !== "all" ? discountTypeFilter : undefined,
-    ...(effectiveClassId ? { classId: effectiveClassId } : {}),
-    ...(effectiveCourseId ? { courseId: effectiveCourseId } : {}),
+  // Helper to extract IDs as strings from array of objects or IDs
+  const getEntityIds = (list) => {
+    if (!Array.isArray(list)) return []
+    return list
+      .map((item) => {
+        if (item === null || item === undefined) return null
+        if (typeof item === "object") return String(item.id ?? item._id ?? "")
+        return String(item)
+      })
+      .filter(Boolean)
   }
+
+  // Query params with courseId / classId filter from backend
+  const queryParams = useMemo(
+    () => ({
+      page: 1,
+      pageSize: 100,
+      sponsorType: "Instructor",
+      courseId: effectiveCourseId ? Number(effectiveCourseId) : undefined,
+      classId: effectiveClassId ? Number(effectiveClassId) : undefined,
+    }),
+    [effectiveCourseId, effectiveClassId],
+  )
 
   const {
     data: vouchersResponse,
@@ -99,25 +119,84 @@ const VouchersTab = ({
 
   const rawList = vouchersResponse?.data || []
 
-  // Client-side filter fallback in case backend returns all teacher vouchers
-  const vouchersList = rawList.filter((v) => {
-    if (effectiveClassId) {
-      const clsIds = Array.isArray(v.classes)
-        ? v.classes.map((c) => String(c.id || c._id))
-        : (v.classIds || []).map(String)
-      return clsIds.length === 0 || clsIds.includes(String(effectiveClassId))
-    }
-    if (effectiveCourseId) {
-      const crsIds = Array.isArray(v.courses)
-        ? v.courses.map((c) => String(c.id || c._id))
-        : (v.courseIds || []).map(String)
-      return crsIds.length === 0 || crsIds.includes(String(effectiveCourseId))
-    }
-    return true
-  })
+  // Instant in-memory client-side filter (Search, Status, DiscountType)
+  const vouchersList = useMemo(() => {
+    return rawList.filter((v) => {
+      // 1. Search keyword filter
+      if (debouncedSearch.trim()) {
+        const query = debouncedSearch.trim().toLowerCase()
+        const codeMatch = (v.code || "").toLowerCase().includes(query)
+        const titleMatch = (v.title || "").toLowerCase().includes(query)
+        if (!codeMatch && !titleMatch) return false
+      }
+
+      // 2. Status filter
+      if (statusFilter !== "all") {
+        if (
+          v.status !== statusFilter &&
+          String(v.status) !== String(statusFilter)
+        ) {
+          return false
+        }
+      }
+
+      // 3. Discount Type filter
+      if (discountTypeFilter !== "all") {
+        if (
+          v.discountType !== discountTypeFilter &&
+          String(v.discountType) !== String(discountTypeFilter)
+        ) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }, [
+    rawList,
+    debouncedSearch,
+    statusFilter,
+    discountTypeFilter,
+  ])
+
+  const { data: courseDetailData } = useGetCourseDetailQuery(
+    effectiveCourseId,
+    {
+      skip: !effectiveCourseId,
+    },
+  )
+  const courseClasses = useMemo(() => {
+    const raw = courseDetailData?.data || courseDetailData
+    return raw?.classes || []
+  }, [courseDetailData])
+
+  const courseName = useMemo(() => {
+    const raw = courseDetailData?.data || courseDetailData
+    return raw?.name || raw?.title || ""
+  }, [courseDetailData])
 
   // Handle navigate to Create Voucher with class/course pre-selected
   const handleCreateVoucher = () => {
+    if (
+      effectiveScope === "course" ||
+      (!effectiveClassId && effectiveCourseId)
+    ) {
+      const classList = courseClasses || []
+      if (classList.length === 0) {
+        setShowNoClassesModal(true)
+        return
+      }
+      if (classList.length === 1) {
+        setShowSingleClassNoticeModal(true)
+        return
+      }
+      navigate(
+        `/workspace/vouchers/create?courseId=${effectiveCourseId}&courseName=${encodeURIComponent(courseName)}`,
+      )
+      return
+    }
+
+    // Class context
     const params = new URLSearchParams()
     if (effectiveClassId) params.set("classId", String(effectiveClassId))
     if (effectiveCourseId) params.set("courseId", String(effectiveCourseId))
@@ -192,6 +271,23 @@ const VouchersTab = ({
           onClose={() => setSelectedVoucherForUsages(null)}
         />
       )}
+
+      {/* ─── Modal: Single-Class Course Notice ─── */}
+      <SingleClassVoucherNoticeModal
+        open={showSingleClassNoticeModal}
+        onClose={() => setShowSingleClassNoticeModal(false)}
+        courseId={effectiveCourseId}
+        courseName={courseName}
+        courseClasses={courseClasses}
+      />
+
+      {/* ─── Modal: No Classes in Course Warning ─── */}
+      <NoClassesWarningModal
+        open={showNoClassesModal}
+        onClose={() => setShowNoClassesModal(false)}
+        courseId={effectiveCourseId}
+        courseName={courseName}
+      />
     </div>
   )
 }

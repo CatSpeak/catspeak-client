@@ -348,6 +348,13 @@ const Step2TeacherDeposit = ({
               </div>
             )}
 
+            {Number(form.maxBudget) > 0 && (
+              <div className="flex justify-between">
+                <span className="text-secondary">Ngân sách tối đa:</span>
+                <span>{formatCurrency(form.maxBudget)}</span>
+              </div>
+            )}
+
             <div className="flex justify-between">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.usageLimit || "Số lượt sử dụng:"}
@@ -392,6 +399,13 @@ const Step2TeacherDeposit = ({
               </span>
               <span>x {form.totalUsageLimit || 1}</span>
             </div>
+
+            {Number(form.maxBudget) > 0 && (
+              <div className="flex justify-between">
+                <span className="text-secondary">Giới hạn ngân sách:</span>
+                <span>{formatCurrency(form.maxBudget)}</span>
+              </div>
+            )}
 
             <Divider />
 

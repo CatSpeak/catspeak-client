@@ -7,14 +7,17 @@ import {
   DISCOUNT_TYPES,
   SCOPE_TYPES,
 } from "../../../constants/voucherConstants"
-import { formatCurrency } from "../../../utils/voucherTransforms"
+import {
+  formatCurrency,
+  formatNumberWithDots,
+  parseFormattedNumber,
+} from "../../../utils/voucherTransforms"
 
 export const DiscountConfigSection = ({
   form,
   errors,
   onChange,
   isCourseScope,
-  isInitialClassContext,
   lowestTuition,
   lowestTuitionClassName,
   isFixedAmountExceeded,
@@ -23,9 +26,58 @@ export const DiscountConfigSection = ({
   const vf = t?.vouchers?.form || {}
   const ve = t?.vouchers?.errors || {}
   const isPercent = form.discountType === DISCOUNT_TYPES.PERCENTAGE
-  const isPercentDisabled =
-    isCourseScope ||
-    (!isInitialClassContext && form.scopeType !== SCOPE_TYPES.SPECIFIC_CLASSES)
+  const isPercentDisabled = isCourseScope
+
+  const percentVal = Number(form.discountValue) || 0
+  const nominalDiscountAmount =
+    lowestTuition > 0 && percentVal > 0
+      ? Math.round((lowestTuition * percentVal) / 100)
+      : 0
+
+  const maxFiftyPercentAmount =
+    lowestTuition > 0 ? Math.round(lowestTuition * 0.5) : 0
+
+  const enteredMaxDiscount = Number(form.maxDiscountAmount) || 0
+
+  const isMaxDiscountExceeded =
+    isPercent &&
+    lowestTuition > 0 &&
+    enteredMaxDiscount > 0 &&
+    (enteredMaxDiscount > maxFiftyPercentAmount ||
+      (nominalDiscountAmount > 0 && enteredMaxDiscount > nominalDiscountAmount))
+
+  const maxDiscountErrorMessage = isMaxDiscountExceeded
+    ? enteredMaxDiscount > maxFiftyPercentAmount
+      ? ve.maxDiscountExceedFifty
+        ? ve.maxDiscountExceedFifty.replace(
+            "{{amount}}",
+            formatCurrency(maxFiftyPercentAmount),
+          )
+        : `Mức giảm tối đa không được vượt quá 50% học phí lớp học (${formatCurrency(maxFiftyPercentAmount)})`
+      : ve.maxDiscountExceedNominal
+        ? ve.maxDiscountExceedNominal
+            .replace("{{percent}}", percentVal)
+            .replace("{{amount}}", formatCurrency(nominalDiscountAmount))
+        : `Mức giảm tối đa không được vượt quá ${percentVal}% học phí (${formatCurrency(nominalDiscountAmount)})`
+    : undefined
+
+  // Auto-fill maxDiscountAmount based on percentage and class tuition
+  const handleDiscountValueChange = (e) => {
+    const raw = isPercent
+      ? e.target.value
+      : parseFormattedNumber(e.target.value)
+    onChange("discountValue", raw)
+
+    if (isPercent && lowestTuition > 0) {
+      const pct = Number(raw)
+      if (pct >= 1 && pct <= 50) {
+        const autoMax = Math.round((lowestTuition * pct) / 100)
+        onChange("maxDiscountAmount", String(autoMax))
+      } else if (!raw) {
+        onChange("maxDiscountAmount", "")
+      }
+    }
+  }
 
   // Automatically sync and switch to Fixed Amount if Percentage discount is disabled for course scope
   useEffect(() => {
@@ -54,6 +106,11 @@ export const DiscountConfigSection = ({
               onClick={() => {
                 if (!isPercentDisabled) {
                   onChange("discountType", DISCOUNT_TYPES.PERCENTAGE)
+                  const pct = Number(form.discountValue)
+                  if (lowestTuition > 0 && pct >= 1 && pct <= 50) {
+                    const autoMax = Math.round((lowestTuition * pct) / 100)
+                    onChange("maxDiscountAmount", String(autoMax))
+                  }
                 }
               }}
               selected={isPercent}
@@ -62,9 +119,16 @@ export const DiscountConfigSection = ({
                 <Radio
                   checked={isPercent}
                   disabled={isPercentDisabled}
-                  onChange={() =>
-                    onChange("discountType", DISCOUNT_TYPES.PERCENTAGE)
-                  }
+                  onChange={() => {
+                    if (!isPercentDisabled) {
+                      onChange("discountType", DISCOUNT_TYPES.PERCENTAGE)
+                      const pct = Number(form.discountValue)
+                      if (lowestTuition > 0 && pct >= 1 && pct <= 50) {
+                        const autoMax = Math.round((lowestTuition * pct) / 100)
+                        onChange("maxDiscountAmount", String(autoMax))
+                      }
+                    }
+                  }}
                 />
               }
               className={`rounded-xl ${
@@ -73,9 +137,7 @@ export const DiscountConfigSection = ({
                   : ""
               }`}
             >
-              <span>
-                {vf.discountPercent || "Theo phần trăm (%)"}
-              </span>
+              <span>{vf.discountPercent || "Theo phần trăm (%)"}</span>
             </ListItem>
 
             <ListItem
@@ -94,9 +156,7 @@ export const DiscountConfigSection = ({
               }
               className="rounded-xl"
             >
-              <span>
-                {vf.discountFixed || "Số tiền cố định (VNĐ)"}
-              </span>
+              <span>{vf.discountFixed || "Số tiền cố định (VNĐ)"}</span>
             </ListItem>
           </div>
         </div>
@@ -110,14 +170,19 @@ export const DiscountConfigSection = ({
       >
         {/* Giá trị giảm */}
         <TextInput
-          type="number"
+          type={isPercent ? "number" : "text"}
+          inputMode="numeric"
           label={vf.discountValueLabel || "Mức giảm"}
           required
           min={isPercent ? 1 : 2000}
           step={isPercent ? 1 : 1000}
-          value={form.discountValue}
-          onChange={(e) => onChange("discountValue", e.target.value)}
-          placeholder={isPercent ? "20" : "200000"}
+          value={
+            isPercent
+              ? form.discountValue
+              : formatNumberWithDots(form.discountValue)
+          }
+          onChange={handleDiscountValueChange}
+          placeholder={isPercent ? "20" : "200.000"}
           rightContent={isPercent ? "%" : "₫"}
           helperText={
             isPercent
@@ -143,7 +208,8 @@ export const DiscountConfigSection = ({
         {/* Tối đa (When Percentage) */}
         {isPercent && (
           <TextInput
-            type="number"
+            type="text"
+            inputMode="numeric"
             label={
               vf.maxDiscountAmountLabel ||
               "Mức giảm tối đa (VNĐ)"
@@ -151,12 +217,26 @@ export const DiscountConfigSection = ({
             required
             min={2000}
             step={1000}
-            value={form.maxDiscountAmount}
-            onChange={(e) => onChange("maxDiscountAmount", e.target.value)}
-            placeholder="600000"
+            value={formatNumberWithDots(form.maxDiscountAmount)}
+            onChange={(e) =>
+              onChange(
+                "maxDiscountAmount",
+                parseFormattedNumber(e.target.value),
+              )
+            }
+            placeholder={
+              nominalDiscountAmount > 0
+                ? formatNumberWithDots(nominalDiscountAmount)
+                : "200.000"
+            }
             rightContent="₫"
-            helperText={vf.minTwoThousand || "Tối thiểu 2.000 ₫"}
-            error={errors.maxDiscountAmount}
+            helperText={
+              nominalDiscountAmount > 0
+                ? `Tương đương ${formatCurrency(nominalDiscountAmount)} với ${percentVal}% học phí (${formatCurrency(lowestTuition)}).`
+                : vf.maxDiscountHelper ||
+                  "Số tiền giảm tối đa cho 1 lượt đăng ký (tối thiểu 2.000 ₫)."
+            }
+            error={errors.maxDiscountAmount || maxDiscountErrorMessage}
           />
         )}
       </div>
@@ -164,34 +244,25 @@ export const DiscountConfigSection = ({
       {/* Ngân sách tối đa (When Course Scope) */}
       {isCourseScope && (
         <TextInput
-          type="number"
+          type="text"
+          inputMode="numeric"
           label={
             vf.maxBudgetLabel || "Ngân sách tối đa (VNĐ)"
           }
           required
           min={2000}
           step={1000}
-          value={form.maxBudget}
-          onChange={(e) => onChange("maxBudget", e.target.value)}
-          placeholder="10000000"
-          rightContent="₫"
-          helperText={vf.minTwoThousand || "Tối thiểu 2.000 ₫"}
-          error={errors.maxBudget}
-        />
-      )}
-
-      {/* Đơn hàng tối thiểu (When Class Scope) */}
-      {!isCourseScope && (
-        <TextInput
-          type="number"
-          label={
-            vf.minOrderAmountLabel ||
-            "Đơn hàng tối thiểu (VNĐ)"
+          value={formatNumberWithDots(form.maxBudget)}
+          onChange={(e) =>
+            onChange("maxBudget", parseFormattedNumber(e.target.value))
           }
-          value={form.minOrderAmount}
-          onChange={(e) => onChange("minOrderAmount", e.target.value)}
-          placeholder="0"
+          placeholder="10.000.000"
           rightContent="₫"
+          helperText={
+            vf.maxBudgetHelper ||
+            "Voucher tự động dừng khi tổng tiền đã giảm đạt giới hạn này (tối thiểu 2.000 ₫)."
+          }
+          error={errors.maxBudget}
         />
       )}
     </FluentCard>

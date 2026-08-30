@@ -43,6 +43,7 @@ export const vi = {
     // Table Headers
     table: {
       code: "Mã voucher",
+      title: "Tên voucher",
       discountType: "Loại giảm",
       discount: "Giá trị",
       validity: "Hiệu lực",
@@ -241,6 +242,7 @@ export const vi = {
       title: "Chi tiết voucher",
       overview: "Tổng quan cấu hình",
       configTitle: "Thông tin cấu hình",
+      name: "Tên voucher",
       code: "Mã",
       type: "Loại",
       value: "Giá trị",
@@ -334,6 +336,8 @@ export const vi = {
       minMaxDiscount: "Mức giảm tối đa tối thiểu là 2.000 ₫",
       minMaxBudget: "Ngân sách tối đa tối thiểu là 2.000 ₫",
       fixedExceeded: "Mức giảm cố định không được lớn hơn hoặc bằng học phí lớp học",
+      maxDiscountExceedFifty: "Mức giảm tối đa không được vượt quá 50% học phí lớp học ({{amount}})",
+      maxDiscountExceedNominal: "Mức giảm tối đa không được vượt quá {{amount}} ({{percent}}% học phí)",
       scopeCourseDiscountFixedOnly: "Voucher áp dụng cho Khóa học bắt buộc chọn Giảm theo số tiền cố định (FixedAmount)",
       maxBudgetRequired: "Voucher áp dụng cho Khóa học bắt buộc nhập Ngân sách tối đa (VNĐ)",
       selectAtLeastOneCourse: "Vui lòng chọn ít nhất 1 khóa học áp dụng",
@@ -342,6 +346,18 @@ export const vi = {
       validFromRequired: "Vui lòng chọn thời gian bắt đầu hiệu lực",
       validToRequired: "Vui lòng chọn thời gian kết thúc hiệu lực",
       validToAfterValidFrom: "Thời gian kết thúc phải sau thời gian bắt đầu",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "Tạo voucher ưu đãi",
+      singleClassBody: "Khóa học {{courseName}} hiện chỉ có 1 lớp học: \"{{className}}\". Hệ thống sẽ chuyển sang tạo voucher lớp học cho lớp này.",
+      singleClassButton: "Tạo voucher lớp học",
+      noClassesTitle: "Chưa có lớp học",
+      noClassesBody: "Khóa học {{courseName}} hiện chưa có lớp học nào. Vui lòng tạo ít nhất 1 lớp học trước khi tạo voucher ưu đãi.",
+      createClassButton: "Tạo lớp học mới",
+      closeButton: "Đóng",
+      cancelButton: "Hủy",
     },
   },
 }
