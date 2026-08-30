@@ -27,12 +27,20 @@ export const UsageLimitsSection = ({
   const usageLimitHelper = useMemo(() => {
     if (isCourseScope) {
       if (maxSupportedUses !== null && maxSupportedUses > 0) {
-        return `Tự động tính: ${formatCurrency(Number(form.maxBudget))} ÷ ${formatCurrency(Number(form.discountValue))} = ${maxSupportedUses} lượt sử dụng.`
+        return t?.vouchers?.form?.usageLimitAutoCalc
+          ? t.vouchers.form.usageLimitAutoCalc
+              .replace("{{budget}}", formatCurrency(Number(form.maxBudget)))
+              .replace("{{discount}}", formatCurrency(Number(form.discountValue)))
+              .replace("{{uses}}", maxSupportedUses)
+          : `Tự động tính: ${formatCurrency(Number(form.maxBudget))} ÷ ${formatCurrency(Number(form.discountValue))} = ${maxSupportedUses} lượt sử dụng.`
       }
-      return "Tự động tính dựa trên Ngân sách tối đa ÷ Mức giảm."
+      return (
+        t?.vouchers?.form?.usageLimitAutoCalcHelper ||
+        "Tự động tính dựa trên Ngân sách tối đa ÷ Mức giảm."
+      )
     }
     return undefined
-  }, [isCourseScope, maxSupportedUses, form.maxBudget, form.discountValue])
+  }, [isCourseScope, maxSupportedUses, form.maxBudget, form.discountValue, t])
 
   const totalUsageError = useMemo(() => {
     if (errors?.totalUsageLimit) return errors.totalUsageLimit
@@ -67,7 +75,7 @@ export const UsageLimitsSection = ({
         }}
         placeholder={
           isCourseScope
-            ? "Tự động tính theo ngân sách"
+            ? t?.vouchers?.form?.autoCalcByBudget || "Tự động tính theo ngân sách"
             : "100"
         }
         rightIcon={Users}

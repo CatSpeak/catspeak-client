@@ -34,31 +34,21 @@ export const DiscountConfigSection = ({
       ? Math.round((lowestTuition * percentVal) / 100)
       : 0
 
-  const maxFiftyPercentAmount =
-    lowestTuition > 0 ? Math.round(lowestTuition * 0.5) : 0
-
   const enteredMaxDiscount = Number(form.maxDiscountAmount) || 0
 
   const isMaxDiscountExceeded =
     isPercent &&
     lowestTuition > 0 &&
-    enteredMaxDiscount > 0 &&
-    (enteredMaxDiscount > maxFiftyPercentAmount ||
-      (nominalDiscountAmount > 0 && enteredMaxDiscount > nominalDiscountAmount))
+    percentVal > 0 &&
+    nominalDiscountAmount > 0 &&
+    enteredMaxDiscount > nominalDiscountAmount
 
   const maxDiscountErrorMessage = isMaxDiscountExceeded
-    ? enteredMaxDiscount > maxFiftyPercentAmount
-      ? ve.maxDiscountExceedFifty
-        ? ve.maxDiscountExceedFifty.replace(
-            "{{amount}}",
-            formatCurrency(maxFiftyPercentAmount),
-          )
-        : `Mức giảm tối đa không được vượt quá 50% học phí lớp học (${formatCurrency(maxFiftyPercentAmount)})`
-      : ve.maxDiscountExceedNominal
-        ? ve.maxDiscountExceedNominal
-            .replace("{{percent}}", percentVal)
-            .replace("{{amount}}", formatCurrency(nominalDiscountAmount))
-        : `Mức giảm tối đa không được vượt quá ${percentVal}% học phí (${formatCurrency(nominalDiscountAmount)})`
+    ? ve.maxDiscountExceedNominal
+      ? ve.maxDiscountExceedNominal
+          .replace("{{percent}}", percentVal)
+          .replace("{{amount}}", formatCurrency(nominalDiscountAmount))
+      : `Mức giảm tối đa không được vượt quá ${formatCurrency(nominalDiscountAmount)} (${percentVal}% học phí)`
     : undefined
 
   // Auto-fill maxDiscountAmount based on percentage and class tuition
@@ -232,7 +222,15 @@ export const DiscountConfigSection = ({
             rightContent="₫"
             helperText={
               nominalDiscountAmount > 0
-                ? `Tương đương ${formatCurrency(nominalDiscountAmount)} với ${percentVal}% học phí (${formatCurrency(lowestTuition)}).`
+                ? vf.maxDiscountEquivalent
+                  ? vf.maxDiscountEquivalent
+                      .replace(
+                        "{{nominal}}",
+                        formatCurrency(nominalDiscountAmount),
+                      )
+                      .replace("{{percent}}", percentVal)
+                      .replace("{{tuition}}", formatCurrency(lowestTuition))
+                  : `Tương đương ${formatCurrency(nominalDiscountAmount)} với ${percentVal}% học phí (${formatCurrency(lowestTuition)}).`
                 : vf.maxDiscountHelper ||
                   "Số tiền giảm tối đa cho 1 lượt đăng ký (tối thiểu 2.000 ₫)."
             }

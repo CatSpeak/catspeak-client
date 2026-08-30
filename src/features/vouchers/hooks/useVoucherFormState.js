@@ -64,6 +64,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     return initial
   })
   const [errors, setErrors] = useState({})
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
 
   const [createVoucher, { isLoading: isCreating }] = useCreateVoucherMutation()
   const [updateVoucher, { isLoading: isUpdating }] = useUpdateVoucherMutation()
@@ -308,18 +309,23 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
 
   // Submit Draft Handler (from action buttons)
   const handleSaveDraft = async () => {
-    const savedId = await saveVoucher(true)
-    if (savedId) {
-      toast.success(
-        t?.vouchers?.form?.saveDraftSuccess || "Đã lưu voucher vào bản nháp!",
-      )
-      // Stay on page and update URL to edit mode seamlessly if creating new voucher
-      if (!voucherId && savedId) {
-        navigate(`/workspace/vouchers/edit/${savedId}`, { replace: true })
+    setIsSavingDraft(true)
+    try {
+      const savedId = await saveVoucher(true)
+      if (savedId) {
+        toast.success(
+          t?.vouchers?.form?.saveDraftSuccess || "Đã lưu voucher vào bản nháp!",
+        )
+        // Stay on page and update URL to edit mode seamlessly if creating new voucher
+        if (!voucherId && savedId) {
+          navigate(`/workspace/vouchers/edit/${savedId}`, { replace: true })
+        }
+        return true
       }
-      return true
+      return false
+    } finally {
+      setIsSavingDraft(false)
     }
-    return false
   }
 
   return {
@@ -334,6 +340,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     saveVoucher,
     estimatedDeposit,
     isSubmitting: isCreating || isUpdating,
+    isSavingDraft,
     isGeneratingCode,
     isEditing,
   }

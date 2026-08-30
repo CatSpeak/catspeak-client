@@ -18,6 +18,7 @@ import { SCOPE_TYPES } from "../constants/voucherConstants"
 import { useVoucherFormState } from "../hooks/useVoucherFormState"
 import Step1TeacherForm from "../components/form/Step1TeacherForm"
 import Step2TeacherDeposit from "../components/form/Step2TeacherDeposit"
+import VoucherFormSkeleton from "../components/form/VoucherFormSkeleton"
 import PendingDepositConfirmation from "../components/PendingDepositConfirmation"
 import CannotEditVoucher from "../components/CannotEditVoucher"
 import TransferInfoModal from "../components/detail/TransferInfoModal"
@@ -80,6 +81,7 @@ const CreateVoucherPage = () => {
     handleAutoGenerateCode,
     estimatedDeposit,
     isSubmitting,
+    isSavingDraft,
     isGeneratingCode,
   } = useVoucherFormState(voucherDetail, id)
 
@@ -88,9 +90,9 @@ const CreateVoucherPage = () => {
   const classList = form.classIds?.length ? form.classIds : (voucherDetail?.classes || [])
 
   const isCourseVoucher = Boolean(
-    courseIdParam ||
+    (!classIdParam && courseIdParam) ||
     form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES ||
-    courseList.length > 0
+    (courseList.length > 0 && classList.length === 0)
   )
   const isSingleClassVoucher = !isCourseVoucher
 
@@ -202,14 +204,7 @@ const CreateVoucherPage = () => {
   }
 
   if (isEditing && isLoadingDetail) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <LoadingSpinner className="w-8 h-8 text-cath-red-700" />
-        <p className="text-xs text-slate-400 mt-2 font-medium">
-          {t?.vouchers?.loading || "Đang tải thông tin voucher..."}
-        </p>
-      </div>
-    )
+    return <VoucherFormSkeleton />
   }
 
   if (isEditing && (isDetailError || !voucherDetail)) {
@@ -310,6 +305,7 @@ const CreateVoucherPage = () => {
             form={form}
             estimatedDeposit={estimatedDeposit}
             isSubmitting={isSubmitting}
+            isSavingDraft={isSavingDraft}
             saveVoucher={saveVoucher}
             onConfirmSuccess={onDepositConfirmed}
           />
@@ -335,7 +331,9 @@ const CreateVoucherPage = () => {
           <PillButton
             type="button"
             variant="secondary"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isSavingDraft}
+            loading={isSavingDraft}
+            loadingText={t?.vouchers?.form?.savingDraft || "Đang lưu"}
             onClick={handleSaveDraft}
           >
             {t?.vouchers?.form?.saveDraft || "Lưu nháp"}
@@ -345,7 +343,7 @@ const CreateVoucherPage = () => {
             <PillButton
               type="button"
               variant="primary"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isSavingDraft}
               onClick={onAdvanceToStep2}
             >
               {t?.vouchers?.form?.nextStep || "Tiếp theo"}

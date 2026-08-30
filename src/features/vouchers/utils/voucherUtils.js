@@ -145,22 +145,14 @@ export const validateInstructorVoucherForm = (
       } else if (maxDiscount < 2000) {
         errors.maxDiscountAmount =
           errT.minMaxDiscount || "Mức giảm tối đa tối thiểu là 2.000 ₫"
-      } else if (effectiveTuition > 0) {
-        const maxFifty = Math.round(effectiveTuition * 0.5)
+      } else if (effectiveTuition > 0 && discountVal > 0) {
         const nominal = Math.round((effectiveTuition * discountVal) / 100)
-        if (maxDiscount > maxFifty) {
-          errors.maxDiscountAmount = errT.maxDiscountExceedFifty
-            ? errT.maxDiscountExceedFifty.replace(
-                "{{amount}}",
-                formatCurrency(maxFifty),
-              )
-            : `Mức giảm tối đa không được vượt quá 50% học phí lớp học (${formatCurrency(maxFifty)})`
-        } else if (nominal > 0 && maxDiscount > nominal) {
+        if (nominal > 0 && maxDiscount > nominal) {
           errors.maxDiscountAmount = errT.maxDiscountExceedNominal
             ? errT.maxDiscountExceedNominal
                 .replace("{{percent}}", discountVal)
                 .replace("{{amount}}", formatCurrency(nominal))
-            : `Mức giảm tối đa không được vượt quá ${discountVal}% học phí (${formatCurrency(nominal)})`
+            : `Mức giảm tối đa không được vượt quá ${formatCurrency(nominal)} (${discountVal}% học phí)`
         }
       }
     } else {
@@ -175,7 +167,8 @@ export const validateInstructorVoucherForm = (
     }
 
     if (minOrder < 0) {
-      errors.minOrderAmount = "Giá trị đơn hàng tối thiểu không hợp lệ"
+      errors.minOrderAmount =
+        errT.invalidMinOrder || "Giá trị đơn hàng tối thiểu không hợp lệ"
     }
 
     // 5. Scope Type (BR-VC-GV-06 & BR-VC-GV-08)

@@ -100,16 +100,16 @@ const VouchersTab = ({
   }
 
   // Query params with courseId / classId filter from backend
-  const queryParams = useMemo(
-    () => ({
+  const queryParams = useMemo(() => {
+    const isClassScope = Boolean(effectiveClassId)
+    return {
       page: 1,
       pageSize: 100,
       sponsorType: "Instructor",
-      courseId: effectiveCourseId ? Number(effectiveCourseId) : undefined,
-      classId: effectiveClassId ? Number(effectiveClassId) : undefined,
-    }),
-    [effectiveCourseId, effectiveClassId],
-  )
+      classId: isClassScope ? Number(effectiveClassId) : undefined,
+      courseId: !isClassScope && effectiveCourseId ? Number(effectiveCourseId) : undefined,
+    }
+  }, [effectiveCourseId, effectiveClassId])
 
   const {
     data: vouchersResponse,
@@ -117,7 +117,12 @@ const VouchersTab = ({
     isFetching,
   } = useGetVouchersQuery(queryParams)
 
-  const rawList = vouchersResponse?.data || []
+  const rawList = useMemo(() => {
+    if (Array.isArray(vouchersResponse?.data)) return vouchersResponse.data
+    if (Array.isArray(vouchersResponse?.items)) return vouchersResponse.items
+    if (Array.isArray(vouchersResponse)) return vouchersResponse
+    return []
+  }, [vouchersResponse])
 
   // Instant in-memory client-side filter (Search, Status, DiscountType)
   const vouchersList = useMemo(() => {
@@ -200,6 +205,7 @@ const VouchersTab = ({
     const params = new URLSearchParams()
     if (effectiveClassId) params.set("classId", String(effectiveClassId))
     if (effectiveCourseId) params.set("courseId", String(effectiveCourseId))
+    if (courseName) params.set("courseName", courseName)
     const query = params.toString()
     navigate(`/workspace/vouchers/create${query ? `?${query}` : ""}`)
   }
