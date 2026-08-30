@@ -92,17 +92,9 @@ const SessionAnalyticsDetailPage = () => {
       sessionStatsData?.teacherTalkRatio?.studentPercent ?? 55,
     teacherStatus:
       sessionStatsData?.teacherTalkRatio?.status ?? "ideal",
-    totalWords:
-      sessionStatsData?.overview?.totalStudentWords ??
-      participants.reduce((acc, p) => acc + (p.words || 0), 0) ??
-      0,
     durationSeconds:
       sessionStatsData?.overview?.totalStudentDurationSeconds ??
       participants.reduce((acc, p) => acc + (p.durationSeconds || 0), 0) ??
-      0,
-    totalStudentWords:
-      sessionStatsData?.overview?.totalStudentWords ??
-      participants.reduce((acc, p) => acc + (p.words || 0), 0) ??
       0,
     totalStudentDurationSeconds:
       sessionStatsData?.overview?.totalStudentDurationSeconds ??

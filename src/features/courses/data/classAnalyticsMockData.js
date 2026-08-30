@@ -27,7 +27,6 @@ export const mockClassAnalyticsData = {
       sessionsUnmet: 8,
       trend: "improving", // "improving" | "stable" | "declining"
       status: "normal", // "normal" | "attention" | "warning"
-      totalWords: 2480,
     },
     {
       id: "std-2",
@@ -42,7 +41,6 @@ export const mockClassAnalyticsData = {
       sessionsUnmet: 10,
       trend: "stable",
       status: "normal",
-      totalWords: 1890,
     },
     {
       id: "std-3",
@@ -57,7 +55,6 @@ export const mockClassAnalyticsData = {
       sessionsUnmet: 16,
       trend: "declining",
       status: "attention",
-      totalWords: 920,
     },
     {
       id: "std-4",
@@ -72,7 +69,6 @@ export const mockClassAnalyticsData = {
       sessionsUnmet: 19,
       trend: "declining",
       status: "warning",
-      totalWords: 610,
     },
   ],
   sessions: Array.from({ length: 24 }, (_, i) => {
@@ -87,10 +83,10 @@ export const mockClassAnalyticsData = {
       teacherSpeechPercent: teacherPercent,
       studentSpeechPercent: studentTotalPercent,
       studentsDetail: [
-        { name: "Nguyễn A", percent: Math.min(48, Math.max(20, 30 + (i % 5) * 3)), words: 120 + i * 5, isMet: true },
-        { name: "Trần B", percent: Math.min(35, Math.max(15, 24 + (i % 3) * 2)), words: 95 + i * 4, isMet: true },
-        { name: "Lê C", percent: Math.min(25, Math.max(8, 18 - (i % 4) * 2)), words: 50 + i * 2, isMet: i < 8 },
-        { name: "Phạm Đ", percent: Math.min(22, Math.max(5, 12 - (i % 3) * 2)), words: 35 + i * 2, isMet: i < 5 },
+        { name: "Nguyễn A", percent: Math.min(48, Math.max(20, 30 + (i % 5) * 3)), durationSeconds: 240 + i * 10, isMet: true },
+        { name: "Trần B", percent: Math.min(35, Math.max(15, 24 + (i % 3) * 2)), durationSeconds: 180 + i * 8, isMet: true },
+        { name: "Lê C", percent: Math.min(25, Math.max(8, 18 - (i % 4) * 2)), durationSeconds: 90 + i * 4, isMet: i < 8 },
+        { name: "Phạm Đ", percent: Math.min(22, Math.max(5, 12 - (i % 3) * 2)), durationSeconds: 60 + i * 4, isMet: i < 5 },
       ],
       healthStatus: i % 4 === 0 ? "attention" : "good",
     }
@@ -197,7 +193,7 @@ const mockLeCSessions = [
     date: "T6 31/07/2026",
     time: "10:00–11:10",
     percent: 18,
-    words: 112,
+    durationSeconds: 110,
     expectedPercent: 25,
     isMet: false,
     status: "Chưa đạt",
@@ -216,7 +212,7 @@ const mockLeCSessions = [
       date: `${dayName} ${String((sNum * 3) % 28 + 1).padStart(2, "0")}/07/2026`,
       time: `10:00–11:${String((sNum * 4) % 30 + 5).padStart(2, "0")}`,
       percent,
-      words: Math.round(percent * 6.5),
+      durationSeconds: Math.round(percent * 8.5),
       expectedPercent: 25,
       isMet,
       status: isMet ? "Đạt" : "Chưa đạt",
@@ -261,8 +257,8 @@ export const getStudentAnalyticsData = (classId, studentId) => {
     avgSpeechPercent: matched.name === "Lê C" ? 24 : matched.avgStbPercent,
     metRecentCount: 3,
     recentTotal: 6,
-    totalWords: 990,
-    avgWordsPerSession: 165,
+    totalDurationSeconds: 1540,
+    avgDurationPerSession: 256,
     trend: matched.trend || "declining",
     trendText: "Giảm dần",
     recentSessionNumber: 24,

@@ -479,8 +479,6 @@ export const roomsApi = baseApi.injectEndpoints({
           sessions_unmet: s.sessions_unmet ?? s.sessionsUnmet ?? 0,
           trend: s.trend || "stable",
           status: s.status || "normal",
-          totalWords: s.total_words ?? s.totalWords ?? 0,
-          total_words: s.total_words ?? s.totalWords ?? 0,
         }))
 
         const sessions = (raw.sessions || []).map((sess) => ({
@@ -512,7 +510,6 @@ export const roomsApi = baseApi.injectEndpoints({
             ...sd,
             name: sd.name || "Student",
             percent: sd.percent ?? sd.avg_stb_percent ?? 0,
-            words: sd.words ?? sd.total_words ?? 0,
             isMet: sd.is_met ?? sd.isMet ?? true,
             is_met: sd.is_met ?? sd.isMet ?? true,
           })),
@@ -569,8 +566,6 @@ export const roomsApi = baseApi.injectEndpoints({
           sessions_unmet: s.sessions_unmet ?? s.sessionsUnmet ?? 0,
           trend: s.trend || "stable",
           status: s.status || "normal",
-          totalWords: s.total_words ?? s.totalWords ?? 0,
-          total_words: s.total_words ?? s.totalWords ?? 0,
         }))
 
         return {
@@ -655,8 +650,6 @@ export const roomsApi = baseApi.injectEndpoints({
           avgSpeechPercent: raw.avg_speech_percent ?? raw.avgSpeechPercent ?? 0,
           metRecentCount: raw.met_recent_count ?? raw.metRecentCount ?? 0,
           recentTotal: raw.recent_total ?? raw.recentTotal ?? 0,
-          totalWords: raw.total_words ?? raw.totalWords ?? 0,
-          avgWordsPerSession: raw.avg_words_per_session ?? raw.avgWordsPerSession ?? 0,
           trend: raw.trend ?? "stable",
           trendText: raw.trend_text ?? raw.trendText ?? "Ổn định",
           recentSessionNumber: raw.recent_session_number ?? raw.recentSessionNumber ?? 0,
@@ -674,8 +667,6 @@ export const roomsApi = baseApi.injectEndpoints({
             durationMinutes: sess.duration_minutes ?? sess.durationMinutes ?? 0,
             percent: sess.percent ?? sess.speech_percent ?? sess.speechPercent ?? 0,
             speechPercent: sess.speech_percent ?? sess.speechPercent ?? 0,
-            words: sess.words ?? 0,
-            wpm: sess.wpm ?? 0,
             expectedRate: sess.expected_rate ?? sess.expectedRate ?? 25,
             expectedPercent: sess.expected_percent ?? sess.expectedRate ?? 25,
             isMet: sess.is_met ?? sess.isMet ?? true,
@@ -711,9 +702,7 @@ export const roomsApi = baseApi.injectEndpoints({
           updated_at: raw.updated_at ?? raw.updatedAt ?? null,
           hasAnySpeechData: raw.has_any_speech_data ?? raw.hasAnySpeechData ?? false,
           overview: {
-            totalWords: raw.overview?.total_words ?? raw.overview?.totalWords ?? 0,
             totalDurationSeconds: raw.overview?.total_duration_seconds ?? raw.overview?.totalDurationSeconds ?? 0,
-            totalStudentWords: raw.overview?.total_student_words ?? raw.overview?.totalStudentWords ?? 0,
             totalStudentDurationSeconds: raw.overview?.total_student_duration_seconds ?? raw.overview?.totalStudentDurationSeconds ?? 0,
             studentCount: raw.overview?.student_count ?? raw.overview?.studentCount ?? 0,
           },
@@ -722,7 +711,6 @@ export const roomsApi = baseApi.injectEndpoints({
             studentPercent: raw.teacher_talk_ratio?.student_percent ?? raw.teacher_talk_ratio?.studentPercent ?? 0,
             status: raw.teacher_talk_ratio?.status ?? "ideal",
             teacherDurationSeconds: raw.teacher_talk_ratio?.teacher_duration_seconds ?? raw.teacher_talk_ratio?.teacherDurationSeconds ?? 0,
-            teacherWords: raw.teacher_talk_ratio?.teacher_words ?? raw.teacher_talk_ratio?.teacherWords ?? 0,
           },
           fairShare: {
             expectedSharePercent: raw.fair_share?.expected_share_percent ?? raw.fair_share?.expectedSharePercent ?? 0,
@@ -737,14 +725,11 @@ export const roomsApi = baseApi.injectEndpoints({
             role: p.role ?? "student",
             isTeacher: p.is_teacher ?? p.isTeacher ?? false,
             stats: {
-              words: p.stats?.words ?? 0,
               durationSeconds: p.stats?.duration_seconds ?? p.stats?.durationSeconds ?? 0,
-              wpm: p.stats?.wpm ?? 0,
             },
             balance: {
               stbScore: p.balance?.stb_score ?? p.balance?.stbScore ?? 0,
               timePercent: p.balance?.time_percent ?? p.balance?.timePercent ?? 0,
-              wordCountPercent: p.balance?.word_count_percent ?? p.balance?.wordCountPercent ?? 0,
               sharePercent: p.balance?.share_percent ?? p.balance?.sharePercent ?? 0,
               ratioOfExpected: p.balance?.ratio_of_expected ?? p.balance?.ratioOfExpected ?? 0,
               status: p.balance?.status ?? "normal",

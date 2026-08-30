@@ -1,6 +1,14 @@
 import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
+const formatDuration = (seconds) => {
+  if (!seconds || seconds <= 0) return "00:00"
+  const totalSecs = Math.round(seconds)
+  const mins = Math.floor(totalSecs / 60)
+  const secs = totalSecs % 60
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+}
+
 const StudentDetailKpis = ({ data }) => {
   const { t } = useLanguage()
   const c = t.courses || {}
@@ -14,9 +22,9 @@ const StudentDetailKpis = ({ data }) => {
     ? sd.showingRecentSessions.replace("{{count}}", data?.recentTotal ?? 6)
     : `Hiển thị ${data?.recentTotal ?? 6} buổi gần nhất`
 
-  const avgWordsText = sd.avgWordsPerSession
-    ? sd.avgWordsPerSession.replace("{{avg}}", data?.avgWordsPerSession ?? 165)
-    : `Trung bình ${data?.avgWordsPerSession ?? 165} từ/buổi`
+  const avgDurationText = sd.avgDurationPerSession
+    ? sd.avgDurationPerSession.replace("{{avg}}", formatDuration(data?.avgDurationPerSession ?? 0))
+    : `Trung bình ${formatDuration(data?.avgDurationPerSession ?? 0)}/buổi`
 
   const isImproving = data?.trend === "improving"
   const isStable = data?.trend === "stable" || !data?.trend
@@ -89,18 +97,18 @@ const StudentDetailKpis = ({ data }) => {
         </span>
       </div>
 
-      {/* 3. Tổng số từ đã nói */}
+      {/* 3. Tổng thời lượng phát biểu */}
       <div className="bg-[#f3f4f6] rounded-2xl p-5 flex flex-col justify-between shadow-xs transition-all duration-200">
         <span className="text-sm font-medium text-[#4b5563]">
-          {sd.totalWordsSpoken || "Tổng số từ đã nói"}
+          {sd.totalSpeakingDuration || "Tổng thời lượng phát biểu"}
         </span>
         <div className="my-2">
-          <span className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight">
-            {data?.totalWords?.toLocaleString() ?? "0"}
+          <span className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight font-mono">
+            {formatDuration(data?.totalDurationSeconds ?? 0)}
           </span>
         </div>
         <span className="text-xs text-[#6b7280] font-normal">
-          {avgWordsText}
+          {avgDurationText}
         </span>
       </div>
 

@@ -76,19 +76,6 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
     const teacherTalk = statsData.teacherTalkRatio || statsData.teacher_talk_ratio || {}
     const fairShare = statsData.fairShare || statsData.fair_share || {}
 
-    const totalWords = Number(
-      overview.totalWords ??
-        overview.total_words ??
-        statsData.totalRoomWords ??
-        statsData.total_words ??
-        0,
-    )
-    const totalStudentWords = Number(
-      overview.totalStudentWords ??
-        overview.total_student_words ??
-        statsData.total_student_words ??
-        0,
-    )
     const roomDuration = Number(
       overview.totalDurationSeconds ??
         overview.total_duration_seconds ??
@@ -116,9 +103,6 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
         statsData.teacherDurationSeconds ??
         statsData.teacher_duration_seconds ??
         0,
-    )
-    const teacherWords = Number(
-      teacherTalk.teacherWords ?? teacherTalk.teacher_words ?? 0,
     )
     const teacherSpeakingPercent = Number(
       teacherTalk.teacherPercent ??
@@ -163,7 +147,6 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
     const hasAnySpeechData = Boolean(
       statsData.hasAnySpeechData ??
         statsData.has_any_speech_data ??
-        totalWords > 0 ??
         roomDuration > 0,
     )
 
@@ -185,15 +168,6 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
             p.total_duration_seconds ??
             0,
         )
-        const words = Number(
-          pStats.words ?? p.totalWords ?? p.total_words ?? 0,
-        )
-        const wpm =
-          pStats.wpm ??
-          p.wpm ??
-          (durationSec >= 1 && words > 0
-            ? Math.round(words / (durationSec / 60))
-            : 0)
 
         const isTeacher = Boolean(p.isTeacher ?? p.is_teacher)
         const isHost = Boolean(p.isHost ?? p.is_host)
@@ -206,9 +180,7 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
           role: p.role ?? (isTeacher ? "teacher" : "student"),
           isTeacher,
           isHost,
-          totalWords: words,
           totalDurationSeconds: durationSec,
-          wpm,
           stbScore: Number(
             pBalance.stbScore ??
               pBalance.stb_score ??
@@ -220,9 +192,6 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
           ),
           timePercent: Number(
             pBalance.timePercent ?? pBalance.time_percent ?? 0,
-          ),
-          wordCountPercent: Number(
-            pBalance.wordCountPercent ?? pBalance.word_count_percent ?? 0,
           ),
           sharePercent: Number(
             pBalance.sharePercent ??
@@ -258,10 +227,7 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
       participantsList,
       roomTotalDuration: roomDuration,
       roomTotalStudentDuration: studentDuration,
-      totalRoomWords: totalWords,
-      totalStudentWords,
       teacherDurationSeconds,
-      teacherWords,
       teacherSpeakingPercent,
       studentSpeakingPercent,
       teacherStatus,

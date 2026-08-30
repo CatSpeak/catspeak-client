@@ -42,6 +42,15 @@ const StudentAnalyticsDetailPage = () => {
     apiData?.studentName ||
     `Học viên ${studentId || ""}`
 
+  const totalDurationSeconds = (apiData?.sessions || []).reduce(
+    (sum, s) => sum + (s.durationSeconds || (s.durationMinutes ? s.durationMinutes * 60 : 0)),
+    0,
+  )
+  const avgDurationPerSession =
+    (apiData?.totalSessions || apiData?.sessions?.length || 0) > 0
+      ? Math.round(totalDurationSeconds / (apiData?.totalSessions || apiData?.sessions?.length || 1))
+      : 0
+
   // Combined data object
   const studentData = {
     studentId: studentId || "",
@@ -60,8 +69,8 @@ const StudentAnalyticsDetailPage = () => {
     avgSpeechPercent: apiData?.avgSpeechPercent ?? 0,
     metRecentCount: apiData?.metRecentCount ?? 0,
     recentTotal: apiData?.recentTotal ?? 0,
-    totalWords: apiData?.totalWords ?? 0,
-    avgWordsPerSession: apiData?.avgWordsPerSession ?? 0,
+    totalDurationSeconds,
+    avgDurationPerSession,
     trend: apiData?.trend ?? "stable",
     trendText: apiData?.trendText ?? "Ổn định",
     recentSessionNumber: apiData?.recentSessionNumber ?? 0,

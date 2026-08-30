@@ -56,14 +56,13 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
 
       {/* Table Container */}
       <div className="w-full overflow-x-auto bg-white">
-        <table className="w-full text-left text-sm border-collapse min-w-[720px]">
+        <table className="w-full text-left text-sm border-collapse min-w-[620px]">
           <thead>
             <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
               <th className="py-3 px-4 font-semibold">{sd.colDate || "Ngày"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colEndTime || "Giờ kết thúc"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colDuration || "Tổng thời lượng nói"}</th>
               <th className="py-3 px-4 font-semibold text-blue-600">{sd.colSpeechPercent || "% Phát biểu"}</th>
-              <th className="py-3 px-4 font-semibold">{sd.colWords || "Số từ"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colExpected || "Kỳ vọng"}</th>
               <th className="py-3 px-4 font-semibold">{sd.colStatus || "Trạng thái"}</th>
               <th className="py-3 px-2 text-right w-8"></th>
@@ -94,7 +93,7 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
                   </td>
 
                   {/* Tổng thời lượng nói */}
-                  <td className="py-3.5 px-4 text-gray-700 font-normal tabular-nums">
+                  <td className="py-3.5 px-4 text-gray-700 font-normal tabular-nums font-mono">
                     {formatDuration(durationSecs)}
                   </td>
 
@@ -111,11 +110,6 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
                         {sess.percent}%
                       </span>
                     </div>
-                  </td>
-
-                  {/* Số từ */}
-                  <td className="py-3.5 px-4 text-gray-700 font-normal">
-                    {sess.words} {t.courses?.analytics?.classDetail?.wordsCount ? t.courses.analytics.classDetail.wordsCount.replace("{{count}}", "").trim() : "từ"}
                   </td>
 
                   {/* Kỳ vọng */}

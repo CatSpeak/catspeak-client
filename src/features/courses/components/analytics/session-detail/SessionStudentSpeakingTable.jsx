@@ -55,14 +55,12 @@ const SessionStudentSpeakingTable = ({
     <div className="w-full flex flex-col bg-white">
       {/* Responsive Table Container */}
       <div className="w-full overflow-x-auto">
-        <table className="w-full text-left text-sm border-collapse min-w-[650px]">
+        <table className="w-full text-left text-sm border-collapse min-w-[550px]">
           <thead>
             <tr className="bg-[#f4f6f8] text-gray-600 text-xs font-semibold">
               <th className="py-3 px-4 font-semibold">{sessT.colStudent || "Học viên"}</th>
               <th className="py-3 px-4 font-semibold text-blue-600">{sessT.colSpeechPercent || "% Phát biểu (STB)"}</th>
               <th className="py-3 px-4 font-semibold">{sessT.colSpeakingDuration || "Thời lượng nói"}</th>
-              <th className="py-3 px-4 font-semibold">{sessT.colWords || "Số từ"}</th>
-              <th className="py-3 px-4 font-semibold">{sessT.colPace || "Tốc độ nói"}</th>
               <th className="py-3 px-4 font-semibold">{sessT.colStatus || "Trạng thái"}</th>
               <th className="py-3 px-2 text-right w-10"></th>
             </tr>
@@ -70,16 +68,14 @@ const SessionStudentSpeakingTable = ({
           <tbody className="divide-y divide-gray-100">
             {studentList.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-sm text-gray-500">
+                <td colSpan={5} className="py-8 text-center text-sm text-gray-500">
                   {sessT.noStudentData || "Chưa có dữ liệu phát biểu của học viên trong buổi học này."}
                 </td>
               </tr>
             ) : (
               studentList.map((student, idx) => {
                 const percent = student.percent ?? student.stbScore ?? student.balance?.stbScore ?? 0
-                const words = student.words ?? student.stats?.words ?? 0
                 const durationSecs = student.durationSeconds ?? student.stats?.durationSeconds ?? 0
-                const wpm = student.wpm ?? student.stats?.wpm ?? (durationSecs > 0 ? Math.round((words / durationSecs) * 60) : 0)
                 const isMet = student.isMet ?? student.isThresholdMet ?? (percent >= 25)
                 const studentName = student.name || `Student ${student.accountId ?? student.id ?? idx + 1}`
                 const initial = studentName.trim().slice(0, 1).toUpperCase() || "S"
@@ -118,18 +114,8 @@ const SessionStudentSpeakingTable = ({
                     </td>
 
                     {/* Thời lượng nói */}
-                    <td className="py-3.5 px-4 font-semibold text-gray-800 text-sm tabular-nums">
+                    <td className="py-3.5 px-4 font-semibold text-gray-800 text-sm tabular-nums font-mono">
                       {formatDuration(durationSecs)}
-                    </td>
-
-                    {/* Số từ */}
-                    <td className="py-3.5 px-4 font-semibold text-gray-800 text-sm tabular-nums">
-                      {words.toLocaleString()} <span className="text-xs font-normal text-gray-500">{sessT.wordsUnit || "từ"}</span>
-                    </td>
-
-                    {/* Tốc độ nói (WPM) */}
-                    <td className="py-3.5 px-4 text-sm text-gray-700 font-medium tabular-nums">
-                      {wpm} <span className="text-xs text-gray-500">WPM</span>
                     </td>
 
                     {/* Trạng thái */}

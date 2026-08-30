@@ -16,10 +16,6 @@ const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
 
   const teacherPercent = sessionData?.teacherSpeechPercent ?? 0
   const studentPercent = sessionData?.studentSpeechPercent ?? 0
-  const totalWords =
-    sessionData?.totalStudentWords ??
-    sessionData?.totalWords ??
-    0
   const durationSeconds =
     sessionData?.totalStudentDurationSeconds ??
     sessionData?.durationSeconds ??
@@ -77,18 +73,18 @@ const SessionDetailKpis = ({ sessionData, teacherName = "Giảng viên" }) => {
         </span>
       </div>
 
-      {/* 2. Tổng số từ & Thời lượng */}
+      {/* 2. Tổng thời lượng phát biểu */}
       <div className="bg-[#f3f4f6] rounded-2xl p-5 flex flex-col justify-between shadow-xs transition-all duration-200 border border-gray-200/50">
         <span className="text-sm font-medium text-[#4b5563]">
-          {sessT.kpiTotalWordsDuration || "Tổng từ & Thời lượng"}
+          {sessT.kpiTotalDuration || "Tổng thời lượng phát biểu"}
         </span>
         <div className="my-2">
-          <span className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight">
-            {totalWords.toLocaleString()} <span className="text-lg font-semibold text-gray-500">{sessT.wordsUnit || "từ"}</span>
+          <span className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight font-mono">
+            {formatDuration(durationSeconds)}
           </span>
         </div>
         <span className="text-xs text-[#6b7280] font-normal">
-          {sessT.durationPrefix || "Thời gian:"} <strong className="font-semibold text-gray-700">{formatDuration(durationSeconds)}</strong>
+          {sessT.durationHint || "Thời gian học viên thảo luận"}
         </span>
       </div>
 

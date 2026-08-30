@@ -1,12 +1,20 @@
 import React from "react"
 
+const formatDuration = (seconds) => {
+  if (!seconds || seconds <= 0) return "00:00"
+  const totalSecs = Math.round(seconds)
+  const mins = Math.floor(totalSecs / 60)
+  const secs = totalSecs % 60
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+}
+
 /**
  * BreakoutRoomSTBView Component
  * Renders the Speaking Time Balance panel specifically for Breakout Rooms.
  * Matches design in stb-detail-breakout-panel.png:
  *   - No Teacher Talk card
  *   - Room Student summary (HV phòng (N) | Kỳ vọng: X%)
- *   - Column headers (Tên | % | # từ)
+ *   - Column headers (Tên | % | Thời lượng)
  *   - Clean normal & low-thread student rows
  */
 const BreakoutRoomSTBView = ({
@@ -36,7 +44,7 @@ const BreakoutRoomSTBView = ({
         <span>{labels.colName || "Tên"}</span>
         <div className="flex items-center gap-8">
           <span className="w-8 text-right">{labels.colPercent || "%"}</span>
-          <span className="w-10 text-right">{labels.colWords || "# từ"}</span>
+          <span className="w-12 text-right">{labels.colDuration || "Thời lượng"}</span>
         </div>
       </div>
 
@@ -49,7 +57,7 @@ const BreakoutRoomSTBView = ({
           if (isLowThread) {
             return (
               <div
-                key={item.participant.identity || idx}
+                key={item.participant?.identity || idx}
                 className="bg-[#FEF2F2] border border-red-100 rounded-xl p-3.5 flex items-center justify-between text-sm transition-all"
               >
                 <div className="flex items-center gap-2 min-w-0 pr-2">
@@ -64,8 +72,8 @@ const BreakoutRoomSTBView = ({
                   <span className="font-bold text-gray-900 w-8 text-right font-mono">
                     {item.sharePercent}%
                   </span>
-                  <span className="text-gray-400 font-mono w-10 text-right">
-                    {item.totalWords}
+                  <span className="text-gray-500 font-mono w-12 text-right text-xs">
+                    {formatDuration(item.durationSec)}
                   </span>
                 </div>
               </div>
@@ -74,7 +82,7 @@ const BreakoutRoomSTBView = ({
 
           return (
             <div
-              key={item.participant.identity || idx}
+              key={item.participant?.identity || idx}
               className="bg-[#F8F9FA] rounded-xl p-3.5 flex items-center justify-between text-sm transition-all"
             >
               <div className="flex items-center gap-2 min-w-0 pr-2">
@@ -86,8 +94,8 @@ const BreakoutRoomSTBView = ({
                 <span className="font-medium text-gray-900 w-8 text-right font-mono">
                   {item.sharePercent}%
                 </span>
-                <span className="text-gray-400 font-mono w-10 text-right">
-                  {item.totalWords}
+                <span className="text-gray-500 font-mono w-12 text-right text-xs">
+                  {formatDuration(item.durationSec)}
                 </span>
               </div>
             </div>

@@ -6,6 +6,14 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
+const formatDuration = (seconds) => {
+  if (!seconds || seconds <= 0) return "00:00"
+  const totalSecs = Math.round(seconds)
+  const mins = Math.floor(totalSecs / 60)
+  const secs = totalSecs % 60
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+}
+
 /**
  * Parses participant metadata safely
  */
@@ -21,7 +29,7 @@ const parseMetadata = (metadata) => {
 /**
  * StudentSpeakingWidget Component
  * Floating card in the bottom-right corner for students/regular attendees.
- * Displays only the current user's personal speech metrics (% and word count).
+ * Displays only the current user's personal speech metrics (% and speaking duration).
  */
 const StudentSpeakingWidget = ({ onClose, isError = false }) => {
   const { t } = useLanguage()
@@ -78,16 +86,13 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
     return (
       (localIdentity ? speakingStatsMap[localIdentity] : null) ||
       (localAccountId ? speakingStatsMap[String(localAccountId)] : null) || {
-        totalWords: 0,
         totalDurationSeconds: 0,
-        wpm: 0,
         sharePercent: 0,
         status: "normal",
       }
     )
   }, [localParticipant, user, speakingStatsMap])
 
-  const totalWords = myStats?.totalWords || 0
   const durationSec = myStats?.totalDurationSeconds || 0
   const sharePercent = myStats?.sharePercent || 0
 
@@ -154,7 +159,7 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
           <div className="flex-1">
             <div className="text-2xl font-bold text-red-500 leading-none">--</div>
             <div className="text-[11px] text-red-400 font-medium mt-1">
-              {widgetT.errorWords || "# từ"}
+              {widgetT.errorDuration || "Thời lượng"}
             </div>
           </div>
         </div>
@@ -172,11 +177,11 @@ const StudentSpeakingWidget = ({ onClose, isError = false }) => {
           <div className="w-[1px] h-9 bg-gray-100 self-center" />
 
           <div className="flex-1">
-            <div className="text-3xl font-extrabold text-gray-900 tracking-tight leading-none">
-              {totalWords}
+            <div className="text-2xl font-extrabold text-gray-900 tracking-tight leading-none font-mono">
+              {formatDuration(durationSec)}
             </div>
             <div className="text-xs text-gray-400 font-medium mt-1.5">
-              {widgetT.cumulativeWords || "từ tích lũy"}
+              {widgetT.cumulativeDuration || "thời lượng nói"}
             </div>
           </div>
         </div>

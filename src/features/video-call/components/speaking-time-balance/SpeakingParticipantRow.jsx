@@ -1,12 +1,20 @@
 import React from "react"
 
+const formatDuration = (seconds) => {
+  if (!seconds || seconds <= 0) return "00:00"
+  const totalSecs = Math.round(seconds)
+  const mins = Math.floor(totalSecs / 60)
+  const secs = totalSecs % 60
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+}
+
 /**
  * SpeakingParticipantRow Component
- * Renders an individual student's speaking metrics, alert badge ([?], [!!]), word count, and bar.
+ * Renders an individual student's speaking metrics, alert badge ([?], [!!]), speaking duration, and bar.
  */
 const SpeakingParticipantRow = ({
   name,
-  totalWords = 0,
+  durationSec = 0,
   sharePercent = 0,
   status = "normal",
   labels = {},
@@ -41,7 +49,7 @@ const SpeakingParticipantRow = ({
 
   return (
     <div className={containerClass}>
-      {/* Top line: Name + Word count */}
+      {/* Top line: Name + Duration */}
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2 min-w-0 pr-2">
           {badge}
@@ -49,8 +57,8 @@ const SpeakingParticipantRow = ({
             {name}
           </span>
         </div>
-        <span className="text-xs text-gray-500 font-medium shrink-0">
-          {totalWords} {labels.words || "từ"}
+        <span className="text-xs text-gray-500 font-medium font-mono shrink-0">
+          {formatDuration(durationSec)}
         </span>
       </div>
 

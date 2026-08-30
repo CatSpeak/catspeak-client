@@ -102,7 +102,6 @@ const ClassAnalyticsDetailPage = () => {
         sessionsUnmet: 0,
         trend: "stable",
         status: "normal",
-        totalWords: 0,
         hasNoData: true,
       }
     })

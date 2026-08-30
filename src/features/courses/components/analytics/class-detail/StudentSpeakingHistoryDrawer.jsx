@@ -52,10 +52,10 @@ const StudentSpeakingHistoryDrawer = ({ student, open, onClose, thresholdRate = 
           </div>
           <div className="flex flex-col">
             <span className="text-[11px] text-gray-500 font-medium">
-              {cd.drawerWords || "Tổng số từ"}
+              {cd.drawerSessions || "Số buổi tham gia"}
             </span>
             <span className="text-lg font-black text-gray-900 mt-0.5">
-              {student.totalWords?.toLocaleString() || student.totalWords}
+              {student.sessionsMet + student.sessionsUnmet}
             </span>
           </div>
           <div className="flex flex-col">

@@ -135,9 +135,7 @@ const SpeakingTimeBalancePanel = ({
         (meta.accountId ? speakingStatsMap[String(meta.accountId)] : null) ||
         (p.accountId ? speakingStatsMap[String(p.accountId)] : null) ||
         (p.participantId ? speakingStatsMap[p.participantId] : null) || {
-          totalWords: p.totalWords || 0,
           totalDurationSeconds: p.totalDurationSeconds || 0,
-          wpm: p.wpm || 0,
           sharePercent: p.sharePercent || 0,
           status: p.status || "normal",
         }
@@ -145,7 +143,6 @@ const SpeakingTimeBalancePanel = ({
       return {
         participant: p,
         name,
-        totalWords: stats.totalWords || 0,
         durationSec: stats.totalDurationSeconds || 0,
         sharePercent: stats.sharePercent || 0,
         status: stats.status || "normal",
@@ -158,7 +155,7 @@ const SpeakingTimeBalancePanel = ({
     speakingHasAnySpeechData ||
     roomTotalDuration > 0 ||
     roomTotalStudentDuration > 0 ||
-    participantStatsList.some((p) => p.totalWords > 0 || p.durationSec > 0)
+    participantStatsList.some((p) => p.durationSec > 0)
 
   return (
     <div className="flex flex-col h-full w-full bg-white">
@@ -231,7 +228,7 @@ const SpeakingTimeBalancePanel = ({
               <SpeakingParticipantRow
                 key={item.participant.identity || idx}
                 name={item.name}
-                totalWords={item.totalWords}
+                durationSec={item.durationSec}
                 sharePercent={item.sharePercent}
                 status={item.status}
                 labels={stbT}
