@@ -1,5 +1,5 @@
-import React from "react"
-import { Check } from "lucide-react"
+import React from "react";
+import { Check } from "lucide-react";
 
 /**
  * Shared reusable Checkbox input component.
@@ -90,7 +90,7 @@ const Checkbox = ({
           {checkboxIndicator}
         </span>
       </Component>
-    )
+    );
   }
 
   return (
@@ -107,4 +107,4 @@ const Checkbox = ({
   )
 }
 
-export default Checkbox
+export default Checkbox;

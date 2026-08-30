@@ -24,7 +24,7 @@ const CatSpeakLayout = () => {
         <AnimatePresence mode="wait">
           <div
             key={animationKey}
-            className="mx-auto w-full  h-full"
+            className="mx-auto w-full h-full"
           >
             <FluentAnimation animationKey={animationKey}>
               <Outlet />

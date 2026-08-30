@@ -11,7 +11,8 @@ const MobileLanguageItem = ({
     <button
       disabled={disabled}
       onClick={disabled ? undefined : () => onSelect(code)}
-      className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors ${
+      title={label}
+      className={`flex items-center w-full px-3 h-10 text-sm rounded-[5px] text-left transition-colors min-w-0 ${
         disabled
           ? "cursor-default hover:bg-primaryBg"
           : isActive
@@ -29,10 +30,10 @@ const MobileLanguageItem = ({
         />
       </div>
 
-      <span className="flex-grow text-sm">{label}</span>
+      <span className="flex-grow text-sm truncate min-w-0">{label}</span>
 
       {disabled && (
-        <span className="text-xs px-2 py-1 border rounded-full whitespace-nowrap">
+        <span className="text-xs px-2 py-1 border rounded-full whitespace-nowrap shrink-0">
           {soonLabel}
         </span>
       )}

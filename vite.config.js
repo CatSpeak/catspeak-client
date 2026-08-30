@@ -64,6 +64,12 @@ export default defineConfig(({ mode }) => {
           secure: true,
           rewrite: (path) => path.replace(/^\/api\/social/, "/api"),
         },
+        "/api/ai": {
+          target: "https://ai-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/api\/ai/, "/api"),
+        },
         "/api": {
           target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,

@@ -4,11 +4,10 @@ import { auth as firebaseAuth } from "./firebase";
 let failedToken = null;
 
 export async function initFirebaseSession(internalJwt) {
-  if (!internalJwt) return null;
+  if (!firebaseAuth || !internalJwt) return null;
 
   // Tránh gọi lại liên tục nếu token này đã thất bại.
   if (failedToken === internalJwt) return null;
-
   try {
     const baseUrl = import.meta.env.VITE_API_BASE_URL || "/api";
 
