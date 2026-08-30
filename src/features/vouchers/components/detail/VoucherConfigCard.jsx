@@ -84,9 +84,16 @@ const VoucherConfigCard = ({ voucher = {} }) => {
         <h4 className="font-bold">{vd.configTitle || "Thông tin cấu hình"}</h4>
 
         <div className="flex flex-col gap-1 text-base">
+          {voucher.title && (
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-secondary shrink-0">{vd.name || "Tên voucher"}</span>
+              <span className="text-right font-medium truncate">{voucher.title}</span>
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <span className="text-secondary">{vd.code || "Mã"}</span>
-            <span>{voucher.code || "-"}</span>
+            <span className="font-mono font-medium">{voucher.code || "-"}</span>
           </div>
 
           <div className="flex items-center justify-between">

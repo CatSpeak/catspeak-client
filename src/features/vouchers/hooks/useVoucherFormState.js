@@ -52,18 +52,21 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     const initial = { ...INITIAL_VOUCHER_FORM }
     if (classIdParam) {
       initial.classIds = [Number(classIdParam) || classIdParam]
+      initial.courseIds = []
       initial.scopeType = SCOPE_TYPES.SPECIFIC_CLASSES
-      initial.courseClassMode = "specific_classes"
       initial.discountType = DISCOUNT_TYPES.PERCENTAGE
     } else if (courseIdParam) {
       initial.courseIds = [Number(courseIdParam) || courseIdParam]
+      initial.classIds = []
       initial.scopeType = SCOPE_TYPES.SPECIFIC_COURSES
-      initial.courseClassMode = "all_classes"
       initial.discountType = DISCOUNT_TYPES.FIXED_AMOUNT
     }
     return initial
   })
   const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
 
   const [createVoucher, { isLoading: isCreating }] = useCreateVoucherMutation()
   const [updateVoucher, { isLoading: isUpdating }] = useUpdateVoucherMutation()
@@ -77,17 +80,38 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     }
   }, [voucherId])
 
+  // Handle Field Blur - triggers validation for this field (Punish Late)
+  const handleBlur = (field) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+    const { errors: allErrors } = validateInstructorVoucherForm(
+      form,
+      false,
+      t,
+    )
+    if (allErrors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: allErrors[field] }))
+    } else {
+      setErrors((prev) => {
+        if (!prev[field]) return prev
+        const updated = { ...prev }
+        delete updated[field]
+        return updated
+      })
+    }
+  }
+
   // Pre-fill form when editing
   useEffect(() => {
     if (initialData) {
       const scope = initialData.scopeType || SCOPE_TYPES.SPECIFIC_CLASSES
-      const isCourse = scope === SCOPE_TYPES.SPECIFIC_COURSES || scope === 2
-      const classList = Array.isArray(initialData.classes)
-        ? initialData.classes.map((c) => c.id)
-        : initialData.classIds || []
       const courseList = Array.isArray(initialData.courses)
         ? initialData.courses.map((c) => c.id)
         : initialData.courseIds || []
+      const classList = Array.isArray(initialData.classes)
+        ? initialData.classes.map((c) => c.id)
+        : initialData.classIds || []
+
+      const isCourse = scope === SCOPE_TYPES.SPECIFIC_COURSES
 
       setForm({
         code: initialData.code || "",
@@ -100,10 +124,11 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
         maxDiscountAmount: initialData.maxDiscountAmount || "",
         minOrderAmount: initialData.minOrderAmount || 0,
         minLearners: initialData.minLearners || 1,
-        scopeType: scope,
-        courseClassMode: isCourse ? "all_classes" : "specific_classes",
-        courseIds: courseList,
-        classIds: classList,
+        scopeType: isCourse
+          ? SCOPE_TYPES.SPECIFIC_COURSES
+          : SCOPE_TYPES.SPECIFIC_CLASSES,
+        courseIds: isCourse ? courseList : [],
+        classIds: isCourse ? [] : classList,
         validFrom: initialData.validFrom
           ? initialData.validFrom.split("T")[0]
           : new Date().toISOString().split("T")[0],
@@ -119,19 +144,79 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     }
   }, [initialData])
 
-  // Handle Field Change
+  // Handle Field Change (Reward Early / Clear on Fix)
   const handleChange = (field, value) => {
     setForm((prev) => {
       const next = { ...prev, [field]: value }
       if (field === "scopeType" && value === SCOPE_TYPES.SPECIFIC_COURSES) {
         next.discountType = DISCOUNT_TYPES.FIXED_AMOUNT
       }
+      // If course scope, auto calculate totalUsageLimit from maxBudget and discountValue
+      const isCourse = next.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
+      if (isCourse) {
+        const budget = Number(next.maxBudget) || 0
+        const discount = Number(next.discountValue) || 0
+        if (budget > 0 && discount > 0) {
+          next.totalUsageLimit = String(Math.floor(budget / discount))
+        } else if (field === "maxBudget" || field === "discountValue") {
+          next.totalUsageLimit = ""
+        }
+      }
+
+      // Live validation for clearing errors (Reward early) or updating submitted form
+      const { errors: allErrors } = validateInstructorVoucherForm(
+        next,
+        false,
+        t,
+      )
+
+      if (hasAttemptedSubmit) {
+        setErrors(allErrors)
+      } else {
+        setErrors((prevErrors) => {
+          const nextErrors = { ...prevErrors }
+
+          // 1. If this field currently has an error shown, update or clear it
+          if (prevErrors[field]) {
+            if (allErrors[field]) {
+              nextErrors[field] = allErrors[field]
+            } else {
+              delete nextErrors[field]
+            }
+          }
+
+          // 2. Interdependent field clearing:
+          if (field === "validFrom" || field === "validTo") {
+            if (prevErrors.validTo && !allErrors.validTo) {
+              delete nextErrors.validTo
+            }
+            if (prevErrors.validFrom && !allErrors.validFrom) {
+              delete nextErrors.validFrom
+            }
+          }
+
+          if (
+            field === "discountValue" &&
+            prevErrors.maxDiscountAmount &&
+            !allErrors.maxDiscountAmount
+          ) {
+            delete nextErrors.maxDiscountAmount
+          }
+
+          if (
+            field === "discountValue" &&
+            prevErrors.maxBudget &&
+            !allErrors.maxBudget
+          ) {
+            delete nextErrors.maxBudget
+          }
+
+          return nextErrors
+        })
+      }
+
       return next
     })
-
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
-    }
   }
 
   // Handle Auto Code Generation
@@ -195,7 +280,14 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     isOnlyNewUser: Boolean(form.isOnlyNewUser),
     isNotCombineOther: Boolean(form.isNotCombineOther),
     isUnlimitedUsage: false,
-    totalUsageLimit: form.totalUsageLimit ? Number(form.totalUsageLimit) : 1,
+    totalUsageLimit:
+      form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
+        ? Number(form.discountValue) > 0 && Number(form.maxBudget) > 0
+          ? Math.floor(Number(form.maxBudget) / Number(form.discountValue))
+          : 1
+        : form.totalUsageLimit
+          ? Number(form.totalUsageLimit)
+          : 1,
     perUserLimit: form.perUserLimit ? Number(form.perUserLimit) : 1,
     dailyLimit: form.dailyLimit ? Number(form.dailyLimit) : null,
     maxBudget: form.maxBudget ? Number(form.maxBudget) : null,
@@ -214,6 +306,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     )
 
     if (!isDraft && !isValid) {
+      setHasAttemptedSubmit(true)
       setErrors(validationErrors)
       const errorKeys = Object.keys(validationErrors)
       const firstError = validationErrors[errorKeys[0]]
@@ -267,6 +360,7 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     )
 
     if (!isValid) {
+      setHasAttemptedSubmit(true)
       setErrors(validationErrors)
       const errorKeys = Object.keys(validationErrors)
       const firstError = validationErrors[errorKeys[0]]
@@ -288,19 +382,23 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
 
   // Submit Draft Handler (from action buttons)
   const handleSaveDraft = async () => {
-    const savedId = await saveVoucher(true)
-    if (savedId) {
-      toast.success(
-        t?.vouchers?.form?.saveDraftSuccess || "Đã lưu voucher vào bản nháp!",
-      )
-      if (window.history.state && window.history.state.idx > 0) {
-        navigate(-1)
-      } else {
-        navigate("/workspace/courses")
+    setIsSavingDraft(true)
+    try {
+      const savedId = await saveVoucher(true)
+      if (savedId) {
+        toast.success(
+          t?.vouchers?.form?.saveDraftSuccess || "Đã lưu voucher vào bản nháp!",
+        )
+        // Stay on page and update URL to edit mode seamlessly if creating new voucher
+        if (!voucherId && savedId) {
+          navigate(`/workspace/vouchers/edit/${savedId}`, { replace: true })
+        }
+        return true
       }
-      return true
+      return false
+    } finally {
+      setIsSavingDraft(false)
     }
-    return false
   }
 
   return {
@@ -309,12 +407,14 @@ export const useVoucherFormState = (initialData = null, voucherId = null) => {
     currentVoucherId,
     setCurrentVoucherId,
     handleChange,
+    handleBlur,
     handleNextStep,
     handleSaveDraft,
     handleAutoGenerateCode,
     saveVoucher,
     estimatedDeposit,
     isSubmitting: isCreating || isUpdating,
+    isSavingDraft,
     isGeneratingCode,
     isEditing,
   }

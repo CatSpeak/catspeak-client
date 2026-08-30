@@ -1,7 +1,8 @@
 export const vi = {
   vouchers: {
     pageTitle: "Quản lý ưu đãi & voucher",
-    pageSubtitle: "Tạo và quản lý các chương trình ưu đãi, mã giảm giá cho các khóa học và lớp học của bạn.",
+    pageSubtitle:
+      "Tạo và quản lý các chương trình ưu đãi, mã giảm giá cho các khóa học và lớp học của bạn.",
     createNew: "Tạo voucher mới",
     searchPlaceholder: "Tìm theo mã voucher hoặc tiêu đề...",
     allDiscountTypes: "Tất cả loại",
@@ -16,9 +17,11 @@ export const vi = {
     loadingList: "Đang tải danh sách ưu đãi...",
     notFound: "Không tìm thấy thông tin voucher",
     notFoundDesc: "Voucher không tồn tại hoặc bạn không có quyền truy cập.",
-    editDraftOnly: "Voucher này đã được gửi hoặc đang hoạt động nên không thể chỉnh sửa. Bạn chỉ có thể chỉnh sửa voucher ở trạng thái Bản nháp.",
+    editDraftOnly:
+      "Voucher này đã được gửi hoặc đang hoạt động nên không thể chỉnh sửa. Bạn chỉ có thể chỉnh sửa voucher ở trạng thái Bản nháp.",
     cannotEdit: "Không thể chỉnh sửa voucher",
-    tabBanner: "Voucher do bạn tạo sẽ được trừ vào doanh thu của bạn. Nền tảng vẫn thu 10% trên học phí gốc.",
+    tabBanner:
+      "Voucher do bạn tạo sẽ được trừ vào doanh thu của bạn. Nền tảng vẫn thu 10% trên học phí gốc.",
     createVoucher: "Tạo voucher mới",
 
     // KPI Cards
@@ -43,6 +46,7 @@ export const vi = {
     // Table Headers
     table: {
       code: "Mã voucher",
+      title: "Tên voucher",
       discountType: "Loại giảm",
       discount: "Giá trị",
       validity: "Hiệu lực",
@@ -121,13 +125,14 @@ export const vi = {
       autoGenerate: "Tạo ngẫu nhiên",
       titleLabel: "Tên chương trình",
       titlePlaceholder: "VD: Khuyến mãi tựu trường",
-      descLabel: "Mô tả (nội bộ)",
-      descPlaceholder: "Ghi chú nội bộ cho voucher này...",
+      descLabel: "Mô tả",
+      descPlaceholder: "Mô tả cho voucher này",
       scopeConditions: "Điều kiện áp dụng",
       scopeLabel: "Phạm vi áp dụng",
       scopeClass: "Áp dụng theo lớp học",
       scopeCourse: "Áp dụng theo khóa học",
-      scopeClassDesc: "Voucher chỉ áp dụng cho học viên đăng ký lớp học hiện tại.",
+      scopeClassDesc:
+        "Voucher chỉ áp dụng cho học viên đăng ký lớp học hiện tại.",
       scopeCourseDesc: "Voucher áp dụng cho mọi lớp học thuộc khóa học này.",
       scopeAll: "Tất cả khóa/lớp của tôi",
       scopeCourses: "Khóa học cụ thể",
@@ -166,8 +171,21 @@ export const vi = {
       discountForOne: "Giảm giá học viên:",
       platformFee: "Phí nền tảng (10% gốc):",
       teacherReceives: "Giảng viên thực nhận:",
-      lowestTuitionHint: "Học phí thấp nhất: {{amount}} ({{className}}). Mức giảm cố định phải nhỏ hơn mức này.",
+      lowestTuitionHint:
+        "Học phí thấp nhất: {{amount}} ({{className}}). Mức giảm cố định phải nhỏ hơn mức này.",
+      maxDiscountHelper:
+        "Số tiền giảm tối đa cho 1 lượt đăng ký (tối thiểu 2.000 ₫).",
+      maxDiscountEquivalent:
+        "Tương đương {{nominal}} với {{percent}}% học phí ({{tuition}}).",
+      maxBudgetHelper:
+        "Voucher tự động dừng khi tổng tiền đã giảm đạt giới hạn này (tối thiểu 2.000 ₫).",
+      usageLimitAutoCalc:
+        "Tự động tính: {{budget}} ÷ {{discount}} = {{uses}} lượt sử dụng.",
+      usageLimitAutoCalcHelper:
+        "Tự động tính dựa trên Ngân sách tối đa ÷ Mức giảm.",
+      autoCalcByBudget: "Tự động tính theo ngân sách",
       saveDraft: "Lưu nháp",
+      savingDraft: "Đang lưu",
       saveDraftSuccess: "Đã lưu voucher vào bản nháp!",
       nextStep: "Tiếp theo",
       prevStep: "Quay lại",
@@ -177,7 +195,8 @@ export const vi = {
     // Step 2 Deposit
     deposit: {
       cardTitle: "Thanh toán chuyển khoản",
-      qrInstruction: "Quét mã QR bằng ứng dụng ngân hàng để tự động điền số tiền và nội dung",
+      qrInstruction:
+        "Quét mã QR bằng ứng dụng ngân hàng để tự động điền số tiền và nội dung",
       bankName: "Ngân hàng:",
       accountName: "Chủ tài khoản:",
       accountNumber: "Số tài khoản:",
@@ -198,6 +217,8 @@ export const vi = {
       validity: "Thời hạn:",
       neverExpired: "Không giới hạn",
       calculationTitle: "Tính toán cọc",
+      maxBudget: "Ngân sách tối đa:",
+      budgetLimit: "Giới hạn ngân sách:",
       maxDiscountPerUsage: "Giá trị giảm tối đa/lượt:",
       totalUsages: "Tổng lượt:",
       depositRequired: "Cọc bắt buộc:",
@@ -205,32 +226,40 @@ export const vi = {
       termsLink: "Điều khoản cọc và hoàn tiền",
       termsSuffix: "của Cat Speak.",
       confirmDeposit: "Xác nhận đặt cọc",
-      submitting: "Đang xử lý...",
-      adminNotice: "Sau khi xác nhận chuyển khoản, Admin sẽ duyệt trong 24h. Mã voucher sẽ kích hoạt ngay khi được duyệt.",
-      submitSuccess: "Xác nhận đặt cọc thành công! Admin sẽ duyệt kích hoạt voucher trong 24h.",
+      submitting: "Đang xử lý",
+      adminNotice:
+        "Sau khi xác nhận chuyển khoản, Admin sẽ duyệt trong 24h. Mã voucher sẽ kích hoạt ngay khi được duyệt.",
+      submitSuccess:
+        "Xác nhận đặt cọc thành công! Admin sẽ duyệt kích hoạt voucher trong 24h.",
       submitError: "Có lỗi xảy ra khi xác nhận đặt cọc. Vui lòng thử lại.",
     },
 
     // Modals
     modals: {
       transferInfoTitle: "Thông tin chuyển khoản đặt cọc",
-      transferInfoNotice: "Vui lòng quét mã QR hoặc chuyển khoản chính xác nội dung bên dưới để hệ thống xác thực tự động.",
+      transferInfoNotice:
+        "Vui lòng quét mã QR hoặc chuyển khoản chính xác nội dung bên dưới để hệ thống xác thực tự động.",
       copied: "Đã chép",
       copy: "Sao chép",
       confirmDepositAction: "Tôi đã chuyển khoản - Xác nhận cọc",
       rejectionTitle: "Lý do từ chối duyệt voucher",
-      rejectionSubtitle: "Yêu cầu tạo voucher của bạn đã bị từ chối với lý do sau:",
+      rejectionSubtitle:
+        "Yêu cầu tạo voucher của bạn đã bị từ chối với lý do sau:",
       adminFeedback: "Lý do",
-      rejectionSuggestion: "Khoản tiền cọc đã được bảo lưu hoặc hoàn trả về tài khoản của bạn. Bạn có thể tạo voucher mới với thông tin điều chỉnh phù hợp.",
+      rejectionSuggestion:
+        "Khoản tiền cọc đã được bảo lưu hoặc hoàn trả về tài khoản của bạn. Bạn có thể tạo voucher mới với thông tin điều chỉnh phù hợp.",
       stopTitle: "Dừng chương trình voucher sớm",
-      stopDesc: "Bạn có chắc chắn muốn dừng sớm voucher {{code}}? Sau khi dừng, học viên sẽ không thể áp dụng mã này nữa. Số tiền cọc chưa sử dụng sẽ được hoàn trả theo quy định.",
+      stopDesc:
+        "Bạn có chắc chắn muốn dừng sớm voucher {{code}}? Sau khi dừng, học viên sẽ không thể áp dụng mã này nữa. Số tiền cọc chưa sử dụng sẽ được hoàn trả theo quy định.",
       stopAction: "Xác nhận dừng",
       stopSuccess: "Đã dừng hoạt động voucher thành công!",
       stopError: "Có lỗi xảy ra khi dừng voucher. Vui lòng thử lại.",
       cancelDraftTitle: "Xóa bản nháp voucher",
       cancelRequestTitle: "Hủy yêu cầu voucher",
-      cancelDraftMsg: "Bạn có chắc chắn muốn xóa bản nháp voucher \"{{code}}\" không? Bản nháp này sẽ bị xóa khỏi hệ thống.",
-      cancelRequestMsg: "Bạn có chắc chắn muốn hủy yêu cầu đặt cọc voucher \"{{code}}\" không? Yêu cầu này sẽ bị hủy bỏ.",
+      cancelDraftMsg:
+        'Bạn có chắc chắn muốn xóa bản nháp voucher "{{code}}" không? Bản nháp này sẽ bị xóa khỏi hệ thống.',
+      cancelRequestMsg:
+        'Bạn có chắc chắn muốn hủy yêu cầu đặt cọc voucher "{{code}}" không? Yêu cầu này sẽ bị hủy bỏ.',
       cancelConfirm: "Xác nhận hủy",
       cancelSuccess: "Đã hủy yêu cầu voucher thành công!",
       deleteDraftConfirm: "Xóa bản nháp",
@@ -241,6 +270,7 @@ export const vi = {
       title: "Chi tiết voucher",
       overview: "Tổng quan cấu hình",
       configTitle: "Thông tin cấu hình",
+      name: "Tên voucher",
       code: "Mã",
       type: "Loại",
       value: "Giá trị",
@@ -255,7 +285,8 @@ export const vi = {
       depositRemaining: "Còn lại",
       estimatedRefund: "Dự kiến hoàn trả",
       refundTitle: "Dự kiến hoàn cọc",
-      refundDesc: "Dựa trên mức sử dụng hiện tại, dự kiến số tiền cọc dư sẽ được hoàn lại vào ngày kết thúc chiến dịch {{date}}. Số tiền thực tế có thể thay đổi tùy thuộc vào lượng đơn hàng áp dụng thành công.",
+      refundDesc:
+        "Dựa trên mức sử dụng hiện tại, dự kiến số tiền cọc dư sẽ được hoàn lại vào ngày kết thúc chiến dịch {{date}}. Số tiền thực tế có thể thay đổi tùy thuộc vào lượng đơn hàng áp dụng thành công.",
       refundEndFallback: "kết thúc chiến dịch",
       estimatedRefundPrefix: "Ước tính hoàn: ~",
       statsTitle: "Thống kê nhanh",
@@ -306,9 +337,11 @@ export const vi = {
     // Pending Confirmation Screen
     pendingConfirmation: {
       title: "Đã gửi yêu cầu đặt cọc!",
-      subtitle: "Admin CatSpeak sẽ kiểm tra giao dịch và kích hoạt voucher \"{{code}}\" trong vòng 24 giờ làm việc.",
+      subtitle:
+        'Admin CatSpeak sẽ kiểm tra giao dịch và kích hoạt voucher "{{code}}" trong vòng 24 giờ làm việc.',
       transferredPrefix: "Bạn đã chuyển khoản",
-      waitingAdmin: "Đang chờ Admin xác nhận (trong vòng 24h). Mã voucher sẽ kích hoạt ngay khi được duyệt.",
+      waitingAdmin:
+        "Đang chờ Admin xác nhận (trong vòng 24h). Mã voucher sẽ kích hoạt ngay khi được duyệt.",
       viewTransferInfo: "Xem lại thông tin chuyển khoản",
       contactSupport: "Liên hệ hỗ trợ",
       backToList: "Về danh sách voucher",
@@ -318,10 +351,12 @@ export const vi = {
     errors: {
       notPendingDeposit: "Voucher hiện không ở trạng thái chờ cọc.",
       genericSaveError: "Có lỗi xảy ra khi lưu voucher. Vui lòng thử lại.",
-      requiredFields: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi sang Bước 2.",
+      requiredFields:
+        "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi sang Bước 2.",
       invalidFields: "Vui lòng kiểm tra lại các trường thông tin chưa hợp lệ.",
       codeRequired: "Vui lòng nhập mã voucher",
-      codePrefix: "Mã voucher của Giảng viên bắt buộc bắt đầu bằng tiền tố 'GV-'",
+      codePrefix:
+        "Mã voucher của Giảng viên bắt buộc bắt đầu bằng tiền tố 'GV-'",
       codeLength: "Độ dài mã voucher phải từ 4 đến 20 ký tự",
       codeFormat: "Mã voucher chỉ được chứa chữ hoa, số và dấu gạch nối",
       titleRequired: "Vui lòng nhập tiêu đề voucher",
@@ -329,19 +364,53 @@ export const vi = {
       sensitiveKeyword: "Nội dung chứa từ khóa nhạy cảm không hợp lệ",
       discountValueRequired: "Vui lòng nhập mức giảm giá hợp lệ",
       percentRange: "Giáo viên chỉ được tạo voucher giảm từ 1% đến 50%",
-      maxDiscountRequired: "Voucher giảm theo % bắt buộc nhập mức giảm tối đa (VNĐ)",
+      maxDiscountRequired:
+        "Voucher giảm theo % bắt buộc nhập mức giảm tối đa (VNĐ)",
       minFixedDiscount: "Mức giảm cố định tối thiểu là 2.000 ₫",
       minMaxDiscount: "Mức giảm tối đa tối thiểu là 2.000 ₫",
       minMaxBudget: "Ngân sách tối đa tối thiểu là 2.000 ₫",
-      fixedExceeded: "Mức giảm cố định không được lớn hơn hoặc bằng học phí lớp học",
-      scopeCourseDiscountFixedOnly: "Voucher áp dụng cho Khóa học bắt buộc chọn Giảm theo số tiền cố định (FixedAmount)",
-      maxBudgetRequired: "Voucher áp dụng cho Khóa học bắt buộc nhập Ngân sách tối đa (VNĐ)",
+      fixedExceeded:
+        "Mức giảm cố định không được lớn hơn hoặc bằng học phí lớp học",
+      maxDiscountExceedFifty:
+        "Mức giảm tối đa không được vượt quá 50% học phí lớp học ({{amount}})",
+      maxDiscountExceedNominal:
+        "Mức giảm tối đa không được vượt quá {{amount}} ({{percent}}% học phí)",
+      scopeCourseDiscountFixedOnly:
+        "Voucher áp dụng cho Khóa học bắt buộc chọn Giảm theo số tiền cố định (FixedAmount)",
+      maxBudgetRequired:
+        "Voucher áp dụng cho Khóa học bắt buộc nhập Ngân sách tối đa (VNĐ)",
       selectAtLeastOneCourse: "Vui lòng chọn ít nhất 1 khóa học áp dụng",
       selectAtLeastOneClass: "Vui lòng chọn ít nhất 1 lớp học áp dụng",
-      totalUsageLimitRequired: "Giáo viên bắt buộc nhập Tổng lượt sử dụng cụ thể (> 0) để tính tiền cọc",
+      totalUsageLimitRequired:
+        "Giáo viên bắt buộc nhập Tổng lượt sử dụng cụ thể (> 0) để tính tiền cọc",
+      perUserLimitRequired:
+        "Vui lòng nhập số lượt dùng tối đa cho mỗi học viên (≥ 1)",
+      perUserLimitInvalid:
+        "Lượt dùng cho mỗi học viên phải là số nguyên dương (≥ 1)",
+      dailyLimitInvalid:
+        "Giới hạn lượt dùng theo ngày phải là số nguyên dương (≥ 1)",
       validFromRequired: "Vui lòng chọn thời gian bắt đầu hiệu lực",
       validToRequired: "Vui lòng chọn thời gian kết thúc hiệu lực",
       validToAfterValidFrom: "Thời gian kết thúc phải sau thời gian bắt đầu",
+      invalidMinOrder: "Giá trị đơn hàng tối thiểu không hợp lệ",
+      budgetLowerThanDiscount:
+        "Ngân sách tối đa phải lớn hơn hoặc bằng mức giảm ({{amount}})",
+      budgetTooLowForUsage:
+        "Ngân sách tối đa phải đủ chi trả cho ít nhất 1 lượt sử dụng",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "Tạo voucher ưu đãi",
+      singleClassBody:
+        'Khóa học {{courseName}} hiện chỉ có 1 lớp học: "{{className}}". Hệ thống sẽ chuyển sang tạo voucher lớp học cho lớp này.',
+      singleClassButton: "Tạo voucher lớp học",
+      noClassesTitle: "Chưa có lớp học",
+      noClassesBody:
+        "Khóa học {{courseName}} hiện chưa có lớp học nào. Vui lòng tạo ít nhất 1 lớp học trước khi tạo voucher ưu đãi.",
+      createClassButton: "Tạo lớp học mới",
+      closeButton: "Đóng",
+      cancelButton: "Hủy",
     },
   },
 }

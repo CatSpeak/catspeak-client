@@ -23,10 +23,12 @@ const Step2TeacherDeposit = ({
   onConfirmAndCreate,
   saveVoucher,
   isSubmitting = false,
+  isSavingDraft = false,
 }) => {
   const { t } = useLanguage()
   const [copiedField, setCopiedField] = useState(null)
   const [agreedTerms, setAgreedTerms] = useState(false)
+  const [isConfirming, setIsConfirming] = useState(false)
 
   // 1. Fetch official bank details & VietQR image URL from backend
   const { data: depositInfoData, isLoading: isLoadingDepositInfo } =
@@ -75,6 +77,7 @@ const Step2TeacherDeposit = ({
 
   const handleConfirmDeposit = async () => {
     let targetVoucherId = voucherId
+    setIsConfirming(true)
 
     try {
       // Save or create voucher with isDraft: false (creates directly in PendingApproval status)
@@ -113,6 +116,8 @@ const Step2TeacherDeposit = ({
         t?.vouchers?.deposit?.submitError ||
         "Có lỗi xảy ra khi xác nhận đặt cọc. Vui lòng thử lại."
       toast.error(msg)
+    } finally {
+      setIsConfirming(false)
     }
   }
 
@@ -121,7 +126,7 @@ const Step2TeacherDeposit = ({
     ? Number(form.maxDiscountAmount) || 0
     : Number(form.discountValue) || 0
 
-  const isActionLoading = isSubmitting || isSubmittingDeposit
+  const isActionLoading = isConfirming || isSubmittingDeposit
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200">
@@ -348,6 +353,15 @@ const Step2TeacherDeposit = ({
               </div>
             )}
 
+            {Number(form.maxBudget) > 0 && (
+              <div className="flex justify-between">
+                <span className="text-secondary">
+                  {t?.vouchers?.deposit?.maxBudget || "Ngân sách tối đa:"}
+                </span>
+                <span>{formatCurrency(form.maxBudget)}</span>
+              </div>
+            )}
+
             <div className="flex justify-between">
               <span className="text-secondary">
                 {t?.vouchers?.deposit?.usageLimit || "Số lượt sử dụng:"}
@@ -393,6 +407,15 @@ const Step2TeacherDeposit = ({
               <span>x {form.totalUsageLimit || 1}</span>
             </div>
 
+            {Number(form.maxBudget) > 0 && (
+              <div className="flex justify-between">
+                <span className="text-secondary">
+                  {t?.vouchers?.deposit?.budgetLimit || "Giới hạn ngân sách:"}
+                </span>
+                <span>{formatCurrency(form.maxBudget)}</span>
+              </div>
+            )}
+
             <Divider />
 
             <div className="flex justify-between items-baseline">
@@ -428,9 +451,9 @@ const Step2TeacherDeposit = ({
           <PillButton
             type="button"
             variant="primary"
-            disabled={!agreedTerms || isActionLoading}
+            disabled={!agreedTerms || isActionLoading || isSavingDraft || isSubmitting}
             loading={isActionLoading}
-            loadingText={t?.vouchers?.deposit?.submitting || "Đang xử lý..."}
+            loadingText={t?.vouchers?.deposit?.submitting || "Đang xử lý"}
             onClick={handleConfirmDeposit}
             className="w-full"
           >

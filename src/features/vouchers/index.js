@@ -50,5 +50,6 @@ export { default as PendingDepositConfirmation } from "./components/PendingDepos
 export { default as VouchersTab } from "./components/VouchersTab"
 export { default as Step1TeacherForm } from "./components/form/Step1TeacherForm"
 export { default as Step2TeacherDeposit } from "./components/form/Step2TeacherDeposit"
+export { default as VoucherFormSkeleton } from "./components/form/VoucherFormSkeleton"
 
 

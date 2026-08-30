@@ -65,7 +65,10 @@ const NavigationProgress = () => {
         query?.endpointName === "getFolderTree" ||
         query?.endpointName === "getPublicMaterialsByUserId" ||
         query?.endpointName === "generateVoucherCode" ||
-        query?.endpointName === "getVoucherDepositInfo"
+        query?.endpointName === "getVoucherDepositInfo" ||
+        query?.endpointName === "getVouchers" ||
+        query?.endpointName === "getVoucherStats" ||
+        query?.endpointName === "getVoucherUsages"
       ) {
         return false
       }

@@ -79,13 +79,6 @@ const MyLearningOverview = () => {
   return (
     <div className="space-y-6">
 
-      <Breadcrumb
-        items={[
-          { label: lo.home || "Trang chủ", onClick: () => navigate("/") },
-          { label: lo.myLearning || "Lớp học của tôi" },
-        ]}
-      />
-
       {joinedClasses.length > 0 && (
         <>
           <PageTitle className="text-[#1A1A1A]">

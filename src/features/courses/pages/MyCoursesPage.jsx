@@ -280,14 +280,6 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
         </div>
       )}
 
-      {/* ─── Breadcrumb ─── */}
-      <Breadcrumb
-        items={[
-          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
-          { label: isCoursesTab ? (c.myCoursesTab || "My Courses") : (c.myClassesTab || "My Classes") },
-        ]}
-      />
-
       {/* ─── Header & Primary Action ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">

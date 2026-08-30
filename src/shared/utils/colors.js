@@ -54,6 +54,7 @@ export const colors = {
   headingColor: "#2e2e2e",
   textColor: "#515151",
   subtext: coreColors.secondaryGray,
+  placeholder: "#9CA3AF",
   darkOverlay: "rgba(0,0,0,0.2)",
   lightOverlay: "rgba(255,255,255,0.4)",
   lighttextGray: "#9ca0ab",

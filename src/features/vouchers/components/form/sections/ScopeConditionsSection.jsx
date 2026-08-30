@@ -1,3 +1,9 @@
+/**
+ * @deprecated
+ * NOTE: This component was previously used for hybrid multi-class selection inside Course vouchers.
+ * The voucher creation architecture has since been simplified into strict Course Scope vs Class Scope.
+ * This file is currently unmounted and retained for potential future reference (e.g. global voucher hubs).
+ */
 import React from "react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import Banner from "@/shared/components/ui/Banner"
@@ -18,21 +24,21 @@ export const ScopeConditionsSection = ({
   courseClassMode,
   onSelectClassScope,
   onSelectCourseScope,
-  courseClasses,
-  filteredClasses,
+  courseClasses = [],
+  filteredClasses = [],
   classSearch,
   setClassSearch,
   lowestTuition,
 }) => {
   const { t } = useLanguage()
   const vf = t?.vouchers?.form || {}
-  const isCourseScope = form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
+  const totalCourseClasses = courseClasses?.length || 0
+  const isOnlyOneClass = totalCourseClasses === 1
+  const firstClass = courseClasses[0]
 
   return (
     <FluentCard className="space-y-4">
-      <h4 className="font-bold">
-        {vf.scopeConditions || "Điều kiện áp dụng"}
-      </h4>
+      <h4 className="font-bold">{vf.scopeConditions || "Điều kiện áp dụng"}</h4>
 
       {(errors?.classIds || errors?.courseIds || errors?.discountType) && (
         <Banner variant="danger">
@@ -40,94 +46,15 @@ export const ScopeConditionsSection = ({
         </Banner>
       )}
 
-      {/* Context 1: When inside Class Scope context */}
-      {isInitialClassContext ? (
-        <div className="space-y-1">
-          {/* Option: Lớp học này */}
-          <ListItem
-            lines={2}
-            onClick={onSelectClassScope}
-            selected={form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES}
-            leftContent={
-              <Radio
-                checked={form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES}
-                onChange={onSelectClassScope}
-              />
-            }
-            className="rounded-xl"
-          >
-            <span>
-              {vf.scopeClass || "Áp dụng theo Lớp học"}{" "}
-              {classNameParam ? `(${classNameParam})` : ""}
-            </span>
-            <span>
-              {vf.scopeClassDesc ||
-                "Voucher chỉ áp dụng cho học viên đăng ký lớp học hiện tại."}
-            </span>
-          </ListItem>
+      {/* Scope selection inside course */}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-semibold text-slate-700">
+          {vf.scopeInCourse || "Phạm vi áp dụng trong khóa"}
+          <span className="text-red-500 ml-0.5">*</span>
+        </span>
 
-          {/* Option: Tất cả lớp trong khóa */}
-          <ListItem
-            lines={2}
-            onClick={() => onSelectCourseScope("all_classes")}
-            selected={form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES}
-            leftContent={
-              <Radio
-                checked={form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES}
-                onChange={() => onSelectCourseScope("all_classes")}
-              />
-            }
-            className="rounded-xl"
-          >
-            <span>
-              {courseDisplayName
-                ? `${vf.allClassesInCourse || "Tất cả lớp trong khóa"} ${courseDisplayName}`
-                : vf.allClassesInCourse || "Tất cả lớp trong khóa"}
-            </span>
-            <span>
-              {vf.scopeCourseDesc ||
-                "Voucher áp dụng cho mọi lớp học thuộc khóa học này."}
-            </span>
-          </ListItem>
-        </div>
-      ) : (
-        /* Context 2: When inside Course Scope context */
-        <div className="space-y-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs">
-              {vf.scopeLabel || "Phạm vi áp dụng"}
-              <span className="text-red-500 ml-0.5">*</span>
-            </span>
-            <div className="space-y-1">
-              <ListItem
-                lines={1}
-                disabled={true}
-                selected={false}
-                leftContent={<Radio checked={false} disabled={true} />}
-                className="rounded-xl opacity-40 cursor-not-allowed text-secondary"
-              >
-                <span>
-                  {vf.scopeAll || "Tất cả khóa/lớp của tôi"}
-                </span>
-              </ListItem>
-
-              <ListItem
-                lines={1}
-                selected={true}
-                leftContent={<Radio checked={true} />}
-                className="rounded-xl cursor-default"
-              >
-                <span>
-                  {vf.scopeCourses || "Khóa học cụ thể"} (
-                  {courseDisplayName})
-                </span>
-              </ListItem>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className="text-xs">{vf.scopeInCourse || "Phạm vi áp dụng trong khóa"}</span>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
+              {/* Option 1: Toàn bộ lớp trong khóa */}
               <ListItem
                 lines={1}
                 onClick={() => onSelectCourseScope("all_classes")}
@@ -138,50 +65,61 @@ export const ScopeConditionsSection = ({
                     onChange={() => onSelectCourseScope("all_classes")}
                   />
                 }
-                className="rounded-xl"
+                className="rounded-xl cursor-pointer"
               >
-                <span>
-                  {vf.allClassesInCourse || "Toàn bộ lớp trong khóa"}{" "}
-                  ({courseClasses?.length || 0} lớp)
-                </span>
+                <span>{vf.allClassesInCourse || "Toàn bộ lớp trong khóa"}</span>
               </ListItem>
 
+              {/* Option 2: Chọn nhóm lớp trong khóa (Tối thiểu 2 lớp) */}
               <ListItem
                 lines={1}
-                onClick={() => onSelectCourseScope("specific_classes")}
+                onClick={() => {
+                  if (!isOnlyOneClass) {
+                    onSelectCourseScope("specific_classes")
+                  }
+                }}
+                disabled={isOnlyOneClass}
                 selected={courseClassMode === "specific_classes"}
                 leftContent={
                   <Radio
                     checked={courseClassMode === "specific_classes"}
-                    onChange={() => onSelectCourseScope("specific_classes")}
+                    disabled={isOnlyOneClass}
+                    onChange={() => {
+                      if (!isOnlyOneClass) {
+                        onSelectCourseScope("specific_classes")
+                      }
+                    }}
                   />
                 }
-                className="rounded-xl"
+                className={`rounded-xl ${
+                  isOnlyOneClass
+                    ? "opacity-50 cursor-not-allowed bg-slate-50/50"
+                    : "cursor-pointer"
+                }`}
               >
                 <span>
-                  {vf.specificClassesInCourse ||
-                    "Chỉ một số lớp trong khóa"}
+                  {vf.specificClassesInCourse || "Chọn nhóm lớp trong khóa (tối thiểu 2 lớp)"}
                 </span>
               </ListItem>
             </div>
           </div>
 
-          {/* Specific Classes Picker */}
-          {courseClassMode === "specific_classes" && (
-            <div className="space-y-2">
+          {/* Specific Classes Picker (When specific_classes is selected and >= 2 classes exist) */}
+          {courseClassMode === "specific_classes" && !isOnlyOneClass && (
+            <div className="space-y-2 pt-1 animate-in fade-in duration-200">
               {/* Search */}
               <SearchInput
                 value={classSearch}
                 onChange={setClassSearch}
                 placeholder={
-                  vf.searchClasses || "Tìm kiếm lớp học..."
+                  vf.searchClasses || "Tìm kiếm lớp học trong khóa..."
                 }
               />
 
               {/* Checkbox list */}
               <FluentCard
                 padding="p-1"
-                className="max-h-[300px] overflow-y-auto min-h-0 !justify-start space-y-1 pr-1 scrollbar-thin"
+                className="max-h-[260px] overflow-y-auto min-h-0 !justify-start space-y-1 pr-1 scrollbar-thin"
               >
                 {filteredClasses.length === 0 ? (
                   <p className="text-xs text-secondary text-center py-4">
@@ -215,11 +153,11 @@ export const ScopeConditionsSection = ({
                           />
                         }
                         rightContent={
-                          <span className="text-xs text-secondary shrink-0">
+                          <span className="text-xs text-secondary font-medium shrink-0">
                             {formatCurrency(tuition)}
                           </span>
                         }
-                        className="rounded-xl"
+                        className="rounded-xl cursor-pointer"
                       >
                         <span className="truncate">
                           {cls.name || cls.title}
@@ -230,29 +168,51 @@ export const ScopeConditionsSection = ({
                 )}
               </FluentCard>
 
-              <div className="flex items-start justify-between text-xs text-secondary">
-                <span>
-                  {vf.selectedClassesCount
-                    ? vf.selectedClassesCount.replace(
-                        "{{count}}",
-                        form.classIds?.length || 0,
-                      )
-                    : `Đã chọn ${form.classIds?.length || 0} lớp`}
-                </span>
-                {form.classIds?.length > 0 && (
-                  <PillButton
-                    variant="secondary-no-outline"
-                    textColor="#990011"
-                    onClick={() => onChange("classIds", [])}
-                  >
-                    <span>{vf.clearAll || "Xóa tất cả"}</span>
-                  </PillButton>
-                )}
+              {/* Class selection summary & quick actions */}
+              <div className="flex items-center justify-between text-xs text-secondary gap-2 pt-0.5 min-h-[32px]">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-medium">
+                    {`Đã chọn: ${form.classIds?.length || 0} / ${totalCourseClasses} lớp`}
+                  </span>
+                  {(form.classIds?.length || 0) < 2 ? (
+                    <span className="text-amber-600 font-normal">
+                      (Cần tối thiểu 2 lớp)
+                    </span>
+                  ) : (
+                    <span className="text-emerald-600 font-normal">
+                      (Đủ điều kiện)
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {(form.classIds?.length || 0) < totalCourseClasses && (
+                    <PillButton
+                      type="button"
+                      variant="secondary-no-outline"
+                      onClick={() =>
+                        onChange(
+                          "classIds",
+                          (courseClasses || []).map((c) => c.id),
+                        )
+                      }
+                    >
+                      <span>Chọn tất cả</span>
+                    </PillButton>
+                  )}
+                  {(form.classIds?.length || 0) > 0 && (
+                    <PillButton
+                      type="button"
+                      variant="secondary-no-outline"
+                      textColor="#990011"
+                      onClick={() => onChange("classIds", [])}
+                    >
+                      <span>{vf.clearAll || "Xóa tất cả"}</span>
+                    </PillButton>
+                  )}
+                </div>
               </div>
             </div>
           )}
-        </div>
-      )}
     </FluentCard>
   )
 }

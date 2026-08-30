@@ -1,10 +1,11 @@
-import React, { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import React, { useState, useMemo } from "react"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { ArrowLeft, AlertCircle, Ban, ChevronRight } from "lucide-react"
 import PageTitle from "@/shared/components/ui/PageTitle"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { StepPills } from "@/shared/components/ui/navigation"
+import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import FloatingActionDock from "@/shared/components/ui/containers/FloatingActionDock"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -13,9 +14,11 @@ import {
   useGetAllCoursesQuery,
   useGetAllClassesQuery,
 } from "@/store/api/coursesApi"
+import { SCOPE_TYPES } from "../constants/voucherConstants"
 import { useVoucherFormState } from "../hooks/useVoucherFormState"
 import Step1TeacherForm from "../components/form/Step1TeacherForm"
 import Step2TeacherDeposit from "../components/form/Step2TeacherDeposit"
+import VoucherFormSkeleton from "../components/form/VoucherFormSkeleton"
 import PendingDepositConfirmation from "../components/PendingDepositConfirmation"
 import CannotEditVoucher from "../components/CannotEditVoucher"
 import TransferInfoModal from "../components/detail/TransferInfoModal"
@@ -24,6 +27,12 @@ const CreateVoucherPage = () => {
   const { t } = useLanguage()
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const classIdParam = searchParams.get("classId")
+  const classNameParam = searchParams.get("className")
+  const courseIdParam = searchParams.get("courseId")
+  const courseNameParam = searchParams.get("courseName")
+
   const isEditing = Boolean(id)
   const [currentStep, setCurrentStep] = useState(1) // 1: Thông tin, 2: Cọc
   const [submittedVoucherData, setSubmittedVoucherData] = useState(null)
@@ -66,14 +75,115 @@ const CreateVoucherPage = () => {
     errors,
     currentVoucherId,
     handleChange,
+    handleBlur,
     handleNextStep,
     handleSaveDraft,
     saveVoucher,
     handleAutoGenerateCode,
     estimatedDeposit,
     isSubmitting,
+    isSavingDraft,
     isGeneratingCode,
   } = useVoucherFormState(voucherDetail, id)
+
+  // Resolve whether this is a Course-level voucher vs a Single-Class voucher
+  const courseList = form.courseIds?.length
+    ? form.courseIds
+    : voucherDetail?.courses || []
+  const classList = form.classIds?.length
+    ? form.classIds
+    : voucherDetail?.classes || []
+
+  const isCourseVoucher = Boolean(
+    (!classIdParam && courseIdParam) ||
+    form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES ||
+    (courseList.length > 0 && classList.length === 0),
+  )
+  const isSingleClassVoucher = !isCourseVoucher
+
+  const firstClassObj = classList[0]
+  const firstClassId =
+    typeof firstClassObj === "object" ? firstClassObj?.id : firstClassObj
+  const firstCourseObj = courseList[0]
+  const firstCourseId =
+    typeof firstCourseObj === "object" ? firstCourseObj?.id : firstCourseObj
+
+  const targetClassId = isSingleClassVoucher
+    ? classIdParam || firstClassId
+    : null
+
+  const matchedClass = teacherClasses.find(
+    (c) => String(c.id) === String(classIdParam || firstClassId),
+  )
+  const targetCourseId =
+    courseIdParam ||
+    firstCourseId ||
+    matchedClass?.courseId ||
+    voucherDetail?.courseId
+
+  const matchedCourse = teacherCourses.find(
+    (c) => String(c.id) === String(targetCourseId),
+  )
+
+  const resolvedClassName =
+    classNameParam ||
+    matchedClass?.name ||
+    matchedClass?.title ||
+    voucherDetail?.classes?.[0]?.name
+  const resolvedCourseName =
+    courseNameParam ||
+    matchedCourse?.name ||
+    matchedCourse?.title ||
+    voucherDetail?.courses?.[0]?.name
+
+  const pageTitle = isEditing
+    ? t?.vouchers?.form?.editTitle || "Chỉnh sửa voucher ưu đãi"
+    : t?.vouchers?.form?.createTitle || "Tạo voucher ưu đãi"
+
+  const breadcrumbItems = useMemo(() => {
+    const items = [
+      {
+        label: t?.courses?.title || "Khóa học của tôi",
+        onClick: () => navigate("/workspace/courses"),
+      },
+    ]
+
+    if (targetClassId) {
+      if (matchedClass?.courseId || targetCourseId) {
+        const cId = matchedClass?.courseId || targetCourseId
+        items.push({
+          label: resolvedCourseName || "Khóa học",
+          onClick: () => navigate(`/workspace/courses/details/${cId}`),
+        })
+      }
+      items.push({
+        label: resolvedClassName || "Lớp học",
+        onClick: () =>
+          navigate(`/workspace/courses/class/${targetClassId}?tab=vouchers`),
+      })
+    } else if (targetCourseId) {
+      items.push({
+        label: resolvedCourseName || "Khóa học",
+        onClick: () =>
+          navigate(`/workspace/courses/details/${targetCourseId}?tab=vouchers`),
+      })
+    }
+
+    items.push({
+      label: pageTitle,
+    })
+
+    return items
+  }, [
+    targetClassId,
+    targetCourseId,
+    matchedClass?.courseId,
+    resolvedCourseName,
+    resolvedClassName,
+    pageTitle,
+    t?.courses?.title,
+    navigate,
+  ])
 
   // Handle advancing to Step 2 with client-side validation
   const onAdvanceToStep2 = () => {
@@ -105,14 +215,7 @@ const CreateVoucherPage = () => {
   }
 
   if (isEditing && isLoadingDetail) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <LoadingSpinner className="w-8 h-8 text-cath-red-700" />
-        <p className="text-xs text-slate-400 mt-2 font-medium">
-          {t?.vouchers?.loading || "Đang tải thông tin voucher..."}
-        </p>
-      </div>
-    )
+    return <VoucherFormSkeleton />
   }
 
   if (isEditing && (isDetailError || !voucherDetail)) {
@@ -139,11 +242,7 @@ const CreateVoucherPage = () => {
 
   // Prevent editing non-draft vouchers (BR-VC-18)
   if (isEditing && !isDraftStatus) {
-    return (
-      <CannotEditVoucher
-        voucher={voucherDetail}
-      />
-    )
+    return <CannotEditVoucher voucher={voucherDetail} />
   }
 
   // If submitted from Step 2, show Pending Deposit screen
@@ -170,21 +269,10 @@ const CreateVoucherPage = () => {
     )
   }
 
-  const pageTitle = isEditing
-    ? t?.vouchers?.form?.editTitle || "Chỉnh sửa voucher ưu đãi"
-    : t?.vouchers?.form?.createTitle || "Tạo voucher ưu đãi"
-
   return (
     <div className="w-full space-y-6 pb-28 animate-in fade-in duration-300">
-      {/* Back Button */}
-      <PillButton
-        variant="secondary"
-        onClick={handleGoBack}
-        startIcon={<ArrowLeft />}
-        className="w-fit"
-      >
-        {t?.vouchers?.back || "Quay lại"}
-      </PillButton>
+      {/* Contextual Breadcrumb Navigation */}
+      <Breadcrumb items={breadcrumbItems} />
 
       {/* Page Title */}
       <PageTitle>{pageTitle}</PageTitle>
@@ -212,10 +300,12 @@ const CreateVoucherPage = () => {
             form={form}
             errors={errors}
             onChange={handleChange}
+            onBlur={handleBlur}
             onAutoGenerateCode={handleAutoGenerateCode}
             isGeneratingCode={isGeneratingCode}
             teacherCourses={teacherCourses}
             teacherClasses={teacherClasses}
+            estimatedDeposit={estimatedDeposit}
           />
         ) : (
           <Step2TeacherDeposit
@@ -223,6 +313,7 @@ const CreateVoucherPage = () => {
             form={form}
             estimatedDeposit={estimatedDeposit}
             isSubmitting={isSubmitting}
+            isSavingDraft={isSavingDraft}
             saveVoucher={saveVoucher}
             onConfirmSuccess={onDepositConfirmed}
           />
@@ -248,7 +339,9 @@ const CreateVoucherPage = () => {
           <PillButton
             type="button"
             variant="secondary"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isSavingDraft}
+            loading={isSavingDraft}
+            loadingText={t?.vouchers?.form?.savingDraft || "Đang lưu"}
             onClick={handleSaveDraft}
           >
             {t?.vouchers?.form?.saveDraft || "Lưu nháp"}
@@ -258,7 +351,7 @@ const CreateVoucherPage = () => {
             <PillButton
               type="button"
               variant="primary"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isSavingDraft}
               onClick={onAdvanceToStep2}
             >
               {t?.vouchers?.form?.nextStep || "Tiếp theo"}

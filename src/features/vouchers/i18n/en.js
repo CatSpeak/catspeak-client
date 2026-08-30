@@ -1,7 +1,8 @@
 export const en = {
   vouchers: {
     pageTitle: "Promotions & vouchers",
-    pageSubtitle: "Create and manage promotional discount vouchers for your courses and classes.",
+    pageSubtitle:
+      "Create and manage promotional discount vouchers for your courses and classes.",
     createNew: "Create new voucher",
     searchPlaceholder: "Search by voucher code or title...",
     allDiscountTypes: "All discount types",
@@ -9,16 +10,20 @@ export const en = {
     percentDiscount: "Percentage (%)",
     fixedDiscount: "Fixed amount (VND)",
     emptyTitle: "No vouchers found",
-    emptySubtitle: "You haven't created any vouchers matching the current filters.",
+    emptySubtitle:
+      "You haven't created any vouchers matching the current filters.",
     emptyAction: "Create your first voucher",
     back: "Back",
     loading: "Loading voucher details...",
     loadingList: "Loading promotions list...",
     notFound: "Voucher not found",
-    notFoundDesc: "The voucher does not exist or you do not have permission to view it.",
-    editDraftOnly: "This voucher has already been submitted or is active and cannot be edited. You can only edit vouchers in Draft status.",
+    notFoundDesc:
+      "The voucher does not exist or you do not have permission to view it.",
+    editDraftOnly:
+      "This voucher has already been submitted or is active and cannot be edited. You can only edit vouchers in Draft status.",
     cannotEdit: "Cannot edit voucher",
-    tabBanner: "Vouchers you create will be deducted from your revenue. The platform still collects 10% of the original tuition fee.",
+    tabBanner:
+      "Vouchers you create will be deducted from your revenue. The platform still collects 10% of the original tuition fee.",
     createVoucher: "Create new voucher",
 
     stats: {
@@ -40,6 +45,7 @@ export const en = {
 
     table: {
       code: "Voucher code",
+      title: "Voucher name",
       discountType: "Discount type",
       discount: "Discount value",
       validity: "Validity",
@@ -107,22 +113,24 @@ export const en = {
     },
 
     form: {
-      createTitle: "Create promotional voucher",
-      editTitle: "Edit promotional voucher",
+      createTitle: "Create voucher",
+      editTitle: "Edit voucher",
       basicInfo: "Basic information",
       codeLabel: "Voucher code",
       codePlaceholder: "Enter code",
       autoGenerate: "Generate random",
       titleLabel: "Campaign title",
       titlePlaceholder: "e.g. Back to school promo",
-      descLabel: "Description (internal)",
-      descPlaceholder: "Internal notes for this voucher...",
+      descLabel: "Description",
+      descPlaceholder: "Description for this voucher",
       scopeConditions: "Applicable conditions",
       scopeLabel: "Application scope",
       scopeClass: "Apply to classes",
       scopeCourse: "Apply to courses",
-      scopeClassDesc: "Voucher only applies to learners enrolling in the current class.",
-      scopeCourseDesc: "Voucher applies to all classes belonging to this course.",
+      scopeClassDesc:
+        "Voucher only applies to learners enrolling in the current class.",
+      scopeCourseDesc:
+        "Voucher applies to all classes belonging to this course.",
       scopeAll: "All my courses / classes",
       scopeCourses: "Specific course",
       scopeInCourse: "Application scope within course",
@@ -160,8 +168,21 @@ export const en = {
       discountForOne: "Learner discount:",
       platformFee: "Platform fee (10% gross):",
       teacherReceives: "Instructor net revenue:",
-      lowestTuitionHint: "Lowest tuition: {{amount}} ({{className}}). Fixed discount must be lower than this.",
+      lowestTuitionHint:
+        "Lowest tuition: {{amount}} ({{className}}). Fixed discount must be lower than this.",
+      maxDiscountHelper:
+        "Maximum discount amount per enrollment (minimum 2,000 ₫).",
+      maxDiscountEquivalent:
+        "Equivalent to {{nominal}} with {{percent}}% of tuition ({{tuition}}).",
+      maxBudgetHelper:
+        "Voucher automatically stops when total discount given reaches this limit (minimum 2,000 ₫).",
+      usageLimitAutoCalc:
+        "Auto-calculated: {{budget}} ÷ {{discount}} = {{uses}} usages.",
+      usageLimitAutoCalcHelper:
+        "Auto-calculated based on Max Budget ÷ Discount Value.",
+      autoCalcByBudget: "Auto-calculated by budget",
       saveDraft: "Save draft",
+      savingDraft: "Saving",
       saveDraftSuccess: "Voucher saved to draft!",
       nextStep: "Next step",
       prevStep: "Back",
@@ -170,7 +191,8 @@ export const en = {
 
     deposit: {
       cardTitle: "Bank transfer payment",
-      qrInstruction: "Scan QR code via banking app to automatically fill amount and content",
+      qrInstruction:
+        "Scan QR code via banking app to automatically fill amount and content",
       bankName: "Bank:",
       accountName: "Account holder:",
       accountNumber: "Account number:",
@@ -191,6 +213,8 @@ export const en = {
       validity: "Validity:",
       neverExpired: "No expiration",
       calculationTitle: "Deposit calculation",
+      maxBudget: "Max budget:",
+      budgetLimit: "Budget limit:",
       maxDiscountPerUsage: "Max discount / use:",
       totalUsages: "Total uses:",
       depositRequired: "Required deposit:",
@@ -198,17 +222,21 @@ export const en = {
       termsLink: "Deposit and refund terms",
       termsSuffix: "of Cat Speak.",
       confirmDeposit: "Confirm deposit",
-      submitting: "Processing...",
-      adminNotice: "After confirming the transfer, Admin will approve within 24 hours. Voucher will activate once approved.",
-      submitSuccess: "Deposit request confirmed! Admin will approve within 24h.",
+      submitting: "Processing",
+      adminNotice:
+        "After confirming the transfer, Admin will approve within 24 hours. Voucher will activate once approved.",
+      submitSuccess:
+        "Deposit request confirmed! Admin will approve within 24h.",
       submitError: "Failed to confirm deposit. Please try again.",
     },
 
     pendingConfirmation: {
       title: "Deposit request submitted!",
-      subtitle: "CatSpeak Admin will verify your transaction and activate voucher \"{{code}}\" within 24 business hours.",
+      subtitle:
+        'CatSpeak Admin will verify your transaction and activate voucher "{{code}}" within 24 business hours.',
       transferredPrefix: "You transferred",
-      waitingAdmin: "Awaiting Admin approval (within 24h). Voucher will activate immediately upon approval.",
+      waitingAdmin:
+        "Awaiting Admin approval (within 24h). Voucher will activate immediately upon approval.",
       viewTransferInfo: "View transfer details",
       contactSupport: "Contact support",
       backToList: "Back to vouchers",
@@ -216,23 +244,29 @@ export const en = {
 
     modals: {
       transferInfoTitle: "Deposit transfer information",
-      transferInfoNotice: "Please scan the QR code or transfer with the exact content below for automatic system verification.",
+      transferInfoNotice:
+        "Please scan the QR code or transfer with the exact content below for automatic system verification.",
       copied: "Copied",
       copy: "Copy",
       confirmDepositAction: "I have transferred - Confirm deposit",
       rejectionTitle: "Voucher rejection reason",
-      rejectionSubtitle: "Your voucher request was rejected due to the following reason:",
+      rejectionSubtitle:
+        "Your voucher request was rejected due to the following reason:",
       adminFeedback: "Reason",
-      rejectionSuggestion: "The deposit has been reserved or refunded to your account. You can create a new voucher with updated details.",
+      rejectionSuggestion:
+        "The deposit has been reserved or refunded to your account. You can create a new voucher with updated details.",
       stopTitle: "Stop voucher early",
-      stopDesc: "Are you sure you want to stop voucher {{code}} early? Once stopped, learners will no longer be able to use this code. Unused deposit will be refunded per policy.",
+      stopDesc:
+        "Are you sure you want to stop voucher {{code}} early? Once stopped, learners will no longer be able to use this code. Unused deposit will be refunded per policy.",
       stopAction: "Confirm stop",
       stopSuccess: "Voucher stopped successfully!",
       stopError: "Failed to stop voucher. Please try again.",
       cancelDraftTitle: "Delete voucher draft",
       cancelRequestTitle: "Cancel voucher request",
-      cancelDraftMsg: "Are you sure you want to delete draft voucher \"{{code}}\"? This draft will be removed from the system.",
-      cancelRequestMsg: "Are you sure you want to cancel the deposit request for voucher \"{{code}}\"?",
+      cancelDraftMsg:
+        'Are you sure you want to delete draft voucher "{{code}}"? This draft will be removed from the system.',
+      cancelRequestMsg:
+        'Are you sure you want to cancel the deposit request for voucher "{{code}}"?',
       cancelConfirm: "Confirm cancel",
       cancelSuccess: "Voucher request cancelled successfully!",
       deleteDraftConfirm: "Delete draft",
@@ -242,6 +276,7 @@ export const en = {
       title: "Voucher details",
       overview: "Configuration overview",
       configTitle: "Configuration info",
+      name: "Voucher name",
       code: "Code",
       type: "Type",
       value: "Value",
@@ -256,7 +291,8 @@ export const en = {
       depositRemaining: "Remaining",
       estimatedRefund: "Estimated refund",
       refundTitle: "Estimated deposit refund",
-      refundDesc: "Based on current usage, the remaining deposit is expected to be refunded on the campaign end date {{date}}. The actual amount may vary depending on successfully applied orders.",
+      refundDesc:
+        "Based on current usage, the remaining deposit is expected to be refunded on the campaign end date {{date}}. The actual amount may vary depending on successfully applied orders.",
       refundEndFallback: "campaign end date",
       estimatedRefundPrefix: "Estimated refund: ~",
       statsTitle: "Quick stats",
@@ -305,31 +341,66 @@ export const en = {
 
     errors: {
       notPendingDeposit: "Voucher is currently not in pending deposit status.",
-      genericSaveError: "An error occurred while saving the voucher. Please try again.",
-      requiredFields: "Please fill in all required fields before proceeding to Step 2.",
+      genericSaveError:
+        "An error occurred while saving the voucher. Please try again.",
+      requiredFields:
+        "Please fill in all required fields before proceeding to Step 2.",
       invalidFields: "Please check invalid fields before submitting.",
       codeRequired: "Please enter a voucher code",
       codePrefix: "Instructor voucher code must start with 'GV-'",
       codeLength: "Voucher code length must be between 4 and 20 characters",
-      codeFormat: "Voucher code can only contain uppercase letters, numbers, and hyphens",
+      codeFormat:
+        "Voucher code can only contain uppercase letters, numbers, and hyphens",
       titleRequired: "Please enter a voucher title",
       titleLength: "Title must be between 3 and 100 characters",
       sensitiveKeyword: "Content contains invalid sensitive keywords",
       discountValueRequired: "Please enter a valid discount value",
-      percentRange: "Instructors can only create percentage discounts between 1% and 50%",
-      maxDiscountRequired: "Percentage vouchers must specify a maximum discount amount (VND)",
+      percentRange:
+        "Instructors can only create percentage discounts between 1% and 50%",
+      maxDiscountRequired:
+        "Percentage vouchers must specify a maximum discount amount (VND)",
       minFixedDiscount: "Minimum fixed discount is 2,000 ₫",
       minMaxDiscount: "Minimum max discount is 2,000 ₫",
       minMaxBudget: "Minimum max budget is 2,000 ₫",
       fixedExceeded: "Fixed discount cannot exceed or equal class tuition fee",
-      scopeCourseDiscountFixedOnly: "Course vouchers must use fixed amount discount",
+      maxDiscountExceedFifty:
+        "Maximum discount cannot exceed 50% of the class tuition ({{amount}})",
+      maxDiscountExceedNominal:
+        "Maximum discount cannot exceed {{amount}} ({{percent}}% of tuition)",
+      scopeCourseDiscountFixedOnly:
+        "Course vouchers must use fixed amount discount",
       maxBudgetRequired: "Course vouchers must specify a maximum budget (VND)",
       selectAtLeastOneCourse: "Please select at least 1 course",
       selectAtLeastOneClass: "Please select at least 1 class",
-      totalUsageLimitRequired: "Total usage limit (> 0) is required to calculate required deposit",
+      totalUsageLimitRequired:
+        "Total usage limit (> 0) is required to calculate required deposit",
+      perUserLimitRequired:
+        "Please enter max usage limit per learner (≥ 1)",
+      perUserLimitInvalid:
+        "Usage limit per learner must be a positive integer (≥ 1)",
+      dailyLimitInvalid: "Daily usage limit must be a positive integer (≥ 1)",
       validFromRequired: "Please select a start date",
       validToRequired: "Please select an end date",
       validToAfterValidFrom: "End date must be after start date",
+      invalidMinOrder: "Invalid minimum order amount",
+      budgetLowerThanDiscount:
+        "Max budget must be greater than or equal to the discount value ({{amount}})",
+      budgetTooLowForUsage:
+        "Max budget must be sufficient to cover at least 1 usage",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "Create voucher",
+      singleClassBody:
+        'Course {{courseName}} currently only has 1 class: "{{className}}". The system will redirect to creating a class voucher for this class.',
+      singleClassButton: "Create class voucher",
+      noClassesTitle: "No classes available",
+      noClassesBody:
+        "Course {{courseName}} currently has no classes. Please create at least 1 class before creating vouchers.",
+      createClassButton: "Create new class",
+      closeButton: "Close",
+      cancelButton: "Cancel",
     },
   },
 }

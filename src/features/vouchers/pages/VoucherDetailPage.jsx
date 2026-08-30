@@ -124,10 +124,10 @@ const VoucherDetailPage = () => {
         {t?.vouchers?.back || "Quay lại"}
       </PillButton>
 
-      {/* Header: Title + Status Badge + Action Button */}
+      {/* Header: Title + Code + Status Badge + Action Button */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-4 min-w-0">
-          <PageTitle>{voucher?.code || id}</PageTitle>
+        <div className="flex flex-wrap items-center gap-3">
+          <PageTitle>{voucher?.title || voucher?.code || id}</PageTitle>
           {voucher && <VoucherStatusBadge status={voucher.status} />}
         </div>
 
