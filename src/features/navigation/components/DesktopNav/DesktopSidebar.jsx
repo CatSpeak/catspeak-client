@@ -220,6 +220,7 @@ const DesktopSidebar = () => {
         "analytics",
         "schedule",
         "teachingTasks",
+        "manageMaterials",
       ]
       if (teacherTabs.includes(item.key) && !isTeacher) return false
       return true
@@ -294,6 +295,7 @@ const DesktopSidebar = () => {
                 "analytics",
                 "schedule",
                 "teachingTasks",
+                "manageMaterials",
               ]
               if (teacherTabs.includes(item.key) && isStudent) return false
               return true

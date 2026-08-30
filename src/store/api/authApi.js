@@ -66,10 +66,12 @@ export const authApi = baseApi.injectEndpoints({
         try {
           const { data } = await queryFulfilled
           const { user } = getState().auth
-          dispatch(setCredentials({
-            ...data,
-            user: data.user || user
-          }))
+          dispatch(
+            setCredentials({
+              ...data,
+              user: data.user || user,
+            }),
+          )
           // Reset the whole API cache so every query refetches under the new
           // account instead of serving stale data from the previous account.
           dispatch(baseApi.util.resetApiState())

@@ -15,6 +15,7 @@ import {
   Settings,
   RefreshCcw,
   BarChart2,
+  Clapperboard,
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -65,6 +66,8 @@ const MoreMenuDesktopView = ({
     isSubtitleActive,
     isStartingSubtitles,
     stopSubtitles,
+    showWatchTogether,
+    setShowWatchTogether,
   } = useGlobalVideoCall()
 
   const { isBreakoutActive } = useSelector((s) => s.videoCall)
@@ -143,6 +146,20 @@ const MoreMenuDesktopView = ({
             icon={<Split size={20} />}
             label={
               t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"
+            }
+          />
+        )}
+
+      {!isAISession &&
+        isHost && (
+          <MenuItem
+            onClick={() => {
+              setShowWatchTogether(!showWatchTogether)
+              setShowMoreMenu(false)
+            }}
+            icon={<Clapperboard size={20} />}
+            label={
+              t?.rooms?.videoCall?.watchTogether?.toggleButton || "Watch together"
             }
           />
         )}

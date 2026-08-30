@@ -1,78 +1,79 @@
-import React, { useState, useMemo } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ChevronUp, ChevronDown } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
-import MobileLanguageItem from "./MobileLanguageItem";
-import { useActiveLink } from "@/features/navigation/hooks/useActiveLink";
-import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages";
+import { useState, useMemo } from "react"
+import { useNavigate, useParams, useLocation } from "react-router-dom"
+import { ChevronUp, ChevronDown } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import MobileLanguageItem from "./MobileLanguageItem"
+import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
+import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
 
-import { getSwitchCommunityPath } from "@/shared/utils/navigation";
+import { getSwitchCommunityPath } from "@/shared/utils/navigation"
 
-const DEFAULT_COMMUNITY = "zh";
+const DEFAULT_COMMUNITY = "zh"
 
 const MobileCommunityDropdown = ({ navKey, onClose }) => {
-  const { t } = useLanguage();
-  const navigate = useNavigate();
-  const { lang } = useParams();
-  const location = useLocation();
-  const isActive = useActiveLink(navKey);
+  const { t } = useLanguage()
+  const navigate = useNavigate()
+  const { lang } = useParams()
+  const location = useLocation()
+  const isActive = useActiveLink(navKey)
 
-  const [communityOpen, setCommunityOpen] = useState(false);
-  const [overrideCommunity, setOverrideCommunity] = useState(null);
+  const [communityOpen, setCommunityOpen] = useState(false)
 
   // ---- Supported codes (scalable) ----
-  const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), []);
+  const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), [])
 
   // ---- Determine current community ----
   const currentCommunity = useMemo(() => {
     if (supportedCodes.includes(lang)) {
-      localStorage.setItem("communityLanguage", lang);
-      return lang;
+      localStorage.setItem("communityLanguage", lang)
+      return lang
     }
 
-    return overrideCommunity || localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY;
-  }, [lang, supportedCodes, overrideCommunity]);
+    return localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY
+  }, [lang, supportedCodes])
 
   // ---- Display label ----
   const displayLabel = useMemo(() => {
-    const config = LANGUAGE_CONFIG.find((c) => c.code === currentCommunity);
+    const config = LANGUAGE_CONFIG.find((c) => c.code === currentCommunity)
 
     return (
       t.header?.countries?.[config?.labelKey] ||
       config?.fallbackLabel ||
       t.nav?.[navKey]
-    );
-  }, [currentCommunity, t, navKey]);
+    )
+  }, [currentCommunity, t, navKey])
 
   // ---- Navigate to community root ----
   const handleNavigateClick = () => {
-    navigate(`/${currentCommunity}/community`);
-    onClose?.();
-  };
+    navigate(`/${currentCommunity}/community`)
+    onClose?.()
+  }
 
   // ---- Switch community ----
   const handleCommunitySelect = (newCode) => {
     if (newCode === currentCommunity) {
-      setCommunityOpen(false);
-      return;
+      setCommunityOpen(false)
+      return
     }
 
-    localStorage.setItem("communityLanguage", newCode);
-    setCommunityOpen(false);
+    localStorage.setItem("communityLanguage", newCode)
+    setCommunityOpen(false)
 
     const isInsideEcosystem =
       supportedCodes.includes(lang) ||
       location.pathname === `/${currentCommunity}` ||
-      location.pathname.startsWith(`/${currentCommunity}/`);
+      location.pathname.startsWith(`/${currentCommunity}/`)
 
     if (isInsideEcosystem) {
-      window.location.href = getSwitchCommunityPath(location.pathname, currentCommunity, newCode);
+      window.location.assign(
+        getSwitchCommunityPath(location.pathname, currentCommunity, newCode)
+      )
     } else {
-      window.location.reload();
+      window.location.reload()
     }
 
-    onClose?.();
-  };
+    onClose?.()
+  }
 
   return (
     <div className="flex flex-col">
@@ -93,8 +94,8 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
         {/* Expand button */}
         <button
           onClick={(e) => {
-            e.stopPropagation();
-            setCommunityOpen((prev) => !prev);
+            e.stopPropagation()
+            setCommunityOpen((prev) => !prev)
           }}
           className={`w-10 h-10 flex items-center justify-center rounded-[5px] transition-colors hover:bg-primaryBg ${
             isActive || communityOpen ? "text-cath-red-700" : ""
@@ -112,7 +113,7 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
       >
         <div className="flex flex-col gap-1 mt-1">
           {LANGUAGE_CONFIG.map((config) => {
-            if (config.code === "vi") return null;
+            if (config.code === "vi") return null
             return (
               <MobileLanguageItem
                 key={config.code}
@@ -124,12 +125,12 @@ const MobileCommunityDropdown = ({ navKey, onClose }) => {
                 isActive={currentCommunity === config.code}
                 onSelect={() => handleCommunitySelect(config.code)}
               />
-            );
+            )
           })}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default MobileCommunityDropdown;
+export default MobileCommunityDropdown

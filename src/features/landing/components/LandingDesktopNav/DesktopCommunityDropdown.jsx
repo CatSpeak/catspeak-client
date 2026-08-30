@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef, useMemo } from "react"
-import { useNavigate, useParams, useLocation } from "react-router-dom"
+import { useEffect, useState, useRef, useMemo } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { ChevronDown } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -9,22 +9,17 @@ import LanguageMenuItem from "@/shared/components/Header/LanguageMenuItem"
 import { useActiveLink } from "@/features/navigation/hooks/useActiveLink"
 import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
 
-import { getSwitchCommunityPath } from "@/shared/utils/navigation"
-
 const DEFAULT_COMMUNITY = "zh"
 
 const DesktopCommunityDropdown = ({ navKey }) => {
   const { t } = useLanguage()
   const { lang } = useParams()
-  const location = useLocation()
   const navigate = useNavigate()
   const isActive = useActiveLink(navKey)
 
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
   const closeTimer = useRef(null)
-
-  const [overrideCommunity, setOverrideCommunity] = useState(null)
 
   // ---- Supported codes (dynamic, scalable) ----
   const supportedCodes = useMemo(() => LANGUAGE_CONFIG.map((c) => c.code), [])
@@ -36,19 +31,8 @@ const DesktopCommunityDropdown = ({ navKey }) => {
       return lang
     }
 
-    return overrideCommunity || localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY
-  }, [lang, supportedCodes, overrideCommunity])
-
-  // ---- Derive label (no state needed) ----
-  const selectedLabel = useMemo(() => {
-    const config = LANGUAGE_CONFIG.find((c) => c.code === currentCommunity)
-
-    return (
-      t.header?.countries?.[config?.labelKey] ||
-      config?.fallbackLabel ||
-      "Community"
-    )
-  }, [currentCommunity, t])
+    return localStorage.getItem("communityLanguage") || DEFAULT_COMMUNITY
+  }, [lang, supportedCodes])
 
   const handleMouseEnter = () => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
@@ -104,13 +88,13 @@ const DesktopCommunityDropdown = ({ navKey }) => {
         }`}
       >
         <span>{t.nav?.[navKey] || "Community"}</span>
-        <motion.span
+        <Motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           className="inline-flex shrink-0 items-center justify-center"
         >
           <ChevronDown size={16} />
-        </motion.span>
+        </Motion.span>
       </button>
 
       {/* Dropdown panel */}

@@ -4,7 +4,7 @@ import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { TextInput } from "@/shared/components/ui/inputs"
 import ToggleOption from "../ui/ToggleOption"
-import { MessageSquare, Eye } from "lucide-react"
+import { MessageSquare, Eye, X, Plus } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -74,25 +74,42 @@ const CreateBulletinBoardModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title={initialData ? dict.editTitle : dict.title}
-      className="md:max-w-2xl rounded-xl"
-      headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
-      bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
-      footer={
-        <div className="flex justify-end gap-3 px-1">
-          <PillButton
-            type="button"
-            variant="outline"
+      title={
+        <div className="w-full relative flex items-center justify-center">
+          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D]">
+            {initialData ? dict.editTitle : dict.title || "Tạo bảng tin"}
+          </h2>
+          <button 
+            type="button" 
             onClick={onClose}
-            bgColor={"white"}
-            textColor={"#72000d"}
-            borderColor={"#E2E2E2"}
+            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
           >
-            {dict.cancel}
-          </PillButton>
-          <PillButton onClick={handleSubmit}>
-            {initialData ? dict.save : dict.create}
-          </PillButton>
+            <X size={28} strokeWidth={1.5} />
+          </button>
+        </div>
+      }
+      showCloseButton={false}
+      fullScreenOnMobile={false}
+      className="md:max-w-[900px] rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px]"
+      headerClassName="flex items-center justify-between px-6 md:px-10 py-6 md:py-8"
+      bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
+      footerClassName="p-0"
+      footer={
+        <div className="flex justify-between gap-4 px-6 md:px-10 pb-8 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
+          >
+            {dict.cancel || "Hủy"} <X size={18} strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
+          >
+            {initialData ? dict.save || "Lưu" : dict.create || "Tạo bảng tin"} <Plus size={18} strokeWidth={2} />
+          </button>
         </div>
       }
 

@@ -13,6 +13,7 @@ const OnlinePresence = () => {
       case "en": return "english"
       case "vi": return "vietnamese"
       case "zh": return "chinese"
+      case "ja": return "japanese"
       default: return "english"
     }
   }

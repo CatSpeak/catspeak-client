@@ -14,6 +14,7 @@ import {
   Settings,
   BarChart2,
   Split,
+  Clapperboard,
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -22,7 +23,8 @@ import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import {
   isBreakoutSupported,
   isSpeakingTimeBalanceSupported,
-} from "../utils/roomTypeHelpers"
+} from "@/features/video-call/utils/roomTypeHelpers"
+import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 
 const MoreMenuMobileGeneralView = ({
   setShowMoreMenu,
@@ -32,7 +34,6 @@ const MoreMenuMobileGeneralView = ({
   const { t } = useLanguage()
   const { isBreakoutActive } = useSelector((s) => s.videoCall)
   const {
-    isHost,
     showParticipants,
     setShowParticipants,
     showChat,
@@ -62,7 +63,11 @@ const MoreMenuMobileGeneralView = ({
     closingRemainingSeconds,
     isSubtitleActive,
     stopSubtitles,
+    showWatchTogether,
+    setShowWatchTogether,
   } = useGlobalVideoCall()
+
+  const { isHost } = useGameControlStatus()
 
   const { formattedRemaining, formattedMax, hasDuration } = useSessionTimer(
     room?.createDate,
@@ -189,7 +194,7 @@ const MoreMenuMobileGeneralView = ({
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className={`grid gap-3 ${!isAISession && isBreakoutSupported(room?.roomType) && isHost ? 'grid-cols-4' : 'grid-cols-3'}`}>
         <button
           onClick={() => {
             handleToggleScreenShare()
@@ -206,6 +211,20 @@ const MoreMenuMobileGeneralView = ({
             <MonitorUp size={24} />
           )}
         </button>
+
+        {!isAISession && isHost && (
+          <button
+            onClick={() => {
+              setShowWatchTogether(!showWatchTogether)
+              setShowMoreMenu(false)
+            }}
+            className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
+              showWatchTogether ? "bg-red-100 text-red-600" : "bg-[#F5F5F5]"
+            }`}
+          >
+            <Clapperboard size={24} />
+          </button>
+        )}
 
         <button
           onClick={() => {

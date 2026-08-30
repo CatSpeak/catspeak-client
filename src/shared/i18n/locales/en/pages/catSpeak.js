@@ -2,6 +2,7 @@ export default {
   anonymous: "Anonymous",
   connect: "Connect",
   pass: "Pass",
+  report: "Report",
   interested: "Interest sent! Check your messages.",
   hidden: "Story hidden.",
   interactionFailed: "Interaction failed.",
@@ -16,6 +17,13 @@ export default {
     description:
       "Coming soon: Explore cultures, places, and people from around the world.",
   },
+  reportSuccess: "Report success",
+  reportFailed: "Report failed",
+  storyNotFound: "Story not found",
+  cannotReportOwn: "Cannot report own story",
+  reportedWarning: "Reported",
+  reportedTooltip: "This story has been reported by users",
+  myReportedTooltip: "Your story has been reported by users",
   reels: {
     title: "Reels",
     description: "Watch short videos from our community.",

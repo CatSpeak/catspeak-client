@@ -9,6 +9,8 @@ const getLanguageName = (langCode) => {
       return "Vietnamese"
     case "en":
       return "English"
+    case "ja":
+      return "Japanese"
     default:
       return "English"
   }
@@ -21,7 +23,9 @@ export const useJoinRoomForm = () => {
   const navigate = useNavigate()
   const { lang } = useParams()
 
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
+    ? lang
+    : "en"
   const selectedLanguage = getLanguageName(supportedLangCode)
 
   const handleTopicChange = (e) => {

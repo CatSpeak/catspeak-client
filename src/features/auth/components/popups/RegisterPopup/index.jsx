@@ -1,12 +1,15 @@
-import { useState } from "react";
-import { useLanguage } from "@/shared/context/LanguageContext.jsx";
-import AuthButton from "../../ui/AuthButton";
-import { useRegisterMutation } from "@/store/api/authApi";
-import RegisterFormFields from "./RegisterFormFields";
-import AgreementSection from "./AgreementSection";
-import Modal from "@/shared/components/ui/Modal";
-import { parseRegisterError } from "@/features/auth/utils/registerErrors";
-import { getBrowserTimeZone } from "@/shared/constants/timezones";
+import { useState } from "react"
+import { useLanguage } from "@/shared/context/LanguageContext.jsx"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { useRegisterMutation } from "@/store/api/authApi"
+import RegisterFormFields from "./RegisterFormFields"
+import AgreementSection from "./AgreementSection"
+import Modal from "@/shared/components/ui/Modal"
+import {
+  parseRegisterError,
+  validatePhoneInput,
+} from "@/features/auth/utils/registerErrors"
+import { getBrowserTimeZone } from "@/shared/constants/timezones"
 
 const initialFormData = {
   username: "",
@@ -20,178 +23,200 @@ const initialFormData = {
   termsAgreement: false,
   policyAgreement: false,
   isEmailNotificationEnabled: true,
-};
+}
 
 const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
-  const { t } = useLanguage();
-  const authText = t.auth;
-  const [register, { isLoading }] = useRegisterMutation();
-  const [apiError, setApiError] = useState(null);
-  const [formData, setFormData] = useState(initialFormData);
-  const [errors, setErrors] = useState({});
-
-
-  const validatePhoneInput = (phoneNumber, prefix) => {
-    if (!phoneNumber) return true;
-    const clean = phoneNumber.replace(/[\s\-()/]/g, "");
-    if (!/^[0-9]+$/.test(clean)) return false;
-
-    if (prefix === "+84") {
-      return /^(0?[35789]\d{8})$/.test(clean);
-    }
-    if (prefix === "+86") {
-      return /^(1[3-9]\d{9})$/.test(clean);
-    }
-    if (prefix === "+1") {
-      return /^([2-9]\d{9})$/.test(clean);
-    }
-    return clean.length >= 7 && clean.length <= 15;
-  };
+  const { t } = useLanguage()
+  const authText = t.auth
+  const [register, { isLoading }] = useRegisterMutation()
+  const [apiError, setApiError] = useState(null)
+  const [formData, setFormData] = useState(initialFormData)
+  const [errors, setErrors] = useState({})
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setApiError(null);
+    e.preventDefault()
+    setApiError(null)
 
-    // Form validation
-    const localErrors = {};
+    // Comprehensive client-side form validation
+    const localErrors = {}
+    if (!formData.username?.trim()) {
+      localErrors.username =
+        authText.validationUsernameRequired || "Vui lòng nhập tên đăng nhập"
+    }
+
+    if (!formData.email?.trim()) {
+      localErrors.email =
+        authText.validationEmailRequired || "Vui lòng nhập email"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      localErrors.email =
+        authText.validationEmailInvalid || "Vui lòng nhập email hợp lệ"
+    }
+
     if (formData.phoneNumber) {
       if (!validatePhoneInput(formData.phoneNumber, formData.phonePrefix)) {
         localErrors.phoneNumber =
           authText.validationPhoneInvalid ||
-          "Số điện thoại không đúng định dạng";
+          "Số điện thoại không đúng định dạng."
       }
+    }
+
+    if (!formData.dateOfBirth) {
+      localErrors.dateOfBirth =
+        authText.validationDobRequired || "Vui lòng nhập ngày sinh"
+    }
+
+    if (!formData.preferredLanguage) {
+      localErrors.preferredLanguage =
+        authText.validationLanguageRequired || "Vui lòng chọn ngôn ngữ"
+    }
+
+    if (!formData.password) {
+      localErrors.password =
+        authText.validationPasswordRequired || "Vui lòng nhập mật khẩu"
+    } else if (formData.password.length < 6) {
+      localErrors.password =
+        authText.validationPasswordMin || "Mật khẩu phải có ít nhất 6 ký tự"
+    }
+
+    if (!formData.country) {
+      localErrors.country =
+        authText.validationCountryRequired || "Vui lòng chọn quốc gia"
     }
 
     if (!formData.termsAgreement) {
       localErrors.termsAgreement =
-        authText.validationTermsRequired || "Bạn cần đồng ý với điều khoản này";
+        authText.validationTermsRequired ||
+        "Bạn phải đồng ý với điều khoản và chính sách bảo mật"
     }
     if (!formData.policyAgreement) {
       localErrors.policyAgreement =
         authText.validationPolicyRequired ||
-        "Bạn cần đồng ý với chính sách này";
+        "Bạn phải đồng ý với chính sách thanh toán và bản quyền"
     }
 
     if (Object.keys(localErrors).length > 0) {
-      setErrors(localErrors);
-      return;
+      setErrors(localErrors)
+      return
     }
 
     try {
       const payload = {
         ...formData,
         timeZone: getBrowserTimeZone(),
-      };
-      if (payload.phoneNumber) {
-        let phone = payload.phoneNumber.replace(/\s+/g, "");
-        if (phone.startsWith("0")) {
-          phone = phone.substring(1);
-        }
-        const prefix = payload.phonePrefix.replace("+", "");
-        payload.phoneNumber = `${prefix}${phone}`;
       }
-      delete payload.phonePrefix;
+      if (payload.phoneNumber) {
+        let phone = payload.phoneNumber.replace(/\s+/g, "")
+        if (phone.startsWith("0")) {
+          phone = phone.substring(1)
+        }
+        const prefix = payload.phonePrefix.replace("+", "")
+        payload.phoneNumber = `${prefix}${phone}`
+      }
+      delete payload.phonePrefix
 
-      console.log("Sending payload to backend:", payload);
-      await register(payload).unwrap();
-      console.log("Registration successful! Please verify your email.");
-      onSwitchMode("verify-email", formData.email);
+      console.log("Sending payload to backend:", payload)
+      await register(payload).unwrap()
+      console.log("Registration successful! Please verify your email.")
+      onSwitchMode("verify-email", formData.email)
     } catch (err) {
-      console.error("Registration failed:", err);
+      console.error("Registration failed:", err)
 
-      const { fieldErrors, message } = parseRegisterError(err, authText);
-      if (fieldErrors) {
-        setErrors(fieldErrors);
+      const { fieldErrors, message } = parseRegisterError(err, authText)
+      if (fieldErrors && Object.keys(fieldErrors).length > 0) {
+        setErrors(fieldErrors)
+        setApiError(null)
       } else {
-        setApiError(message);
+        setApiError(message)
       }
     }
-  };
+  }
 
-    const handleClose = () => {
-      setFormData(initialFormData);
-      setErrors({});
-      setApiError(null);
-      onClose();
-    };
+  const handleClose = () => {
+    setFormData(initialFormData)
+    setErrors({})
+    setApiError(null)
+    onClose()
+  }
 
   return (
     <Modal
       open={open}
       onClose={handleClose}
-      className="flex flex-col md:max-w-[650px] sm:max-h-[90vh]"
-      bodyClassName="px-4 flex-1 overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cath-red-700 [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]"
-    >
-      <form onSubmit={handleSubmit} className="pb-12 min-[426px]:pb-6">
-        <h2 className="mb-6 pt-2 text-center text-[28px] font-bold text-[#990011] shrink-0">
-          {authText.registerTitle}
-        </h2>
-
-        {/* Scrollable content now natively handled by Modal body */}
-        <div className="-mx-3 px-3">
-          <RegisterFormFields
-            authText={authText}
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-            setErrors={setErrors}
-          />
-
-          <div className="mb-6">
-            <AgreementSection
-              authText={authText}
-              formData={formData}
-              errors={errors}
-              onChange={(field) => (e) => {
-                const value =
-                  e.target.type === "checkbox"
-                    ? e.target.checked
-                    : e.target.value;
-                setFormData({ ...formData, [field]: value });
-                if (errors[field]) {
-                  setErrors((prev) => {
-                    const newErrors = { ...prev };
-                    delete newErrors[field];
-                    return newErrors;
-                  });
-                }
-              }}
-            />
-          </div>
-
-          {/* API Error */}
-          {apiError && (
-            <p className="mb-4 rounded-lg bg-red-100 h-10 flex items-center px-3 text-sm text-red-700">
-              {apiError}
-            </p>
-          )}
-
+      showCloseButton={true}
+      className="max-w-3xl rounded-none md:rounded-xl md:border md:border-border"
+      headerClassName="flex items-center justify-between p-4 sm:p-6 pb-0"
+      bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
+      footerClassName="p-4 sm:p-6"
+      footer={
+        <div className="w-full">
           {/* Submit */}
-          <AuthButton type="submit" className="mb-5" disabled={isLoading}>
+          <PillButton
+            form="register-form"
+            type="submit"
+            className="w-full mb-2"
+            loading={isLoading}
+          >
             {isLoading ? authText.registering : authText.registerButton}
-          </AuthButton>
+          </PillButton>
 
           {/* Switch to login */}
-          <div className="relative mb-4 text-center">
-            <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-200" />
-            <span className="relative z-10 bg-white px-4 font-semibold text-gray-500 text-sm">
-              {authText.or}
-            </span>
-          </div>
-          <p className="text-center text-xs text-[#7A7574]">
+          <p className="text-center text-xs text-secondary">
             {authText.haveAccount}{" "}
             <button
               type="button"
-              className="font-semibold text-cath-red-700 hover:underline"
+              className="font-semibold text-primary hover:underline"
               onClick={() => onSwitchMode("login")}
             >
               {authText.loginLink}
             </button>
           </p>
         </div>
+      }
+    >
+      <form id="register-form" onSubmit={handleSubmit} noValidate>
+        <h2 className="text-center text-3xl font-bold text-primary mb-6">
+          {authText.registerTitle}
+        </h2>
+
+        <RegisterFormFields
+          authText={authText}
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          setErrors={setErrors}
+        />
+
+        <AgreementSection
+          authText={authText}
+          formData={formData}
+          errors={errors}
+          onChange={(field) => (e) => {
+            const value =
+              e.target?.type === "checkbox"
+                ? e.target.checked
+                : e?.target
+                  ? e.target.value
+                  : e
+            setFormData((prev) => ({ ...prev, [field]: value }))
+            if (errors[field]) {
+              setErrors((prev) => {
+                const newErrors = { ...prev }
+                delete newErrors[field]
+                return newErrors
+              })
+            }
+          }}
+        />
+
+        {/* API Error */}
+        {apiError && (
+          <div className="mt-6 rounded-lg bg-red-50 py-3.5 px-4 text-sm text-red-700">
+            {apiError}
+          </div>
+        )}
       </form>
     </Modal>
-  );
-};
+  )
+}
 
-export default RegisterPopup;
+export default RegisterPopup

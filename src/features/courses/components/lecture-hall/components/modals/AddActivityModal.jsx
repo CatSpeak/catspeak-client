@@ -2,8 +2,9 @@ import React, { useMemo, useState } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { Checkbox, TextInput } from "@/shared/components/ui/inputs"
-import { Search, FileText, CheckSquare, Inbox } from "lucide-react"
+import { Search, FileText, CheckSquare, Inbox, X, Plus, Eye } from "lucide-react"
 import { useGetTeacherAssignmentsQuery, useGetTeacherQuizzesQuery } from "@/store/api/coursesApi"
+import ToggleOption from "../ui/ToggleOption"
 import { getAssignmentTitle, getAssignmentStatus } from "../../../../utils/assignmentUtils"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -24,12 +25,15 @@ const AddActivityModal = ({
   const [selectedIds, setSelectedIds] = useState([])
   const [prevOpen, setPrevOpen] = useState(open)
 
+  const [isVisibleToStudents, setIsVisibleToStudents] = useState(true)
+
   if (open !== prevOpen) {
     setPrevOpen(open)
     if (open) {
       setSearchQuery("")
       setFilterType("all")
       setSelectedIds([])
+      setIsVisibleToStudents(true)
     }
   }
 
@@ -91,6 +95,7 @@ const AddActivityModal = ({
         dueDate: act.dueDate
           ? formatDateTime(act.dueDate)
           : dict.noDueDate,
+        isVisibleToStudents,
       }))
     onSubmit(chosenActivities)
     onClose()
@@ -99,9 +104,9 @@ const AddActivityModal = ({
   const getTypeBadgeStyle = (type) => {
     switch (type) {
       case "assignment":
-        return "bg-[#FFDAD6] text-[#93000A]"
+        return "bg-[#E6F4EA] text-[#137333]"
       case "quiz":
-        return "bg-[#FFDCBD] text-[#2C1600]"
+        return "bg-[#FCE8E6] text-[#C5221F]"
       default:
         return "bg-[#FFDBCF] text-[#380D00]"
     }
@@ -111,64 +116,47 @@ const AddActivityModal = ({
     <Modal
       open={open}
       onClose={onClose}
-      title={dict.title}
-      className="md:max-w-[900px] rounded-xl"
-      headerClassName="flex items-center justify-between px-6 py-4 border-b border-[#E2E2E2]"
-      bodyClassName="p-6 flex-1 overflow-y-auto border-b border-[#E2E2E2]"
-      footer={
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <PillButton
-            type="button"
-            variant="outline"
+      title={
+        <div className="w-full relative flex items-center justify-center">
+          <h2 className="text-[22px] md:text-[28px] font-medium text-[#191C1D]">
+            {dict.title || "Thêm hoạt động học tập"}
+          </h2>
+          <button 
+            type="button" 
             onClick={onClose}
-            bgColor={"white"}
-            textColor={"#72000d"}
-            borderColor={"#E2E2E2"}
-            className="flex-1"
+            className="absolute right-0 -mr-2 p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
           >
-            {dict.cancel}
-          </PillButton>
-          <PillButton
+            <X size={28} strokeWidth={1.5} />
+          </button>
+        </div>
+      }
+      showCloseButton={false}
+      fullScreenOnMobile={false}
+      className="md:max-w-[900px] rounded-[24px] h-auto max-h-[95vh] md:max-h-[800px]"
+      headerClassName="flex items-center justify-between px-6 md:px-10 py-6 md:py-8"
+      bodyClassName="px-6 md:px-10 pb-6 flex-1 overflow-y-auto"
+      footerClassName="p-0"
+      footer={
+        <div className="flex justify-between gap-4 px-6 md:px-10 pb-8 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 h-[52px] rounded-full border border-[#990011] text-[#990011] font-medium text-base flex justify-center items-center gap-2 hover:bg-red-50 transition-colors"
+          >
+            {dict.cancel || "Hủy"} <X size={18} strokeWidth={2} />
+          </button>
+          <button
             type="button"
             onClick={handleSubmit}
             disabled={selectedIds.length === 0}
-            className="flex-1"
+            className="flex-1 h-[52px] rounded-full bg-[#990011] text-white font-medium text-base flex justify-center items-center gap-2 hover:bg-[#80000e] transition-colors disabled:opacity-70"
           >
-            {dict.add} ({selectedIds.length})
-          </PillButton>
+            {dict.add || "Thêm hoạt động"} <Plus size={18} strokeWidth={2} />
+          </button>
         </div>
       }
     >
-      <div className="space-y-5">
-        {/* Filter Tabs & Search Bar Row */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-2">
-          {/* Tabs */}
-          <div className="flex items-center gap-2 w-full sm:w-auto bg-[#F3F4F5] p-1 rounded-xl">
-            {["all", "assignment", "quiz"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setFilterType(type)}
-                className={`flex-1 sm:flex-none px-4 py-1.5 text-sm font-medium rounded-lg transition-colors border ${filterType === type
-                  ? "bg-white text-[#191C1D] border-[#E2E2E2] shadow-faq-card"
-                  : "border-transparent text-[#5B403C] hover:text-[#191C1D]"
-                  }`}
-              >
-                {type === "all" ? dict.filterAll || "Tất cả" : type === "assignment" ? dict.filterAssignment || "Bài nộp" : dict.filterQuiz || "Bài kiểm tra"}
-              </button>
-            ))}
-          </div>
-
-          <div className="relative w-full sm:w-[300px]">
-            <TextInput
-              icon={Search}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={dict.searchPlaceholder}
-              className="rounded-xl !h-[40px] px-4 text-sm"
-            />
-          </div>
-        </div>
-
+      <div className="space-y-4">
         {/* Activity Items List */}
         <div className="space-y-3 max-h-96 overflow-y-auto">
           {isLoading ? (
@@ -239,9 +227,9 @@ const AddActivityModal = ({
                 <div
                   key={uid}
                   onClick={() => handleToggleSelect(uid)}
-                  className={`border rounded-lg p-4 flex items-center justify-between transition-all ${isChecked
-                    ? "border-cath-red-700 shadow-faq-card cursor-pointer"
-                    : "border-[#E2E2E2] bg-white hover:border-[#F3F4F5] cursor-pointer"
+                  className={`rounded-[16px] p-4 flex items-center justify-between transition-all cursor-pointer ${isChecked
+                    ? "bg-[#F9F9F9] ring-2 ring-cath-red-700"
+                    : "bg-[#F9F9F9] hover:bg-gray-100"
                     }`}
                 >
                   {/* Checkbox & Left info */}
@@ -252,24 +240,26 @@ const AddActivityModal = ({
                       aria-label={dict.selectActivityAriaLabel ? dict.selectActivityAriaLabel.replace("{{title}}", title) : ""}
                     />
 
-                    <div className="space-y-1 min-w-0">
+                    <div className="space-y-1.5 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap min-h-5">
+                        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#777777] text-white flex items-center gap-1">
+                          {statusLower === "published" && <CheckSquare size={10} />}
+                          {statusLower === "draft" && <FileText size={10} />}
+                          {statusLabel}
+                        </span>
+
                         <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-md flex items-center gap-1 ${getTypeBadgeStyle(
+                          className={`text-[11px] font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${getTypeBadgeStyle(
                             type
                           )}`}
                         >
-                          {type === "assignment" && <FileText size={12} />}
+                          {type === "assignment" && <FileText size={10} />}
                           {type === "quiz" && <CheckSquare size={10} />}
                           {typeLabel}
                         </span>
-
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-[#E2E2E2] text-[#5B403C]">
-                          {statusLabel}
-                        </span>
                       </div>
 
-                      <h5 className="text-sm font-bold text-[#191C1D] truncate">
+                      <h5 className="text-[14px] font-normal text-[#191C1D] truncate">
                         {title}
                       </h5>
                     </div>
@@ -281,6 +271,18 @@ const AddActivityModal = ({
               )
             })
           )}
+        </div>
+
+        {/* Toggle Option */}
+        <div className="pt-2">
+          <ToggleOption
+            icon={<Eye size={20} className="text-[#F83B4F]" />}
+            iconBg="bg-[#FFEAED]"
+            title={dict.visibleToStudents || "Hiển thị với học viên"}
+            description={dict.visibleToStudentsDesc || "Tùy chỉnh độ hiển thị với học viên"}
+            checked={isVisibleToStudents}
+            onChange={(e) => setIsVisibleToStudents(e.target.checked)}
+          />
         </div>
       </div>
     </Modal>

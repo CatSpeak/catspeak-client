@@ -43,6 +43,7 @@ import CreatePostPage from "@/features/courses/components/lecture-hall/pages/Cre
 import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/LinkYoutubePage";
 import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage";
 
+import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton";
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
@@ -133,6 +134,9 @@ const VoucherDetailPage = lazy(
 );
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
+);
+const AllTeachingTasksPage = lazy(
+  () => import("@/features/courses/pages/AllTeachingTasksPage"),
 );
 const AllClassesPage = lazy(
   () => import("@/features/courses/pages/AllClassesPage"),
@@ -259,17 +263,17 @@ const routesConfig = [
           {
             path: "resources",
             element: (
-              <AuthGuard>
+              <LazyRoute>
                 <ResourcesHubPage />
-              </AuthGuard>
+              </LazyRoute>
             ),
           },
           {
             path: "resources/:id",
             element: (
-              <AuthGuard>
+              <LazyRoute>
                 <WebsitePage />
-              </AuthGuard>
+              </LazyRoute>
             ),
           },
           { path: "*", element: <PageNotFound /> },
@@ -501,6 +505,16 @@ const routesConfig = [
                 element: (
                   <RoleGuard allowedRoles={["Teacher"]}>
                     <LazyRoute>
+                      <AllTeachingTasksPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "teaching-tasks/overview",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
                       <WorkspaceCalendarPage />
                     </LazyRoute>
                   </RoleGuard>
@@ -509,17 +523,21 @@ const routesConfig = [
               {
                 path: "materials",
                 element: (
-                  <LazyRoute>
-                    <TeachingMaterialPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <TeachingMaterialPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
                 path: "materials/:folderId",
                 element: (
-                  <LazyRoute>
-                    <TeachingMaterialPage />
-                  </LazyRoute>
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <TeachingMaterialPage />
+                    </LazyRoute>
+                  </RoleGuard>
                 ),
               },
               {
@@ -621,6 +639,10 @@ const routesConfig = [
                     </LazyRoute>
                   </RoleGuard>
                 ),
+              },
+              {
+                path: "courses",
+                element: <Navigate to="/workspace/courses/all" replace />,
               },
               {
                 path: "courses/all",
@@ -921,7 +943,7 @@ const routesConfig = [
               {
                 path: "profile/:accountId?",
                 element: (
-                  <LazyRoute>
+                  <LazyRoute fallback={<ProfilePageSkeleton />}>
                     <Profile />
                   </LazyRoute>
                 ),
@@ -942,7 +964,7 @@ const routesConfig = [
           {
             path: "profile/:accountId?",
             element: (
-              <LazyRoute>
+              <LazyRoute fallback={<ProfilePageSkeleton />}>
                 <Profile />
               </LazyRoute>
             ),

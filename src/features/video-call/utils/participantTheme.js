@@ -1,4 +1,22 @@
-const USER_PALETTES = [
+export const USER_COLORS = [
+  "#2563EB", // Blue
+  "#16A34A", // Green
+  "#9333EA", // Purple
+  "#EA580C", // Orange
+  "#0D9488", // Teal
+  "#DB2777", // Pink
+  "#0284C7", // Sky
+  "#7C3AED", // Violet
+  "#E11D48", // Rose
+  "#059669", // Emerald
+  "#D97706", // Amber
+  "#4F46E5", // Indigo
+  "#C026D3", // Fuchsia
+  "#0891B2", // Cyan
+  "#DC2626", // Red
+]
+
+export const USER_PALETTES = [
   {
     bg: "radial-gradient(circle, #DC2626 0%, #7F1D1D 100%)",
     avatarClass: "!bg-[#FCA5A5] !text-[#7F1D1D]",
@@ -66,6 +84,7 @@ const USER_PALETTES = [
 ]
 
 const themeCache = new Map()
+const colorCache = new Map()
 
 const stringToHash = (str) => {
   const s = String(str || "")
@@ -74,6 +93,18 @@ const stringToHash = (str) => {
     hash = s.charCodeAt(i) + ((hash << 5) - hash)
   }
   return Math.abs(hash)
+}
+
+export const getUserColor = (identity, fallbackName = "") => {
+  const seedString = identity || fallbackName
+  if (!seedString) {
+    return USER_COLORS[0]
+  }
+  if (!colorCache.has(seedString)) {
+    const hashIndex = stringToHash(seedString) % USER_COLORS.length
+    colorCache.set(seedString, USER_COLORS[hashIndex])
+  }
+  return colorCache.get(seedString)
 }
 
 export const getParticipantTheme = (identity, fallbackName = "") => {

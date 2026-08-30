@@ -19,8 +19,11 @@ import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 import CompletionReviewPrompt from "@/features/courses/components/CompletionReviewPrompt"
+import BugReportButton from "@/features/bug-report/components/BugReportButton"
+import AutoCrashReporterSync from "@/shared/components/AutoCrashReporterSync"
 // import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
 
+import GlobalErrorBoundary from "@/shared/components/GlobalErrorBoundary"
 import WebViewGuard from "@/shared/components/WebViewGuard"
 
 function App() {
@@ -28,27 +31,31 @@ function App() {
     <Provider store={store}>
       <AuthVisibilitySync />
       <LanguageProvider>
-        <WebViewGuard>
-          <GlobalVideoCallProvider>
-            <NavigationProgress />
-            <ServerDownScreen />
-            <SidebarProvider>
-              <ConversationSignalRProvider>
-                <GlobalPresenceProvider>
-                  <GlobalSignalRHandler />
-                  <AppToaster />
-                  <CompletionReviewPrompt />
-                  {/* <ScrollToTopButton /> */}
-                  <AppRouter />
-                  <PiPWidget />
-                  <GlobalTaskProgressWidget />
-                  <RecordingPoller />
-                  <GlobalTaskSync />
-                </GlobalPresenceProvider>
-              </ConversationSignalRProvider>
-            </SidebarProvider>
-          </GlobalVideoCallProvider>
-        </WebViewGuard>
+        <GlobalErrorBoundary>
+          <WebViewGuard>
+            <GlobalVideoCallProvider>
+              <NavigationProgress />
+              <ServerDownScreen />
+              <SidebarProvider>
+                <ConversationSignalRProvider>
+                  <GlobalPresenceProvider>
+                    <GlobalSignalRHandler />
+                    <AppToaster />
+                    <CompletionReviewPrompt />
+                    {/* <ScrollToTopButton /> */}
+                    <AppRouter />
+                    <PiPWidget />
+                    <GlobalTaskProgressWidget />
+                    <RecordingPoller />
+                    <GlobalTaskSync />
+                    <AutoCrashReporterSync />
+                    <BugReportButton />
+                  </GlobalPresenceProvider>
+                </ConversationSignalRProvider>
+              </SidebarProvider>
+            </GlobalVideoCallProvider>
+          </WebViewGuard>
+        </GlobalErrorBoundary>
       </LanguageProvider>
     </Provider>
   )

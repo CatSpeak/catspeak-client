@@ -1,30 +1,15 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { useGetVouchersQuery } from "../api/vouchersApi"
 import VoucherTable from "./VoucherTable"
+import VoucherTableSkeleton from "./VoucherTableSkeleton"
 import VoucherUsagesModal from "./VoucherUsagesModal"
 import Banner from "@/shared/components/ui/Banner"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { SearchInput } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
-
-const STATUS_OPTIONS = [
-  { value: "all", label: "Tất cả trạng thái" },
-  { value: "Active", label: "Đang hoạt động" },
-  { value: "Draft", label: "Bản nháp" },
-  { value: "PendingDeposit", label: "Chờ đặt cọc" },
-  { value: "PendingApproval", label: "Chờ duyệt" },
-  { value: "Expired", label: "Hết hạn" },
-  { value: "Disabled", label: "Vô hiệu hóa" },
-]
-
-const DISCOUNT_TYPE_OPTIONS = [
-  { value: "all", label: "Tất cả loại" },
-  { value: "Percentage", label: "Phần trăm (%)" },
-  { value: "FixedAmount", label: "Số tiền cố định (₫)" },
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * VouchersTab - Tab "Ưu đãi" for Class Detail and Course Detail pages (Requirement 2.1).
@@ -43,12 +28,42 @@ const VouchersTab = ({
   targetId,
   title,
 }) => {
+  const { t } = useLanguage()
+  const vt = t.vouchers || {}
   const navigate = useNavigate()
   const [selectedVoucherForUsages, setSelectedVoucherForUsages] = useState(null)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [discountTypeFilter, setDiscountTypeFilter] = useState("all")
+
+  const statusOptions = useMemo(
+    () => [
+      { value: "all", label: vt.allStatuses || "Tất cả trạng thái" },
+      { value: "Active", label: vt.status?.Active || "Đang hoạt động" },
+      { value: "Draft", label: vt.status?.Draft || "Bản nháp" },
+      {
+        value: "PendingDeposit",
+        label: vt.status?.PendingDeposit || "Chờ đặt cọc",
+      },
+      {
+        value: "PendingApproval",
+        label: vt.status?.PendingApproval || "Chờ duyệt",
+      },
+      { value: "Expired", label: vt.status?.Expired || "Hết hạn" },
+      { value: "Disabled", label: vt.status?.Disabled || "Vô hiệu hóa" },
+    ],
+    [vt],
+  )
+
+  const discountTypeOptions = useMemo(
+    () => [
+      { value: "all", label: vt.allDiscountTypes || "Tất cả loại" },
+      { value: "Percentage", label: vt.table?.percent || "Phần trăm (%)" },
+      { value: "FixedAmount", label: vt.table?.fixed || "Số tiền cố định (₫)" },
+    ],
+    [vt],
+  )
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -114,8 +129,8 @@ const VouchersTab = ({
     <div className="space-y-4 animate-in fade-in duration-300">
       {/* ─── Revenue Warning Alert Banner (BR-VC-GV-17 & Wireframe 1) ─── */}
       <Banner variant="info">
-        Voucher do bạn tạo sẽ được trừ vào doanh thu của bạn. Nền tảng vẫn thu
-        10% trên học phí gốc.
+        {vt.tabBanner ||
+          "Voucher do bạn tạo sẽ được trừ vào doanh thu của bạn. Nền tảng vẫn thu 10% trên học phí gốc."}
       </Banner>
 
       {/* ─── Actions & Filters Bar ─── */}
@@ -125,16 +140,16 @@ const VouchersTab = ({
             <SearchInput
               value={search}
               onChange={setSearch}
-              placeholder="Tìm theo mã hoặc tên..."
+              placeholder={vt.searchPlaceholder || "Tìm theo mã hoặc tên..."}
             />
           </div>
 
           <div className="w-full sm:w-auto">
             <Dropdown
-              options={STATUS_OPTIONS}
+              options={statusOptions}
               value={statusFilter}
               onChange={setStatusFilter}
-              placeholder="Tất cả trạng thái"
+              placeholder={vt.allStatuses || "Tất cả trạng thái"}
               triggerClassName="w-full sm:!min-w-[150px] text-xs"
               dropdownClassName="min-w-[170px]"
             />
@@ -142,10 +157,10 @@ const VouchersTab = ({
 
           <div className="w-full sm:w-auto">
             <Dropdown
-              options={DISCOUNT_TYPE_OPTIONS}
+              options={discountTypeOptions}
               value={discountTypeFilter}
               onChange={setDiscountTypeFilter}
-              placeholder="Tất cả loại"
+              placeholder={vt.allDiscountTypes || "Tất cả loại"}
               triggerClassName="w-full sm:!min-w-[130px] text-xs"
               dropdownClassName="min-w-[160px]"
             />
@@ -153,18 +168,13 @@ const VouchersTab = ({
         </div>
 
         <PillButton onClick={handleCreateVoucher} startIcon={<Plus />}>
-          Tạo voucher mới
+          {vt.createVoucher || "Tạo voucher mới"}
         </PillButton>
       </div>
 
       {/* ─── Table Content ─── */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200/80">
-          <LoadingSpinner className="w-8 h-8 text-cath-red-700" />
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            Đang tải danh sách ưu đãi...
-          </p>
-        </div>
+        <VoucherTableSkeleton rows={5} />
       ) : (
         <VoucherTable
           vouchers={vouchersList}

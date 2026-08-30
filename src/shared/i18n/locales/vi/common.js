@@ -23,11 +23,13 @@ export default {
       vietnam: "Việt Nam",
       china: "Trung Quốc",
       english: "Anh",
+      japan: "Nhật Bản",
     },
     languages: {
       vi: "Tiếng Việt",
-      zh: "中文",
-      en: "English",
+      zh: "Tiếng Trung",
+      en: "Tiếng Anh",
+      ja: "Tiếng Nhật",
     },
   },
   pagination: {
@@ -57,7 +59,7 @@ export default {
     myClass: "Lớp học của tôi",
     myCalendar: "Lịch của tôi",
     schedule: "Lịch giảng dạy",
-    teachingTasks: "Công việc giảng dạy",
+    teachingTasks: "Việc giảng dạy",
     vouchers: "Ưu đãi & Voucher",
     myLearning: "Góc học tập",
     manageMaterials: "Quản lý tài liệu",
@@ -154,6 +156,11 @@ export default {
     of: "trên",
     prevPage: "Trang trước",
     nextPage: "Trang tiếp",
+  },
+  errors: {
+    maxActiveRoomsReached:
+      "Bạn đã đạt giới hạn số phòng hoạt động đồng thời. Vui lòng nâng cấp gói hoặc đóng phòng hiện tại.",
+    generalFailed: "Đã có lỗi xảy ra. Vui lòng thử lại.",
   },
   uploadWidget: {
     uploading: "Đang tiến hành... {{progress}}%",

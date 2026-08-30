@@ -199,9 +199,25 @@ const UploadMaterialModal = ({ open, onClose, currentFolderId }) => {
       data: formData,
       isUploadTask: true,
       isHidden: true,
-      onSuccess: () => {
+      onSuccess: (resData) => {
         dispatch(materialApi.util.invalidateTags(["PersonalMaterials"]));
-        toast.success(t.materials.uploadSuccessCount.replace('{{count}}', pendingFiles.length));
+        const response = resData?.data || resData;
+        const results = response?.results || [];
+        const succeeded = response?.totalSucceeded ?? results.filter(r => r.success).length;
+        const failed = response?.totalFailed ?? results.filter(r => !r.success).length;
+
+        if (failed === 0) {
+          toast.success(t.materials.uploadSuccessCount?.replace('{{count}}', succeeded) || `Tải lên thành công ${succeeded} tệp.`);
+        } else {
+          const partialSuccessMsg = t.materials.uploadPartialSuccess?.replace('{{total}}', succeeded + failed).replace('{{success}}', succeeded).replace('{{fail}}', failed) 
+            || `Đã xử lý ${succeeded + failed} tệp: ${succeeded} thành công, ${failed} thất bại.`;
+          
+          toast(partialSuccessMsg, { icon: '⚠️' });
+          results.filter(r => !r.success).forEach(r => {
+            const translatedError = t.materials.errors?.[r.error] || r.error;
+            toast.error(`${t.materials.file || 'Tệp'} "${r.fileName}": ${translatedError}`);
+          });
+        }
         handleClose();
       },
       onError: () => {

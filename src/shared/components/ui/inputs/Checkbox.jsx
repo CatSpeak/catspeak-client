@@ -1,52 +1,110 @@
 import React from "react";
 import { Check } from "lucide-react";
 
+/**
+ * Shared reusable Checkbox input component.
+ *
+ * @param {boolean} checked - Whether the checkbox is checked.
+ * @param {function} onChange - Change or click handler.
+ * @param {string} id - Optional element id.
+ * @param {boolean} disabled - Disabled state.
+ * @param {"default" | "white" | "large"} variant - Styling variant.
+ * @param {boolean} withWrapper - Optional 48px touch target with 40px hover circle.
+ * @param {"button" | "div"} as - Element type when withWrapper/large is used.
+ * @param {string} className - Optional styling overrides for outer wrapper.
+ * @param {string} innerClassName - Optional styling overrides for indicator.
+ */
 const Checkbox = ({
-  checked,
+  checked = false,
   onChange,
   id,
-  variant = "standard", // "standard" | "large"
   disabled = false,
-  className = "",
+  variant = "default",
+  withWrapper = false,
   as = "button",
+  className = "",
+  innerClassName = "",
   ...props
 }) => {
-  if (variant === "large") {
-    const Component = as === "div" ? "div" : "button";
+  const isWhite = variant === "white"
+  const isLarge = variant === "large" || withWrapper
+
+  const outerBorderClass = isWhite
+    ? checked
+      ? "bg-white border-white text-[#990011]"
+      : "bg-transparent border-white/60 group-hover:border-white text-transparent"
+    : checked
+      ? "bg-[#990011] border-[#990011] text-white"
+      : "bg-white border-black/50 group-hover:border-black text-transparent"
+
+  const handleClick = (e) => {
+    if (disabled) return
+    if (onChange) {
+      const syntheticEvent = {
+        ...e,
+        target: {
+          ...e?.target,
+          checked: !checked,
+          type: "checkbox",
+          id,
+        },
+      }
+      onChange(syntheticEvent)
+    }
+  }
+
+  const checkboxIndicator = (
+    <div
+      className={`flex w-[18px] h-[18px] items-center justify-center rounded-[2px] border-2 transition-all duration-200 select-none ${outerBorderClass} ${innerClassName}`}
+    >
+      {checked && (
+        <Check
+          size={12}
+          strokeWidth={3}
+          className={isWhite ? "text-[#990011]" : "text-white"}
+        />
+      )}
+    </div>
+  )
+
+  if (isLarge) {
+    const Component = as === "div" ? "div" : "button"
     return (
       <Component
         type={Component === "button" ? "button" : undefined}
         id={id}
-        onClick={onChange}
+        onClick={handleClick}
         disabled={disabled}
-        className={`group/cb inline-flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 hover:bg-primaryBg active:bg-[#E6E6E6] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        className={`group/cb inline-flex items-center justify-center w-12 h-12 rounded-full shrink-0 focus:outline-none transition-all duration-200 ${
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+        } ${className}`}
         {...props}
       >
-        <div
-          className={`flex items-center justify-center w-6 h-6 rounded-[6px] border-2 transition-all duration-200 ${
-            checked
-              ? "bg-[#990011] border-[#990011] group-hover/cb:bg-[#80000e] group-hover/cb:border-[#80000e] text-white"
-              : "bg-white border-[#C6C6C6] group-hover/cb:border-[#990011]"
+        <span
+          className={`w-10 h-10 inline-flex items-center justify-center rounded-full transition-colors ${
+            disabled
+              ? ""
+              : "group-hover/cb:bg-primaryBg hover:bg-primaryBg active:bg-[#E6E6E6]"
           }`}
         >
-          {checked && (
-            <Check size={14} strokeWidth={3} className="text-white" />
-          )}
-        </div>
+          {checkboxIndicator}
+        </span>
       </Component>
     );
   }
 
-  // Standard checkbox
   return (
-    <input
-      type="checkbox"
+    <div
       id={id}
-      checked={checked}
-      onChange={onChange}
-      className={`h-4 w-4 cursor-pointer rounded border-gray-300 text-cath-red-700 accent-cath-red-700 focus:ring-cath-red-700 ${className}`}
-    />
-  );
-};
+      onClick={handleClick}
+      className={`inline-flex items-center justify-center shrink-0 ${
+        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+      } ${className}`}
+      {...props}
+    >
+      {checkboxIndicator}
+    </div>
+  )
+}
 
 export default Checkbox;

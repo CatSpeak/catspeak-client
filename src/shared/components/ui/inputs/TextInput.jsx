@@ -26,6 +26,7 @@ const TextInput = ({
   leftContentWidthClass = "pl-14",
   rightContent,
   rightContentWidthClass = "!pr-12",
+  rightContentClassName = "right-4",
   multiline = false,
   floatingLabel = false,
   required = false,
@@ -60,12 +61,20 @@ const TextInput = ({
   const hasCustomHeight = className
     .split(" ")
     .some((c) => c.startsWith("h-") || c.startsWith("!h-"))
+  const hasCustomPadding = className
+    .split(" ")
+    .some((c) => c.startsWith("px-") || c.startsWith("!px-") || c.startsWith("p-") || c.startsWith("!p-"))
   const heightClass = multiline
-    ? "min-h-14 px-4 py-[15px]"
+    ? "min-h-14"
     : hasCustomHeight
       ? ""
-      : "h-14 px-4"
-  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
+      : "h-14"
+  const paddingClass = multiline
+    ? hasCustomPadding ? "" : "px-4 py-[15px]"
+    : hasCustomPadding
+      ? ""
+      : "px-4"
+  const finalClassName = `w-full border border-border outline-none transition-all duration-200 focus:border-[var(--focus-color)] hover:border-[var(--focus-color)] disabled:hover:border-border disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-50 placeholder-[var(--placeholder-color)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${variantClasses} ${iconPadding} ${rightIconPadding} ${passwordPadding} ${errorClass} ${leftContentPadding} ${rightContentPadding} ${heightClass} ${paddingClass} ${floatingLabel ? "peer placeholder-transparent" : ""} ${className}`
 
   const handleInput = (e) => {
     if (multiline) {
@@ -89,7 +98,7 @@ const TextInput = ({
           </div>
         )}
         {Icon && !leftContent && (
-          <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A7574]" />
+          <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary" />
         )}
         {multiline ? (
           <textarea
@@ -102,7 +111,7 @@ const TextInput = ({
               "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
-            className={`${finalClassName} resize-none overflow-hidden scrollbar-hide`}
+            className={`${finalClassName} resize-none overflow-y-auto`}
             value={value}
             onChange={onChange}
             onInput={handleInput}
@@ -131,7 +140,7 @@ const TextInput = ({
           <button
             type="button"
             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7A7574] hover:text-[#333] transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-[#333] transition-colors"
             tabIndex={-1}
           >
             {isPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -148,7 +157,9 @@ const TextInput = ({
           </IconButton>
         )}
         {rightContent && (
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs">
+          <div
+            className={`absolute ${rightContentClassName} top-1/2 -translate-y-1/2 z-10 flex items-center select-none text-slate-500 font-medium text-xs`}
+          >
             {rightContent}
           </div>
         )}
@@ -161,7 +172,7 @@ const TextInput = ({
                 color || "var(--tw-colors-cath-red-700, #8e0000)",
             }}
             className={`absolute transition-all duration-200 pointer-events-none origin-left scale-100
-              top-1/2 -translate-y-1/2 text-[#7A7574]
+              top-1/2 -translate-y-1/2 text-secondary
               peer-focus:top-0 peer-focus:-translate-y-1/2 peer-focus:scale-75 peer-focus:text-[var(--focus-color)] peer-focus:bg-white peer-focus:px-1
               peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:-translate-y-1/2 peer-[:not(:placeholder-shown)]:scale-75 peer-[:not(:placeholder-shown)]:bg-white peer-[:not(:placeholder-shown)]:px-1
               ${Icon || leftContent ? "left-10" : "left-4"}
@@ -182,7 +193,7 @@ const TextInput = ({
             ) : helperText ? (
               <span
                 className={`text-xs block ${
-                  helperTextClassName || "text-[#7A7574] dark:text-neutral-400"
+                  helperTextClassName || "text-secondary"
                 }`}
               >
                 {helperText}
@@ -190,7 +201,7 @@ const TextInput = ({
             ) : null}
           </div>
           {showCount && props.maxLength && (
-            <span className="text-xs text-[#7A7574] ml-2 whitespace-nowrap">
+            <span className="text-xs text-secondary ml-2 whitespace-nowrap">
               {String(value || "").length} / {props.maxLength}
             </span>
           )}

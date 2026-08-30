@@ -50,7 +50,7 @@ const NavigationProgress = () => {
         return false
       }
 
-      // Ignore background refetches that shouldn't interrupt UX
+      // Ignore background refetches and in-form actions that shouldn't interrupt UX
       if (
         query?.endpointName === "getProfile" ||
         query?.endpointName === "getSampleBackgrounds" ||
@@ -60,7 +60,12 @@ const NavigationProgress = () => {
         query?.endpointName === "getBreakoutStatus" ||
         query?.endpointName === "getPostComments" ||
         query?.endpointName === "setDefaultInstructorBankAccount" ||
-        query?.endpointName === "getInstructorBankAccounts"
+        query?.endpointName === "getInstructorBankAccounts" ||
+        query?.endpointName === "getPersonalMaterials" ||
+        query?.endpointName === "getFolderTree" ||
+        query?.endpointName === "getPublicMaterialsByUserId" ||
+        query?.endpointName === "generateVoucherCode" ||
+        query?.endpointName === "getVoucherDepositInfo"
       ) {
         return false
       }

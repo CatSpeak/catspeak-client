@@ -26,16 +26,23 @@ const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
   return (
     <div className="w-full flex flex-col min-w-0">
       {visibleRows.length > 0 ? (
-        <div className="flex flex-col border-t border-b border-[#edf0f3] divide-y divide-[#edf0f3]">
+        <div className="flex flex-col divide-y divide-[#E8EBED]">
           {visibleRows.map((row, idx) => {
             const globalRank = startIdx + idx + 1
-            const learners = row.learners ?? 0
-            const fill = row.fill ?? 0
-            const capacity = row.capacity || Math.max(
-              learners,
-              Math.ceil(learners / Math.max(fill / 100, 0.01))
-            )
-            const newReg = row.newRegistrations ?? 0
+            const learners = Number(row.learners) || 0
+            const rawFill = parseFloat(row.fill) || 0
+            const fill = Math.min(Math.max(Math.round(rawFill), 0), 100)
+            
+            let capacity = row.capacity
+            if (!capacity || isNaN(capacity)) {
+              if (fill > 0 && learners > 0) {
+                capacity = Math.max(learners, Math.round(learners / (fill / 100)))
+              } else {
+                capacity = learners > 0 ? learners : 1
+              }
+            }
+            const newReg = Number(row.newRegistrations) || 0
+
             return (
               <div
                 key={row.className || idx}
@@ -46,35 +53,48 @@ const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
                     navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
                   }
                 }}
-                className="grid grid-cols-1 md:grid-cols-[36px_minmax(200px,1.25fr)_minmax(220px,1.6fr)] gap-3 items-center py-3 px-2 hover:bg-[#fffafb] transition-colors cursor-pointer group"
+                className="flex flex-col sm:grid sm:grid-cols-[24px_minmax(120px,1.2fr)_minmax(100px,1fr)_100px_minmax(80px,1fr)_48px] gap-2 sm:gap-3 items-start sm:items-center py-2.5 px-2 hover:bg-[#FBFBFC] transition-colors text-xs cursor-pointer"
               >
                 {/* Rank number */}
-                <span className="w-6 h-6 rounded-full bg-[#fff0d7] text-[#9a5a00] font-bold flex items-center justify-center text-xs">
-                  {globalRank}
-                </span>
-
-                {/* Class details */}
-                <div className="flex flex-col min-w-0">
-                  <strong className="text-xs font-bold text-gray-900 group-hover:text-[#990011] transition-colors truncate">
+                <div className="flex items-center gap-2 sm:block sm:text-center w-full sm:w-auto">
+                  <span className="font-semibold text-[#B25905] text-sm">
+                    {globalRank}
+                  </span>
+                  <strong className="sm:hidden font-semibold text-[#14171F] truncate" title={row.className}>
                     {row.className}
                   </strong>
-                  <small className="text-[11px] text-gray-500 truncate">
-                    {row.course} · {learners}/{capacity} {learnersStr} · +{newReg} {newRegStr}
-                  </small>
+                </div>
+
+                {/* Class name (desktop) */}
+                <strong className="hidden sm:block font-semibold text-[#14171F] truncate" title={row.className}>
+                  {row.className}
+                </strong>
+
+                {/* Course name */}
+                <span className="text-[#6B758A] truncate" title={row.course}>
+                  {row.course || "Không thuộc khóa"}
+                </span>
+
+                {/* Learners & New Reg */}
+                <div className="flex items-center gap-1.5 text-[#14171F] whitespace-nowrap">
+                  <span>{learners}/{capacity}</span>
+                  {newReg > 0 && (
+                    <span className="text-[#6B758A] text-[11px] truncate">({newReg} {newRegStr})</span>
+                  )}
                 </div>
 
                 {/* Fill bar */}
-                <div className="grid grid-cols-[1fr_48px] gap-3 items-center">
-                  <div className="h-2.5 rounded-full bg-[#eff1f4] overflow-hidden w-full">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#dc1630] to-[#f06b79] transition-all duration-500"
-                      style={{ width: `${Math.min(fill, 100)}%` }}
-                    />
-                  </div>
-                  <strong className="text-right text-xs font-bold text-gray-900 tabular-nums">
-                    {fill}%
-                  </strong>
+                <div className="h-2 rounded-full bg-[#EDEDF0] overflow-hidden w-full">
+                  <div
+                    className="h-full rounded-full bg-[#E51A33] transition-all duration-500"
+                    style={{ width: `${fill}%` }}
+                  />
                 </div>
+
+                {/* Percentage */}
+                <strong className="text-right font-semibold text-[#14171F] tabular-nums sm:w-full">
+                  {fill}%
+                </strong>
               </div>
             )
           })}
@@ -96,7 +116,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              className="w-7 h-7 rounded-lg border border-border bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-border disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-7 h-7 rounded-lg border border-[#D6D9E0] bg-white hover:border-[#B20514] hover:text-[#B20514] disabled:opacity-40 disabled:hover:border-[#D6D9E0] disabled:hover:text-gray-400 flex items-center justify-center transition-all cursor-pointer"
             >
               <ChevronLeft size={14} />
             </button>
@@ -105,10 +125,11 @@ const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
                 key={pNum}
                 type="button"
                 onClick={() => setCurrentPage(pNum)}
-                className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${pNum === safePage
-                  ? "bg-[#990011] border-[#990011] text-white"
-                  : "bg-white border-border text-gray-700 hover:border-[#990011] hover:text-[#990011]"
-                  }`}
+                className={`min-w-[28px] h-7 px-1.5 rounded-lg border font-semibold text-xs flex items-center justify-center transition-all cursor-pointer ${
+                  pNum === safePage
+                    ? "bg-[#B20514] border-[#B20514] text-white"
+                    : "bg-white border-[#D6D9E0] text-[#14171F] hover:border-[#B20514] hover:text-[#B20514]"
+                }`}
               >
                 {pNum}
               </button>
@@ -117,7 +138,7 @@ const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              className="w-7 h-7 rounded-lg border border-border bg-white hover:border-[#990011] hover:text-[#990011] disabled:opacity-40 disabled:hover:border-border disabled:hover:text-gray-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-7 h-7 rounded-lg border border-[#D6D9E0] bg-white hover:border-[#B20514] hover:text-[#B20514] disabled:opacity-40 disabled:hover:border-[#D6D9E0] disabled:hover:text-gray-400 flex items-center justify-center transition-all cursor-pointer"
             >
               <ChevronRight size={14} />
             </button>

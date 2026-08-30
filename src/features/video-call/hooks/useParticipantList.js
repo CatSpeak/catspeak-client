@@ -1,4 +1,5 @@
 import { useMemo, useRef } from "react"
+import { isMediaParticipant } from "@/features/video-call/utils/mediaParticipant"
 
 /**
  * Parses a LiveKit participant metadata JSON string.
@@ -58,6 +59,9 @@ export const useParticipantList = (allParticipants, localParticipant) => {
         meta.is_stt_agent === true || p.identity?.startsWith("agent-")
 
       if (isAgent) return
+
+      // Filter out the shared-media (watch-together) ingress agent
+      if (isMediaParticipant(p)) return
 
       seenIdentities.add(p.identity)
       list.push(p)

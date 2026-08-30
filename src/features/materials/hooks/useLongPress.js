@@ -38,7 +38,7 @@ export const useLongPress = ({ isSelectionMode, onToggleSelect, onClick }) => {
       e.stopPropagation();
       return;
     }
-    if (isSelectionMode) {
+    if (e.ctrlKey || e.metaKey || isSelectionMode) {
       e.preventDefault();
       e.stopPropagation();
       onToggleSelect && onToggleSelect();

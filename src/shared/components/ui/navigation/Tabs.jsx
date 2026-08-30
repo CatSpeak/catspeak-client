@@ -21,9 +21,14 @@ const Tabs = memo(
     inactiveClassName = "text-[#606060]",
     fullWidth = true,
   }) => {
+    const isResponsive = fullWidth === "responsive"
+    const isFull = fullWidth === true
+
     return (
       <div
-        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${!fullWidth ? 'gap-0 sm:gap-6' : ''} ${className}`}
+        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${
+          !isFull && !isResponsive ? "gap-1 sm:gap-2" : ""
+        } ${className}`}
       >
         {tabs.map((tab) => {
           const tabKey = tab.id ?? tab.value
@@ -33,15 +38,14 @@ const Tabs = memo(
           return (
             <button
               key={tabKey}
+              type="button"
               onClick={() => onChange(tabKey)}
-              className={`h-12 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${
-                fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
-              }`}
+              className={`h-10 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
+                }`}
             >
               <div
-                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${
-                  isActive ? activeClassName : inactiveClassName
-                }`}
+                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${isActive ? activeClassName : inactiveClassName
+                  }`}
               >
                 {Icon && <Icon size={18} className="hidden sm:block" />}
 
@@ -55,11 +59,10 @@ const Tabs = memo(
 
                 {tab.badge && (
                   <span
-                    className={`w-4 h-4 rounded-full text-xs flex items-center justify-center transition-colors ${
-                      isActive
-                        ? "bg-[#990011] text-white"
-                        : "bg-primaryBg text-gray-700"
-                    }`}
+                    className={`w-4 h-4 rounded-full text-xs flex items-center justify-center transition-colors ${isActive
+                      ? "bg-[#990011] text-white"
+                      : "bg-primaryBg text-gray-700"
+                      }`}
                   >
                     {tab.badge}
                   </span>
@@ -67,11 +70,10 @@ const Tabs = memo(
 
                 {/* Underline Indicator */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${
-                    isActive
-                      ? "bg-[#990011] scale-x-100"
-                      : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
-                  }`}
+                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${isActive
+                    ? "bg-[#990011] scale-x-100"
+                    : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
+                    }`}
                 />
               </div>
             </button>

@@ -12,6 +12,8 @@ const getLanguageName = (langCode) => {
       return "Vietnamese"
     case "en":
       return "English"
+    case "ja":
+      return "Japanese"
     default:
       return "English"
   }
@@ -20,7 +22,9 @@ const getLanguageName = (langCode) => {
 export const useEditCustomRoomForm = (room, open, onClose) => {
   const { lang } = useParams()
   const { t } = useLanguage()
-  const supportedLangCode = ["zh", "vi", "en"].includes(lang) ? lang : "en"
+  const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
+    ? lang
+    : "en"
   const selectedLanguage = room?.languageType || getLanguageName(supportedLangCode)
 
   const [updateCustomRoom, { isLoading: isUpdating }] =
@@ -32,6 +36,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     selectedLevel: "",
     isPrivate: false,
     password: "",
+    maxParticipants: 10,
   })
   const [thumbnailFile, setThumbnailFile] = useState(null)
   const [nameError, setNameError] = useState("")
@@ -43,7 +48,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
       const topicsList = Array.isArray(room.topics)
         ? room.topics
         : room.topic
-          ? [room.topic]
+          ? room.topic.split(",").map((t) => t.trim()).filter(Boolean)
           : []
 
       const isPrivate = Boolean(room.hasPassword || room.privacy === "Private")
@@ -54,6 +59,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
         selectedLevel: room.requiredLevel || "",
         isPrivate: isPrivate,
         password: room.password || "",
+        maxParticipants: room.maxParticipants || 10,
       })
       setThumbnailFile(room.thumbnailUrl || null)
       setNameError("")
@@ -115,6 +121,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
       }
 
       data.append("Privacy", formData.isPrivate ? "Private" : "Public")
+      data.append("MaxParticipants", formData.maxParticipants)
 
       // Only append Password if private and user actually entered a new password
       if (formData.isPrivate && formData.password.trim()) {

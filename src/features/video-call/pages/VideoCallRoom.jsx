@@ -25,6 +25,9 @@ import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBac
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
+import MediaSpotlightTile from "@/features/video-call/components/MediaSpotlightTile"
+import MediaParticipantStrip from "@/features/video-call/components/MediaParticipantStrip"
+import WatchTogetherPanel from "@/features/video-call/components/WatchTogetherPanel"
 import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
 import SpeakingTimeBalancePanel from "@/features/video-call/components/SpeakingTimeBalancePanel"
@@ -82,6 +85,17 @@ const VideoCallRoomContent = () => {
     confirmStopRecording,
     participants,
     isHost: isHostFromContext,
+    // Watch together (YouTube)
+    mediaActive,
+    mediaTrackRef,
+    mediaTitle,
+    isMediaHost,
+    isStartingMedia,
+    isStoppingMedia,
+    startMedia,
+    stopMedia,
+    showWatchTogether,
+    setShowWatchTogether,
   } = useVideoCallContext()
 
   const { isBreakoutActive, breakoutRoomName, parentSessionId } = useSelector(
@@ -96,9 +110,13 @@ const VideoCallRoomContent = () => {
     if (isHost && parentSessionId) {
       stopBreakoutRooms(parentSessionId).unwrap().catch(console.error)
       dispatch(exitBreakout())
-      toast.success("Hết thời gian! Đã tự động đóng phòng nhóm.")
+      toast.success(
+        t?.rooms?.breakoutRooms?.timerEndToast ??
+          "Hết thời gian! Đã tự động đóng phòng nhóm.",
+        { id: "breakout-timer-end" },
+      )
     }
-  }, [isHost, parentSessionId, stopBreakoutRooms, dispatch])
+  }, [isHost, parentSessionId, stopBreakoutRooms, dispatch, t])
 
   const {
     countdownSeconds,
@@ -122,20 +140,20 @@ const VideoCallRoomContent = () => {
 
   const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
-    ? t.rooms.videoCall.participantList.title
+    ? (t?.rooms?.videoCall?.participantList?.title ?? "Participants")
     : showSpeakingTimeBalance
       ? t.rooms?.videoCall?.speakingTimeBalance?.title || "Speaking Time Balance"
       : showVirtualBackground
-        ? t.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects"
+        ? (t?.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects")
         : showAvatarPicker
-          ? t.rooms?.avatarPicker?.title || "Meeting Avatar"
+          ? (t?.rooms?.avatarPicker?.title || "Meeting Avatar")
           : showTroubleshoot
-            ? t.rooms?.videoCall?.reconnect || "Troubleshoot connection"
+            ? (t?.rooms?.videoCall?.reconnect || "Troubleshoot connection")
             : showBreakout
               ? isBreakoutActive
                 ? "Phòng thảo luận"
                 : "Phòng họp nhóm"
-              : t.rooms.chatBox.title
+              : (t?.rooms?.chatBox?.title ?? "Chat")
 
   // ── LiveKit connection gate ──
   // The "Connecting…" loading screen from VideoCallProvider is dismissed
@@ -199,7 +217,7 @@ const VideoCallRoomContent = () => {
     }
     return (
       <VideoCallLoading
-        message={t.rooms.videoCall.provider.connecting ?? "Connecting..."}
+        message={t?.rooms?.videoCall?.provider?.connecting ?? "Connecting..."}
       />
     )
   }
@@ -236,7 +254,20 @@ const VideoCallRoomContent = () => {
             />
           )}
           <div className="flex flex-1 min-h-0 relative">
-            <VideoGrid />
+            {mediaActive && mediaTrackRef ? (
+              <div className="relative h-full w-full">
+                <MediaSpotlightTile
+                  trackRef={mediaTrackRef}
+                  title={mediaTitle}
+                  onStop={isMediaHost ? stopMedia : undefined}
+                />
+                <MediaParticipantStrip participants={participants} />
+              </div>
+            ) : (
+              <VideoGrid />
+            )}
+            {/* AI Floating Widget */}
+            {isAISession && <AIFloatingWidget />}
 
             {/* Student Floating Speaking Time Balance Widget */}
             <AnimatePresence>
@@ -249,6 +280,17 @@ const VideoCallRoomContent = () => {
               )}
             </AnimatePresence>
           </div>
+          {/* Watch Together host panel */}
+          <WatchTogetherPanel
+            open={showWatchTogether}
+            onClose={() => setShowWatchTogether(false)}
+            sessionId={sessionId}
+            isHost={isMediaHost}
+            isStarting={isStartingMedia}
+            isStopping={isStoppingMedia}
+            onStart={startMedia}
+            onStop={stopMedia}
+          />
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
           {/* Non-AI Room subtitles — only show in non-AI rooms when enabled */}
@@ -433,7 +475,7 @@ const VideoCallRoomWrapper = () => {
   const { lang } = useParams()
   return (
     <VideoCallProvider>
-      <GameProvider roomLanguage={lang === "zh" ? "zh" : "en"}>
+      <GameProvider roomLanguage={lang === "zh" ? "zh" : lang === "ja" ? "ja" : "en"}>
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>

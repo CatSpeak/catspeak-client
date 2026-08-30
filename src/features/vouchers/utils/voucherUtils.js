@@ -65,31 +65,39 @@ export const checkSensitiveKeywords = (text) => {
 /**
  * Validate Instructor Voucher Form according to BR-VC rules
  */
-export const validateInstructorVoucherForm = (values, isDraft = false) => {
+export const validateInstructorVoucherForm = (values, isDraft = false, t = null) => {
   const errors = {}
+  const errT = t?.vouchers?.errors || {}
 
   // 1. Voucher Code (BR-VC-GV-02)
   const code = (values.code || "").trim().toUpperCase()
   if (!code) {
-    errors.code = "Vui lòng nhập mã voucher"
+    errors.code = errT.codeRequired || "Vui lòng nhập mã voucher"
   } else if (!code.startsWith("GV-")) {
-    errors.code = "Mã voucher của Giảng viên bắt buộc bắt đầu bằng tiền tố 'GV-'"
+    errors.code =
+      errT.codePrefix ||
+      "Mã voucher của Giảng viên bắt buộc bắt đầu bằng tiền tố 'GV-'"
   } else if (code.length < 4 || code.length > 20) {
-    errors.code = "Độ dài mã voucher phải từ 4 đến 20 ký tự"
+    errors.code =
+      errT.codeLength || "Độ dài mã voucher phải từ 4 đến 20 ký tự"
   } else if (!/^[A-Z0-9_-]+$/.test(code)) {
-    errors.code = "Mã voucher chỉ được chứa chữ hoa, số và dấu gạch nối"
+    errors.code =
+      errT.codeFormat ||
+      "Mã voucher chỉ được chứa chữ hoa, số và dấu gạch nối"
   }
 
   // 2. Title (BR-VC-GV-03)
   const title = (values.title || "").trim()
   if (!title) {
-    errors.title = "Vui lòng nhập tiêu đề voucher"
+    errors.title = errT.titleRequired || "Vui lòng nhập tiêu đề voucher"
   } else if (title.length < 3 || title.length > 100) {
-    errors.title = "Tiêu đề phải từ 3 đến 100 ký tự"
+    errors.title = errT.titleLength || "Tiêu đề phải từ 3 đến 100 ký tự"
   } else {
     const sensitiveMatch = checkSensitiveKeywords(title)
     if (sensitiveMatch) {
-      errors.title = `Tiêu đề không được chứa từ khóa nhạy cảm: '${sensitiveMatch}'`
+      errors.title =
+        errT.sensitiveKeyword ||
+        `Tiêu đề không được chứa từ khóa nhạy cảm: '${sensitiveMatch}'`
     }
   }
 
@@ -98,26 +106,43 @@ export const validateInstructorVoucherForm = (values, isDraft = false) => {
   if (description) {
     const sensitiveMatch = checkSensitiveKeywords(description)
     if (sensitiveMatch) {
-      errors.description = `Mô tả không được chứa từ khóa nhạy cảm: '${sensitiveMatch}'`
+      errors.description =
+        errT.sensitiveKeyword ||
+        `Mô tả không được chứa từ khóa nhạy cảm: '${sensitiveMatch}'`
     }
   }
 
   // If saving draft, basic info is enough, but if submitting active voucher, check all rules
   if (!isDraft) {
     // 4. Discount Type & Values (BR-VC-GV-05 & BR-VC-GV-06)
-    const isPercentage = values.discountType === DISCOUNT_TYPES.PERCENTAGE || values.discountType === 1
+    const isPercentage =
+      values.discountType === DISCOUNT_TYPES.PERCENTAGE ||
+      values.discountType === 1
     const discountVal = Number(values.discountValue)
     const maxDiscount = Number(values.maxDiscountAmount)
     const minOrder = Number(values.minOrderAmount)
 
     if (isNaN(discountVal) || discountVal <= 0) {
-      errors.discountValue = "Vui lòng nhập mức giảm giá hợp lệ"
+      errors.discountValue =
+        errT.discountValueRequired || "Vui lòng nhập mức giảm giá hợp lệ"
     } else if (isPercentage) {
       if (discountVal < 1 || discountVal > 50) {
-        errors.discountValue = "Giáo viên chỉ được tạo voucher giảm từ 1% đến 50%"
+        errors.discountValue =
+          errT.percentRange ||
+          "Giáo viên chỉ được tạo voucher giảm từ 1% đến 50%"
       }
       if (isNaN(maxDiscount) || maxDiscount <= 0) {
-        errors.maxDiscountAmount = "Voucher giảm theo % bắt buộc nhập mức giảm tối đa (VNĐ)"
+        errors.maxDiscountAmount =
+          errT.maxDiscountRequired ||
+          "Voucher giảm theo % bắt buộc nhập mức giảm tối đa (VNĐ)"
+      } else if (maxDiscount < 2000) {
+        errors.maxDiscountAmount =
+          errT.minMaxDiscount || "Mức giảm tối đa tối thiểu là 2.000 ₫"
+      }
+    } else {
+      if (discountVal < 2000) {
+        errors.discountValue =
+          errT.minFixedDiscount || "Mức giảm cố định tối thiểu là 2.000 ₫"
       }
     }
 
@@ -129,36 +154,53 @@ export const validateInstructorVoucherForm = (values, isDraft = false) => {
     const scope = values.scopeType
     if (scope === SCOPE_TYPES.SPECIFIC_COURSES || scope === 2) {
       if (isPercentage) {
-        errors.discountType = "Voucher áp dụng cho Khóa học bắt buộc chọn Giảm theo số tiền cố định (FixedAmount)"
+        errors.discountType =
+          errT.scopeCourseDiscountFixedOnly ||
+          "Voucher áp dụng cho Khóa học bắt buộc chọn Giảm theo số tiền cố định (FixedAmount)"
       }
       const maxBudget = Number(values.maxBudget)
       if (isNaN(maxBudget) || maxBudget <= 0) {
-        errors.maxBudget = "Voucher áp dụng cho Khóa học bắt buộc nhập Ngân sách tối đa (VNĐ)"
+        errors.maxBudget =
+          errT.maxBudgetRequired ||
+          "Voucher áp dụng cho Khóa học bắt buộc nhập Ngân sách tối đa (VNĐ)"
+      } else if (maxBudget < 2000) {
+        errors.maxBudget =
+          errT.minMaxBudget || "Ngân sách tối đa tối thiểu là 2.000 ₫"
       }
       if (!Array.isArray(values.courseIds) || values.courseIds.length === 0) {
-        errors.courseIds = "Vui lòng chọn ít nhất 1 khóa học áp dụng"
+        errors.courseIds =
+          errT.selectAtLeastOneCourse ||
+          "Vui lòng chọn ít nhất 1 khóa học áp dụng"
       }
     } else if (scope === SCOPE_TYPES.SPECIFIC_CLASSES || scope === 3) {
       if (!Array.isArray(values.classIds) || values.classIds.length === 0) {
-        errors.classIds = "Vui lòng chọn ít nhất 1 lớp học áp dụng"
+        errors.classIds =
+          errT.selectAtLeastOneClass ||
+          "Vui lòng chọn ít nhất 1 lớp học áp dụng"
       }
     }
 
     // 6. Total Usage Limit (BR-VC-GV-11)
     const totalLimit = Number(values.totalUsageLimit)
     if (isNaN(totalLimit) || totalLimit <= 0 || !Number.isInteger(totalLimit)) {
-      errors.totalUsageLimit = "Giáo viên bắt buộc nhập Tổng lượt sử dụng cụ thể (> 0) để tính tiền cọc"
+      errors.totalUsageLimit =
+        errT.totalUsageLimitRequired ||
+        "Giáo viên bắt buộc nhập Tổng lượt sử dụng cụ thể (> 0) để tính tiền cọc"
     }
 
     // 7. Validity Dates (BR-VC-GV-10)
     if (!values.validFrom) {
-      errors.validFrom = "Vui lòng chọn thời gian bắt đầu hiệu lực"
+      errors.validFrom =
+        errT.validFromRequired || "Vui lòng chọn thời gian bắt đầu hiệu lực"
     }
     if (!values.isNeverExpired) {
       if (!values.validTo) {
-        errors.validTo = "Vui lòng chọn thời gian kết thúc hiệu lực"
+        errors.validTo =
+          errT.validToRequired || "Vui lòng chọn thời gian kết thúc hiệu lực"
       } else if (new Date(values.validTo) <= new Date(values.validFrom)) {
-        errors.validTo = "Thời gian kết thúc phải sau thời gian bắt đầu"
+        errors.validTo =
+          errT.validToAfterValidFrom ||
+          "Thời gian kết thúc phải sau thời gian bắt đầu"
       }
     }
   }

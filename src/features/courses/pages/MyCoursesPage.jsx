@@ -11,13 +11,14 @@ import {
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
-import Tabs from "@/shared/components/ui/navigation/Tabs"
+import { Breadcrumb, Tabs } from "@/shared/components/ui/navigation"
 
 import CourseManagementCard from "../components/CourseManagementCard"
 import CourseSelectFilter from "../components/CourseSelectFilter"
 import EmptyCoursesState from "../components/EmptyCoursesState"
 import ViewModeToggle from "../components/shared/ViewModeToggle"
+import UpcomingClassesSection from "../components/overview/UpcomingClassesSection"
+import TeachingTasksSection from "../components/assignments/TeachingTasksSection"
 import { useDeleteCourse } from "../hooks/useDeleteCourse"
 import {
   filterByStatus,
@@ -48,6 +49,21 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
     { value: "not_started", label: c.notStartedStatus || "Not Started" },
     { value: "archived", label: c.archive || "Archived" },
   ]
+
+  const mainTabs = useMemo(() => [
+    {
+      id: "courses",
+      value: "courses",
+      label: c.myCoursesTab || "Khóa học của tôi",
+      icon: BookOpen,
+    },
+    {
+      id: "classes",
+      value: "classes",
+      label: c.myClassesTab || "Lớp học của tôi",
+      icon: GraduationCap,
+    },
+  ], [c.myCoursesTab, c.myClassesTab])
 
   const handleTabChange = (tabId) => {
     setSearchParams((prev) => {
@@ -165,12 +181,15 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
       course,
       index,
       {
+        classCount: c.classCount,
+        noClasses: c.noClasses || "Chưa có lớp",
         studentsCount: c.studentsCount,
+        free: c.free || "Miễn phí",
         tba: c.workspaceUi?.tba,
       },
       formatDate,
     )),
-    [coursesRaw, c.studentsCount, c.workspaceUi?.tba, formatDate],
+    [coursesRaw, c.classCount, c.noClasses, c.studentsCount, c.free, c.workspaceUi?.tba, formatDate],
   )
 
   const classList = useMemo(
@@ -296,21 +315,36 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
         )}
       </div>
 
-      {/* ─── Navigation Tabs & Controls ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-2 mt-2">
-        <Tabs
-          tabs={tabs}
-          activeTab={activeTab}
-          onChange={handleTabChange}
-          fullWidth={false}
-          className="border-b-0"
-        />
+      {/* ─── Overview Section: Upcoming Classes (3/5) & Teaching Tasks (2/5) ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 items-start">
+        <div className="lg:col-span-3">
+          <UpcomingClassesSection />
+        </div>
+        <div className="lg:col-span-2">
+          <TeachingTasksSection />
+        </div>
+      </div>
 
-        <div className="flex items-center gap-3 self-end sm:self-auto">
+      {/* ─── Navigation Tabs & Controls ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between sm:border-b sm:border-gray-200/90 mt-3 mb-3 gap-3 sm:gap-4">
+        {/* Left Tabs */}
+        <div className="w-full sm:w-auto overflow-x-auto scrollbar-hidden -mb-[1px] border-b border-gray-200/90 sm:border-b-0">
+          <Tabs
+            tabs={mainTabs}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+            fullWidth={false}
+            className="w-full sm:w-auto border-b-0"
+          />
+        </div>
+
+        {/* Right Filter & View Mode Controls */}
+        <div className="flex items-center justify-between sm:justify-end gap-2.5 pb-2 shrink-0">
           <CourseSelectFilter
             value={statusFilter}
             onChange={setStatusFilter}
             options={statusOptions}
+            align="left"
           />
           <ViewModeToggle value={viewMode} onChange={setViewMode} />
         </div>
@@ -335,7 +369,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
           </button>
         </div>
       ) : (
-        <div className="flex flex-col gap-4 mt-2">
+        <div className="flex flex-col gap-6 mt-1">
           {filteredDisplayList.length === 0 ? (
             <EmptyCoursesState
               icon={statusFilter !== "all" ? FilterX : (isCoursesTab ? BookOpen : GraduationCap)}
@@ -376,7 +410,7 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
               }
             />
           ) : (
-            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>
+            <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
               {filteredDisplayList.map((item) => (
                 <CourseManagementCard
                   key={item.id}
@@ -414,9 +448,9 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
             <button
               type="button"
               onClick={() => navigate(isCoursesTab ? "/workspace/courses/all" : "/workspace/classes/all-classes")}
-              className="text-sm font-black text-[#b20a1c] hover:underline self-center py-2 cursor-pointer"
+              className="text-sm font-semibold text-[#b20a1c] hover:underline self-center py-4 cursor-pointer"
             >
-              {c.myCourses?.viewAll || "View all"}
+              {c.myCourses?.viewAll || "Xem tất cả"}
             </button>
           )}
         </div>

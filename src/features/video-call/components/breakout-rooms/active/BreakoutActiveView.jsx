@@ -155,6 +155,7 @@ const BreakoutActiveView = ({
         message: broadcastMsg.trim(),
       }).unwrap()
       setBroadcastMsg("")
+      toast.success(t?.rooms?.breakoutRooms?.broadcastSuccess ?? "Đã gửi thông báo đến tất cả các phòng!")
     } catch (err) {
       console.error(err)
       toast.error(t.rooms.breakoutRooms.broadcastError)

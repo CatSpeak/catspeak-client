@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { FluentAnimation } from "@/shared/components/ui/animations"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { VietNam, China, UK } from "@/shared/assets/icons/flags"
+import { VietNam, China, UK, Japan } from "@/shared/assets/icons/flags"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 
@@ -16,6 +16,7 @@ const LANGUAGES = [
   { key: "vi", label: "Tiếng Việt", flag: VietNam },
   { key: "zh", label: "中文", flag: China },
   { key: "en", label: "English", flag: UK },
+  { key: "ja", label: "日本語", flag: Japan },
 ]
 
 const LanguageSwitcher = ({ className = "", align = "auto" }) => {
@@ -159,7 +160,7 @@ const LanguageSwitcher = ({ className = "", align = "auto" }) => {
                         />
                       </span>
                       <span className="min-w-0 flex-1 truncate text-[14px]">
-                        {label}
+                        {t.header?.languages?.[key] || label}
                       </span>
                       {disabled ? (
                         <span className="shrink-0 ml-auto rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-400">

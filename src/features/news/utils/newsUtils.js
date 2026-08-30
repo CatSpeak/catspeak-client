@@ -66,6 +66,8 @@ export const getCommunityName = (code) => {
     return "English"
   if (c === "vi" || c === "vn" || c === "vietnam" || c === "vietnamese")
     return "Vietnamese"
+  if (c === "ja" || c === "jp" || c === "japan" || c === "japanese")
+    return "Japanese"
   return code
 }
 

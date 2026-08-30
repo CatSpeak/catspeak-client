@@ -4,12 +4,12 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
-import { MessageSquare, Video } from "lucide-react"
+import { MessageSquare, MessageSquareText, Plus, Video } from "lucide-react"
 
 import {
   useGetClassDetailQuery,
   useUpdateClassMutation,
-  useDeleteClassMutation
+  useDeleteClassMutation,
 } from "@/store/api/coursesApi"
 import { formatCurrency } from "../utils/courseUtils"
 import { getClassLanguageCode } from "@/shared/utils/navigation"
@@ -23,11 +23,21 @@ import CreatePostTypeModal from "../components/CreatePostTypeModal"
 import { useAuth } from "@/features/auth"
 import { useRoleOverride } from "../components/RoleSwitcher"
 
-const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages/ClassLectureHallPage"))
-const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
-const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
-const ClassInviteFriendsTab = lazy(() => import("../components/members/ClassInviteFriendsTab"))
-const VouchersTab = lazy(() => import("@/features/vouchers/components/VouchersTab"))
+const ClassLectureHallPage = lazy(
+  () => import("../components/lecture-hall/pages/ClassLectureHallPage"),
+)
+const ClassGradingTab = lazy(
+  () => import("../components/grading/ClassGradingTab"),
+)
+const ClassMembersTab = lazy(
+  () => import("../components/members/ClassMembersTab"),
+)
+const ClassInviteFriendsTab = lazy(
+  () => import("../components/members/ClassInviteFriendsTab"),
+)
+const VouchersTab = lazy(
+  () => import("@/features/vouchers/components/VouchersTab"),
+)
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
@@ -67,15 +77,13 @@ const ClassDetailPage = () => {
     "invite-friends",
     "vouchers",
   ]
-  const initialTab = (urlTab && VALID_TABS.includes(urlTab)) ? urlTab : "overview"
+  const initialTab = urlTab && VALID_TABS.includes(urlTab) ? urlTab : "overview"
   const activeTab = hasGradingDeepLink ? "grading" : initialTab
 
   const handleTabChange = (tab) => {
     const nextSearchParams = new URLSearchParams(searchParams)
     nextSearchParams.set("tab", tab)
-    GRADING_DETAIL_PARAM_KEYS.forEach((key) => (
-      nextSearchParams.delete(key)
-    ))
+    GRADING_DETAIL_PARAM_KEYS.forEach((key) => nextSearchParams.delete(key))
     setSearchParams(nextSearchParams)
   }
 
@@ -87,18 +95,19 @@ const ClassDetailPage = () => {
     error: detailError,
     refetch: refetchDetail,
   } = useGetClassDetailQuery(id, { skip: !id })
-  const [updateClass, { isLoading: isCompletingClass }] = useUpdateClassMutation()
-  const [deleteClass, { isLoading: isCancellingClass }] = useDeleteClassMutation()
+  const [updateClass, { isLoading: isCompletingClass }] =
+    useUpdateClassMutation()
+  const [deleteClass, { isLoading: isCancellingClass }] =
+    useDeleteClassMutation()
 
   // Process data for rendering
-  const classData = (
-    detailResponse
-    && typeof detailResponse === "object"
-    && !Array.isArray(detailResponse)
-    && detailResponse.id
-  )
-    ? detailResponse
-    : null
+  const classData =
+    detailResponse &&
+    typeof detailResponse === "object" &&
+    !Array.isArray(detailResponse) &&
+    detailResponse.id
+      ? detailResponse
+      : null
 
   // State Management for UI Actions
   const [showActionsDropdown, setShowActionsDropdown] = useState(false)
@@ -109,11 +118,12 @@ const ClassDetailPage = () => {
   // Cancel class handler
   const handleCancelClass = async () => {
     if (
-      classActionGuardRef.current
-      || isCancellingClass
-      || isCompletingClass
-      || !id
-    ) return
+      classActionGuardRef.current ||
+      isCancellingClass ||
+      isCompletingClass ||
+      !id
+    )
+      return
     classActionGuardRef.current = true
     try {
       await deleteClass({ id, courseId: classData?.courseId }).unwrap()
@@ -130,11 +140,12 @@ const ClassDetailPage = () => {
   // Complete class handler
   const handleCompleteClass = async () => {
     if (
-      classActionGuardRef.current
-      || isCompletingClass
-      || isCancellingClass
-      || !id
-    ) return
+      classActionGuardRef.current ||
+      isCompletingClass ||
+      isCancellingClass ||
+      !id
+    )
+      return
     classActionGuardRef.current = true
     setShowActionsDropdown(false)
     try {
@@ -152,14 +163,15 @@ const ClassDetailPage = () => {
   }
 
   const isClassTeacher = Boolean(
-    isTeacher
-    || user?.isTeacher
-    || (user?.accountId && [
-      classData?.teacherId,
-      classData?.instructorId,
-      classData?.teacher?.id,
-      classData?.teacher?.accountId,
-    ].some((tid) => tid != null && String(tid) === String(user.accountId)))
+    isTeacher ||
+    user?.isTeacher ||
+    (user?.accountId &&
+      [
+        classData?.teacherId,
+        classData?.instructorId,
+        classData?.teacher?.id,
+        classData?.teacher?.accountId,
+      ].some((tid) => tid != null && String(tid) === String(user.accountId))),
   )
 
   const tabs = [
@@ -167,25 +179,38 @@ const ClassDetailPage = () => {
     { value: "members", label: cd.members || "Members" },
     { value: "lecture-hall", label: cd.lectureHall || "Lecture Hall" },
     { value: "grading", label: cd.grading || "Grading" },
-    ...(isClassTeacher ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }] : []),
-    // ...(isClassTeacher ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }] : []),
+    ...(isClassTeacher
+      ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }]
+      : []),
+    ...(isClassTeacher
+      ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }]
+      : []),
   ]
 
-  const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
+  const getWeeklyScheduleText = () =>
+    formatWeeklySchedule(classData || {}, ui.tba)
 
-  if (
-    isDetailLoading
-    || (isDetailFetching && detailResponse === undefined)
-  ) {
-    return <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
+  if (isDetailLoading || (isDetailFetching && detailResponse === undefined)) {
+    return (
+      <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
+    )
   }
 
   if (detailError || !id || !classData) {
     return (
-      <div role="alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3">
-        <span>{cd.loadFailed || "This class could not be loaded. Please try again."}</span>
+      <div
+        role="alert"
+        className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm font-semibold flex flex-col items-start gap-3"
+      >
+        <span>
+          {cd.loadFailed || "This class could not be loaded. Please try again."}
+        </span>
         {id && (
-          <button type="button" onClick={refetchDetail} className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white">
+          <button
+            type="button"
+            onClick={refetchDetail}
+            className="rounded-xl bg-[#990011] px-4 py-2 text-xs font-bold text-white"
+          >
             {cd.retry || "Try again"}
           </button>
         )}
@@ -206,13 +231,26 @@ const ClassDetailPage = () => {
           {/* ─── Breadcrumb ─── */}
           <Breadcrumb
             items={[
-              { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
-              { label: c.allClasses?.title || "Toàn bộ lớp học", onClick: () => navigate("/workspace/classes/all-classes") },
+              {
+                label: t.nav?.home || "Trang chủ",
+                onClick: () => navigate("/workspace"),
+              },
+              {
+                label: c.allClasses?.title || "Toàn bộ lớp học",
+                onClick: () => navigate("/workspace/classes/all-classes"),
+              },
               ...(classData.courseId
                 ? [
                     {
-                      label: classData.courseName || classData.courseTitle || c.student?.courseDetails || "Course Details",
-                      onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
+                      label:
+                        classData.courseName ||
+                        classData.courseTitle ||
+                        c.student?.courseDetails ||
+                        "Course Details",
+                      onClick: () =>
+                        navigate(
+                          `/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`,
+                        ),
                     },
                   ]
                 : []),
@@ -228,14 +266,14 @@ const ClassDetailPage = () => {
 
             <div className="flex items-center gap-3">
               {/* Vào phòng học button */}
-              <button
+              {/* <button
                 type="button"
                 onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
                 className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
               >
                 <Video size={14} className="fill-white" />
                 <span>{cd.joinRoom || c.joinRoom || "Vào phòng học"}</span>
-              </button>
+              </button> */}
 
               {/* Trò chuyện button */}
               <button
@@ -247,20 +285,20 @@ const ClassDetailPage = () => {
                     navigate("/chat")
                   }
                 }}
-                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
+                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-bold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
-                <MessageSquare size={14} className="fill-[#990011]" />
                 <span>{c.student?.chat || "Chat"}</span>
+                <MessageSquareText size={14} className="text-[#990011]" />
               </button>
 
               {/* Tạo bài button */}
               <button
                 type="button"
                 onClick={() => setShowCreatePostModal(true)}
-                className="h-10 px-5 bg-white border border-[#990011] text-[#990011] hover:bg-red-50/50 font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
+                className="h-10 px-5 bg-[#990011] hover:bg-[#700000] text-white font-bold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-xs"
               >
                 <span>{cd.createPost || "Create Post"}</span>
-                <span className="text-sm font-light">+</span>
+                <Plus size={14} className="fill-white" />
               </button>
             </div>
           </div>
@@ -294,35 +332,38 @@ const ClassDetailPage = () => {
             isActionPending={isCompletingClass || isCancellingClass}
             formatCurrency={formatCurrency}
             getWeeklyScheduleText={getWeeklyScheduleText}
-            upcomingSessionLabel={c.courseDetail?.upcomingSession || "Upcoming Session"}
+            upcomingSessionLabel={
+              c.courseDetail?.upcomingSession || "Upcoming Session"
+            }
             joinRoomLabel={c.joinRoom || "Join Room"}
             viewAllLabel={c.viewAll || "View All"}
-            noUpcomingLabel={c.courseDetail?.noUpcoming || "No upcoming sessions"}
-            createClassToScheduleLabel={c.courseDetail?.createClassToSchedule || "Create a class to schedule your first session."}
+            noUpcomingLabel={
+              c.courseDetail?.noUpcoming || "No upcoming sessions"
+            }
+            createClassToScheduleLabel={
+              c.courseDetail?.createClassToSchedule ||
+              "Create a class to schedule your first session."
+            }
             teachingTasksLabel={c.teachingTasks || "Teaching Tasks"}
             gradeAssignmentLabel={c.gradeAssignment || "Grade homework"}
             giveFeedbackLabel={c.giveFeedback || "Give feedback"}
             prepareLessonLabel={c.prepareLesson || "Prepare lesson plan"}
-            onJoinRoom={() => navigate(
-              `/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`
-            )}
-            onTaskAction={() => navigate("/workspace/courses/schedule")}
-            onViewTasks={() => navigate("/workspace/courses/schedule")}
+            onJoinRoom={() =>
+              navigate(
+                `/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`,
+              )
+            }
+            onTaskAction={() => navigate("/workspace/teaching-tasks")}
+            onViewTasks={() => navigate("/workspace/teaching-tasks")}
           />
         )}
 
         {activeTab === "members" && (
-          <ClassMembersTab
-            classData={classData}
-            isStudent={false}
-          />
+          <ClassMembersTab classData={classData} isStudent={false} />
         )}
 
         {activeTab === "lecture-hall" && (
-          <ClassLectureHallPage
-            id={id}
-            isStudent={false}
-          />
+          <ClassLectureHallPage id={id} isStudent={false} />
         )}
 
         {activeTab === "grading" && (
@@ -335,17 +376,11 @@ const ClassDetailPage = () => {
         )}
 
         {activeTab === "invite-friends" && isClassTeacher && (
-          <ClassInviteFriendsTab
-            classData={classData}
-            cd={cd}
-          />
+          <ClassInviteFriendsTab classData={classData} cd={cd} />
         )}
 
         {activeTab === "vouchers" && isClassTeacher && (
-          <VouchersTab
-            scope="class"
-            classId={id}
-          />
+          <VouchersTab scope="class" classId={id} />
         )}
       </Suspense>
 
@@ -358,7 +393,9 @@ const ClassDetailPage = () => {
         onConfirm={handleCancelClass}
         isPending={isCancellingClass}
         title={cd.cancelClass || "Cancel Class"}
-        message={cd.confirmCancelClass || "Are you sure you want to cancel this class?"}
+        message={
+          cd.confirmCancelClass || "Are you sure you want to cancel this class?"
+        }
         confirmText={cd.cancelClass || "Cancel Class"}
         cancelText={c.createClass?.cancel || "Hủy"}
       />
@@ -368,9 +405,13 @@ const ClassDetailPage = () => {
         onClose={() => setShowCreatePostModal(false)}
         onSelect={(type) => {
           if (type === "exam") {
-            navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}/create-exam`)
+            navigate(
+              `/workspace/courses/class/${encodeURIComponent(String(id))}/create-exam`,
+            )
           } else {
-            navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}/create-assignment`)
+            navigate(
+              `/workspace/courses/class/${encodeURIComponent(String(id))}/create-assignment`,
+            )
           }
         }}
       />

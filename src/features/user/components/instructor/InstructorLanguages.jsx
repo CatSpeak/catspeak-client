@@ -7,15 +7,20 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 const LANGUAGE_LEVELS = {
   "English": ["B2", "C1", "C2"],
   "Chinese": ["HSK 4", "HSK 5", "HSK 6", "HSK 7", "HSK 8", "HSK 9"],
+  "Japanese": ["N2", "N1"],
 }
 const LANGUAGE_OPTIONS = Object.keys(LANGUAGE_LEVELS)
 
-const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, placeholder = "Select languages..." }) => {
+const getLocalizedLanguageLabel = (t, langKey) =>
+  t?.courses?.student?.languages?.[langKey] || langKey || ""
+
+const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, placeholder = "Select languages...", t }) => {
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef(null)
 
   useClickOutside(ref, () => setIsOpen(false))
   const selectedLanguages = selected.map((item) => item.language)
+  const localizedLabel = (lang) => getLocalizedLanguageLabel(t, lang)
 
   const toggleLanguage = (lang) => {
     if (disabled) return
@@ -46,7 +51,7 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
             key={item.language}
             className="inline-flex items-center gap-1 bg-cath-red-700/10 text-cath-red-700 px-2 py-1 rounded-full text-[13px] font-medium"
           >
-            {item.language}
+            {localizedLabel(item.language)}
             {!disabled && (
               <X
                 className="w-3.5 h-3.5 cursor-pointer hover:text-red-800 transition"
@@ -72,13 +77,13 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
                 key={lang}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer text-sm transition-colors ${isSelected ? "bg-cath-red-700/5 font-medium text-cath-red-700" : "hover:bg-gray-50"}`}
               >
-                <input
+<input
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleLanguage(lang)}
                   className="w-4 h-4 accent-cath-red-700 rounded"
                 />
-                <span>{lang}</span>
+                <span>{localizedLabel(lang)}</span>
               </label>
             )
           })}
@@ -115,6 +120,7 @@ const InstructorLanguages = ({
             onChange={onLanguagesChange}
             options={LANGUAGE_OPTIONS}
             placeholder={ins.selectLanguages || "Chọn ngôn ngữ"}
+            t={t}
           />
           {errors.languagesTeach && <p className="text-xs text-red-500 mt-1">{errors.languagesTeach}</p>}
         </div>
@@ -128,7 +134,7 @@ const InstructorLanguages = ({
               {formData.languagesTeach.map((item, index) => (
                 <div key={item.language} className="flex items-center gap-3">
                   <span className="text-sm font-medium text-gray-600 w-16 truncate">
-                    {item.language}
+                    {getLocalizedLanguageLabel(t, item.language)}
                   </span>
                     <div className="flex-1 min-w-0">
                       <Dropdown
@@ -178,9 +184,27 @@ const InstructorLanguages = ({
           </label>
           <Dropdown
             options={[
-              { value: "English", label: "English" },
-              { value: "中文", label: "中文" },
-              { value: "Tiếng Việt", label: "Tiếng Việt" },
+              {
+                value: "English",
+                label:
+                  t?.courses?.student?.languages?.English || "English",
+              },
+              {
+                value: "中文",
+                label:
+                  t?.courses?.student?.languages?.Chinese || "中文",
+              },
+              {
+                value: "Tiếng Việt",
+                label:
+                  t?.courses?.student?.languages?.Vietnamese ||
+                  "Tiếng Việt",
+              },
+              {
+                value: "日本語",
+                label:
+                  t?.courses?.student?.languages?.Japanese || "日本語",
+              },
             ]}
             value={formData.nativeLanguage}
             onChange={(val) => onChange({ target: { name: "nativeLanguage", value: val } })}

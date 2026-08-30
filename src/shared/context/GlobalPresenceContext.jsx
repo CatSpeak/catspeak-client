@@ -33,6 +33,8 @@ export const GlobalPresenceProvider = ({ children }) => {
         return "vietnamese"
       case "zh":
         return "chinese"
+      case "ja":
+        return "japanese"
       default:
         return "english"
     }

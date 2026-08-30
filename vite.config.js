@@ -54,8 +54,7 @@ export default defineConfig(({ mode }) => {
           secure: true,
         },
         "/api/v1/Payments": {
-          // target: "https://staging-api.catspeak.com.vn",
-          target: "http://localhost:5001",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: true,
         },
@@ -65,9 +64,14 @@ export default defineConfig(({ mode }) => {
           secure: true,
           rewrite: (path) => path.replace(/^\/api\/social/, "/api"),
         },
+        "/api/ai": {
+          target: "https://ai-staging-api.catspeak.com.vn",
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/api\/ai/, "/api"),
+        },
         "/api": {
-          // target: "https://staging-api.catspeak.com.vn",
-          target: "http://localhost:5001",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           secure: false,
         },
@@ -78,8 +82,7 @@ export default defineConfig(({ mode }) => {
           ws: true,
         },
         "/hubs": {
-          // target: "https://staging-api.catspeak.com.vn",
-          target: "http://localhost:5001",
+          target: "https://staging-api.catspeak.com.vn",
           changeOrigin: true,
           // secure: true,
           secure: false,

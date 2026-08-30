@@ -5,7 +5,7 @@ import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
 import AnalyticsBarChart from "../AnalyticsBarChart"
 import AnalyticsDataTable from "../AnalyticsDataTable"
-import { money, numberVi } from "../../../data/analyticsData"
+import { money, numberVi, getLocalizedCompareNote } from "../../../data/analyticsData"
 import {
   useGetAnalyticsRevenueOverviewQuery,
   useGetAnalyticsRevenueTrendQuery,
@@ -15,7 +15,7 @@ import {
 
 const RevenueTab = ({ group, queryParams = {} }) => {
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
   const secT = analyticsT.sections || {}
@@ -32,43 +32,74 @@ const RevenueTab = ({ group, queryParams = {} }) => {
   const { data: revenueByClassData } = useGetAnalyticsRevenueByClassQuery(activeParams)
   const { data: topClassesData } = useGetAnalyticsRevenueTopClassesQuery(activeParams)
 
-  // 1. KPIs (strict API data)
+  // 3. Line Chart Data (Revenue Trend)
+  const trendPoints = (trendDataApi?.trendData || [])
+    .filter((point) => point?.label || point?.date)
+
+  const chartLabels = trendPoints.map((p) => p.label || p.date)
+  const seriesRevenue = trendPoints.map((p) => (p.totalRevenue != null ? p.totalRevenue / 1000000 : 0))
+
+  // 1. Comparison & KPIs
+  const hasComparison = Boolean(queryParams.compare && queryParams.compare !== "")
+  const compareNote = getLocalizedCompareNote(group, queryParams.compare, language, t)
+
+  const fmtGrowth = (growth) => {
+    if (growth === null || growth === undefined || isNaN(growth)) return ""
+    const sign = growth >= 0 ? "↑" : "↓"
+    return `${sign} ${numberVi(Math.abs(growth), 1, language)}%`
+  }
+
+  const latestPoint = trendPoints.length > 0 ? trendPoints[trendPoints.length - 1] : null
+  const prevPoint = trendPoints.length > 1 ? trendPoints[trendPoints.length - 2] : null
+
+  const revenueGrowth = prevPoint && prevPoint.totalRevenue > 0
+    ? ((latestPoint.totalRevenue - prevPoint.totalRevenue) / prevPoint.totalRevenue) * 100
+    : null
+
+  const netGrowth = prevPoint && prevPoint.netReceipt > 0
+    ? ((latestPoint.netReceipt - prevPoint.netReceipt) / prevPoint.netReceipt) * 100
+    : revenueGrowth
+
+  const feeGrowth = prevPoint && prevPoint.platformFee > 0
+    ? ((latestPoint.platformFee - prevPoint.platformFee) / prevPoint.platformFee) * 100
+    : revenueGrowth
+
   const overview = overviewData || {}
   const kpis = [
     {
       label: kpiT.totalRevenue || "Tổng doanh thu",
-      value: money(overview.totalRevenue ?? 0),
-      delta: "",
+      value: money(overview.totalRevenue ?? 0, language),
+      delta: hasComparison && revenueGrowth != null ? fmtGrowth(revenueGrowth) : "",
       tone: "red",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && revenueGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.netEarnings || "Thực nhận",
-      value: money(overview.netReceipt ?? 0),
-      delta: "",
+      value: money(overview.netReceipt ?? 0, language),
+      delta: hasComparison && netGrowth != null ? fmtGrowth(netGrowth) : "",
       tone: "green",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && netGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.platformFee || "Phí nền tảng",
-      value: money(overview.platformFee ?? 0),
-      delta: "",
+      value: money(overview.platformFee ?? 0, language),
+      delta: hasComparison && feeGrowth != null ? fmtGrowth(feeGrowth) : "",
       tone: "blue",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && feeGrowth != null ? compareNote : "",
     },
     {
       label: kpiT.topRevenueClass || "Lớp doanh thu cao nhất",
       value: overview.topClassByRevenue || "-",
       delta: "",
       tone: "orange",
-      note: "Top lớp",
+      note: overview.topClassByRevenue ? "Top lớp" : "",
     },
     {
       label: kpiT.avgRevenuePerClass || "Doanh thu TB/lớp",
-      value: money(overview.averageRevenuePerClass ?? 0),
-      delta: "",
+      value: money(overview.averageRevenuePerClass ?? 0, language),
+      delta: hasComparison && revenueGrowth != null ? fmtGrowth(revenueGrowth) : "",
       tone: "purple",
-      note: kpiT.vsPrevious || "so với kỳ trước",
+      note: hasComparison && revenueGrowth != null ? compareNote : "",
     },
   ]
 
@@ -79,14 +110,6 @@ const RevenueTab = ({ group, queryParams = {} }) => {
     label: r.className,
     value: r.grossRevenue ?? r.revenue ?? 0,
   }))
-
-  // 3. Line Chart Data (Revenue Trend)
-  const trendPoints = (trendDataApi?.trendData || [])
-    .filter((point) => point?.label || point?.date)
-
-  const chartLabels = trendPoints.map((p) => p.label || p.date)
-
-  const seriesRevenue = trendPoints.map((p) => (p.totalRevenue != null ? p.totalRevenue / 1000000 : 0))
 
   // 4. Detail Table Data
   const tableItems = revenueByClassData?.data || (Array.isArray(revenueByClassData) ? revenueByClassData : [])
@@ -112,19 +135,19 @@ const RevenueTab = ({ group, queryParams = {} }) => {
       <AnalyticsKpiGrid items={kpis} />
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         {/* Top Class Revenue Bar Chart */}
-        <div className="lg:col-span-5 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.topRevenueClasses || "Top lớp học theo doanh thu"}</h2>
+        <div className="xl:col-span-5 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.topRevenueClasses || "Top lớp học theo doanh thu"}</h2>
           <AnalyticsBarChart rows={barData} formatter={money} />
         </div>
 
         {/* Revenue Trend Line Chart */}
-        <div className="lg:col-span-7 bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-3">{secT.revenueTrend || "Xu hướng doanh thu"}</h2>
+        <div className="xl:col-span-7 bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+          <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.revenueTrend || "Xu hướng doanh thu"}</h2>
           <AnalyticsLineChart
             chartLabels={chartLabels}
-            series={[{ name: kpiT.totalRevenue || "Doanh thu", values: seriesRevenue, color: "#e11d2e" }]}
+            series={[{ name: kpiT.totalRevenue || "Doanh thu", values: seriesRevenue, color: "#E11D48" }]}
             yAxisLabel={millionLabel}
             valueFormatter={(val) => `${numberVi(val)} ${millionShortLabel}`}
             axisFormatter={(val) => `${numberVi(val)}tr`}
@@ -133,8 +156,8 @@ const RevenueTab = ({ group, queryParams = {} }) => {
       </div>
 
       {/* Revenue Detail Table */}
-      <div className="bg-white border border-[#e6e7ea] rounded-2xl p-4 shadow-sm">
-        <h2 className="text-base font-bold text-gray-900 mb-3">{secT.revenueDetail || "Chi tiết doanh thu theo lớp học"}</h2>
+      <div className="bg-white border border-[#DEE0E5] rounded-xl p-4 shadow-sm">
+        <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.revenueDetail || "Chi tiết doanh thu theo lớp học"}</h2>
         <AnalyticsDataTable
           columns={[
             {
@@ -161,7 +184,7 @@ const RevenueTab = ({ group, queryParams = {} }) => {
             { key: "net", label: colT.netEarnings || "Thực nhận", align: "right" },
           ]}
           data={tableData}
-          pageSize={7}
+          pageSize={6}
         />
       </div>
     </div>

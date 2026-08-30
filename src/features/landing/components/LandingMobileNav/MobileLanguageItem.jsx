@@ -1,5 +1,3 @@
-import React from "react";
-
 const MobileLanguageItem = ({
   code,
   label,
