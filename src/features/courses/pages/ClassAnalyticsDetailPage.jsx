@@ -156,10 +156,14 @@ const ClassAnalyticsDetailPage = () => {
   }
 
   if (isLoading) {
+    const loadingText =
+      t.courses?.analytics?.sessionDetail?.loading ||
+      t.courses?.analytics?.sections?.loading ||
+      "Đang tải dữ liệu phân tích..."
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] w-full gap-3">
         <div className="w-8 h-8 border-3 border-gray-200 border-t-[#16a34a] rounded-full animate-spin" />
-        <p className="text-sm font-medium text-gray-500">Đang tải dữ liệu phân tích buổi học...</p>
+        <p className="text-sm font-medium text-gray-500">{loadingText}</p>
       </div>
     )
   }

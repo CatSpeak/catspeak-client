@@ -84,6 +84,7 @@ const CoursesTab = ({ group, queryParams = {} }) => {
   // 2. Course Performance Table Data
   const effItems = effectivenessData?.data || (Array.isArray(effectivenessData) ? effectivenessData : [])
   const courseTableData = effItems.map((r) => ({
+    courseId: r.courseId,
     course: r.courseName || "-",
     classCount: r.classCount ?? 0,
     students: r.totalStudents ?? 0,
@@ -143,6 +144,10 @@ const CoursesTab = ({ group, queryParams = {} }) => {
             ]}
             data={courseTableData}
             pageSize={4}
+            expandConfig={{
+              courseIdKey: "courseId",
+              pageSize: 5,
+            }}
           />
         </div>
 
