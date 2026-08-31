@@ -19,39 +19,46 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api/v1/Instructors": {
-          target: "https://instructor-staging-api.catspeak.com.vn",
+          // target: "https://instructor-staging-api.catspeak.com.vn",
+          target: "http://localhost:5187",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/v1/instructor": {
-          target: "https://instructor-staging-api.catspeak.com.vn",
+          // target: "https://instructor-staging-api.catspeak.com.vn",
+          target: "http://localhost:5187",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/teacher": {
-          target: "https://instructor-staging-api.catspeak.com.vn",
+          // target: "https://instructor-staging-api.catspeak.com.vn",
+          target: "http://localhost:5187",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/student": {
-          target: "https://instructor-staging-api.catspeak.com.vn",
+          // target: "https://instructor-staging-api.catspeak.com.vn",
+          target: "http://localhost:5187",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/explore": {
-          target: "https://instructor-staging-api.catspeak.com.vn",
+          // target: "https://instructor-staging-api.catspeak.com.vn",
+          target: "http://localhost:5187",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/personal-materials": {
-          target: "https://instructor-staging-api.catspeak.com.vn",
+          // target: "https://instructor-staging-api.catspeak.com.vn",
+          target: "http://localhost:5187",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/vouchers": {
-          target: "https://instructor-staging-api.catspeak.com.vn",
+          // target: "https://instructor-staging-api.catspeak.com.vn",
+          target: "http://localhost:5187",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/v1/Payments": {
           target: "https://staging-api.catspeak.com.vn",
@@ -65,9 +72,10 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/social/, "/api"),
         },
         "/api/ai": {
-          target: "https://ai-staging-api.catspeak.com.vn",
+          // target: "https://ai-staging-api.catspeak.com.vn",
+          target: "http://localhost:8080",
           changeOrigin: true,
-          secure: true,
+          secure: false,
           rewrite: (path) => path.replace(/^\/api\/ai/, "/api"),
         },
         "/api": {
