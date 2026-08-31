@@ -1,30 +1,20 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { Plus } from "lucide-react"
 import { useGetVouchersQuery } from "../api/vouchersApi"
+import { useGetCourseDetailQuery } from "@/store/api/coursesApi"
 import VoucherTable from "./VoucherTable"
+import VoucherTableSkeleton from "./VoucherTableSkeleton"
 import VoucherUsagesModal from "./VoucherUsagesModal"
+import {
+  SingleClassVoucherNoticeModal,
+  NoClassesWarningModal,
+} from "./CourseVoucherNoticeModal"
 import Banner from "@/shared/components/ui/Banner"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { SearchInput } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { LoadingSpinner } from "@/shared/components/ui/indicators"
-
-const STATUS_OPTIONS = [
-  { value: "all", label: "Tất cả trạng thái" },
-  { value: "Active", label: "Đang hoạt động" },
-  { value: "Draft", label: "Bản nháp" },
-  { value: "PendingDeposit", label: "Chờ đặt cọc" },
-  { value: "PendingApproval", label: "Chờ duyệt" },
-  { value: "Expired", label: "Hết hạn" },
-  { value: "Disabled", label: "Vô hiệu hóa" },
-]
-
-const DISCOUNT_TYPE_OPTIONS = [
-  { value: "all", label: "Tất cả loại" },
-  { value: "Percentage", label: "Phần trăm (%)" },
-  { value: "FixedAmount", label: "Số tiền cố định (₫)" },
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * VouchersTab - Tab "Ưu đãi" for Class Detail and Course Detail pages (Requirement 2.1).
@@ -43,12 +33,45 @@ const VouchersTab = ({
   targetId,
   title,
 }) => {
+  const { t } = useLanguage()
+  const vt = t.vouchers || {}
   const navigate = useNavigate()
   const [selectedVoucherForUsages, setSelectedVoucherForUsages] = useState(null)
+  const [showSingleClassNoticeModal, setShowSingleClassNoticeModal] =
+    useState(false)
+  const [showNoClassesModal, setShowNoClassesModal] = useState(false)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [discountTypeFilter, setDiscountTypeFilter] = useState("all")
+
+  const statusOptions = useMemo(
+    () => [
+      { value: "all", label: vt.allStatuses || "Tất cả trạng thái" },
+      { value: "Active", label: vt.status?.Active || "Đang hoạt động" },
+      { value: "Draft", label: vt.status?.Draft || "Bản nháp" },
+      {
+        value: "PendingDeposit",
+        label: vt.status?.PendingDeposit || "Chờ đặt cọc",
+      },
+      {
+        value: "PendingApproval",
+        label: vt.status?.PendingApproval || "Chờ duyệt",
+      },
+      { value: "Expired", label: vt.status?.Expired || "Hết hạn" },
+      { value: "Disabled", label: vt.status?.Disabled || "Vô hiệu hóa" },
+    ],
+    [vt],
+  )
+
+  const discountTypeOptions = useMemo(
+    () => [
+      { value: "all", label: vt.allDiscountTypes || "Tất cả loại" },
+      { value: "Percentage", label: vt.table?.percent || "Phần trăm (%)" },
+      { value: "FixedAmount", label: vt.table?.fixed || "Số tiền cố định (₫)" },
+    ],
+    [vt],
+  )
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -64,17 +87,29 @@ const VouchersTab = ({
   const effectiveCourseId =
     courseId || (effectiveScope === "course" ? targetId : null)
 
-  // Query vouchers filtered by classId or courseId + search & status
-  const queryParams = {
-    page: 1,
-    pageSize: 50,
-    sponsorType: "Instructor",
-    search: debouncedSearch.trim() || undefined,
-    status: statusFilter !== "all" ? statusFilter : undefined,
-    discountType: discountTypeFilter !== "all" ? discountTypeFilter : undefined,
-    ...(effectiveClassId ? { classId: effectiveClassId } : {}),
-    ...(effectiveCourseId ? { courseId: effectiveCourseId } : {}),
+  // Helper to extract IDs as strings from array of objects or IDs
+  const getEntityIds = (list) => {
+    if (!Array.isArray(list)) return []
+    return list
+      .map((item) => {
+        if (item === null || item === undefined) return null
+        if (typeof item === "object") return String(item.id ?? item._id ?? "")
+        return String(item)
+      })
+      .filter(Boolean)
   }
+
+  // Query params with courseId / classId filter from backend
+  const queryParams = useMemo(() => {
+    const isClassScope = Boolean(effectiveClassId)
+    return {
+      page: 1,
+      pageSize: 100,
+      sponsorType: "Instructor",
+      classId: isClassScope ? Number(effectiveClassId) : undefined,
+      courseId: !isClassScope && effectiveCourseId ? Number(effectiveCourseId) : undefined,
+    }
+  }, [effectiveCourseId, effectiveClassId])
 
   const {
     data: vouchersResponse,
@@ -82,30 +117,95 @@ const VouchersTab = ({
     isFetching,
   } = useGetVouchersQuery(queryParams)
 
-  const rawList = vouchersResponse?.data || []
+  const rawList = useMemo(() => {
+    if (Array.isArray(vouchersResponse?.data)) return vouchersResponse.data
+    if (Array.isArray(vouchersResponse?.items)) return vouchersResponse.items
+    if (Array.isArray(vouchersResponse)) return vouchersResponse
+    return []
+  }, [vouchersResponse])
 
-  // Client-side filter fallback in case backend returns all teacher vouchers
-  const vouchersList = rawList.filter((v) => {
-    if (effectiveClassId) {
-      const clsIds = Array.isArray(v.classes)
-        ? v.classes.map((c) => String(c.id || c._id))
-        : (v.classIds || []).map(String)
-      return clsIds.length === 0 || clsIds.includes(String(effectiveClassId))
-    }
-    if (effectiveCourseId) {
-      const crsIds = Array.isArray(v.courses)
-        ? v.courses.map((c) => String(c.id || c._id))
-        : (v.courseIds || []).map(String)
-      return crsIds.length === 0 || crsIds.includes(String(effectiveCourseId))
-    }
-    return true
-  })
+  // Instant in-memory client-side filter (Search, Status, DiscountType)
+  const vouchersList = useMemo(() => {
+    return rawList.filter((v) => {
+      // 1. Search keyword filter
+      if (debouncedSearch.trim()) {
+        const query = debouncedSearch.trim().toLowerCase()
+        const codeMatch = (v.code || "").toLowerCase().includes(query)
+        const titleMatch = (v.title || "").toLowerCase().includes(query)
+        if (!codeMatch && !titleMatch) return false
+      }
+
+      // 2. Status filter
+      if (statusFilter !== "all") {
+        if (
+          v.status !== statusFilter &&
+          String(v.status) !== String(statusFilter)
+        ) {
+          return false
+        }
+      }
+
+      // 3. Discount Type filter
+      if (discountTypeFilter !== "all") {
+        if (
+          v.discountType !== discountTypeFilter &&
+          String(v.discountType) !== String(discountTypeFilter)
+        ) {
+          return false
+        }
+      }
+
+      return true
+    })
+  }, [
+    rawList,
+    debouncedSearch,
+    statusFilter,
+    discountTypeFilter,
+  ])
+
+  const { data: courseDetailData } = useGetCourseDetailQuery(
+    effectiveCourseId,
+    {
+      skip: !effectiveCourseId,
+    },
+  )
+  const courseClasses = useMemo(() => {
+    const raw = courseDetailData?.data || courseDetailData
+    return raw?.classes || []
+  }, [courseDetailData])
+
+  const courseName = useMemo(() => {
+    const raw = courseDetailData?.data || courseDetailData
+    return raw?.name || raw?.title || ""
+  }, [courseDetailData])
 
   // Handle navigate to Create Voucher with class/course pre-selected
   const handleCreateVoucher = () => {
+    if (
+      effectiveScope === "course" ||
+      (!effectiveClassId && effectiveCourseId)
+    ) {
+      const classList = courseClasses || []
+      if (classList.length === 0) {
+        setShowNoClassesModal(true)
+        return
+      }
+      if (classList.length === 1) {
+        setShowSingleClassNoticeModal(true)
+        return
+      }
+      navigate(
+        `/workspace/vouchers/create?courseId=${effectiveCourseId}&courseName=${encodeURIComponent(courseName)}`,
+      )
+      return
+    }
+
+    // Class context
     const params = new URLSearchParams()
     if (effectiveClassId) params.set("classId", String(effectiveClassId))
     if (effectiveCourseId) params.set("courseId", String(effectiveCourseId))
+    if (courseName) params.set("courseName", courseName)
     const query = params.toString()
     navigate(`/workspace/vouchers/create${query ? `?${query}` : ""}`)
   }
@@ -114,8 +214,8 @@ const VouchersTab = ({
     <div className="space-y-4 animate-in fade-in duration-300">
       {/* ─── Revenue Warning Alert Banner (BR-VC-GV-17 & Wireframe 1) ─── */}
       <Banner variant="info">
-        Voucher do bạn tạo sẽ được trừ vào doanh thu của bạn. Nền tảng vẫn thu
-        10% trên học phí gốc.
+        {vt.tabBanner ||
+          "Voucher do bạn tạo sẽ được trừ vào doanh thu của bạn. Nền tảng vẫn thu 10% trên học phí gốc."}
       </Banner>
 
       {/* ─── Actions & Filters Bar ─── */}
@@ -125,16 +225,16 @@ const VouchersTab = ({
             <SearchInput
               value={search}
               onChange={setSearch}
-              placeholder="Tìm theo mã hoặc tên..."
+              placeholder={vt.searchPlaceholder || "Tìm theo mã hoặc tên..."}
             />
           </div>
 
           <div className="w-full sm:w-auto">
             <Dropdown
-              options={STATUS_OPTIONS}
+              options={statusOptions}
               value={statusFilter}
               onChange={setStatusFilter}
-              placeholder="Tất cả trạng thái"
+              placeholder={vt.allStatuses || "Tất cả trạng thái"}
               triggerClassName="w-full sm:!min-w-[150px] text-xs"
               dropdownClassName="min-w-[170px]"
             />
@@ -142,10 +242,10 @@ const VouchersTab = ({
 
           <div className="w-full sm:w-auto">
             <Dropdown
-              options={DISCOUNT_TYPE_OPTIONS}
+              options={discountTypeOptions}
               value={discountTypeFilter}
               onChange={setDiscountTypeFilter}
-              placeholder="Tất cả loại"
+              placeholder={vt.allDiscountTypes || "Tất cả loại"}
               triggerClassName="w-full sm:!min-w-[130px] text-xs"
               dropdownClassName="min-w-[160px]"
             />
@@ -153,18 +253,13 @@ const VouchersTab = ({
         </div>
 
         <PillButton onClick={handleCreateVoucher} startIcon={<Plus />}>
-          Tạo voucher mới
+          {vt.createVoucher || "Tạo voucher mới"}
         </PillButton>
       </div>
 
       {/* ─── Table Content ─── */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200/80">
-          <LoadingSpinner className="w-8 h-8 text-cath-red-700" />
-          <p className="text-xs text-slate-400 mt-2 font-medium">
-            Đang tải danh sách ưu đãi...
-          </p>
-        </div>
+        <VoucherTableSkeleton rows={5} />
       ) : (
         <VoucherTable
           vouchers={vouchersList}
@@ -182,6 +277,23 @@ const VouchersTab = ({
           onClose={() => setSelectedVoucherForUsages(null)}
         />
       )}
+
+      {/* ─── Modal: Single-Class Course Notice ─── */}
+      <SingleClassVoucherNoticeModal
+        open={showSingleClassNoticeModal}
+        onClose={() => setShowSingleClassNoticeModal(false)}
+        courseId={effectiveCourseId}
+        courseName={courseName}
+        courseClasses={courseClasses}
+      />
+
+      {/* ─── Modal: No Classes in Course Warning ─── */}
+      <NoClassesWarningModal
+        open={showNoClassesModal}
+        onClose={() => setShowNoClassesModal(false)}
+        courseId={effectiveCourseId}
+        courseName={courseName}
+      />
     </div>
   )
 }

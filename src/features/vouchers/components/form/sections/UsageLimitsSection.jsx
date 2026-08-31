@@ -1,43 +1,121 @@
-import React from "react"
-import { Users, User, Calendar } from "lucide-react"
+import React, { useMemo } from "react"
+import { Users, Calendar, UserCheck } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { TextInput } from "@/shared/components/ui/inputs"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { formatCurrency } from "../../../utils/voucherTransforms"
 
-export const UsageLimitsSection = ({ form, errors, onChange }) => {
+export const UsageLimitsSection = ({
+  form,
+  errors,
+  onChange,
+  onBlur,
+  estimatedDeposit = 0,
+  isCourseScope = false,
+}) => {
+  const { t } = useLanguage()
+
+  // Calculate potential uses supported by Max Budget
+  const maxSupportedUses = useMemo(() => {
+    const budget = Number(form.maxBudget) || 0
+    const discount = Number(form.discountValue) || 0
+    if (isCourseScope && budget > 0 && discount > 0) {
+      return Math.floor(budget / discount)
+    }
+    return null
+  }, [isCourseScope, form.maxBudget, form.discountValue])
+
+  const usageLimitHelper = useMemo(() => {
+    if (isCourseScope) {
+      if (maxSupportedUses !== null && maxSupportedUses > 0) {
+        return t?.vouchers?.form?.usageLimitAutoCalc
+          ? t.vouchers.form.usageLimitAutoCalc
+              .replace("{{budget}}", formatCurrency(Number(form.maxBudget)))
+              .replace(
+                "{{discount}}",
+                formatCurrency(Number(form.discountValue)),
+              )
+              .replace("{{uses}}", maxSupportedUses)
+          : `Tự động tính: ${formatCurrency(Number(form.maxBudget))} ÷ ${formatCurrency(Number(form.discountValue))} = ${maxSupportedUses} lượt sử dụng.`
+      }
+      return (
+        t?.vouchers?.form?.usageLimitAutoCalcHelper ||
+        "Tự động tính dựa trên Ngân sách tối đa ÷ Mức giảm."
+      )
+    }
+    return undefined
+  }, [isCourseScope, maxSupportedUses, form.maxBudget, form.discountValue, t])
+
+  const totalUsageError = useMemo(() => {
+    if (errors?.totalUsageLimit) return errors.totalUsageLimit
+    return undefined
+  }, [errors?.totalUsageLimit])
+
+  const displayTotalUsageValue = isCourseScope
+    ? maxSupportedUses !== null && maxSupportedUses > 0
+      ? String(maxSupportedUses)
+      : ""
+    : form.totalUsageLimit
+
   return (
     <FluentCard className="space-y-4">
-      <h4 className="font-bold">Giới hạn sử dụng</h4>
+      <h4 className="font-bold">
+        {t?.vouchers?.form?.usageLimits || "Giới hạn sử dụng"}
+      </h4>
 
       {/* Tổng lượt sử dụng */}
       <TextInput
         type="number"
-        label="Tổng lượt sử dụng"
+        label={t?.vouchers?.form?.totalUsageLimitLabel || "Tổng lượt sử dụng"}
         required
-        value={form.totalUsageLimit}
-        onChange={(e) => onChange("totalUsageLimit", e.target.value)}
-        placeholder="100"
+        min={1}
+        disabled={isCourseScope}
+        readOnly={isCourseScope}
+        value={displayTotalUsageValue}
+        onChange={(e) => {
+          if (!isCourseScope) {
+            onChange("totalUsageLimit", e.target.value)
+          }
+        }}
+        onBlur={() => onBlur?.("totalUsageLimit")}
+        placeholder={
+          isCourseScope
+            ? t?.vouchers?.form?.autoCalcByBudget ||
+              "Tự động tính theo ngân sách"
+            : "100"
+        }
         rightIcon={Users}
-        error={errors?.totalUsageLimit}
+        helperText={usageLimitHelper}
+        error={totalUsageError}
       />
 
-      {/* Số lượt tối đa/người */}
+      {/* Lượt dùng / học viên */}
       <TextInput
+        required
         type="number"
-        label="Số lượt tối đa/người"
-        value={form.perUserLimit || 1}
+        label={t?.vouchers?.form?.perUserLimitLabel || "Lượt dùng / học viên"}
+        min={1}
+        step={1}
+        value={form.perUserLimit ?? ""}
         onChange={(e) => onChange("perUserLimit", e.target.value)}
+        onBlur={() => onBlur?.("perUserLimit")}
         placeholder="1"
-        rightIcon={User}
+        rightIcon={UserCheck}
+        error={errors?.perUserLimit}
       />
 
       {/* Giới hạn theo ngày */}
       <TextInput
         type="number"
-        label="Giới hạn theo ngày (Tùy chọn)"
+        label={t?.vouchers?.form?.dailyLimitLabel || "Giới hạn lượt / ngày"}
+        min={1}
+        step={1}
         value={form.dailyLimit || ""}
         onChange={(e) => onChange("dailyLimit", e.target.value)}
-        placeholder="Không giới hạn"
+        onBlur={() => onBlur?.("dailyLimit")}
+        placeholder={t?.vouchers?.form?.unlimited || "Không giới hạn"}
         rightIcon={Calendar}
+        error={errors?.dailyLimit}
       />
     </FluentCard>
   )

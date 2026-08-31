@@ -28,12 +28,12 @@ const Radio = ({
       ? "border-white"
       : "border-white/60 group-hover:border-white"
     : checked
-      ? "border-[#990011] dark:border-red-500"
-      : "border-black/50 dark:border-white/50 group-hover:border-black dark:group-hover:border-white"
+      ? "border-[#990011]"
+      : "border-black/50 group-hover:border-black"
 
   const innerDotClass = isWhite
     ? "bg-white"
-    : "bg-[#990011] dark:bg-red-500"
+    : "bg-[#990011]"
 
   const radioIndicator = (
     <div

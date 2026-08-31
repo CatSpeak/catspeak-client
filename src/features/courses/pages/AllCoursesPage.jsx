@@ -95,7 +95,6 @@ const AllCoursesPage = () => {
       )}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
           { label: c.title || "My Courses", onClick: () => navigate("/workspace/courses") },
           { label: ac.title || "All Courses" },
         ]}

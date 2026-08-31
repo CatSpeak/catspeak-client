@@ -8,20 +8,18 @@ import {
   Ban,
   QrCode,
   AlertCircle,
-  Trash2,
 } from "lucide-react"
 import { toast } from "react-hot-toast"
 import DataTable from "@/shared/components/ui/DataTable"
 import Popover from "@/shared/components/ui/Popover"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import { IconButton } from "@/shared/components/ui/buttons"
-import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import VoucherStatusBadge from "./VoucherStatusBadge"
 import VoucherCard from "./VoucherCard"
 import StopVoucherModal from "./detail/StopVoucherModal"
 import TransferInfoModal from "./detail/TransferInfoModal"
 import RejectionReasonModal from "./detail/RejectionReasonModal"
-import { useUpdateVoucherMutation } from "../api/vouchersApi"
+import { useStopVoucherMutation } from "../api/vouchersApi"
 import { formatCurrency } from "../utils/voucherTransforms"
 import { DISCOUNT_TYPES } from "../constants/voucherConstants"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -46,11 +44,10 @@ const VoucherTable = ({
     useState(null)
   const [selectedVoucherForRejection, setSelectedVoucherForRejection] =
     useState(null)
-  const [selectedVoucherForCancel, setSelectedVoucherForCancel] = useState(null)
 
-  // API Mutation (PUT /api/vouchers/{id})
-  const [updateVoucherMutation, { isLoading: isUpdating }] =
-    useUpdateVoucherMutation()
+  // API Mutations
+  const [stopVoucherMutation, { isLoading: isStopping }] =
+    useStopVoucherMutation()
 
   const handleViewDetails = (voucher) => {
     if (onViewDetails) {
@@ -60,37 +57,24 @@ const VoucherTable = ({
     }
   }
 
-  // Handle Stop Early confirm (using existing PUT /api/vouchers/{id})
+  // Handle Stop Early confirm (POST /api/vouchers/{id}/stop)
   const handleConfirmStop = async () => {
     if (!selectedVoucherForStop) return
     try {
-      await updateVoucherMutation({
-        id: selectedVoucherForStop.id,
-        status: "Stopped",
-      }).unwrap()
-      toast.success("Đã dừng hoạt động voucher thành công!")
+      await stopVoucherMutation(selectedVoucherForStop.id).unwrap()
+      toast.success(
+        vt.modals?.stopSuccess || "Đã dừng hoạt động voucher thành công!",
+      )
     } catch (err) {
-      console.warn("Stop voucher fallback:", err)
-      toast.success("Đã dừng voucher!")
+      console.error("Stop voucher error:", err)
+      const msg =
+        err?.data?.message ||
+        err?.data?.data?.message ||
+        vt.modals?.stopError ||
+        "Có lỗi xảy ra khi dừng voucher. Vui lòng thử lại."
+      toast.error(msg)
     } finally {
       setSelectedVoucherForStop(null)
-    }
-  }
-
-  // Handle Cancel Voucher / Pending Deposit confirm (using existing PUT /api/vouchers/{id})
-  const handleConfirmCancel = async () => {
-    if (!selectedVoucherForCancel) return
-    try {
-      await updateVoucherMutation({
-        id: selectedVoucherForCancel.id,
-        status: "Disabled",
-      }).unwrap()
-      toast.success("Đã hủy yêu cầu voucher thành công!")
-    } catch (err) {
-      console.warn("Cancel voucher fallback:", err)
-      toast.success("Đã hủy yêu cầu voucher!")
-    } finally {
-      setSelectedVoucherForCancel(null)
     }
   }
 
@@ -98,28 +82,41 @@ const VoucherTable = ({
     {
       key: "code",
       label: vt.table?.code || "Mã voucher",
-      headerClassName: "w-[16%]",
-      className: "w-[16%] font-bold",
+      headerClassName: "w-[14%]",
+      className: "w-[14%] font-bold",
+    },
+    {
+      key: "title",
+      label: vt.table?.title || "Tên voucher",
+      headerClassName: "w-[18%]",
+      className: "w-[18%]",
+      render: (voucher) => (
+        <span className="line-clamp-1" title={voucher.title || "-"}>
+          {voucher.title || "-"}
+        </span>
+      ),
     },
     {
       key: "discountType",
       label: vt.table?.discountType || "Loại giảm",
-      headerClassName: "w-[14%]",
-      className: "w-[14%]",
+      headerClassName: "w-[12%]",
+      className: "w-[12%]",
       render: (voucher) => {
         const isPercent =
           voucher.discountType === DISCOUNT_TYPES.PERCENTAGE ||
           voucher.discountType === 1 ||
           voucher.discountType === "Percentage"
 
-        return isPercent ? "Phần trăm" : "Cố định"
+        return isPercent
+          ? vt.table?.percent || "Phần trăm"
+          : vt.table?.fixed || "Cố định"
       },
     },
     {
       key: "discount",
-      label: vt.table?.discount || "Giá trị",
-      headerClassName: "w-[18%]",
-      className: "w-[18%] font-bold text-cath-red-700",
+      label: vt.table?.discount || "Mức giảm",
+      headerClassName: "w-[14%]",
+      className: "w-[14%] font-bold text-cath-red-700",
       render: (voucher) => {
         const isPercent =
           voucher.discountType === DISCOUNT_TYPES.PERCENTAGE ||
@@ -134,15 +131,11 @@ const VoucherTable = ({
     {
       key: "validity",
       label: vt.table?.validity || "Hiệu lực",
-      headerClassName: "w-[20%]",
-      className: "w-[20%]",
+      headerClassName: "w-[16%]",
+      className: "w-[16%]",
       render: (voucher) => {
         if (voucher.isNeverExpired) {
-          return (
-            <span className="text-emerald-600">
-              {vt.table?.neverExpired || "Không giới hạn"}
-            </span>
-          )
+          return <span>{vt.table?.neverExpired || "Không giới hạn"}</span>
         }
         const from = voucher.validFrom ? formatDate(voucher.validFrom) : null
         const to = voucher.validTo ? formatDate(voucher.validTo) : null
@@ -162,8 +155,8 @@ const VoucherTable = ({
     {
       key: "usage",
       label: vt.table?.usage || "Đã dùng",
-      headerClassName: "w-[12%]",
-      className: "w-[12%]",
+      headerClassName: "w-[10%]",
+      className: "w-[10%]",
       render: (voucher) => {
         const used = voucher.usedCount || 0
         const limit = voucher.totalUsageLimit || 0
@@ -173,15 +166,15 @@ const VoucherTable = ({
     {
       key: "status",
       label: vt.table?.status || "Trạng thái",
-      headerClassName: "w-[12%]",
-      className: "w-[12%]",
+      headerClassName: "w-[10%]",
+      className: "w-[10%]",
       render: (voucher) => <VoucherStatusBadge status={voucher.status} />,
     },
     {
       key: "actions",
       label: <span className="sr-only">{vt.table?.actions || "Thao tác"}</span>,
-      headerClassName: "w-[8%] text-right",
-      className: "w-[8%] whitespace-nowrap text-right",
+      headerClassName: "w-[6%] text-right",
+      className: "w-[6%] whitespace-nowrap text-right",
       render: (voucher) => {
         const status = voucher.status
         const isActive =
@@ -212,56 +205,40 @@ const VoucherTable = ({
               }
               content={(close) => (
                 <MenuList>
-                  {/* 1. Trạng thái Hoạt động: Xem chi tiết, Dừng sớm */}
+                  {/* 1. Trạng thái Hoạt động: Dừng sớm */}
                   {isActive && (
-                    <>
-                      <MenuItem
-                        label="Xem chi tiết"
-                        icon={<Eye />}
-                        onClick={() => {
-                          close()
-                          handleViewDetails(voucher)
-                        }}
-                      />
-                      <MenuItem
-                        label="Dừng sớm"
-                        icon={<Ban />}
-                        className="text-rose-600"
-                        onClick={() => {
-                          close()
-                          setSelectedVoucherForStop(voucher)
-                        }}
-                      />
-                    </>
+                    <MenuItem
+                      label={vt.actions?.stopEarly || "Dừng sớm"}
+                      icon={<Ban />}
+                      className="text-rose-600"
+                      onClick={() => {
+                        close()
+                        setSelectedVoucherForStop(voucher)
+                      }}
+                    />
                   )}
 
-                  {/* 2. Trạng thái Chờ nạp cọc / Chờ duyệt: Xem thông tin chuyển khoản, Hủy yêu cầu (BR-VC-GV-21) */}
+                  {/* 2. Trạng thái Chờ nạp cọc / Chờ duyệt: Xem thông tin chuyển khoản (BR-VC-GV-21) */}
                   {isPendingDeposit && (
-                    <>
-                      <MenuItem
-                        label="Xem thông tin chuyển khoản"
-                        icon={<QrCode />}
-                        onClick={() => {
-                          close()
-                          setSelectedVoucherForTransfer(voucher)
-                        }}
-                      />
-                      <MenuItem
-                        label="Hủy yêu cầu"
-                        icon={<Trash2 />}
-                        className="text-rose-600"
-                        onClick={() => {
-                          close()
-                          setSelectedVoucherForCancel(voucher)
-                        }}
-                      />
-                    </>
+                    <MenuItem
+                      label={
+                        vt.actions?.viewTransferInfo ||
+                        "Xem thông tin chuyển khoản"
+                      }
+                      icon={<QrCode />}
+                      onClick={() => {
+                        close()
+                        setSelectedVoucherForTransfer(voucher)
+                      }}
+                    />
                   )}
 
                   {/* 3. Trạng thái Bị từ chối: Xem lý do từ chối */}
                   {isRejected && (
                     <MenuItem
-                      label="Xem lý do từ chối"
+                      label={
+                        vt.actions?.viewRejectionReason || "Xem lý do từ chối"
+                      }
                       icon={<AlertCircle />}
                       onClick={() => {
                         close()
@@ -270,31 +247,20 @@ const VoucherTable = ({
                     />
                   )}
 
-                  {/* 4. Trạng thái Bản nháp: Chỉnh sửa, Xóa bản nháp */}
+                  {/* 4. Trạng thái Bản nháp: Chỉnh sửa */}
                   {isDraft && (
-                    <>
-                      <MenuItem
-                        label="Chỉnh sửa"
-                        icon={<Edit3 />}
-                        onClick={() => {
-                          close()
-                          if (onEditDraft) {
-                            onEditDraft(voucher)
-                          } else {
-                            navigate(`/workspace/vouchers/edit/${voucher.id}`)
-                          }
-                        }}
-                      />
-                      <MenuItem
-                        label="Xóa bản nháp"
-                        icon={<Trash2 />}
-                        className="text-rose-600"
-                        onClick={() => {
-                          close()
-                          setSelectedVoucherForCancel(voucher)
-                        }}
-                      />
-                    </>
+                    <MenuItem
+                      label={vt.actions?.edit || "Chỉnh sửa"}
+                      icon={<Edit3 />}
+                      onClick={() => {
+                        close()
+                        if (onEditDraft) {
+                          onEditDraft(voucher)
+                        } else {
+                          navigate(`/workspace/vouchers/edit/${voucher.id}`)
+                        }
+                      }}
+                    />
                   )}
 
                   {/* 5. Trạng thái Hết lượt / Hết hạn / Đã dừng / Vô hiệu hóa: Xem chi tiết */}
@@ -303,7 +269,7 @@ const VoucherTable = ({
                     !isRejected &&
                     !isDraft && (
                       <MenuItem
-                        label="Xem chi tiết"
+                        label={vt.actions?.viewDetails || "Xem chi tiết"}
                         icon={<Eye />}
                         onClick={() => {
                           close()
@@ -319,10 +285,6 @@ const VoucherTable = ({
       },
     },
   ]
-
-  const isCancellingDraft =
-    selectedVoucherForCancel?.status === "Draft" ||
-    selectedVoucherForCancel?.status === 1
 
   return (
     <>
@@ -347,7 +309,6 @@ const VoucherTable = ({
             onOpenTransfer={() => setSelectedVoucherForTransfer(voucher)}
             onOpenRejection={() => setSelectedVoucherForRejection(voucher)}
             onOpenStop={() => setSelectedVoucherForStop(voucher)}
-            onOpenCancel={() => setSelectedVoucherForCancel(voucher)}
           />
         )}
       />
@@ -359,7 +320,7 @@ const VoucherTable = ({
         onClose={() => setSelectedVoucherForStop(null)}
         onConfirm={handleConfirmStop}
         voucherCode={selectedVoucherForStop?.code}
-        isSubmitting={isUpdating}
+        isSubmitting={isStopping}
       />
 
       {/* 2. Modal Thông tin chuyển khoản (Chờ nạp cọc) */}
@@ -374,25 +335,6 @@ const VoucherTable = ({
         open={Boolean(selectedVoucherForRejection)}
         onClose={() => setSelectedVoucherForRejection(null)}
         voucher={selectedVoucherForRejection || {}}
-      />
-
-      {/* 4. Modal Hủy yêu cầu (Chờ nạp cọc) / Xóa bản nháp (Bản nháp) */}
-      <ConfirmationModal
-        open={Boolean(selectedVoucherForCancel)}
-        onClose={() => setSelectedVoucherForCancel(null)}
-        onConfirm={handleConfirmCancel}
-        title={
-          isCancellingDraft ? "Xóa bản nháp voucher" : "Hủy yêu cầu voucher"
-        }
-        message={
-          isCancellingDraft
-            ? `Bạn có chắc chắn muốn xóa bản nháp voucher "${selectedVoucherForCancel?.code}" không? Bản nháp này sẽ bị xóa khỏi hệ thống.`
-            : `Bạn có chắc chắn muốn hủy yêu cầu đặt cọc voucher "${selectedVoucherForCancel?.code}" không? Yêu cầu này sẽ bị hủy bỏ.`
-        }
-        confirmText={isCancellingDraft ? "Xóa bản nháp" : "Xác nhận hủy"}
-        cancelText="Quay lại"
-        confirmVariant="destructive"
-        isPending={isUpdating}
       />
     </>
   )

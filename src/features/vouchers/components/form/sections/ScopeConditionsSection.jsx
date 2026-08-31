@@ -1,8 +1,16 @@
+/**
+ * @deprecated
+ * NOTE: This component was previously used for hybrid multi-class selection inside Course vouchers.
+ * The voucher creation architecture has since been simplified into strict Course Scope vs Class Scope.
+ * This file is currently unmounted and retained for potential future reference (e.g. global voucher hubs).
+ */
 import React from "react"
-import { Search } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import Banner from "@/shared/components/ui/Banner"
-import { Radio, Checkbox } from "@/shared/components/ui/inputs"
+import ListItem from "@/shared/components/ui/ListItem"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { Radio, Checkbox, SearchInput } from "@/shared/components/ui/inputs"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { SCOPE_TYPES } from "../../../constants/voucherConstants"
 import { formatCurrency } from "../../../utils/voucherTransforms"
 
@@ -16,17 +24,21 @@ export const ScopeConditionsSection = ({
   courseClassMode,
   onSelectClassScope,
   onSelectCourseScope,
-  courseClasses,
-  filteredClasses,
+  courseClasses = [],
+  filteredClasses = [],
   classSearch,
   setClassSearch,
   lowestTuition,
 }) => {
-  const isCourseScope = form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
+  const { t } = useLanguage()
+  const vf = t?.vouchers?.form || {}
+  const totalCourseClasses = courseClasses?.length || 0
+  const isOnlyOneClass = totalCourseClasses === 1
+  const firstClass = courseClasses[0]
 
   return (
     <FluentCard className="space-y-4">
-      <h4 className="font-bold">Điều kiện áp dụng</h4>
+      <h4 className="font-bold">{vf.scopeConditions || "Điều kiện áp dụng"}</h4>
 
       {(errors?.classIds || errors?.courseIds || errors?.discountType) && (
         <Banner variant="danger">
@@ -34,141 +46,85 @@ export const ScopeConditionsSection = ({
         </Banner>
       )}
 
-      {/* Context 1: When inside Class Scope context */}
-      {isInitialClassContext ||
-      (form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES &&
-        !isCourseScope &&
-        courseClassMode !== "specific_classes") ? (
-        <div className="space-y-3">
-          {/* Option: Lớp học này */}
-          <div
-            onClick={onSelectClassScope}
-            className={`group block p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
-              form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES
-                ? "border-cath-red-700/80 bg-cath-red-50/20 ring-1 ring-cath-red-700/20"
-                : "border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Radio
-                checked={form.scopeType === SCOPE_TYPES.SPECIFIC_CLASSES}
-                onChange={onSelectClassScope}
-              />
-              <span className="text-xs font-bold text-slate-900">
-                Lớp học này {classNameParam ? `(${classNameParam})` : ""}
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 ml-8.5 mt-0.5">
-              Voucher chỉ áp dụng cho học viên đăng ký lớp học hiện tại.
-            </p>
-          </div>
+      {/* Scope selection inside course */}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-xs font-semibold text-slate-700">
+          {vf.scopeInCourse || "Phạm vi áp dụng trong khóa"}
+          <span className="text-red-500 ml-0.5">*</span>
+        </span>
 
-          {/* Option: Khóa học cụ thể */}
-          <div
-            onClick={() => onSelectCourseScope("all_classes")}
-            className={`group block p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
-              form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
-                ? "border-cath-red-700/80 bg-cath-red-50/20 ring-1 ring-cath-red-700/20"
-                : "border-slate-200 hover:bg-slate-50"
-            }`}
-          >
-            <div className="flex items-center gap-2.5">
-              <Radio
-                checked={form.scopeType === SCOPE_TYPES.SPECIFIC_COURSES}
-                onChange={() => onSelectCourseScope("all_classes")}
-              />
-              <span className="text-xs font-bold text-slate-900">
-                Khóa học cụ thể ({courseDisplayName})
-              </span>
-            </div>
-          </div>
-
-          {/* Blue note for class scope */}
-          <Banner variant="info">
-            Lưu ý: Chỉ lớp của bạn mới được áp dụng.
-          </Banner>
-        </div>
-      ) : (
-        /* Context 2: When inside Course Scope context (Image 1 & Image 3) */
-        <div className="space-y-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs">
-              Áp dụng cho<span className="text-red-500 ml-0.5">*</span>
-            </span>
-            <div className="flex flex-col">
-              <div className="group flex items-center gap-2 select-none opacity-40 cursor-not-allowed text-secondary">
-                <Radio
-                  withWrapper
-                  checked={false}
-                  disabled={true}
-                />
-                <span>Tất cả khóa học</span>
-              </div>
-
-              <div className="group flex items-center gap-2 cursor-pointer select-none">
-                <Radio
-                  withWrapper
-                  checked={true}
-                  onChange={() => {}}
-                />
-                <span>Khóa học cụ thể ({courseDisplayName})</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className="text-xs">
-              Phạm vi áp dụng trong khóa
-            </span>
-            <div className="flex flex-col">
-              <div
+            <div className="space-y-1.5">
+              {/* Option 1: Toàn bộ lớp trong khóa */}
+              <ListItem
+                lines={1}
                 onClick={() => onSelectCourseScope("all_classes")}
-                className="group flex items-center gap-2 cursor-pointer select-none"
+                selected={courseClassMode === "all_classes"}
+                leftContent={
+                  <Radio
+                    checked={courseClassMode === "all_classes"}
+                    onChange={() => onSelectCourseScope("all_classes")}
+                  />
+                }
+                className="rounded-xl cursor-pointer"
               >
-                <Radio
-                  withWrapper
-                  checked={courseClassMode === "all_classes"}
-                  onChange={() => onSelectCourseScope("all_classes")}
-                />
-                <span>
-                  Tất cả lớp trong khóa ({courseClasses?.length || 0} lớp)
-                </span>
-              </div>
+                <span>{vf.allClassesInCourse || "Toàn bộ lớp trong khóa"}</span>
+              </ListItem>
 
-              <div
-                onClick={() => onSelectCourseScope("specific_classes")}
-                className="group flex items-center gap-2 cursor-pointer select-none"
+              {/* Option 2: Chọn nhóm lớp trong khóa (Tối thiểu 2 lớp) */}
+              <ListItem
+                lines={1}
+                onClick={() => {
+                  if (!isOnlyOneClass) {
+                    onSelectCourseScope("specific_classes")
+                  }
+                }}
+                disabled={isOnlyOneClass}
+                selected={courseClassMode === "specific_classes"}
+                leftContent={
+                  <Radio
+                    checked={courseClassMode === "specific_classes"}
+                    disabled={isOnlyOneClass}
+                    onChange={() => {
+                      if (!isOnlyOneClass) {
+                        onSelectCourseScope("specific_classes")
+                      }
+                    }}
+                  />
+                }
+                className={`rounded-xl ${
+                  isOnlyOneClass
+                    ? "opacity-50 cursor-not-allowed bg-slate-50/50"
+                    : "cursor-pointer"
+                }`}
               >
-                <Radio
-                  withWrapper
-                  checked={courseClassMode === "specific_classes"}
-                  onChange={() => onSelectCourseScope("specific_classes")}
-                />
-                <span>Chọn lớp cụ thể</span>
-              </div>
+                <span>
+                  {vf.specificClassesInCourse || "Chọn nhóm lớp trong khóa (tối thiểu 2 lớp)"}
+                </span>
+              </ListItem>
             </div>
           </div>
 
-          {/* Specific Classes Picker */}
-          {courseClassMode === "specific_classes" && (
-            <div className="space-y-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+          {/* Specific Classes Picker (When specific_classes is selected and >= 2 classes exist) */}
+          {courseClassMode === "specific_classes" && !isOnlyOneClass && (
+            <div className="space-y-2 pt-1 animate-in fade-in duration-200">
               {/* Search */}
-              <div className="relative">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={classSearch}
-                  onChange={(e) => setClassSearch(e.target.value)}
-                  placeholder="Tìm lớp..."
-                  className="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-cath-red-500/20 focus:border-cath-red-500"
-                />
-              </div>
+              <SearchInput
+                value={classSearch}
+                onChange={setClassSearch}
+                placeholder={
+                  vf.searchClasses || "Tìm kiếm lớp học trong khóa..."
+                }
+              />
 
               {/* Checkbox list */}
-              <div className="max-h-48 overflow-y-auto bg-white rounded-xl border border-slate-200 p-1.5 space-y-1 shadow-2xs">
+              <FluentCard
+                padding="p-1"
+                className="max-h-[260px] overflow-y-auto min-h-0 !justify-start space-y-1 pr-1 scrollbar-thin"
+              >
                 {filteredClasses.length === 0 ? (
-                  <p className="text-xs text-slate-400 text-center py-3">
-                    Không tìm thấy lớp học nào trong khóa.
+                  <p className="text-xs text-secondary text-center py-4">
+                    {vf.noClassesFoundInCourse ||
+                      "Không tìm thấy lớp học nào trong khóa."}
                   </p>
                 ) : (
                   filteredClasses.map((cls) => {
@@ -177,72 +133,86 @@ export const ScopeConditionsSection = ({
                       form.classIds?.includes(Number(cls.id))
                     const tuition = cls.price ?? cls.tuitionFee ?? 900000
                     return (
-                      <div
+                      <ListItem
                         key={cls.id}
+                        lines={1}
                         onClick={() => {
                           const currentIds = form.classIds || []
                           const next = isChecked
                             ? currentIds.filter(
-                                (id) =>
-                                  id !== cls.id && id !== Number(cls.id),
+                                (id) => id !== cls.id && id !== Number(cls.id),
                               )
                             : [...currentIds, cls.id]
                           onChange("classIds", next)
                         }}
-                        className={`flex items-center justify-between p-2.5 rounded-lg cursor-pointer text-xs transition-colors select-none ${
-                          isChecked
-                            ? "bg-cath-red-50/60 text-cath-red-900 font-bold border border-cath-red-200/60"
-                            : "hover:bg-slate-50 text-slate-700 font-medium"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 truncate pr-2">
+                        selected={Boolean(isChecked)}
+                        leftContent={
                           <Checkbox
                             checked={Boolean(isChecked)}
                             onChange={() => {}}
                           />
-                          <span className="truncate">
-                            {cls.name || cls.title}
+                        }
+                        rightContent={
+                          <span className="text-xs text-secondary font-medium shrink-0">
+                            {formatCurrency(tuition)}
                           </span>
-                        </div>
-                        <span className="text-[11px] text-slate-400 font-normal shrink-0">
-                          (Học phí: {formatCurrency(tuition)}/người)
+                        }
+                        className="rounded-xl cursor-pointer"
+                      >
+                        <span className="truncate">
+                          {cls.name || cls.title}
                         </span>
-                      </div>
+                      </ListItem>
                     )
                   })
                 )}
-              </div>
+              </FluentCard>
 
-              <div className="flex items-center justify-between text-xs px-1">
-                <span className="text-slate-600 font-medium">
-                  Đã chọn: <strong>{form.classIds?.length || 0}</strong> lớp
-                </span>
-                {form.classIds?.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => onChange("classIds", [])}
-                    className="text-xs text-cath-red-700 hover:underline font-semibold cursor-pointer"
-                  >
-                    [Xóa tất cả]
-                  </button>
-                )}
+              {/* Class selection summary & quick actions */}
+              <div className="flex items-center justify-between text-xs text-secondary gap-2 pt-0.5 min-h-[32px]">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-medium">
+                    {`Đã chọn: ${form.classIds?.length || 0} / ${totalCourseClasses} lớp`}
+                  </span>
+                  {(form.classIds?.length || 0) < 2 ? (
+                    <span className="text-amber-600 font-normal">
+                      (Cần tối thiểu 2 lớp)
+                    </span>
+                  ) : (
+                    <span className="text-emerald-600 font-normal">
+                      (Đủ điều kiện)
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {(form.classIds?.length || 0) < totalCourseClasses && (
+                    <PillButton
+                      type="button"
+                      variant="secondary-no-outline"
+                      onClick={() =>
+                        onChange(
+                          "classIds",
+                          (courseClasses || []).map((c) => c.id),
+                        )
+                      }
+                    >
+                      <span>Chọn tất cả</span>
+                    </PillButton>
+                  )}
+                  {(form.classIds?.length || 0) > 0 && (
+                    <PillButton
+                      type="button"
+                      variant="secondary-no-outline"
+                      textColor="#990011"
+                      onClick={() => onChange("classIds", [])}
+                    >
+                      <span>{vf.clearAll || "Xóa tất cả"}</span>
+                    </PillButton>
+                  )}
+                </div>
               </div>
             </div>
           )}
-
-          {/* Lowest Tuition Info Banner */}
-          <Banner variant="info">
-            {courseClassMode === "specific_classes"
-              ? `Lớp thấp nhất trong lớp đã chọn: ${formatCurrency(lowestTuition)}. Giá trị giảm phải < ${formatCurrency(lowestTuition)}`
-              : `Lớp có học phí thấp nhất: ${formatCurrency(lowestTuition)}. Giá trị giảm phải < ${formatCurrency(lowestTuition)}`}
-          </Banner>
-
-          {/* Restriction Notice */}
-          <Banner variant="info">
-            Lưu ý: Chỉ lớp/khóa của bạn mới được áp dụng.
-          </Banner>
-        </div>
-      )}
     </FluentCard>
   )
 }

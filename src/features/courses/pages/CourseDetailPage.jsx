@@ -61,8 +61,8 @@ const CourseDetailPage = () => {
   }
 
   const courseTabs = [
-    { value: "overview", label: c.courseDetail?.overview || "Tổng quan" },
-    // ...(isCourseTeacher ? [{ value: "vouchers", label: "Ưu đãi" }] : []),
+    { value: "overview", label: c.courseDetail?.overview || "Overview" },
+    ...(isCourseTeacher ? [{ value: "vouchers", label: c.courseDetail?.vouchers || "Vouchers" }] : []),
   ]
 
   if ((isLoading || isFetching) && data === undefined) {
@@ -108,24 +108,18 @@ const CourseDetailPage = () => {
       <Breadcrumb
         items={[
           {
-            label: t.nav?.home || "Trang chủ",
-            onClick: () => navigate("/workspace"),
-          },
-          {
             label: c.title || "Khóa học của tôi",
             onClick: () => navigate("/workspace/courses"),
           },
           {
-            label: c.allCourses?.title || "All Courses",
-            onClick: () => navigate("/workspace/courses"),
+            label: rawCourse?.name || "Chi tiết khóa học",
           },
-          { label: c.student?.courseDetails || "Course Details" },
         ]}
       />
 
       {/* ─── Page Heading ─── */}
       <h1 className="text-3xl font-black text-gray-950 tracking-tight">
-        {c.student?.courseDetails || "Course Details"}
+        {rawCourse?.name || "Chi tiết khóa học"}
       </h1>
 
       {/* ─── Navigation Tabs ─── */}

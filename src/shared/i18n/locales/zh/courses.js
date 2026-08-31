@@ -434,6 +434,8 @@ export default {
     cancel: "取消",
   },
   courseDetail: {
+    overview: "概览",
+    vouchers: "优惠券",
     information: "详细信息",
     language: "语言",
     level: "级别",
@@ -472,6 +474,7 @@ export default {
     feed: "动态",
     lectureHall: "演讲厅",
     grading: "打分",
+    vouchers: "优惠券",
     classOverview: "班级概览",
     classInformation: "班级信息",
     tuitionFee: "学费",

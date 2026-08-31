@@ -6,7 +6,7 @@
 
 const coreColors = {
   primaryRed: "#990011", // Cat Speak
-  secondaryGray: "#7A7574", // Fluent UI
+  secondaryGray: "#606060", // Secondary text / subtext
   borderColor: "#E5E5E5", // Fluent UI
   youtubeBorderColor: "#C6C6C6", // Youtube border color
   // #F2F2F2 hover/active bg
@@ -54,6 +54,7 @@ export const colors = {
   headingColor: "#2e2e2e",
   textColor: "#515151",
   subtext: coreColors.secondaryGray,
+  placeholder: "#9CA3AF",
   darkOverlay: "rgba(0,0,0,0.2)",
   lightOverlay: "rgba(255,255,255,0.4)",
   lighttextGray: "#9ca0ab",

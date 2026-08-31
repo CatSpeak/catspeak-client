@@ -602,6 +602,10 @@ const routesConfig = [
                 ),
               },
               {
+                path: "courses",
+                element: <Navigate to="/workspace/courses/all" replace />,
+              },
+              {
                 path: "courses/all",
                 element: (
                   <RoleGuard allowedRoles={["Teacher"]}>

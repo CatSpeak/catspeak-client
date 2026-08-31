@@ -453,6 +453,8 @@ export default {
     cancel: "Cancel",
   },
   courseDetail: {
+    overview: "Overview",
+    vouchers: "Vouchers",
     information: "Information",
     language: "LANGUAGE",
     level: "LEVEL",
@@ -492,6 +494,7 @@ export default {
     feed: "Feed",
     lectureHall: "Lecture Hall",
     grading: "Grading",
+    vouchers: "Vouchers",
     classOverview: "Class Overview",
     classInformation: "Class Information",
     tuitionFee: "TUITION FEE",
