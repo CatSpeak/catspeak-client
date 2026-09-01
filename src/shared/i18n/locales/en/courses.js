@@ -260,6 +260,7 @@ export default {
       avgClassStb: "Class Average STB",
       overSessions: "Over {{count}} sessions",
       belowThreshold: "Students below threshold (< {{rate}}%)",
+      studentsUnit: "students",
       needsAttention: "Needs more attention",
       totalSessionsLearned: "Total completed sessions",
       teacherDisclaimer: "Teacher is not counted in STB — only student talk time is measured.",

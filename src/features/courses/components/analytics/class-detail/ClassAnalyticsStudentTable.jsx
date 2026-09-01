@@ -63,7 +63,7 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
     ? cd.expectedThresholdHint
         .replace("{{rate}}", thresholdRate)
         .replace("{{total}}", totalStudents)
-    : `Ngưỡng kỳ vọng: mỗi học viên phát biểu ≥ ${thresholdRate}% thời gian (kỳ vọng cân bằng 1/${totalStudents} HV)`
+    : `Ngưỡng kỳ vọng: mỗi học viên phát biểu ≥ ${thresholdRate}% thời gian (kỳ vọng cân bằng 1/${totalStudents} học viên)`
 
   return (
     <div className="w-full flex flex-col bg-white">
