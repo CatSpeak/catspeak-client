@@ -71,7 +71,7 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
           </div>
         )}
 
-        <div className="scrim absolute left-0 right-0 bottom-0 h-[38%] flex flex-col justify-end px-4 pb-4 pt-5 text-white transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] z-20 group-hover/card:h-[70%] group-hover/card:translate-y-0 translate-y-[62%]"
+        <div className="absolute left-0 right-0 bottom-0 flex flex-col justify-end px-4 pb-4 pt-5 text-white z-20"
           style={{
             background: "linear-gradient(to top, rgba(145,11,9,0.96) 45%, rgba(145,11,9,0.0) 100%)",
           }}
@@ -79,21 +79,16 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
           <span className="text-[11px] font-medium text-[#FFB3AC] mb-0.5">
             {roleText}
           </span>
-          <span className="text-base sm:text-lg font-semibold leading-tight mb-1.5">
+          <span className="text-base sm:text-lg font-semibold leading-tight mb-0 group-hover/card:mb-1.5">
             {displayName}
           </span>
           <p className="text-xs leading-relaxed text-[#FFD4D4] max-h-0 opacity-0 overflow-hidden transition-all duration-200 ease-out mb-0 group-hover/card:max-h-[72px] group-hover/card:opacity-100 group-hover/card:mb-2.5">
             {description}
           </p>
-          <span className="inline-flex items-center self-start bg-white text-[#910B09] text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-100">
+          <span className="inline-flex items-center self-start bg-white text-[#910B09] text-xs font-semibold px-3.5 py-2 rounded-lg opacity-0 translate-y-2 transition-all duration-200 ease-out group-hover/card:opacity-100 group-hover/card:translate-y-0">
             {t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"}
           </span>
         </div>
-      </div>
-
-      <div className="mt-3 text-center w-full px-2">
-        <h3 className="text-sm sm:text-base font-bold text-gray-900">{displayName}</h3>
-        <p className="text-xs sm:text-sm text-secondary">{roleText}</p>
       </div>
     </div>
   )
