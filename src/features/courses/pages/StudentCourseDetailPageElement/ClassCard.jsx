@@ -152,7 +152,7 @@ const ClassCard = ({
                   const classPath = isClassEnrolled
                     ? `/workspace/learning/class/${encodeURIComponent(String(cls.id))}`
                     : `/explore-courses/class/${encodeURIComponent(String(cls.id))}`
-                  window.open(classPath, "_blank")
+                  navigate(classPath)
                 }}
                 className="hover:text-cath-red-700"
               >
