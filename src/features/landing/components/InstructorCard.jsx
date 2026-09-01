@@ -71,12 +71,12 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
           </div>
         )}
 
-        <div className="absolute left-0 right-0 bottom-0 flex flex-col justify-end px-4 pb-3 pt-8 text-white z-20"
+        <div className="absolute left-0 right-0 bottom-0 h-[20%] group-hover/card:h-[55%] flex flex-col justify-end px-4 pb-3 pt-2 text-white z-20 transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)]"
           style={{
-            background: "linear-gradient(to top, rgba(145,11,9,0.95) 0%, rgba(145,11,9,0.7) 50%, rgba(145,11,9,0.0) 100%)",
+            background: "linear-gradient(to top, rgba(145,11,9,0.95) 0%, rgba(145,11,9,0.6) 60%, rgba(145,11,9,0.0) 100%)",
           }}
         >
-          <span className="text-[11px] font-semibold tracking-wide uppercase text-[#FFB3AC] mb-0.5">
+          <span className="text-[11px] font-semibold tracking-wide uppercase text-[#FFE4B5] mb-0.5">
             {roleText}
           </span>
           <span className="text-sm sm:text-base font-bold leading-tight text-white mb-0 group-hover/card:mb-1">
