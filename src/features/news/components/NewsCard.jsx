@@ -109,7 +109,7 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-hidden"
+      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-visible"
     >
       {/* ── Image area ───────────────────────────────────────────── */}
       <div className="relative w-full rounded-t-xl overflow-hidden">
