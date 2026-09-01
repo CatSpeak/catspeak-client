@@ -17,6 +17,12 @@ export default {
       post: "投稿表示",
       article: "記事表示",
     },
+    filters: {
+      searchPlaceholder: "記事を検索...",
+      newest: "最新",
+      mostViewed: "閲覧数が多い",
+      mostReactions: "リアクションが多い",
+    },
     newsDetail: {
       back: "戻る",
       views: "閲覧",

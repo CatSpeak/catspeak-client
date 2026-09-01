@@ -17,6 +17,12 @@ export default {
       post: "Dạng bài đăng",
       article: "Dạng bài viết",
     },
+    filters: {
+      searchPlaceholder: "Tìm kiếm bài viết...",
+      newest: "Mới nhất",
+      mostViewed: "Xem nhiều nhất",
+      mostReactions: "Tương tác nhiều",
+    },
     newsDetail: {
       back: "Quay lại",
       views: "lượt xem",
