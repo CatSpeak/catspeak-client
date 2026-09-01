@@ -143,7 +143,7 @@ const LeadingTeamSection = ({ openAuthModal }) => {
         {/* Teacher Recruitment Banner - only shown for non-teachers */}
         {!isTeacherUser && (
           <ScrollItem>
-            <div className="mt-8 relative rounded-xl px-8 sm:px-10 lg:px-12 overflow-hidden">
+            <div className="mt-16 relative rounded-xl px-8 sm:px-10 lg:px-12 overflow-hidden">
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="max-w-2xl text-center md:text-left">
                   <h3 className="text-2xl sm:text-3xl font-extrabold text-[#910B09] leading-tight">
