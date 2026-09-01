@@ -159,11 +159,11 @@ const NewsCard = ({ news }) => {
 
       {/* ── Action bar ────────────────────────────────────────────── */}
       <div
-        className="grid grid-cols-3 border-t border-border rounded-b-xl"
+        className="grid grid-cols-3 border-t border-border rounded-b-xl overflow-visible"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <div
-          className="group/reactions relative flex items-center justify-center"
+          className="group/reactions relative flex items-center justify-center overflow-visible"
           onMouseEnter={() => setShowReactions(true)}
           onMouseLeave={() => setShowReactions(false)}
         >
