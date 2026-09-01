@@ -135,9 +135,15 @@ const ClassAnalyticsDetailPage = () => {
       studentsAnalyticsData?.totalStudents ||
       0,
     totalSessions:
+      mainClassDetail?.totalSessions ??
+      mainClassDetail?.progress?.totalSessions ??
       sessionsAnalyticsData?.totalSessions ??
       studentsAnalyticsData?.totalSessions ??
-      mainClassDetail?.totalSessions ??
+      0,
+    completedSessions:
+      mainClassDetail?.completedSessions ??
+      mainClassDetail?.progress?.completedSessions ??
+      sessionsAnalyticsData?.sessions?.length ??
       0,
     avgClassStb: studentsAnalyticsData?.avgClassStb ?? 0,
     belowThresholdCount: studentsAnalyticsData?.belowThresholdCount ?? 0,

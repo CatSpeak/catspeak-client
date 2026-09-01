@@ -246,6 +246,7 @@ export default {
       avgClassStb: "全班平均 STB",
       overSessions: "在 {{count}} 节课程中",
       belowThreshold: "发言偏低学员 (< {{rate}}%)",
+      studentsUnit: "位学员",
       needsAttention: "需重点关注",
       totalSessionsLearned: "已上完总课节",
       teacherDisclaimer: "教师发言不计入 STB — 仅统计学员发言时间平衡。",

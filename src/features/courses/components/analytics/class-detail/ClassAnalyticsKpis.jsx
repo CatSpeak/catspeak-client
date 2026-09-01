@@ -11,8 +11,8 @@ const ClassAnalyticsKpis = ({ classData }) => {
     : `Trên ${classData?.totalSessions || 24} buổi học`
 
   const belowThresholdTitle = cd.belowThreshold
-    ? cd.belowThreshold.replace("{{rate}}", "30")
-    : "HV dưới ngưỡng (< 30%)"
+    ? cd.belowThreshold.replace("{{rate}}", classData?.thresholdRate ?? 25)
+    : `Học viên dưới ngưỡng (< ${classData?.thresholdRate ?? 25}%)`
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -31,14 +31,14 @@ const ClassAnalyticsKpis = ({ classData }) => {
         </span>
       </div>
 
-      {/* 2. HV dưới ngưỡng (< 30%) */}
+      {/* 2. Học viên dưới ngưỡng */}
       <div className="bg-[#fef9e7] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-xs">
         <span className="text-sm font-medium text-[#b45309]">
           {belowThresholdTitle}
         </span>
         <div className="my-2">
           <span className="text-3xl sm:text-4xl font-bold text-[#b45309] tracking-tight">
-            {classData?.belowThresholdCount ?? 1} / {classData?.totalStudents ?? 4} HV
+            {classData?.belowThresholdCount ?? 0} / {classData?.totalStudents ?? 0} {cd.studentsUnit || "học viên"}
           </span>
         </div>
         <span className="text-xs text-[#92400e] font-normal">
@@ -53,7 +53,7 @@ const ClassAnalyticsKpis = ({ classData }) => {
         </span>
         <div className="my-2">
           <span className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight">
-            {classData?.totalSessions ?? 24}
+            {classData?.completedSessions ?? 0} / {classData?.totalSessions ?? 0}
           </span>
         </div>
         <span className="text-xs text-[#6b7280] font-normal">

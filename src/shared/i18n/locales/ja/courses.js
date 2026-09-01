@@ -260,6 +260,7 @@ export default {
       avgClassStb: "クラス平均 STB",
       overSessions: "{{count}} 回の授業を通して",
       belowThreshold: "発言少なめの生徒 (< {{rate}}%)",
+      studentsUnit: "名",
       needsAttention: "重点フォローが必要",
       totalSessionsLearned: "受講済み総授業数",
       teacherDisclaimer: "講師の発言は STB に含まれません — 生徒の発言時間バランスのみが集計されます。",
