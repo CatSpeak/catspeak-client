@@ -1,193 +1,136 @@
-import React from "react"
-import { toast as sonnerToast, Toaster as SonnerToaster } from "sonner"
-import {
-  X,
-  CheckCircle2,
-  AlertCircle,
-  Info,
-  TriangleAlert,
-  Loader2,
-} from "lucide-react"
-import IconButton from "@/shared/components/ui/buttons/IconButton"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
+let globalToastRef = null
+const pendingToastQueue = []
 
 /**
- * Custom Toast Card Component following exact Figma specifications:
- * - Uses Sonner's built-in ::after hover bridge so mouse movements between stacked cards stay 100% smooth without hover jitter
- * - Row Layout: [ Left Section (Icon + 2-Line Text) ] -> [ Right Section (Action Button + Close Button) ]
- * - Dimensions: 344px width x 48px min-height
- * - Reuses IconButton & PillButton
+ * Binds PrimeReact Toast instance reference from AppToaster container
  */
-const CustomToastCard = ({
-  id,
-  message,
-  description,
-  type,
-  action,
-  closeButton = true,
-}) => {
-  return (
-    <div className="w-[344px] max-w-[calc(100vw-32px)] min-h-[48px] bg-[#212121] text-[#F4F0F4] border border-white/10 rounded-[12px] shadow-2xl flex items-center justify-between font-sans box-border pointer-events-auto select-none overflow-hidden">
-      {/* LEFT SECTION: Icon + 2-Line Text Content (Title & Description) */}
-      <div
-        className={`flex items-center gap-4 min-w-0 pl-4 ${
-          closeButton ? "pr-1" : "pr-4"
-        } flex-1 overflow-hidden`}
-      >
-        {type === "success" && (
-          <CheckCircle2
-            className="w-6 h-6 text-[#81C784] shrink-0"
-            aria-hidden="true"
-          />
-        )}
-        {type === "error" && (
-          <AlertCircle
-            className="w-6 h-6 text-[#FF5252] shrink-0"
-            aria-hidden="true"
-          />
-        )}
-        {type === "warning" && (
-          <TriangleAlert
-            className="w-6 h-6 text-[#FFB74D] shrink-0"
-            aria-hidden="true"
-          />
-        )}
-        {type === "info" && (
-          <Info
-            className="w-6 h-6 text-[#64B5F6] shrink-0"
-            aria-hidden="true"
-          />
-        )}
-        {type === "loading" && (
-          <Loader2
-            className="w-6 h-6 text-[#64B5F6] animate-spin shrink-0"
-            aria-hidden="true"
-          />
-        )}
-
-        <div className="flex-1 min-w-0 flex flex-col justify-center overflow-hidden">
-          {/* Title (Line 1) */}
-          <div className="text-sm font-semibold leading-5 text-[#F4F0F4] line-clamp-1">
-            {message}
-          </div>
-          {/* Text / Description (Line 2) */}
-          {description && (
-            <div className="text-xs text-neutral-400 leading-4 line-clamp-1">
-              {description}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* RIGHT SECTION: Action & Close Buttons */}
-      {(action || closeButton) && (
-        <div className="flex items-center shrink-0 ml-auto">
-          {action && (
-            <PillButton
-              variant="snackbar"
-              onClick={() => {
-                action.onClick?.()
-                sonnerToast.dismiss(id)
-              }}
-              className="shrink-0"
-            >
-              {action.label}
-            </PillButton>
-          )}
-
-          {closeButton && (
-            <IconButton
-              variant="iconOnly"
-              onClick={() => sonnerToast.dismiss(id)}
-              title="Close"
-            >
-              <X />
-            </IconButton>
-          )}
-        </div>
-      )}
-    </div>
-  )
+export const setGlobalToastRef = (ref) => {
+  globalToastRef = ref
+  if (globalToastRef && pendingToastQueue.length > 0) {
+    while (pendingToastQueue.length > 0) {
+      const item = pendingToastQueue.shift()
+      globalToastRef.show(item)
+    }
+  }
 }
 
+export const getGlobalToastRef = () => globalToastRef
+
 /**
- * Toast Helper Bridge
- * Destructures `description`, `action`, and `cancel` so they render INSIDE CustomToastCard without Sonner rendering duplicate nodes outside.
+ * Normalizes message & options into PrimeReact / PrimeNG Basic Toast message structure
  */
+const showToast = (severity, messageOrObj, opts = {}) => {
+  let payload
+
+  if (typeof messageOrObj === "object" && messageOrObj !== null) {
+    payload = {
+      severity: messageOrObj.severity || severity || "info",
+      summary:
+        messageOrObj.summary ||
+        (severity
+          ? severity.charAt(0).toUpperCase() + severity.slice(1)
+          : "Info"),
+      detail:
+        messageOrObj.detail || messageOrObj.description || messageOrObj.message,
+      life: messageOrObj.life || messageOrObj.duration || 3000,
+      sticky: messageOrObj.sticky || false,
+      closable: messageOrObj.closable !== false,
+      ...messageOrObj,
+    }
+  } else {
+    const options = typeof opts === "object" ? opts : { detail: opts }
+    const detail = options.detail || options.description
+    const summary = options.summary || messageOrObj
+
+    payload = {
+      severity: severity || "info",
+      summary: summary,
+      detail: detail,
+      life:
+        options.duration ||
+        options.life ||
+        (severity === "error" ? 4000 : 3000),
+      sticky: options.sticky || false,
+      closable: options.closeButton !== false && options.closable !== false,
+      ...options,
+    }
+  }
+
+  if (globalToastRef?.show) {
+    globalToastRef.show(payload)
+  } else {
+    pendingToastQueue.push(payload)
+  }
+
+  return payload
+}
+
 const customToast = (message, opts = {}) => {
-  const { description, action, cancel, ...restOpts } = opts
-  return sonnerToast.custom(
-    (id) => (
-      <CustomToastCard
-        id={id}
-        message={message}
-        description={description}
-        type={opts.type || "info"}
-        action={action}
-        closeButton={opts.closeButton !== false}
-      />
-    ),
-    restOpts,
-  )
+  return showToast(opts.type || opts.severity || "info", message, opts)
 }
 
-/** Show a success toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
-customToast.success = (message, opts) => {
-  const options = typeof opts === "object" ? opts : { description: opts }
-  return customToast(message, { ...options, type: "success" })
+/** PrimeNG/PrimeReact standard show() method */
+customToast.show = (messageOrObj) => {
+  if (typeof messageOrObj === "object" && messageOrObj !== null) {
+    return showToast(messageOrObj.severity || "info", messageOrObj)
+  }
+  return showToast("info", messageOrObj)
 }
 
-/** Show an error toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
-customToast.error = (message, opts) => {
-  const options = typeof opts === "object" ? opts : { description: opts }
-  return customToast(message, { ...options, type: "error" })
-}
+/** Basic Success Toast */
+customToast.success = (message, opts) => showToast("success", message, opts)
 
-/** Show an info toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
-customToast.info = (message, opts) => {
-  const options = typeof opts === "object" ? opts : { description: opts }
-  return customToast(message, { ...options, type: "info" })
-}
+/** Basic Error Toast */
+customToast.error = (message, opts) => showToast("error", message, opts)
 
-/** Show a warning toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
-customToast.warning = (message, opts) => {
-  const options = typeof opts === "object" ? opts : { description: opts }
-  return customToast(message, { ...options, type: "warning" })
-}
+/** Basic Info Toast */
+customToast.info = (message, opts) => showToast("info", message, opts)
 
-/** Show a loading toast notification. See docs/TOAST_GUIDELINES.md for usage details. */
+/** Basic Warning / Warn Toast */
+customToast.warning = (message, opts) => showToast("warn", message, opts)
+customToast.warn = (message, opts) => showToast("warn", message, opts)
+
+/** Basic Loading Toast (sticky) */
 customToast.loading = (message, opts) => {
-  const options = typeof opts === "object" ? opts : { description: opts }
-  return customToast(message, { ...options, type: "loading" })
+  return showToast("info", message, { ...opts, sticky: true })
 }
 
-customToast.dismiss = sonnerToast.dismiss
+/** Clear / Dismiss active toasts */
+customToast.dismiss = () => {
+  globalToastRef?.clear?.()
+}
+customToast.clear = () => {
+  globalToastRef?.clear?.()
+}
 
-/** Show an async promise toast notification (loading -> success/error). See docs/TOAST_GUIDELINES.md for usage details. */
+/** Async promise toast */
 customToast.promise = (promise, msgs = {}, opts = {}) => {
   const loadingMsg =
-    typeof msgs.loading === "string" ? msgs.loading : "Loading..."
-  const toastId = customToast.loading(loadingMsg, opts)
+    typeof msgs.loading === "string" ? msgs.loading : "Đang xử lý..."
+  customToast.loading(loadingMsg, opts)
 
   const p = typeof promise === "function" ? promise() : promise
 
-  p.then((data) => {
-    const successMsg =
-      typeof msgs.success === "function"
-        ? msgs.success(data)
-        : msgs.success || "Success!"
-    customToast.success(successMsg, { id: toastId, ...opts })
-  }).catch((err) => {
-    const errorMsg =
-      typeof msgs.error === "function"
-        ? msgs.error(err)
-        : msgs.error || "Error occurred"
-    customToast.error(errorMsg, { id: toastId, ...opts })
-  })
-
-  return toastId
+  return p
+    .then((data) => {
+      customToast.clear()
+      const successMsg =
+        typeof msgs.success === "function"
+          ? msgs.success(data)
+          : msgs.success || "Thành công!"
+      customToast.success(successMsg, opts)
+      return data
+    })
+    .catch((err) => {
+      customToast.clear()
+      const errorMsg =
+        typeof msgs.error === "function"
+          ? msgs.error(err)
+          : msgs.error || "Có lỗi xảy ra"
+      customToast.error(errorMsg, opts)
+      throw err
+    })
 }
 
 export const toast = customToast
-export const Toaster = SonnerToaster
 export default customToast
