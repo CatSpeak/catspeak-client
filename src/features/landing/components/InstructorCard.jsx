@@ -71,18 +71,18 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
           </div>
         )}
 
-        <div className="absolute left-0 right-0 bottom-0 flex flex-col justify-end px-4 pb-4 pt-5 text-white z-20"
+        <div className="absolute left-0 right-0 bottom-0 flex flex-col justify-end px-4 pb-3 pt-8 text-white z-20"
           style={{
-            background: "linear-gradient(to top, rgba(145,11,9,0.96) 45%, rgba(145,11,9,0.0) 100%)",
+            background: "linear-gradient(to top, rgba(145,11,9,0.95) 0%, rgba(145,11,9,0.7) 50%, rgba(145,11,9,0.0) 100%)",
           }}
         >
-          <span className="text-[11px] font-medium text-[#FFB3AC] mb-0.5">
+          <span className="text-[11px] font-semibold tracking-wide uppercase text-[#FFB3AC] mb-0.5">
             {roleText}
           </span>
-          <span className="text-base sm:text-lg font-semibold leading-tight mb-0 group-hover/card:mb-1.5">
+          <span className="text-sm sm:text-base font-bold leading-tight text-white mb-0 group-hover/card:mb-1">
             {displayName}
           </span>
-          <p className="text-xs leading-relaxed text-[#FFD4D4] max-h-0 opacity-0 overflow-hidden transition-all duration-200 ease-out mb-0 group-hover/card:max-h-[72px] group-hover/card:opacity-100 group-hover/card:mb-2.5">
+          <p className="text-xs leading-relaxed text-white/80 max-h-0 opacity-0 overflow-hidden transition-all duration-200 ease-out mb-0 group-hover/card:max-h-[72px] group-hover/card:opacity-100 group-hover/card:mb-2">
             {description}
           </p>
           <span className="inline-flex items-center self-start bg-white text-[#910B09] text-xs font-semibold px-3.5 py-2 rounded-lg opacity-0 translate-y-2 transition-all duration-200 ease-out group-hover/card:opacity-100 group-hover/card:translate-y-0">
