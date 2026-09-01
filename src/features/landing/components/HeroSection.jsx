@@ -51,7 +51,7 @@ const HeroSection = ({ openAuthModal }) => {
   }
 
   return (
-    <div className="relative w-full bg-white px-6 sm:px-8 md:px-10 pt-16 pb-12 lg:pt-24 lg:pb-48 overflow-visible">
+    <div className="relative w-full bg-white px-6 sm:px-8 md:px-10 pt-10 pb-8 lg:pt-16 lg:pb-32 overflow-visible">
       {/* Background Element - Full natural hero ribbon height without cut-off */}
       <img
         src={Element1}

@@ -40,7 +40,7 @@ const PartnerSection = () => {
     "Đơn vị kết nối"
 
   return (
-    <section className="w-full py-16 lg:py-20 bg-white overflow-hidden">
+    <section className="w-full py-10 lg:py-14 bg-white overflow-hidden">
       <ScrollReveal stagger className="w-full text-center">
         <ScrollItem>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#990011] mb-8 lg:mb-12">

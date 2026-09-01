@@ -59,7 +59,7 @@ const LeadingTeamSection = ({ openAuthModal }) => {
   const recruitmentT = sectionT.recruitment || {}
 
   return (
-    <section className="w-full mt-6 sm:mt-0 py-12 sm:py-16 md:py-20 lg:py-24 bg-white overflow-hidden">
+    <section className="w-full mt-6 sm:mt-0 py-8 sm:py-10 md:py-14 lg:py-16 bg-white overflow-hidden">
       <ScrollReveal stagger className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-12">
@@ -143,7 +143,7 @@ const LeadingTeamSection = ({ openAuthModal }) => {
         {/* Teacher Recruitment Banner - only shown for non-teachers */}
         {!isTeacherUser && (
           <ScrollItem>
-            <div className="mt-16 relative bg-[#FFF0F2] rounded-xl p-8 sm:p-10 lg:p-12 overflow-hidden border border-rose-100">
+            <div className="mt-16 relative rounded-xl p-8 sm:p-10 lg:p-12 overflow-hidden">
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="max-w-2xl text-center md:text-left">
                   <h3 className="text-2xl sm:text-3xl font-extrabold text-[#910B09] leading-tight">

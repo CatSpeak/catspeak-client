@@ -28,7 +28,7 @@ const AISection = () => {
   }
 
   return (
-    <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 bg-white relative overflow-hidden">
+    <section className="w-full py-8 sm:py-10 md:py-14 lg:py-16 bg-white relative overflow-hidden">
       {/* Hand-drawn SVG Doodle — Single Organic Wave path from Left to Right and Top to Bottom */}
       <PencilDoodle
         path="M -30 100 C 160 80, 320 180, 520 170 C 700 160, 860 290, 1060 270 C 1200 250, 1340 460, 1490 540"
