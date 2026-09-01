@@ -45,7 +45,8 @@ const NewsPage = ({ postType = "1" }) => {
     sortBy: filters.sortBy,
   });
 
-  // Search input is local state (for snappy typing); URL only updates after debounce.
+  // Search input is local state (for snappy typing); URL only updates when the
+  // user commits the keyword (Enter key or leaving the field).
   const [searchInput, setSearchInput] = useState(filters.searchKeyword);
   const [prevKeyword, setPrevKeyword] = useState(filters.searchKeyword);
 
@@ -56,15 +57,13 @@ const NewsPage = ({ postType = "1" }) => {
     setSearchInput(filters.searchKeyword);
   }
 
-  // Debounce: push search keyword to URL 300ms after the user stops typing.
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      const currentKeyword = parseNewsFilter(window.location.search).searchKeyword;
-      if (searchInput === currentKeyword) return;
-      setSearchParams(applyNewsFilter(window.location.search, { searchKeyword: searchInput }));
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [searchInput, setSearchParams]);
+  // Commit a keyword to the URL (triggers refetch + page reset via the
+  // filter-change effect below). No-op when the value already matches the URL.
+  const commitSearch = (keyword = searchInput) => {
+    const currentKeyword = parseNewsFilter(window.location.search).searchKeyword;
+    if (keyword === currentKeyword) return;
+    setSearchParams(applyNewsFilter(window.location.search, { searchKeyword: keyword }));
+  };
 
   // Whenever the URL filters change, go back to page 1 and scroll to top.
   const isFirstRender = useRef(true);
@@ -132,8 +131,20 @@ const NewsPage = ({ postType = "1" }) => {
     setSearchInput(value);
   };
 
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitSearch();
+    }
+  };
+
+  const handleSearchBlur = () => {
+    commitSearch();
+  };
+
   const handleClearSearch = () => {
     setSearchInput("");
+    commitSearch();
   };
 
   const filterBar = (
@@ -148,6 +159,8 @@ const NewsPage = ({ postType = "1" }) => {
           type="text"
           value={searchInput}
           onChange={(e) => handleSearchChange(e.target.value)}
+          onKeyDown={handleSearchKeyDown}
+          onBlur={handleSearchBlur}
           placeholder={t.news?.filters?.searchPlaceholder || "Search articles..."}
           className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-9 text-sm text-foreground placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/40"
           aria-label={t.news?.filters?.searchPlaceholder || "Search articles..."}
@@ -155,6 +168,7 @@ const NewsPage = ({ postType = "1" }) => {
         {searchInput && (
           <button
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={handleClearSearch}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-foreground"
             aria-label="Clear search"
