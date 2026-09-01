@@ -40,7 +40,7 @@ const ResponseSection = () => {
   }
 
   return (
-    <section className="relative w-full py-16 sm:py-20 lg:py-24 overflow-hidden">
+    <section className="relative w-full py-10 sm:py-14 lg:py-16 overflow-hidden">
       <ScrollReveal stagger className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start px-4 sm:px-6">
         {/* Left: Title + Navigation */}
         <div className="lg:col-span-4 lg:pr-2">

@@ -33,7 +33,7 @@ const FAQSection = () => {
   const questions = faqT.questions || []
 
   return (
-    <section className="relative w-full pt-12 sm:pt-16 md:pt-20 lg:pt-24 pb-16 sm:pb-24 md:pb-28 lg:pb-36 overflow-hidden">
+    <section className="relative w-full pt-8 sm:pt-10 md:pt-14 lg:pt-16 pb-10 sm:pb-16 md:pb-20 lg:pb-24 overflow-hidden">
       {/* Background sketch element */}
       <img
         src={Element6}

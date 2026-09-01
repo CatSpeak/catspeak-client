@@ -68,7 +68,7 @@ const ExploreEcosystemSection = () => {
   const featuresT = ecoT.features || {}
 
   return (
-    <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 bg-white relative overflow-hidden">
+    <section className="w-full py-8 sm:py-10 md:py-14 lg:py-16 bg-white relative overflow-hidden">
       {/* Hand-drawn SVG Doodle — Organic Loop path across and behind the cards */}
       <PencilDoodle
         path="M -30 460 C 140 420, 290 520, 460 480 C 560 460, 630 380, 650 310 C 665 240, 595 230, 545 280 C 490 330, 500 440, 590 490 C 690 550, 840 520, 990 480 C 1140 440, 1260 580, 1340 680 C 1390 750, 1440 730, 1490 710"
