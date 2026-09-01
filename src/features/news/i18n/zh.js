@@ -17,6 +17,12 @@ export default {
       post: "帖子视图",
       article: "文章视图",
     },
+    filters: {
+      searchPlaceholder: "搜索文章...",
+      newest: "最新",
+      mostViewed: "最多浏览",
+      mostReactions: "最多互动",
+    },
     newsDetail: {
       back: "返回",
       views: "次观看",
