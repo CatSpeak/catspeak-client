@@ -45,18 +45,18 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
   return (
     <div
       onClick={handleClick}
-      className="flex-shrink-0 w-[210px] sm:w-[230px] lg:w-[245px] flex flex-col items-center group/card cursor-pointer snap-start"
+      className="flex-shrink-0 w-[210px] sm:w-[230px] lg:w-[245px] flex flex-col group/card cursor-pointer snap-start"
     >
-      <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100 flex items-center justify-center">
+      <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100">
         {avatarSrc ? (
           <img
             src={avatarSrc}
             alt={displayName}
-            className="w-full h-full object-cover transition-opacity duration-300 group-hover/card:opacity-40"
+            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
             onError={() => setImgError(true)}
           />
         ) : fallbackAvatar ? (
-          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60 transition-opacity duration-300 group-hover/card:opacity-40">
+          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60 transition-transform duration-500 ease-out group-hover/card:scale-105">
             <img
               src={fallbackAvatar}
               alt={displayName}
@@ -64,25 +64,36 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
             />
           </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60 transition-opacity duration-300 group-hover/card:opacity-40">
+          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60 transition-transform duration-500 ease-out group-hover/card:scale-105">
             <div className="w-20 h-20 rounded-full bg-white/90 border border-border flex items-center justify-center text-gray-400 group-hover/card:text-[#910B09] transition-colors">
               <UserRound size={36} strokeWidth={1.5} />
             </div>
           </div>
         )}
 
-        <div className="absolute inset-0 flex items-end translate-y-full group-hover/card:translate-y-0 transition-transform duration-300 ease-out z-20">
-          <div className="w-full bg-white/95 backdrop-blur-sm p-4 border-t border-gray-200/60">
-            <p className="text-xs sm:text-sm text-gray-700 leading-relaxed line-clamp-3">
-              {description}
-            </p>
-          </div>
+        <div className="scrim absolute left-0 right-0 bottom-0 h-[38%] flex flex-col justify-end px-4 pb-4 pt-5 text-white transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] z-20 group-hover/card:h-[70%] group-hover/card:translate-y-0 translate-y-[62%]"
+          style={{
+            background: "linear-gradient(to top, rgba(145,11,9,0.96) 45%, rgba(145,11,9,0.0) 100%)",
+          }}
+        >
+          <span className="text-[11px] font-medium text-[#FFB3AC] mb-0.5">
+            {roleText}
+          </span>
+          <span className="text-base sm:text-lg font-semibold leading-tight mb-1.5">
+            {displayName}
+          </span>
+          <p className="text-xs leading-relaxed text-[#FFD4D4] max-h-0 opacity-0 overflow-hidden transition-all duration-200 ease-out mb-0 group-hover/card:max-h-[72px] group-hover/card:opacity-100 group-hover/card:mb-2.5">
+            {description}
+          </p>
+          <span className="inline-flex items-center self-start bg-white text-[#910B09] text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-100">
+            {t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"}
+          </span>
         </div>
       </div>
 
-      <div className="mt-4 text-center w-full px-4">
-        <h3 className="text-base font-bold">{displayName}</h3>
-        <p className="text-sm text-secondary">{roleText}</p>
+      <div className="mt-3 text-center w-full px-2">
+        <h3 className="text-sm sm:text-base font-bold text-gray-900">{displayName}</h3>
+        <p className="text-xs sm:text-sm text-secondary">{roleText}</p>
       </div>
     </div>
   )
