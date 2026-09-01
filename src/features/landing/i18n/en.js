@@ -171,8 +171,8 @@ export default {
       ],
     },
     leadingTeam: {
-      title: "Leading and Accompanying Team",
-      subtitle: "High Quality",
+      title: "Teaching Team",
+      subtitle: "Instructor of the Week",
       viewInstructor: "View instructor",
       defaultInstructor: "Instructor",
       defaultRole: "CatSpeak Instructor",
@@ -181,7 +181,7 @@ export default {
       prevInstructor: "Previous instructor",
       nextInstructor: "Next instructor",
       recruitment: {
-        title: "Want to become part of the CatSpeak Team?",
+        title: "Want to become part of the Cat Speak teaching team?",
         description:
           "Share knowledge, connect with a global community, and manage your time flexibly with a leading tech platform.",
         instructorArea: "Instructor Area",

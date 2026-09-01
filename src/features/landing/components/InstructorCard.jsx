@@ -45,7 +45,7 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
   return (
     <div
       onClick={handleClick}
-      className="flex-shrink-0 w-[210px] sm:w-[230px] lg:w-[245px] flex flex-col group/card cursor-pointer snap-start"
+      className="w-full flex flex-col group/card cursor-pointer"
     >
       <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100">
         {avatarSrc ? (
@@ -71,23 +71,27 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
           </div>
         )}
 
-        <div className="absolute left-0 right-0 bottom-0 h-[20%] group-hover/card:h-[55%] flex flex-col justify-end px-4 pb-0 pt-2 text-white z-20 transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)]"
+        <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col justify-end px-4 pt-5 pb-4 text-white transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] h-[30%] group-hover/card:h-[70%]"
           style={{
             background: "linear-gradient(to top, rgba(145,11,9,0.95) 0%, rgba(145,11,9,0.6) 60%, rgba(145,11,9,0.0) 100%)",
           }}
         >
-          <span className="text-[11px] font-semibold tracking-wide uppercase text-[#FFE4B5] mb-0.5">
+          <span className="text-[11px] font-semibold tracking-wide uppercase text-[#FFE4B5] leading-none">
             {roleText}
           </span>
-          <span className="text-sm sm:text-base font-bold leading-tight text-white mb-0 group-hover/card:mb-1">
+          <span className="mt-0.5 text-sm sm:text-base font-bold leading-tight text-white">
             {displayName}
           </span>
-          <p className="text-xs leading-relaxed text-white/80 max-h-0 opacity-0 overflow-hidden transition-all duration-200 ease-out mb-0 group-hover/card:max-h-[72px] group-hover/card:opacity-100 group-hover/card:mb-2">
-            {description}
-          </p>
-          <span className="inline-flex items-center self-start bg-white text-[#910B09] text-xs font-semibold px-3.5 py-2 rounded-lg opacity-0 translate-y-2 transition-all duration-200 ease-out group-hover/card:opacity-100 group-hover/card:translate-y-0">
-            {t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"}
-          </span>
+          <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] group-hover/card:max-h-20 group-hover/card:opacity-100 group-hover/card:mt-2">
+            <p className="text-xs leading-relaxed text-white/80">
+              {description}
+            </p>
+          </div>
+          <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] group-hover/card:max-h-12 group-hover/card:opacity-100 group-hover/card:mt-3">
+            <span className="inline-flex items-center bg-white text-[#910B09] text-xs font-semibold px-3.5 py-2 rounded-lg">
+              {t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"}
+            </span>
+          </div>
         </div>
       </div>
     </div>

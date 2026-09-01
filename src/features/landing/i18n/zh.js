@@ -162,8 +162,8 @@ export default {
       ],
     },
     leadingTeam: {
-      title: "领航与同行导师团队",
-      subtitle: "高品质教学",
+      title: "讲师团队",
+      subtitle: "本周明星讲师",
       viewInstructor: "查看导师",
       defaultInstructor: "导师",
       defaultRole: "CatSpeak 导师",
@@ -172,7 +172,7 @@ export default {
       prevInstructor: "上一位导师",
       nextInstructor: "下一位导师",
       recruitment: {
-        title: "想要成为 CatSpeak 导师团队的一员吗？",
+        title: "想成为 Cat Speak 讲师团队的一员吗？",
         description:
           "分享知识，连接全球社区，依托领先技术平台灵活自主掌控时间。",
         instructorArea: "导师专区",
