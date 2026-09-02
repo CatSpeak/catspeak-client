@@ -108,6 +108,14 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["UserProfile", "User"],
     }),
+    uploadMeetingAvatar: builder.mutation({
+      query: (formData) => ({
+        url: "/user-profile/meeting-avatar",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["UserProfile"],
+    }),
   }),
 });
 
@@ -123,6 +131,7 @@ export const {
   useUpdatePhoneNumberMutation,
   useUpdateMeetingAvatarMutation,
   useUpdateAvatarMutation,
+  useUploadMeetingAvatarMutation,
   useVerifyChangePasswordOtpMutation,
   useGetFollowersQuery,
   useGetFollowingQuery,
