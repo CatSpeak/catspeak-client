@@ -3,7 +3,8 @@ import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { useForgotPasswordMutation } from "@/store/api/authApi"
-import { parseApiError } from "@/shared/utils/apiError"
+import { resolveLocalizedError } from "@/shared/utils/apiError"
+import { resolveGeneralErrorMessage } from "@/features/auth/utils/registerErrors"
 
 const RequestOtpStep = ({ onSuccess, onSwitchMode }) => {
   const { t } = useLanguage()
@@ -40,20 +41,13 @@ const RequestOtpStep = ({ onSuccess, onSwitchMode }) => {
       onSuccess(emailValue)
     } catch (err) {
       console.error("Failed to send OTP:", err)
-      const { errorCode, message } = parseApiError(err)
-      if (errorCode === "AUTH_TOO_MANY_REQUESTS" || err?.status === 429) {
-        setApiError(
-          authText.tooManyOtpRequests ||
-            "Bạn đã yêu cầu gửi mã OTP quá nhiều lần. Vui lòng đợi trong giây lát.",
-        )
-      } else if (
-        message === "Email not found" ||
-        errorCode === "AUTH_ACCOUNT_NOT_FOUND"
-      ) {
-        setApiError(authText.emailNotFound || "Email không tồn tại")
-      } else {
-        setApiError(message || authText.sendOtpFailed || "Gửi OTP thất bại.")
-      }
+      setApiError(
+        resolveLocalizedError(
+          err,
+          (e) => resolveGeneralErrorMessage(e, authText),
+          authText.sendOtpFailed || "Gửi OTP thất bại.",
+        ),
+      )
     }
   }
 

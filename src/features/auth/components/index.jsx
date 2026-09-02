@@ -6,7 +6,7 @@ import VerifyEmailOtpPopup from "./popups/VerifyEmailOtpPopup"
 
 // The AnimatePresence inside each Popup's Modal will handle the cross-fade cleanly
 // when their respective 'open' prop toggles from true to false.
-const Auth = ({ isOpen, mode = "login", email = "", onClose, onSwitchMode }) => {
+const Auth = ({ isOpen, mode = "login", email = "", pendingActivation = false, onClose, onSwitchMode }) => {
   return (
     <>
       <LoginPopup
@@ -31,6 +31,7 @@ const Auth = ({ isOpen, mode = "login", email = "", onClose, onSwitchMode }) => 
         key="verify-email"
         open={isOpen && mode === "verify-email"}
         email={email}
+        pendingActivation={pendingActivation}
         onClose={onClose}
         onSwitchMode={onSwitchMode}
       />

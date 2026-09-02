@@ -16,19 +16,22 @@ const LandingPage = () => {
     isOpen: false,
     mode: "login",
     email: "",
+    pendingActivation: false,
   })
 
-  const openAuthModal = (mode = "login", email = "") =>
+  const openAuthModal = (mode = "login", email = "", pendingActivation = false) =>
     setAuthModal({
       isOpen: true,
       mode,
       email,
+      pendingActivation: !!pendingActivation,
     })
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
       ...prev,
       isOpen: false,
+      pendingActivation: false,
     }))
 
   const switchAuthMode = (mode, email = "") => openAuthModal(mode, email)
@@ -53,6 +56,7 @@ const LandingPage = () => {
           key="verify-email"
           open={true}
           email={authModal.email}
+          pendingActivation={authModal.pendingActivation}
           onClose={closeAuthModal}
           onSwitchMode={switchAuthMode}
         />

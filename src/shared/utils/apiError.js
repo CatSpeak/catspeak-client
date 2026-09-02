@@ -17,3 +17,15 @@ export function parseApiError(err) {
     traceId: res?.traceId,
   }
 }
+
+/**
+ * Resolves a localized error message when the backend returned a machine-readable
+ * errorCode, falling back to a localized default when it did not.
+ * `resolve` maps an errorCode to a localized message; `fallback` is used when there
+ * is no errorCode (e.g. a plain server message or a network failure).
+ */
+export function resolveLocalizedError(err, resolve, fallback) {
+  const { errorCode } = parseApiError(err)
+  if (errorCode) return resolve(err, errorCode) || fallback
+  return fallback
+}

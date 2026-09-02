@@ -24,6 +24,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     isOpen: false,
     mode: "login",
     email: "",
+    pendingActivation: false,
     redirectAfterLogin: null,
   })
 
@@ -41,6 +42,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         isOpen: true,
         mode: "reset-password",
         email: "",
+        pendingActivation: false,
         redirectAfterLogin: null,
       })
     }
@@ -50,6 +52,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         isOpen: true,
         mode: "reset-password",
         email: "",
+        pendingActivation: false,
         redirectAfterLogin: null,
       })
     }
@@ -59,18 +62,21 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         isOpen: true,
         mode: "login",
         email: "",
+        pendingActivation: false,
         redirectAfterLogin: location.state.redirectTo || null,
       })
     }
   }, [location.pathname, searchParams, location.state])
 
-  const openAuthModal = (mode = "login", secondArg = null) => {
-    // When switching to verify-email, the second arg is the email address
+  const openAuthModal = (mode = "login", secondArg = null, thirdArg = false) => {
+    // When switching to verify-email, the second arg is the email address and the
+    // third arg flags a pending-activation resume (a previously registered account).
     if (mode === "verify-email") {
       setAuthModal({
         isOpen: true,
         mode,
         email: secondArg || "",
+        pendingActivation: !!thirdArg,
         redirectAfterLogin: null,
       })
     } else {
@@ -78,6 +84,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         isOpen: true,
         mode,
         email: "",
+        pendingActivation: false,
         redirectAfterLogin: secondArg,
       })
     }
@@ -88,6 +95,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
       ...prev,
       isOpen: false,
       email: "",
+      pendingActivation: false,
       redirectAfterLogin: null,
     }))
 
@@ -148,6 +156,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         isOpen={authModal.isOpen}
         mode={authModal.mode}
         email={authModal.email}
+        pendingActivation={authModal.pendingActivation}
         onClose={closeAuthModal}
         onSwitchMode={openAuthModal}
       />
