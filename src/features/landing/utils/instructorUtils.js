@@ -159,7 +159,7 @@ export const getFallbackAvatarByGender = (gender) => {
   return null
 }
 
-export const getLocalizedLanguageName = (rawLang, t) => {
+export const getLocalizedLanguageName = (rawLang, t, language = "vi") => {
   if (!rawLang) return ""
   const str = String(rawLang).trim()
   const lower = str.toLowerCase()
@@ -168,7 +168,8 @@ export const getLocalizedLanguageName = (rawLang, t) => {
   if (langCode && t?.landing?.leadingTeam?.languages?.[langCode]) {
     return t.landing.leadingTeam.languages[langCode]
   }
-  if (LANGUAGE_MAP[lower]) {
+  // LANGUAGE_MAP is Vietnamese-only; only use for vi UI to avoid mixed language (e.g., "Giảng viên tiếng 英語")
+  if (language === "vi" && LANGUAGE_MAP[lower]) {
     return LANGUAGE_MAP[lower]
   }
   if (lower.startsWith("tiếng ")) {
@@ -202,7 +203,7 @@ export const getInstructorRole = (languages, t, language = "vi") => {
   const names = languages
     .map((l) => {
       const raw = typeof l === "object" ? l.language || l.name : l
-      return getLocalizedLanguageName(raw, t)
+      return getLocalizedLanguageName(raw, t, language)
     })
     .filter(Boolean)
 
@@ -214,6 +215,9 @@ export const getInstructorRole = (languages, t, language = "vi") => {
   }
   if (language === "zh") {
     return `${uniqueNames.join("、")}导师`
+  }
+  if (language === "ja") {
+    return `${uniqueNames.join("、")}講師`
   }
   return `Giảng viên tiếng ${uniqueNames.join(", ")}`
 }
