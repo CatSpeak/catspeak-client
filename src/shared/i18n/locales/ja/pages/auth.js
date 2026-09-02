@@ -127,7 +127,7 @@ export default {
   accountLocked:
     "ログイン試行の失敗が複数回あったため、アカウントは一時的にロックされています。後でもう一度お試しください。",
   accountLockedAttempts:
-    "ログイン試行の失敗が規定回数を超えたため、アカウントは15分間ロックされています。",
+    "ログイン試行の失敗が複数回あったため、アカウントは一時的にロックされています。後でもう一度お試しください。",
   ageRequirementNotMet: "規定の最低年齢に達していません。",
   validationFailed: "1つ以上の入力エラーが発生しました。",
   errorCodes: {
@@ -138,9 +138,9 @@ export default {
     AUTH_ACCOUNT_NOT_ACTIVATED:
       "アカウントが有効化されていません。メール/OTPを確認してください。",
     AUTH_ACCOUNT_INACTIVE: "アカウントは無効化または停止されています。",
-    AUTH_ACCOUNT_LOCKED: "アカウントは一時的にロックされています。",
+    AUTH_ACCOUNT_LOCKED: "アカウントは一時的にロックされています。後でもう一度お試しください。",
     AUTH_ACCOUNT_LOCKED_ATTEMPTS:
-      "ログイン試行の失敗が規定回数を超えたため、アカウントは15分間ロックされています。",
+      "ログイン試行の失敗が複数回あったため、アカウントは一時的にロックされています。後でもう一度お試しください。",
     AUTH_ACCOUNT_ALREADY_ACTIVE: "このアカウントはすでに有効化されています。",
     AUTH_ACCOUNT_PENDING_ACTIVATION: "アカウントがまだ有効化されていません。OTPでメールを確認してください。",
     AUTH_EMAIL_EXISTS: "このメールアドレスは登録済みです。",
