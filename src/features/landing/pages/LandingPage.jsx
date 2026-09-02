@@ -17,24 +17,28 @@ const LandingPage = () => {
     mode: "login",
     email: "",
     pendingActivation: false,
+    openNonce: 0,
   })
 
   const openAuthModal = (mode = "login", email = "", pendingActivation = false) =>
-    setAuthModal({
+    setAuthModal((prev) => ({
       isOpen: true,
       mode,
       email,
       pendingActivation: !!pendingActivation,
-    })
+      openNonce: (prev.openNonce || 0) + 1,
+    }))
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
       ...prev,
       isOpen: false,
+      email: "",
       pendingActivation: false,
     }))
 
-  const switchAuthMode = (mode, email = "") => openAuthModal(mode, email)
+  const switchAuthMode = (mode, email = "", pendingActivation = false) =>
+    openAuthModal(mode, email, pendingActivation)
 
   const renderAuthPopup = () => {
     if (!authModal.isOpen) return null
@@ -42,7 +46,7 @@ const LandingPage = () => {
     if (authModal.mode === "register") {
       return (
         <RegisterPopup
-          key="register"
+          key={`register-${authModal.openNonce}`}
           open={true}
           onClose={closeAuthModal}
           onSwitchMode={switchAuthMode}
@@ -53,7 +57,7 @@ const LandingPage = () => {
     if (authModal.mode === "verify-email") {
       return (
         <VerifyEmailOtpPopup
-          key="verify-email"
+          key={`verify-email-${authModal.openNonce}`}
           open={true}
           email={authModal.email}
           pendingActivation={authModal.pendingActivation}

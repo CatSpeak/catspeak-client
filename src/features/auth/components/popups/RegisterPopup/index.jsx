@@ -140,10 +140,14 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     }
   }
 
-  const handleClose = () => {
+  const resetForm = () => {
     setFormData(initialFormData)
     setErrors({})
     setApiError(null)
+  }
+
+  const handleClose = () => {
+    resetForm()
     onClose()
   }
 

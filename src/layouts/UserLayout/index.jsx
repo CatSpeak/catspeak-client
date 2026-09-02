@@ -13,29 +13,34 @@ const UserLayout = ({ showFooter = true }) => {
     mode: "login",
     email: "",
     pendingActivation: false,
+    openNonce: 0,
     redirectAfterLogin: null,
   })
 
   const openAuthModal = (mode = "login", secondArg = null, thirdArg = false) => {
     // When switching to verify-email, the second arg is the email address and the
     // third arg flags a pending-activation resume (a previously registered account).
-    if (mode === "verify-email") {
-      setAuthModal({
-        isOpen: true,
-        mode,
-        email: secondArg || "",
-        pendingActivation: !!thirdArg,
-        redirectAfterLogin: null,
-      })
-    } else {
-      setAuthModal({
+    setAuthModal((prev) => {
+      const openNonce = (prev.openNonce || 0) + 1
+      if (mode === "verify-email") {
+        return {
+          isOpen: true,
+          mode,
+          email: secondArg || "",
+          pendingActivation: !!thirdArg,
+          openNonce,
+          redirectAfterLogin: null,
+        }
+      }
+      return {
         isOpen: true,
         mode,
         email: "",
         pendingActivation: false,
+        openNonce,
         redirectAfterLogin: secondArg,
-      })
-    }
+      }
+    })
   }
 
   const closeAuthModal = () =>
@@ -73,6 +78,7 @@ const UserLayout = ({ showFooter = true }) => {
           mode={authModal.mode}
           email={authModal.email}
           pendingActivation={authModal.pendingActivation}
+          openNonce={authModal.openNonce}
           onClose={closeAuthModal}
           onSwitchMode={openAuthModal}
         />

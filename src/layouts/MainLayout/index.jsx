@@ -25,6 +25,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     mode: "login",
     email: "",
     pendingActivation: false,
+    openNonce: 0,
     redirectAfterLogin: null,
   })
 
@@ -38,56 +39,63 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     // If we are on the reset-password route OR we have parameters indicating a reset
     if (location.pathname === "/reset-password") {
       // Assuming parameters are passed in query string: ?token=...&email=...
-      setAuthModal({
+      setAuthModal((prev) => ({
         isOpen: true,
         mode: "reset-password",
         email: "",
         pendingActivation: false,
+        openNonce: (prev.openNonce || 0) + 1,
         redirectAfterLogin: null,
-      })
+      }))
     }
     // Alternatively, check for "mode" param in query string if backend link is like /?mode=reset
     else if (searchParams.get("mode") === "resetPassword") {
-      setAuthModal({
+      setAuthModal((prev) => ({
         isOpen: true,
         mode: "reset-password",
         email: "",
         pendingActivation: false,
+        openNonce: (prev.openNonce || 0) + 1,
         redirectAfterLogin: null,
-      })
+      }))
     }
     // Check for login required redirect via router state
     else if (location.state?.requireLogin) {
-      setAuthModal({
+      setAuthModal((prev) => ({
         isOpen: true,
         mode: "login",
         email: "",
         pendingActivation: false,
+        openNonce: (prev.openNonce || 0) + 1,
         redirectAfterLogin: location.state.redirectTo || null,
-      })
+      }))
     }
   }, [location.pathname, searchParams, location.state])
 
   const openAuthModal = (mode = "login", secondArg = null, thirdArg = false) => {
     // When switching to verify-email, the second arg is the email address and the
     // third arg flags a pending-activation resume (a previously registered account).
-    if (mode === "verify-email") {
-      setAuthModal({
-        isOpen: true,
-        mode,
-        email: secondArg || "",
-        pendingActivation: !!thirdArg,
-        redirectAfterLogin: null,
-      })
-    } else {
-      setAuthModal({
+    setAuthModal((prev) => {
+      const openNonce = (prev.openNonce || 0) + 1
+      if (mode === "verify-email") {
+        return {
+          isOpen: true,
+          mode,
+          email: secondArg || "",
+          pendingActivation: !!thirdArg,
+          openNonce,
+          redirectAfterLogin: null,
+        }
+      }
+      return {
         isOpen: true,
         mode,
         email: "",
         pendingActivation: false,
+        openNonce,
         redirectAfterLogin: secondArg,
-      })
-    }
+      }
+    })
   }
 
   const closeAuthModal = () =>
@@ -157,6 +165,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         mode={authModal.mode}
         email={authModal.email}
         pendingActivation={authModal.pendingActivation}
+        openNonce={authModal.openNonce}
         onClose={closeAuthModal}
         onSwitchMode={openAuthModal}
       />
