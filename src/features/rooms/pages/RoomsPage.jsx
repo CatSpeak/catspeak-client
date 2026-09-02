@@ -243,6 +243,7 @@ const RoomsPage = () => {
                   isCreatingAI: state.isCreatingAI,
                   isCreatingCustom: state.isCreatingCustom,
                   canUseAI: true,
+                  currentLang: lang,
                 }}
               />
               <WorkshopCarousel hideTitle={true} />

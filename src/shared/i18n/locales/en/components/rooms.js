@@ -235,6 +235,7 @@ export default {
     connect25: "Connect 2:5",
     yourAI: "With AI 1:1",
     customRoom: "Create Room",
+    aiChat: "Chat with AI",
   },
   customRooms: {
     title: "Pro Custom Room",

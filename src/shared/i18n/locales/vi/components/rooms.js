@@ -210,6 +210,7 @@ export default {
     connect25: "Kết nối 2:5",
     yourAI: "1:1 với AI",
     customRoom: "Tạo phòng",
+    aiChat: "Trò chuyện với AI",
   },
   customRooms: {
     title: "Phòng Tùy Chỉnh Pro",

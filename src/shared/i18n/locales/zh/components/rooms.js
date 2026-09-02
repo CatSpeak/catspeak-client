@@ -207,6 +207,7 @@ export default {
     connect25: "连接 2:5",
     yourAI: "1:1 AI 对话",
     customRoom: "创建房间",
+    aiChat: "与AI对话",
   },
   customRooms: {
     title: "Pro 自定义房间",
