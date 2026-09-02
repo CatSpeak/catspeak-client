@@ -149,6 +149,7 @@ const RegisterFormFields = ({
         <div className="flex-1">
           <label className="block text-xs text-secondary mb-1">
             {authText.phoneLabel}
+            <span className="text-red-500 ml-0.5">*</span>
           </label>
           <Dropdown
             options={phonePrefixes}
