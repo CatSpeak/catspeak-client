@@ -17,17 +17,37 @@ const LandingPage = () => {
     mode: "login",
     email: "",
     pendingActivation: false,
+    registerNonce: 0,
+    verifyNonce: 0,
     openNonce: 0,
   })
 
   const openAuthModal = (mode = "login", email = "", pendingActivation = false) =>
-    setAuthModal((prev) => ({
-      isOpen: true,
-      mode,
-      email,
-      pendingActivation: !!pendingActivation,
-      openNonce: (prev.openNonce || 0) + 1,
-    }))
+    setAuthModal((prev) => {
+      const isFreshOpen = !prev.isOpen
+      let registerNonce = prev.registerNonce || 0
+      let verifyNonce = prev.verifyNonce || 0
+      let openNonce = prev.openNonce || 0
+
+      if (mode === "register") {
+        if (isFreshOpen) registerNonce++
+      } else if (mode === "verify-email") {
+        if (isFreshOpen || prev.mode !== "verify-email") verifyNonce++
+        if (isFreshOpen) openNonce++
+      } else {
+        if (isFreshOpen) openNonce++
+      }
+
+      return {
+        isOpen: true,
+        mode,
+        email,
+        pendingActivation: !!pendingActivation,
+        registerNonce,
+        verifyNonce,
+        openNonce,
+      }
+    })
 
   const closeAuthModal = () =>
     setAuthModal((prev) => ({
@@ -46,7 +66,7 @@ const LandingPage = () => {
     if (authModal.mode === "register") {
       return (
         <RegisterPopup
-          key={`register-${authModal.openNonce}`}
+          key={`register-${authModal.registerNonce}`}
           open={true}
           onClose={closeAuthModal}
           onSwitchMode={switchAuthMode}
@@ -57,7 +77,7 @@ const LandingPage = () => {
     if (authModal.mode === "verify-email") {
       return (
         <VerifyEmailOtpPopup
-          key={`verify-email-${authModal.openNonce}`}
+          key={`verify-email-${authModal.verifyNonce}`}
           open={true}
           email={authModal.email}
           pendingActivation={authModal.pendingActivation}
