@@ -117,7 +117,11 @@ export default {
   newEmailPlaceholder: "正しいメールアドレスを入力",
   accountNotActivated: "アカウントが有効化されていません。",
   clickToVerifyEmail: "クリックしてメールを確認してください。",
+  registrationPendingActivation:
+    "アカウントがまだ有効化されていません。メールに送信されたOTPを入力してください。期限切れの場合は「OTPを再送信」をクリックしてください。",
   otpResentSuccess: "OTPを再送信しました",
+  emailUpdatedOtpSent: "メールアドレスが更新され、新しいOTPが送信されました。",
+  updateEmailFailed: "メールアドレスの更新に失敗しました。もう一度お試しください。",
   sendingOtp: "OTPを送信中...",
   tooManyOtpRequests: "OTPのリクエストが多すぎます。後でもう一度お試しください。",
   accountLocked:
@@ -138,6 +142,7 @@ export default {
     AUTH_ACCOUNT_LOCKED_ATTEMPTS:
       "ログイン試行の失敗が規定回数を超えたため、アカウントは15分間ロックされています。",
     AUTH_ACCOUNT_ALREADY_ACTIVE: "このアカウントはすでに有効化されています。",
+    AUTH_ACCOUNT_PENDING_ACTIVATION: "アカウントがまだ有効化されていません。OTPでメールを確認してください。",
     AUTH_EMAIL_EXISTS: "このメールアドレスは登録済みです。",
     AUTH_PHONE_EXISTS: "この電話番号は登録済みです。",
     AUTH_PHONE_INVALID: "電話番号の形式が無効です。",
