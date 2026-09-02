@@ -13,21 +13,36 @@ const UserLayout = ({ showFooter = true }) => {
     mode: "login",
     email: "",
     pendingActivation: false,
+    registerNonce: 0,
+    verifyNonce: 0,
     openNonce: 0,
     redirectAfterLogin: null,
   })
 
   const openAuthModal = (mode = "login", secondArg = null, thirdArg = false) => {
-    // When switching to verify-email, the second arg is the email address and the
-    // third arg flags a pending-activation resume (a previously registered account).
     setAuthModal((prev) => {
-      const openNonce = (prev.openNonce || 0) + 1
+      const isFreshOpen = !prev.isOpen
+      let registerNonce = prev.registerNonce || 0
+      let verifyNonce = prev.verifyNonce || 0
+      let openNonce = prev.openNonce || 0
+
+      if (mode === "register") {
+        if (isFreshOpen) registerNonce++
+      } else if (mode === "verify-email") {
+        if (isFreshOpen || prev.mode !== "verify-email") verifyNonce++
+        if (isFreshOpen) openNonce++
+      } else {
+        if (isFreshOpen) openNonce++
+      }
+
       if (mode === "verify-email") {
         return {
           isOpen: true,
           mode,
           email: secondArg || "",
           pendingActivation: !!thirdArg,
+          registerNonce,
+          verifyNonce,
           openNonce,
           redirectAfterLogin: null,
         }
@@ -37,6 +52,8 @@ const UserLayout = ({ showFooter = true }) => {
         mode,
         email: "",
         pendingActivation: false,
+        registerNonce,
+        verifyNonce,
         openNonce,
         redirectAfterLogin: secondArg,
       }
@@ -78,7 +95,8 @@ const UserLayout = ({ showFooter = true }) => {
           mode={authModal.mode}
           email={authModal.email}
           pendingActivation={authModal.pendingActivation}
-          openNonce={authModal.openNonce}
+          registerNonce={authModal.registerNonce}
+          verifyNonce={authModal.verifyNonce}
           onClose={closeAuthModal}
           onSwitchMode={openAuthModal}
         />
