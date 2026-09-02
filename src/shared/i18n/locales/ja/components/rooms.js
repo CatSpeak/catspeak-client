@@ -209,6 +209,7 @@ export default {
     connect25: "2:5で接続",
     yourAI: "AIと1:1",
     customRoom: "ルームを作成",
+    aiChat: "AIと会話",
   },
   customRooms: {
     title: "Proカスタムルーム",
