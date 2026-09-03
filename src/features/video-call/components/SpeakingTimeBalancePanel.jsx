@@ -140,11 +140,12 @@ const SpeakingTimeBalancePanel = ({
 
   const studentParticipants = useMemo(() => {
     if (participants && participants.length > 0) {
-      const filtered = participants.filter((p) => !isHostOrTeacher(p))
-      if (filtered.length > 0) return filtered
+      return participants.filter((p) => !isHostOrTeacher(p))
     }
     if (speakingParticipantsList && speakingParticipantsList.length > 0) {
-      return speakingParticipantsList.filter((p) => !p.isTeacher && !p.isHost)
+      return speakingParticipantsList.filter(
+        (p) => !isHostOrTeacher(p) && !p.isTeacher && !p.isHost,
+      )
     }
     return []
   }, [participants, speakingParticipantsList, isHostOrTeacher])
