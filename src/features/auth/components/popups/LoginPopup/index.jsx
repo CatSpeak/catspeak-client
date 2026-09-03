@@ -81,7 +81,10 @@ const LoginPopup = ({ open, onClose, onSwitchMode }) => {
         return
       }
 
-      if (errorCode === "AUTH_ACCOUNT_LOCKED_ATTEMPTS") {
+      if (
+        errorCode === "AUTH_ACCOUNT_LOCKED_ATTEMPTS" ||
+        errorCode === "AUTH_ACCOUNT_LOCKED"
+      ) {
         setApiError(authText.accountLocked || message)
         return
       }

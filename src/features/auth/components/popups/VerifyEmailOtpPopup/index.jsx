@@ -10,6 +10,8 @@ import {
   useVerifyEmailOtpMutation,
   useResendEmailOtpMutation,
 } from "@/store/api/authApi"
+import { parseApiError, resolveLocalizedError } from "@/shared/utils/apiError"
+import { resolveGeneralErrorMessage } from "@/features/auth/utils/registerErrors"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 
 const VerifyEmailOtpPopup = ({
@@ -17,6 +19,7 @@ const VerifyEmailOtpPopup = ({
   onClose,
   email: initialEmail,
   onSwitchMode,
+  pendingActivation = false,
 }) => {
   const { t } = useLanguage()
   const authText = t.auth || {}
@@ -63,11 +66,12 @@ const VerifyEmailOtpPopup = ({
       onClose()
       if (redirectAfterLogin) navigate(redirectAfterLogin, { replace: true })
     } catch (err) {
-      const apiMsg = err?.data?.message
       setApiError(
-        apiMsg === "Invalid or expired OTP"
-          ? authText.verifyOtpFailed
-          : apiMsg || authText.verifyOtpFailed || "Invalid or expired OTP.",
+        resolveLocalizedError(
+          err,
+          (e) => resolveGeneralErrorMessage(e, authText),
+          authText.verifyOtpFailed || "Invalid or expired OTP.",
+        ),
       )
     }
   }
@@ -81,11 +85,12 @@ const VerifyEmailOtpPopup = ({
         authText.otpResentSuccess || "Mã OTP đã được gửi lại thành công",
       )
     } catch (err) {
-      const apiMsg = err?.data?.message
       setApiError(
-        apiMsg === "Too many OTP requests. Please try again later."
-          ? authText.tooManyOtpRequests
-          : apiMsg || "Gửi OTP thất bại.",
+        resolveLocalizedError(
+          err,
+          (e) => resolveGeneralErrorMessage(e, authText),
+          authText.sendOtpFailed || "Gửi OTP thất bại.",
+        ),
       )
     }
   }
@@ -102,9 +107,22 @@ const VerifyEmailOtpPopup = ({
       await resendEmailOtp({ email: currentEmail, newEmail }).unwrap()
       setEmail(newEmail)
       setIsEditingEmail(false)
-      setSuccessMsg("Email updated and new OTP sent")
+      setSuccessMsg(
+        authText.emailUpdatedOtpSent || "Email updated and new OTP sent",
+      )
     } catch (err) {
-      setApiError(err?.data?.message || "Failed to update email.")
+      const { errorCode, message } = parseApiError(err)
+      if (errorCode === "AUTH_EMAIL_EXISTS") {
+        setApiError(authText.emailExists || message)
+      } else {
+        setApiError(
+          resolveLocalizedError(
+            err,
+            (e) => resolveGeneralErrorMessage(e, authText),
+            authText.updateEmailFailed || message || "Failed to update email.",
+          ),
+        )
+      }
     }
   }
 
@@ -164,6 +182,12 @@ const VerifyEmailOtpPopup = ({
         <h2 className="text-center text-3xl font-bold text-primary mb-6">
           {authText.verifyEmailTitle || "Xác minh OTP"}
         </h2>
+
+        {pendingActivation && authText.registrationPendingActivation && (
+          <div className="mb-6 rounded-lg bg-amber-50 py-3 px-4 text-sm text-amber-800">
+            {authText.registrationPendingActivation}
+          </div>
+        )}
 
         {!isEditingEmail ? (
           <p className="mb-6 text-center text-sm text-secondary flex flex-col items-center">

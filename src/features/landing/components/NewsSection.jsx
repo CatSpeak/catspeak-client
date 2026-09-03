@@ -50,7 +50,7 @@ const NewsSection = () => {
   const newsT = t?.landing?.news || {}
 
   return (
-    <section className="relative w-full py-12 sm:py-16 md:py-20 lg:py-24 bg-white overflow-hidden">
+    <section className="relative w-full py-8 sm:py-10 md:py-14 lg:py-16 bg-white overflow-hidden">
       {/* Background Translucent Watermark Text */}
       <div className="absolute top-12 left-0 right-0 pointer-events-none select-none overflow-hidden z-0 opacity-15 whitespace-nowrap">
         <span className="text-[120px] font-black text-rose-300 tracking-wider">

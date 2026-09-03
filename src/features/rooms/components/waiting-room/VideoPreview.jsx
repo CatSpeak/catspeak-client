@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react"
 import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
+import { useMeetingAvatar } from "@/features/video-call/hooks/useMeetingAvatar"
 
 const VideoPreview = ({
   localStream,
@@ -16,6 +17,8 @@ const VideoPreview = ({
 }) => {
   const { t } = useLanguage()
   const videoRef = useRef(null)
+
+  const { displayAvatar } = useMeetingAvatar(user)
 
   useEffect(() => {
     const videoElement = videoRef.current
@@ -56,11 +59,11 @@ const VideoPreview = ({
 
         {!cameraOn && (
           <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
-            {user?.avatarImageUrl && (
+            {displayAvatar && (
               <>
                 <div className="absolute inset-0 z-0 bg-neutral-900" />
                 <img
-                  src={user.avatarImageUrl}
+                  src={displayAvatar}
                   alt=""
                   className="absolute inset-0 z-0 h-full w-full object-cover blur-[40px] scale-125 opacity-60"
                   onError={(e) => {
@@ -73,10 +76,10 @@ const VideoPreview = ({
             <div className="relative z-10 flex items-center justify-center">
               <Avatar
                 size={64}
-                src={user?.avatarImageUrl}
+                src={displayAvatar}
                 alt={user?.username || "User"}
                 name={user?.fullName || user?.username || "User"}
-                className={`md:!w-24 md:!h-24 ${user?.avatarImageUrl ? "shadow-xl" : ""}`}
+                className={`md:!w-24 md:!h-24 ${displayAvatar ? "shadow-xl" : ""}`}
               />
             </div>
           </div>

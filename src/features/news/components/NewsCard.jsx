@@ -109,7 +109,7 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-hidden"
+      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-visible"
     >
       {/* ── Image area ───────────────────────────────────────────── */}
       <div className="relative w-full rounded-t-xl overflow-hidden">
@@ -159,11 +159,11 @@ const NewsCard = ({ news }) => {
 
       {/* ── Action bar ────────────────────────────────────────────── */}
       <div
-        className="grid grid-cols-3 border-t border-border rounded-b-xl"
+        className="grid grid-cols-3 border-t border-border rounded-b-xl overflow-visible"
         onPointerDown={(e) => e.stopPropagation()}
       >
         <div
-          className="group/reactions relative flex items-center justify-center"
+          className="group/reactions relative flex items-center justify-center overflow-visible"
           onMouseEnter={() => setShowReactions(true)}
           onMouseLeave={() => setShowReactions(false)}
         >

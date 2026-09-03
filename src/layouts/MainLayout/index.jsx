@@ -24,6 +24,10 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     isOpen: false,
     mode: "login",
     email: "",
+    pendingActivation: false,
+    registerNonce: 0,
+    verifyNonce: 0,
+    openNonce: 0,
     redirectAfterLogin: null,
   })
 
@@ -37,50 +41,85 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
     // If we are on the reset-password route OR we have parameters indicating a reset
     if (location.pathname === "/reset-password") {
       // Assuming parameters are passed in query string: ?token=...&email=...
-      setAuthModal({
+      setAuthModal((prev) => ({
+        ...prev,
         isOpen: true,
         mode: "reset-password",
         email: "",
+        pendingActivation: false,
+        openNonce: !prev.isOpen ? (prev.openNonce || 0) + 1 : prev.openNonce,
         redirectAfterLogin: null,
-      })
+      }))
     }
     // Alternatively, check for "mode" param in query string if backend link is like /?mode=reset
     else if (searchParams.get("mode") === "resetPassword") {
-      setAuthModal({
+      setAuthModal((prev) => ({
+        ...prev,
         isOpen: true,
         mode: "reset-password",
         email: "",
+        pendingActivation: false,
+        openNonce: !prev.isOpen ? (prev.openNonce || 0) + 1 : prev.openNonce,
         redirectAfterLogin: null,
-      })
+      }))
     }
     // Check for login required redirect via router state
     else if (location.state?.requireLogin) {
-      setAuthModal({
+      setAuthModal((prev) => ({
+        ...prev,
         isOpen: true,
         mode: "login",
         email: "",
+        pendingActivation: false,
+        openNonce: !prev.isOpen ? (prev.openNonce || 0) + 1 : prev.openNonce,
         redirectAfterLogin: location.state.redirectTo || null,
-      })
+      }))
     }
   }, [location.pathname, searchParams, location.state])
 
-  const openAuthModal = (mode = "login", secondArg = null) => {
-    // When switching to verify-email, the second arg is the email address
-    if (mode === "verify-email") {
-      setAuthModal({
-        isOpen: true,
-        mode,
-        email: secondArg || "",
-        redirectAfterLogin: null,
-      })
-    } else {
-      setAuthModal({
+  const openAuthModal = (mode = "login", secondArg = null, thirdArg = false) => {
+    // Dual-nonce: registerNonce only bumps on fresh open (closed -> open) to
+    // preserve register form on back navigation (verify -> register). verifyNonce
+    // bumps on every entry to verify-email (fresh or forward) to ensure OTP is fresh.
+    setAuthModal((prev) => {
+      const isFreshOpen = !prev.isOpen
+      let registerNonce = prev.registerNonce || 0
+      let verifyNonce = prev.verifyNonce || 0
+      let openNonce = prev.openNonce || 0
+
+      if (mode === "register") {
+        if (isFreshOpen) registerNonce++
+      } else if (mode === "verify-email") {
+        if (isFreshOpen || prev.mode !== "verify-email") verifyNonce++
+        // keep openNonce for other flows
+        if (isFreshOpen) openNonce++
+      } else {
+        if (isFreshOpen) openNonce++
+      }
+
+      if (mode === "verify-email") {
+        return {
+          isOpen: true,
+          mode,
+          email: secondArg || "",
+          pendingActivation: !!thirdArg,
+          registerNonce,
+          verifyNonce,
+          openNonce,
+          redirectAfterLogin: null,
+        }
+      }
+      return {
         isOpen: true,
         mode,
         email: "",
+        pendingActivation: false,
+        registerNonce,
+        verifyNonce,
+        openNonce,
         redirectAfterLogin: secondArg,
-      })
-    }
+      }
+    })
   }
 
   const closeAuthModal = () =>
@@ -88,6 +127,7 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
       ...prev,
       isOpen: false,
       email: "",
+      pendingActivation: false,
       redirectAfterLogin: null,
     }))
 
@@ -148,6 +188,9 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
         isOpen={authModal.isOpen}
         mode={authModal.mode}
         email={authModal.email}
+        pendingActivation={authModal.pendingActivation}
+        registerNonce={authModal.registerNonce}
+        verifyNonce={authModal.verifyNonce}
         onClose={closeAuthModal}
         onSwitchMode={openAuthModal}
       />

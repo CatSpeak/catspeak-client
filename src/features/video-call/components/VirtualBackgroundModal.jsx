@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Modal from "@/shared/components/ui/Modal";
 import VirtualBackgroundPicker from "./VirtualBackgroundPicker";
 import BeautyPicker from "./BeautyPicker";
+import MeetingAvatarPicker from "./MeetingAvatarPicker";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
 import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHelpers";
@@ -93,6 +94,8 @@ const VirtualBackgroundModal = ({
   const tabLabel = (tab) => {
     if (tab === "backgrounds")
       return t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds";
+    if (tab === "avatar")
+      return t?.rooms?.avatarPicker?.tabLabel || "Avatar";
     return t?.rooms?.beauty?.tabLabel || "Beauty";
   };
 
@@ -132,9 +135,12 @@ const VirtualBackgroundModal = ({
         <div className="w-full md:w-80 flex-shrink-0 flex flex-col flex-1 md:h-auto">
           {/* Tab strip */}
           {(() => {
-            const availableTabs = isBeautyFilterSupported(room?.roomType)
-              ? ["backgrounds", "beauty"]
-              : ["backgrounds"];
+            const availableTabs = [
+              ...(isBeautyFilterSupported(room?.roomType)
+                ? ["backgrounds", "beauty"]
+                : ["backgrounds"]),
+              "avatar",
+            ];
             if (availableTabs.length <= 1) return null;
             return (
               <div className="flex border-b border-border mb-3">
@@ -157,6 +163,8 @@ const VirtualBackgroundModal = ({
 
           {activeTab === "backgrounds" ? (
             <VirtualBackgroundPicker onApply={handleApply} className="p-0" />
+          ) : activeTab === "avatar" ? (
+            <MeetingAvatarPicker className="p-0" />
           ) : (
             <BeautyPicker
               beautyOptions={beautyOptions}

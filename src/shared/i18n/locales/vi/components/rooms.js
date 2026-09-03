@@ -210,6 +210,7 @@ export default {
     connect25: "Kết nối 2:5",
     yourAI: "1:1 với AI",
     customRoom: "Tạo phòng",
+    aiChat: "Trò chuyện với AI",
   },
   customRooms: {
     title: "Phòng Tùy Chỉnh Pro",
@@ -625,12 +626,16 @@ export default {
   },
   avatarPicker: {
     title: "Ảnh đại diện cuộc họp",
+    tabLabel: "Ảnh đại diện",
     success: "Cập nhật ảnh đại diện thành công",
     error: "Cập nhật ảnh đại diện thất bại",
-    imageUrl: "Đường dẫn hình ảnh",
-    placeholder: "Dán đường dẫn hình ảnh vào đây...",
     description:
-      "Dán đường dẫn hình ảnh hợp lệ. Nếu không hợp lệ, sẽ hiển thị chữ cái đầu tên bạn.",
+      "Tải lên hình ảnh để đổi ảnh đại diện phòng họp. Nếu để trống, hệ thống sẽ dùng ảnh đại diện chính.",
+    uploadImage: "Tải lên ảnh mới",
+    invalidFile: "Vui lòng chọn tệp hình ảnh hợp lệ",
+    cropTitle: "Cắt ảnh đại diện phòng họp",
+    resetToProfile: "Dùng ảnh đại diện chính",
+    resetSuccess: "Đã dùng ảnh đại diện chính",
     saving: "Đang lưu...",
     saveAvatar: "Lưu ảnh đại diện",
   },

@@ -98,7 +98,7 @@ const ValuesSection = () => {
     "GIÁ TRỊ CỐT LÕI CAT SPEAK MANG LẠI"
 
   return (
-    <section className="w-full py-12 sm:py-16 md:py-20 lg:py-24 relative overflow-hidden">
+    <section className="w-full py-8 sm:py-10 md:py-14 lg:py-16 relative overflow-hidden">
       {/* Hand-drawn SVG Doodle — Organic Butterfly Wing curve from Right to Left and Top to Bottom */}
       <PencilDoodle
         path="M 1480 140 C 1320 180, 1220 250, 1150 420 C 1080 580, 990 700, 880 640 C 790 590, 770 360, 720 370 C 670 380, 650 590, 560 640 C 450 700, 360 580, 290 420 C 220 250, 120 180, -50 780"

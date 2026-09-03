@@ -54,6 +54,13 @@ const CategoryRoomSection = ({
     let fetched = responseData?.items ?? []
     const pagination = responseData?.pagination || {}
 
+    // Sort by currentParticipantCount descending (rooms with most people first)
+    const sortByParticipants = (rooms) => {
+      return [...rooms].sort(
+        (a, b) => (b.currentParticipantCount || 0) - (a.currentParticipantCount || 0),
+      )
+    }
+
     if (isOther) {
       const known = ["Knowledge", "Culture", "Lifestyle", "Growth"]
       const filtered = fetched.filter((r) => {
@@ -67,17 +74,18 @@ const CategoryRoomSection = ({
         return !hasKnown
       })
 
+      const sorted = sortByParticipants(filtered)
       const start = (page - 1) * pageSize
       return {
-        currentRooms: filtered.slice(start, start + pageSize),
-        totalCount: filtered.length,
-        totalPages: Math.max(1, Math.ceil(filtered.length / pageSize)),
-        hasNextPage: start + pageSize < filtered.length,
+        currentRooms: sorted.slice(start, start + pageSize),
+        totalCount: sorted.length,
+        totalPages: Math.max(1, Math.ceil(sorted.length / pageSize)),
+        hasNextPage: start + pageSize < sorted.length,
       }
     }
 
     return {
-      currentRooms: fetched,
+      currentRooms: sortByParticipants(fetched),
       totalCount: pagination.totalCount || 0,
       totalPages: pagination.totalPages || 1,
       hasNextPage: pagination.hasNextPage || false,
@@ -186,16 +194,14 @@ const CategoryRoomSection = ({
 
         {showRightSide && (
           <div className="flex items-center gap-1.5 sm:gap-2 pr-1 sm:pr-2">
-            {!isMobile && (
-              <button
-                onClick={goPrev}
-                disabled={!canGoPrev || isFetching}
-                aria-label="Previous rooms"
-                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
-              </button>
-            )}
+            <button
+              onClick={goPrev}
+              disabled={!canGoPrev || isFetching}
+              aria-label="Previous rooms"
+              className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
+            </button>
 
             {!isLoading && (
               <span className="text-sm sm:text-base font-medium text-[#606060] whitespace-nowrap">
@@ -206,16 +212,14 @@ const CategoryRoomSection = ({
               </span>
             )}
 
-            {!isMobile && (
-              <button
-                onClick={goNext}
-                disabled={!canGoNext || isFetching}
-                aria-label="Next rooms"
-                className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
-              </button>
-            )}
+            <button
+              onClick={goNext}
+              disabled={!canGoNext || isFetching}
+              aria-label="Next rooms"
+              className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
+            </button>
           </div>
         )}
       </div>

@@ -19,7 +19,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
       <div className="flex flex-col gap-2">
         {/* Terms and Privacy */}
         <div>
-          <label className="inline-flex items-center gap-2 cursor-pointer">
+          <div className="inline-flex items-center gap-2 cursor-pointer">
             <Checkbox
               checked={formData.termsAgreement}
               onChange={onChange("termsAgreement")}
@@ -43,7 +43,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               </button>{" "}
               {authText.companySuffix}
             </span>
-          </label>
+          </div>
           {errors.termsAgreement && (
             <p className="mt-1 text-xs text-red-600">{errors.termsAgreement}</p>
           )}
@@ -51,7 +51,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
 
         {/* Payment and IP */}
         <div>
-          <label className="inline-flex items-center gap-2 cursor-pointer">
+          <div className="inline-flex items-center gap-2 cursor-pointer">
             <Checkbox
               checked={formData.policyAgreement}
               onChange={onChange("policyAgreement")}
@@ -75,7 +75,7 @@ const AgreementSection = ({ authText, formData, errors = {}, onChange }) => {
               </button>{" "}
               {authText.companySuffix}
             </span>
-          </label>
+          </div>
           {errors.policyAgreement && (
             <p className="mt-1 text-xs text-red-600">
               {errors.policyAgreement}
