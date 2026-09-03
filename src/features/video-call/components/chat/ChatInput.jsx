@@ -54,7 +54,7 @@ const ChatInput = ({
     return participants.filter((p) => {
       if (p.isLocal) return false
       const meta = parseMetadata(p.metadata)
-      const isAgent = meta.is_stt_agent === true || p.identity?.startsWith("agent-")
+      const isAgent = meta.is_stt_agent === true || p.identity?.startsWith("agent")
       return !isAgent
     })
   }, [participants])
