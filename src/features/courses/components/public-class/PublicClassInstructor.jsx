@@ -28,9 +28,9 @@ const PublicClassInstructor = ({ classData }) => {
     pc.defaultTeacherBio ||
     "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc."
   const experienceBadge = useMemo(() => {
-    const langs = parseLanguages(teacher.languagesTeach ?? teacher.languages)
+    const langs = parseLanguages(teacher.teachLanguages ?? teacher.languagesTeach ?? teacher.languages)
     return getExperienceBadgeText(langs, t, "vi")
-  }, [teacher.languagesTeach, teacher.languages, t])
+  }, [teacher.teachLanguages, teacher.languagesTeach, teacher.languages, t])
 
   return (
     <div id="instructor" className="scroll-mt-24">

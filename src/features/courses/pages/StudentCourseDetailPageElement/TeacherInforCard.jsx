@@ -14,9 +14,9 @@ const TeacherInforCard = ({
   className = "",
 }) => {
   const experienceBadge = useMemo(() => {
-    const langs = parseLanguages(teacher.languagesTeach ?? teacher.languages)
+    const langs = parseLanguages(teacher.teachLanguages ?? teacher.languagesTeach ?? teacher.languages)
     return getExperienceBadgeText(langs, undefined, "vi")
-  }, [teacher.languagesTeach, teacher.languages])
+  }, [teacher.teachLanguages, teacher.languagesTeach, teacher.languages])
   return (
     <div
       className={`rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col items-center justify-between bg-[linear-gradient(225deg,rgba(153,0,17,0.12)_0%,rgba(255,255,255,1)_60%)] relative overflow-hidden ${className}`}
