@@ -7,6 +7,7 @@ import {
   parseLanguages,
   getInstructorRole,
   getExperienceBadgeText,
+  getExperienceLineText,
 } from "../utils/instructorUtils"
 
 const InstructorCard = ({ teacher, onClick, onExplore }) => {
@@ -31,6 +32,10 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
   )
   const experienceBadge = useMemo(
     () => getExperienceBadgeText(languages, t, language),
+    [languages, t, language],
+  )
+  const experienceLine = useMemo(
+    () => getExperienceLineText(languages, t, language),
     [languages, t, language],
   )
 
@@ -92,6 +97,11 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
           <span className="mt-0.5 text-sm sm:text-base font-bold leading-tight text-white">
             {displayName}
           </span>
+          {experienceLine && (
+            <span className="mt-0.5 text-[11px] font-medium leading-tight text-white/90">
+              {experienceLine}
+            </span>
+          )}
           <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] group-hover/card:max-h-20 group-hover/card:opacity-100 group-hover/card:mt-2">
             <p className="text-xs leading-relaxed text-white/80">
               {description}

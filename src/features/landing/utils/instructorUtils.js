@@ -218,6 +218,36 @@ export const getExperienceBadgeText = (languages, t, language = "vi") => {
   return `${name} · ${first.yearsExperience} năm KN`
 }
 
+const formatYearsExperience = (years, language = "vi") => {
+  if (language === "en") return years === 1 ? "≥ 1 year" : `≥ ${years} years`
+  if (language === "zh") return `≥ ${years}年经验`
+  if (language === "ja") return `≥ ${years}年経験`
+  return `≥ ${years} năm kinh nghiệm`
+}
+
+/**
+ * Full experience line listing every language with data, e.g.
+ * "Tiếng Anh ≥ 8 năm kinh nghiệm · Tiếng Nhật ≥ 3 năm kinh nghiệm".
+ * Returns "" when no language carries experience data (caller hides the line).
+ */
+export const getExperienceLineText = (languages, t, language = "vi") => {
+  const list = getLanguageExperienceList(languages)
+  if (list.length === 0) return ""
+  const positives = list.filter((x) => x.yearsExperience > 0)
+  if (positives.length === 0) return getExperienceFallbackText(t, language)
+  return positives
+    .map((x) => {
+      const name = getLocalizedLanguageName(x.language, t, language)
+      return `${name} ${formatYearsExperience(x.yearsExperience, language)}`
+    })
+    .join(" · ")
+}
+
+export const getExperienceFallbackText = (t, language = "vi") => {
+  if (language === "en") return t?.landing?.leadingTeam?.newInstructor || "New instructor"
+  return t?.landing?.leadingTeam?.newInstructor || "Giảng viên mới"
+}
+
 export const getInstructorRole = (languages, t, language = "vi") => {
   const defaultRole =
     t?.landing?.leadingTeam?.defaultRole || "Giảng viên CatSpeak"

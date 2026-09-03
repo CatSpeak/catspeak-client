@@ -1,7 +1,9 @@
 import React, { useMemo } from "react"
 import { SquareUserRound, Mail, Star, Medal, BookOpen } from "lucide-react"
-import TeacherStatCard from "../../student/components/TeacherStatCard"
-import { parseLanguages, getExperienceBadgeText } from "@/features/landing/utils/instructorUtils"
+import { parseLanguages, getLanguageExperienceList } from "@/features/landing/utils/instructorUtils"
+
+const statBoxClass =
+  "flex-1 min-w-0 px-2 py-2 bg-white shadow-[0px_1px_4px_rgba(12,12,13,0.05),0px_1px_4px_rgba(12,12,13,0.10)] rounded-xl flex flex-col justify-center items-center gap-1.5"
 
 const TeacherInforCard = ({
   teacher = {},
@@ -13,110 +15,110 @@ const TeacherInforCard = ({
   navigate,
   className = "",
 }) => {
-  const experienceBadge = useMemo(() => {
+  const teacherId = teacher.accountId || teacher.id
+  const goToProfile = () => {
+    if (teacherId) {
+      navigate(`/profile/${encodeURIComponent(String(teacherId))}`)
+    }
+  }
+
+  // Năm KN theo đúng ngôn ngữ của lớp/khóa đang xem (Q3); thiếu thì ẩn ô (Q8a).
+  const courseLanguage = useMemo(() => {
+    const raw =
+      rawCourse.language || rawCourse.Language || classes[0]?.language || classes[0]?.Language || ""
+    return String(raw).trim().toLowerCase()
+  }, [rawCourse.language, rawCourse.Language, classes])
+
+  const yearsExperience = useMemo(() => {
     const langs = parseLanguages(teacher.teachLanguages ?? teacher.languagesTeach ?? teacher.languages)
-    return getExperienceBadgeText(langs, undefined, "vi")
-  }, [teacher.teachLanguages, teacher.languagesTeach, teacher.languages])
+    const list = getLanguageExperienceList(langs)
+    if (list.length === 0 || !courseLanguage) return null
+    const match = list.find((x) => String(x.language || "").trim().toLowerCase() === courseLanguage)
+    return match ? match.yearsExperience : null
+  }, [teacher.teachLanguages, teacher.languagesTeach, teacher.languages, courseLanguage])
+
+  const showRating = Number(teacher.totalReviews ?? teacher.reviewCount ?? 0) >= 5
+  const ratingValue = teacher.rating ?? teacher.averageRating ?? rawCourse.rating ?? "5.0"
+  const taughtCount = teacher.totalClasses ?? teacher.classCount ?? classes.length ?? 0
+
   return (
     <div
-      className={`rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col items-center justify-between bg-[linear-gradient(225deg,rgba(153,0,17,0.12)_0%,rgba(255,255,255,1)_60%)] relative overflow-hidden ${className}`}
+      className={`rounded-3xl p-5 shadow-sm flex flex-col items-center gap-4 bg-[linear-gradient(44deg,white_1%,white_35%,#F5DBDB_100%)] relative overflow-hidden ${className}`}
     >
-      <div className="w-full flex flex-col items-center">
-        {/* Avatar + Name + Email card */}
+      {/* Avatar + Name + handle */}
+      <div className="w-36 flex flex-col items-center gap-1">
         <div
-          className="group cursor-pointer flex flex-col items-center transition-all duration-200"
-          onClick={() => {
-            const teacherId = teacher.accountId || teacher.id
-            if (teacherId) {
-              navigate(`/profile/${encodeURIComponent(String(teacherId))}`)
-            }
-          }}
+          className="group cursor-pointer flex flex-col items-center gap-1"
+          onClick={goToProfile}
         >
-          {/* Avatar (lớn, căn giữa) */}
           {teacherAvatarUrl ? (
             <img
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mx-auto transition-transform duration-200 group-hover:scale-105"
+              className="w-[106px] h-[106px] rounded-full object-cover transition-transform duration-200 group-hover:scale-105"
               src={teacherAvatarUrl}
               alt={teacher.name || ""}
               loading="lazy"
               decoding="async"
             />
           ) : (
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-red-100 text-cath-red-700 flex items-center justify-center font-bold text-2xl sm:text-3xl border-4 border-white shadow-md mx-auto transition-transform duration-200 group-hover:scale-105">
+            <div className="w-[106px] h-[106px] rounded-full bg-red-100 text-cath-red-700 flex items-center justify-center font-bold text-3xl border-4 border-white shadow-md transition-transform duration-200 group-hover:scale-105">
               {(teacher.name || "T")[0]?.toUpperCase()}
             </div>
           )}
-
-          {/* Name */}
-          <h3 className="font-bold text-base sm:text-lg text-gray-900 group-hover:text-cath-red-700 transition-colors text-center mt-3">
-            {teacher.name || scd.instructorUnavailable || "Giảng viên"}
-          </h3>
-
-          {/* Email */}
-          <p className="text-xs text-gray-400 group-hover:text-cath-red-700 transition-colors font-normal text-center mt-0.5">
-            {teacher.email ||
-              teacher.contactEmail ||
-              teacher.accountEmail ||
-              teacher.title ||
-              "teacher@catspeak.com"}
-          </p>
-          {experienceBadge && (
-            <span className="inline-flex items-center bg-red-50 text-cath-red-700 text-[11px] font-bold px-2.5 py-1 rounded-full mt-2">
-              {experienceBadge}
-            </span>
-          )}
-        </div>
-
-        {/* Padding bên dưới email */}
-        <div className="w-full pt-3">
-          {/* Cards thể hiện: rating, reviewCount (nếu >= 5), totalClasses */}
-          <div className="flex items-center justify-center gap-2 w-full">
-            {/* Rating */}
-            {Number(teacher.totalReviews ?? teacher.reviewCount ?? 0) >= 5 && (
-              <TeacherStatCard
-                className="flex-1 min-w-0"
-                title={scd.rating || "Đánh giá"}
-                value={
-                  teacher.rating ??
-                  teacher.averageRating ??
-                  rawCourse.rating ??
-                  "5.0"
-                }
-                color="#f59e0b"
-                icon={
-                  <Star size={13} className="fill-amber-400 text-amber-400" />
-                }
-              />
-            )}
-
-            {/* Review Count */}
-
-            <TeacherStatCard
-              className="flex-1 min-w-0"
-              title={scd.totalReviews || "Lượt đánh giá"}
-              value={teacher.totalReviews ?? teacher.reviewCount}
-              color="#8c65e0"
-              icon={<Medal size={15} />}
-            />
-
-            {/* Total Classes */}
-            <TeacherStatCard
-              className="flex-1 min-w-0"
-              title={scd.classesCount || "Lớp học"}
-              value={
-                teacher.totalClasses ??
-                teacher.classCount ??
-                classes.length ??
-                0
-              }
-              color="#1c7dfc"
-              icon={<BookOpen size={15} />}
-            />
+          <div className="self-stretch flex flex-col items-center gap-1">
+            <h3 className="self-stretch text-center text-black text-sm font-semibold leading-[19.6px] break-words">
+              {teacher.name || scd.instructorUnavailable || "Giảng viên"}
+            </h3>
+            <p className="self-stretch text-center text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+              {teacher.email ||
+                teacher.contactEmail ||
+                teacher.accountEmail ||
+                teacher.title ||
+                "teacher@catspeak.com"}
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Introduction paragraph */}
-        <p className="text-xs sm:text-sm text-gray-700 font-normal text-justify leading-relaxed mt-3.5 p-3 sm:p-3.5 bg-amber-50/90 border border-amber-100 rounded-2xl line-clamp-3 sm:line-clamp-4 w-full">
+      {/* Stat boxes */}
+      <div className="self-stretch flex justify-between items-stretch gap-2">
+        {showRating && (
+          <div className={statBoxClass}>
+            <div className="w-9 h-9 p-1 bg-[#FFF3C6] rounded-full flex justify-center items-center overflow-hidden">
+              <Star size={18} className="fill-[#F4AB1B] text-[#F4AB1B]" />
+            </div>
+            <div className="text-black text-lg font-medium leading-[25.2px] break-words">{ratingValue}</div>
+            <div className="text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+              {scd.rating || "Đánh giá"}
+            </div>
+          </div>
+        )}
+
+        {yearsExperience !== null && (
+          <div className={statBoxClass}>
+            <div className="w-9 h-9 p-1 bg-[#E3D7FF] rounded-full flex justify-center items-center overflow-hidden">
+              <Medal size={18} className="text-[#8C65E1]" />
+            </div>
+            <div className="text-black text-lg font-medium leading-[25.2px] break-words">{yearsExperience}</div>
+            <div className="text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+              {scd.yearsExperience || "Năm KN"}
+            </div>
+          </div>
+        )}
+
+        <div className={statBoxClass}>
+          <div className="w-9 h-9 p-1 bg-[#BFDBFF] rounded-full flex justify-center items-center overflow-hidden">
+            <BookOpen size={18} className="text-[#1D7DFD]" />
+          </div>
+          <div className="text-black text-lg font-medium leading-[25.2px] break-words">{taughtCount}</div>
+          <div className="text-[#7B7979] text-xs font-normal leading-[16.8px] break-words">
+            {scd.classesCount || "Khóa đã dạy"}
+          </div>
+        </div>
+      </div>
+
+      {/* Introduction */}
+      <div className="self-stretch p-2.5 bg-[#FFFBEA] rounded-xl outline outline-[0.2px] outline-[#FFE47C] outline-offset-[-0.2px] flex justify-center items-center gap-2.5">
+        <p className="text-black text-xs font-normal leading-[16.8px] break-words line-clamp-4">
           {teacher.introduction ||
             teacher.bio ||
             teacher.description ||
@@ -125,31 +127,28 @@ const TeacherInforCard = ({
         </p>
       </div>
 
-      {/* Phía dưới cùng: 2 nút "<SquareUserRound /> Trang cá nhân" và nút liên hệ */}
-      <div className="flex items-center gap-2.5 sm:gap-3 w-full mt-5 pt-1">
+      {/* Actions */}
+      <div className="self-stretch flex justify-start items-center gap-5">
         <button
           type="button"
-          onClick={() => {
-            const teacherId = teacher.accountId || teacher.id
-            if (teacherId) {
-              navigate(`/profile/${encodeURIComponent(String(teacherId))}`)
-            }
-          }}
-          disabled={!teacher.accountId && !teacher.id}
-          className="flex-1 h-10 bg-gradient-to-r from-[#e3495b] to-[#f59aa5] hover:opacity-95 text-white text-xs sm:text-sm font-bold rounded-full flex items-center justify-center gap-1.5 sm:gap-2 transition-all shadow-sm active:scale-95 cursor-pointer disabled:opacity-50"
+          onClick={goToProfile}
+          disabled={!teacherId}
+          className="flex-1 px-3 py-2 bg-[linear-gradient(129deg,#DD2E41_0%,#F7A0AA_100%)] rounded-[20px] flex justify-center items-center gap-2.5 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
         >
-          <SquareUserRound size={16} />
-          <span>{scd.profileBtn || "Trang cá nhân"}</span>
+          <SquareUserRound size={20} className="text-[#F5F5F5]" />
+          <span className="text-[#F5F5F5] text-xs font-normal leading-[16.8px] break-words">
+            {scd.profileBtn || "Trang cá nhân"}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={handleContactTeacher}
-          disabled={!teacher.accountId && !teacher.id}
+          disabled={!teacherId}
           title={scd.messageTeacher || "Nhắn tin với giảng viên"}
-          className="h-10 w-10 rounded-full border border-cath-red-700 hover:bg-red-50 text-cath-red-700 flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+          className="w-7 h-7 p-2 rounded-full outline outline-1 outline-[#990011] outline-offset-[-1px] flex justify-center items-center gap-2.5 transition-all hover:bg-red-50 active:scale-95 cursor-pointer disabled:opacity-50"
         >
-          <Mail size={17} />
+          <Mail size={12} className="text-[#990011]" />
         </button>
       </div>
     </div>
