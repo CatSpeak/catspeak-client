@@ -77,6 +77,15 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
       }
     })
 
+    connection.on("MediaEnded", (sessId) => {
+      console.log("[VideoChatSignalR] Received MediaEnded:", { sessId })
+      if (Number(sessId) === Number(sessionId)) {
+        if (onEventReceivedRef.current) {
+          onEventReceivedRef.current("MediaEnded", {})
+        }
+      }
+    })
+
     // Picture IT Events
     connection.on("OnSyncGameState", (sessId, senderId, statePayload) => {
       if (Number(sessId) === Number(sessionId) && onEventReceivedRef.current) {

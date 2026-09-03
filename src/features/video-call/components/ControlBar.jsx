@@ -14,7 +14,6 @@ import {
   MoreVertical,
   Hand,
   Split,
-  LayoutGrid,
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
