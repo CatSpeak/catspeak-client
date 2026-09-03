@@ -153,16 +153,8 @@ const ClassAnalyticsStudentTable = ({ students = [], onSelectStudent, thresholdR
         </table>
       </div>
 
-      {/* Footer Hints */}
-      <div className="pt-4 flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={() => students.length > 0 && onSelectStudent && onSelectStudent(students[0])}
-          className="text-xs sm:text-sm text-blue-600 font-medium hover:underline text-left cursor-pointer inline-flex items-center gap-1"
-        >
-          {cd.clickStudentHint || "› Click học viên để xem lịch sử phát biểu từng buổi của học viên đó"}
-        </button>
-        <hr className="border-t border-gray-200 my-1" />
+      {/* Footer Note */}
+      <div className="pt-4">
         <p className="text-xs text-gray-500">
           {thresholdHintText}
         </p>

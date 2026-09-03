@@ -1,6 +1,5 @@
 export { default as ClassAnalyticsHeader } from "./ClassAnalyticsHeader"
 export { default as ClassAnalyticsKpis } from "./ClassAnalyticsKpis"
-export { default as ClassAnalyticsNotice } from "./ClassAnalyticsNotice"
 export { default as ClassAnalyticsStudentTable } from "./ClassAnalyticsStudentTable"
 export { default as ClassAnalyticsSessionList } from "./ClassAnalyticsSessionList"
 export { default as StudentSpeakingHistoryDrawer } from "./StudentSpeakingHistoryDrawer"
