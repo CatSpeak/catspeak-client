@@ -1,8 +1,9 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { BadgeCheck } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getSafeMediaUrl } from "../../utils/courseUtils"
+import { parseLanguages, getExperienceBadgeText } from "@/features/landing/utils/instructorUtils"
 
 const PublicClassInstructor = ({ classData }) => {
   const navigate = useNavigate()
@@ -26,6 +27,10 @@ const PublicClassInstructor = ({ classData }) => {
     teacher.description ||
     pc.defaultTeacherBio ||
     "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc."
+  const experienceBadge = useMemo(() => {
+    const langs = parseLanguages(teacher.languagesTeach ?? teacher.languages)
+    return getExperienceBadgeText(langs, t, "vi")
+  }, [teacher.languagesTeach, teacher.languages, t])
 
   return (
     <div id="instructor" className="scroll-mt-24">
@@ -78,6 +83,11 @@ const PublicClassInstructor = ({ classData }) => {
               <p className="text-xs font-semibold text-slate-500 group-hover:text-cath-red-700 transition-colors">
                 {teacherTitle}
               </p>
+            )}
+            {experienceBadge && (
+              <span className="inline-flex w-fit items-center bg-[#b20a1c]/10 text-[#b20a1c] text-xs font-bold px-2.5 py-1 rounded-full">
+                {experienceBadge}
+              </span>
             )}
             <p className="text-slate-600 leading-relaxed text-justify">
               {teacherBio}
