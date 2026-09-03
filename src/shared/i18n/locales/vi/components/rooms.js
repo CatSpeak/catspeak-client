@@ -473,7 +473,6 @@ export default {
       loading: "Đang tải...",
       loadingData: "Đang tải dữ liệu",
       teacherTalk: "Teacher Talk",
-      reference: "tham khảo",
       teacher: "GV",
       students: "HV",
       expected: "Exp",

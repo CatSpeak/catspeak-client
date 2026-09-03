@@ -495,7 +495,6 @@ export default {
       loading: "Loading...",
       loadingData: "Loading data",
       teacherTalk: "Teacher Talk",
-      reference: "reference",
       teacher: "Teacher",
       students: "Students",
       expected: "Exp",

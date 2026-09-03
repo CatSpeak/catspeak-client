@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { useSelector } from "react-redux"
+import { Loader2 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
@@ -95,21 +96,56 @@ const SpeakingTimeBalancePanel = ({
   // Helper to distinguish Host/Teacher vs Students
   const isHostOrTeacher = useCallback(
     (p) => {
-      if (p.isTeacher || p.isHost) return true
+      if (!p) return false
+      if (
+        p.isTeacher ||
+        p.is_teacher ||
+        p.isHost ||
+        p.is_host ||
+        p.role === "teacher" ||
+        p.role === "instructor" ||
+        p.role === "host"
+      ) {
+        return true
+      }
+
       const meta = parseMetadata(p.metadata)
-      const accountId = meta.accountId || (p.isLocal ? user?.accountId : null)
-      return isRoomHost(room, accountId)
+      if (
+        meta.isTeacher ||
+        meta.is_teacher ||
+        meta.isHost ||
+        meta.is_host ||
+        meta.role === "teacher" ||
+        meta.role === "instructor" ||
+        meta.role === "host"
+      ) {
+        return true
+      }
+
+      const accountId =
+        meta.accountId ||
+        (p.isLocal ? user?.accountId : null) ||
+        p.identity ||
+        p.participantId
+
+      if (isRoomHost(room, accountId)) return true
+      if (room?.creatorId && p.identity && String(p.identity) === String(room.creatorId)) {
+        return true
+      }
+
+      return false
     },
     [room, user],
   )
 
   const studentParticipants = useMemo(() => {
     if (participants && participants.length > 0) {
-      const filtered = participants.filter((p) => !isHostOrTeacher(p))
-      if (filtered.length > 0) return filtered
+      return participants.filter((p) => !isHostOrTeacher(p))
     }
     if (speakingParticipantsList && speakingParticipantsList.length > 0) {
-      return speakingParticipantsList.filter((p) => !p.isTeacher && !p.isHost)
+      return speakingParticipantsList.filter(
+        (p) => !isHostOrTeacher(p) && !p.isTeacher && !p.isHost,
+      )
     }
     return []
   }, [participants, speakingParticipantsList, isHostOrTeacher])
@@ -175,7 +211,7 @@ const SpeakingTimeBalancePanel = ({
       {activeIsLoading ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
-            <div className="w-6 h-1 bg-cath-red-700 rounded-full animate-pulse" />
+            <Loader2 className="w-6 h-6 text-cath-red-700 animate-spin" />
           </div>
           <p className="text-sm text-gray-600 font-medium">
             {stbT.loadingData || "Đang tải dữ liệu"}

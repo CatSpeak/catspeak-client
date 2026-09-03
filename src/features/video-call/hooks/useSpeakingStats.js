@@ -156,7 +156,7 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
     if (Array.isArray(statsData.participants)) {
       for (const p of statsData.participants) {
         const pId = String(p.participantId || p.participant_id || "")
-        if (!pId) continue
+        if (!pId || pId.startsWith("agent") || p.is_stt_agent === true) continue
 
         const pStats = p.stats || {}
         const pBalance = p.balance || {}

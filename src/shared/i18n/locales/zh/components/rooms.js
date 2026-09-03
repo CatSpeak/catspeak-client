@@ -458,7 +458,6 @@ export default {
       loading: "加载中...",
       loadingData: "正在加载数据",
       teacherTalk: "教师发言",
-      reference: "参考",
       teacher: "教师",
       students: "学员",
       expected: "预估",

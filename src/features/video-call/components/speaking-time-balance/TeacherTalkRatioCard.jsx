@@ -29,12 +29,9 @@ const TeacherTalkRatioCard = ({
 
   return (
     <div className="px-4 py-3 border-l-4 border-cath-red-700 bg-white shrink-0">
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2">
         <span className="text-sm font-semibold text-gray-800">
           {labels.teacherTalk || "Teacher Talk"}
-        </span>
-        <span className="text-xs text-gray-400">
-          {labels.reference || "tham khảo"}
         </span>
       </div>
 
