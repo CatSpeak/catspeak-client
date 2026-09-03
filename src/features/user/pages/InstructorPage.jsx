@@ -114,14 +114,16 @@ function mapApplicationToFormData(app) {
   };
 }
 
-/** Extract status string from API response (case-insensitive normalize) */
+/** Extract status string from API response (case-insensitive normalize).
+ * Accepts status names ("Approved", "approved "...), numeric codes (1-4)
+ * and camelCase ("requestEdit"). Unknown values pass through. */
 function getApplicationStatus(app) {
-  const raw = app?.status || app?.Status || "";
-  const normalized = raw.toString().toLowerCase();
-  if (normalized === "pending") return "Pending";
-  if (normalized === "approved") return "Approved";
-  if (normalized === "rejected") return "Rejected";
-  if (normalized === "requestedit") return "RequestEdit";
+  const raw = app?.status ?? app?.Status ?? app?.statusCode ?? app?.StatusCode ?? "";
+  const normalized = raw.toString().trim().toLowerCase().replace(/[\s_-]+/g, "");
+  if (normalized === "pending" || normalized === "1") return "Pending";
+  if (normalized === "approved" || normalized === "2") return "Approved";
+  if (normalized === "rejected" || normalized === "3") return "Rejected";
+  if (normalized === "requestedit" || normalized === "4") return "RequestEdit";
   return raw || null;
 }
 
@@ -136,6 +138,7 @@ const InstructorPage = () => {
     data: instructorData,
     isLoading: isLoadingInstructor,
     error: profileError,
+    refetch: refetchInstructorProfile,
   } = useGetInstructorProfileQuery();
 
   const { data: userProfileData, isLoading: isLoadingProfile } =
@@ -638,6 +641,33 @@ const InstructorPage = () => {
     );
   }
 
+  // Non-404 fetch failure with no data: show an error panel instead of a
+  // white disabled form (the form below would render readOnly with no banner).
+  if (profileError && !hasNotApplied && !rawApplication) {
+    return (
+      <div className="flex flex-col gap-4">
+        <PageTitle>
+          {t.nav?.instructor || "Giảng viên"}
+        </PageTitle>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+          <h3 className="text-sm font-bold text-red-800">
+            {ins.loadErrorTitle || "Không tải được hồ sơ giảng viên"}
+          </h3>
+          <p className="text-sm text-red-700 mt-1">
+            {ins.loadErrorDesc || "Vui lòng kiểm tra kết nối và thử lại."}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetchInstructorProfile()}
+            className="mt-3 px-4 py-2 bg-[#990011] text-white text-sm font-medium rounded-lg hover:bg-[#7a000e] transition-colors cursor-pointer"
+          >
+            {ins.retry || "Thử lại"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Not applied + not showing form → empty state.
   // When the account has a linked (approved) teacher account the profile now lives
   // on that teacher account — show a switch CTA instead of the "not applied" state.
@@ -683,8 +713,11 @@ const InstructorPage = () => {
     );
   }
 
-  // Determine readOnly for section components
-  const readOnly = !canEdit || isSubmitting || isTaskSubmitting;
+  // Determine readOnly for section components.
+  // Section edit ("Chỉnh sửa" on Approved) unlocks at the parent too so the
+  // personal-info fields stay editable even if a child prop goes stale (case B).
+  const readOnly =
+    (!canEdit && !isEditingPersonalInfo) || isSubmitting || isTaskSubmitting;
 
   return (
     <div className="flex flex-col gap-6">
