@@ -194,6 +194,30 @@ export const parseLanguages = (raw) => {
   }
 }
 
+export const getLanguageExperienceList = (languages) => {
+  if (!Array.isArray(languages)) return []
+  return languages
+    .map((l) => {
+      if (!l || typeof l !== "object") return null
+      const raw = l.language || l.name
+      const years = Number(l.yearsExperience)
+      if (!raw || !Number.isFinite(years)) return null
+      return { language: raw, yearsExperience: Math.max(0, Math.min(50, Math.trunc(years))) }
+    })
+    .filter(Boolean)
+}
+
+export const getExperienceBadgeText = (languages, t, language = "vi") => {
+  const list = getLanguageExperienceList(languages).filter((x) => x.yearsExperience > 0)
+  if (list.length === 0) return ""
+  const first = list[0]
+  const name = getLocalizedLanguageName(first.language, t, language)
+  if (language === "en") return `${name} · ${first.yearsExperience}y exp`
+  if (language === "zh") return `${name} · ${first.yearsExperience}年经验`
+  if (language === "ja") return `${name} · ${first.yearsExperience}年経験`
+  return `${name} · ${first.yearsExperience} năm KN`
+}
+
 export const getInstructorRole = (languages, t, language = "vi") => {
   const defaultRole =
     t?.landing?.leadingTeam?.defaultRole || "Giảng viên CatSpeak"

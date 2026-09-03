@@ -6,6 +6,7 @@ import {
   getFallbackAvatarByGender,
   parseLanguages,
   getInstructorRole,
+  getExperienceBadgeText,
 } from "../utils/instructorUtils"
 
 const InstructorCard = ({ teacher, onClick, onExplore }) => {
@@ -28,6 +29,10 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
     () => getInstructorRole(languages, t, language),
     [languages, t, language],
   )
+  const experienceBadge = useMemo(
+    () => getExperienceBadgeText(languages, t, language),
+    [languages, t, language],
+  )
 
   const rawAvatar = teacher.avatarImageUrl
   const avatarSrc = rawAvatar && !imgError ? getImageUrl(rawAvatar) : null
@@ -48,6 +53,11 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
       className="w-full flex flex-col group/card cursor-pointer"
     >
       <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100">
+        {experienceBadge && (
+          <span className="absolute top-3 left-3 z-30 inline-flex items-center bg-white/95 text-[#910B09] text-[11px] font-bold px-2.5 py-1 rounded-full shadow">
+            {experienceBadge}
+          </span>
+        )}
         {avatarSrc ? (
           <img
             src={avatarSrc}

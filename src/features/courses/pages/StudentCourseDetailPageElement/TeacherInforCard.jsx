@@ -1,6 +1,7 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { SquareUserRound, Mail, Star, Medal, BookOpen } from "lucide-react"
 import TeacherStatCard from "../../student/components/TeacherStatCard"
+import { parseLanguages, getExperienceBadgeText } from "@/features/landing/utils/instructorUtils"
 
 const TeacherInforCard = ({
   teacher = {},
@@ -12,6 +13,10 @@ const TeacherInforCard = ({
   navigate,
   className = "",
 }) => {
+  const experienceBadge = useMemo(() => {
+    const langs = parseLanguages(teacher.teachLanguages ?? teacher.languagesTeach ?? teacher.languages)
+    return getExperienceBadgeText(langs, undefined, "vi")
+  }, [teacher.teachLanguages, teacher.languagesTeach, teacher.languages])
   return (
     <div
       className={`rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col items-center justify-between bg-[linear-gradient(225deg,rgba(153,0,17,0.12)_0%,rgba(255,255,255,1)_60%)] relative overflow-hidden ${className}`}
@@ -55,6 +60,11 @@ const TeacherInforCard = ({
               teacher.title ||
               "teacher@catspeak.com"}
           </p>
+          {experienceBadge && (
+            <span className="inline-flex items-center bg-red-50 text-cath-red-700 text-[11px] font-bold px-2.5 py-1 rounded-full mt-2">
+              {experienceBadge}
+            </span>
+          )}
         </div>
 
         {/* Padding bên dưới email */}

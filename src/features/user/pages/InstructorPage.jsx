@@ -68,20 +68,25 @@ function safeParseArray(value) {
 }
 
 /**
- * Normalize languagesTeach from the API into an array of {language, level} objects.
+ * Normalize languagesTeach from the API into an array of {language, level, yearsExperience} objects.
  * Supports:
- *  - Array of objects: [{language: "English", level: "B2"}, ...]
- *  - Array of strings: ["English", "Japanese"] → [{language: "English", level: ""}, ...]
- *  - JSON string of either format above
+ *  - Array of objects: [{language: "English", level: "B2", yearsExperience: 5}, ...]
+ *  - Array of strings: ["English", "Japanese"] → [{language: "English", level: "", yearsExperience: 0}, ...]
+ *  - JSON string of either format above (legacy items without yearsExperience default to 0)
  */
 function normalizeLanguagesTeach(raw) {
   const arr = safeParseArray(raw);
   return arr.map((item) => {
     if (typeof item === "object" && item !== null) {
-      return { language: item.language || "", level: item.level || "" };
+      const years = Number(item.yearsExperience);
+      return {
+        language: item.language || "",
+        level: item.level || "",
+        yearsExperience: Number.isFinite(years) ? Math.max(0, Math.min(50, Math.trunc(years))) : 0,
+      };
     }
     // Legacy format: plain string = language name only
-    return { language: String(item), level: "" };
+    return { language: String(item), level: "", yearsExperience: 0 };
   });
 }
 
@@ -319,6 +324,12 @@ const InstructorPage = () => {
             ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
           break;
         }
+        const years = Number(lang.yearsExperience);
+        if (!Number.isFinite(years) || years < 0 || years > 50) {
+          newErrors.languagesTeachExperience =
+            ins.experienceError || "Số năm kinh nghiệm mỗi ngôn ngữ phải từ 0 đến 50";
+          break;
+        }
       }
     }
 
@@ -326,12 +337,10 @@ const InstructorPage = () => {
       newErrors.idFrontFile = ins.requiredField || "Vui lòng tải lên mặt trước";
     if (!formData.idBackFile)
       newErrors.idBackFile = ins.requiredField || "Vui lòng tải lên mặt sau";
-    if (!formData.introduction?.trim())
-      newErrors.introduction = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.introduction?.trim() && !formData.videoFile)
+      newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
     if (!formData.credentials || formData.credentials.length === 0)
       newErrors.credentials = ins.requiredField || "Vui lòng tải lên chứng chỉ";
-    if (!formData.videoFile)
-      newErrors.videoFile = ins.requiredField || "Vui lòng tải lên video";
 
     setErrors(newErrors);
     return newErrors;

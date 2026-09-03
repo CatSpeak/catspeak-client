@@ -18,6 +18,7 @@ export function buildInstructorFormData({
   credentials,
   introVideo,
   taskId,
+  otpCode,
 }) {
   const fd = new FormData()
 
@@ -53,6 +54,7 @@ export function buildInstructorFormData({
   }
 
   if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
+  if (otpCode) fd.append("OtpCode", otpCode)
 
   return fd
 }

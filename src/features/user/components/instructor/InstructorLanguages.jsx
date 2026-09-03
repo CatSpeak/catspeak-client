@@ -28,7 +28,7 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
     if (exists) {
       onChange(selected.filter((item) => item.language !== lang))
     } else {
-      onChange([...selected, { language: lang, level: "" }])
+      onChange([...selected, { language: lang, level: "", yearsExperience: 0 }])
     }
   }
 
@@ -136,6 +136,27 @@ const InstructorLanguages = ({
                   <span className="text-sm font-medium text-gray-600 w-16 truncate">
                     {getLocalizedLanguageLabel(t, item.language)}
                   </span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={50}
+                    step={1}
+                    value={item.yearsExperience ?? 0}
+                    disabled={readOnly}
+                    title={ins.yearsExperience || "Số năm kinh nghiệm"}
+                    placeholder="0"
+                    onChange={(e) => {
+                      if (readOnly) return
+                      let v = parseInt(e.target.value, 10)
+                      if (Number.isNaN(v)) v = 0
+                      v = Math.max(0, Math.min(50, v))
+                      const updated = formData.languagesTeach.map((lang, i) =>
+                        i === index ? { ...lang, yearsExperience: v } : lang
+                      )
+                      onLanguagesChange(updated)
+                    }}
+                    className={`w-16 h-11 px-2 rounded-xl bg-gray-50/50 border text-sm text-gray-700 text-center disabled:opacity-50 ${(errors.languagesTeachExperience || errors.languagesTeach) && (item.yearsExperience === undefined || item.yearsExperience === null) ? "border-red-500" : "border-border"}`}
+                  />
                     <div className="flex-1 min-w-0">
                       <Dropdown
                         options={(LANGUAGE_LEVELS[item.language] || []).map((code) => ({
