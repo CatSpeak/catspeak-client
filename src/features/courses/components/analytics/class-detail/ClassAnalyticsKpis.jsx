@@ -1,5 +1,14 @@
 import React from "react"
+import { Percent, Users, BookOpen } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+
+const toneStyles = {
+  red: "bg-[#FFEBED] text-[#E11D2E]",
+  green: "bg-[#E8FAED] text-[#0D9E3D]",
+  blue: "bg-[#E5F0FF] text-[#2563EB]",
+  purple: "bg-[#F0E5FF] text-[#7C3AED]",
+  orange: "bg-[#FFF2E0] text-[#F97316]",
+}
 
 const ClassAnalyticsKpis = ({ classData }) => {
   const { t } = useLanguage()
@@ -14,52 +23,53 @@ const ClassAnalyticsKpis = ({ classData }) => {
     ? cd.belowThreshold.replace("{{rate}}", classData?.thresholdRate ?? 25)
     : `Học viên dưới ngưỡng (< ${classData?.thresholdRate ?? 25}%)`
 
+  const hasBelowThreshold = (classData?.belowThresholdCount ?? 0) > 0
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       {/* 1. STB Trung bình cả lớp */}
-      <div className="bg-[#eafaf1] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-xs">
-        <span className="text-sm font-medium text-[#168853]">
-          {cd.avgClassStb || "STB Trung bình cả lớp"}
-        </span>
-        <div className="my-2">
-          <span className="text-3xl sm:text-4xl font-bold text-[#107c41] tracking-tight">
-            {classData?.avgClassStb ?? 78}%
-          </span>
+      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.green}`}>
+          <Percent size={20} />
         </div>
-        <span className="text-xs text-[#2e7d32] font-normal">
-          {overSessionsText}
-        </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[#667085] text-xs font-normal truncate">{cd.avgClassStb || "STB Trung bình cả lớp"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={`${classData?.avgClassStb ?? 78}%`}>
+            {classData?.avgClassStb ?? 78}%
+          </strong>
+          <small className="block text-[11px] text-[#667085] truncate font-normal">{overSessionsText}</small>
+        </div>
+      </article>
 
       {/* 2. Học viên dưới ngưỡng */}
-      <div className="bg-[#fef9e7] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-xs">
-        <span className="text-sm font-medium text-[#b45309]">
-          {belowThresholdTitle}
-        </span>
-        <div className="my-2">
-          <span className="text-3xl sm:text-4xl font-bold text-[#b45309] tracking-tight">
-            {classData?.belowThresholdCount ?? 0} / {classData?.totalStudents ?? 0} {cd.studentsUnit || "học viên"}
-          </span>
+      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${hasBelowThreshold ? toneStyles.orange : toneStyles.green}`}>
+          <Users size={20} />
         </div>
-        <span className="text-xs text-[#92400e] font-normal">
-          {cd.needsAttention || "Cần được chú ý thêm"}
-        </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[#667085] text-xs font-normal truncate">{belowThresholdTitle}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={`${classData?.belowThresholdCount ?? 0} / ${classData?.totalStudents ?? 0} ${cd.studentsUnit || "học viên"}`}>
+            {classData?.belowThresholdCount ?? 0} / {classData?.totalStudents ?? 0} {cd.studentsUnit || "học viên"}
+          </strong>
+          <small className={`block text-[11px] truncate font-normal ${hasBelowThreshold ? "text-[#b45309]" : "text-[#667085]"}`}>
+            {cd.needsAttention || "Cần được chú ý thêm"}
+          </small>
+        </div>
+      </article>
 
       {/* 3. Tổng buổi đã học */}
-      <div className="bg-[#f3f4f6] rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 shadow-xs">
-        <span className="text-sm font-medium text-[#4b5563]">
-          {cd.totalSessionsLearned || "Tổng buổi đã học"}
-        </span>
-        <div className="my-2">
-          <span className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight">
-            {classData?.completedSessions ?? 0} / {classData?.totalSessions ?? 0}
-          </span>
+      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.blue}`}>
+          <BookOpen size={20} />
         </div>
-        <span className="text-xs text-[#6b7280] font-normal">
-          {classData?.courseName || cd.allSessionsRecorded || "Dữ liệu toàn bộ buổi học"}
-        </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[#667085] text-xs font-normal truncate">{cd.totalSessionsLearned || "Tổng buổi đã học"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={`${classData?.completedSessions ?? 0} / ${classData?.totalSessions ?? 0}`}>
+            {classData?.completedSessions ?? 0} / {classData?.totalSessions ?? 0}
+          </strong>
+          <small className="block text-[11px] text-[#667085] truncate font-normal">{classData?.courseName || cd.allSessionsRecorded || "Dữ liệu toàn bộ buổi học"}</small>
+        </div>
+      </article>
     </div>
   )
 }

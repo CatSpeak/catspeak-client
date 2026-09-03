@@ -114,7 +114,7 @@ const SessionStudentSpeakingTable = ({
                     </td>
 
                     {/* Thời lượng nói */}
-                    <td className="py-3.5 px-4 font-semibold text-gray-800 text-sm tabular-nums font-mono">
+                    <td className="py-3.5 px-4 font-semibold text-gray-800 text-sm tabular-nums">
                       {formatDuration(durationSecs)}
                     </td>
 

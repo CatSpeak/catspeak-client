@@ -9,7 +9,6 @@ import { useGetClassDetailQuery } from "@/store/api/coursesApi"
 import {
   ClassAnalyticsHeader,
   ClassAnalyticsKpis,
-  ClassAnalyticsNotice,
   ClassAnalyticsStudentTable,
   ClassAnalyticsSessionList,
 } from "../components/analytics/class-detail"
@@ -182,10 +181,7 @@ const ClassAnalyticsDetailPage = () => {
       {/* 2. Top Summary Metrics (3 Cards) */}
       <ClassAnalyticsKpis classData={classData} />
 
-      {/* 3. Teacher speech disclaimer alert */}
-      <ClassAnalyticsNotice teacherName={classData.teacherName} />
-
-      {/* 4. Tab Navigation & Content Container */}
+      {/* 3. Tab Navigation & Content Container */}
       <div className="flex flex-col bg-white border border-gray-100 rounded-2xl shadow-xs overflow-hidden">
         {/* Tab Switcher */}
         <div className="flex gap-6 border-b border-gray-200 px-6 pt-2">

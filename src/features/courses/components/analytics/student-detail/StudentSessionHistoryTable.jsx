@@ -93,7 +93,7 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
                   </td>
 
                   {/* Tổng thời lượng nói */}
-                  <td className="py-3.5 px-4 text-gray-700 font-normal tabular-nums font-mono">
+                  <td className="py-3.5 px-4 text-gray-700 font-normal tabular-nums">
                     {formatDuration(durationSecs)}
                   </td>
 
@@ -141,13 +141,6 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
             })}
           </tbody>
         </table>
-      </div>
-
-      {/* Footer Hint */}
-      <div className="pt-2">
-        <span className="text-xs sm:text-sm text-blue-600 font-medium hover:underline cursor-pointer">
-          {sd.clickSessionHint || "› Click vào buổi để xem báo cáo đầy đủ của cả lớp trong buổi đó (sc19)"}
-        </span>
       </div>
 
       {/* Pagination Bar */}

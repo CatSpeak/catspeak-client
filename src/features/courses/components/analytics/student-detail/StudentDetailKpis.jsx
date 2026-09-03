@@ -1,5 +1,14 @@
 import React from "react"
+import { Percent, Users, Clock, TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+
+const toneStyles = {
+  red: "bg-[#FFEBED] text-[#E11D2E]",
+  green: "bg-[#E8FAED] text-[#0D9E3D]",
+  blue: "bg-[#E5F0FF] text-[#2563EB]",
+  purple: "bg-[#F0E5FF] text-[#7C3AED]",
+  orange: "bg-[#FFF2E0] text-[#F97316]",
+}
 
 const formatDuration = (seconds) => {
   if (!seconds || seconds <= 0) return "00:00"
@@ -28,104 +37,99 @@ const StudentDetailKpis = ({ data }) => {
 
   const isImproving = data?.trend === "improving"
   const isStable = data?.trend === "stable" || !data?.trend
-  const trendIcon = isImproving ? "↗" : isStable ? "→" : "↘"
   const trendLabel = isImproving
     ? sd.trendImproving || "Cải thiện"
     : isStable
       ? sd.trendStable || "Ổn định"
       : sd.trendDeclining || "Giảm dần"
 
-  const trendBg = isImproving
-    ? "bg-[#eafaf1]"
-    : isStable
-      ? "bg-[#f3f4f6]"
-      : "bg-[#ffeceb]"
+  const trendTone = isImproving ? "green" : isStable ? "blue" : "red"
+  const TrendIcon = isImproving ? TrendingUp : isStable ? Minus : TrendingDown
 
-  const trendHeaderColor = isImproving
-    ? "text-[#168853]"
-    : isStable
-      ? "text-[#4b5563]"
-      : "text-[#be123c]"
+  const isRecentMet =
+    (data?.recentSessionPercent ?? data?.avgSpeechPercent ?? 0) >=
+    (data?.classExpectedRate ?? 25)
 
-  const trendValueColor = isImproving
-    ? "text-[#107c41]"
-    : isStable
-      ? "text-[#111827]"
-      : "text-[#e11d48]"
-
-  const trendSubColor = isImproving
-    ? "text-[#2e7d32]"
-    : isStable
-      ? "text-[#6b7280]"
-      : "text-[#be123c]"
-
-  const recentResultText = data?.recentSessionDate
-    ? `Buổi ${data.recentSessionDate}: đạt ${data.recentSessionPercent ?? 0}%`
-    : data?.recentSessionNumber
-      ? `Buổi gần nhất: đạt ${data.recentSessionPercent ?? 0}%`
-      : `Buổi gần nhất: ${data?.avgSpeechPercent ?? 0}%`
+  let recentResultText = ""
+  if (data?.recentSessionDate) {
+    const template = isRecentMet
+      ? (sd.recentSessionResultGood || "Buổi {{session}}: đạt {{rate}}%")
+      : (sd.recentSessionResult || "Buổi {{session}}: chỉ đạt {{rate}}%")
+    recentResultText = template
+      .replace("{{session}}", data.recentSessionDate)
+      .replace("{{rate}}", data.recentSessionPercent ?? 0)
+  } else if (data?.recentSessionNumber) {
+    const template = isRecentMet
+      ? (sd.recentSessionResultGood || "Buổi {{session}}: đạt {{rate}}%")
+      : (sd.recentSessionResult || "Buổi {{session}}: chỉ đạt {{rate}}%")
+    recentResultText = template
+      .replace("{{session}}", data.recentSessionNumber)
+      .replace("{{rate}}", data.recentSessionPercent ?? 0)
+  } else {
+    const template = isRecentMet
+      ? (sd.latestSessionResultGood || sd.latestSessionAvg || "Buổi gần nhất: đạt {{rate}}%")
+      : (sd.latestSessionResult || sd.latestSessionAvg || "Buổi gần nhất: chỉ đạt {{rate}}%")
+    recentResultText = template
+      .replace("{{rate}}", data?.recentSessionPercent ?? data?.avgSpeechPercent ?? 0)
+  }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {/* 1. % Phát biểu TB */}
-      <div className="bg-[#fff8e7] rounded-2xl p-5 flex flex-col justify-between shadow-xs transition-all duration-200">
-        <span className="text-sm font-medium text-[#b45309]">
-          {sd.avgSpeechPercent || "% Phát biểu TB"}
-        </span>
-        <div className="my-2">
-          <span className="text-3xl sm:text-4xl font-bold text-[#b45309] tracking-tight">
-            {data?.avgSpeechPercent ?? 0}%
-          </span>
+      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.orange}`}>
+          <Percent size={20} />
         </div>
-        <span className="text-xs text-[#92400e] font-normal">
-          {classExpectedText}
-        </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[#667085] text-xs font-normal truncate">{sd.avgSpeechPercent || "% Phát biểu TB"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={`${data?.avgSpeechPercent ?? 0}%`}>
+            {data?.avgSpeechPercent ?? 0}%
+          </strong>
+          <small className="block text-[11px] text-[#667085] truncate font-normal">{classExpectedText}</small>
+        </div>
+      </article>
 
       {/* 2. Buổi đạt ngưỡng */}
-      <div className="bg-[#eafaf1] rounded-2xl p-5 flex flex-col justify-between shadow-xs transition-all duration-200">
-        <span className="text-sm font-medium text-[#168853]">
-          {sd.sessionsMetThreshold || "Buổi đạt ngưỡng"}
-        </span>
-        <div className="my-2">
-          <span className="text-3xl sm:text-4xl font-bold text-[#107c41] tracking-tight">
-            {data?.metRecentCount ?? 0} / {data?.recentTotal ?? 0}
-          </span>
+      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.green}`}>
+          <Users size={20} />
         </div>
-        <span className="text-xs text-[#2e7d32] font-normal">
-          {showingRecentText}
-        </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[#667085] text-xs font-normal truncate">{sd.sessionsMetThreshold || "Buổi đạt ngưỡng"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={`${data?.metRecentCount ?? 0} / ${data?.recentTotal ?? 0}`}>
+            {data?.metRecentCount ?? 0} / {data?.recentTotal ?? 0}
+          </strong>
+          <small className="block text-[11px] text-[#667085] truncate font-normal">{showingRecentText}</small>
+        </div>
+      </article>
 
       {/* 3. Tổng thời lượng phát biểu */}
-      <div className="bg-[#f3f4f6] rounded-2xl p-5 flex flex-col justify-between shadow-xs transition-all duration-200">
-        <span className="text-sm font-medium text-[#4b5563]">
-          {sd.totalSpeakingDuration || "Tổng thời lượng phát biểu"}
-        </span>
-        <div className="my-2">
-          <span className="text-3xl sm:text-4xl font-bold text-[#111827] tracking-tight font-mono">
-            {formatDuration(data?.totalDurationSeconds ?? 0)}
-          </span>
+      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles.blue}`}>
+          <Clock size={20} />
         </div>
-        <span className="text-xs text-[#6b7280] font-normal">
-          {avgDurationText}
-        </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[#667085] text-xs font-normal truncate">{sd.totalSpeakingDuration || "Tổng thời lượng phát biểu"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={formatDuration(data?.totalDurationSeconds ?? 0)}>
+            {formatDuration(data?.totalDurationSeconds ?? 0)}
+          </strong>
+          <small className="block text-[11px] text-[#667085] truncate font-normal">{avgDurationText}</small>
+        </div>
+      </article>
 
       {/* 4. Xu hướng gần đây */}
-      <div className={`${trendBg} rounded-2xl p-5 flex flex-col justify-between shadow-xs transition-all duration-200`}>
-        <span className={`text-sm font-medium ${trendHeaderColor}`}>
-          {sd.recentTrend || "Xu hướng gần đây"}
-        </span>
-        <div className="my-2">
-          <span className={`text-2xl sm:text-3xl font-bold ${trendValueColor} tracking-tight`}>
-            {trendIcon} {trendLabel}
-          </span>
+      <article className="min-h-[104px] min-w-0 bg-white border border-[#DEE0E5] rounded-xl p-3.5 flex gap-3 items-center shadow-sm hover:shadow transition-shadow">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${toneStyles[trendTone]}`}>
+          <TrendIcon size={20} />
         </div>
-        <span className={`text-xs ${trendSubColor} font-normal`}>
-          {recentResultText}
-        </span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="m-0 text-[#667085] text-xs font-normal truncate">{sd.recentTrend || "Xu hướng gần đây"}</p>
+          <strong className="text-lg sm:text-xl font-bold leading-tight block text-[#14171F] truncate tracking-tight my-0.5" title={trendLabel}>
+            {trendLabel}
+          </strong>
+          <small className="block text-[11px] text-[#667085] truncate font-normal">{recentResultText}</small>
+        </div>
+      </article>
     </div>
   )
 }

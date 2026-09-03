@@ -8,7 +8,6 @@ import {
   SessionDetailKpis,
   SessionStudentSpeakingTable,
 } from "../components/analytics/session-detail"
-import ClassAnalyticsNotice from "../components/analytics/class-detail/ClassAnalyticsNotice"
 
 const SessionAnalyticsDetailPage = () => {
   const { classId, sessionId } = useParams()
@@ -159,10 +158,7 @@ const SessionAnalyticsDetailPage = () => {
         teacherName={classData.teacherName}
       />
 
-      {/* 3. Teacher speech disclaimer notice */}
-      <ClassAnalyticsNotice />
-
-      {/* 4. Student Speaking Data Table */}
+      {/* 3. Student Speaking Data Table */}
       <div className="flex flex-col bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs overflow-hidden">
         <div className="mb-4">
           <h3 className="text-base font-bold text-gray-900">
