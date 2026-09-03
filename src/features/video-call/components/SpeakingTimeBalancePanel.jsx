@@ -96,10 +96,44 @@ const SpeakingTimeBalancePanel = ({
   // Helper to distinguish Host/Teacher vs Students
   const isHostOrTeacher = useCallback(
     (p) => {
-      if (p.isTeacher || p.isHost) return true
+      if (!p) return false
+      if (
+        p.isTeacher ||
+        p.is_teacher ||
+        p.isHost ||
+        p.is_host ||
+        p.role === "teacher" ||
+        p.role === "instructor" ||
+        p.role === "host"
+      ) {
+        return true
+      }
+
       const meta = parseMetadata(p.metadata)
-      const accountId = meta.accountId || (p.isLocal ? user?.accountId : null)
-      return isRoomHost(room, accountId)
+      if (
+        meta.isTeacher ||
+        meta.is_teacher ||
+        meta.isHost ||
+        meta.is_host ||
+        meta.role === "teacher" ||
+        meta.role === "instructor" ||
+        meta.role === "host"
+      ) {
+        return true
+      }
+
+      const accountId =
+        meta.accountId ||
+        (p.isLocal ? user?.accountId : null) ||
+        p.identity ||
+        p.participantId
+
+      if (isRoomHost(room, accountId)) return true
+      if (room?.creatorId && p.identity && String(p.identity) === String(room.creatorId)) {
+        return true
+      }
+
+      return false
     },
     [room, user],
   )
