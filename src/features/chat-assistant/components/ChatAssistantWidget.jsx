@@ -8,6 +8,7 @@ import {
   fetchQuota,
   fetchSuggestions,
   storedToken,
+  suggestionsDaLuu,
 } from "../api/ragClient"
 import useChatHistory from "../hooks/useChatHistory"
 import ContactSupportModal from "./ContactSupportModal"
@@ -101,14 +102,20 @@ export default function ChatAssistantWidget() {
   // phụ thuộc [open, token, isEmpty] — không cái nào đổi sau đó — nên một lần hỏng là
   // mất gợi ý cho tới khi tải lại trang. Đúng lỗi gặp ngày 30/08.
   //
-  // KHÔNG chép cứng danh sách gợi ý sang đây làm phương án dự phòng. Danh sách bên
-  // read/rag/messages.py được chọn theo điểm đo trên chính chỉ mục đang chạy; bản chép
-  // ở client sẽ lệch sau mỗi lần sửa knowledge/ rồi gợi ý một câu mà chatbot từ chối
-  // trả lời. Mà server không gọi được thì ô chat cũng hỏng: để trống trung thực hơn.
+  // Hiện NGAY danh sách lần trước rồi mới gọi server làm mới. Vẫn không chép cứng
+  // danh sách vào đây — bản đệm lấy từ chính server này nên không lệch với
+  // read/rag/messages.py, và lần gọi thành công kế tiếp là ghi đè.
+  //
+  // Ban đầu tôi để trống khi gọi hỏng, lập luận rằng như vậy "trung thực hơn". Sai:
+  // trong một buổi phát triển đã ba lần widget mở ra trắng trơn, và người mở lần đầu
+  // không có gì để bấm. Bản đệm giữ được cả hai — không lệch, mà cũng không trống.
   useEffect(() => {
     if (!open || !token) return
     fetchQuota(caller.tier).then(setQuota).catch(() => {})
     if (!isEmpty || suggestions.length > 0) return
+
+    const dem = suggestionsDaLuu()
+    if (dem) setSuggestions(dem)
 
     let cancelled = false
     // Mốc chờ cộng dồn 31 giây, phủ hết khoảng ai-api nạp mô hình.
@@ -135,6 +142,9 @@ export default function ChatAssistantWidget() {
           console.warn("[chat-assistant] chưa lấy được gợi ý, sẽ thử lại:", e.message)
         }
       }
+      // Hỏng hết bốn lần thì thôi, và GIỮ NGUYÊN bản đệm đang hiện. Xoá nó đi chỉ
+      // làm người dùng mất chỗ bấm mà không đổi được gì.
+      console.warn("[chat-assistant] bỏ cuộc sau 4 lần thử; giữ danh sách đã lưu")
     })()
     return () => {
       cancelled = true

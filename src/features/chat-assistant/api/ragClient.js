@@ -152,11 +152,55 @@ export async function fetchQuota(tier = "Free") {
   return json(res)
 }
 
+/**
+ * Bộ nhớ đệm cho danh sách gợi ý.
+ *
+ * Danh sách này lấy từ CHÍNH server đang chạy, không phải chép cứng, nên nó không
+ * lệch với `read/rag/messages.py` như một bản sao viết tay sẽ lệch. Nó chỉ cũ đi khi
+ * server đổi danh sách, và lần gọi thành công kế tiếp là cập nhật ngay.
+ *
+ * Vì sao cần: ai-api mất khoảng 40 giây nạp mô hình mỗi lần khởi động lại, và trong
+ * khoảng đó widget mở ra là trống trơn. Ba lần trong một buổi phát triển đã gặp cảnh
+ * đó, và người mở lần đầu thấy khung trắng không có gì để bấm.
+ *
+ * Hạn 7 ngày: quá lâu mà vẫn không gọi được server thì chat cũng hỏng rồi, gợi ý một
+ * câu có thể đã bị gỡ khỏi tài liệu còn tệ hơn là không gợi ý gì.
+ */
+const KHOA_GOI_Y = "catspeak.chat.suggestions.v1"
+const HAN_GOI_Y = 7 * 24 * 60 * 60 * 1000
+
+export function suggestionsDaLuu() {
+  try {
+    const raw = localStorage.getItem(KHOA_GOI_Y)
+    if (!raw) return null
+    const { items, at } = JSON.parse(raw)
+    if (!Array.isArray(items) || !items.length) return null
+    if (Date.now() - at > HAN_GOI_Y) return null
+    return items
+  } catch {
+    // localStorage có thể bị chặn (cửa sổ ẩn danh, thiết lập trình duyệt). Không có
+    // đệm thì chạy như cũ, không phải lỗi.
+    return null
+  }
+}
+
+function luuSuggestions(items) {
+  try {
+    if (Array.isArray(items) && items.length) {
+      localStorage.setItem(KHOA_GOI_Y, JSON.stringify({ items, at: Date.now() }))
+    }
+  } catch {
+    // Hết dung lượng hoặc bị chặn. Bỏ qua.
+  }
+}
+
 export async function fetchSuggestions() {
   const res = await fetch(`${BASE}/v1/rag/suggestions`, {
     headers: authHeaders(),
   })
-  return json(res)
+  const data = await json(res)
+  luuSuggestions(data.items)
+  return data
 }
 
 /** Nguyên văn đoạn trích, cho drawer khi chunk không có source_url. */
