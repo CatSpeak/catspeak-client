@@ -260,6 +260,8 @@ export default {
     imageHint: "PNG、JPG、WEBP 最大5MB",
     change: "変更",
     remove: "削除",
+    maxParticipantsLabel: "最大参加人数",
+    maxParticipantsLimit: "最大: {max}人",
     people: "人",
     unlimited: "無制限",
   },

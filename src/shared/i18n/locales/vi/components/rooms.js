@@ -260,6 +260,8 @@ export default {
     imageHint: "PNG, JPG, WEBP tối đa 5MB",
     change: "Thay đổi",
     remove: "Xóa",
+    maxParticipantsLabel: "Số người tối đa",
+    maxParticipantsLimit: "Tối đa: {max} người",
     people: "người",
     unlimited: "Vĩnh viễn",
   },

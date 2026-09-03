@@ -285,6 +285,8 @@ export default {
     imageHint: "PNG, JPG, WEBP up to 5MB",
     change: "Change",
     remove: "Remove",
+    maxParticipantsLabel: "Max Participants",
+    maxParticipantsLimit: "Max: {max} participants",
     people: "people",
     unlimited: "Unlimited",
   },

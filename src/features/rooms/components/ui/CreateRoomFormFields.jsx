@@ -7,6 +7,7 @@ import TopicSelect from "./TopicSelect"
 import LevelSelector from "./LevelSelector"
 import { TOPICS, LEVELS } from "../../config/constants"
 import { Crown } from "lucide-react"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 
 /**
  * A centralized, DRY form component for room creation.
@@ -29,6 +30,8 @@ const CreateRoomFormFields = ({
   const ct = t.rooms?.customRooms || {}
   const isCustomMode = mode === "custom"
   const isDisabled = isCustomMode && isQuotaFull
+  const { limits } = usePlanFeatures()
+  const maxParticipantsLimit = limits.maxParticipantsInCustomRooms
 
   return (
     <div className="flex flex-col gap-6">
@@ -136,27 +139,31 @@ const CreateRoomFormFields = ({
             {/* Max Participants Selection */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-gray-800">
-                {t.rooms?.createRoom?.maxParticipantsLabel || "Số người tối đa (Max Participants)"}
+                {ct.maxParticipantsLabel || "Max Participants"}
               </label>
-              <div className="grid grid-cols-5 gap-2">
-                {[5, 10, 25, 35, 50].map((num) => {
-                  const isSelected = (formData.maxParticipants || 10) === num
-                  return (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => handleChange("maxParticipants", num)}
-                      disabled={isDisabled}
-                      className={`flex items-center justify-center py-2 rounded-xl font-bold text-sm transition-all border ${
-                        isSelected
-                          ? "border-cath-red-700 bg-[#FFF0F2] text-cath-red-700 ring-1 ring-cath-red-700 shadow-sm"
-                          : "bg-white border-border text-gray-700 hover:border-gray-300"
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  )
-                })}
+              <div className="flex flex-col gap-3 rounded-xl border border-border px-4 py-3 bg-white">
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold text-cath-red-700">
+                    {formData.maxParticipants || 10}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {ct.maxParticipantsLimit?.replace("{max}", maxParticipantsLimit) || `Max: ${maxParticipantsLimit} participants`}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={5}
+                  max={maxParticipantsLimit}
+                  step={1}
+                  value={formData.maxParticipants || 10}
+                  onChange={(e) => handleChange("maxParticipants", parseInt(e.target.value, 10))}
+                  disabled={isDisabled}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-cath-red-700"
+                />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>5</span>
+                  <span>{maxParticipantsLimit}</span>
+                </div>
               </div>
             </div>
           </div>
