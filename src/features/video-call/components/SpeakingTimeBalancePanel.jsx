@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { useSelector } from "react-redux"
+import { Loader2 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
@@ -175,7 +176,7 @@ const SpeakingTimeBalancePanel = ({
       {activeIsLoading ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
-            <div className="w-6 h-1 bg-cath-red-700 rounded-full animate-pulse" />
+            <Loader2 className="w-6 h-6 text-cath-red-700 animate-spin" />
           </div>
           <p className="text-sm text-gray-600 font-medium">
             {stbT.loadingData || "Đang tải dữ liệu"}
