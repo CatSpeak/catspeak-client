@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux"
 import { MessageCircle, X, Send } from "lucide-react"
 
@@ -10,6 +10,7 @@ import {
   storedToken,
   suggestionsDaLuu,
 } from "../api/ragClient"
+import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import useChatHistory from "../hooks/useChatHistory"
 import ContactSupportModal from "./ContactSupportModal"
 import MessageBubble from "./MessageBubble"
@@ -30,17 +31,36 @@ const WARN_REMAINING = 3       // FR-rag-chatbot-018
  * Người dùng thật không cần biết mã lỗi. Nhưng họ cần biết việc phải làm khác nhau:
  * hết phiên thì đăng nhập lại, mất mạng thì kiểm tra mạng, hỏng thật thì chờ.
  */
-function errorMessage(e) {
-  if (navigator.onLine === false) {
-    return "Không có kết nối mạng. Vui lòng kiểm tra lại."
-  }
-  if (e?.status === 401 || e?.status === 403) {
-    return "Phiên đăng nhập đã hết hạn. Bạn đăng nhập lại rồi hỏi tiếp giúp mình."
-  }
-  if (e?.status === 429) {
-    return "Đang có nhiều người hỏi cùng lúc. Bạn thử lại sau một lát nhé."
-  }
-  return "Chatbot đang gặp sự cố kỹ thuật. Vui lòng thử lại sau."
+function errorMessage(e, L) {
+  const m = L?.errors || {}
+  if (navigator.onLine === false) return m.offline
+  if (e?.status === 401 || e?.status === 403) return m.session
+  if (e?.status === 429) return m.busy
+  return m.generic
+}
+
+
+/**
+ * Đường dẫn hiện tại, đọc bằng window.location chứ không bằng useLocation().
+ *
+ * Widget mount ở App.jsx, NGOÀI <AppRouter />, nên không có context của Router —
+ * useLocation() ném lỗi ngay lúc render. Cùng cách BugReportButton đang làm, và cố
+ * ý giống nó: hai nút này nằm cạnh nhau và phải ẩn/hiện theo cùng một luật.
+ */
+function usePathname() {
+  const [pathname, setPathname] = useState(
+    typeof window !== "undefined" ? window.location.pathname : "",
+  )
+  useEffect(() => {
+    const doc = () => setPathname(window.location.pathname)
+    window.addEventListener("popstate", doc)
+    const id = setInterval(doc, 400)
+    return () => {
+      window.removeEventListener("popstate", doc)
+      clearInterval(id)
+    }
+  }, [])
+  return pathname
 }
 
 /**
@@ -74,6 +94,12 @@ export default function ChatAssistantWidget() {
   // trong khi token duoc dat bang tay luc phat trien ma chua tai lai trang.
   const token = useSelector((s) => s.auth?.token) || storedToken()
   const user = useSelector((s) => s.auth?.user)
+  const { t } = useLanguage()
+  // useMemo chứ không phải một biểu thức trần: `t.chatAssistant || {}` sinh vật thể
+  // mới mỗi lần render, mà L nằm trong danh sách phụ thuộc của useCallback bên dưới
+  // — để trần thì hàm gửi câu hỏi được dựng lại sau mỗi phím gõ.
+  const L = useMemo(() => t.chatAssistant || {}, [t])
+  const pathname = usePathname()
 
   const accountId = user?.accountId || user?.AccountId || user?.id || null
   const { messages, append, patchLast, apiHistory, isEmpty } =
@@ -213,7 +239,7 @@ export default function ChatAssistantWidget() {
         applyFinal(done, question)
       } catch (e) {
         if (e.name !== "AbortError") {
-          patchLast({ text: errorMessage(e), status: "error", streaming: false })
+          patchLast({ text: errorMessage(e, L), status: "error", streaming: false })
         }
       } finally {
         bufferRef.current = ""
@@ -221,7 +247,7 @@ export default function ChatAssistantWidget() {
         abortRef.current = null
       }
     },
-    [draft, busy, apiHistory, append, patchLast, applyFinal, caller],
+    [draft, busy, apiHistory, append, patchLast, applyFinal, caller, L],
   )
 
   // Chưa đăng nhập thì không hiện widget (FR-rag-chatbot-001). Quota đếm theo tài
@@ -235,42 +261,53 @@ export default function ChatAssistantWidget() {
   // khoá đó.
   if (!token) return null
 
+  // Trong phòng học thì không hiện (phản hồi 03/09). Màn hình phòng học đã kín
+  // thanh điều khiển gọi, và câu hỏi về sản phẩm không phải việc người ta làm giữa
+  // buổi nói chuyện. Nút báo lỗi vẫn ở lại — trong phòng mới hay hỏng nhất.
+  if (pathname.includes("/meet") || pathname.includes("/room")) return null
+
   const remaining = quota?.remaining
   const showWarning =
     typeof remaining === "number" && remaining > 0 && remaining <= WARN_REMAINING
 
   return (
     <>
-      {!open && (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label="Mở trợ lý CatSpeak"
-          /* right-24 chứ không right-5: BugReportButton đã chiếm bottom-6 right-6.
-             Để cả hai ở góc thì nút này đè lên nút báo lỗi và không ai bấm được nút
-             dưới. Dời sang trái một khoảng bằng bề rộng nút cộng lề. */
-          style={{ background: BRAND.red }}
-          className="fixed bottom-5 right-24 z-[60] flex h-13 w-13 items-center justify-center rounded-full p-3.5 text-white shadow-lg transition hover:scale-105 hover:brightness-110"
-        >
-          <MessageCircle size={22} />
-        </button>
-      )}
+      {/* Nút KHÔNG biến mất khi khung mở (phản hồi 03/09): nó là mỏ neo thị giác của
+          cuộc hội thoại, mất đi thì lúc đóng lại người dùng phải đi tìm. Khung chat
+          né lên trên chứ nút không né đi.
+
+          Hai nút nổi xếp dọc, nút báo lỗi ở trên, nút này ở dưới. Cùng trục dọc:
+          nút này rộng 52px cách phải 20px → tâm cách phải 46px; nút báo lỗi rộng
+          44px cách phải 24px → cũng 46px. Sửa một trong hai con số thì phải sửa cả
+          bên BugReportButton, nếu không hai nút lệch trục. */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label={open ? L.closeLabel : L.openLabel}
+        aria-expanded={open}
+        style={{ background: BRAND.red }}
+        className="fixed bottom-5 right-5 z-[60] flex h-[52px] w-[52px] items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105 hover:brightness-110"
+      >
+        <MessageCircle size={22} />
+      </button>
 
       {open && (
-        <div className="fixed bottom-5 right-5 z-[60] flex h-[560px] max-h-[80vh] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+        /* bottom-[8.75rem] = chừa đủ chỗ cho CẢ HAI nút bên dưới (nút chat cao
+           52px từ mốc 20px, nút báo lỗi cao 44px từ mốc 84px → đỉnh ở 128px), cộng
+           12px thở. Khung rộng 380px nên nó phủ ngang qua chỗ hai nút đứng; chỉ
+           còn cách né theo chiều dọc. */
+        <div className="fixed bottom-[8.75rem] right-5 z-[60] flex h-[560px] max-h-[calc(100vh-10.5rem)] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
           <header className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
             <div>
               <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                Trợ lý CatSpeak
+                {L.title}
               </p>
-              <p className="text-[11px] text-neutral-500">
-                Trả lời dựa trên tài liệu chính thức
-              </p>
+              <p className="text-[11px] text-neutral-500">{L.subtitle}</p>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Đóng trợ lý"
+              aria-label={L.closeLabel}
               className="rounded-full p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               <X size={18} />
@@ -281,7 +318,7 @@ export default function ChatAssistantWidget() {
             <div ref={listRef} className="h-full space-y-3 overflow-y-auto px-4 py-3">
               {isEmpty && (
                 <p className="pt-6 text-center text-sm text-neutral-500">
-                  Hỏi mình bất cứ điều gì về CatSpeak.
+                  {L.emptyHint}
                 </p>
               )}
               {messages.map((m, i) => (
@@ -313,7 +350,11 @@ export default function ChatAssistantWidget() {
             </div>
 
             <SourceDrawer source={drawerSource} onClose={() => setDrawerSource(null)} />
+            {/* key đổi theo câu hỏi để form dựng lại từ đầu mỗi lần mở. Không có
+                nó thì hàm khởi tạo useState bên trong chỉ chạy một lần, lúc
+                supportFor còn là null, và ô nội dung mở ra luôn trống. */}
             <ContactSupportModal
+              key={supportFor ?? "dong"}
               open={supportFor !== null}
               question={supportFor}
               onClose={() => setSupportFor(null)}
@@ -339,15 +380,13 @@ export default function ChatAssistantWidget() {
                     if (canSend) send()
                   }
                 }}
-                placeholder={
-                  inputLocked ? "Đã hết lượt hỏi hôm nay" : "Nhập câu hỏi…"
-                }
+                placeholder={inputLocked ? L.inputLocked : L.inputPlaceholder}
                 className="max-h-28 flex-1 resize-none rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#990011] disabled:bg-neutral-100 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
               />
               <button
                 type="submit"
                 disabled={!canSend}
-                aria-label="Gửi câu hỏi"
+                aria-label={L.sendLabel}
                 style={{ background: BRAND.red }}
                 className="rounded-xl p-2.5 text-white transition disabled:cursor-not-allowed disabled:opacity-40"
               >
@@ -355,16 +394,36 @@ export default function ChatAssistantWidget() {
               </button>
             </div>
 
-            {tooLong && (
-              <p className="mt-1 text-[11px] text-red-600">
-                Câu hỏi tối đa {MAX_CHARS} ký tự.
-              </p>
-            )}
-            {!tooLong && showWarning && (
-              <p className="mt-1 text-[11px] text-amber-600">
-                Còn {remaining} câu hỏi hôm nay
-              </p>
-            )}
+            {/* Bộ đếm đứng bên phải và LUÔN hiện, kể cả khi ô còn trống (phản hồi
+                03/09). Trước đây chỉ có dòng đỏ báo khi ĐÃ vượt 500 — tức là người
+                dùng chỉ biết giới hạn sau khi đã gõ thừa, lúc đó phải ngồi cắt bớt.
+                Đổi màu ở mốc 90% để cảnh báo trước khi chạm. */}
+            <div className="mt-1 flex items-start justify-between gap-3">
+              <div className="min-h-[1rem] flex-1">
+                {tooLong && (
+                  <p className="text-[11px] text-red-600">
+                    {(L.tooLong || "").replace("{max}", MAX_CHARS)}
+                  </p>
+                )}
+                {!tooLong && showWarning && (
+                  <p className="text-[11px] text-amber-600">
+                    {(L.quotaWarning || "").replace("{n}", remaining)}
+                  </p>
+                )}
+              </div>
+              <span
+                aria-hidden="true"
+                className={`shrink-0 text-[11px] tabular-nums ${
+                  tooLong
+                    ? "text-red-600"
+                    : draft.length >= MAX_CHARS * 0.9
+                      ? "text-amber-600"
+                      : "text-neutral-400"
+                }`}
+              >
+                {draft.length}/{MAX_CHARS}
+              </span>
+            </div>
           </form>
         </div>
       )}

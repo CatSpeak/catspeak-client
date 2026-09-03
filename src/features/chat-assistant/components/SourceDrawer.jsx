@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { X, FileText, ExternalLink } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext.jsx"
 import { fetchSource } from "../api/ragClient"
 import { BRAND } from "../lib/theme"
 
@@ -12,6 +13,8 @@ import { BRAND } from "../lib/theme"
  * Nội dung ở đây chỉ đọc, không sửa được (US-003 AC-004).
  */
 export default function SourceDrawer({ source, onClose }) {
+  const { t } = useLanguage()
+  const D = t.chatAssistant?.drawer || {}
   const [detail, setDetail] = useState(null)
   const [error, setError] = useState(null)
 
@@ -58,7 +61,7 @@ export default function SourceDrawer({ source, onClose }) {
     <div className="absolute inset-0 z-20 flex flex-col justify-end">
       <button
         type="button"
-        aria-label="Đóng"
+        aria-label={D.close}
         onClick={onClose}
         className="absolute inset-0 bg-black/40"
       />
@@ -78,7 +81,7 @@ export default function SourceDrawer({ source, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Đóng đoạn trích"
+            aria-label={D.closeExcerpt}
             className="rounded-full p-1 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
             <X size={18} />
@@ -87,11 +90,11 @@ export default function SourceDrawer({ source, onClose }) {
 
         {error ? (
           <p className="text-sm text-red-600">
-            Không tải được đoạn trích gốc. {error}
+            {D.loadFailed} {error}
           </p>
         ) : (
           <p className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 dark:text-neutral-200">
-            {text || "Đang tải…"}
+            {text || D.loading}
           </p>
         )}
 
@@ -103,12 +106,12 @@ export default function SourceDrawer({ source, onClose }) {
             style={{ color: BRAND.red }}
             className="mt-3 inline-flex items-center gap-1 text-sm font-medium hover:underline"
           >
-            Mở tài liệu gốc <ExternalLink size={13} />
+            {D.openOriginal} <ExternalLink size={13} />
           </a>
         )}
 
         <p className="mt-4 border-t border-neutral-200 pt-2 text-[11px] text-neutral-400 dark:border-neutral-700">
-          Mã đoạn: {source.chunk_id}
+          {D.chunkId} {source.chunk_id}
         </p>
       </div>
     </div>

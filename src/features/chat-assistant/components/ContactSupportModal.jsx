@@ -20,16 +20,22 @@ const MAX_MESSAGE = 1000
  *
  * Trước đây chỗ này điều hướng sang /connect. Đổi thành popup vì rời khỏi trang là
  * mất luôn đoạn hội thoại, mà câu người dùng vừa hỏi chính là thứ cần gửi kèm.
+ *
+ * Bên gọi PHẢI truyền `key` đổi theo câu hỏi. Component này nằm luôn trong cây
+ * (chỉ trả null khi đóng), nên hàm khởi tạo useState chỉ chạy đúng một lần — lần
+ * đó `question` còn là null. Không có key thì ô nội dung luôn trống trơn, đúng lỗi
+ * phát hiện ngày 03/09.
  */
 export default function ContactSupportModal({ open, question, onClose }) {
-  const { language } = useLanguage()
+  const { t, language } = useLanguage()
+  const S = t.chatAssistant?.support || {}
   const user = useSelector((s) => s.auth?.user)
 
   // Điền sẵn từ hồ sơ. Vẫn cho sửa: người dùng có thể muốn nhận trả lời ở hộp thư khác.
   const [email, setEmail] = useState(user?.email || "")
   const [name, setName] = useState(user?.fullName || user?.nickname || user?.username || "")
   const [message, setMessage] = useState(
-    question ? `Mình hỏi trợ lý câu này nhưng chưa có câu trả lời:\n\n"${question}"\n\n` : "",
+    question ? `${S.prefill || ""}\n\n"${question}"\n\n` : "",
   )
   const [error, setError] = useState(null)
   const [done, setDone] = useState(false)
@@ -39,7 +45,7 @@ export default function ContactSupportModal({ open, question, onClose }) {
     e.preventDefault()
     setError(null)
     if (!email.trim() || !message.trim()) {
-      setError("Cần có email và nội dung câu hỏi.")
+      setError(S.required)
       return
     }
     try {
@@ -51,18 +57,29 @@ export default function ContactSupportModal({ open, question, onClose }) {
       }).unwrap()
       setDone(true)
     } catch {
-      setError("Chưa gửi được. Bạn thử lại sau ít phút giúp mình.")
+      setError(S.failed)
     }
   }
 
   if (!open) return null
 
   return (
-    <Modal open={open} onClose={onClose} title="Liên hệ hỗ trợ">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={S.title}
+      /* Bớt khoảng trống dưới tiêu đề. Mặc định của Modal là p-6 ở đầu VÀ p-6 ở
+         thân, cộng lại thành 48px trắng trước dòng chữ đầu tiên — nhìn như form bị
+         tụt xuống (phản hồi 03/09). */
+      headerClassName="flex items-center justify-between px-4 pt-4 pb-1 sm:px-6 sm:pt-5 sm:pb-2"
+      bodyClassName="px-4 pb-4 sm:px-6 sm:pb-5 flex-1 overflow-y-auto"
+    >
       {done ? (
         <div className="py-2">
           <p className="text-sm text-neutral-700 dark:text-neutral-200">
-            Đã gửi. Bộ phận hỗ trợ sẽ trả lời qua email <strong>{email}</strong>.
+            {S.doneBefore}
+            <strong>{email}</strong>
+            {S.doneAfter}
           </p>
           <div className="mt-6 flex justify-end">
             <button
@@ -71,46 +88,49 @@ export default function ContactSupportModal({ open, question, onClose }) {
               className="rounded-full px-6 py-2 text-sm text-white"
               style={{ background: BRAND.red }}
             >
-              Đóng
+              {S.close}
             </button>
           </div>
         </div>
       ) : (
-        <form onSubmit={submit} className="flex flex-col gap-3">
-          <p className="text-xs text-neutral-500">
-            Trợ lý chưa tìm được câu trả lời cho câu hỏi này. Để lại email, đội hỗ trợ
-            sẽ liên hệ lại.
-          </p>
+        /* gap-2.5 chứ không gap-3, email và họ tên cùng một hàng, ô nội dung 4 dòng
+           chứ không 5: ba chỗ này gộp lại cắt khoảng 120px chiều cao, đủ để form
+           nằm gọn trong 600px của Modal mà không sinh thanh cuộn. */
+        <form onSubmit={submit} className="flex flex-col gap-2.5">
+          <p className="text-xs text-neutral-500">{S.intro}</p>
 
-          <TextInput
-            type="email"
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ban@example.com"
-          />
-          <TextInput
-            label="Họ tên"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Tên của bạn"
-          />
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <TextInput
+              type="email"
+              label={S.email}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={S.emailPlaceholder}
+            />
+            <TextInput
+              label={S.name}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={S.namePlaceholder}
+            />
+          </div>
+
           <div>
             <label
               htmlFor="chat-support-message"
               className="mb-1 block text-sm text-neutral-700 dark:text-neutral-200"
             >
-              Nội dung
+              {S.message}
             </label>
             <textarea
               id="chat-support-message"
-              rows={5}
+              rows={4}
               value={message}
               maxLength={MAX_MESSAGE}
               onChange={(e) => setMessage(e.target.value)}
               className="w-full resize-none rounded-xl border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
             />
-            <div className="mt-1 text-right text-[11px] text-neutral-400">
+            <div className="mt-1 text-right text-[11px] tabular-nums text-neutral-400">
               {message.length}/{MAX_MESSAGE}
             </div>
           </div>
@@ -123,7 +143,7 @@ export default function ContactSupportModal({ open, question, onClose }) {
               onClick={onClose}
               className="rounded-full border border-neutral-300 px-5 py-2 text-sm text-neutral-700 dark:border-neutral-600 dark:text-neutral-200"
             >
-              Huỷ
+              {S.cancel}
             </button>
             <button
               type="submit"
@@ -132,7 +152,7 @@ export default function ContactSupportModal({ open, question, onClose }) {
               style={{ background: BRAND.red }}
             >
               <Send size={14} />
-              {isLoading ? "Đang gửi…" : "Gửi"}
+              {isLoading ? S.sending : S.send}
             </button>
           </div>
         </form>
