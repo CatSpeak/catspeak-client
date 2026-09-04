@@ -54,11 +54,11 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
     >
       <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100">
         {experienceBadges.length > 0 && (
-          <div className="absolute top-3 left-3 z-30 flex flex-col items-start gap-1">
+          <div className="absolute top-3 left-3 right-3 z-30 flex flex-row flex-wrap items-center gap-1">
             {experienceBadges.map((badge) => (
               <span
                 key={badge}
-                className="inline-flex max-w-[calc(100%-0rem)] items-center gap-1 bg-white/95 text-[#910B09] text-[11px] font-bold px-2.5 py-1 rounded-full shadow"
+                className="inline-flex max-w-full items-center gap-1 bg-white/95 text-[#910B09] text-[11px] font-bold px-2.5 py-1 rounded-full shadow"
               >
                 <BadgeCheck size={13} strokeWidth={2.5} className="shrink-0" />
                 <span className="truncate">{badge}</span>
