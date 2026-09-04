@@ -35,40 +35,32 @@ const TeacherTalkRatioCard = ({
         </span>
       </div>
 
-      {/* GV (Teacher) Bar */}
-      <div className="flex items-center gap-2.5 mb-2">
-        <span
-          className="text-xs font-semibold text-gray-600 w-16 shrink-0 truncate"
-          title={labels.teacher || "GV"}
-        >
+      <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-x-2.5 gap-y-2">
+        {/* GV (Teacher) Row */}
+        <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">
           {labels.teacher || "GV"}
         </span>
-        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div className="bg-gray-200 rounded-full h-2 overflow-hidden w-full">
           <div
             className="bg-cath-red-700 h-full rounded-full transition-all duration-500"
             style={{ width: `${Math.min(100, Math.max(0, gvPercent))}%` }}
           />
         </div>
-        <span className="text-xs font-bold text-cath-red-700 w-10 text-right shrink-0">
+        <span className="text-xs font-bold text-cath-red-700 font-mono text-right min-w-[2.5rem]">
           {gvPercent}%
         </span>
-      </div>
 
-      {/* HV (Students) Bar */}
-      <div className="flex items-center gap-2.5">
-        <span
-          className="text-xs font-semibold text-gray-600 w-16 shrink-0 truncate"
-          title={labels.students || "HV"}
-        >
+        {/* HV (Students) Row */}
+        <span className="text-xs font-semibold text-gray-600 whitespace-nowrap">
           {labels.students || "HV"}
         </span>
-        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div className="bg-gray-200 rounded-full h-2 overflow-hidden w-full">
           <div
             className="bg-emerald-500 h-full rounded-full transition-all duration-500"
             style={{ width: `${Math.min(100, Math.max(0, hvPercent))}%` }}
           />
         </div>
-        <span className="text-xs font-bold text-emerald-600 w-10 text-right shrink-0">
+        <span className="text-xs font-bold text-emerald-600 font-mono text-right min-w-[2.5rem]">
           {hvPercent}%
         </span>
       </div>
