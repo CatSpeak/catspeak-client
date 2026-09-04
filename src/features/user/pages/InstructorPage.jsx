@@ -9,8 +9,7 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Loader2, GraduationCap, Pencil } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { useGetUserProfileQuery, useRequestUserProfileOtpMutation } from "@/store/api/userApi";
-import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal";
+import { useGetUserProfileQuery } from "@/store/api/userApi";
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
 import { store } from "@/store";
 import {
@@ -19,12 +18,16 @@ import {
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
+  useGetPendingTeachingUpdateQuery,
+  useSubmitTeachingUpdateMutation,
+  useCancelTeachingUpdateMutation,
 } from "@/store/api/instructorApi";
 import { parsePhoneData } from "@/shared/constants/countriesOptions";
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 
 import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
 import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
+import InstructorPendingUpdateBanner from "@/features/user/components/instructor/InstructorPendingUpdateBanner";
 
 import InstructorPersonalInfo from "@/features/user/components/instructor/InstructorPersonalInfo";
 import InstructorLanguages from "@/features/user/components/instructor/InstructorLanguages";
@@ -212,9 +215,6 @@ const InstructorPage = () => {
   // Global Approved edit (spec Q9/Q13): single Edit-all outside cards
   const [isEditingApproved, setIsEditingApproved] = useState(false);
   const [isSavingApproved, setIsSavingApproved] = useState(false);
-  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [requestProfileOtp] = useRequestUserProfileOtpMutation();
 
   // Snapshot of the original form data to detect changes
   const originalFormDataRef = useRef(null);
@@ -514,22 +514,62 @@ const InstructorPage = () => {
     [formData],
   );
 
-  const buildFullPhone = (prefix, number) =>
-    number ? `${prefix || ""}${String(number).replace(/^0+/, "")}` : "";
+  const [submitTeaching] = useSubmitTeachingUpdateMutation();
+  const [cancelTeaching, { isLoading: isCancellingTeaching }] =
+    useCancelTeachingUpdateMutation();
 
-  const isSensitiveChange = useCallback(() => {
-    const orig = originalFormDataRef.current;
-    if (!orig) return false;
-    const emailChanged =
-      (formData.email || "").trim().toLowerCase() !==
-      (orig.email || "").trim().toLowerCase();
-    const phoneChanged =
-      buildFullPhone(formData.phonePrefix, formData.phoneNumber) !==
-      buildFullPhone(orig.phonePrefix, orig.phoneNumber);
-    const idChanged =
-      formData.idFrontFile instanceof File || formData.idBackFile instanceof File;
-    return emailChanged || phoneChanged || idChanged;
-  }, [formData]);
+  const { data: pendingTeachingData } = useGetPendingTeachingUpdateQuery(
+    undefined,
+    { skip: applicationStatus !== "Approved" },
+  );
+
+  const pendingTeaching = useMemo(() => {
+    return pendingTeachingData?.data ?? pendingTeachingData ?? null;
+  }, [pendingTeachingData]);
+
+  // Teaching-only validation for Approved updates: no personal fields, no ID
+  // cards (identity lives in the account page), credentials optional.
+  const validateTeachingForm = useCallback(() => {
+    const newErrors = {};
+    if (!formData.nativeLanguage?.trim())
+      newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc";
+
+    if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
+      newErrors.languagesTeach =
+        ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
+    } else {
+      for (const lang of formData.languagesTeach) {
+        if (!lang.language || !lang.level) {
+          newErrors.languagesTeachLevel =
+            ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
+          break;
+        }
+        const years = Number(lang.yearsExperience);
+        if (!Number.isFinite(years) || years < 0 || years > 50) {
+          newErrors.languagesTeachExperience =
+            ins.experienceError || "Số năm kinh nghiệm mỗi ngôn ngữ phải từ 0 đến 50";
+          break;
+        }
+      }
+    }
+
+    if (!formData.introduction?.trim() && !formData.videoFile)
+      newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
+
+    setErrors(newErrors);
+    return newErrors;
+  }, [formData, ins]);
+
+  const buildTeachingPayload = useCallback(
+    () => ({
+      languagesTeach: formData.languagesTeach,
+      nativeLanguage: formData.nativeLanguage,
+      introduction: formData.introduction,
+      credentials: formData.credentials,
+      introVideo: formData.videoFile,
+    }),
+    [formData],
+  );
 
   const handleStartEditApproved = useCallback(() => {
     setErrors({});
@@ -542,24 +582,13 @@ const InstructorPage = () => {
     }
     setErrors({});
     setIsEditingApproved(false);
-    setIsOtpModalOpen(false);
   }, []);
 
-  const doApprovedPut = useCallback(
-    async (otpCode) => {
-      await updateInstructor(buildPayload(otpCode)).unwrap();
-      toast.success("Đã gửi thay đổi, đang chờ admin duyệt!");
-      setIsEditingApproved(false);
-      setIsOtpModalOpen(false);
-      setErrors({});
-      store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
-    },
-    [buildPayload, updateInstructor],
-  );
-
+  // Approved save: teaching content only. No personal fields, no OTP — the live
+  // Approved profile keeps serving while the draft awaits admin review.
   const handleSaveApproved = useCallback(async () => {
     if (isSavingApproved || isSubmitting) return;
-    const newErrors = validateForm();
+    const newErrors = validateTeachingForm();
     if (Object.keys(newErrors).length > 0) {
       setTimeout(() => {
         const firstErrorKey = Object.keys(newErrors)[0];
@@ -568,67 +597,37 @@ const InstructorPage = () => {
       }, 0);
       return;
     }
-    if (isSensitiveChange()) {
-      try {
-        await requestProfileOtp({ newEmail: formData.email }).unwrap();
-        setIsOtpModalOpen(true);
-      } catch (err) {
-        toast.error(err?.data?.message || "Không thể gửi OTP. Vui lòng thử lại.");
-      }
-      return;
-    }
     setIsSavingApproved(true);
     try {
-      await doApprovedPut();
+      await submitTeaching(buildTeachingPayload()).unwrap();
+      toast.success(
+        ins.teachingSubmitSuccess ||
+          "Đã gửi thay đổi nội dung giảng dạy! Hồ sơ đã duyệt vẫn hoạt động bình thường trong lúc chờ duyệt.",
+      );
+      setIsEditingApproved(false);
+      setErrors({});
     } catch (err) {
-      const msg = err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.";
-      if (msg.toLowerCase().includes("otp") || msg.includes("OTP")) {
-        try {
-          await requestProfileOtp({ newEmail: formData.email }).unwrap();
-          setIsOtpModalOpen(true);
-        } catch {
-          toast.error(msg);
-        }
-      } else {
-        toast.error(msg);
-      }
+      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.");
     } finally {
       setIsSavingApproved(false);
     }
   }, [
     isSavingApproved,
     isSubmitting,
-    validateForm,
-    isSensitiveChange,
-    requestProfileOtp,
-    formData.email,
-    doApprovedPut,
+    validateTeachingForm,
+    buildTeachingPayload,
+    submitTeaching,
+    ins,
   ]);
 
-  const handleOtpVerifyApproved = useCallback(
-    async (otpValue, { setError: setModalError }) => {
-      setIsVerifyingOtp(true);
-      try {
-        setIsSavingApproved(true);
-        await doApprovedPut(otpValue);
-      } catch (err) {
-        const apiMessage = err?.data?.message || "Có lỗi xảy ra, vui lòng thử lại.";
-        if (apiMessage.toLowerCase().includes("otp") || apiMessage.includes("OTP")) {
-          setModalError("Mã OTP không hợp lệ hoặc đã hết hạn");
-        } else {
-          setModalError(apiMessage);
-        }
-      } finally {
-        setIsVerifyingOtp(false);
-        setIsSavingApproved(false);
-      }
-    },
-    [doApprovedPut],
-  );
-
-  const handleOtpResendApproved = useCallback(async () => {
-    await requestProfileOtp({ newEmail: formData.email }).unwrap();
-  }, [requestProfileOtp, formData.email]);
+  const handleCancelTeachingUpdate = useCallback(async () => {
+    try {
+      await cancelTeaching().unwrap();
+      toast.success(ins.teachingCancelSuccess || "Đã hủy bản nháp chờ duyệt.");
+    } catch (err) {
+      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi hủy bản nháp.");
+    }
+  }, [cancelTeaching, ins]);
 
   const handleSavePersonalInfo = useCallback(async () => {
     const personalErrors = {};
@@ -889,7 +888,7 @@ const InstructorPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
           <p className="text-sm text-emerald-800">
             {ins.approvedEditHint ||
-              "Hồ sơ đã được duyệt. Bạn có thể chỉnh sửa, thay đổi sẽ chuyển về Pending chờ admin duyệt."}
+              "Hồ sơ đã được duyệt. Chỉnh sửa nội dung giảng dạy — hồ sơ hiện tại vẫn hoạt động bình thường trong lúc chờ duyệt."}
           </p>
           <button
             type="button"
@@ -906,7 +905,7 @@ const InstructorPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-800">
             {ins.approvedEditingHint ||
-              "Đang chỉnh sửa. Nhấn Lưu để gửi admin duyệt lại, hoặc Hủy để hoàn tác."}
+              "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt, hoặc Hủy để hoàn tác."}
           </p>
           <div className="flex items-center gap-2 shrink-0">
             <button
@@ -920,7 +919,7 @@ const InstructorPage = () => {
             <button
               type="button"
               onClick={handleSaveApproved}
-              disabled={isSavingApproved || isSubmitting}
+              disabled={isSavingApproved || isSubmitting || isCancellingTeaching}
               className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition cursor-pointer shadow-sm disabled:opacity-50"
             >
               {(isSavingApproved || isSubmitting) && (
@@ -936,20 +935,50 @@ const InstructorPage = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        <InstructorPersonalInfo
-          formData={formData}
-          onChange={handleChange}
-          readOnly={readOnly}
-          errors={errors}
+      {/* Pending teaching-update banner — live profile keeps serving */}
+      {isApproved && (
+        <InstructorPendingUpdateBanner
+          live={rawApplication}
+          pending={pendingTeaching}
+          onCancel={handleCancelTeachingUpdate}
+          isCancelling={isCancellingTeaching}
           t={t}
-          canSectionEdit={canSectionEdit}
-          isSectionEditing={isEditingPersonalInfo}
-          onStartSectionEdit={handleStartEditPersonalInfo}
-          onCancelSectionEdit={handleCancelEditPersonalInfo}
-          onSaveSectionEdit={handleSavePersonalInfo}
-          isSavingSection={isSavingPersonalInfo}
         />
+      )}
+
+      {/* Personal data lives in account settings for Approved teachers */}
+      {isApproved && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-sm text-slate-700">
+            {ins.personalMovedHint ||
+              "Thông tin cá nhân (họ tên, liên hệ, địa chỉ, CCCD) đã chuyển sang Cài đặt tài khoản."}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("../account")}
+            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg transition cursor-pointer shrink-0"
+          >
+            {ins.goToAccount || "Sang Cài đặt tài khoản"}
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        {!isApproved && (
+          <InstructorPersonalInfo
+            formData={formData}
+            onChange={handleChange}
+            readOnly={readOnly}
+            errors={errors}
+            t={t}
+            canSectionEdit={canSectionEdit}
+            isSectionEditing={isEditingPersonalInfo}
+            onStartSectionEdit={handleStartEditPersonalInfo}
+            onCancelSectionEdit={handleCancelEditPersonalInfo}
+            onSaveSectionEdit={handleSavePersonalInfo}
+            isSavingSection={isSavingPersonalInfo}
+          />
+        )}
         <InstructorLanguages
           formData={formData}
           onChange={handleChange}
@@ -958,13 +987,15 @@ const InstructorPage = () => {
           errors={errors}
           t={t}
         />
-        <InstructorIdentity
-          formData={formData}
-          onEdit={handleEdit}
-          readOnly={readOnly}
-          errors={errors}
-          t={t}
-        />
+        {!isApproved && (
+          <InstructorIdentity
+            formData={formData}
+            onEdit={handleEdit}
+            readOnly={readOnly}
+            errors={errors}
+            t={t}
+          />
+        )}
         <InstructorCredentials
           formData={formData}
           onAddCredential={handleAddCredential}
@@ -1002,23 +1033,28 @@ const InstructorPage = () => {
         />
       )}
 
-      {/* Hidden file inputs — new/RequestEdit/Reapply + Approved global edit */}
+      {/* Hidden file inputs — new/RequestEdit/Reapply + Approved global edit.
+          ID cards are creation-only (identity lives in the account page). */}
       {effectiveCanEdit && (
         <>
-          <input
-            ref={idFrontInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFileChange("idFrontFile")}
-          />
-          <input
-            ref={idBackInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFileChange("idBackFile")}
-          />
+          {!isApproved && (
+            <>
+              <input
+                ref={idFrontInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChange("idFrontFile")}
+              />
+              <input
+                ref={idBackInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChange("idBackFile")}
+              />
+            </>
+          )}
           <input
             ref={credentialInputRef}
             type="file"
@@ -1036,17 +1072,6 @@ const InstructorPage = () => {
           />
         </>
       )}
-
-      <ProfileOtpModal
-        open={isOtpModalOpen}
-        onClose={() => !isVerifyingOtp && setIsOtpModalOpen(false)}
-        email={formData.email}
-        onVerify={handleOtpVerifyApproved}
-        isVerifying={isVerifyingOtp}
-        onResend={handleOtpResendApproved}
-        isResending={false}
-        t={t}
-      />
     </div>
   );
 };

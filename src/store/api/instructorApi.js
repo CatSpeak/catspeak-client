@@ -59,6 +59,42 @@ export function buildInstructorFormData({
   return fd
 }
 
+/**
+ * Build a FormData object with teaching-only fields (Approved-teacher updates).
+ * No personal fields, no OTP — the live profile keeps serving meanwhile.
+ */
+export function buildTeachingFormData({
+  languagesTeach,
+  nativeLanguage,
+  introduction,
+  credentials,
+  introVideo,
+}) {
+  const fd = new FormData()
+
+  if (nativeLanguage) fd.append("NativeLanguage", nativeLanguage)
+  if (introduction) fd.append("Introduction", introduction)
+
+  if (languagesTeach) {
+    fd.append(
+      "LanguagesTeach",
+      typeof languagesTeach === "string"
+        ? languagesTeach
+        : JSON.stringify(languagesTeach),
+    )
+  }
+
+  if (Array.isArray(credentials)) {
+    credentials.forEach((file) => {
+      if (file instanceof File) fd.append("Credentials", file)
+    })
+  }
+
+  if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
+
+  return fd
+}
+
 export const instructorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getInstructorProfile: builder.query({
@@ -90,6 +126,32 @@ export const instructorApi = baseApi.injectEndpoints({
       invalidatesTags: ["InstructorProfile"],
     }),
 
+    getPendingTeachingUpdate: builder.query({
+      query: () => ({
+        url: "/InstructorProfile/my/teaching-update",
+        method: "GET",
+      }),
+      providesTags: ["TeachingUpdate"],
+    }),
+
+    submitTeachingUpdate: builder.mutation({
+      query: (data) => ({
+        url: "/InstructorProfile/my/teaching",
+        method: "PUT",
+        body: data instanceof FormData ? data : buildTeachingFormData(data),
+        formData: true,
+      }),
+      invalidatesTags: ["TeachingUpdate"],
+    }),
+
+    cancelTeachingUpdate: builder.mutation({
+      query: () => ({
+        url: "/InstructorProfile/my/teaching-update",
+        method: "DELETE",
+      }),
+      invalidatesTags: ["TeachingUpdate"],
+    }),
+
     getHonoredInstructors: builder.query({
       query: (params) => {
         const limit = typeof params === "number" ? params : params?.limit
@@ -109,5 +171,8 @@ export const {
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
+  useGetPendingTeachingUpdateQuery,
+  useSubmitTeachingUpdateMutation,
+  useCancelTeachingUpdateMutation,
   useGetHonoredInstructorsQuery,
 } = instructorApi
