@@ -25,6 +25,9 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   const [isOverflowing, setIsOverflowing] = useState(false)
   const contentRef = useRef(null)
 
+  const contentUrl = post?.contentUrl || post?.ContentUrl || null
+  const hasContent = Boolean(post?.content || contentUrl)
+
   useEffect(() => {
     const el = contentRef.current
     if (!el) return
@@ -39,7 +42,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
     const observer = new ResizeObserver(checkOverflow)
     observer.observe(el)
     return () => observer.disconnect()
-  }, [post?.content, isExpanded])
+  }, [post?.content, contentUrl, isExpanded])
   const {
     shareUrl,
     isShareModalOpen,
@@ -89,13 +92,17 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
             <h4 className="text-2xl font-bold">{post.title}</h4>
           )}
 
-          {post.content && (
+          {hasContent && (
             <div>
               <div
                 ref={contentRef}
                 className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
               >
-                <PostContent html={post.content} className="text-sm text-[#606060]" />
+                <PostContent
+                  html={post.content}
+                  contentUrl={contentUrl}
+                  className="text-sm text-[#606060]"
+                />
               </div>
               {(isOverflowing || isExpanded) && (
                 <button
