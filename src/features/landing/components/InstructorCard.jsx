@@ -1,13 +1,12 @@
 import { useState, useMemo } from "react"
-import { UserRound } from "lucide-react"
+import { UserRound, BadgeCheck } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import {
   getFallbackAvatarByGender,
   parseLanguages,
   getInstructorRole,
-  getExperienceBadgeText,
-  getExperienceLineText,
+  getExperienceBadgeList,
 } from "../utils/instructorUtils"
 
 const InstructorCard = ({ teacher, onClick, onExplore }) => {
@@ -30,12 +29,8 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
     () => getInstructorRole(languages, t, language),
     [languages, t, language],
   )
-  const experienceBadge = useMemo(
-    () => getExperienceBadgeText(languages, t, language),
-    [languages, t, language],
-  )
-  const experienceLine = useMemo(
-    () => getExperienceLineText(languages, t, language),
+  const experienceBadges = useMemo(
+    () => getExperienceBadgeList(languages, t, language),
     [languages, t, language],
   )
 
@@ -58,10 +53,18 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
       className="w-full flex flex-col group/card cursor-pointer"
     >
       <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100">
-        {experienceBadge && (
-          <span className="absolute top-3 left-3 z-30 inline-flex items-center bg-white/95 text-[#910B09] text-[11px] font-bold px-2.5 py-1 rounded-full shadow">
-            {experienceBadge}
-          </span>
+        {experienceBadges.length > 0 && (
+          <div className="absolute top-3 left-3 z-30 flex flex-col items-start gap-1">
+            {experienceBadges.map((badge) => (
+              <span
+                key={badge}
+                className="inline-flex max-w-[calc(100%-0rem)] items-center gap-1 bg-white/95 text-[#910B09] text-[11px] font-bold px-2.5 py-1 rounded-full shadow"
+              >
+                <BadgeCheck size={13} strokeWidth={2.5} className="shrink-0" />
+                <span className="truncate">{badge}</span>
+              </span>
+            ))}
+          </div>
         )}
         {avatarSrc ? (
           <img
@@ -97,11 +100,6 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
           <span className="mt-0.5 text-sm sm:text-base font-bold leading-tight text-white">
             {displayName}
           </span>
-          {experienceLine && (
-            <span className="mt-0.5 text-[11px] font-medium leading-tight text-white/90">
-              {experienceLine}
-            </span>
-          )}
           <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] group-hover/card:max-h-20 group-hover/card:opacity-100 group-hover/card:mt-2">
             <p className="text-xs leading-relaxed text-white/80">
               {description}
