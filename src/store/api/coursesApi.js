@@ -2818,6 +2818,7 @@ export const {
   useEnrollInCourseMutation,
   useGetAllCoursesQuery,
   useGetAllClassesQuery,
+  useLazyGetAllClassesQuery,
   useGetCourseDetailQuery,
   useGetClassDetailQuery,
   useCreateCourseMutation,

@@ -114,6 +114,15 @@ const MyClassesPage = lazy(
 const WorkspaceAnalyticsPage = lazy(
   () => import("@/features/courses/components/WorkspaceAnalyticsPage"),
 );
+const ClassAnalyticsDetailPage = lazy(
+  () => import("@/features/courses/pages/ClassAnalyticsDetailPage"),
+);
+const StudentAnalyticsDetailPage = lazy(
+  () => import("@/features/courses/pages/StudentAnalyticsDetailPage"),
+);
+const SessionAnalyticsDetailPage = lazy(
+  () => import("@/features/courses/pages/SessionAnalyticsDetailPage"),
+);
 const WorkspaceDashboardPage = lazy(
   () => import("@/features/courses/components/WorkspaceDashboardPage"),
 );
@@ -547,6 +556,36 @@ const routesConfig = [
                   <RoleGuard allowedRoles={["Teacher"]}>
                     <LazyRoute>
                       <WorkspaceAnalyticsPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "analytics/class/:classId",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <ClassAnalyticsDetailPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "analytics/class/:classId/student/:studentId",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <StudentAnalyticsDetailPage />
+                    </LazyRoute>
+                  </RoleGuard>
+                ),
+              },
+              {
+                path: "analytics/class/:classId/session/:sessionId",
+                element: (
+                  <RoleGuard allowedRoles={["Teacher"]}>
+                    <LazyRoute>
+                      <SessionAnalyticsDetailPage />
                     </LazyRoute>
                   </RoleGuard>
                 ),

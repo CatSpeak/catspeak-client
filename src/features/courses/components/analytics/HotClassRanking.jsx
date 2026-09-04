@@ -1,8 +1,10 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
+const HotClassRanking = ({ rows = [], pageSize = 6, onRowClick }) => {
+  const navigate = useNavigate()
   const { t } = useLanguage()
   const secT = t.courses?.analytics?.sections || {}
   const learnersStr = secT.learners || "học viên"
@@ -44,7 +46,14 @@ const HotClassRanking = ({ rows = [], pageSize = 6 }) => {
             return (
               <div
                 key={row.className || idx}
-                className="flex flex-col sm:grid sm:grid-cols-[24px_minmax(120px,1.2fr)_minmax(100px,1fr)_100px_minmax(80px,1fr)_48px] gap-2 sm:gap-3 items-start sm:items-center py-2.5 px-2 hover:bg-[#FBFBFC] transition-colors text-xs"
+                onClick={() => {
+                  if (onRowClick) {
+                    onRowClick(row)
+                  } else if (row.classId) {
+                    navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
+                  }
+                }}
+                className="flex flex-col sm:grid sm:grid-cols-[24px_minmax(120px,1.2fr)_minmax(100px,1fr)_100px_minmax(80px,1fr)_48px] gap-2 sm:gap-3 items-start sm:items-center py-2.5 px-2 hover:bg-[#FBFBFC] transition-colors text-xs cursor-pointer"
               >
                 {/* Rank number */}
                 <div className="flex items-center gap-2 sm:block sm:text-center w-full sm:w-auto">

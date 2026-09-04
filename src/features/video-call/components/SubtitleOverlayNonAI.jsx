@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from "react"
 import { Globe, ChevronDown, X } from "lucide-react"
 import { useSubtitles } from "@/features/video-call/hooks/useSubtitles"
+import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
@@ -20,16 +21,16 @@ const LANG_FLAGS = { en: UK, vi: VietNam, zh: China, ja: Japan }
 /**
  * In-call subtitle overlay for non-AI rooms.
  * Displays subtitles filtered by the viewer's selected display language.
- * Includes an inline language switcher for changing the display language.
+ * Includes an inline language switcher that invokes changeSubtitleLanguage to trigger backend API sessions.
  */
 const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
-  const { subtitles } = useSubtitles()
   const {
     room,
     subtitleSelectedLanguage,
-    setSubtitleSelectedLanguage,
     stopSubtitles,
+    changeSubtitleLanguage,
   } = useGlobalVideoCall()
+  const { subtitles } = useSubtitles()
   const { t } = useLanguage()
 
   const [showLangPicker, setShowLangPicker] = useState(false)
@@ -120,7 +121,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
               <ListItem
                 key={lang}
                 onClick={() => {
-                  setSubtitleSelectedLanguage(lang)
+                  changeSubtitleLanguage(lang)
                   setShowLangPicker(false)
                 }}
                 hoverEffect={true}

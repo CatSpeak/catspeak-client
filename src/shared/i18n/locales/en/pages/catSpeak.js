@@ -298,4 +298,4 @@ export default {
   created: "Created",
   expiresIn: "Expires in",
   story: "Story",
-};
+}

@@ -52,4 +52,34 @@ export const isRoomHost = (room, userOrAccountId) => {
   return String(room.creatorId) === String(targetId);
 };
 
+/**
+ * STB (Speaking Time Balance) is only available and visible for classes room
+ * (both dependent and independent classes) and their breakout rooms,
+ * NOT in normal (OneToOne, Group) or custom rooms.
+ * @param {object} room - Room object containing roomType, id, isClassRoom, etc.
+ * @param {string|number} [roomType] - Optional explicit roomType if room object is not provided
+ * @returns {boolean}
+ */
+export const isSpeakingTimeBalanceSupported = (room, roomType) => {
+  if (!room && roomType == null) return false;
+
+  // Direct boolean flag set for class rooms
+  if (room?.isClassRoom === true) return true;
+
+  // If roomId starts with "class-"
+  if (typeof room?.id === "string" && room.id.startsWith("class-")) return true;
+
+  // If room has classId property
+  if (room?.classId != null) return true;
+
+  // Check explicit roomType (Class = 3)
+  const targetType = room?.roomType !== undefined ? room.roomType : roomType;
+  if (targetType !== undefined && targetType !== null) {
+    const str = String(targetType).toLowerCase();
+    return str === "class" || str === "3";
+  }
+
+  return false;
+};
+
 
