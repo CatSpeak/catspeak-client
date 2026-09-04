@@ -17,6 +17,8 @@ export function buildInstructorFormData({
   idCardBack,
   credentials,
   introVideo,
+  introVideoUrl,
+  removeIntroVideo,
   taskId,
   otpCode,
 }) {
@@ -54,6 +56,9 @@ export function buildInstructorFormData({
   }
 
   if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
+  else if (typeof introVideo === "string" && introVideo) fd.append("IntroVideoUrl", introVideo)
+  else if (typeof introVideoUrl === "string" && introVideoUrl) fd.append("IntroVideoUrl", introVideoUrl)
+  if (removeIntroVideo === true) fd.append("RemoveIntroVideo", "true")
   if (otpCode) fd.append("OtpCode", otpCode)
 
   return fd
@@ -69,6 +74,8 @@ export function buildTeachingFormData({
   introduction,
   credentials,
   introVideo,
+  introVideoUrl,
+  removeIntroVideo,
 }) {
   const fd = new FormData()
 
@@ -91,6 +98,9 @@ export function buildTeachingFormData({
   }
 
   if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
+  else if (typeof introVideo === "string" && introVideo) fd.append("IntroVideoUrl", introVideo)
+  else if (typeof introVideoUrl === "string" && introVideoUrl) fd.append("IntroVideoUrl", introVideoUrl)
+  if (removeIntroVideo === true) fd.append("RemoveIntroVideo", "true")
 
   return fd
 }

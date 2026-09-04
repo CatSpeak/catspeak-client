@@ -50,6 +50,7 @@ const INITIAL_FORM_DATA = {
   idBackFile: null,
   introduction: "",
   credentials: [],
+  videoFile: null,
 };
 
 /**
@@ -477,9 +478,33 @@ const InstructorPage = () => {
       }
       setFormData((prev) => ({ ...prev, videoFile: file }));
       clearError("videoFile");
+      clearError("introduction");
+      e.target.value = "";
     },
     [effectiveCanEdit, ins],
   );
+
+  const handleRemoveVideo = useCallback(() => {
+    if (!effectiveCanEdit) return;
+    const confirmed =
+      typeof window === "undefined"
+        ? true
+        : window.confirm(
+            ins.deleteVideoConfirm ||
+              "Xóa video giới thiệu? Thay đổi chỉ có hiệu lực sau khi bạn nhấn Lưu.",
+          );
+    if (!confirmed) return;
+    setFormData((prev) => ({ ...prev, videoFile: null }));
+    if (videoInputRef.current) videoInputRef.current.value = "";
+    clearError("videoFile");
+  }, [effectiveCanEdit, ins]);
+
+  const handleUndoVideo = useCallback(() => {
+    if (!effectiveCanEdit) return;
+    const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+    setFormData((prev) => ({ ...prev, videoFile: originalVideo }));
+    clearError("videoFile");
+  }, [effectiveCanEdit]);
 
   const handleRemoveCredential = useCallback(
     (index) => {
@@ -494,23 +519,30 @@ const InstructorPage = () => {
   );
 
   const buildPayload = useCallback(
-    (otpCode) => ({
-      fullName: formData.fullName,
-      email: formData.email,
-      address: formData.address,
-      phoneNumber: formData.phoneNumber
+    (otpCode) => {
+      const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+      const originalHadVideo =
+        typeof originalVideo === "string" && !!originalVideo;
+      const removeIntroVideo = originalHadVideo && !formData.videoFile;
+      return {
+        fullName: formData.fullName,
+        email: formData.email,
+        address: formData.address,
+        phoneNumber: formData.phoneNumber
           ? `${formData.phonePrefix}${formData.phoneNumber.replace(/^0+/, "")}`
           : "",
-      nationality: formData.nationality,
-      languagesTeach: formData.languagesTeach,
-      nativeLanguage: formData.nativeLanguage,
-      introduction: formData.introduction,
-      idCardFront: formData.idFrontFile,
-      idCardBack: formData.idBackFile,
-      credentials: formData.credentials,
-      introVideo: formData.videoFile,
-      ...(otpCode ? { otpCode } : {}),
-    }),
+        nationality: formData.nationality,
+        languagesTeach: formData.languagesTeach,
+        nativeLanguage: formData.nativeLanguage,
+        introduction: formData.introduction,
+        idCardFront: formData.idFrontFile,
+        idCardBack: formData.idBackFile,
+        credentials: formData.credentials,
+        introVideo: formData.videoFile,
+        removeIntroVideo,
+        ...(otpCode ? { otpCode } : {}),
+      };
+    },
     [formData],
   );
 
@@ -560,16 +592,19 @@ const InstructorPage = () => {
     return newErrors;
   }, [formData, ins]);
 
-  const buildTeachingPayload = useCallback(
-    () => ({
+  const buildTeachingPayload = useCallback(() => {
+    const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+    const originalHadVideo =
+      typeof originalVideo === "string" && !!originalVideo;
+    return {
       languagesTeach: formData.languagesTeach,
       nativeLanguage: formData.nativeLanguage,
       introduction: formData.introduction,
       credentials: formData.credentials,
       introVideo: formData.videoFile,
-    }),
-    [formData],
-  );
+      removeIntroVideo: originalHadVideo && !formData.videoFile,
+    };
+  }, [formData]);
 
   const handleStartEditApproved = useCallback(() => {
     setErrors({});
@@ -1011,6 +1046,9 @@ const InstructorPage = () => {
         formData={formData}
         onChange={handleChange}
         onSelectVideo={handleSelectVideo}
+        onRemoveVideo={handleRemoveVideo}
+        onUndoVideo={handleUndoVideo}
+        originalVideoUrl={existingApplication?.videoFile ?? null}
         readOnly={readOnly}
         errors={errors}
         t={t}
