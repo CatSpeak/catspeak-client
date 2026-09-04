@@ -37,7 +37,10 @@ const TeacherTalkRatioCard = ({
 
       {/* GV (Teacher) Bar */}
       <div className="flex items-center gap-2.5 mb-2">
-        <span className="text-xs font-semibold text-gray-600 w-5 shrink-0">
+        <span
+          className="text-xs font-semibold text-gray-600 w-16 shrink-0 truncate"
+          title={labels.teacher || "GV"}
+        >
           {labels.teacher || "GV"}
         </span>
         <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -46,14 +49,17 @@ const TeacherTalkRatioCard = ({
             style={{ width: `${Math.min(100, Math.max(0, gvPercent))}%` }}
           />
         </div>
-        <span className="text-xs font-bold text-cath-red-700 w-9 text-right shrink-0">
+        <span className="text-xs font-bold text-cath-red-700 w-10 text-right shrink-0">
           {gvPercent}%
         </span>
       </div>
 
       {/* HV (Students) Bar */}
       <div className="flex items-center gap-2.5">
-        <span className="text-xs font-semibold text-gray-600 w-5 shrink-0">
+        <span
+          className="text-xs font-semibold text-gray-600 w-16 shrink-0 truncate"
+          title={labels.students || "HV"}
+        >
           {labels.students || "HV"}
         </span>
         <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -62,7 +68,7 @@ const TeacherTalkRatioCard = ({
             style={{ width: `${Math.min(100, Math.max(0, hvPercent))}%` }}
           />
         </div>
-        <span className="text-xs font-bold text-emerald-600 w-9 text-right shrink-0">
+        <span className="text-xs font-bold text-emerald-600 w-10 text-right shrink-0">
           {hvPercent}%
         </span>
       </div>
