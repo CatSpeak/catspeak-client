@@ -758,9 +758,7 @@ const CreateClassPage = () => {
       {/* ─── Breadcrumb ─── */}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Trang chủ", onClick: isFormBusy ? undefined : () => navigate("/workspace") },
           { label: c.title || "Khóa học của tôi", onClick: isFormBusy ? undefined : () => navigate("/workspace/courses") },
-          { label: c.allClasses?.title || "Toàn bộ lớp học", onClick: isFormBusy ? undefined : () => navigate("/workspace/classes/all-classes") },
           { label: pageTitle },
         ]}
       />

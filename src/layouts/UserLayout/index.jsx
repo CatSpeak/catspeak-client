@@ -12,26 +12,52 @@ const UserLayout = ({ showFooter = true }) => {
     isOpen: false,
     mode: "login",
     email: "",
+    pendingActivation: false,
+    registerNonce: 0,
+    verifyNonce: 0,
+    openNonce: 0,
     redirectAfterLogin: null,
   })
 
-  const openAuthModal = (mode = "login", secondArg = null) => {
-    // When switching to verify-email, the second arg is the email address
-    if (mode === "verify-email") {
-      setAuthModal({
-        isOpen: true,
-        mode,
-        email: secondArg || "",
-        redirectAfterLogin: null,
-      })
-    } else {
-      setAuthModal({
+  const openAuthModal = (mode = "login", secondArg = null, thirdArg = false) => {
+    setAuthModal((prev) => {
+      const isFreshOpen = !prev.isOpen
+      let registerNonce = prev.registerNonce || 0
+      let verifyNonce = prev.verifyNonce || 0
+      let openNonce = prev.openNonce || 0
+
+      if (mode === "register") {
+        if (isFreshOpen) registerNonce++
+      } else if (mode === "verify-email") {
+        if (isFreshOpen || prev.mode !== "verify-email") verifyNonce++
+        if (isFreshOpen) openNonce++
+      } else {
+        if (isFreshOpen) openNonce++
+      }
+
+      if (mode === "verify-email") {
+        return {
+          isOpen: true,
+          mode,
+          email: secondArg || "",
+          pendingActivation: !!thirdArg,
+          registerNonce,
+          verifyNonce,
+          openNonce,
+          redirectAfterLogin: null,
+        }
+      }
+      return {
         isOpen: true,
         mode,
         email: "",
+        pendingActivation: false,
+        registerNonce,
+        verifyNonce,
+        openNonce,
         redirectAfterLogin: secondArg,
-      })
-    }
+      }
+    })
   }
 
   const closeAuthModal = () =>
@@ -39,6 +65,7 @@ const UserLayout = ({ showFooter = true }) => {
       ...prev,
       isOpen: false,
       email: "",
+      pendingActivation: false,
       redirectAfterLogin: null,
     }))
 
@@ -67,6 +94,9 @@ const UserLayout = ({ showFooter = true }) => {
           isOpen={authModal.isOpen}
           mode={authModal.mode}
           email={authModal.email}
+          pendingActivation={authModal.pendingActivation}
+          registerNonce={authModal.registerNonce}
+          verifyNonce={authModal.verifyNonce}
           onClose={closeAuthModal}
           onSwitchMode={openAuthModal}
         />

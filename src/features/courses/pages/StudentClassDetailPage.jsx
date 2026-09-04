@@ -260,7 +260,6 @@ const StudentClassDetailPage = () => {
       {/* ─── Breadcrumb ─── */}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
           { label: c.student?.dashboardTitle || "Lớp học của tôi", onClick: () => navigate("/workspace/learning") },
           ...(classData.courseId
             ? [
@@ -270,7 +269,13 @@ const StudentClassDetailPage = () => {
               },
             ]
             : []),
-          { label: c.student?.classDetails || "Class Details" },
+          {
+            label:
+              classData.name ||
+              classData.title ||
+              c.student?.classDetails ||
+              "Chi tiết lớp học",
+          },
         ]}
       />
 

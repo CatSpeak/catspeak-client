@@ -165,8 +165,8 @@ export default {
       ],
     },
     leadingTeam: {
-      title: "リーディング＆伴走チーム",
-      subtitle: "高品質",
+      title: "講師陣",
+      subtitle: "今週の講師",
       viewInstructor: "講師を見る",
       defaultInstructor: "講師",
       defaultRole: "CatSpeak講師",
@@ -175,7 +175,7 @@ export default {
       prevInstructor: "前の講師",
       nextInstructor: "次の講師",
       recruitment: {
-        title: "CatSpeakチームの一員になりませんか？",
+        title: "Cat Speak 講師陣の一員になりませんか？",
         description:
           "最先端のテックプラットフォームで、知識を共有し、グローバルコミュニティとつながり、時間を柔軟に管理しましょう。",
         instructorArea: "講師エリア",

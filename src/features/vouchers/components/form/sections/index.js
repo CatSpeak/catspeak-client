@@ -1,6 +1,5 @@
 export { default as BasicInfoSection } from "./BasicInfoSection"
 export { default as DiscountConfigSection } from "./DiscountConfigSection"
-export { default as ScopeConditionsSection } from "./ScopeConditionsSection"
 export { default as OtherConfigSection } from "./OtherConfigSection"
 export { default as ValiditySection } from "./ValiditySection"
 export { default as UsageLimitsSection } from "./UsageLimitsSection"

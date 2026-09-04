@@ -16,9 +16,11 @@ export const zh = {
     loadingList: "正在加载优惠列表...",
     notFound: "未找到优惠券信息",
     notFoundDesc: "优惠券不存在或您无权访问。",
-    editDraftOnly: "此优惠券已提交或处于活动状态，无法编辑。您只能编辑草稿状态的优惠券。",
+    editDraftOnly:
+      "此优惠券已提交或处于活动状态，无法编辑。您只能编辑草稿状态的优惠券。",
     cannotEdit: "无法编辑优惠券",
-    tabBanner: "您创建的优惠券金额将从您的收入中扣除。平台仍将收取原始学费的10%。",
+    tabBanner:
+      "您创建的优惠券金额将从您的收入中扣除。平台仍将收取原始学费的10%。",
     createVoucher: "创建新优惠券",
 
     stats: {
@@ -40,6 +42,7 @@ export const zh = {
 
     table: {
       code: "优惠码",
+      title: "优惠券名称",
       discountType: "折扣类型",
       discount: "折扣额度",
       validity: "有效期",
@@ -115,8 +118,8 @@ export const zh = {
       autoGenerate: "随机生成",
       titleLabel: "活动名称",
       titlePlaceholder: "例如：开学季优惠",
-      descLabel: "描述（内部）",
-      descPlaceholder: "此优惠券的内部说明...",
+      descLabel: "描述",
+      descPlaceholder: "此优惠券的说明",
       scopeConditions: "适用条件",
       scopeLabel: "适用范围",
       scopeClass: "按班级适用",
@@ -160,8 +163,19 @@ export const zh = {
       discountForOne: "学员优惠减免:",
       platformFee: "平台服务费 (原价10%):",
       teacherReceives: "教师实际收入:",
-      lowestTuitionHint: "最低学费：{{amount}} ({{className}})。固定折扣金额必须低于此学费。",
+      lowestTuitionHint:
+        "最低学费：{{amount}} ({{className}})。固定折扣金额必须低于此学费。",
+      maxDiscountHelper: "单笔报名的最高减免金额（最低 2,000 ₫）。",
+      maxDiscountEquivalent:
+        "相当于学费（{{tuition}}）的 {{percent}}%（{{nominal}}）。",
+      maxBudgetHelper:
+        "当累计减免金额达到此限额时优惠券将自动停止（最低 2,000 ₫）。",
+      usageLimitAutoCalc:
+        "自动计算：{{budget}} ÷ {{discount}} = {{uses}} 次使用。",
+      usageLimitAutoCalcHelper: "基于最高预算 ÷ 优惠金额自动计算。",
+      autoCalcByBudget: "按预算自动计算",
       saveDraft: "保存草稿",
+      savingDraft: "正在保存",
       saveDraftSuccess: "优惠券已保存为草稿！",
       nextStep: "下一步",
       prevStep: "返回",
@@ -191,6 +205,8 @@ export const zh = {
       validity: "有效期:",
       neverExpired: "无限制",
       calculationTitle: "押金计算",
+      maxBudget: "最高预算:",
+      budgetLimit: "预算限额:",
       maxDiscountPerUsage: "每单最高优惠:",
       totalUsages: "总次数:",
       depositRequired: "所需押金:",
@@ -198,7 +214,7 @@ export const zh = {
       termsLink: "押金及退款条款",
       termsSuffix: "。",
       confirmDeposit: "确认充值押金",
-      submitting: "处理中...",
+      submitting: "处理中",
       adminNotice: "确认转账后，管理员将在24小时内审核并激活优惠券。",
       submitSuccess: "押金申请提交成功！管理员将在24小时内审核激活。",
       submitError: "提交押金申请时出错，请重试。",
@@ -206,7 +222,8 @@ export const zh = {
 
     pendingConfirmation: {
       title: "押金申请已提交！",
-      subtitle: "CatSpeak 管理员将核对交易并在24个工作小时内激活优惠券 \"{{code}}\"。",
+      subtitle:
+        'CatSpeak 管理员将核对交易并在24个工作小时内激活优惠券 "{{code}}"。',
       transferredPrefix: "您已转账",
       waitingAdmin: "等待管理员确认（24小时内）。审核通过后优惠券将立即生效。",
       viewTransferInfo: "查看转账信息",
@@ -216,23 +233,27 @@ export const zh = {
 
     modals: {
       transferInfoTitle: "押金转账信息",
-      transferInfoNotice: "请扫描二维码或准确按照下方附言转账，以便系统自动核验。",
+      transferInfoNotice:
+        "请扫描二维码或准确按照下方附言转账，以便系统自动核验。",
       copied: "已复制",
       copy: "复制",
       confirmDepositAction: "我已转账 - 确认押金",
       rejectionTitle: "优惠券被拒绝原因",
       rejectionSubtitle: "您的优惠券申请因以下原因被拒绝：",
       adminFeedback: "原因",
-      rejectionSuggestion: "押金已保留或退回至您的账户。您可以修改信息后重新创建优惠券。",
+      rejectionSuggestion:
+        "押金已保留或退回至您的账户。您可以修改信息后重新创建优惠券。",
       stopTitle: "提前停止优惠券",
-      stopDesc: "您确定要提前停止优惠券 {{code}} 吗？停止后学员将无法继续使用此代码。未使用的押金将根据规定退还。",
+      stopDesc:
+        "您确定要提前停止优惠券 {{code}} 吗？停止后学员将无法继续使用此代码。未使用的押金将根据规定退还。",
       stopAction: "确认停止",
       stopSuccess: "优惠券已成功停止！",
       stopError: "停止优惠券时发生错误，请重试。",
       cancelDraftTitle: "删除优惠券草稿",
       cancelRequestTitle: "取消优惠券申请",
-      cancelDraftMsg: "您确定要删除草稿优惠券 \"{{code}}\" 吗？此草稿将从系统中永久移除。",
-      cancelRequestMsg: "您确定要取消优惠券 \"{{code}}\" 的押金申请吗？",
+      cancelDraftMsg:
+        '您确定要删除草稿优惠券 "{{code}}" 吗？此草稿将从系统中永久移除。',
+      cancelRequestMsg: '您确定要取消优惠券 "{{code}}" 的押金申请吗？',
       cancelConfirm: "确认取消",
       cancelSuccess: "优惠券申请已成功取消！",
       deleteDraftConfirm: "删除草稿",
@@ -242,6 +263,7 @@ export const zh = {
       title: "优惠券详情",
       overview: "配置概览",
       configTitle: "配置信息",
+      name: "优惠券名称",
       code: "代码",
       type: "类型",
       value: "价值",
@@ -256,7 +278,8 @@ export const zh = {
       depositRemaining: "剩余押金",
       estimatedRefund: "预计退款",
       refundTitle: "预计押金退还",
-      refundDesc: "根据当前使用情况，剩余押金预计将在活动结束日期 {{date}} 退还。实际金额可能会根据成功应用的订单量有所变动。",
+      refundDesc:
+        "根据当前使用情况，剩余押金预计将在活动结束日期 {{date}} 退还。实际金额可能会根据成功应用的订单量有所变动。",
       refundEndFallback: "活动结束日期",
       estimatedRefundPrefix: "预计退还: ~",
       statsTitle: "快捷统计",
@@ -322,14 +345,37 @@ export const zh = {
       minMaxDiscount: "最低最高减免为 2,000 ₫",
       minMaxBudget: "最低最高预算为 2,000 ₫",
       fixedExceeded: "固定折扣金额不能大于或等于班级学费",
+      maxDiscountExceedFifty: "最高减免金额不能超过课程学费的50%（{{amount}}）",
+      maxDiscountExceedNominal:
+        "最高减免金额不能超过{{amount}}（学费的{{percent}}%）",
       scopeCourseDiscountFixedOnly: "课程优惠券必须选择固定金额折扣",
       maxBudgetRequired: "课程优惠券必须输入最高预算 (VND)",
       selectAtLeastOneCourse: "请至少选择 1 门课程",
       selectAtLeastOneClass: "请至少选择 1 个班级",
       totalUsageLimitRequired: "必须输入总使用次数限制 (> 0) 以便计算所需押金",
+      perUserLimitRequired: "请输入每位学员的限用次数（≥ 1）",
+      perUserLimitInvalid: "每位学员的限用次数必须为正整数（≥ 1）",
+      dailyLimitInvalid: "每日使用限制必须为正整数（≥ 1）",
       validFromRequired: "请选择生效开始日期",
       validToRequired: "请选择生效结束日期",
       validToAfterValidFrom: "结束日期必须晚于开始日期",
+      invalidMinOrder: "最低订单金额无效",
+      budgetLowerThanDiscount: "最高预算必须大于或等于折扣金额（{{amount}}）",
+      budgetTooLowForUsage: "最高预算必须足以支付至少 1 次使用",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "创建优惠券",
+      singleClassBody:
+        "课程 {{courseName}} 目前只有 1 个班级：“{{className}}”。系统将跳转至为该班级创建班级优惠券。",
+      singleClassButton: "创建班级优惠券",
+      noClassesTitle: "暂无班级",
+      noClassesBody:
+        "课程 {{courseName}} 目前没有任何班级。请在创建优惠券之前先创建至少 1 个班级。",
+      createClassButton: "创建新班级",
+      closeButton: "关闭",
+      cancelButton: "取消",
     },
   },
 }

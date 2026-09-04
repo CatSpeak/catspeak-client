@@ -3,7 +3,7 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 import { TextInput, Checkbox } from "@/shared/components/ui/inputs"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-export const OtherConfigSection = ({ form, errors = {}, onChange }) => {
+export const OtherConfigSection = ({ form, errors = {}, onChange, onBlur }) => {
   const { t } = useLanguage()
 
   return (
@@ -26,8 +26,10 @@ export const OtherConfigSection = ({ form, errors = {}, onChange }) => {
         type="number"
         label={t?.vouchers?.form?.minLearnersLabel || "Số người học tối thiểu"}
         required
-        value={form.minLearners || 1}
+        min={1}
+        value={form.minLearners ?? ""}
         onChange={(e) => onChange("minLearners", e.target.value)}
+        onBlur={() => onBlur?.("minLearners")}
         error={errors?.minLearners}
         placeholder="1"
       />

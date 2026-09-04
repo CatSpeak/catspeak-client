@@ -82,14 +82,25 @@ const VoucherTable = ({
     {
       key: "code",
       label: vt.table?.code || "Mã voucher",
-      headerClassName: "w-[16%]",
-      className: "w-[16%] font-bold",
+      headerClassName: "w-[14%]",
+      className: "w-[14%] font-bold",
+    },
+    {
+      key: "title",
+      label: vt.table?.title || "Tên voucher",
+      headerClassName: "w-[18%]",
+      className: "w-[18%]",
+      render: (voucher) => (
+        <span className="line-clamp-1" title={voucher.title || "-"}>
+          {voucher.title || "-"}
+        </span>
+      ),
     },
     {
       key: "discountType",
       label: vt.table?.discountType || "Loại giảm",
-      headerClassName: "w-[14%]",
-      className: "w-[14%]",
+      headerClassName: "w-[12%]",
+      className: "w-[12%]",
       render: (voucher) => {
         const isPercent =
           voucher.discountType === DISCOUNT_TYPES.PERCENTAGE ||
@@ -103,9 +114,9 @@ const VoucherTable = ({
     },
     {
       key: "discount",
-      label: vt.table?.discount || "Giá trị",
-      headerClassName: "w-[18%]",
-      className: "w-[18%] font-bold text-cath-red-700",
+      label: vt.table?.discount || "Mức giảm",
+      headerClassName: "w-[14%]",
+      className: "w-[14%] font-bold text-cath-red-700",
       render: (voucher) => {
         const isPercent =
           voucher.discountType === DISCOUNT_TYPES.PERCENTAGE ||
@@ -120,8 +131,8 @@ const VoucherTable = ({
     {
       key: "validity",
       label: vt.table?.validity || "Hiệu lực",
-      headerClassName: "w-[20%]",
-      className: "w-[20%]",
+      headerClassName: "w-[16%]",
+      className: "w-[16%]",
       render: (voucher) => {
         if (voucher.isNeverExpired) {
           return <span>{vt.table?.neverExpired || "Không giới hạn"}</span>
@@ -144,8 +155,8 @@ const VoucherTable = ({
     {
       key: "usage",
       label: vt.table?.usage || "Đã dùng",
-      headerClassName: "w-[12%]",
-      className: "w-[12%]",
+      headerClassName: "w-[10%]",
+      className: "w-[10%]",
       render: (voucher) => {
         const used = voucher.usedCount || 0
         const limit = voucher.totalUsageLimit || 0
@@ -155,15 +166,15 @@ const VoucherTable = ({
     {
       key: "status",
       label: vt.table?.status || "Trạng thái",
-      headerClassName: "w-[12%]",
-      className: "w-[12%]",
+      headerClassName: "w-[10%]",
+      className: "w-[10%]",
       render: (voucher) => <VoucherStatusBadge status={voucher.status} />,
     },
     {
       key: "actions",
       label: <span className="sr-only">{vt.table?.actions || "Thao tác"}</span>,
-      headerClassName: "w-[8%] text-right",
-      className: "w-[8%] whitespace-nowrap text-right",
+      headerClassName: "w-[6%] text-right",
+      className: "w-[6%] whitespace-nowrap text-right",
       render: (voucher) => {
         const status = voucher.status
         const isActive =

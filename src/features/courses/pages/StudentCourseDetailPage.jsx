@@ -326,21 +326,16 @@ const StudentCourseDetailPage = () => {
       <Breadcrumb
         items={[
           {
-            label: t.nav?.home || "Home",
-            onClick: () =>
-              navigate(isExploreRoute ? exploreHomePath : "/workspace"),
-          },
-          {
             label: isExploreRoute
-              ? t.nav?.exploreCourses || "Explore Courses"
-              : c.student?.dashboardTitle || "My Learning",
+              ? t.nav?.exploreCourses || "Khám phá khóa học"
+              : c.student?.dashboardTitle || "Lớp học của tôi",
             onClick: () =>
               navigate(
                 isExploreRoute ? exploreHomePath : "/workspace/learning",
               ),
           },
           {
-            label: rawCourse.title,
+            label: rawCourse.name || rawCourse.title,
           },
         ]}
       />

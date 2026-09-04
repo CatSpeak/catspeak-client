@@ -1,15 +1,34 @@
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { Calendar, Clock, BookOpen, Compass, Star } from "lucide-react"
+import {
+  Calendar,
+  Clock,
+  BookOpen,
+  Compass,
+  Star,
+  Users,
+  Share2,
+  CheckCircle2,
+  GraduationCap,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useTimezone } from "@/shared/hooks/useTimezone"
-import { useGetStudentCompletedClassesQuery } from "@/store/api/coursesApi"
+import {
+  useGetStudentCompletedClassesQuery,
+  useShareStudentClassMutation,
+} from "@/store/api/coursesApi"
 import { Badge, EmptyState } from "@/shared/components/ui/indicators"
 import CompletedClassSkeleton from "./CompletedClassSkeleton"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
 import Pagination from "@/shared/components/ui/navigation/Pagination"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import Avatar from "@/shared/components/ui/Avatar"
+import ProgressBar from "@/shared/components/ui/ProgressBar"
+import ShareCompletedClassModal from "./ShareCompletedClassModal"
+import { defaultCourseThumbnail } from "@/features/courses/utils/courseUtils"
 
 const UNKNOWN_VALUE = "—"
 
@@ -23,16 +42,30 @@ const formatDisplayDate = (value, formatDate) => {
   return formatted || UNKNOWN_VALUE
 }
 
+const formatLanguageLabel = (lang, sc) => {
+  if (!lang) return UNKNOWN_VALUE
+  const str = String(lang).trim()
+  const titleCased = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+  return (
+    sc?.languages?.[str] ||
+    sc?.languages?.[titleCased] ||
+    sc?.languages?.[str.toUpperCase()] ||
+    titleCased
+  )
+}
+
 const CompletedClass = ({ isOwnProfile }) => {
   const { t } = useLanguage()
-  const { formatDate } = useTimezone()
+  const { formatDate, formatScheduleDays } = useTimezone()
   const navigate = useNavigate()
 
   const sc = t?.courses?.student || {}
   const cc = t?.profile?.completedClass || {}
   const [searchQuery, setSearchQuery] = useState("")
   const [page, setPage] = useState(1)
-  const PAGE_SIZE = 10
+  const [sharingClassId, setSharingClassId] = useState(null)
+  const [selectedShareClassId, setSelectedShareClassId] = useState(null)
+  const PAGE_SIZE = 6
 
   const {
     data: responseData,
@@ -42,18 +75,45 @@ const CompletedClass = ({ isOwnProfile }) => {
     skip: !isOwnProfile,
   })
 
-  const classes = responseData?.data || []
+  const [shareStudentClass] = useShareStudentClassMutation()
 
-  // Filter classes based on searchQuery
-  const filteredClasses = classes.filter((cls) => {
-    if (!searchQuery) return true
-    const title = cls.title || cls.name || ""
-    const courseTitle = cls.courseName || cls.courseTitle || ""
-    return (
-      title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      courseTitle.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  })
+  const classes = useMemo(() => {
+    const rawData = responseData?.data || responseData || []
+    return Array.isArray(rawData) ? rawData : []
+  }, [responseData])
+
+  const activeShareClass = useMemo(() => {
+    if (!selectedShareClassId) return null
+    return classes.find((c) => c.id === selectedShareClassId) || null
+  }, [classes, selectedShareClassId])
+
+  // Filter classes based on search query
+  const filteredClasses = useMemo(() => {
+    if (!searchQuery.trim()) return classes
+
+    const query = searchQuery.toLowerCase().trim()
+    return classes.filter((cls) => {
+      const title = (cls.title || cls.name || "").toLowerCase()
+      const courseTitle = (
+        cls.courseName ||
+        cls.courseTitle ||
+        ""
+      ).toLowerCase()
+      const teacherName = (
+        cls.teacher?.name ||
+        cls.teacher?.fullName ||
+        ""
+      ).toLowerCase()
+      const language = (cls.language || "").toLowerCase()
+
+      return (
+        title.includes(query) ||
+        courseTitle.includes(query) ||
+        teacherName.includes(query) ||
+        language.includes(query)
+      )
+    })
+  }, [classes, searchQuery])
 
   // Pagination logic
   const totalPages = Math.max(1, Math.ceil(filteredClasses.length / PAGE_SIZE))
@@ -63,6 +123,27 @@ const CompletedClass = ({ isOwnProfile }) => {
     localPageStart,
     localPageStart + PAGE_SIZE,
   )
+
+  const handleToggleShare = async (e, cls) => {
+    e?.stopPropagation?.()
+    const classId = cls.id
+    if (!classId) return
+
+    const nextShared = !Boolean(cls.isShared)
+
+    try {
+      setSharingClassId(classId)
+
+      await shareStudentClass({
+        classId,
+        isShared: nextShared,
+      }).unwrap()
+    } catch (err) {
+      console.error("Failed to toggle completed class share:", err)
+    } finally {
+      setSharingClassId(null)
+    }
+  }
 
   const renderContent = () => {
     if (!isOwnProfile) {
@@ -81,12 +162,12 @@ const CompletedClass = ({ isOwnProfile }) => {
     }
 
     if (isLoading) {
-      return <CompletedClassSkeleton count={3} />
+      return <CompletedClassSkeleton count={6} />
     }
 
     if (isError) {
       return (
-        <div className="py-10 text-center text-red-500 font-medium w-full">
+        <div className="py-12 text-center text-red-500 font-medium w-full bg-red-50/50 rounded-2xl border border-red-100">
           {cc.errorLoading ||
             "Đã xảy ra lỗi khi tải danh sách lớp học đã hoàn thành."}
         </div>
@@ -95,12 +176,12 @@ const CompletedClass = ({ isOwnProfile }) => {
 
     if (filteredClasses.length === 0) {
       return (
-        <FluentCard className="bg-white">
+        <FluentCard className="bg-white py-8">
           <EmptyState
             icon={Compass}
             title={
               searchQuery
-                ? cc.noClassesFound || "Không tìm thấy lớp học đã hoàn thành"
+                ? cc.noClassesFound || "Không tìm thấy lớp học phù hợp"
                 : cc.noClassesTitle || "Chưa có lớp học đã hoàn thành"
             }
             description={
@@ -109,154 +190,281 @@ const CompletedClass = ({ isOwnProfile }) => {
                   "Thử điều chỉnh từ khoá tìm kiếm của bạn."
                 : cc.noClassesDesc || "Bạn chưa hoàn thành bất kỳ lớp học nào."
             }
+            action={
+              searchQuery ? (
+                <PillButton
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("")
+                    setPage(1)
+                  }}
+                  className="mt-2"
+                >
+                  {cc.clearFilters || "Xóa tìm kiếm"}
+                </PillButton>
+              ) : null
+            }
           />
         </FluentCard>
       )
     }
 
     return (
-      <div className="flex flex-col w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex flex-col gap-2">
+      <div className="flex flex-col w-full animate-in fade-in slide-in-from-bottom-2 duration-300 gap-6">
+        {/* Grid Card Layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full">
           {visibleClasses.map((cls) => {
             const classTitle =
               cls.title || cls.name || cc.untitledClass || "Untitled class"
+            const courseTitle = cls.courseName || cls.courseTitle || null
+            const isSharingThis = sharingClassId === cls.id
 
+            // Schedule days formatting
             let scheduleDays = UNKNOWN_VALUE
             if (
               Array.isArray(cls.schedule?.days) &&
               cls.schedule.days.length > 0
             ) {
-              scheduleDays = cls.schedule.days.join(" - ")
+              scheduleDays = formatScheduleDays
+                ? formatScheduleDays(cls.schedule.days)
+                : cls.schedule.days.join(" - ")
             } else if (Array.isArray(cls.schedule) && cls.schedule.length > 0) {
-              scheduleDays = cls.schedule
-                .map((s) => s.dayOfWeek)
-                .filter(Boolean)
-                .join(" - ")
+              const days = cls.schedule.map((s) => s.dayOfWeek).filter(Boolean)
+              scheduleDays = formatScheduleDays
+                ? formatScheduleDays(days)
+                : days.join(" - ")
             }
 
+            // Schedule time formatting
             let scheduleTime = UNKNOWN_VALUE
             if (cls.schedule?.startTime && cls.schedule?.endTime) {
               scheduleTime = `${cls.schedule.startTime} - ${cls.schedule.endTime}`
             } else if (
               Array.isArray(cls.schedule) &&
               cls.schedule.length > 0 &&
-              cls.schedule[0].startTime &&
-              cls.schedule[0].endTime
+              cls.schedule[0]?.startTime &&
+              cls.schedule[0]?.endTime
             ) {
               scheduleTime = `${cls.schedule[0].startTime} - ${cls.schedule[0].endTime}`
             }
 
-            const languageLabel = cls.language
-              ? sc.languages?.[cls.language] || cls.language
-              : UNKNOWN_VALUE
+            const languageLabel = formatLanguageLabel(cls.language, sc)
 
             const levelLabel =
               Array.isArray(cls.levels) && cls.levels[0]
-                ? cls.levels[0]
+                ? String(cls.levels[0]).trim().toUpperCase()
                 : UNKNOWN_VALUE
+
+            // Progress stats
+            const completedSessions =
+              cls.progress?.completedSessions ?? cls.completedSessions ?? 0
+            const totalSessions =
+              cls.progress?.totalSessions ?? cls.totalSessions ?? 0
+            const progressPercent =
+              totalSessions > 0
+                ? Math.min(
+                    100,
+                    Math.round((completedSessions / totalSessions) * 100),
+                  )
+                : (cls.progress?.percentage ?? 100)
+
+            // Teacher data
+            const teacher = cls.teacher || {}
+            const teacherName =
+              teacher.name || teacher.fullName || UNKNOWN_VALUE
+            const teacherAvatar =
+              teacher.avatarImageUrl || teacher.avatarUrl || teacher.avatar
+            const teacherId = teacher.accountId || teacher.id || cls.accountId
+
+            // Capacity & Enrolled
+            const enrolled =
+              cls.enrolledCount ?? cls.studentCount ?? cls.enrolledStudents
+            const capacity = cls.capacity ?? cls.slots
+
+            const thumbnail = cls.thumbnailUrl || defaultCourseThumbnail
 
             return (
               <FluentCard
                 key={cls.id}
-                onClick={() => navigate(`/workspace/learning/class/${cls.id}`)}
-                className="flex cursor-pointer flex-col items-stretch gap-4 md:flex-row md:items-center bg-white"
+                className="relative flex flex-col h-full overflow-hidden !p-0"
               >
-                <div className="flex flex-1 flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge color="yellow">{languageLabel}</Badge>
-                    <Badge color="gray">{levelLabel}</Badge>
-                    {cls.isReviewed ? (
-                      <Badge color="emerald">
-                        <span
-                          aria-hidden="true"
-                          className="h-1.5 w-1.5 rounded-full bg-emerald-500"
-                        />
-                        {cc.reviewedLabel || "Đã đánh giá"}
-                      </Badge>
-                    ) : (
-                      <Badge color="blue">
-                        <span
-                          aria-hidden="true"
-                          className="h-1.5 w-1.5 rounded-full bg-blue-500"
-                        />
-                        {cc.completedLabel || "Đã hoàn thành"}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div>
-                    <h3 className="font-bold mb-2 sm:mb-0">{classTitle}</h3>
-
-                    <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-x-2 text-sm text-secondary">
-                      <span>
-                        {cls.courseName || cls.courseTitle || UNKNOWN_VALUE}
-                      </span>
-                      <span
-                        className="hidden md:inline-block h-1 w-1 rounded-full bg-secondary shrink-0"
-                        aria-hidden="true"
-                      />
-                      <span>
-                        {scheduleDays} | {scheduleTime}
-                      </span>
-                      <span
-                        className="hidden md:inline-block h-1 w-1 rounded-full bg-secondary shrink-0"
-                        aria-hidden="true"
-                      />
-                      <span>
-                        {formatDisplayDate(cls.startDate, formatDate)}
-                        {" - "}
-                        {formatDisplayDate(cls.endDate, formatDate)}
+                {/* 1. Top Cover / Hero Panel */}
+                <div className="relative w-full h-44 bg-slate-100 overflow-hidden shrink-0">
+                  {thumbnail ? (
+                    <img
+                      src={thumbnail}
+                      alt={classTitle}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none"
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 text-gray-400 gap-2">
+                      <GraduationCap className="w-12 h-12 text-gray-300" />
+                      <span className="text-xs font-medium text-gray-400">
+                        {languageLabel}
                       </span>
                     </div>
+                  )}
+
+                  {/* Top Badges Overlay Bar */}
+                  <div className="absolute top-3 inset-x-3 flex items-center justify-between gap-2 z-10">
+                    {/* Left Badges */}
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Badge color="cath-red">{languageLabel}</Badge>
+                      <Badge color="cath-red">{levelLabel}</Badge>
+                    </div>
+
+                    {/* Right Live isShared Badge */}
+                    <Badge color="dark">
+                      {cls.isShared
+                        ? cc.displayed || "Hiển thị"
+                        : cc.hidden || "Đã ẩn"}
+                    </Badge>
                   </div>
                 </div>
 
-                {!cls.isReviewed && (
-                  <div className="flex shrink-0 flex-col items-stretch gap-2 md:items-end">
+                {/* 2. Card Content Panel */}
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-4">
+                    {/* Header Row: Avatar + Title & Teacher */}
+                    <div className="flex items-start gap-4">
+                      <Avatar
+                        src={teacherAvatar}
+                        name={teacherName}
+                        size={40}
+                        accountId={teacherId}
+                        clickable={false}
+                        className="shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={(e) => {
+                          if (teacherId) {
+                            e.stopPropagation()
+                            navigate(`/profile/${teacherId}`)
+                          }
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        {/* Class Title */}
+                        <h3
+                          className="font-bold line-clamp-2"
+                          title={classTitle}
+                        >
+                          {classTitle}
+                        </h3>
+
+                        {/* Teacher Name Subtitle */}
+                        <span
+                          className="text-sm text-secondary line-clamp-1 truncate cursor-pointer hover:underline"
+                          title={teacherName}
+                          onClick={(e) => {
+                            if (teacherId) {
+                              e.stopPropagation()
+                              navigate(`/profile/${teacherId}`)
+                            }
+                          }}
+                        >
+                          {teacherName}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Metadata Details: 2 clean lines */}
+                    <div className="space-y-1 text-sm text-secondary">
+                      {/* Course */}
+                      <div className="truncate">
+                        <span>{cc.course || "Khóa học"}: </span>
+                        <span
+                          className="font-medium text-gray-900"
+                          title={
+                            courseTitle ||
+                            cc.standaloneClass ||
+                            "Lớp học độc lập"
+                          }
+                        >
+                          {courseTitle ||
+                            cc.standaloneClass ||
+                            "Lớp học độc lập"}
+                        </span>
+                      </div>
+
+                      {/* Completed Date */}
+                      <div className="truncate">
+                        <span>{cc.completedOn || "Ngày hoàn thành"}: </span>
+                        <span className="font-medium text-gray-900">
+                          {formatDisplayDate(cls?.completedAtUtc, formatDate)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Bottom Actions Panel */}
+                  <div className="flex items-center gap-2">
+                    {/* Share Action -> Opens Modal */}
                     <PillButton
+                      variant="secondary"
                       onClick={(e) => {
                         e.stopPropagation()
-                        navigate(`/workspace/learning/class/${cls.id}/review`)
+                        setSelectedShareClassId(cls.id)
                       }}
+                      className="flex-1"
                     >
-                      {cc.reviewNow || "Đánh giá ngay"}
+                      {cc.share || "Chia sẻ"}
                     </PillButton>
+
+                    {/* Review Action or Reviewed Indicator */}
+                    {!cls.isReviewed ? (
+                      <PillButton
+                        variant="primary"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(`/workspace/learning/class/${cls.id}/review`)
+                        }}
+                        className="flex-1"
+                      >
+                        {cc.reviewNow || "Đánh giá ngay"}
+                      </PillButton>
+                    ) : (
+                      <PillButton
+                        className="flex-1"
+                        variant="secondary"
+                        disabled
+                      >
+                        {cc.reviewed || "Đã đánh giá"}
+                      </PillButton>
+                    )}
                   </div>
-                )}
+                </div>
               </FluentCard>
             )
           })}
         </div>
 
-        <Pagination
-          page={boundedPage}
-          totalPages={totalPages}
-          onChangePage={setPage}
-        />
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-4 flex justify-center w-full">
+            <Pagination
+              page={boundedPage}
+              totalPages={totalPages}
+              onChangePage={setPage}
+            />
+          </div>
+        )}
       </div>
     )
   }
 
   return (
-    <div className="w-full flex flex-col gap-4 min-h-[500px]">
-      {/* Search Input */}
-      {isOwnProfile && (
-        <div className="flex justify-end w-full">
-          <SearchInput
-            value={searchQuery}
-            onChange={(val) => {
-              setSearchQuery(val)
-              setPage(1)
-            }}
-            placeholder={cc.searchPlaceholder || "Tìm kiếm lớp học..."}
-            className="w-full md:w-[360px]"
-          />
-        </div>
-      )}
+    <>
+      <div>{renderContent()}</div>
 
-      {/* Grid Content */}
-      <div className="w-full">{renderContent()}</div>
-    </div>
+      {/* Share Modal */}
+      <ShareCompletedClassModal
+        open={Boolean(activeShareClass)}
+        onClose={() => setSelectedShareClassId(null)}
+        classItem={activeShareClass}
+      />
+    </>
   )
 }
 

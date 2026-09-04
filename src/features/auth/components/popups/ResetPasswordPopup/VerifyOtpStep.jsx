@@ -7,7 +7,8 @@ import {
   useVerifyResetOtpMutation,
   useForgotPasswordMutation,
 } from "@/store/api/authApi"
-import { parseApiError } from "@/shared/utils/apiError"
+import { resolveLocalizedError } from "@/shared/utils/apiError"
+import { resolveGeneralErrorMessage } from "@/features/auth/utils/registerErrors"
 
 const VerifyOtpStep = ({ email, onSuccess, onBack, onSwitchMode }) => {
   const { t } = useLanguage()
@@ -47,11 +48,12 @@ const VerifyOtpStep = ({ email, onSuccess, onBack, onSwitchMode }) => {
       onSuccess(result.resetToken)
     } catch (err) {
       console.error("OTP verification failed:", err)
-      const { message } = parseApiError(err)
       setApiError(
-        message ||
-          authText.verifyOtpFailed ||
-          "Mã OTP không chính xác hoặc đã hết hạn.",
+        resolveLocalizedError(
+          err,
+          (e) => resolveGeneralErrorMessage(e, authText),
+          authText.verifyOtpFailed || "Mã OTP không chính xác hoặc đã hết hạn.",
+        ),
       )
     }
   }
@@ -66,15 +68,13 @@ const VerifyOtpStep = ({ email, onSuccess, onBack, onSwitchMode }) => {
         authText.otpResentSuccess || "Mã OTP đã được gửi lại thành công",
       )
     } catch (err) {
-      const { errorCode, message } = parseApiError(err)
-      if (errorCode === "AUTH_TOO_MANY_REQUESTS" || err?.status === 429) {
-        setApiError(
-          authText.tooManyOtpRequests ||
-            "Bạn đã yêu cầu gửi mã OTP quá nhiều lần. Vui lòng đợi trong giây lát.",
-        )
-      } else {
-        setApiError(message || authText.sendOtpFailed || "Gửi OTP thất bại.")
-      }
+      setApiError(
+        resolveLocalizedError(
+          err,
+          (e) => resolveGeneralErrorMessage(e, authText),
+          authText.sendOtpFailed || "Gửi OTP thất bại.",
+        ),
+      )
     }
   }
 

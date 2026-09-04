@@ -171,8 +171,8 @@ export default {
       ],
     },
     leadingTeam: {
-      title: "Đội ngũ Dẫn dắt và Đồng hành",
-      subtitle: "Chất lượng cao",
+      title: "Đội ngũ giảng viên",
+      subtitle: "Giảng viên của tuần",
       viewInstructor: "Xem giảng viên",
       defaultInstructor: "Giảng viên",
       defaultRole: "Giảng viên CatSpeak",
@@ -181,7 +181,7 @@ export default {
       prevInstructor: "Giảng viên trước",
       nextInstructor: "Giảng viên tiếp theo",
       recruitment: {
-        title: "Bạn muốn trở thành một phần của Đội ngũ CatSpeak?",
+        title: "Bạn muốn trở thành một phần của đội ngũ giảng viên Cat Speak",
         description:
           "Chia sẻ tri thức, kết nối cộng đồng toàn cầu và chủ động thời gian cùng nền tảng công nghệ hàng đầu.",
         instructorArea: "Khu vực Giảng viên",

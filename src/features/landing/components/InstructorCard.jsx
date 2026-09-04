@@ -40,26 +40,23 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
     t?.landing?.leadingTeam?.defaultInstructor ||
     "Giảng viên"
 
-  const viewText = t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"
+  const description = teacher.introduction || roleText
 
   return (
     <div
       onClick={handleClick}
-      className="flex-shrink-0 w-[210px] sm:w-[230px] lg:w-[245px] flex flex-col items-center group/card cursor-pointer snap-start"
+      className="w-full flex flex-col group/card cursor-pointer"
     >
-      {/* Top Image / Avatar Showcase Frame with rounded-xl */}
-      <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100 flex items-center justify-center">
-        {/* If real photo exists, cover the whole frame */}
+      <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100">
         {avatarSrc ? (
           <img
             src={avatarSrc}
             alt={displayName}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-105"
             onError={() => setImgError(true)}
           />
         ) : fallbackAvatar ? (
-          /* Fallback illustration with clean neutral background */
-          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60">
+          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60 transition-transform duration-500 ease-out group-hover/card:scale-105">
             <img
               src={fallbackAvatar}
               alt={displayName}
@@ -67,26 +64,35 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
             />
           </div>
         ) : (
-          /* When gender and avatar are null: same neutral background as fallback gender images with user icon */
-          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60">
+          <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-b from-stone-100 to-stone-200/60 transition-transform duration-500 ease-out group-hover/card:scale-105">
             <div className="w-20 h-20 rounded-full bg-white/90 border border-border flex items-center justify-center text-gray-400 group-hover/card:text-[#910B09] transition-colors">
               <UserRound size={36} strokeWidth={1.5} />
             </div>
           </div>
         )}
 
-        {/* Hover Pill Button */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 flex items-center justify-center z-20">
-          <span className="bg-black/60 text-white text-xs font-medium px-6 py-2 rounded-full border border-white/20 pointer-events-none">
-            {viewText}
+        <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col justify-end px-4 pt-5 pb-4 text-white transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] h-[30%] group-hover/card:h-[70%]"
+          style={{
+            background: "linear-gradient(to top, rgba(145,11,9,0.95) 0%, rgba(145,11,9,0.6) 60%, rgba(145,11,9,0.0) 100%)",
+          }}
+        >
+          <span className="text-[11px] font-semibold tracking-wide uppercase text-[#FFE4B5] leading-none">
+            {roleText}
           </span>
+          <span className="mt-0.5 text-sm sm:text-base font-bold leading-tight text-white">
+            {displayName}
+          </span>
+          <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] group-hover/card:max-h-20 group-hover/card:opacity-100 group-hover/card:mt-2">
+            <p className="text-xs leading-relaxed text-white/80">
+              {description}
+            </p>
+          </div>
+          <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.3,0.9,0.3,1)] group-hover/card:max-h-12 group-hover/card:opacity-100 group-hover/card:mt-3">
+            <span className="inline-flex items-center bg-white text-[#910B09] text-xs font-semibold px-3.5 py-2 rounded-lg">
+              {t?.landing?.leadingTeam?.viewInstructor || "Xem giảng viên"}
+            </span>
+          </div>
         </div>
-      </div>
-
-      {/* Info Section beneath the image */}
-      <div className="mt-4 text-center w-full px-4">
-        <h3 className="text-base font-bold">{displayName}</h3>
-        <p className="text-sm text-secondary">{roleText}</p>
       </div>
     </div>
   )

@@ -1,15 +1,9 @@
 import React, { useRef, useState } from "react"
 import toast from "react-hot-toast"
-import { Camera, Users, Check } from "lucide-react"
+import { Camera } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import Modal from "@/shared/components/ui/Modal"
 import ImageCropModal from "@/shared/components/ui/ImageCropModal"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
-import {
-  useUpdateAvatarMutation,
-  useUpdateMeetingAvatarMutation,
-} from "@/store/api/userApi"
+import { useUpdateAvatarMutation } from "@/store/api/userApi"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 import backgroundAccount from "@/shared/assets/backgrounds/background-account.png"
@@ -28,26 +22,17 @@ const ProfileAvatarNCover = ({
 }) => {
   const profileData = profile ?? formData ?? user ?? {}
   const displayAvatarUrl = profileData?.avatarImageUrl
-  const displayMeetingAvatarUrl =
-    profileData?.meetingAvatarUrl || displayAvatarUrl
   const displayName = profileData?.username || ""
-
-  const [isMeetingAvatarModalOpen, setIsMeetingAvatarModalOpen] =
-    useState(false)
-  const [meetingAvatarUrlInput, setMeetingAvatarUrlInput] = useState("")
 
   const [fileToCrop, setFileToCrop] = useState(null)
   const [isCropModalOpen, setIsCropModalOpen] = useState(false)
 
   const [updateAvatar, { isLoading: isUpdatingAvatar }] =
     useUpdateAvatarMutation()
-  const [updateMeetingAvatar, { isLoading: isUpdatingMeetingAvatar }] =
-    useUpdateMeetingAvatarMutation()
 
   // Optional: khi user đang trong call, đồng bộ avatar mới xuống LiveKit metadata ngay lập tức
   let localParticipant = null
   try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const callCtx = useGlobalVideoCall()
     localParticipant = callCtx?.localParticipant ?? null
   } catch {
@@ -116,59 +101,6 @@ const ProfileAvatarNCover = ({
     }
   }
 
-  const handleOpenMeetingAvatarModal = () => {
-    if (!isOwnProfile) return
-    setMeetingAvatarUrlInput(displayMeetingAvatarUrl || "")
-    setIsMeetingAvatarModalOpen(true)
-  }
-
-  const handleSaveMeetingAvatarUrl = async () => {
-    if (!isOwnProfile) return
-    const trimmed = (meetingAvatarUrlInput || "").trim()
-
-    if (trimmed.startsWith("data:")) {
-      toast.error(
-        "Vui lòng nhập đường dẫn URL (http/https), không sử dụng chuỗi base64.",
-      )
-      return
-    }
-
-    if (trimmed && !/^https?:\/\//i.test(trimmed)) {
-      toast.error("Đường dẫn ảnh phải bắt đầu bằng http:// hoặc https://")
-      return
-    }
-
-    try {
-      toast.loading(
-        t.profile?.personalInfo?.updatingMeetingAvatar ||
-          "Đang cập nhật ảnh đại diện phòng họp...",
-        { id: "meeting-avatar-update" },
-      )
-
-      await updateMeetingAvatar({ meetingAvatarUrl: trimmed }).unwrap()
-
-      if (localParticipant) {
-        await safeSetLiveKitMetadata(localParticipant, {
-          avatarImageUrl: trimmed,
-        })
-      }
-
-      toast.success(
-        t.profile?.personalInfo?.updateMeetingAvatarSuccess ||
-          "Cập nhật ảnh đại diện phòng họp thành công",
-        { id: "meeting-avatar-update" },
-      )
-      setIsMeetingAvatarModalOpen(false)
-    } catch (err) {
-      console.error(err)
-      toast.error(
-        t.profile?.personalInfo?.updateMeetingAvatarError ||
-          "Không thể cập nhật ảnh đại diện phòng họp",
-        { id: "meeting-avatar-update" },
-      )
-    }
-  }
-
   const hasBottomContent = Boolean(children || actions)
 
   const renderCover = (hasFullBorder = false) => (
@@ -185,58 +117,6 @@ const ProfileAvatarNCover = ({
           className="w-full h-full object-cover"
         />
       </div>
-
-      {/* Meeting Avatar Badge on Top-Right of Cover Photo (Only when isOwnProfile) */}
-      {isOwnProfile && (
-        <div
-          onClick={(e) => {
-            e.stopPropagation()
-            if (!isUpdatingMeetingAvatar) {
-              handleOpenMeetingAvatarModal()
-            }
-          }}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 bg-black/65 backdrop-blur-md border border-white/30 rounded-2xl px-3 py-2 flex items-center gap-3 shadow-lg hover:bg-black/80 transition-all cursor-pointer group/meeting"
-        >
-          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/80 bg-cath-red-700 shadow-sm">
-            <Avatar
-              size={44}
-              src={displayMeetingAvatarUrl}
-              alt={displayName}
-              name={displayName}
-              className="w-full h-full text-white text-base"
-              style={{ border: "none" }}
-            />
-            <div
-              className={`absolute inset-0 bg-black/50 flex items-center justify-center transition-opacity ${
-                isUpdatingMeetingAvatar
-                  ? "opacity-100"
-                  : "opacity-0 group-hover/meeting:opacity-100"
-              }`}
-            >
-              {isUpdatingMeetingAvatar ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Camera className="w-4 h-4 text-white" />
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col text-left pr-1">
-            <div className="flex items-center gap-1.5 text-white font-bold text-xs whitespace-nowrap">
-              <Users size={13} className="text-amber-400 shrink-0" />
-              <span>
-                {t.profile?.personalInfo?.meetingAvatarLabel || "Ảnh phòng họp"}
-              </span>
-            </div>
-            <span className="text-[10px] text-gray-200 mt-0.5 group-hover/meeting:text-white transition-colors font-medium whitespace-nowrap">
-              {isUpdatingMeetingAvatar
-                ? t.profile?.personalInfo?.updatingAvatar || "Đang cập nhật..."
-                : t.profile?.personalInfo?.clickToChangeMeetingAvatar ||
-                  "Bấm để đổi ảnh phòng họp"}
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   )
 
@@ -317,52 +197,10 @@ const ProfileAvatarNCover = ({
           }}
         />
       )}
-
-      {/* Meeting Avatar URL Modal (Only when isOwnProfile) */}
-      {isOwnProfile && (
-        <Modal
-          open={isMeetingAvatarModalOpen}
-          onClose={() => setIsMeetingAvatarModalOpen(false)}
-          title={t.profile?.personalInfo?.meetingAvatarLabel || "Ảnh phòng họp"}
-          className="max-w-md w-full"
-          bodyClassName="px-4 sm:px-6 flex-1 overflow-y-auto"
-          footer={
-            <PillButton
-              onClick={handleSaveMeetingAvatarUrl}
-              loading={isUpdatingMeetingAvatar}
-              className="w-full"
-            >
-              {t.profile?.personalInfo?.save || t.save || "Lưu ảnh"}
-            </PillButton>
-          }
-        >
-          <div className="flex flex-col items-center gap-6">
-            <Avatar
-              size={100}
-              src={meetingAvatarUrlInput || displayMeetingAvatarUrl}
-              alt={displayName}
-              name={displayName}
-              className="shadow-md border-2 border-white"
-            />
-
-            <TextInput
-              label={t?.rooms?.avatarPicker?.imageUrl || "Đường dẫn ảnh (URL)"}
-              helperText={
-                t?.rooms?.avatarPicker?.description ||
-                "Dán đường dẫn ảnh hợp lệ (http:// hoặc https://). Nếu để trống, hệ thống sẽ mặc định dùng ảnh đại diện chính."
-              }
-              value={meetingAvatarUrlInput}
-              onChange={(e) => setMeetingAvatarUrlInput(e.target.value)}
-              placeholder="https://example.com/avatar.jpg"
-              containerClassName="w-full"
-            />
-          </div>
-        </Modal>
-      )}
     </>
   )
 
-  // Standalone mode (no children, no actions - used in AccountHeader)
+  // Standalone mode (no children, no actions)
   if (!hasBottomContent) {
     return (
       <div className={`w-full relative mb-16 md:mb-20 ${className}`}>

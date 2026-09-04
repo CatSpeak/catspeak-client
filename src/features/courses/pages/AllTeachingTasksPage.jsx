@@ -112,13 +112,6 @@ const AllTeachingTasksPage = () => {
 
   return (
     <div className="flex flex-col gap-6 text-[#2e2e2e]">
-      <Breadcrumb
-        items={[
-          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/") },
-          { label: c.allTeachingTasksTitle || "Việc giảng dạy" },
-        ]}
-      />
-
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">
           {c.allTeachingTasksTitle || "Việc giảng dạy"}

@@ -240,6 +240,7 @@ export default {
     connect25: "Connect 2:5",
     yourAI: "With AI 1:1",
     customRoom: "Create Room",
+    aiChat: "Chat with AI",
   },
   customRooms: {
     title: "Pro Custom Room",
@@ -709,12 +710,16 @@ export default {
   },
   avatarPicker: {
     title: "Meeting Avatar",
+    tabLabel: "Avatar",
     success: "Avatar updated successfully",
     error: "Failed to update avatar",
-    imageUrl: "Image URL",
-    placeholder: "Paste image URL here...",
     description:
-      "Paste a valid image URL. If invalid, it will fallback to your initial.",
+      "Upload an image to change your meeting-room avatar. If empty, your profile avatar is used.",
+    uploadImage: "Upload new image",
+    invalidFile: "Please choose a valid image file",
+    cropTitle: "Crop meeting-room avatar",
+    resetToProfile: "Use my profile avatar",
+    resetSuccess: "Using your profile avatar now",
     saving: "Saving...",
     saveAvatar: "Save Avatar",
   },

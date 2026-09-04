@@ -89,8 +89,7 @@ const AllClassesPage = () => {
       )}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Home", onClick: () => navigate("/workspace") },
-          { label: c.myClassesTab || "My Classes", onClick: () => navigate("/workspace/classes") },
+          { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
           { label: ac.tabAll || "All Classes" },
         ]}
       />

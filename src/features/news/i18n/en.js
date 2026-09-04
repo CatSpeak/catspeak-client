@@ -17,6 +17,12 @@ export default {
       post: "Post View",
       article: "Article View",
     },
+    filters: {
+      searchPlaceholder: "Search articles...",
+      newest: "Newest",
+      mostViewed: "Most viewed",
+      mostReactions: "Most reactions",
+    },
     newsDetail: {
       back: "Back",
       views: "views",

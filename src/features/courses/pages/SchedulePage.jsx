@@ -249,17 +249,6 @@ const SchedulePage = () => {
         </span>
       )}
 
-      {/* ─── Breadcrumbs ─── */}
-      <Breadcrumb
-        items={[
-          {
-            label: t.nav?.home || "Home",
-            onClick: () => navigate("/workspace"),
-          },
-          { label: c.teachingSchedule || "Teaching Schedule" },
-        ]}
-      />
-
       {/* ─── Header ─── */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-black text-gray-950 tracking-tight">

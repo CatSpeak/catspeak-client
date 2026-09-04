@@ -1,9 +1,9 @@
-import React, { useState } from "react"
+import React, { useState, forwardRef } from "react"
 import { colors } from "@/shared/utils/colors"
 import { Eye, EyeOff } from "lucide-react"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 
-const TextInput = ({
+const TextInput = forwardRef(({
   id,
   label,
   value,
@@ -31,7 +31,7 @@ const TextInput = ({
   floatingLabel = false,
   required = false,
   ...props
-}) => {
+}, ref) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const isPassword = type === "password"
   const inputType = isPassword
@@ -102,12 +102,13 @@ const TextInput = ({
         )}
         {multiline ? (
           <textarea
+            ref={ref}
             id={id}
             autoFocus={autoFocus}
             required={required}
             style={{
               "--border-color": colors.border,
-              "--placeholder-color": colors.subtext,
+              "--placeholder-color": colors.placeholder || "#9CA3AF",
               "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
@@ -120,13 +121,14 @@ const TextInput = ({
           />
         ) : (
           <input
+            ref={ref}
             id={id}
             type={inputType}
             autoFocus={autoFocus}
             required={required}
             style={{
               "--border-color": colors.border,
-              "--placeholder-color": colors.subtext,
+              "--placeholder-color": colors.placeholder || "#9CA3AF",
               "--focus-color": color || colors.primaryRed || "#990011",
             }}
             placeholder={floatingLabel ? placeholder || " " : placeholder}
@@ -209,6 +211,8 @@ const TextInput = ({
       ) : null}
     </div>
   )
-}
+})
+
+TextInput.displayName = "TextInput"
 
 export default TextInput

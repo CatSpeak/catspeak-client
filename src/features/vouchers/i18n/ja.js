@@ -1,15 +1,15 @@
 export const ja = {
   vouchers: {
     pageTitle: "プロモーション＆バウチャー",
-    pageSubtitle:
-      "コースやクラス向けの割引バウチャーを作成・管理します。",
+    pageSubtitle: "コースやクラス向けの割引バウチャーを作成・管理します。",
     createNew: "新しいバウチャーを作成",
     searchPlaceholder: "バウチャーコードまたはタイトルで検索...",
     allDiscountTypes: "すべての割引タイプ",
     percentDiscount: "パーセント（%）",
     fixedDiscount: "固定金額（VND）",
     emptyTitle: "バウチャーが見つかりません",
-    emptySubtitle: "現在のフィルターに一致するバウチャーはまだ作成されていません。",
+    emptySubtitle:
+      "現在のフィルターに一致するバウチャーはまだ作成されていません。",
     emptyAction: "最初のバウチャーを作成",
 
     stats: {
@@ -31,6 +31,7 @@ export const ja = {
 
     table: {
       code: "バウチャーコード",
+      title: "バウチャー名",
       discountType: "割引タイプ",
       discount: "割引額",
       validity: "有効期間",
@@ -96,7 +97,7 @@ export const ja = {
       titleLabel: "キャンペーンタイトル",
       titlePlaceholder: "例: 初心者向け英会話20%オフ",
       descLabel: "説明",
-      descPlaceholder: "生徒向けの条件やメッセージ...",
+      descPlaceholder: "生徒向けの条件やメッセージ",
       discountTypeLabel: "割引タイプ",
       discountValueLabel: "割引額",
       maxDiscountAmountLabel: "最大割引額（VND）",
@@ -130,6 +131,7 @@ export const ja = {
 
     detail: {
       title: "バウチャーの詳細",
+      name: "バウチャー名",
       overview: "設定の概要",
       depositInfo: "預託 ＆ エスクローの詳細",
       depositPaid: "支払済み預託",
@@ -152,6 +154,20 @@ export const ja = {
       usedAt: "利用日時",
       orderStatus: "注文ステータス",
       empty: "このバウチャーを利用した生徒はまだいません。",
+    },
+
+    // Notice & Warning Modals
+    noticeModal: {
+      singleClassTitle: "割引クーポンを作成",
+      singleClassBody:
+        "コース {{courseName}} には現在 1 つのクラス「{{className}}」しかありません。このクラス用のクラスクーポン作成画面にリダイレクトします。",
+      singleClassButton: "クラスクーポンを作成",
+      noClassesTitle: "クラスがありません",
+      noClassesBody:
+        "コース {{courseName}} には現在クラスがありません。クーポンを作成する前に、少なくとも1つのクラスを作成してください。",
+      createClassButton: "新しいクラスを作成",
+      closeButton: "閉じる",
+      cancelButton: "キャンセル",
     },
   },
 }

@@ -257,19 +257,17 @@ const CreateAssignmentForm = ({ id, assignmentId, classData, initialAssignment, 
       {/* ─── Breadcrumbs ─── */}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
           { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
-          { label: c.allCourses?.title || "Toàn bộ khóa học", onClick: () => navigate("/workspace/courses/all") },
           ...(classData.courseId
             ? [
               {
-                label: c.student?.courseDetails || "Chi tiết khóa học",
+                label: classData.courseName || classData.courseTitle || "Khóa học",
                 onClick: () => navigate(`/workspace/courses/details/${encodeURIComponent(String(classData.courseId))}`),
               },
             ]
             : []),
           {
-            label: classData.name || c.student?.classDetails || "Chi tiết lớp học",
+            label: classData.name || classData.title || c.student?.classDetails || "Lớp học",
             onClick: () => navigate(`/workspace/courses/class/${encodeURIComponent(String(id))}`),
           },
           {

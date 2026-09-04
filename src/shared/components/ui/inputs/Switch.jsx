@@ -42,8 +42,8 @@ const Switch = ({
       translate: "peer-checked:after:translate-x-[20px]",
     },
     lg: {
-      track: "w-[51px] h-[31px]",
-      thumb: "after:w-[27px] after:h-[27px] after:top-[2px] after:left-[2px]",
+      track: "w-[52px] h-[32px]",
+      thumb: "after:w-[24px] after:h-[24px] after:top-[4px] after:left-[4px]",
       translate: "peer-checked:after:translate-x-[20px]",
     },
   }
@@ -52,10 +52,11 @@ const Switch = ({
 
   return (
     <label
-      className={`relative inline-flex items-center select-none ${disabled
-        ? "cursor-not-allowed opacity-50"
-        : "cursor-pointer active:scale-[0.98] transition-transform duration-150"
-        } ${className}`}
+      className={`relative inline-flex items-center select-none ${
+        disabled
+          ? "cursor-not-allowed opacity-50"
+          : "cursor-pointer active:scale-[0.98] transition-transform duration-150"
+      } ${className}`}
     >
       {showLabel && (
         <span className="mr-3 text-sm font-medium text-gray-700 dark:text-gray-200 select-none">
@@ -78,4 +79,3 @@ const Switch = ({
 }
 
 export default Switch
-

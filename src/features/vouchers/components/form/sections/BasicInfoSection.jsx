@@ -10,6 +10,7 @@ export const BasicInfoSection = ({
   form,
   errors,
   onChange,
+  onBlur,
   onAutoGenerateCode,
   isGeneratingCode,
 }) => {
@@ -34,6 +35,7 @@ export const BasicInfoSection = ({
             const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "")
             onChange("code", `GV-${raw}`)
           }}
+          onBlur={() => onBlur?.("code")}
           placeholder={t?.vouchers?.form?.codePlaceholder || "Nhập mã"}
           leftContent="GV-"
           error={errors.code}
@@ -54,20 +56,22 @@ export const BasicInfoSection = ({
         required
         value={form.title}
         onChange={(e) => onChange("title", e.target.value)}
+        onBlur={() => onBlur?.("title")}
         placeholder={
           t?.vouchers?.form?.titlePlaceholder || "VD: Khuyến mãi tựu trường"
         }
         error={errors.title}
       />
 
-      {/* Mô tả (nội bộ) */}
+      {/* Mô tả */}
       <TextInput
         multiline
-        label={t?.vouchers?.form?.descLabel || "Mô tả (nội bộ)"}
+        label={t?.vouchers?.form?.descLabel || "Mô tả"}
         value={form.description}
         onChange={(e) => onChange("description", e.target.value)}
+        onBlur={() => onBlur?.("description")}
         placeholder={
-          t?.vouchers?.form?.descPlaceholder || "Ghi chú nội bộ cho voucher này..."
+          t?.vouchers?.form?.descPlaceholder || "Mô tả cho voucher này"
         }
       />
 

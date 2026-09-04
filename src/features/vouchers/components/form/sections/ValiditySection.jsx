@@ -3,7 +3,7 @@ import FluentCard from "@/shared/components/ui/FluentCard"
 import { TextInput, Checkbox } from "@/shared/components/ui/inputs"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
-export const ValiditySection = ({ form, errors, onChange }) => {
+export const ValiditySection = ({ form, errors, onChange, onBlur }) => {
   const { t } = useLanguage()
 
   return (
@@ -19,6 +19,7 @@ export const ValiditySection = ({ form, errors, onChange }) => {
         required
         value={form.validFrom || ""}
         onChange={(e) => onChange("validFrom", e.target.value)}
+        onBlur={() => onBlur?.("validFrom")}
         error={errors?.validFrom}
       />
 
@@ -30,6 +31,7 @@ export const ValiditySection = ({ form, errors, onChange }) => {
         disabled={Boolean(form.isNeverExpired)}
         value={form.isNeverExpired ? "" : form.validTo || ""}
         onChange={(e) => onChange("validTo", e.target.value)}
+        onBlur={() => onBlur?.("validTo")}
         error={!form.isNeverExpired ? errors?.validTo : undefined}
       />
 

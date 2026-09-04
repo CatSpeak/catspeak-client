@@ -7,19 +7,20 @@ import {
 export const postsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     getPosts: builder.query({
-      query: ({ page = 1, pageSize = 10, postType } = {}) => ({
+      query: ({ page = 1, pageSize = 10, postType, searchKeyword, sortBy } = {}) => ({
         url: "/Post",
         params: {
           page,
           pageSize,
           postType,
-          sortBy: "createDate",
+          searchKeyword,
+          sortBy,
           sortDesc: true,
         },
       }),
       providesTags: ["Post"],
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
-        return `${endpointName}_${queryArgs?.postType || "all"}`
+        return `${endpointName}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}`
       },
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) {
@@ -36,7 +37,9 @@ export const postsApi = socialApi.injectEndpoints({
       forceRefetch({ currentArg, previousArg }) {
         return (
           currentArg?.page !== previousArg?.page ||
-          currentArg?.postType !== previousArg?.postType
+          currentArg?.postType !== previousArg?.postType ||
+          currentArg?.searchKeyword !== previousArg?.searchKeyword ||
+          currentArg?.sortBy !== previousArg?.sortBy
         )
       },
     }),

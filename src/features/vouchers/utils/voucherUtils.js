@@ -1,4 +1,5 @@
 import { SENSITIVE_KEYWORDS, DISCOUNT_TYPES, SCOPE_TYPES } from "../constants/voucherConstants"
+import { formatCurrency } from "./voucherTransforms"
 
 /**
  * Calculate required deposit for Instructor voucher (BR-VC-GV-12)
@@ -65,9 +66,15 @@ export const checkSensitiveKeywords = (text) => {
 /**
  * Validate Instructor Voucher Form according to BR-VC rules
  */
-export const validateInstructorVoucherForm = (values, isDraft = false, t = null) => {
+export const validateInstructorVoucherForm = (
+  values,
+  isDraft = false,
+  t = null,
+  lowestTuition = 0,
+) => {
   const errors = {}
   const errT = t?.vouchers?.errors || {}
+  const effectiveTuition = lowestTuition || Number(values.lowestTuition) || 0
 
   // 1. Voucher Code (BR-VC-GV-02)
   const code = (values.code || "").trim().toUpperCase()
@@ -138,21 +145,36 @@ export const validateInstructorVoucherForm = (values, isDraft = false, t = null)
       } else if (maxDiscount < 2000) {
         errors.maxDiscountAmount =
           errT.minMaxDiscount || "Mức giảm tối đa tối thiểu là 2.000 ₫"
+      } else if (effectiveTuition > 0 && discountVal > 0) {
+        const nominal = Math.round((effectiveTuition * discountVal) / 100)
+        if (nominal > 0 && maxDiscount > nominal) {
+          errors.maxDiscountAmount = errT.maxDiscountExceedNominal
+            ? errT.maxDiscountExceedNominal
+                .replace("{{percent}}", discountVal)
+                .replace("{{amount}}", formatCurrency(nominal))
+            : `Mức giảm tối đa không được vượt quá ${formatCurrency(nominal)} (${discountVal}% học phí)`
+        }
       }
     } else {
       if (discountVal < 2000) {
         errors.discountValue =
           errT.minFixedDiscount || "Mức giảm cố định tối thiểu là 2.000 ₫"
+      } else if (effectiveTuition > 0 && discountVal >= effectiveTuition) {
+        errors.discountValue =
+          errT.fixedExceeded ||
+          "Mức giảm cố định không được lớn hơn hoặc bằng học phí lớp học"
       }
     }
 
     if (minOrder < 0) {
-      errors.minOrderAmount = "Giá trị đơn hàng tối thiểu không hợp lệ"
+      errors.minOrderAmount =
+        errT.invalidMinOrder || "Giá trị đơn hàng tối thiểu không hợp lệ"
     }
 
     // 5. Scope Type (BR-VC-GV-06 & BR-VC-GV-08)
-    const scope = values.scopeType
-    if (scope === SCOPE_TYPES.SPECIFIC_COURSES || scope === 2) {
+    const isCourseScope = values.scopeType === SCOPE_TYPES.SPECIFIC_COURSES
+
+    if (isCourseScope) {
       if (isPercentage) {
         errors.discountType =
           errT.scopeCourseDiscountFixedOnly ||
@@ -166,13 +188,18 @@ export const validateInstructorVoucherForm = (values, isDraft = false, t = null)
       } else if (maxBudget < 2000) {
         errors.maxBudget =
           errT.minMaxBudget || "Ngân sách tối đa tối thiểu là 2.000 ₫"
+      } else if (discountVal > 0 && maxBudget < discountVal) {
+        errors.maxBudget =
+          errT.budgetLowerThanDiscount ||
+          `Ngân sách tối đa phải lớn hơn hoặc bằng mức giảm (${formatCurrency(discountVal)})`
       }
+
       if (!Array.isArray(values.courseIds) || values.courseIds.length === 0) {
         errors.courseIds =
           errT.selectAtLeastOneCourse ||
           "Vui lòng chọn ít nhất 1 khóa học áp dụng"
       }
-    } else if (scope === SCOPE_TYPES.SPECIFIC_CLASSES || scope === 3) {
+    } else {
       if (!Array.isArray(values.classIds) || values.classIds.length === 0) {
         errors.classIds =
           errT.selectAtLeastOneClass ||
@@ -181,11 +208,53 @@ export const validateInstructorVoucherForm = (values, isDraft = false, t = null)
     }
 
     // 6. Total Usage Limit (BR-VC-GV-11)
-    const totalLimit = Number(values.totalUsageLimit)
-    if (isNaN(totalLimit) || totalLimit <= 0 || !Number.isInteger(totalLimit)) {
-      errors.totalUsageLimit =
-        errT.totalUsageLimitRequired ||
-        "Giáo viên bắt buộc nhập Tổng lượt sử dụng cụ thể (> 0) để tính tiền cọc"
+    if (isCourseScope) {
+      const maxBudget = Number(values.maxBudget)
+      if (maxBudget > 0 && discountVal > 0) {
+        const derivedLimit = Math.floor(maxBudget / discountVal)
+        if (derivedLimit < 1) {
+          errors.totalUsageLimit =
+            errT.budgetTooLowForUsage ||
+            "Ngân sách tối đa phải đủ chi trả cho ít nhất 1 lượt sử dụng"
+        }
+      }
+    } else {
+      const totalLimit = Number(values.totalUsageLimit)
+      if (isNaN(totalLimit) || totalLimit <= 0 || !Number.isInteger(totalLimit)) {
+        errors.totalUsageLimit =
+          errT.totalUsageLimitRequired ||
+          "Giáo viên bắt buộc nhập Tổng lượt sử dụng cụ thể (> 0) để tính tiền cọc"
+      }
+    }
+
+    // 6b. Per User Limit (Required, default 1)
+    const perUser = Number(values.perUserLimit)
+    if (
+      values.perUserLimit === undefined ||
+      values.perUserLimit === "" ||
+      values.perUserLimit === null
+    ) {
+      errors.perUserLimit =
+        errT.perUserLimitRequired ||
+        "Vui lòng nhập số lượt dùng tối đa cho mỗi học viên (≥ 1)"
+    } else if (isNaN(perUser) || perUser < 1 || !Number.isInteger(perUser)) {
+      errors.perUserLimit =
+        errT.perUserLimitInvalid ||
+        "Lượt dùng cho mỗi học viên phải là số nguyên dương (≥ 1)"
+    }
+
+    // 6c. Daily Limit
+    if (
+      values.dailyLimit !== undefined &&
+      values.dailyLimit !== "" &&
+      values.dailyLimit !== null
+    ) {
+      const daily = Number(values.dailyLimit)
+      if (isNaN(daily) || daily < 1 || !Number.isInteger(daily)) {
+        errors.dailyLimit =
+          errT.dailyLimitInvalid ||
+          "Giới hạn lượt dùng theo ngày phải là số nguyên dương (≥ 1)"
+      }
     }
 
     // 7. Validity Dates (BR-VC-GV-10)

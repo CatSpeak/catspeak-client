@@ -9,6 +9,7 @@ import {
   parseRegisterError,
   validatePhoneInput,
 } from "@/features/auth/utils/registerErrors"
+import { parseApiError } from "@/shared/utils/apiError"
 import { getBrowserTimeZone } from "@/shared/constants/timezones"
 
 const initialFormData = {
@@ -121,6 +122,14 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     } catch (err) {
       console.error("Registration failed:", err)
 
+      // A pending (unactivated) account already exists for this email/phone —
+      // resume it instead of blocking the re-registration.
+      const { errorCode } = parseApiError(err)
+      if (errorCode === "AUTH_ACCOUNT_PENDING_ACTIVATION") {
+        onSwitchMode("verify-email", formData.email, true)
+        return
+      }
+
       const { fieldErrors, message } = parseRegisterError(err, authText)
       if (fieldErrors && Object.keys(fieldErrors).length > 0) {
         setErrors(fieldErrors)
@@ -131,10 +140,14 @@ const RegisterPopup = ({ open, onClose, onSwitchMode }) => {
     }
   }
 
-  const handleClose = () => {
+  const resetForm = () => {
     setFormData(initialFormData)
     setErrors({})
     setApiError(null)
+  }
+
+  const handleClose = () => {
+    resetForm()
     onClose()
   }
 

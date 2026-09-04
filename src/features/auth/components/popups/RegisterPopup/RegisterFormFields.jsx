@@ -149,6 +149,7 @@ const RegisterFormFields = ({
         <div className="flex-1">
           <label className="block text-xs text-secondary mb-1">
             {authText.phoneLabel}
+            <span className="text-red-500 ml-0.5">*</span>
           </label>
           <Dropdown
             options={phonePrefixes}
@@ -239,6 +240,7 @@ const RegisterFormFields = ({
         <div className="flex-1">
           <label className="block text-xs text-secondary mb-1">
             {authText.dateOfBirthLabel}
+            <span className="text-red-500 ml-0.5">*</span>
           </label>
           <FormDatePicker
             placeholder={authText.dateOfBirthPlaceholder}
@@ -252,6 +254,7 @@ const RegisterFormFields = ({
         <div className="flex-1">
           <label className="block text-xs text-secondary mb-1">
             {authText.languageLabel}
+            <span className="text-red-500 ml-0.5">*</span>
           </label>
           <Dropdown
             placeholder={authText.languagePlaceholder}
@@ -313,6 +316,7 @@ const RegisterFormFields = ({
         <div className="flex-1">
           <label className="block text-xs text-secondary mb-1">
             {authText.countryLabel}
+            <span className="text-red-500 ml-0.5">*</span>
           </label>
           <Dropdown
             placeholder={authText.countryPlaceholder}

@@ -333,7 +333,6 @@ const CreateCoursePage = () => {
       {/* ─── Breadcrumb ─── */}
       <Breadcrumb
         items={[
-          { label: t.nav?.home || "Trang chủ", onClick: () => navigate("/workspace") },
           { label: c.title || "Khóa học của tôi", onClick: () => navigate("/workspace/courses") },
           { label: labelCourseAction },
         ]}
