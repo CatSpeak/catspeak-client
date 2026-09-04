@@ -877,6 +877,7 @@ const InstructorPage = () => {
           editRequestNote={
             rawApplication?.editRequestNote || rawApplication?.EditRequestNote
           }
+          isRevision={!!(rawApplication?.isRevision || rawApplication?.IsRevision)}
           t={t}
           onReapply={() => setIsReapplying(true)}
           isReapplying={isReapplying}

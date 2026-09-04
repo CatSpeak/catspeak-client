@@ -1,6 +1,5 @@
 import React from "react";
 import { Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
-import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 
 const STATUS_CONFIG = {
@@ -43,11 +42,11 @@ const InstructorStatusBanner = ({
   rejectReason,
   banUntil,
   editRequestNote,
+  isRevision,
   t,
   onReapply,
   isReapplying,
 }) => {
-  const { language } = useLanguage();
   const { formatDate } = useTimezone();
   const ins = t.profile?.instructor || {};
   const config = STATUS_CONFIG[status];
@@ -85,6 +84,27 @@ const InstructorStatusBanner = ({
       <p className={`text-sm ${config.textColor} ml-8`}>
         {statusDescriptions[status]}
       </p>
+
+      {/* Legacy Pending (pre-revision cutover): nudge to resubmit as a revision.
+          Revision-based Pending rows already use the new queue — no nudge. */}
+      {status === "Pending" && !isRevision && onReapply && !isReapplying && (
+        <div className="mt-3 ml-8">
+          <div className="bg-white/60 rounded-lg px-4 py-3 border border-amber-100">
+            <p className="text-sm text-amber-800">
+              {ins.legacyPendingHint ||
+                "Hồ sơ cũ của bạn chưa được xử lý qua hệ thống mới. Hãy gửi lại đơn để tiếp tục."}
+            </p>
+            <div className="pt-2">
+              <button
+                onClick={onReapply}
+                className="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors shadow-sm"
+              >
+                {ins.resubmit || "Gửi lại đơn"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Rejected: reason + ban date */}
       {status === "Rejected" && (
