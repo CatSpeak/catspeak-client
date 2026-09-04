@@ -33,7 +33,13 @@ const ProfileFriendsTab = ({
     hasMore,
     fetchingRecs,
     bottomSentinelRef,
-  } = useProfileFriends({ targetAccountId, isOwnProfile, defaultSubTab })
+    followingIdSet,
+  } = useProfileFriends({
+    targetAccountId,
+    isOwnProfile,
+    defaultSubTab,
+    currentUserId,
+  })
 
   const navigateToProfile = useCallback(
     (accountId) => {
@@ -63,7 +69,17 @@ const ProfileFriendsTab = ({
                 className="shrink-0"
               >
                 {tab.label}
-                {tab.badge != null && ` (${tab.badge})`}
+                {tab.badge != null && (
+                  <span
+                    className={`ml-1 inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full text-xs font-semibold ${
+                      isActive
+                        ? "bg-white/25 text-white"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
               </PillButton>
             )
           })}
@@ -113,16 +129,22 @@ const ProfileFriendsTab = ({
         ) : (
           <>
             <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-              {list.map((user) => (
-                <ProfileFriendCard
-                  key={user.accountId || user.friendshipId}
-                  user={user}
-                  activeSubTab={activeSubTab}
-                  isOwnProfile={isOwnProfile}
-                  currentUserId={currentUserId}
-                  onNavigate={navigateToProfile}
-                />
-              ))}
+              {list.map((user) => {
+                const accountId = user.accountId ?? user.id ?? user.userId
+                const isFollowing =
+                  accountId != null && followingIdSet?.has(Number(accountId))
+                return (
+                  <ProfileFriendCard
+                    key={user.accountId || user.friendshipId}
+                    user={user}
+                    activeSubTab={activeSubTab}
+                    isOwnProfile={isOwnProfile}
+                    currentUserId={currentUserId}
+                    isFollowing={isFollowing}
+                    onNavigate={navigateToProfile}
+                  />
+                )
+              })}
 
               {/* Skeletons when fetching additional pages */}
               {hasMore &&

@@ -42,6 +42,7 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await sendFriendRequest(targetId).unwrap()
+      toast.success(t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn")
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -51,6 +52,7 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await followUser(targetId).unwrap()
+      toast.success(t.profile?.social?.followSuccess || "Đã theo dõi")
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -60,6 +62,7 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await unfollowUser(targetId).unwrap()
+      toast.success(t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi")
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }

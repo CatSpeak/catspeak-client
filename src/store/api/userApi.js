@@ -31,7 +31,7 @@ export const userApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["UserProfile", "User"],
+      invalidatesTags: ["UserProfile", "User", "PublicProfile"],
     }),
     changePassword: builder.mutation({
       query: (data) => ({
@@ -106,7 +106,15 @@ export const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["UserProfile", "User"],
+      invalidatesTags: ["UserProfile", "User", "PublicProfile"],
+    }),
+    updateCover: builder.mutation({
+      query: (formData) => ({
+        url: "/user-profile/cover",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["UserProfile", "User", "PublicProfile"],
     }),
     uploadMeetingAvatar: builder.mutation({
       query: (formData) => ({
@@ -114,7 +122,7 @@ export const userApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["UserProfile"],
+      invalidatesTags: ["UserProfile", "PublicProfile"],
     }),
   }),
 });
@@ -131,6 +139,7 @@ export const {
   useUpdatePhoneNumberMutation,
   useUpdateMeetingAvatarMutation,
   useUpdateAvatarMutation,
+  useUpdateCoverMutation,
   useUploadMeetingAvatarMutation,
   useVerifyChangePasswordOtpMutation,
   useGetFollowersQuery,

@@ -6,6 +6,7 @@ import {
   UserCheck,
   MessageSquare,
 } from "lucide-react"
+import toast from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
@@ -15,28 +16,53 @@ import ListItem from "@/shared/components/ui/ListItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getUserColor } from "@/features/video-call/utils/participantTheme"
 import { useFriendActions } from "../hooks/useFriendActions"
+import { useSendFriendRequestMutation } from "@/store/api/social/friendshipApi"
 import AnimatedNameFallback from "./AnimatedNameFallback"
 
 const isUserTeacher = (user) =>
   user?.isTeacher === true ||
   user?.isTeacher === 1 ||
-  user?.isTeacher === "true" ||
-  (typeof user?.level === "string" &&
-    user.level.trim().toLowerCase() === "expert")
+  user?.isTeacher === "true"
 
 const ProfileFriendCard = memo(
-  ({ user, activeSubTab, isOwnProfile, currentUserId, onNavigate }) => {
+  ({
+    user,
+    activeSubTab,
+    isOwnProfile,
+    currentUserId,
+    isFollowing = false,
+    onNavigate,
+  }) => {
     const { t } = useLanguage()
     const [imgError, setImgError] = useState(false)
+    const [requestSent, setRequestSent] = useState(false)
+    const [sendFriendRequest, { isLoading: isSendingRequest }] =
+      useSendFriendRequestMutation()
     const {
       handleStartChat,
-      handleSendRequest,
       handleFollow,
       handleUnfollow,
       handleUnfriend,
       handleAcceptRequest,
       handleDeclineRequest,
     } = useFriendActions()
+
+    const handleAddFriend = async (close) => {
+      if (isSendingRequest || requestSent) {
+        if (close) close()
+        return
+      }
+      if (close) close()
+      try {
+        await sendFriendRequest(user.accountId).unwrap()
+        setRequestSent(true)
+        toast.success(
+          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+        )
+      } catch {
+        toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
+      }
+    }
 
     const isTeacher = isUserTeacher(user)
     const roleLabel = isTeacher
@@ -49,7 +75,7 @@ const ProfileFriendCard = memo(
       user?.name ||
       user?.displayName ||
       "User"
-    const userRole = user?.roleName || roleLabel
+    const userRole = roleLabel
     const avatarUrl = user?.avatarImageUrl || user?.avatarUrl
     const isSelf =
       currentUserId != null &&
@@ -65,10 +91,13 @@ const ProfileFriendCard = memo(
         {activeSubTab === "find" && !isSelf && (
           <MenuItem
             icon={<UserPlus />}
-            label={t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
+            label={
+              requestSent
+                ? t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"
+                : t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"
+            }
             onClick={() => {
-              handleSendRequest(user.accountId)
-              close()
+              handleAddFriend(close)
             }}
           />
         )}
@@ -111,12 +140,23 @@ const ProfileFriendCard = memo(
         )}
 
         {/* Followers tab action */}
-        {activeSubTab === "followers" && !isSelf && (
+        {activeSubTab === "followers" && !isSelf && !isFollowing && (
           <MenuItem
             icon={<UserPlus />}
             label={t.profile?.friends?.actions?.followBack || "Theo dõi lại"}
             onClick={() => {
               handleFollow(user.accountId)
+              close()
+            }}
+          />
+        )}
+        {activeSubTab === "followers" && !isSelf && isFollowing && (
+          <MenuItem
+            icon={<UserMinus className="text-red-600" />}
+            label={t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
+            className="text-red-600"
+            onClick={() => {
+              handleUnfollow(user.accountId)
               close()
             }}
           />
@@ -281,11 +321,15 @@ const ProfileFriendCard = memo(
             {/* Find Friends / Recommendations */}
             {activeSubTab === "find" && !isSelf && (
               <PillButton
-                variant="primary"
+                variant={requestSent ? "secondary" : "primary"}
                 className="w-full"
-                onClick={() => handleSendRequest(user.accountId)}
+                onClick={() => handleAddFriend()}
+                loading={isSendingRequest}
+                disabled={isSendingRequest || requestSent}
               >
-                {t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
+                {requestSent
+                  ? t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"
+                  : t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
               </PillButton>
             )}
 
@@ -332,13 +376,22 @@ const ProfileFriendCard = memo(
             )}
 
             {/* Followers */}
-            {activeSubTab === "followers" && !isSelf && (
+            {activeSubTab === "followers" && !isSelf && !isFollowing && (
               <PillButton
                 variant="primary"
                 className="w-full"
                 onClick={() => handleFollow(user.accountId)}
               >
                 {t.profile?.friends?.actions?.followBack || "Theo dõi lại"}
+              </PillButton>
+            )}
+            {activeSubTab === "followers" && !isSelf && isFollowing && (
+              <PillButton
+                variant="secondary"
+                className="w-full"
+                onClick={() => handleUnfollow(user.accountId)}
+              >
+                {t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
               </PillButton>
             )}
           </div>

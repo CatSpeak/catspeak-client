@@ -22,6 +22,7 @@ export const useProfileFriends = ({
   targetAccountId,
   isOwnProfile,
   defaultSubTab,
+  currentUserId,
 }) => {
   const { t } = useLanguage()
   const [activeSubTab, setActiveSubTab] = useState(defaultSubTab || "all")
@@ -71,6 +72,11 @@ export const useProfileFriends = ({
     },
     { skip: !isOwnProfile },
   )
+  // My following list for cross-check on other people's profiles.
+  // When viewing own profile, followingRes already is my list.
+  const { data: myFollowingRes } = useGetFollowingQuery(currentUserId, {
+    skip: isOwnProfile || !currentUserId,
+  })
 
   // Infinite Scroll Observer for bottom sentinel
   useEffect(() => {
@@ -91,21 +97,50 @@ export const useProfileFriends = ({
   }, [recRes, fetchingRecs, activeSubTab])
 
   const pendingRequests = useMemo(() => getArray(pendingRes), [pendingRes])
+  const friendsList = useMemo(() => getArray(friendsRes), [friendsRes])
+  const followingList = useMemo(
+    () => getArray(followingRes),
+    [followingRes],
+  )
+  const followersList = useMemo(
+    () => getArray(followersRes),
+    [followersRes],
+  )
+  const myFollowingList = useMemo(
+    () => getArray(myFollowingRes),
+    [myFollowingRes],
+  )
+
+  // Set of accountIds that the viewer is following.
+  // Own profile: followingList is mine. Other profile: myFollowingList is mine.
+  const followingIdSet = useMemo(() => {
+    const source = isOwnProfile ? followingList : myFollowingList
+    const set = new Set()
+    for (const u of source) {
+      const id = u?.accountId ?? u?.id ?? u?.userId
+      if (id != null) set.add(Number(id))
+    }
+    return set
+  }, [isOwnProfile, followingList, myFollowingList])
 
   // Subtabs configuration
   const subTabs = useMemo(() => {
+    const badgeOrNull = (n) => (n > 0 ? String(n) : null)
     const tabs = [
       {
         id: "all",
         label: t.profile?.friends?.subTabs?.all || "Tất cả bạn bè",
+        badge: badgeOrNull(friendsList.length),
       },
       {
         id: "following",
         label: t.profile?.friends?.subTabs?.following || "Đang theo dõi",
+        badge: badgeOrNull(followingList.length),
       },
       {
         id: "followers",
         label: t.profile?.friends?.subTabs?.followers || "Người theo dõi",
+        badge: badgeOrNull(followersList.length),
       },
     ]
     if (isOwnProfile) {
@@ -113,10 +148,7 @@ export const useProfileFriends = ({
         {
           id: "pending",
           label: t.profile?.friends?.subTabs?.pending || "Yêu cầu kết nối",
-          badge:
-            pendingRequests.length > 0
-              ? pendingRequests.length.toString()
-              : null,
+          badge: badgeOrNull(pendingRequests.length),
         },
         {
           id: "find",
@@ -125,7 +157,14 @@ export const useProfileFriends = ({
       )
     }
     return tabs
-  }, [isOwnProfile, pendingRequests.length, t])
+  }, [
+    isOwnProfile,
+    friendsList.length,
+    followingList.length,
+    followersList.length,
+    pendingRequests.length,
+    t,
+  ])
 
   // Compute active list & loading state
   const isSearchingRecs =
@@ -214,6 +253,7 @@ export const useProfileFriends = ({
     hasMore: activeSubTab === "find" && recRes?.hasMore !== false,
     fetchingRecs,
     bottomSentinelRef,
+    followingIdSet,
   }
 }
 

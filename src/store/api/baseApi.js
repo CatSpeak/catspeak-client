@@ -378,6 +378,9 @@ export const baseApi = createApi({
   tagTypes: [
     "Auth",
     "User",
+    "UserProfile",
+    "PublicProfile",
+    "Background",
     "Rooms",
     "Stories",
     "MyStories",
