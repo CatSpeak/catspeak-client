@@ -26,7 +26,11 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
   const contentRef = useRef(null)
 
   const contentUrl = post?.contentUrl || post?.ContentUrl || null
-  const hasContent = Boolean(post?.content || contentUrl)
+  // List API (GetPostsAsync) strips Content (excludeContent=true) and old posts
+  // have ContentUrl=null, so fall back to excerpt (backend always returns it).
+  const excerpt = post?.excerpt || post?.Excerpt || null
+  const hasRichContent = Boolean(post?.content || contentUrl)
+  const hasContent = Boolean(hasRichContent || excerpt)
 
   useEffect(() => {
     const el = contentRef.current
@@ -42,7 +46,7 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
     const observer = new ResizeObserver(checkOverflow)
     observer.observe(el)
     return () => observer.disconnect()
-  }, [post?.content, contentUrl, isExpanded])
+  }, [post?.content, contentUrl, excerpt, isExpanded])
   const {
     shareUrl,
     isShareModalOpen,
@@ -98,11 +102,17 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                 ref={contentRef}
                 className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
               >
-                <PostContent
-                  html={post.content}
-                  contentUrl={contentUrl}
-                  className="text-sm text-[#606060]"
-                />
+                {hasRichContent ? (
+                  <PostContent
+                    html={post.content}
+                    contentUrl={contentUrl}
+                    className="text-sm text-[#606060]"
+                  />
+                ) : (
+                  <p className="text-sm text-[#606060] whitespace-pre-line break-words">
+                    {excerpt}
+                  </p>
+                )}
               </div>
               {(isOverflowing || isExpanded) && (
                 <button
