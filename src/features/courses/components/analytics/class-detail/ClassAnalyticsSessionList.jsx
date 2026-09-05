@@ -2,6 +2,16 @@ import React, { useState } from "react"
 import { ChevronLeft, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
+const isSessionProcessing = (session) => {
+  const created = session?.createdAt || session?.created_at
+  const updated = session?.updatedAt || session?.updated_at
+  if (!created) return false
+  if (!updated) return true
+  const createdTime = new Date(created).getTime()
+  const updatedTime = new Date(updated).getTime()
+  return !isNaN(createdTime) && !isNaN(updatedTime) && createdTime === updatedTime
+}
+
 const formatDate = (isoStr) => {
   if (!isoStr) return "—"
   const d = new Date(isoStr)
@@ -80,12 +90,14 @@ const ClassAnalyticsSessionList = ({
               </tr>
             ) : (
               visibleSessions.map((session) => {
+                const isProcessing = isSessionProcessing(session)
+                const createdIso = session.createdAt || session.created_at
+                const updatedIso = session.updatedAt || session.updated_at
+                const dateDisplay = formatDate(createdIso)
+                const timeDisplay = formatTime(updatedIso)
                 const teacherPercent = session.teacherSpeechPercent ?? 0
                 const studentPercent = session.studentSpeechPercent ?? 0
                 const avgStb = session.avgStbScore ?? 0
-                const createdIso = session.createdAt || session.created_at
-                const dateDisplay = formatDate(createdIso)
-                const timeDisplay = formatTime(createdIso)
 
                 return (
                   <tr
@@ -102,37 +114,55 @@ const ClassAnalyticsSessionList = ({
 
                     {/* Giờ kết thúc */}
                     <td className="py-3.5 px-4 font-medium text-gray-700 text-sm">
-                      {timeDisplay || "—"}
+                      {isProcessing ? (
+                        <span className="text-amber-700 font-medium">
+                          {cd.sessionNotEnded || "Chưa kết thúc"}
+                        </span>
+                      ) : (
+                        timeDisplay || "—"
+                      )}
                     </td>
 
                     {/* Tỷ lệ GV / HV with split progress bar */}
                     <td className="py-3.5 px-4">
-                      <div className="flex flex-col gap-1.5 min-w-[130px] max-w-[170px]">
-                        <div className="flex items-center justify-between text-xs font-semibold text-gray-700">
-                          <span>{cd.teacherTalk || "GV"}: {teacherPercent}%</span>
-                          <span>{cd.studentTalk || "HV"}: {studentPercent}%</span>
+                      {isProcessing ? (
+                        <span className="text-gray-400 font-medium">—</span>
+                      ) : (
+                        <div className="flex flex-col gap-1.5 min-w-[130px] max-w-[170px]">
+                          <div className="flex items-center justify-between text-xs font-semibold text-gray-700">
+                            <span>{cd.teacherTalk || "GV"}: {teacherPercent}%</span>
+                            <span>{cd.studentTalk || "HV"}: {studentPercent}%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden flex">
+                            <div
+                              style={{ width: `${Math.min(100, Math.max(0, teacherPercent))}%` }}
+                              className="bg-sky-500 h-full"
+                            />
+                            <div
+                              style={{ width: `${Math.min(100, Math.max(0, studentPercent))}%` }}
+                              className="bg-emerald-500 h-full"
+                            />
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden flex">
-                          <div
-                            style={{ width: `${Math.min(100, Math.max(0, teacherPercent))}%` }}
-                            className="bg-sky-500 h-full"
-                          />
-                          <div
-                            style={{ width: `${Math.min(100, Math.max(0, studentPercent))}%` }}
-                            className="bg-emerald-500 h-full"
-                          />
-                        </div>
-                      </div>
+                      )}
                     </td>
 
                     {/* STB TB */}
                     <td className="py-3.5 px-4 font-bold text-gray-900 text-sm tabular-nums">
-                      {avgStb}%
+                      {isProcessing ? (
+                        <span className="text-gray-400 font-normal">—</span>
+                      ) : (
+                        `${avgStb}%`
+                      )}
                     </td>
 
                     {/* Trạng thái */}
                     <td className="py-3.5 px-4">
-                      {getStatusBadge(session.healthStatus)}
+                      {isProcessing ? (
+                        <span className="text-gray-400 font-medium">—</span>
+                      ) : (
+                        getStatusBadge(session.healthStatus)
+                      )}
                     </td>
 
                     {/* Action */}

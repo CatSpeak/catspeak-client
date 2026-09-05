@@ -1,5 +1,6 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import { Loader2 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetSessionSpeakingStatsQuery } from "@/store/api/roomsApi"
 import { useGetClassDetailQuery } from "@/store/api/coursesApi"
@@ -127,6 +128,16 @@ const SessionAnalyticsDetailPage = () => {
       "Giảng viên",
   }
 
+  const createdIso = sessionData.createdAt || sessionData.created_at
+  const updatedIso = sessionData.updatedAt || sessionData.updated_at
+  const isProcessing = useMemo(() => {
+    if (!createdIso) return false
+    if (!updatedIso) return true
+    const cTime = new Date(createdIso).getTime()
+    const uTime = new Date(updatedIso).getTime()
+    return !isNaN(cTime) && !isNaN(uTime) && cTime === uTime
+  }, [createdIso, updatedIso])
+
   const handleSelectStudent = (student) => {
     const targetStudentId = student.accountId || student.id || student.participantId
     if (targetStudentId && classId) {
@@ -152,30 +163,45 @@ const SessionAnalyticsDetailPage = () => {
       {/* 1. Header with Breadcrumbs, Title and Subtitle */}
       <SessionDetailHeader sessionData={sessionData} classData={classData} />
 
-      {/* 2. Top Summary Metrics (3 KPI Cards) */}
-      <SessionDetailKpis
-        sessionData={sessionData}
-        teacherName={classData.teacherName}
-      />
-
-      {/* 3. Student Speaking Data Table */}
-      <div className="flex flex-col bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs overflow-hidden">
-        <div className="mb-4">
-          <h3 className="text-base font-bold text-gray-900">
-            {sessT.tableTitle || "Dữ liệu phát biểu học viên"}
+      {isProcessing ? (
+        <div className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-2xl p-12 sm:p-16 shadow-xs text-center min-h-[320px]">
+          <Loader2 className="w-9 h-9 text-[#990011] animate-spin mb-4" />
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            {sessT.aggregatingTitle || "Buổi học đang tổng hợp dữ liệu"}
           </h3>
-          <p className="text-xs text-gray-500">
-            {sessT.tableDesc || "Thống kê chi tiết thời lượng, số từ và trạng thái phát biểu của từng học viên trong buổi học."}
+          <p className="text-sm text-gray-500 max-w-md">
+            {sessT.aggregatingDesc || "Buổi học cần một thời gian ngắn để đóng hẳn và tổng hợp dữ liệu. Vui lòng quay lại sau."}
           </p>
         </div>
+      ) : (
+        <>
+          {/* 2. Top Summary Metrics (3 KPI Cards) */}
+          <SessionDetailKpis
+            sessionData={sessionData}
+            teacherName={classData.teacherName}
+          />
 
-        <SessionStudentSpeakingTable
-          participants={sessionData.participants}
-          onSelectStudent={handleSelectStudent}
-        />
-      </div>
+          {/* 3. Student Speaking Data Table */}
+          <div className="flex flex-col bg-white border border-gray-100 rounded-2xl p-5 sm:p-6 shadow-xs overflow-hidden">
+            <div className="mb-4">
+              <h3 className="text-base font-bold text-gray-900">
+                {sessT.tableTitle || "Dữ liệu phát biểu học viên"}
+              </h3>
+              <p className="text-xs text-gray-500">
+                {sessT.tableDesc || "Thống kê chi tiết thời lượng, số từ và trạng thái phát biểu của từng học viên trong buổi học."}
+              </p>
+            </div>
+
+            <SessionStudentSpeakingTable
+              participants={sessionData.participants}
+              onSelectStudent={handleSelectStudent}
+            />
+          </div>
+        </>
+      )}
     </div>
   )
 }
 
 export default SessionAnalyticsDetailPage
+

@@ -73,8 +73,9 @@ const StudentSessionHistoryTable = ({ sessions = [], onSessionClick, pageSize = 
               const isMet = sess.isMet
               const durationSecs = sess.durationSeconds ?? (sess.durationMinutes ? sess.durationMinutes * 60 : 0)
               const createdIso = sess.createdAt || sess.created_at || sess.date
+              const updatedIso = sess.updatedAt || sess.updated_at
               const dateDisplay = formatDate(createdIso)
-              const timeDisplay = formatTime(createdIso)
+              const timeDisplay = formatTime(updatedIso || createdIso)
 
               return (
                 <tr
