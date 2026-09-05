@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsDataTable from "../AnalyticsDataTable"
@@ -83,6 +84,7 @@ const CoursesTab = ({ group, queryParams = {} }) => {
   // 2. Course Performance Table Data
   const effItems = effectivenessData?.data || (Array.isArray(effectivenessData) ? effectivenessData : [])
   const courseTableData = effItems.map((r) => ({
+    courseId: r.courseId,
     course: r.courseName || "-",
     classCount: r.classCount ?? 0,
     students: r.totalStudents ?? 0,
@@ -97,6 +99,7 @@ const CoursesTab = ({ group, queryParams = {} }) => {
   // 3. Standalone Classes Table Data
   const saItems = standaloneData?.data || (Array.isArray(standaloneData) ? standaloneData : [])
   const independentClasses = saItems.map((r) => ({
+    classId: r.classId,
     className: r.className || "-",
     students: r.studentCount ?? 0,
     gross: money(r.revenue || 0, language),
@@ -110,6 +113,7 @@ const CoursesTab = ({ group, queryParams = {} }) => {
   // 4. Hot Class Ranking Data
   const hotItems = hotClassesData?.data || (Array.isArray(hotClassesData) ? hotClassesData : [])
   const hotRankingRows = hotItems.map((r) => ({
+    classId: r.classId,
     className: r.className || "-",
     course: r.courseName || (colT.course || "Khóa học"),
     learners: r.students ?? 0,
@@ -140,6 +144,10 @@ const CoursesTab = ({ group, queryParams = {} }) => {
             ]}
             data={courseTableData}
             pageSize={4}
+            expandConfig={{
+              courseIdKey: "courseId",
+              pageSize: 5,
+            }}
           />
         </div>
 

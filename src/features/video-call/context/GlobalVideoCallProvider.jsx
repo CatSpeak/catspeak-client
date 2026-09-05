@@ -98,8 +98,12 @@ const IDLE_VALUE = {
   subtitleSupportedLangs: ["en", "vi"],
   startSubtitles: async () => {},
   stopSubtitles: async () => {},
+  changeSubtitleLanguage: async () => {},
 
   lkRoomName: null,
+  speakingStatsMap: {},
+  roomTotalDuration: 0,
+  roomTotalStudentDuration: 0,
   unreadRoomChat: 0,
   unreadAiChat: 0,
   isChatCollapsed: false,
@@ -108,6 +112,8 @@ const IDLE_VALUE = {
   setUnreadAiChat: () => {},
   setIsChatCollapsed: () => {},
   setIsAiCollapsed: () => {},
+  speakingAssistantEnabled: false,
+  setSpeakingAssistantEnabled: () => {},
   activeChatTab: "room",
   setActiveChatTab: () => {},
   layoutMode: "auto",
@@ -117,6 +123,8 @@ const IDLE_VALUE = {
   hideEmptyTiles: false,
   setHideEmptyTiles: () => {},
 
+  showAiSuggestions: true,
+  setShowAiSuggestions: () => {},
   showRoomSettings: false,
   setShowRoomSettings: () => {},
   activeSettingsTab: "audio-video",
@@ -128,6 +136,8 @@ const IdleCallContent = ({
   children,
   receiveSystemMsgs,
   setReceiveSystemMsgs,
+  speakingAssistantEnabled,
+  setSpeakingAssistantEnabled,
   showAiSuggestions,
   setShowAiSuggestions,
 }) => (
@@ -136,6 +146,8 @@ const IdleCallContent = ({
       ...IDLE_VALUE,
       receiveSystemMsgs,
       setReceiveSystemMsgs,
+      speakingAssistantEnabled,
+      setSpeakingAssistantEnabled,
       showAiSuggestions,
       setShowAiSuggestions,
     }}
@@ -159,9 +171,21 @@ export const GlobalVideoCallProvider = ({ children }) => {
     return saved !== null ? JSON.parse(saved) : true
   })
 
+  const [speakingAssistantEnabled, setSpeakingAssistantEnabled] = useState(() => {
+    const saved = localStorage.getItem("speakingAssistantEnabled")
+    return saved !== null ? JSON.parse(saved) : false
+  })
+
   useEffect(() => {
     localStorage.setItem("receiveSystemMsgs", JSON.stringify(receiveSystemMsgs))
   }, [receiveSystemMsgs])
+
+  useEffect(() => {
+    localStorage.setItem(
+      "speakingAssistantEnabled",
+      JSON.stringify(speakingAssistantEnabled),
+    )
+  }, [speakingAssistantEnabled])
 
   const [showAiSuggestions, setShowAiSuggestions] = useState(() => {
     const saved = localStorage.getItem("showAiSuggestions")
@@ -196,6 +220,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
       <IdleCallContent
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
+        speakingAssistantEnabled={speakingAssistantEnabled}
+        setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
         showAiSuggestions={showAiSuggestions}
         setShowAiSuggestions={setShowAiSuggestions}
       >
@@ -240,6 +266,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
         showAiSuggestions={showAiSuggestions}
         setShowAiSuggestions={setShowAiSuggestions}
         panelState={panelState}
+        speakingAssistantEnabled={speakingAssistantEnabled}
+        setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
       >
         {children}
       </GlobalCallContent>

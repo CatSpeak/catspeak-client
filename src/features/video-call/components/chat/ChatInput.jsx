@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from "react"
 import { Send, Smile, Sparkles } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
@@ -8,7 +9,6 @@ import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
 import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import { toast } from "react-hot-toast"
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 import {
@@ -54,7 +54,7 @@ const ChatInput = ({
     return participants.filter((p) => {
       if (p.isLocal) return false
       const meta = parseMetadata(p.metadata)
-      const isAgent = meta.is_stt_agent === true || p.identity?.startsWith("agent-")
+      const isAgent = meta.is_stt_agent === true || p.identity?.startsWith("agent")
       return !isAgent
     })
   }, [participants])
