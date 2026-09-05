@@ -3,8 +3,10 @@ import {
   CalendarClock,
   PenSquare,
   CheckCircle2,
+  PencilLine,
   RotateCw,
   Megaphone,
+  XCircle,
   Zap,
   UserPlus,
   UserCheck,
@@ -22,6 +24,74 @@ const replaceVars = (text, m) => {
 
 const getLoc = (t) =>
   t.courses?.notifications || t.courses?.lectureHall?.notifications;
+
+const INSTRUCTOR_PROFILE_URL = "/setting/instructor";
+
+const decodeHtml = (value) => {
+  if (value === null || value === undefined) return "";
+  const text = String(value);
+  if (!text) return "";
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#x2F;/g, "/");
+};
+
+const getInstructorReason = (m, t) => {
+  const raw = decodeHtml(m.escapedReason || m.note || "").trim();
+  return (
+    raw ||
+    t.notifications?.instructor_profile_rejected?.defaultReason ||
+    "Vui lòng vào Cài đặt > Giảng viên để xem chi tiết"
+  );
+};
+
+const getInstructorBanText = (m, t) => {
+  const loc = t.notifications?.instructor_profile_rejected;
+  const formatted = decodeHtml(m.formattedBanUntil || "").trim();
+  const isBanned =
+    !!formatted && /\d{2}\/\d{2}\/\d{4}/.test(formatted);
+  if (isBanned) {
+    return `${loc?.bannedPrefix || "Cấm nộp lại đến"} ${formatted}`;
+  }
+  return loc?.canResubmit || "Bạn có thể nộp hồ sơ mới ngay.";
+};
+
+const getInstructorRequestTypeLabel = (m, t) => {
+  const loc = t.notifications?.instructor_profile_request_edit;
+  if (m.requestType === "Update") {
+    return (
+      loc?.requestTypeUpdate ||
+      decodeHtml(m.requestTypeLabel || "").trim() ||
+      "Cập nhật giảng dạy"
+    );
+  }
+  if (m.requestType === "Initial") {
+    return (
+      loc?.requestTypeInitial ||
+      decodeHtml(m.requestTypeLabel || "").trim() ||
+      "Đăng ký mới"
+    );
+  }
+  return (
+    decodeHtml(m.requestTypeLabel || "").trim() ||
+    loc?.requestTypeInitial ||
+    "Đăng ký mới"
+  );
+};
+
+const getInstructorEditNote = (m, t) => {
+  const raw = decodeHtml(m.escapedEditNote || m.note || "").trim();
+  return (
+    raw ||
+    t.notifications?.instructor_profile_request_edit?.defaultNote ||
+    "Vui lòng vào Cài đặt > Giảng viên để xem nội dung cần bổ sung"
+  );
+};
 
 export const NOTIFICATION_TYPES = {
   class_invite: {
@@ -375,6 +445,55 @@ export const NOTIFICATION_TYPES = {
         ? `/${lang}/cat-speak/reels?challenge=${m.challengeId}`
         : `/${lang}/cat-speak/reels`;
     },
+  },
+  instructor_profile_approved: {
+    icon: CheckCircle2,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      t.notifications?.instructor_profile_approved?.title ||
+      "Hồ sơ Giảng viên đã được phê duyệt",
+    resolveBody: (m, t) =>
+      t.notifications?.instructor_profile_approved?.body ||
+      "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
+    resolveUrl: () => INSTRUCTOR_PROFILE_URL,
+  },
+  instructor_profile_rejected: {
+    icon: XCircle,
+    color: "text-red-500",
+    resolveTitle: (m, t) =>
+      t.notifications?.instructor_profile_rejected?.title ||
+      "Hồ sơ Giảng viên bị từ chối",
+    resolveBody: (m, t) => {
+      const reason = getInstructorReason(m, t);
+      const banUntil = getInstructorBanText(m, t);
+      const template = t.notifications?.instructor_profile_rejected?.body;
+      if (template) {
+        return template
+          .replace("{reason}", reason)
+          .replace("{banUntil}", banUntil);
+      }
+      return `Lý do: ${reason}. ${banUntil}`;
+    },
+    resolveUrl: () => INSTRUCTOR_PROFILE_URL,
+  },
+  instructor_profile_request_edit: {
+    icon: PencilLine,
+    color: "text-amber-500",
+    resolveTitle: (m, t) =>
+      t.notifications?.instructor_profile_request_edit?.title ||
+      "Hồ sơ cần chỉnh sửa",
+    resolveBody: (m, t) => {
+      const editNote = getInstructorEditNote(m, t);
+      const requestTypeLabel = getInstructorRequestTypeLabel(m, t);
+      const template = t.notifications?.instructor_profile_request_edit?.body;
+      if (template) {
+        return template
+          .replace("{editNote}", editNote)
+          .replace("{requestTypeLabel}", requestTypeLabel);
+      }
+      return `${editNote} (${requestTypeLabel})`;
+    },
+    resolveUrl: () => INSTRUCTOR_PROFILE_URL,
   },
 };
 

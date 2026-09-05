@@ -59,9 +59,9 @@ const Tabs = memo(
 
                 {tab.badge && (
                   <span
-                    className={`w-4 h-4 rounded-full text-xs flex items-center justify-center transition-colors ${isActive
+                    className={`min-w-4 h-4 px-1 rounded-full text-xs flex items-center justify-center transition-colors ${isActive
                       ? "bg-[#990011] text-white"
-                      : "bg-primaryBg text-gray-700"
+                      : "bg-gray-200 text-gray-700"
                       }`}
                   >
                     {tab.badge}

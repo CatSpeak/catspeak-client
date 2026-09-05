@@ -199,5 +199,19 @@ export default {
       title: "教师资料已通过审核",
       body: "您现在可以切换到教师账户。",
     },
+    instructor_profile_rejected: {
+      title: "教师资料未通过审核",
+      body: "原因：{reason}。{banUntil}",
+      defaultReason: "请前往“设置 > 教师”查看详情",
+      canResubmit: "您可以立即提交新的申请。",
+      bannedPrefix: "禁止重新提交至",
+    },
+    instructor_profile_request_edit: {
+      title: "教师资料需要修改",
+      body: "{editNote}（{requestTypeLabel}）",
+      defaultNote: "请前往“设置 > 教师”查看需要补充的内容",
+      requestTypeInitial: "新注册",
+      requestTypeUpdate: "教学更新",
+    },
   },
 };

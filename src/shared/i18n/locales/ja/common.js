@@ -202,5 +202,19 @@ export default {
       title: "講師プロフィールが承認されました",
       body: "講師アカウントに切り替えることができます。",
     },
+    instructor_profile_rejected: {
+      title: "講師プロフィールが却下されました",
+      body: "理由: {reason}。{banUntil}",
+      defaultReason: "設定 > 講師から詳細をご確認ください",
+      canResubmit: "すぐに新しい申請を提出できます。",
+      bannedPrefix: "再申請停止期限",
+    },
+    instructor_profile_request_edit: {
+      title: "プロフィールの修正が必要です",
+      body: "{editNote}（{requestTypeLabel}）",
+      defaultNote: "設定 > 講師から修正内容をご確認ください",
+      requestTypeInitial: "新規登録",
+      requestTypeUpdate: "指導内容の更新",
+    },
   },
 }
