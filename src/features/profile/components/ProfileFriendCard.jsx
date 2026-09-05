@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import toast from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
+import Modal from "@/shared/components/ui/Modal"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -45,6 +46,7 @@ const ProfileFriendCard = memo(
     const { t } = useLanguage()
     const [imgError, setImgError] = useState(false)
     const [requestSent, setRequestSent] = useState(false)
+    const [confirmCancel, setConfirmCancel] = useState(false)
     const [sendFriendRequest, { isLoading: isSendingRequest }] =
       useSendFriendRequestMutation()
     const {
@@ -93,6 +95,13 @@ const ProfileFriendCard = memo(
 
     const handleCancel = (close) => {
       if (close) close()
+      if (!resolvedFriendshipId) return
+      // Confirm nhẹ trước khi thu hồi (tránh bấm nhầm mất follow kèm theo).
+      setConfirmCancel(true)
+    }
+
+    const confirmCancelRequest = () => {
+      setConfirmCancel(false)
       if (resolvedFriendshipId) handleCancelRequest(resolvedFriendshipId)
     }
 
@@ -476,6 +485,39 @@ const ProfileFriendCard = memo(
             )}
           </div>
         </div>
+
+        {/* Confirm nhẹ trước khi thu hồi lời mời đã gửi */}
+        <Modal
+          open={confirmCancel}
+          onClose={() => setConfirmCancel(false)}
+          title={t.profile?.friends?.actions?.cancelTitle || "Thu hồi lời mời"}
+          className="max-w-sm"
+          fullScreenOnMobile={false}
+          bodyClassName="px-4 sm:px-6 py-0 flex-1 overflow-y-auto"
+          footer={
+            <div className="flex items-center gap-2 w-full">
+              <PillButton
+                variant="secondary"
+                className="flex-1"
+                onClick={() => setConfirmCancel(false)}
+              >
+                {t.profile?.friends?.actions?.keepRequest || "Giữ lại"}
+              </PillButton>
+              <PillButton
+                variant="primary"
+                className="flex-1"
+                onClick={confirmCancelRequest}
+              >
+                {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
+              </PillButton>
+            </div>
+          }
+        >
+          <p className="text-sm text-gray-600">
+            {(t.profile?.friends?.actions?.cancelMessage || "Thu hồi lời mời kết bạn đã gửi tới {name}? Bạn sẽ đồng thời bỏ theo dõi người này.")
+              .replace("{name}", displayName)}
+          </p>
+        </Modal>
       </div>
     )
   },
