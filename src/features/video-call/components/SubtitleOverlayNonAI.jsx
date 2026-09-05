@@ -19,13 +19,13 @@ const LANG_MAP = {
 const LANG_FLAGS = { en: UK, vi: VietNam, zh: China, ja: Japan }
 
 const FONT_SIZES = [
-  { id: "default", label: "Mặc định", className: "text-base sm:text-lg" },
-  { id: "xs", label: "Rất nhỏ", className: "text-sm" },
-  { id: "sm", label: "Nhỏ", className: "text-[15px]" },
-  { id: "md", label: "Trung bình", className: "text-lg" },
-  { id: "lg", label: "Lớn", className: "text-xl" },
-  { id: "xl", label: "Rất lớn", className: "text-2xl" },
-  { id: "2xl", label: "Lớn nhất", className: "text-3xl" },
+  { id: "default", className: "text-base sm:text-lg" },
+  { id: "xs", className: "text-sm" },
+  { id: "sm", className: "text-[15px]" },
+  { id: "md", className: "text-lg" },
+  { id: "lg", className: "text-xl" },
+  { id: "xl", className: "text-2xl" },
+  { id: "2xl", className: "text-3xl" },
 ]
 
 const TextSizeIcon = ({ className = "w-5 h-5" }) => (
@@ -171,8 +171,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                           )}
                         </div>
                         <span>
-                          {t.rooms?.videoCall?.fontSizes?.[size.id] ||
-                            size.label}
+                          {t.rooms?.videoCall?.fontSizes?.[size.id] || size.id}
                         </span>
                       </button>
                     )
