@@ -10,7 +10,13 @@ import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import {
   useKickParticipantMutation,
   useMuteParticipantMutation,
+  useGetRoomCoHostQuery,
+  useAssignRoomCoHostMutation,
+  useUpdateRoomCoHostMutation,
+  useRevokeRoomCoHostMutation,
 } from "@/store/api/roomsApi"
+import CoHostModal from "@/features/co-host/CoHostModal"
+import { normalizeCoHost } from "@/features/co-host/constants"
 
 export const ParticipantVolumeSlider = ({ participant, className = "", isInline = false }) => {
   const { t } = useLanguage()
@@ -142,8 +148,6 @@ export const ParticipantActionPopover = ({ participant, children }) => {
   const [kickParticipant, { isLoading: isKicking }] = useKickParticipantMutation()
   const [muteParticipant, { isLoading: isMuting }] = useMuteParticipantMutation()
 
-  if (participant.isLocal) return <>{children}</>
-
   const parseMetadata = (metadata) => {
     if (!metadata) return {}
     try {
@@ -153,8 +157,28 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     }
   }
 
-  const meta = parseMetadata(participant.metadata)
-  const targetAccountId = meta.accountId || participant.identity
+  const meta = parseMetadata(participant?.metadata)
+  const targetAccountId = meta.accountId || participant?.identity
+
+  // ── Co-host in-live (ticket 01): host phân công / thay thế ngay trong live ──
+  const [coHostModalOpen, setCoHostModalOpen] = useState(false)
+  const { data: liveCoHostData } = useGetRoomCoHostQuery(roomId, {
+    skip: !roomId || !isCurrentHost,
+  })
+  const [assignRoomCoHost, { isLoading: isAssigningCoHost }] =
+    useAssignRoomCoHostMutation()
+  const [updateRoomCoHost, { isLoading: isUpdatingCoHost }] =
+    useUpdateRoomCoHostMutation()
+  const [revokeRoomCoHost, { isLoading: isRevokingCoHost }] =
+    useRevokeRoomCoHostMutation()
+  const [revokeCoHostConfirm, setRevokeCoHostConfirm] = useState(false)
+  const liveCoHost = normalizeCoHost(liveCoHostData)
+  const isTargetCoHost =
+    liveCoHost?.coHostAccountId != null &&
+    targetAccountId != null &&
+    String(liveCoHost.coHostAccountId) === String(targetAccountId)
+
+  if (participant?.isLocal) return <>{children}</>
 
   const handleMuteTrack = async (trackKind) => {
     if (!roomId) return
@@ -291,6 +315,26 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             <UserX size={18} className="text-red-600 shrink-0" />
             <span>{pl.ban || "Xóa & Cấm vào lại"}</span>
           </button>
+
+          <button
+            onClick={() => setCoHostModalOpen(true)}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-lg transition-colors text-left w-full"
+          >
+            <Shield size={18} className="text-amber-600 shrink-0" />
+            <span>
+              {isTargetCoHost ? "Quản lý co-host" : "Phân công làm Co-host"}
+            </span>
+          </button>
+
+          {isTargetCoHost && (
+            <button
+              onClick={() => setRevokeCoHostConfirm(true)}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full"
+            >
+              <UserX size={18} className="text-red-500 shrink-0" />
+              <span>Gỡ co-host</span>
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -319,6 +363,82 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       confirmVariant="destructive"
       isPending={isKicking}
     />
+
+    {/* Revoke trong live cũng cần confirm riêng */}
+    <ConfirmationModal
+      open={revokeCoHostConfirm}
+      onClose={() => setRevokeCoHostConfirm(false)}
+      onConfirm={async () => {
+        try {
+          await revokeRoomCoHost(roomId).unwrap()
+          toast.success("Đã gỡ phân công co-host.")
+          setRevokeCoHostConfirm(false)
+        } catch (err) {
+          toast.error(
+            err?.data?.message || "Không thể gỡ co-host. Vui lòng thử lại.",
+          )
+        }
+      }}
+      title="Xác nhận gỡ co-host"
+      message="Bạn có chắc muốn gỡ phân công co-host này? Hành động này không thể hoàn tác."
+      cancelText="Hủy"
+      confirmText="Xóa"
+      confirmVariant="destructive"
+      isPending={isRevokingCoHost}
+    />
+
+    {coHostModalOpen && (
+      <CoHostModal
+        open={coHostModalOpen}
+        onClose={() => setCoHostModalOpen(false)}
+        title="Phân công Co-host"
+        candidates={[
+          {
+            accountId: Number(targetAccountId),
+            name: participant?.name || meta?.name || String(targetAccountId),
+            email: "",
+            badge:
+              liveCoHost?.coHostAccountId != null &&
+              String(liveCoHost.coHostAccountId) === String(targetAccountId)
+                ? "Co-host"
+                : undefined,
+          },
+        ]}
+        initialAccountId={Number(targetAccountId)}
+        initialPermissions={
+          liveCoHost?.coHostAccountId != null &&
+          String(liveCoHost.coHostAccountId) === String(targetAccountId)
+            ? (liveCoHost.permissions ?? [])
+            : []
+        }
+        confirmLabel="Phân công Co-host"
+        isSaving={isAssigningCoHost || isUpdatingCoHost}
+        onSubmit={async ({ coHostAccountId, permissions }) => {
+          try {
+            const samePerson =
+              liveCoHost?.coHostAccountId != null &&
+              String(liveCoHost.coHostAccountId) === String(coHostAccountId)
+            if (samePerson) {
+              await updateRoomCoHost({ id: roomId, permissions }).unwrap()
+              toast.success("Đã cập nhật quyền co-host.")
+            } else {
+              await assignRoomCoHost({
+                id: roomId,
+                coHostAccountId: Number(coHostAccountId),
+                permissions,
+              }).unwrap()
+              toast.success("Đã phân công co-host.")
+            }
+            setCoHostModalOpen(false)
+          } catch (err) {
+            toast.error(
+              err?.data?.message ||
+                "Không thể phân công co-host. Vui lòng thử lại.",
+            )
+          }
+        }}
+      />
+    )}
   </>)
 }
 

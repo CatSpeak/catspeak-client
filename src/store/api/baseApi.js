@@ -423,6 +423,8 @@ export const baseApi = createApi({
     "VoucherDetail",
     "VoucherStats",
     "VoucherUsages",
+    "CoHost",
+    "ClassCoHost",
   ],
   endpoints: () => ({}),
 })

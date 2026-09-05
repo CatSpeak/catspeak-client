@@ -1301,6 +1301,43 @@ export const coursesApi = baseApi.injectEndpoints({
       },
     }),
 
+    // 14b. Class Co-host foundation (ticket 01)
+    getClassCoHost: builder.query({
+      query: (classId) => `/teacher/classes/${encodePathSegment(classId)}/co-host`,
+      providesTags: (result, error, classId) => [
+        { type: "ClassCoHost", id: String(classId) },
+      ],
+    }),
+    assignClassCoHost: builder.mutation({
+      query: ({ classId, coHostAccountId, permissions }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/co-host`,
+        method: "POST",
+        body: { coHostAccountId, permissions },
+      }),
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "ClassCoHost", id: String(classId) },
+      ],
+    }),
+    updateClassCoHost: builder.mutation({
+      query: ({ classId, permissions }) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/co-host`,
+        method: "PUT",
+        body: { permissions },
+      }),
+      invalidatesTags: (result, error, { classId }) => [
+        { type: "ClassCoHost", id: String(classId) },
+      ],
+    }),
+    revokeClassCoHost: builder.mutation({
+      query: (classId) => ({
+        url: `/teacher/classes/${encodePathSegment(classId)}/co-host`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, classId) => [
+        { type: "ClassCoHost", id: String(classId) },
+      ],
+    }),
+
     // 16. Get Teacher Assignments
     getTeacherAssignments: builder.query({
       query: ({ classId, status, search, onlyUnassigned }) => ({
@@ -2854,6 +2891,11 @@ export const {
   useJoinClassRoomMutation,
   useJoinStudentClassRoomMutation,
   useInviteToClassMutation,
+  useGetClassCoHostQuery,
+  useLazyGetClassCoHostQuery,
+  useAssignClassCoHostMutation,
+  useUpdateClassCoHostMutation,
+  useRevokeClassCoHostMutation,
   useGetCurriculumByClassQuery,
   useGetStudentCurriculumByClassQuery,
   useCreateCurriculumSectionMutation,

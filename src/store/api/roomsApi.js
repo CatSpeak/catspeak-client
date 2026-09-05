@@ -262,6 +262,47 @@ export const roomsApi = baseApi.injectEndpoints({
       invalidatesTags: ["CustomRooms", "Rooms"],
     }),
 
+    // --- Co-host foundation (ticket 01) ---
+    getRoomCoHost: builder.query({
+      query: (id) => `/rooms/${id}/co-host`,
+      providesTags: (result, error, id) => [{ type: "CoHost", id }],
+    }),
+    assignRoomCoHost: builder.mutation({
+      query: ({ id, coHostAccountId, permissions }) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "POST",
+        body: { coHostAccountId, permissions },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+    updateRoomCoHost: builder.mutation({
+      query: ({ id, permissions }) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "PUT",
+        body: { permissions },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+    revokeRoomCoHost: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+
     // --- Host Moderation ---
     // Kick a participant from a room
     kickParticipant: builder.mutation({
@@ -423,6 +464,12 @@ export const {
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,
   useInviteToRoomMutation,
+  // Co-host foundation
+  useGetRoomCoHostQuery,
+  useLazyGetRoomCoHostQuery,
+  useAssignRoomCoHostMutation,
+  useUpdateRoomCoHostMutation,
+  useRevokeRoomCoHostMutation,
   // My Rooms & Bookmarks & Advanced Room Creation
   useGetMyRoomsQuery,
   useLazyGetMyRoomsQuery,
