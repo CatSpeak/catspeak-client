@@ -162,6 +162,25 @@ export const instructorApi = baseApi.injectEndpoints({
       invalidatesTags: ["TeachingUpdate"],
     }),
 
+    updateIdentityDocuments: builder.mutation({
+      query: (data) => {
+        const body = data instanceof FormData ? data : (() => {
+          const fd = new FormData()
+          if (data?.idCardFront instanceof File) fd.append("IdCardFront", data.idCardFront)
+          if (data?.idCardBack instanceof File) fd.append("IdCardBack", data.idCardBack)
+          if (data?.otpCode) fd.append("OtpCode", data.otpCode)
+          return fd
+        })()
+        return {
+          url: "/InstructorProfile/my/identity",
+          method: "PUT",
+          body,
+          formData: true,
+        }
+      },
+      invalidatesTags: ["InstructorProfile"],
+    }),
+
     getHonoredInstructors: builder.query({
       query: (params) => {
         const limit = typeof params === "number" ? params : params?.limit
@@ -184,5 +203,6 @@ export const {
   useGetPendingTeachingUpdateQuery,
   useSubmitTeachingUpdateMutation,
   useCancelTeachingUpdateMutation,
+  useUpdateIdentityDocumentsMutation,
   useGetHonoredInstructorsQuery,
 } = instructorApi

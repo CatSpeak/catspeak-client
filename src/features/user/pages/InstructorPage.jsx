@@ -742,7 +742,9 @@ const InstructorPage = () => {
       return;
     }
 
-    const newErrors = validateForm();
+    const newErrors = (isRequestEdit || isReapplying)
+      ? validateTeachingForm()
+      : validateForm();
     if (Object.keys(newErrors).length > 0) {
       setTimeout(() => {
         const firstErrorKey = Object.keys(newErrors)[0];
@@ -754,8 +756,10 @@ const InstructorPage = () => {
 
     try {
       if (isRequestEdit || isReapplying) {
-        // PUT /my for resubmission — simple RTK Query
-        await updateInstructor(buildPayload()).unwrap();
+        // PUT /my for resubmission — teaching content only. Personal/identity
+        // fields are locked (owned by the account page) and stripped from the
+        // payload; the backend keeps the draft's submitted values. No OTP.
+        await updateInstructor(buildTeachingPayload()).unwrap();
         toast.success(ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!");
         setShowForm(false);
         setAgreed(false);
@@ -817,9 +821,11 @@ const InstructorPage = () => {
     isRequestEdit,
     isReapplying,
     validateForm,
+    validateTeachingForm,
     applyInstructor,
     updateInstructor,
     buildPayload,
+    buildTeachingPayload,
     ins,
     t,
   ]);
@@ -954,9 +960,9 @@ const InstructorPage = () => {
         />
       )}
 
-      {/* Global Approved edit bar — button only, no hint message */}
+      {/* Global Approved edit — button only, no card frame */}
       {showGlobalEditBar && !isEditingApproved && (
-        <div className="flex justify-end gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={handleStartEditApproved}
@@ -1014,7 +1020,8 @@ const InstructorPage = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        {!isApproved && (
+        {/* Personal/identity locked on resubmit (owned by the account page) */}
+        {!isApproved && !isRequestEdit && !isReapplying && (
           <InstructorPersonalInfo
             formData={formData}
             onChange={handleChange}
@@ -1037,7 +1044,7 @@ const InstructorPage = () => {
           errors={errors}
           t={t}
         />
-        {!isApproved && (
+        {!isApproved && !isRequestEdit && !isReapplying && (
           <InstructorIdentity
             formData={formData}
             onEdit={handleEdit}
