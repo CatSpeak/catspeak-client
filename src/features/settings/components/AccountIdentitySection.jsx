@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { toast } from "react-hot-toast"
 import { Upload, Edit2 } from "lucide-react"
-import { useUpdateIdentityDocumentsMutation } from "@/store/api/instructorApi"
-import { useRequestUserProfileOtpMutation } from "@/store/api/userApi"
-import ProfileOtpModal from "./ProfileOtpModal"
 
 const MAX_ID_FILE_BYTES = 5 * 1024 * 1024
 const ACCEPT_ID_IMAGE = "image/jpeg,image/png,image/webp"
@@ -16,36 +13,22 @@ const previewOf = (fileOrUrl) => {
 
 /**
  * CCCD/ID-card block inside the security card (/setting/account).
- * Teacher accounts only. Shares the card-level edit button: boxes are
- * clickable only while the card is editing. Re-upload is OTP-gated
- * (email OTP) and resets admin ID verification on the live profile.
+ * Teacher accounts only. Controlled component: file picks live in the page,
+ * saving goes through the card-level Save button (OTP-gated in the mutation
+ * hook). Boxes are clickable only while the card is editing.
  */
-const AccountIdentitySection = ({ frontUrl, backUrl, email, t, isEditing = false }) => {
+const AccountIdentitySection = ({
+  frontFile,
+  backFile,
+  frontUrl,
+  backUrl,
+  t,
+  isEditing = false,
+  onPickFile,
+}) => {
   const idText = t.profile?.identity || {}
-  const [front, setFront] = useState(frontUrl || null)
-  const [back, setBack] = useState(backUrl || null)
-  const [isOtpOpen, setIsOtpOpen] = useState(false)
 
-  const [updateIdentity, { isLoading: isSaving }] = useUpdateIdentityDocumentsMutation()
-  const [requestOtp, { isLoading: isSendingOtp }] = useRequestUserProfileOtpMutation()
-
-  useEffect(() => {
-    setFront(frontUrl || null)
-  }, [frontUrl])
-  useEffect(() => {
-    setBack(backUrl || null)
-  }, [backUrl])
-  // Card-level cancel exits edit mode → drop unpicked file selections
-  useEffect(() => {
-    if (!isEditing) {
-      setFront(frontUrl || null)
-      setBack(backUrl || null)
-    }
-  }, [isEditing, frontUrl, backUrl])
-
-  const hasNewFile = front instanceof File || back instanceof File
-
-  const pickFile = (setter) => (e) => {
+  const pickFile = (side) => (e) => {
     const file = e.target.files?.[0]
     e.target.value = ""
     if (!file) return
@@ -53,45 +36,11 @@ const AccountIdentitySection = ({ frontUrl, backUrl, email, t, isEditing = false
       toast.error(idText.fileTooLarge || "Ảnh CCCD không được vượt quá 5 MB.")
       return
     }
-    setter(file)
+    onPickFile?.(side, file)
   }
 
-  const handleCancel = () => {
-    setFront(frontUrl || null)
-    setBack(backUrl || null)
-  }
-
-  const handleSave = async () => {
-    if (!hasNewFile || isSaving || isSendingOtp) return
-    try {
-      await requestOtp({}).unwrap()
-      setIsOtpOpen(true)
-    } catch (err) {
-      toast.error(err?.data?.message || "Không thể gửi OTP. Vui lòng thử lại.")
-    }
-  }
-
-  const handleOtpVerify = async (otpValue, { setError }) => {
-    try {
-      const fd = new FormData()
-      if (front instanceof File) fd.append("IdCardFront", front)
-      if (back instanceof File) fd.append("IdCardBack", back)
-      fd.append("OtpCode", otpValue)
-      await updateIdentity(fd).unwrap()
-      toast.success(idText.updateSuccess || "Đã cập nhật ảnh CCCD, chờ admin xác thực lại.")
-      setIsOtpOpen(false)
-    } catch (err) {
-      const msg = err?.data?.message || ""
-      if (msg.toLowerCase().includes("otp")) {
-        setError(idText.otpInvalid || "Mã OTP không hợp lệ hoặc đã hết hạn")
-      } else {
-        setError(msg || "Có lỗi xảy ra, vui lòng thử lại.")
-      }
-    }
-  }
-
-  const renderBox = (label, value, setter, inputId) => {
-    const preview = previewOf(value)
+  const renderBox = (label, file, url, side, inputId) => {
+    const preview = previewOf(file || url)
     return (
       <div className="flex flex-col gap-1 w-full max-w-[220px]">
         <label
@@ -122,7 +71,7 @@ const AccountIdentitySection = ({ frontUrl, backUrl, email, t, isEditing = false
           accept={ACCEPT_ID_IMAGE}
           className="hidden"
           disabled={!isEditing}
-          onChange={pickFile(setter)}
+          onChange={pickFile(side)}
         />
       </div>
     )
@@ -135,44 +84,13 @@ const AccountIdentitySection = ({ frontUrl, backUrl, email, t, isEditing = false
       </label>
 
       <div className="flex flex-wrap gap-4">
-        {renderBox(idText.front || "Mặt trước", front, setFront, "account-id-front")}
-        {renderBox(idText.back || "Mặt sau", back, setBack, "account-id-back")}
+        {renderBox(idText.front || "Mặt trước", frontFile, frontUrl, "front", "account-id-front")}
+        {renderBox(idText.back || "Mặt sau", backFile, backUrl, "back", "account-id-back")}
       </div>
 
       <p className="text-[11px] text-gray-400">
         {idText.hint || "Đổi ảnh CCCD cần xác thực OTP qua email. Ảnh mới cần admin xác thực lại."}
       </p>
-
-      {isEditing && hasNewFile && (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleCancel}
-            className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
-            disabled={isSaving || isSendingOtp}
-          >
-            {t.profile?.personalInfo?.cancel || "Hủy"}
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-1.5 rounded-full bg-cath-red-700 text-white hover:bg-cath-red-800 transition-colors text-sm font-medium disabled:opacity-50"
-            disabled={isSaving || isSendingOtp}
-          >
-            {isSendingOtp ? (t.profile?.personalInfo?.sendingOtp || "Đang gửi OTP...") : (idText.saveImages || "Lưu ảnh CCCD")}
-          </button>
-        </div>
-      )}
-
-      <ProfileOtpModal
-        open={isOtpOpen}
-        onClose={() => setIsOtpOpen(false)}
-        email={email}
-        title={idText.verifyTitle || "Xác nhận đổi ảnh CCCD"}
-        onVerify={handleOtpVerify}
-        isVerifying={isSaving}
-        onResend={() => requestOtp({}).unwrap()}
-        isResending={isSendingOtp}
-        t={t}
-      />
     </div>
   )
 }

@@ -47,20 +47,25 @@ export const userApi = baseApi.injectEndpoints({
         body,
       }),
     }),
-    requestPhoneUpdateOtp: builder.mutation({
-      query: (body) => ({
-        url: "/user-profile/phone/request-otp",
-        method: "POST",
-        body,
-      }),
-    }),
-    updatePhoneNumber: builder.mutation({
-      query: (body) => ({
-        url: "/user-profile/phone",
-        method: "PUT",
-        body,
-      }),
-      invalidatesTags: ["UserProfile"],
+    updateSecurityProfile: builder.mutation({
+      query: (data) => {
+        const body = data instanceof FormData ? data : (() => {
+          const fd = new FormData()
+          if (data?.email) fd.append("Email", data.email)
+          if (data?.phoneNumber) fd.append("PhoneNumber", data.phoneNumber)
+          if (data?.idCardFront instanceof File) fd.append("IdCardFront", data.idCardFront)
+          if (data?.idCardBack instanceof File) fd.append("IdCardBack", data.idCardBack)
+          if (data?.otpCode) fd.append("OtpCode", data.otpCode)
+          return fd
+        })()
+        return {
+          url: "/user-profile/security",
+          method: "PUT",
+          body,
+          formData: true,
+        }
+      },
+      invalidatesTags: ["UserProfile", "User", "PublicProfile", "InstructorProfile"],
     }),
     getCurrentBackground: builder.query({
       query: () => ({
@@ -135,8 +140,7 @@ export const {
   useUpdateUserProfileMutation,
   useChangePasswordMutation,
   useRequestUserProfileOtpMutation,
-  useRequestPhoneUpdateOtpMutation,
-  useUpdatePhoneNumberMutation,
+  useUpdateSecurityProfileMutation,
   useUpdateMeetingAvatarMutation,
   useUpdateAvatarMutation,
   useUpdateCoverMutation,

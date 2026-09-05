@@ -22,9 +22,11 @@ const AccountSettingsForm = ({
   t,
   isTeacherAccount = false,
   showIdentitySection = false,
+  idCardFrontFile = null,
+  idCardBackFile = null,
+  onPickIdFile,
   idCardFrontUrl = null,
   idCardBackUrl = null,
-  userEmail = "",
 }) => {
   const isEditingPersonal = editingField === "personalInfo"
   const isEditingSecurity = editingField === "securityInfo"
@@ -314,11 +316,13 @@ const AccountSettingsForm = ({
         {isTeacherAccount && showIdentitySection && (
         <div className="w-full pt-2 border-t border-border">
           <AccountIdentitySection
+            frontFile={idCardFrontFile}
+            backFile={idCardBackFile}
             frontUrl={idCardFrontUrl}
             backUrl={idCardBackUrl}
-            email={userEmail}
             t={t}
             isEditing={isEditingSecurity}
+            onPickFile={onPickIdFile}
           />
         </div>
         )}
