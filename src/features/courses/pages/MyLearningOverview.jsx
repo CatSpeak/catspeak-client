@@ -118,7 +118,7 @@ const MyLearningOverview = () => {
                   <NextSessionCard
                     key={session.id || index}
                     title={classInfo.title || classInfo.name || lo.defaultClassTitle || "Lớp học"}
-                    language={classInfo.language || "Tiếng Anh"}
+                    language={classInfo.language || ""}
                     date={formattedDate}
                     time={timeDisplay}
                     tags={classInfo.levels || []}

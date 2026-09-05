@@ -1,8 +1,10 @@
 import React from "react"
 import { BookOpen, Video, Globe } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import RenderHTML from "@/shared/components/ui/RenderHTML"
 import CourseTabs from "../../components/CourseTabs"
 import ClassCard from "./ClassCard"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 
 const CourseTab = ({
   courseDetailTabs = [],
@@ -28,6 +30,7 @@ const CourseTab = ({
   ui = {},
   className = "",
 }) => {
+  const { t } = useLanguage()
   return (
     <div className={`flex flex-col gap-6 w-full ${className}`}>
       {/* Tabs Bar */}
@@ -84,10 +87,12 @@ const CourseTab = ({
                   </span>
                 </div>
                 <div className="text-sm sm:text-base font-bold text-gray-900 mt-3 truncate">
-                  {rawCourse.languageName ||
-                    rawCourse.language ||
+                  {getLocalizedLanguageName(
+                    rawCourse.languageName || rawCourse.language,
+                    t,
+                  ) ||
                     scd.defaultLanguage ||
-                    "Tiếng Anh"}
+                    "—"}
                 </div>
               </div>
             </div>

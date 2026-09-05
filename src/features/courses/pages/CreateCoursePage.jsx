@@ -471,7 +471,7 @@ const CreateCoursePage = () => {
                   setSelectedLanguage(val)
                   clearError("selectedLanguage")
                 }}
-                placeholder={cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ"}
+                placeholder={cc.languagePlaceholder || c.languagePlaceholder || "—"}
                 dropdownClassName="w-full"
                 trigger={(isOpen, selectedOption, toggle) => (
                   <button
@@ -482,7 +482,7 @@ const CreateCoursePage = () => {
                     }`}
                   >
                     <span className={selectedLanguage ? "text-gray-900 font-medium" : "text-gray-400 font-normal"}>
-                      {selectedLanguage || (cc.languagePlaceholder || c.languagePlaceholder || "Chọn ngôn ngữ")}
+                      {getLocalizedLanguageName(selectedLanguage, t) || (cc.languagePlaceholder || c.languagePlaceholder || "—")}
                     </span>
                     <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                   </button>
