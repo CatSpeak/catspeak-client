@@ -25,12 +25,16 @@ const AccountInfoPage = () => {
   const isTeacherAccount =
     user?.accountType === "Teacher" || (!user?.accountType && !!profile?.isTeacher)
 
-  const { data: instructorData, error: instructorError } = useGetInstructorProfileQuery(undefined, {
+  const { data: instructorData } = useGetInstructorProfileQuery(undefined, {
     skip: !isTeacherAccount,
   })
   const instructor = instructorData?.data ?? instructorData ?? null
-  // Show the ID section only when an instructor profile actually exists (404 → hidden)
-  const showIdentitySection = isTeacherAccount && instructorError?.status !== 404 && instructorError?.originalStatus !== 404
+  // Show the ID section only on the teacher account with a live Approved
+  // profile (source accounts get a revision row → hidden by design).
+  const instructorStatus = (instructor?.status || instructor?.Status || "").toString().toLowerCase()
+  const isLiveApprovedProfile =
+    !!instructor && !instructor.isRevision && !instructor.IsRevision && instructorStatus === "approved"
+  const showIdentitySection = isTeacherAccount && isLiveApprovedProfile
   const idCardFrontUrl = instructor?.idCardFrontUrl || instructor?.IdCardFrontUrl || null
   const idCardBackUrl = instructor?.idCardBackUrl || instructor?.IdCardBackUrl || null
 
@@ -93,9 +97,6 @@ const AccountInfoPage = () => {
 
       {/* Password — own card */}
       <FluentCard className="flex flex-col w-full p-6 sm:p-8 gap-4 border-border rounded-xl shadow-sm !justify-start">
-        <h2 className="text-xl font-bold text-gray-900">
-          {t.profile?.personalInfo?.passwordTitle || t.profile?.personalInfo?.password || "Mật khẩu"}
-        </h2>
         <ChangePasswordSection t={t} />
       </FluentCard>
 

@@ -318,6 +318,7 @@ const AccountSettingsForm = ({
             backUrl={idCardBackUrl}
             email={userEmail}
             t={t}
+            isEditing={isEditingSecurity}
           />
         </div>
         )}
