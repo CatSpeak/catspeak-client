@@ -202,5 +202,19 @@ export default {
       title: "Hồ sơ Giảng viên đã được phê duyệt",
       body: "Bạn có thể chuyển sang tài khoản Giáo viên ngay bây giờ.",
     },
+    instructor_profile_rejected: {
+      title: "Hồ sơ Giảng viên bị từ chối",
+      body: "Lý do: {reason}. {banUntil}",
+      defaultReason: "Vui lòng vào Cài đặt > Giảng viên để xem chi tiết",
+      canResubmit: "Bạn có thể nộp hồ sơ mới ngay.",
+      bannedPrefix: "Cấm nộp lại đến",
+    },
+    instructor_profile_request_edit: {
+      title: "Hồ sơ cần chỉnh sửa",
+      body: "{editNote} ({requestTypeLabel})",
+      defaultNote: "Vui lòng vào Cài đặt > Giảng viên để xem nội dung cần bổ sung",
+      requestTypeInitial: "Đăng ký mới",
+      requestTypeUpdate: "Cập nhật giảng dạy",
+    },
   },
 }
