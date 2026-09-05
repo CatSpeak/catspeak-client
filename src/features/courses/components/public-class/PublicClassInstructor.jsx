@@ -1,13 +1,13 @@
 import React, { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { BadgeCheck } from "lucide-react"
+import { BadgeCheck, Briefcase } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getSafeMediaUrl } from "../../utils/courseUtils"
 import { parseLanguages, getExperienceBadgeText } from "@/features/landing/utils/instructorUtils"
 
 const PublicClassInstructor = ({ classData }) => {
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const c = t.courses || {}
   const pc = c.publicClass || {}
 
@@ -29,8 +29,8 @@ const PublicClassInstructor = ({ classData }) => {
     "Giảng viên giàu kinh nghiệm huấn luyện giao tiếp phản xạ ngôn ngữ chuẩn quốc tế. Hơn 8 năm kinh nghiệm giảng dạy cho các doanh nghiệp và học viên trên toàn quốc."
   const experienceBadge = useMemo(() => {
     const langs = parseLanguages(teacher.teachLanguages ?? teacher.languagesTeach ?? teacher.languages)
-    return getExperienceBadgeText(langs, t, "vi")
-  }, [teacher.teachLanguages, teacher.languagesTeach, teacher.languages, t])
+    return getExperienceBadgeText(langs, t, language || "vi")
+  }, [teacher.teachLanguages, teacher.languagesTeach, teacher.languages, t, language])
 
   return (
     <div id="instructor" className="scroll-mt-24">
@@ -79,15 +79,20 @@ const PublicClassInstructor = ({ classData }) => {
             <h3 className="font-bold text-slate-900 group-hover:text-cath-red-700 transition-colors leading-tight">
               {teacherName}
             </h3>
-            {teacherTitle && (
-              <p className="text-xs font-semibold text-slate-500 group-hover:text-cath-red-700 transition-colors">
-                {teacherTitle}
-              </p>
-            )}
-            {experienceBadge && (
-              <span className="inline-flex w-fit items-center bg-[#b20a1c]/10 text-[#b20a1c] text-xs font-bold px-2.5 py-1 rounded-full">
-                {experienceBadge}
-              </span>
+            {(teacherTitle || experienceBadge) && (
+              <div className="flex flex-wrap items-center gap-2">
+                {teacherTitle && (
+                  <p className="text-xs font-semibold text-slate-500 group-hover:text-cath-red-700 transition-colors">
+                    {teacherTitle}
+                  </p>
+                )}
+                {experienceBadge && (
+                  <span className="inline-flex w-fit items-center gap-1 bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold px-2.5 py-1 rounded-full">
+                    <Briefcase size={12} />
+                    {experienceBadge}
+                  </span>
+                )}
+              </div>
             )}
             <p className="text-slate-600 leading-relaxed text-justify">
               {teacherBio}
