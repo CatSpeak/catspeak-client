@@ -131,34 +131,26 @@ const InstructorLanguages = ({
             <label className="text-sm font-semibold text-gray-800">
               {ins.yourLevel || "Trình độ của bạn"}
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {formData.languagesTeach.map((item, index) => (
-                <div key={item.language} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-600 w-16 truncate">
-                    {getLocalizedLanguageLabel(t, item.language)}
-                  </span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={50}
-                    step={1}
-                    value={item.yearsExperience ?? 0}
-                    disabled={readOnly}
-                    title={ins.yearsExperience || "Số năm kinh nghiệm"}
-                    placeholder="0"
-                    onChange={(e) => {
-                      if (readOnly) return
-                      let v = parseInt(e.target.value, 10)
-                      if (Number.isNaN(v)) v = 0
-                      v = Math.max(0, Math.min(50, v))
-                      const updated = formData.languagesTeach.map((lang, i) =>
-                        i === index ? { ...lang, yearsExperience: v } : lang
-                      )
-                      onLanguagesChange(updated)
-                    }}
-                    className={`w-16 h-11 px-2 rounded-xl bg-gray-50/50 border text-sm text-gray-700 text-center disabled:opacity-50 ${(errors.languagesTeachExperience || errors.languagesTeach) && (item.yearsExperience === undefined || item.yearsExperience === null) ? "border-red-500" : "border-border"}`}
-                  />
-                    <div className="flex-1 min-w-0">
+            <div className="grid grid-cols-1 gap-3">
+              {formData.languagesTeach.map((item, index) => {
+                const updateYears = (v) => {
+                  if (readOnly) return
+                  let n = parseInt(v, 10)
+                  if (Number.isNaN(n)) n = 0
+                  n = Math.max(0, Math.min(50, n))
+                  const updated = formData.languagesTeach.map((lang, i) =>
+                    i === index ? { ...lang, yearsExperience: n } : lang
+                  )
+                  onLanguagesChange(updated)
+                }
+                return (
+                <div key={item.language} className="flex flex-col gap-2 rounded-xl border border-border bg-white p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-gray-800 truncate">
+                      {getLocalizedLanguageLabel(t, item.language)}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
                       <Dropdown
                         options={(LANGUAGE_LEVELS[item.language] || []).map((code) => ({
                           value: code,
@@ -194,8 +186,46 @@ const InstructorLanguages = ({
                         </p>
                       )}
                     </div>
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <label className="text-sm font-medium text-gray-600">
+                      {ins.yearsExperience || "Số năm kinh nghiệm"}
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={readOnly}
+                        onClick={() => updateYears((item.yearsExperience ?? 0) - 1)}
+                        aria-label="Giảm năm kinh nghiệm"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-gray-50/50 text-lg font-bold text-gray-600 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+                      >
+                        −
+                      </button>
+                      <input
+                        type="number"
+                        min={0}
+                        max={50}
+                        step={1}
+                        value={item.yearsExperience ?? 0}
+                        disabled={readOnly}
+                        title={ins.yearsExperience || "Số năm kinh nghiệm"}
+                        placeholder="0"
+                        onChange={(e) => updateYears(e.target.value)}
+                        className={`w-16 h-9 px-2 rounded-xl bg-gray-50/50 border text-sm text-gray-700 text-center disabled:opacity-50 ${(errors.languagesTeachExperience || errors.languagesTeach) && (item.yearsExperience === undefined || item.yearsExperience === null) ? "border-red-500" : "border-border"}`}
+                      />
+                      <button
+                        type="button"
+                        disabled={readOnly}
+                        onClick={() => updateYears((item.yearsExperience ?? 0) + 1)}
+                        aria-label="Tăng năm kinh nghiệm"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-gray-50/50 text-lg font-bold text-gray-600 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
-                ))}
+                  </div>
+                )
+              })}
               </div>
             </div>
           )}

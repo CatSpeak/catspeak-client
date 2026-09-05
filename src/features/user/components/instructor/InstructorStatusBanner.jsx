@@ -46,6 +46,8 @@ const InstructorStatusBanner = ({
   t,
   onReapply,
   isReapplying,
+  onDismiss,
+  dismissLabel,
 }) => {
   const { formatDate } = useTimezone();
   const ins = t.profile?.instructor || {};
@@ -70,8 +72,19 @@ const InstructorStatusBanner = ({
 
   return (
     <div
-      className={`rounded-xl border ${config.borderColor} ${config.bgColor} p-5`}
+      className={`relative rounded-xl border ${config.borderColor} ${config.bgColor} p-5`}
     >
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label={dismissLabel || "Đóng"}
+          title={dismissLabel || "Đóng"}
+          className="absolute top-3 right-3 inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold text-gray-400 hover:bg-white/70 hover:text-gray-600 transition cursor-pointer"
+        >
+          ✕
+        </button>
+      )}
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <Icon className={`w-5 h-5 ${config.iconColor} flex-shrink-0`} />

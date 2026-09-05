@@ -3,6 +3,7 @@ import { parsePhoneData } from "@/shared/constants/countriesOptions"
 
 export const useProfileState = (profileData) => {
   const [formData, setFormData] = useState({
+    fullName: "",
     username: "",
     nickname: "",
     email: "",
@@ -26,6 +27,7 @@ export const useProfileState = (profileData) => {
     if (profileData) {
       const { phonePrefix, phoneNumber } = parsePhoneData(profileData.phoneNumber)
       setFormData({
+        fullName: profileData.fullName || "",
         username: profileData.username || "",
         nickname: profileData.nickname || "",
         email: profileData.email || "",
@@ -55,6 +57,7 @@ export const useProfileState = (profileData) => {
       const { phonePrefix, phoneNumber } = parsePhoneData(profileData.phoneNumber)
       setFormData((prev) => ({
         ...prev,
+        fullName: profileData.fullName || "",
         username: profileData.username || "",
         nickname: profileData.nickname || "",
         email: profileData.email || "",
