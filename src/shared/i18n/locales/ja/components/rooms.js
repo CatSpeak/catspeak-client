@@ -497,6 +497,16 @@ export default {
     subtitleWaiting: "字幕を待っています...",
     speechWaiting: "音声を待っています...",
     displayLanguage: "表示言語",
+    fontSize: "文字サイズ",
+    fontSizes: {
+      default: "デフォルト",
+      xs: "極小",
+      sm: "小",
+      md: "中",
+      lg: "大",
+      xl: "特大",
+      "2xl": "最大",
+    },
     subtitleLanguages: {
       en: "英語",
       vi: "ベトナム語",

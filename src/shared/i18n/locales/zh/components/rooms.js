@@ -489,6 +489,16 @@ export default {
     subtitleWaiting: "等待字幕...",
     speechWaiting: "等待语音...",
     displayLanguage: "显示语言",
+    fontSize: "字号大小",
+    fontSizes: {
+      default: "默认",
+      xs: "极小",
+      sm: "小",
+      md: "中",
+      lg: "大",
+      xl: "特大",
+      "2xl": "最大",
+    },
     subtitleLanguages: {
       en: "英语",
       vi: "越南语",
