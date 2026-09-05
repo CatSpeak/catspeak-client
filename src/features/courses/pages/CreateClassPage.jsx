@@ -855,7 +855,7 @@ const CreateClassPage = () => {
                     clearError("selectedLanguage")
                   }}
                   disabled={isRecoverMode || !!initialCourseId || !!courseId}
-                  placeholder={c.languagePlaceholder || "Eg. English, Chinese..."}
+                  placeholder={c.languagePlaceholder || cc.languagePlaceholder || "—"}
                   dropdownClassName="w-full"
                   trigger={(isOpen, selectedOption, toggle) => (
                     <button
@@ -867,7 +867,7 @@ const CreateClassPage = () => {
                       }`}
                     >
                       <span className={selectedLanguage ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
-                        {selectedOption?.label || (selectedLanguage ? getLocalizedLanguageName(selectedLanguage, t) : (c.languagePlaceholder || "Eg. English, Chinese..."))}
+                        {selectedOption?.label || (selectedLanguage ? getLocalizedLanguageName(selectedLanguage, t) : (c.languagePlaceholder || cc.languagePlaceholder || "—"))}
                       </span>
                       <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                     </button>

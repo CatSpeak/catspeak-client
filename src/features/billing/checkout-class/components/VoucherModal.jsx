@@ -10,6 +10,7 @@ const VoucherModal = ({
   voucherData,
   selectedVouchers,
   onToggleVoucher,
+  orderAmount,
   t
 }) => {
   const tc = t.billing.checkoutClass
@@ -66,11 +67,11 @@ const VoucherModal = ({
         </div>
       ) : (
         <>
-          <VoucherCategoryList title={tc.categoryValid} vouchers={validVouchers} category="valid" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
-          <VoucherCategoryList title={tc.categoryInvalidClass} vouchers={invalidForClass} category="invalid_class" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
-          <VoucherCategoryList title={tc.categoryIneligible} vouchers={ineligible} category="ineligible" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
-          <VoucherCategoryList title={tc.categoryExpired} vouchers={expired} category="expired" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
-          <VoucherCategoryList title={tc.categoryExhausted} vouchers={outOfUses} category="out_of_uses" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} t={t} />
+          <VoucherCategoryList title={tc.categoryValid} vouchers={validVouchers} category="valid" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} orderAmount={orderAmount} t={t} />
+          <VoucherCategoryList title={tc.categoryInvalidClass} vouchers={invalidForClass} category="invalid_class" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} orderAmount={orderAmount} t={t} />
+          <VoucherCategoryList title={tc.categoryIneligible} vouchers={ineligible} category="ineligible" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} orderAmount={orderAmount} t={t} />
+          <VoucherCategoryList title={tc.categoryExpired} vouchers={expired} category="expired" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} orderAmount={orderAmount} t={t} />
+          <VoucherCategoryList title={tc.categoryExhausted} vouchers={outOfUses} category="out_of_uses" selectedVouchers={selectedVouchers} onToggleVoucher={onToggleVoucher} orderAmount={orderAmount} t={t} />
         </>
       )}
     </Modal>

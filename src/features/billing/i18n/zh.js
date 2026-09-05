@@ -165,6 +165,7 @@ export default {
       paymentSuccess: "支付成功！",
       paymentError: "支付过程中发生错误。",
       voucherUnavailable: "优惠码 {{code}} 已不可用，已自动从订单中移除",
+      redirecting: "正在跳转到支付页面...",
 
       // ClassInfoSection
       classInfo: "班级信息",
@@ -230,6 +231,10 @@ export default {
       // Ineligible reason patterns
       reasonMinLearners: "订单中至少需要 {{count}} 名学员",
       reasonMinOrder: "最低订单金额 {{minAmount}}（小计：{{currentAmount}}）",
+      reasonExpired: "该优惠码已过期",
+      reasonExhausted: "该优惠码已用完",
+      reasonPerUserLimit: "您已用完该优惠码的可用次数",
+      reasonNewUserOnly: "仅限新用户使用",
 
       // VoucherModal
       myOffers: "我的优惠",
@@ -250,6 +255,12 @@ export default {
       COMMON_EXTERNAL_SERVICE_ERROR: "发生外部服务错误，请稍后重试。",
       COMMON_BAD_REQUEST: "无效请求，请检查输入。",
       COMMON_CONFLICT: "发生冲突，请重试。",
+      COMMON_VALIDATION_FAILED: "输入无效，请检查内容。",
+      COMMON_RESOURCE_NOT_FOUND: "未找到请求的资源。",
+      COMMON_UNAUTHORIZED: "您尚未登录，请重新登录。",
+      COMMON_FORBIDDEN: "您没有权限执行此操作。",
+      COMMON_RATE_LIMIT_EXCEEDED: "您的操作过于频繁，请稍后重试。",
+      COMMON_CONFIGURATION_ERROR: "服务暂时不可用，请稍后重试。",
       PAYMENT_PLAN_NOT_FOUND: "所选的订阅方案已不可用。",
       PAYMENT_CLASS_NOT_FOUND: "未找到该班级，或该班级已不可用。",
       PAYMENT_LEARNER_NOT_FOUND: "未找到该邮箱对应的 CatSpeak 账号。",

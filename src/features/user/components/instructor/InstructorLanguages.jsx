@@ -3,6 +3,7 @@ import { ChevronDown, X } from "lucide-react"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import { getLocalizedLanguageName } from "@/features/courses/data/courseFormOptions"
 
 const LANGUAGE_LEVELS = {
   "English": ["B2", "C1", "C2"],
@@ -12,7 +13,7 @@ const LANGUAGE_LEVELS = {
 const LANGUAGE_OPTIONS = Object.keys(LANGUAGE_LEVELS)
 
 const getLocalizedLanguageLabel = (t, langKey) =>
-  t?.courses?.student?.languages?.[langKey] || langKey || ""
+  getLocalizedLanguageName(langKey, t) || langKey || ""
 
 const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, placeholder = "Select languages...", t }) => {
   const [isOpen, setIsOpen] = useState(false)

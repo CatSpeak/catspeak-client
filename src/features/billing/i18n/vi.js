@@ -165,6 +165,7 @@ export default {
       paymentSuccess: "Thanh toán thành công!",
       paymentError: "Đã xảy ra lỗi khi thanh toán.",
       voucherUnavailable: "Mã {{code}} không còn khả dụng, đã tự động gỡ khỏi đơn hàng",
+      redirecting: "Đang chuyển hướng đến trang thanh toán...",
 
       // ClassInfoSection
       classInfo: "Thông tin lớp học",
@@ -230,6 +231,10 @@ export default {
       // Ineligible reason patterns
       reasonMinLearners: "Yêu cầu tối thiểu {{count}} người học trong đơn hàng",
       reasonMinOrder: "Đơn hàng tối thiểu từ {{minAmount}} (Tạm tính: {{currentAmount}})",
+      reasonExpired: "Mã này đã hết hạn",
+      reasonExhausted: "Mã này đã hết lượt sử dụng",
+      reasonPerUserLimit: "Bạn đã dùng hết số lượt cho phép của mã này",
+      reasonNewUserOnly: "Chỉ dành cho người dùng mới",
 
       // VoucherModal
       myOffers: "Ưu đãi của tôi",
@@ -250,6 +255,12 @@ export default {
       COMMON_EXTERNAL_SERVICE_ERROR: "Đã xảy ra lỗi dịch vụ bên ngoài. Vui lòng thử lại sau.",
       COMMON_BAD_REQUEST: "Yêu cầu không hợp lệ. Vui lòng kiểm tra thông tin.",
       COMMON_CONFLICT: "Đã xảy ra xung đột. Vui lòng thử lại.",
+      COMMON_VALIDATION_FAILED: "Thông tin nhập không hợp lệ. Vui lòng kiểm tra lại.",
+      COMMON_RESOURCE_NOT_FOUND: "Không tìm thấy tài nguyên yêu cầu.",
+      COMMON_UNAUTHORIZED: "Bạn chưa đăng nhập. Vui lòng đăng nhập lại.",
+      COMMON_FORBIDDEN: "Bạn không có quyền thực hiện thao tác này.",
+      COMMON_RATE_LIMIT_EXCEEDED: "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+      COMMON_CONFIGURATION_ERROR: "Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.",
       PAYMENT_PLAN_NOT_FOUND: "Gói đăng ký bạn chọn không còn khả dụng.",
       PAYMENT_CLASS_NOT_FOUND: "Không tìm thấy lớp học hoặc lớp không còn khả dụng.",
       PAYMENT_LEARNER_NOT_FOUND: "Không tìm thấy tài khoản CatSpeak cho email này.",
