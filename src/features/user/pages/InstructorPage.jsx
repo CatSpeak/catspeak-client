@@ -276,6 +276,35 @@ const InstructorPage = () => {
   // Legacy per-card edit disabled — Approved now uses global Edit-all bar
   const canSectionEdit = false;
 
+  // Approved banner shows only on first view — dismiss persists per profile in localStorage
+  const approvedBannerKey = useMemo(() => {
+    const id =
+      rawApplication?.profileId ||
+      rawApplication?.ProfileId ||
+      rawApplication?.accountId ||
+      rawApplication?.AccountId ||
+      "global";
+    return `instructor_approved_seen_${id}`;
+  }, [rawApplication]);
+  const [approvedBannerHidden, setApprovedBannerHidden] = useState(false);
+  useEffect(() => {
+    try {
+      setApprovedBannerHidden(localStorage.getItem(approvedBannerKey) === "1");
+    } catch {
+      setApprovedBannerHidden(false);
+    }
+  }, [approvedBannerKey]);
+  const handleDismissApprovedBanner = useCallback(() => {
+    try {
+      localStorage.setItem(approvedBannerKey, "1");
+    } catch {
+      // ignore storage errors (private mode, etc.)
+    }
+    setApprovedBannerHidden(true);
+  }, [approvedBannerKey]);
+  const showApprovedBanner =
+    applicationStatus === "Approved" ? !approvedBannerHidden : true;
+
   // Handlers for section editing "Thông tin của bạn"
   const handleStartEditPersonalInfo = useCallback(() => {
     personalInfoBackupRef.current = {
@@ -901,8 +930,9 @@ const InstructorPage = () => {
         </div>
       )}
 
-      {/* Status Banner — shown when an application exists */}
-      {applicationStatus && (
+      {/* Status Banner — shown when an application exists.
+          Approved shows only on first view (localStorage dismiss). */}
+      {applicationStatus && (applicationStatus !== "Approved" || showApprovedBanner) && (
         <InstructorStatusBanner
           status={applicationStatus}
           rejectReason={
@@ -916,20 +946,21 @@ const InstructorPage = () => {
           t={t}
           onReapply={() => setIsReapplying(true)}
           isReapplying={isReapplying}
+          onDismiss={
+            applicationStatus === "Approved"
+              ? handleDismissApprovedBanner
+              : undefined
+          }
         />
       )}
 
-      {/* Global Approved edit bar — outside cards (spec Q13) */}
+      {/* Global Approved edit bar — button only, no hint message */}
       {showGlobalEditBar && !isEditingApproved && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
-          <p className="text-sm text-emerald-800">
-            {ins.approvedEditHint ||
-              "Hồ sơ đã được duyệt. Chỉnh sửa nội dung giảng dạy — hồ sơ hiện tại vẫn hoạt động bình thường trong lúc chờ duyệt."}
-          </p>
+        <div className="flex justify-end gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
           <button
             type="button"
             onClick={handleStartEditApproved}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition-colors shadow-sm cursor-pointer shrink-0"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition-colors shadow-sm cursor-pointer shrink-0"
           >
             <Pencil size={15} />
             <span>{ins.editInfo || "Chỉnh sửa"}</span>
@@ -943,12 +974,12 @@ const InstructorPage = () => {
             {ins.approvedEditingHint ||
               "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt, hoặc Hủy để hoàn tác."}
           </p>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
             <button
               type="button"
               onClick={handleCancelEditApproved}
               disabled={isSavingApproved}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50 w-full sm:w-auto"
             >
               {ins.cancel || "Hủy"}
             </button>
@@ -956,7 +987,7 @@ const InstructorPage = () => {
               type="button"
               onClick={handleSaveApproved}
               disabled={isSavingApproved || isSubmitting || isCancellingTeaching}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition cursor-pointer shadow-sm disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition cursor-pointer shadow-sm disabled:opacity-50 w-full sm:w-auto"
             >
               {(isSavingApproved || isSubmitting) && (
                 <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -980,23 +1011,6 @@ const InstructorPage = () => {
           isCancelling={isCancellingTeaching}
           t={t}
         />
-      )}
-
-      {/* Personal data lives in account settings for Approved teachers */}
-      {isApproved && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm text-slate-700">
-            {ins.personalMovedHint ||
-              "Thông tin cá nhân (họ tên, liên hệ, địa chỉ, CCCD) đã chuyển sang Cài đặt tài khoản."}
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate("../account")}
-            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-lg transition cursor-pointer shrink-0"
-          >
-            {ins.goToAccount || "Sang Cài đặt tài khoản"}
-          </button>
-        </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">

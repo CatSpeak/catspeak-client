@@ -73,6 +73,22 @@ const AccountSettingsForm = ({
           )}
         </div>
 
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-gray-800">
+            {t.profile?.personalInfo?.fullName || "Họ tên"}
+          </label>
+          <TextInput
+            name="fullName"
+            value={formData.fullName || ""}
+            onChange={onChange}
+            disabled={!isEditingPersonal || isUpdating}
+            placeholder={t.profile?.personalInfo?.enterFullName || "Nhập họ tên..."}
+            error={errors?.fullName}
+            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.fullName ? "border-red-500" : "border-border"}`}
+            containerClassName="!gap-0"
+          />
+        </div>
+
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
@@ -110,7 +126,7 @@ const AccountSettingsForm = ({
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.country || "Quốc gia"}
+              {t.profile?.personalInfo?.country || "Quốc tịch"}
             </label>
           <Dropdown
             options={countryOptions}
@@ -213,18 +229,6 @@ const AccountSettingsForm = ({
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.accountType || "Loại tài khoản"}
-            </label>
-            <TextInput
-              name="accountType"
-              value={formData.accountType || "User"}
-              disabled={true}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 border-border text-gray-500 cursor-not-allowed`}
-              containerClassName="!gap-0"
-            />
-          </div>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
               {t.profile?.personalInfo?.email || "Email"}
