@@ -53,7 +53,9 @@ const MyLearningOverview = () => {
 
     return classes.filter(cls => {
       const status = (cls.status || "").toUpperCase()
-      return status !== "FINISHED" && status !== "ARCHIVED"
+      // ARCHIVED is read-only but stays visible to enrolled students (per spec);
+      // only FINISHED is hidden from this tab (shown in the completed tab instead).
+      return status !== "FINISHED"
     })
   }, [joinedRes])
 
