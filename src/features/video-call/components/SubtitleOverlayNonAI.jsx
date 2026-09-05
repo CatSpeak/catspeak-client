@@ -170,7 +170,10 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                             <Check className="w-4 h-4 text-[#d40018]" />
                           )}
                         </div>
-                        <span>{size.label}</span>
+                        <span>
+                          {t.rooms?.videoCall?.fontSizes?.[size.id] ||
+                            size.label}
+                        </span>
                       </button>
                     )
                   })}

@@ -526,6 +526,16 @@ export default {
     subtitleWaiting: "Waiting for subtitles...",
     speechWaiting: "Waiting for speech...",
     displayLanguage: "Display language",
+    fontSize: "Font size",
+    fontSizes: {
+      default: "Default",
+      xs: "Very small",
+      sm: "Small",
+      md: "Medium",
+      lg: "Large",
+      xl: "Extra large",
+      "2xl": "Largest",
+    },
     subtitleLanguages: {
       en: "English",
       vi: "Vietnamese",
