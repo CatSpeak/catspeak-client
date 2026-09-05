@@ -34,6 +34,9 @@ const ProfileFriendsTab = ({
     fetchingRecs,
     bottomSentinelRef,
     followingIdSet,
+    sentRequestIds,
+    markRequestSent,
+    unmarkRequestSent,
   } = useProfileFriends({
     targetAccountId,
     isOwnProfile,
@@ -129,18 +132,24 @@ const ProfileFriendsTab = ({
         ) : (
           <>
             <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-              {list.map((user) => {
-                const accountId = user.accountId ?? user.id ?? user.userId
+              {list.map((user, index) => {
+                const accountId =
+                  user.accountId ?? user.id ?? user.userId ?? user.friendshipId
                 const isFollowing =
                   accountId != null && followingIdSet?.has(Number(accountId))
+                const isRequestSent =
+                  accountId != null && sentRequestIds?.has(Number(accountId))
                 return (
                   <ProfileFriendCard
-                    key={user.accountId || user.friendshipId}
+                    key={accountId ?? `row-${index}`}
                     user={user}
                     activeSubTab={activeSubTab}
                     isOwnProfile={isOwnProfile}
                     currentUserId={currentUserId}
                     isFollowing={isFollowing}
+                    isRequestSent={isRequestSent}
+                    onRequestSent={markRequestSent}
+                    onRequestFailed={unmarkRequestSent}
                     onNavigate={navigateToProfile}
                   />
                 )

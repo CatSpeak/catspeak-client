@@ -30,6 +30,10 @@ export const useProfileFriends = ({
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
   const [recPage, setRecPage] = useState(1)
   const bottomSentinelRef = useRef(null)
+  // accountIds mà viewer vừa gửi yêu cầu kết bạn trong session này.
+  // Sống ở parent để không mất khi list refetch/remount card (RTK invalidates Recommendation).
+  // Reload persistence do backend đảm nhiệm (recommendations exclude outgoing pending).
+  const [sentRequestIds, setSentRequestIds] = useState(() => new Set())
 
   // Reset pagination on tab/search change
   useEffect(() => {
@@ -254,6 +258,19 @@ export const useProfileFriends = ({
     fetchingRecs,
     bottomSentinelRef,
     followingIdSet,
+    sentRequestIds,
+    markRequestSent: (accountId) => {
+      if (accountId == null) return
+      setSentRequestIds((prev) => new Set(prev).add(Number(accountId)))
+    },
+    unmarkRequestSent: (accountId) => {
+      if (accountId == null) return
+      setSentRequestIds((prev) => {
+        const next = new Set(prev)
+        next.delete(Number(accountId))
+        return next
+      })
+    },
   }
 }
 
