@@ -7,7 +7,7 @@ import { DatePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { ChevronDown } from "lucide-react"
 import { countryOptions, phonePrefixes } from "@/shared/constants/countriesOptions"
-import ChangePasswordSection from "./ChangePasswordSection"
+import AccountIdentitySection from "./AccountIdentitySection"
 
 const AccountSettingsForm = ({
   formData,
@@ -20,6 +20,11 @@ const AccountSettingsForm = ({
   onCountryChange,
   errors,
   t,
+  isTeacherAccount = false,
+  showIdentitySection = false,
+  idCardFrontUrl = null,
+  idCardBackUrl = null,
+  userEmail = "",
 }) => {
   const isEditingPersonal = editingField === "personalInfo"
   const isEditingSecurity = editingField === "securityInfo"
@@ -73,6 +78,7 @@ const AccountSettingsForm = ({
           )}
         </div>
 
+        {isTeacherAccount && (
         <div className="flex flex-col gap-2">
           <label className="text-sm font-semibold text-gray-800">
             {t.profile?.personalInfo?.fullName || "Họ tên"}
@@ -88,6 +94,7 @@ const AccountSettingsForm = ({
             containerClassName="!gap-0"
           />
         </div>
+        )}
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
@@ -304,9 +311,16 @@ const AccountSettingsForm = ({
           </div>
         </div>
 
-        <div className="w-full p-6 border border-border rounded-xl mt-2">
-          <ChangePasswordSection t={t} />
+        {isTeacherAccount && showIdentitySection && (
+        <div className="w-full pt-2 border-t border-border">
+          <AccountIdentitySection
+            frontUrl={idCardFrontUrl}
+            backUrl={idCardBackUrl}
+            email={userEmail}
+            t={t}
+          />
         </div>
+        )}
         </div>
       </FluentCard>
     </div>
