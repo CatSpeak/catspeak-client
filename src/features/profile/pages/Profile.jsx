@@ -9,9 +9,7 @@ import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPublicProfileQuery } from "@/store/api/userApi"
 import {
-  useGetFriendsQuery,
-  useGetFollowersQuery,
-  useGetPendingFriendRequestsQuery,
+  useGetFriendshipCountsQuery,
 } from "../../../store/api/social/friendshipApi"
 
 import SocialProfileHeader from "../components/SocialProfileHeader"
@@ -55,27 +53,20 @@ const Profile = () => {
 
   const profile = publicProfileResponse?.data ?? publicProfileResponse ?? null
 
-  // Fetch Friendship Data
-  const { data: friendsResponse } = useGetFriendsQuery(targetAccountId, {
-    skip: !targetAccountId,
+  // Lightweight counts for header badges. Lists are lazy-loaded inside ProfileFriendsTab.
+  // No polling; refetch on focus + after mutations via invalidation.
+  const { data: countsResponse } = useGetFriendshipCountsQuery(undefined, {
+    skip: !isOwnProfile,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
   })
-  const { data: followersResponse } = useGetFollowersQuery(targetAccountId, {
-    skip: !targetAccountId,
-  })
-  const { data: pendingResponse } = useGetPendingFriendRequestsQuery(
-    undefined,
-    { skip: !isOwnProfile, pollingInterval: 4000 },
-  )
 
-  const friendsCount = Array.isArray(friendsResponse)
-    ? friendsResponse.length
-    : friendsResponse?.data?.length || 0
-  const followersCount = Array.isArray(followersResponse)
-    ? followersResponse.length
-    : followersResponse?.data?.length || 0
-  const pendingCount = Array.isArray(pendingResponse)
-    ? pendingResponse.length
-    : pendingResponse?.data?.length || 0
+  const counts = countsResponse?.data ?? countsResponse ?? null
+  const friendsCount = counts?.friends ?? counts?.Friends ?? 0
+  const followersCount = counts?.followers ?? counts?.Followers ?? 0
+  const pendingCount =
+    (counts?.pendingIncoming ?? counts?.PendingIncoming ?? 0) +
+    (counts?.pendingOutgoing ?? counts?.PendingOutgoing ?? 0)
 
   const [searchParams] = useSearchParams()
   const currentToken = searchParams.get("sharedMaterialToken")

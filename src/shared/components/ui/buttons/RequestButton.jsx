@@ -53,7 +53,8 @@ const RequestButton = ({
   const { data: queriedStatusResponse, isLoading: isQueryLoading } =
     useGetConnectionStatusQuery(targetId, {
       skip: shouldSkipQuery,
-      pollingInterval: 4000,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     })
 
   // Fetch incoming pending requests of current user to distinguish incoming vs outgoing

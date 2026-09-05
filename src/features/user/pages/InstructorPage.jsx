@@ -440,10 +440,26 @@ const InstructorPage = () => {
       if (!effectiveCanEdit) return;
       const file = e.target.files?.[0];
       if (!file) return;
+      // CCCD images: 5MB max, jpg/png/webp only (mirrors backend rule)
+      const ID_MAX_MB = 5;
+      const ID_TYPES = ["image/jpeg", "image/png", "image/webp"];
+      if (!ID_TYPES.includes(file.type) || file.size > ID_MAX_MB * 1024 * 1024) {
+        const actualMb = (file.size / 1024 / 1024).toFixed(1);
+        setErrors((prev) => ({
+          ...prev,
+          [fieldName]:
+            ins.idSizeLimit
+              ?.replace("{max}", ID_MAX_MB)
+              ?.replace("{actual}", actualMb) ||
+            `Ảnh CCCD phải là JPG/PNG/WebP và nhỏ hơn ${ID_MAX_MB}MB (hiện tại ${actualMb}MB).`,
+        }));
+        e.target.value = "";
+        return;
+      }
       setFormData((prev) => ({ ...prev, [fieldName]: file }));
       clearError(fieldName);
     },
-    [effectiveCanEdit],
+    [effectiveCanEdit, ins],
   );
 
   const handleAddCredential = useCallback(() => {

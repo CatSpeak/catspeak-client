@@ -26,7 +26,8 @@ const SocialProfileHeader = ({
     targetAccountId,
     {
       skip: isOwnProfile || !targetAccountId,
-      pollingInterval: 3000,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     },
   )
   const status =
