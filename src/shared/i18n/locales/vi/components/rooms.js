@@ -504,6 +504,16 @@ export default {
     subtitleWaiting: "Đang đợi phụ đề...",
     speechWaiting: "Đang đợi giọng nói...",
     displayLanguage: "Ngôn ngữ hiển thị",
+    fontSize: "Cỡ chữ",
+    fontSizes: {
+      default: "Mặc định",
+      xs: "Rất nhỏ",
+      sm: "Nhỏ",
+      md: "Trung bình",
+      lg: "Lớn",
+      xl: "Rất lớn",
+      "2xl": "Lớn nhất",
+    },
     subtitleLanguages: {
       en: "Tiếng Anh",
       vi: "Tiếng Việt",
