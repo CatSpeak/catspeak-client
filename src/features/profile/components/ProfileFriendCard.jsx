@@ -31,6 +31,9 @@ const ProfileFriendCard = memo(
     isOwnProfile,
     currentUserId,
     isFollowing = false,
+    isRequestSent = false,
+    onRequestSent,
+    onRequestFailed,
     onNavigate,
   }) => {
     const { t } = useLanguage()
@@ -48,21 +51,35 @@ const ProfileFriendCard = memo(
     } = useFriendActions()
 
     const handleAddFriend = async (close) => {
-      if (isSendingRequest || requestSent) {
+      const accountId = user.accountId ?? user.id ?? user.userId
+      if (isSendingRequest || requestSent || isRequestSent) {
         if (close) close()
         return
       }
+      if (!accountId) {
+        if (close) close()
+        toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
+        return
+      }
       if (close) close()
+      // Optimistic: cập nhật nút ngay lập tức, giữ qua refetch nhờ parent Set.
+      setRequestSent(true)
+      onRequestSent?.(accountId)
       try {
-        await sendFriendRequest(user.accountId).unwrap()
-        setRequestSent(true)
+        await sendFriendRequest(accountId).unwrap()
         toast.success(
           t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
         )
       } catch {
+        // Rollback khi gửi thất bại (vd. đã tồn tại request) để nút không kẹt.
+        setRequestSent(false)
+        onRequestFailed?.(accountId)
         toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
       }
     }
+
+    // Đã gửi = local optimistic hoặc parent Set (sống qua refetch/remount).
+    const sent = requestSent || isRequestSent
 
     const isTeacher = isUserTeacher(user)
     const roleLabel = isTeacher
@@ -92,7 +109,7 @@ const ProfileFriendCard = memo(
           <MenuItem
             icon={<UserPlus />}
             label={
-              requestSent
+              sent
                 ? t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"
                 : t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"
             }
@@ -247,19 +264,25 @@ const ProfileFriendCard = memo(
           }
           rightContent={
             <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-              <Popover
-                placement="bottom-right"
-                trigger={
-                  <IconButton
-                    title={t.profile?.friends?.options || "Tùy chọn"}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <MoreHorizontal />
-                  </IconButton>
-                }
-                content={renderMobileMenu}
-              />
+              {activeSubTab === "find" && sent && !isSelf ? (
+                <PillButton variant="secondary" disabled className="!h-8 !px-3 !text-xs">
+                  {t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"}
+                </PillButton>
+              ) : (
+                <Popover
+                  placement="bottom-right"
+                  trigger={
+                    <IconButton
+                      title={t.profile?.friends?.options || "Tùy chọn"}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      <MoreHorizontal />
+                    </IconButton>
+                  }
+                  content={renderMobileMenu}
+                />
+              )}
             </div>
           }
         >
@@ -321,13 +344,13 @@ const ProfileFriendCard = memo(
             {/* Find Friends / Recommendations */}
             {activeSubTab === "find" && !isSelf && (
               <PillButton
-                variant={requestSent ? "secondary" : "primary"}
+                variant={sent ? "secondary" : "primary"}
                 className="w-full"
                 onClick={() => handleAddFriend()}
                 loading={isSendingRequest}
-                disabled={isSendingRequest || requestSent}
+                disabled={isSendingRequest || sent}
               >
-                {requestSent
+                {sent
                   ? t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"
                   : t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
               </PillButton>

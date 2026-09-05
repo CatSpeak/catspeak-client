@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
@@ -39,7 +39,14 @@ const AccountInfoPage = () => {
   const idCardBackUrl = instructor?.idCardBackUrl || instructor?.IdCardBackUrl || null
 
   const stateHooks = useProfileState(profile)
-  const mutationHooks = useProfileMutations(t, profile, stateHooks)
+
+  // CCCD picks live here so the card-level Save/Hủy buttons own them
+  const [idFiles, setIdFiles] = useState({ front: null, back: null })
+  const setIdFile = (side, file) =>
+    setIdFiles((prev) => ({ ...prev, [side]: file }))
+  const resetIdFiles = () => setIdFiles({ front: null, back: null })
+
+  const mutationHooks = useProfileMutations(t, profile, stateHooks, { idFiles, resetIdFiles })
 
   const {
     formData,
@@ -52,11 +59,15 @@ const AccountInfoPage = () => {
     handleChange,
   } = stateHooks
 
+  const handleCancelAll = () => {
+    handleCancel()
+    resetIdFiles()
+  }
+
   const {
     isUpdating,
-    isUpdatingPhone,
     isSendingOtp,
-    isSendingPhoneOtp,
+    isSavingSecurity,
     handleSave,
     handleOtpVerify,
     handleOtpResend,
@@ -81,7 +92,7 @@ const AccountInfoPage = () => {
           editingField={editingField}
           isUpdating={isUpdating}
           onEdit={handleEdit}
-          onCancel={handleCancel}
+          onCancel={handleCancelAll}
           onSave={handleSave}
           onChange={handleChange}
           onCountryChange={handleCountryChange}
@@ -89,9 +100,11 @@ const AccountInfoPage = () => {
           t={t}
           isTeacherAccount={isTeacherAccount}
           showIdentitySection={showIdentitySection}
+          idCardFrontFile={idFiles.front}
+          idCardBackFile={idFiles.back}
+          onPickIdFile={setIdFile}
           idCardFrontUrl={idCardFrontUrl}
           idCardBackUrl={idCardBackUrl}
-          userEmail={profile?.email || ""}
         />
       </div>
 
@@ -107,20 +120,11 @@ const AccountInfoPage = () => {
         open={isOtpModalOpen}
         onClose={() => setIsOtpModalOpen(false)}
         email={profile?.email}
-        title={
-          editingField === "phoneNumber"
-            ? t.profile?.personalInfo?.verifyPhoneTitle ||
-              "Xác nhận thay đổi số điện thoại"
-            : editingField === "email"
-              ? t.profile?.personalInfo?.verifyEmailTitle ||
-                "Xác nhận thay đổi Email"
-              : t.profile?.personalInfo?.verifyChangesTitle ||
-                "Xác minh thay đổi"
-        }
+        title={t.profile?.personalInfo?.verifyChangesTitle || "Xác minh thay đổi"}
         onVerify={handleOtpVerify}
-        isVerifying={isUpdating || isUpdatingPhone}
+        isVerifying={isSavingSecurity}
         onResend={handleOtpResend}
-        isResending={isSendingOtp || isSendingPhoneOtp}
+        isResending={isSendingOtp}
         t={t}
       />
     </div>

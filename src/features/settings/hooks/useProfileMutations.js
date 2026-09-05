@@ -2,10 +2,8 @@ import { toast } from "react-hot-toast"
 import {
   useUpdateUserProfileMutation,
   useRequestUserProfileOtpMutation,
-  useUpdateMeetingAvatarMutation,
-  useRequestPhoneUpdateOtpMutation,
-  useUpdatePhoneNumberMutation,
   useUpdateAvatarMutation,
+  useUpdateSecurityProfileMutation,
 } from "@/store/api/userApi"
 import { buildProfilePayload, validatePhoneInput } from "../utils/profileValidation"
 
@@ -77,7 +75,7 @@ const validateFieldInput = (field, formData, t) => {
   return null
 }
 
-export const useProfileMutations = (t, profileData, stateHooks) => {
+export const useProfileMutations = (t, profileData, stateHooks, identityState) => {
   const {
     formData,
     setFormData,
@@ -85,28 +83,39 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     setEditingField,
     setErrors,
     setIsOtpModalOpen,
+    parsePhoneData,
   } = stateHooks
+  const { idFiles, resetIdFiles } = identityState || {}
 
   const [updateProfile, { isLoading: isUpdatingProfile }] = useUpdateUserProfileMutation()
-  const [updateMeetingAvatar] = useUpdateMeetingAvatarMutation()
   const [updateAvatar] = useUpdateAvatarMutation()
   const [requestUserProfileOtp, { isLoading: isSendingOtp }] = useRequestUserProfileOtpMutation()
-  const [requestPhoneUpdateOtp, { isLoading: isSendingPhoneOtp }] = useRequestPhoneUpdateOtpMutation()
-  const [updatePhoneNumber, { isLoading: isUpdatingPhone }] = useUpdatePhoneNumberMutation()
+  const [updateSecurity, { isLoading: isSavingSecurity }] = useUpdateSecurityProfileMutation()
 
-  const isUpdating = isUpdatingProfile || isSendingOtp || isSendingPhoneOtp
+  const isUpdating = isUpdatingProfile || isSendingOtp || isSavingSecurity
 
-  // Handles Email update requiring OTP verification
-  const handleEmailSaveWithOtp = async () => {
-    try {
-      await requestUserProfileOtp({ newEmail: formData.email }).unwrap()
-      setIsOtpModalOpen(true)
-    } catch (err) {
-      console.error("Failed to request OTP for email update", err)
-      const { field: errField, message } = parseProfileApiError(err, t, editingField)
-      setErrors((prev) => ({ ...prev, [errField]: message }))
-      toast.error(message)
+  // Client-side validation for the unified security card (email + phone)
+  const validateSecurityInput = () => {
+    const errs = {}
+    if (!formData.email) {
+      errs.email = t.auth?.validationEmailRequired || "Vui lòng nhập email!"
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errs.email = t.auth?.validationEmailInvalid || "Vui lòng nhập email hợp lệ!"
     }
+    if (formData.phoneNumber && !validatePhoneInput(formData.phoneNumber, formData.phonePrefix)) {
+      errs.phoneNumber = t.auth?.validationPhoneInvalid || "Số điện thoại không đúng định dạng"
+    }
+    return Object.keys(errs).length > 0 ? errs : null
+  }
+
+  // True when Email/Phone/ID differs from the saved profile
+  const isSecurityChanged = () => {
+    const origEmail = (profileData?.email || "").toLowerCase()
+    if ((formData.email || "").toLowerCase() !== origEmail) return true
+    const orig = parsePhoneData(profileData?.phoneNumber)
+    if (formData.phoneNumber !== orig.phoneNumber || formData.phonePrefix !== orig.phonePrefix) return true
+    if (idFiles?.front instanceof File || idFiles?.back instanceof File) return true
+    return false
   }
 
   // Handles direct update for non-email fields (Username, Nickname, Phone, Address, etc.)
@@ -127,46 +136,67 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
     if (isUpdating) return
     setErrors({})
 
+    // Security card: one Save for Email + Phone + ID with a single OTP.
+    if (editingField === "securityInfo") {
+      const securityErrors = validateSecurityInput()
+      if (securityErrors) {
+        setErrors(securityErrors)
+        return
+      }
+      if (!isSecurityChanged()) {
+        setEditingField(null)
+        resetIdFiles?.()
+        return
+      }
+      try {
+        await requestUserProfileOtp({}).unwrap()
+        setIsOtpModalOpen(true)
+      } catch (err) {
+        console.error("Failed to request OTP for security update", err)
+        toast.error(err?.data?.message || "Không thể gửi OTP. Vui lòng thử lại.")
+      }
+      return
+    }
+
     const validationError = validateFieldInput(editingField, formData, t)
     if (validationError) {
       setErrors(validationError)
       return
     }
 
-    const origEmail = (profileData?.email || "").toLowerCase()
-    const newEmail = (formData.email || "").toLowerCase()
-    const isEmailChanged = (editingField === "email" || editingField === "securityInfo") && origEmail !== newEmail
-
-    if (isEmailChanged) {
-      await handleEmailSaveWithOtp()
-    } else {
-      await handleDirectProfileSave()
-    }
+    await handleDirectProfileSave()
   }
 
   const handleOtpVerify = async (otpValue, { setError: setModalError }) => {
     try {
-      await updateProfile(buildProfilePayload(editingField, formData, { OtpCode: otpValue })).unwrap()
+      const fd = new FormData()
+      fd.append("Email", formData.email || "")
+      fd.append("PhoneNumber", formData.phoneNumber || "")
+      if (idFiles?.front instanceof File) fd.append("IdCardFront", idFiles.front)
+      if (idFiles?.back instanceof File) fd.append("IdCardBack", idFiles.back)
+      fd.append("OtpCode", otpValue)
+      await updateSecurity(fd).unwrap()
       toast.success(t.profile?.personalInfo?.accountUpdateSuccess || "Cập nhật thông tin tài khoản thành công!")
       setIsOtpModalOpen(false)
       setEditingField(null)
+      resetIdFiles?.()
     } catch (err) {
-      console.error("Failed to update profile with OTP", err)
+      console.error("Failed to update security info with OTP", err)
       const apiMessage = err?.data?.message || err?.data?.title || ""
       const lowerMsg = apiMessage.toLowerCase()
 
       if (lowerMsg.includes("otp") || lowerMsg.includes("mã otp")) {
         setModalError(t.profile?.personalInfo?.otpInvalid || "Mã OTP không hợp lệ hoặc đã hết hạn")
-      } else if (lowerMsg.includes("email")) {
-        setModalError(apiMessage || t.auth?.emailExists || "Email này đã được sử dụng bởi một tài khoản khác")
       } else {
+        const { field: errField } = parseProfileApiError(err, t, editingField)
+        setErrors((prev) => ({ ...prev, [errField]: apiMessage || "Có lỗi xảy ra, vui lòng thử lại." }))
         setModalError(apiMessage || "Có lỗi xảy ra, vui lòng thử lại.")
       }
     }
   }
 
   const handleOtpResend = async () => {
-    await requestUserProfileOtp({ newEmail: formData.email }).unwrap()
+    await requestUserProfileOtp({}).unwrap()
   }
 
   const handleCountryChange = async (val) => {
@@ -192,9 +222,8 @@ export const useProfileMutations = (t, profileData, stateHooks) => {
 
   return {
     isUpdating,
-    isUpdatingPhone,
     isSendingOtp,
-    isSendingPhoneOtp,
+    isSavingSecurity,
     handleSave,
     handleOtpVerify,
     handleOtpResend,
