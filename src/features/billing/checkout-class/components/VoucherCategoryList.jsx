@@ -2,7 +2,7 @@ import React from 'react'
 import { AlertTriangle, XCircle } from 'lucide-react'
 import VoucherCard from './VoucherCard'
 
-const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onToggleVoucher, t }) => {
+const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onToggleVoucher, orderAmount, t }) => {
   const tc = t.billing.checkoutClass
   if (vouchers.length === 0) return null
 
@@ -29,6 +29,7 @@ const VoucherCategoryList = ({ title, vouchers, category, selectedVouchers, onTo
               isSelected={isSelected}
               canUse={canUse}
               onToggleVoucher={onToggleVoucher}
+              orderAmount={orderAmount}
               t={t}
             />
           )
