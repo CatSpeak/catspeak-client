@@ -19,10 +19,14 @@ import { useFriendActions } from "../hooks/useFriendActions"
 import { useSendFriendRequestMutation } from "@/store/api/social/friendshipApi"
 import AnimatedNameFallback from "./AnimatedNameFallback"
 
-const isUserTeacher = (user) =>
-  user?.isTeacher === true ||
-  user?.isTeacher === 1 ||
-  user?.isTeacher === "true"
+const isUserTeacher = (user) => {
+  const v =
+    user?.isTeacher ?? user?.IsTeacher ?? user?.isTeacherAccount ?? user?.IsTeacherAccount
+  if (v === true || v === 1 || v === "true") return true
+  const role = String(user?.roleName ?? user?.RoleName ?? "").toLowerCase()
+  if (role === "teacher" || role === "instructor" || role === "expert") return true
+  return false
+}
 
 const ProfileFriendCard = memo(
   ({
@@ -32,6 +36,8 @@ const ProfileFriendCard = memo(
     currentUserId,
     isFollowing = false,
     isRequestSent = false,
+    friendshipId: friendshipIdProp,
+    isOutgoingRequest = false,
     onRequestSent,
     onRequestFailed,
     onNavigate,
@@ -48,6 +54,7 @@ const ProfileFriendCard = memo(
       handleUnfriend,
       handleAcceptRequest,
       handleDeclineRequest,
+      handleCancelRequest,
     } = useFriendActions()
 
     const handleAddFriend = async (close) => {
@@ -78,8 +85,16 @@ const ProfileFriendCard = memo(
       }
     }
 
-    // Đã gửi = local optimistic hoặc parent Set (sống qua refetch/remount).
-    const sent = requestSent || isRequestSent
+    // Đã gửi = local optimistic hoặc parent Set (server-persistent outgoing + optimistic).
+    // Reload persistence do backend đảm nhiệm (GET /requests/sent).
+    const sent = requestSent || isRequestSent || isOutgoingRequest || Boolean(user?.isOutgoingRequest)
+    const resolvedFriendshipId =
+      friendshipIdProp ?? user?.friendshipId ?? user?.FriendshipId ?? null
+
+    const handleCancel = (close) => {
+      if (close) close()
+      if (resolvedFriendshipId) handleCancelRequest(resolvedFriendshipId)
+    }
 
     const isTeacher = isUserTeacher(user)
     const roleLabel = isTeacher
@@ -105,17 +120,21 @@ const ProfileFriendCard = memo(
     const renderMobileMenu = (close) => (
       <MenuList className="w-52 shadow-lg">
         {/* Find tab action */}
-        {activeSubTab === "find" && !isSelf && (
+        {activeSubTab === "find" && !isSelf && !sent && (
           <MenuItem
             icon={<UserPlus />}
-            label={
-              sent
-                ? t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"
-                : t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"
-            }
+            label={t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
             onClick={() => {
               handleAddFriend(close)
             }}
+          />
+        )}
+        {activeSubTab === "find" && !isSelf && sent && (
+          <MenuItem
+            icon={<UserMinus className="text-red-600" />}
+            label={t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
+            className="text-red-600"
+            onClick={() => handleCancel(close)}
           />
         )}
 
@@ -141,6 +160,14 @@ const ProfileFriendCard = memo(
               }}
             />
           </>
+        )}
+        {(isOutgoingRequest || user?.isOutgoingRequest) && (
+          <MenuItem
+            icon={<UserMinus className="text-red-600" />}
+            label={t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
+            className="text-red-600"
+            onClick={() => handleCancel(close)}
+          />
         )}
 
         {/* Following tab action */}
@@ -263,12 +290,17 @@ const ProfileFriendCard = memo(
             />
           }
           rightContent={
-            <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-              {activeSubTab === "find" && sent && !isSelf ? (
-                <PillButton variant="secondary" disabled className="!h-8 !px-3 !text-xs">
-                  {t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"}
+            <div className="shrink-0 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              {((activeSubTab === "find" && sent && !isSelf) || isOutgoingRequest || user?.isOutgoingRequest) && resolvedFriendshipId ? (
+                <PillButton
+                  variant="secondary"
+                  className="!h-8 !px-3 !text-xs !text-red-600"
+                  onClick={() => handleCancel()}
+                >
+                  {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
                 </PillButton>
-              ) : (
+              ) : null}
+              {!(activeSubTab === "find" && sent && !isSelf && !resolvedFriendshipId) && (
                 <Popover
                   placement="bottom-right"
                   trigger={
@@ -340,19 +372,44 @@ const ProfileFriendCard = memo(
           </div>
 
           {/* Primary Action Button via PillButton (Desktop only) */}
-          <div className="w-full mt-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full mt-auto flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
             {/* Find Friends / Recommendations */}
-            {activeSubTab === "find" && !isSelf && (
+            {activeSubTab === "find" && !isSelf && !sent && (
               <PillButton
-                variant={sent ? "secondary" : "primary"}
+                variant="primary"
                 className="w-full"
                 onClick={() => handleAddFriend()}
                 loading={isSendingRequest}
-                disabled={isSendingRequest || sent}
+                disabled={isSendingRequest}
               >
-                {sent
-                  ? t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"
-                  : t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
+                {t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
+              </PillButton>
+            )}
+            {activeSubTab === "find" && !isSelf && sent && (
+              <div className="flex items-center gap-2 w-full">
+                <PillButton variant="secondary" className="flex-1" disabled>
+                  {t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"}
+                </PillButton>
+                {resolvedFriendshipId && (
+                  <PillButton
+                    variant="secondary"
+                    className="flex-1 !text-red-600"
+                    onClick={() => handleCancel()}
+                  >
+                    {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
+                  </PillButton>
+                )}
+              </div>
+            )}
+
+            {/* Outgoing requests (pending tab section + anywhere flagged) */}
+            {(isOutgoingRequest || user?.isOutgoingRequest) && (
+              <PillButton
+                variant="secondary"
+                className="w-full !text-red-600"
+                onClick={() => handleCancel()}
+              >
+                {t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
               </PillButton>
             )}
 

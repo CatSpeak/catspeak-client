@@ -118,6 +118,17 @@ export const useFriendActions = () => {
     }
   }
 
+  const handleCancelRequest = async (friendshipId, close) => {
+    if (close) close()
+    if (!friendshipId) return
+    try {
+      await deleteFriendship(friendshipId).unwrap()
+      toast.success(t.profile?.friends?.actions?.cancelSuccess || "Đã thu hồi lời mời")
+    } catch {
+      toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
+    }
+  }
+
   return {
     handleStartChat,
     handleSendRequest,
@@ -126,6 +137,7 @@ export const useFriendActions = () => {
     handleUnfriend,
     handleAcceptRequest,
     handleDeclineRequest,
+    handleCancelRequest,
   }
 }
 
