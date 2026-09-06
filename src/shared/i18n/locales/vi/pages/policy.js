@@ -76,7 +76,7 @@ export default {
     {
       title: '9. Liên hệ',
       intro: 'Nếu bạn có bất kỳ câu hỏi nào về chính sách này, vui lòng liên hệ:',
-      bullets: ['Email: support@cathspeak.com', 'Hotline: +84 123 456 789', 'Fanpage: facebook.com/cathspeak'],
+      bullets: ['Email: support@catspeak.com.vn', 'Hotline: +84 123 456 789', 'Fanpage: facebook.com/cathspeak'],
     },
   ],
 }
