@@ -77,7 +77,15 @@ export function useBugReportForm({
       formData.append("file", file)
 
       const res = await uploadScreenshot(formData).unwrap()
-      const uploadedUrl = res?.data?.url || res?.url
+      // Old contract wrapped the FileUploadResult object ({url, objectName,
+      // bucket}) under data.url; the fixed contract returns a plain string.
+      const rawUrl = res?.data?.url ?? res?.url
+      const uploadedUrl =
+        typeof rawUrl === "string"
+          ? rawUrl
+          : typeof rawUrl?.url === "string"
+          ? rawUrl.url
+          : null
       if (uploadedUrl) {
         setScreenshots((prev) => [...prev, uploadedUrl])
         toast.success(lang.uploadSuccess || "Đã tải ảnh lên thành công!")
