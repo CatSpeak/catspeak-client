@@ -428,6 +428,7 @@ export const baseApi = createApi({
     "SelfUnmutePolicy",
     "BannedParticipants",
     "WaitingQueue",
+    "RoomLock",
   ],
   endpoints: () => ({}),
 })

@@ -568,6 +568,18 @@ export default {
       successUnban: "Đã gỡ cấm thành viên thành công",
       bannedFromRoom: "Tài khoản của bạn đã bị cấm truy cập vào phòng này bởi Host.",
       forbiddenKick: "Bạn không có quyền mời thành viên ra khỏi phòng.",
+      lockRoom: "Khóa phòng (chặn người mới)",
+      lockOn: "Đã khóa phòng. Người mới không thể tham gia.",
+      lockOff: "Đã mở khóa phòng.",
+      forbiddenLock: "Bạn không có quyền khóa/mở phòng.",
+      hostLockedRoom: "Host đã khóa phòng. Người mới không thể tham gia.",
+      hostUnlockedRoom: "Host đã mở khóa phòng.",
+      endLive: "Kết thúc buổi live",
+      confirmEndLiveTitle: "Kết thúc buổi live",
+      confirmEndLive: "Kết thúc buổi live cho tất cả mọi người? Mọi người sẽ về màn hình kết thúc, tham gia lại sẽ tạo phiên mới. Lớp/phòng và điểm danh không đổi.",
+      endLiveSuccess: "Đã kết thúc buổi live.",
+      forbiddenEnd: "Bạn không có quyền kết thúc buổi live.",
+      hostEndedSession: "Host đã kết thúc buổi live.",
     },
     waitingQueue: {
       tab: "Chờ",
@@ -597,6 +609,7 @@ export default {
       rejectedHint: "Bạn đã bị từ chối. Vui lòng chờ được mời lại mới có thể xin vào tiếp.",
       admittedTitle: "Đã được duyệt vào phòng!",
       admittedToast: "Đã được duyệt vào phòng!",
+      lockedHint: "Phòng đã bị khóa. Người mới không thể tham gia lúc này.",
     },
     webviewBlock: {
       title: "Mở trong trình duyệt",
@@ -710,13 +723,17 @@ export default {
   callEnded: {
     titleExpired: "Phiên này đã hết hạn",
     titleLeft: "Bạn đã rời khỏi cuộc họp",
+    titleEnded: "Buổi live đã kết thúc",
     descExpired:
       "Đã đạt đến giới hạn thời gian của phòng và phiên đã tự động đóng.",
     descLeft:
       "Bạn có thể đóng cửa sổ này một cách an toàn hoặc quay lại màn hình chính.",
+    descEnded:
+      "Host đã kết thúc buổi live cho tất cả mọi người. Bạn có thể tham gia lại để bắt đầu phiên mới.",
     rejoin: "Tham gia lại",
     returnHome: "Quay lại trang chủ",
     expiredToast: "Cuộc gọi đã kết thúc do hết thời lượng phòng",
+    endedToast: "Buổi live đã kết thúc",
   },
   breakoutRooms: {
     mainRoom: "Phòng chính",

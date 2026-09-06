@@ -400,6 +400,27 @@ export const roomsApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
     }),
 
+    // --- Ticket 04: room lock + end live for all ---
+    // Lock persists until manually unlocked; end closes the live session only.
+    getRoomLock: builder.query({
+      query: (id) => `/rooms/${id}/lock`,
+      providesTags: (result, error, id) => [{ type: "RoomLock", id }],
+    }),
+    updateRoomLock: builder.mutation({
+      query: ({ id, locked }) => ({
+        url: `/rooms/${id}/lock`,
+        method: "PUT",
+        body: { locked },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomLock", id }],
+    }),
+    endLiveSession: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/end-live`,
+        method: "POST",
+      }),
+    }),
+
 
 
     // Invite user(s) to a room
@@ -532,6 +553,10 @@ export const {
   useKnockWaitingMutation,
   useAdmitWaitingMutation,
   useRejectWaitingMutation,
+  // Ticket 04: room lock + end live
+  useGetRoomLockQuery,
+  useUpdateRoomLockMutation,
+  useEndLiveSessionMutation,
   // Co-host foundation
   useGetRoomCoHostQuery,
   useLazyGetRoomCoHostQuery,

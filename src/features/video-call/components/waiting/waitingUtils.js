@@ -40,7 +40,9 @@ export const knockWithToast = async ({ roomId, knockWaiting, t }) => {
       err?.data?.message ||
         (code === "ROOM_WAITING_REJECTED"
           ? (wq.rejectedHint || "Bạn đã bị từ chối. Vui lòng chờ được mời lại.")
-          : (wq.knockFailed || "Không thể gửi yêu cầu. Vui lòng thử lại."))
+          : code === "ROOM_LOCKED"
+            ? (wq.lockedHint || "Phòng đã bị khóa. Người mới không thể tham gia lúc này.")
+            : (wq.knockFailed || "Không thể gửi yêu cầu. Vui lòng thử lại."))
     )
   }
 }

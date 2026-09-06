@@ -556,6 +556,18 @@ export default {
       bannedFromRoom:
         "あなたのアカウントはこのルームへの参加をホストによって禁止されました。",
       forbiddenKick: "メンバーをルームから退出させる権限がありません。",
+      lockRoom: "ルームをロック（新規参加をブロック）",
+      lockOn: "ルームをロックしました。新規参加者は参加できません。",
+      lockOff: "ルームのロックを解除しました。",
+      forbiddenLock: "ルームをロック/解除する権限がありません。",
+      hostLockedRoom: "ホストがルームをロックしました。新規参加者は参加できません。",
+      hostUnlockedRoom: "ホストがルームのロックを解除しました。",
+      endLive: "ライブを終了",
+      confirmEndLiveTitle: "ライブを終了",
+      confirmEndLive: "全員のライブを終了しますか？全員が終了画面に戻り、再参加すると新しいセッションが始まります。クラス/ルームと出席は変わりません。",
+      endLiveSuccess: "ライブを終了しました。",
+      forbiddenEnd: "ライブを終了する権限がありません。",
+      hostEndedSession: "ホストがライブを終了しました。",
     },
     waitingQueue: {
       tab: "待機",
@@ -585,6 +597,7 @@ export default {
       rejectedHint: "拒否されました。再度リクエストする前に招待をお待ちください。",
       admittedTitle: "参加が承認されました！",
       admittedToast: "ルームへの参加が承認されました！",
+      lockedHint: "このルームはロックされています。新規参加者は今参加できません。",
     },
     webviewBlock: {
       title: "ブラウザで開く",
@@ -699,12 +712,16 @@ export default {
   callEnded: {
     titleExpired: "このセッションは期限が切れました",
     titleLeft: "会議を退出しました",
+    titleEnded: "ライブが終了しました",
     descExpired:
       "ルームの時間制限に達したため、セッションは自動的に終了しました。",
     descLeft: "このウィンドウを閉じるか、ホーム画面に戻ることができます。",
+    descEnded:
+      "ホストが全員のライブを終了しました。再参加すると新しいセッションが始まります。",
     rejoin: "再参加",
     returnHome: "ホームに戻る",
     expiredToast: "ルームの時間制限により通話が終了しました",
+    endedToast: "ライブが終了しました",
   },
   breakoutRooms: {
     mainRoom: "メインルーム",

@@ -591,6 +591,18 @@ export default {
       successUnban: "Unbanned member successfully",
       bannedFromRoom: "Your account has been banned from joining this room by the Host.",
       forbiddenKick: "You do not have permission to remove members from the room.",
+      lockRoom: "Lock room (block newcomers)",
+      lockOn: "Room locked. Newcomers cannot join.",
+      lockOff: "Room unlocked.",
+      forbiddenLock: "You do not have permission to lock/unlock the room.",
+      hostLockedRoom: "Host locked the room. Newcomers cannot join.",
+      hostUnlockedRoom: "Host unlocked the room.",
+      endLive: "End live session",
+      confirmEndLiveTitle: "End live session",
+      confirmEndLive: "End the live session for everyone? Everyone returns to the end screen; rejoining starts a new session. Class/room and attendance stay unchanged.",
+      endLiveSuccess: "Live session ended.",
+      forbiddenEnd: "You do not have permission to end the live session.",
+      hostEndedSession: "Host ended the live session.",
     },
     waitingQueue: {
       tab: "Waiting",
@@ -620,6 +632,7 @@ export default {
       rejectedHint: "You were rejected. Please wait to be invited before requesting again.",
       admittedTitle: "You have been admitted!",
       admittedToast: "You have been admitted into the room!",
+      lockedHint: "This room is locked. Newcomers cannot join right now.",
     },
     webviewBlock: {
       title: "Open in Browser",
@@ -734,12 +747,16 @@ export default {
   callEnded: {
     titleExpired: "This session has expired",
     titleLeft: "You left the meeting",
+    titleEnded: "Live session ended",
     descExpired:
       "The room time limit was reached and the session was automatically closed.",
     descLeft: "You can safely close this window or return to the home screen.",
+    descEnded:
+      "The host ended the live session for everyone. You can rejoin to start a new session.",
     rejoin: "Rejoin",
     returnHome: "Return to home",
     expiredToast: "The call has ended due to room duration limit",
+    endedToast: "Live session ended",
   },
   breakoutRooms: {
     mainRoom: "Main Room",

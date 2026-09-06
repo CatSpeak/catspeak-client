@@ -37,6 +37,7 @@ import {
 } from "@/features/video-call/hooks/useNavigateRef"
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
+import { roomsApi } from "@/store/api/roomsApi"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
@@ -66,6 +67,7 @@ const GlobalCallContent = ({
   panelState,
 }) => {
   const { t, language } = useLanguage()
+  const dispatch = useDispatch()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
   const currentRoomId = callInfo?.roomId || roomData?.id
@@ -551,6 +553,46 @@ const GlobalCallContent = ({
               ? (pl.selfUnmuteOn || "Host đã cho phép học viên tự bật mic.")
               : (pl.selfUnmuteOff || "Host đã tắt quyền học viên tự bật mic.")
           )
+          return
+        }
+
+        // Ticket 04: room lock changed — refetch lock state + toast.
+        if (data.action === "ROOM_LOCK_CHANGED") {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "RoomLock", id: currentRoomId },
+            ])
+          )
+          toast.info(
+            data.locked
+              ? (pl.hostLockedRoom ||
+                  "Host đã khóa phòng. Người mới không thể tham gia.")
+              : (pl.hostUnlockedRoom || "Host đã mở khóa phòng.")
+          )
+          return
+        }
+
+        // Ticket 04: host/co-host ended the live for everyone —
+        // drop the LiveKit room and land on the end screen (rejoin
+        // creates a brand-new session; room/class state untouched).
+        if (data.action === "ROOM_ENDED") {
+          toast.error(pl.hostEndedSession || "Host đã kết thúc buổi live.", {
+            duration: 5000,
+          })
+          try {
+            lkRoom?.disconnect()
+          } catch {
+            /* ignore disconnect errors */
+          }
+          dispatch(leaveCall())
+          const nav = getNavigate()
+          const loc = getLocation()
+          if (nav && loc && loc.pathname.includes("/meet/")) {
+            nav(loc.pathname, {
+              replace: true,
+              state: { callEnded: true, reason: "ended" },
+            })
+          }
           return
         }
 

@@ -11,8 +11,13 @@ import {
   Ellipsis,
   DoorOpen,
   Loader2,
+  Lock,
+  LockOpen,
+  PhoneOff,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
+import { useDispatch } from "react-redux"
+import { leaveCall as leaveCallAction } from "@/store/slices/videoCallSlice"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
@@ -36,6 +41,9 @@ import {
   useGetWaitingQueueQuery,
   useGetMyWaitingStatusQuery,
   useKnockWaitingMutation,
+  useGetRoomLockQuery,
+  useUpdateRoomLockMutation,
+  useEndLiveSessionMutation,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -218,6 +226,14 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
   const [muteAllConfirmOpen, setMuteAllConfirmOpen] = React.useState(false)
+  const dispatch = useDispatch()
+  let navigate
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    navigate = useNavigate()
+  } catch {
+    navigate = getNavigate()
+  }
 
   // Ticket 02: co-host perms cho mute-all + self-unmute gate.
   const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
@@ -341,8 +357,104 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const handleLowerAllHands = async () => {
-    if (lkRoom?.localParticipant) {
+  // Ticket 04: room lock (lock_class) + end live for all (end_class).
+  const canManageLock =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.LOCK_CLASS)
+  const canEndLive =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.END_CLASS)
+  const { data: roomLockData } = useGetRoomLockQuery(roomId, {
+    skip: !roomId,
+  })
+  const isLocked =
+    roomLockData?.data?.isLocked ?? roomLockData?.isLocked ?? false
+  const [updateRoomLock, { isLoading: isTogglingLock }] =
+    useUpdateRoomLockMutation()
+  const [endLiveApi, { isLoading: isEndingLive }] = useEndLiveSessionMutation()
+  const [endLiveConfirmOpen, setEndLiveConfirmOpen] = React.useState(false)
+
+  const handleToggleLock = async () => {
+    if (!roomId) return
+    try {
+      const next = !isLocked
+      await updateRoomLock({ id: roomId, locked: next }).unwrap()
+      // Broadcast để các client khác thấy ngay mà không cần refetch.
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({ action: "ROOM_LOCK_CHANGED", locked: next })
+        )
+        lkRoom?.localParticipant?.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch {
+        /* ignore broadcast errors */
+      }
+      toast.success(
+        next
+          ? (pl.lockOn || "Đã khóa phòng. Người mới không thể tham gia.")
+          : (pl.lockOff || "Đã mở khóa phòng.")
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenLock || "Bạn không có quyền khóa/mở phòng."
+        )
+      )
+    }
+  }
+
+  const confirmEndLive = async () => {
+    setEndLiveConfirmOpen(false)
+    if (!roomId) return
+    try {
+      await endLiveApi(roomId).unwrap()
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenEnd || "Bạn không có quyền kết thúc buổi live."
+        )
+      )
+      return
+    }
+    // Mọi client (kể cả người bấm) đều về màn hình kết thúc;
+    // tham gia lại sẽ tạo phiên mới.
+    try {
+      const payload = new TextEncoder().encode(
+        JSON.stringify({
+          action: "ROOM_ENDED",
+          senderId: String(user?.accountId ?? ""),
+        })
+      )
+      lkRoom?.localParticipant?.publishData(payload, {
+        topic: "moderation",
+        reliable: true,
+      })
+    } catch {
+      /* ignore broadcast errors */
+    }
+    try {
+      lkRoom?.disconnect()
+    } catch {
+      /* ignore disconnect errors */
+    }
+    dispatch(leaveCallAction())
+    toast.success(pl.endLiveSuccess || "Đã kết thúc buổi live.")
+    const nav = navigate ?? getNavigate()
+    if (nav && window.location.pathname.includes("/meet/")) {
+      nav(window.location.pathname, {
+        replace: true,
+        state: { callEnded: true, reason: "ended" },
+      })
+    }
+  }
+
+  const handleLowerAllHands = async () => {    if (lkRoom?.localParticipant) {
       safeSetLiveKitMetadata(lkRoom.localParticipant, { handRaised: false, handRaisedAt: 0 })
       try {
         const payload = new TextEncoder().encode(
@@ -422,8 +534,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         </div>
       )}
 
-      {/* Host / Co-host Quick Moderation Actions (ticket 02 per-perm) */}
-      {(canMuteAll || canToggleSelfUnmute || isHost) && (
+      {/* Host / Co-host Quick Moderation Actions (ticket 02 per-perm, ticket 04 lock/end) */}
+      {(canMuteAll || canToggleSelfUnmute || canManageLock || canEndLive || isHost) && (
         <div className="p-2.5 border-b border-[#E5E5E5] flex flex-col gap-2 bg-gray-50/90 shrink-0">
           <div className="flex items-center gap-2">
             {canMuteAll && (
@@ -457,6 +569,36 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                 className="h-4 w-4 accent-blue-600"
               />
             </label>
+          )}
+
+          {/* Ticket 04: lock toggle (lock_class) — khóa thì chặn người mới, người trong phòng ở lại. */}
+          {canManageLock && (
+            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
+              <span className="inline-flex items-center gap-1.5">
+                {isLocked ? <Lock size={14} className="text-red-600" /> : <LockOpen size={14} className="text-neutral-500" />}
+                {pl.lockRoom || "Khóa phòng (chặn người mới)"}
+              </span>
+              <input
+                type="checkbox"
+                checked={isLocked}
+                disabled={isTogglingLock}
+                onChange={handleToggleLock}
+                className="h-4 w-4 accent-red-600"
+              />
+            </label>
+          )}
+
+          {/* Ticket 04: end live for all (end_class) — chỉ end session live, join lại tạo phiên mới. */}
+          {canEndLive && (
+            <button
+              type="button"
+              onClick={() => setEndLiveConfirmOpen(true)}
+              disabled={isEndingLive}
+              className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border border-red-600 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+            >
+              <PhoneOff size={15} className="shrink-0 rotate-[135deg]" />
+              <span>{pl.endLive || "Kết thúc buổi live"}</span>
+            </button>
           )}
         </div>
       )}
@@ -512,6 +654,17 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         title={pl.confirmMuteAllTitle || pl.muteAll || "Tắt tất cả mic"}
         message={pl.confirmMuteAll || "Bạn có chắc chắn muốn tắt tiếng tất cả thành viên trong phòng?"}
         confirmText={pl.muteAll || "Tắt tất cả mic"}
+        confirmVariant="destructive"
+      />
+
+      {/* Ticket 04: end-live confirm — mọi người về màn hình kết thúc, join lại tạo phiên mới. */}
+      <ConfirmationModal
+        open={endLiveConfirmOpen}
+        onClose={() => setEndLiveConfirmOpen(false)}
+        onConfirm={confirmEndLive}
+        title={pl.confirmEndLiveTitle || pl.endLive || "Kết thúc buổi live"}
+        message={pl.confirmEndLive || "Kết thúc buổi live cho tất cả mọi người? Mọi người sẽ về màn hình kết thúc, tham gia lại sẽ tạo phiên mới. Lớp/phòng và điểm danh không đổi."}
+        confirmText={pl.endLive || "Kết thúc buổi live"}
         confirmVariant="destructive"
       />
     </div>
