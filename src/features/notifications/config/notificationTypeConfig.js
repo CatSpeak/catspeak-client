@@ -16,10 +16,41 @@ const replaceVars = (text, m) => {
   if (!text) return text;
   return text
     .replace(/{className}/g, m.className || "Không rõ")
+    .replace(/{roomName}/g, m.roomName || "")
+    .replace(/{hostName}/g, m.hostName || m.teacherName || "Giáo viên")
+    .replace(/{scope}/g, m.scope || "")
     .replace(/{assignmentName}/g, m.assignmentName || "Không rõ")
     .replace(/{quizName}/g, m.quizName || "Không rõ")
     .replace(/{teacherName}/g, m.teacherName || m.inviterName || "Giảng viên")
     .replace(/{payerName}/g, m.payerName || "Ai đó");
+};
+
+// "ở đâu": lớp học "{className}" / phòng "{roomName}" — theo locale.
+const coHostScope = (m, t) => {
+  const c = t.rooms?.coHost || {};
+  if (m.className)
+    return (c.scopeClass || 'trong lớp học "{name}"').replace(
+      "{name}",
+      m.className,
+    );
+  if (m.roomName)
+    return (c.scopeRoom || 'trong phòng "{name}"').replace(
+      "{name}",
+      m.roomName,
+    );
+  return "";
+};
+
+const withScope = (m, t) => ({ ...m, scope: coHostScope(m, t) });
+
+const coHostUrl = (m) => {
+  if (m.classId) return `/workspace/learning/class/${m.classId}`;
+  if (m.roomId) {
+    const match = window?.location?.pathname?.match(/^\/([a-z]{2})(?:\/|$)/i);
+    const lang = match ? match[1] : "vi";
+    return `/${lang}/meet/${m.roomId}`;
+  }
+  return null;
 };
 
 const getLoc = (t) =>
@@ -427,8 +458,49 @@ export const NOTIFICATION_TYPES = {
         : `/${lang}/cat-speak/news`;
     },
   },
-  new_challenge: {
-    icon: Zap,
+  co_host_assigned: {
+    icon: UserCheck,
+    color: "text-emerald-500",
+    resolveTitle: (m, t) =>
+      t.rooms?.notifications?.co_host_assigned?.title ||
+      "Được phân công làm Co-host",
+    resolveBody: (m, t) =>
+      replaceVars(
+        t.rooms?.notifications?.co_host_assigned?.body ||
+          "{hostName} đã phân công bạn làm co-host {scope}",
+        withScope(m, t),
+      ),
+    resolveUrl: (m) => coHostUrl(m),
+  },
+  co_host_updated: {
+    icon: RotateCw,
+    color: "text-blue-500",
+    resolveTitle: (m, t) =>
+      t.rooms?.notifications?.co_host_updated?.title ||
+      "Quyền Co-host được cập nhật",
+    resolveBody: (m, t) =>
+      replaceVars(
+        t.rooms?.notifications?.co_host_updated?.body ||
+          "{hostName} đã cập nhật quyền co-host của bạn {scope}",
+        withScope(m, t),
+      ),
+    resolveUrl: (m) => coHostUrl(m),
+  },
+  co_host_revoked: {
+    icon: CalendarClock,
+    color: "text-gray-500",
+    resolveTitle: (m, t) =>
+      t.rooms?.notifications?.co_host_revoked?.title ||
+      "Đã gỡ phân công Co-host",
+    resolveBody: (m, t) =>
+      replaceVars(
+        t.rooms?.notifications?.co_host_revoked?.body ||
+          "{hostName} đã gỡ phân công co-host của bạn {scope}",
+        withScope(m, t),
+      ),
+    resolveUrl: (m) => coHostUrl(m),
+  },
+  new_challenge: {    icon: Zap,
     color: "text-amber-500",
     resolveTitle: (m, t) =>
       t.notifications?.new_challenge?.title || "Thử thách mới!",

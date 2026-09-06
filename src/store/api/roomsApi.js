@@ -269,6 +269,47 @@ export const roomsApi = baseApi.injectEndpoints({
       invalidatesTags: ["CustomRooms", "Rooms"],
     }),
 
+    // --- Co-host foundation (ticket 01) ---
+    getRoomCoHost: builder.query({
+      query: (id) => `/rooms/${id}/co-host`,
+      providesTags: (result, error, id) => [{ type: "CoHost", id }],
+    }),
+    assignRoomCoHost: builder.mutation({
+      query: ({ id, coHostAccountId, permissions }) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "POST",
+        body: { coHostAccountId, permissions },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+    updateRoomCoHost: builder.mutation({
+      query: ({ id, permissions }) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "PUT",
+        body: { permissions },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+    revokeRoomCoHost: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+
     // --- Host Moderation ---
     // Kick a participant from a room
     kickParticipant: builder.mutation({
@@ -283,12 +324,37 @@ export const roomsApi = baseApi.injectEndpoints({
     }),
 
     // Mute audio/video track of a participant
+    // Ticket 02: body { targetAccountId, trackSid?, trackKind?: 'audio'|'video', muted }
     muteParticipant: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `/rooms/${id}/moderation/mute`,
         method: "POST",
         body,
       }),
+    }),
+
+    // Ticket 02: mute all mics at once (verify sender holds mute_all, excludes self)
+    muteAllParticipants: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/mute-all`,
+        method: "POST",
+      }),
+    }),
+
+    // Ticket 02: session-level self-unmute gate (default open)
+    getSelfUnmutePolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/self-unmute-policy`,
+      providesTags: (result, error, id) => [{ type: "SelfUnmutePolicy", id }],
+    }),
+    updateSelfUnmutePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/self-unmute-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "SelfUnmutePolicy", id },
+      ],
     }),
 
     // Get list of banned participants for a room
@@ -305,6 +371,98 @@ export const roomsApi = baseApi.injectEndpoints({
         body: { targetAccountId },
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "BannedParticipants", id }],
+    }),
+
+    // --- Ticket 03: waiting queue ---
+    // Class pre-fills client-side from Pending enrollments; Custom fills on knock.
+    getWaitingQueue: builder.query({
+      query: (id) => `/rooms/${id}/waiting`,
+      providesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    getMyWaitingStatus: builder.query({
+      query: (id) => `/rooms/${id}/waiting/me`,
+      providesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    knockWaiting: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/waiting/knock`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    admitWaiting: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/waiting/admit`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
+    }),
+    rejectWaiting: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/waiting/reject`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
+    }),
+
+    // --- Ticket 04: room lock + end live for all ---
+    // Lock persists until manually unlocked; end closes the live session only.
+    getRoomLock: builder.query({
+      query: (id) => `/rooms/${id}/lock`,
+      providesTags: (result, error, id) => [{ type: "RoomLock", id }],
+    }),
+    updateRoomLock: builder.mutation({
+      query: ({ id, locked }) => ({
+        url: `/rooms/${id}/lock`,
+        method: "PUT",
+        body: { locked },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomLock", id }],
+    }),
+    endLiveSession: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/end-live`,
+        method: "POST",
+      }),
+    }),
+
+    // --- Ticket 05: student screen-share gate (default open, session-scoped) ---
+    // Host or co-host with manage_student_share toggles.
+    getStudentSharePolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/student-share-policy`,
+      providesTags: (result, error, id) => [{ type: "StudentSharePolicy", id }],
+    }),
+    updateStudentSharePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/student-share-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "StudentSharePolicy", id },
+      ],
+    }),
+
+    // --- Ticket 05: member recording gate, server-side (default open) ---
+    // Host or co-host with record toggles; shared recording start is gated
+    // server-side via EnsureRecordingAllowedAsync.
+    getMemberRecordingPolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/member-recording-policy`,
+      providesTags: (result, error, id) => [
+        { type: "MemberRecordingPolicy", id },
+      ],
+    }),
+    updateMemberRecordingPolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/member-recording-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "MemberRecordingPolicy", id },
+      ],
     }),
 
 
@@ -772,6 +930,9 @@ export const {
   // Host Moderation
   useKickParticipantMutation,
   useMuteParticipantMutation,
+  useMuteAllParticipantsMutation,
+  useGetSelfUnmutePolicyQuery,
+  useUpdateSelfUnmutePolicyMutation,
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,
   useInviteToRoomMutation,
@@ -784,6 +945,27 @@ export const {
   useGetClassSessionsSpeakingAnalyticsQuery,
   useGetStudentSpeakingHistoryQuery,
   useGetSessionSpeakingStatsQuery,
+  // Ticket 03: waiting queue
+  useGetWaitingQueueQuery,
+  useGetMyWaitingStatusQuery,
+  useKnockWaitingMutation,
+  useAdmitWaitingMutation,
+  useRejectWaitingMutation,
+  // Ticket 04: room lock + end live
+  useGetRoomLockQuery,
+  useUpdateRoomLockMutation,
+  useEndLiveSessionMutation,
+  // Ticket 05: student share + member recording policies
+  useGetStudentSharePolicyQuery,
+  useUpdateStudentSharePolicyMutation,
+  useGetMemberRecordingPolicyQuery,
+  useUpdateMemberRecordingPolicyMutation,
+  // Co-host foundation
+  useGetRoomCoHostQuery,
+  useLazyGetRoomCoHostQuery,
+  useAssignRoomCoHostMutation,
+  useUpdateRoomCoHostMutation,
+  useRevokeRoomCoHostMutation,
   // My Rooms & Bookmarks & Advanced Room Creation
   useGetMyRoomsQuery,
   useLazyGetMyRoomsQuery,

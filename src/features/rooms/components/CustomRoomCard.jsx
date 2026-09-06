@@ -11,6 +11,16 @@ import {
 } from "lucide-react"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import CoHostManager from "@/features/co-host/CoHostManager"
+import CoHostBadge from "@/features/co-host/CoHostBadge"
+import { normalizeCoHost } from "@/features/co-host/constants"
+import {
+  useGetRoomCoHostQuery,
+  useAssignRoomCoHostMutation,
+  useUpdateRoomCoHostMutation,
+  useRevokeRoomCoHostMutation,
+} from "@/store/api/roomsApi"
 import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon"
 import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
@@ -30,11 +40,40 @@ const CustomRoomCard = ({
   ct: propsCt = {},
 }) => {
   const { t } = useLanguage()
+  const { user } = useAuth()
   const customRooms = { ...(t.rooms?.customRooms || {}), ...propsCt }
   const roomId = room.id || room.roomId
   const isCopied = copiedId === roomId
   const [imageError, setImageError] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  // BR-ML-01: chỉ chủ phòng thấy nút phân công.
+  const isRoomOwner =
+    user?.accountId != null &&
+    (room.creatorId ?? room.creator?.accountId ?? room.creator?.id) != null &&
+    String(user.accountId) ===
+      String(room.creatorId ?? room.creator?.accountId ?? room.creator?.id)
+
+  // ── Co-host foundation (ticket 01): assign từ chi tiết phòng (card) ──
+  const { data: roomCoHostData } = useGetRoomCoHostQuery(roomId, {
+    skip: roomId == null,
+  })
+  const [assignRoomCoHost, { isLoading: isAssigningCoHost }] =
+    useAssignRoomCoHostMutation()
+  const [updateRoomCoHost, { isLoading: isUpdatingCoHost }] =
+    useUpdateRoomCoHostMutation()
+  const [revokeRoomCoHost, { isLoading: isRevokingCoHost }] =
+    useRevokeRoomCoHostMutation()
+  const roomCoHost = normalizeCoHost(roomCoHostData)
+  const coHostCandidates = (Array.isArray(room.currentParticipants)
+    ? room.currentParticipants
+    : []
+  )
+    .map((p) => ({
+      accountId: p?.accountId ?? p?.id ?? p?.userId,
+      name: p?.name ?? p?.nickname ?? p?.username ?? "",
+      email: p?.email ?? "",
+    }))
+    .filter((p) => p.accountId != null && String(p.accountId) !== String(room.creatorId))
 
   // Thumbnail fallback handling
   const fallbackThumbnail =
@@ -261,6 +300,9 @@ const CustomRoomCard = ({
                   ? `${currentCount}/${maxParticipantsDisplay} ${t.rooms?.people || "người"}`
                   : `${currentCount} ${t.rooms?.people || "người"}`}
               </span>
+              {roomCoHost?.coHostAccountId && (
+                <CoHostBadge />
+              )}
             </div>
 
             {/* Duration */}
@@ -272,6 +314,33 @@ const CustomRoomCard = ({
                 <span>{durationText}</span>
               </div>
             </div>
+          </div>
+
+          {/* Co-host row (chi tiết phòng): Thêm khi chưa có, Quản lý khi đã có.
+              Chưa có co-host thì gợi ý đúng chuỗi SRS BR-COH-08. */}
+          <div
+            className="mt-3 flex flex-col gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {!roomCoHost?.coHostAccountId && (
+              <p className="text-[11px] text-gray-400">
+                Chưa có Co-host được phân công cho phòng này
+              </p>
+            )}
+            <CoHostManager
+              coHost={roomCoHost}
+              candidates={coHostCandidates}
+              isTeacher={isRoomOwner}
+              isSaving={isAssigningCoHost || isUpdatingCoHost}
+              isRevoking={isRevokingCoHost}
+              onAssign={(body) =>
+                assignRoomCoHost({ id: roomId, ...body }).unwrap()
+              }
+              onUpdate={(body) =>
+                updateRoomCoHost({ id: roomId, ...body }).unwrap()
+              }
+              onRevoke={() => revokeRoomCoHost(roomId).unwrap()}
+            />
           </div>
         </div>
       </Animated3DCard>

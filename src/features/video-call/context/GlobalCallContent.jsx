@@ -43,6 +43,15 @@ import {
 import { useSpeakingStats } from "@/features/video-call/hooks/useSpeakingStats"
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
+import { roomsApi } from "@/store/api/roomsApi"
+import {
+  useGetRoomCoHostQuery,
+  useGetStudentSharePolicyQuery,
+  useGetMemberRecordingPolicyQuery,
+} from "@/store/api/roomsApi"
+import {
+  normalizeCoHost,
+} from "@/features/co-host/constants"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
@@ -77,6 +86,7 @@ const GlobalCallContent = ({
   setSpeakingAssistantEnabled,
 }) => {
   const { t, language } = useLanguage()
+  const dispatch = useDispatch()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
   const currentRoomId = callInfo?.roomId || roomData?.id
@@ -482,10 +492,33 @@ const GlobalCallContent = ({
 
   const videoCallState = useVideoCall(t)
   const isHostUser = isRoomHost(roomData, user?.accountId)
+  // Ticket 05: co-host + server policies for share/record gates.
+  const { data: liveCoHostData } = useGetRoomCoHostQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const liveCoHost = normalizeCoHost(liveCoHostData)
+  const { data: studentSharePolicyData } = useGetStudentSharePolicyQuery(
+    currentRoomId,
+    { skip: !currentRoomId }
+  )
+  const allowStudentShare =
+    studentSharePolicyData?.data?.allowStudentShare ??
+    studentSharePolicyData?.allowStudentShare ??
+    true
+  const { data: memberRecordingPolicyData } = useGetMemberRecordingPolicyQuery(
+    currentRoomId,
+    { skip: !currentRoomId }
+  )
+  const allowMemberRecording =
+    memberRecordingPolicyData?.data?.allowMemberRecording ??
+    memberRecordingPolicyData?.allowMemberRecording ??
+    true
   const screenShareState = useScreenShare({
     roomData,
     user,
     isHost: isHostUser,
+    coHost: liveCoHost,
+    allowStudentShare,
     t,
   })
   const watchTogether = useWatchTogether({
@@ -503,6 +536,9 @@ const GlobalCallContent = ({
     sessionId,
     roomId: currentRoomId,
     isHost: isRoomHost(roomData, user?.accountId),
+    accountId: user?.accountId,
+    coHost: liveCoHost,
+    allowMemberRecording,
   })
 
   const subtitleControls = useSubtitleControls({
@@ -611,13 +647,110 @@ const GlobalCallContent = ({
         const pl = t.rooms?.videoCall?.participantList || {}
         const isHost = isRoomHost(roomData, user?.accountId)
 
-        if (data.action === "MUTE_ALL" && !isHost) {
-          if (localParticipant) {
+        // Ticket 02: mute-all từ host hoặc co-host có mute_all.
+        // Không tự mute (khong tu khoa) + host không bị co-host mute.
+        if (data.action === "MUTE_ALL") {
+          const senderIsMe =
+            (data.senderId != null && String(data.senderId) === currentAccId) ||
+            (data.senderIdentity != null &&
+              String(data.senderIdentity) === localIdent)
+          if (!senderIsMe && !isHost && localParticipant) {
             localParticipant.setMicrophoneEnabled(false)
             toast.error(
               pl.hostMutedAll ||
-                "Host đã tắt tiếng tất cả mọi người trong phòng.",
+                "Host đã tắt tiếng tất cả mọi người trong phòng."
             )
+          }
+          return
+        }
+
+        if (data.action === "SELF_UNMUTE_POLICY") {
+          toast.info(
+            data.allow
+              ? (pl.selfUnmuteOn || "Host đã cho phép học viên tự bật mic.")
+              : (pl.selfUnmuteOff || "Host đã tắt quyền học viên tự bật mic.")
+          )
+          return
+        }
+
+        // Ticket 05: student share gate changed — refetch + toast.
+        // Students with an active share keep it; new starts are gated.
+        if (data.action === "STUDENT_SHARE_POLICY") {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "StudentSharePolicy", id: currentRoomId },
+            ])
+          )
+          toast.info(
+            data.allow
+              ? (pl.studentShareOn || "Host đã cho phép học viên chia sẻ màn hình.")
+              : (pl.studentShareOff || "Host đã tắt quyền học viên chia sẻ màn hình.")
+          )
+          return
+        }
+
+        // Ticket 05: member recording gate changed server-side — refetch +
+        // toast + keep the legacy local toggle in sync for older clients.
+        if (data.action === "MEMBER_RECORDING_POLICY") {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "MemberRecordingPolicy", id: currentRoomId },
+            ])
+          )
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.MEMBER_RECORDING,
+            data.allow !== false
+          )
+          window.dispatchEvent(
+            new Event("catspeak_member_recording_allowed_changed")
+          )
+          toast.info(
+            data.allow !== false
+              ? (pl.hostAllowedRecording ||
+                  "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
+              : (pl.hostDisabledRecording ||
+                  "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
+          )
+          return
+        }
+
+        // Ticket 04: room lock changed — refetch lock state + toast.
+        if (data.action === "ROOM_LOCK_CHANGED") {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "RoomLock", id: currentRoomId },
+            ])
+          )
+          toast.info(
+            data.locked
+              ? (pl.hostLockedRoom ||
+                  "Host đã khóa phòng. Người mới không thể tham gia.")
+              : (pl.hostUnlockedRoom || "Host đã mở khóa phòng.")
+          )
+          return
+        }
+
+        // Ticket 04: host/co-host ended the live for everyone —
+        // drop the LiveKit room and land on the end screen (rejoin
+        // creates a brand-new session; room/class state untouched).
+        if (data.action === "ROOM_ENDED") {
+          toast.error(pl.hostEndedSession || "Host đã kết thúc buổi live.", {
+            duration: 5000,
+          })
+          try {
+            lkRoom?.disconnect()
+          } catch {
+            /* ignore disconnect errors */
+          }
+          dispatch(leaveCall())
+          const nav = getNavigate()
+          const loc = getLocation()
+          if (nav && loc && loc.pathname.includes("/meet/")) {
+            nav(loc.pathname, {
+              replace: true,
+              state: { callEnded: true, reason: "ended" },
+            })
           }
           return
         }
@@ -784,21 +917,34 @@ const GlobalCallContent = ({
           })
           actions.handleLeaveSession()
         } else if (data.action === "MUTE_PARTICIPANT") {
+          // Ticket 02: host/co-host mute (muted=true) hoặc bật giùm (muted=false).
+          // Bật giùm luôn được phép kể cả khi gate tự bật mic đang tắt.
+          const shouldMute = data.muted !== false
           if (data.trackKind === "audio" && localParticipant) {
-            localParticipant.setMicrophoneEnabled(false)
-            toast.error(pl.hostMutedMic || "Host đã tắt mic của bạn.")
+            localParticipant.setMicrophoneEnabled(!shouldMute)
+            toast.error(
+              shouldMute
+                ? (pl.hostMutedMic || "Host đã tắt mic của bạn.")
+                : (pl.hostUnmutedMic || "Host đã bật mic của bạn.")
+            )
           } else if (data.trackKind === "video" && localParticipant) {
-            localParticipant.setCameraEnabled(false)
-            toast.error(pl.hostMutedCam || "Host đã tắt camera của bạn.")
+            localParticipant.setCameraEnabled(!shouldMute)
+            toast.error(
+              shouldMute
+                ? (pl.hostMutedCam || "Host đã tắt camera của bạn.")
+                : (pl.hostUnmutedCam || "Host đã bật camera của bạn.")
+            )
           } else if (
             (data.trackKind === "screen" ||
               data.trackKind === "screen_share") &&
             localParticipant
           ) {
-            localParticipant.setScreenShareEnabled(false)
-            toast.error(
-              pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn.",
-            )
+            if (shouldMute) {
+              localParticipant.setScreenShareEnabled(false)
+              toast.error(
+                pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn."
+              )
+            }
           }
         }
       } catch (err) {

@@ -10,6 +10,10 @@ import {
   useGetClassDetailQuery,
   useUpdateClassMutation,
   useDeleteClassMutation,
+  useGetClassCoHostQuery,
+  useAssignClassCoHostMutation,
+  useUpdateClassCoHostMutation,
+  useRevokeClassCoHostMutation,
 } from "@/store/api/coursesApi"
 import { formatCurrency } from "../utils/courseUtils"
 import { getClassLanguageCode } from "@/shared/utils/navigation"
@@ -22,6 +26,8 @@ import CreatePostTypeModal from "../components/CreatePostTypeModal"
 
 import { useAuth } from "@/features/auth"
 import { useRoleOverride } from "../components/RoleSwitcher"
+import CoHostManager from "@/features/co-host/CoHostManager"
+import { normalizeCoHost } from "@/features/co-host/constants"
 
 const ClassLectureHallPage = lazy(
   () => import("../components/lecture-hall/pages/ClassLectureHallPage"),
@@ -190,6 +196,44 @@ const ClassDetailPage = () => {
   const getWeeklyScheduleText = () =>
     formatWeeklySchedule(classData || {}, ui.tba)
 
+  // ── Co-host foundation (ticket 01) ──
+  const { data: classCoHostData } = useGetClassCoHostQuery(id, { skip: !id })
+  const [assignClassCoHost, { isLoading: isAssigningCoHost }] =
+    useAssignClassCoHostMutation()
+  const [updateClassCoHost, { isLoading: isUpdatingCoHost }] =
+    useUpdateClassCoHostMutation()
+  const [revokeClassCoHost, { isLoading: isRevokingCoHost }] =
+    useRevokeClassCoHostMutation()
+  const classCoHost =
+    normalizeCoHost(classCoHostData)
+  const coHostCandidates = React.useMemo(() => {
+    const raw =
+      classData?.students ?? classData?.members ?? classData?.enrollments ?? []
+    const ownerIds = new Set(
+      [
+        classData?.teacherId,
+        classData?.instructorId,
+        classData?.teacher?.id,
+        classData?.teacher?.accountId,
+      ]
+        .filter((v) => v != null)
+        .map(String),
+    )
+    return (Array.isArray(raw) ? raw : [])
+      .filter((s) => {
+        // Chỉ học viên Confirmed (Status === 1); entry không có trường
+        // status (members view-model) thì giữ lại, server validate tiếp.
+        const st = s?.status ?? s?.enrollmentStatus
+        return st == null || Number(st) === 1
+      })
+      .map((s) => ({
+        accountId: s?.accountId ?? s?.id ?? s?.studentId ?? s?.userId,
+        name: s?.name ?? s?.fullName ?? s?.studentName ?? "",
+        email: s?.email ?? "",
+      }))
+      .filter((s) => s.accountId != null && !ownerIds.has(String(s.accountId)))
+  }, [classData])
+
   if (isDetailLoading || (isDetailFetching && detailResponse === undefined)) {
     return (
       <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
@@ -259,6 +303,23 @@ const ClassDetailPage = () => {
             </h1>
 
             <div className="flex items-center gap-3">
+              {/* Co-host: Thêm khi chưa có, Quản lý khi đã có (chi tiết lớp) */}
+              {isClassTeacher && (
+                <CoHostManager
+                  coHost={classCoHost}
+                  candidates={coHostCandidates}
+                  isTeacher={isClassTeacher}
+                  isSaving={isAssigningCoHost || isUpdatingCoHost}
+                  isRevoking={isRevokingCoHost}
+                  onAssign={(body) =>
+                    assignClassCoHost({ classId: id, ...body }).unwrap()
+                  }
+                  onUpdate={(body) =>
+                    updateClassCoHost({ classId: id, ...body }).unwrap()
+                  }
+                  onRevoke={() => revokeClassCoHost(id).unwrap()}
+                />
+              )}
               {/* Vào phòng học button */}
               {/* <button
                 type="button"

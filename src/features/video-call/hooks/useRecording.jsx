@@ -13,6 +13,10 @@ import {
   getRoomSetting,
   ROOM_SETTING_KEYS,
 } from "@/features/video-call/utils/roomSettingHelpers"
+import {
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
 
 /**
  * useRecording — manages recording state for a video call session.
@@ -54,17 +58,50 @@ export function useRecording(lkRoom = null, syncState = {}) {
 
     const currentRoomId = syncState?.roomId || lkRoom?.name
     const isHost = syncState?.isHost
+    const coHost = syncState?.coHost ?? null
+    const localAccountId = syncState?.accountId
+    // Ticket 05: server-side member recording gate (default open).
+    // Host or co-host with record always bypass (shared recording);
+    // anyone else may record only while the gate is open. The legacy
+    // local toggle stays as an additional gate for the host's room.
+    const allowMemberRecording =
+      syncState?.allowMemberRecording ?? true
+    const canSharedRecord =
+      isHost ||
+      hasCoHostPermission(coHost, localAccountId, CO_HOST_PERMISSIONS.RECORD)
     const isMemberRecordingAllowed = getRoomSetting(
       currentRoomId,
       ROOM_SETTING_KEYS.MEMBER_RECORDING
     )
 
-    if (!isRecording && !isHost && !isMemberRecordingAllowed) {
+    if (!isRecording && !canSharedRecord && !allowMemberRecording) {
+      toast.error(
+        t.rooms?.videoCall?.participantList?.memberRecordingBlocked ||
+          t.rooms?.videoCall?.recordingDisabledByHost ||
+          "Host đã tắt quyền ghi hình phòng họp đối với thành viên."
+      )
+      return
+    }
+
+    if (!isRecording && !isHost && !canSharedRecord && !isMemberRecordingAllowed) {
       toast.error(
         t.rooms?.videoCall?.recordingDisabledByHost ||
           "Host đã tắt quyền ghi hình phòng họp đối với thành viên."
       )
       return
+    }
+
+    // Ticket 05: stop gate (UX nicety — the server re-checks creator /
+    // starter / record on confirm). Block only when we positively know
+    // this is someone else's recording; otherwise let the server decide.
+    if (isRecording && !canSharedRecord && startedByAccountId != null && localAccountId != null) {
+      if (String(startedByAccountId) !== String(localAccountId)) {
+        toast.error(
+          t.rooms?.videoCall?.participantList?.forbiddenRecord ||
+            "Bạn không có quyền dừng ghi hình."
+        )
+        return
+      }
     }
 
     setIsTogglingRecording(true)
@@ -185,6 +222,9 @@ export function useRecording(lkRoom = null, syncState = {}) {
     setEgressId,
     setStartedByAccountId,
     sessionId,
+    startedByAccountId,
+    syncState,
+    t,
   ])
 
   const confirmStopRecording = async () => {

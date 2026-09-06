@@ -8,6 +8,11 @@ import { Track } from "livekit-client"
 import { toast } from "react-hot-toast"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { parseMetadata } from "@/features/video-call/hooks/useParticipantList"
+import {
+  isCoHostUser,
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
 
 /**
  * Encapsulates screen-share state & actions using LiveKit.
@@ -37,7 +42,14 @@ const MOCK_SCREEN_TRACKS = ENABLE_MOCK_SCREEN_SHARE
     ]
   : []
 
-export const useScreenShare = ({ roomData, user, isHost, t } = {}) => {
+export const useScreenShare = ({
+  roomData,
+  user,
+  isHost,
+  coHost = null,
+  allowStudentShare = true,
+  t,
+} = {}) => {
   const room = useRoomContext()
   const { isScreenShareEnabled } = useLocalParticipant()
 
@@ -105,6 +117,28 @@ export const useScreenShare = ({ roomData, user, isHost, t } = {}) => {
       return
     }
 
+    // Ticket 05: self-share gate — host bypasses; co-host needs
+    // share_screen; students share by default while the student-share
+    // gate is open (host/co-host always bypass that gate).
+    const isSelfCoHost = isCoHostUser(coHost, user?.accountId)
+    if (!isHost && isSelfCoHost) {
+      if (
+        !hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.SHARE_SCREEN)
+      ) {
+        toast.error(
+          t?.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
+            "Bạn không có quyền chia sẻ màn hình."
+        )
+        return
+      }
+    } else if (!isHost && !isSelfCoHost && !allowStudentShare) {
+      toast.error(
+        t?.rooms?.videoCall?.participantList?.studentShareBlocked ||
+          "Host đã tắt quyền chia sẻ màn hình của học viên."
+      )
+      return
+    }
+
     // If someone else is currently sharing screen
     if (screenShareOn && !isLocalScreenShare) {
       // Host Protection Rule: If presenter is the Room Creator / Host and local user is NOT the host, block takeover
@@ -129,6 +163,9 @@ export const useScreenShare = ({ roomData, user, isHost, t } = {}) => {
     isLocalScreenShare,
     isPresenterHost,
     isHost,
+    coHost,
+    user?.accountId,
+    allowStudentShare,
     t,
     stopScreenShare,
     startScreenShare,
