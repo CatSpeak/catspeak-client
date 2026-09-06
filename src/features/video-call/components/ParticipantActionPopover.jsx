@@ -17,6 +17,7 @@ import {
 } from "@/store/api/roomsApi"
 import CoHostModal from "@/features/co-host/CoHostModal"
 import { normalizeCoHost } from "@/features/co-host/constants"
+import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
 
 export const ParticipantVolumeSlider = ({ participant, className = "", isInline = false }) => {
   const { t } = useLanguage()
@@ -375,7 +376,11 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           setRevokeCoHostConfirm(false)
         } catch (err) {
           toast.error(
-            err?.data?.message || "Không thể gỡ co-host. Vui lòng thử lại.",
+            resolveCoHostErrorMessage(
+              err,
+              t,
+              err?.data?.message || "Không thể gỡ co-host. Vui lòng thử lại.",
+            ),
           )
         }
       }}
@@ -432,8 +437,12 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             setCoHostModalOpen(false)
           } catch (err) {
             toast.error(
-              err?.data?.message ||
-                "Không thể phân công co-host. Vui lòng thử lại.",
+              resolveCoHostErrorMessage(
+                err,
+                t,
+                err?.data?.message ||
+                  "Không thể phân công co-host. Vui lòng thử lại.",
+              ),
             )
           }
         }}

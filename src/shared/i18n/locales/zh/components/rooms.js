@@ -856,11 +856,37 @@ export default {
     },
   },
 
+  coHost: {
+    scopeClass: '在班级“{name}”',
+    scopeRoom: '在房间“{name}”',
+    errors: {
+      COHOST_PERMISSION_REQUIRED: "请至少为助教选择一项权限。",
+      COHOST_PERMISSION_INVALID: "助教权限无效。",
+      COHOST_ROOM_TYPE_UNSUPPORTED: "仅班级房间和 Pro/自定义房间支持助教功能。",
+      COHOST_NOT_HOST: "只有房主才能指派助教。",
+      COHOST_CANNOT_ASSIGN_OWNER: "不能将房主/班主指派为助教。",
+      COHOST_TARGET_NOT_ONLINE: "只有当前在线的用户才能担任助教。",
+      COHOST_TARGET_BANNED: "被禁用的用户不能担任助教。",
+      COHOST_TARGET_NOT_CONFIRMED: "只有已确认的学生才能担任助教。",
+      COHOST_NO_ASSIGNMENT: "尚未指派助教。",
+    },
+  },
   notifications: {
     inviteSent: "已发送邀请",
     room_invite: {
       title: "房间邀请",
       body: "{inviterName} 邀请您加入会议室",
-    }
-  }
+    },
+    co_host_assigned: {
+      title: "您被指派为助教",
+      body: "{hostName}已指派您担任助教{scope}",
+    },
+    co_host_updated: {
+      title: "助教权限已更新",
+      body: "{hostName}已更新您的助教权限{scope}",
+    },
+    co_host_revoked: {
+      title: "助教指派已取消",
+      body: "{hostName}已取消您的助教指派{scope}",
+    },  }
 }

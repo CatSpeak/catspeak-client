@@ -907,11 +907,37 @@ export default {
     },
   },
 
+  coHost: {
+    scopeClass: 'in class "{name}"',
+    scopeRoom: 'in room "{name}"',
+    errors: {
+      COHOST_PERMISSION_REQUIRED: "Select at least one permission for the co-host.",
+      COHOST_PERMISSION_INVALID: "Invalid co-host permission.",
+      COHOST_ROOM_TYPE_UNSUPPORTED: "Only Class rooms and Pro/Custom rooms support co-hosts.",
+      COHOST_NOT_HOST: "Only the room host can assign a co-host.",
+      COHOST_CANNOT_ASSIGN_OWNER: "The host cannot be assigned as co-host.",
+      COHOST_TARGET_NOT_ONLINE: "Only users currently online in the room can be co-hosts.",
+      COHOST_TARGET_BANNED: "A banned user cannot be a co-host.",
+      COHOST_TARGET_NOT_CONFIRMED: "Only confirmed students can be co-hosts.",
+      COHOST_NO_ASSIGNMENT: "No co-host assigned yet.",
+    },
+  },
   notifications: {
     inviteSent: "Invite sent",
     room_invite: {
       title: "Room Invitation",
       body: "{inviterName} invited you to join a room",
-    }
-  }
+    },
+    co_host_assigned: {
+      title: "Assigned as Co-host",
+      body: "{hostName} assigned you as co-host {scope}",
+    },
+    co_host_updated: {
+      title: "Co-host permissions updated",
+      body: "{hostName} updated your co-host permissions {scope}",
+    },
+    co_host_revoked: {
+      title: "Co-host assignment removed",
+      body: "{hostName} removed your co-host assignment {scope}",
+    },  }
 };

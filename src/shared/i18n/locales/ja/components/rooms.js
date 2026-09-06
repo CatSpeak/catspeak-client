@@ -884,11 +884,38 @@ export default {
     },
   },
 
+  coHost: {
+    scopeClass: '「{name}」クラスで',
+    scopeRoom: '「{name}」ルームで',
+    errors: {
+      COHOST_PERMISSION_REQUIRED: "コーホストに少なくとも1つの権限を選択してください。",
+      COHOST_PERMISSION_INVALID: "コーホストの権限が無効です。",
+      COHOST_ROOM_TYPE_UNSUPPORTED: "クラスルームとPro/カスタムルームのみコーホストに対応しています。",
+      COHOST_NOT_HOST: "ルームのホストのみコーホストを指名できます。",
+      COHOST_CANNOT_ASSIGN_OWNER: "ホストをコーホストに指名できません。",
+      COHOST_TARGET_NOT_ONLINE: "オンライン中のユーザーのみコーホストに指名できます。",
+      COHOST_TARGET_BANNED: "BAN中のユーザーはコーホストに指名できません。",
+      COHOST_TARGET_NOT_CONFIRMED: "承認済み（Confirmed）の生徒のみコーホストに指名できます。",
+      COHOST_NO_ASSIGNMENT: "コーホストはまだ指名されていません。",
+    },
+  },
   notifications: {
     inviteSent: "招待を送信しました",
     room_invite: {
       title: "ルームへの招待",
       body: "{inviterName}さんがルームへの参加に招待しました",
+    },
+    co_host_assigned: {
+      title: "コーホストに指名されました",
+      body: "{hostName}さんが{scope}あなたをコーホストに指名しました",
+    },
+    co_host_updated: {
+      title: "コーホスト権限が更新されました",
+      body: "{hostName}さんが{scope}あなたのコーホスト権限を更新しました",
+    },
+    co_host_revoked: {
+      title: "コーホストの指名が解除されました",
+      body: "{hostName}さんが{scope}あなたのコーホスト指名を解除しました",
     },
   },
 }

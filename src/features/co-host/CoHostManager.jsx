@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Crown } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import CoHostModal from "./CoHostModal"
 import CoHostBadge from "./CoHostBadge"
+import { resolveCoHostErrorMessage } from "./errors"
 
 /**
  * Reusable co-host manager (ticket 01).
@@ -28,6 +30,7 @@ const CoHostManager = ({
   isRevoking = false,
   serverError = "",
 }) => {
+  const { t } = useLanguage()
   const [modalOpen, setModalOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
 
@@ -59,7 +62,13 @@ const CoHostManager = ({
       }
       setModalOpen(false)
     } catch (err) {
-      toast.error(err?.data?.message || "Không thể phân công co-host. Vui lòng thử lại.")
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          err?.data?.message || "Không thể phân công co-host. Vui lòng thử lại.",
+        ),
+      )
     }
   }
 
@@ -70,7 +79,13 @@ const CoHostManager = ({
       setConfirmOpen(false)
       setModalOpen(false)
     } catch (err) {
-      toast.error(err?.data?.message || "Không thể gỡ co-host. Vui lòng thử lại.")
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          err?.data?.message || "Không thể gỡ co-host. Vui lòng thử lại.",
+        ),
+      )
     }
   }
 

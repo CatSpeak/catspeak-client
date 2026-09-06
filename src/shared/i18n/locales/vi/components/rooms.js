@@ -884,11 +884,37 @@ export default {
     },
   },
 
+  coHost: {
+    scopeClass: 'trong lớp học "{name}"',
+    scopeRoom: 'trong phòng "{name}"',
+    errors: {
+      COHOST_PERMISSION_REQUIRED: "Phải chọn ít nhất một quyền cho co-host.",
+      COHOST_PERMISSION_INVALID: "Quyền co-host không hợp lệ.",
+      COHOST_ROOM_TYPE_UNSUPPORTED: "Chỉ phòng Lớp học và phòng Pro/Custom mới hỗ trợ co-host.",
+      COHOST_NOT_HOST: "Chỉ chủ phòng mới được phân công co-host.",
+      COHOST_CANNOT_ASSIGN_OWNER: "Không thể phân công chủ phòng/lớp làm co-host.",
+      COHOST_TARGET_NOT_ONLINE: "Chỉ người đang online trong phòng mới được làm co-host.",
+      COHOST_TARGET_BANNED: "Người dùng đang bị cấm không thể làm co-host.",
+      COHOST_TARGET_NOT_CONFIRMED: "Chỉ học viên đã xác nhận (Confirmed) mới được làm co-host.",
+      COHOST_NO_ASSIGNMENT: "Chưa có co-host được phân công.",
+    },
+  },
   notifications: {
     inviteSent: "Đã gửi lời mời",
     room_invite: {
       title: "Lời mời tham gia phòng",
       body: "{inviterName} đã mời bạn tham gia phòng họp",
-    }
-  }
+    },
+    co_host_assigned: {
+      title: "Được phân công làm Co-host",
+      body: "{hostName} đã phân công bạn làm co-host {scope}",
+    },
+    co_host_updated: {
+      title: "Quyền Co-host được cập nhật",
+      body: "{hostName} đã cập nhật quyền co-host của bạn {scope}",
+    },
+    co_host_revoked: {
+      title: "Đã gỡ phân công Co-host",
+      body: "{hostName} đã gỡ phân công co-host của bạn {scope}",
+    },  }
 }
