@@ -76,7 +76,7 @@ export default {
     {
       title: '9. Contact',
       intro: 'If you have any questions about this policy, please reach out:',
-      bullets: ['Email: support@cathspeak.com', 'Hotline: +84 123 456 789', 'Fanpage: facebook.com/cathspeak'],
+      bullets: ['Email: support@catspeak.com.vn', 'Hotline: +84 123 456 789', 'Fanpage: facebook.com/cathspeak'],
     },
   ],
 }

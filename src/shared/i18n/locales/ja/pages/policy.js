@@ -77,7 +77,7 @@ export default {
       title: "9. お問い合わせ",
       intro: "このポリシーに関するご質問がある場合は、お問い合わせください:",
       bullets: [
-        "Email: support@cathspeak.com",
+        "Email: support@catspeak.com.vn",
         "Hotline: +84 123 456 789",
         "Fanpage: facebook.com/cathspeak",
       ],
