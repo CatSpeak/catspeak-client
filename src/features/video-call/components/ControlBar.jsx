@@ -17,7 +17,15 @@ import {
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
-import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  useGetRoomCoHostQuery,
+  useGetSelfUnmutePolicyQuery,
+} from "@/store/api/roomsApi"
+import {
+  isBreakoutSupported,
+  isRoomHost,
+} from "@/features/video-call/utils/roomTypeHelpers"
+import { normalizeCoHost, isCoHostUser } from "@/features/co-host/constants"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -72,14 +80,46 @@ const VideoCallControlBar = () => {
     participants,
     isAISession,
     isHost: isHostFromContext,
+    id: roomId,
   } = useVideoCallContext()
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall)
-  const isHost = isHostFromContext
+  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
     skip: !parentSessionId,
   })
+
+  // Ticket 02: gate tự bật mic — khi tắt, học viên đang mute không tự bật lại được.
+  // Host/co-host vẫn bật giùm được (qua popover + MUTE_PARTICIPANT muted=false).
+  const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
+    skip: !roomId,
+  })
+  const { data: selfUnmutePolicy } = useGetSelfUnmutePolicyQuery(roomId, {
+    skip: !roomId,
+  })
+  const allowSelfUnmute =
+    selfUnmutePolicy?.data?.allowSelfUnmute ??
+    selfUnmutePolicy?.allowSelfUnmute ??
+    true
+  const isSelfCoHost = isCoHostUser(normalizeCoHost(coHostData), user?.accountId)
+
+  const handleMicWithGate = async () => {
+    const tryingToUnmute = !micOn
+    if (
+      tryingToUnmute &&
+      !allowSelfUnmute &&
+      !isHost &&
+      !isSelfCoHost
+    ) {
+      toast.error(
+        t.rooms?.videoCall?.participantList?.selfUnmuteBlocked ||
+          "Host đã tắt quyền tự bật mic. Vui lòng chờ host bật giùm."
+      )
+      return
+    }
+    await handleToggleMic()
+  }
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
   const [showMoreMenu, setShowMoreMenu] = useState(false)
@@ -117,7 +157,7 @@ const VideoCallControlBar = () => {
         <ControlButton
           isActive={micOn}
           isLoading={isTogglingMic}
-          onClick={handleToggleMic}
+          onClick={handleMicWithGate}
           title={
             micOn
               ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"

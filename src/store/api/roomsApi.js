@@ -317,12 +317,37 @@ export const roomsApi = baseApi.injectEndpoints({
     }),
 
     // Mute audio/video track of a participant
+    // Ticket 02: body { targetAccountId, trackSid?, trackKind?: 'audio'|'video', muted }
     muteParticipant: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `/rooms/${id}/moderation/mute`,
         method: "POST",
         body,
       }),
+    }),
+
+    // Ticket 02: mute all mics at once (verify sender holds mute_all, excludes self)
+    muteAllParticipants: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/mute-all`,
+        method: "POST",
+      }),
+    }),
+
+    // Ticket 02: session-level self-unmute gate (default open)
+    getSelfUnmutePolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/self-unmute-policy`,
+      providesTags: (result, error, id) => [{ type: "SelfUnmutePolicy", id }],
+    }),
+    updateSelfUnmutePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/self-unmute-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "SelfUnmutePolicy", id },
+      ],
     }),
 
     // Get list of banned participants for a room
@@ -461,6 +486,9 @@ export const {
   // Host Moderation
   useKickParticipantMutation,
   useMuteParticipantMutation,
+  useMuteAllParticipantsMutation,
+  useGetSelfUnmutePolicyQuery,
+  useUpdateSelfUnmutePolicyMutation,
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,
   useInviteToRoomMutation,

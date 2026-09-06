@@ -528,14 +528,29 @@ const GlobalCallContent = ({
         const pl = t.rooms?.videoCall?.participantList || {}
         const isHost = isRoomHost(roomData, user?.accountId)
 
-        if (data.action === "MUTE_ALL" && !isHost) {
-          if (localParticipant) {
+        // Ticket 02: mute-all từ host hoặc co-host có mute_all.
+        // Không tự mute (khong tu khoa) + host không bị co-host mute.
+        if (data.action === "MUTE_ALL") {
+          const senderIsMe =
+            (data.senderId != null && String(data.senderId) === currentAccId) ||
+            (data.senderIdentity != null &&
+              String(data.senderIdentity) === localIdent)
+          if (!senderIsMe && !isHost && localParticipant) {
             localParticipant.setMicrophoneEnabled(false)
             toast.error(
               pl.hostMutedAll ||
-                "Host đã tắt tiếng tất cả mọi người trong phòng.",
+                "Host đã tắt tiếng tất cả mọi người trong phòng."
             )
           }
+          return
+        }
+
+        if (data.action === "SELF_UNMUTE_POLICY") {
+          toast.info(
+            data.allow
+              ? (pl.selfUnmuteOn || "Host đã cho phép học viên tự bật mic.")
+              : (pl.selfUnmuteOff || "Host đã tắt quyền học viên tự bật mic.")
+          )
           return
         }
 
@@ -701,21 +716,34 @@ const GlobalCallContent = ({
           })
           actions.handleLeaveSession()
         } else if (data.action === "MUTE_PARTICIPANT") {
+          // Ticket 02: host/co-host mute (muted=true) hoặc bật giùm (muted=false).
+          // Bật giùm luôn được phép kể cả khi gate tự bật mic đang tắt.
+          const shouldMute = data.muted !== false
           if (data.trackKind === "audio" && localParticipant) {
-            localParticipant.setMicrophoneEnabled(false)
-            toast.error(pl.hostMutedMic || "Host đã tắt mic của bạn.")
+            localParticipant.setMicrophoneEnabled(!shouldMute)
+            toast.error(
+              shouldMute
+                ? (pl.hostMutedMic || "Host đã tắt mic của bạn.")
+                : (pl.hostUnmutedMic || "Host đã bật mic của bạn.")
+            )
           } else if (data.trackKind === "video" && localParticipant) {
-            localParticipant.setCameraEnabled(false)
-            toast.error(pl.hostMutedCam || "Host đã tắt camera của bạn.")
+            localParticipant.setCameraEnabled(!shouldMute)
+            toast.error(
+              shouldMute
+                ? (pl.hostMutedCam || "Host đã tắt camera của bạn.")
+                : (pl.hostUnmutedCam || "Host đã bật camera của bạn.")
+            )
           } else if (
             (data.trackKind === "screen" ||
               data.trackKind === "screen_share") &&
             localParticipant
           ) {
-            localParticipant.setScreenShareEnabled(false)
-            toast.error(
-              pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn.",
-            )
+            if (shouldMute) {
+              localParticipant.setScreenShareEnabled(false)
+              toast.error(
+                pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn."
+              )
+            }
           }
         }
       } catch (err) {

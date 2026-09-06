@@ -26,6 +26,18 @@ import { toast } from "react-hot-toast"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { useNavigate } from "react-router-dom"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
+import {
+  useGetRoomCoHostQuery,
+  useMuteAllParticipantsMutation,
+  useGetSelfUnmutePolicyQuery,
+  useUpdateSelfUnmutePolicyMutation,
+} from "@/store/api/roomsApi"
+import {
+  normalizeCoHost,
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
+import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
 
 /**
  * A single row in the participant list.
@@ -198,16 +210,62 @@ const ParticipantList = ({ hideTitle }) => {
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
   const [muteAllConfirmOpen, setMuteAllConfirmOpen] = React.useState(false)
 
+  // Ticket 02: co-host perms cho mute-all + self-unmute gate.
+  const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
+    skip: !roomId,
+  })
+  const coHost = normalizeCoHost(coHostData)
+  const canMuteAll =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.MUTE_ALL)
+  const canToggleSelfUnmute =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
+    )
+
+  const [muteAllApi, { isLoading: isMutingAll }] =
+    useMuteAllParticipantsMutation()
+  const { data: selfUnmutePolicy } = useGetSelfUnmutePolicyQuery(roomId, {
+    skip: !roomId,
+  })
+  const [updateSelfUnmute, { isLoading: isTogglingSelfUnmute }] =
+    useUpdateSelfUnmutePolicyMutation()
+  const allowSelfUnmute =
+    selfUnmutePolicy?.data?.allowSelfUnmute ??
+    selfUnmutePolicy?.allowSelfUnmute ??
+    true
+
   const handleMuteAll = () => {
     setMuteAllConfirmOpen(true)
   }
 
-  const confirmMuteAll = () => {
+  const confirmMuteAll = async () => {
     setMuteAllConfirmOpen(false)
+    if (!roomId) return
+    try {
+      await muteAllApi(roomId).unwrap()
+    } catch (err) {
+      console.warn("Backend mute-all API response:", err)
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenMuteAll || "Bạn không có quyền tắt toàn bộ mic."
+        )
+      )
+      return
+    }
     if (lkRoom?.localParticipant) {
       try {
         const payload = new TextEncoder().encode(
-          JSON.stringify({ action: "MUTE_ALL" })
+          JSON.stringify({
+            action: "MUTE_ALL",
+            senderId: String(user?.accountId ?? ""),
+            senderIdentity: String(lkRoom.localParticipant.identity ?? ""),
+          })
         )
         lkRoom.localParticipant.publishData(payload, {
           topic: "moderation",
@@ -218,6 +276,39 @@ const ParticipantList = ({ hideTitle }) => {
       }
     }
     toast.success(pl.successMuteAll || "Đã tắt mic tất cả mọi người")
+  }
+
+  const handleToggleSelfUnmute = async () => {
+    if (!roomId) return
+    try {
+      const next = !allowSelfUnmute
+      await updateSelfUnmute({ id: roomId, allow: next }).unwrap()
+      // Broadcast để các client khác thấy ngay mà không cần refetch.
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({ action: "SELF_UNMUTE_POLICY", allow: next })
+        )
+        lkRoom?.localParticipant?.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch {
+        /* ignore broadcast errors */
+      }
+      toast.success(
+        next
+          ? (pl.selfUnmuteOn || "Đã cho phép học viên tự bật mic.")
+          : (pl.selfUnmuteOff || "Đã tắt quyền học viên tự bật mic.")
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenSelfUnmute || "Bạn không có quyền đổi chính sách này."
+        )
+      )
+    }
   }
 
   const handleLowerAllHands = async () => {
@@ -262,26 +353,42 @@ const ParticipantList = ({ hideTitle }) => {
         </ListItem>
       )}
 
-      {/* Host Quick Moderation Actions */}
-      {isHost && (
-        <div className="p-2.5 border-b border-[#E5E5E5] flex items-center gap-2 bg-gray-50/90 shrink-0">
-          <button
-            onClick={handleMuteAll}
+      {/* Host / Co-host Quick Moderation Actions (ticket 02 per-perm) */}
+      {(canMuteAll || canToggleSelfUnmute || isHost) && (
+        <div className="p-2.5 border-b border-[#E5E5E5] flex flex-col gap-2 bg-gray-50/90 shrink-0">
+          <div className="flex items-center gap-2">
+            {canMuteAll && (
+              <button
+                onClick={handleMuteAll}
+                disabled={isMutingAll}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-red-700 bg-red-50/80 hover:bg-red-100 border border-red-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+              >
+                <MicOff size={15} className="text-red-500 shrink-0" />
+                <span>{pl.muteAll || "Tắt tất cả mic"}</span>
+              </button>
+            )}
 
-            className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-red-700 bg-red-50/80 hover:bg-red-100 border border-red-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
-          >
-            <MicOff size={15} className="text-red-500 shrink-0" />
-            <span>{pl.muteAll || "Tắt tất cả mic"}</span>
-          </button>
+            <button
+              onClick={handleLowerAllHands}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+            >
+              <Hand size={15} className="text-amber-500 shrink-0" />
+              <span>{pl.lowerAllHands || "Hạ tất cả tay"}</span>
+            </button>
+          </div>
 
-          <button
-            onClick={handleLowerAllHands}
-
-            className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
-          >
-            <Hand size={15} className="text-amber-500 shrink-0" />
-            <span>{pl.lowerAllHands || "Hạ tất cả tay"}</span>
-          </button>
+          {canToggleSelfUnmute && (
+            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
+              <span>{pl.allowSelfUnmute || "Cho phép học viên tự bật mic"}</span>
+              <input
+                type="checkbox"
+                checked={allowSelfUnmute}
+                disabled={isTogglingSelfUnmute}
+                onChange={handleToggleSelfUnmute}
+                className="h-4 w-4 accent-blue-600"
+              />
+            </label>
+          )}
         </div>
       )}
       <div className="flex-1 overflow-y-auto p-1">

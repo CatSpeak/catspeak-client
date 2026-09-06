@@ -92,3 +92,14 @@ export const normalizeCoHost = (payload) => {
     return null
   return inner
 }
+
+// Ticket 02: helpers cho live enforce theo từng quyền con.
+export const isCoHostUser = (coHost, accountId) => {
+  if (!coHost?.coHostAccountId || accountId == null) return false
+  return String(coHost.coHostAccountId) === String(accountId)
+}
+
+export const hasCoHostPermission = (coHost, accountId, code) => {
+  if (!isCoHostUser(coHost, accountId)) return false
+  return (coHost.permissions ?? []).includes(code)
+}

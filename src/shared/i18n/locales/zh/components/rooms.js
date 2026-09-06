@@ -869,6 +869,7 @@ export default {
       COHOST_TARGET_BANNED: "被禁用的用户不能担任助教。",
       COHOST_TARGET_NOT_CONFIRMED: "只有已确认的学生才能担任助教。",
       COHOST_NO_ASSIGNMENT: "尚未指派助教。",
+      COHOST_FORBIDDEN: "助教没有执行此操作的权限。",
     },
   },
   notifications: {

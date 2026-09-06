@@ -16,7 +16,11 @@ import {
   useRevokeRoomCoHostMutation,
 } from "@/store/api/roomsApi"
 import CoHostModal from "@/features/co-host/CoHostModal"
-import { normalizeCoHost } from "@/features/co-host/constants"
+import {
+  normalizeCoHost,
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
 import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
 
 export const ParticipantVolumeSlider = ({ participant, className = "", isInline = false }) => {
@@ -162,9 +166,10 @@ export const ParticipantActionPopover = ({ participant, children }) => {
   const targetAccountId = meta.accountId || participant?.identity
 
   // ── Co-host in-live (ticket 01): host phân công / thay thế ngay trong live ──
+  // Ticket 02: fetch cho mọi thành viên để co-host biết quyền media của mình.
   const [coHostModalOpen, setCoHostModalOpen] = useState(false)
   const { data: liveCoHostData } = useGetRoomCoHostQuery(roomId, {
-    skip: !roomId || !isCurrentHost,
+    skip: !roomId,
   })
   const [assignRoomCoHost, { isLoading: isAssigningCoHost }] =
     useAssignRoomCoHostMutation()
@@ -179,19 +184,38 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     targetAccountId != null &&
     String(liveCoHost.coHostAccountId) === String(targetAccountId)
 
+  // Ticket 02: quyền media của chính mình (host bypass, co-host theo từng quyền con).
+  const canToggleMic =
+    isCurrentHost ||
+    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.MIC_TOGGLE)
+  const canToggleCam =
+    isCurrentHost ||
+    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.CAMERA_TOGGLE)
+  const canModerateMedia = canToggleMic || canToggleCam
+
+  const [kickConfirm, setKickConfirm] = React.useState({ open: false, banRejoin: false })
+
   if (participant?.isLocal) return <>{children}</>
 
-  const handleMuteTrack = async (trackKind) => {
+  const handleMuteTrack = async (trackKind, muted = true) => {
     if (!roomId) return
     try {
       await muteParticipant({
         id: roomId,
-        targetAccountId,
+        targetAccountId: Number(targetAccountId),
         trackKind,
-        muted: true,
+        muted,
       }).unwrap()
     } catch (err) {
       console.warn("Backend mute API response:", err)
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenMedia || "Bạn không có quyền điều khiển mic/camera."
+        )
+      )
+      return
     }
 
     if (lkRoom?.localParticipant) {
@@ -202,6 +226,9 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             targetId: String(targetAccountId),
             targetIdentity: String(participant.identity),
             trackKind,
+            muted,
+            senderId: String(user?.accountId ?? ""),
+            senderIdentity: String(lkRoom.localParticipant.identity ?? ""),
           })
         )
         lkRoom.localParticipant.publishData(payload, {
@@ -213,16 +240,25 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       }
     }
 
-    toast.success(
-      trackKind === "audio"
-        ? (pl.successMuteMic || "Đã tắt mic người dùng")
-        : trackKind === "screen"
-        ? (pl.successStopScreen || "Đã dừng chia sẻ màn hình người dùng")
-        : (pl.successMuteCam || "Đã tắt camera người dùng")
-    )
+    if (muted) {
+      toast.success(
+        trackKind === "audio"
+          ? (pl.successMuteMic || "Đã tắt mic người dùng")
+          : trackKind === "screen"
+          ? (pl.successStopScreen || "Đã dừng chia sẻ màn hình người dùng")
+          : (pl.successMuteCam || "Đã tắt camera người dùng")
+      )
+    } else {
+      toast.success(
+        trackKind === "audio"
+          ? (pl.successUnmuteMic || "Đã bật mic người dùng")
+          : (pl.successUnmuteCam || "Đã bật camera người dùng")
+      )
+    }
   }
 
-  const [kickConfirm, setKickConfirm] = React.useState({ open: false, banRejoin: false })
+  const isTargetMicOn = participant?.isMicrophoneEnabled ?? true
+  const isTargetCamOn = participant?.isCameraEnabled ?? true
 
   const handleKick = (banRejoin = false) => {
     setKickConfirm({ open: true, banRejoin })
@@ -270,28 +306,44 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     <div className="bg-white rounded-xl shadow-lg border border-neutral-200/80 p-3 w-72 flex flex-col gap-2">
       <ParticipantVolumeSlider participant={participant} isInline />
 
+      {canModerateMedia && (
+        <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
+          {canToggleMic && (
+            <button
+              onClick={() => handleMuteTrack("audio", isTargetMicOn)}
+              disabled={isMuting}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            >
+              <MicOff size={18} className="text-neutral-500 shrink-0" />
+              <span>
+                {isTargetMicOn
+                  ? (pl.mute || "Tắt tiếng")
+                  : (pl.unmute || "Bật mic giùm")}
+              </span>
+            </button>
+          )}
+
+          {canToggleCam && (
+            <button
+              onClick={() => handleMuteTrack("video", isTargetCamOn)}
+              disabled={isMuting}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            >
+              <VideoOff size={18} className="text-neutral-500 shrink-0" />
+              <span>
+                {isTargetCamOn
+                  ? (pl.muteCam || "Tắt camera")
+                  : (pl.unmuteCam || "Bật camera giùm")}
+              </span>
+            </button>
+          )}
+        </div>
+      )}
+
       {isCurrentHost && (
         <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
           <button
-            onClick={() => handleMuteTrack("audio")}
-            disabled={isMuting}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <MicOff size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.mute || "Tắt tiếng"}</span>
-          </button>
-
-          <button
-            onClick={() => handleMuteTrack("video")}
-            disabled={isMuting}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <VideoOff size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.muteCam || "Tắt camera"}</span>
-          </button>
-
-          <button
-            onClick={() => handleMuteTrack("screen")}
+            onClick={() => handleMuteTrack("screen", true)}
             disabled={isMuting}
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >

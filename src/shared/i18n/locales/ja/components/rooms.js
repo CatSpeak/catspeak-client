@@ -897,6 +897,7 @@ export default {
       COHOST_TARGET_BANNED: "BAN中のユーザーはコーホストに指名できません。",
       COHOST_TARGET_NOT_CONFIRMED: "承認済み（Confirmed）の生徒のみコーホストに指名できます。",
       COHOST_NO_ASSIGNMENT: "コーホストはまだ指名されていません。",
+      COHOST_FORBIDDEN: "コーホストにはこの操作の権限がありません。",
     },
   },
   notifications: {

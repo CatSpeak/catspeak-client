@@ -15,6 +15,7 @@ export const COHOST_ERROR_CODES = {
   TARGET_BANNED: "COHOST_TARGET_BANNED",
   TARGET_NOT_CONFIRMED: "COHOST_TARGET_NOT_CONFIRMED",
   NO_ASSIGNMENT: "COHOST_NO_ASSIGNMENT",
+  FORBIDDEN: "COHOST_FORBIDDEN",
 }
 
 const VI_FALLBACKS = {
@@ -33,6 +34,7 @@ const VI_FALLBACKS = {
   [COHOST_ERROR_CODES.TARGET_NOT_CONFIRMED]:
     "Chỉ học viên đã xác nhận (Confirmed) mới được làm co-host.",
   [COHOST_ERROR_CODES.NO_ASSIGNMENT]: "Chưa có co-host được phân công.",
+  [COHOST_ERROR_CODES.FORBIDDEN]: "Co-host không có quyền thực hiện thao tác này.",
 }
 
 /**
