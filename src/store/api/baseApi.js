@@ -425,6 +425,9 @@ export const baseApi = createApi({
     "VoucherUsages",
     "CoHost",
     "ClassCoHost",
+    "SelfUnmutePolicy",
+    "BannedParticipants",
+    "WaitingQueue",
   ],
   endpoints: () => ({}),
 })

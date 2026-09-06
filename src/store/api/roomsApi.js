@@ -366,6 +366,40 @@ export const roomsApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [{ type: "BannedParticipants", id }],
     }),
 
+    // --- Ticket 03: waiting queue ---
+    // Class pre-fills client-side from Pending enrollments; Custom fills on knock.
+    getWaitingQueue: builder.query({
+      query: (id) => `/rooms/${id}/waiting`,
+      providesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    getMyWaitingStatus: builder.query({
+      query: (id) => `/rooms/${id}/waiting/me`,
+      providesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    knockWaiting: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/waiting/knock`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    admitWaiting: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/waiting/admit`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
+    }),
+    rejectWaiting: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/waiting/reject`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
+    }),
+
 
 
     // Invite user(s) to a room
@@ -492,6 +526,12 @@ export const {
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,
   useInviteToRoomMutation,
+  // Ticket 03: waiting queue
+  useGetWaitingQueueQuery,
+  useGetMyWaitingStatusQuery,
+  useKnockWaitingMutation,
+  useAdmitWaitingMutation,
+  useRejectWaitingMutation,
   // Co-host foundation
   useGetRoomCoHostQuery,
   useLazyGetRoomCoHostQuery,

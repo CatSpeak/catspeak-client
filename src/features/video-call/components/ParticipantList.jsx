@@ -9,6 +9,8 @@ import {
   UserPlus,
   Crown,
   Ellipsis,
+  DoorOpen,
+  Loader2,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -31,6 +33,9 @@ import {
   useMuteAllParticipantsMutation,
   useGetSelfUnmutePolicyQuery,
   useUpdateSelfUnmutePolicyMutation,
+  useGetWaitingQueueQuery,
+  useGetMyWaitingStatusQuery,
+  useKnockWaitingMutation,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -38,6 +43,8 @@ import {
   CO_HOST_PERMISSIONS,
 } from "@/features/co-host/constants"
 import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
+import WaitingQueueTab from "./waiting/WaitingQueueTab"
+import { normalizeWaitingEntry, normalizeWaitingQueue, knockWithToast } from "./waiting/waitingUtils"
 
 /**
  * A single row in the participant list.
@@ -174,8 +181,10 @@ const ParticipantItem = ({ participant }) => {
 /**
  * Participant list panel.
  * Reads participants and local media state from VideoCallContext.
+ * Ticket 03: `externalPending` merges Class Pending enrollments into the
+ * waiting tab client-side (cath-api cannot join instructor enrollments).
  */
-const ParticipantList = ({ hideTitle }) => {
+const ParticipantList = ({ hideTitle, externalPending }) => {
   const { t } = useLanguage()
   const {
     participants,
@@ -225,6 +234,27 @@ const ParticipantList = ({ hideTitle }) => {
       user?.accountId,
       CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
     )
+
+  // Ticket 03: waiting queue — host "Chờ" tab + waiter knock banner.
+  const [activeTab, setActiveTab] = React.useState("members")
+  const canViewWaiting =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.ADMIT_WAITING)
+  const { data: waitingQueueData } = useGetWaitingQueueQuery(roomId, {
+    skip: !roomId || !canViewWaiting,
+    pollingInterval: 10000,
+  })
+  const pendingCount =
+    normalizeWaitingQueue(waitingQueueData)?.pendingCount ??
+    normalizeWaitingQueue(waitingQueueData)?.pending?.length ??
+    0
+  const { data: myWaitingData } = useGetMyWaitingStatusQuery(roomId, {
+    skip: !roomId || isHost,
+  })
+  const myWaitingEntry = normalizeWaitingEntry(myWaitingData)
+  const [knockWaiting, { isLoading: isKnocking }] = useKnockWaitingMutation()
+
+  const handleKnock = () => knockWithToast({ roomId, knockWaiting, t })
 
   const [muteAllApi, { isLoading: isMutingAll }] =
     useMuteAllParticipantsMutation()
@@ -337,9 +367,29 @@ const ParticipantList = ({ hideTitle }) => {
           className="border-b border-border shrink-0"
         >
           <div className="flex items-center justify-between">
-            <span className="font-semibold">
-              {pl.title} ({participants.length})
-            </span>
+            {canViewWaiting ? (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("members")}
+                  className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${activeTab === "members" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
+                >
+                  {pl.title} ({participants.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("waiting")}
+                  className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${activeTab === "waiting" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
+                >
+                  {t?.rooms?.videoCall?.waitingQueue?.tab || "Chờ"}
+                  {pendingCount > 0 ? ` (${pendingCount})` : ""}
+                </button>
+              </div>
+            ) : (
+              <span className="font-semibold">
+                {pl.title} ({participants.length})
+              </span>
+            )}
             <div className="flex items-center gap-1">
               <IconButton
                 variant="ghost"
@@ -351,6 +401,25 @@ const ParticipantList = ({ hideTitle }) => {
             </div>
           </div>
         </ListItem>
+      )}
+
+      {/* Ticket 03: knock banner for non-hosts with no request yet. */}
+      {!isHost && activeTab === "members" && !myWaitingEntry && (
+        <div className="mx-2 mt-2 flex items-center gap-2 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2 shrink-0">
+          <DoorOpen size={16} className="shrink-0 text-blue-600" />
+          <span className="min-w-0 flex-1 text-xs font-medium text-blue-900">
+            {t?.rooms?.videoCall?.waitingQueue?.knockHint || "Phòng bật chế độ duyệt? Gõ cửa để xin vào."}
+          </span>
+          <button
+            type="button"
+            onClick={handleKnock}
+            disabled={isKnocking}
+            className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {isKnocking && <Loader2 size={12} className="animate-spin" />}
+            <span>{t?.rooms?.videoCall?.waitingQueue?.knock || "Gõ cửa"}</span>
+          </button>
+        </div>
       )}
 
       {/* Host / Co-host Quick Moderation Actions (ticket 02 per-perm) */}
@@ -391,6 +460,7 @@ const ParticipantList = ({ hideTitle }) => {
           )}
         </div>
       )}
+      {(!canViewWaiting || activeTab === "members") && (
       <div className="flex-1 overflow-y-auto p-1">
         {raisedHandParticipants.length > 0 && (
           <ul className="flex flex-col gap-1">
@@ -420,6 +490,14 @@ const ParticipantList = ({ hideTitle }) => {
           </ul>
         )}
       </div>
+      )}
+
+      {/* Ticket 03: host/co-host "Chờ" tab — knock list + Duyệt/Từ chối. */}
+      {canViewWaiting && activeTab === "waiting" && (
+        <div className="flex-1 overflow-y-auto">
+          <WaitingQueueTab roomId={roomId} externalPending={externalPending} />
+        </div>
+      )}
 
       <InviteParticipantModal
         open={isInviteModalOpen}

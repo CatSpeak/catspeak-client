@@ -33,6 +33,7 @@ import BreakoutBanner from "@/features/video-call/components/breakout-rooms/acti
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
 
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { WaitingGate } from "@/features/video-call/components/waiting/WaitingScreen"
 import { VideoCallProvider } from "@/features/video-call/context/VideoCallProvider"
 import { GameProvider } from "@/features/games/context/GameContext"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -214,6 +215,8 @@ const VideoCallRoomContent = () => {
 
   return (
     <div className="flex h-full w-full flex-col relative">
+      {/* Ticket 03: waiter lobby gate (pending/rejected see WaitingScreen). */}
+      <WaitingGate>
       {isReconnecting && (
         <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/50 backdrop-blur-md text-white">
           <div className="relative flex items-center justify-center h-16 w-16 mb-6">
@@ -431,6 +434,7 @@ const VideoCallRoomContent = () => {
       </AnimatePresence>
 
       <VideoCallControlBar />
+      </WaitingGate>
     </div>
   )
 }
