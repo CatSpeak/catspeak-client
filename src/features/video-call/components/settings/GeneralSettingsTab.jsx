@@ -9,6 +9,18 @@ import {
   setRoomSetting,
   ROOM_SETTING_KEYS,
 } from "@/features/video-call/utils/roomSettingHelpers"
+import {
+  useGetRoomCoHostQuery,
+  useGetMemberRecordingPolicyQuery,
+  useUpdateMemberRecordingPolicyMutation,
+} from "@/store/api/roomsApi"
+import {
+  normalizeCoHost,
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
+import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
+import { toast } from "react-hot-toast"
 
 const GeneralSettingsTab = ({
   receiveSystemMsgs = true,
@@ -28,6 +40,27 @@ const GeneralSettingsTab = ({
   const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
+  // Ticket 05: member recording gate is server-side; co-host with
+  // record manages it alongside the host (local toggle kept as fallback).
+  const { data: liveCoHostData } = useGetRoomCoHostQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const canManageMemberRecording =
+    isHost ||
+    hasCoHostPermission(
+      normalizeCoHost(liveCoHostData),
+      user?.accountId,
+      CO_HOST_PERMISSIONS.RECORD
+    )
+  const { data: memberRecordingPolicy } = useGetMemberRecordingPolicyQuery(
+    currentRoomId,
+    { skip: !currentRoomId }
+  )
+  const [updateMemberRecordingApi] = useUpdateMemberRecordingPolicyMutation()
+  const serverMemberRecording =
+    memberRecordingPolicy?.data?.allowMemberRecording ??
+    memberRecordingPolicy?.allowMemberRecording
+
   const [joinLeaveSound, setJoinLeaveSound] = React.useState(() => {
     return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND)
   })
@@ -35,6 +68,18 @@ const GeneralSettingsTab = ({
   const [memberRecordingAllowed, setMemberRecordingAllowed] = React.useState(() => {
     return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING)
   })
+
+  // Ticket 05: server policy is authoritative when loaded.
+  React.useEffect(() => {
+    if (serverMemberRecording !== undefined) {
+      setMemberRecordingAllowed(serverMemberRecording)
+      setRoomSetting(
+        currentRoomId,
+        ROOM_SETTING_KEYS.MEMBER_RECORDING,
+        serverMemberRecording
+      )
+    }
+  }, [serverMemberRecording, currentRoomId])
 
   const [memberPrivateAiAllowed, setMemberPrivateAiAllowed] = React.useState(() => {
     return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
@@ -87,6 +132,23 @@ const GeneralSettingsTab = ({
     setRoomSetting(currentRoomId, ROOM_SETTING_KEYS.MEMBER_RECORDING, val)
     window.dispatchEvent(new Event("catspeak_member_recording_allowed_changed"))
 
+    // Ticket 05: persist server-side so co-hosts/students enforce the
+    // same gate (fail-soft: local toggle already applied above).
+    if (currentRoomId) {
+      updateMemberRecordingApi({ id: currentRoomId, allow: val })
+        .unwrap()
+        .catch((err) => {
+          toast.error(
+            resolveCoHostErrorMessage(
+              err,
+              t,
+              t?.rooms?.videoCall?.participantList?.forbiddenRecord ||
+                "Bạn không có quyền đổi chính sách này."
+            )
+          )
+        })
+    }
+
     if (lkRoom?.localParticipant) {
       try {
         const payload = new TextEncoder().encode(
@@ -98,6 +160,17 @@ const GeneralSettingsTab = ({
         })
       } catch (err) {
         console.error("Failed to broadcast TOGGLE_MEMBER_RECORDING:", err)
+      }
+      try {
+        const serverPayload = new TextEncoder().encode(
+          JSON.stringify({ action: "MEMBER_RECORDING_POLICY", allow: val })
+        )
+        lkRoom.localParticipant.publishData(serverPayload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch (err) {
+        console.error("Failed to broadcast MEMBER_RECORDING_POLICY:", err)
       }
     }
   }
@@ -163,8 +236,9 @@ const GeneralSettingsTab = ({
         </span>
       </ListItem>
 
-      {isHost && (
+      {(isHost || canManageMemberRecording) && (
         <>
+          {isHost && (
           <ListItem
             lines="auto"
             rightContent={
@@ -183,6 +257,7 @@ const GeneralSettingsTab = ({
                 "Phát chuông thông báo âm thanh khi có thành viên mới vào hoặc rời khỏi cuộc họp."}
             </span>
           </ListItem>
+          )}
 
           <ListItem
             lines="auto"
@@ -203,6 +278,7 @@ const GeneralSettingsTab = ({
             </span>
           </ListItem>
 
+          {isHost && (
           <ListItem
             lines="auto"
             rightContent={
@@ -221,6 +297,7 @@ const GeneralSettingsTab = ({
                 "Khi tắt, thành viên chỉ có thể sử dụng AI Chat công khai trong phòng họp, không thể trò chuyện riêng với AI."}
             </span>
           </ListItem>
+          )}
         </>
       )}
     </div>

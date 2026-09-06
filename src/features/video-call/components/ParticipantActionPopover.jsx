@@ -198,6 +198,16 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     isCurrentHost ||
     hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
 
+  // Ticket 05: co-host with manage_student_share stops an ongoing
+  // student share (server mute path now requires manage_student_share).
+  const canStopScreen =
+    isCurrentHost ||
+    hasCoHostPermission(
+      liveCoHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE
+    )
+
   const [kickConfirm, setKickConfirm] = React.useState({ open: false, banRejoin: false })
 
   if (participant?.isLocal) return <>{children}</>
@@ -217,7 +227,9 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenMedia || "Bạn không có quyền điều khiển mic/camera."
+          trackKind === "screen"
+            ? (pl.forbiddenStopScreen || pl.forbiddenMedia || "Bạn không có quyền dừng chia sẻ màn hình.")
+            : (pl.forbiddenMedia || "Bạn không có quyền điều khiển mic/camera.")
         )
       )
       return
@@ -405,8 +417,20 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       )}
 
       {/* Ticket 03: co-host with remove_student sees kick-only (no ban, no screen-stop). */}
-      {!isCurrentHost && canKick && (
+      {/* Ticket 05: co-host with manage_student_share sees stop-share. */}
+      {(!isCurrentHost && (canKick || canStopScreen)) && (
         <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
+          {canStopScreen && (
+            <button
+              onClick={() => handleMuteTrack("screen", true)}
+              disabled={isMuting}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            >
+              <MonitorUp size={18} className="text-neutral-500 shrink-0" />
+              <span>{pl.stopScreenShare || "Dừng chia sẻ màn hình"}</span>
+            </button>
+          )}
+          {canKick && (
           <button
             onClick={() => handleKick(false)}
             disabled={isKicking}
@@ -415,6 +439,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             <UserX size={18} className="text-red-500 shrink-0" />
             <span>{pl.kick || "Mời ra khỏi phòng"}</span>
           </button>
+          )}
         </div>
       )}
     </div>

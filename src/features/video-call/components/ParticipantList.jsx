@@ -44,6 +44,10 @@ import {
   useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
+  useGetStudentSharePolicyQuery,
+  useUpdateStudentSharePolicyMutation,
+  useGetMemberRecordingPolicyQuery,
+  useUpdateMemberRecordingPolicyMutation,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -364,6 +368,38 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const canEndLive =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.END_CLASS)
+
+  // Ticket 05: student share gate (manage_student_share) + member
+  // recording gate, server-side (record). Both default open.
+  const canManageStudentShare =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE
+    )
+  const canManageMemberRecording =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.RECORD)
+  const { data: studentSharePolicy } = useGetStudentSharePolicyQuery(roomId, {
+    skip: !roomId,
+  })
+  const [updateStudentShare, { isLoading: isTogglingStudentShare }] =
+    useUpdateStudentSharePolicyMutation()
+  const allowStudentShare =
+    studentSharePolicy?.data?.allowStudentShare ??
+    studentSharePolicy?.allowStudentShare ??
+    true
+  const { data: memberRecordingPolicy } = useGetMemberRecordingPolicyQuery(
+    roomId,
+    { skip: !roomId }
+  )
+  const [updateMemberRecording, { isLoading: isTogglingMemberRecording }] =
+    useUpdateMemberRecordingPolicyMutation()
+  const allowMemberRecording =
+    memberRecordingPolicy?.data?.allowMemberRecording ??
+    memberRecordingPolicy?.allowMemberRecording ??
+    true
   const { data: roomLockData } = useGetRoomLockQuery(roomId, {
     skip: !roomId,
   })
@@ -454,8 +490,74 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const handleLowerAllHands = async () => {    if (lkRoom?.localParticipant) {
-      safeSetLiveKitMetadata(lkRoom.localParticipant, { handRaised: false, handRaisedAt: 0 })
+  // Ticket 05: student share gate (manage_student_share) — default open.
+  const handleToggleStudentShare = async () => {
+    if (!roomId) return
+    try {
+      const next = !allowStudentShare
+      await updateStudentShare({ id: roomId, allow: next }).unwrap()
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({ action: "STUDENT_SHARE_POLICY", allow: next })
+        )
+        lkRoom?.localParticipant?.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch {
+        /* ignore broadcast errors */
+      }
+      toast.success(
+        next
+          ? (pl.studentShareOn || "Đã cho phép học viên chia sẻ màn hình.")
+          : (pl.studentShareOff || "Đã tắt quyền học viên chia sẻ màn hình.")
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenStudentShare || "Bạn không có quyền đổi chính sách này."
+        )
+      )
+    }
+  }
+
+  // Ticket 05: member recording gate, server-side (record).
+  const handleToggleMemberRecording = async () => {
+    if (!roomId) return
+    try {
+      const next = !allowMemberRecording
+      await updateMemberRecording({ id: roomId, allow: next }).unwrap()
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({ action: "MEMBER_RECORDING_POLICY", allow: next })
+        )
+        lkRoom?.localParticipant?.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch {
+        /* ignore broadcast errors */
+      }
+      toast.success(
+        next
+          ? (pl.memberRecordingOn || "Đã cho phép học viên ghi hình.")
+          : (pl.memberRecordingOff || "Đã tắt quyền học viên ghi hình.")
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenRecord || "Bạn không có quyền đổi chính sách này."
+        )
+      )
+    }
+  }
+
+  const handleLowerAllHands = async () => {
+    if (lkRoom?.localParticipant) {      safeSetLiveKitMetadata(lkRoom.localParticipant, { handRaised: false, handRaisedAt: 0 })
       try {
         const payload = new TextEncoder().encode(
           JSON.stringify({ action: "LOWER_ALL_HANDS" })
@@ -534,8 +636,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         </div>
       )}
 
-      {/* Host / Co-host Quick Moderation Actions (ticket 02 per-perm, ticket 04 lock/end) */}
-      {(canMuteAll || canToggleSelfUnmute || canManageLock || canEndLive || isHost) && (
+      {/* Host / Co-host Quick Moderation Actions (ticket 02 per-perm, ticket 04 lock/end, ticket 05 share/record) */}
+      {(canMuteAll || canToggleSelfUnmute || canManageLock || canEndLive || canManageStudentShare || canManageMemberRecording || isHost) && (
         <div className="p-2.5 border-b border-[#E5E5E5] flex flex-col gap-2 bg-gray-50/90 shrink-0">
           <div className="flex items-center gap-2">
             {canMuteAll && (
@@ -599,6 +701,34 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               <PhoneOff size={15} className="shrink-0 rotate-[135deg]" />
               <span>{pl.endLive || "Kết thúc buổi live"}</span>
             </button>
+          )}
+
+          {/* Ticket 05: student share gate (manage_student_share) — default mở. */}
+          {canManageStudentShare && (
+            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
+              <span>{pl.allowStudentShare || "Cho phép học viên chia sẻ màn hình"}</span>
+              <input
+                type="checkbox"
+                checked={allowStudentShare}
+                disabled={isTogglingStudentShare}
+                onChange={handleToggleStudentShare}
+                className="h-4 w-4 accent-blue-600"
+              />
+            </label>
+          )}
+
+          {/* Ticket 05: member recording gate, server-side (record). */}
+          {canManageMemberRecording && (
+            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
+              <span>{pl.allowMemberRecording || "Cho phép học viên ghi hình"}</span>
+              <input
+                type="checkbox"
+                checked={allowMemberRecording}
+                disabled={isTogglingMemberRecording}
+                onChange={handleToggleMemberRecording}
+                className="h-4 w-4 accent-blue-600"
+              />
+            </label>
           )}
         </div>
       )}

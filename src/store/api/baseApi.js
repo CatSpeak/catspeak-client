@@ -429,6 +429,8 @@ export const baseApi = createApi({
     "BannedParticipants",
     "WaitingQueue",
     "RoomLock",
+    "StudentSharePolicy",
+    "MemberRecordingPolicy",
   ],
   endpoints: () => ({}),
 })

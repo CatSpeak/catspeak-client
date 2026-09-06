@@ -38,6 +38,14 @@ import {
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { roomsApi } from "@/store/api/roomsApi"
+import {
+  useGetRoomCoHostQuery,
+  useGetStudentSharePolicyQuery,
+  useGetMemberRecordingPolicyQuery,
+} from "@/store/api/roomsApi"
+import {
+  normalizeCoHost,
+} from "@/features/co-host/constants"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
@@ -401,10 +409,33 @@ const GlobalCallContent = ({
 
   const videoCallState = useVideoCall(t)
   const isHostUser = isRoomHost(roomData, user?.accountId)
+  // Ticket 05: co-host + server policies for share/record gates.
+  const { data: liveCoHostData } = useGetRoomCoHostQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const liveCoHost = normalizeCoHost(liveCoHostData)
+  const { data: studentSharePolicyData } = useGetStudentSharePolicyQuery(
+    currentRoomId,
+    { skip: !currentRoomId }
+  )
+  const allowStudentShare =
+    studentSharePolicyData?.data?.allowStudentShare ??
+    studentSharePolicyData?.allowStudentShare ??
+    true
+  const { data: memberRecordingPolicyData } = useGetMemberRecordingPolicyQuery(
+    currentRoomId,
+    { skip: !currentRoomId }
+  )
+  const allowMemberRecording =
+    memberRecordingPolicyData?.data?.allowMemberRecording ??
+    memberRecordingPolicyData?.allowMemberRecording ??
+    true
   const screenShareState = useScreenShare({
     roomData,
     user,
     isHost: isHostUser,
+    coHost: liveCoHost,
+    allowStudentShare,
     t,
   })
   const watchTogether = useWatchTogether({
@@ -422,6 +453,9 @@ const GlobalCallContent = ({
     sessionId,
     roomId: currentRoomId,
     isHost: isRoomHost(roomData, user?.accountId),
+    accountId: user?.accountId,
+    coHost: liveCoHost,
+    allowMemberRecording,
   })
 
   const subtitleControls = useSubtitleControls({
@@ -552,6 +586,48 @@ const GlobalCallContent = ({
             data.allow
               ? (pl.selfUnmuteOn || "Host đã cho phép học viên tự bật mic.")
               : (pl.selfUnmuteOff || "Host đã tắt quyền học viên tự bật mic.")
+          )
+          return
+        }
+
+        // Ticket 05: student share gate changed — refetch + toast.
+        // Students with an active share keep it; new starts are gated.
+        if (data.action === "STUDENT_SHARE_POLICY") {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "StudentSharePolicy", id: currentRoomId },
+            ])
+          )
+          toast.info(
+            data.allow
+              ? (pl.studentShareOn || "Host đã cho phép học viên chia sẻ màn hình.")
+              : (pl.studentShareOff || "Host đã tắt quyền học viên chia sẻ màn hình.")
+          )
+          return
+        }
+
+        // Ticket 05: member recording gate changed server-side — refetch +
+        // toast + keep the legacy local toggle in sync for older clients.
+        if (data.action === "MEMBER_RECORDING_POLICY") {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "MemberRecordingPolicy", id: currentRoomId },
+            ])
+          )
+          setRoomSetting(
+            currentRoomId,
+            ROOM_SETTING_KEYS.MEMBER_RECORDING,
+            data.allow !== false
+          )
+          window.dispatchEvent(
+            new Event("catspeak_member_recording_allowed_changed")
+          )
+          toast.info(
+            data.allow !== false
+              ? (pl.hostAllowedRecording ||
+                  "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
+              : (pl.hostDisabledRecording ||
+                  "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
           )
           return
         }

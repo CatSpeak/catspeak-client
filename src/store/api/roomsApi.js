@@ -421,6 +421,43 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // --- Ticket 05: student screen-share gate (default open, session-scoped) ---
+    // Host or co-host with manage_student_share toggles.
+    getStudentSharePolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/student-share-policy`,
+      providesTags: (result, error, id) => [{ type: "StudentSharePolicy", id }],
+    }),
+    updateStudentSharePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/student-share-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "StudentSharePolicy", id },
+      ],
+    }),
+
+    // --- Ticket 05: member recording gate, server-side (default open) ---
+    // Host or co-host with record toggles; shared recording start is gated
+    // server-side via EnsureRecordingAllowedAsync.
+    getMemberRecordingPolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/member-recording-policy`,
+      providesTags: (result, error, id) => [
+        { type: "MemberRecordingPolicy", id },
+      ],
+    }),
+    updateMemberRecordingPolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/member-recording-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "MemberRecordingPolicy", id },
+      ],
+    }),
+
 
 
     // Invite user(s) to a room
@@ -557,6 +594,11 @@ export const {
   useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
+  // Ticket 05: student share + member recording policies
+  useGetStudentSharePolicyQuery,
+  useUpdateStudentSharePolicyMutation,
+  useGetMemberRecordingPolicyQuery,
+  useUpdateMemberRecordingPolicyMutation,
   // Co-host foundation
   useGetRoomCoHostQuery,
   useLazyGetRoomCoHostQuery,
