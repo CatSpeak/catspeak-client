@@ -48,7 +48,7 @@ const InstructorPendingUpdateBanner = ({ live, pending, onCancel, isCancelling, 
       </div>
       <p className="text-sm text-blue-700 ml-8">
         {ins.pendingUpdateDesc ||
-          "Hồ sơ đã duyệt của bạn vẫn hiển thị và nhận học viên bình thường. Thay đổi sẽ có hiệu lực sau khi được duyệt."}
+          "Hồ sơ đã duyệt của bạn vẫn hiển thị và nhận học viên bình thường. Thay đổi sẽ có hiệu lực sau khi được duyệt. Bạn vẫn có thể bấm Chỉnh sửa để ghi đè yêu cầu cũ."}
       </p>
       {changedFields.length > 0 && (
         <p className="text-sm text-blue-700 ml-8">
@@ -68,7 +68,7 @@ const InstructorPendingUpdateBanner = ({ live, pending, onCancel, isCancelling, 
           ) : (
             <X size={14} />
           )}
-          <span>{isCancelling ? ins.cancelling || "Đang hủy..." : ins.cancelUpdate || "Hủy bản nháp"}</span>
+          <span>{isCancelling ? ins.cancelling || "Đang hủy..." : ins.cancelPendingRequest || ins.cancelUpdate || "Hủy yêu cầu chờ duyệt"}</span>
         </button>
       </div>
     </div>

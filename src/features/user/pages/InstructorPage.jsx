@@ -222,25 +222,20 @@ const InstructorPage = () => {
   // { type: "video" } | { type: "credential", index }
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  // True once a pending teaching draft has been auto-loaded into edit mode
-  // on page load (spec: reload shows the saved draft, not stale live values).
-  const draftLoadedRef = useRef(false);
+  // Q9: confirm modal for cancelling a pending teaching-update draft
+  // (DELETE /my/teaching-update). Distinct from "Hủy thay đổi" while editing.
+  const [confirmCancelPending, setConfirmCancelPending] = useState(false);
 
-  // Snapshot of the original form data to detect changes
+  // Snapshot of the original (live) form data to detect changes
   const originalFormDataRef = useRef(null);
   const personalInfoBackupRef = useRef(null);
 
-  // Populate form from existing application
+  // Snapshot live values (for change detection / video remove logic).
   useEffect(() => {
     if (existingApplication) {
       originalFormDataRef.current = existingApplication;
-      // Don't clobber a draft the teacher is editing (approved edit loads draft
-      // values into the form; re-setting live values here would wipe them).
-      if (!isEditingApproved) {
-        setFormData(existingApplication);
-      }
     }
-  }, [existingApplication, isEditingApproved]);
+  }, [existingApplication]);
 
   // Pre-fill form from user profile (new applications only)
   useEffect(() => {
@@ -486,17 +481,33 @@ const InstructorPage = () => {
       const files = Array.from(e.target.files || []);
       if (!files.length) return;
       const CRED_MAX_MB = 100;
-      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024);
-      if (oversized) {
-        const actualMb = (oversized.size / 1024 / 1024).toFixed(1);
+      // Spec Q12: only PDF (accept=".pdf" is advisory — enforce here too).
+      const nonPdf = files.find(
+        (f) => !(f.type === "application/pdf" || f.name?.toLowerCase().endsWith(".pdf")),
+      );
+      if (nonPdf) {
         setErrors((prev) => ({
           ...prev,
           credentials:
-            ins.credentialSizeLimit
-              ?.replace("{max}", CRED_MAX_MB)
-              ?.replace("{actual}", actualMb) ||
-            `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`,
+            ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.",
         }));
+        toast.error(ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.");
+        e.target.value = "";
+        return;
+      }
+      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024);
+      if (oversized) {
+        const actualMb = (oversized.size / 1024 / 1024).toFixed(1);
+        const msg =
+          ins.credentialSizeLimit
+            ?.replace("{max}", CRED_MAX_MB)
+            ?.replace("{actual}", actualMb) ||
+          `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`;
+        setErrors((prev) => ({
+          ...prev,
+          credentials: msg,
+        }));
+        toast.error(msg);
         e.target.value = "";
         return;
       }
@@ -666,16 +677,25 @@ const InstructorPage = () => {
     [],
   );
 
-  // BUG3: with a pending draft, load the page into edit mode showing the draft —
-  // the saved edits, not the stale approved values.
+  // Spec Q6/Q10: view mode shows the newest draft merged over live and stays
+  // in view mode. Reload shows the saved draft, not stale live values.
+  // Never auto-enter edit mode — the header shows a single "Chỉnh sửa" button
+  // while the pending banner explains the awaiting-review state.
   useEffect(() => {
-    if (!isApproved || !existingApplication || !pendingTeaching) return;
-    if (draftLoadedRef.current) return;
-    draftLoadedRef.current = true;
-    setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
-    setIsEditingApproved(true);
-    setErrors({});
-  }, [isApproved, existingApplication, pendingTeaching, mergeDraftFormData]);
+    if (!existingApplication) return;
+    if (isEditingApproved) return;
+    if (isApproved && pendingTeaching) {
+      setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
+    } else if (!pendingTeaching) {
+      setFormData(existingApplication);
+    }
+  }, [
+    isApproved,
+    existingApplication,
+    pendingTeaching,
+    isEditingApproved,
+    mergeDraftFormData,
+  ]);
 
   // Teaching-only validation for Approved updates: no personal fields, no ID
   // cards (identity lives in the account page), credentials optional.
@@ -706,6 +726,38 @@ const InstructorPage = () => {
     if (!formData.introduction?.trim() && !formData.videoFile)
       newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
 
+    // Spec Q12: block Save when credentials violate the kept rule
+    // (max 4 files, PDF only, each <=100MB). File-picker errors set
+    // errors.credentials, but a Save must not wipe them via setErrors(newErrors).
+    if (formData.credentials?.length > 4) {
+      newErrors.credentials =
+        ins.credentialLimit || "Tối đa 4 file chứng chỉ.";
+    } else {
+      const badCred = (formData.credentials || []).find(
+        (c) =>
+          c instanceof File &&
+          (c.size > 100 * 1024 * 1024 ||
+            !(c.type === "application/pdf" || c.name?.toLowerCase().endsWith(".pdf"))),
+      );
+      if (badCred) {
+        const isTypeBad = !(
+          badCred.type === "application/pdf" ||
+          badCred.name?.toLowerCase().endsWith(".pdf")
+        );
+        if (isTypeBad) {
+          newErrors.credentials =
+            ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.";
+        } else {
+          const actualMb = (badCred.size / 1024 / 1024).toFixed(1);
+          newErrors.credentials =
+            ins.credentialSizeLimit
+              ?.replace("{max}", 100)
+              ?.replace("{actual}", actualMb) ||
+            `Mỗi chứng chỉ phải nhỏ hơn 100MB (hiện tại ${actualMb}MB).`;
+        }
+      }
+    }
+
     setErrors(newErrors);
     return newErrors;
   }, [formData, ins]);
@@ -734,15 +786,25 @@ const InstructorPage = () => {
   }, [pendingTeaching, existingApplication, mergeDraftFormData]);
 
   const handleCancelEditApproved = useCallback(() => {
-    if (originalFormDataRef.current) {
+    // Spec Q9: "Hủy thay đổi" — revert to the current view (draft merged over
+    // live when a pending draft exists, else live). No API call.
+    if (existingApplication) {
+      if (pendingTeaching) {
+        setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
+      } else if (originalFormDataRef.current) {
+        setFormData(originalFormDataRef.current);
+      }
+    } else if (originalFormDataRef.current) {
       setFormData(originalFormDataRef.current);
     }
     setErrors({});
     setIsEditingApproved(false);
-  }, []);
+  }, [existingApplication, pendingTeaching, mergeDraftFormData]);
 
   // Approved save: teaching content only. No personal fields, no OTP — the live
   // Approved profile keeps serving while the draft awaits admin review.
+  // Backend overwrites the same Pending row (Q7), so a second Save replaces
+  // the previous request instead of creating a new one.
   const handleSaveApproved = useCallback(async () => {
     if (isSavingApproved || isSubmitting) return;
     const newErrors = validateTeachingForm();
@@ -758,15 +820,15 @@ const InstructorPage = () => {
     try {
       await submitTeaching(buildTeachingPayload()).unwrap();
       toast.success(
-        ins.teachingSubmitSuccess ||
-          "Đã gửi thay đổi nội dung giảng dạy! Hồ sơ đã duyệt vẫn hoạt động bình thường trong lúc chờ duyệt.",
+        ins.teachingUpdateOverwriteSuccess ||
+          ins.teachingSubmitSuccess ||
+          "Đã cập nhật yêu cầu chờ duyệt (ghi đè yêu cầu cũ). Hồ sơ đã duyệt vẫn hoạt động bình thường trong lúc chờ duyệt.",
       );
       setIsEditingApproved(false);
       setErrors({});
-      // Back to the live values; the draft still awaits review (pending banner).
-      if (originalFormDataRef.current) {
-        setFormData(originalFormDataRef.current);
-      }
+      // Q6/Q10: keep showing the new draft (formData already holds it).
+      // The pending query refetch keeps the view in sync. Do NOT reset to
+      // stale live values here.
     } catch (err) {
       toast.error(err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.");
     } finally {
@@ -781,10 +843,18 @@ const InstructorPage = () => {
     ins,
   ]);
 
+  // Spec Q9: "Hủy yêu cầu chờ duyệt" — DELETE the pending draft. Opened via a
+  // confirmation modal (see confirmCancelPending below), live stays untouched.
+  const handleRequestCancelTeachingUpdate = useCallback(() => {
+    if (!pendingTeaching || isCancellingTeaching) return;
+    setConfirmCancelPending(true);
+  }, [pendingTeaching, isCancellingTeaching]);
+
   const handleCancelTeachingUpdate = useCallback(async () => {
     try {
       await cancelTeaching().unwrap();
-      toast.success(ins.teachingCancelSuccess || "Đã hủy bản nháp chờ duyệt.");
+      setConfirmCancelPending(false);
+      toast.success(ins.teachingCancelSuccess || "Đã hủy yêu cầu chờ duyệt.");
     } catch (err) {
       toast.error(err?.data?.message || "Đã có lỗi xảy ra khi hủy bản nháp.");
     }
@@ -1045,7 +1115,7 @@ const InstructorPage = () => {
               disabled={isSavingApproved}
               className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50"
             >
-              {ins.cancel || "Hủy"}
+              {ins.cancelEditChanges || ins.cancel || "Hủy thay đổi"}
             </button>
             <button
               type="button"
@@ -1105,7 +1175,7 @@ const InstructorPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-800 flex-1">
             {ins.approvedEditingHint ||
-              "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt, hoặc Hủy để hoàn tác."}
+              "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt (ghi đè yêu cầu cũ nếu có), hoặc Hủy thay đổi để hoàn tác."}
           </p>
           {pendingTeaching && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-blue-700 bg-blue-100 rounded-full shrink-0">
@@ -1120,7 +1190,7 @@ const InstructorPage = () => {
         <InstructorPendingUpdateBanner
           live={rawApplication}
           pending={pendingTeaching}
-          onCancel={handleCancelTeachingUpdate}
+          onCancel={handleRequestCancelTeachingUpdate}
           isCancelling={isCancellingTeaching}
           t={t}
         />
@@ -1262,6 +1332,20 @@ const InstructorPage = () => {
               "Xóa video giới thiệu? Thay đổi chỉ có hiệu lực sau khi bạn nhấn Lưu."
         }
         confirmText={ins.delete || "Xóa"}
+      />
+
+      {/* Q9: confirm cancelling the pending teaching-update draft */}
+      <ConfirmationModal
+        open={confirmCancelPending}
+        onClose={() => setConfirmCancelPending(false)}
+        onConfirm={handleCancelTeachingUpdate}
+        title={ins.cancelPendingTitle || "Hủy yêu cầu chờ duyệt?"}
+        message={
+          ins.cancelPendingConfirm ||
+          "Hủy bản nháp chờ duyệt? Hồ sơ đã duyệt của bạn vẫn giữ nguyên và hiển thị bình thường."
+        }
+        confirmText={ins.cancelPendingRequest || ins.cancelUpdate || "Hủy yêu cầu"}
+        isPending={isCancellingTeaching}
       />
     </div>
   );

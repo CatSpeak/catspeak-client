@@ -152,7 +152,30 @@ export default {
     formInvalid: "Vui lòng điền đầy đủ các thông tin bắt buộc trước khi gửi.",
     credentialSizeLimit:
       "Mỗi chứng chỉ phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
+    credentialTypeError: "Chứng chỉ phải ở định dạng PDF.",
+    credentialLimit: "Tối đa 4 file chứng chỉ.",
     videoSizeLimit: "Video phải nhỏ hơn {max}MB (hiện tại {actual}MB).",
+    editInfo: "Chỉnh sửa",
+    cancelEditChanges: "Hủy thay đổi",
+    cancelPendingRequest: "Hủy yêu cầu chờ duyệt",
+    cancelPendingTitle: "Hủy yêu cầu chờ duyệt?",
+    cancelPendingConfirm:
+      "Hủy bản nháp chờ duyệt? Hồ sơ đã duyệt của bạn vẫn giữ nguyên và hiển thị bình thường.",
+    teachingUpdateOverwriteSuccess:
+      "Đã cập nhật yêu cầu chờ duyệt (ghi đè yêu cầu cũ). Hồ sơ đã duyệt vẫn hoạt động bình thường trong lúc chờ duyệt.",
+    teachingSubmitSuccess:
+      "Đã cập nhật yêu cầu chờ duyệt (ghi đè yêu cầu cũ). Hồ sơ đã duyệt vẫn hoạt động bình thường trong lúc chờ duyệt.",
+    teachingCancelSuccess: "Đã hủy yêu cầu chờ duyệt.",
+    approvedEditingHint:
+      "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt (ghi đè yêu cầu cũ nếu có), hoặc Hủy thay đổi để hoàn tác.",
+    pendingBadge: "Chờ admin duyệt",
+    pendingUpdateTitle: "Thay đổi nội dung giảng dạy đang chờ admin duyệt",
+    pendingUpdateDesc:
+      "Hồ sơ đã duyệt của bạn vẫn hiển thị và nhận học viên bình thường. Thay đổi sẽ có hiệu lực sau khi được duyệt. Bạn vẫn có thể bấm Chỉnh sửa để ghi đè yêu cầu cũ.",
+    previewCredential: "Bấm để xem chứng chỉ",
+    openNewTab: "Mở tab mới",
+    download: "Tải xuống",
+    previewLoading: "Đang tải xem trước...",
   },
   friends: {
     teacher: "Giảng viên",
