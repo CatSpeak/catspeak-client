@@ -840,6 +840,10 @@ export default {
     toastEnterClassName: "Please enter class name!",
     toastSelectCourseFirst: "Please select a course first!",
     toastSelectSchedule: "Please select at least one teaching day!",
+    languageNotAllowed:
+      "The selected language is not allowed according to your instructor profile.",
+    levelNotAllowed:
+      "The selected level exceeds your registered teaching level.",
     toastCreateSuccess: "Class created successfully!",
     commissionNote:
       "An platform commission of {{commission}}% (VND {{amount}}) will be deducted from each student registration.",

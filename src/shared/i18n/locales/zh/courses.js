@@ -808,6 +808,8 @@ export default {
     toastEnterClassName: "请输入班级名称！",
     toastSelectCourseFirst: "请先选择一个课程！",
     toastSelectSchedule: "请至少选择一个授课日程！",
+    languageNotAllowed: "根据您的教师资料，所选语言不受允许。",
+    levelNotAllowed: "所选级别超出了您注册的授课级别。",
     toastCreateSuccess: "成功创建班级！",
     commissionNote: "系统将从每位学生的注册费用中扣除 {{commission}}% 的平台佣金 ({{amount}} VND)。",
     minTuitionFeeNote: "此班级配置的最低学费为 {{minFee}} VNĐ。请重新调整！",

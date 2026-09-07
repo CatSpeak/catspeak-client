@@ -835,6 +835,10 @@ export default {
     toastEnterClassName: "クラス名を入力してください！",
     toastSelectCourseFirst: "まずコースを選択してください！",
     toastSelectSchedule: "少なくとも1つの授業日を選択してください！",
+    languageNotAllowed:
+      "選択した言語は、あなたの講師プロフィールでは許可されていません。",
+    levelNotAllowed:
+      "選択したレベルは、あなたの登録レベルを超えています。",
     toastCreateSuccess: "クラスを作成しました！",
     commissionNote:
       "各生徒の登録から{{commission}}%（VND {{amount}}）のプラットフォーム手数料が差し引かれます。",
