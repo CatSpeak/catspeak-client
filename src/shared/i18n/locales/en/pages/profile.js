@@ -149,7 +149,30 @@ export default {
     certifyError: "Please check the box to agree with our terms.",
     formInvalid: "Please fill all required fields before submitting.",
     credentialSizeLimit: "Each credential must be smaller than {max}MB (current {actual}MB).",
+    credentialTypeError: "Credentials must be in PDF format.",
+    credentialLimit: "Maximum 4 credential files.",
     videoSizeLimit: "Video must be smaller than {max}MB (current {actual}MB).",
+    editInfo: "Edit",
+    cancelEditChanges: "Discard changes",
+    cancelPendingRequest: "Cancel pending request",
+    cancelPendingTitle: "Cancel pending request?",
+    cancelPendingConfirm:
+      "Cancel the pending draft? Your approved profile stays live and unchanged.",
+    teachingUpdateOverwriteSuccess:
+      "Pending request updated (previous request overwritten). Your approved profile keeps serving while awaiting review.",
+    teachingSubmitSuccess:
+      "Pending request updated (previous request overwritten). Your approved profile keeps serving while awaiting review.",
+    teachingCancelSuccess: "Pending request cancelled.",
+    approvedEditingHint:
+      "Editing teaching content. Press Save to send for admin review (overwrites the previous request if any), or Discard changes to revert.",
+    pendingBadge: "Awaiting admin review",
+    pendingUpdateTitle: "Teaching content changes awaiting admin review",
+    pendingUpdateDesc:
+      "Your approved profile keeps showing and receiving students normally. Changes take effect after approval. You can still press Edit to overwrite the previous request.",
+    previewCredential: "Click to preview certificate",
+    openNewTab: "Open in new tab",
+    download: "Download",
+    previewLoading: "Loading preview...",
   },
   friends: {
     teacher: "Teacher",
