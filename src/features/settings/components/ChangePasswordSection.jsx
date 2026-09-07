@@ -39,28 +39,49 @@ const ChangePasswordSection = ({ t }) => {
 
   if (!isEditing) {
     return (
-      <div className="flex flex-col gap-3">
-        <span className="text-sm font-semibold text-gray-800">{t.profile?.personalInfo?.password || "Mật khẩu"}</span>
-        <div className="w-full h-11 rounded-xl border border-border bg-gray-50/50 text-gray-500 cursor-not-allowed px-3 flex items-center text-lg tracking-widest">
-          ***********
-        </div>
-        <div className="flex justify-end gap-3 mt-1 max-[425px]:w-full">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900">
+            {t.profile?.personalInfo?.passwordTitle || t.profile?.personalInfo?.password || "Mật khẩu"}
+          </h2>
           <PillButton
             onClick={onEditClick}
             variant="outline"
             startIcon={<Pencil size={18} />}
-            className="max-[425px]:w-full"
           >
             {t.profile?.personalInfo?.reset || "Reset"}
           </PillButton>
+        </div>
+        <div className="w-full h-11 rounded-xl border border-border bg-gray-50/50 text-gray-500 cursor-not-allowed px-3 flex items-center text-lg tracking-widest">
+          ***********
         </div>
       </div>
     )
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col gap-3">
-      <span className="text-sm font-semibold text-gray-800">{t.profile?.personalInfo?.password || "Mật khẩu"}</span>
+    <div ref={containerRef} className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-900">
+          {t.profile?.personalInfo?.passwordTitle || t.profile?.personalInfo?.password || "Mật khẩu"}
+        </h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCancel}
+            className="px-4 py-1.5 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
+            disabled={isLoading || isSendingOtp}
+          >
+            {t.profile?.personalInfo?.cancel || "Hủy"}
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-1.5 rounded-full bg-cath-red-700 text-white hover:bg-cath-red-800 transition-colors text-sm font-medium disabled:opacity-50"
+            disabled={isLoading || isSendingOtp || isFormInvalid}
+          >
+            {t.profile?.personalInfo?.save || "Lưu"}
+          </button>
+        </div>
+      </div>
 
       <div className="flex flex-col gap-4">
         <PasswordInput
@@ -110,27 +131,6 @@ const ChangePasswordSection = ({ t }) => {
         />
 
         {error && <p className="text-sm text-red-600 px-1">{error}</p>}
-      </div>
-
-      <div className="flex justify-end gap-3 mt-2 max-[425px]:w-full">
-        <PillButton
-          onClick={handleCancel}
-          disabled={isLoading || isSendingOtp}
-          variant="outline"
-          className="max-[425px]:flex-1"
-        >
-          {t.profile?.personalInfo?.cancel || "Hủy"}
-        </PillButton>
-        <PillButton
-          onClick={handleSave}
-          disabled={isLoading || isSendingOtp || isFormInvalid}
-          loading={isSendingOtp}
-          variant="primary"
-          bgColor="#16a34a"
-          className="max-[425px]:flex-1"
-        >
-          {t.profile?.personalInfo?.save || "Lưu"}
-        </PillButton>
       </div>
 
       <ProfileOtpModal

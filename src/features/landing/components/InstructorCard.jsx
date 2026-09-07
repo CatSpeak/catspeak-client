@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react"
-import { UserRound } from "lucide-react"
+import { UserRound, BadgeCheck } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getImageUrl } from "@/shared/utils/imageUtils"
 import {
   getFallbackAvatarByGender,
   parseLanguages,
   getInstructorRole,
+  getExperienceBadgeList,
 } from "../utils/instructorUtils"
 
 const InstructorCard = ({ teacher, onClick, onExplore }) => {
@@ -28,6 +29,10 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
     () => getInstructorRole(languages, t, language),
     [languages, t, language],
   )
+  const experienceBadges = useMemo(
+    () => getExperienceBadgeList(languages, t, language),
+    [languages, t, language],
+  )
 
   const rawAvatar = teacher.avatarImageUrl
   const avatarSrc = rawAvatar && !imgError ? getImageUrl(rawAvatar) : null
@@ -48,6 +53,19 @@ const InstructorCard = ({ teacher, onClick, onExplore }) => {
       className="w-full flex flex-col group/card cursor-pointer"
     >
       <div className="relative w-full h-[280px] sm:h-[300px] lg:h-[320px] rounded-xl overflow-hidden bg-stone-100">
+        {experienceBadges.length > 0 && (
+          <div className="absolute top-3 left-3 right-3 z-30 flex flex-row flex-wrap items-center gap-1">
+            {experienceBadges.map((badge) => (
+              <span
+                key={badge}
+                className="inline-flex max-w-full items-center gap-1 bg-white/95 text-[#910B09] text-[11px] font-bold px-2.5 py-1 rounded-full shadow"
+              >
+                <BadgeCheck size={13} strokeWidth={2.5} className="shrink-0" />
+                <span className="truncate">{badge}</span>
+              </span>
+            ))}
+          </div>
+        )}
         {avatarSrc ? (
           <img
             src={avatarSrc}

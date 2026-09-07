@@ -300,7 +300,10 @@ const NewsDetailPage = () => {
             >
               {/* Article Content */}
               <article className="min-w-0">
-                <PostContent html={newsItem.content} />
+                <PostContent
+                  html={newsItem.content}
+                  contentUrl={newsItem.contentUrl || newsItem.ContentUrl}
+                />
 
                 {/* Action Bar */}
                 <NewsDetailActionBar

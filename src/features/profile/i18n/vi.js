@@ -63,6 +63,7 @@ export default {
       },
       actions: {
         addFriend: "Thêm bạn bè",
+        requestSent: "Đã gửi yêu cầu",
         accept: "Chấp nhận",
         decline: "Từ chối",
         message: "Nhắn tin",

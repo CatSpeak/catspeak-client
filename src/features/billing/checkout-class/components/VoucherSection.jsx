@@ -118,7 +118,7 @@ const VoucherSection = ({
                 onRemoveVoucher(selectedVouchers[0]);
               }}
               className="text-gray-400 hover:text-[#B20000] transition-colors p-1"
-              title={tc.removeVoucher}
+              title={tc.removeVoucherConfirm || tc.removeVoucherTitle || "Remove"}
             >
               <X size={16} />
             </button>

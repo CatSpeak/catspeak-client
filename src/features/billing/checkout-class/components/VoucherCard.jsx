@@ -4,7 +4,7 @@ import { PillButton } from '@/shared/components/ui/buttons'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { formatCurrency, translateIneligibleReason } from '../../utils/checkoutUtils'
 
-const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher, t }) => {
+const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher, orderAmount, t }) => {
   const tc = t.billing.checkoutClass
   const { formatDate } = useTimezone()
   let Icon = CheckCircle2
@@ -48,7 +48,7 @@ const VoucherCard = ({ voucher, category, isSelected, canUse, onToggleVoucher, t
               <div className="mt-2 text-xs flex items-start gap-1">
                 <div className='flex items-center gap-1'>
                   <TriangleAlert size={12} className={`${iconColor} shrink-0 mt-0.5`} />
-                  <span className={`${iconColor} font-bold`}> {translateIneligibleReason(voucher.ineligibleReason, tc)}</span>
+                  <span className={`${iconColor} font-bold`}> {translateIneligibleReason(voucher, tc, { orderAmount, category })}</span>
                 </div>
               </div>
             )}

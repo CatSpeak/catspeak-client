@@ -9,9 +9,7 @@ import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPublicProfileQuery } from "@/store/api/userApi"
 import {
-  useGetFriendsQuery,
-  useGetFollowersQuery,
-  useGetPendingFriendRequestsQuery,
+  useGetFriendshipCountsQuery,
 } from "../../../store/api/social/friendshipApi"
 
 import SocialProfileHeader from "../components/SocialProfileHeader"
@@ -55,27 +53,22 @@ const Profile = () => {
 
   const profile = publicProfileResponse?.data ?? publicProfileResponse ?? null
 
-  // Fetch Friendship Data
-  const { data: friendsResponse } = useGetFriendsQuery(targetAccountId, {
+  // Lightweight counts for header badges. Lists are lazy-loaded inside ProfileFriendsTab.
+  // Fetched for the target account (own or external) so the header and tab badges show
+  // real totals without visiting each sub-tab. Refetch on focus + after mutations.
+  const { data: countsResponse } = useGetFriendshipCountsQuery(targetAccountId, {
     skip: !targetAccountId,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
-  const { data: followersResponse } = useGetFollowersQuery(targetAccountId, {
-    skip: !targetAccountId,
-  })
-  const { data: pendingResponse } = useGetPendingFriendRequestsQuery(
-    undefined,
-    { skip: !isOwnProfile, pollingInterval: 4000 },
-  )
 
-  const friendsCount = Array.isArray(friendsResponse)
-    ? friendsResponse.length
-    : friendsResponse?.data?.length || 0
-  const followersCount = Array.isArray(followersResponse)
-    ? followersResponse.length
-    : followersResponse?.data?.length || 0
-  const pendingCount = Array.isArray(pendingResponse)
-    ? pendingResponse.length
-    : pendingResponse?.data?.length || 0
+  const counts = countsResponse?.data ?? countsResponse ?? null
+  const friendsCount = counts?.friends ?? counts?.Friends ?? 0
+  const followersCount = counts?.followers ?? counts?.Followers ?? 0
+  // Badge của tab ngoài "Bạn bè" là tổng số bạn bè (Accepted) cho khớp label.
+  // Số yêu cầu pending có badge riêng ở sub-tab "Yêu cầu kết nối" bên trong.
+  const friendsBadge = friendsCount > 0 ? friendsCount.toString() : null
 
   const [searchParams] = useSearchParams()
   const currentToken = searchParams.get("sharedMaterialToken")
@@ -100,7 +93,7 @@ const Profile = () => {
     {
       id: "friends",
       label: t.profile?.tabs?.friends || "Bạn bè",
-      badge: pendingCount > 0 ? pendingCount.toString() : null,
+      badge: friendsBadge,
     },
     { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
     { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },

@@ -6,7 +6,9 @@ import {
   UserCheck,
   MessageSquare,
 } from "lucide-react"
+import toast from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
+import Modal from "@/shared/components/ui/Modal"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -15,28 +17,104 @@ import ListItem from "@/shared/components/ui/ListItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getUserColor } from "@/features/video-call/utils/participantTheme"
 import { useFriendActions } from "../hooks/useFriendActions"
+import { useSendFriendRequestMutation } from "@/store/api/social/friendshipApi"
 import AnimatedNameFallback from "./AnimatedNameFallback"
 
-const isUserTeacher = (user) =>
-  user?.isTeacher === true ||
-  user?.isTeacher === 1 ||
-  user?.isTeacher === "true" ||
-  (typeof user?.level === "string" &&
-    user.level.trim().toLowerCase() === "expert")
+const isUserTeacher = (user) => {
+  const v =
+    user?.isTeacher ?? user?.IsTeacher ?? user?.isTeacherAccount ?? user?.IsTeacherAccount
+  if (v === true || v === 1 || v === "true") return true
+  const role = String(user?.roleName ?? user?.RoleName ?? "").toLowerCase()
+  if (role === "teacher" || role === "instructor" || role === "expert") return true
+  return false
+}
 
 const ProfileFriendCard = memo(
-  ({ user, activeSubTab, isOwnProfile, currentUserId, onNavigate }) => {
+  ({
+    user,
+    activeSubTab,
+    isOwnProfile,
+    currentUserId,
+    isFollowing = false,
+    isRequestSent = false,
+    friendshipId: friendshipIdProp,
+    isOutgoingRequest = false,
+    onRequestSent,
+    onRequestFailed,
+    onFollowed,
+    onUnfollowed,
+    onNavigate,
+  }) => {
     const { t } = useLanguage()
     const [imgError, setImgError] = useState(false)
+    const [requestSent, setRequestSent] = useState(false)
+    const [confirmCancel, setConfirmCancel] = useState(false)
+    const [sendFriendRequest, { isLoading: isSendingRequest }] =
+      useSendFriendRequestMutation()
     const {
       handleStartChat,
-      handleSendRequest,
       handleFollow,
       handleUnfollow,
       handleUnfriend,
       handleAcceptRequest,
       handleDeclineRequest,
+      handleCancelRequest,
     } = useFriendActions()
+
+    // Optimistically flip the follow-back state so the button updates instantly;
+    // the server list refetch reconciles afterwards.
+    const handleFollowToggle = (accountId, follow) => {
+      if (follow) onFollowed?.(accountId)
+      else onUnfollowed?.(accountId)
+      if (follow) handleFollow(accountId)
+      else handleUnfollow(accountId)
+    }
+
+    const handleAddFriend = async (close) => {
+      const accountId = user.accountId ?? user.id ?? user.userId
+      if (isSendingRequest || requestSent || isRequestSent) {
+        if (close) close()
+        return
+      }
+      if (!accountId) {
+        if (close) close()
+        toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
+        return
+      }
+      if (close) close()
+      // Optimistic: cập nhật nút ngay lập tức, giữ qua refetch nhờ parent Set.
+      setRequestSent(true)
+      onRequestSent?.(accountId)
+      try {
+        await sendFriendRequest(accountId).unwrap()
+        toast.success(
+          t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn",
+        )
+      } catch {
+        // Rollback khi gửi thất bại (vd. đã tồn tại request) để nút không kẹt.
+        setRequestSent(false)
+        onRequestFailed?.(accountId)
+        toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
+      }
+    }
+
+    // Đã gửi = local optimistic hoặc parent Set (server-persistent outgoing + optimistic).
+    // Reload persistence do backend đảm nhiệm (GET /requests/sent).
+    const sent = requestSent || isRequestSent || isOutgoingRequest || Boolean(user?.isOutgoingRequest)
+    const resolvedFriendshipId =
+      friendshipIdProp ?? user?.friendshipId ?? user?.FriendshipId ?? null
+
+    const handleCancel = (close) => {
+      if (close) close()
+      if (!resolvedFriendshipId) return
+      // Confirm nhẹ trước khi thu hồi (tránh bấm nhầm mất follow kèm theo).
+      setConfirmCancel(true)
+    }
+
+    const confirmCancelRequest = () => {
+      setConfirmCancel(false)
+      if (resolvedFriendshipId) handleCancelRequest(resolvedFriendshipId)
+    }
 
     const isTeacher = isUserTeacher(user)
     const roleLabel = isTeacher
@@ -49,7 +127,7 @@ const ProfileFriendCard = memo(
       user?.name ||
       user?.displayName ||
       "User"
-    const userRole = user?.roleName || roleLabel
+    const userRole = roleLabel
     const avatarUrl = user?.avatarImageUrl || user?.avatarUrl
     const isSelf =
       currentUserId != null &&
@@ -62,14 +140,21 @@ const ProfileFriendCard = memo(
     const renderMobileMenu = (close) => (
       <MenuList className="w-52 shadow-lg">
         {/* Find tab action */}
-        {activeSubTab === "find" && !isSelf && (
+        {activeSubTab === "find" && !isSelf && !sent && (
           <MenuItem
             icon={<UserPlus />}
             label={t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
             onClick={() => {
-              handleSendRequest(user.accountId)
-              close()
+              handleAddFriend(close)
             }}
+          />
+        )}
+        {activeSubTab === "find" && !isSelf && sent && (
+          <MenuItem
+            icon={<UserMinus className="text-red-600" />}
+            label={t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
+            className="text-red-600"
+            onClick={() => handleCancel(close)}
           />
         )}
 
@@ -96,6 +181,14 @@ const ProfileFriendCard = memo(
             />
           </>
         )}
+        {(isOutgoingRequest || user?.isOutgoingRequest) && (
+          <MenuItem
+            icon={<UserMinus className="text-red-600" />}
+            label={t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
+            className="text-red-600"
+            onClick={() => handleCancel(close)}
+          />
+        )}
 
         {/* Following tab action */}
         {activeSubTab === "following" && isOwnProfile && (
@@ -104,19 +197,30 @@ const ProfileFriendCard = memo(
             label={t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
             className="text-red-600"
             onClick={() => {
-              handleUnfollow(user.accountId)
+              handleFollowToggle(user.accountId, false)
               close()
             }}
           />
         )}
 
         {/* Followers tab action */}
-        {activeSubTab === "followers" && !isSelf && (
+        {activeSubTab === "followers" && !isSelf && !isFollowing && (
           <MenuItem
             icon={<UserPlus />}
             label={t.profile?.friends?.actions?.followBack || "Theo dõi lại"}
             onClick={() => {
-              handleFollow(user.accountId)
+              handleFollowToggle(user.accountId, true)
+              close()
+            }}
+          />
+        )}
+        {activeSubTab === "followers" && !isSelf && isFollowing && (
+          <MenuItem
+            icon={<UserMinus className="text-red-600" />}
+            label={t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
+            className="text-red-600"
+            onClick={() => {
+              handleFollowToggle(user.accountId, false)
               close()
             }}
           />
@@ -206,20 +310,31 @@ const ProfileFriendCard = memo(
             />
           }
           rightContent={
-            <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-              <Popover
-                placement="bottom-right"
-                trigger={
-                  <IconButton
-                    title={t.profile?.friends?.options || "Tùy chọn"}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <MoreHorizontal />
-                  </IconButton>
-                }
-                content={renderMobileMenu}
-              />
+            <div className="shrink-0 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              {((activeSubTab === "find" && sent && !isSelf) || isOutgoingRequest || user?.isOutgoingRequest) && resolvedFriendshipId ? (
+                <PillButton
+                  variant="secondary"
+                  className="!h-8 !px-3 !text-xs !text-red-600"
+                  onClick={() => handleCancel()}
+                >
+                  {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
+                </PillButton>
+              ) : null}
+              {!(activeSubTab === "find" && sent && !isSelf && !resolvedFriendshipId) && (
+                <Popover
+                  placement="bottom-right"
+                  trigger={
+                    <IconButton
+                      title={t.profile?.friends?.options || "Tùy chọn"}
+                      size="sm"
+                      variant="ghost"
+                    >
+                      <MoreHorizontal />
+                    </IconButton>
+                  }
+                  content={renderMobileMenu}
+                />
+              )}
             </div>
           }
         >
@@ -277,15 +392,44 @@ const ProfileFriendCard = memo(
           </div>
 
           {/* Primary Action Button via PillButton (Desktop only) */}
-          <div className="w-full mt-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full mt-auto flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
             {/* Find Friends / Recommendations */}
-            {activeSubTab === "find" && !isSelf && (
+            {activeSubTab === "find" && !isSelf && !sent && (
               <PillButton
                 variant="primary"
                 className="w-full"
-                onClick={() => handleSendRequest(user.accountId)}
+                onClick={() => handleAddFriend()}
+                loading={isSendingRequest}
+                disabled={isSendingRequest}
               >
                 {t.profile?.friends?.actions?.addFriend || "Thêm bạn bè"}
+              </PillButton>
+            )}
+            {activeSubTab === "find" && !isSelf && sent && (
+              <div className="flex items-center gap-2 w-full">
+                <PillButton variant="secondary" className="flex-1" disabled>
+                  {t.profile?.friends?.actions?.requestSent || "Đã gửi yêu cầu"}
+                </PillButton>
+                {resolvedFriendshipId && (
+                  <PillButton
+                    variant="secondary"
+                    className="flex-1 !text-red-600"
+                    onClick={() => handleCancel()}
+                  >
+                    {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
+                  </PillButton>
+                )}
+              </div>
+            )}
+
+            {/* Outgoing requests (pending tab section + anywhere flagged) */}
+            {(isOutgoingRequest || user?.isOutgoingRequest) && (
+              <PillButton
+                variant="secondary"
+                className="w-full !text-red-600"
+                onClick={() => handleCancel()}
+              >
+                {t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
               </PillButton>
             )}
 
@@ -325,24 +469,66 @@ const ProfileFriendCard = memo(
               <PillButton
                 variant="secondary"
                 className="w-full"
-                onClick={() => handleUnfollow(user.accountId)}
+                onClick={() => handleFollowToggle(user.accountId, false)}
               >
                 {t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
               </PillButton>
             )}
 
             {/* Followers */}
-            {activeSubTab === "followers" && !isSelf && (
+            {activeSubTab === "followers" && !isSelf && !isFollowing && (
               <PillButton
                 variant="primary"
                 className="w-full"
-                onClick={() => handleFollow(user.accountId)}
+                onClick={() => handleFollowToggle(user.accountId, true)}
               >
                 {t.profile?.friends?.actions?.followBack || "Theo dõi lại"}
               </PillButton>
             )}
+            {activeSubTab === "followers" && !isSelf && isFollowing && (
+              <PillButton
+                variant="secondary"
+                className="w-full"
+                onClick={() => handleFollowToggle(user.accountId, false)}
+              >
+                {t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
+              </PillButton>
+            )}
           </div>
         </div>
+
+        {/* Confirm nhẹ trước khi thu hồi lời mời đã gửi */}
+        <Modal
+          open={confirmCancel}
+          onClose={() => setConfirmCancel(false)}
+          title={t.profile?.friends?.actions?.cancelTitle || "Thu hồi lời mời"}
+          className="max-w-sm"
+          fullScreenOnMobile={false}
+          bodyClassName="px-4 sm:px-6 py-0 flex-1 overflow-y-auto"
+          footer={
+            <div className="flex items-center gap-2 w-full">
+              <PillButton
+                variant="secondary"
+                className="flex-1"
+                onClick={() => setConfirmCancel(false)}
+              >
+                {t.profile?.friends?.actions?.keepRequest || "Giữ lại"}
+              </PillButton>
+              <PillButton
+                variant="primary"
+                className="flex-1"
+                onClick={confirmCancelRequest}
+              >
+                {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
+              </PillButton>
+            </div>
+          }
+        >
+          <p className="text-sm text-gray-600">
+            {(t.profile?.friends?.actions?.cancelMessage || "Thu hồi lời mời kết bạn đã gửi tới {name}? Bạn sẽ đồng thời bỏ theo dõi người này.")
+              .replace("{name}", displayName)}
+          </p>
+        </Modal>
       </div>
     )
   },

@@ -194,6 +194,81 @@ export const parseLanguages = (raw) => {
   }
 }
 
+export const getLanguageExperienceList = (languages) => {
+  if (!Array.isArray(languages)) return []
+  return languages
+    .map((l) => {
+      if (!l || typeof l !== "object") return null
+      const raw = l.language || l.name
+      const years = Number(l.yearsExperience)
+      if (!raw || !Number.isFinite(years)) return null
+      return { language: raw, yearsExperience: Math.max(0, Math.min(50, Math.trunc(years))) }
+    })
+    .filter(Boolean)
+}
+
+export const formatExperienceBadgeItem = (name, years, language = "vi") => {
+  if (language === "en") return `${name} · ${years}+ yrs`
+  if (language === "zh") return `${name} · ${years}+年`
+  if (language === "ja") return `${name} · ${years}+年`
+  return `${name} · ${years}+ năm`
+}
+
+export const getExperienceBadgeList = (languages, t, language = "vi") => {
+  const list = getLanguageExperienceList(languages)
+    .filter((x) => x.yearsExperience > 0)
+    .sort((a, b) => b.yearsExperience - a.yearsExperience)
+  return list.map((item) => {
+    const name = getLocalizedLanguageName(item.language, t, language)
+    return formatExperienceBadgeItem(name, item.yearsExperience, language)
+  })
+}
+
+export const getExperienceBadgeText = (languages, t, language = "vi") => {
+  const list = getLanguageExperienceList(languages).filter((x) => x.yearsExperience > 0)
+  if (list.length === 0) return ""
+  const primary = list.reduce(
+    (max, cur) => (cur.yearsExperience > max.yearsExperience ? cur : max),
+    list[0],
+  )
+  const name = getLocalizedLanguageName(primary.language, t, language)
+  const extra = list.length > 1 ? ` +${list.length - 1}` : ""
+  if (language === "en") return `${name} · ${primary.yearsExperience}+ yrs${extra}`
+  if (language === "zh") return `${name} · ${primary.yearsExperience}+年${extra}`
+  if (language === "ja") return `${name} · ${primary.yearsExperience}+年${extra}`
+  return `${name} · ${primary.yearsExperience}+ năm${extra}`
+}
+
+const formatYearsExperience = (years, language = "vi") => {
+  if (language === "en") return years === 1 ? "≥ 1 year" : `≥ ${years} years`
+  if (language === "zh") return `≥ ${years}年经验`
+  if (language === "ja") return `≥ ${years}年経験`
+  return `≥ ${years} năm kinh nghiệm`
+}
+
+/**
+ * Full experience line listing every language with data, e.g.
+ * "Tiếng Anh ≥ 8 năm kinh nghiệm · Tiếng Nhật ≥ 3 năm kinh nghiệm".
+ * Returns "" when no language carries experience data (caller hides the line).
+ */
+export const getExperienceLineText = (languages, t, language = "vi") => {
+  const list = getLanguageExperienceList(languages)
+  if (list.length === 0) return ""
+  const positives = list.filter((x) => x.yearsExperience > 0)
+  if (positives.length === 0) return getExperienceFallbackText(t, language)
+  return positives
+    .map((x) => {
+      const name = getLocalizedLanguageName(x.language, t, language)
+      return `${name} ${formatYearsExperience(x.yearsExperience, language)}`
+    })
+    .join(" · ")
+}
+
+export const getExperienceFallbackText = (t, language = "vi") => {
+  if (language === "en") return t?.landing?.leadingTeam?.newInstructor || "New instructor"
+  return t?.landing?.leadingTeam?.newInstructor || "Giảng viên mới"
+}
+
 export const getInstructorRole = (languages, t, language = "vi") => {
   const defaultRole =
     t?.landing?.leadingTeam?.defaultRole || "Giảng viên CatSpeak"

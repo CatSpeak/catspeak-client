@@ -104,7 +104,7 @@ export const mapTeacherCourseSummary = (
   return {
     id: course.id,
     title: course.name || course.title || labels.untitledCourse || "—",
-    subtitle: course.language ? `Khóa học tiếng ${course.language.toLowerCase()}` : stripHtmlToText(course.description),
+    subtitle: stripHtmlToText(course.description) || "",
     language: course.language || "",
     description: course.description || "",
     classCount: classCountText,

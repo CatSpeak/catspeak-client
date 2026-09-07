@@ -257,7 +257,7 @@ const GeneralSection = ({
             </div>
             <div className="flex flex-col">
               <span className="text-sm text-gray-400">
-                {cd.language || "Language"}
+                {cd.language || "—"}
               </span>
               <span className="text-gray-900 font-bold text-sm mt-0.5">
                 {getLocalizedLanguageName(classData?.language, t) || "—"}

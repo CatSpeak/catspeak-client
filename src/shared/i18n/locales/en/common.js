@@ -201,5 +201,19 @@ export default {
       title: "Instructor Profile Approved",
       body: "You can now switch to your Teacher account.",
     },
+    instructor_profile_rejected: {
+      title: "Instructor Profile Rejected",
+      body: "Reason: {reason}. {banUntil}",
+      defaultReason: "Please go to Settings > Instructor to see details",
+      canResubmit: "You can submit a new application now.",
+      bannedPrefix: "Resubmission blocked until",
+    },
+    instructor_profile_request_edit: {
+      title: "Instructor Profile Needs Edits",
+      body: "{editNote} ({requestTypeLabel})",
+      defaultNote: "Please go to Settings > Instructor to review requested changes",
+      requestTypeInitial: "New application",
+      requestTypeUpdate: "Teaching update",
+    },
   },
 }

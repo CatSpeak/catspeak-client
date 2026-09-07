@@ -77,7 +77,7 @@ export default {
       title: "9. 联系方式",
       intro: "如果您对本政策有任何疑问，请联系：",
       bullets: [
-        "邮箱: support@cathspeak.com",
+        "邮箱: support@catspeak.com.vn",
         "热线: +84 123 456 789",
         "粉丝页: facebook.com/cathspeak",
       ],

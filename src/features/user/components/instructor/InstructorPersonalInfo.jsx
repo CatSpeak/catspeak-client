@@ -19,7 +19,9 @@ const InstructorPersonalInfo = ({
   isSavingSection = false,
 }) => {
   const ins = t.profile?.instructor || {}
-  const effectiveReadOnly = isSectionEditing ? false : readOnly
+  // Explicit form: editable only when the section is being edited, regardless
+  // of which readOnly value the parent passes (case B hardening).
+  const effectiveReadOnly = readOnly && !isSectionEditing
 
   const prefixLength = formData.phonePrefix?.length || 3
   const plClass =

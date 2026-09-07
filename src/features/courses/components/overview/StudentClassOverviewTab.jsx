@@ -212,7 +212,7 @@ const StudentClassOverviewTab = ({
                 <Globe size={18} />
               </div>
               <div className="flex flex-col">
-                <span className="text-sm text-gray-400 font-bold">{cd.language || "Language"}</span>
+                <span className="text-sm text-gray-400 font-bold">{cd.language || "—"}</span>
                 <span className="text-gray-900 font-extrabold text-sm mt-0.5">
                   {getLocalizedLanguageName(classData.language, t) || "—"}
                 </span>

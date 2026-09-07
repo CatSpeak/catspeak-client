@@ -841,6 +841,10 @@ export default {
     toastEnterClassName: "Vui lòng nhập tên lớp học!",
     toastSelectCourseFirst: "Vui lòng chọn khóa học trước!",
     toastSelectSchedule: "Vui lòng chọn ít nhất một ngày dạy!",
+    languageNotAllowed:
+      "Ngôn ngữ được chọn không nằm trong danh sách ngôn ngữ bạn được phép giảng dạy.",
+    levelNotAllowed:
+      "Trình độ được chọn vượt quá trình độ bạn được phép giảng dạy.",
     toastCreateSuccess: "Lớp học đã được tạo thành công!",
     commissionNote:
       "Phí hoa hồng hệ thống {{commission}}% ({{amount}} VND) sẽ được khấu trừ từ mỗi lượt đăng ký của học viên.",

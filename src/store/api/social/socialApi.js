@@ -30,6 +30,11 @@ const socialRawBaseQuery = fetchBaseQuery({
 export const socialApi = createApi({
   reducerPath: "socialApi",
   baseQuery: createReauthBaseQuery(socialRawBaseQuery),
+  // Lazy per-tab: keep cache 2min so switching back doesn't refetch.
+  // No polling anywhere; refresh via refetchOnFocus + invalidation after mutations.
+  keepUnusedDataFor: 120,
+  refetchOnFocus: true,
+  refetchOnReconnect: true,
   tagTypes: [
     "Post",
     "PostComment",
@@ -42,6 +47,8 @@ export const socialApi = createApi({
     "Following",
     "Recommendation",
     "FriendRequest",
+    "SentFriendRequest",
+    "FriendshipCounts",
     "Stories",
     "MyStories",
   ],

@@ -8,6 +8,7 @@ import CourseSearchInput from "../../components/CourseSearchInput"
 import CourseSelectFilter from "../../components/CourseSelectFilter"
 import TablePagination from "../../components/shared/TablePagination"
 import { filterStudentClasses } from "../../utils/courseTransforms"
+import { getLocalizedLanguageName } from "../../data/courseFormOptions"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { Breadcrumb } from "@/shared/components/ui/navigation"
@@ -250,7 +251,7 @@ const StudentDashboard = ({ t }) => {
 
   const languageFilterOptions = [
     { value: "all", label: sc.allLanguages || "All Languages" },
-    ...languagesOptions.map((lang) => ({ value: lang, label: sc.languages?.[lang] || lang })),
+    ...languagesOptions.map((lang) => ({ value: lang, label: getLocalizedLanguageName(lang, t) || lang })),
   ]
 
   const levelFilterOptions = [
@@ -420,7 +421,7 @@ const StudentDashboard = ({ t }) => {
           <div className="flex gap-3 items-center">
             <label>
               <span className="sr-only">
-                {sc.languageLabel || "Language"}
+                {sc.languageLabel || "—"}
               </span>
               <CourseSelectFilter
                 value={langFilter}
@@ -596,7 +597,7 @@ const StudentDashboard = ({ t }) => {
                         <div className="flex flex-1 flex-col gap-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="rounded-full bg-[#FEF3C7] px-2.5 py-0.5 text-[9px] font-bold uppercase text-[#D97706]">
-                              {sc.languages?.[cls.language] || cls.language || UNKNOWN_VALUE}
+                              {getLocalizedLanguageName(cls.language, t) || cls.language || UNKNOWN_VALUE}
                             </span>
                             <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[9px] font-bold uppercase text-gray-600">
                               {cls.levels[0] || UNKNOWN_VALUE}

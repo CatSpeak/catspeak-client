@@ -7,7 +7,7 @@ import { DatePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { ChevronDown } from "lucide-react"
 import { countryOptions, phonePrefixes } from "@/shared/constants/countriesOptions"
-import ChangePasswordSection from "./ChangePasswordSection"
+import AccountIdentitySection from "./AccountIdentitySection"
 
 const AccountSettingsForm = ({
   formData,
@@ -20,6 +20,13 @@ const AccountSettingsForm = ({
   onCountryChange,
   errors,
   t,
+  isTeacherAccount = false,
+  showIdentitySection = false,
+  idCardFrontFile = null,
+  idCardBackFile = null,
+  onPickIdFile,
+  idCardFrontUrl = null,
+  idCardBackUrl = null,
 }) => {
   const isEditingPersonal = editingField === "personalInfo"
   const isEditingSecurity = editingField === "securityInfo"
@@ -73,6 +80,24 @@ const AccountSettingsForm = ({
           )}
         </div>
 
+        {isTeacherAccount && (
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-gray-800">
+            {t.profile?.personalInfo?.fullName || "Họ tên"}
+          </label>
+          <TextInput
+            name="fullName"
+            value={formData.fullName || ""}
+            onChange={onChange}
+            disabled={!isEditingPersonal || isUpdating}
+            placeholder={t.profile?.personalInfo?.enterFullName || "Nhập họ tên..."}
+            error={errors?.fullName}
+            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.fullName ? "border-red-500" : "border-border"}`}
+            containerClassName="!gap-0"
+          />
+        </div>
+        )}
+
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
@@ -110,7 +135,7 @@ const AccountSettingsForm = ({
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.country || "Quốc gia"}
+              {t.profile?.personalInfo?.country || "Quốc tịch"}
             </label>
           <Dropdown
             options={countryOptions}
@@ -215,18 +240,6 @@ const AccountSettingsForm = ({
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.accountType || "Loại tài khoản"}
-            </label>
-            <TextInput
-              name="accountType"
-              value={formData.accountType || "User"}
-              disabled={true}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 border-border text-gray-500 cursor-not-allowed`}
-              containerClassName="!gap-0"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
               {t.profile?.personalInfo?.email || "Email"}
             </label>
             <TextInput
@@ -300,9 +313,19 @@ const AccountSettingsForm = ({
           </div>
         </div>
 
-        <div className="w-full p-6 border border-border rounded-xl mt-2">
-          <ChangePasswordSection t={t} />
+        {isTeacherAccount && showIdentitySection && (
+        <div className="w-full pt-2 border-t border-border">
+          <AccountIdentitySection
+            frontFile={idCardFrontFile}
+            backFile={idCardBackFile}
+            frontUrl={idCardFrontUrl}
+            backUrl={idCardBackUrl}
+            t={t}
+            isEditing={isEditingSecurity}
+            onPickFile={onPickIdFile}
+          />
         </div>
+        )}
         </div>
       </FluentCard>
     </div>

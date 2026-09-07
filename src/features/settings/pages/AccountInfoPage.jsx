@@ -1,23 +1,52 @@
-import React from "react"
+import React, { useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
+import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { useProfileState } from "@/features/settings/hooks/useProfileState"
 import { useProfileMutations } from "@/features/settings/hooks/useProfileMutations"
 
 import ProfileOtpModal from "@/features/settings/components/ProfileOtpModal"
 import AccountSettingsForm from "@/features/settings/components/AccountSettingsForm"
+import ChangePasswordSection from "@/features/settings/components/ChangePasswordSection"
 import PageTitle from "@/shared/components/ui/PageTitle"
+import FluentCard from "@/shared/components/ui/FluentCard"
 import { BankAccountList } from "@/features/bank-accounts"
 
 const AccountInfoPage = () => {
   const { t } = useLanguage()
+  const { user } = useAuth()
 
   // Fetch private profile
   const { data: privateProfileData, isLoading } = useGetUserProfileQuery()
   const profile = privateProfileData?.data ?? privateProfileData ?? null
 
+  // Teacher-only extras (FullName + ID card) show on the teacher account only
+  const isTeacherAccount =
+    user?.accountType === "Teacher" || (!user?.accountType && !!profile?.isTeacher)
+
+  const { data: instructorData } = useGetInstructorProfileQuery(undefined, {
+    skip: !isTeacherAccount,
+  })
+  const instructor = instructorData?.data ?? instructorData ?? null
+  // Show the ID section only on the teacher account with a live Approved
+  // profile (source accounts get a revision row → hidden by design).
+  const instructorStatus = (instructor?.status || instructor?.Status || "").toString().toLowerCase()
+  const isLiveApprovedProfile =
+    !!instructor && !instructor.isRevision && !instructor.IsRevision && instructorStatus === "approved"
+  const showIdentitySection = isTeacherAccount && isLiveApprovedProfile
+  const idCardFrontUrl = instructor?.idCardFrontUrl || instructor?.IdCardFrontUrl || null
+  const idCardBackUrl = instructor?.idCardBackUrl || instructor?.IdCardBackUrl || null
+
   const stateHooks = useProfileState(profile)
-  const mutationHooks = useProfileMutations(t, profile, stateHooks)
+
+  // CCCD picks live here so the card-level Save/Hủy buttons own them
+  const [idFiles, setIdFiles] = useState({ front: null, back: null })
+  const setIdFile = (side, file) =>
+    setIdFiles((prev) => ({ ...prev, [side]: file }))
+  const resetIdFiles = () => setIdFiles({ front: null, back: null })
+
+  const mutationHooks = useProfileMutations(t, profile, stateHooks, { idFiles, resetIdFiles })
 
   const {
     formData,
@@ -30,11 +59,15 @@ const AccountInfoPage = () => {
     handleChange,
   } = stateHooks
 
+  const handleCancelAll = () => {
+    handleCancel()
+    resetIdFiles()
+  }
+
   const {
     isUpdating,
-    isUpdatingPhone,
     isSendingOtp,
-    isSendingPhoneOtp,
+    isSavingSecurity,
     handleSave,
     handleOtpVerify,
     handleOtpResend,
@@ -59,14 +92,26 @@ const AccountInfoPage = () => {
           editingField={editingField}
           isUpdating={isUpdating}
           onEdit={handleEdit}
-          onCancel={handleCancel}
+          onCancel={handleCancelAll}
           onSave={handleSave}
           onChange={handleChange}
           onCountryChange={handleCountryChange}
           errors={errors}
           t={t}
+          isTeacherAccount={isTeacherAccount}
+          showIdentitySection={showIdentitySection}
+          idCardFrontFile={idFiles.front}
+          idCardBackFile={idFiles.back}
+          onPickIdFile={setIdFile}
+          idCardFrontUrl={idCardFrontUrl}
+          idCardBackUrl={idCardBackUrl}
         />
       </div>
+
+      {/* Password — own card */}
+      <FluentCard className="flex flex-col w-full p-6 sm:p-8 gap-4 border-border rounded-xl shadow-sm !justify-start">
+        <ChangePasswordSection t={t} />
+      </FluentCard>
 
       {/* Bank Accounts Section */}
       <BankAccountList />
@@ -75,20 +120,11 @@ const AccountInfoPage = () => {
         open={isOtpModalOpen}
         onClose={() => setIsOtpModalOpen(false)}
         email={profile?.email}
-        title={
-          editingField === "phoneNumber"
-            ? t.profile?.personalInfo?.verifyPhoneTitle ||
-              "Xác nhận thay đổi số điện thoại"
-            : editingField === "email"
-              ? t.profile?.personalInfo?.verifyEmailTitle ||
-                "Xác nhận thay đổi Email"
-              : t.profile?.personalInfo?.verifyChangesTitle ||
-                "Xác minh thay đổi"
-        }
+        title={t.profile?.personalInfo?.verifyChangesTitle || "Xác minh thay đổi"}
         onVerify={handleOtpVerify}
-        isVerifying={isUpdating || isUpdatingPhone}
+        isVerifying={isSavingSecurity}
         onResend={handleOtpResend}
-        isResending={isSendingOtp || isSendingPhoneOtp}
+        isResending={isSendingOtp}
         t={t}
       />
     </div>

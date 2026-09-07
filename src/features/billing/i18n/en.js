@@ -165,6 +165,7 @@ export default {
       paymentSuccess: "Payment successful!",
       paymentError: "An error occurred during payment.",
       voucherUnavailable: "Code {{code}} is no longer available, automatically removed from the order",
+      redirecting: "Redirecting to payment page...",
 
       // ClassInfoSection
       classInfo: "Class information",
@@ -230,6 +231,10 @@ export default {
       // Ineligible reason patterns
       reasonMinLearners: "Requires at least {{count}} learners in the order",
       reasonMinOrder: "Minimum order of {{minAmount}} (Subtotal: {{currentAmount}})",
+      reasonExpired: "This code has expired",
+      reasonExhausted: "This code has run out of uses",
+      reasonPerUserLimit: "You have used up the allowed uses for this code",
+      reasonNewUserOnly: "For new users only",
 
       // VoucherModal
       myOffers: "My offers",
@@ -250,6 +255,12 @@ export default {
       COMMON_EXTERNAL_SERVICE_ERROR: "An external service error occurred. Please try again later.",
       COMMON_BAD_REQUEST: "Invalid request. Please check your input.",
       COMMON_CONFLICT: "A conflict occurred. Please try again.",
+      COMMON_VALIDATION_FAILED: "Invalid input. Please review your details.",
+      COMMON_RESOURCE_NOT_FOUND: "The requested resource was not found.",
+      COMMON_UNAUTHORIZED: "You are not logged in. Please log in again.",
+      COMMON_FORBIDDEN: "You do not have permission to perform this action.",
+      COMMON_RATE_LIMIT_EXCEEDED: "You are acting too fast. Please try again later.",
+      COMMON_CONFIGURATION_ERROR: "The service is temporarily unavailable. Please try again later.",
       PAYMENT_PLAN_NOT_FOUND: "The selected subscription plan is no longer available.",
       PAYMENT_CLASS_NOT_FOUND: "The class was not found or is no longer available.",
       PAYMENT_LEARNER_NOT_FOUND: "No CatSpeak account was found for this email address.",

@@ -26,6 +26,8 @@ import {
   getClassEnrollmentIssueMessage,
 } from "@/features/courses/utils/courseUtils";
 import { calculateVoucherDiscount } from "../utils/checkoutUtils";
+import { getLocalizedLanguageName } from "@/features/courses/data/courseFormOptions";
+import { BILLING_ERROR_CODE, VOUCHER_CODE_PREFIX } from "../utils/billingErrorCodes";
 
 const EMPTY_VOUCHER_DATA = {
   availableVouchers: [],
@@ -115,7 +117,7 @@ const CheckoutClassPage = () => {
         dateRange: `${classDetail.startDate ? formatDate(classDetail.startDate) : tc.fallbackUpdating} - ${classDetail.endDate ? formatDate(classDetail.endDate) : tc.fallbackUpdating}`,
         totalSessions: classDetail.totalSessions,
         teacher: classDetail.teacher?.name,
-        tags: [classDetail.language, ...classDetail.levels].filter(Boolean),
+        tags: [getLocalizedLanguageName(classDetail.language, t) || classDetail.language, ...classDetail.levels].filter(Boolean),
         unitPrice: classDetail.price,
       }
     : {};
@@ -160,6 +162,9 @@ const CheckoutClassPage = () => {
   // Use API data if available, otherwise use empty defaults
   const resolvedVoucherData = voucherData || EMPTY_VOUCHER_DATA;
 
+  // Subtotal for voucher reason formatting (guarded: classData may be empty while loading)
+  const modalOrderAmount = (classData.unitPrice || 0) * learners.length;
+
   useEffect(() => {
     if (
       resolvedVoucherData.availableVouchers.length > 0 ||
@@ -200,7 +205,7 @@ const CheckoutClassPage = () => {
         return {
           success: false,
           message: getErrorMessage(
-            response.errorCode,
+            response.errorCode || response.error,
             response.message || tc.fallbackAccountNotFound,
           ),
         };
@@ -229,7 +234,7 @@ const CheckoutClassPage = () => {
       return {
         success: false,
         message: getErrorMessage(
-          responseData.errorCode,
+          responseData.errorCode || responseData.error,
           responseData.message || error?.error || tc.addLearnerError,
         ),
       };
@@ -254,9 +259,8 @@ const CheckoutClassPage = () => {
 
   const getErrorMessage = (code, fallback) => {
     if (!code) return fallback;
-    const i18nKey = `billing.errorCodes.${code}`;
-    const translatedMsg = t(i18nKey);
-    return translatedMsg !== i18nKey ? translatedMsg : fallback;
+    const localized = t.billing?.errorCodes?.[code];
+    return localized || fallback;
   };
 
   const handleCheckout = async (confirmScheduleConflict = false) => {
@@ -304,25 +308,23 @@ const CheckoutClassPage = () => {
     } catch (error) {
       const status = error?.status ?? error?.originalStatus;
       const responseData = error?.data?.data || error?.data || {};
-      const errorCode = responseData.errorCode;
+      const errorCode = responseData.errorCode || responseData.error;
       const errMsg = responseData.message || error?.error || tc.paymentError;
 
       if (
         status === 409 ||
-        errorCode === "CLASS_ENROLLMENT_SCHEDULE_CONFLICT"
+        errorCode === BILLING_ERROR_CODE.scheduleConflict
       ) {
-        const names =
-          responseData.conflictingClassNames ||
-          (errMsg.match(/Lịch học trùng với lớp: (.+)/) || [])[1]
-            ?.split(", ")
-            .filter(Boolean) ||
-          [];
+        const rawNames = responseData.conflictingClassNames;
+        const names = Array.isArray(rawNames)
+          ? rawNames.filter(Boolean)
+          : [];
         setConflictClasses({ names });
         return;
       }
 
-      if (errorCode === "PAYMENT_VOUCHER_UNAVAILABLE") {
-        const codeMatch = errMsg.match(/CODE:([^|]+)/);
+      if (errorCode === BILLING_ERROR_CODE.voucherUnavailable) {
+        const codeMatch = errMsg.match(new RegExp(`${VOUCHER_CODE_PREFIX}([^|]+)`));
         const voucherCode = codeMatch ? codeMatch[1] : "";
 
         if (voucherCode) {
@@ -337,7 +339,7 @@ const CheckoutClassPage = () => {
         } else {
           toast.error(getErrorMessage(errorCode, errMsg));
         }
-      } else if (errorCode === "PAYMENT_VOUCHER_DISCOUNT_CHANGED") {
+      } else if (errorCode === BILLING_ERROR_CODE.voucherDiscountChanged) {
         toast.error(getErrorMessage(errorCode, errMsg));
         refetchVouchers();
       } else {
@@ -437,6 +439,7 @@ const CheckoutClassPage = () => {
         voucherData={resolvedVoucherData}
         selectedVouchers={selectedVouchers}
         onToggleVoucher={handleToggleVoucher}
+        orderAmount={modalOrderAmount}
         t={t}
       />
 

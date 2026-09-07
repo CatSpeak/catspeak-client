@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle, Loader2, GraduationCap } from "lucide-react";
+import { CheckCircle, Loader2, GraduationCap, Pencil } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetUserProfileQuery } from "@/store/api/userApi";
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher";
@@ -18,12 +18,16 @@ import {
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
+  useGetPendingTeachingUpdateQuery,
+  useSubmitTeachingUpdateMutation,
+  useCancelTeachingUpdateMutation,
 } from "@/store/api/instructorApi";
 import { parsePhoneData } from "@/shared/constants/countriesOptions";
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
 
 import InstructorEmptyState from "@/features/user/components/instructor/InstructorEmptyState";
 import InstructorStatusBanner from "@/features/user/components/instructor/InstructorStatusBanner";
+import InstructorPendingUpdateBanner from "@/features/user/components/instructor/InstructorPendingUpdateBanner";
 
 import InstructorPersonalInfo from "@/features/user/components/instructor/InstructorPersonalInfo";
 import InstructorLanguages from "@/features/user/components/instructor/InstructorLanguages";
@@ -32,6 +36,7 @@ import InstructorCredentials from "@/features/user/components/instructor/Instruc
 import InstructorMedia from "@/features/user/components/instructor/InstructorMedia";
 import InstructorSubmitSection from "@/features/user/components/instructor/InstructorSubmitSection";
 import PageTitle from "@/shared/components/ui/PageTitle";
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
 
 const INITIAL_FORM_DATA = {
   fullName: "",
@@ -46,6 +51,7 @@ const INITIAL_FORM_DATA = {
   idBackFile: null,
   introduction: "",
   credentials: [],
+  videoFile: null,
 };
 
 /**
@@ -68,20 +74,25 @@ function safeParseArray(value) {
 }
 
 /**
- * Normalize languagesTeach from the API into an array of {language, level} objects.
+ * Normalize languagesTeach from the API into an array of {language, level, yearsExperience} objects.
  * Supports:
- *  - Array of objects: [{language: "English", level: "B2"}, ...]
- *  - Array of strings: ["English", "Japanese"] → [{language: "English", level: ""}, ...]
- *  - JSON string of either format above
+ *  - Array of objects: [{language: "English", level: "B2", yearsExperience: 5}, ...]
+ *  - Array of strings: ["English", "Japanese"] → [{language: "English", level: "", yearsExperience: 0}, ...]
+ *  - JSON string of either format above (legacy items without yearsExperience default to 0)
  */
 function normalizeLanguagesTeach(raw) {
   const arr = safeParseArray(raw);
   return arr.map((item) => {
     if (typeof item === "object" && item !== null) {
-      return { language: item.language || "", level: item.level || "" };
+      const years = Number(item.yearsExperience);
+      return {
+        language: item.language || "",
+        level: item.level || "",
+        yearsExperience: Number.isFinite(years) ? Math.max(0, Math.min(50, Math.trunc(years))) : 0,
+      };
     }
     // Legacy format: plain string = language name only
-    return { language: String(item), level: "" };
+    return { language: String(item), level: "", yearsExperience: 0 };
   });
 }
 
@@ -109,14 +120,16 @@ function mapApplicationToFormData(app) {
   };
 }
 
-/** Extract status string from API response (case-insensitive normalize) */
+/** Extract status string from API response (case-insensitive normalize).
+ * Accepts status names ("Approved", "approved "...), numeric codes (1-4)
+ * and camelCase ("requestEdit"). Unknown values pass through. */
 function getApplicationStatus(app) {
-  const raw = app?.status || app?.Status || "";
-  const normalized = raw.toString().toLowerCase();
-  if (normalized === "pending") return "Pending";
-  if (normalized === "approved") return "Approved";
-  if (normalized === "rejected") return "Rejected";
-  if (normalized === "requestedit") return "RequestEdit";
+  const raw = app?.status ?? app?.Status ?? app?.statusCode ?? app?.StatusCode ?? "";
+  const normalized = raw.toString().trim().toLowerCase().replace(/[\s_-]+/g, "");
+  if (normalized === "pending" || normalized === "1") return "Pending";
+  if (normalized === "approved" || normalized === "2") return "Approved";
+  if (normalized === "rejected" || normalized === "3") return "Rejected";
+  if (normalized === "requestedit" || normalized === "4") return "RequestEdit";
   return raw || null;
 }
 
@@ -131,6 +144,7 @@ const InstructorPage = () => {
     data: instructorData,
     isLoading: isLoadingInstructor,
     error: profileError,
+    refetch: refetchInstructorProfile,
   } = useGetInstructorProfileQuery();
 
   const { data: userProfileData, isLoading: isLoadingProfile } =
@@ -200,15 +214,25 @@ const InstructorPage = () => {
   const [isTaskSubmitting, setIsTaskSubmitting] = useState(false);
   const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
   const [isSavingPersonalInfo, setIsSavingPersonalInfo] = useState(false);
+  // Global Approved edit (spec Q9/Q13): single Edit-all outside cards
+  const [isEditingApproved, setIsEditingApproved] = useState(false);
+  const [isSavingApproved, setIsSavingApproved] = useState(false);
 
-  // Snapshot of the original form data to detect changes
+  // Delete confirmations (replaces native window.confirm):
+  // { type: "video" } | { type: "credential", index }
+  const [confirmDelete, setConfirmDelete] = useState(null);
+
+  // Q9: confirm modal for cancelling a pending teaching-update draft
+  // (DELETE /my/teaching-update). Distinct from "Hủy thay đổi" while editing.
+  const [confirmCancelPending, setConfirmCancelPending] = useState(false);
+
+  // Snapshot of the original (live) form data to detect changes
   const originalFormDataRef = useRef(null);
   const personalInfoBackupRef = useRef(null);
 
-  // Populate form from existing application
+  // Snapshot live values (for change detection / video remove logic).
   useEffect(() => {
     if (existingApplication) {
-      setFormData(existingApplication);
       originalFormDataRef.current = existingApplication;
     }
   }, [existingApplication]);
@@ -251,8 +275,43 @@ const InstructorPage = () => {
   // Can edit when: new form (no existing application) OR RequestEdit status OR Reapplying
   const canEdit = (showForm && !existingApplication) || isRequestEdit || isReapplying;
 
-  // Can section edit "Thông tin của bạn" (5 fields) ONLY when the instructor application is Approved ("Approved")
-  const canSectionEdit = applicationStatus === "Approved" && !canEdit;
+  const isApproved = applicationStatus === "Approved";
+  // Global Approved edit unlocks ALL sections + files (spec Q9/Q12/Q13)
+  const canEditApproved = isApproved && isEditingApproved;
+  const effectiveCanEdit = canEdit || canEditApproved;
+  // Global bar replaces per-card button (spec Q13: button outside cards)
+  const showGlobalEditBar = isApproved && !canEdit;
+  // Legacy per-card edit disabled — Approved now uses global Edit-all bar
+  const canSectionEdit = false;
+
+  // Approved banner shows only on first view — dismiss persists per profile in localStorage
+  const approvedBannerKey = useMemo(() => {
+    const id =
+      rawApplication?.profileId ||
+      rawApplication?.ProfileId ||
+      rawApplication?.accountId ||
+      rawApplication?.AccountId ||
+      "global";
+    return `instructor_approved_seen_${id}`;
+  }, [rawApplication]);
+  const [approvedBannerHidden, setApprovedBannerHidden] = useState(false);
+  useEffect(() => {
+    try {
+      setApprovedBannerHidden(localStorage.getItem(approvedBannerKey) === "1");
+    } catch {
+      setApprovedBannerHidden(false);
+    }
+  }, [approvedBannerKey]);
+  const handleDismissApprovedBanner = useCallback(() => {
+    try {
+      localStorage.setItem(approvedBannerKey, "1");
+    } catch {
+      // ignore storage errors (private mode, etc.)
+    }
+    setApprovedBannerHidden(true);
+  }, [approvedBannerKey]);
+  const showApprovedBanner =
+    applicationStatus === "Approved" ? !approvedBannerHidden : true;
 
   // Handlers for section editing "Thông tin của bạn"
   const handleStartEditPersonalInfo = useCallback(() => {
@@ -319,6 +378,12 @@ const InstructorPage = () => {
             ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
           break;
         }
+        const years = Number(lang.yearsExperience);
+        if (!Number.isFinite(years) || years < 0 || years > 50) {
+          newErrors.languagesTeachExperience =
+            ins.experienceError || "Số năm kinh nghiệm mỗi ngôn ngữ phải từ 0 đến 50";
+          break;
+        }
       }
     }
 
@@ -326,12 +391,10 @@ const InstructorPage = () => {
       newErrors.idFrontFile = ins.requiredField || "Vui lòng tải lên mặt trước";
     if (!formData.idBackFile)
       newErrors.idBackFile = ins.requiredField || "Vui lòng tải lên mặt sau";
-    if (!formData.introduction?.trim())
-      newErrors.introduction = ins.requiredField || "Trường này là bắt buộc";
+    if (!formData.introduction?.trim() && !formData.videoFile)
+      newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
     if (!formData.credentials || formData.credentials.length === 0)
       newErrors.credentials = ins.requiredField || "Vui lòng tải lên chứng chỉ";
-    if (!formData.videoFile)
-      newErrors.videoFile = ins.requiredField || "Vui lòng tải lên video";
 
     setErrors(newErrors);
     return newErrors;
@@ -350,90 +413,131 @@ const InstructorPage = () => {
 
   const handleChange = useCallback(
     (e) => {
-      if (!canEdit && !isEditingPersonalInfo) return;
+      if (!effectiveCanEdit && !isEditingPersonalInfo) return;
       const { name, value } = e.target;
       setFormData((prev) => ({ ...prev, [name]: value }));
       clearError(name);
     },
-    [canEdit, isEditingPersonalInfo],
+    [effectiveCanEdit, isEditingPersonalInfo],
   );
 
   const handleLanguagesChange = useCallback(
     (languages) => {
-      if (!canEdit) return;
+      if (!effectiveCanEdit) return;
       setFormData((prev) => ({ ...prev, languagesTeach: languages }));
       clearError("languagesTeach");
       clearError("languagesTeachLevel");
     },
-    [canEdit],
+    [effectiveCanEdit],
   );
 
   const handleEdit = useCallback(
     (field) => {
-      if (!canEdit) return;
+      if (!effectiveCanEdit) return;
       if (field === "idFront") {
         idFrontInputRef.current?.click();
       } else if (field === "idBack") {
         idBackInputRef.current?.click();
       }
     },
-    [canEdit],
+    [effectiveCanEdit],
   );
 
   const handleFileChange = useCallback(
     (fieldName) => (e) => {
-      if (!canEdit) return;
+      if (!effectiveCanEdit) return;
       const file = e.target.files?.[0];
       if (!file) return;
-      setFormData((prev) => ({ ...prev, [fieldName]: file }));
-      clearError(fieldName);
-    },
-    [canEdit],
-  );
-
-  const handleAddCredential = useCallback(() => {
-    if (!canEdit) return;
-    credentialInputRef.current?.click();
-  }, [canEdit]);
-
-  const handleCredentialFileChange = useCallback(
-    (e) => {
-      if (!canEdit) return;
-      const files = Array.from(e.target.files || []);
-      if (!files.length) return;
-      const CRED_MAX_MB = 100;
-      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024);
-      if (oversized) {
-        const actualMb = (oversized.size / 1024 / 1024).toFixed(1);
+      // CCCD images: 5MB max, jpg/png/webp only (mirrors backend rule)
+      const ID_MAX_MB = 5;
+      const ID_TYPES = ["image/jpeg", "image/png", "image/webp"];
+      if (!ID_TYPES.includes(file.type) || file.size > ID_MAX_MB * 1024 * 1024) {
+        const actualMb = (file.size / 1024 / 1024).toFixed(1);
         setErrors((prev) => ({
           ...prev,
-          credentials:
-            ins.credentialSizeLimit
-              ?.replace("{max}", CRED_MAX_MB)
+          [fieldName]:
+            ins.idSizeLimit
+              ?.replace("{max}", ID_MAX_MB)
               ?.replace("{actual}", actualMb) ||
-            `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`,
+            `Ảnh CCCD phải là JPG/PNG/WebP và nhỏ hơn ${ID_MAX_MB}MB (hiện tại ${actualMb}MB).`,
         }));
         e.target.value = "";
         return;
       }
-      setFormData((prev) => ({
-        ...prev,
-        credentials: [...prev.credentials, ...files],
-      }));
+      setFormData((prev) => ({ ...prev, [fieldName]: file }));
+      clearError(fieldName);
+    },
+    [effectiveCanEdit, ins],
+  );
+
+  const handleAddCredential = useCallback(() => {
+    if (!effectiveCanEdit) return;
+    credentialInputRef.current?.click();
+  }, [effectiveCanEdit]);
+
+  const handleCredentialFileChange = useCallback(
+    (e) => {
+      if (!effectiveCanEdit) return;
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      const CRED_MAX_MB = 100;
+      // Spec Q12: only PDF (accept=".pdf" is advisory — enforce here too).
+      const nonPdf = files.find(
+        (f) => !(f.type === "application/pdf" || f.name?.toLowerCase().endsWith(".pdf")),
+      );
+      if (nonPdf) {
+        setErrors((prev) => ({
+          ...prev,
+          credentials:
+            ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.",
+        }));
+        toast.error(ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.");
+        e.target.value = "";
+        return;
+      }
+      const oversized = files.find((f) => f.size > CRED_MAX_MB * 1024 * 1024);
+      if (oversized) {
+        const actualMb = (oversized.size / 1024 / 1024).toFixed(1);
+        const msg =
+          ins.credentialSizeLimit
+            ?.replace("{max}", CRED_MAX_MB)
+            ?.replace("{actual}", actualMb) ||
+          `Mỗi chứng chỉ phải nhỏ hơn ${CRED_MAX_MB}MB (hiện tại ${actualMb}MB).`;
+        setErrors((prev) => ({
+          ...prev,
+          credentials: msg,
+        }));
+        toast.error(msg);
+        e.target.value = "";
+        return;
+      }
+      setFormData((prev) => {
+        const combined = [...prev.credentials, ...files];
+        if (combined.length > 4) {
+          setErrors((prevErr) => ({
+            ...prevErr,
+            credentials:
+              ins.credentialLimit ||
+              "Tối đa 4 file chứng chỉ.",
+          }));
+          return prev;
+        }
+        return { ...prev, credentials: combined };
+      });
       clearError("credentials");
       e.target.value = "";
     },
-    [canEdit, ins],
+    [effectiveCanEdit, ins],
   );
 
   const handleSelectVideo = useCallback(() => {
-    if (!canEdit) return;
+    if (!effectiveCanEdit) return;
     videoInputRef.current?.click();
-  }, [canEdit]);
+  }, [effectiveCanEdit]);
 
   const handleVideoFileChange = useCallback(
     (e) => {
-      if (!canEdit) return;
+      if (!effectiveCanEdit) return;
       const file = e.target.files?.[0];
       if (!file) return;
       const VIDEO_MAX_MB = 500;
@@ -452,41 +556,343 @@ const InstructorPage = () => {
       }
       setFormData((prev) => ({ ...prev, videoFile: file }));
       clearError("videoFile");
+      clearError("introduction");
+      e.target.value = "";
     },
-    [canEdit, ins],
+    [effectiveCanEdit, ins],
   );
+
+  const handleRemoveVideo = useCallback(() => {
+    if (!effectiveCanEdit) return;
+    setConfirmDelete({ type: "video" });
+  }, [effectiveCanEdit]);
+
+  const confirmDeleteVideo = useCallback(() => {
+    setFormData((prev) => ({ ...prev, videoFile: null }));
+    if (videoInputRef.current) videoInputRef.current.value = "";
+    clearError("videoFile");
+    setConfirmDelete(null);
+  }, [clearError]);
+
+  const handleUndoVideo = useCallback(() => {
+    if (!effectiveCanEdit) return;
+    const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+    setFormData((prev) => ({ ...prev, videoFile: originalVideo }));
+    clearError("videoFile");
+  }, [effectiveCanEdit]);
 
   const handleRemoveCredential = useCallback(
     (index) => {
-      if (!canEdit) return;
-      setFormData((prev) => {
-        const newCreds = [...prev.credentials];
-        newCreds.splice(index, 1);
-        return { ...prev, credentials: newCreds };
-      });
+      if (!effectiveCanEdit) return;
+      setConfirmDelete({ type: "credential", index });
     },
-    [canEdit],
+    [effectiveCanEdit],
   );
 
+  const confirmRemoveCredential = useCallback(() => {
+    if (!confirmDelete || confirmDelete.type !== "credential") return;
+    const index = confirmDelete.index;
+    setFormData((prev) => {
+      const newCreds = [...prev.credentials];
+      newCreds.splice(index, 1);
+      return { ...prev, credentials: newCreds };
+    });
+    setConfirmDelete(null);
+  }, [confirmDelete]);
+
   const buildPayload = useCallback(
-    () => ({
-      fullName: formData.fullName,
-      email: formData.email,
-      address: formData.address,
-      phoneNumber: formData.phoneNumber
+    (otpCode) => {
+      const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+      const originalHadVideo =
+        typeof originalVideo === "string" && !!originalVideo;
+      const removeIntroVideo = originalHadVideo && !formData.videoFile;
+      return {
+        fullName: formData.fullName,
+        email: formData.email,
+        address: formData.address,
+        phoneNumber: formData.phoneNumber
           ? `${formData.phonePrefix}${formData.phoneNumber.replace(/^0+/, "")}`
           : "",
-      nationality: formData.nationality,
+        nationality: formData.nationality,
+        languagesTeach: formData.languagesTeach,
+        nativeLanguage: formData.nativeLanguage,
+        introduction: formData.introduction,
+        idCardFront: formData.idFrontFile,
+        idCardBack: formData.idBackFile,
+        credentials: formData.credentials,
+        introVideo: formData.videoFile,
+        removeIntroVideo,
+        ...(otpCode ? { otpCode } : {}),
+      };
+    },
+    [formData],
+  );
+
+  const [submitTeaching] = useSubmitTeachingUpdateMutation();
+  const [cancelTeaching, { isLoading: isCancellingTeaching }] =
+    useCancelTeachingUpdateMutation();
+
+  const { data: pendingTeachingData, refetch: refetchPendingTeaching } =
+    useGetPendingTeachingUpdateQuery(undefined, {
+      skip: applicationStatus !== "Approved",
+    });
+
+  // Spec Q4: empty payloads (null/undefined/404/{}/envelope with null data)
+  // all mean "no draft". The query may resolve to {} or {success,data:null}
+  // which are truthy — normalize them to null so the banner hides.
+  const pendingTeaching = useMemo(() => {
+    const raw =
+      pendingTeachingData?.data !== undefined
+        ? pendingTeachingData.data
+        : (pendingTeachingData ?? null);
+    if (raw == null) return null;
+    if (typeof raw !== "object") return raw;
+    if (Array.isArray(raw)) return raw.length > 0 ? raw : null;
+    return Object.keys(raw).length === 0 ? null : raw;
+  }, [pendingTeachingData]);
+
+  /**
+   * Merge the pending teaching draft into the live form data so the teacher sees
+   * their submitted changes (BUG3: reload must not show stale live values).
+   * The draft is authoritative for the 5 teaching fields; all else stays live.
+   */
+  const mergeDraftFormData = useCallback(
+    (liveForm, pending) => {
+      const p = pending ?? {};
+      const pick = (camel, pascal, fallback) => {
+        const val = p[camel] ?? p[pascal];
+        return val !== undefined ? val : fallback;
+      };
+      return {
+        ...liveForm,
+        languagesTeach: normalizeLanguagesTeach(
+          pick("languagesTeach", "LanguagesTeach", liveForm.languagesTeach),
+        ),
+        nativeLanguage: pick(
+          "nativeLanguage",
+          "NativeLanguage",
+          liveForm.nativeLanguage,
+        ),
+        introduction: pick(
+          "introduction",
+          "Introduction",
+          liveForm.introduction,
+        ),
+        credentials: safeParseArray(
+          pick("credentialUrls", "CredentialUrls", liveForm.credentials),
+        ),
+        videoFile: pick("introVideoUrl", "IntroVideoUrl", liveForm.videoFile),
+      };
+    },
+    [],
+  );
+
+  // Spec Q6/Q10: view mode shows the newest draft merged over live and stays
+  // in view mode. Reload shows the saved draft, not stale live values.
+  // Never auto-enter edit mode — the header shows a single "Chỉnh sửa" button
+  // while the pending banner explains the awaiting-review state.
+  useEffect(() => {
+    if (!existingApplication) return;
+    if (isEditingApproved) return;
+    if (isApproved && pendingTeaching) {
+      setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
+    } else if (!pendingTeaching) {
+      setFormData(existingApplication);
+    }
+  }, [
+    isApproved,
+    existingApplication,
+    pendingTeaching,
+    isEditingApproved,
+    mergeDraftFormData,
+  ]);
+
+  // Teaching-only validation for Approved updates: no personal fields, no ID
+  // cards (identity lives in the account page), credentials optional.
+  const validateTeachingForm = useCallback(() => {
+    const newErrors = {};
+    if (!formData.nativeLanguage?.trim())
+      newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc";
+
+    if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
+      newErrors.languagesTeach =
+        ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
+    } else {
+      for (const lang of formData.languagesTeach) {
+        if (!lang.language || !lang.level) {
+          newErrors.languagesTeachLevel =
+            ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
+          break;
+        }
+        const years = Number(lang.yearsExperience);
+        if (!Number.isFinite(years) || years < 0 || years > 50) {
+          newErrors.languagesTeachExperience =
+            ins.experienceError || "Số năm kinh nghiệm mỗi ngôn ngữ phải từ 0 đến 50";
+          break;
+        }
+      }
+    }
+
+    if (!formData.introduction?.trim() && !formData.videoFile)
+      newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
+
+    // Spec Q12: block Save when credentials violate the kept rule
+    // (max 4 files, PDF only, each <=100MB). File-picker errors set
+    // errors.credentials, but a Save must not wipe them via setErrors(newErrors).
+    if (formData.credentials?.length > 4) {
+      newErrors.credentials =
+        ins.credentialLimit || "Tối đa 4 file chứng chỉ.";
+    } else {
+      const badCred = (formData.credentials || []).find(
+        (c) =>
+          c instanceof File &&
+          (c.size > 100 * 1024 * 1024 ||
+            !(c.type === "application/pdf" || c.name?.toLowerCase().endsWith(".pdf"))),
+      );
+      if (badCred) {
+        const isTypeBad = !(
+          badCred.type === "application/pdf" ||
+          badCred.name?.toLowerCase().endsWith(".pdf")
+        );
+        if (isTypeBad) {
+          newErrors.credentials =
+            ins.credentialTypeError || "Chứng chỉ phải ở định dạng PDF.";
+        } else {
+          const actualMb = (badCred.size / 1024 / 1024).toFixed(1);
+          newErrors.credentials =
+            ins.credentialSizeLimit
+              ?.replace("{max}", 100)
+              ?.replace("{actual}", actualMb) ||
+            `Mỗi chứng chỉ phải nhỏ hơn 100MB (hiện tại ${actualMb}MB).`;
+        }
+      }
+    }
+
+    setErrors(newErrors);
+    return newErrors;
+  }, [formData, ins]);
+
+  const buildTeachingPayload = useCallback(() => {
+    const originalVideo = originalFormDataRef.current?.videoFile ?? null;
+    const originalHadVideo =
+      typeof originalVideo === "string" && !!originalVideo;
+    return {
       languagesTeach: formData.languagesTeach,
       nativeLanguage: formData.nativeLanguage,
       introduction: formData.introduction,
-      idCardFront: formData.idFrontFile,
-      idCardBack: formData.idBackFile,
       credentials: formData.credentials,
       introVideo: formData.videoFile,
-    }),
-    [formData],
-  );
+      removeIntroVideo: originalHadVideo && !formData.videoFile,
+    };
+  }, [formData]);
+
+  const handleStartEditApproved = useCallback(() => {
+    setErrors({});
+    // Entering edit while a draft exists loads the draft values.
+    if (pendingTeaching && existingApplication) {
+      setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
+    }
+    setIsEditingApproved(true);
+  }, [pendingTeaching, existingApplication, mergeDraftFormData]);
+
+  const handleCancelEditApproved = useCallback(() => {
+    // Spec Q9: "Hủy thay đổi" — revert to the current view (draft merged over
+    // live when a pending draft exists, else live). No API call.
+    if (existingApplication) {
+      if (pendingTeaching) {
+        setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
+      } else if (originalFormDataRef.current) {
+        setFormData(originalFormDataRef.current);
+      }
+    } else if (originalFormDataRef.current) {
+      setFormData(originalFormDataRef.current);
+    }
+    setErrors({});
+    setIsEditingApproved(false);
+  }, [existingApplication, pendingTeaching, mergeDraftFormData]);
+
+  // Approved save: teaching content only. No personal fields, no OTP — the live
+  // Approved profile keeps serving while the draft awaits admin review.
+  // Backend overwrites the same Pending row (Q7), so a second Save replaces
+  // the previous request instead of creating a new one.
+  const handleSaveApproved = useCallback(async () => {
+    if (isSavingApproved || isSubmitting) return;
+    const newErrors = validateTeachingForm();
+    if (Object.keys(newErrors).length > 0) {
+      setTimeout(() => {
+        const firstErrorKey = Object.keys(newErrors)[0];
+        const el = document.getElementById(`field-${firstErrorKey}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
+      return;
+    }
+    setIsSavingApproved(true);
+    try {
+      await submitTeaching(buildTeachingPayload()).unwrap();
+      toast.success(
+        ins.teachingUpdateOverwriteSuccess ||
+          ins.teachingSubmitSuccess ||
+          "Đã cập nhật yêu cầu chờ duyệt (ghi đè yêu cầu cũ). Hồ sơ đã duyệt vẫn hoạt động bình thường trong lúc chờ duyệt.",
+      );
+      setIsEditingApproved(false);
+      setErrors({});
+      // Q6/Q10: keep showing the new draft (formData already holds it).
+      // The pending query refetch keeps the view in sync. Do NOT reset to
+      // stale live values here.
+    } catch (err) {
+      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.");
+    } finally {
+      setIsSavingApproved(false);
+    }
+  }, [
+    isSavingApproved,
+    isSubmitting,
+    validateTeachingForm,
+    buildTeachingPayload,
+    submitTeaching,
+    ins,
+  ]);
+
+  // Spec Q9: "Hủy yêu cầu chờ duyệt" — DELETE the pending draft. Opened via a
+  // confirmation modal (see confirmCancelPending below), live stays untouched.
+  const handleRequestCancelTeachingUpdate = useCallback(() => {
+    if (!pendingTeaching || isCancellingTeaching) return;
+    setConfirmCancelPending(true);
+  }, [pendingTeaching, isCancellingTeaching]);
+
+  const handleCancelTeachingUpdate = useCallback(async () => {
+    try {
+      await cancelTeaching().unwrap();
+      // Spec Q1/Q5: optimistic clean state — banner disappears immediately,
+      // form reverts to live, errors cleared, modal closed. Patch the pending
+      // query cache to null first so the banner/effect see "no draft" in the
+      // same render (otherwise the stale draft re-merges via the view-sync
+      // effect before the background refetch finishes).
+      try {
+        store.dispatch(
+          instructorApi.util.updateQueryData(
+            "getPendingTeachingUpdate",
+            undefined,
+            () => null,
+          ),
+        );
+      } catch {
+        // Cache patch is best-effort; the refetch below still reconciles.
+      }
+      setConfirmCancelPending(false);
+      setErrors({});
+      setIsEditingApproved(false);
+      if (existingApplication) {
+        setFormData(existingApplication);
+      } else if (originalFormDataRef.current) {
+        setFormData(originalFormDataRef.current);
+      }
+      toast.success(ins.teachingCancelSuccess || "Đã hủy yêu cầu chờ duyệt.");
+      refetchPendingTeaching?.();
+    } catch (err) {
+      toast.error(err?.data?.message || "Đã có lỗi xảy ra khi hủy bản nháp.");
+    }
+  }, [cancelTeaching, ins, existingApplication, refetchPendingTeaching]);
 
   const handleSavePersonalInfo = useCallback(async () => {
     const personalErrors = {};
@@ -537,7 +943,9 @@ const InstructorPage = () => {
       return;
     }
 
-    const newErrors = validateForm();
+    const newErrors = (isRequestEdit || isReapplying)
+      ? validateTeachingForm()
+      : validateForm();
     if (Object.keys(newErrors).length > 0) {
       setTimeout(() => {
         const firstErrorKey = Object.keys(newErrors)[0];
@@ -549,8 +957,10 @@ const InstructorPage = () => {
 
     try {
       if (isRequestEdit || isReapplying) {
-        // PUT /my for resubmission — simple RTK Query
-        await updateInstructor(buildPayload()).unwrap();
+        // PUT /my for resubmission — teaching content only. Personal/identity
+        // fields are locked (owned by the account page) and stripped from the
+        // payload; the backend keeps the draft's submitted values. No OTP.
+        await updateInstructor(buildTeachingPayload()).unwrap();
         toast.success(ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!");
         setShowForm(false);
         setAgreed(false);
@@ -612,9 +1022,11 @@ const InstructorPage = () => {
     isRequestEdit,
     isReapplying,
     validateForm,
+    validateTeachingForm,
     applyInstructor,
     updateInstructor,
     buildPayload,
+    buildTeachingPayload,
     ins,
     t,
   ]);
@@ -625,6 +1037,33 @@ const InstructorPage = () => {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="w-8 h-8 border-3 border-cath-red-700 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Non-404 fetch failure with no data: show an error panel instead of a
+  // white disabled form (the form below would render readOnly with no banner).
+  if (profileError && !hasNotApplied && !rawApplication) {
+    return (
+      <div className="flex flex-col gap-4">
+        <PageTitle>
+          {t.nav?.instructor || "Giảng viên"}
+        </PageTitle>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+          <h3 className="text-sm font-bold text-red-800">
+            {ins.loadErrorTitle || "Không tải được hồ sơ giảng viên"}
+          </h3>
+          <p className="text-sm text-red-700 mt-1">
+            {ins.loadErrorDesc || "Vui lòng kiểm tra kết nối và thử lại."}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetchInstructorProfile()}
+            className="mt-3 px-4 py-2 bg-[#990011] text-white text-sm font-medium rounded-lg hover:bg-[#7a000e] transition-colors cursor-pointer"
+          >
+            {ins.retry || "Thử lại"}
+          </button>
+        </div>
       </div>
     );
   }
@@ -674,14 +1113,62 @@ const InstructorPage = () => {
     );
   }
 
-  // Determine readOnly for section components
-  const readOnly = !canEdit || isSubmitting || isTaskSubmitting;
+  // Determine readOnly for section components.
+  // Global Approved edit unlocks ALL sections + files (spec Q9/Q12).
+  const readOnly =
+    (!effectiveCanEdit && !isEditingPersonalInfo) ||
+    isSubmitting ||
+    isTaskSubmitting ||
+    isSavingApproved;
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle>
-        {t.nav?.instructor || "Giảng viên"}
-      </PageTitle>
+      {/* Header row: title + Edit / Cancel / Save on the same line */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <PageTitle>
+          {t.nav?.instructor || "Giảng viên"}
+        </PageTitle>
+
+        {/* Global Approved edit — button only, no card frame */}
+        {showGlobalEditBar && !isEditingApproved && (
+          <button
+            type="button"
+            onClick={handleStartEditApproved}
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition-colors shadow-sm cursor-pointer shrink-0"
+          >
+            <Pencil size={15} />
+            <span>{ins.editInfo || "Chỉnh sửa"}</span>
+          </button>
+        )}
+
+        {showGlobalEditBar && isEditingApproved && (
+          <div className="flex items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
+            <button
+              type="button"
+              onClick={handleCancelEditApproved}
+              disabled={isSavingApproved}
+              className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50"
+            >
+              {ins.cancelEditChanges || ins.cancel || "Hủy thay đổi"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveApproved}
+              disabled={isSavingApproved || isSubmitting || isCancellingTeaching}
+              className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition cursor-pointer shadow-sm disabled:opacity-50"
+            >
+              {(isSavingApproved || isSubmitting) && (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              <span>
+                {isSavingApproved
+                  ? ins.saving || "Đang lưu..."
+                  : ins.save || "Lưu"}
+              </span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Task submitting banner */}
       {isTaskSubmitting && (
@@ -693,8 +1180,9 @@ const InstructorPage = () => {
         </div>
       )}
 
-      {/* Status Banner — shown when an application exists */}
-      {applicationStatus && (
+      {/* Status Banner — shown when an application exists.
+          Approved shows only on first view (localStorage dismiss). */}
+      {applicationStatus && (applicationStatus !== "Approved" || showApprovedBanner) && (
         <InstructorStatusBanner
           status={applicationStatus}
           rejectReason={
@@ -704,26 +1192,59 @@ const InstructorPage = () => {
           editRequestNote={
             rawApplication?.editRequestNote || rawApplication?.EditRequestNote
           }
+          isRevision={!!(rawApplication?.isRevision || rawApplication?.IsRevision)}
           t={t}
           onReapply={() => setIsReapplying(true)}
           isReapplying={isReapplying}
+          onDismiss={
+            applicationStatus === "Approved"
+              ? handleDismissApprovedBanner
+              : undefined
+          }
+        />
+      )}
+
+      {/* Edit-mode hint — text only, buttons live in the header row.
+          Spec Q3: no pending badge here, keep the hint text only. */}
+      {showGlobalEditBar && isEditingApproved && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm text-amber-800 flex-1">
+            {ins.approvedEditingHint ||
+              "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt (ghi đè yêu cầu cũ nếu có), hoặc Hủy thay đổi để hoàn tác."}
+          </p>
+        </div>
+      )}
+
+      {/* Pending teaching-update banner — live profile keeps serving.
+          Spec Q2/Q6: hidden while editing (2-step flow: discard changes first,
+          then cancel the pending request from view mode). */}
+      {isApproved && !isEditingApproved && (
+        <InstructorPendingUpdateBanner
+          live={rawApplication}
+          pending={pendingTeaching}
+          onCancel={handleRequestCancelTeachingUpdate}
+          isCancelling={isCancellingTeaching}
+          t={t}
         />
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        <InstructorPersonalInfo
-          formData={formData}
-          onChange={handleChange}
-          readOnly={readOnly}
-          errors={errors}
-          t={t}
-          canSectionEdit={canSectionEdit}
-          isSectionEditing={isEditingPersonalInfo}
-          onStartSectionEdit={handleStartEditPersonalInfo}
-          onCancelSectionEdit={handleCancelEditPersonalInfo}
-          onSaveSectionEdit={handleSavePersonalInfo}
-          isSavingSection={isSavingPersonalInfo}
-        />
+        {/* Personal/identity locked on resubmit (owned by the account page) */}
+        {!isApproved && !isRequestEdit && !isReapplying && (
+          <InstructorPersonalInfo
+            formData={formData}
+            onChange={handleChange}
+            readOnly={readOnly}
+            errors={errors}
+            t={t}
+            canSectionEdit={canSectionEdit}
+            isSectionEditing={isEditingPersonalInfo}
+            onStartSectionEdit={handleStartEditPersonalInfo}
+            onCancelSectionEdit={handleCancelEditPersonalInfo}
+            onSaveSectionEdit={handleSavePersonalInfo}
+            isSavingSection={isSavingPersonalInfo}
+          />
+        )}
         <InstructorLanguages
           formData={formData}
           onChange={handleChange}
@@ -732,13 +1253,15 @@ const InstructorPage = () => {
           errors={errors}
           t={t}
         />
-        <InstructorIdentity
-          formData={formData}
-          onEdit={handleEdit}
-          readOnly={readOnly}
-          errors={errors}
-          t={t}
-        />
+        {!isApproved && !isRequestEdit && !isReapplying && (
+          <InstructorIdentity
+            formData={formData}
+            onEdit={handleEdit}
+            readOnly={readOnly}
+            errors={errors}
+            t={t}
+          />
+        )}
         <InstructorCredentials
           formData={formData}
           onAddCredential={handleAddCredential}
@@ -753,6 +1276,9 @@ const InstructorPage = () => {
         formData={formData}
         onChange={handleChange}
         onSelectVideo={handleSelectVideo}
+        onRemoveVideo={handleRemoveVideo}
+        onUndoVideo={handleUndoVideo}
+        originalVideoUrl={existingApplication?.videoFile ?? null}
         readOnly={readOnly}
         errors={errors}
         t={t}
@@ -776,23 +1302,28 @@ const InstructorPage = () => {
         />
       )}
 
-      {/* Hidden file inputs — only in edit mode */}
-      {canEdit && (
+      {/* Hidden file inputs — new/RequestEdit/Reapply + Approved global edit.
+          ID cards are creation-only (identity lives in the account page). */}
+      {effectiveCanEdit && (
         <>
-          <input
-            ref={idFrontInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFileChange("idFrontFile")}
-          />
-          <input
-            ref={idBackInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFileChange("idBackFile")}
-          />
+          {!isApproved && (
+            <>
+              <input
+                ref={idFrontInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChange("idFrontFile")}
+              />
+              <input
+                ref={idBackInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChange("idBackFile")}
+              />
+            </>
+          )}
           <input
             ref={credentialInputRef}
             type="file"
@@ -810,6 +1341,44 @@ const InstructorPage = () => {
           />
         </>
       )}
+
+      {/* Delete confirmations (video + certificate) */}
+      <ConfirmationModal
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={
+          confirmDelete?.type === "credential"
+            ? confirmRemoveCredential
+            : confirmDeleteVideo
+        }
+        title={
+          confirmDelete?.type === "credential"
+            ? ins.deleteCredentialTitle || "Xóa chứng chỉ"
+            : ins.deleteVideoTitle || "Xóa video giới thiệu"
+        }
+        message={
+          confirmDelete?.type === "credential"
+            ? ins.deleteCredentialConfirm ||
+              "Xóa chứng chỉ này? Thay đổi chỉ có hiệu lực sau khi bạn nhấn Lưu."
+            : ins.deleteVideoConfirm ||
+              "Xóa video giới thiệu? Thay đổi chỉ có hiệu lực sau khi bạn nhấn Lưu."
+        }
+        confirmText={ins.delete || "Xóa"}
+      />
+
+      {/* Q9: confirm cancelling the pending teaching-update draft */}
+      <ConfirmationModal
+        open={confirmCancelPending}
+        onClose={() => setConfirmCancelPending(false)}
+        onConfirm={handleCancelTeachingUpdate}
+        title={ins.cancelPendingTitle || "Hủy yêu cầu chờ duyệt?"}
+        message={
+          ins.cancelPendingConfirm ||
+          "Hủy bản nháp chờ duyệt? Hồ sơ đã duyệt của bạn vẫn giữ nguyên và hiển thị bình thường."
+        }
+        confirmText={ins.cancelPendingRequest || ins.cancelUpdate || "Hủy yêu cầu"}
+        isPending={isCancellingTeaching}
+      />
     </div>
   );
 };

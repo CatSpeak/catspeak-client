@@ -42,6 +42,7 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await sendFriendRequest(targetId).unwrap()
+      toast.success(t.profile?.social?.requestSent || "Đã gửi yêu cầu kết bạn")
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -51,6 +52,7 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await followUser(targetId).unwrap()
+      toast.success(t.profile?.social?.followSuccess || "Đã theo dõi")
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -60,6 +62,7 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await unfollowUser(targetId).unwrap()
+      toast.success(t.profile?.social?.unfollowSuccess || "Đã hủy theo dõi")
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -101,6 +104,9 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await respondFriendRequest({ friendshipId, action: "accept" }).unwrap()
+      toast.success(
+        t.profile?.friends?.actions?.acceptSuccess || "Đã chấp nhận kết bạn!",
+      )
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -110,6 +116,20 @@ export const useFriendActions = () => {
     if (close) close()
     try {
       await respondFriendRequest({ friendshipId, action: "decline" }).unwrap()
+      toast.success(
+        t.profile?.friends?.actions?.declineSuccess || "Đã từ chối kết bạn",
+      )
+    } catch {
+      toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
+    }
+  }
+
+  const handleCancelRequest = async (friendshipId, close) => {
+    if (close) close()
+    if (!friendshipId) return
+    try {
+      await deleteFriendship(friendshipId).unwrap()
+      toast.success(t.profile?.friends?.actions?.cancelSuccess || "Đã thu hồi lời mời")
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -123,6 +143,7 @@ export const useFriendActions = () => {
     handleUnfriend,
     handleAcceptRequest,
     handleDeclineRequest,
+    handleCancelRequest,
   }
 }
 

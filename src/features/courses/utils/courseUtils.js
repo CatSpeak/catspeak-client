@@ -294,7 +294,7 @@ export const getClassEnrollmentIssueMessage = (issue, studentText = {}) => {
     not_open:
       studentText.enrollmentNotOpen || "Class enrollment is not open.",
     upcoming:
-      studentText.upcomingNotice || studentText.enrollmentNotOpen || "Lớp học này sắp diễn ra và chưa mở đăng ký.",
+      studentText.upcomingNotice || studentText.enrollmentNotOpen || "This class is upcoming and not open for enrollment yet.",
     full:
       studentText.classFull || "This class is full.",
     not_started:
@@ -314,7 +314,7 @@ export const getClassEnrollmentIssueLabel = (issue, studentText = {}) => {
     not_open:
       studentText.notOpen || "Not open",
     upcoming:
-      studentText.upcomingStatus || studentText.upcoming || "Sắp diễn ra",
+      studentText.upcomingStatus || studentText.upcoming || "Upcoming",
     full:
       studentText.full || "Full",
     not_started:

@@ -171,6 +171,7 @@ export default {
       paymentError: "支払い中にエラーが発生しました。",
       voucherUnavailable:
         "コード{{code}}は利用できなくなったため、注文から自動的に削除されました",
+      redirecting: "決済ページにリダイレクト中...",
 
       // ClassInfoSection
       classInfo: "クラス情報",
@@ -238,6 +239,10 @@ export default {
       reasonMinLearners: "注文に少なくとも{{count}}人の学習者が必要です",
       reasonMinOrder:
         "最低注文金額{{minAmount}}（小計: {{currentAmount}}）",
+      reasonExpired: "このコードは有効期限が切れています",
+      reasonExhausted: "このコードは使用回数を使い切りました",
+      reasonPerUserLimit: "このコードの利用可能回数を使い切りました",
+      reasonNewUserOnly: "新規ユーザーのみ対象です",
 
       // VoucherModal
       myOffers: "マイ特典",
@@ -260,6 +265,12 @@ export default {
       COMMON_EXTERNAL_SERVICE_ERROR: "外部サービスエラーが発生しました。後でもう一度お試しください。",
       COMMON_BAD_REQUEST: "無効なリクエストです。入力を確認してください。",
       COMMON_CONFLICT: "競合が発生しました。もう一度お試しください。",
+      COMMON_VALIDATION_FAILED: "無効な入力です。内容を確認してください。",
+      COMMON_RESOURCE_NOT_FOUND: "要求されたリソースが見つかりません。",
+      COMMON_UNAUTHORIZED: "ログインしていません。もう一度ログインしてください。",
+      COMMON_FORBIDDEN: "この操作を行う権限がありません。",
+      COMMON_RATE_LIMIT_EXCEEDED: "操作が速すぎます。後でもう一度お試しください。",
+      COMMON_CONFIGURATION_ERROR: "サービスは一時的に利用できません。後でもう一度お試しください。",
 
       // Payment errors
       PAYMENT_PLAN_NOT_FOUND: "選択したサブスクリプションプランは利用できなくなりました。",

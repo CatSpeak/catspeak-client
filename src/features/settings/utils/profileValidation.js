@@ -17,6 +17,7 @@ export const validatePhoneInput = (phoneNumber, prefix) => {
 
 export const buildProfilePayload = (editingField, formData, overrides = {}) => {
   const payload = {
+    fullName: null,
     username: null,
     nickname: null,
     country: null,
@@ -27,6 +28,7 @@ export const buildProfilePayload = (editingField, formData, overrides = {}) => {
     email: null,
   };
 
+  if (editingField === "fullName") payload.fullName = formData.fullName;
   if (editingField === "username") payload.username = formData.username;
   if (editingField === "nickname") payload.nickname = formData.nickname;
   if (editingField === "country") payload.country = formData.country;
@@ -37,6 +39,7 @@ export const buildProfilePayload = (editingField, formData, overrides = {}) => {
   if (editingField === "email") payload.email = formData.email;
 
   if (editingField === "personalInfo") {
+    payload.fullName = formData.fullName;
     payload.username = formData.username;
     payload.nickname = formData.nickname;
     payload.country = formData.country;
