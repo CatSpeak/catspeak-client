@@ -37,6 +37,8 @@
     "lucide-react": "^0.564.0",
     "nprogress": "^0.2.0",
     "pnpm": "^10.34.4",
+    "primeicons": "^8.0.0",
+    "primereact": "^10.9.9",
     "react": "^19.2.0",
     "react-circular-progressbar": "^2.2.0",
     "react-confetti": "^6.4.0",
