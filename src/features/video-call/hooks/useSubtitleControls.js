@@ -74,14 +74,20 @@ export const useSubtitleControls = ({
 
   const startSubtitles = async (language) => {
     try {
-      const result = await startMutation({ sessionId, language }).unwrap()
+      const chosenLang = language || defaultDisplayLang
+      const result = await startMutation({ sessionId, language: chosenLang }).unwrap()
       setDispatchId(result.dispatchId)
       setIsSubtitleActive(true)
-      setSubtitleSelectedLanguage?.(defaultDisplayLang)
+      setSubtitleSelectedLanguage?.(chosenLang)
       setShowRoomSubtitles?.(true)
     } catch (err) {
       console.error("[useSubtitleControls] Failed to start subtitles:", err)
     }
+  }
+
+  const changeSubtitleLanguage = async (newLanguage) => {
+    if (!newLanguage) return
+    await startSubtitles(newLanguage)
   }
 
   const stopSubtitles = async () => {
@@ -106,6 +112,7 @@ export const useSubtitleControls = ({
     dispatchId,
     subtitleSupportedLangs,
     startSubtitles,
+    changeSubtitleLanguage,
     stopSubtitles,
   }
 }

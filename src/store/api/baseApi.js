@@ -88,6 +88,31 @@ const instructorBaseQuery = fetchBaseQuery({
   },
 })
 
+const aiBaseQuery = fetchBaseQuery({
+  baseUrl: import.meta.env.VITE_AI_API_BASE_URL || "/api/ai",
+  prepareHeaders: (headers, { getState }) => {
+    const token = getState().auth.token
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`)
+    }
+
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
+    if (match) {
+      headers.set("X-Community-Lang", match[1])
+    }
+
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
+    headers.set("X-Time-Zone", userTz)
+
+    headers.set(
+      "X-Timezone-Offset",
+      (-new Date().getTimezoneOffset()).toString(),
+    )
+
+    return headers
+  },
+})
+
 // ─── Refresh logic ──────────────────────────────────────────────────
 let refreshPromise = null
 
@@ -204,8 +229,8 @@ export async function ensureRefresh(
         return false
       }
 
-      if (refreshResult.data?.data) {
-        const payload = refreshResult.data.data
+      const payload = refreshResult.data?.data || refreshResult.data
+      if (payload?.token) {
         api.dispatch(setCredentials(payload))
         console.info(
           AUTH_LOG,
@@ -352,21 +377,39 @@ export function createReauthBaseQuery(queryResolver) {
 const baseQueryWithReauth = createReauthBaseQuery(
   async (args, api, extraOptions) => {
     const url = typeof args === "string" ? args : args?.url
+    const lowerUrl = url ? url.toLowerCase() : ""
+
+    const isAiRoute =
+      lowerUrl &&
+      (lowerUrl.includes("speaking-stats") ||
+        lowerUrl.includes("speaking-analytics") ||
+        lowerUrl.includes("speaking-history") ||
+        lowerUrl.startsWith("/ai/") ||
+        lowerUrl.startsWith("ai/") ||
+        lowerUrl.startsWith("/v1/ai/") ||
+        lowerUrl.startsWith("v1/ai/"))
+
     const isCoursesRoute =
-      url &&
-      (url.toLowerCase().startsWith("/teacher/") ||
-        url.toLowerCase().startsWith("teacher/") ||
-        url.toLowerCase().startsWith("/student/") ||
-        url.toLowerCase().startsWith("student/") ||
-        url.toLowerCase().startsWith("/explore/") ||
-        url.toLowerCase().startsWith("/v1/instructor") ||
-        url.toLowerCase().startsWith("/v1/instructors") ||
-        url.toLowerCase().startsWith("explore/") ||
-        url.toLowerCase().startsWith("/personal-materials") ||
-        url.toLowerCase().startsWith("personal-materials") ||
-        url.toLowerCase().startsWith("/vouchers") ||
-        url.toLowerCase().startsWith("vouchers"))
-    const activeQuery = isCoursesRoute ? instructorBaseQuery : baseQuery
+      lowerUrl &&
+      (lowerUrl.startsWith("/teacher/") ||
+        lowerUrl.startsWith("teacher/") ||
+        lowerUrl.startsWith("/student/") ||
+        lowerUrl.startsWith("student/") ||
+        lowerUrl.startsWith("/explore/") ||
+        lowerUrl.startsWith("/v1/instructor") ||
+        lowerUrl.startsWith("/v1/instructors") ||
+        lowerUrl.startsWith("explore/") ||
+        lowerUrl.startsWith("/personal-materials") ||
+        lowerUrl.startsWith("personal-materials") ||
+        lowerUrl.startsWith("/vouchers") ||
+        lowerUrl.startsWith("vouchers"))
+
+    const activeQuery = isAiRoute
+      ? aiBaseQuery
+      : isCoursesRoute
+        ? instructorBaseQuery
+        : baseQuery
+
     return activeQuery(args, api, extraOptions)
   },
 )

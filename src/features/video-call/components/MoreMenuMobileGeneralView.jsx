@@ -1,4 +1,5 @@
 import React from "react"
+import { useSelector } from "react-redux"
 import { toast } from "react-hot-toast"
 import {
   Users,
@@ -11,13 +12,18 @@ import {
   Copy,
   Info,
   Settings,
+  BarChart2,
+  Split,
   Clapperboard,
 } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSessionTimer } from "../hooks/useSessionTimer"
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
-import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  isBreakoutSupported,
+  isSpeakingTimeBalanceSupported,
+} from "@/features/video-call/utils/roomTypeHelpers"
 import { useGameControlStatus } from "@/features/games/hooks/useGameControlStatus"
 
 const MoreMenuMobileGeneralView = ({
@@ -26,11 +32,18 @@ const MoreMenuMobileGeneralView = ({
   setShowSubtitlePicker,
 }) => {
   const { t } = useLanguage()
+  const { isBreakoutActive } = useSelector((s) => s.videoCall)
   const {
     showParticipants,
     setShowParticipants,
     showChat,
     setShowChat,
+    showSpeakingTimeBalance,
+    setShowSpeakingTimeBalance,
+    showStudentSpeakingWidget,
+    setShowStudentSpeakingWidget,
+    showBreakout,
+    setShowBreakout,
     participants,
     unreadRoomChat,
     unreadAiChat,
@@ -124,6 +137,62 @@ const MoreMenuMobileGeneralView = ({
           )}
         </button>
       </div>
+
+      {(!isAISession && (isSpeakingTimeBalanceSupported(room) || (isBreakoutSupported(room?.roomType) && (isHost || isBreakoutActive)))) && (
+        <div
+          className={`grid ${
+            isSpeakingTimeBalanceSupported(room) &&
+            isBreakoutSupported(room?.roomType) &&
+            (isHost || isBreakoutActive)
+              ? "grid-cols-2"
+              : "grid-cols-1"
+          } gap-3`}
+        >
+          {isSpeakingTimeBalanceSupported(room) && (
+            <button
+              onClick={() => {
+                if (isHost) {
+                  setShowSpeakingTimeBalance(!showSpeakingTimeBalance)
+                } else {
+                  setShowStudentSpeakingWidget(!showStudentSpeakingWidget)
+                }
+                setShowMoreMenu(false)
+              }}
+              className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors px-3 ${
+                (isHost ? showSpeakingTimeBalance : showStudentSpeakingWidget)
+                  ? "bg-red-100 text-red-600"
+                  : "bg-[#F5F5F5] text-black"
+              }`}
+            >
+              <BarChart2 size={20} className="shrink-0" />
+              <span className="truncate">
+                {t.rooms?.videoCall?.controls?.speakingTimeBalance ||
+                  "Speaking Time Balance"}
+              </span>
+            </button>
+          )}
+
+          {isBreakoutSupported(room?.roomType) &&
+            (isHost || isBreakoutActive) && (
+              <button
+                onClick={() => {
+                  setShowBreakout(!showBreakout)
+                  setShowMoreMenu(false)
+                }}
+                className={`h-14 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors px-3 ${
+                  showBreakout
+                    ? "bg-red-100 text-red-600"
+                    : "bg-[#F5F5F5] text-black"
+                }`}
+              >
+                <Split size={20} className="shrink-0" />
+                <span className="truncate">
+                  {t?.rooms?.breakoutRooms?.breakoutRoomOption || "Breakout Rooms"}
+                </span>
+              </button>
+            )}
+        </div>
+      )}
 
       <div className={`grid gap-3 ${!isAISession && isBreakoutSupported(room?.roomType) && isHost ? 'grid-cols-4' : 'grid-cols-3'}`}>
         <button

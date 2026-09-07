@@ -23,6 +23,7 @@ export const useSidePanelState = () => {
   const showAvatarPicker = activeSidePanel === "avatarPicker"
   const showTroubleshoot = activeSidePanel === "troubleshoot"
   const showBreakout = activeSidePanel === "breakout"
+  const showSpeakingTimeBalance = activeSidePanel === "speakingTimeBalance"
 
   // Convenience setters (accept boolean toggle style)
   const setShowChat = (show) => setActiveSidePanel(show ? "chat" : null)
@@ -35,6 +36,8 @@ export const useSidePanelState = () => {
   const setShowTroubleshoot = (show) =>
     setActiveSidePanel(show ? "troubleshoot" : null)
   const setShowBreakout = (show) => setActiveSidePanel(show ? "breakout" : null)
+  const setShowSpeakingTimeBalance = (show) =>
+    setActiveSidePanel(show ? "speakingTimeBalance" : null)
 
   // Chat sub-panel collapse state (tightly coupled to panel visibility)
   const [isChatCollapsed, setIsChatCollapsed] = useState(false)
@@ -58,6 +61,8 @@ export const useSidePanelState = () => {
     setShowTroubleshoot,
     showBreakout,
     setShowBreakout,
+    showSpeakingTimeBalance,
+    setShowSpeakingTimeBalance,
     isChatCollapsed,
     setIsChatCollapsed,
     isAiCollapsed,

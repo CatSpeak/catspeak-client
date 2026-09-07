@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import AnalyticsKpiGrid from "../AnalyticsKpiGrid"
 import AnalyticsLineChart from "../AnalyticsLineChart"
@@ -13,6 +14,7 @@ import {
 } from "@/store/api/coursesApi"
 
 const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
+  const navigate = useNavigate()
   const { t, language } = useLanguage()
   const analyticsT = t.courses?.analytics || {}
   const kpiT = analyticsT.kpis || {}
@@ -113,6 +115,7 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
   // 4. Class Table Data & Bar Data
   const classItems = studentsByClassData?.data || (Array.isArray(studentsByClassData) ? studentsByClassData : [])
   const classTableData = classItems.map((r) => ({
+    classId: r.classId,
     className: r.className,
     course: r.courseName || "Khóa học",
     learners: r.totalStudents,
@@ -183,7 +186,23 @@ const StudentsTab = ({ group, onDrillDown, queryParams = {} }) => {
           <h2 className="text-base font-bold text-[#14171F] mb-3">{secT.studentsByClass || "Học viên theo lớp học"}</h2>
           <AnalyticsDataTable
             columns={[
-              { key: "className", label: colT.class || "Lớp học" },
+              {
+                key: "className",
+                label: colT.class || "Lớp học",
+                render: (val, row) => (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (row.classId) {
+                        navigate(`/workspace/analytics/class/${encodeURIComponent(row.classId)}`)
+                      }
+                    }}
+                    className="font-bold text-left text-gray-900 hover:text-[#990011] transition-colors cursor-pointer hover:underline"
+                  >
+                    {val}
+                  </button>
+                ),
+              },
               { key: "course", label: colT.course || "Khóa học" },
               { key: "learners", label: colT.totalStudents || "Học viên", align: "right" },
               { key: "newStudents", label: colT.newStudents || "HV mới", align: "right" },

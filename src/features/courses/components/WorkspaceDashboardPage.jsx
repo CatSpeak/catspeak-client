@@ -261,6 +261,7 @@ const WorkspaceDashboardPage = () => {
   // ── Course & Class snapshot ──
   const courseClass = dashboard?.courseClass || {}
   const fillRateRows = (courseClass.topClassesByFillRate || []).slice(0, 3).map((r) => ({
+    classId: r.classId,
     className: r.className,
     course: r.courseName || "Khóa học",
     learners: r.students ?? 0,

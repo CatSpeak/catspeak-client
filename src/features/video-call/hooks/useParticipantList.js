@@ -56,7 +56,7 @@ export const useParticipantList = (allParticipants, localParticipant) => {
       // Filter out STT agent — check both metadata flag and identity prefix
       const meta = parseMetadata(p.metadata)
       const isAgent =
-        meta.is_stt_agent === true || p.identity?.startsWith("agent-")
+        meta.is_stt_agent === true || p.identity?.startsWith("agent")
 
       if (isAgent) return
 

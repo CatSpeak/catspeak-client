@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useParams } from "react-router-dom"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -18,8 +18,14 @@ const ControlBarMoreMenu = ({
 }) => {
   const { id: roomId } = useParams()
   const { t } = useLanguage()
-  const { isAISession, subtitleSupportedLangs, startSubtitles } =
-    useGlobalVideoCall()
+  const {
+    isAISession,
+    subtitleSupportedLangs,
+    subtitleSelectedLanguage,
+    isSubtitleActive,
+    startSubtitles,
+    changeSubtitleLanguage,
+  } = useGlobalVideoCall()
 
   const [showGameSetup, setShowGameSetup] = useState(false)
   const [showGameHistory, setShowGameHistory] = useState(false)
@@ -85,13 +91,17 @@ const ControlBarMoreMenu = ({
                     >
                       <SubtitleLanguagePicker
                         languages={subtitleSupportedLangs}
-                        selectedLanguage={null}
+                        selectedLanguage={subtitleSelectedLanguage}
                         label={
                           t?.rooms?.videoCall?.controls?.selectSubtitleLanguage
                         }
                         languageNames={t?.rooms?.videoCall?.subtitleLanguages}
                         onSelect={(lang) => {
-                          startSubtitles(lang)
+                          if (isSubtitleActive) {
+                            changeSubtitleLanguage(lang)
+                          } else {
+                            startSubtitles(lang)
+                          }
                           setShowSubtitlePicker(false)
                           setShowMoreMenu(false)
                         }}

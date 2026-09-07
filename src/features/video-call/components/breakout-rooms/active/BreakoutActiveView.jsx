@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { toast } from "react-hot-toast"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import {
   useStopBreakoutRoomsMutation,
   useJoinBreakoutRoomMutation,
@@ -19,6 +19,7 @@ import BreakoutActiveRoomList from "./BreakoutActiveRoomList"
 import BreakoutActiveFooter from "./BreakoutActiveFooter"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useDragScroll } from "../../../hooks/useDragScroll"
+import { useBreakoutSpeakingStats } from "../../../hooks/useBreakoutSpeakingStats"
 
 const BreakoutActiveView = ({
   sessionId,
@@ -31,6 +32,24 @@ const BreakoutActiveView = ({
 }) => {
   const { t } = useLanguage()
   const dispatch = useDispatch()
+  const { callInfo } = useSelector((s) => s.videoCall)
+
+  const { breakoutRoomsMap, breakoutRoomsStats } = useBreakoutSpeakingStats(
+    sessionId,
+    {
+      breakoutRooms: status?.breakoutSessions || [],
+      parentLivekitRoomName:
+        status?.mainRoom?.liveKitRoomName ||
+        callInfo?.roomData?.liveKitRoomName ||
+        "",
+      parentRoomId: callInfo?.roomId || null,
+      enabled: Boolean(
+        status?.isBreakoutActive && (status?.breakoutSessions?.length || 0) > 0,
+      ),
+      includeMainRoom: true,
+      pollingInterval: 60000,
+    },
+  )
 
   const [stopBreakoutRooms, { isLoading: isStopping }] =
     useStopBreakoutRoomsMutation()
@@ -183,6 +202,8 @@ const BreakoutActiveView = ({
           students={allLiveStudents}
           handleHostLeave={handleHostLeave}
           isJoiningRoom={isJoiningRoom}
+          breakoutRoomsMap={breakoutRoomsMap}
+          breakoutRoomsStats={breakoutRoomsStats}
         />
       </div>
 

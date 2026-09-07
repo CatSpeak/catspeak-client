@@ -151,7 +151,6 @@ export const useAiSend = () => {
         const conversations = threadHistory.slice(0, -1)
 
         const payload = { roomName, message: text, conversations }
-        console.log("Sending AI payload:", payload)
 
         if (isPublic) {
           await chatPublicAi(payload).unwrap()

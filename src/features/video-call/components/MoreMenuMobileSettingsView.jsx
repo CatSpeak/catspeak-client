@@ -126,7 +126,7 @@ const MoreMenuMobileSettingsView = ({
             "Điều chỉnh chế độ xem"}
         </ListItem>
 
-        {(isPiPSupported ?? ("documentPictureInPicture" in window)) && (
+        {(isPiPSupported ?? "documentPictureInPicture" in window) && (
           <ListItem
             onClick={() => {
               enterPiP?.()

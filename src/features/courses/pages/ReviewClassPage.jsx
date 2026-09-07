@@ -248,6 +248,14 @@ const ReviewClassPage = () => {
                     {context.className}
                   </p>
                 )}
+                {context.language ? (
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mt-0.5">
+                    {getLocalizedLanguageName(context.language, t) || context.language}
+                    {Array.isArray(context.levels) && context.levels.length > 0
+                      ? ` · ${context.levels.join(" · ")}`
+                      : ""}
+                  </p>
+                ) : null}
                 <div className="mt-2 flex items-center gap-2">
                   <Avatar
                     src={getSafeMediaUrl(context.teacher?.avatarImageUrl || context.teacher?.avatarUrl)}

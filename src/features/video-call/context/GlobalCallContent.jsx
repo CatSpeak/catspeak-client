@@ -29,12 +29,18 @@ import {
   parseMetadata,
 } from "@/features/video-call/hooks/useParticipantList"
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
+import {
+  useStartAssistantMutation,
+  useStopAssistantMutation,
+  useGetAssistantStatusQuery,
+} from "@/store/api/assistantApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
 import {
   getNavigate,
   getLocation,
 } from "@/features/video-call/hooks/useNavigateRef"
+import { useSpeakingStats } from "@/features/video-call/hooks/useSpeakingStats"
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
@@ -46,7 +52,10 @@ import {
   ROOM_SETTING_KEYS,
 } from "@/features/video-call/utils/roomSettingHelpers"
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
-import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  isRoomHost,
+  isSpeakingTimeBalanceSupported,
+} from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -64,6 +73,8 @@ const GlobalCallContent = ({
   showAiSuggestions,
   setShowAiSuggestions,
   panelState,
+  speakingAssistantEnabled,
+  setSpeakingAssistantEnabled,
 }) => {
   const { t, language } = useLanguage()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
@@ -279,6 +290,78 @@ const GlobalCallContent = ({
   const sessionId =
     callInfo?.sessionId || parseMetadata(localParticipant?.metadata)?.sessionId
   const token = useSelector(selectCurrentToken)
+
+  // ── Speaking Assistant Integration ──
+  const [activeDispatchId, setActiveDispatchId] = useState(null)
+  const [startAssistant] = useStartAssistantMutation()
+  const [stopAssistant] = useStopAssistantMutation()
+
+  const { data: assistantStatus } = useGetAssistantStatusQuery(sessionId, {
+    skip: !sessionId || !isConnected,
+  })
+
+  useEffect(() => {
+    if (assistantStatus?.dispatchId) {
+      setActiveDispatchId(assistantStatus.dispatchId)
+    }
+  }, [assistantStatus])
+
+  const hasTriggeredInitial = useRef(false)
+  const prevEnabled = useRef(speakingAssistantEnabled)
+
+  useEffect(() => {
+    if (!sessionId || !isConnected) return
+
+    const triggerToggle = async () => {
+      if (speakingAssistantEnabled) {
+        try {
+          const res = await startAssistant({ sessionId }).unwrap()
+          if (res?.dispatchId) {
+            setActiveDispatchId(res.dispatchId)
+          }
+        } catch (err) {
+          console.error("Failed to start speaking assistant:", err)
+          toast.error(
+            err?.data?.message || "Failed to start speaking assistant",
+          )
+          setSpeakingAssistantEnabled(false)
+          prevEnabled.current = false
+        }
+      } else {
+        const dispatchIdToStop = activeDispatchId || assistantStatus?.dispatchId
+        if (dispatchIdToStop) {
+          try {
+            await stopAssistant({
+              sessionId,
+              dispatchId: dispatchIdToStop,
+            }).unwrap()
+            setActiveDispatchId(null)
+          } catch (err) {
+            console.error("Failed to stop speaking assistant:", err)
+            toast.error(
+              err?.data?.message || "Failed to stop speaking assistant",
+            )
+          }
+        }
+      }
+    }
+
+    const isInitialRun = !hasTriggeredInitial.current
+    if (isInitialRun || speakingAssistantEnabled !== prevEnabled.current) {
+      hasTriggeredInitial.current = true
+      prevEnabled.current = speakingAssistantEnabled
+      triggerToggle()
+    }
+  }, [
+    speakingAssistantEnabled,
+    setSpeakingAssistantEnabled,
+    isConnected,
+    sessionId,
+    activeDispatchId,
+    assistantStatus,
+    startAssistant,
+    stopAssistant,
+  ])
 
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState(null)
@@ -821,6 +904,43 @@ const GlobalCallContent = ({
     t,
   })
 
+  // ── Student Floating Speaking Widget ──
+  const [showStudentSpeakingWidget, setShowStudentSpeakingWidget] = useState(false)
+
+  // ── Realtime Speaking Statistics ──
+  const {
+    statsMap: speakingStatsMap,
+    participantsList: speakingParticipantsList,
+    roomTotalDuration,
+    roomTotalStudentDuration,
+    roomTotalDurationMs,
+    roomTotalStudentDurationMs,
+    teacherDurationMs: speakingTeacherDurationMs,
+    teacherDurationSeconds: speakingTeacherDurationSeconds,
+    teacherSpeakingPercent: speakingTeacherSpeakingPercent,
+    studentSpeakingPercent: speakingStudentSpeakingPercent,
+    teacherStatus: speakingTeacherStatus,
+    studentCount: speakingStudentCount,
+    expectedSharePercent: speakingExpectedSharePercent,
+    hasAnySpeechData: speakingHasAnySpeechData,
+    lowSpeakingCount: speakingLowSpeakingCount,
+    hasWarning: speakingHasWarning,
+    lastUpdated: speakingStatsLastUpdated,
+    isLoading: isSpeakingStatsLoading,
+    isFetching: isSpeakingStatsFetching,
+    isError: isSpeakingStatsError,
+    refetchStats: refetchSpeakingStats,
+  } = useSpeakingStats(
+    lkRoom,
+    activeSessionId,
+    {
+      enabled:
+        isSpeakingTimeBalanceSupported(roomData) &&
+        (panelState.showSpeakingTimeBalance || showStudentSpeakingWidget),
+      pollingInterval: 60000,
+    },
+  )
+
   // ── Context value ──
   const value = {
     // Call lifecycle
@@ -844,6 +964,29 @@ const GlobalCallContent = ({
     lkRoom,
     lkRoomName: lkRoom?.name,
     sessionError: null,
+
+    // Speaking stats
+    speakingStatsMap,
+    speakingParticipantsList,
+    roomTotalDuration,
+    roomTotalStudentDuration,
+    roomTotalDurationMs,
+    roomTotalStudentDurationMs,
+    speakingTeacherDurationMs,
+    speakingTeacherDurationSeconds,
+    speakingTeacherSpeakingPercent,
+    speakingStudentSpeakingPercent,
+    speakingTeacherStatus,
+    speakingStudentCount,
+    speakingExpectedSharePercent,
+    speakingHasAnySpeechData,
+    speakingLowSpeakingCount,
+    speakingHasWarning,
+    speakingStatsLastUpdated,
+    isSpeakingStatsLoading,
+    isSpeakingStatsFetching,
+    isSpeakingStatsError,
+    refetchSpeakingStats,
 
     // User
     user,
@@ -869,6 +1012,8 @@ const GlobalCallContent = ({
 
     // UI panels
     ...panelState,
+    showStudentSpeakingWidget,
+    setShowStudentSpeakingWidget,
     showTroubleshoot: panelState.showTroubleshoot,
     setShowTroubleshoot: panelState.setShowTroubleshoot,
     unreadRoomChat,
@@ -891,6 +1036,7 @@ const GlobalCallContent = ({
     subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,
     startSubtitles: subtitleControls.startSubtitles,
     stopSubtitles: subtitleControls.stopSubtitles,
+    changeSubtitleLanguage: subtitleControls.changeSubtitleLanguage,
 
     // Chat
     messages: chatMessages,
@@ -902,6 +1048,8 @@ const GlobalCallContent = ({
     setReceiveSystemMsgs,
     showAiSuggestions,
     setShowAiSuggestions,
+    speakingAssistantEnabled,
+    setSpeakingAssistantEnabled,
     updateAiInteraction,
     isCurrentUserPrompting,
     startNewThread,

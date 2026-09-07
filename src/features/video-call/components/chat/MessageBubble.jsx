@@ -325,27 +325,13 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
                   }`
             }
           >
-            {/* Reply Context - Zalo Style */}
+            {/* Reply Context */}
             {msg.replyTo && (
-              <div
-                className={`flex flex-col border-l-[3px] py-1 px-2 rounded-r-md mb-1.5 cursor-default ${isMe
-                  ? "border-white/60 bg-white/10 text-white/90"
-                  : msg.status === "error"
-                    ? "border-red-400 bg-red-400/10 text-red-900/90"
-                    : isSystem
-                      ? "border-orange-400 bg-orange-400/10 text-orange-900/90"
-                      : isAi
-                        ? "border-amber-500 bg-amber-500/10 text-amber-900/90"
-                        : "border-[#990011]/60 bg-[#990011]/10 text-black/80"
-                  }`}
-              >
-                <span className="font-semibold text-xs shrink-0">
-                  {msg.replyTo.name}
-                </span>
-                <span className="truncate opacity-80 text-xs">
-                  {renderFormattedMessage(msg.replyTo.message)}
-                </span>
-              </div>
+              <RepliedMessage
+                senderName={msg.replyTo.name}
+                content={msg.replyTo.message}
+                isOwn={isMe}
+              />
             )}
 
             {msg.status === "loading" ? (
@@ -386,9 +372,42 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
                 ))}
               </span>
             ) : (
-              <p className="m-0 whitespace-pre-wrap">
-                {renderFormattedMessage(msg.message)}
-              </p>
+              <div>
+                {msg.message &&
+                  (() => {
+                    const urlDetailsList = findUrlsInText(msg.message)
+                    if (urlDetailsList.length === 0) return null
+                    return (
+                      <div className="mb-1 flex flex-col gap-1 w-full">
+                        {urlDetailsList.map((urlDetails, idx) => {
+                          if (urlDetails.type === "youtube") {
+                            return (
+                              <YouTubeEmbed
+                                key={idx}
+                                videoId={urlDetails.youtube.videoId}
+                                timestamp={urlDetails.youtube.timestamp}
+                                originalUrl={urlDetails.originalUrl}
+                                isOwn={isMe}
+                                hasCaption={Boolean(msg.message)}
+                              />
+                            )
+                          }
+                          return (
+                            <LinkPreviewCard
+                              key={idx}
+                              urlDetails={urlDetails}
+                              isOwn={isMe}
+                              hasCaption={Boolean(msg.message)}
+                            />
+                          )
+                        })}
+                      </div>
+                    )
+                  })()}
+                <p className="m-0 whitespace-pre-wrap break-words">
+                  {renderFormattedMessage(msg.message)}
+                </p>
+              </div>
             )}
 
             {msg.translatedMessage && (
