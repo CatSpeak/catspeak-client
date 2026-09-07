@@ -1,6 +1,5 @@
 import React, { useMemo } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { Loader2 } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetSessionSpeakingStatsQuery } from "@/store/api/roomsApi"
 import { useGetClassDetailQuery } from "@/store/api/coursesApi"
@@ -165,7 +164,6 @@ const SessionAnalyticsDetailPage = () => {
 
       {isProcessing ? (
         <div className="flex flex-col items-center justify-center bg-white border border-gray-100 rounded-2xl p-12 sm:p-16 shadow-xs text-center min-h-[320px]">
-          <Loader2 className="w-9 h-9 text-[#990011] animate-spin mb-4" />
           <h3 className="text-lg font-bold text-gray-900 mb-2">
             {sessT.aggregatingTitle || "Buổi học đang tổng hợp dữ liệu"}
           </h3>
