@@ -45,6 +45,7 @@ import {
 import { parseLocalDateString, toLocalDateString } from "../utils/dateUtils"
 
 import { useClassFormReducer } from "../hooks/useClassFormReducer"
+import { resolveClassErrorMessage } from "../utils/classErrorMessages"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import ClassScheduleCalendarPreview from "../components/ClassScheduleCalendarPreview"
 
@@ -561,87 +562,7 @@ const CreateClassPage = () => {
       ) {
         return
       }
-      const errData = error?.data
-      const errCode = errData?.errorCode || errData?.code || errData?.error
-      const errMsg = errData?.message || errData?.detail || error?.message || ""
-
-      const isLanguageNotAllowed =
-        errCode === "LANGUAGE_NOT_ALLOWED" ||
-        (typeof errMsg === "string" && (errMsg.includes("LANGUAGE_NOT_ALLOWED") || errMsg.toLowerCase().includes("language not allowed"))) ||
-        (typeof errCode === "string" && errCode.includes("LANGUAGE_NOT_ALLOWED"))
-
-      const isScheduleLocked =
-        errCode === "SCHEDULE_LOCKED" ||
-        (typeof errMsg === "string" && (errMsg.includes("SCHEDULE_LOCKED") || errMsg.toLowerCase().includes("schedule_locked"))) ||
-        (typeof errCode === "string" && errCode.includes("SCHEDULE_LOCKED"))
-
-      const isLevelsLocked =
-        errCode === "LEVELS_LOCKED" ||
-        (typeof errMsg === "string" && (errMsg.includes("LEVELS_LOCKED") || errMsg.toLowerCase().includes("levels_locked"))) ||
-        (typeof errCode === "string" && errCode.includes("LEVELS_LOCKED"))
-
-      const isScheduleConflict =
-        errCode === "SESSION_CONFLICT" ||
-        errCode === "SCHEDULE_CONFLICT" ||
-        (typeof errMsg === "string" && (
-          errMsg.includes("SESSION_CONFLICT") ||
-          errMsg.includes("SCHEDULE_CONFLICT") ||
-          errMsg.toLowerCase().includes("session_conflict") ||
-          errMsg.toLowerCase().includes("schedule_conflict")
-        )) ||
-        (typeof errCode === "string" && (errCode.includes("SESSION_CONFLICT") || errCode.includes("SCHEDULE_CONFLICT")))
-
-      const isPayOSError =
-        errCode === "PAYOS_ERROR" ||
-        (typeof errMsg === "string" && (
-          errMsg.includes("Enrollment start must be in the future") ||
-          errMsg.includes("Enrollment end must be after enrollment start") ||
-          errMsg.includes("PAYOS_ERROR")
-        ))
-
-      const dateMismatchMatch = typeof errMsg === "string" && errMsg.match(/Class start date \((.*?)\) does not match the first scheduled session date \((.*?)\)/i)
-      const isStartDateMismatch = Boolean(dateMismatchMatch) || (typeof errMsg === "string" && errMsg.includes("does not match the first scheduled session date"))
-
-      let displayMessage
-      if (isStartDateMismatch) {
-        const startD = dateMismatchMatch ? dateMismatchMatch[1] : ""
-        const firstSessionD = dateMismatchMatch ? dateMismatchMatch[2] : ""
-        if (startD && firstSessionD && cc.toastStartDateMismatchFirstSession) {
-          displayMessage = cc.toastStartDateMismatchFirstSession
-            .replace("{{startDate}}", startD)
-            .replace("{{firstSessionDate}}", firstSessionD)
-        } else {
-          displayMessage = cc.toastStartDateMismatchFirstSessionDefault || "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!"
-        }
-      } else if (isScheduleConflict) {
-        displayMessage = (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("SESSION_CONFLICT") && !errMsg.includes("SCHEDULE_CONFLICT") && !errMsg.includes("PAYOS_ERROR"))
-          ? errMsg
-          : (cc.toastScheduleConflictDefault || "Xung đột lịch học với lớp khác của bạn! Vui lòng chọn khung giờ hoặc thứ học khác.")
-      } else if (isLanguageNotAllowed) {
-        displayMessage = cc.languageNotAllowed || c.createCourse?.languageNotAllowed || "The selected language or level is not allowed according to your instructor profile."
-      } else if (isScheduleLocked) {
-        displayMessage = cc.scheduleLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Teaching schedule cannot be changed for this class.")
-      } else if (isLevelsLocked) {
-        displayMessage = cc.levelsLocked || (typeof errMsg === "string" && errMsg.trim().length > 0 ? errMsg : "Class level cannot be changed for this class.")
-      } else if (isPayOSError) {
-        if (typeof errMsg === "string" && (errMsg.includes("Enrollment end must be after") || errMsg.includes("end date must be later"))) {
-          displayMessage = cc.toastAdmissionEndLater || "Enrollment end date must be later than enrollment start date!"
-        } else if (typeof errMsg === "string" && (errMsg.includes("Enrollment start must be in the future") || errMsg.includes("start must be in the future"))) {
-          displayMessage = cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!"
-        } else if (typeof errMsg === "string" && (errMsg.includes("Start date must be") || errMsg.includes("start date"))) {
-          displayMessage = cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!"
-        } else {
-          displayMessage = isEditMode
-            ? (cc.toastUpdateFail || "Failed to update class!")
-            : (cc.toastCreateFail || "Failed to create class!")
-        }
-      } else if (typeof errMsg === "string" && errMsg.trim().length > 0 && !errMsg.includes("Unexpected") && !errMsg.includes("Missing")) {
-        displayMessage = errMsg
-      } else {
-        displayMessage = isEditMode
-          ? (cc.toastUpdateFail || "Failed to update class!")
-          : (cc.toastCreateFail || "Failed to create class!")
-      }
+      const displayMessage = resolveClassErrorMessage(error, { cc, isEditMode })
 
       toast.error(displayMessage)
     } finally {
