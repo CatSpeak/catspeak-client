@@ -54,19 +54,23 @@ const Profile = () => {
   const profile = publicProfileResponse?.data ?? publicProfileResponse ?? null
 
   // Lightweight counts for header badges. Lists are lazy-loaded inside ProfileFriendsTab.
-  // No polling; refetch on focus + after mutations via invalidation.
-  const { data: countsResponse } = useGetFriendshipCountsQuery(undefined, {
-    skip: !isOwnProfile,
+  // Fetched for the target account (own or external) so the header and tab badges show
+  // real totals without visiting each sub-tab. Refetch on focus + after mutations.
+  const { data: countsResponse } = useGetFriendshipCountsQuery(targetAccountId, {
+    skip: !targetAccountId,
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
 
   const counts = countsResponse?.data ?? countsResponse ?? null
   const friendsCount = counts?.friends ?? counts?.Friends ?? 0
   const followersCount = counts?.followers ?? counts?.Followers ?? 0
-  const pendingCount =
-    (counts?.pendingIncoming ?? counts?.PendingIncoming ?? 0) +
-    (counts?.pendingOutgoing ?? counts?.PendingOutgoing ?? 0)
+  // Pending request badge is only relevant on the owner's own profile.
+  const pendingCount = isOwnProfile
+    ? (counts?.pendingIncoming ?? counts?.PendingIncoming ?? 0) +
+      (counts?.pendingOutgoing ?? counts?.PendingOutgoing ?? 0)
+    : 0
 
   const [searchParams] = useSearchParams()
   const currentToken = searchParams.get("sharedMaterialToken")

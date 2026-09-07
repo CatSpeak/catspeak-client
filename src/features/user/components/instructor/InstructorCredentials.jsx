@@ -4,8 +4,31 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { FileText, ImageIcon } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 
+/**
+ * Extract the original filename from a stored credential URL.
+ * Storage renames uploads to "{GUID}_{originalName}", so the original name is
+ * the last path segment after the GUID prefix.
+ */
+function fileNameFromUrl(url) {
+  if (!url || typeof url !== "string") return ""
+  try {
+    const clean = url.split(/[?#]/)[0]
+    const last = clean.split("/").filter(Boolean).pop() || ""
+    const idx = last.indexOf("_")
+    return idx >= 0 ? last.slice(idx + 1) : last
+  } catch {
+    return ""
+  }
+}
+
 const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, readOnly = false, errors = {}, t }) => {
   const ins = t.profile?.instructor || {}
+
+  const displayName = (cred, idx) => {
+    if (cred instanceof File) return cred.name
+    const parsed = fileNameFromUrl(cred)
+    return parsed || `${ins.document || "Tài liệu"} ${idx + 1}`
+  }
 
   return (
     <FluentCard id="field-credentials" className="gap-6 !justify-start h-full min-h-[320px] flex-col flex">
@@ -43,8 +66,8 @@ const InstructorCredentials = ({ formData, onAddCredential, onRemoveCredential, 
               <FileText className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-gray-700 truncate" title={typeof cred === "string" ? `${ins.document || "Tài liệu"} ${idx + 1}` : cred.name}>
-                {typeof cred === "string" ? `${ins.document || "Tài liệu"} ${idx + 1}` : cred.name}
+              <p className="text-[13px] font-medium text-gray-700 truncate" title={displayName(cred, idx)}>
+                {displayName(cred, idx)}
               </p>
               <p className="text-[11px] text-gray-400 mt-0.5">
                 {typeof cred === "string" ? (ins.attachedFile || "Tệp đính kèm") : (ins.pdfDocument || "Tài liệu PDF")}

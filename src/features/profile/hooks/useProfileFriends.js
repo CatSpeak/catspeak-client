@@ -50,6 +50,10 @@ export const useProfileFriends = ({
 
   // Optimistic sent (survives refetch within session; reload persistence via outgoing API).
   const [optimisticSentIds, setOptimisticSentIds] = useState(() => new Set())
+  // Optimistic follow/unfollow so the follow-back button flips immediately,
+  // even before the server list refetches (and independent of page-1 pagination).
+  const [optimisticFollowing, setOptimisticFollowing] = useState(() => new Set())
+  const [optimisticUnfollowing, setOptimisticUnfollowing] = useState(() => new Set())
 
   const activeFilter = filtersByTab[activeSubTab] || EMPTY_FILTER
   const debouncedKeyword = useDebounce(activeFilter.keyword || "", 300)
@@ -86,12 +90,14 @@ export const useProfileFriends = ({
 
   // Per-tab page memory; missing entries fall back to 1 via `|| 1` at usage sites.
 
-  // Counts: always loaded for own profile (1 light call for all badges).
+  // Counts: real server totals for the target account (own or external).
+  // Used for sub-tab badges so they don't require visiting each tab to appear.
   // No polling; refetch on focus + after mutations via invalidation.
-  const { data: countsRes } = useGetFriendshipCountsQuery(undefined, {
-    skip: !isOwnProfile,
+  const { data: countsRes } = useGetFriendshipCountsQuery(targetAccountId, {
+    skip: !targetAccountId,
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
   const counts = countsRes?.data ?? countsRes ?? null
 
@@ -181,10 +187,12 @@ export const useProfileFriends = ({
     refetchOnReconnect: true,
   })
 
-  // My following for cross-check on other people's profiles (small, single page).
+  // My following: always loaded for the logged-in user (own profile included).
+  // Used to compute the follow-back state on the followers tab, which is a
+  // different sub-tab from "following" and must not depend on that lazy list.
   const { data: myFollowingRes } = useGetFollowingQuery(
     { accountId: currentUserId, page: 1, pageSize: 100 },
-    { skip: isOwnProfile || !currentUserId },
+    { skip: !currentUserId, refetchOnFocus: true, refetchOnReconnect: true },
   )
 
   const friendsList = useMemo(() => getArray(friendsRes), [friendsRes])
@@ -232,22 +240,25 @@ export const useProfileFriends = ({
   }, [outgoingMap, optimisticSentIds])
 
   const followingIdSet = useMemo(() => {
-    const source = isOwnProfile ? followingList : myFollowingList
-    // When own following tab hasn't loaded yet (lazy), followingList is empty;
-    // fall back to empty set (cards will show Follow state until loaded).
+    // Source is always the logged-in user's own following list, so the state is
+    // consistent on any sub-tab (including "followers"). Optimistic sets let the
+    // button flip immediately and also cover follows beyond the first page.
     const set = new Set()
-    for (const u of source) {
+    for (const u of myFollowingList) {
       const id = getAccountId(u)
       if (id != null) set.add(Number(id))
     }
+    for (const id of optimisticFollowing) set.add(Number(id))
+    for (const id of optimisticUnfollowing) set.delete(Number(id))
     return set
-  }, [isOwnProfile, followingList, myFollowingList])
+  }, [myFollowingList, optimisticFollowing, optimisticUnfollowing])
 
-  // Badges: counts for own profile (no list needed); fallback to loaded lengths for external profiles.
+  // Badges: real server totals for any profile. Fall back to loaded list lengths
+  // only while counts haven't loaded yet (so badges never show stale list-page sizes).
   const subTabs = useMemo(() => {
     const badgeOrNull = (n) => (n != null && n > 0 ? String(n) : null)
     let allBadge; let followingBadge; let followersBadge; let pendingBadge
-    if (isOwnProfile && counts) {
+    if (counts) {
       allBadge = badgeOrNull(counts.friends ?? counts.Friends)
       followingBadge = badgeOrNull(counts.following ?? counts.Following)
       followersBadge = badgeOrNull(counts.followers ?? counts.Followers)
@@ -255,7 +266,7 @@ export const useProfileFriends = ({
       const outgoing = counts.pendingOutgoing ?? counts.PendingOutgoing ?? 0
       pendingBadge = badgeOrNull((incoming || 0) + (outgoing || 0))
     } else {
-      allBadge = badgeOrNull(friendsList.length) ?? (activeSubTab === "all" ? null : badgeOrNull(friendsList.length))
+      allBadge = badgeOrNull(friendsList.length)
       followingBadge = badgeOrNull(followingList.length)
       followersBadge = badgeOrNull(followersList.length)
       pendingBadge = badgeOrNull(pendingIncomingList.length + pendingOutgoingList.length)
@@ -272,7 +283,7 @@ export const useProfileFriends = ({
       )
     }
     return tabs
-  }, [isOwnProfile, counts, friendsList.length, followingList.length, followersList.length, pendingIncomingList.length, pendingOutgoingList.length, t, activeSubTab])
+  }, [isOwnProfile, counts, friendsList.length, followingList.length, followersList.length, pendingIncomingList.length, pendingOutgoingList.length, t])
 
   const { list, isLoading, emptyMessage, hasMore, isFetchingMore } = useMemo(() => {
     let raw = []
@@ -388,6 +399,26 @@ export const useProfileFriends = ({
       setOptimisticSentIds((prev) => {
         const next = new Set(prev)
         next.delete(Number(accountId))
+        return next
+      })
+    },
+    markFollowed: (accountId) => {
+      if (accountId == null) return
+      const id = Number(accountId)
+      setOptimisticFollowing((prev) => new Set(prev).add(id))
+      setOptimisticUnfollowing((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+    },
+    markUnfollowed: (accountId) => {
+      if (accountId == null) return
+      const id = Number(accountId)
+      setOptimisticUnfollowing((prev) => new Set(prev).add(id))
+      setOptimisticFollowing((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
         return next
       })
     },

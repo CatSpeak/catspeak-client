@@ -41,6 +41,8 @@ const ProfileFriendCard = memo(
     isOutgoingRequest = false,
     onRequestSent,
     onRequestFailed,
+    onFollowed,
+    onUnfollowed,
     onNavigate,
   }) => {
     const { t } = useLanguage()
@@ -58,6 +60,15 @@ const ProfileFriendCard = memo(
       handleDeclineRequest,
       handleCancelRequest,
     } = useFriendActions()
+
+    // Optimistically flip the follow-back state so the button updates instantly;
+    // the server list refetch reconciles afterwards.
+    const handleFollowToggle = (accountId, follow) => {
+      if (follow) onFollowed?.(accountId)
+      else onUnfollowed?.(accountId)
+      if (follow) handleFollow(accountId)
+      else handleUnfollow(accountId)
+    }
 
     const handleAddFriend = async (close) => {
       const accountId = user.accountId ?? user.id ?? user.userId
@@ -186,7 +197,7 @@ const ProfileFriendCard = memo(
             label={t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
             className="text-red-600"
             onClick={() => {
-              handleUnfollow(user.accountId)
+              handleFollowToggle(user.accountId, false)
               close()
             }}
           />
@@ -198,7 +209,7 @@ const ProfileFriendCard = memo(
             icon={<UserPlus />}
             label={t.profile?.friends?.actions?.followBack || "Theo dõi lại"}
             onClick={() => {
-              handleFollow(user.accountId)
+              handleFollowToggle(user.accountId, true)
               close()
             }}
           />
@@ -209,7 +220,7 @@ const ProfileFriendCard = memo(
             label={t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
             className="text-red-600"
             onClick={() => {
-              handleUnfollow(user.accountId)
+              handleFollowToggle(user.accountId, false)
               close()
             }}
           />
@@ -458,7 +469,7 @@ const ProfileFriendCard = memo(
               <PillButton
                 variant="secondary"
                 className="w-full"
-                onClick={() => handleUnfollow(user.accountId)}
+                onClick={() => handleFollowToggle(user.accountId, false)}
               >
                 {t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
               </PillButton>
@@ -469,7 +480,7 @@ const ProfileFriendCard = memo(
               <PillButton
                 variant="primary"
                 className="w-full"
-                onClick={() => handleFollow(user.accountId)}
+                onClick={() => handleFollowToggle(user.accountId, true)}
               >
                 {t.profile?.friends?.actions?.followBack || "Theo dõi lại"}
               </PillButton>
@@ -478,7 +489,7 @@ const ProfileFriendCard = memo(
               <PillButton
                 variant="secondary"
                 className="w-full"
-                onClick={() => handleUnfollow(user.accountId)}
+                onClick={() => handleFollowToggle(user.accountId, false)}
               >
                 {t.profile?.friends?.actions?.unfollow || "Bỏ theo dõi"}
               </PillButton>

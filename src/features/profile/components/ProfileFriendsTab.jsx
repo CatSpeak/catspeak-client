@@ -44,6 +44,8 @@ const ProfileFriendsTab = ({
     outgoingMap,
     markRequestSent,
     unmarkRequestSent,
+    markFollowed,
+    markUnfollowed,
   } = useProfileFriends({
     targetAccountId,
     isOwnProfile,
@@ -91,6 +93,8 @@ const ProfileFriendsTab = ({
         isOutgoingRequest={Boolean(extra.isOutgoingRequest || user?.isOutgoingRequest)}
         onRequestSent={markRequestSent}
         onRequestFailed={unmarkRequestSent}
+        onFollowed={markFollowed}
+        onUnfollowed={markUnfollowed}
         onNavigate={navigateToProfile}
       />
     )

@@ -88,8 +88,21 @@ export const friendshipApi = socialApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "Friendship", id }],
     }),
     getFriendshipCounts: builder.query({
-      query: () => "/friendships/counts",
-      providesTags: ["FriendshipCounts"],
+      query: (accountId) => {
+        const params = accountId != null ? { accountId } : undefined
+        return {
+          url: "/friendships/counts",
+          method: "GET",
+          params,
+        }
+      },
+      providesTags: (result, error, accountId) => [
+        { type: "FriendshipCounts", id: accountId ?? "self" },
+      ],
+      serializeQueryArgs: ({ endpointName, queryArgs }) =>
+        `${endpointName}_${queryArgs ?? "self"}`,
+      forceRefetch: ({ currentArg, previousArg }) =>
+        (currentArg ?? null) !== (previousArg ?? null),
     }),
     getFriends: builder.query({
       query: (arg) => {

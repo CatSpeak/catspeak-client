@@ -36,6 +36,7 @@ import InstructorCredentials from "@/features/user/components/instructor/Instruc
 import InstructorMedia from "@/features/user/components/instructor/InstructorMedia";
 import InstructorSubmitSection from "@/features/user/components/instructor/InstructorSubmitSection";
 import PageTitle from "@/shared/components/ui/PageTitle";
+import ConfirmationModal from "@/shared/components/ui/ConfirmationModal";
 
 const INITIAL_FORM_DATA = {
   fullName: "",
@@ -217,6 +218,14 @@ const InstructorPage = () => {
   const [isEditingApproved, setIsEditingApproved] = useState(false);
   const [isSavingApproved, setIsSavingApproved] = useState(false);
 
+  // Delete confirmations (replaces native window.confirm):
+  // { type: "video" } | { type: "credential", index }
+  const [confirmDelete, setConfirmDelete] = useState(null);
+
+  // True once a pending teaching draft has been auto-loaded into edit mode
+  // on page load (spec: reload shows the saved draft, not stale live values).
+  const draftLoadedRef = useRef(false);
+
   // Snapshot of the original form data to detect changes
   const originalFormDataRef = useRef(null);
   const personalInfoBackupRef = useRef(null);
@@ -224,10 +233,14 @@ const InstructorPage = () => {
   // Populate form from existing application
   useEffect(() => {
     if (existingApplication) {
-      setFormData(existingApplication);
       originalFormDataRef.current = existingApplication;
+      // Don't clobber a draft the teacher is editing (approved edit loads draft
+      // values into the form; re-setting live values here would wipe them).
+      if (!isEditingApproved) {
+        setFormData(existingApplication);
+      }
     }
-  }, [existingApplication]);
+  }, [existingApplication, isEditingApproved]);
 
   // Pre-fill form from user profile (new applications only)
   useEffect(() => {
@@ -487,10 +500,19 @@ const InstructorPage = () => {
         e.target.value = "";
         return;
       }
-      setFormData((prev) => ({
-        ...prev,
-        credentials: [...prev.credentials, ...files],
-      }));
+      setFormData((prev) => {
+        const combined = [...prev.credentials, ...files];
+        if (combined.length > 4) {
+          setErrors((prevErr) => ({
+            ...prevErr,
+            credentials:
+              ins.credentialLimit ||
+              "Tối đa 4 file chứng chỉ.",
+          }));
+          return prev;
+        }
+        return { ...prev, credentials: combined };
+      });
       clearError("credentials");
       e.target.value = "";
     },
@@ -531,18 +553,15 @@ const InstructorPage = () => {
 
   const handleRemoveVideo = useCallback(() => {
     if (!effectiveCanEdit) return;
-    const confirmed =
-      typeof window === "undefined"
-        ? true
-        : window.confirm(
-            ins.deleteVideoConfirm ||
-              "Xóa video giới thiệu? Thay đổi chỉ có hiệu lực sau khi bạn nhấn Lưu.",
-          );
-    if (!confirmed) return;
+    setConfirmDelete({ type: "video" });
+  }, [effectiveCanEdit]);
+
+  const confirmDeleteVideo = useCallback(() => {
     setFormData((prev) => ({ ...prev, videoFile: null }));
     if (videoInputRef.current) videoInputRef.current.value = "";
     clearError("videoFile");
-  }, [effectiveCanEdit, ins]);
+    setConfirmDelete(null);
+  }, [clearError]);
 
   const handleUndoVideo = useCallback(() => {
     if (!effectiveCanEdit) return;
@@ -554,14 +573,21 @@ const InstructorPage = () => {
   const handleRemoveCredential = useCallback(
     (index) => {
       if (!effectiveCanEdit) return;
-      setFormData((prev) => {
-        const newCreds = [...prev.credentials];
-        newCreds.splice(index, 1);
-        return { ...prev, credentials: newCreds };
-      });
+      setConfirmDelete({ type: "credential", index });
     },
     [effectiveCanEdit],
   );
+
+  const confirmRemoveCredential = useCallback(() => {
+    if (!confirmDelete || confirmDelete.type !== "credential") return;
+    const index = confirmDelete.index;
+    setFormData((prev) => {
+      const newCreds = [...prev.credentials];
+      newCreds.splice(index, 1);
+      return { ...prev, credentials: newCreds };
+    });
+    setConfirmDelete(null);
+  }, [confirmDelete]);
 
   const buildPayload = useCallback(
     (otpCode) => {
@@ -603,6 +629,53 @@ const InstructorPage = () => {
   const pendingTeaching = useMemo(() => {
     return pendingTeachingData?.data ?? pendingTeachingData ?? null;
   }, [pendingTeachingData]);
+
+  /**
+   * Merge the pending teaching draft into the live form data so the teacher sees
+   * their submitted changes (BUG3: reload must not show stale live values).
+   * The draft is authoritative for the 5 teaching fields; all else stays live.
+   */
+  const mergeDraftFormData = useCallback(
+    (liveForm, pending) => {
+      const p = pending ?? {};
+      const pick = (camel, pascal, fallback) => {
+        const val = p[camel] ?? p[pascal];
+        return val !== undefined ? val : fallback;
+      };
+      return {
+        ...liveForm,
+        languagesTeach: normalizeLanguagesTeach(
+          pick("languagesTeach", "LanguagesTeach", liveForm.languagesTeach),
+        ),
+        nativeLanguage: pick(
+          "nativeLanguage",
+          "NativeLanguage",
+          liveForm.nativeLanguage,
+        ),
+        introduction: pick(
+          "introduction",
+          "Introduction",
+          liveForm.introduction,
+        ),
+        credentials: safeParseArray(
+          pick("credentialUrls", "CredentialUrls", liveForm.credentials),
+        ),
+        videoFile: pick("introVideoUrl", "IntroVideoUrl", liveForm.videoFile),
+      };
+    },
+    [],
+  );
+
+  // BUG3: with a pending draft, load the page into edit mode showing the draft —
+  // the saved edits, not the stale approved values.
+  useEffect(() => {
+    if (!isApproved || !existingApplication || !pendingTeaching) return;
+    if (draftLoadedRef.current) return;
+    draftLoadedRef.current = true;
+    setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
+    setIsEditingApproved(true);
+    setErrors({});
+  }, [isApproved, existingApplication, pendingTeaching, mergeDraftFormData]);
 
   // Teaching-only validation for Approved updates: no personal fields, no ID
   // cards (identity lives in the account page), credentials optional.
@@ -653,8 +726,12 @@ const InstructorPage = () => {
 
   const handleStartEditApproved = useCallback(() => {
     setErrors({});
+    // Entering edit while a draft exists loads the draft values.
+    if (pendingTeaching && existingApplication) {
+      setFormData(mergeDraftFormData(existingApplication, pendingTeaching));
+    }
     setIsEditingApproved(true);
-  }, []);
+  }, [pendingTeaching, existingApplication, mergeDraftFormData]);
 
   const handleCancelEditApproved = useCallback(() => {
     if (originalFormDataRef.current) {
@@ -686,6 +763,10 @@ const InstructorPage = () => {
       );
       setIsEditingApproved(false);
       setErrors({});
+      // Back to the live values; the draft still awaits review (pending banner).
+      if (originalFormDataRef.current) {
+        setFormData(originalFormDataRef.current);
+      }
     } catch (err) {
       toast.error(err?.data?.message || "Đã có lỗi xảy ra khi cập nhật thông tin.");
     } finally {
@@ -938,9 +1019,52 @@ const InstructorPage = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle>
-        {t.nav?.instructor || "Giảng viên"}
-      </PageTitle>
+      {/* Header row: title + Edit / Cancel / Save on the same line */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <PageTitle>
+          {t.nav?.instructor || "Giảng viên"}
+        </PageTitle>
+
+        {/* Global Approved edit — button only, no card frame */}
+        {showGlobalEditBar && !isEditingApproved && (
+          <button
+            type="button"
+            onClick={handleStartEditApproved}
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition-colors shadow-sm cursor-pointer shrink-0"
+          >
+            <Pencil size={15} />
+            <span>{ins.editInfo || "Chỉnh sửa"}</span>
+          </button>
+        )}
+
+        {showGlobalEditBar && isEditingApproved && (
+          <div className="flex items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
+            <button
+              type="button"
+              onClick={handleCancelEditApproved}
+              disabled={isSavingApproved}
+              className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50"
+            >
+              {ins.cancel || "Hủy"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveApproved}
+              disabled={isSavingApproved || isSubmitting || isCancellingTeaching}
+              className="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition cursor-pointer shadow-sm disabled:opacity-50"
+            >
+              {(isSavingApproved || isSubmitting) && (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              )}
+              <span>
+                {isSavingApproved
+                  ? ins.saving || "Đang lưu..."
+                  : ins.save || "Lưu"}
+              </span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Task submitting banner */}
       {isTaskSubmitting && (
@@ -976,51 +1100,18 @@ const InstructorPage = () => {
         />
       )}
 
-      {/* Global Approved edit — button only, no card frame */}
-      {showGlobalEditBar && !isEditingApproved && (
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={handleStartEditApproved}
-            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition-colors shadow-sm cursor-pointer shrink-0"
-          >
-            <Pencil size={15} />
-            <span>{ins.editInfo || "Chỉnh sửa"}</span>
-          </button>
-        </div>
-      )}
-
+      {/* Edit-mode hint — text only, buttons live in the header row */}
       {showGlobalEditBar && isEditingApproved && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm text-amber-800">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm text-amber-800 flex-1">
             {ins.approvedEditingHint ||
               "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt, hoặc Hủy để hoàn tác."}
           </p>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
-            <button
-              type="button"
-              onClick={handleCancelEditApproved}
-              disabled={isSavingApproved}
-              className="px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-100 border border-border rounded-lg transition cursor-pointer disabled:opacity-50 w-full sm:w-auto"
-            >
-              {ins.cancel || "Hủy"}
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveApproved}
-              disabled={isSavingApproved || isSubmitting || isCancellingTeaching}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-[#990011] hover:bg-[#7a000e] rounded-lg transition cursor-pointer shadow-sm disabled:opacity-50 w-full sm:w-auto"
-            >
-              {(isSavingApproved || isSubmitting) && (
-                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              )}
-              <span>
-                {isSavingApproved
-                  ? ins.saving || "Đang lưu..."
-                  : ins.save || "Lưu"}
-              </span>
-            </button>
-          </div>
+          {pendingTeaching && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-blue-700 bg-blue-100 rounded-full shrink-0">
+              {ins.pendingBadge || "Chờ admin duyệt"}
+            </span>
+          )}
         </div>
       )}
 
@@ -1148,6 +1239,30 @@ const InstructorPage = () => {
           />
         </>
       )}
+
+      {/* Delete confirmations (video + certificate) */}
+      <ConfirmationModal
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={
+          confirmDelete?.type === "credential"
+            ? confirmRemoveCredential
+            : confirmDeleteVideo
+        }
+        title={
+          confirmDelete?.type === "credential"
+            ? ins.deleteCredentialTitle || "Xóa chứng chỉ"
+            : ins.deleteVideoTitle || "Xóa video giới thiệu"
+        }
+        message={
+          confirmDelete?.type === "credential"
+            ? ins.deleteCredentialConfirm ||
+              "Xóa chứng chỉ này? Thay đổi chỉ có hiệu lực sau khi bạn nhấn Lưu."
+            : ins.deleteVideoConfirm ||
+              "Xóa video giới thiệu? Thay đổi chỉ có hiệu lực sau khi bạn nhấn Lưu."
+        }
+        confirmText={ins.delete || "Xóa"}
+      />
     </div>
   );
 };

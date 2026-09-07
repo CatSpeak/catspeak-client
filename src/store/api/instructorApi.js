@@ -49,10 +49,20 @@ export function buildInstructorFormData({
   if (idCardFront instanceof File) fd.append("IdCardFront", idCardFront)
   if (idCardBack instanceof File) fd.append("IdCardBack", idCardBack)
 
+  // Credentials: keep existing URLs + append newly selected files.
+  // The backend merges CredentialUrls + Credentials instead of replacing.
   if (Array.isArray(credentials)) {
-    credentials.forEach((file) => {
-      if (file instanceof File) fd.append("Credentials", file)
+    let sentUrlCount = 0
+    credentials.forEach((item) => {
+      if (item instanceof File) fd.append("Credentials", item)
+      else if (typeof item === "string" && item) {
+        fd.append("CredentialUrls", item)
+        sentUrlCount += 1
+      }
     })
+    // Signal an explicitly-empty list (teacher removed every certificate) so the
+    // backend does not fall back to the stored list.
+    if (sentUrlCount === 0) fd.append("CredentialUrls", "")
   }
 
   if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
@@ -91,10 +101,18 @@ export function buildTeachingFormData({
     )
   }
 
+  // Credentials: keep existing URLs + append newly selected files.
   if (Array.isArray(credentials)) {
-    credentials.forEach((file) => {
-      if (file instanceof File) fd.append("Credentials", file)
+    let sentUrlCount = 0
+    credentials.forEach((item) => {
+      if (item instanceof File) fd.append("Credentials", item)
+      else if (typeof item === "string" && item) {
+        fd.append("CredentialUrls", item)
+        sentUrlCount += 1
+      }
     })
+    // Signal an explicitly-empty list (teacher removed every certificate).
+    if (sentUrlCount === 0) fd.append("CredentialUrls", "")
   }
 
   if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
