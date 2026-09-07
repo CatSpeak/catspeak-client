@@ -21,6 +21,7 @@ import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTask
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 import CompletionReviewPrompt from "@/features/courses/components/CompletionReviewPrompt"
 import BugReportButton from "@/features/bug-report/components/BugReportButton"
+import { ChatAssistantWidget } from "@/features/chat-assistant"
 import AutoCrashReporterSync from "@/shared/components/AutoCrashReporterSync"
 // import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
 
@@ -51,6 +52,10 @@ function App() {
                     <GlobalTaskSync />
                     <AutoCrashReporterSync />
                     <BugReportButton />
+                    {/* TASK-AI-08: nút nổi trợ lý chatbot, hiện trên mọi màn hình
+                        sau khi đăng nhập (FR-rag-chatbot-001). Mount ở đây chứ không
+                        ở từng layout để khỏi lặp lại bốn lần. */}
+                    <ChatAssistantWidget />
                   </GlobalPresenceProvider>
                 </ConversationSignalRProvider>
               </SidebarProvider>

@@ -26,9 +26,16 @@ export default function BugReportButton() {
   }, [])
 
   const isInsideRoom = pathname.includes("/meet") || pathname.includes("/room")
+  // Ngoài phòng học có hai nút nổi xếp dọc: nút này ở TRÊN, nút trợ lý CatSpeak ở
+  // dưới (TASK-AI-08, phản hồi 03/09). 5.25rem = 84px: nút trợ lý cao 52px tính từ
+  // mốc 20px nên đỉnh nó ở 72px, cộng 12px thở. right-6 để tâm hai nút trùng trục
+  // dọc — nút này rộng 44px cách phải 24px, nút kia rộng 52px cách phải 20px, cùng
+  // ra 46px. Đổi một trong hai thì phải đổi cả bên ChatAssistantWidget.
+  //
+  // Trong phòng học chỉ còn mỗi nút này, trợ lý tự ẩn, nên vị trí cũ giữ nguyên.
   const positionClass = isInsideRoom
     ? "fixed top-1 right-4 z-40"
-    : "fixed bottom-6 right-6 z-40"
+    : "fixed bottom-[5.25rem] right-6 z-40"
 
   const tooltipText = lang.buttonTooltip || "Báo cáo sự cố"
 
