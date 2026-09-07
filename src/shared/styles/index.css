@@ -6,6 +6,7 @@
 
 /* CSS Variables */
 :root {
+  color-scheme: light;
   --font-primary: "Nunito", "Noto Sans SC", "Noto Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
   --font-nunito: "Nunito", sans-serif;
   --header-height: 72px;
@@ -83,6 +84,8 @@ body {
 }
 
 body {
+  background-color: #ffffff;
+  color-scheme: light;
   font-family: var(--font-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
