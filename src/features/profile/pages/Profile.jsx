@@ -66,11 +66,9 @@ const Profile = () => {
   const counts = countsResponse?.data ?? countsResponse ?? null
   const friendsCount = counts?.friends ?? counts?.Friends ?? 0
   const followersCount = counts?.followers ?? counts?.Followers ?? 0
-  // Pending request badge is only relevant on the owner's own profile.
-  const pendingCount = isOwnProfile
-    ? (counts?.pendingIncoming ?? counts?.PendingIncoming ?? 0) +
-      (counts?.pendingOutgoing ?? counts?.PendingOutgoing ?? 0)
-    : 0
+  // Badge của tab ngoài "Bạn bè" là tổng số bạn bè (Accepted) cho khớp label.
+  // Số yêu cầu pending có badge riêng ở sub-tab "Yêu cầu kết nối" bên trong.
+  const friendsBadge = friendsCount > 0 ? friendsCount.toString() : null
 
   const [searchParams] = useSearchParams()
   const currentToken = searchParams.get("sharedMaterialToken")
@@ -95,7 +93,7 @@ const Profile = () => {
     {
       id: "friends",
       label: t.profile?.tabs?.friends || "Bạn bè",
-      badge: pendingCount > 0 ? pendingCount.toString() : null,
+      badge: friendsBadge,
     },
     { id: "media", label: t.profile?.tabs?.media || "Video/Ảnh" },
     { id: "documents", label: t.profile?.tabs?.documents || "Tài liệu" },

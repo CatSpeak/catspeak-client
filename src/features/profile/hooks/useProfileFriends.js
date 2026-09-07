@@ -93,7 +93,7 @@ export const useProfileFriends = ({
   // Counts: real server totals for the target account (own or external).
   // Used for sub-tab badges so they don't require visiting each tab to appear.
   // No polling; refetch on focus + after mutations via invalidation.
-  const { data: countsRes } = useGetFriendshipCountsQuery(targetAccountId, {
+  const { data: countsRes, refetch: refetchCounts } = useGetFriendshipCountsQuery(targetAccountId, {
     skip: !targetAccountId,
     refetchOnFocus: true,
     refetchOnReconnect: true,
@@ -160,31 +160,37 @@ export const useProfileFriends = ({
     skip: !targetAccountId || activeSubTab !== "all",
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
   const { data: followingRes, isLoading: loadingFollowing, isFetching: fetchingFollowing } = useGetFollowingQuery(followingArgs, {
     skip: !targetAccountId || activeSubTab !== "following",
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
   const { data: followersRes, isLoading: loadingFollowers, isFetching: fetchingFollowers } = useGetFollowersQuery(followersArgs, {
     skip: !targetAccountId || activeSubTab !== "followers",
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
-  const { data: pendingRes, isLoading: loadingPending, isFetching: fetchingPending } = useGetPendingFriendRequestsQuery(pendingArgs, {
+  const { data: pendingRes, isLoading: loadingPending, isFetching: fetchingPending, refetch: refetchPending } = useGetPendingFriendRequestsQuery(pendingArgs, {
     skip: !isOwnProfile || activeSubTab !== "pending",
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
-  const { data: sentRes, isLoading: loadingSent, isFetching: fetchingSent } = useGetSentFriendRequestsQuery(pendingArgs, {
+  const { data: sentRes, isLoading: loadingSent, isFetching: fetchingSent, refetch: refetchSent } = useGetSentFriendRequestsQuery(pendingArgs, {
     skip: !isOwnProfile || (activeSubTab !== "pending" && activeSubTab !== "find"),
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
   const { data: recRes, isLoading: loadingRecs, isFetching: fetchingRecs } = useGetFriendRecommendationsQuery(recArgs, {
     skip: !isOwnProfile || activeSubTab !== "find",
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
   })
 
   // My following: always loaded for the logged-in user (own profile included).
@@ -193,6 +199,23 @@ export const useProfileFriends = ({
   const { data: myFollowingRes } = useGetFollowingQuery(
     { accountId: currentUserId, page: 1, pageSize: 100 },
     { skip: !currentUserId, refetchOnFocus: true, refetchOnReconnect: true },
+  )
+
+  // Bấm vào sub-tab là tín hiệu reload: reset page của tab đó về 1 để list
+  // dựng lại từ đầu, và với tab "pending" (Yêu cầu kết bạn) thì refetch tường
+  // minh cả incoming + outgoing + counts — kể cả khi bấm lại tab đang mở
+  // (lúc đó arg không đổi nên RTK sẽ không tự fetch).
+  const handleSubTabChange = useCallback(
+    (tab) => {
+      setActiveSubTab(tab)
+      setPagesByTab((prev) => (prev[tab] === 1 ? prev : { ...prev, [tab]: 1 }))
+      if (tab === "pending" && isOwnProfile) {
+        refetchPending?.()
+        refetchSent?.()
+        refetchCounts?.()
+      }
+    },
+    [isOwnProfile, refetchPending, refetchSent, refetchCounts],
   )
 
   const friendsList = useMemo(() => getArray(friendsRes), [friendsRes])
@@ -368,7 +391,7 @@ export const useProfileFriends = ({
 
   return {
     activeSubTab,
-    setActiveSubTab,
+    setActiveSubTab: handleSubTabChange,
     subTabs,
     // New filter API
     activeFilter,
