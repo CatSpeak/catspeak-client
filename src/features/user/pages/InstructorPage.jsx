@@ -632,13 +632,23 @@ const InstructorPage = () => {
   const [cancelTeaching, { isLoading: isCancellingTeaching }] =
     useCancelTeachingUpdateMutation();
 
-  const { data: pendingTeachingData } = useGetPendingTeachingUpdateQuery(
-    undefined,
-    { skip: applicationStatus !== "Approved" },
-  );
+  const { data: pendingTeachingData, refetch: refetchPendingTeaching } =
+    useGetPendingTeachingUpdateQuery(undefined, {
+      skip: applicationStatus !== "Approved",
+    });
 
+  // Spec Q4: empty payloads (null/undefined/404/{}/envelope with null data)
+  // all mean "no draft". The query may resolve to {} or {success,data:null}
+  // which are truthy — normalize them to null so the banner hides.
   const pendingTeaching = useMemo(() => {
-    return pendingTeachingData?.data ?? pendingTeachingData ?? null;
+    const raw =
+      pendingTeachingData?.data !== undefined
+        ? pendingTeachingData.data
+        : (pendingTeachingData ?? null);
+    if (raw == null) return null;
+    if (typeof raw !== "object") return raw;
+    if (Array.isArray(raw)) return raw.length > 0 ? raw : null;
+    return Object.keys(raw).length === 0 ? null : raw;
   }, [pendingTeachingData]);
 
   /**
@@ -853,12 +863,36 @@ const InstructorPage = () => {
   const handleCancelTeachingUpdate = useCallback(async () => {
     try {
       await cancelTeaching().unwrap();
+      // Spec Q1/Q5: optimistic clean state — banner disappears immediately,
+      // form reverts to live, errors cleared, modal closed. Patch the pending
+      // query cache to null first so the banner/effect see "no draft" in the
+      // same render (otherwise the stale draft re-merges via the view-sync
+      // effect before the background refetch finishes).
+      try {
+        store.dispatch(
+          instructorApi.util.updateQueryData(
+            "getPendingTeachingUpdate",
+            undefined,
+            () => null,
+          ),
+        );
+      } catch {
+        // Cache patch is best-effort; the refetch below still reconciles.
+      }
       setConfirmCancelPending(false);
+      setErrors({});
+      setIsEditingApproved(false);
+      if (existingApplication) {
+        setFormData(existingApplication);
+      } else if (originalFormDataRef.current) {
+        setFormData(originalFormDataRef.current);
+      }
       toast.success(ins.teachingCancelSuccess || "Đã hủy yêu cầu chờ duyệt.");
+      refetchPendingTeaching?.();
     } catch (err) {
       toast.error(err?.data?.message || "Đã có lỗi xảy ra khi hủy bản nháp.");
     }
-  }, [cancelTeaching, ins]);
+  }, [cancelTeaching, ins, existingApplication, refetchPendingTeaching]);
 
   const handleSavePersonalInfo = useCallback(async () => {
     const personalErrors = {};
@@ -1170,23 +1204,21 @@ const InstructorPage = () => {
         />
       )}
 
-      {/* Edit-mode hint — text only, buttons live in the header row */}
+      {/* Edit-mode hint — text only, buttons live in the header row.
+          Spec Q3: no pending badge here, keep the hint text only. */}
       {showGlobalEditBar && isEditingApproved && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-800 flex-1">
             {ins.approvedEditingHint ||
               "Đang chỉnh sửa nội dung giảng dạy. Nhấn Lưu để gửi admin duyệt (ghi đè yêu cầu cũ nếu có), hoặc Hủy thay đổi để hoàn tác."}
           </p>
-          {pendingTeaching && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-blue-700 bg-blue-100 rounded-full shrink-0">
-              {ins.pendingBadge || "Chờ admin duyệt"}
-            </span>
-          )}
         </div>
       )}
 
-      {/* Pending teaching-update banner — live profile keeps serving */}
-      {isApproved && (
+      {/* Pending teaching-update banner — live profile keeps serving.
+          Spec Q2/Q6: hidden while editing (2-step flow: discard changes first,
+          then cancel the pending request from view mode). */}
+      {isApproved && !isEditingApproved && (
         <InstructorPendingUpdateBanner
           live={rawApplication}
           pending={pendingTeaching}
