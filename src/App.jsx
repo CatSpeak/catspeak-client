@@ -23,7 +23,6 @@ import BugReportButton from "@/features/bug-report/components/BugReportButton"
 import { ChatAssistantWidget } from "@/features/chat-assistant"
 import AutoCrashReporterSync from "@/shared/components/AutoCrashReporterSync"
 // import TimezoneBackfill from "@/shared/components/TimezoneBackfill";
-import { ChatAssistantWidget } from "@/features/chat-assistant"
 
 import GlobalErrorBoundary from "@/shared/components/GlobalErrorBoundary"
 import WebViewGuard from "@/shared/components/WebViewGuard"
