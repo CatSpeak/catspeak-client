@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { useGetSpeakingStatsQuery } from "@/store/api/roomsApi"
+import { isNonHumanParticipant } from "@/features/video-call/utils/participantIdentity"
 
 /**
  * Formats speaking duration dynamically:
@@ -155,8 +156,9 @@ export const useSpeakingStats = (lkRoom, sessionId, options = {}) => {
 
     if (Array.isArray(statsData.participants)) {
       for (const p of statsData.participants) {
+        if (isNonHumanParticipant(p)) continue
         const pId = String(p.participantId || p.participant_id || "")
-        if (!pId || pId.startsWith("agent") || p.is_stt_agent === true) continue
+        if (!pId) continue
 
         const pStats = p.stats || {}
         const pBalance = p.balance || {}

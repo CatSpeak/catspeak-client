@@ -1,17 +1,20 @@
 import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
+import { filterHumanParticipants } from "@/features/video-call/utils/participantIdentity"
 
 const ParticipantsPreview = ({ participants = [], participantCount }) => {
   const { t } = useLanguage()
-  const count = participantCount ?? participants.length
+  // BE counts are human-only; filter again for stale caches / mixed lists.
+  const humanParticipants = filterHumanParticipants(participants)
+  const count = participantCount ?? humanParticipants.length
 
   if (count === 0) {
     return <p className="text-[#7A7574]">{t.rooms.waitingScreen.noOneHere}</p>
   }
 
   const MAX_VISIBLE = 5
-  const visibleParticipants = participants.slice(0, MAX_VISIBLE)
+  const visibleParticipants = humanParticipants.slice(0, MAX_VISIBLE)
   const remainingCount = Math.max(0, count - visibleParticipants.length)
 
   return (

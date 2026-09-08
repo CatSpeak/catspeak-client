@@ -16,6 +16,7 @@ import ENThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-ANH.png"
 import ZHThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-TQ.png"
 import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg"
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard"
+import { filterHumanParticipants } from "@/features/video-call/utils/participantIdentity"
 
 const CustomRoomCard = ({
   room,
@@ -68,10 +69,10 @@ const CustomRoomCard = ({
         ? `${room.duration} ${t.rooms?.minutes || "phút"}`
         : customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
 
-  // Participant count calculation
-  const participants = Array.isArray(room.currentParticipants)
-    ? room.currentParticipants
-    : []
+  // Participant count calculation (human-only; API count already excludes agents)
+  const participants = filterHumanParticipants(
+    Array.isArray(room.currentParticipants) ? room.currentParticipants : [],
+  )
   const currentCount = room.currentParticipantCount ?? participants.length ?? 0
   const maxParticipantsDisplay =
     room.maxParticipants && room.maxParticipants > 0

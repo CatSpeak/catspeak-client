@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react"
-import { isMediaParticipant } from "@/features/video-call/utils/mediaParticipant"
+import { isNonHumanParticipant } from "@/features/video-call/utils/participantIdentity"
 
 /**
  * Parses a LiveKit participant metadata JSON string.
@@ -53,15 +53,10 @@ export const useParticipantList = (allParticipants, localParticipant) => {
 
     const processParticipant = (p) => {
       if (!p || seenIdentities.has(p.identity)) return
-      // Filter out STT agent — check both metadata flag and identity prefix
-      const meta = parseMetadata(p.metadata)
-      const isAgent =
-        meta.is_stt_agent === true || p.identity?.startsWith("agent")
-
-      if (isAgent) return
-
-      // Filter out the shared-media (watch-together) ingress agent
-      if (isMediaParticipant(p)) return
+      // Filter out non-human participants (STT agent, media ingress, EGRESS/SIP, ...).
+      // Covers kind/isAgent + metadata flag + identity prefixes; media spotlight
+      // participants are excluded here and rendered separately.
+      if (isNonHumanParticipant(p)) return
 
       seenIdentities.add(p.identity)
       list.push(p)

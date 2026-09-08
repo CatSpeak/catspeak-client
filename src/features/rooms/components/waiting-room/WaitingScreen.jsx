@@ -16,6 +16,7 @@ import { getCommunityPath } from "@/shared/utils/navigation"
 import VirtualBackgroundModal from "@/features/video-call/components/VirtualBackgroundModal"
 import EditNicknameModal from "./EditNicknameModal"
 import { copyRoomLink } from "@/shared/utils/shareUtils"
+import { filterHumanParticipants } from "@/features/video-call/utils/participantIdentity"
 
 import DeviceSettingsModal from "./DeviceSettingsModal"
 import { detectWebView } from "@/shared/utils/isWebView"
@@ -38,7 +39,10 @@ const WaitingScreen = ({
   deviceSelection,
 }) => {
   const navigate = useNavigate()
-  const participants = room?.currentParticipants || session?.participants || []
+  // Human-only: API details are already filtered, this guards stale caches.
+  const participants = filterHumanParticipants(
+    room?.currentParticipants || session?.participants || [],
+  )
   const meetingFallbackImage =
     room?.languageType === "Japanese"
       ? meetingFallbackImageJP
