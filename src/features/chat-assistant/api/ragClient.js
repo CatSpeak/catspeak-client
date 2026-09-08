@@ -33,14 +33,99 @@ export function storedToken() {
   return localStorage.getItem("token")
 }
 
+/**
+ * Token khách (TASK-AI-09).
+ *
+ * Khách chưa đăng nhập vẫn phải có JWT: ai-api lấy account_id từ token để đếm
+ * quota, và một endpoint gọi LLM không có gì để đếm là một endpoint mở cho cả
+ * internet. Nên thay vì cho ai-api chấp nhận request không token, catspeak-api
+ * phát một JWT riêng cho khách — cùng JWT_SECRET, cùng đường verify, chỉ khác
+ * claim `role=Guest` và một guest id ngẫu nhiên.
+ *
+ * Token này ngắn hạn và catspeak-api mới là nơi quyết định hạn. Client không tự
+ * suy ra hạn từ đâu cả: hết hạn thì ai-api trả 401, và `ensureGuestToken` xin
+ * cái mới. Đó là lý do có tham số `force`.
+ */
+const GUEST_TOKEN_KEY = "ai_guest_token"
+const GUEST_ID_KEY = "ai_guest_id"
+
+const AUTH_BASE =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "/api"
+
+export function guestToken() {
+  return localStorage.getItem(GUEST_TOKEN_KEY)
+}
+
+export function guestId() {
+  return localStorage.getItem(GUEST_ID_KEY)
+}
+
+export function clearGuestToken() {
+  localStorage.removeItem(GUEST_TOKEN_KEY)
+  localStorage.removeItem(GUEST_ID_KEY)
+}
+
+/**
+ * Trả về token khách đang dùng được, xin mới nếu chưa có.
+ *
+ * Gọi song song nhiều lần là chuyện bình thường: widget mở ra là vừa lấy quota
+ * vừa lấy gợi ý. Gom vào một promise dùng chung để không xin hai token rồi ghi
+ * đè nhau — hai guest id khác nhau nghĩa là quota đếm sai.
+ */
+let guestPending = null
+
+export async function ensureGuestToken({ force = false } = {}) {
+  if (!force) {
+    const co = guestToken()
+    if (co) return co
+  }
+  if (guestPending) return guestPending
+
+  guestPending = (async () => {
+    try {
+      const res = await fetch(`${AUTH_BASE}/Auth/guest-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+      if (!res.ok) {
+        const body = await res.text().catch(() => "")
+        throw new RagHttpError(res.status, res.statusText, body)
+      }
+      const data = await res.json()
+      const token = data.token || data.Token
+      if (!token) throw new Error("guest-token: thiếu trường token")
+      localStorage.setItem(GUEST_TOKEN_KEY, token)
+      const id = data.guestId || data.GuestId
+      if (id) localStorage.setItem(GUEST_ID_KEY, id)
+      return token
+    } finally {
+      guestPending = null
+    }
+  })()
+
+  return guestPending
+}
+
+/** Token thật đứng trước token khách: người vừa đăng nhập xong mà request vẫn đi
+ *  bằng token khách thì quota đếm nhầm chỗ và lịch sử chat treo ở guest id cũ. */
+function activeToken() {
+  return storedToken() || guestToken()
+}
+
 function authHeaders() {
-  const token = storedToken()
+  const token = activeToken()
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
 /** Tier và level: JWT do catspeak-api phát KHÔNG chứa hai trường này, nên client
- *  phải gửi kèm. Server chỉ lấy account_id từ token, không lấy từ body. */
+ *  phải gửi kèm. Server chỉ lấy account_id từ token, không lấy từ body.
+ *
+ *  Không có user thì đây là khách: tier "Guest", và server có bảng quota riêng cho
+ *  nó. Đừng để rơi về "Free" — khách sẽ được hạn mức của tài khoản thật. */
 export function callerFrom(user, language = "vi") {
+  if (!user) {
+    return { tier: "Guest", level: null, language, language_community: null }
+  }
   return {
     tier: user?.tier || user?.Tier || "Free",
     level: user?.level || user?.Level || null,
