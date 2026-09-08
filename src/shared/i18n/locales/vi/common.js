@@ -48,7 +48,7 @@ export default {
     reels: "Reels",
     video: "Video",
     letters: "Thư",
-    calendar: "Lịch",
+    calendar: "Sự kiện",
     events: "Sự kiện",
     analytics: "Thống kê",
     dashboard: "Bảng điều khiển",

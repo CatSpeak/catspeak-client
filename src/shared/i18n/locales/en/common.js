@@ -48,7 +48,7 @@ export default {
     reels: "Reels",
     video: "Video",
     letters: "Letters",
-    calendar: "Calendar",
+    calendar: "Events",
     events: "Events",
     analytics: "Analytics",
     dashboard: "Dashboard",

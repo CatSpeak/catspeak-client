@@ -277,7 +277,7 @@ export default {
     discover: "Khám phá thế giới",
     reels: "Thước phim",
     letters: "Thư",
-    calendar: "Lịch",
+    calendar: "Sự kiện",
     settings: "Cài đặt",
     report: "Nhật ký báo cáo",
     help: "Trợ giúp",
