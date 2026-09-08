@@ -33,14 +33,74 @@ export function storedToken() {
   return localStorage.getItem("token")
 }
 
+const GUEST_TOKEN_KEY = "ai_guest_token"
+const GUEST_ID_KEY = "ai_guest_id"
+
+const AUTH_BASE =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "/api"
+
+export function guestToken() {
+  return localStorage.getItem(GUEST_TOKEN_KEY)
+}
+
+export function guestId() {
+  return localStorage.getItem(GUEST_ID_KEY)
+}
+
+export function clearGuestToken() {
+  localStorage.removeItem(GUEST_TOKEN_KEY)
+  localStorage.removeItem(GUEST_ID_KEY)
+}
+
+let guestPending = null
+
+export async function ensureGuestToken({ force = false } = {}) {
+  if (!force) {
+    const co = guestToken()
+    if (co) return co
+  }
+  if (guestPending) return guestPending
+
+  guestPending = (async () => {
+    try {
+      const res = await fetch(`${AUTH_BASE}/Auth/guest-token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+      if (!res.ok) {
+        const body = await res.text().catch(() => "")
+        throw new RagHttpError(res.status, res.statusText, body)
+      }
+      const data = await res.json()
+      const token = data.token || data.Token
+      if (!token) throw new Error("guest-token: thiếu trường token")
+      localStorage.setItem(GUEST_TOKEN_KEY, token)
+      const id = data.guestId || data.GuestId
+      if (id) localStorage.setItem(GUEST_ID_KEY, id)
+      return token
+    } finally {
+      guestPending = null
+    }
+  })()
+
+  return guestPending
+}
+
+function activeToken() {
+  return storedToken() || guestToken()
+}
+
 function authHeaders() {
-  const token = storedToken()
+  const token = activeToken()
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
 /** Tier và level: JWT do catspeak-api phát KHÔNG chứa hai trường này, nên client
  *  phải gửi kèm. Server chỉ lấy account_id từ token, không lấy từ body. */
 export function callerFrom(user, language = "vi") {
+  if (!user) {
+    return { tier: "Guest", level: null, language, language_community: null }
+  }
   return {
     tier: user?.tier || user?.Tier || "Free",
     level: user?.level || user?.Level || null,

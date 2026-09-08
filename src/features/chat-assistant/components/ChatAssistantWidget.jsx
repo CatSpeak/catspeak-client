@@ -5,8 +5,12 @@ import { MessageCircle, X, Send } from "lucide-react"
 import {
   askQuestionStream,
   callerFrom,
+  clearGuestToken,
+  ensureGuestToken,
   fetchQuota,
   fetchSuggestions,
+  guestId,
+  guestToken,
   storedToken,
   suggestionsDaLuu,
 } from "../api/ragClient"
@@ -66,7 +70,7 @@ function usePathname() {
 /**
  * Widget trợ lý chatbot (TASK-AI-08).
  *
- * Nút nổi góc dưới phải, hiện trên mọi màn hình sau khi đăng nhập
+ * Nút nổi góc dưới phải, hiện trên mọi màn hình, kể cả khi chưa đăng nhập
  * (FR-rag-chatbot-001). Mount một lần ở App.jsx, cạnh PiPWidget.
  *
  * Widget hỏng thì im lặng: nút không hiện, phần còn lại của ứng dụng chạy bình
@@ -94,6 +98,8 @@ export default function ChatAssistantWidget() {
   // trong khi token duoc dat bang tay luc phat trien ma chua tai lai trang.
   const token = useSelector((s) => s.auth?.token) || storedToken()
   const user = useSelector((s) => s.auth?.user)
+  const [guest, setGuest] = useState(() => guestToken())
+  const authToken = token || guest
   const { t } = useLanguage()
   // useMemo chứ không phải một biểu thức trần: `t.chatAssistant || {}` sinh vật thể
   // mới mỗi lần render, mà L nằm trong danh sách phụ thuộc của useCallback bên dưới
@@ -101,7 +107,8 @@ export default function ChatAssistantWidget() {
   const L = useMemo(() => t.chatAssistant || {}, [t])
   const pathname = usePathname()
 
-  const accountId = user?.accountId || user?.AccountId || user?.id || null
+  const accountId =
+    user?.accountId || user?.AccountId || user?.id || (guest ? guestId() : null)
   const { messages, append, patchLast, apiHistory, isEmpty } =
     useChatHistory(accountId)
 
@@ -121,11 +128,33 @@ export default function ChatAssistantWidget() {
   const bufferRef = useRef("")
   const caller = callerFrom(user)
 
+  useEffect(() => {
+    if (!open || token || guest) return
+    let cancelled = false
+    ensureGuestToken()
+      .then((t) => {
+        if (!cancelled) setGuest(t)
+      })
+      .catch((e) => {
+        console.warn("[chat-assistant] không xin được token khách:", e.message)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open, token, guest])
+
+  useEffect(() => {
+    if (token && guest) {
+      clearGuestToken()
+      setGuest(null)
+    }
+  }, [token, guest])
+
   // Lần đầu mở mà chưa có lịch sử thì lấy gợi ý câu mẫu (FR-rag-chatbot-009).
   //
   // Có thử lại, và KHÔNG nuốt lỗi. ai-api mất khoảng 40 giây nạp mô hình nhúng 543MB
   // mỗi lần khởi động lại; mở widget trong khoảng đó thì request hỏng. Effect này chỉ
-  // phụ thuộc [open, token, isEmpty] — không cái nào đổi sau đó — nên một lần hỏng là
+  // phụ thuộc [open, authToken, isEmpty] — không cái nào đổi sau đó — nên một lần hỏng là
   // mất gợi ý cho tới khi tải lại trang. Đúng lỗi gặp ngày 30/08.
   //
   // Hiện NGAY danh sách lần trước rồi mới gọi server làm mới. Vẫn không chép cứng
@@ -136,7 +165,7 @@ export default function ChatAssistantWidget() {
   // trong một buổi phát triển đã ba lần widget mở ra trắng trơn, và người mở lần đầu
   // không có gì để bấm. Bản đệm giữ được cả hai — không lệch, mà cũng không trống.
   useEffect(() => {
-    if (!open || !token) return
+    if (!open || !authToken) return
     fetchQuota(caller.tier).then(setQuota).catch(() => {})
     if (!isEmpty || suggestions.length > 0) return
 
@@ -177,7 +206,7 @@ export default function ChatAssistantWidget() {
     }
     // caller.tier đọc lại mỗi lần mở là đủ; không cần theo dõi từng thay đổi.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, token, isEmpty])
+  }, [open, authToken, isEmpty])
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight })
@@ -224,8 +253,9 @@ export default function ChatAssistantWidget() {
       const ctrl = new AbortController()
       abortRef.current = ctrl
       bufferRef.current = ""
-      try {
-        const done = await askQuestionStream({
+
+      const goi = () =>
+        askQuestionStream({
           question,
           history,
           caller,
@@ -236,6 +266,18 @@ export default function ChatAssistantWidget() {
             patchLast({ text: bufferRef.current })
           },
         })
+
+      try {
+        let done
+        try {
+          done = await goi()
+        } catch (e) {
+          if (e?.status !== 401 || storedToken()) throw e
+          setGuest(await ensureGuestToken({ force: true }))
+          bufferRef.current = ""
+          patchLast({ text: "", streaming: true })
+          done = await goi()
+        }
         applyFinal(done, question)
       } catch (e) {
         if (e.name !== "AbortError") {
@@ -249,17 +291,6 @@ export default function ChatAssistantWidget() {
     },
     [draft, busy, apiHistory, append, patchLast, applyFinal, caller, L],
   )
-
-  // Chưa đăng nhập thì không hiện widget (FR-rag-chatbot-001). Quota đếm theo tài
-  // khoản, nên người dùng ẩn danh không có gì để đếm.
-  //
-  // Trước đây có cờ VITE_AI_ALLOW_ANONYMOUS mở widget khi chưa đăng nhập, để thử
-  // giao diện lúc chưa dựng được catspeak-api tại máy. Đã gỡ ngày 02/09: một đường
-  // tắt còn nằm trong code là một đường tắt sớm muộn có người bật nhầm ở production.
-  // Muốn thử tay không cần đăng nhập thật thì dùng tools/mint_dev_token.py bên
-  // catspeak-ai — nó ký token bằng đúng JWT_SECRET, và chỉ chạy được trên máy có
-  // khoá đó.
-  if (!token) return null
 
   // Trong phòng học thì không hiện (phản hồi 03/09). Màn hình phòng học đã kín
   // thanh điều khiển gọi, và câu hỏi về sản phẩm không phải việc người ta làm giữa
