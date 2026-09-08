@@ -70,9 +70,8 @@ function usePathname() {
 /**
  * Widget trợ lý chatbot (TASK-AI-08).
  *
- * Nút nổi góc dưới phải, hiện trên mọi màn hình, cho cả khách chưa đăng nhập
- * (FR-rag-chatbot-001, mở rộng ở TASK-AI-09). Mount một lần ở App.jsx, cạnh
- * PiPWidget.
+ * Nút nổi góc dưới phải, hiện trên mọi màn hình, kể cả khi chưa đăng nhập
+ * (FR-rag-chatbot-001). Mount một lần ở App.jsx, cạnh PiPWidget.
  *
  * Widget hỏng thì im lặng: nút không hiện, phần còn lại của ứng dụng chạy bình
  * thường (E-rag-chatbot-004).
@@ -99,8 +98,6 @@ export default function ChatAssistantWidget() {
   // trong khi token duoc dat bang tay luc phat trien ma chua tai lai trang.
   const token = useSelector((s) => s.auth?.token) || storedToken()
   const user = useSelector((s) => s.auth?.user)
-  // Token khách, giữ ở state để việc xin được nó kéo theo một lần render — các
-  // effect bên dưới gác bằng `authToken` nên phải chạy lại đúng lúc token về.
   const [guest, setGuest] = useState(() => guestToken())
   const authToken = token || guest
   const { t } = useLanguage()
@@ -110,8 +107,6 @@ export default function ChatAssistantWidget() {
   const L = useMemo(() => t.chatAssistant || {}, [t])
   const pathname = usePathname()
 
-  // Khách cũng cần khoá riêng: hai người dùng chung một máy, một người đăng nhập
-  // một người không, mà dùng chung khoá thì thấy hội thoại của nhau.
   const accountId =
     user?.accountId || user?.AccountId || user?.id || (guest ? guestId() : null)
   const { messages, append, patchLast, apiHistory, isEmpty } =
@@ -133,10 +128,6 @@ export default function ChatAssistantWidget() {
   const bufferRef = useRef("")
   const caller = callerFrom(user)
 
-  // Xin token khách khi mở widget lúc chưa đăng nhập (TASK-AI-09).
-  //
-  // Xin lúc MỞ chứ không lúc mount: phần lớn người vào trang không bấm vào nút
-  // chat, và mỗi token xin ra là một dòng trong bảng quota bên ai-api.
   useEffect(() => {
     if (!open || token || guest) return
     let cancelled = false
@@ -152,8 +143,6 @@ export default function ChatAssistantWidget() {
     }
   }, [open, token, guest])
 
-  // Đăng nhập xong thì bỏ token khách đi. Để lại thì lần sau logout sẽ dùng lại
-  // một token có thể đã hết hạn, và quota của khách cũ dính sang phiên mới.
   useEffect(() => {
     if (token && guest) {
       clearGuestToken()
@@ -283,14 +272,7 @@ export default function ChatAssistantWidget() {
         try {
           done = await goi()
         } catch (e) {
-          // Token khách hết hạn thì xin cái mới rồi gửi lại đúng MỘT lần, ngay
-          // tại đây chứ không gọi lại send(): send() mở đầu bằng hai lần append,
-          // nên gọi lại là nhân đôi câu hỏi trong lịch sử.
-          //
-          // Chỉ thử lại một lần: nếu token vừa xin cũng bị từ chối thì vấn đề nằm
-          // ở cấu hình (lệch `iss`, lệch JWT_SECRET), thử thêm chỉ giấu lỗi đó đi.
-          const laKhach = !storedToken()
-          if (e?.status !== 401 || !laKhach) throw e
+          if (e?.status !== 401 || storedToken()) throw e
           setGuest(await ensureGuestToken({ force: true }))
           bufferRef.current = ""
           patchLast({ text: "", streaming: true })
@@ -310,15 +292,6 @@ export default function ChatAssistantWidget() {
     [draft, busy, apiHistory, append, patchLast, applyFinal, caller, L],
   )
 
-  // Widget hiện cho cả khách chưa đăng nhập (TASK-AI-09). Không còn cửa nào trả
-  // null theo trạng thái đăng nhập.
-  //
-  // Đây KHÔNG phải là dựng lại cờ VITE_AI_ALLOW_ANONYMOUS đã gỡ ngày 02/09. Cờ đó
-  // là một đường tắt: nó cho widget gọi ai-api mà không có token nào cả. Ở đây
-  // khách vẫn có JWT thật do catspeak-api ký, vẫn đi qua đúng đường verify, và vẫn
-  // có account_id để đếm quota — chỉ là account_id của một guest id thay vì của
-  // một tài khoản.
-  //
   // Trong phòng học thì không hiện (phản hồi 03/09). Màn hình phòng học đã kín
   // thanh điều khiển gọi, và câu hỏi về sản phẩm không phải việc người ta làm giữa
   // buổi nói chuyện. Nút báo lỗi vẫn ở lại — trong phòng mới hay hỏng nhất.
