@@ -48,7 +48,7 @@ export default {
     reels: "短视频",
     video: "视频",
     letters: "信",
-    calendar: "日历",
+    calendar: "活动",
     events: "活动",
     analytics: "数据分析",
     dashboard: "仪表盘",

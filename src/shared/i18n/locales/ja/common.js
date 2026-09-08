@@ -48,7 +48,7 @@ export default {
     reels: "リール",
     video: "動画",
     letters: "レター",
-    calendar: "カレンダー",
+    calendar: "イベント",
     events: "イベント",
     analytics: "分析",
     dashboard: "ダッシュボード",

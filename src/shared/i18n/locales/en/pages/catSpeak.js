@@ -288,7 +288,7 @@ export default {
     discover: "Discover World",
     reels: "Reels",
     letters: "Letters",
-    calendar: "Calendar",
+    calendar: "Events",
     settings: "Settings",
     report: "Report Log",
     help: "Help",
