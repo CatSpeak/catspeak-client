@@ -94,18 +94,42 @@ const CustomRoomCard = ({
 
   // Password check (supports privacy: 1, "Private", isPrivate, hasPassword)
   const isPrivate =
-    room.privacy === "Private" || room.isPrivate || room.privacy === 1
+    room.privacy === "Private" || room.isPrivate || room.privacy === 1 || room.Privacy === 1
   const hasPassword =
-    isPrivate || room.hasPassword || room.isPasswordProtected || !!room.password
+    isPrivate || room.hasPassword || room.isPasswordProtected || !!room.password || !!room.Password
 
-  // Duration text (supports remainingTime, isUnlimited, duration)
-  const durationText = room.remainingTime
-    ? `${room.remainingTime}`
-    : room.isUnlimited || room.duration === null
-      ? customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
-      : room.duration && room.duration > 0
-        ? `${room.duration} ${t.rooms?.minutes || "phút"}`
-        : customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
+  // Badge helpers (Ticket 02)
+  const roomTypeVal = room.roomType ?? room.RoomType
+  const isCustomType = roomTypeVal === 4 || roomTypeVal === "4" || roomTypeVal === "Custom"
+  const roomTypeBadge = isCustomType ? "Custom" : "Temporary"
+  const visibilityBadge = isPrivate ? "Private" : "Public"
+  const languageBadge = room.languageType || room.LanguageType || room.language || "—"
+  const activityBadge = room.activity || (currentCount > 0 ? "InUse" : "Empty")
+  let isUnlimitedRoom = isCustomType || room.duration === null
+  if (room.isUnlimited !== undefined && room.isUnlimited !== null) isUnlimitedRoom = room.isUnlimited
+  else if (room.IsUnlimited !== undefined && room.IsUnlimited !== null) isUnlimitedRoom = room.IsUnlimited
+
+  // Duration text — Ticket 02: Temporary countdown, Custom Unlimited
+  const isExpired = !isUnlimitedRoom && (room.remainingSeconds === 0 || room.RemainingSeconds === 0 || room.remainingTime === "00:00")
+  const durationText = (() => {
+    if (isUnlimitedRoom) return customRooms.unlimited || t.rooms?.noLimit || "Unlimited"
+    if (room.remainingTime) return `${room.remainingTime}`
+    if (room.RemainingTime) return `${room.RemainingTime}`
+    if (room.remainingSeconds != null) {
+      const s = room.remainingSeconds
+      const m = Math.floor(s / 60)
+      const sec = s % 60
+      return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+    }
+    if (room.RemainingSeconds != null) {
+      const s = room.RemainingSeconds
+      const m = Math.floor(s / 60)
+      const sec = s % 60
+      return `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+    }
+    if (room.duration && room.duration > 0) return `${room.duration} ${t.rooms?.minutes || "phút"}`
+    return customRooms.unlimited || t.rooms?.noLimit || "Không giới hạn"
+  })()
 
   // Participant count calculation
   const participants = Array.isArray(room.currentParticipants)
@@ -123,6 +147,7 @@ const CustomRoomCard = ({
   ).replace("{{name}}", room.name || "")
 
   const handleCardClick = () => {
+    if (isExpired) return
     if (onJoin) onJoin(roomId)
   }
 
@@ -251,19 +276,13 @@ const CustomRoomCard = ({
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-1 flex-col p-4 pb-4">
+        <div className={`flex flex-1 flex-col p-4 pb-4 ${isExpired ? "opacity-60" : ""}`}>
           {/* Title & Copy Link */}
-          <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-start justify-between gap-3 mb-2">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">
                 {room.name}
               </h3>
-              {room.activity === "InUse" && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  In Use
-                </span>
-              )}
             </div>
 
             {onCopyLink && (
@@ -287,6 +306,29 @@ const CustomRoomCard = ({
               </div>
             )}
           </div>
+
+          {/* Badges: RoomType / Visibility / Language / Activity */}
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
+              {roomTypeBadge}
+            </span>
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivate ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
+              {visibilityBadge}
+            </span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+              {languageBadge}
+            </span>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
+              {activityBadge === "InUse" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+              {activityBadge === "InUse" ? "In Use" : "Empty"}
+            </span>
+          </div>
+
+          {isExpired && (
+            <div className="mb-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 text-center">
+              Đã hết hạn — sẽ được xóa
+            </div>
+          )}
 
           {/* Footer Info */}
           <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">

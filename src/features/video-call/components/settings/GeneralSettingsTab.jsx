@@ -13,6 +13,8 @@ import {
   useGetRoomCoHostQuery,
   useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
+  useGetGamePolicyQuery,
+  useUpdateGamePolicyMutation,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -60,6 +62,30 @@ const GeneralSettingsTab = ({
   const serverMemberRecording =
     memberRecordingPolicy?.data?.allowMemberRecording ??
     memberRecordingPolicy?.allowMemberRecording
+
+  // Ticket 01: game policy — host-only switch, default open
+  const canManageGame =
+    isHost ||
+    hasCoHostPermission(
+      normalizeCoHost(liveCoHostData),
+      user?.accountId,
+      CO_HOST_PERMISSIONS.MUTE_ALL
+    ) ||
+    hasCoHostPermission(
+      normalizeCoHost(liveCoHostData),
+      user?.accountId,
+      CO_HOST_PERMISSIONS.REMOVE_STUDENT
+    )
+  const { data: gamePolicyData } = useGetGamePolicyQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const [updateGamePolicyApi] = useUpdateGamePolicyMutation()
+  const serverAllowGame =
+    gamePolicyData?.data?.allowGame ?? gamePolicyData?.allowGame ?? true
+  const [allowGame, setAllowGame] = React.useState(true)
+  React.useEffect(() => {
+    if (serverAllowGame !== undefined) setAllowGame(serverAllowGame)
+  }, [serverAllowGame])
 
   const [joinLeaveSound, setJoinLeaveSound] = React.useState(() => {
     return getRoomSetting(currentRoomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND)
@@ -196,6 +222,38 @@ const GeneralSettingsTab = ({
     }
   }
 
+  const handleToggleGame = (e) => {
+    const val = e.target.checked
+    setAllowGame(val)
+    if (currentRoomId) {
+      updateGamePolicyApi({ id: currentRoomId, allow: val })
+        .unwrap()
+        .catch((err) => {
+          toast.error(
+            resolveCoHostErrorMessage(
+              err,
+              t,
+              "Bạn không có quyền thay đổi chính sách trò chơi."
+            )
+          )
+          setAllowGame(!val)
+        })
+    }
+    if (lkRoom?.localParticipant) {
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({ action: "GAME_POLICY", allow: val })
+        )
+        lkRoom.localParticipant.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch (err) {
+        console.error("Failed to broadcast GAME_POLICY:", err)
+      }
+    }
+  }
+
   return (
     <div className="bg-white rounded-xl border border-[#e5e5e5] flex flex-col divide-y divide-[#e5e5e5]">
       <ListItem
@@ -295,6 +353,26 @@ const GeneralSettingsTab = ({
             <span className="text-sm text-[#606060]">
               {gt.allowMemberPrivateAiDesc ||
                 "Khi tắt, thành viên chỉ có thể sử dụng AI Chat công khai trong phòng họp, không thể trò chuyện riêng với AI."}
+            </span>
+          </ListItem>
+          )}
+          {(isHost || canManageGame) && (
+          <ListItem
+            lines="auto"
+            rightContent={
+              <Switch
+                checked={allowGame}
+                onChange={handleToggleGame}
+                colorClass="peer-checked:bg-green-500"
+              />
+            }
+          >
+            <span>
+              {gt.allowGame || "Cho phép trò chơi trong phòng"}
+            </span>
+            <span className="text-sm text-[#606060]">
+              {gt.allowGameDesc ||
+                "Khi tắt, thành viên không thể bắt đầu ván game mới. Ván đang chạy vẫn tiếp tục."}
             </span>
           </ListItem>
           )}

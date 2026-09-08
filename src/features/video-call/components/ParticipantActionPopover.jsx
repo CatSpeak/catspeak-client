@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { MoreVertical, Volume2, VolumeX, MicOff, VideoOff, UserX, MonitorUp, Shield } from "lucide-react"
+import { MoreVertical, Volume2, VolumeX, MicOff, VideoOff, UserX, MonitorUp, Shield, MessageSquareOff, Mic } from "lucide-react"
 import { toast } from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
@@ -14,6 +14,10 @@ import {
   useAssignRoomCoHostMutation,
   useUpdateRoomCoHostMutation,
   useRevokeRoomCoHostMutation,
+  useRestrictChatMutation,
+  useUnrestrictChatMutation,
+  useRestrictVoiceMutation,
+  useUnrestrictVoiceMutation,
 } from "@/store/api/roomsApi"
 import CoHostModal from "@/features/co-host/CoHostModal"
 import {
@@ -210,6 +214,43 @@ export const ParticipantActionPopover = ({ participant, children }) => {
 
   const [kickConfirm, setKickConfirm] = React.useState({ open: false, banRejoin: false })
 
+  // Ticket 01: restrict chat/voice — host or co-host with mute_all/remove_student
+  const canRestrict = isCurrentHost ||
+    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.MUTE_ALL) ||
+    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
+  const [restrictChatApi, { isLoading: isRestrictingChat }] = useRestrictChatMutation()
+  const [unrestrictChatApi, { isLoading: isUnrestrictingChat }] = useUnrestrictChatMutation()
+  const [restrictVoiceApi, { isLoading: isRestrictingVoice }] = useRestrictVoiceMutation()
+  const [unrestrictVoiceApi, { isLoading: isUnrestrictingVoice }] = useUnrestrictVoiceMutation()
+  const [restrictConfirm, setRestrictConfirm] = React.useState({ open: false, type: null })
+
+  const handleRestrict = async (type) => {
+    if (!roomId || !targetAccountId) return
+    const idNum = Number(targetAccountId)
+    try {
+      if (type === "chat") await restrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      else if (type === "voice") await restrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      else if (type === "unrestrict_chat") await unrestrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      else if (type === "unrestrict_voice") await unrestrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
+      const actionMap = { chat: "CHAT_RESTRICTED", voice: "VOICE_RESTRICTED", unrestrict_chat: "CHAT_UNRESTRICTED", unrestrict_voice: "VOICE_UNRESTRICTED" }
+      try {
+        const payload = new TextEncoder().encode(JSON.stringify({ action: actionMap[type], targetId: String(targetAccountId), targetIdentity: String(participant.identity) }))
+        lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
+      } catch {}
+      const msgMap = { chat: "Đã hạn chế chat", voice: "Đã hạn chế voice", unrestrict_chat: "Đã gỡ hạn chế chat", unrestrict_voice: "Đã gỡ hạn chế voice" }
+      toast.success(msgMap[type] || "Thành công")
+    } catch (err) {
+      if (err?.status === 404) {
+        toast.error(pl.participantNotFound || "Người tham gia đã rời phòng. Đang làm mới danh sách.")
+        // trigger refresh via broadcast?
+      } else if (err?.status === 409) {
+        toast.error(err?.data?.message || pl.alreadyRestricted || "Đã ở trạng thái đó.")
+      } else {
+        toast.error(resolveCoHostErrorMessage(err, t, "Bạn không có quyền thực hiện thao tác này."))
+      }
+    }
+  }
+
   if (participant?.isLocal) return <>{children}</>
 
   const handleMuteTrack = async (trackKind, muted = true) => {
@@ -365,6 +406,43 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         </div>
       )}
 
+      {canRestrict && (
+        <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
+          <button
+            onClick={() => setRestrictConfirm({ open: true, type: "chat" })}
+            disabled={isRestrictingChat}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+          >
+            <MessageSquareOff size={18} className="text-neutral-500 shrink-0" />
+            <span>{pl.restrictChat || "Hạn chế chat"}</span>
+          </button>
+          <button
+            onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_chat" })}
+            disabled={isUnrestrictingChat}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+          >
+            <MessageSquareOff size={18} className="text-emerald-600 shrink-0" />
+            <span>{pl.unrestrictChat || "Gỡ hạn chế chat"}</span>
+          </button>
+          <button
+            onClick={() => setRestrictConfirm({ open: true, type: "voice" })}
+            disabled={isRestrictingVoice}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+          >
+            <Mic size={18} className="text-neutral-500 shrink-0" />
+            <span>{pl.restrictVoice || "Hạn chế voice"}</span>
+          </button>
+          <button
+            onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_voice" })}
+            disabled={isUnrestrictingVoice}
+            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+          >
+            <Mic size={18} className="text-emerald-600 shrink-0" />
+            <span>{pl.unrestrictVoice || "Gỡ hạn chế voice"}</span>
+          </button>
+        </div>
+      )}
+
       {isCurrentHost && (
         <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
           <button
@@ -467,6 +545,31 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       confirmText={kickConfirm.banRejoin ? (pl.ban || "Xóa & Cấm vào lại") : (pl.kick || "Mời ra khỏi phòng")}
       confirmVariant="destructive"
       isPending={isKicking}
+    />
+
+    <ConfirmationModal
+      open={restrictConfirm.open}
+      onClose={() => setRestrictConfirm({ open: false, type: null })}
+      onConfirm={() => {
+        const t2 = restrictConfirm.type
+        setRestrictConfirm({ open: false, type: null })
+        handleRestrict(t2)
+      }}
+      title={
+        restrictConfirm.type === "chat" ? (pl.confirmRestrictChatTitle || "Hạn chế chat") :
+        restrictConfirm.type === "unrestrict_chat" ? (pl.confirmUnrestrictChatTitle || "Gỡ hạn chế chat") :
+        restrictConfirm.type === "voice" ? (pl.confirmRestrictVoiceTitle || "Hạn chế voice") :
+        (pl.confirmUnrestrictVoiceTitle || "Gỡ hạn chế voice")
+      }
+      message={
+        restrictConfirm.type === "chat" ? `Bạn có chắc muốn hạn chế chat của ${participant?.name || targetAccountId}?` :
+        restrictConfirm.type === "unrestrict_chat" ? `Bạn có chắc muốn gỡ hạn chế chat của ${participant?.name || targetAccountId}?` :
+        restrictConfirm.type === "voice" ? `Bạn có chắc muốn hạn chế voice của ${participant?.name || targetAccountId}?` :
+        `Bạn có chắc muốn gỡ hạn chế voice của ${participant?.name || targetAccountId}?`
+      }
+      confirmText={pl.confirm || "Xác nhận"}
+      confirmVariant={restrictConfirm.type?.startsWith("unrestrict") ? "default" : "destructive"}
+      isPending={isRestrictingChat || isRestrictingVoice || isUnrestrictingChat || isUnrestrictingVoice}
     />
 
     {/* Revoke trong live cũng cần confirm riêng */}
