@@ -292,7 +292,7 @@ export default {
     discover: "世界を発見",
     reels: "リール",
     letters: "レター",
-    calendar: "カレンダー",
+    calendar: "イベント",
     settings: "設定",
     report: "レポートログ",
     help: "ヘルプ",

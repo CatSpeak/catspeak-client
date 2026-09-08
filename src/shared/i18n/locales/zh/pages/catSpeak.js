@@ -273,7 +273,7 @@ export default {
     discover: "探索世界",
     reels: "短视频",
     letters: "信",
-    calendar: "日程表",
+    calendar: "活动",
     settings: "设置",
     report: "报告日志",
     help: "帮助",

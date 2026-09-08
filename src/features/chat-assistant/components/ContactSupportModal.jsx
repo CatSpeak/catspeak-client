@@ -68,6 +68,13 @@ export default function ContactSupportModal({ open, question, onClose }) {
       open={open}
       onClose={onClose}
       title={S.title}
+      /* Vỏ Modal phải tự khai màu nền VÀ màu chữ.
+         Modal.jsx ép `bg-white` khi bên gọi không truyền lớp `bg-` nào, mà bên
+         trong form lại có mấy chỗ `dark:text-*` — chế độ tối thành chữ gần trắng
+         trên nền trắng, không đọc được. Phải có cả `text-`: thẻ <h2> tiêu đề trong
+         Modal.jsx không có lớp màu nào, nó thừa kế, nên đổi nền sang tối mà quên
+         màu chữ thì tiêu đề lại biến mất. */
+      className="bg-white text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100"
       /* Bớt khoảng trống dưới tiêu đề. Mặc định của Modal là p-6 ở đầu VÀ p-6 ở
          thân, cộng lại thành 48px trắng trước dòng chữ đầu tiên — nhìn như form bị
          tụt xuống (phản hồi 03/09). */

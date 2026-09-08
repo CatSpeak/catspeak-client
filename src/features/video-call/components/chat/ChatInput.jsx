@@ -17,6 +17,7 @@ import {
 } from "@/features/video-call/utils/roomSettingHelpers"
 import MentionPopover from "./MentionPopover"
 import { parseMetadata } from "@/features/video-call/hooks/useParticipantList"
+import { isNonHumanParticipant } from "@/features/video-call/utils/participantIdentity"
 
 const ChatInput = ({
   onSendMessage,
@@ -48,14 +49,12 @@ const ChatInput = ({
     selectedIndex: 0,
   })
 
-  // Filter participants for mention matching (exclude local user & STT agents)
+  // Filter participants for mention matching (exclude local user & non-human agents)
   const availableMentionParticipants = React.useMemo(() => {
     if (!participants) return []
     return participants.filter((p) => {
       if (p.isLocal) return false
-      const meta = parseMetadata(p.metadata)
-      const isAgent = meta.is_stt_agent === true || p.identity?.startsWith("agent")
-      return !isAgent
+      return !isNonHumanParticipant(p)
     })
   }, [participants])
 
