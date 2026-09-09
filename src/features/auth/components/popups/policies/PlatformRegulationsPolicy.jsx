@@ -18,7 +18,7 @@ const PlatformRegulationsPolicy = () => {
 
   return (
     <div className="flex flex-col h-full mt-2">
-      <div className="flex border-b border-border mb-6 overflow-x-auto custom-scrollbar">
+      <div className="flex border-b border-border mb-6 overflow-x-auto scrollbar-none scroll-smooth [-webkit-overflow-scrolling:touch] overscroll-x-contain">
         {tabs.map((tab, index) => (
           <button
             key={tab.id}
