@@ -20,18 +20,30 @@ const InstructorSubmitSection = ({
   const [selectedPolicy, setSelectedPolicy] = useState(null);
 
 
+  const handleToggleAgreed = () => {
+    if (!isDisabled) onAgreeChange(!agreed);
+  };
+
   return (
     <>
       <FluentCard className="sm:flex-row items-center justify-between gap-6 mb-32">
         {/* Terms */}
-        <label id="field-agreed" className={`flex items-start gap-3 group flex-1 ${isDisabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
+        <div id="field-agreed" className={`flex items-start gap-3 group flex-1 ${isDisabled ? "cursor-not-allowed opacity-60" : ""}`}>
           <Checkbox
             checked={agreed}
             onChange={(e) => !isDisabled && onAgreeChange(e.target.checked)}
             disabled={isDisabled}
             className="mt-0.5 shrink-0"
           />
-          <span className={`text-[13px] leading-relaxed transition-colors ${errors.agreed ? "text-red-500" : "text-gray-500 group-hover:text-gray-800"}`}>
+          <span
+            onClick={(e) => {
+              if (isDisabled) return;
+              // Button already stops propagation; guard in case of nested clicks
+              if (e.target.closest?.("button")) return;
+              handleToggleAgreed();
+            }}
+            className={`text-[13px] leading-relaxed transition-colors select-none ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"} ${errors.agreed ? "text-red-500" : "text-gray-500 group-hover:text-gray-800"}`}
+          >
             Tôi xác nhận rằng thông tin cung cấp là chính xác.{" "}
             Tôi đồng ý tuân thủ{" "}
             <button 
@@ -41,13 +53,13 @@ const InstructorSubmitSection = ({
                 e.stopPropagation();
                 setSelectedPolicy("Quy định nền tảng");
               }} 
-              className="text-[#8f0d15] hover:underline font-medium"
+              className="text-[#8f0d15] hover:underline font-medium cursor-pointer"
             >
               Quy định nền tảng
             </button>
             .
           </span>
-        </label>
+        </div>
 
         {/* Submit Button */}
         <PillButton

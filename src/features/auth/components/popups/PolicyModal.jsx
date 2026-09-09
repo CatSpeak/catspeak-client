@@ -1,4 +1,7 @@
+/* eslint-disable react-hooks/static-components */
 import { FiX } from "react-icons/fi"
+import { useEffect } from "react"
+import { createPortal } from "react-dom"
 import { getPolicyComponent } from "./policies"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -6,10 +9,28 @@ const PolicyModal = ({ open, onClose, title }) => {
   const { t } = useLanguage()
   const PolicyComponent = getPolicyComponent(title)
 
+  useEffect(() => {
+    if (!open) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.()
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.body.style.overflow = prevOverflow
+      document.removeEventListener("keydown", onKeyDown)
+    }
+  }, [open, onClose])
+
   if (!open) return null
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+      onClick={onClose}
+      role="presentation"
+    >
       <div 
         className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-[24px] p-6 flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -41,6 +62,9 @@ const PolicyModal = ({ open, onClose, title }) => {
       </div>
     </div>
   )
+
+  if (typeof document === "undefined") return modalContent
+  return createPortal(modalContent, document.body)
 }
 
 export default PolicyModal
