@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-hot-toast";
 
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils";
+import { useMaskTextMutation } from "@/store/api/moderationApi";
 import { getCommunityPath } from "@/shared/utils/navigation";
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import {
@@ -43,6 +44,10 @@ export const useCallActions = ({
   setActiveSidePanel,
 }) => {
   const dispatch = useDispatch();
+
+  // [Moderation] Chat phòng meet đi thẳng client → LiveKit → client, không qua
+  // backend .NET, nên đây là chỗ DUY NHẤT chặn được từ vi phạm trong phòng.
+  const [maskText] = useMaskTextMutation();
 
   // ── Media toggles ──
 
@@ -90,11 +95,27 @@ export const useCallActions = ({
   const handleSendMessage = useCallback(
     async (text, replyTarget) => {
       try {
+        // [Moderation] Che ★ từ vi phạm TRƯỚC khi đẩy vào LiveKit, để mọi người
+        // trong phòng đều nhận bản sạch. Áp dụng cho cả tin thường lẫn tin trả lời.
+        //
+        // Fail-open có chủ ý: API kiểm duyệt lỗi, chậm, hay người dùng chưa đăng
+        // nhập thì gửi nguyên văn. Một cuộc gọi đang diễn ra không được phép đứng
+        // im chỉ vì dịch vụ phụ trợ hỏng.
+        let safeText = text;
+        try {
+          const res = await maskText({ text }).unwrap();
+          // Backend bọc phản hồi trong ApiResponse ({ data: {...} }); đọc cả hai
+          // dạng để không phụ thuộc vào lớp bọc đó.
+          safeText = res?.data?.masked ?? res?.masked ?? text;
+        } catch {
+          // Đã fail-open — không toast, không log ồn: người dùng không làm gì sai.
+        }
+
         if (replyTarget) {
           await chatSend(
             JSON.stringify({
               isReply: true,
-              text,
+              text: safeText,
               replyTo: {
                 message: replyTarget.message,
                 name: replyTarget.from?.name || "User",
@@ -102,13 +123,13 @@ export const useCallActions = ({
             }),
           );
         } else {
-          await chatSend(text);
+          await chatSend(safeText);
         }
       } catch (err) {
         console.error("[useCallActions] Failed to send chat message:", err);
       }
     },
-    [chatSend],
+    [chatSend, maskText],
   );
 
   // ── Leave session ──
