@@ -9,7 +9,7 @@ export default function HelpButton({ onClick, isActive }) {
   const tooltip = t.helpBox?.helpTooltip || t.bugReport?.buttonTooltip || "Help"
 
   return (
-    <div className="fixed bottom-[5.25rem] right-6 z-40">
+    <div className="fixed bottom-5 right-6 z-40">
       <button
         type="button"
         onClick={onClick}
