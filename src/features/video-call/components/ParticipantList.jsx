@@ -48,6 +48,8 @@ import {
   useUpdateStudentSharePolicyMutation,
   useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
+  useLowerAllHandsMutation,
+  useRestrictVoiceAllMutation,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -556,21 +558,65 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const handleLowerAllHands = async () => {
-    if (lkRoom?.localParticipant) {      safeSetLiveKitMetadata(lkRoom.localParticipant, { handRaised: false, handRaisedAt: 0 })
+  const [lowerAllHandsApi, { isLoading: isLoweringHands }] = useLowerAllHandsMutation()
+  const [restrictVoiceAllApi, { isLoading: isRestrictingVoiceAll }] = useRestrictVoiceAllMutation()
+  const [lowerHandsConfirmOpen, setLowerHandsConfirmOpen] = React.useState(false)
+  const [restrictVoiceAllConfirmOpen, setRestrictVoiceAllConfirmOpen] = React.useState(false)
+
+  const handleLowerAllHands = () => {
+    if (raisedHandParticipants.length === 0) {
+      toast(pl.noHandsRaised || "Không có ai đang giơ tay.")
+      return
+    }
+    setLowerHandsConfirmOpen(true)
+  }
+
+  const confirmLowerAllHands = async () => {
+    setLowerHandsConfirmOpen(false)
+    if (!roomId) return
+    try {
+      const res = await lowerAllHandsApi(roomId).unwrap()
+      // Update local LiveKit metadata for all raised participants (best-effort)
+      if (lkRoom?.localParticipant) {
+        safeSetLiveKitMetadata(lkRoom.localParticipant, { handRaised: false, handRaisedAt: 0 })
+        try {
+          const payload = new TextEncoder().encode(JSON.stringify({ action: "LOWER_ALL_HANDS" }))
+          lkRoom.localParticipant.publishData(payload, { topic: "moderation", reliable: true })
+        } catch (e) {
+          console.error("Failed to broadcast LOWER_ALL_HANDS:", e)
+        }
+      }
+      // Also lower for each participant via metadata clear (client will sync via data channel)
+      toast.success(res?.message || pl.successLowerAllHands || `Đã hạ ${res?.data?.loweredCount ?? raisedHandParticipants.length} tay`)
+    } catch (err) {
+      toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenLowerHands || "Bạn không có quyền hạ tay."))
+    }
+  }
+
+  const handleRestrictVoiceAll = () => {
+    setRestrictVoiceAllConfirmOpen(true)
+  }
+
+  const confirmRestrictVoiceAll = async () => {
+    setRestrictVoiceAllConfirmOpen(false)
+    if (!roomId) return
+    try {
+      const res = await restrictVoiceAllApi(roomId).unwrap()
       try {
-        const payload = new TextEncoder().encode(
-          JSON.stringify({ action: "LOWER_ALL_HANDS" })
-        )
-        lkRoom.localParticipant.publishData(payload, {
-          topic: "moderation",
-          reliable: true,
-        })
-      } catch (e) {
-        console.error("Failed to broadcast LOWER_ALL_HANDS:", e)
+        const payload = new TextEncoder().encode(JSON.stringify({ action: "RESTRICT_VOICE_ALL" }))
+        lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
+      } catch {}
+      toast.success(res?.message || `Đã hạn chế voice ${res?.data?.restrictedCount ?? ""} thành viên`)
+    } catch (err) {
+      const msg = err?.data?.message || err?.error || ""
+      if (err?.status === 404) {
+        toast.error("Không có phiên live đang diễn ra.")
+      } else if (err?.status === 409) {
+        toast.error(msg || "Đã ở trạng thái hạn chế.")
+      } else {
+        toast.error(resolveCoHostErrorMessage(err, t, "Bạn không có quyền hạn chế voice."))
       }
     }
-    toast.success(pl.successLowerAllHands || "Đã hạ tất cả các tay xuống")
   }
 
   return (
@@ -656,9 +702,19 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
             >
               <Hand size={15} className="text-amber-500 shrink-0" />
-              <span>{pl.lowerAllHands || "Hạ tất cả tay"}</span>
+              <span>{pl.lowerAllHands || "Hạ tất cả tay"}{raisedHandParticipants.length > 0 ? ` (${raisedHandParticipants.length})` : ""}</span>
             </button>
           </div>
+          {(canMuteAll || isHost) && (
+            <button
+              onClick={handleRestrictVoiceAll}
+              disabled={isRestrictingVoiceAll}
+              className="w-full inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-orange-700 bg-orange-50/80 hover:bg-orange-100 border border-orange-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+            >
+              <MicOff size={15} className="text-orange-500 shrink-0" />
+              <span>{pl.restrictVoiceAll || "Cấm voice tất cả"}</span>
+            </button>
+          )}
 
           {canToggleSelfUnmute && (
             <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
@@ -796,6 +852,28 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         message={pl.confirmEndLive || "Kết thúc buổi live cho tất cả mọi người? Mọi người sẽ về màn hình kết thúc, tham gia lại sẽ tạo phiên mới. Lớp/phòng và điểm danh không đổi."}
         confirmText={pl.endLive || "Kết thúc buổi live"}
         confirmVariant="destructive"
+      />
+
+      <ConfirmationModal
+        open={lowerHandsConfirmOpen}
+        onClose={() => setLowerHandsConfirmOpen(false)}
+        onConfirm={confirmLowerAllHands}
+        title={pl.confirmLowerHandsTitle || "Hạ tất cả tay"}
+        message={(pl.confirmLowerHands || "Bạn có chắc muốn hạ tay của {count} người đang giơ tay?").replace("{count}", String(raisedHandParticipants.length))}
+        confirmText={pl.lowerAllHands || "Hạ tất cả tay"}
+        confirmVariant="default"
+        isPending={isLoweringHands}
+      />
+
+      <ConfirmationModal
+        open={restrictVoiceAllConfirmOpen}
+        onClose={() => setRestrictVoiceAllConfirmOpen(false)}
+        onConfirm={confirmRestrictVoiceAll}
+        title={pl.confirmRestrictVoiceAllTitle || "Cấm voice tất cả"}
+        message={pl.confirmRestrictVoiceAll || "Bạn có chắc muốn hạn chế quyền bật mic của tất cả thành viên trong phòng? Họ sẽ không thể tự bật mic cho đến khi được gỡ."}
+        confirmText={pl.restrictVoiceAll || "Cấm voice tất cả"}
+        confirmVariant="destructive"
+        isPending={isRestrictingVoiceAll}
       />
     </div>
   );

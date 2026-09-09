@@ -66,7 +66,9 @@ const RoomCard = ({ room }) => {
     (room.currentParticipantCount || 0) >= room.maxParticipants
 
   const isExpired = isRoomExpired(room);
-  if (isExpired) {
+  // Ticket 02: keep expired visible but disabled in workspace (worker will delete); hide only in community listing
+  const isWorkspaceBookmark = window.location.pathname.includes("/workspace/rooms");
+  if (isExpired && !isWorkspaceBookmark) {
     return null;
   }
 
@@ -97,19 +99,39 @@ const RoomCard = ({ room }) => {
     navigate(`/${communityLang}/meet/${roomId}`)
   }
 
-  // Date and time formatting using locale-aware utilities
+  // Badge helpers (Ticket 02) — derive from server DTO when available
+  const activityBadge = room.activity || ((room.currentParticipantCount || 0) > 0 ? "InUse" : "Empty")
+  const roomTypeVal = room.roomType ?? room.RoomType
+  const isCustomType = roomTypeVal === 4 || roomTypeVal === "4" || roomTypeVal === "Custom" || room.isUnlimited || room.IsUnlimited
+  const roomTypeBadge = isCustomType ? "Custom" : "Temporary"
+  const isPrivateRoom = room.privacy === "Private" || room.isPrivate || room.Privacy === 1
+  const visibilityBadge = isPrivateRoom ? "Private" : "Public"
+  const languageBadge = room.languageType || room.LanguageType || room.language || "—"
+  let isUnlimitedRoom = isCustomType || room.duration === null
+  if (room.isUnlimited !== undefined && room.isUnlimited !== null) isUnlimitedRoom = room.isUnlimited
+  else if (room.IsUnlimited !== undefined && room.IsUnlimited !== null) isUnlimitedRoom = room.IsUnlimited
+
+  // Duration: prefer server remainingTime/remainingSeconds (Ticket 02), fallback to legacy calculate
   const createDate = room.createDate
     ? new Date(room.createDate)
     : room.createdAt
       ? new Date(room.createdAt)
       : new Date()
-
   const isInfiniteDuration = room.duration === null
-  const durationMinutes = room.duration || 20 // fallback to 20 if not null
+  const durationMinutes = room.duration || 20
   const endDate = calculateEndDate(createDate, durationMinutes)
-  const timeStr = isInfiniteDuration
-    ? t.rooms.noLimit
-    : `${formatTime(createDate)} - ${formatTime(endDate)}`
+  const serverRemaining = room.remainingTime ?? room.RemainingTime
+  const serverRemainingSec = room.remainingSeconds ?? room.RemainingSeconds
+  let timeStr
+  if (isUnlimitedRoom) timeStr = t.rooms.noLimit || "Unlimited"
+  else if (serverRemaining) timeStr = serverRemaining
+  else if (serverRemainingSec != null) {
+    const s = serverRemainingSec
+    const m = Math.floor(s / 60)
+    const sec = s % 60
+    timeStr = `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+  } else if (isInfiniteDuration) timeStr = t.rooms.noLimit
+  else timeStr = `${formatTime(createDate)} - ${formatTime(endDate)}`
 
   const [showFullModal, setShowFullModal] = useState(false)
   const [showCopied, setShowCopied] = useState(false)
@@ -294,9 +316,9 @@ const RoomCard = ({ room }) => {
         </div>
 
         {/* Content Section */}
-        <div className="flex flex-1 flex-col p-4 pb-4">
+        <div className={`flex flex-1 flex-col p-4 pb-4 ${isExpired ? "opacity-60" : ""}`}>
           {/* Title & Link */}
-          <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-start justify-between gap-3 mb-2">
             <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">
               {translatedName}
             </h3>
@@ -308,6 +330,30 @@ const RoomCard = ({ room }) => {
               <LinkIcon size={18} />
             </div>
           </div>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {!isWorkspaceBookmark && (
+              <>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
+                  {roomTypeBadge}
+                </span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivateRoom ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
+                  {visibilityBadge}
+                </span>
+              </>
+            )}
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+              {languageBadge}
+            </span>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
+              {activityBadge === "InUse" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+              {activityBadge === "InUse" ? "In Use" : "Empty"}
+            </span>
+          </div>
+          {isExpired && (
+            <div className="mb-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 text-center">
+              Đã hết hạn
+            </div>
+          )}
 
           {/* Footer Info */}
           <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">

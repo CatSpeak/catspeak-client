@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate, useParams, Outlet } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { AnimatePresence } from "framer-motion";
@@ -28,19 +28,6 @@ import RoomCard from "../components/RoomCard";
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
 
-// const getLanguageName = (langCode) => {
-//   switch (langCode) {
-//     case "zh":
-//       return "Chinese";
-//     case "vi":
-//       return "Vietnamese";
-//     case "en":
-//       return "English";
-//     default:
-//       return "English";
-//   }
-// };
-
 const WorkspaceRoomsContent = () => {
   const { t } = useLanguage();
   const { lang, id } = useParams();
@@ -59,13 +46,19 @@ const WorkspaceRoomsContent = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
 
-  // Search, Filter & Sort States
+  // Search state
   const [searchInputValue, setSearchInputValue] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
-  const [appliedLevels, setAppliedLevels] = useState([]);
-  const [appliedTopics, setAppliedTopics] = useState([]);
+
+  // Ticket 02 filters: server-side
+  const [appliedRoomType, setAppliedRoomType] = useState("All"); // All | Temporary | Custom
+  const [appliedVisibility, setAppliedVisibility] = useState("All"); // All | Public | Private
+  const [appliedActivity, setAppliedActivity] = useState("All"); // All | InUse | Empty
+  const [appliedLanguage, setAppliedLanguage] = useState("All");
   const [appliedSortField, setAppliedSortField] = useState("createdAt");
   const [appliedSortOrder, setAppliedSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 12;
 
   // Tab mapping for API: "created" | "bookmark"
   const apiTab =
@@ -87,17 +80,65 @@ const WorkspaceRoomsContent = () => {
     return "newest";
   }, [appliedSortField, appliedSortOrder]);
 
-  // API Hooks
+  // Visibility tracking for polling 15s only when tab visible
+  const [isTabVisible, setIsTabVisible] = useState(() => typeof document !== "undefined" ? document.visibilityState === "visible" : true);
+  useEffect(() => {
+    const onVis = () => setIsTabVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", onVis);
+    const onFocus = () => setIsTabVisible(true);
+    const onBlur = () => setIsTabVisible(false);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
+  // Reset page when filters/search/tab/sort change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [apiTab, appliedSearch, apiSort, appliedRoomType, appliedVisibility, appliedActivity, appliedLanguage]);
+
+  // Build query params: created vs bookmark differences
+  const queryParams = useMemo(() => {
+    const base = {
+      tab: apiTab,
+      search: appliedSearch.trim() || undefined,
+      sort: apiSort,
+      page: currentPage,
+      pageSize,
+    };
+    if (apiTab === "bookmark") {
+      // bookmark: only search/activity/language/sort
+      return {
+        ...base,
+        activity: appliedActivity !== "All" ? appliedActivity : undefined,
+        language: appliedLanguage !== "All" ? appliedLanguage : undefined,
+      };
+    }
+    // created: full filters
+    return {
+      ...base,
+      roomType: appliedRoomType !== "All" ? appliedRoomType : undefined,
+      visibility: appliedVisibility !== "All" ? appliedVisibility : undefined,
+      activity: appliedActivity !== "All" ? appliedActivity : undefined,
+      language: appliedLanguage !== "All" ? appliedLanguage : undefined,
+    };
+  }, [apiTab, appliedSearch, apiSort, currentPage, appliedRoomType, appliedVisibility, appliedActivity, appliedLanguage]);
+
+  // API Hooks with polling 15s only when visible
   const {
     data: myRoomsResponse,
     isLoading: isMyRoomsLoading,
+    isError: isMyRoomsError,
+    error: myRoomsError,
     refetch: refetchMyRooms,
-  } = useGetMyRoomsQuery({
-    tab: apiTab,
-    search: appliedSearch.trim() || undefined,
-    sort: apiSort,
-    page: 1,
-    pageSize: 50,
+  } = useGetMyRoomsQuery(queryParams, {
+    pollingInterval: isTabVisible ? 15000 : 0,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
   });
 
   const { data: customRoomsData } = useGetMyCustomRoomsQuery();
@@ -109,7 +150,7 @@ const WorkspaceRoomsContent = () => {
 
   const isLoading = isMyRoomsLoading && !myRoomsResponse;
 
-  // Extract raw room list from getMyRooms response
+  // Extract room list from getMyRooms response (paginated)
   const rawTargetRooms = useMemo(() => {
     if (Array.isArray(myRoomsResponse?.data?.items)) {
       return myRoomsResponse.data.items;
@@ -120,11 +161,15 @@ const WorkspaceRoomsContent = () => {
     if (Array.isArray(myRoomsResponse?.items)) {
       return myRoomsResponse.items;
     }
+    // Fallback for customRooms endpoint shape (should not happen for paged)
     if (apiTab === "created" && Array.isArray(customRoomsData?.customRooms)) {
       return customRoomsData.customRooms;
     }
     return [];
   }, [myRoomsResponse, apiTab, customRoomsData]);
+
+  const totalCount = myRoomsResponse?.data?.totalCount ?? myRoomsResponse?.totalCount ?? rawTargetRooms.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   // Quota for custom rooms
   const quota = {
@@ -217,10 +262,13 @@ const WorkspaceRoomsContent = () => {
     [toggleBookmark, refetchMyRooms],
   );
 
-  // Filter & Sort Application
-  const handleApplyFilter = useCallback((levels, topics) => {
-    setAppliedLevels(levels);
-    setAppliedTopics(topics);
+  // Filter & Sort Application — new server-side filters
+  const handleApplyFilter = useCallback((filters) => {
+    // filters: { roomType, visibility, activity, language }
+    if (filters.roomType !== undefined) setAppliedRoomType(filters.roomType);
+    if (filters.visibility !== undefined) setAppliedVisibility(filters.visibility);
+    if (filters.activity !== undefined) setAppliedActivity(filters.activity);
+    if (filters.language !== undefined) setAppliedLanguage(filters.language);
   }, []);
 
   const handleApplySort = useCallback((field, order) => {
@@ -228,45 +276,26 @@ const WorkspaceRoomsContent = () => {
     setAppliedSortOrder(order);
   }, []);
 
-  const activeFilterCount = appliedLevels.length + appliedTopics.length;
-
-  // Client-side filtering
-  const filteredAndSortedRooms = useMemo(() => {
-    let list = [...rawTargetRooms];
-
-    // 1. Level Filter
-    if (appliedLevels.length > 0) {
-      list = list.filter(
-        (room) =>
-          room.requiredLevel && appliedLevels.includes(room.requiredLevel),
-      );
+  const activeFilterCount = useMemo(() => {
+    let c = 0;
+    if (apiTab === "created") {
+      if (appliedRoomType !== "All") c++;
+      if (appliedVisibility !== "All") c++;
     }
+    if (appliedActivity !== "All") c++;
+    if (appliedLanguage !== "All") c++;
+    return c;
+  }, [apiTab, appliedRoomType, appliedVisibility, appliedActivity, appliedLanguage]);
 
-    // 2. Topic Filter
-    if (appliedTopics.length > 0) {
-      list = list.filter((room) => {
-        const topicsList = Array.isArray(room.topics)
-          ? room.topics
-          : room.topic
-            ? [room.topic]
-            : [];
-        return topicsList.some((tp) => appliedTopics.includes(tp));
-      });
+  // No client-side filtering — server already filtered. Keep raw list.
+  const displayedRooms = rawTargetRooms;
+
+  // Toast on error with retry
+  useEffect(() => {
+    if (isMyRoomsError) {
+      toast.error(myRoomsError?.data?.message || "Không thể tải danh sách phòng. Vui lòng thử lại.");
     }
-
-    return list;
-  }, [rawTargetRooms, appliedLevels, appliedTopics]);
-
-  // if (!isPlanLoading && !limits.allowCustomRooms) {
-  //   return (
-  //     <PlanRequiredState
-  //       pageTitle={ct.myRoomsTitle || "My Custom Rooms"}
-  //       subtext="Custom rooms allow you to create persistent, customizable rooms for your community. Upgrade to CatSpeak Pro to unlock custom rooms!"
-  //       featureName="Custom Rooms"
-  //       animationKey="custom-rooms-pro-required"
-  //     />
-  //   )
-  // }
+  }, [isMyRoomsError, myRoomsError]);
 
   return (
     <div className="flex flex-col gap-5 text-gray-800">
@@ -285,8 +314,11 @@ const WorkspaceRoomsContent = () => {
       <WorkspaceRoomFilterModal
         open={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
-        selectedLevels={appliedLevels}
-        selectedTopics={appliedTopics}
+        activeTab={apiTab}
+        selectedRoomType={appliedRoomType}
+        selectedVisibility={appliedVisibility}
+        selectedActivity={appliedActivity}
+        selectedLanguage={appliedLanguage}
         onApply={handleApplyFilter}
       />
 
@@ -337,7 +369,7 @@ const WorkspaceRoomsContent = () => {
                   onChange={handleSearchInputChange}
                   onSearch={handleSearch}
                   placeholder={
-                    t.rooms?.searchPlaceholder || "Tìm kiếm theo tên phòng..."
+                    t.rooms?.searchPlaceholder || "Tìm kiếm theo tên phòng, chủ đề..."
                   }
                   className="h-12 border-border"
                 />
@@ -353,9 +385,6 @@ const WorkspaceRoomsContent = () => {
                   title={t.rooms?.filters?.title || "Bộ lọc"}
                 >
                   <SlidersHorizontal size={18} strokeWidth={2} />
-                  {/* <span className="hidden sm:inline">
-                    {t.rooms?.filters?.title || "Bộ lọc"}
-                  </span> */}
                   {activeFilterCount > 0 && (
                     <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-[11px] font-bold text-white shadow-sm ring-2 ring-white">
                       {activeFilterCount}
@@ -371,9 +400,6 @@ const WorkspaceRoomsContent = () => {
                   title={t.rooms?.sortTitle || "Sắp xếp"}
                 >
                   <ArrowUpDown size={18} strokeWidth={2} />
-                  {/* <span className="hidden sm:inline">
-                    {t.rooms?.sortTitle || "Sắp xếp"}
-                  </span> */}
                   {appliedSortField && (
                     <span className="flex h-2 w-2 rounded-full bg-cath-red-700" />
                   )}
@@ -402,8 +428,17 @@ const WorkspaceRoomsContent = () => {
             {/* Room List Content */}
             {isLoading ? (
               <RoomsListSkeleton />
-            ) : filteredAndSortedRooms.length === 0 ? (
-              /* Empty state matching WorkspaceMyReelsTab.jsx style */
+            ) : isMyRoomsError ? (
+              <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 my-4">
+                <p className="text-sm text-gray-600 mb-4">Không thể tải danh sách phòng. Vui lòng thử lại.</p>
+                <button
+                  onClick={() => refetchMyRooms()}
+                  className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors text-sm shadow"
+                >
+                  Thử lại
+                </button>
+              </div>
+            ) : displayedRooms.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 my-4">
                 {activeTab === "created" ? (
                   <Crown size={48} className="text-gray-300 mb-3" />
@@ -413,9 +448,9 @@ const WorkspaceRoomsContent = () => {
 
                 <h3 className="font-bold text-gray-700 mb-1 text-center">
                   {appliedSearch || activeFilterCount > 0
-                    ? t.rooms?.noSearchResults || "Không tìm thấy phòng phù hợp"
+                    ? t.rooms?.noSearchResults || "Không tìm thấy kết quả phù hợp"
                     : activeTab === "created"
-                      ? ct.noRooms || "Bạn chưa tạo phòng tùy chỉnh nào"
+                      ? ct.noRooms || "Bạn chưa có phòng nào"
                       : t.rooms?.noBookmarkedRooms ||
                         "Chưa có phòng nào được lưu"}
                 </h3>
@@ -444,32 +479,78 @@ const WorkspaceRoomsContent = () => {
                   )}
               </div>
             ) : apiTab === "bookmark" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-                {filteredAndSortedRooms.map((room) => (
-                  <RoomCard
-                    key={room.id || room.roomId}
-                    room={room}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                  {displayedRooms.map((room) => (
+                    <RoomCard
+                      key={room.id || room.roomId}
+                      room={room}
+                    />
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <button
+                      disabled={currentPage <= 1}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                    >
+                      Trước
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      Trang {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                    >
+                      Tiếp
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-                {filteredAndSortedRooms.map((room) => (
-                  <CustomRoomCard
-                    key={room.id || room.roomId}
-                    room={room}
-                    onEdit={handleEditRoom}
-                    onDelete={handleDelete}
-                    onCopyLink={handleCopyLink}
-                    onJoin={handleJoinRoom}
-                    onToggleBookmark={handleToggleBookmark}
-                    isBookmarkTab={false}
-                    copiedId={copiedId}
-                    isDeleting={isDeleting}
-                    ct={ct}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                  {displayedRooms.map((room) => (
+                    <CustomRoomCard
+                      key={room.id || room.roomId}
+                      room={room}
+                      onEdit={handleEditRoom}
+                      onDelete={handleDelete}
+                      onCopyLink={handleCopyLink}
+                      onJoin={handleJoinRoom}
+                      onToggleBookmark={handleToggleBookmark}
+                      isBookmarkTab={false}
+                      copiedId={copiedId}
+                      isDeleting={isDeleting}
+                      ct={ct}
+                    />
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <button
+                      disabled={currentPage <= 1}
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                    >
+                      Trước
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      Trang {currentPage} / {totalPages} ({totalCount} phòng)
+                    </span>
+                    <button
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
+                    >
+                      Tiếp
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </FluentAnimation>
         </AnimatePresence>

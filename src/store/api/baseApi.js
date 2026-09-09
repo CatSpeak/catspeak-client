@@ -478,6 +478,7 @@ export const baseApi = createApi({
     "RoomLock",
     "StudentSharePolicy",
     "MemberRecordingPolicy",
+    "GamePolicy",
   ],
   endpoints: () => ({}),
 })

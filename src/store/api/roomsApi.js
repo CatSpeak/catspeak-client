@@ -465,6 +465,60 @@ export const roomsApi = baseApi.injectEndpoints({
       ],
     }),
 
+    // --- Ticket 01: Restrict Chat/Voice + Hands + Game Policy ---
+    restrictChat: builder.mutation({
+      query: ({ id, targetAccountId, reason }) => ({
+        url: `/rooms/${id}/moderation/restrict-chat`,
+        method: "POST",
+        body: { targetAccountId, reason },
+      }),
+    }),
+    unrestrictChat: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/moderation/unrestrict-chat`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+    }),
+    restrictVoice: builder.mutation({
+      query: ({ id, targetAccountId, reason }) => ({
+        url: `/rooms/${id}/moderation/restrict-voice`,
+        method: "POST",
+        body: { targetAccountId, reason },
+      }),
+    }),
+    unrestrictVoice: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/moderation/unrestrict-voice`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+    }),
+    restrictVoiceAll: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/restrict-voice-all`,
+        method: "POST",
+      }),
+    }),
+    lowerAllHands: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/lower-all-hands`,
+        method: "POST",
+      }),
+    }),
+    getGamePolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/game-policy`,
+      providesTags: (result, error, id) => [{ type: "GamePolicy", id }],
+    }),
+    updateGamePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/game-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "GamePolicy", id }],
+    }),
+
 
 
     // Invite user(s) to a room
@@ -960,6 +1014,14 @@ export const {
   useUpdateStudentSharePolicyMutation,
   useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
+  useRestrictChatMutation,
+  useUnrestrictChatMutation,
+  useRestrictVoiceMutation,
+  useUnrestrictVoiceMutation,
+  useRestrictVoiceAllMutation,
+  useLowerAllHandsMutation,
+  useGetGamePolicyQuery,
+  useUpdateGamePolicyMutation,
   // Co-host foundation
   useGetRoomCoHostQuery,
   useLazyGetRoomCoHostQuery,
