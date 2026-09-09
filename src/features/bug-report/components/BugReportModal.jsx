@@ -1,35 +1,40 @@
 import React from "react"
-import { Bug, ChevronDown, Image as ImageIcon, UploadCloud, Trash2, Loader2 } from "lucide-react"
+import { Bug, ChevronDown, Loader2, Check, LayoutDashboard, WifiOff, Video, CreditCard, GraduationCap, MoreHorizontal, X } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
-import PillButton from "@/shared/components/ui/buttons/PillButton"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import TextInput from "@/shared/components/ui/inputs/TextInput"
-import { useBugReportForm, MAX_BUG_IMAGES } from "../hooks/useBugReportForm"
+import { useBugReportForm } from "../hooks/useBugReportForm"
 
-export default function BugReportModal({
-  isOpen,
-  open,
-  onClose,
-  initialTitle = "",
-  initialDescription = "",
-}) {
+const categoryIconMap = {
+  ui_issue: LayoutDashboard,
+  api_error: WifiOff,
+  video_audio: Video,
+  payment: CreditCard,
+  course_exam: GraduationCap,
+  other: MoreHorizontal,
+}
+
+export default function BugReportModal({ isOpen, open, onClose, initialTitle = "", initialDescription = "" }) {
   const isModalOpen = Boolean(open ?? isOpen)
 
   const {
     lang,
-    title,
-    setTitle,
     description,
     setDescription,
     category,
     setCategory,
-    screenshots,
-    isUploadingImage,
-    fileInputRef,
+    includeScreenshot,
+    screenshotDataUrl,
+    screenshotUrl,
+    isCapturing,
+    previewOpen,
+    setPreviewOpen,
+    showConfirm,
     isLoading,
     categoryOptions,
-    handleFileSelect,
-    removeScreenshot,
+    handleToggleScreenshot,
+    handleRequestClose,
+    confirmDiscard,
+    cancelDiscard,
     handleSubmit,
   } = useBugReportForm({
     isOpen: isModalOpen,
@@ -38,180 +43,159 @@ export default function BugReportModal({
     onClose,
   })
 
+  // enrich options with icons for dropdown
+  const enrichedOptions = categoryOptions.map((opt) => {
+    const Icon = categoryIconMap[opt.value] || MoreHorizontal
+    return {
+      ...opt,
+      icon: <Icon size={16} className={category === opt.value ? "text-[#9E1C25]" : "text-[#9CA3AF]"} />,
+    }
+  })
+
+  const viewDisabled = !includeScreenshot || (!screenshotDataUrl && !screenshotUrl) || isCapturing
+
   return (
-    <Modal
-      open={isModalOpen}
-      onClose={onClose}
-      fullScreenOnMobile={true}
-      className="md:max-w-xl"
-      title={
-        <div className="flex items-start gap-3 min-w-0 flex-1 pr-2">
-          <div className="p-2.5 rounded-2xl bg-red-50 text-cath-red-700 border border-red-100 flex items-center justify-center shrink-0 mt-0.5">
-            <Bug className="w-5 h-5" />
+    <>
+      <Modal
+        open={isModalOpen}
+        onClose={handleRequestClose}
+        fullScreenOnMobile={true}
+        className="md:max-w-[620px] !rounded-[28px] overflow-hidden"
+        headerClassName="flex items-start justify-between px-7 pt-7 pb-2"
+        bodyClassName="px-7 pb-2 flex-1 overflow-y-auto"
+        footerClassName="px-7 pt-4 pb-7 flex justify-end"
+        title={
+          <div className="flex items-start gap-3.5 min-w-0 flex-1 pr-2">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FDF2F2] border border-red-50 text-[#9E1C25]">
+              <Bug size={20} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[20px] font-bold leading-[27.5px] text-[#111827]">
+                {lang.modalTitle || "Báo cáo sự cố / Góp ý lỗi"}
+              </h3>
+              <p className="mt-1 text-[13.5px] leading-[21.9px] text-[#6B7280]">
+                {lang.modalSubtitle || "Gặp lỗi hoặc giao diện không hoạt động đúng? Hãy gửi phản hồi để đội ngũ kỹ thuật khắc phục ngay."}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-[#2e2e2e] text-lg leading-snug">
-              {lang.modalTitle || "Báo cáo sự cố / Góp ý lỗi"}
-            </h3>
-            <p className="text-xs text-[#7A7574] font-normal mt-0.5 break-words">
-              {lang.modalSubtitle || "Gặp lỗi hoặc giao diện không hoạt động đúng? Hãy gửi phản hồi để đội ngũ kỹ thuật khắc phục ngay."}
-            </p>
+        }
+        footer={
+          <div className="flex items-center justify-end gap-3 w-full">
+            <button
+              type="button"
+              onClick={handleRequestClose}
+              disabled={isLoading || isCapturing}
+              className="rounded-full border border-[#E5E7EB] bg-white px-6 py-2 text-[14.5px] font-medium leading-[21.75px] text-[#374151] shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
+            >
+              {lang.cancel || "Hủy"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading || isCapturing}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#8B0816] px-6 py-2 text-[14.5px] font-medium leading-[21.75px] text-white shadow-sm transition hover:brightness-110 disabled:opacity-60"
+            >
+              {(isLoading || isCapturing) && <Loader2 size={16} className="animate-spin" />}
+              {isLoading ? (lang.submitting || "Đang gửi...") : isCapturing ? "Đang chụp..." : (lang.submit || "Gửi báo cáo")}
+            </button>
           </div>
-        </div>
-      }
-      footer={
-        <div className="flex items-center justify-end gap-3 w-full">
-          <PillButton
-            variant="secondary"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            {lang.cancel || "Hủy"}
-          </PillButton>
-          <PillButton
-            variant="primary"
-            onClick={handleSubmit}
-            loading={isLoading}
-            loadingText={lang.submitting || "Đang gửi..."}
-          >
-            {lang.submit || "Gửi báo cáo"}
-          </PillButton>
-        </div>
-      }
-    >
-      <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-        {/* Category */}
-        <div>
-          <label className="block text-xs font-semibold text-[#515151] mb-1.5">
-            {lang.categoryLabel || "Phân loại sự cố"}
-          </label>
-          <Dropdown
-            options={categoryOptions}
-            value={category}
-            onChange={(val) => setCategory(val)}
-            dropdownClassName="w-full min-w-0 max-w-full overflow-hidden"
-            className="w-full"
-            trigger={(isOpenDropdown, selected, toggle) => (
-              <button
-                type="button"
-                onClick={toggle}
-                className={`w-full h-11 px-3.5 text-sm rounded-xl bg-white border text-left flex items-center justify-between transition-colors focus:outline-none cursor-pointer ${
-                  isOpenDropdown
-                    ? "border-cath-red-700 ring-1 ring-cath-red-700/15"
-                    : "border-[#E5E5E5] hover:border-cath-red-700"
-                }`}
-              >
-                <span className="text-[#2e2e2e] font-medium">
-                  {selected?.label || "Chọn phân loại"}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-[#7A7574] shrink-0 transition-transform duration-200 ${
-                    isOpenDropdown ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-            )}
-          />
-        </div>
-
-        {/* Title */}
-        <TextInput
-          label={lang.titleLabel || "Tiêu đề ngắn gọn về sự cố"}
-          required
-          placeholder={lang.titlePlaceholder || "Ví dụ: Không tải được danh sách bài tập, lỗi khi vào phòng học..."}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          variant="rounded-xl"
-          className="!h-11 text-sm bg-white"
-          labelClassName="font-semibold text-[#515151]"
-        />
-
-        {/* Description */}
-        <TextInput
-          label={lang.descLabel || "Mô tả chi tiết sự cố"}
-          required
-          multiline
-          placeholder={lang.descPlaceholder || "Mô tả các bước bạn đã làm trước khi bị lỗi, thông báo lỗi xuất hiện (nếu có)..."}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          variant="rounded-xl"
-          className="text-sm bg-white min-h-[110px] max-h-[180px] overflow-y-auto !py-3 !px-3.5 leading-relaxed"
-          labelClassName="font-semibold text-[#515151]"
-        />
-
-        {/* Screenshots / Attachments */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-semibold text-[#515151] flex items-center gap-1.5">
-              <ImageIcon className="w-3.5 h-3.5 text-[#7A7574]" />
-              {lang.screenshotsLabel || "Hình ảnh minh họa sự cố"}
+        }
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-[15px] pt-3">
+          {/* Category */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13.5px] font-medium leading-5 text-[#374151]">
+              {lang.categoryLabel || "Phân loại sự cố"}
             </label>
-            <span className="text-[11px] text-[#7A7574]">
-              {screenshots.length}/{MAX_BUG_IMAGES}
-            </span>
-          </div>
-
-          {/* Hidden File Input */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept="image/*"
-            multiple
-            className="hidden"
-          />
-
-          {/* Thumbnails grid & Upload Trigger */}
-          <div className="grid grid-cols-3 gap-3">
-            {screenshots.map((imgSrc, idx) => (
-              <div
-                key={idx}
-                className="relative aspect-video rounded-xl border border-[#E5E5E5] overflow-hidden bg-gray-50 group"
-              >
-                <img
-                  src={imgSrc}
-                  alt={`Screenshot ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                />
+            <Dropdown
+              options={enrichedOptions}
+              value={category}
+              onChange={(val) => setCategory(val)}
+              dropdownClassName="w-full min-w-0 max-w-full overflow-hidden"
+              className="w-full"
+              trigger={(isOpenDropdown, selected, toggle) => (
                 <button
                   type="button"
-                  onClick={() => removeScreenshot(idx)}
-                  className="absolute top-1.5 right-1.5 p-1 rounded-lg bg-black/60 hover:bg-red-600 text-white transition-colors cursor-pointer"
-                  title={lang.removeImage || "Xóa ảnh"}
+                  onClick={toggle}
+                  className={`flex h-[46px] w-full items-center justify-between rounded-xl border bg-white px-4 text-left text-[14.5px] shadow-sm transition focus:outline-none ${
+                    isOpenDropdown ? "border-[#9E1C25] ring-1 ring-[#9E1C25]/10" : "border-[#E5E7EB] hover:border-[#9E1C25]/50"
+                  }`}
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <span className="flex items-center gap-2 text-[#111827]">
+                    {selected?.icon}
+                    <span>{selected?.label || "Chọn phân loại"}</span>
+                  </span>
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-[#4B5563] transition-transform ${isOpenDropdown ? "rotate-180" : ""}`} />
                 </button>
-              </div>
-            ))}
-
-            {screenshots.length < MAX_BUG_IMAGES && (
-              <button
-                type="button"
-                disabled={isUploadingImage}
-                onClick={() => fileInputRef.current?.click()}
-                className="aspect-video rounded-xl border-2 border-dashed border-[#E5E5E5] hover:border-cath-red-700 hover:bg-red-50/20 transition-all flex flex-col items-center justify-center gap-1.5 text-[#7A7574] hover:text-cath-red-700 cursor-pointer p-2 text-center disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isUploadingImage ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin text-cath-red-700" />
-                    <span className="text-[11px] font-medium leading-tight">Đang tải ảnh lên...</span>
-                  </>
-                ) : (
-                  <>
-                    <UploadCloud className="w-5 h-5" />
-                    <span className="text-[11px] font-medium leading-tight">
-                      {lang.screenshotsHint || "Tải ảnh lên hoặc bấm Ctrl+V để dán"}
-                    </span>
-                  </>
-                )}
-              </button>
-            )}
+              )}
+            />
           </div>
-          <p className="text-[11px] text-[#7A7574] mt-1.5">
-            {lang.screenshotsLimit || "Tối đa 3 ảnh (mỗi ảnh ≤ 5MB), hỗ trợ chụp màn hình dán Ctrl+V."}
-          </p>
-        </div>
-      </form>
-    </Modal>
+
+          {/* Description */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13.5px] font-medium leading-5 text-[#374151]">
+              {lang.descLabel || "Mô tả chi tiết sự cố"} <span className="text-[#EF4444]">*</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={lang.descPlaceholder || "Mô tả các bước bạn đã làm trước khi bị lỗi, thông báo lỗi xuất hiện (nếu có)..."}
+              rows={5}
+              className="min-h-[140px] w-full resize-none rounded-2xl border border-[#E5E7EB] bg-white px-4 py-3 text-[14px] leading-6 text-[#111827] placeholder:text-[#9CA3AF] shadow-sm focus:border-[#9E1C25] focus:outline-none focus:ring-1 focus:ring-[#9E1C25]/10"
+            />
+          </div>
+
+          {/* Include screenshot */}
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={includeScreenshot}
+              onClick={() => handleToggleScreenshot(!includeScreenshot)}
+              disabled={isCapturing}
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border shadow-sm transition ${
+                includeScreenshot ? "bg-[#1877F2] border-[#1877F2] text-white" : "bg-white border-[#E5E7EB] hover:border-[#1877F2]/50"
+              } disabled:opacity-60`}
+            >
+              {includeScreenshot && <Check size={14} strokeWidth={3} />}
+            </button>
+            <span className="text-[15px] leading-[22.5px] text-[#1F2937]"> {lang.includeScreenshot || "Include desktop screenshot"}</span>
+            <button
+              type="button"
+              onClick={() => !viewDisabled && setPreviewOpen(true)}
+              disabled={viewDisabled}
+              className={`pl-1 text-[15px] font-medium leading-[22.5px] transition ${viewDisabled ? "text-slate-300 cursor-not-allowed" : "text-[#1A73E8] hover:underline"}`}
+            >
+              {lang.viewScreenshot || "View screenshot"}
+            </button>
+            {isCapturing && <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#6B7280]"><Loader2 size={12} className="animate-spin" /> Đang chụp...</span>}
+          </div>
+        </form>
+      </Modal>
+
+      {/* Screenshot Preview */}
+      {previewOpen && (screenshotDataUrl || screenshotUrl) && (
+        <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} className="md:max-w-3xl" title={lang.screenshotPreviewTitle || "Xem trước ảnh chụp"}>
+          <div className="overflow-auto rounded-xl border border-slate-200 bg-slate-50 p-2">
+            <img src={screenshotDataUrl || screenshotUrl} alt="Screenshot preview" className="max-h-[70vh] w-full object-contain rounded-lg" />
+          </div>
+        </Modal>
+      )}
+
+      {/* Confirm discard */}
+      {showConfirm && (
+        <Modal open={showConfirm} onClose={cancelDiscard} className="md:max-w-md" title={lang.closeConfirmTitle || "Bỏ báo cáo?"}>
+          <p className="text-sm text-slate-600">{lang.closeConfirmDesc || "Bạn đã nhập nội dung, đóng bây giờ sẽ mất dữ liệu đã nhập."}</p>
+          <div className="mt-6 flex justify-end gap-3">
+            <button type="button" onClick={cancelDiscard} className="rounded-full border border-slate-200 px-5 py-2 text-sm text-slate-700 hover:bg-slate-50">
+              {lang.closeConfirmKeep || "Tiếp tục chỉnh sửa"}
+            </button>
+            <button type="button" onClick={confirmDiscard} className="rounded-full bg-red-600 px-5 py-2 text-sm text-white hover:bg-red-700">
+              {lang.closeConfirmDiscard || "Bỏ thay đổi"}
+            </button>
+          </div>
+        </Modal>
+      )}
+    </>
   )
 }

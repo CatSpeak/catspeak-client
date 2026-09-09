@@ -150,6 +150,19 @@ export default function ChatAssistantWidget() {
     }
   }, [token, guest])
 
+  // HelpChatBox integration (Q7=A): allow Help widget to open chat via event
+  useEffect(() => {
+    const onOpen = () => setOpen(true)
+    window.addEventListener("catspeak:open-chat-assistant", onOpen)
+    return () => window.removeEventListener("catspeak:open-chat-assistant", onOpen)
+  }, [])
+
+  useEffect(() => {
+    if (open) {
+      window.dispatchEvent(new CustomEvent("catspeak:chat-assistant-opened"))
+    }
+  }, [open])
+
   // Lần đầu mở mà chưa có lịch sử thì lấy gợi ý câu mẫu (FR-rag-chatbot-009).
   //
   // Có thử lại, và KHÔNG nuốt lỗi. ai-api mất khoảng 40 giây nạp mô hình nhúng 543MB
