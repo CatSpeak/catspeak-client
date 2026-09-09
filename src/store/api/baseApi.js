@@ -267,11 +267,20 @@ export function createReauthBaseQuery(queryResolver) {
     const url = typeof args === "string" ? args : args?.url
     const isAuthEndpoint =
       url === "/Auth/refresh-token" || url === "/Auth/login"
+    // Switch carries a refreshToken in its *body* that is captured at call
+    // time. A proactive refresh right before the switch would rotate that
+    // token (revoking the one in the body) and force the switch into the
+    // 5-min grace path. Skip proactive refresh for switch so the body and
+    // the Authorization header stay in sync — the 401 retry below (with
+    // server-side grace handling) still recovers if the JWT was already
+    // expired.
+    const isSwitchEndpoint = url === "/Auth/switch-account-type"
+    const shouldProactiveRefresh = !isAuthEndpoint && !isSwitchEndpoint
 
     const requestToken = api.getState().auth.token
 
     // ── Proactive refresh: if token is close to expiring, refresh first ──
-    if (!isAuthEndpoint && requestToken) {
+    if (shouldProactiveRefresh && requestToken) {
       const remaining = tokenSecondsRemaining(requestToken)
       if (remaining < PROACTIVE_REFRESH_BUFFER) {
         console.info(
