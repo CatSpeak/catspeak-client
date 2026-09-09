@@ -6,15 +6,33 @@ import BugReportModal from "@/features/bug-report/components/BugReportModal"
 export default function HelpWidget() {
   const [isBoxOpen, setIsBoxOpen] = useState(false)
   const [isReportOpen, setIsReportOpen] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(false)
 
-  // Close box on Escape
+  // Track chat open state for Q4 extra: Help toggle closes chat
+  useEffect(() => {
+    const onChatOpen = () => setIsChatOpen(true)
+    const onChatClose = () => setIsChatOpen(false)
+    window.addEventListener("catspeak:chat-assistant-opened", onChatOpen)
+    window.addEventListener("catspeak:chat-assistant-closed", onChatClose)
+    return () => {
+      window.removeEventListener("catspeak:chat-assistant-opened", onChatOpen)
+      window.removeEventListener("catspeak:chat-assistant-closed", onChatClose)
+    }
+  }, [])
+
+  // Close box on Escape (also close chat)
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "Escape" && isBoxOpen) setIsBoxOpen(false)
+      if (e.key === "Escape") {
+        if (isChatOpen) {
+          window.dispatchEvent(new CustomEvent("catspeak:close-chat-assistant"))
+        }
+        if (isBoxOpen) setIsBoxOpen(false)
+      }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [isBoxOpen])
+  }, [isBoxOpen, isChatOpen])
 
   // Single active popup: when report opens, close box
   const handleReportProblem = useCallback(() => {
@@ -33,16 +51,25 @@ export default function HelpWidget() {
     window.dispatchEvent(new CustomEvent("catspeak:open-chat-assistant"))
   }, [])
 
-  // Also listen for external request to close help box when chat opens
+  // Single popup rule: when chat opens, close help box
   useEffect(() => {
     const onChatOpen = () => setIsBoxOpen(false)
     window.addEventListener("catspeak:chat-assistant-opened", onChatOpen)
     return () => window.removeEventListener("catspeak:chat-assistant-opened", onChatOpen)
   }, [])
 
+  const handleHelpToggle = useCallback(() => {
+    // Q4 extra: if chat is open, Help click closes chat instead of toggling box
+    if (isChatOpen) {
+      window.dispatchEvent(new CustomEvent("catspeak:close-chat-assistant"))
+      return
+    }
+    setIsBoxOpen((v) => !v)
+  }, [isChatOpen])
+
   return (
     <>
-      <HelpButton onClick={() => setIsBoxOpen((v) => !v)} isActive={isBoxOpen} />
+      <HelpButton onClick={handleHelpToggle} isActive={isBoxOpen || isChatOpen} />
       <HelpChatBox
         open={isBoxOpen}
         onClose={() => setIsBoxOpen(false)}

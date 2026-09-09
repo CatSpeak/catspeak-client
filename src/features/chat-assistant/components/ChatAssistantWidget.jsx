@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useSelector } from "react-redux"
-import { MessageCircle, X, Send } from "lucide-react"
+import { X, Send } from "lucide-react"
 
 import {
   askQuestionStream,
@@ -150,16 +150,23 @@ export default function ChatAssistantWidget() {
     }
   }, [token, guest])
 
-  // HelpChatBox integration (Q7=A): allow Help widget to open chat via event
+  // HelpChatBox integration (Q7=A, Round2 Q1-4 A): Help is single entry, Chat has no floating button
   useEffect(() => {
     const onOpen = () => setOpen(true)
+    const onClose = () => setOpen(false)
     window.addEventListener("catspeak:open-chat-assistant", onOpen)
-    return () => window.removeEventListener("catspeak:open-chat-assistant", onOpen)
+    window.addEventListener("catspeak:close-chat-assistant", onClose)
+    return () => {
+      window.removeEventListener("catspeak:open-chat-assistant", onOpen)
+      window.removeEventListener("catspeak:close-chat-assistant", onClose)
+    }
   }, [])
 
   useEffect(() => {
     if (open) {
       window.dispatchEvent(new CustomEvent("catspeak:chat-assistant-opened"))
+    } else {
+      window.dispatchEvent(new CustomEvent("catspeak:chat-assistant-closed"))
     }
   }, [open])
 
@@ -305,42 +312,16 @@ export default function ChatAssistantWidget() {
     [draft, busy, apiHistory, append, patchLast, applyFinal, caller, L],
   )
 
-  // Trong phòng học thì không hiện (phản hồi 03/09). Màn hình phòng học đã kín
-  // thanh điều khiển gọi, và câu hỏi về sản phẩm không phải việc người ta làm giữa
-  // buổi nói chuyện. Nút báo lỗi vẫn ở lại — trong phòng mới hay hỏng nhất.
-  if (pathname.includes("/meet") || pathname.includes("/room")) return null
-
   const remaining = quota?.remaining
   const showWarning =
     typeof remaining === "number" && remaining > 0 && remaining <= WARN_REMAINING
 
+  // Single entry via Help ? (Round2 Q1=A): no floating Chat button, popup anchored above Help ? at bottom-[88px] right-6
+  // Keep mounted on all routes (including /meet) so Help → Ask can open chat even inside room.
+  if (!open) return null
+
   return (
-    <>
-      {/* Nút KHÔNG biến mất khi khung mở (phản hồi 03/09): nó là mỏ neo thị giác của
-          cuộc hội thoại, mất đi thì lúc đóng lại người dùng phải đi tìm. Khung chat
-          né lên trên chứ nút không né đi.
-
-          Hai nút nổi xếp dọc, nút báo lỗi ở trên, nút này ở dưới. Cùng trục dọc:
-          nút này rộng 52px cách phải 20px → tâm cách phải 46px; nút báo lỗi rộng
-          44px cách phải 24px → cũng 46px. Sửa một trong hai con số thì phải sửa cả
-          bên BugReportButton, nếu không hai nút lệch trục. */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? L.closeLabel : L.openLabel}
-        aria-expanded={open}
-        style={{ background: BRAND.red }}
-        className="fixed bottom-5 right-5 z-[60] flex h-[52px] w-[52px] items-center justify-center rounded-full text-white shadow-lg transition hover:scale-105 hover:brightness-110"
-      >
-        <MessageCircle size={22} />
-      </button>
-
-      {open && (
-        /* bottom-[8.75rem] = chừa đủ chỗ cho CẢ HAI nút bên dưới (nút chat cao
-           52px từ mốc 20px, nút báo lỗi cao 44px từ mốc 84px → đỉnh ở 128px), cộng
-           12px thở. Khung rộng 380px nên nó phủ ngang qua chỗ hai nút đứng; chỉ
-           còn cách né theo chiều dọc. */
-        <div className="fixed bottom-[8.75rem] right-5 z-[60] flex h-[560px] max-h-[calc(100vh-10.5rem)] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+    <div className="fixed bottom-[88px] right-6 z-[60] flex h-[560px] max-h-[calc(100vh-10.5rem)] w-[385px] max-w-[calc(100vw-2.5rem)] flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
           <header className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 dark:border-neutral-700">
             <div>
               <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
@@ -470,7 +451,5 @@ export default function ChatAssistantWidget() {
             </div>
           </form>
         </div>
-      )}
-    </>
   )
 }
