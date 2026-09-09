@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { toast } from "react-hot-toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { parseApiError } from "@/shared/utils/apiError"
@@ -9,7 +9,7 @@ import {
 } from "@/store/api/bugReportApi"
 
 export const MAX_BUG_IMAGES = 3
-export const MAX_BUG_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+export const MAX_BUG_FILE_SIZE = 5 * 1024 * 1024
 
 export function useBugReportForm({
   isOpen,
@@ -20,12 +20,21 @@ export function useBugReportForm({
   const { t } = useLanguage()
   const lang = t.bugReport || {}
 
-  const [title, setTitle] = useState(initialTitle)
-  const [description, setDescription] = useState(initialDescription)
+  // Merge legacy title into description for new modal without title field
+  const mergedInitialDescription = initialTitle
+    ? initialDescription
+      ? `${initialTitle}\n\n${initialDescription}`
+      : initialTitle
+    : initialDescription
+
+  const [description, setDescription] = useState(mergedInitialDescription)
   const [category, setCategory] = useState("ui_issue")
-  const [screenshots, setScreenshots] = useState([])
-  const [isUploadingImage, setIsUploadingImage] = useState(false)
-  const fileInputRef = useRef(null)
+  const [includeScreenshot, setIncludeScreenshot] = useState(false)
+  const [screenshotDataUrl, setScreenshotDataUrl] = useState(null)
+  const [screenshotUrl, setScreenshotUrl] = useState(null)
+  const [isCapturing, setIsCapturing] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const [submitBugReport, { isLoading }] = useSubmitBugReportMutation()
   const [uploadScreenshot] = useUploadBugScreenshotMutation()
@@ -47,114 +56,133 @@ export function useBugReportForm({
     return message || fallback
   }
 
-  // Reset or initialize state when modal opens/closes
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
-      setTitle(initialTitle)
-      setDescription(initialDescription)
+      setDescription(mergedInitialDescription)
+      setCategory("ui_issue")
+      setIncludeScreenshot(false)
+      setScreenshotDataUrl(null)
+      setScreenshotUrl(null)
+      setPreviewOpen(false)
+      setShowConfirm(false)
     } else {
-      setScreenshots([])
+      // cleanup on close
+      setScreenshotDataUrl(null)
+      setScreenshotUrl(null)
+      setPreviewOpen(false)
+      setShowConfirm(false)
     }
-  }, [isOpen, initialTitle, initialDescription])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, mergedInitialDescription])
 
-  // Upload image file to server storage and store public URL
-  const processImageFile = async (file) => {
-    if (!file || !file.type.startsWith("image/")) return
-
-    if (file.size > MAX_BUG_FILE_SIZE) {
-      toast.error(lang.errorCodes?.BUG_REPORT_IMAGE_TOO_LARGE || lang.imageTooLarge || "Dung lượng ảnh vượt quá giới hạn 5MB")
-      return
-    }
-
-    if (screenshots.length >= MAX_BUG_IMAGES) {
-      toast.error(lang.maxImagesReached || "Bạn chỉ có thể đính kèm tối đa 3 hình ảnh")
-      return
-    }
-
+  const captureScreenshot = useCallback(async () => {
+    setIsCapturing(true)
     try {
-      setIsUploadingImage(true)
-      const formData = new FormData()
-      formData.append("file", file)
+      const html2canvas = (await import("html2canvas")).default
+      const canvas = await html2canvas(document.body, {
+        scale: 0.5,
+        useCORS: true,
+        logging: false,
+        windowWidth: document.documentElement.clientWidth,
+        windowHeight: document.documentElement.clientHeight,
+      })
+      const dataUrl = canvas.toDataURL("image/png")
+      setScreenshotDataUrl(dataUrl)
 
-      const res = await uploadScreenshot(formData).unwrap()
-      // Old contract wrapped the FileUploadResult object ({url, objectName,
-      // bucket}) under data.url; the fixed contract returns a plain string.
-      const rawUrl = res?.data?.url ?? res?.url
-      const uploadedUrl =
-        typeof rawUrl === "string"
-          ? rawUrl
-          : typeof rawUrl?.url === "string"
-          ? rawUrl.url
-          : null
-      if (uploadedUrl) {
-        setScreenshots((prev) => [...prev, uploadedUrl])
-        toast.success(lang.uploadSuccess || "Đã tải ảnh lên thành công!")
-      } else {
-        toast.error(lang.uploadError || "Không nhận được đường dẫn ảnh từ máy chủ.")
+      // Try to upload to get persistent URL
+      try {
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.8))
+        if (blob) {
+          const file = new File([blob], `screenshot-${Date.now()}.png`, { type: "image/png" })
+          const formData = new FormData()
+          formData.append("file", file)
+          const res = await uploadScreenshot(formData).unwrap()
+          const rawUrl = res?.data?.url ?? res?.url
+          const uploadedUrl =
+            typeof rawUrl === "string"
+              ? rawUrl
+              : typeof rawUrl?.url === "string"
+                ? rawUrl.url
+                : null
+          if (uploadedUrl) {
+            setScreenshotUrl(uploadedUrl)
+          } else {
+            // fallback to dataUrl as URL
+            setScreenshotUrl(dataUrl)
+          }
+        } else {
+          setScreenshotUrl(dataUrl)
+        }
+      } catch (uploadErr) {
+        // fallback to dataUrl if upload fails
+        console.warn("Screenshot upload failed, using dataUrl fallback:", uploadErr)
+        setScreenshotUrl(dataUrl)
       }
     } catch (err) {
-      console.error("Failed to upload screenshot:", err)
-      const errMsg = resolveErrorMessage(err, lang.uploadError || "Không thể tải ảnh lên kho lưu trữ. Vui lòng thử lại.")
-      toast.error(errMsg)
+      console.error("Failed to capture screenshot:", err)
+      toast.error(lang.captureFailed || "Không thể chụp màn hình. Vui lòng thử lại.")
+      setIncludeScreenshot(false)
+      setScreenshotDataUrl(null)
+      setScreenshotUrl(null)
     } finally {
-      setIsUploadingImage(false)
+      setIsCapturing(false)
     }
-  }
+  }, [uploadScreenshot, lang.captureFailed])
 
-  // Handle file picker selection
-  const handleFileSelect = async (e) => {
-    const files = Array.from(e.target.files || [])
-    for (const file of files) {
-      await processImageFile(file)
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
-    }
-  }
-
-  // Handle clipboard paste (Ctrl+V) anywhere inside the modal
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handlePaste = (e) => {
-      const items = e.clipboardData?.items
-      if (!items) return
-
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          const file = item.getAsFile()
-          if (file) {
-            processImageFile(file)
-          }
-        }
+  const handleToggleScreenshot = async (checked) => {
+    setIncludeScreenshot(checked)
+    if (checked) {
+      if (!screenshotDataUrl) {
+        await captureScreenshot()
       }
     }
-
-    window.addEventListener("paste", handlePaste)
-    return () => window.removeEventListener("paste", handlePaste)
-  }, [isOpen, screenshots.length])
-
-  const removeScreenshot = (indexToRemove) => {
-    setScreenshots((prev) => prev.filter((_, idx) => idx !== indexToRemove))
   }
+
+  const hasUnsaved = description.trim().length > 0 || includeScreenshot
+
+  const handleRequestClose = useCallback(() => {
+    if (hasUnsaved) {
+      setShowConfirm(true)
+    } else {
+      onClose?.()
+    }
+  }, [hasUnsaved, onClose])
+
+  const confirmDiscard = useCallback(() => {
+    setShowConfirm(false)
+    onClose?.()
+  }, [onClose])
+
+  const cancelDiscard = useCallback(() => {
+    setShowConfirm(false)
+  }, [])
 
   const handleSubmit = async (e) => {
     e?.preventDefault()
-    if (!title.trim()) {
-      toast.error(lang.errorCodes?.BUG_REPORT_TITLE_REQUIRED || lang.titleRequired || "Vui lòng nhập tiêu đề sự cố")
-      return
-    }
     if (!description.trim()) {
       toast.error(lang.errorCodes?.BUG_REPORT_DESCRIPTION_REQUIRED || lang.descRequired || "Vui lòng nhập mô tả sự cố")
       return
     }
 
     try {
-      // Extract technical telemetry logs silently in background
       const diagnosticsData = extractRelevantLogs()
 
+      // Screenshots: if includeScreenshot and we have URL/dataUrl, send it
+      let screenshotsPayload = null
+      if (includeScreenshot) {
+        const urlToSend = screenshotUrl || screenshotDataUrl
+        if (urlToSend) {
+          screenshotsPayload = JSON.stringify([urlToSend])
+        } else if (isCapturing) {
+          toast.error(lang.captureFailed || "Đang chụp màn hình, vui lòng đợi...")
+          return
+        }
+      }
+
       const payload = {
-        title: title.trim(),
+        // Title optional per BE Q6=A, BE will auto-generate; send null to let BE generate from description
+        title: null,
         description: description.trim(),
         category,
         severity: diagnosticsData?.suggestedSeverity || "low",
@@ -163,12 +191,11 @@ export function useBugReportForm({
         deviceInfo: diagnosticsData?.deviceInfo || null,
         networkLogs: diagnosticsData?.networkLogs || null,
         consoleLogs: diagnosticsData?.consoleLogs || null,
-        screenshots: screenshots.length > 0 ? JSON.stringify(screenshots) : null,
+        screenshots: screenshotsPayload,
       }
 
       await submitBugReport(payload).unwrap()
       toast.success(lang.submitSuccess || "Báo cáo sự cố đã được gửi thành công!")
-      setScreenshots([])
       onClose?.()
     } catch (err) {
       console.error("Bug report submission failed:", err)
@@ -182,26 +209,31 @@ export function useBugReportForm({
     { value: "api_error", label: lang.categories?.api_error || "Lỗi kết nối / Tải dữ liệu" },
     { value: "video_audio", label: lang.categories?.video_audio || "Video Call / Âm thanh" },
     { value: "payment", label: lang.categories?.payment || "Thanh toán / Giao dịch" },
-    { value: "course_exam", label: lang.categories?.course_exam || "Khóa học / Bài tập / Đề thi" },
+    { value: "course_exam", label: lang.categories?.course_exam || "Khóa học / Bài học / Đề thi" },
     { value: "other", label: lang.categories?.other || "Khác" },
   ]
 
   return {
     lang,
-    title,
-    setTitle,
     description,
     setDescription,
     category,
     setCategory,
-    screenshots,
-    isUploadingImage,
-    fileInputRef,
+    includeScreenshot,
+    screenshotDataUrl,
+    screenshotUrl,
+    isCapturing,
+    previewOpen,
+    setPreviewOpen,
+    showConfirm,
     isLoading,
     categoryOptions,
-    processImageFile,
-    handleFileSelect,
-    removeScreenshot,
+    handleToggleScreenshot,
+    captureScreenshot,
+    handleRequestClose,
+    confirmDiscard,
+    cancelDiscard,
     handleSubmit,
+    hasUnsaved,
   }
 }

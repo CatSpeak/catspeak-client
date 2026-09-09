@@ -66,6 +66,7 @@ const SystemSettingsPage = lazy(
 
 const ReelsPage = lazy(() => import("@/features/reels/ReelsPage"));
 const ChatPage = lazy(() => import("@/features/chat/pages/ChatPage"));
+const HelpCenterPage = lazy(() => import("@/features/help/pages/HelpCenterPage"));
 const ReelDetailPage = lazy(
   () => import("@/features/reels/pages/ReelDetailPage"),
 );
@@ -273,6 +274,14 @@ const routesConfig = [
             element: (
               <LazyRoute>
                 <WebsitePage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "help",
+            element: (
+              <LazyRoute>
+                <HelpCenterPage />
               </LazyRoute>
             ),
           },
