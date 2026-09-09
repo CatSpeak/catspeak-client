@@ -999,7 +999,7 @@ export const coursesApi = baseApi.injectEndpoints({
         }
 
         return baseQuery({
-          url: "/v1/Payments/checkout",
+          url: "/payment/checkout",
           method: "POST",
           body: {
             paymentType: "ClassEnrollment",
@@ -1197,7 +1197,7 @@ export const coursesApi = baseApi.injectEndpoints({
           lateAttendancePolicy: data.lateAttendancePolicy ?? (data.includeLateAttendance === false ? "IgnoreLate" : "CountLate"),
         }
         return {
-          url: "/v1/Payments/checkout",
+          url: "/payment/checkout",
           method: "POST",
           body: {
             paymentType: "ClassOpeningFee",

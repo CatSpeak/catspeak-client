@@ -3,12 +3,12 @@ import { baseApi } from "@/store/api/baseApi"
 export const refundsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     checkRefundEligibility: builder.query({
-      query: (paymentId) => `v1/refunds/eligibility/${paymentId}`,
+      query: (paymentId) => `/payment/refunds/eligibility/${paymentId}`,
     }),
 
     requestRefund: builder.mutation({
       query: (data) => ({
-        url: "v1/refunds/request",
+        url: "/payment/refunds/request",
         method: "POST",
         body: data,
       }),
@@ -16,7 +16,7 @@ export const refundsApi = baseApi.injectEndpoints({
     }),
 
     getRefundHistory: builder.query({
-      query: () => "v1/refunds/history",
+      query: () => "/payment/refunds/history",
       providesTags: ["RefundHistory"],
     }),
   }),

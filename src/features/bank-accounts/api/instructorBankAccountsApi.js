@@ -2,10 +2,10 @@ import { baseApi } from "@/store/api/baseApi"
 
 export const instructorBankAccountsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // 1. GET /api/v1/bank-accounts/banks - Get list of supported banks
+    // 1. GET /payment/bank-accounts/banks - Get list of supported banks
     getBanks: builder.query({
       query: (searchQuery) => ({
-        url: "v1/bank-accounts/banks",
+        url: "/payment/bank-accounts/banks",
         params: searchQuery
           ? { search: searchQuery, query: searchQuery }
           : undefined,
@@ -14,18 +14,18 @@ export const instructorBankAccountsApi = baseApi.injectEndpoints({
       providesTags: [{ type: "InstructorBankAccounts", id: "BANKS" }],
     }),
 
-    // 2. POST /api/v1/bank-accounts/verify - Verify bank account details
+    // 2. POST /payment/bank-accounts/verify - Verify bank account details
     verifyBankAccount: builder.mutation({
       query: (data) => ({
-        url: "v1/bank-accounts/verify",
+        url: "/payment/bank-accounts/verify",
         method: "POST",
         body: data,
       }),
     }),
 
-    // 3. GET /api/v1/bank-accounts - Get list of instructor bank accounts
+    // 3. GET /payment/bank-accounts - Get list of instructor bank accounts
     getInstructorBankAccounts: builder.query({
-      query: () => "v1/bank-accounts",
+      query: () => "/payment/bank-accounts",
       transformResponse: (response) => response?.data ?? response ?? [],
       providesTags: (result) => {
         const list = Array.isArray(result) ? result : []
@@ -36,28 +36,28 @@ export const instructorBankAccountsApi = baseApi.injectEndpoints({
       },
     }),
 
-    // 4. POST /api/v1/bank-accounts - Add a new bank account
+    // 4. POST /payment/bank-accounts - Add a new bank account
     addInstructorBankAccount: builder.mutation({
       query: (data) => ({
-        url: "v1/bank-accounts",
+        url: "/payment/bank-accounts",
         method: "POST",
         body: data,
       }),
       invalidatesTags: [{ type: "InstructorBankAccounts", id: "LIST" }],
     }),
 
-    // 5. GET /api/v1/bank-accounts/{id} - Get bank account by ID
+    // 5. GET /payment/bank-accounts/{id} - Get bank account by ID
     getInstructorBankAccountById: builder.query({
-      query: (id) => `v1/bank-accounts/${id}`,
+      query: (id) => `/payment/bank-accounts/${id}`,
       providesTags: (result, error, id) => [
         { type: "InstructorBankAccounts", id },
       ],
     }),
 
-    // 6. DELETE /api/v1/bank-accounts/{id} - Delete bank account by ID
+    // 6. DELETE /payment/bank-accounts/{id} - Delete bank account by ID
     deleteInstructorBankAccount: builder.mutation({
       query: (id) => ({
-        url: `v1/bank-accounts/${id}`,
+        url: `/payment/bank-accounts/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: (result, error, id) => [
@@ -66,10 +66,10 @@ export const instructorBankAccountsApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // 7. PUT /api/v1/bank-accounts/{id}/default - Set bank account as default
+    // 7. PUT /payment/bank-accounts/{id}/default - Set bank account as default
     setDefaultInstructorBankAccount: builder.mutation({
       query: (id) => ({
-        url: `v1/bank-accounts/${id}/default`,
+        url: `/payment/bank-accounts/${id}/default`,
         method: "PUT",
       }),
       invalidatesTags: [{ type: "InstructorBankAccounts", id: "LIST" }],

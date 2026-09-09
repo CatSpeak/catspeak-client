@@ -88,6 +88,36 @@ const instructorBaseQuery = fetchBaseQuery({
   },
 })
 
+// Payment-service base query. The payment service is routed through the gateway at
+// the canonical `/payment/*` prefix (no `/api`), so this base has an empty prefix
+// and money modules use leading-slash `/payment/...` URLs. Configurable per env.
+const paymentBaseQuery = fetchBaseQuery({
+  baseUrl: import.meta.env.VITE_PAYMENT_API_BASE_URL || "",
+  prepareHeaders: (headers, { getState, extraOptions }) => {
+    if (!extraOptions?.skipAuthHeader) {
+      const token = getState().auth.token
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`)
+      }
+    }
+
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i)
+    if (match) {
+      headers.set("X-Community-Lang", match[1])
+    }
+
+    const userTz = getState()?.auth?.user?.timeZone || getBrowserTimeZone()
+    headers.set("X-Time-Zone", userTz)
+
+    headers.set(
+      "X-Timezone-Offset",
+      (-new Date().getTimezoneOffset()).toString(),
+    )
+
+    return headers
+  },
+})
+
 const aiBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_AI_API_BASE_URL || "/api/ai",
   prepareHeaders: (headers, { getState }) => {
@@ -404,11 +434,16 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("/vouchers") ||
         lowerUrl.startsWith("vouchers"))
 
-    const activeQuery = isAiRoute
-      ? aiBaseQuery
-      : isCoursesRoute
-        ? instructorBaseQuery
-        : baseQuery
+    const isPaymentRoute =
+      lowerUrl && (lowerUrl.startsWith("/payment") || lowerUrl.startsWith("payment"))
+
+    const activeQuery = isPaymentRoute
+      ? paymentBaseQuery
+      : isAiRoute
+        ? aiBaseQuery
+        : isCoursesRoute
+          ? instructorBaseQuery
+          : baseQuery
 
     return activeQuery(args, api, extraOptions)
   },

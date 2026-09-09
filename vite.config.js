@@ -53,10 +53,10 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: true,
         },
-        "/api/v1/Payments": {
-          target: "https://staging-api.catspeak.com.vn",
+        "/payment": {
+          target: "http://localhost:5200",
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
         "/api/social": {
           target: "https://social-staging-api.catspeak.com.vn",
