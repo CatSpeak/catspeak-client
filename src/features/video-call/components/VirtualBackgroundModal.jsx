@@ -38,6 +38,37 @@ const VirtualBackgroundModal = ({
 }) => {
   const { t } = useLanguage();
   const videoRef = useRef(null);
+  const [needsRotate, setNeedsRotate] = useState(false);
+
+  // [DEBUG-iphone] Same fallback as VideoPreview for raw landscape-in-portrait
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el || !open) return
+    const check = () => {
+      const vw = el.videoWidth || 0
+      const vh = el.videoHeight || 0
+      const isMobilePortrait = window.matchMedia("(orientation: portrait)").matches && window.innerWidth < 768
+      const shouldRotate = isMobilePortrait && vw > 0 && vh > 0 && vw > vh
+      // eslint-disable-next-line no-console
+      console.log("[DEBUG-iphone] VirtualBackgroundModal check", { vw, vh, isMobilePortrait, shouldRotate, cameraOn })
+      setNeedsRotate(shouldRotate)
+    }
+    el.addEventListener("loadedmetadata", check)
+    el.addEventListener("resize", check)
+    const onWinResize = () => check()
+    window.addEventListener("resize", onWinResize)
+    window.addEventListener("orientationchange", onWinResize)
+    const t = setTimeout(check, 500)
+    const iv = setInterval(check, 1000)
+    return () => {
+      el.removeEventListener("loadedmetadata", check)
+      el.removeEventListener("resize", check)
+      window.removeEventListener("resize", onWinResize)
+      window.removeEventListener("orientationchange", onWinResize)
+      clearTimeout(t)
+      clearInterval(iv)
+    }
+  }, [open, localStream, lkVideoTrack, cameraOn])
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -163,7 +194,7 @@ const VirtualBackgroundModal = ({
             playsInline
             muted
             className={`w-full h-full object-cover ${cameraOn ? "opacity-100" : "opacity-0"}`}
-            style={{ transform: "scaleX(-1)" }}
+            style={{ transform: needsRotate ? "rotate(90deg) scaleX(-1)" : "scaleX(-1)" }}
           />
           {!cameraOn && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-4 text-center">

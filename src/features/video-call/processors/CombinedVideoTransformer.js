@@ -784,6 +784,8 @@ export class CombinedVideoTransformer extends VideoTransformer {
     // ignore rotation metadata and display raw pixels.
     if (!hasBeauty && !hasBg) {
       if (rotation === 0) {
+        // eslint-disable-next-line no-console
+        console.log("[DEBUG-iphone] transform passthrough", { rotation, hasBeauty, hasBg, fw: frame.displayWidth, fh: frame.displayHeight })
         controller.enqueue(frame)
         return
       }
@@ -793,6 +795,8 @@ export class CombinedVideoTransformer extends VideoTransformer {
     const ts = frame.timestamp
     const fw = Math.max(1, Math.round(frame.displayWidth))
     const fh = Math.max(1, Math.round(frame.displayHeight))
+    // eslint-disable-next-line no-console
+    console.log("[DEBUG-iphone] transform bake", { rotation, hasBeauty, hasBg, fw, fh, ts })
 
     if (!isFinite(fw) || !isFinite(fh)) {
       controller.enqueue(frame)

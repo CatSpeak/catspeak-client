@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
@@ -19,6 +19,39 @@ const VideoPreview = ({
   const videoRef = useRef(null)
 
   const { displayAvatar } = useMeetingAvatar(user)
+  const [needsRotate, setNeedsRotate] = useState(false)
+
+  // [DEBUG-iphone] Detect landscape video in portrait container (iPhone raw fallback with rotation=0)
+  // If mobile portrait (<768) and video is landscape (w>h), we need to rotate 90deg to appear upright.
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+    const check = () => {
+      const vw = el.videoWidth || 0
+      const vh = el.videoHeight || 0
+      const isMobilePortrait = window.matchMedia("(orientation: portrait)").matches && window.innerWidth < 768
+      const shouldRotate = isMobilePortrait && vw > 0 && vh > 0 && vw > vh
+      // eslint-disable-next-line no-console
+      console.log("[DEBUG-iphone] VideoPreview check", { vw, vh, isMobilePortrait, shouldRotate, cameraOn })
+      setNeedsRotate(shouldRotate)
+    }
+    el.addEventListener("loadedmetadata", check)
+    el.addEventListener("resize", check)
+    const onWinResize = () => check()
+    window.addEventListener("resize", onWinResize)
+    window.addEventListener("orientationchange", onWinResize)
+    // Initial check after a short delay (videoWidth may be 0 immediately after attach)
+    const t = setTimeout(check, 500)
+    const iv = setInterval(check, 1000)
+    return () => {
+      el.removeEventListener("loadedmetadata", check)
+      el.removeEventListener("resize", check)
+      window.removeEventListener("resize", onWinResize)
+      window.removeEventListener("orientationchange", onWinResize)
+      clearTimeout(t)
+      clearInterval(iv)
+    }
+  }, [localStream, lkVideoTrack, cameraOn])
 
   useEffect(() => {
     const videoElement = videoRef.current
@@ -102,7 +135,8 @@ const VideoPreview = ({
             autoPlay
             playsInline
             muted // Always mute local video preview purely for UI
-            className={`h-full w-full rounded-xl object-cover transform -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
+            className={`h-full w-full rounded-xl object-cover transform ${needsRotate ? "rotate-90 scale-x-[-1]" : "-scale-x-100"} ${!cameraOn ? "hidden" : ""}`}
+            style={needsRotate ? { transform: "rotate(90deg) scaleX(-1)" } : undefined}
           />
         )}
 
