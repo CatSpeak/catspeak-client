@@ -321,13 +321,17 @@ export const useCombinedProcessor = () => {
       })
     } else {
       // ── Camera disabled ───────────────────────────────────────────────
-      // When the user turns off their camera, destroy the dead processor pipeline so the next enable gets a fresh one
-      busyRef.current = false
-      cleanupProcessor()
-      attachedTrackRef.current = null
-      attachedTrackIdRef.current = null
-      attachingRef.current = false
-      setProcessorStatus("idle")
+      // When the user turns off their camera, destroy the dead processor pipeline so the next enable gets a fresh one.
+      // Must await cleanup to avoid GL shader race on next toggle (second enable failed with Shader compile failed: null).
+      busyRef.current = true
+      cleanupProcessor().finally(() => {
+        if (cancelled) return
+        attachedTrackRef.current = null
+        attachedTrackIdRef.current = null
+        attachingRef.current = false
+        busyRef.current = false
+        setProcessorStatus("idle")
+      })
     }
 
     return () => {
