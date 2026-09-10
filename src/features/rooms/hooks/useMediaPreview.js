@@ -34,11 +34,17 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
   const [micOn, setMicOn] = useState(false)
   const [cameraOn, setCameraOn] = useState(false)
   const [localStream, setLocalStream] = useState(null)
+  // Tracked as state (not just a ref) so consumers (VideoPreview) re-attach the
+  // correct LiveKit track whenever it is rebuilt on device/processor changes.
+  const [lkVideoTrack, setLkVideoTrack] = useState(null)
 
   const streamRef = useRef(null)
   const lkVideoTrackRef = useRef(null)
   const rawVideoTrackRef = useRef(null)
   const processorRef = useRef(null)
+  // Guards against overlapping async toggle/device operations that could leave
+  // stale (stopped) tracks attached — a common cause of black previews.
+  const busyRef = useRef(false)
 
   // Track last applied beauty options for polling diff
   const lastAppliedBeautyRef = useRef(null)
@@ -90,27 +96,64 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     return () => clearInterval(interval)
   }, [processorStatus])
 
+  const safeStopMediaTrack = (t) => {
+    try {
+      t?.stop?.()
+    } catch {
+      /* already stopped — ignore */
+    }
+  }
+
+  // Tears down the LiveKit video pipeline (processor → LocalVideoTrack → raw
+  // track). Every step is guarded so a half-torn-down pipeline can never throw
+  // an unhandled rejection (one suspected cause of the full-page reload).
+  const teardownVideoPipeline = useCallback(async () => {
+    const processor = processorRef.current
+    processorRef.current = null
+    if (processor?.destroy) {
+      try {
+        await processor.destroy()
+      } catch {
+        /* ignore cleanup errors */
+      }
+    }
+    const lkTrack = lkVideoTrackRef.current
+    lkVideoTrackRef.current = null
+    if (lkTrack) {
+      try {
+        lkTrack.stop()
+      } catch {
+        /* ignore */
+      }
+      try {
+        lkTrack.detach?.()
+      } catch {
+        /* ignore */
+      }
+    }
+    const raw = rawVideoTrackRef.current
+    rawVideoTrackRef.current = null
+    safeStopMediaTrack(raw)
+    setLkVideoTrack(null)
+    setProcessorStatus((s) => (s === "unsupported" ? s : "idle"))
+  }, [])
+
   const stopAllPreviewTracks = useCallback(() => {
+    busyRef.current = false
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop())
+      try {
+        streamRef.current.getTracks().forEach(safeStopMediaTrack)
+      } catch {
+        /* ignore */
+      }
       streamRef.current = null
     }
-    if (processorRef.current?.destroy) {
-      processorRef.current.destroy()
-      processorRef.current = null
-    }
-    if (lkVideoTrackRef.current) {
-      lkVideoTrackRef.current.stop()
-      lkVideoTrackRef.current = null
-    }
-    if (rawVideoTrackRef.current) {
-      rawVideoTrackRef.current.stop()
-      rawVideoTrackRef.current = null
-    }
+    // Fire-and-forget is safe here because teardownVideoPipeline never rejects.
+    teardownVideoPipeline()
     setLocalStream(null)
     setMicOn(false)
     setCameraOn(false)
-  }, [])
+  }, [teardownVideoPipeline])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -142,27 +185,39 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       if (video && ProcessorWrapper.isSupported) {
         const rawVideoTrack = stream.getVideoTracks()[0]
         if (rawVideoTrack) {
-          if (lkVideoTrackRef.current) lkVideoTrackRef.current.stop()
-          if (rawVideoTrackRef.current) rawVideoTrackRef.current.stop()
+          // Fully tear down any previous pipeline first so a stale (stopped)
+          // processor/track can never linger and render black.
+          await teardownVideoPipeline()
 
           rawVideoTrackRef.current = rawVideoTrack
 
-          const lkTrack = new LocalVideoTrack(rawVideoTrack)
-          lkVideoTrackRef.current = lkTrack
-
-          if (processorRef.current?.destroy) {
-            try {
-              await processorRef.current.destroy()
-            } catch {}
-            processorRef.current = null
+          let lkTrack = null
+          try {
+            lkTrack = new LocalVideoTrack(rawVideoTrack)
+          } catch (err) {
+            console.error("[useMediaPreview] LocalVideoTrack creation failed:", err)
+            safeStopMediaTrack(rawVideoTrack)
+            rawVideoTrackRef.current = null
+            return stream
           }
+          lkVideoTrackRef.current = lkTrack
+          setLkVideoTrack(lkTrack)
 
           const transformer = new CombinedVideoTransformer()
           const newProcessor = new ProcessorWrapper(transformer, "preview-combined-processor")
           processorRef.current = newProcessor
           setProcessorStatus("initializing")
 
-          await lkTrack.setProcessor(newProcessor)
+          try {
+            await lkTrack.setProcessor(newProcessor)
+          } catch (err) {
+            // Processor attach failed (e.g. browser lost hardware mid-toggle).
+            // Fall back to the raw camera track instead of a black preview.
+            console.error("[useMediaPreview] setProcessor failed, using raw track:", err)
+            processorRef.current = null
+            setProcessorStatus("error")
+            return stream
+          }
           setProcessorStatus("attached")
 
           // Apply stored beauty options from localStorage (pre-join settings)
@@ -183,8 +238,16 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
               .catch(() => {})
           }
 
-          stream.removeTrack(rawVideoTrack)
-          stream.addTrack(lkTrack.mediaStreamTrack)
+          try {
+            stream.removeTrack(rawVideoTrack)
+          } catch {
+            /* ignore */
+          }
+          try {
+            if (lkTrack.mediaStreamTrack) stream.addTrack(lkTrack.mediaStreamTrack)
+          } catch {
+            /* ignore */
+          }
         }
       }
 
@@ -210,134 +273,200 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
 
   // Toggle mic
   const toggleMic = async () => {
-    console.log("[useMediaPreview] Toggling mic...")
-    let audioTracks = streamRef.current?.getAudioTracks() || []
-
-    if (audioTracks.length === 0) {
-      const stream = await getMediaStream({
-        audio: true,
-        video: false,
-        device: "mic",
-        customAudioId: audioDeviceId,
-      })
-      audioTracks = stream?.getAudioTracks() || []
-
-      if (stream) {
-        if (!streamRef.current) streamRef.current = new MediaStream()
-        audioTracks.forEach((t) => streamRef.current.addTrack(t))
-        setLocalStream(new MediaStream(streamRef.current.getTracks()))
-      }
-    }
-
-    if (audioTracks.length === 0) {
-      console.warn("[useMediaPreview] Toggle mic failed: no audio tracks acquired")
-      return false
-    }
-
-    setMicOn((prev) => {
-      const next = !prev
-      console.log("[useMediaPreview] Mic toggled to:", next)
+    if (busyRef.current) return false
+    busyRef.current = true
+    try {
+      console.log("[useMediaPreview] Toggling mic...")
+      // NOTE: side effects live outside the state updater (updaters must stay
+      // pure — React StrictMode double-invokes them, which previously caused
+      // double-stop / torn-down streams).
+      const next = !micOn
 
       if (next) {
-        audioTracks.forEach((t) => (t.enabled = true))
+        let audioTracks = []
+        try {
+          audioTracks = streamRef.current?.getAudioTracks()?.filter((t) => t.readyState === "live") || []
+        } catch {
+          audioTracks = []
+        }
+
+        if (audioTracks.length === 0) {
+          const stream = await getMediaStream({
+            audio: true,
+            video: false,
+            device: "mic",
+            customAudioId: audioDeviceId,
+          })
+          audioTracks = stream?.getAudioTracks() || []
+
+          if (stream && audioTracks.length > 0) {
+            if (!streamRef.current) streamRef.current = new MediaStream()
+            audioTracks.forEach((t) => {
+              try {
+                if (!streamRef.current.getTrackById(t.id)) streamRef.current.addTrack(t)
+              } catch {
+                /* ignore */
+              }
+            })
+            setLocalStream(new MediaStream(streamRef.current.getTracks()))
+          }
+        } else {
+          audioTracks.forEach((t) => {
+            try {
+              t.enabled = true
+            } catch {
+              /* ignore */
+            }
+          })
+        }
+
+        if (audioTracks.length === 0) {
+          console.warn("[useMediaPreview] Toggle mic failed: no audio tracks acquired")
+          return false
+        }
+        console.log("[useMediaPreview] Mic toggled to:", true)
+        setMicOn(true)
       } else {
         // Stop mic tracks completely if turning off
-        audioTracks.forEach((t) => t.stop())
-        // Remove stopped tracks from streamRef
-        streamRef.current = new MediaStream(
-          streamRef.current.getVideoTracks(), // keep only video
-        )
-        setLocalStream(streamRef.current)
+        let audioTracks = []
+        try {
+          audioTracks = streamRef.current?.getAudioTracks() || []
+        } catch {
+          audioTracks = []
+        }
+        audioTracks.forEach(safeStopMediaTrack)
+        // Remove stopped tracks from streamRef (keep only video)
+        try {
+          const videoOnly = streamRef.current?.getVideoTracks() || []
+          streamRef.current = new MediaStream(videoOnly)
+          setLocalStream(new MediaStream(streamRef.current.getTracks()))
+        } catch {
+          /* ignore */
+        }
+        console.log("[useMediaPreview] Mic toggled to:", false)
+        setMicOn(false)
       }
 
-      return next
-    })
-
-    return true
+      return true
+    } finally {
+      busyRef.current = false
+    }
   }
 
   // Toggle camera
   const toggleCamera = async () => {
-    console.log("[useMediaPreview] Toggling camera...")
-    let videoTracks = streamRef.current?.getVideoTracks() || []
-
-    if (videoTracks.length === 0) {
-      const stream = await getMediaStream({
-        audio: false,
-        video: true,
-        device: "camera",
-        customVideoId: videoDeviceId,
-      })
-      videoTracks = stream?.getVideoTracks() || []
-
-      if (stream) {
-        if (!streamRef.current) streamRef.current = new MediaStream()
-        videoTracks.forEach((t) => streamRef.current.addTrack(t))
-        setLocalStream(new MediaStream(streamRef.current.getTracks()))
-      }
-    }
-
-    if (videoTracks.length === 0) {
-      console.warn("[useMediaPreview] Toggle camera failed: no video tracks acquired")
-      return false
-    }
-
-    setCameraOn((prev) => {
-      const next = !prev
-      console.log("[useMediaPreview] Camera toggled to:", next)
+    if (busyRef.current) return false
+    busyRef.current = true
+    try {
+      console.log("[useMediaPreview] Toggling camera...")
+      const next = !cameraOn
 
       if (next) {
-        videoTracks.forEach((t) => (t.enabled = true))
+        // Only reuse a live track; a stopped ("ended") track renders black.
+        let videoTracks = []
+        try {
+          videoTracks = streamRef.current?.getVideoTracks()?.filter((t) => t.readyState === "live") || []
+        } catch {
+          videoTracks = []
+        }
+
+        if (videoTracks.length === 0) {
+          const stream = await getMediaStream({
+            audio: false,
+            video: true,
+            device: "camera",
+            customVideoId: videoDeviceId,
+          })
+          videoTracks = stream?.getVideoTracks()?.filter((t) => t.readyState !== "ended") || []
+
+          if (stream && videoTracks.length > 0) {
+            if (!streamRef.current) streamRef.current = new MediaStream()
+            videoTracks.forEach((t) => {
+              try {
+                if (!streamRef.current.getTrackById(t.id)) streamRef.current.addTrack(t)
+              } catch {
+                /* ignore */
+              }
+            })
+            setLocalStream(new MediaStream(streamRef.current.getTracks()))
+          }
+        } else {
+          videoTracks.forEach((t) => {
+            try {
+              t.enabled = true
+            } catch {
+              /* ignore */
+            }
+          })
+        }
+
+        if (videoTracks.length === 0) {
+          console.warn("[useMediaPreview] Toggle camera failed: no video tracks acquired")
+          return false
+        }
+        console.log("[useMediaPreview] Camera toggled to:", true)
+        setCameraOn(true)
       } else {
-        videoTracks.forEach((t) => t.stop())
-
-        if (lkVideoTrackRef.current) {
-          lkVideoTrackRef.current.stop()
-          lkVideoTrackRef.current = null
+        try {
+          streamRef.current?.getVideoTracks()?.forEach(safeStopMediaTrack)
+        } catch {
+          /* ignore */
         }
 
-        if (rawVideoTrackRef.current) {
-          rawVideoTrackRef.current.stop()
-          rawVideoTrackRef.current = null
-        }
+        await teardownVideoPipeline()
 
-        if (processorRef.current?.destroy) {
-          processorRef.current.destroy().catch(() => {})
-          processorRef.current = null
+        // Remove stopped tracks from streamRef (keep only mic)
+        try {
+          const audioOnly = streamRef.current?.getAudioTracks()?.filter((t) => t.readyState === "live") || []
+          streamRef.current = new MediaStream(audioOnly)
+          setLocalStream(new MediaStream(streamRef.current.getTracks()))
+        } catch {
+          /* ignore */
         }
-        setProcessorStatus("idle")
-
-        // Remove stopped tracks from streamRef
-        streamRef.current = new MediaStream(
-          streamRef.current.getAudioTracks(), // keep only mic
-        )
-        setLocalStream(streamRef.current)
+        console.log("[useMediaPreview] Camera toggled to:", false)
+        setCameraOn(false)
       }
 
-      return next
-    })
-
-    return true
+      return true
+    } finally {
+      busyRef.current = false
+    }
   }
 
   // Handle device changes on the fly
   useEffect(() => {
     if (micOn && audioDeviceId) {
       ;(async () => {
-        const stream = await getMediaStream({
-          audio: true,
-          video: false,
-          device: "mic",
-          customAudioId: audioDeviceId,
-        })
-        if (stream) {
-          const oldAudio = streamRef.current?.getAudioTracks() || []
-          oldAudio.forEach((t) => {
-            t.stop()
-            streamRef.current.removeTrack(t)
+        if (busyRef.current) return
+        busyRef.current = true
+        try {
+          const stream = await getMediaStream({
+            audio: true,
+            video: false,
+            device: "mic",
+            customAudioId: audioDeviceId,
           })
-          stream.getAudioTracks().forEach((t) => streamRef.current.addTrack(t))
-          setLocalStream(new MediaStream(streamRef.current.getTracks()))
+          if (stream && streamRef.current) {
+            const oldAudio = streamRef.current?.getAudioTracks() || []
+            oldAudio.forEach((t) => {
+              safeStopMediaTrack(t)
+              try {
+                streamRef.current.removeTrack(t)
+              } catch {
+                /* ignore */
+              }
+            })
+            stream.getAudioTracks().forEach((t) => {
+              try {
+                if (!streamRef.current.getTrackById(t.id)) streamRef.current.addTrack(t)
+              } catch {
+                /* ignore */
+              }
+            })
+            setLocalStream(new MediaStream(streamRef.current.getTracks()))
+          }
+        } finally {
+          busyRef.current = false
         }
       })()
     }
@@ -347,20 +476,41 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
   useEffect(() => {
     if (cameraOn && videoDeviceId) {
       ;(async () => {
-        const stream = await getMediaStream({
-          audio: false,
-          video: true,
-          device: "camera",
-          customVideoId: videoDeviceId,
-        })
-        if (stream) {
-          const oldVideo = streamRef.current?.getVideoTracks() || []
-          oldVideo.forEach((t) => {
-            t.stop()
-            streamRef.current.removeTrack(t)
+        if (busyRef.current) return
+        busyRef.current = true
+        try {
+          const stream = await getMediaStream({
+            audio: false,
+            video: true,
+            device: "camera",
+            customVideoId: videoDeviceId,
           })
-          stream.getVideoTracks().forEach((t) => streamRef.current.addTrack(t))
-          setLocalStream(new MediaStream(streamRef.current.getTracks()))
+          if (stream && streamRef.current) {
+            const newVideo = stream.getVideoTracks() || []
+            // getMediaStream already tore down the old pipeline; only swap the
+            // container tracks here so no stopped track stays attached.
+            const oldVideo = streamRef.current?.getVideoTracks() || []
+            oldVideo.forEach((t) => {
+              if (!newVideo.some((n) => n.id === t.id)) {
+                safeStopMediaTrack(t)
+                try {
+                  streamRef.current.removeTrack(t)
+                } catch {
+                  /* ignore */
+                }
+              }
+            })
+            newVideo.forEach((t) => {
+              try {
+                if (!streamRef.current.getTrackById(t.id)) streamRef.current.addTrack(t)
+              } catch {
+                /* ignore */
+              }
+            })
+            setLocalStream(new MediaStream(streamRef.current.getTracks()))
+          }
+        } finally {
+          busyRef.current = false
         }
       })()
     }
@@ -386,7 +536,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     micOn,
     cameraOn,
     localStream,
-    lkVideoTrack: lkVideoTrackRef.current,
+    lkVideoTrack,
     toggleMic,
     toggleCamera,
     switchBeauty,

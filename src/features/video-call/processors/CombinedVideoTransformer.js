@@ -45,6 +45,10 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _bgTransformer = null
   _bgTransformerReady = false
   _bgInitializing = false
+  // True when background segmentation is unsupported on this browser (e.g. iOS
+  // Safari lacks WebGL2 / createImageBitmap). Once detected we stop trying so we
+  // don't re-attempt init on every frame.
+  _bgUnsupported = false
 
   // ── FaceMeshProcessor (lazy) ──────────────────────────────────────────────
   _faceMesh = null
@@ -109,7 +113,16 @@ export class CombinedVideoTransformer extends VideoTransformer {
    * Called only when a background effect is actually needed.
    */
   async _ensureBgTransformer() {
-    if (this._bgTransformerReady || this._bgInitializing || !this._initOpts) return
+    if (this._bgTransformerReady || this._bgInitializing || this._bgUnsupported || !this._initOpts) return
+    // Background segmentation requires WebGL2 + OffscreenCanvas + VideoFrame +
+    // createImageBitmap (see BackgroundTransformer.isSupported). ProcessorWrapper
+    // support (Canvas 2D) is NOT enough. If the browser can't run MediaPipe
+    // segmentation we mark it unsupported so background degrades gracefully
+    // instead of silently failing every frame.
+    if (!BackgroundTransformer.isSupported) {
+      this._bgUnsupported = true
+      return
+    }
     this._bgInitializing = true
     try {
       this._bgTransformer = new BackgroundTransformer({ ...this._bgOptions })
@@ -118,6 +131,7 @@ export class CombinedVideoTransformer extends VideoTransformer {
     } catch (err) {
       console.error("[CombinedVideoTransformer] BackgroundTransformer init failed:", err)
       this._bgTransformer = null
+      this._bgUnsupported = true
     } finally {
       this._bgInitializing = false
     }
@@ -208,6 +222,7 @@ export class CombinedVideoTransformer extends VideoTransformer {
   }
 
   _hasBg() {
+    if (this._bgUnsupported) return false
     return (
       !this._bgOptions.backgroundDisabled &&
       (typeof this._bgOptions.imagePath === "string" ||
@@ -676,6 +691,51 @@ export class CombinedVideoTransformer extends VideoTransformer {
 
   // ── Main transform ─────────────────────────────────────────────────────────
 
+  /**
+   * Draws a VideoFrame onto a canvas applying the frame's reported rotation
+   * (0/90/180/270 degrees) so portrait webcams / phones are shown upright.
+   * Only rotation is baked in here — horizontal mirror stays a display-side
+   * concern (CSS scaleX(-1)) so the processed track shared with other
+   * participants remains non-mirrored. Returns the working [width, height].
+   */
+  _drawFrameOriented(ctx, frame, cw, ch) {
+    const rotation = Number(frame.rotation) || 0
+    const fw = Math.max(1, Math.round(frame.displayWidth))
+    const fh = Math.max(1, Math.round(frame.displayHeight))
+
+    ctx.save()
+    ctx.filter = "none"
+    ctx.clearRect(0, 0, cw, ch)
+
+    if (rotation === 90 || rotation === 270) {
+      // Swap output dims — caller sizes the canvas to [h, w] for these rotations.
+      ctx.translate(cw / 2, ch / 2)
+      ctx.rotate((rotation * Math.PI) / 180)
+      ctx.drawImage(frame, -fh / 2, -fw / 2, fh, fw)
+    } else if (rotation === 180) {
+      ctx.translate(cw, ch)
+      ctx.rotate(Math.PI)
+      ctx.drawImage(frame, 0, 0, fw, fh)
+    } else {
+      ctx.drawImage(frame, 0, 0, fw, fh)
+    }
+
+    ctx.restore()
+  }
+
+  /** Builds a fresh VideoFrame from the beauty canvas with a safe fallback. */
+  _frameFromCanvas(canvas, ts) {
+    try {
+      return new VideoFrame(canvas, { timestamp: ts })
+    } catch {
+      const fb = document.createElement("canvas")
+      fb.width = canvas.width
+      fb.height = canvas.height
+      fb.getContext("2d").drawImage(canvas, 0, 0)
+      return new VideoFrame(fb, { timestamp: ts })
+    }
+  }
+
   async transform(frame, controller) {
     const hasBeauty = this._hasBeauty()
     const hasBg = this._hasBg()
@@ -686,29 +746,35 @@ export class CombinedVideoTransformer extends VideoTransformer {
       return
     }
 
+    const ts = frame.timestamp
+    const rotation = Number(frame.rotation) || 0
+    const fw = Math.max(1, Math.round(frame.displayWidth))
+    const fh = Math.max(1, Math.round(frame.displayHeight))
+
+    if (!isFinite(fw) || !isFinite(fh)) {
+      controller.enqueue(frame)
+      return
+    }
+
+    // For 90/270 rotations the working canvas dims are swapped so the frame
+    // is stored upright regardless of source orientation.
+    const rotated = rotation === 90 || rotation === 270
+    const w = rotated ? fh : fw
+    const h = rotated ? fw : fh
+
+    // Ensure canvases are the correct size
+    if (this._beautyCanvas.width !== w) this._beautyCanvas.width = w
+    if (this._beautyCanvas.height !== h) this._beautyCanvas.height = h
+    if (this._scratchCanvas.width !== w) this._scratchCanvas.width = w
+    if (this._scratchCanvas.height !== h) this._scratchCanvas.height = h
+    if (this._maskCanvas.width !== w) this._maskCanvas.width = w
+    if (this._maskCanvas.height !== h) this._maskCanvas.height = h
+
+    // ── Step 1: Draw raw frame (oriented) onto beauty canvas ───────────────
+    this._drawFrameOriented(this._beautyCtx, frame, w, h)
+    frame.close()
+
     if (hasBeauty) {
-      const ts = frame.timestamp
-      const w = Math.max(1, Math.round(frame.displayWidth))
-      const h = Math.max(1, Math.round(frame.displayHeight))
-
-      if (!isFinite(w) || !isFinite(h)) {
-        controller.enqueue(frame)
-        return
-      }
-
-      // Ensure canvases are the correct size
-      if (this._beautyCanvas.width !== w) this._beautyCanvas.width = w
-      if (this._beautyCanvas.height !== h) this._beautyCanvas.height = h
-      if (this._scratchCanvas.width !== w) this._scratchCanvas.width = w
-      if (this._scratchCanvas.height !== h) this._scratchCanvas.height = h
-      if (this._maskCanvas.width !== w) this._maskCanvas.width = w
-      if (this._maskCanvas.height !== h) this._maskCanvas.height = h
-
-      // ── Step 1: Draw raw frame onto beauty canvas ─────────────────────────
-      this._beautyCtx.filter = "none"
-      this._beautyCtx.drawImage(frame, 0, 0, w, h)
-      frame.close()
-
       // ── Step 2: Face-aware effects (if mesh available) ────────────────────
       let faceMeshUsed = false
       const needsMesh = this._needsFaceMesh()
@@ -791,58 +857,30 @@ export class CombinedVideoTransformer extends VideoTransformer {
         // Safari < 18: use pixel-level fallback for brightness / warmth / colorFilter
         this._applyPixelFilters(this._beautyCtx, w, h)
       }
-
-      // ── Step 4: Background (if requested) ─────────────────────────────────
-      if (!hasBg) {
-        try {
-          controller.enqueue(
-            new VideoFrame(this._beautyCanvas, { timestamp: ts })
-          )
-        } catch (e) {
-          console.error("[CombinedVideoTransformer] VideoFrame from OffscreenCanvas failed; falling back to HTMLCanvasElement snapshot", e)
-          try {
-            const fb = document.createElement("canvas")
-            fb.width = w; fb.height = h
-            fb.getContext("2d").drawImage(this._beautyCanvas, 0, 0)
-            controller.enqueue(new VideoFrame(fb, { timestamp: ts }))
-          } catch (e2) {
-            console.error("[CombinedVideoTransformer] Fallback VideoFrame also failed, skipping frame", e2)
-          }
-        }
-        return
-      }
-
-      // Beauty + background: delegate the beauty-processed frame to BackgroundTransformer
-      await this._ensureBgTransformer()
-      let beautyFrame
-      try {
-        beautyFrame = new VideoFrame(this._beautyCanvas, { timestamp: ts })
-      } catch (e) {
-        console.error("[CombinedVideoTransformer] VideoFrame from OffscreenCanvas failed for bg path; falling back to HTMLCanvasElement snapshot", e)
-        try {
-          const fb = document.createElement("canvas")
-          fb.width = w; fb.height = h
-          fb.getContext("2d").drawImage(this._beautyCanvas, 0, 0)
-          beautyFrame = new VideoFrame(fb, { timestamp: ts })
-        } catch (e2) {
-          console.error("[CombinedVideoTransformer] Fallback VideoFrame also failed, skipping frame", e2)
-          return
-        }
-      }
-      if (this._bgTransformerReady) {
-        await this._bgTransformer.transform(beautyFrame, controller)
-      } else {
-        controller.enqueue(beautyFrame)
-      }
-      return
     }
 
-    // ── Background only (no beauty) ─────────────────────────────────────────
-    await this._ensureBgTransformer()
-    if (this._bgTransformerReady) {
-      await this._bgTransformer.transform(frame, controller)
-    } else {
-      controller.enqueue(frame)
+    // ── Step 4: Background (if requested & supported) ──────────────────────
+    if (hasBg) {
+      await this._ensureBgTransformer()
+      if (this._bgTransformerReady) {
+        let workingFrame
+        try {
+          workingFrame = this._frameFromCanvas(this._beautyCanvas, ts)
+        } catch (e) {
+          console.error("[CombinedVideoTransformer] Failed to build bg input frame", e)
+          controller.enqueue(new VideoFrame(this._beautyCanvas, { timestamp: ts }))
+          return
+        }
+        await this._bgTransformer.transform(workingFrame, controller)
+        return
+      }
+    }
+
+    // No background applied — enqueue the (optionally beautified) canvas frame.
+    try {
+      controller.enqueue(this._frameFromCanvas(this._beautyCanvas, ts))
+    } catch (e) {
+      console.error("[CombinedVideoTransformer] Failed to enqueue processed frame", e)
     }
   }
 
@@ -871,6 +909,9 @@ export class CombinedVideoTransformer extends VideoTransformer {
     if (this._bgTransformerReady) {
       await this._bgTransformer?.destroy().catch(() => {})
     }
+    this._bgTransformer = null
+    this._bgTransformerReady = false
+    this._bgUnsupported = false
     await super.destroy()
   }
 }

@@ -43,17 +43,61 @@ const VirtualBackgroundModal = ({
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    if (lkVideoTrack) {
-      lkVideoTrack.attach(videoElement);
+    // Same live-track guard as VideoPreview: never attach an ended track,
+    // otherwise the modal preview sticks on a black frame after re-toggle.
+    const liveLkTrack =
+      lkVideoTrack?.mediaStreamTrack?.readyState === "ended" ? null : lkVideoTrack;
+
+    if (liveLkTrack) {
+      try {
+        liveLkTrack.detach(videoElement);
+      } catch {
+        /* ignore */
+      }
+      try {
+        liveLkTrack.attach(videoElement);
+      } catch {
+        /* ignore */
+      }
       return () => {
-        lkVideoTrack.detach(videoElement);
+        try {
+          liveLkTrack.detach(videoElement);
+        } catch {
+          /* ignore */
+        }
       };
-    } else if (localStream) {
-      videoElement.srcObject = localStream;
-    } else {
-      videoElement.srcObject = null;
     }
-  }, [lkVideoTrack, localStream]);
+
+    if (lkVideoTrack) {
+      try {
+        lkVideoTrack.detach(videoElement);
+      } catch {
+        /* ignore */
+      }
+    }
+    try {
+      const hasLiveVideo = (() => {
+        try {
+          return (localStream?.getVideoTracks() || []).some((t) => t.readyState === "live");
+        } catch {
+          return false;
+        }
+      })();
+      videoElement.srcObject = hasLiveVideo ? localStream : null;
+      if (hasLiveVideo) {
+        videoElement.play?.().catch(() => {});
+      }
+    } catch {
+      /* ignore */
+    }
+    return () => {
+      try {
+        videoElement.srcObject = null;
+      } catch {
+        /* ignore */
+      }
+    };
+  }, [lkVideoTrack, localStream, open]);
   const [activeTab, setActiveTab] = useState("backgrounds");
 
   // Initialise beauty options from localStorage so pre-join selections survive

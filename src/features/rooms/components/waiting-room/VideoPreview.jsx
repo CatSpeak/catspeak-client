@@ -24,15 +24,63 @@ const VideoPreview = ({
     const videoElement = videoRef.current
     if (!videoElement) return
 
-    if (lkVideoTrack) {
-      lkVideoTrack.attach(videoElement)
-      return () => {
-        lkVideoTrack.detach(videoElement)
+    // Prefer the LiveKit track only while its underlying MediaStreamTrack is
+    // still live. Attaching an ended (stopped) track is the classic "black
+    // screen on second toggle" — the element keeps showing the dead track.
+    const liveLkTrack =
+      lkVideoTrack?.mediaStreamTrack?.readyState === "ended" ? null : lkVideoTrack
+
+    if (liveLkTrack) {
+      try {
+        liveLkTrack.detach(videoElement)
+      } catch {
+        /* ignore */
       }
-    } else if (localStream) {
-      videoElement.srcObject = localStream
-    } else {
-      videoElement.srcObject = null
+      try {
+        liveLkTrack.attach(videoElement)
+      } catch {
+        /* ignore */
+      }
+      return () => {
+        try {
+          liveLkTrack.detach(videoElement)
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    // Fallback / no live processor track: detach any stale attachment, then
+    // drive the element from the raw MediaStream (only if it has a live video
+    // track — an audio-only or fully-stopped stream must clear the element).
+    if (lkVideoTrack) {
+      try {
+        lkVideoTrack.detach(videoElement)
+      } catch {
+        /* ignore */
+      }
+    }
+    try {
+      const hasLiveVideo = (() => {
+        try {
+          return (localStream?.getVideoTracks() || []).some((t) => t.readyState === "live")
+        } catch {
+          return false
+        }
+      })()
+      videoElement.srcObject = hasLiveVideo ? localStream : null
+      if (hasLiveVideo) {
+        videoElement.play?.().catch(() => {})
+      }
+    } catch {
+      /* ignore */
+    }
+    return () => {
+      try {
+        videoElement.srcObject = null
+      } catch {
+        /* ignore */
+      }
     }
   }, [lkVideoTrack, localStream])
 
