@@ -72,6 +72,14 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _beautyOptions = { ...DEFAULT_BEAUTY_OPTIONS }
   _bgOptions = { ...DEFAULT_BG_OPTIONS }
 
+  // ── Portrait hint from caller (mobile vertical) ─────────────────────────
+  // iPhone held portrait often still delivers landscape frames (e.g. 640x480
+  // rotation:0). When true and input is landscape with no rotation metadata,
+  // bake a 90/270 rotation in canvas so output is true portrait. Front camera
+  // ("user") needs 270, back ("environment") needs 90. Set via update().
+  _forcePortrait = false
+  _facingMode = "user"
+
   // ── BackgroundTransformer (lazy) ──────────────────────────────────────────
   _bgTransformer = null
   _bgTransformerReady = false
@@ -752,8 +760,8 @@ export class CombinedVideoTransformer extends VideoTransformer {
    * concern (CSS scaleX(-1)) so the processed track shared with other
    * participants remains non-mirrored. Returns the working [width, height].
    */
-  _drawFrameOriented(ctx, frame, cw, ch) {
-    const rotation = Number(frame.rotation) || 0
+  _drawFrameOriented(ctx, frame, cw, ch, rotationOverride) {
+    const rotation = rotationOverride !== undefined ? rotationOverride : (Number(frame.rotation) || 0)
     const fw = Math.max(1, Math.round(frame.displayWidth))
     const fh = Math.max(1, Math.round(frame.displayHeight))
 
@@ -793,20 +801,6 @@ export class CombinedVideoTransformer extends VideoTransformer {
   async transform(frame, controller) {
     const hasBeauty = this._hasBeauty()
     const hasBg = this._hasBg()
-    const rotation = Number(frame.rotation) || 0
-
-    // Passthrough only when no effects AND no orientation to fix.
-    // On iPhone portrait (rotation 90/270) the frame must be baked upright
-    // even without beauty/bg — otherwise the preview (waiting room & bg modal)
-    // appears rotated 90° sideways because MediaStreamTrackGenerator frames
-    // ignore rotation metadata and display raw pixels.
-    if (!hasBeauty && !hasBg) {
-      if (rotation === 0) {
-        controller.enqueue(frame)
-        return
-      }
-      // Non-zero rotation (90/180/270): fall through to bake rotation into canvas.
-    }
 
     const ts = frame.timestamp
     const fw = Math.max(1, Math.round(frame.displayWidth))
@@ -817,9 +811,30 @@ export class CombinedVideoTransformer extends VideoTransformer {
       return
     }
 
+    // Effective rotation: trust frame metadata first; if none but caller
+    // hinted mobile portrait and sensor delivered landscape (iPhone 640x480
+    // rotation:0 in portrait hold), synthesize the missing rotation here so
+    // output is true portrait. Front camera needs 270, back needs 90.
+    const rawRotation = Number(frame.rotation) || 0
+    let effectiveRotation = rawRotation
+    if (rawRotation === 0 && this._forcePortrait && fw > fh) {
+      effectiveRotation = this._facingMode === "environment" ? 90 : 270
+    }
+
+    // Passthrough only when no effects AND no orientation to fix.
+    // NOTE: must use effectiveRotation (not raw) — otherwise the iPhone
+    // landscape-in-portrait case skips the bake and stays sideways.
+    if (!hasBeauty && !hasBg) {
+      if (effectiveRotation === 0) {
+        controller.enqueue(frame)
+        return
+      }
+      // Non-zero rotation (90/180/270): fall through to bake rotation into canvas.
+    }
+
     // For 90/270 rotations the working canvas dims are swapped so the frame
     // is stored upright regardless of source orientation.
-    const rotated = rotation === 90 || rotation === 270
+    const rotated = effectiveRotation === 90 || effectiveRotation === 270
     const w = rotated ? fh : fw
     const h = rotated ? fw : fh
 
@@ -832,7 +847,7 @@ export class CombinedVideoTransformer extends VideoTransformer {
     if (this._maskCanvas.height !== h) this._maskCanvas.height = h
 
     // ── Step 1: Draw raw frame (oriented) onto beauty canvas ───────────────
-    this._drawFrameOriented(this._beautyCtx, frame, w, h)
+    this._drawFrameOriented(this._beautyCtx, frame, w, h, effectiveRotation)
     frame.close()
 
     if (hasBeauty) {
@@ -948,6 +963,12 @@ export class CombinedVideoTransformer extends VideoTransformer {
   // ── Configuration update ──────────────────────────────────────────────────
 
   update(opts) {
+    if (opts.forcePortrait !== undefined) {
+      this._forcePortrait = !!opts.forcePortrait
+    }
+    if (opts.facingMode !== undefined && typeof opts.facingMode === "string") {
+      this._facingMode = opts.facingMode
+    }
     if (opts.beautyOptions !== undefined) {
       this._beautyOptions = { ...this._beautyOptions, ...opts.beautyOptions }
     }
