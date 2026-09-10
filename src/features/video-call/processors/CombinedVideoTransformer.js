@@ -941,17 +941,32 @@ export class CombinedVideoTransformer extends VideoTransformer {
   // ── Cleanup ───────────────────────────────────────────────────────────────
 
   async destroy() {
-    if (this._faceMesh) {
-      await this._faceMesh.destroy().catch(() => {})
-      this._faceMesh = null
-      this._faceMeshReady = false
-    }
-    if (this._bgTransformerReady) {
-      await this._bgTransformer?.destroy().catch(() => {})
-    }
-    this._bgTransformer = null
-    this._bgTransformerReady = false
-    this._bgUnsupported = false
-    await super.destroy()
+    // Serialize destroy with wasm chain to avoid concurrent init/destroy abort
+    return chainWasmInit(async () => {
+      if (this._faceMesh) {
+        await this._faceMesh.destroy().catch(() => {})
+        this._faceMesh = null
+        this._faceMeshReady = false
+        this._faceMeshInitializing = false
+      }
+      // Always destroy _bgTransformer if it exists, even when init failed
+      // halfway (shader compile / Module.arguments abort leaves half GL state
+      // that would cause next init to fail with Shader compile failed: null).
+      if (this._bgTransformer) {
+        try {
+          await this._bgTransformer.destroy().catch(() => {})
+        } catch {}
+      }
+      this._bgTransformer = null
+      this._bgTransformerReady = false
+      this._bgInitializing = false
+      // Keep _bgUnsupported false for transient Module.arguments aborts;
+      // only hard unsupported (isSupported false) stays sticky.
+      // Transient flag is per-instance, so reset here is safe.
+      this._bgUnsupported = false
+      this._initOpts = null
+      this._smoothedLandmarks = null
+      await super.destroy()
+    })
   }
 }

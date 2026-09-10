@@ -264,9 +264,13 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     maxParticipants !== null && currentParticipantCount >= maxParticipants
 
   // --- Cleanup media preview tracks when transitioning to in-call ---
-  const cleanupMediaPreview = useCallback(() => {
+  const cleanupMediaPreview = useCallback(async () => {
     if (stopAllPreviewTracks) {
-      stopAllPreviewTracks()
+      try {
+        await stopAllPreviewTracks()
+      } catch {
+        /* ignore */
+      }
     } else if (localStream) {
       localStream.getTracks().forEach((track) => track.stop())
     }
@@ -431,7 +435,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       })
 
       // Stop preview tracks before entering the call & give iOS hardware 300ms to release
-      cleanupMediaPreview()
+      await cleanupMediaPreview()
       await new Promise((resolve) => setTimeout(resolve, 300))
 
       // Set phase to in-call

@@ -156,8 +156,8 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     setProcessorStatus((s) => (s === "unsupported" ? s : "idle"))
   }, [])
 
-  const stopAllPreviewTracks = useCallback(() => {
-    busyRef.current = false
+  const stopAllPreviewTracks = useCallback(async () => {
+    busyRef.current = true
     if (streamRef.current) {
       try {
         streamRef.current.getTracks().forEach(safeStopMediaTrack)
@@ -166,11 +166,15 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       }
       streamRef.current = null
     }
-    // Fire-and-forget is safe here because teardownVideoPipeline never rejects.
-    teardownVideoPipeline()
+    try {
+      await teardownVideoPipeline()
+    } catch {
+      /* ignore */
+    }
     setLocalStream(null)
     setMicOn(false)
     setCameraOn(false)
+    busyRef.current = false
   }, [teardownVideoPipeline])
 
   // Cleanup on unmount
