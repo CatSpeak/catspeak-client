@@ -202,6 +202,8 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
         constraints.video = buildVideoConstraint(customVideoId)
       }
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      // eslint-disable-next-line no-console
+      console.log("[DEBUG-iphone] getUserMedia", { constraints, isSupported: ProcessorWrapper.isSupported, tracks: stream.getVideoTracks().map(t=>({id:t.id, settings: t.getSettings?.(), readyState:t.readyState})) })
 
       // Apply beauty + virtual background to video track (via CombinedVideoTransformer)
       if (video && ProcessorWrapper.isSupported) {
@@ -276,6 +278,9 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
             /* ignore */
           }
         }
+      } else if (video) {
+        // eslint-disable-next-line no-console
+        console.log("[DEBUG-iphone] Processor not supported, using raw track", { isSupported: ProcessorWrapper.isSupported })
       }
 
       if (!streamRef.current) {

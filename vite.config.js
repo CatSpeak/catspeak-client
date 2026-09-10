@@ -22,9 +22,18 @@ export default defineConfig(({ mode }) => {
       // "Module.arguments has been replaced with plain arguments_" abort.
       // Exclude from pre-bundle to keep original wasm loader intact.
       exclude: ["@mediapipe/tasks-vision", "@mediapipe/face_mesh"],
+      esbuildOptions: {
+        keepNames: true,
+      },
     },
     esbuild: {
       keepNames: true,
+    },
+    worker: {
+      format: "es",
+    },
+    define: {
+      global: "globalThis",
     },
     server: {
       proxy: {
