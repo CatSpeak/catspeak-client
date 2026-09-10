@@ -93,7 +93,8 @@ const VideoPreview = ({
 
   return (
     <div className="relative w-full max-w-[440px] lg:max-w-none flex flex-col items-center rounded-xl border border-[#F5F5F5] bg-[#FCFCFC]">
-      <div className="relative w-full aspect-video overflow-hidden rounded-xl">
+      {/* Mobile portrait: 3/4 vertical for face cam; desktop/tablet keeps 16:9 */}
+      <div className="relative w-full aspect-[3/4] md:aspect-video overflow-hidden rounded-xl max-h-[65vh] md:max-h-none">
         {/* Video Preview */}
         {localStream && (
           <video

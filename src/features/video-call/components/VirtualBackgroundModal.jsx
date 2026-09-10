@@ -155,8 +155,8 @@ const VirtualBackgroundModal = ({
       bodyClassName="px-6 pb-6 flex-1 overflow-y-auto"
     >
       <div className="flex flex-col md:flex-row gap-5 h-full min-h-[400px]">
-        {/* Left Column: Video Preview */}
-        <div className="min-w-0 flex flex-col bg-[#202124] rounded-xl overflow-hidden relative aspect-video md:w-[280px] w-full h-full">
+        {/* Left Column: Video Preview - portrait on mobile, landscape on desktop */}
+        <div className="min-w-0 flex flex-col bg-[#202124] rounded-xl overflow-hidden relative aspect-[3/4] md:aspect-video md:w-[280px] w-full h-full max-h-[45vh] md:max-h-none">
           <video
             ref={videoRef}
             autoPlay

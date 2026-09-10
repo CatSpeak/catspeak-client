@@ -18,15 +18,33 @@ export const buildAudioConstraint = (deviceId) => {
 
 /**
  * Builds safe video constraints for getUserMedia, avoiding invalid exact device ID matching on iOS WebKit.
+ * For mobile portrait (iPhone held vertical), requests portrait ideal resolution
+ * (720×1280) so the camera delivers upright frames and the preview container
+ * (aspect-[3/4] on mobile) fills without sideways cropping. Desktop keeps 16:9.
  *
  * @param {string|null} deviceId - Target hardware camera ID
  * @returns {boolean|object} Video constraint
  */
 export const buildVideoConstraint = (deviceId) => {
+  const isMobilePortrait = (() => {
+    try {
+      if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false
+      return window.matchMedia("(orientation: portrait)").matches && window.innerWidth < 768
+    } catch {
+      return false
+    }
+  })()
+
+  const portraitIdeal = isMobilePortrait
+    ? { width: { ideal: 720 }, height: { ideal: 1280 }, aspectRatio: { ideal: 0.5625 } }
+    : { width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 1.77778 } }
+
   if (!deviceId || deviceId === "default") {
-    return true
+    // Use ideal (not exact) so iOS Safari never fails on unsupported constraints,
+    // but hint the browser toward portrait on phones.
+    return isMobilePortrait ? { ...portraitIdeal, facingMode: { ideal: "user" } } : true
   }
-  return { deviceId: { exact: deviceId } }
+  return { deviceId: { exact: deviceId }, ...portraitIdeal }
 }
 
 /**
