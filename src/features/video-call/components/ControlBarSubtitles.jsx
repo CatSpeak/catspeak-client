@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { Captions } from "lucide-react"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlButton from "./ControlButton"
@@ -8,14 +8,13 @@ const ControlBarSubtitles = ({ className = "" }) => {
     showCC,
     setShowCC,
     isAISession,
-    isSubtitleActive,
+    showRoomSubtitles,
     isStartingSubtitles,
+    isStoppingSubtitles,
     subtitleSupportedLangs,
     startSubtitles,
     stopSubtitles,
   } = useGlobalVideoCall()
-
-  const [showSubtitlePicker, setShowSubtitlePicker] = useState(false)
 
   if (isAISession) {
     return (
@@ -33,16 +32,16 @@ const ControlBarSubtitles = ({ className = "" }) => {
   return (
     <div className={`relative ${className}`}>
       <ControlButton
-        isActive={isSubtitleActive}
-        isLoading={isStartingSubtitles}
+        isActive={showRoomSubtitles}
+        isLoading={isStartingSubtitles || isStoppingSubtitles}
         onClick={() => {
-          if (isSubtitleActive) {
+          if (showRoomSubtitles) {
             stopSubtitles()
           } else {
             startSubtitles(subtitleSupportedLangs[0])
           }
         }}
-        title={isSubtitleActive ? "Turn subtitles off" : "Turn subtitles on"}
+        title={showRoomSubtitles ? "Turn subtitles off" : "Turn subtitles on"}
         iconActive={<Captions className="w-6 h-6" />}
         iconInactive={<Captions className="w-6 h-6" />}
       />
