@@ -70,6 +70,10 @@ export const useCombinedProcessor = () => {
   const attachedTrackIdRef = useRef(null)
   // Prevent concurrent attach attempts (setProcessor is async)
   const attachingRef = useRef(false)
+  // Guard against overlapping toggle operations — iPhone Safari is slow to
+  // start/stop tracks and a second toggle before the first completes left
+  // stale (ended) tracks attached => black preview.
+  const busyRef = useRef(false)
 
   const { data: bgData } = useGetCurrentBackgroundQuery(undefined, {
     refetchOnMountOrArgChange: true,
@@ -105,7 +109,24 @@ export const useCombinedProcessor = () => {
   }, [processorStatus, t])
 
   // Helper to destroy active processor instance cleanly
+  // On LiveKit tracks the processor is owned by the track — we must go
+  // through track.stopProcessor() so LiveKit can swap the sender back to
+  // the raw track and re-attach elements. Directly destroying the wrapper
+  // (old behavior) left track.processor pointing at a destroyed wrapper
+  // with an ended processedTrack => black screen on next enable (iPhone).
   const cleanupProcessor = useCallback(async () => {
+    const participant = room?.localParticipant
+    const pub = participant?.getTrackPublication?.(Track.Source.Camera)
+    const track = pub?.track
+    // If LiveKit still holds the processor, use its API to cleanly detach.
+    // This is the correct way to remove a processor from a published track.
+    if (track?.processor && track.stopProcessor) {
+      try {
+        await track.stopProcessor()
+      } catch {
+        /* ignore — fall through to direct destroy */
+      }
+    }
     if (processorRef.current) {
       const old = processorRef.current
       processorRef.current = null
@@ -114,8 +135,11 @@ export const useCombinedProcessor = () => {
       } catch {
         /* ignore cleanup errors */
       }
+    } else if (track?.processor) {
+      // Edge case: wrapper was already destroyed but track still thinks it has one
+      processorRef.current = null
     }
-  }, [])
+  }, [room])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -131,16 +155,54 @@ export const useCombinedProcessor = () => {
     if (!ProcessorWrapper.isSupported) return
 
     const participant = room.localParticipant
+    let cancelled = false
+    let timeoutId = null
+    const handleTrackPublished = (pub) => {
+      if (pub?.source === Track.Source.Camera) {
+        queueMicrotask(() => {
+          if (cancelled) return
+          tryAttach().then((ok) => {
+            if (ok) {
+              participant.off(ParticipantEvent.LocalTrackPublished, handleTrackPublished)
+              participant.off("localTrackPublished", handleTrackPublished)
+              participant.off("trackPublished", handleTrackPublished)
+              if (timeoutId) clearTimeout(timeoutId)
+            }
+          })
+        })
+      }
+    }
 
     // Helper: try to attach right now. Returns true if it found a track to attach to.
     // The actual attachment is async; we guard against concurrent attempts via attachingRef.
     const tryAttach = async () => {
       // Prevent overlapping attach attempts
       if (attachingRef.current) return true
+      if (busyRef.current) {
+        console.log("[useCombinedProcessor] busy, deferring attach")
+        return false
+      }
 
       const pub = participant.getTrackPublication(Track.Source.Camera)
       const track = pub?.track
       if (!track) return false
+
+      // iPhone Safari: after mute/unmute the publication still exists but the
+      // underlying MediaStreamTrack may be ended or muted if the hardware was
+      // released. Attaching a processor to an ended track yields a black
+      // preview. Treat non-live tracks as "not ready" and wait for a fresh
+      // publication (same pattern as waiting-room fix).
+      const rawTrack = track.mediaStreamTrack // may be processedTrack if already attached
+      const underlying = track._mediaStreamTrack ?? rawTrack
+      if (underlying?.readyState !== "live") {
+        console.warn("[useCombinedProcessor] Camera track not live (readyState:", underlying?.readyState, ") — waiting for fresh track")
+        return false
+      }
+      // If track is still muted/enabled false, LiveKit hasn't unmuted yet
+      if (track.isMuted) {
+        console.log("[useCombinedProcessor] Track still muted, deferring attach")
+        return false
+      }
 
       // Build a stable identity: prefer track.sid (LiveKit internal), fall back to
       // mediaStreamTrack.id, and guard against both being null (e.g. early lifecycle).
@@ -150,6 +212,7 @@ export const useCombinedProcessor = () => {
         return true
       }
 
+      busyRef.current = true
       attachingRef.current = true
       setProcessorStatus("initializing")
 
@@ -166,10 +229,29 @@ export const useCombinedProcessor = () => {
 
         await track.setProcessor(newProcessor)
 
+        // Verify the processed track is actually live — on iPhone the
+        // MediaStreamTrackProcessor fallback can stall if video element play()
+        // is blocked (NotAllowedError). If the processedTrack is ended we
+        // fall back to raw track instead of showing black.
+        const outTrack = track.mediaStreamTrack
+        if (outTrack?.readyState !== "live") {
+          console.warn("[useCombinedProcessor] Processed track not live after setProcessor, falling back to raw")
+          try { await track.stopProcessor() } catch {}
+          processorRef.current = null
+          attachedTrackRef.current = null
+          attachedTrackIdRef.current = null
+          setProcessorStatus("error")
+          toast.error(
+            t.rooms?.beauty?.attachFailed ||
+              "Beauty effects unavailable — camera will continue without effects.",
+            { id: "beauty-attach-failed" },
+          )
+          return true
+        }
+
         console.log("[useCombinedProcessor] Processor attached to camera track")
         attachedTrackIdRef.current = track.sid ?? track.mediaStreamTrack?.id ?? null
         setProcessorStatus("attached")
-        attachingRef.current = false
 
         // Apply any beauty options the user set before joining
         const stored = readStoredBeautyOptions()
@@ -195,13 +277,15 @@ export const useCombinedProcessor = () => {
         await cleanupProcessor()
         attachedTrackRef.current = null
         attachedTrackIdRef.current = null
-        attachingRef.current = false
         setProcessorStatus("error")
         toast.error(
           t.rooms?.beauty?.attachFailed ||
             "Beauty effects unavailable — your device may not support video processing.",
           { id: "beauty-attach-failed" },
         )
+      } finally {
+        attachingRef.current = false
+        busyRef.current = false
       }
 
       return true
@@ -212,31 +296,18 @@ export const useCombinedProcessor = () => {
       // Try immediate attach first (handles the common case where the track
       // is already published by the time this effect runs).
       tryAttach().then((attached) => {
-        if (!attached) {
+        if (!attached && !cancelled) {
           console.log("[useCombinedProcessor] Camera track not ready yet, waiting for trackPublished…")
-          const handleTrackPublished = (pub) => {
-            if (pub?.source === Track.Source.Camera) {
-              queueMicrotask(() => {
-                tryAttach().then((ok) => {
-                  if (ok) {
-                    participant.off(ParticipantEvent.LocalTrackPublished, handleTrackPublished)
-                    participant.off("localTrackPublished", handleTrackPublished)
-                    participant.off("trackPublished", handleTrackPublished)
-                  }
-                })
-              })
-            }
-          }
           participant.on(ParticipantEvent.LocalTrackPublished, handleTrackPublished)
           participant.on("localTrackPublished", handleTrackPublished)
           participant.on("trackPublished", handleTrackPublished)
 
           // Safety timeout: if the track never appears, stop waiting
-          const timeout = setTimeout(() => {
+          timeoutId = setTimeout(() => {
             participant.off(ParticipantEvent.LocalTrackPublished, handleTrackPublished)
             participant.off("localTrackPublished", handleTrackPublished)
             participant.off("trackPublished", handleTrackPublished)
-            if (!attachedTrackRef.current) {
+            if (!attachedTrackRef.current && !cancelled) {
               console.error("[useCombinedProcessor] Timed out waiting for camera track publication")
               setProcessorStatus("error")
               toast.error(
@@ -246,25 +317,26 @@ export const useCombinedProcessor = () => {
               )
             }
           }, 10000)
-
-          return () => {
-            clearTimeout(timeout)
-            participant.off(ParticipantEvent.LocalTrackPublished, handleTrackPublished)
-            participant.off("localTrackPublished", handleTrackPublished)
-            participant.off("trackPublished", handleTrackPublished)
-          }
         }
       })
-      return
+    } else {
+      // ── Camera disabled ───────────────────────────────────────────────
+      // When the user turns off their camera, destroy the dead processor pipeline so the next enable gets a fresh one
+      busyRef.current = false
+      cleanupProcessor()
+      attachedTrackRef.current = null
+      attachedTrackIdRef.current = null
+      attachingRef.current = false
+      setProcessorStatus("idle")
     }
 
-    // ── Camera disabled ───────────────────────────────────────────────
-    // When the user turns off their camera, destroy the dead processor pipeline so the next enable gets a fresh one
-    cleanupProcessor()
-    attachedTrackRef.current = null
-    attachedTrackIdRef.current = null
-    attachingRef.current = false
-    setProcessorStatus("idle")
+    return () => {
+      cancelled = true
+      if (timeoutId) clearTimeout(timeoutId)
+      participant.off(ParticipantEvent.LocalTrackPublished, handleTrackPublished)
+      participant.off("localTrackPublished", handleTrackPublished)
+      participant.off("trackPublished", handleTrackPublished)
+    }
   }, [isCameraEnabled, room.localParticipant, cleanupProcessor, activeBackgroundUrl, t])
 
   // ── Sync background URL from Redux into the processor ─────────────────────
