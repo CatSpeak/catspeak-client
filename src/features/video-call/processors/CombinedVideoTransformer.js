@@ -900,7 +900,16 @@ export class CombinedVideoTransformer extends VideoTransformer {
     if (opts.bgOptions !== undefined) {
       this._bgOptions = { ...this._bgOptions, ...opts.bgOptions }
       if (this._bgTransformerReady) {
-        this._bgTransformer.update(this._bgOptions)
+        this._bgTransformer.update(this._bgOptions).catch((err) => {
+          console.error("[CombinedVideoTransformer] BackgroundTransformer update failed:", err)
+        })
+      } else if (this._hasBg() && this._initOpts && !this._bgInitializing && !this._bgUnsupported) {
+        // Eagerly start init when bg becomes enabled before the next frame.
+        // Previously we only lazy-initialized inside transform(), so the first
+        // frame after enabling bg would still show no background. Triggering
+        // early reduces that flicker and also handles the re-enter case where
+        // the processor is created with bg already enabled.
+        this._ensureBgTransformer().catch(() => {})
       }
     }
   }

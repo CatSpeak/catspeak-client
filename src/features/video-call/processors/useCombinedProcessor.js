@@ -71,9 +71,20 @@ export const useCombinedProcessor = () => {
   // Prevent concurrent attach attempts (setProcessor is async)
   const attachingRef = useRef(false)
 
-  const { data: bgData } = useGetCurrentBackgroundQuery()
+  const { data: bgData } = useGetCurrentBackgroundQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
   const activeBackgroundUrl =
-    bgData?.activeBackgroundUrl ?? bgData?.data?.activeBackgroundUrl ?? null
+    bgData === undefined
+      ? undefined
+      : (bgData?.activeBackgroundUrl ?? bgData?.data?.activeBackgroundUrl ?? null)
+
+  // Latest bg url ref avoids stale closure when tryAttach runs before a
+  // re-render that brings the fresh bg url.
+  const activeBackgroundUrlRef = useRef(activeBackgroundUrl)
+  useEffect(() => {
+    activeBackgroundUrlRef.current = activeBackgroundUrl
+  }, [activeBackgroundUrl])
 
   // ── Diagnostic status for on-screen indicators ────────────────────────────
   const [processorStatus, setProcessorStatus] = useState(
@@ -168,16 +179,15 @@ export const useCombinedProcessor = () => {
             .catch(() => {})
         }
 
-        // Apply virtual background if active
-        if (activeBackgroundUrl) {
+        // Apply virtual background if active (use ref for latest value, handle
+        // undefined = still loading -> skip, null = explicitly None -> disable).
+        const currentBgUrl = activeBackgroundUrlRef.current
+        if (currentBgUrl !== undefined) {
+          const bgOptions = currentBgUrl
+            ? { backgroundDisabled: false, imagePath: currentBgUrl, blurRadius: undefined }
+            : { backgroundDisabled: true, imagePath: undefined, blurRadius: undefined }
           await newProcessor
-            .updateTransformerOptions({
-              bgOptions: {
-                backgroundDisabled: false,
-                imagePath: activeBackgroundUrl,
-                blurRadius: undefined,
-              },
-            })
+            .updateTransformerOptions({ bgOptions })
             .catch(() => {})
         }
       } catch (err) {
@@ -258,8 +268,12 @@ export const useCombinedProcessor = () => {
   }, [isCameraEnabled, room.localParticipant, cleanupProcessor, activeBackgroundUrl, t])
 
   // ── Sync background URL from Redux into the processor ─────────────────────
+  // Depends on processorStatus so that a bg already known before the
+  // processor existed is applied after attach (previous bug: effect aborted
+  // when processor null, then never retried because url didn't change).
   useEffect(() => {
     if (!processorRef.current) return
+    if (activeBackgroundUrl === undefined) return // still loading
 
     let bgOptions
     if (activeBackgroundUrl) {
@@ -271,7 +285,7 @@ export const useCombinedProcessor = () => {
     processorRef.current
       .updateTransformerOptions({ bgOptions })
       .catch((err) => console.error("[useCombinedProcessor] Failed to update bg:", err))
-  }, [activeBackgroundUrl])
+  }, [activeBackgroundUrl, processorStatus])
 
   // ── switchBeauty — called from in-call BeautyPicker, persists to localStorage ──
   const switchBeauty = useCallback((beautyOptions) => {
