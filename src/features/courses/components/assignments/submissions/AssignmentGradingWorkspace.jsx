@@ -142,10 +142,13 @@ const AssignmentGradingWorkspace = ({
     : (userProfile?.fullName || userProfile?.name || cg.studentLabel || "Học viên")
   const studentInitials = getStudentInitials(studentName, cg.studentInitials || "HV")
   const submissionFiles = Array.isArray(student.files) ? student.files : []
-  const firstFile = submissionFiles[0]
-    ? getFileMeta(submissionFiles[0], cg.unnamedFile || "Tệp đính kèm")
-    : null
-  const firstFileUrl = getSafeFileUrl(firstFile?.url)
+  const submissionText = typeof student.submissionText === "string"
+    ? student.submissionText
+    : ""
+
+  const safeAssignmentTitle = typeof assignmentTitle === "string" && assignmentTitle.trim()
+    ? assignmentTitle.trim()
+    : (cg.untitledAssignment || "Bài tập chưa có tiêu đề")
 
   function safeTitleToFileName(title) {
     if (!title || typeof title !== "string") return "Bai_tap"
@@ -156,16 +159,12 @@ const AssignmentGradingWorkspace = ({
       .slice(0, 30)
   }
 
+  const firstFile = submissionFiles[0]
+    ? getFileMeta(submissionFiles[0], cg.unnamedFile || "Tệp đính kèm")
+    : null
+  const firstFileUrl = getSafeFileUrl(firstFile?.url)
   const firstFileName = firstFile?.name || (submissionText ? `${safeTitleToFileName(assignmentTitle)}.pdf` : "Tệp bài làm")
   const fileExtension = getFileExtension(firstFileName)
-
-  const safeAssignmentTitle = typeof assignmentTitle === "string" && assignmentTitle.trim()
-    ? assignmentTitle.trim()
-    : (cg.untitledAssignment || "Bài tập chưa có tiêu đề")
-
-  const submissionText = typeof student.submissionText === "string"
-    ? student.submissionText
-    : ""
 
   const rawAvatar =
     student.avatar ||
