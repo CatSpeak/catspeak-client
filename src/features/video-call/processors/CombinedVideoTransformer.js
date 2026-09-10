@@ -739,15 +739,22 @@ export class CombinedVideoTransformer extends VideoTransformer {
   async transform(frame, controller) {
     const hasBeauty = this._hasBeauty()
     const hasBg = this._hasBg()
+    const rotation = Number(frame.rotation) || 0
 
-    // Passthrough: nothing to do
+    // Passthrough only when no effects AND no orientation to fix.
+    // On iPhone portrait (rotation 90/270) the frame must be baked upright
+    // even without beauty/bg — otherwise the preview (waiting room & bg modal)
+    // appears rotated 90° sideways because MediaStreamTrackGenerator frames
+    // ignore rotation metadata and display raw pixels.
     if (!hasBeauty && !hasBg) {
-      controller.enqueue(frame)
-      return
+      if (rotation === 0) {
+        controller.enqueue(frame)
+        return
+      }
+      // Non-zero rotation (90/180/270): fall through to bake rotation into canvas.
     }
 
     const ts = frame.timestamp
-    const rotation = Number(frame.rotation) || 0
     const fw = Math.max(1, Math.round(frame.displayWidth))
     const fh = Math.max(1, Math.round(frame.displayHeight))
 

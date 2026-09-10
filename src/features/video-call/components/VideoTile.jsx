@@ -137,7 +137,7 @@ const VideoTileInner = ({ participant, onClick }) => {
             ref={videoRef}
             className={`h-full w-full object-cover ${
               isVideoVisible ? "block" : "hidden"
-            } ${isLocal ? "-scale-x-100" : ""}`}
+            } ${isLocal ? "transform -scale-x-100" : ""}`}
           />
         )
       ) : null}

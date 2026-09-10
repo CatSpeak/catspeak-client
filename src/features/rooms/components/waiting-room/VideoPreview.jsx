@@ -101,7 +101,7 @@ const VideoPreview = ({
             autoPlay
             playsInline
             muted // Always mute local video preview purely for UI
-            className={`h-full w-full rounded-xl object-cover -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
+            className={`h-full w-full rounded-xl object-cover transform -scale-x-100 ${!cameraOn ? "hidden" : ""}`}
           />
         )}
 
