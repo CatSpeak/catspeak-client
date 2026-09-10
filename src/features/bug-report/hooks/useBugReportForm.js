@@ -10,12 +10,15 @@ import {
 
 export const MAX_BUG_IMAGES = 3
 export const MAX_BUG_FILE_SIZE = 5 * 1024 * 1024
+// Q7: chờ animation modal đóng xong trước khi html2canvas, tránh dính form vào ảnh
+export const CAPTURE_HIDE_DELAY_MS = 350
 
 export function useBugReportForm({
   isOpen,
   initialTitle = "",
   initialDescription = "",
   onClose,
+  roomContext = null,
 }) {
   const { t } = useLanguage()
   const lang = t.bugReport || {}
@@ -33,6 +36,7 @@ export function useBugReportForm({
   const [screenshotDataUrl, setScreenshotDataUrl] = useState(null)
   const [screenshotUrl, setScreenshotUrl] = useState(null)
   const [isCapturing, setIsCapturing] = useState(false)
+  const [isHiddenForCapture, setIsHiddenForCapture] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
@@ -78,6 +82,11 @@ export function useBugReportForm({
 
   const captureScreenshot = useCallback(async () => {
     setIsCapturing(true)
+    // Q4/Q7: ẩn modal tạm thời để ảnh chụp không dính form.
+    // Modal là portal z-[1300] nên html2canvas(document.body) sẽ dính nó.
+    // Unmount tạm + delay cho animation đóng xong rồi mới chụp.
+    setIsHiddenForCapture(true)
+    await new Promise((r) => setTimeout(r, CAPTURE_HIDE_DELAY_MS))
     try {
       const html2canvas = (await import("html2canvas")).default
       const canvas = await html2canvas(document.body, {
@@ -126,6 +135,7 @@ export function useBugReportForm({
       setScreenshotDataUrl(null)
       setScreenshotUrl(null)
     } finally {
+      setIsHiddenForCapture(false)
       setIsCapturing(false)
     }
   }, [uploadScreenshot, lang.captureFailed])
@@ -138,6 +148,19 @@ export function useBugReportForm({
       }
     }
   }
+
+  const handleRetakeScreenshot = useCallback(async () => {
+    setScreenshotDataUrl(null)
+    setScreenshotUrl(null)
+    setIncludeScreenshot(true)
+    await captureScreenshot()
+  }, [captureScreenshot])
+
+  const handleRemoveScreenshot = useCallback(() => {
+    setScreenshotDataUrl(null)
+    setScreenshotUrl(null)
+    setIncludeScreenshot(false)
+  }, [])
 
   const hasUnsaved = description.trim().length > 0 || includeScreenshot
 
@@ -180,10 +203,17 @@ export function useBugReportForm({
         }
       }
 
+      // Q6: gửi ngầm room context — BE không có field roomId nên prefix vào description.
+      // url (room URL) + userId (auth claim) BE đã tự ghi nhận.
+      const roomPrefix =
+        roomContext?.roomId || roomContext?.roomName
+          ? `[Phòng: ${roomContext.roomName || roomContext.roomId}${roomContext.roomId && roomContext.roomName ? ` (${roomContext.roomId})` : ""}]\n`
+          : ""
+
       const payload = {
         // Title optional per BE Q6=A, BE will auto-generate; send null to let BE generate from description
         title: null,
-        description: description.trim(),
+        description: `${roomPrefix}${description.trim()}`,
         category,
         severity: diagnosticsData?.suggestedSeverity || "low",
         url: window.location.href,
@@ -223,12 +253,15 @@ export function useBugReportForm({
     screenshotDataUrl,
     screenshotUrl,
     isCapturing,
+    isHiddenForCapture,
     previewOpen,
     setPreviewOpen,
     showConfirm,
     isLoading,
     categoryOptions,
     handleToggleScreenshot,
+    handleRetakeScreenshot,
+    handleRemoveScreenshot,
     captureScreenshot,
     handleRequestClose,
     confirmDiscard,

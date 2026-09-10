@@ -3,10 +3,33 @@ import HelpButton from "./HelpButton"
 import HelpChatBox from "./HelpChatBox"
 import BugReportModal from "@/features/bug-report/components/BugReportModal"
 
+function usePathname() {
+  const [pathname, setPathname] = useState(
+    typeof window !== "undefined" ? window.location.pathname : "",
+  )
+  useEffect(() => {
+    const update = () => {
+      if (typeof window !== "undefined") {
+        setPathname(window.location.pathname)
+      }
+    }
+    window.addEventListener("popstate", update)
+    const id = setInterval(update, 400)
+    return () => {
+      window.removeEventListener("popstate", update)
+      clearInterval(id)
+    }
+  }, [])
+  return pathname
+}
+
 export default function HelpWidget() {
   const [isBoxOpen, setIsBoxOpen] = useState(false)
   const [isReportOpen, setIsReportOpen] = useState(false)
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const pathname = usePathname()
+  // Nhất quán với BugReportButton.jsx:28 ("/meet" || "/room")
+  const isInRoom = pathname.includes("/meet") || pathname.includes("/room")
 
   // Track chat open state for Q4 extra: Help toggle closes chat
   useEffect(() => {
@@ -66,6 +89,10 @@ export default function HelpWidget() {
     }
     setIsBoxOpen((v) => !v)
   }, [isChatOpen])
+
+  // Q1: ẩn toàn bộ Help global chỉ khi vào room (/:lang/meet/:id).
+  // Ngoài room giữ nguyên. Trong room dùng nút ? trên RoomHeader thay thế.
+  if (isInRoom) return null
 
   return (
     <>

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useParams, Link } from "react-router-dom"
 import { MainLogo } from "@/shared/assets/icons/logo"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -7,14 +7,20 @@ import { useSessionTimer } from "@/features/video-call"
 import { useParticipants, useLocalParticipant } from "@livekit/components-react"
 import { toast } from "react-hot-toast"
 import { IconButton } from "@/shared/components/ui/buttons"
-import { Link2, Clock } from "lucide-react"
+import { Link2, Clock, HelpCircle, RefreshCcw } from "lucide-react"
 import { copyRoomLink } from "@/shared/utils/shareUtils"
-import RightSideControls from "./RightSideControls"
+import BugReportModal from "@/features/bug-report/components/BugReportModal"
 
 const RoomHeader = () => {
   const { t, language } = useLanguage()
-  const { lang } = useParams()
-  const { room, closingRemainingSeconds } = useVideoCallContext()
+  const { lang, id: routeRoomId } = useParams()
+  const {
+    room,
+    closingRemainingSeconds,
+    showTroubleshoot,
+    setShowTroubleshoot,
+  } = useVideoCallContext()
+  const [isReportOpen, setIsReportOpen] = useState(false)
   const { formattedRemaining, formattedMax, hasDuration, remainingSeconds } =
     useSessionTimer(room?.createDate, room?.duration, closingRemainingSeconds)
 
@@ -124,7 +130,39 @@ const RoomHeader = () => {
             </span>
           </div>
         )}
+        {/* Q2/Q9: [counter] [?] [troubleshoot] — cụm phải header, luôn hiện cả mobile */}
+        <button
+          type="button"
+          onClick={() => setIsReportOpen(true)}
+          title={t?.bugReport?.buttonTooltip || t?.helpBox?.helpTooltip || "Báo cáo sự cố"}
+          aria-label={t?.bugReport?.buttonTooltip || t?.helpBox?.helpTooltip || "Báo cáo sự cố"}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
+        >
+          <HelpCircle size={20} />
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowTroubleshoot?.(!showTroubleshoot)}
+          title={t?.rooms?.videoCall?.reconnect || "Khắc phục sự cố kết nối"}
+          aria-label={t?.rooms?.videoCall?.reconnect || "Khắc phục sự cố kết nối"}
+          aria-pressed={Boolean(showTroubleshoot)}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
+            showTroubleshoot
+              ? "bg-red-100 text-red-600"
+              : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
+          }`}
+        >
+          <RefreshCcw size={18} />
+        </button>
       </div>
+      <BugReportModal
+        open={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        roomContext={{
+            roomId: room?.id || routeRoomId || "",
+            roomName: room?.name || routeRoomId || rawRoomName,
+          }}
+      />
     </div>
   )
 }
