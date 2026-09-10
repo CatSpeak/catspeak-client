@@ -28,17 +28,35 @@ export const DEFAULT_BG_OPTIONS = {
   imagePath: undefined,
 }
 
-// ── Global wasm init serialization ───────────────────────────────────────
+// ── Global wasm init serialization + Module isolation ────────────────────
 // mediapipe/face_mesh and @mediapipe/tasks-vision both use Emscripten
-// Module globals. Concurrent instantiation triggers
-// "Module.arguments has been replaced with plain arguments_" abort.
-// Chain all wasm inits through a single promise.
+// Module globals on window. Concurrent or sequential instantiation without
+// isolation leaves `Module.arguments` getter from the first wasm (which
+// aborts on access) polluting the second init:
+//   vision_wasm_internal.js:2807 Object.get Module.arguments → abort
+// Chain + isolate window.Module for each init.
 let wasmInitChain = Promise.resolve()
 const chainWasmInit = (fn) => {
   const p = wasmInitChain.then(fn, fn)
-  // Keep chain alive even if fn rejects
   wasmInitChain = p.catch(() => {})
   return p
+}
+const withIsolatedModule = async (fn) => {
+  const g = typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : null
+  if (!g) return fn()
+  const prevModule = g.Module
+  const hadModule = "Module" in g
+  // Give each wasm a fresh Module to avoid cross-pollution
+  g.Module = {}
+  try {
+    return await fn()
+  } finally {
+    if (!hadModule) {
+      try { delete g.Module } catch {}
+    } else {
+      g.Module = prevModule
+    }
+  }
 }
 
 /**
@@ -131,42 +149,40 @@ export class CombinedVideoTransformer extends VideoTransformer {
       this._bgUnsupported = true
       return
     }
-    // Serialize wasm init to avoid concurrent Module.arguments abort
-    return chainWasmInit(async () => {
-      if (this._bgTransformerReady || this._bgUnsupported || !this._initOpts) return
-      if (this._bgInitializing) return
-      this._bgInitializing = true
-      try {
-        this._bgTransformer = new BackgroundTransformer({ ...this._bgOptions })
-        await this._bgTransformer.init(this._initOpts)
-        this._bgTransformerReady = true
-      } catch (err) {
-        const msg = String(err?.message || err || "")
-        const isTransient =
-          msg.includes("Module.arguments") ||
-          msg.includes("arguments_") ||
-          msg.includes("Shader compile") ||
-          msg.includes("Too many active WebGL")
-        console.error("[CombinedVideoTransformer] BackgroundTransformer init failed:", err)
-        // On transient webgl/wasm errors, try to lose context immediately so
-        // the next retry doesn't hit the same limit. Don't permanently mark
-        // unsupported — it recovers on next processor instance.
-        if (isTransient) {
-          try {
-            this._bgTransformer?.gl?.getExtension("WEBGL_lose_context")?.loseContext()
-          } catch {}
-          try {
-            this.gl?.getExtension("WEBGL_lose_context")?.loseContext()
-          } catch {}
+    return chainWasmInit(() =>
+      withIsolatedModule(async () => {
+        if (this._bgTransformerReady || this._bgUnsupported || !this._initOpts) return
+        if (this._bgInitializing) return
+        this._bgInitializing = true
+        try {
+          this._bgTransformer = new BackgroundTransformer({ ...this._bgOptions })
+          await this._bgTransformer.init(this._initOpts)
+          this._bgTransformerReady = true
+        } catch (err) {
+          const msg = String(err?.message || err || "")
+          const isTransient =
+            msg.includes("Module.arguments") ||
+            msg.includes("arguments_") ||
+            msg.includes("Shader compile") ||
+            msg.includes("Too many active WebGL")
+          console.error("[CombinedVideoTransformer] BackgroundTransformer init failed:", err)
+          if (isTransient) {
+            try {
+              this._bgTransformer?.gl?.getExtension("WEBGL_lose_context")?.loseContext()
+            } catch {}
+            try {
+              this.gl?.getExtension("WEBGL_lose_context")?.loseContext()
+            } catch {}
+          }
+          this._bgTransformer = null
+          if (!isTransient) {
+            this._bgUnsupported = true
+          }
+        } finally {
+          this._bgInitializing = false
         }
-        this._bgTransformer = null
-        if (!isTransient) {
-          this._bgUnsupported = true
-        }
-      } finally {
-        this._bgInitializing = false
-      }
-    })
+      })
+    )
   }
 
   /**
@@ -176,26 +192,28 @@ export class CombinedVideoTransformer extends VideoTransformer {
    */
   async _ensureFaceMesh() {
     if (this._faceMeshReady || this._faceMeshInitializing) return
-    return chainWasmInit(async () => {
-      if (this._faceMeshReady || !this) return
-      if (this._faceMeshInitializing) return
-      this._faceMeshInitializing = true
-      try {
-        this._faceMesh = new FaceMeshProcessor()
-        await this._faceMesh.init()
-        this._faceMeshReady = this._faceMesh.initialized
-        if (!this._faceMeshReady) {
-          console.warn(
-            "[CombinedVideoTransformer] FaceMesh init failed — falling back to global filters"
-          )
+    return chainWasmInit(() =>
+      withIsolatedModule(async () => {
+        if (this._faceMeshReady || !this) return
+        if (this._faceMeshInitializing) return
+        this._faceMeshInitializing = true
+        try {
+          this._faceMesh = new FaceMeshProcessor()
+          await this._faceMesh.init()
+          this._faceMeshReady = this._faceMesh.initialized
+          if (!this._faceMeshReady) {
+            console.warn(
+              "[CombinedVideoTransformer] FaceMesh init failed — falling back to global filters"
+            )
+          }
+        } catch (err) {
+          console.error("[CombinedVideoTransformer] FaceMeshProcessor init error:", err)
+          this._faceMesh = null
+        } finally {
+          this._faceMeshInitializing = false
         }
-      } catch (err) {
-        console.error("[CombinedVideoTransformer] FaceMeshProcessor init error:", err)
-        this._faceMesh = null
-      } finally {
-        this._faceMeshInitializing = false
-      }
-    })
+      })
+    )
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
@@ -784,8 +802,6 @@ export class CombinedVideoTransformer extends VideoTransformer {
     // ignore rotation metadata and display raw pixels.
     if (!hasBeauty && !hasBg) {
       if (rotation === 0) {
-        // eslint-disable-next-line no-console
-        console.log("[DEBUG-iphone] transform passthrough", { rotation, hasBeauty, hasBg, fw: frame.displayWidth, fh: frame.displayHeight })
         controller.enqueue(frame)
         return
       }
@@ -795,8 +811,6 @@ export class CombinedVideoTransformer extends VideoTransformer {
     const ts = frame.timestamp
     const fw = Math.max(1, Math.round(frame.displayWidth))
     const fh = Math.max(1, Math.round(frame.displayHeight))
-    // eslint-disable-next-line no-console
-    console.log("[DEBUG-iphone] transform bake", { rotation, hasBeauty, hasBg, fw, fh, ts })
 
     if (!isFinite(fw) || !isFinite(fh)) {
       controller.enqueue(frame)
