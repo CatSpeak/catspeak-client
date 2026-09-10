@@ -28,6 +28,19 @@ export const DEFAULT_BG_OPTIONS = {
   imagePath: undefined,
 }
 
+// ── Global wasm init serialization ───────────────────────────────────────
+// mediapipe/face_mesh and @mediapipe/tasks-vision both use Emscripten
+// Module globals. Concurrent instantiation triggers
+// "Module.arguments has been replaced with plain arguments_" abort.
+// Chain all wasm inits through a single promise.
+let wasmInitChain = Promise.resolve()
+const chainWasmInit = (fn) => {
+  const p = wasmInitChain.then(fn, fn)
+  // Keep chain alive even if fn rejects
+  wasmInitChain = p.catch(() => {})
+  return p
+}
+
 /**
  * A single VideoTransformer that handles beauty effects (Canvas 2D filters +
  * face-aware targeted effects via MediaPipe Face Mesh) as a pre-processing step,
@@ -114,27 +127,34 @@ export class CombinedVideoTransformer extends VideoTransformer {
    */
   async _ensureBgTransformer() {
     if (this._bgTransformerReady || this._bgInitializing || this._bgUnsupported || !this._initOpts) return
-    // Background segmentation requires WebGL2 + OffscreenCanvas + VideoFrame +
-    // createImageBitmap (see BackgroundTransformer.isSupported). ProcessorWrapper
-    // support (Canvas 2D) is NOT enough. If the browser can't run MediaPipe
-    // segmentation we mark it unsupported so background degrades gracefully
-    // instead of silently failing every frame.
     if (!BackgroundTransformer.isSupported) {
       this._bgUnsupported = true
       return
     }
-    this._bgInitializing = true
-    try {
-      this._bgTransformer = new BackgroundTransformer({ ...this._bgOptions })
-      await this._bgTransformer.init(this._initOpts)
-      this._bgTransformerReady = true
-    } catch (err) {
-      console.error("[CombinedVideoTransformer] BackgroundTransformer init failed:", err)
-      this._bgTransformer = null
-      this._bgUnsupported = true
-    } finally {
-      this._bgInitializing = false
-    }
+    // Serialize wasm init to avoid concurrent Module.arguments abort
+    return chainWasmInit(async () => {
+      if (this._bgTransformerReady || this._bgUnsupported || !this._initOpts) return
+      if (this._bgInitializing) return
+      this._bgInitializing = true
+      try {
+        this._bgTransformer = new BackgroundTransformer({ ...this._bgOptions })
+        await this._bgTransformer.init(this._initOpts)
+        this._bgTransformerReady = true
+      } catch (err) {
+        const msg = String(err?.message || err)
+        const isArgumentsAbort = msg.includes("Module.arguments") || msg.includes("arguments_")
+        console.error("[CombinedVideoTransformer] BackgroundTransformer init failed:", err)
+        this._bgTransformer = null
+        // Don't permanently mark unsupported on transient wasm arguments abort;
+        // it recovers on next processor instance / retry. Only hard unsupported
+        // for isSupported=false stays permanent.
+        if (!isArgumentsAbort) {
+          this._bgUnsupported = true
+        }
+      } finally {
+        this._bgInitializing = false
+      }
+    })
   }
 
   /**
@@ -144,22 +164,26 @@ export class CombinedVideoTransformer extends VideoTransformer {
    */
   async _ensureFaceMesh() {
     if (this._faceMeshReady || this._faceMeshInitializing) return
-    this._faceMeshInitializing = true
-    try {
-      this._faceMesh = new FaceMeshProcessor()
-      await this._faceMesh.init()
-      this._faceMeshReady = this._faceMesh.initialized
-      if (!this._faceMeshReady) {
-        console.warn(
-          "[CombinedVideoTransformer] FaceMesh init failed — falling back to global filters"
-        )
+    return chainWasmInit(async () => {
+      if (this._faceMeshReady || !this) return
+      if (this._faceMeshInitializing) return
+      this._faceMeshInitializing = true
+      try {
+        this._faceMesh = new FaceMeshProcessor()
+        await this._faceMesh.init()
+        this._faceMeshReady = this._faceMesh.initialized
+        if (!this._faceMeshReady) {
+          console.warn(
+            "[CombinedVideoTransformer] FaceMesh init failed — falling back to global filters"
+          )
+        }
+      } catch (err) {
+        console.error("[CombinedVideoTransformer] FaceMeshProcessor init error:", err)
+        this._faceMesh = null
+      } finally {
+        this._faceMeshInitializing = false
       }
-    } catch (err) {
-      console.error("[CombinedVideoTransformer] FaceMeshProcessor init error:", err)
-      this._faceMesh = null
-    } finally {
-      this._faceMeshInitializing = false
-    }
+    })
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

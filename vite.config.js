@@ -16,6 +16,16 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    optimizeDeps: {
+      // mediapipe wasm uses Emscripten Module['arguments'] which esbuild
+      // incorrectly minifies to plain `arguments_` causing
+      // "Module.arguments has been replaced with plain arguments_" abort.
+      // Exclude from pre-bundle to keep original wasm loader intact.
+      exclude: ["@mediapipe/tasks-vision", "@mediapipe/face_mesh"],
+    },
+    esbuild: {
+      keepNames: true,
+    },
     server: {
       proxy: {
         "/api/v1/Instructors": {
@@ -100,6 +110,7 @@ export default defineConfig(({ mode }) => {
             "react-vendor": ["react", "react-dom", "react-router-dom"],
             "redux-vendor": ["@reduxjs/toolkit", "react-redux"],
             "mediapipe-face": ["@mediapipe/face_mesh"],
+            "mediapipe-tasks": ["@mediapipe/tasks-vision"],
           },
         },
         onwarn(warning, warn) {
