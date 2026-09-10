@@ -1,17 +1,13 @@
-import { useState, useEffect } from "react"
 import {
   useStartSubtitlesMutation,
   useStopSubtitlesMutation,
-  useGetSubtitleStatusQuery,
 } from "@/store/api/subtitlesApi"
-import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 
 /**
- * Manages subtitle start/stop lifecycle.
+ * Manages subtitle start/stop lifecycle on-demand per user.
  *
- * - startSubtitles(language) dispatches the room-stt agent and enables the overlay
- * - stopSubtitles()          removes the dispatch and hides the overlay
- * - On mount, syncs with server status so users who join mid-session see active subtitles
+ * - startSubtitles(language) starts STT subscription on backend and enables the overlay
+ * - stopSubtitles()          removes STT subscription on backend and hides the overlay
  *
  * `subtitleSupportedLangs` is derived from room.languageType so no extra API call
  * is required before presenting the language picker to the user.
@@ -22,18 +18,10 @@ export const useSubtitleControls = ({
   setShowRoomSubtitles,
   setSubtitleSelectedLanguage,
 } = {}) => {
-  const [isSubtitleActive, setIsSubtitleActive] = useState(false)
-  const [dispatchId, setDispatchId] = useState(null)
-
   const [startMutation, { isLoading: isStarting }] = useStartSubtitlesMutation()
   const [stopMutation,  { isLoading: isStopping  }] = useStopSubtitlesMutation()
 
-  // Poll server once on mount to sync with any already-active subtitle session
-  const { data: statusData } = useGetSubtitleStatusQuery(sessionId, {
-    skip: !sessionId,
-  })
-
-  // Derive the two supported language codes from room metadata
+  // Derive the supported language codes from room metadata
   const LANG_MAP = {
     English: "en",
     Chinese: "zh",
@@ -51,33 +39,10 @@ export const useSubtitleControls = ({
     ? communityLang
     : roomLangCode
 
-  // Sync local state when the server reports an active dispatch
-  useEffect(() => {
-    if (!statusData) return
-    if (statusData.active && statusData.dispatchId && !isSubtitleActive) {
-      setDispatchId(statusData.dispatchId)
-      setIsSubtitleActive(true)
-      setShowRoomSubtitles?.(true)
-      // Default display language to community language from URL
-      setSubtitleSelectedLanguage?.((prev) =>
-        prev ?? defaultDisplayLang
-      )
-    } else if (!statusData.active && isSubtitleActive) {
-      // Agent stopped externally (e.g. another user stopped it)
-      setDispatchId(null)
-      setIsSubtitleActive(false)
-      setShowRoomSubtitles?.(false)
-      setSubtitleSelectedLanguage?.(null)
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusData])
-
   const startSubtitles = async (language) => {
     try {
       const chosenLang = language || defaultDisplayLang
-      const result = await startMutation({ sessionId, language: chosenLang }).unwrap()
-      setDispatchId(result.dispatchId)
-      setIsSubtitleActive(true)
+      await startMutation({ sessionId, language: chosenLang }).unwrap()
       setSubtitleSelectedLanguage?.(chosenLang)
       setShowRoomSubtitles?.(true)
     } catch (err) {
@@ -91,28 +56,23 @@ export const useSubtitleControls = ({
   }
 
   const stopSubtitles = async () => {
-    const targetDispatchId = dispatchId || statusData?.dispatchId
-    if (targetDispatchId) {
-      try {
-        await stopMutation({ sessionId, dispatchId: targetDispatchId }).unwrap()
-      } catch (err) {
-        console.error("[useSubtitleControls] Failed to stop subtitles:", err)
-      }
+    try {
+      await stopMutation({ sessionId }).unwrap()
+    } catch (err) {
+      console.error("[useSubtitleControls] Failed to stop subtitles:", err)
+    } finally {
+      setShowRoomSubtitles?.(false)
+      setSubtitleSelectedLanguage?.(null)
     }
-    setDispatchId(null)
-    setIsSubtitleActive(false)
-    setShowRoomSubtitles?.(false)
-    setSubtitleSelectedLanguage?.(null)
   }
 
   return {
-    isSubtitleActive,
     isStarting,
     isStopping,
-    dispatchId,
     subtitleSupportedLangs,
     startSubtitles,
     changeSubtitleLanguage,
     stopSubtitles,
   }
 }
+

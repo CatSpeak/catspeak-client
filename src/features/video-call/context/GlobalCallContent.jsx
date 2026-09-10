@@ -1176,7 +1176,7 @@ const GlobalCallContent = ({
     setShowRoomSubtitles,
     subtitleSelectedLanguage,
     setSubtitleSelectedLanguage,
-    isSubtitleActive: subtitleControls.isSubtitleActive,
+    isSubtitleActive: showRoomSubtitles,
     isStartingSubtitles: subtitleControls.isStarting,
     isStoppingSubtitles: subtitleControls.isStopping,
     subtitleSupportedLangs: subtitleControls.subtitleSupportedLangs,

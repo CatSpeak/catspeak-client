@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, useMemo } from "react"
-import { Globe, ChevronDown, X, Check } from "lucide-react"
+import { Globe, X, Check } from "lucide-react"
 import { useSubtitles } from "@/features/video-call/hooks/useSubtitles"
-import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Modal from "@/shared/components/ui/Modal"
