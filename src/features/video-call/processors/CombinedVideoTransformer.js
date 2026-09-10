@@ -141,14 +141,26 @@ export class CombinedVideoTransformer extends VideoTransformer {
         await this._bgTransformer.init(this._initOpts)
         this._bgTransformerReady = true
       } catch (err) {
-        const msg = String(err?.message || err)
-        const isArgumentsAbort = msg.includes("Module.arguments") || msg.includes("arguments_")
+        const msg = String(err?.message || err || "")
+        const isTransient =
+          msg.includes("Module.arguments") ||
+          msg.includes("arguments_") ||
+          msg.includes("Shader compile") ||
+          msg.includes("Too many active WebGL")
         console.error("[CombinedVideoTransformer] BackgroundTransformer init failed:", err)
+        // On transient webgl/wasm errors, try to lose context immediately so
+        // the next retry doesn't hit the same limit. Don't permanently mark
+        // unsupported — it recovers on next processor instance.
+        if (isTransient) {
+          try {
+            this._bgTransformer?.gl?.getExtension("WEBGL_lose_context")?.loseContext()
+          } catch {}
+          try {
+            this.gl?.getExtension("WEBGL_lose_context")?.loseContext()
+          } catch {}
+        }
         this._bgTransformer = null
-        // Don't permanently mark unsupported on transient wasm arguments abort;
-        // it recovers on next processor instance / retry. Only hard unsupported
-        // for isSupported=false stays permanent.
-        if (!isArgumentsAbort) {
+        if (!isTransient) {
           this._bgUnsupported = true
         }
       } finally {
@@ -954,7 +966,22 @@ export class CombinedVideoTransformer extends VideoTransformer {
       // that would cause next init to fail with Shader compile failed: null).
       if (this._bgTransformer) {
         try {
+          // Explicitly lose WebGL context to avoid "Too many active WebGL
+          // contexts" warning (browser limit ~16). BackgroundTransformer
+          // holds its own gl, CombinedVideoTransformer holds this.gl.
+          const gls = [this._bgTransformer.gl, this.gl].filter(Boolean)
+          for (const gl of gls) {
+            try {
+              gl.getExtension("WEBGL_lose_context")?.loseContext()
+            } catch {}
+          }
           await this._bgTransformer.destroy().catch(() => {})
+        } catch {}
+      } else if (this.gl) {
+        // No bg transformer but base VideoTransformer still has a gl from
+        // super.init — lose it explicitly.
+        try {
+          this.gl.getExtension("WEBGL_lose_context")?.loseContext()
         } catch {}
       }
       this._bgTransformer = null
@@ -967,6 +994,10 @@ export class CombinedVideoTransformer extends VideoTransformer {
       this._initOpts = null
       this._smoothedLandmarks = null
       await super.destroy()
+      // Double-lose after super.destroy in case it recreated gl
+      try {
+        this.gl?.getExtension("WEBGL_lose_context")?.loseContext()
+      } catch {}
     })
   }
 }
