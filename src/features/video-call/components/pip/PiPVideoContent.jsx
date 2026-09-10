@@ -56,7 +56,7 @@ const DominantVideo = ({ participant }) => {
           autoPlay
           playsInline
           muted={isLocal}
-          className={`w-full h-full object-cover ${isLocal ? "-scale-x-100" : ""}`}
+          className={`w-full h-full object-cover ${isLocal ? "transform -scale-x-100" : ""}`}
         />
       ) : (
         <div

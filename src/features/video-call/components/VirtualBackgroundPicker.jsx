@@ -18,11 +18,20 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
     useGetSampleBackgroundsQuery()
   const samples = Array.isArray(samplesResponse) ? samplesResponse : []
 
-  // Fetch current active background
-  const { data: currentBackgroundResponse } = useGetCurrentBackgroundQuery()
-  const activeUrl = currentBackgroundResponse?.activeBackgroundUrl ?? null
+  // Fetch current active background — handle both single-level and
+  // double-nested (data.data) shapes produced by baseApi normalization, and
+  // force refetch on mount so re-entering waiting room always reflects server.
+  const { data: currentBackgroundResponse } = useGetCurrentBackgroundQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
+  const activeUrl =
+    currentBackgroundResponse?.activeBackgroundUrl ??
+    currentBackgroundResponse?.data?.activeBackgroundUrl ??
+    null
   const customUploadedUrl =
-    currentBackgroundResponse?.customUploadedBackgroundUrl ?? null
+    currentBackgroundResponse?.customUploadedBackgroundUrl ??
+    currentBackgroundResponse?.data?.customUploadedBackgroundUrl ??
+    null
 
   const [selectedUrl, setSelectedUrl] = useState(activeUrl)
   const [isUploading, setIsUploading] = useState(false)
@@ -73,11 +82,12 @@ const VirtualBackgroundPicker = ({ onApply, className = "p-4" }) => {
       await uploadCustom(formData).unwrap()
 
       const res = await getCurrent().unwrap()
-      const uploadedUrl = res?.customUploadedBackgroundUrl ?? null
+      const uploadedUrl = res?.customUploadedBackgroundUrl ?? res?.data?.customUploadedBackgroundUrl ?? null
 
       if (uploadedUrl) {
         // Ensure it's active
-        if (res?.activeBackgroundUrl !== uploadedUrl) {
+        const resActive = res?.activeBackgroundUrl ?? res?.data?.activeBackgroundUrl ?? null
+        if (resActive !== uploadedUrl) {
           await setActive({ backgroundUrl: uploadedUrl }).unwrap()
         }
         setSelectedUrl(uploadedUrl)

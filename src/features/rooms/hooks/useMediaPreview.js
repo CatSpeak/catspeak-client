@@ -54,13 +54,31 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     ProcessorWrapper.isSupported ? "idle" : "unsupported",
   )
 
-  const { data: bgData } = useGetCurrentBackgroundQuery()
+  const { data: bgData } = useGetCurrentBackgroundQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
+  // bgData === undefined => still loading (don't touch processor yet).
+  // bgData === null/object with null url => explicit "None" (disabled).
   const virtualBackgroundUrl =
-    bgData?.activeBackgroundUrl ?? bgData?.data?.activeBackgroundUrl
+    bgData === undefined
+      ? undefined
+      : (bgData?.activeBackgroundUrl ?? bgData?.data?.activeBackgroundUrl ?? null)
 
-  // Update background if it changes (via CombinedVideoTransformer.updateTransformerOptions)
+  // Keep latest bg url in a ref so getMediaStream never captures a stale
+  // closure (React re-creates getMediaStream each render, but an already-running
+  // async getMediaStream would still see the old value).
+  const virtualBackgroundUrlRef = useRef(virtualBackgroundUrl)
+  useEffect(() => {
+    virtualBackgroundUrlRef.current = virtualBackgroundUrl
+  }, [virtualBackgroundUrl])
+
+  // Update background if it changes OR when processor becomes ready.
+  // Previously this effect only watched virtualBackgroundUrl, so if the url
+  // was already known before the processor existed, the effect aborted
+  // (processor null) and never retried — the re-enter bug.
   useEffect(() => {
     if (!processorRef.current) return
+    if (virtualBackgroundUrl === undefined) return // still loading
     let bgOptions
     if (virtualBackgroundUrl) {
       bgOptions = { backgroundDisabled: false, imagePath: virtualBackgroundUrl, blurRadius: undefined }
@@ -70,7 +88,7 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
     processorRef.current
       .updateTransformerOptions({ bgOptions })
       .catch((err) => console.error("[useMediaPreview] Failed to update bg:", err))
-  }, [virtualBackgroundUrl])
+  }, [virtualBackgroundUrl, processorStatus])
 
   // ── Poll localStorage for beauty changes ─────────────────────────────
   // The pre-join BeautyPicker only persists to localStorage; we can't alter
@@ -229,12 +247,17 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
               .catch(() => {})
           }
 
-          // Apply virtual background if one is already active
-          if (virtualBackgroundUrl) {
+          // Apply virtual background if one is already active.
+          // Use the ref (latest value) instead of the closure-captured
+          // virtualBackgroundUrl to avoid stale closure when getMediaStream
+          // was invoked before a re-render that brought the bg url.
+          const currentBgUrl = virtualBackgroundUrlRef.current
+          if (currentBgUrl !== undefined) {
+            const bgOptions = currentBgUrl
+              ? { backgroundDisabled: false, imagePath: currentBgUrl, blurRadius: undefined }
+              : { backgroundDisabled: true, imagePath: undefined, blurRadius: undefined }
             await newProcessor
-              .updateTransformerOptions({
-                bgOptions: { backgroundDisabled: false, imagePath: virtualBackgroundUrl, blurRadius: undefined },
-              })
+              .updateTransformerOptions({ bgOptions })
               .catch(() => {})
           }
 

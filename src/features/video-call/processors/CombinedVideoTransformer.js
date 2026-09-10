@@ -739,15 +739,22 @@ export class CombinedVideoTransformer extends VideoTransformer {
   async transform(frame, controller) {
     const hasBeauty = this._hasBeauty()
     const hasBg = this._hasBg()
+    const rotation = Number(frame.rotation) || 0
 
-    // Passthrough: nothing to do
+    // Passthrough only when no effects AND no orientation to fix.
+    // On iPhone portrait (rotation 90/270) the frame must be baked upright
+    // even without beauty/bg — otherwise the preview (waiting room & bg modal)
+    // appears rotated 90° sideways because MediaStreamTrackGenerator frames
+    // ignore rotation metadata and display raw pixels.
     if (!hasBeauty && !hasBg) {
-      controller.enqueue(frame)
-      return
+      if (rotation === 0) {
+        controller.enqueue(frame)
+        return
+      }
+      // Non-zero rotation (90/180/270): fall through to bake rotation into canvas.
     }
 
     const ts = frame.timestamp
-    const rotation = Number(frame.rotation) || 0
     const fw = Math.max(1, Math.round(frame.displayWidth))
     const fh = Math.max(1, Math.round(frame.displayHeight))
 
@@ -893,7 +900,16 @@ export class CombinedVideoTransformer extends VideoTransformer {
     if (opts.bgOptions !== undefined) {
       this._bgOptions = { ...this._bgOptions, ...opts.bgOptions }
       if (this._bgTransformerReady) {
-        this._bgTransformer.update(this._bgOptions)
+        this._bgTransformer.update(this._bgOptions).catch((err) => {
+          console.error("[CombinedVideoTransformer] BackgroundTransformer update failed:", err)
+        })
+      } else if (this._hasBg() && this._initOpts && !this._bgInitializing && !this._bgUnsupported) {
+        // Eagerly start init when bg becomes enabled before the next frame.
+        // Previously we only lazy-initialized inside transform(), so the first
+        // frame after enabling bg would still show no background. Triggering
+        // early reduces that flicker and also handles the re-enter case where
+        // the processor is created with bg already enabled.
+        this._ensureBgTransformer().catch(() => {})
       }
     }
   }
