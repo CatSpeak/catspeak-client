@@ -13,7 +13,7 @@ const categoryIconMap = {
   other: MoreHorizontal,
 }
 
-export default function BugReportModal({ isOpen, open, onClose, initialTitle = "", initialDescription = "" }) {
+export default function BugReportModal({ isOpen, open, onClose, initialTitle = "", initialDescription = "", roomContext = null }) {
   const isModalOpen = Boolean(open ?? isOpen)
 
   const {
@@ -26,12 +26,15 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
     screenshotDataUrl,
     screenshotUrl,
     isCapturing,
+    isHiddenForCapture,
     previewOpen,
     setPreviewOpen,
     showConfirm,
     isLoading,
     categoryOptions,
     handleToggleScreenshot,
+    handleRetakeScreenshot,
+    handleRemoveScreenshot,
     handleRequestClose,
     confirmDiscard,
     cancelDiscard,
@@ -41,7 +44,12 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
     initialTitle,
     initialDescription,
     onClose,
+    roomContext,
   })
+
+  // Q4/Q7: đang chụp thì unmount modal tạm để html2canvas không dính form.
+  // Hook đã delay 350ms cho animation đóng xong. Render nothing để lộ room bên dưới.
+  if (isHiddenForCapture) return null
 
   // enrich options with icons for dropdown
   const enrichedOptions = categoryOptions.map((opt) => {
@@ -102,6 +110,12 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
         }
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-[15px] pt-3">
+          {/* Q6: dòng xám room context, không cho sửa */}
+          {(roomContext?.roomId || roomContext?.roomName) && (
+            <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
+              Báo lỗi từ phòng: {roomContext.roomName || roomContext.roomId}
+            </div>
+          )}
           {/* Category */}
           <div className="flex flex-col gap-1.5">
             <label className="text-[13.5px] font-medium leading-5 text-[#374151]">
@@ -170,6 +184,38 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
             </button>
             {isCapturing && <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#6B7280]"><Loader2 size={12} className="animate-spin" /> Đang chụp...</span>}
           </div>
+
+          {/* Q7: thumbnail + Chụp lại / Xóa. Q8: ghi chú video có thể đen */}
+          {(screenshotDataUrl || screenshotUrl) && (
+            <div className="flex flex-col gap-2 rounded-2xl border border-[#E5E7EB] bg-gray-50 p-3">
+              <img
+                src={screenshotDataUrl || screenshotUrl}
+                alt="Screenshot preview"
+                className="max-h-40 w-full rounded-xl border border-slate-200 object-contain bg-white"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleRetakeScreenshot}
+                  disabled={isCapturing || isLoading}
+                  className="rounded-full border border-[#E5E7EB] bg-white px-4 py-1.5 text-[13px] font-medium text-[#374151] shadow-sm transition hover:bg-gray-100 disabled:opacity-60"
+                >
+                  Chụp lại
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRemoveScreenshot}
+                  disabled={isCapturing || isLoading}
+                  className="rounded-full border border-[#E5E7EB] bg-white px-4 py-1.5 text-[13px] font-medium text-red-600 shadow-sm transition hover:bg-red-50 disabled:opacity-60"
+                >
+                  Xóa ảnh
+                </button>
+              </div>
+              <p className="text-[12px] leading-5 text-[#6B7280]">
+                Phần video có thể hiển thị đen do giới hạn trình duyệt — header/chat/lỗi UI vẫn đủ để debug.
+              </p>
+            </div>
+          )}
         </form>
       </Modal>
 

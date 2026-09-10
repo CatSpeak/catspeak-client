@@ -10,7 +10,6 @@ import {
   Circle,
   Loader2,
   Copy,
-  Info,
   Settings,
   BarChart2,
   Split,
@@ -57,8 +56,6 @@ const MoreMenuMobileGeneralView = ({
     isTogglingRecording,
     handleToggleRecording,
     confirmStopRecording,
-    showTroubleshoot,
-    setShowTroubleshoot,
     room,
     closingRemainingSeconds,
     isSubtitleActive,
@@ -284,17 +281,8 @@ const MoreMenuMobileGeneralView = ({
         {t?.rooms?.videoCall?.copyLink || "Sao chép liên kết"}
       </button>
 
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => {
-            setShowTroubleshoot(!showTroubleshoot)
-            setShowMoreMenu(false)
-          }}
-          className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"
-        >
-          <Info size={24} />
-        </button>
-
+      {/* Q10: troubleshoot đã move ra RoomHeader, xóa khỏi More menu */}
+      <div className="grid grid-cols-1 gap-3">
         <button
           onClick={() => setShowMobileSettings(true)}
           className="h-16 bg-[#F5F5F5] rounded-xl flex items-center justify-center"

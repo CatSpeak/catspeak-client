@@ -13,7 +13,6 @@ import {
   UserCircle,
   MonitorUp,
   Settings,
-  RefreshCcw,
   BarChart2,
   Clapperboard,
 } from "lucide-react"
@@ -51,8 +50,6 @@ const MoreMenuDesktopView = ({
     isAISession,
     enterPiP,
     isPiPSupported,
-    showTroubleshoot,
-    setShowTroubleshoot,
     room,
     user,
     showBreakout,
@@ -289,17 +286,7 @@ const MoreMenuDesktopView = ({
         />
       )}
 
-      <MenuItem
-        onClick={() => {
-          setShowTroubleshoot(!showTroubleshoot)
-          setShowMoreMenu(false)
-        }}
-        icon={<RefreshCcw size={20} className="shrink-0" />}
-        label={
-          t?.rooms?.videoCall?.reconnect || "Troubleshoot connection"
-        }
-      />
-
+      {/* Q10: troubleshoot đã move ra RoomHeader, xóa khỏi More menu */}
       <MenuItem
         onClick={() => {
           setActiveSettingsTab?.("audio-video")
