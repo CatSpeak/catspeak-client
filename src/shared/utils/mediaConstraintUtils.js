@@ -18,33 +18,38 @@ export const buildAudioConstraint = (deviceId) => {
 
 /**
  * Builds safe video constraints for getUserMedia, avoiding invalid exact device ID matching on iOS WebKit.
- * For mobile portrait (iPhone held vertical), requests portrait ideal resolution
- * (720×1280) so the camera delivers upright frames and the preview container
- * (aspect-[3/4] on mobile) fills without sideways cropping. Desktop keeps 16:9.
+ *
+ * Always requests LANDSCAPE ideal (1280×720) — even on mobile portrait.
+ * Rationale (measured on iPhone, ?iphonedbg overlay): requesting portrait
+ * ideal makes Safari return frames with portrait METADATA (720×1280,
+ * rotation:0) whose pixels are still landscape — an undetectable lie that
+ * no canvas code can correct (dims say portrait, content is sideways).
+ * Requesting landscape yields honest landscape frames, and
+ * CombinedVideoTransformer (forcePortrait → bake 270 for front camera)
+ * converts them to true portrait deterministically — the same path that
+ * already works in-room. The mobile 3/4 container then fills correctly.
  *
  * @param {string|null} deviceId - Target hardware camera ID
  * @returns {boolean|object} Video constraint
  */
 export const buildVideoConstraint = (deviceId) => {
-  const isMobilePortrait = (() => {
+  const isMobile = (() => {
     try {
       if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false
-      return window.matchMedia("(orientation: portrait)").matches && window.innerWidth < 768
+      return window.innerWidth < 768
     } catch {
       return false
     }
   })()
 
-  const portraitIdeal = isMobilePortrait
-    ? { width: { ideal: 720 }, height: { ideal: 1280 }, aspectRatio: { ideal: 0.5625 } }
-    : { width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 1.77778 } }
+  const landscapeIdeal = { width: { ideal: 1280 }, height: { ideal: 720 }, aspectRatio: { ideal: 1.77778 } }
 
   if (!deviceId || deviceId === "default") {
-    // Use ideal (not exact) so iOS Safari never fails on unsupported constraints,
-    // but hint the browser toward portrait on phones.
-    return isMobilePortrait ? { ...portraitIdeal, facingMode: { ideal: "user" } } : true
+    // Use ideal (not exact) so iOS Safari never fails on unsupported
+    // constraints. On phones add facingMode user (front camera).
+    return isMobile ? { ...landscapeIdeal, facingMode: { ideal: "user" } } : true
   }
-  return { deviceId: { exact: deviceId }, ...portraitIdeal }
+  return { deviceId: { exact: deviceId }, ...landscapeIdeal }
 }
 
 /**
