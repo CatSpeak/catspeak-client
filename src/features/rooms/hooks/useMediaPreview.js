@@ -11,6 +11,18 @@ import { LocalVideoTrack } from "livekit-client"
 import { ProcessorWrapper } from "@livekit/track-processors"
 import { CombinedVideoTransformer } from "@/features/video-call/processors/CombinedVideoTransformer"
 
+// ── Mobile portrait hint: iPhone held vertical still delivers landscape ──
+// frames (640x480 rotation:0). The transformer bakes the missing rotation
+// in canvas when this is true (no CSS rotate needed, so no letterbox).
+const isMobilePortraitView = () => {
+  try {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false
+    return window.matchMedia("(orientation: portrait)").matches && window.innerWidth < 768
+  } catch {
+    return false
+  }
+}
+
 // ── Beauty localStorage helpers (mirrored from useCombinedProcessor) ──
 
 const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
@@ -89,6 +101,26 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
       .updateTransformerOptions({ bgOptions })
       .catch((err) => console.error("[useMediaPreview] Failed to update bg:", err))
   }, [virtualBackgroundUrl, processorStatus])
+
+  // ── Keep portrait hint fresh on rotate/resize (mobile vertical) ───────
+  // If the user rotates the phone after the processor attached, the baked
+  // orientation must follow — otherwise portrait starts correct then goes
+  // sideways (or vice versa) until the camera is toggled.
+  useEffect(() => {
+    if (processorStatus !== "attached" || !processorRef.current) return
+    const sync = () => {
+      processorRef.current
+        ?.updateTransformerOptions({ forcePortrait: isMobilePortraitView(), facingMode: "user" })
+        .catch(() => {})
+    }
+    sync()
+    window.addEventListener("resize", sync)
+    window.addEventListener("orientationchange", sync)
+    return () => {
+      window.removeEventListener("resize", sync)
+      window.removeEventListener("orientationchange", sync)
+    }
+  }, [processorStatus])
 
   // ── Poll localStorage for beauty changes ─────────────────────────────
   // The pre-join BeautyPicker only persists to localStorage; we can't alter
@@ -202,8 +234,6 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
         constraints.video = buildVideoConstraint(customVideoId)
       }
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      // eslint-disable-next-line no-console
-      console.log("[DEBUG-iphone] getUserMedia", { constraints, isSupported: ProcessorWrapper.isSupported, tracks: stream.getVideoTracks().map(t=>({id:t.id, settings: t.getSettings?.(), readyState:t.readyState})) })
 
       // Apply beauty + virtual background to video track (via CombinedVideoTransformer)
       if (video && ProcessorWrapper.isSupported) {
@@ -244,6 +274,12 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
           }
           setProcessorStatus("attached")
 
+          // Tell the transformer the current orientation so it can bake the
+          // missing iPhone portrait rotation in canvas (front camera).
+          await newProcessor
+            .updateTransformerOptions({ forcePortrait: isMobilePortraitView(), facingMode: "user" })
+            .catch(() => {})
+
           // Apply stored beauty options from localStorage (pre-join settings)
           const storedBeauty = readStoredBeautyOptions()
           if (storedBeauty) {
@@ -278,9 +314,6 @@ export const useMediaPreview = ({ audioDeviceId, videoDeviceId } = {}) => {
             /* ignore */
           }
         }
-      } else if (video) {
-        // eslint-disable-next-line no-console
-        console.log("[DEBUG-iphone] Processor not supported, using raw track", { isSupported: ProcessorWrapper.isSupported })
       }
 
       if (!streamRef.current) {

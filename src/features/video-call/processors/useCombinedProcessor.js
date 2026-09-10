@@ -49,6 +49,18 @@ const persistBeautyOptions = (opts) => {
   } catch { /* quota exceeded — silently drop */ }
 }
 
+// Same mobile-portrait hint as waiting-room preview: iPhone held vertical
+// can deliver landscape frames (640x480 rotation:0); the transformer bakes
+// the missing rotation in canvas when this is true.
+const isMobilePortraitView = () => {
+  try {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false
+    return window.matchMedia("(orientation: portrait)").matches && window.innerWidth < 768
+  } catch {
+    return false
+  }
+}
+
 /**
  * Owns the single ProcessorWrapper<CombinedVideoTransformer> for the active call.
  *
@@ -253,6 +265,10 @@ export const useCombinedProcessor = () => {
         attachedTrackIdRef.current = track.sid ?? track.mediaStreamTrack?.id ?? null
         setProcessorStatus("attached")
 
+        await newProcessor
+          .updateTransformerOptions({ forcePortrait: isMobilePortraitView(), facingMode: "user" })
+          .catch(() => {})
+
         // Apply any beauty options the user set before joining
         const stored = readStoredBeautyOptions()
         if (stored) {
@@ -362,6 +378,23 @@ export const useCombinedProcessor = () => {
       .updateTransformerOptions({ bgOptions })
       .catch((err) => console.error("[useCombinedProcessor] Failed to update bg:", err))
   }, [activeBackgroundUrl, processorStatus])
+
+  // ── Keep portrait hint fresh on rotate/resize (mobile vertical) ──────
+  useEffect(() => {
+    if (processorStatus !== "attached" || !processorRef.current) return
+    const sync = () => {
+      processorRef.current
+        ?.updateTransformerOptions({ forcePortrait: isMobilePortraitView(), facingMode: "user" })
+        .catch(() => {})
+    }
+    sync()
+    window.addEventListener("resize", sync)
+    window.addEventListener("orientationchange", sync)
+    return () => {
+      window.removeEventListener("resize", sync)
+      window.removeEventListener("orientationchange", sync)
+    }
+  }, [processorStatus])
 
   // ── switchBeauty — called from in-call BeautyPicker, persists to localStorage ──
   const switchBeauty = useCallback((beautyOptions) => {
