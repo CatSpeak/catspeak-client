@@ -80,6 +80,13 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _forcePortrait = false
   _facingMode = "user"
 
+  // ── [DIAG-v4 TEMP] per-frame orientation snapshot (plain assignment, no ──
+  // console spam). Surfaced on window.__iphoneDiag only when ?iphonedbg=1 so
+  // a phone without devtools can report: input dims, raw vs effective
+  // rotation, output dims. REMOVE before closing the iPhone rotation issue.
+  _lastDiag = null
+  _diagEnabled = false
+
   // ── BackgroundTransformer (lazy) ──────────────────────────────────────────
   _bgTransformer = null
   _bgTransformerReady = false
@@ -115,6 +122,14 @@ export class CombinedVideoTransformer extends VideoTransformer {
   async init(opts) {
     await super.init(opts)
     this._initOpts = opts
+    // [DIAG-v4 TEMP] gate window mirror to explicit debug flag only.
+    try {
+      this._diagEnabled =
+        typeof window !== "undefined" &&
+        window.location?.search?.includes("iphonedbg") === true
+    } catch {
+      this._diagEnabled = false
+    }
     this._initBeautyCanvas()
   }
 
@@ -819,6 +834,22 @@ export class CombinedVideoTransformer extends VideoTransformer {
     let effectiveRotation = rawRotation
     if (rawRotation === 0 && this._forcePortrait && fw > fh) {
       effectiveRotation = this._facingMode === "environment" ? 90 : 270
+    }
+
+    // [DIAG-v4 TEMP] snapshot before branching (cheap, no logging).
+    this._lastDiag = {
+      fw, fh,
+      rawRot: rawRotation,
+      effRot: effectiveRotation,
+      fp: this._forcePortrait,
+      fm: this._facingMode,
+      outW: effectiveRotation === 90 || effectiveRotation === 270 ? fh : fw,
+      outH: effectiveRotation === 90 || effectiveRotation === 270 ? fw : fh,
+      beauty: hasBeauty,
+      bg: hasBg,
+    }
+    if (this._diagEnabled) {
+      try { window.__iphoneDiag = this._lastDiag } catch { /* ignore */ }
     }
 
     // Passthrough only when no effects AND no orientation to fix.

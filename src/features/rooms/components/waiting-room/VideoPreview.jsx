@@ -1,8 +1,63 @@
-import React, { useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useMeetingAvatar } from "@/features/video-call/hooks/useMeetingAvatar"
+
+// [DIAG-v4 TEMP] On-screen orientation readout for iPhone debugging without
+// devtools. Rendered ONLY when URL has ?iphonedbg=1. Shows raw track
+// settings, element dims and transformer diag (window.__iphoneDiag).
+// REMOVE before closing the iPhone rotation issue.
+const IphoneDiagOverlay = ({ videoRef, localStream }) => {
+  const [snap, setSnap] = useState(null)
+  useEffect(() => {
+    let alive = true
+    const tick = () => {
+      if (!alive) return
+      try {
+        const el = videoRef.current
+        const t = localStream?.getVideoTracks?.()?.[0]
+        const s = t?.getSettings?.() || {}
+        const d = window.__iphoneDiag || null
+        setSnap({
+          settings: `${s.width || "?"}x${s.height || "?"} fm=${s.facingMode || "?"}`,
+          el: el ? `${el.videoWidth || 0}x${el.videoHeight || 0}` : "no-el",
+          in: d ? `${d.fw}x${d.fh}` : "?",
+          raw: d?.rawRot ?? "?",
+          eff: d?.effRot ?? "?",
+          fp: d ? String(d.fp) : "?",
+          out: d ? `${d.outW}x${d.outH}` : "?",
+          vw: window.innerWidth,
+        })
+      } catch {
+        /* ignore */
+      }
+    }
+    tick()
+    const iv = setInterval(tick, 500)
+    return () => {
+      alive = false
+      clearInterval(iv)
+    }
+  }, [videoRef, localStream])
+  if (!snap) return null
+  return (
+    <div className="absolute top-1 left-1 z-20 rounded bg-black/70 px-2 py-1 font-mono text-[10px] leading-tight text-lime-300">
+      <div>cam:{snap.settings}</div>
+      <div>el:{snap.el} win:{snap.vw}</div>
+      <div>in:{snap.in} raw:{snap.raw} eff:{snap.eff} fp:{snap.fp}</div>
+      <div>out:{snap.out}</div>
+    </div>
+  )
+}
+
+const showIphoneDiag = (() => {
+  try {
+    return typeof window !== "undefined" && window.location?.search?.includes("iphonedbg") === true
+  } catch {
+    return false
+  }
+})()
 
 const VideoPreview = ({
   localStream,
@@ -95,6 +150,9 @@ const VideoPreview = ({
     <div className="relative w-full max-w-[440px] lg:max-w-none flex flex-col items-center rounded-xl border border-[#F5F5F5] bg-[#FCFCFC]">
       {/* Mobile portrait: 3/4 vertical for face cam; desktop/tablet keeps 16:9 */}
       <div className="relative w-full aspect-[3/4] md:aspect-video overflow-hidden rounded-xl max-h-[65vh] md:max-h-none">
+        {showIphoneDiag && (
+          <IphoneDiagOverlay videoRef={videoRef} localStream={localStream} />
+        )}
         {/* Video Preview */}
         {localStream && (
           <video
