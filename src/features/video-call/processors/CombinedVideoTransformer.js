@@ -10,6 +10,7 @@ import {
   makeCanvas,
   createFeatheredMask,
 } from "./FaceMeshProcessor"
+import { computeOrientedDraw } from "./orientationMath"
 
 export const DEFAULT_BEAUTY_OPTIONS = {
   smoothing: 0,
@@ -774,28 +775,26 @@ export class CombinedVideoTransformer extends VideoTransformer {
    * Only rotation is baked in here — horizontal mirror stays a display-side
    * concern (CSS scaleX(-1)) so the processed track shared with other
    * participants remains non-mirrored. Returns the working [width, height].
+   *
+   * Geometry comes from computeOrientedDraw (orientationMath.js): rotate()
+   * itself swaps the axes for 90/270, so the frame is drawn at NATIVE dims.
+   * Drawing at swapped dims double-swaps — mapped rect overflows the canvas
+   * (hard crop = zoom) and under-fills the other axis (letterbox), which any
+   * downstream cover-fit then stretches into wide faces.
    */
   _drawFrameOriented(ctx, frame, cw, ch, rotationOverride) {
     const rotation = rotationOverride !== undefined ? rotationOverride : (Number(frame.rotation) || 0)
     const fw = Math.max(1, Math.round(frame.displayWidth))
     const fh = Math.max(1, Math.round(frame.displayHeight))
+    const d = computeOrientedDraw(rotation, fw, fh, cw, ch)
 
     ctx.save()
     ctx.filter = "none"
     ctx.clearRect(0, 0, cw, ch)
 
-    if (rotation === 90 || rotation === 270) {
-      // Swap output dims — caller sizes the canvas to [h, w] for these rotations.
-      ctx.translate(cw / 2, ch / 2)
-      ctx.rotate((rotation * Math.PI) / 180)
-      ctx.drawImage(frame, -fh / 2, -fw / 2, fh, fw)
-    } else if (rotation === 180) {
-      ctx.translate(cw, ch)
-      ctx.rotate(Math.PI)
-      ctx.drawImage(frame, 0, 0, fw, fh)
-    } else {
-      ctx.drawImage(frame, 0, 0, fw, fh)
-    }
+    ctx.translate(d.translate[0], d.translate[1])
+    if (d.rotate) ctx.rotate(d.rotate)
+    ctx.drawImage(frame, d.dx, d.dy, d.dw, d.dh)
 
     ctx.restore()
   }
@@ -827,13 +826,16 @@ export class CombinedVideoTransformer extends VideoTransformer {
     }
 
     // Effective rotation: trust frame metadata first; if none but caller
-    // hinted mobile portrait and sensor delivered landscape (iPhone 640x480
+    // hinted mobile portrait and sensor delivered landscape (iPhone 1280x720
     // rotation:0 in portrait hold), synthesize the missing rotation here so
-    // output is true portrait. Front camera needs 270, back needs 90.
+    // output is true portrait.
+    // ?iphonedbg evidence: eff:270 on front camera rendered upside-down
+    // (S=270 sensor content + 270 = 540 = 180), so the content needs +90,
+    // not +270. Proven by scripts/diag-orient-v6.cjs matrix check.
     const rawRotation = Number(frame.rotation) || 0
     let effectiveRotation = rawRotation
     if (rawRotation === 0 && this._forcePortrait && fw > fh) {
-      effectiveRotation = this._facingMode === "environment" ? 90 : 270
+      effectiveRotation = 90
     }
 
     // [DIAG-v4 TEMP] snapshot before branching (cheap, no logging).
