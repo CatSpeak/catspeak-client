@@ -7,6 +7,10 @@ import {
   Repeat,
   Square,
   MousePointerClick,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
 } from "lucide-react"
 
 const formatTime = (seconds) => {
@@ -19,16 +23,20 @@ const formatTime = (seconds) => {
 /**
  * WatchTogetherToolbar — action bar rendered BELOW the synced video
  * (never overlaid), so controls stay visible on desktop and mobile.
+ * The player itself is chromeless (controls=0): this is the only control
+ * surface. Mobile renders on black (YouTube-app style), desktop on white.
  *
  * Host: play / pause / ±10s / seek slider (local player calls only —
- * useHostSync's tracker publishes the transition to viewers) + change / stop.
- * Viewer: status title + persistent tap-to-sync. Volume/fullscreen stay on
- * the native YouTube controls inside the player.
+ * useHostSync's tracker publishes the transition to viewers) + volume /
+ * fullscreen (local-only) + change / stop.
+ * Viewer: title + volume / fullscreen (local-only) + persistent tap-to-sync.
+ * CC / quality pickers are intentionally dropped (YouTube auto quality).
  */
 const WatchTogetherToolbar = ({
   isHost,
   mediaTitle,
   playerRef,
+  mediaRef,
   onChangeVideo,
   onStop,
   isStopping = false,
@@ -39,21 +47,35 @@ const WatchTogetherToolbar = ({
   const strings = t?.rooms?.videoCall?.watchTogether ?? {}
   const [now, setNow] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [muted, setMuted] = useState(false)
+  const [volume, setVolume] = useState(100)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
-    if (!isHost) return
     const id = setInterval(() => {
       try {
-        const time = playerRef?.current?.getCurrentTime?.()
-        const total = playerRef?.current?.getDuration?.()
-        if (typeof time === "number" && Number.isFinite(time)) setNow(time)
-        if (typeof total === "number" && Number.isFinite(total)) setDuration(total)
+        if (isHost) {
+          const time = playerRef?.current?.getCurrentTime?.()
+          const total = playerRef?.current?.getDuration?.()
+          if (typeof time === "number" && Number.isFinite(time)) setNow(time)
+          if (typeof total === "number" && Number.isFinite(total)) setDuration(total)
+        }
+        const isMuted = playerRef?.current?.isMuted?.()
+        const level = playerRef?.current?.getVolume?.()
+        if (typeof isMuted === "boolean") setMuted(isMuted)
+        if (typeof level === "number" && Number.isFinite(level)) setVolume(level)
       } catch {
         // Player not ready yet — next tick retries.
       }
     }, 1000)
     return () => clearInterval(id)
   }, [isHost, playerRef])
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(!!document.fullscreenElement)
+    document.addEventListener("fullscreenchange", onChange)
+    return () => document.removeEventListener("fullscreenchange", onChange)
+  }, [])
 
   const seekBy = (delta) => {
     try {
@@ -77,12 +99,92 @@ const WatchTogetherToolbar = ({
     }
   }
 
+  const toggleMute = () => {
+    try {
+      if (muted) {
+        playerRef?.current?.unMute?.()
+        setMuted(false)
+      } else {
+        playerRef?.current?.mute?.()
+        setMuted(true)
+      }
+    } catch {
+      // No-op when player is tearing down.
+    }
+  }
+
+  const handleVolume = (value) => {
+    const next = Number(value)
+    if (!Number.isFinite(next)) return
+    try {
+      playerRef?.current?.setVolume?.(next)
+      if (next > 0 && muted) {
+        playerRef?.current?.unMute?.()
+        setMuted(false)
+      }
+      setVolume(next)
+    } catch {
+      // No-op when player is tearing down.
+    }
+  }
+
+  const toggleFullscreen = () => {
+    try {
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.()?.catch?.(() => {})
+      } else {
+        mediaRef?.current?.requestFullscreen?.()?.catch?.(() => {})
+      }
+    } catch {
+      // Fullscreen unsupported — no-op.
+    }
+  }
+
+  const iconButton =
+    "p-2 rounded-full text-white hover:bg-white/10 md:text-gray-700 md:hover:bg-gray-100 transition-colors"
+  const volumeButton = (
+    <button
+      type="button"
+      onClick={toggleMute}
+      className={iconButton}
+      aria-label={muted ? strings.unmute || "Bật tiếng" : strings.mute || "Tắt tiếng"}
+      title={muted ? strings.unmute || "Bật tiếng" : strings.mute || "Tắt tiếng"}
+    >
+      {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+    </button>
+  )
+  const volumeSlider = (
+    <input
+      type="range"
+      min={0}
+      max={100}
+      value={Math.round(volume)}
+      onChange={(e) => handleVolume(e.target.value)}
+      className="hidden md:block w-20 accent-red-600"
+      aria-label={strings.volume || "Âm lượng"}
+    />
+  )
+  const fullscreenButton = (
+    <button
+      type="button"
+      onClick={toggleFullscreen}
+      className={iconButton}
+      aria-label={isFullscreen ? strings.exitFullscreen || "Thoát toàn màn hình" : strings.fullscreen || "Toàn màn hình"}
+      title={isFullscreen ? strings.exitFullscreen || "Thoát toàn màn hình" : strings.fullscreen || "Toàn màn hình"}
+    >
+      {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+    </button>
+  )
+
   if (!isHost) {
     return (
-      <div className="flex items-center gap-2 border-t border-border bg-white px-3 py-2 shrink-0">
-        <p className="flex-1 min-w-0 truncate text-sm font-medium text-gray-800">
+      <div className="flex items-center gap-2 border-t border-white/10 bg-black px-3 py-2 shrink-0 md:border-border md:bg-white">
+        <p className="flex-1 min-w-0 truncate text-sm font-medium text-white md:text-gray-800">
           {mediaTitle || strings.hostWatching || "Chủ phòng đang phát video chung."}
         </p>
+        {volumeButton}
+        {volumeSlider}
+        {fullscreenButton}
         {needsTapToSync && (
           <button
             type="button"
@@ -98,15 +200,15 @@ const WatchTogetherToolbar = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 border-t border-border bg-white px-3 py-2 shrink-0">
+    <div className="flex flex-col gap-2 border-t border-white/10 bg-black px-3 py-2 shrink-0 md:border-border md:bg-white">
       <div className="flex items-center gap-2 min-w-0">
-        <p className="flex-1 min-w-0 truncate text-sm font-medium text-gray-800">
+        <p className="flex-1 min-w-0 truncate text-sm font-medium text-white md:text-gray-800">
           {mediaTitle}
         </p>
         <button
           type="button"
           onClick={onChangeVideo ?? undefined}
-          className="flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="flex shrink-0 items-center gap-1 rounded-full border border-white/20 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10 transition-colors md:border-border md:text-gray-700 md:hover:bg-gray-50"
         >
           <Repeat size={14} />
           {strings.changeVideo || "Đổi video"}
@@ -127,7 +229,7 @@ const WatchTogetherToolbar = ({
         <button
           type="button"
           onClick={() => playerRef?.current?.play?.()}
-          className="p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+          className={iconButton}
           aria-label={strings.play || "Phát"}
           title={strings.play || "Phát"}
         >
@@ -136,7 +238,7 @@ const WatchTogetherToolbar = ({
         <button
           type="button"
           onClick={() => playerRef?.current?.pause?.()}
-          className="p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+          className={iconButton}
           aria-label={strings.pause || "Tạm dừng"}
           title={strings.pause || "Tạm dừng"}
         >
@@ -145,7 +247,7 @@ const WatchTogetherToolbar = ({
         <button
           type="button"
           onClick={() => seekBy(-10)}
-          className="p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+          className={iconButton}
           aria-label={strings.back10s || "Lùi 10 giây"}
           title={strings.back10s || "Lùi 10 giây"}
         >
@@ -154,13 +256,13 @@ const WatchTogetherToolbar = ({
         <button
           type="button"
           onClick={() => seekBy(10)}
-          className="p-2 rounded-full hover:bg-gray-100 text-gray-700 transition-colors"
+          className={iconButton}
           aria-label={strings.forward10s || "Tiến 10 giây"}
           title={strings.forward10s || "Tiến 10 giây"}
         >
           <RotateCw size={18} />
         </button>
-        <span className="text-xs tabular-nums text-gray-500 shrink-0 ml-1">
+        <span className="text-xs tabular-nums text-white/70 shrink-0 ml-1 md:text-gray-500">
           {formatTime(now)}
         </span>
         <input
@@ -173,9 +275,12 @@ const WatchTogetherToolbar = ({
           className="flex-1 min-w-0 accent-red-600"
           aria-label={strings.seek || "Tua video"}
         />
-        <span className="text-xs tabular-nums text-gray-500 shrink-0">
+        <span className="text-xs tabular-nums text-white/70 shrink-0 md:text-gray-500">
           {formatTime(duration)}
         </span>
+        {volumeButton}
+        {volumeSlider}
+        {fullscreenButton}
       </div>
     </div>
   )

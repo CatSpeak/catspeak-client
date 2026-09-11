@@ -109,6 +109,7 @@ const VideoCallRoomContent = () => {
     (s) => s.videoCall,
   )
   const isHost = isHostFromContext
+  const mediaRef = useRef(null)
 
   const dispatch = useDispatch()
   const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
@@ -264,7 +265,7 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex flex-1 min-h-0 relative">
             {mediaActive && mediaVideoId ? (
-              <div className="flex h-full w-full min-h-0 flex-col overflow-y-auto md:overflow-hidden">
+              <div ref={mediaRef} className="flex h-full w-full min-h-0 flex-col overflow-y-auto bg-black md:overflow-hidden md:bg-transparent">
                 <div
                   className="w-full shrink-0 mx-auto"
                   style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}
@@ -276,9 +277,8 @@ const VideoCallRoomContent = () => {
                     onTapToSync={tapToSync}
                     onError={reportSyncError}
                     syncError={syncError}
-                    title={mediaTitle}
                     t={t}
-                    className="md:rounded-xl"
+                    className="rounded-none md:rounded-xl"
                   />
                 </div>
                 <div className="w-full shrink-0 mx-auto" style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}>
@@ -286,6 +286,7 @@ const VideoCallRoomContent = () => {
                     isHost={isMediaHost}
                     mediaTitle={mediaTitle}
                     playerRef={mediaPlayerRef}
+                    mediaRef={mediaRef}
                     onChangeVideo={() => setShowWatchTogether(true)}
                     onStop={stopMedia}
                     isStopping={isStoppingMedia}

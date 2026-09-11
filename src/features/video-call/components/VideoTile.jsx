@@ -6,6 +6,7 @@ import { Track, ParticipantEvent, TrackEvent } from "livekit-client"
 import { motion } from "framer-motion"
 
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import { getVideoTileRootClass } from "@/features/video-call/utils/videoTileClass"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getProfilePath } from "@/shared/utils/navigation"
@@ -22,7 +23,7 @@ import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
  *
  * @param {{ participant: import('livekit-client').Participant }} props
  */
-const VideoTileInner = ({ participant, onClick }) => {
+const VideoTileInner = ({ participant, onClick, compact = false }) => {
   const { t } = useLanguage()
   const isSpeaking = useIsSpeaking(participant)
   const { room, user, isHost: isHostFromContext } = useVideoCallContext()
@@ -204,9 +205,11 @@ const VideoTileInner = ({ participant, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`group relative h-full w-full min-h-[100px] overflow-hidden rounded-xl transition-all duration-200 ease-in-out [container-type:inline-size] ${
-        isVideoVisible ? "bg-neutral-900" : ""
-      } ${onClick ? "cursor-pointer" : ""}`}
+      className={getVideoTileRootClass({
+        compact,
+        isVideoVisible,
+        clickable: !!onClick,
+      })}
     >
       {/* Speaking Indicator Overlay */}
       <div
