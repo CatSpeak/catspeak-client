@@ -27,6 +27,7 @@ import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
 import SyncedYouTubePlayer from "@/features/video-call/components/SyncedYouTubePlayer"
 import MediaParticipantStrip from "@/features/video-call/components/MediaParticipantStrip"
+import WatchTogetherToolbar from "@/features/video-call/components/WatchTogetherToolbar"
 import WatchTogetherPanel from "@/features/video-call/components/WatchTogetherPanel"
 import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
@@ -260,29 +261,39 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex flex-1 min-h-0 relative">
             {mediaActive && mediaVideoId ? (
-              <div className="relative h-full w-full">
-                <SyncedYouTubePlayer
-                  ref={mediaPlayerRef}
-                  videoId={mediaVideoId}
-                  needsTapToSync={isMediaHost ? false : needsTapToSync}
-                  onTapToSync={tapToSync}
-                  onError={reportSyncError}
-                  syncError={syncError}
-                  title={mediaTitle}
-                  t={t}
-                />
-                {isMediaHost && (
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-auto">
-                    <button
-                      onClick={stopMedia}
-                      className="flex items-center gap-1.5 rounded-full bg-red-600/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
-                    >
-                      {t?.rooms?.videoCall?.watchTogether?.stopButton ||
-                        "Dừng video"}
-                    </button>
-                  </div>
-                )}
-                <MediaParticipantStrip participants={participants} />
+              <div className="flex h-full w-full min-h-0 flex-col overflow-y-auto md:overflow-hidden">
+                <div
+                  className="w-full shrink-0 mx-auto"
+                  style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}
+                >
+                  <SyncedYouTubePlayer
+                    ref={mediaPlayerRef}
+                    videoId={mediaVideoId}
+                    needsTapToSync={isMediaHost ? false : needsTapToSync}
+                    onTapToSync={tapToSync}
+                    onError={reportSyncError}
+                    syncError={syncError}
+                    title={mediaTitle}
+                    t={t}
+                    className="md:rounded-xl"
+                  />
+                </div>
+                <div className="w-full shrink-0 mx-auto" style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}>
+                  <WatchTogetherToolbar
+                    isHost={isMediaHost}
+                    mediaTitle={mediaTitle}
+                    playerRef={mediaPlayerRef}
+                    onChangeVideo={() => setShowWatchTogether(true)}
+                    onStop={stopMedia}
+                    isStopping={isStoppingMedia}
+                    needsTapToSync={isMediaHost ? false : needsTapToSync}
+                    onTapToSync={tapToSync}
+                    t={t}
+                  />
+                </div>
+                <div className="w-full shrink-0 mx-auto" style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}>
+                  <MediaParticipantStrip participants={participants} />
+                </div>
               </div>
             ) : (
               <VideoGrid />

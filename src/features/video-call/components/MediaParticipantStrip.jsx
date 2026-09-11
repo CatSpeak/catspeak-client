@@ -1,9 +1,9 @@
 import VideoTile from "@/features/video-call/components/VideoTile"
 
 /**
- * Compact strip of camera tiles shown alongside the watch-together media
- * spotlight, so participants remain visible while everyone watches (decision:
- * "media spotlight replaces the grid — camera tiles collapse to a side strip").
+ * Compact strip of camera tiles shown below the watch-together media
+ * spotlight, so participants remain visible while everyone watches.
+ * Horizontal scrollable row — never overlays the video.
  */
 const MediaParticipantStrip = ({ participants }) => {
   const visible = (participants || [])
@@ -13,11 +13,11 @@ const MediaParticipantStrip = ({ participants }) => {
   if (visible.length === 0) return null
 
   return (
-    <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 pointer-events-auto z-20">
+    <div className="flex flex-row gap-2 overflow-x-auto px-3 py-2 shrink-0">
       {visible.map((p) => (
         <div
           key={p.identity}
-          className="h-16 w-24 rounded-lg overflow-hidden border border-white/20 shadow-md bg-neutral-900"
+          className="h-16 w-28 shrink-0 rounded-lg overflow-hidden border border-border shadow-sm bg-neutral-900"
         >
           <VideoTile participant={p} />
         </div>
