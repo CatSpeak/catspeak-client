@@ -10,7 +10,7 @@ import {
   makeCanvas,
   createFeatheredMask,
 } from "./FaceMeshProcessor"
-import { computeOrientedDraw } from "./orientationMath"
+import { computeOrientedDraw, resolveOrientedSize } from "./orientationMath"
 
 export const DEFAULT_BEAUTY_OPTIONS = {
   smoothing: 0,
@@ -74,10 +74,10 @@ export class CombinedVideoTransformer extends VideoTransformer {
   _bgOptions = { ...DEFAULT_BG_OPTIONS }
 
   // ── Portrait hint from caller (mobile vertical) ─────────────────────────
-  // iPhone held portrait often still delivers landscape frames (e.g. 640x480
+  // iPhone held portrait often still delivers landscape frames (e.g. 1280x720
   // rotation:0). When true and input is landscape with no rotation metadata,
-  // bake a 90/270 rotation in canvas so output is true portrait. Front camera
-  // ("user") needs 270, back ("environment") needs 90. Set via update().
+  // bake a 90° rotation in canvas so output is true portrait (measured S=270
+  // sensor content needs +90, not +270 — see transform()). Set via update().
   _forcePortrait = false
   _facingMode = "user"
 
@@ -799,6 +799,39 @@ export class CombinedVideoTransformer extends VideoTransformer {
     ctx.restore()
   }
 
+  /**
+   * Keeps every output canvas at the rotated size (w/h).
+   * iOS Safari lacks MediaStreamTrackProcessor, so LiveKit's ProcessorWrapper
+   * falls back to a hidden displayCanvas sized ONCE from the source track
+   * (1280x720) and every enqueue() does
+   *   drawImage(processedFrame, 0, 0, displayCanvas.width, displayCanvas.height)
+   * which squeezes a portrait 720x1280 frame back into landscape = wide faces.
+   * Resizing that canvas (found via its data-livekit-processor marker) before
+   * enqueue makes the fallback draw 1:1. No-op on the modern stream path,
+   * which carries VideoFrame dims directly. Guarded so a missing DOM never throws.
+   */
+  _syncOutputCanvasSize(w, h) {
+    try {
+      if (this.canvas && (this.canvas.width !== w || this.canvas.height !== h)) {
+        this.canvas.width = w
+        this.canvas.height = h
+      }
+    } catch { /* ignore */ }
+    try {
+      if (typeof document !== "undefined" && typeof document.querySelectorAll === "function") {
+        const nodes = document.querySelectorAll("canvas[data-livekit-processor]")
+        nodes.forEach((c) => {
+          try {
+            if (c.width !== w || c.height !== h) {
+              c.width = w
+              c.height = h
+            }
+          } catch { /* ignore per-canvas */ }
+        })
+      }
+    } catch { /* ignore */ }
+  }
+
   /** Builds a fresh VideoFrame from the beauty canvas with a safe fallback. */
   _frameFromCanvas(canvas, ts) {
     try {
@@ -866,10 +899,11 @@ export class CombinedVideoTransformer extends VideoTransformer {
     }
 
     // For 90/270 rotations the working canvas dims are swapped so the frame
-    // is stored upright regardless of source orientation.
-    const rotated = effectiveRotation === 90 || effectiveRotation === 270
-    const w = rotated ? fh : fw
-    const h = rotated ? fw : fh
+    // is stored upright regardless of source orientation. The fallback
+    // displayCanvas (iOS Safari) must follow the same size or it stretches
+    // the portrait frame back into landscape (wide faces).
+    const { w, h } = resolveOrientedSize(fw, fh, effectiveRotation)
+    this._syncOutputCanvasSize(w, h)
 
     // Ensure canvases are the correct size
     if (this._beautyCanvas.width !== w) this._beautyCanvas.width = w

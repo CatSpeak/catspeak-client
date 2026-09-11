@@ -25,9 +25,8 @@ export const buildAudioConstraint = (deviceId) => {
  * rotation:0) whose pixels are still landscape — an undetectable lie that
  * no canvas code can correct (dims say portrait, content is sideways).
  * Requesting landscape yields honest landscape frames, and
- * CombinedVideoTransformer (forcePortrait → bake 270 for front camera)
- * converts them to true portrait deterministically — the same path that
- * already works in-room. The mobile 3/4 container then fills correctly.
+ * CombinedVideoTransformer (forcePortrait → bake 90) converts them to true
+ * portrait deterministically — the same path that already works in-room. The mobile 3/4 container then fills correctly.
  *
  * @param {string|null} deviceId - Target hardware camera ID
  * @returns {boolean|object} Video constraint
