@@ -13,6 +13,20 @@
 // other (letterbox bars), and any downstream cover-fit stretches faces.
 
 /**
+ * Resolved working-canvas size for a frame + rotation.
+ * 90/270 swap axes; 0/180 keep native dims. Pure so it stays node-testable.
+ *
+ * @param {number} fw - frame displayWidth
+ * @param {number} fh - frame displayHeight
+ * @param {number} rotation - 0/90/180/270
+ * @returns {{w:number, h:number}}
+ */
+export const resolveOrientedSize = (fw, fh, rotation) => {
+  if (rotation === 90 || rotation === 270) return { w: fh, h: fw }
+  return { w: fw, h: fh }
+}
+
+/**
  * @param {number} rotation - 0/90/180/270
  * @param {number} fw - frame displayWidth
  * @param {number} fh - frame displayHeight
