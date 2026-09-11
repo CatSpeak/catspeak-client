@@ -25,7 +25,7 @@ import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBac
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
-import MediaSpotlightTile from "@/features/video-call/components/MediaSpotlightTile"
+import SyncedYouTubePlayer from "@/features/video-call/components/SyncedYouTubePlayer"
 import MediaParticipantStrip from "@/features/video-call/components/MediaParticipantStrip"
 import WatchTogetherPanel from "@/features/video-call/components/WatchTogetherPanel"
 import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
@@ -86,15 +86,20 @@ const VideoCallRoomContent = () => {
     confirmStopRecording,
     participants,
     isHost: isHostFromContext,
-    // Watch together (YouTube)
+    // Watch together (YouTube, client-sync)
     mediaActive,
-    mediaTrackRef,
+    mediaVideoId,
     mediaTitle,
     isMediaHost,
     isStartingMedia,
     isStoppingMedia,
     startMedia,
     stopMedia,
+    mediaPlayerRef,
+    needsTapToSync,
+    syncError,
+    tapToSync,
+    reportSyncError,
     showWatchTogether,
     setShowWatchTogether,
   } = useVideoCallContext()
@@ -257,13 +262,29 @@ const VideoCallRoomContent = () => {
             />
           )}
           <div className="flex flex-1 min-h-0 relative">
-            {mediaActive && mediaTrackRef ? (
+            {mediaActive && mediaVideoId ? (
               <div className="relative h-full w-full">
-                <MediaSpotlightTile
-                  trackRef={mediaTrackRef}
+                <SyncedYouTubePlayer
+                  ref={mediaPlayerRef}
+                  videoId={mediaVideoId}
+                  needsTapToSync={isMediaHost ? false : needsTapToSync}
+                  onTapToSync={tapToSync}
+                  onError={reportSyncError}
+                  syncError={syncError}
                   title={mediaTitle}
-                  onStop={isMediaHost ? stopMedia : undefined}
+                  t={t}
                 />
+                {isMediaHost && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-auto">
+                    <button
+                      onClick={stopMedia}
+                      className="flex items-center gap-1.5 rounded-full bg-red-600/90 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
+                    >
+                      {t?.rooms?.videoCall?.watchTogether?.stopButton ||
+                        "Dừng video"}
+                    </button>
+                  </div>
+                )}
                 <MediaParticipantStrip participants={participants} />
               </div>
             ) : (

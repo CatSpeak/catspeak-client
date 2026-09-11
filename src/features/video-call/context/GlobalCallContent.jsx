@@ -461,8 +461,10 @@ const GlobalCallContent = ({
           "Video chung đã kết thúc.",
         { duration: 5000 },
       )
-      // The media ingress participant leaves the room; the spotlight auto-hides
-      // once the track is gone, and the media status query re-fetches.
+      // Server marked the playback stopped (live webhook / natural end) —
+      // reset this viewer's synced copy so the spotlight hides even when the
+      // host could not publish a stop message itself.
+      watchTogether.stopLocal?.()
     }
   })
 
@@ -525,6 +527,7 @@ const GlobalCallContent = ({
     sessionId,
     isHost: isHostUser,
     t,
+    lkRoom,
   })
   const recordingState = useRecording(lkRoom, {
     isRecording,
@@ -1218,16 +1221,20 @@ const GlobalCallContent = ({
     presenterDisplayName: screenShareState.presenterDisplayName,
     handleToggleScreenShare: actions.handleToggleScreenShare,
     isTogglingScreenShare: screenShareState.isTogglingScreenShare,
-    // Watch together (YouTube)
+    // Watch together (YouTube, client-sync over the watch-sync DataChannel)
     mediaActive: watchTogether.isMediaActive,
-    mediaParticipant: watchTogether.mediaParticipant,
-    mediaTrackRef: watchTogether.mediaTrackRef,
+    mediaVideoId: watchTogether.videoId,
     mediaTitle: watchTogether.mediaTitle,
     isMediaHost: watchTogether.isMediaHost,
     isStartingMedia: watchTogether.isStarting,
     isStoppingMedia: watchTogether.isStopping,
     startMedia: watchTogether.startMedia,
     stopMedia: watchTogether.stopMedia,
+    mediaPlayerRef: watchTogether.playerRef,
+    needsTapToSync: watchTogether.needsTapToSync,
+    syncError: watchTogether.syncError,
+    tapToSync: watchTogether.tapToSync,
+    reportSyncError: watchTogether.reportError,
     showWatchTogether,
     setShowWatchTogether,
     // Recording
