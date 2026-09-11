@@ -41,7 +41,7 @@ export default function BugReportButton() {
 
   return (
     <>
-      <div className={`${positionClass} transition-all duration-300`}>
+      <div data-html2canvas-ignore="true" className={`${positionClass} transition-all duration-300`}>
         <button
           onClick={() => setIsOpen(true)}
           className="group relative flex items-center justify-center w-10 h-10 md:w-11 md:h-11 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg shadow-red-500/30 hover:scale-105 active:scale-95 transition-all focus:outline-hidden cursor-pointer"

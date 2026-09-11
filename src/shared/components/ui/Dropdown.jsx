@@ -367,6 +367,7 @@ const Dropdown = ({
               <div
                 ref={portalRef}
                 data-dropdown-portal="true"
+                data-html2canvas-ignore="true"
                 className="dropdown-portal"
                 style={{
                   position: "absolute",

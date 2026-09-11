@@ -82,6 +82,7 @@ const ModalContent = ({
 
   return (
     <div
+      data-html2canvas-ignore="true"
       className={`fixed inset-0 z-[1300] flex items-center justify-center ${fullScreenOnMobile ? "p-0 md:p-4" : "p-4"}`}
     >
       {/* Backdrop */}
