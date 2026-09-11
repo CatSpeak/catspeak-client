@@ -53,9 +53,15 @@ const runPlayerEffect = (playerRef, effect) => {
  * @param {object} args
  * @param {import("livekit-client").Room|null} args.lkRoom LiveKit room (null until joined)
  * @param {React.RefObject} args.playerRef imperative SyncedYouTubePlayer handle
- * @param {{videoId:string,title:string|null}|null} args.initialMedia late-joiner seed from media/status (wired in Ticket 04)
+ * @param {{videoId:string,title:string|null}|null} args.initialMedia late-joiner seed from media/status
+ * @param {boolean} args.disabled skip the subscription (host drives its own copy)
  */
-export const useSyncedPlayer = ({ lkRoom, playerRef, initialMedia = null }) => {
+export const useSyncedPlayer = ({
+  lkRoom,
+  playerRef,
+  initialMedia = null,
+  disabled = false,
+}) => {
   const [syncState, setSyncState] = useState(() => createWatchSyncState())
   // Mirrors for event handlers/subscriptions (refs must only be written in
   // effects or handlers — never during render). Declared before the
@@ -90,11 +96,12 @@ export const useSyncedPlayer = ({ lkRoom, playerRef, initialMedia = null }) => {
   )
 
   useEffect(() => {
-    if (initialMedia?.videoId) cueInitial(initialMedia)
-  }, [initialMedia, cueInitial])
+    if (disabled || !initialMedia?.videoId) return
+    cueInitial(initialMedia)
+  }, [initialMedia, cueInitial, disabled])
 
   useEffect(() => {
-    if (!lkRoom) return
+    if (disabled || !lkRoom) return
 
     const handleData = (payload, _participant, _kind, topic) => {
       if (topic !== WATCH_SYNC_TOPIC) return
@@ -123,7 +130,7 @@ export const useSyncedPlayer = ({ lkRoom, playerRef, initialMedia = null }) => {
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleData)
     }
-  }, [lkRoom, applyEffects])
+  }, [lkRoom, applyEffects, disabled])
 
   // The explicit sync gesture: unlocks autoplay and jumps to the staged target.
   const tapToSync = useCallback(() => {
@@ -138,6 +145,19 @@ export const useSyncedPlayer = ({ lkRoom, playerRef, initialMedia = null }) => {
     setSyncState(state)
   }, [])
 
+  // Server-driven end (e.g. the MediaEnded SignalR event when the host did
+  // not publish stop): reset this viewer's copy to idle.
+  const stopLocal = useCallback(() => {
+    const { state, effects } = applyWatchSyncMessage(
+      stateRef.current,
+      { type: "stop" },
+      Date.now(),
+      null,
+    )
+    setSyncState(state)
+    applyEffects(effects)
+  }, [applyEffects])
+
   return {
     syncState,
     videoId: syncState.videoId,
@@ -149,5 +169,6 @@ export const useSyncedPlayer = ({ lkRoom, playerRef, initialMedia = null }) => {
     tapToSync,
     reportError,
     cueInitial,
+    stopLocal,
   }
 }

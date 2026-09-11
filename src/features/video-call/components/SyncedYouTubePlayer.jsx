@@ -50,8 +50,10 @@ const loadYouTubeIframeApi = () => {
  * can play/pause/seek every viewer in sync. All sync decisions live in
  * useSyncedPlayer; this component only owns the player instance plus two
  * overlays: the tap-to-sync gate (autoplay policy) and the per-viewer error
- * card (embed blocked vs generic failure). New copy strings fall back to
- * Vietnamese until Ticket 04 adds the en/vi/zh/ja keys.
+ * card (embed blocked vs generic failure). Copy comes from the four locales;
+ * Vietnamese is the fallback. The `videoId` prop auto-cues on mount/change
+ * (covers the host, whose copy is driven by native controls, and viewers
+ * whose player mounts after a load arrives).
  */
 const SyncedYouTubePlayer = forwardRef(
   (
@@ -60,6 +62,7 @@ const SyncedYouTubePlayer = forwardRef(
       onTapToSync = null,
       onError = null,
       syncError = null,
+      videoId = null,
       title = null,
       t = null,
       className = "",
@@ -136,6 +139,23 @@ const SyncedYouTubePlayer = forwardRef(
         playerRef.current = null
       }
     }, [])
+
+    // Auto-cue when a video is (first) supplied or swapped — survives the
+    // player not being ready yet via pendingVideoRef. This is the load path
+    // for the host (native controls) and a safe complement for viewers whose
+    // machine already cued the same id.
+    useEffect(() => {
+      if (!videoId) return
+      if (readyRef.current && playerRef.current) {
+        try {
+          playerRef.current.cueVideoById(videoId)
+        } catch {
+          // Player torn down mid-cue; teardown below cleans up.
+        }
+      } else {
+        pendingVideoRef.current = videoId
+      }
+    }, [videoId])
 
     useImperativeHandle(
       ref,
