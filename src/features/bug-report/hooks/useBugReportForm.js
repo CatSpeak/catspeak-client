@@ -7,6 +7,7 @@ import {
   useSubmitBugReportMutation,
   useUploadBugScreenshotMutation,
 } from "@/store/api/bugReportApi"
+import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 export const MAX_BUG_IMAGES = 3
 export const MAX_BUG_FILE_SIZE = 5 * 1024 * 1024
@@ -15,18 +16,22 @@ export const MAX_BUG_FILE_SIZE = 5 * 1024 * 1024
 // khỏi ảnh qua ignoreElements nên không cần unmount nữa.
 // Delay nhỏ chỉ để spinner kịp paint trước khi html2canvas block main thread.
 export const CAPTURE_PAINT_DELAY_MS = 80
-// Giữ export cũ để không gãy import bên ngoài (deprecated, không dùng nữa).
-export const CAPTURE_HIDE_DELAY_MS = CAPTURE_PAINT_DELAY_MS
 // Q6: viewport đã nhỏ hơn full-page nhiều nên tăng nét vẫn khó vượt 5MB.
 export const CAPTURE_SCALE = 0.85
-export const CAPTURE_IGNORE_ATTR = "data-html2canvas-ignore"
+// Q6: JPEG + quality là nén thật (PNG bỏ qua quality). Preview/dataUrl giữ PNG,
+// file upload dùng JPEG để nhẹ và chắc chắn dưới 5MB.
+export const CAPTURE_UPLOAD_MIME = "image/jpeg"
+export const CAPTURE_UPLOAD_QUALITY = 0.85
 
 /**
  * Q5: loại mọi overlay khỏi ảnh, chỉ giữ nền web phía sau.
- * - [data-html2canvas-ignore]: Modal root, nút bug nổi, dropdown portal...
- * - .p-toast*: PrimeReact toast (AppToaster)
- * - .go4109123758 / [data-rht-toaster]: react-hot-toast container
- * - [data-dropdown-portal] / .dropdown-portal: Dropdown portal (nằm ngoài modal)
+ * - [data-html2canvas-ignore]: marker của chính mình (Modal root, nút bug nổi,
+ *   dropdown portal...). Xem `screenshotUtils.CAPTURE_IGNORE_ATTR`.
+ * - .p-toast*: PrimeReact toast (AppToaster) — class ổn định theo docs.
+ * - [data-dropdown-portal] / .dropdown-portal: Dropdown portal (nằm ngoài modal).
+ * Không match class sinh tự động của lib khác (giòn, đổi class là lọt ảnh).
+ * Lưu ý: react-hot-toast hiện không mount <Toaster/> ở App nên không render gì;
+ * nếu sau này mount thì gắn marker vào container của nó.
  * Pure function để dễ test đơn.
  */
 export function shouldIgnoreCaptureElement(el) {
@@ -35,7 +40,7 @@ export function shouldIgnoreCaptureElement(el) {
     if (el.closest(`[${CAPTURE_IGNORE_ATTR}]`)) return true
     if (
       el.closest(
-        ".p-toast, .p-toast-message, [data-dropdown-portal], .dropdown-portal, [data-rht-toaster], .go4109123758",
+        ".p-toast, .p-toast-message, [data-dropdown-portal], .dropdown-portal",
       )
     )
       return true
@@ -68,9 +73,6 @@ export function useBugReportForm({
   const [screenshotDataUrl, setScreenshotDataUrl] = useState(null)
   const [screenshotUrl, setScreenshotUrl] = useState(null)
   const [isCapturing, setIsCapturing] = useState(false)
-  // Deprecated (Q2/Q3): modal không còn bị unmount khi chụp nữa, luôn giữ false
-  // để tương thích import cũ ở BugReportModal.
-  const [isHiddenForCapture] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
 
@@ -122,11 +124,13 @@ export function useBugReportForm({
     try {
       const html2canvas = (await import("html2canvas")).default
       // Q1/Q7: viewport-only tại đúng vị trí scroll hiện tại.
+      // Chụp documentElement (không phải body) để luôn phủ đủ viewport
+      // kể cả trang ngắn hơn màn hình.
       const x = window.scrollX || window.pageXOffset || 0
       const y = window.scrollY || window.pageYOffset || 0
       const width = window.innerWidth || document.documentElement.clientWidth
       const height = window.innerHeight || document.documentElement.clientHeight
-      const canvas = await html2canvas(document.body, {
+      const canvas = await html2canvas(document.documentElement, {
         scale: CAPTURE_SCALE,
         useCORS: true,
         logging: false,
@@ -142,11 +146,15 @@ export function useBugReportForm({
       const dataUrl = canvas.toDataURL("image/png")
       setScreenshotDataUrl(dataUrl)
 
-      // Try to upload to get persistent URL
+      // Try to upload to get persistent URL (Q6: JPEG nén thật, chắc dưới 5MB)
       try {
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.8))
+        const blob = await new Promise((resolve) =>
+          canvas.toBlob(resolve, CAPTURE_UPLOAD_MIME, CAPTURE_UPLOAD_QUALITY),
+        )
         if (blob) {
-          const file = new File([blob], `screenshot-${Date.now()}.png`, { type: "image/png" })
+          const file = new File([blob], `screenshot-${Date.now()}.jpg`, {
+            type: CAPTURE_UPLOAD_MIME,
+          })
           const formData = new FormData()
           formData.append("file", file)
           const res = await uploadScreenshot(formData).unwrap()
@@ -298,7 +306,6 @@ export function useBugReportForm({
     screenshotDataUrl,
     screenshotUrl,
     isCapturing,
-    isHiddenForCapture,
     previewOpen,
     setPreviewOpen,
     showConfirm,

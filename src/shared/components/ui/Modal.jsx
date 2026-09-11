@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "framer-motion" // eslint-disable-line no-unused-vars
 import { X } from "lucide-react"
 import useScrollLock from "@/shared/hooks/useScrollLock"
+import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 const ModalContent = ({
   onClose,
@@ -82,7 +83,7 @@ const ModalContent = ({
 
   return (
     <div
-      data-html2canvas-ignore="true"
+      {...{ [CAPTURE_IGNORE_ATTR]: "true" }}
       className={`fixed inset-0 z-[1300] flex items-center justify-center ${fullScreenOnMobile ? "p-0 md:p-4" : "p-4"}`}
     >
       {/* Backdrop */}
