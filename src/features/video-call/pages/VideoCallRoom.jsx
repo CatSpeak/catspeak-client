@@ -44,6 +44,7 @@ import {
   isSpeakingTimeBalanceSupported,
 } from "@/features/video-call/utils/roomTypeHelpers"
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
+import { shouldShowCenterPlay } from "@/features/video-call/utils/watchPlayerVars"
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage()
@@ -109,6 +110,9 @@ const VideoCallRoomContent = () => {
   )
   const isHost = isHostFromContext
   const mediaRef = useRef(null)
+  // Native YT state of the host copy (viewers follow via watch-sync and never
+  // report). Drives the host-only center play button over the shield.
+  const [hostPlayerState, setHostPlayerState] = useState(null)
 
   const dispatch = useDispatch()
   const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
@@ -273,6 +277,13 @@ const VideoCallRoomContent = () => {
                     needsTapToSync={isMediaHost ? false : needsTapToSync}
                     onTapToSync={tapToSync}
                     onError={reportSyncError}
+                    onStateChange={isMediaHost ? setHostPlayerState : undefined}
+                    showCenterPlay={shouldShowCenterPlay(hostPlayerState, {
+                      isHost: isMediaHost,
+                      needsTapToSync: isMediaHost ? false : needsTapToSync,
+                      hasError: !!syncError,
+                    })}
+                    onCenterPlay={() => mediaPlayerRef.current?.play?.()}
                     syncError={syncError}
                     t={t}
                     className="rounded-none md:rounded-xl"
