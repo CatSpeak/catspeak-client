@@ -8,6 +8,7 @@ import colors from "@/shared/utils/colors"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import MenuItem from "@/shared/components/ui/MenuItem"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 const removeDiacritics = (str) => {
   if (!str) return ""
@@ -367,6 +368,7 @@ const Dropdown = ({
               <div
                 ref={portalRef}
                 data-dropdown-portal="true"
+                {...{ [CAPTURE_IGNORE_ATTR]: "true" }}
                 className="dropdown-portal"
                 style={{
                   position: "absolute",

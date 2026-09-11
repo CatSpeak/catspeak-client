@@ -26,7 +26,6 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
     screenshotDataUrl,
     screenshotUrl,
     isCapturing,
-    isHiddenForCapture,
     previewOpen,
     setPreviewOpen,
     showConfirm,
@@ -47,9 +46,9 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
     roomContext,
   })
 
-  // Q4/Q7: đang chụp thì unmount modal tạm để html2canvas không dính form.
-  // Hook đã delay 350ms cho animation đóng xong. Render nothing để lộ room bên dưới.
-  if (isHiddenForCapture) return null
+  // Q2/Q3: modal luôn giữ nguyên khi chụp (không unmount gây chớp).
+  // Form + backdrop đã gắn data-html2canvas-ignore nên bị loại khỏi ảnh,
+  // chỉ giữ nền web phía sau.
 
   // enrich options with icons for dropdown
   const enrichedOptions = categoryOptions.map((opt) => {
@@ -104,7 +103,7 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
               className="inline-flex items-center justify-center gap-2 rounded-full bg-[#8B0816] px-6 py-2 text-[14.5px] font-medium leading-[21.75px] text-white shadow-sm transition hover:brightness-110 disabled:opacity-60"
             >
               {(isLoading || isCapturing) && <Loader2 size={16} className="animate-spin" />}
-              {isLoading ? (lang.submitting || "Đang gửi...") : isCapturing ? "Đang chụp..." : (lang.submit || "Gửi báo cáo")}
+              {isLoading ? (lang.submitting || "Đang gửi...") : isCapturing ? (lang.capturing || "Đang chụp...") : (lang.submit || "Gửi báo cáo")}
             </button>
           </div>
         }
@@ -159,30 +158,35 @@ export default function BugReportModal({ isOpen, open, onClose, initialTitle = "
             />
           </div>
 
-          {/* Include screenshot */}
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              type="button"
-              role="checkbox"
-              aria-checked={includeScreenshot}
-              onClick={() => handleToggleScreenshot(!includeScreenshot)}
-              disabled={isCapturing}
-              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border shadow-sm transition ${
-                includeScreenshot ? "bg-[#1877F2] border-[#1877F2] text-white" : "bg-white border-[#E5E7EB] hover:border-[#1877F2]/50"
-              } disabled:opacity-60`}
-            >
-              {includeScreenshot && <Check size={14} strokeWidth={3} />}
-            </button>
-            <span className="text-[15px] leading-[22.5px] text-[#1F2937]"> {lang.includeScreenshot || "Include desktop screenshot"}</span>
-            <button
-              type="button"
-              onClick={() => !viewDisabled && setPreviewOpen(true)}
-              disabled={viewDisabled}
-              className={`pl-1 text-[15px] font-medium leading-[22.5px] transition ${viewDisabled ? "text-slate-300 cursor-not-allowed" : "text-[#1A73E8] hover:underline"}`}
-            >
-              {lang.viewScreenshot || "View screenshot"}
-            </button>
-            {isCapturing && <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#6B7280]"><Loader2 size={12} className="animate-spin" /> Đang chụp...</span>}
+          {/* Q9: wording rõ chỉ chụp nền phía sau, form giữ nguyên (Q2/Q3) */}
+          <div className="flex flex-col gap-1 pt-2">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                role="checkbox"
+                aria-checked={includeScreenshot}
+                onClick={() => handleToggleScreenshot(!includeScreenshot)}
+                disabled={isCapturing}
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border shadow-sm transition ${
+                  includeScreenshot ? "bg-[#1877F2] border-[#1877F2] text-white" : "bg-white border-[#E5E7EB] hover:border-[#1877F2]/50"
+                } disabled:opacity-60`}
+              >
+                {includeScreenshot && <Check size={14} strokeWidth={3} />}
+              </button>
+              <span className="text-[15px] leading-[22.5px] text-[#1F2937]"> {lang.includeScreenshot || "Attach current view (excluding this form)"}</span>
+              <button
+                type="button"
+                onClick={() => !viewDisabled && setPreviewOpen(true)}
+                disabled={viewDisabled}
+                className={`pl-1 text-[15px] font-medium leading-[22.5px] transition ${viewDisabled ? "text-slate-300 cursor-not-allowed" : "text-[#1A73E8] hover:underline"}`}
+              >
+                {lang.viewScreenshot || "View screenshot"}
+              </button>
+              {isCapturing && <span className="ml-2 inline-flex items-center gap-1 text-xs text-[#6B7280]"><Loader2 size={12} className="animate-spin" /> {lang.capturing || "Đang chụp..."}</span>}
+            </div>
+            <p className="pl-8 text-[12px] leading-5 text-[#6B7280]">
+              {lang.includeScreenshotHint || "Ảnh chỉ lấy nền phía sau, form vẫn giữ nguyên khi chụp."}
+            </p>
           </div>
 
           {/* Q7: thumbnail + Chụp lại / Xóa. Q8: ghi chú video có thể đen */}

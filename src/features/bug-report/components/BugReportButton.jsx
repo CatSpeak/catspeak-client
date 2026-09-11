@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Bug } from "lucide-react"
 import BugReportModal from "./BugReportModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { CAPTURE_IGNORE_ATTR } from "@/shared/utils/screenshotUtils"
 
 export default function BugReportButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -41,7 +42,7 @@ export default function BugReportButton() {
 
   return (
     <>
-      <div className={`${positionClass} transition-all duration-300`}>
+      <div {...{ [CAPTURE_IGNORE_ATTR]: "true" }} className={`${positionClass} transition-all duration-300`}>
         <button
           onClick={() => setIsOpen(true)}
           className="group relative flex items-center justify-center w-10 h-10 md:w-11 md:h-11 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg shadow-red-500/30 hover:scale-105 active:scale-95 transition-all focus:outline-hidden cursor-pointer"
