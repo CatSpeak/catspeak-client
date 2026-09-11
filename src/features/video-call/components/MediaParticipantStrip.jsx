@@ -13,11 +13,11 @@ const MediaParticipantStrip = ({ participants }) => {
   if (visible.length === 0) return null
 
   return (
-    <div className="flex flex-row gap-2 overflow-x-auto px-3 py-2 shrink-0">
+    <div className="flex flex-row gap-2 overflow-x-auto bg-black px-3 py-2 shrink-0 md:bg-transparent">
       {visible.map((p) => (
         <div
           key={p.identity}
-          className="h-16 w-28 shrink-0 rounded-lg overflow-hidden border border-border shadow-sm bg-neutral-900"
+          className="h-16 w-28 shrink-0 rounded-lg overflow-hidden border border-white/20 shadow-sm bg-neutral-900 md:border-border"
         >
           <VideoTile participant={p} />
         </div>

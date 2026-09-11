@@ -44,16 +44,22 @@ const loadYouTubeIframeApi = () => {
 }
 
 /**
- * SyncedYouTubePlayer — a YouTube video controllable over JS for watch-sync.
+ * SyncedYouTubePlayer — a chromeless YouTube video controllable over JS for
+ * watch-sync.
  *
  * Unlike the mute chat embed, this wraps the IFrame Player API so the room
- * can play/pause/seek every viewer in sync. All sync decisions live in
- * useSyncedPlayer; this component only owns the player instance plus two
- * overlays: the tap-to-sync gate (autoplay policy) and the per-viewer error
- * card (embed blocked vs generic failure). Copy comes from the four locales;
- * Vietnamese is the fallback. The `videoId` prop auto-cues on mount/change
- * (covers the host, whose copy is driven by native controls, and viewers
- * whose player mounts after a load arrives).
+ * can play/pause/seek every viewer in sync. The player is fully chromeless
+ * (controls=0): the room's WatchTogetherToolbar below the video is the only
+ * control surface, so host gestures always flow through the sync publisher.
+ * All sync decisions live in useSyncedPlayer; this component only owns the
+ * player instance plus two overlays: the tap-to-sync gate (autoplay policy)
+ * and the per-viewer error card (embed blocked vs generic failure). Copy
+ * comes from the four locales; Vietnamese is the fallback. The `videoId`
+ * prop auto-cues on mount/change (covers the host, whose copy is driven by
+ * the custom toolbar, and viewers whose player mounts after a load arrives).
+ *
+ * The title is NOT rendered here — VideoCallRoom shows it below the video
+ * (YouTube-app style).
  */
 const SyncedYouTubePlayer = forwardRef(
   (
@@ -63,7 +69,6 @@ const SyncedYouTubePlayer = forwardRef(
       onError = null,
       syncError = null,
       videoId = null,
-      title = null,
       t = null,
       className = "",
     },
@@ -101,6 +106,10 @@ const SyncedYouTubePlayer = forwardRef(
               playsinline: 1,
               modestbranding: 1,
               enablejsapi: 1,
+              controls: 0,
+              disablekb: 1,
+              fs: 0,
+              iv_load_policy: 3,
               origin:
                 typeof window !== "undefined" ? window.location.origin : undefined,
             },
@@ -142,7 +151,7 @@ const SyncedYouTubePlayer = forwardRef(
 
     // Auto-cue when a video is (first) supplied or swapped — survives the
     // player not being ready yet via pendingVideoRef. This is the load path
-    // for the host (native controls) and a safe complement for viewers whose
+    // for the host (custom toolbar) and a safe complement for viewers whose
     // machine already cued the same id.
     useEffect(() => {
       if (!videoId) return
@@ -220,6 +229,45 @@ const SyncedYouTubePlayer = forwardRef(
             return null
           }
         },
+        mute: () => {
+          try {
+            playerRef.current?.mute?.()
+          } catch {
+            // No-op when player is tearing down.
+          }
+        },
+        unMute: () => {
+          try {
+            playerRef.current?.unMute?.()
+          } catch {
+            // No-op when player is tearing down.
+          }
+        },
+        isMuted: () => {
+          try {
+            const value = playerRef.current?.isMuted?.()
+            return typeof value === "boolean" ? value : null
+          } catch {
+            return null
+          }
+        },
+        getVolume: () => {
+          try {
+            const value = playerRef.current?.getVolume?.()
+            return typeof value === "number" && Number.isFinite(value)
+              ? value
+              : null
+          } catch {
+            return null
+          }
+        },
+        setVolume: (level) => {
+          try {
+            playerRef.current?.setVolume?.(level)
+          } catch {
+            // No-op when player is tearing down.
+          }
+        },
       }),
       [],
     )
@@ -227,13 +275,6 @@ const SyncedYouTubePlayer = forwardRef(
     return (
       <div className={`relative aspect-video w-full overflow-hidden bg-black ${className}`}>
         <div ref={mountRef} className="h-full w-full" />
-        {title ? (
-          <div className="pointer-events-none absolute left-0 right-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-3 pb-6 pt-2 text-sm font-medium text-white">
-            <p className="truncate whitespace-nowrap overflow-hidden">
-              {title}
-            </p>
-          </div>
-        ) : null}
         {syncError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/85 px-6 text-center text-white">
             <TriangleAlert size={28} className="text-amber-400" />
