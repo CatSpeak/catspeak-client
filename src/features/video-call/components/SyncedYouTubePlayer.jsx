@@ -210,6 +210,16 @@ const SyncedYouTubePlayer = forwardRef(
             return null
           }
         },
+        getDuration: () => {
+          try {
+            const value = playerRef.current?.getDuration?.()
+            return typeof value === "number" && Number.isFinite(value)
+              ? value
+              : null
+          } catch {
+            return null
+          }
+        },
       }),
       [],
     )
@@ -219,7 +229,9 @@ const SyncedYouTubePlayer = forwardRef(
         <div ref={mountRef} className="h-full w-full" />
         {title ? (
           <div className="pointer-events-none absolute left-0 right-0 top-0 bg-gradient-to-b from-black/70 to-transparent px-3 pb-6 pt-2 text-sm font-medium text-white">
-            {title}
+            <p className="truncate whitespace-nowrap overflow-hidden">
+              {title}
+            </p>
           </div>
         ) : null}
         {syncError ? (
