@@ -45,6 +45,7 @@ import {
 } from "@/features/video-call/utils/roomTypeHelpers"
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
 import { shouldShowCenterPlay } from "@/features/video-call/utils/watchPlayerVars"
+import { getWatchMediaUnitClass } from "@/features/video-call/utils/watchMediaLayout"
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage()
@@ -267,6 +268,7 @@ const VideoCallRoomContent = () => {
           <div className="flex flex-1 min-h-0 relative">
             {mediaActive && mediaVideoId ? (
               <div ref={mediaRef} className="flex h-full w-full min-h-0 flex-col overflow-y-auto bg-black md:overflow-hidden md:bg-transparent">
+                <div className={getWatchMediaUnitClass()}>
                 <div
                   className="w-full shrink-0 mx-auto"
                   style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}
@@ -305,6 +307,7 @@ const VideoCallRoomContent = () => {
                 </div>
                 <div className="w-full shrink-0 mx-auto" style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}>
                   <MediaParticipantStrip participants={participants} />
+                </div>
                 </div>
               </div>
             ) : (
