@@ -6,7 +6,14 @@ import { Track, ParticipantEvent, TrackEvent } from "livekit-client"
 import { motion } from "framer-motion"
 
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
-import { getVideoTileRootClass } from "@/features/video-call/utils/videoTileClass"
+import {
+  getVideoTileRootClass,
+  getVideoTileAvatarSize,
+  getVideoTileAvatarClass,
+  getVideoTileOverlayBarClass,
+  getVideoTileOverlayPillClass,
+  getVideoTileOverlayNameClass,
+} from "@/features/video-call/utils/videoTileClass"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getProfilePath } from "@/shared/utils/navigation"
@@ -271,7 +278,7 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
             className={`${avatarUrl ? "relative z-10" : ""} flex items-center justify-center`}
           >
             <Avatar
-              size={64}
+              size={getVideoTileAvatarSize({ compact })}
               name={displayName || "?"}
               src={avatarUrl}
               speaking={false}
@@ -279,7 +286,7 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
                 meta.accountId ||
                 (/^\d+$/.test(participant.identity) ? participant.identity : null)
               }
-              className={`!w-[20cqi] !h-[20cqi] !max-w-[128px] !max-h-[128px] !min-w-[48px] !min-h-[48px] !text-[clamp(0.875rem,8cqi,2rem)] !border-none ${
+              className={`${getVideoTileAvatarClass({ compact })} ${
                 avatarUrl ? "shadow-xl" : ""
               } ${theme.avatarClass}`}
             />
@@ -288,9 +295,9 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
       )}
 
       {/* Bottom Controls Overlay */}
-      <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center justify-between gap-1 pointer-events-none z-20">
+      <div className={getVideoTileOverlayBarClass({ compact })}>
         {/* Status icons and Name */}
-        <div className="flex min-w-0 items-center gap-1 sm:gap-1.5 rounded-full bg-black/40 px-2 py-1 sm:px-3 sm:py-2 text-white backdrop-blur-sm pointer-events-auto">
+        <div className={getVideoTileOverlayPillClass({ compact })}>
           <div className="flex flex-shrink-0 items-center gap-1">
             {screenShareOn && <MonitorUp size={14} className="sm:w-4 sm:h-4" />}
             {!micOn && <MicOff size={14} className="sm:w-4 sm:h-4" />}
@@ -310,7 +317,7 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
                 )
               }
             }}
-            className={`min-w-0 truncate font-medium text-xs sm:text-sm ${
+            className={`${getVideoTileOverlayNameClass({ compact })} ${
               meta.accountId || /^\d+$/.test(participant.identity)
                 ? "cursor-pointer hover:underline"
                 : ""
