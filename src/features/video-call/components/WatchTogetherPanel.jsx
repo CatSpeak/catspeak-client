@@ -39,7 +39,24 @@ const WatchTogetherPanel = ({
     }
     setUrlError("")
     try {
-      await onStart?.(url)
+      // Overwrite flow (Q1=A, Q4=A): starting while active replaces the
+      // current video without a manual stop or confirm. Auto-close only on
+      // success (Q2=A); failures keep the old video + panel open (Q5=A).
+      const result = await onStart?.(url)
+      if (result) {
+        setUrl("")
+        onClose?.()
+      }
+    } catch {
+      // error toast handled in the hook
+    }
+  }
+
+  const handleStop = async () => {
+    try {
+      const result = await onStop?.()
+      // Consistent with start: stop success also auto-closes (Q10=A).
+      if (result) onClose?.()
     } catch {
       // error toast handled in the hook
     }
@@ -77,22 +94,26 @@ const WatchTogetherPanel = ({
 
           <div className="flex-1 overflow-y-auto p-4">
             {isHost ? (
-              <>
-                {isPlaying ? (
-                  <div className="space-y-4">
-                    <div className="rounded-xl bg-gray-50 p-3 border border-border">
-                      <p className="text-sm font-medium text-gray-800 truncate">
-                        {status?.title || status?.videoId || "Đang phát video"}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
+              <div className="space-y-4">
+                {isPlaying && (
+                  <div className="rounded-xl bg-gray-50 p-3 border border-border">
+                    <p className="text-xs font-medium text-gray-500">
+                      {t?.rooms?.videoCall?.watchTogether?.nowPlaying ||
+                        "Đang phát"}
+                    </p>
+                    <p className="text-sm font-medium text-gray-800 truncate mt-0.5">
+                      {status?.title || status?.videoId || "Đang phát video"}
+                    </p>
+                    {status?.watchUrl && (
+                      <p className="text-xs text-gray-500 mt-1 truncate">
                         {status?.watchUrl}
                       </p>
-                    </div>
+                    )}
                     <button
                       type="button"
                       disabled={isStopping}
-                      onClick={onStop}
-                      className="w-full h-11 rounded-xl bg-red-600 text-white font-semibold disabled:opacity-50 transition-colors"
+                      onClick={handleStop}
+                      className="mt-2.5 w-full h-10 rounded-xl bg-gray-900 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
                     >
                       {isStopping
                         ? (t?.rooms?.videoCall?.watchTogether?.stopping ||
@@ -101,39 +122,44 @@ const WatchTogetherPanel = ({
                             "Dừng video")}
                     </button>
                   </div>
-                ) : (
-                  <form onSubmit={handleStart} className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">
-                      {t?.rooms?.videoCall?.watchTogether?.inputLabel ||
-                        "Dán link YouTube"}
-                    </label>
-                    <input
-                      value={url}
-                      onChange={(e) => {
-                        setUrl(e.target.value)
-                        if (urlError) setUrlError("")
-                      }}
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      className="w-full h-11 px-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-red-500/40 text-sm"
-                      autoFocus
-                    />
-                    {urlError && (
-                      <p className="text-xs text-red-600">{urlError}</p>
-                    )}
-                    <button
-                      type="submit"
-                      disabled={isStarting}
-                      className="w-full h-11 rounded-xl bg-red-600 text-white font-semibold disabled:opacity-50 transition-colors"
-                    >
-                      {isStarting
-                        ? (t?.rooms?.videoCall?.watchTogether?.starting ||
-                            "Đang phát...")
+                )}
+                <form onSubmit={handleStart} className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    {isPlaying
+                      ? (t?.rooms?.videoCall?.watchTogether?.switchLabel ||
+                          "Dán link YouTube mới để đổi video")
+                      : (t?.rooms?.videoCall?.watchTogether?.inputLabel ||
+                          "Dán link YouTube")}
+                  </label>
+                  <input
+                    value={url}
+                    onChange={(e) => {
+                      setUrl(e.target.value)
+                      if (urlError) setUrlError("")
+                    }}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="w-full h-11 px-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-red-500/40 text-sm"
+                    autoFocus={!isPlaying}
+                  />
+                  {urlError && (
+                    <p className="text-xs text-red-600">{urlError}</p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isStarting}
+                    className="w-full h-11 rounded-xl bg-red-600 text-white font-semibold disabled:opacity-50 transition-colors"
+                  >
+                    {isStarting
+                      ? (t?.rooms?.videoCall?.watchTogether?.starting ||
+                          "Đang phát...")
+                      : isPlaying
+                        ? (t?.rooms?.videoCall?.watchTogether?.switchButton ||
+                            "Đổi sang video này")
                         : (t?.rooms?.videoCall?.watchTogether?.startButton ||
                             "Phát video cho cả phòng")}
-                    </button>
-                  </form>
-                )}
-              </>
+                  </button>
+                </form>
+              </div>
             ) : (
               <div className="text-center text-gray-500 text-sm py-10">
                 {isPlaying

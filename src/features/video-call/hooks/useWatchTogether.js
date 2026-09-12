@@ -69,18 +69,21 @@ export const useWatchTogether = ({ sessionId, isHost, t, lkRoom }) => {
 
   const startMedia = useCallback(
     async (url) => {
-      if (!sessionId) return
+      if (!sessionId) return null
       if (!isHost) {
         toast.error(
           t?.rooms?.videoCall?.watchTogether?.hostOnly ||
             "Chỉ chủ phòng có thể phát video chung.",
         )
-        return
+        return null
       }
       try {
         // Lightweight API first — only a saved playback gets published. The
         // spotlight player auto-cues from mediaStatus.videoId, so the host's
-        // own copy loads once the ledger flips active.
+        // own copy loads once the ledger flips active. Calling start while a
+        // video is already active overwrites it (Q1=A, Q4=A): no confirm,
+        // no manual stop needed. A failed start leaves the current video
+        // untouched (Q5=A).
         const dto = await startMediaMutation({ sessionId, url }).unwrap()
         publishLoad(dto.videoId, dto.title)
         toast.success(
@@ -93,19 +96,20 @@ export const useWatchTogether = ({ sessionId, isHost, t, lkRoom }) => {
           t?.rooms?.videoCall?.watchTogether?.startError ||
             "Không thể phát video. Vui lòng thử lại.",
         )
+        return null
       }
     },
     [sessionId, isHost, startMediaMutation, publishLoad, t],
   )
 
   const stopMedia = useCallback(async () => {
-    if (!sessionId) return
+    if (!sessionId) return false
     if (!isHost) {
       toast.error(
         t?.rooms?.videoCall?.watchTogether?.hostOnly ||
           "Chỉ chủ phòng có thể dừng video chung.",
       )
-      return
+      return false
     }
     try {
       await stopMediaMutation({ sessionId }).unwrap()
@@ -114,11 +118,13 @@ export const useWatchTogether = ({ sessionId, isHost, t, lkRoom }) => {
         t?.rooms?.videoCall?.watchTogether?.stopSuccess ||
           "Đã dừng video chung.",
       )
+      return true
     } catch {
       toast.error(
         t?.rooms?.videoCall?.watchTogether?.stopError ||
           "Không thể dừng video.",
       )
+      return false
     }
   }, [sessionId, isHost, stopMediaMutation, publishStop, t])
 

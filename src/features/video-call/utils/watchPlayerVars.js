@@ -39,3 +39,129 @@ export const shouldShowCenterPlay = (
   !needsTapToSync &&
   !hasError &&
   CENTER_PLAY_STATES.has(playerState)
+
+/**
+ * Local-only CC preference (Q6=A, Q8=A). Each viewer toggles captions on
+ * their own copy; nothing is published over watch-sync. Stored as "1"/"0"
+ * so the choice survives video swaps and re-joins on the same device.
+ */
+export const WATCH_CC_STORAGE_KEY = "catspeak:watch-cc-enabled"
+
+export const readWatchCcEnabled = (storage = null) => {
+  try {
+    const store =
+      storage ??
+      (typeof window !== "undefined" ? window.localStorage : null)
+    return store?.getItem?.(WATCH_CC_STORAGE_KEY) === "1"
+  } catch {
+    return false
+  }
+}
+
+export const writeWatchCcEnabled = (enabled, storage = null) => {
+  try {
+    const store =
+      storage ??
+      (typeof window !== "undefined" ? window.localStorage : null)
+    if (!store) return
+    if (enabled) store.setItem?.(WATCH_CC_STORAGE_KEY, "1")
+    else store.removeItem?.(WATCH_CC_STORAGE_KEY)
+  } catch {
+    // Private-mode storage failures must never break playback.
+  }
+}
+
+/**
+ * Picks the best captions track for the local viewer. Prefers the given
+ * language codes in order (prefix match, so "vi" matches "vi-VN"), then
+ * falls back to the first available track. Returns null when empty.
+ */
+export const pickWatchCaptionTrack = (tracks, preferred = ["vi", "en"]) => {
+  if (!Array.isArray(tracks) || tracks.length === 0) return null
+  const langs = (preferred ?? []).map((l) => String(l).toLowerCase())
+  for (const lang of langs) {
+    const hit = tracks.find((t) =>
+      String(t?.languageCode ?? "").toLowerCase().startsWith(lang),
+    )
+    if (hit) return hit
+  }
+  return tracks[0] ?? null
+}
+
+/**
+ * Enables local captions: loads the captions module (YouTube then renders
+ * its default track) and best-effort selects the preferred language when
+ * the tracklist happens to be populated. Always returns true (unless the
+ * player is missing) — a video without captions simply shows nothing, so
+ * there is no failure to report. NOTE: getOption("captions","tracklist")
+ * permanently returns [] in this embed while captions demonstrably render,
+ * so its result must NEVER drive UI state (see disableWatchCaptions).
+ */
+export const enableWatchCaptions = (player, preferred = ["vi", "en"]) => {
+  if (!player) return false
+  try {
+    player.loadModule?.("captions")
+    const tracks = getWatchCaptionTracks(player)
+    const picked = pickWatchCaptionTrack(tracks ?? [], preferred)
+    if (picked?.languageCode) {
+      player.setOption?.("captions", "track", {
+        languageCode: picked.languageCode,
+      })
+    }
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Disables local captions via unloadModule — the ONLY off-switch proven to
+ * work (headless-harness screenshots, video usRA-xASQPI):
+ *   loadModule + setOption("captions","track",{})  -> subs STILL render
+ *     (and the player fires error 2 "invalid parameter")
+ *   unloadModule                                   -> subs hidden
+ *   loadModule alone                               -> subs reappear
+ * Deliberately does NOT consult the tracklist: it reads [] even while
+ * captions render, so it cannot mean "no captions". Availability
+ * auto-detection is therefore unimplementable on this seam — the toolbar
+ * CC button stays enabled and ON is a harmless no-op on captionless
+ * videos instead of a wrongly-disabled button on captioned ones.
+ */
+export const disableWatchCaptions = (player) => {
+  if (!player) return false
+  try {
+    player.unloadModule?.("captions")
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Applies a local CC preference to a YT.Player. Enabled loads the captions
+ * module (best-effort preferred-language select); disabled unloads it.
+ * Returns false only when the player is missing/torn down.
+ */
+export const applyWatchCcPreference = (player, enabled) => {
+  if (!player) return false
+  if (enabled) return enableWatchCaptions(player)
+  return disableWatchCaptions(player)
+}
+
+/**
+ * Reads the YouTube captions tracklist when exposed. WARNING: in this
+ * chromeless embed the getter returns [] / undefined even while captions
+ * demonstrably render (verified headless against usRA-xASQPI), so a []
+ * result means "unknown", never "no captions". Only used as a
+ * best-effort language hint inside enableWatchCaptions — never for
+ * availability UI.
+ */
+export const getWatchCaptionTracks = (player) => {
+  if (!player) return null
+  try {
+    const list = player.getOption?.("captions", "tracklist")
+    return Array.isArray(list) ? list : null
+  } catch {
+    return null
+  }
+}
