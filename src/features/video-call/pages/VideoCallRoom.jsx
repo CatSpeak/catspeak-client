@@ -118,6 +118,23 @@ const VideoCallRoomContent = () => {
   const dispatch = useDispatch()
   const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
 
+  // Auto-close the panel on success only (Q2=A, Q10=A). Failures return
+  // null/false from the hook, leaving the panel open to fix the link (Q5=A).
+  // The panel also closes itself; this covers the toolbar Stop button.
+  const handleStartWatchTogether = useCallback(
+    async (url) => {
+      const result = await startMedia(url)
+      if (result) setShowWatchTogether(false)
+      return result
+    },
+    [startMedia, setShowWatchTogether],
+  )
+  const handleStopWatchTogether = useCallback(async () => {
+    const result = await stopMedia()
+    if (result) setShowWatchTogether(false)
+    return result
+  }, [stopMedia, setShowWatchTogether])
+
   const handleTimerEnd = useCallback(() => {
     if (isHost && parentSessionId) {
       stopBreakoutRooms(parentSessionId).unwrap().catch(console.error)
@@ -267,47 +284,43 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex flex-1 min-h-0 relative">
             {mediaActive && mediaVideoId ? (
-              <div ref={mediaRef} className="flex h-full w-full min-h-0 flex-col overflow-y-auto bg-black md:overflow-hidden md:bg-transparent">
+              <div ref={mediaRef} className="flex h-full w-full min-h-0 flex-col overflow-y-auto p-3 sm:p-4">
                 <div className={getWatchMediaUnitClass()}>
-                <div
-                  className="w-full shrink-0 mx-auto"
-                  style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}
-                >
-                  <SyncedYouTubePlayer
-                    ref={mediaPlayerRef}
-                    videoId={mediaVideoId}
-                    needsTapToSync={isMediaHost ? false : needsTapToSync}
-                    onTapToSync={tapToSync}
-                    onError={reportSyncError}
-                    onStateChange={isMediaHost ? setHostPlayerState : undefined}
-                    showCenterPlay={shouldShowCenterPlay(hostPlayerState, {
-                      isHost: isMediaHost,
-                      needsTapToSync: isMediaHost ? false : needsTapToSync,
-                      hasError: !!syncError,
-                    })}
-                    onCenterPlay={() => mediaPlayerRef.current?.play?.()}
-                    syncError={syncError}
-                    t={t}
-                    className="rounded-none md:rounded-xl"
-                  />
-                </div>
-                <div className="w-full shrink-0 mx-auto" style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}>
-                  <WatchTogetherToolbar
-                    isHost={isMediaHost}
-                    mediaTitle={mediaTitle}
-                    playerRef={mediaPlayerRef}
-                    mediaRef={mediaRef}
-                    onChangeVideo={() => setShowWatchTogether(true)}
-                    onStop={stopMedia}
-                    isStopping={isStoppingMedia}
-                    needsTapToSync={isMediaHost ? false : needsTapToSync}
-                    onTapToSync={tapToSync}
-                    t={t}
-                  />
-                </div>
-                <div className="w-full shrink-0 mx-auto" style={{ maxWidth: "min(100%, calc(60vh * 16 / 9))" }}>
+                  {/* Light card: only the 16:9 video frame is black — toolbar
+                      and page stay on the app's light surface (#F5F5F7). */}
+                  <div className="w-full shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/[0.06]">
+                    <SyncedYouTubePlayer
+                      ref={mediaPlayerRef}
+                      videoId={mediaVideoId}
+                      needsTapToSync={isMediaHost ? false : needsTapToSync}
+                      onTapToSync={tapToSync}
+                      onError={reportSyncError}
+                      onStateChange={isMediaHost ? setHostPlayerState : undefined}
+                      showCenterPlay={shouldShowCenterPlay(hostPlayerState, {
+                        isHost: isMediaHost,
+                        needsTapToSync: isMediaHost ? false : needsTapToSync,
+                        hasError: !!syncError,
+                      })}
+                      onCenterPlay={() => mediaPlayerRef.current?.play?.()}
+                      syncError={syncError}
+                      t={t}
+                      className="rounded-none"
+                    />
+                    <WatchTogetherToolbar
+                      isHost={isMediaHost}
+                      mediaTitle={mediaTitle}
+                      playerRef={mediaPlayerRef}
+                      mediaRef={mediaRef}
+                      onChangeVideo={() => setShowWatchTogether(true)}
+                      onStop={handleStopWatchTogether}
+                      isStopping={isStoppingMedia}
+                      needsTapToSync={isMediaHost ? false : needsTapToSync}
+                      onTapToSync={tapToSync}
+                      playerState={isMediaHost ? hostPlayerState : null}
+                      t={t}
+                    />
+                  </div>
                   <MediaParticipantStrip participants={participants} />
-                </div>
                 </div>
               </div>
             ) : (
@@ -335,8 +348,8 @@ const VideoCallRoomContent = () => {
             isHost={isMediaHost}
             isStarting={isStartingMedia}
             isStopping={isStoppingMedia}
-            onStart={startMedia}
-            onStop={stopMedia}
+            onStart={handleStartWatchTogether}
+            onStop={handleStopWatchTogether}
           />
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}

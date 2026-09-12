@@ -6,6 +6,11 @@ import {
 } from "react"
 import { TriangleAlert, MousePointerClick, Play } from "lucide-react"
 import { buildWatchPlayerVars } from "@/features/video-call/utils/watchPlayerVars"
+import {
+  applyWatchCcPreference,
+  getWatchCaptionTracks,
+  readWatchCcEnabled,
+} from "@/features/video-call/utils/watchPlayerVars"
 
 let iframeApiPromise = null
 
@@ -115,14 +120,11 @@ const SyncedYouTubePlayer = forwardRef(
             events: {
               onReady: () => {
                 readyRef.current = true
-                try {
-                  // Captions have no playerVars off-switch; unload the module
-                  // so forced subtitles never cover the shared video.
-                  player.unloadModule?.("captions")
-                } catch {
-                  // Older embed builds may lack unloadModule; captions then
-                  // follow the viewer's own YouTube default.
-                }
+                // Local-only CC (Q6=A, Q8=A): default OFF, remembered per
+                // device. Enabled loads the captions module (YouTube
+                // auto-picks the track); disabled unloads it so forced
+                // subtitles never cover the shared video.
+                applyWatchCcPreference(player, readWatchCcEnabled())
                 if (pendingVideoRef.current) {
                   try {
                     player.cueVideoById(pendingVideoRef.current)
@@ -171,6 +173,9 @@ const SyncedYouTubePlayer = forwardRef(
         } catch {
           // Player torn down mid-cue; teardown below cleans up.
         }
+        // Cueing can reset the captions module — re-apply the local
+        // preference so a new video honors the remembered choice.
+        applyWatchCcPreference(playerRef.current, readWatchCcEnabled())
       } else {
         pendingVideoRef.current = videoId
       }
@@ -278,6 +283,12 @@ const SyncedYouTubePlayer = forwardRef(
             // No-op when player is tearing down.
           }
         },
+        setCaptionsEnabled: (enabled) => {
+          return applyWatchCcPreference(playerRef.current, enabled)
+        },
+        getCaptionTracks: () => {
+          return getWatchCaptionTracks(playerRef.current)
+        },
       }),
       [],
     )
@@ -295,10 +306,10 @@ const SyncedYouTubePlayer = forwardRef(
             type="button"
             onClick={onCenterPlay ?? undefined}
             aria-label={tapPlayLabel}
-            className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center bg-transparent"
+            className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center bg-black/45 backdrop-blur-[1px] transition-colors hover:bg-black/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 shadow-lg">
-              <Play size={26} className="ml-1 text-white" fill="currentColor" />
+            <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-red-600 shadow-2xl ring-4 ring-white/20 transition-transform hover:scale-105 active:scale-95">
+              <Play size={30} className="ml-1 text-white" fill="currentColor" />
             </span>
           </button>
         ) : null}
@@ -315,12 +326,12 @@ const SyncedYouTubePlayer = forwardRef(
           <button
             type="button"
             onClick={onTapToSync ?? undefined}
-            className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-2 bg-black/60 text-white transition-colors hover:bg-black/50"
+            className="absolute inset-0 z-20 flex cursor-pointer flex-col items-center justify-center gap-3 bg-black/65 px-6 text-center text-white backdrop-blur-[1px] transition-colors hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-500"
           >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 shadow-lg">
-              <MousePointerClick size={26} />
+            <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-red-600 shadow-2xl ring-4 ring-white/20 transition-transform hover:scale-105 active:scale-95">
+              <MousePointerClick size={30} />
             </span>
-            <span className="text-sm font-medium">{tapLabel}</span>
+            <span className="text-sm font-semibold">{tapLabel}</span>
           </button>
         ) : null}
       </div>
