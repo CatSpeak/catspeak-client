@@ -252,14 +252,14 @@ const WorkspaceRoomsContent = () => {
     async (roomId) => {
       try {
         const res = await toggleBookmark(roomId).unwrap();
-        toast.success(res?.message || "Đã cập nhật danh sách phòng đã lưu");
+        toast.success(res?.message || t.rooms?.bookmarkUpdated || "Đã cập nhật danh sách phòng đã lưu");
         refetchMyRooms();
       } catch (err) {
         console.error("Failed to toggle bookmark:", err);
-        toast.error(err?.data?.message || "Không thể thay đổi lưu phòng");
+        toast.error(err?.data?.message || t.rooms?.bookmarkUpdateError || "Không thể thay đổi lưu phòng");
       }
     },
-    [toggleBookmark, refetchMyRooms],
+    [toggleBookmark, refetchMyRooms, t.rooms?.bookmarkUpdated, t.rooms?.bookmarkUpdateError],
   );
 
   // Filter & Sort Application — new server-side filters
@@ -293,9 +293,9 @@ const WorkspaceRoomsContent = () => {
   // Toast on error with retry
   useEffect(() => {
     if (isMyRoomsError) {
-      toast.error(myRoomsError?.data?.message || "Không thể tải danh sách phòng. Vui lòng thử lại.");
+      toast.error(myRoomsError?.data?.message || t.rooms?.loadError || "Không thể tải danh sách phòng. Vui lòng thử lại.");
     }
-  }, [isMyRoomsError, myRoomsError]);
+  }, [isMyRoomsError, myRoomsError, t.rooms?.loadError]);
 
   return (
     <div className="flex flex-col gap-5 text-gray-800">
@@ -382,7 +382,7 @@ const WorkspaceRoomsContent = () => {
                   type="button"
                   onClick={() => setIsFilterOpen(true)}
                   className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
-                  title={t.rooms?.filters?.title || "Bộ lọc"}
+                  title={t.rooms?.filters?.filterTooltip || t.rooms?.filters?.filterModalTitle || t.rooms?.filters?.title || "Bộ lọc"}
                 >
                   <SlidersHorizontal size={18} strokeWidth={2} />
                   {activeFilterCount > 0 && (
@@ -397,7 +397,7 @@ const WorkspaceRoomsContent = () => {
                   type="button"
                   onClick={() => setIsSortOpen(true)}
                   className="relative flex items-center justify-center h-12 px-4 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 font-medium transition-colors shrink-0 gap-2 text-sm"
-                  title={t.rooms?.sortTitle || "Sắp xếp"}
+                  title={t.rooms?.sortTooltip || t.rooms?.sortTitle || "Sắp xếp"}
                 >
                   <ArrowUpDown size={18} strokeWidth={2} />
                   {appliedSortField && (
@@ -430,12 +430,12 @@ const WorkspaceRoomsContent = () => {
               <RoomsListSkeleton />
             ) : isMyRoomsError ? (
               <div className="flex flex-col items-center justify-center p-10 border border-dashed border-border rounded-2xl bg-gray-50/50 my-4">
-                <p className="text-sm text-gray-600 mb-4">Không thể tải danh sách phòng. Vui lòng thử lại.</p>
+                <p className="text-sm text-gray-600 mb-4">{t.rooms?.loadError || "Không thể tải danh sách phòng. Vui lòng thử lại."}</p>
                 <button
                   onClick={() => refetchMyRooms()}
                   className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors text-sm shadow"
                 >
-                  Thử lại
+                  {t.rooms?.retry || "Thử lại"}
                 </button>
               </div>
             ) : displayedRooms.length === 0 ? (
@@ -495,17 +495,19 @@ const WorkspaceRoomsContent = () => {
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
                     >
-                      Trước
+                      {t.rooms?.pagination?.prev || "Trước"}
                     </button>
                     <span className="text-sm text-gray-600">
-                      Trang {currentPage} / {totalPages}
+                      {(t.rooms?.pagination?.pageOf || "Trang {page} / {totalPages}")
+                        .replace("{page}", currentPage)
+                        .replace("{totalPages}", totalPages)} {activeTab !== "bookmark" && `(${totalCount} ${t.rooms?.filters?.room || "phòng"})`}
                     </span>
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                       className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
                     >
-                      Tiếp
+                      {t.rooms?.pagination?.next || "Tiếp"}
                     </button>
                   </div>
                 )}
@@ -536,17 +538,19 @@ const WorkspaceRoomsContent = () => {
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
                     >
-                      Trước
+                      {t.rooms?.pagination?.prev || "Trước"}
                     </button>
                     <span className="text-sm text-gray-600">
-                      Trang {currentPage} / {totalPages} ({totalCount} phòng)
+                      {(t.rooms?.pagination?.pageOf || "Trang {page} / {totalPages}")
+                        .replace("{page}", currentPage)
+                        .replace("{totalPages}", totalPages)} ({totalCount} {t.rooms?.filters?.room || "phòng"})
                     </span>
                     <button
                       disabled={currentPage >= totalPages}
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                       className="px-4 py-2 rounded-lg border border-border text-sm font-medium disabled:opacity-40"
                     >
-                      Tiếp
+                      {t.rooms?.pagination?.next || "Tiếp"}
                     </button>
                   </div>
                 )}

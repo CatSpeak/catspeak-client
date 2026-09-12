@@ -302,6 +302,8 @@ const ClassDetailPage = () => {
               {/* Co-host: Thêm khi chưa có, Quản lý khi đã có (chi tiết lớp) */}
               {isClassTeacher && (
                 <CoHostManager
+                  roomName={classData.name}
+                  roomType="class"
                   coHost={classCoHost}
                   candidates={coHostCandidates}
                   isTeacher={isClassTeacher}

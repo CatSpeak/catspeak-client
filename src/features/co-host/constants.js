@@ -30,6 +30,19 @@ export const CO_HOST_ALL = [
   CO_HOST_PERMISSIONS.RECORD,
 ]
 
+export const CO_HOST_PRESETS = {
+  ASSISTANT: [
+    CO_HOST_PERMISSIONS.MIC_TOGGLE,
+    CO_HOST_PERMISSIONS.CAMERA_TOGGLE,
+    CO_HOST_PERMISSIONS.MUTE_ALL,
+    CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE,
+    CO_HOST_PERMISSIONS.ADMIT_WAITING,
+    CO_HOST_PERMISSIONS.SHARE_SCREEN,
+  ],
+  ALL: CO_HOST_ALL,
+  CLEAR: [],
+}
+
 export const CO_HOST_GROUPS = [
   {
     id: "student_management",
@@ -71,6 +84,67 @@ export const CO_HOST_PERMISSION_LABELS = {
   [CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE]:
     "Quản lý quyền chia sẻ màn hình/cửa sổ của học viên",
   [CO_HOST_PERMISSIONS.RECORD]: "Bắt đầu/dừng ghi hình",
+}
+
+export const CO_HOST_PERMISSION_META = {
+  [CO_HOST_PERMISSIONS.MIC_TOGGLE]: {
+    icon: "Mic",
+    isSensitive: false,
+    helper: "Cho phép hoặc giới hạn mic của từng thành viên",
+  },
+  [CO_HOST_PERMISSIONS.CAMERA_TOGGLE]: {
+    icon: "Video",
+    isSensitive: false,
+    helper: "Bật hoặc tắt camera của thành viên",
+  },
+  [CO_HOST_PERMISSIONS.MUTE_ALL]: {
+    icon: "MicOff",
+    isSensitive: false,
+    helper: "Tắt mic tất cả học viên trong phòng",
+  },
+  [CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE]: {
+    icon: "Volume2",
+    isSensitive: false,
+    helper: "Cho phép học viên tự mở lại mic",
+  },
+  [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: {
+    icon: "UserX",
+    isSensitive: true,
+    severity: "danger",
+    helper: "Mời học viên rời khỏi phòng học",
+  },
+  [CO_HOST_PERMISSIONS.ADMIT_WAITING]: {
+    icon: "UserCheck",
+    isSensitive: false,
+    helper: "Duyệt học viên từ phòng chờ vào lớp",
+  },
+  [CO_HOST_PERMISSIONS.LOCK_CLASS]: {
+    icon: "Lock",
+    isSensitive: true,
+    severity: "warning",
+    helper: "Khóa phòng, không cho thêm người vào",
+  },
+  [CO_HOST_PERMISSIONS.END_CLASS]: {
+    icon: "Power",
+    isSensitive: true,
+    severity: "danger",
+    helper: "Đóng phòng và kết thúc phiên học",
+  },
+  [CO_HOST_PERMISSIONS.SHARE_SCREEN]: {
+    icon: "MonitorUp",
+    isSensitive: false,
+    helper: "Chia sẻ màn hình hoặc cửa sổ bài giảng",
+  },
+  [CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE]: {
+    icon: "Sliders",
+    isSensitive: false,
+    helper: "Quản lý quyền chia sẻ màn hình của học viên",
+  },
+  [CO_HOST_PERMISSIONS.RECORD]: {
+    icon: "Disc",
+    isSensitive: false,
+    helper: "Bắt đầu hoặc dừng ghi hình phiên học",
+  },
 }
 
 export const countByGroup = (selected = []) => {

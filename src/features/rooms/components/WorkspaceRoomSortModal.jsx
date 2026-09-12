@@ -37,10 +37,10 @@ const WorkspaceRoomSortModal = ({
   if (!open) return null
 
   const fieldOptions = [
-    { value: "name", label: t.rooms?.sortOptions?.name || "Tên phòng (Name)" },
-    { value: "createdAt", label: t.rooms?.sortOptions?.createdAt || "Ngày tạo (Creation Date)" },
-    { value: "currentParticipantCount", label: t.rooms?.sortOptions?.participants || "Số người tham gia (Participants)" },
-    { value: "duration", label: t.rooms?.sortOptions?.duration || "Thời lượng (Duration)" },
+    { value: "name", label: t.rooms?.sortOptions?.name || "Tên phòng" },
+    { value: "createdAt", label: t.rooms?.sortOptions?.createdAt || "Ngày tạo" },
+    { value: "currentParticipantCount", label: t.rooms?.sortOptions?.participants || "Số người tham gia" },
+    { value: "duration", label: t.rooms?.sortOptions?.duration || "Thời lượng" },
   ]
 
   return createPortal(

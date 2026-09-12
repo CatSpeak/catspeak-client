@@ -106,25 +106,25 @@ const WorkspaceRoomFilterModal = ({
 
   const roomTypeLabels = {
     All: t.rooms?.filters?.roomTypes?.All || "Tất cả",
-    Temporary: t.rooms?.filters?.roomTypes?.Temporary || "Temporary",
-    Custom: t.rooms?.filters?.roomTypes?.Custom || "Custom",
+    Temporary: t.rooms?.filters?.roomTypes?.Temporary || "Tạm thời",
+    Custom: t.rooms?.filters?.roomTypes?.Custom || "Tùy chỉnh",
   }
   const visibilityLabels = {
     All: t.rooms?.filters?.visibilities?.All || "Tất cả",
-    Public: t.rooms?.filters?.visibilities?.Public || "Public",
-    Private: t.rooms?.filters?.visibilities?.Private || "Private",
+    Public: t.rooms?.filters?.visibilities?.Public || "Công khai",
+    Private: t.rooms?.filters?.visibilities?.Private || "Riêng tư",
   }
   const activityLabels = {
     All: t.rooms?.filters?.activities?.All || "Tất cả",
-    InUse: t.rooms?.filters?.activities?.InUse || "In Use",
-    Empty: t.rooms?.filters?.activities?.Empty || "Empty",
+    InUse: t.rooms?.filters?.activities?.InUse || "Đang diễn ra",
+    Empty: t.rooms?.filters?.activities?.Empty || "Đang trống",
   }
   const languageLabels = {
     All: t.rooms?.filters?.languages?.All || "Tất cả",
-    English: "English",
-    Chinese: "Chinese",
-    Japanese: "Japanese",
-    Vietnamese: "Vietnamese",
+    English: t.rooms?.filters?.languages?.English || "Tiếng Anh",
+    Chinese: t.rooms?.filters?.languages?.Chinese || "Tiếng Trung",
+    Japanese: t.rooms?.filters?.languages?.Japanese || "Tiếng Nhật",
+    Vietnamese: t.rooms?.filters?.languages?.Vietnamese || "Tiếng Việt",
   }
 
   return createPortal(
@@ -137,7 +137,7 @@ const WorkspaceRoomFilterModal = ({
               <SlidersHorizontal size={18} strokeWidth={2.5} />
             </div>
             <h2 className="text-[18px] font-bold text-gray-900 tracking-tight">
-              {t.rooms?.filters?.title || "Bộ lọc phòng"}
+              {t.rooms?.filters?.filterModalTitle || t.rooms?.filters?.title || "Bộ lọc phòng"}
             </h2>
           </div>
           <button onClick={onClose} className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 rounded-full transition-colors">
@@ -154,7 +154,7 @@ const WorkspaceRoomFilterModal = ({
 
         <div className="flex gap-3 items-center justify-between p-4 sm:p-5 border-t border-border bg-gray-50/80 shrink-0">
           <button type="button" onClick={handleClear} className="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 text-[14px] font-bold text-gray-600 hover:text-cath-red-700 hover:bg-[#FFF0F2] rounded-xl transition-all">
-            {t.rooms?.filters?.clear || "Xóa tất cả"}
+            {t.rooms?.filters?.clearAll || t.rooms?.filters?.clear || "Xóa tất cả"}
           </button>
           <button type="button" onClick={handleApply} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-cath-red-700 hover:bg-cath-red-800 text-white text-[14px] font-bold rounded-xl shadow-md shadow-cath-red-700/10 transition-all">
             <span>{t.rooms?.filters?.apply || "Áp dụng"}</span>
