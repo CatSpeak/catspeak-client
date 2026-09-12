@@ -284,11 +284,15 @@ const VideoCallRoomContent = () => {
           )}
           <div className="flex flex-1 min-h-0 relative">
             {mediaActive && mediaVideoId ? (
-              <div ref={mediaRef} className="flex h-full w-full min-h-0 flex-col overflow-y-auto p-3 sm:p-4">
+              <div className="flex h-full w-full min-h-0 flex-col overflow-y-auto p-3 sm:p-4">
                 <div className={getWatchMediaUnitClass()}>
-                  {/* Light card: only the 16:9 video frame is black — toolbar
-                      and page stay on the app's light surface (#F5F5F7). */}
-                  <div className="w-full shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/[0.06]">
+                  {/* Cinematic fullscreen: only this card (video + toolbar)
+                      goes fullscreen on a deep-black stage. Participant strip
+                      stays in the normal layout behind. */}
+                  <div
+                    ref={mediaRef}
+                    className="watch-fs-card w-full shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/[0.06]"
+                  >
                     <SyncedYouTubePlayer
                       ref={mediaPlayerRef}
                       videoId={mediaVideoId}
@@ -304,7 +308,7 @@ const VideoCallRoomContent = () => {
                       onCenterPlay={() => mediaPlayerRef.current?.play?.()}
                       syncError={syncError}
                       t={t}
-                      className="rounded-none"
+                      className="rounded-none watch-fs-video"
                     />
                     <WatchTogetherToolbar
                       isHost={isMediaHost}
