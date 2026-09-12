@@ -72,14 +72,18 @@ test("CC defaults to OFF and round-trips through storage (Q8=A)", () => {
   assert.equal(readWatchCcEnabled(storage), false)
 })
 
-test("CC OFF clears the track but keeps the module loaded (no false-negative)", () => {
+test("CC OFF loads the module then clears the track (queryable, hidden)", () => {
   const calls = []
   const player = {
+    loadModule: (m) => calls.push(["load", m]),
     setOption: (mod, name, value) => calls.push([mod, name, value]),
     unloadModule: () => calls.push(["unload"]),
   }
   assert.equal(applyWatchCcPreference(player, false), true)
-  assert.deepEqual(calls, [["captions", "track", {}]])
+  assert.deepEqual(calls, [
+    ["load", "captions"],
+    ["captions", "track", {}],
+  ])
   assert.equal(applyWatchCcPreference(null, true), false)
 })
 
@@ -123,6 +127,19 @@ test("CC ON selects the picked track; no tracks returns false", () => {
   }
   assert.equal(enableWatchCaptions(noTracks), false)
   assert.equal(disableWatchCaptions(null), false)
+})
+
+test("CC ON with not-ready tracklist returns true provisionally (poll asserts later)", () => {
+  const calls = []
+  const player = {
+    loadModule: (m) => calls.push(["load", m]),
+    getOption: () => undefined,
+    setOption: () => {
+      throw new Error("must not select before the tracklist is known")
+    },
+  }
+  assert.equal(enableWatchCaptions(player), true)
+  assert.deepEqual(calls, [["load", "captions"]])
 })
 
 test("caption tracks: empty disables, unknown keeps button enabled (Q9=A)", () => {

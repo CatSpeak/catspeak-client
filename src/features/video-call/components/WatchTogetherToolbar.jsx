@@ -73,6 +73,9 @@ const WatchTogetherToolbar = ({
   // false = confirmed no tracks → disable with tooltip (Q9=A).
   const [ccHasTracks, setCcHasTracks] = useState(null)
   const ccTitleRef = useRef(mediaTitle)
+  // mediaTitle for which an ON-selection was asserted against a known
+  // tracklist. Guards the once-per-video re-assert below.
+  const ccAssertedRef = useRef(null)
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -82,6 +85,7 @@ const WatchTogetherToolbar = ({
       // reset never fights the query below.
       if (ccTitleRef.current !== mediaTitle) {
         ccTitleRef.current = mediaTitle
+        ccAssertedRef.current = null
         setCcHasTracks(null)
         return
       }
@@ -106,11 +110,31 @@ const WatchTogetherToolbar = ({
         if (typeof level === "number" && Number.isFinite(level)) setVolume(level)
         // Poll caption availability for the CC disabled state. Only a
         // confirmed empty tracklist disables; unknown keeps it enabled.
+        // The module is always loaded (OFF clears the track instead of
+        // unloading), so a confirmed [] truly means "no captions".
         try {
           const tracks =
             playerRef?.current?.getCaptionTracks?.() ??
             getWatchCaptionTracks(playerRef?.current)
-          if (Array.isArray(tracks)) setCcHasTracks(tracks.length > 0)
+          if (Array.isArray(tracks)) {
+            const has = tracks.length > 0
+            setCcHasTracks(has)
+            if (ccEnabled && has && ccAssertedRef.current !== mediaTitle) {
+              // ON was switched while the tracklist was still unknown
+              // (or a new video cued): assert the pick now that tracks
+              // are known. Idempotent — runs once per video.
+              const ok =
+                playerRef?.current?.setCaptionsEnabled?.(true) !== false
+              if (ok) ccAssertedRef.current = mediaTitle
+            }
+            if (ccEnabled && !has) {
+              // Video confirmed to have no captions while ON: revert to
+              // OFF quietly so the button state matches reality.
+              ccAssertedRef.current = null
+              setCcEnabled(false)
+              writeWatchCcEnabled(false)
+            }
+          }
         } catch {
           // Player tearing down — keep last known availability.
         }
@@ -119,7 +143,7 @@ const WatchTogetherToolbar = ({
       }
     }, 1000)
     return () => clearInterval(id)
-  }, [isHost, playerRef, playerState, mediaTitle])
+  }, [isHost, playerRef, playerState, mediaTitle, ccEnabled])
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement)

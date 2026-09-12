@@ -130,10 +130,10 @@ const SyncedYouTubePlayer = forwardRef(
                 }
                 // Local-only CC (Q6=A, Q8=A): default OFF, remembered per
                 // device. Applied AFTER any pending cue (cueing resets the
-                // captions module). OFF clears the track but keeps the
-                // module loaded so the toolbar can still query the
-                // tracklist — unloading here caused the CC button to
-                // wrongly disable on videos that DO have captions.
+                // captions module). OFF loads the module then clears the
+                // track, so the toolbar can still query the tracklist —
+                // without the load, YouTube reports an empty list and the
+                // CC button wrongly disables on captioned videos.
                 applyWatchCcPreference(player, readWatchCcEnabled())
               },
               onError: (event) => {

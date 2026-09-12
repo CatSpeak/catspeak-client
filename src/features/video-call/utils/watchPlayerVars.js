@@ -91,14 +91,18 @@ export const pickWatchCaptionTrack = (tracks, preferred = ["vi", "en"]) => {
 /**
  * Enables local captions: loads the captions module and selects the best
  * track. Returns true on success, false when the video exposes no tracks
- * (caller should revert + mark the CC button unavailable).
+ * (caller should revert + mark the CC button unavailable). A not-ready-yet
+ * tracklist (null) returns true provisionally — loading the module surfaces
+ * the YouTube default track, and the toolbar poll asserts the pick once the
+ * tracklist arrives.
  */
 export const enableWatchCaptions = (player, preferred = ["vi", "en"]) => {
   if (!player) return false
   try {
     player.loadModule?.("captions")
     const tracks = getWatchCaptionTracks(player)
-    const picked = pickWatchCaptionTrack(tracks ?? [], preferred)
+    if (tracks === null) return true
+    const picked = pickWatchCaptionTrack(tracks, preferred)
     if (!picked?.languageCode) return false
     player.setOption?.("captions", "track", {
       languageCode: picked.languageCode,
@@ -110,14 +114,18 @@ export const enableWatchCaptions = (player, preferred = ["vi", "en"]) => {
 }
 
 /**
- * Disables local captions but KEEPS the module loaded (track cleared).
- * Unloading would make getOption("captions", "tracklist") report empty and
- * the toolbar would wrongly disable the CC button for videos that DO have
- * captions — the false-negative this fixes.
+ * Disables local captions: loads the captions module FIRST, then clears the
+ * selected track. The load is the critical part — YouTube only reports
+ * getOption("captions", "tracklist") while the module is loaded, so clearing
+ * without loading leaves the tracklist empty and the toolbar wrongly
+ * disables the CC button on videos that DO have captions (while YouTube
+ * still renders captions by its own default — visible subs + disabled
+ * button, the exact symptom reported).
  */
 export const disableWatchCaptions = (player) => {
   if (!player) return false
   try {
+    player.loadModule?.("captions")
     if (typeof player.setOption === "function") {
       player.setOption("captions", "track", {})
       return true
