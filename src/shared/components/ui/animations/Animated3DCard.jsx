@@ -1,8 +1,9 @@
 import React, { useState } from "react"
 
 /**
- * A reusable Pushable 3D animated card component.
- * Replaces the previous mouse-tracking tilt effect with a layered CSS pushable effect.
+ * A reusable animated card component.
+ * Hover: smooth lift + soft glow shadow.
+ * Press: slight push-down for tactile feedback.
  */
 const Animated3DCard = ({
   children,
@@ -27,31 +28,16 @@ const Animated3DCard = ({
       style={style}
       {...props}
     >
-      {/* Shadow */}
+      {/* Card front — lift on hover, push on press */}
       <div
-        className="absolute top-0 left-0 w-full h-full rounded-2xl bg-black/10 will-change-transform translate-y-[0px] opacity-0 transition-all duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] sm:group-hover/card:translate-y-[6px] sm:group-hover/card:opacity-100 sm:group-hover/card:duration-[250ms] sm:group-hover/card:ease-[cubic-bezier(.3,.7,.4,1.5)]"
+        className={`relative rounded-2xl bg-white flex flex-col overflow-hidden border border-border will-change-transform transition-[transform,box-shadow] duration-[280ms] ease-[cubic-bezier(.25,.8,.25,1)] shadow-sm sm:group-hover/card:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.14),0_2px_8px_-2px_rgba(0,0,0,0.08)] sm:group-hover/card:-translate-y-[5px] ${className}`}
         style={
           isPressed
-            ? { transform: "translateY(1px)", transitionDuration: "34ms" }
-            : undefined
-        }
-      ></div>
-
-      {/* Edge */}
-      <div
-        className="absolute top-0 left-0 w-full h-full rounded-2xl opacity-0 transition-opacity duration-[600ms] sm:group-hover/card:opacity-100 sm:group-hover/card:duration-[250ms]"
-        style={{
-          background:
-            "linear-gradient(to left, #e5e5e5 0%, #f5f5f5 8%, #f5f5f5 92%, #e5e5e5 100%)",
-        }}
-      ></div>
-
-      {/* Front */}
-      <div
-        className={`relative rounded-2xl bg-white flex flex-col overflow-hidden border border-border shadow-sm sm:group-hover/card:shadow-none will-change-transform translate-y-[0px] transition-all duration-[600ms] ease-[cubic-bezier(.3,.7,.4,1)] sm:group-hover/card:-translate-y-[6px] sm:group-hover/card:duration-[250ms] sm:group-hover/card:ease-[cubic-bezier(.3,.7,.4,1.5)] ${className}`}
-        style={
-          isPressed
-            ? { transform: "translateY(-2px)", transitionDuration: "34ms" }
+            ? {
+                transform: "translateY(1px) scale(0.99)",
+                boxShadow: "0 2px 8px -2px rgba(0,0,0,0.10)",
+                transitionDuration: "60ms",
+              }
             : undefined
         }
       >

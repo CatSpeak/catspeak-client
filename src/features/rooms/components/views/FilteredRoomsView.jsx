@@ -1,6 +1,6 @@
 import React from "react"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
-import RoomCard from "../RoomCard"
+import CommunityRoomCard from "../CommunityRoomCard"
 import EmptyRoomState from "../EmptyRoomState"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { categoryFriendlyNames } from "../../config/communicateTabConfig"
@@ -51,7 +51,7 @@ const FilteredRoomsView = ({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {rooms.map((room) => (
               <div key={room.roomId} className="w-full">
-                <RoomCard room={room} />
+                <CommunityRoomCard room={room} />
               </div>
             ))}
           </div>

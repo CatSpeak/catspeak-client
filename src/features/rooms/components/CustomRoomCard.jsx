@@ -241,7 +241,7 @@ const CustomRoomCard = ({
                 />
               </div>
             ) : (
-              <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-sm">
+              <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-md opacity-0 group-hover/card:opacity-100 transition-opacity duration-200">
                 {/* Edit Button */}
                 {onEdit && (
                   <button
@@ -308,26 +308,27 @@ const CustomRoomCard = ({
             )}
           </div>
 
+
           {/* Badges: RoomType / Visibility / Language / Activity */}
           <div className="flex flex-wrap gap-1.5 mb-3">
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
-              {roomTypeBadge}
+              {t.rooms?.filters?.roomTypes?.[roomTypeBadge] || roomTypeBadge}
             </span>
             <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivate ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
-              {visibilityBadge}
+              {t.rooms?.filters?.visibilities?.[visibilityBadge] || visibilityBadge}
             </span>
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-              {languageBadge}
+              {t.rooms?.aiSettings?.[languageBadge?.toLowerCase()] || languageBadge}
             </span>
             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
               {activityBadge === "InUse" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
-              {activityBadge === "InUse" ? "In Use" : "Empty"}
+              {t.rooms?.filters?.activities?.[activityBadge] || (activityBadge === "InUse" ? "In Use" : "Empty")}
             </span>
           </div>
 
           {isExpired && (
             <div className="mb-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 text-center">
-              Đã hết hạn — sẽ được xóa
+              {customRooms.expiredWarning || "Đã hết hạn — sẽ được xóa"}
             </div>
           )}
 
@@ -359,18 +360,19 @@ const CustomRoomCard = ({
             </div>
           </div>
 
-          {/* Co-host row (chi tiết phòng): Thêm khi chưa có, Quản lý khi đã có.
-              Chưa có co-host thì gợi ý đúng chuỗi SRS BR-COH-08. */}
+          {/* Co-host row */}
           <div
-            className="mt-3 flex flex-col gap-1"
+            className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            {!roomCoHost?.coHostAccountId && (
-              <p className="text-[11px] text-gray-400">
-                Chưa có Co-host được phân công cho phòng này
-              </p>
-            )}
+            <p className="text-[11px] text-gray-400 leading-snug">
+              {roomCoHost?.coHostAccountId
+                ? (customRooms.assignedCoHost || "Đã phân công Co-host")
+                : (customRooms.noCoHost || "Chưa có Co-host")}
+            </p>
             <CoHostManager
+              roomName={room.name}
+              roomType="room"
               coHost={roomCoHost}
               candidates={coHostCandidates}
               isTeacher={isRoomOwner}

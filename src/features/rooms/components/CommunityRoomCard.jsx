@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { getRoomShareUrl } from "@/shared/utils/shareUtils";
 import { useNavigate, useParams } from "react-router-dom";
@@ -17,7 +17,11 @@ import JPThumbnail from "@/shared/assets/images/rooms/THUMBNAIL-NHAT.jpg";
 import { getTopicIcon, getTopicMeta } from "../utils/getTopicIcon";
 import Animated3DCard from "@/shared/components/ui/animations/Animated3DCard";
 
-const RoomCard = ({ room }) => {
+/**
+ * CommunityRoomCard — dung rieng cho trang /community.
+ * Giong RoomCard nhung KHONG hien thi dong badge (Custom / Public / Language / Empty).
+ */
+const CommunityRoomCard = ({ room }) => {
   const { t } = useLanguage()
   const { formatTime } = useTimezone()
   const { isAuthenticated } = useAuth()
@@ -65,14 +69,13 @@ const RoomCard = ({ room }) => {
     !isUnlimitedParticipants &&
     (room.currentParticipantCount || 0) >= room.maxParticipants
 
-  const isExpired = isRoomExpired(room);
-  // Ticket 02: keep expired visible but disabled in workspace (worker will delete); hide only in community listing
-  const isWorkspaceBookmark = window.location.pathname.includes("/workspace/rooms");
-  if (isExpired && !isWorkspaceBookmark) {
-    return null;
+  const isExpired = isRoomExpired(room)
+  // Hide expired rooms in the community listing
+  if (isExpired) {
+    return null
   }
 
-  const isPrivate = room.privacy === "Private" || room.isPrivate;
+  const isPrivate = room.privacy === "Private" || room.isPrivate
   const hasPassword =
     room.hasPassword || room.isPasswordProtected || !!room.password
 
@@ -83,35 +86,33 @@ const RoomCard = ({ room }) => {
 
     if (isExpired) {
       toast.error(
-        t?.rooms?.callEnded?.expiredToast || "Phòng này đã hết thời hạn sử dụng!"
-      );
-      return;
+        t?.rooms?.callEnded?.expiredToast || "Phong nay da het thoi han su dung!"
+      )
+      return
     }
 
-    // If user is not authenticated, open login modal instead of navigating
     if (!isAuthenticated) {
       openAuthModal("login")
       return
     }
 
-    // If authenticated, navigate to the unified meet page
     const communityLang = localStorage.getItem("communityLanguage") || "en"
     navigate(`/${communityLang}/meet/${roomId}`)
   }
 
-  // Badge helpers (Ticket 02) — derive from server DTO when available
-  const activityBadge = room.activity || ((room.currentParticipantCount || 0) > 0 ? "InUse" : "Empty")
   const roomTypeVal = room.roomType ?? room.RoomType
-  const isCustomType = roomTypeVal === 4 || roomTypeVal === "4" || roomTypeVal === "Custom" || room.isUnlimited || room.IsUnlimited
-  const roomTypeBadge = isCustomType ? "Custom" : "Temporary"
-  const isPrivateRoom = room.privacy === "Private" || room.isPrivate || room.Privacy === 1
-  const visibilityBadge = isPrivateRoom ? "Private" : "Public"
-  const languageBadge = room.languageType || room.LanguageType || room.language || "—"
+  const isCustomType =
+    roomTypeVal === 4 ||
+    roomTypeVal === "4" ||
+    roomTypeVal === "Custom" ||
+    room.isUnlimited ||
+    room.IsUnlimited
   let isUnlimitedRoom = isCustomType || room.duration === null
-  if (room.isUnlimited !== undefined && room.isUnlimited !== null) isUnlimitedRoom = room.isUnlimited
-  else if (room.IsUnlimited !== undefined && room.IsUnlimited !== null) isUnlimitedRoom = room.IsUnlimited
+  if (room.isUnlimited !== undefined && room.isUnlimited !== null)
+    isUnlimitedRoom = room.isUnlimited
+  else if (room.IsUnlimited !== undefined && room.IsUnlimited !== null)
+    isUnlimitedRoom = room.IsUnlimited
 
-  // Duration: prefer server remainingTime/remainingSeconds (Ticket 02), fallback to legacy calculate
   const createDate = room.createDate
     ? new Date(room.createDate)
     : room.createdAt
@@ -138,11 +139,11 @@ const RoomCard = ({ room }) => {
 
   const handleRoomClick = (e) => {
     if (isExpired) {
-      e.stopPropagation();
+      e.stopPropagation()
       toast.error(
-        t?.rooms?.callEnded?.expiredToast || "Phòng này đã hết thời hạn sử dụng!"
-      );
-      return;
+        t?.rooms?.callEnded?.expiredToast || "Phong nay da het thoi han su dung!"
+      )
+      return
     }
 
     if (isRoomFull) {
@@ -173,14 +174,14 @@ const RoomCard = ({ room }) => {
       toast.success(
         res?.message ||
           (prev
-            ? t.rooms?.unbookmarkSuccess || "Đã bỏ lưu phòng"
-            : t.rooms?.bookmarkSuccess || "Đã lưu phòng thành công"),
+            ? t.rooms?.unbookmarkSuccess || "Da bo luu phong"
+            : t.rooms?.bookmarkSuccess || "Da luu phong thanh cong"),
       )
     } catch (err) {
       setIsBookmarked(prev)
       toast.error(
         err?.data?.message ||
-          (prev ? "Không thể bỏ lưu phòng" : "Không thể lưu phòng"),
+          (prev ? "Khong the bo luu phong" : "Khong the luu phong"),
       )
     }
   }
@@ -197,7 +198,7 @@ const RoomCard = ({ room }) => {
         setTimeout(() => setShowCopied(false), 2000)
       })
       .catch(() => {
-        toast.error("Không thể sao chép liên kết", { position: "top-center" })
+        toast.error("Khong the sao chep lien ket", { position: "top-center" })
       })
   }
 
@@ -226,16 +227,8 @@ const RoomCard = ({ room }) => {
             className={`relative z-10 h-full w-full ${!imageError && room.thumbnailUrl ? "object-contain" : "object-cover"}`}
           />
 
-          {/* Top Left: Badges */}
+          {/* Top Left: Level & Topic badges only (no type/visibility badges) */}
           <div className="absolute left-2 top-2 max-w-[65%] flex items-center gap-1.5 z-10 p-1">
-            {isExpired && (
-              <div
-                className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-2.5 bg-[#580009] text-white border border-white/25 text-[11px] sm:text-xs font-bold rounded-md shadow-sm cursor-default"
-                title={t?.rooms?.expiredBadge || "Đã hết hạn"}
-              >
-                {t?.rooms?.expiredBadge || "Đã hết hạn"}
-              </div>
-            )}
             {room.requiredLevel && (
               <div
                 className="flex shrink-0 items-center justify-center h-7 sm:h-8 px-3 bg-cath-red-800 text-[11px] sm:text-xs font-bold text-white rounded-md shadow-sm truncate cursor-default"
@@ -243,7 +236,7 @@ const RoomCard = ({ room }) => {
                   t?.rooms?.filters?.levels?.[
                     room.requiredLevel?.toLowerCase()
                   ] ||
-                  `${t?.rooms?.filters?.levelLabel || "Trình độ"}: ${room.requiredLevel}`
+                  `${t?.rooms?.filters?.levelLabel || "Trinh do"}: ${room.requiredLevel}`
                 }
               >
                 {t?.rooms?.filters?.levels?.[
@@ -262,7 +255,7 @@ const RoomCard = ({ room }) => {
                 t?.rooms?.filters?.topics?.[topicKey] ||
                 activeTopic ||
                 t?.rooms?.filters?.topics?.other ||
-                "Khác"
+                "Khac"
               return (
                 <div
                   className="flex shrink-0 items-center justify-center h-7 w-7 sm:h-8 sm:w-8 bg-cath-red-800 rounded-full shadow-sm z-10 cursor-default"
@@ -299,8 +292,8 @@ const RoomCard = ({ room }) => {
               onClick={handleBookmarkClick}
               title={
                 isBookmarked
-                  ? t?.rooms?.unbookmark || "Bỏ lưu phòng"
-                  : t?.rooms?.bookmark || "Lưu phòng"
+                  ? t?.rooms?.unbookmark || "Bo luu phong"
+                  : t?.rooms?.bookmark || "Luu phong"
               }
             >
               <Bookmark
@@ -315,8 +308,8 @@ const RoomCard = ({ room }) => {
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className={`flex flex-1 flex-col p-4 pb-4 ${isExpired ? "opacity-60" : ""}`}>
+        {/* Content Section — no badges row */}
+        <div className="flex flex-1 flex-col p-4 pb-4">
           {/* Title & Link */}
           <div className="flex items-start justify-between gap-3 mb-2">
             <h3 className="text-lg font-bold line-clamp-1 text-black leading-snug">
@@ -324,37 +317,12 @@ const RoomCard = ({ room }) => {
             </h3>
             <div
               onClick={handleCopyLink}
-              title={t?.rooms?.copyLinkTooltip || "Sao chép liên kết"}
+              title={t?.rooms?.copyLinkTooltip || "Sao chep lien ket"}
               className="flex items-center justify-center text-cath-red-800 shrink-0 hover:scale-110 transition-all active:scale-95 cursor-pointer p-1.5 rounded-full hover:bg-red-50"
             >
               <LinkIcon size={18} />
             </div>
           </div>
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {!isWorkspaceBookmark && (
-              <>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isCustomType ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
-                  {t.rooms?.filters?.roomTypes?.[roomTypeBadge] || roomTypeBadge}
-                </span>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${isPrivateRoom ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
-                  {t.rooms?.filters?.visibilities?.[visibilityBadge] || visibilityBadge}
-                </span>
-              </>
-            )}
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-              {t.rooms?.aiSettings?.[languageBadge?.toLowerCase()] || languageBadge}
-            </span>
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${activityBadge === "InUse" ? "bg-emerald-100 text-emerald-700 border-emerald-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
-              {activityBadge === "InUse" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
-              {t.rooms?.filters?.activities?.[activityBadge] || (activityBadge === "InUse" ? "In Use" : "Empty")}
-            </span>
-          </div>
-
-          {isExpired && (
-            <div className="mb-2 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1 text-center">
-              {t.rooms?.expiredBadge || "Đã hết hạn"}
-            </div>
-          )}
 
           {/* Footer Info */}
           <div className="mt-auto flex justify-between items-center gap-3 sm:gap-4 flex-wrap">
@@ -392,7 +360,7 @@ const RoomCard = ({ room }) => {
         typeof document !== "undefined" &&
         createPortal(
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[99999] px-4 py-2 bg-black/75 text-white rounded-full text-[15px] font-medium pointer-events-none shadow-lg whitespace-nowrap">
-            {t?.rooms?.copySuccess || "Đã sao chép liên kết!"}
+            {t?.rooms?.copySuccess || "Da sao chep lien ket!"}
           </div>,
           document.body,
         )}
@@ -400,4 +368,4 @@ const RoomCard = ({ room }) => {
   )
 }
 
-export default RoomCard
+export default CommunityRoomCard
