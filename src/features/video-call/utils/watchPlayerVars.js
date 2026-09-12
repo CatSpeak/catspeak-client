@@ -72,20 +72,74 @@ export const writeWatchCcEnabled = (enabled, storage = null) => {
 }
 
 /**
- * Applies a local CC preference to a YT.Player. Enabled loads the captions
- * module (YouTube auto-picks the track); disabled unloads it so forced
- * subtitles never cover the shared video. Returns false only when the
- * player is missing/torn down.
+ * Picks the best captions track for the local viewer. Prefers the given
+ * language codes in order (prefix match, so "vi" matches "vi-VN"), then
+ * falls back to the first available track. Returns null when empty.
  */
-export const applyWatchCcPreference = (player, enabled) => {
+export const pickWatchCaptionTrack = (tracks, preferred = ["vi", "en"]) => {
+  if (!Array.isArray(tracks) || tracks.length === 0) return null
+  const langs = (preferred ?? []).map((l) => String(l).toLowerCase())
+  for (const lang of langs) {
+    const hit = tracks.find((t) =>
+      String(t?.languageCode ?? "").toLowerCase().startsWith(lang),
+    )
+    if (hit) return hit
+  }
+  return tracks[0] ?? null
+}
+
+/**
+ * Enables local captions: loads the captions module and selects the best
+ * track. Returns true on success, false when the video exposes no tracks
+ * (caller should revert + mark the CC button unavailable).
+ */
+export const enableWatchCaptions = (player, preferred = ["vi", "en"]) => {
   if (!player) return false
   try {
-    if (enabled) player.loadModule?.("captions")
-    else player.unloadModule?.("captions")
+    player.loadModule?.("captions")
+    const tracks = getWatchCaptionTracks(player)
+    const picked = pickWatchCaptionTrack(tracks ?? [], preferred)
+    if (!picked?.languageCode) return false
+    player.setOption?.("captions", "track", {
+      languageCode: picked.languageCode,
+    })
     return true
   } catch {
     return false
   }
+}
+
+/**
+ * Disables local captions but KEEPS the module loaded (track cleared).
+ * Unloading would make getOption("captions", "tracklist") report empty and
+ * the toolbar would wrongly disable the CC button for videos that DO have
+ * captions — the false-negative this fixes.
+ */
+export const disableWatchCaptions = (player) => {
+  if (!player) return false
+  try {
+    if (typeof player.setOption === "function") {
+      player.setOption("captions", "track", {})
+      return true
+    }
+    player.unloadModule?.("captions")
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Applies a local CC preference to a YT.Player. Enabled selects the best
+ * track (vi → en → first); disabled clears the track while keeping the
+ * module loaded so availability stays queryable. Returns false only when
+ * the player is missing/torn down, or when enabling a video with no
+ * tracks.
+ */
+export const applyWatchCcPreference = (player, enabled) => {
+  if (!player) return false
+  if (enabled) return enableWatchCaptions(player)
+  return disableWatchCaptions(player)
 }
 
 /**

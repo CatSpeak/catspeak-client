@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Play,
   Pause,
@@ -72,9 +72,19 @@ const WatchTogetherToolbar = ({
   // null = unknown (player not ready / no tracklist API) → keep enabled.
   // false = confirmed no tracks → disable with tooltip (Q9=A).
   const [ccHasTracks, setCcHasTracks] = useState(null)
+  const ccTitleRef = useRef(mediaTitle)
 
   useEffect(() => {
     const id = setInterval(() => {
+      // A new video means new caption availability: drop the previous
+      // verdict back to unknown (button enabled) until the poll confirms
+      // otherwise. Done inside the tick (not the effect body) so the
+      // reset never fights the query below.
+      if (ccTitleRef.current !== mediaTitle) {
+        ccTitleRef.current = mediaTitle
+        setCcHasTracks(null)
+        return
+      }
       try {
         if (isHost) {
           const time = playerRef?.current?.getCurrentTime?.()
@@ -109,7 +119,7 @@ const WatchTogetherToolbar = ({
       }
     }, 1000)
     return () => clearInterval(id)
-  }, [isHost, playerRef, playerState])
+  }, [isHost, playerRef, playerState, mediaTitle])
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement)
@@ -191,15 +201,28 @@ const WatchTogetherToolbar = ({
 
   const toggleCaptions = () => {
     const next = !ccEnabled
-    setCcEnabled(next)
-    writeWatchCcEnabled(next)
+    let ok = false
     try {
       if (typeof playerRef?.current?.setCaptionsEnabled === "function") {
-        playerRef.current.setCaptionsEnabled(next)
+        ok = playerRef.current.setCaptionsEnabled(next) !== false
+      } else {
+        // Facade not ready (StrictMode remount) — optimistically persist;
+        // the player re-applies the stored preference on ready/cue.
+        ok = true
       }
     } catch {
-      // No-op when player is tearing down.
+      ok = false
     }
+    if (next && !ok) {
+      // Video exposes no caption tracks: stay OFF and disable the button
+      // with the "no captions" tooltip instead of silently doing nothing.
+      setCcEnabled(false)
+      writeWatchCcEnabled(false)
+      setCcHasTracks(false)
+      return
+    }
+    setCcEnabled(next)
+    writeWatchCcEnabled(next)
   }
 
   // 40px touch targets on the light card.

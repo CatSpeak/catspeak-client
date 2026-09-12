@@ -120,11 +120,6 @@ const SyncedYouTubePlayer = forwardRef(
             events: {
               onReady: () => {
                 readyRef.current = true
-                // Local-only CC (Q6=A, Q8=A): default OFF, remembered per
-                // device. Enabled loads the captions module (YouTube
-                // auto-picks the track); disabled unloads it so forced
-                // subtitles never cover the shared video.
-                applyWatchCcPreference(player, readWatchCcEnabled())
                 if (pendingVideoRef.current) {
                   try {
                     player.cueVideoById(pendingVideoRef.current)
@@ -133,6 +128,13 @@ const SyncedYouTubePlayer = forwardRef(
                   }
                   pendingVideoRef.current = null
                 }
+                // Local-only CC (Q6=A, Q8=A): default OFF, remembered per
+                // device. Applied AFTER any pending cue (cueing resets the
+                // captions module). OFF clears the track but keeps the
+                // module loaded so the toolbar can still query the
+                // tracklist — unloading here caused the CC button to
+                // wrongly disable on videos that DO have captions.
+                applyWatchCcPreference(player, readWatchCcEnabled())
               },
               onError: (event) => {
                 callbacksRef.current.onError?.(event?.data)

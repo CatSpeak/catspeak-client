@@ -10,6 +10,9 @@ import {
   writeWatchCcEnabled,
   applyWatchCcPreference,
   getWatchCaptionTracks,
+  pickWatchCaptionTrack,
+  enableWatchCaptions,
+  disableWatchCaptions,
 } from "./watchPlayerVars.js"
 
 test("watch player stays fully chromeless (toolbar is the only control surface)", () => {
@@ -69,19 +72,57 @@ test("CC defaults to OFF and round-trips through storage (Q8=A)", () => {
   assert.equal(readWatchCcEnabled(storage), false)
 })
 
-test("CC preference applies via captions module (load/unload only)", () => {
+test("CC OFF clears the track but keeps the module loaded (no false-negative)", () => {
+  const calls = []
+  const player = {
+    setOption: (mod, name, value) => calls.push([mod, name, value]),
+    unloadModule: () => calls.push(["unload"]),
+  }
+  assert.equal(applyWatchCcPreference(player, false), true)
+  assert.deepEqual(calls, [["captions", "track", {}]])
+  assert.equal(applyWatchCcPreference(null, true), false)
+})
+
+test("CC ON picks vi first, then en, then first track", () => {
+  const tracks = [
+    { languageCode: "en" },
+    { languageCode: "vi" },
+    { languageCode: "ja" },
+  ]
+  assert.equal(pickWatchCaptionTrack(tracks).languageCode, "vi")
+  assert.equal(
+    pickWatchCaptionTrack([{ languageCode: "en" }, { languageCode: "ja" }])
+      .languageCode,
+    "en",
+  )
+  assert.equal(
+    pickWatchCaptionTrack([{ languageCode: "ja" }]).languageCode,
+    "ja",
+  )
+  assert.equal(pickWatchCaptionTrack([]), null)
+})
+
+test("CC ON selects the picked track; no tracks returns false", () => {
   const calls = []
   const player = {
     loadModule: (m) => calls.push(["load", m]),
-    unloadModule: (m) => calls.push(["unload", m]),
+    getOption: () => [{ languageCode: "en" }, { languageCode: "vi" }],
+    setOption: (mod, name, value) => calls.push([mod, name, value]),
   }
-  assert.equal(applyWatchCcPreference(player, true), true)
-  assert.equal(applyWatchCcPreference(player, false), true)
+  assert.equal(enableWatchCaptions(player), true)
   assert.deepEqual(calls, [
     ["load", "captions"],
-    ["unload", "captions"],
+    ["captions", "track", { languageCode: "vi" }],
   ])
-  assert.equal(applyWatchCcPreference(null, true), false)
+  const noTracks = {
+    loadModule: () => {},
+    getOption: () => [],
+    setOption: () => {
+      throw new Error("must not select when there is no track")
+    },
+  }
+  assert.equal(enableWatchCaptions(noTracks), false)
+  assert.equal(disableWatchCaptions(null), false)
 })
 
 test("caption tracks: empty disables, unknown keeps button enabled (Q9=A)", () => {
