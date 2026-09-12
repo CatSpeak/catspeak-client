@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Play,
   Pause,
@@ -14,7 +14,6 @@ import {
   Captions,
 } from "lucide-react"
 import {
-  getWatchCaptionTracks,
   readWatchCcEnabled,
   writeWatchCcEnabled,
 } from "@/features/video-call/utils/watchPlayerVars"
@@ -69,26 +68,9 @@ const WatchTogetherToolbar = ({
   const [isPlaying, setIsPlaying] = useState(false)
   // Local-only CC (Q6=A, Q8=A): per-viewer toggle, remembered on device.
   const [ccEnabled, setCcEnabled] = useState(() => readWatchCcEnabled())
-  // null = unknown (player not ready / no tracklist API) → keep enabled.
-  // false = confirmed no tracks → disable with tooltip (Q9=A).
-  const [ccHasTracks, setCcHasTracks] = useState(null)
-  const ccTitleRef = useRef(mediaTitle)
-  // mediaTitle for which an ON-selection was asserted against a known
-  // tracklist. Guards the once-per-video re-assert below.
-  const ccAssertedRef = useRef(null)
 
   useEffect(() => {
     const id = setInterval(() => {
-      // A new video means new caption availability: drop the previous
-      // verdict back to unknown (button enabled) until the poll confirms
-      // otherwise. Done inside the tick (not the effect body) so the
-      // reset never fights the query below.
-      if (ccTitleRef.current !== mediaTitle) {
-        ccTitleRef.current = mediaTitle
-        ccAssertedRef.current = null
-        setCcHasTracks(null)
-        return
-      }
       try {
         if (isHost) {
           const time = playerRef?.current?.getCurrentTime?.()
@@ -108,42 +90,12 @@ const WatchTogetherToolbar = ({
         const level = playerRef?.current?.getVolume?.()
         if (typeof isMuted === "boolean") setMuted(isMuted)
         if (typeof level === "number" && Number.isFinite(level)) setVolume(level)
-        // Poll caption availability for the CC disabled state. Only a
-        // confirmed empty tracklist disables; unknown keeps it enabled.
-        // The module is always loaded (OFF clears the track instead of
-        // unloading), so a confirmed [] truly means "no captions".
-        try {
-          const tracks =
-            playerRef?.current?.getCaptionTracks?.() ??
-            getWatchCaptionTracks(playerRef?.current)
-          if (Array.isArray(tracks)) {
-            const has = tracks.length > 0
-            setCcHasTracks(has)
-            if (ccEnabled && has && ccAssertedRef.current !== mediaTitle) {
-              // ON was switched while the tracklist was still unknown
-              // (or a new video cued): assert the pick now that tracks
-              // are known. Idempotent — runs once per video.
-              const ok =
-                playerRef?.current?.setCaptionsEnabled?.(true) !== false
-              if (ok) ccAssertedRef.current = mediaTitle
-            }
-            if (ccEnabled && !has) {
-              // Video confirmed to have no captions while ON: revert to
-              // OFF quietly so the button state matches reality.
-              ccAssertedRef.current = null
-              setCcEnabled(false)
-              writeWatchCcEnabled(false)
-            }
-          }
-        } catch {
-          // Player tearing down — keep last known availability.
-        }
       } catch {
         // Player not ready yet — next tick retries.
       }
     }, 1000)
     return () => clearInterval(id)
-  }, [isHost, playerRef, playerState, mediaTitle, ccEnabled])
+  }, [isHost, playerRef, playerState])
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement)
@@ -225,28 +177,15 @@ const WatchTogetherToolbar = ({
 
   const toggleCaptions = () => {
     const next = !ccEnabled
-    let ok = false
-    try {
-      if (typeof playerRef?.current?.setCaptionsEnabled === "function") {
-        ok = playerRef.current.setCaptionsEnabled(next) !== false
-      } else {
-        // Facade not ready (StrictMode remount) — optimistically persist;
-        // the player re-applies the stored preference on ready/cue.
-        ok = true
-      }
-    } catch {
-      ok = false
-    }
-    if (next && !ok) {
-      // Video exposes no caption tracks: stay OFF and disable the button
-      // with the "no captions" tooltip instead of silently doing nothing.
-      setCcEnabled(false)
-      writeWatchCcEnabled(false)
-      setCcHasTracks(false)
-      return
-    }
     setCcEnabled(next)
     writeWatchCcEnabled(next)
+    try {
+      // Best-effort: the player re-applies the stored preference on
+      // ready/cue, so a tearing-down player self-heals on remount.
+      playerRef?.current?.setCaptionsEnabled?.(next)
+    } catch {
+      // No-op when player is tearing down.
+    }
   }
 
   // 40px touch targets on the light card.
@@ -286,21 +225,21 @@ const WatchTogetherToolbar = ({
       {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
     </button>
   )
-  const noCaptions = ccHasTracks === false
-  const ccLabel = noCaptions
-    ? strings.noCaptions || "Video này không có phụ đề"
-    : ccEnabled
-      ? strings.captionsOff || "Tắt phụ đề"
-      : strings.captionsOn || "Bật phụ đề"
+  // No availability auto-disable: the IFrame API's tracklist getter reads
+  // [] even while captions demonstrably render (verified headless), so no
+  // client signal can mean "no captions". The button stays enabled; ON is
+  // a harmless no-op on captionless videos, OFF always hides via unload.
+  const ccLabel = ccEnabled
+    ? strings.captionsOff || "Tắt phụ đề"
+    : strings.captionsOn || "Bật phụ đề"
   const ccButton = (
     <button
       type="button"
       onClick={toggleCaptions}
-      disabled={noCaptions}
       aria-pressed={ccEnabled}
       aria-label={ccLabel}
       title={ccLabel}
-      className={`${iconButton} ${ccEnabled && !noCaptions ? "!bg-red-50 !text-[#990011]" : ""} disabled:cursor-not-allowed disabled:opacity-40`}
+      className={`${iconButton} ${ccEnabled ? "!bg-red-50 !text-[#990011]" : ""}`}
     >
       <Captions size={20} />
     </button>

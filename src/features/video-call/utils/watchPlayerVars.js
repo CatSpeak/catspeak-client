@@ -89,24 +89,25 @@ export const pickWatchCaptionTrack = (tracks, preferred = ["vi", "en"]) => {
 }
 
 /**
- * Enables local captions: loads the captions module and selects the best
- * track. Returns true on success, false when the video exposes no tracks
- * (caller should revert + mark the CC button unavailable). A not-ready-yet
- * tracklist (null) returns true provisionally — loading the module surfaces
- * the YouTube default track, and the toolbar poll asserts the pick once the
- * tracklist arrives.
+ * Enables local captions: loads the captions module (YouTube then renders
+ * its default track) and best-effort selects the preferred language when
+ * the tracklist happens to be populated. Always returns true (unless the
+ * player is missing) — a video without captions simply shows nothing, so
+ * there is no failure to report. NOTE: getOption("captions","tracklist")
+ * permanently returns [] in this embed while captions demonstrably render,
+ * so its result must NEVER drive UI state (see disableWatchCaptions).
  */
 export const enableWatchCaptions = (player, preferred = ["vi", "en"]) => {
   if (!player) return false
   try {
     player.loadModule?.("captions")
     const tracks = getWatchCaptionTracks(player)
-    if (tracks === null) return true
-    const picked = pickWatchCaptionTrack(tracks, preferred)
-    if (!picked?.languageCode) return false
-    player.setOption?.("captions", "track", {
-      languageCode: picked.languageCode,
-    })
+    const picked = pickWatchCaptionTrack(tracks ?? [], preferred)
+    if (picked?.languageCode) {
+      player.setOption?.("captions", "track", {
+        languageCode: picked.languageCode,
+      })
+    }
     return true
   } catch {
     return false
@@ -114,22 +115,21 @@ export const enableWatchCaptions = (player, preferred = ["vi", "en"]) => {
 }
 
 /**
- * Disables local captions: loads the captions module FIRST, then clears the
- * selected track. The load is the critical part — YouTube only reports
- * getOption("captions", "tracklist") while the module is loaded, so clearing
- * without loading leaves the tracklist empty and the toolbar wrongly
- * disables the CC button on videos that DO have captions (while YouTube
- * still renders captions by its own default — visible subs + disabled
- * button, the exact symptom reported).
+ * Disables local captions via unloadModule — the ONLY off-switch proven to
+ * work (headless-harness screenshots, video usRA-xASQPI):
+ *   loadModule + setOption("captions","track",{})  -> subs STILL render
+ *     (and the player fires error 2 "invalid parameter")
+ *   unloadModule                                   -> subs hidden
+ *   loadModule alone                               -> subs reappear
+ * Deliberately does NOT consult the tracklist: it reads [] even while
+ * captions render, so it cannot mean "no captions". Availability
+ * auto-detection is therefore unimplementable on this seam — the toolbar
+ * CC button stays enabled and ON is a harmless no-op on captionless
+ * videos instead of a wrongly-disabled button on captioned ones.
  */
 export const disableWatchCaptions = (player) => {
   if (!player) return false
   try {
-    player.loadModule?.("captions")
-    if (typeof player.setOption === "function") {
-      player.setOption("captions", "track", {})
-      return true
-    }
     player.unloadModule?.("captions")
     return true
   } catch {
@@ -138,11 +138,9 @@ export const disableWatchCaptions = (player) => {
 }
 
 /**
- * Applies a local CC preference to a YT.Player. Enabled selects the best
- * track (vi → en → first); disabled clears the track while keeping the
- * module loaded so availability stays queryable. Returns false only when
- * the player is missing/torn down, or when enabling a video with no
- * tracks.
+ * Applies a local CC preference to a YT.Player. Enabled loads the captions
+ * module (best-effort preferred-language select); disabled unloads it.
+ * Returns false only when the player is missing/torn down.
  */
 export const applyWatchCcPreference = (player, enabled) => {
   if (!player) return false
@@ -151,10 +149,12 @@ export const applyWatchCcPreference = (player, enabled) => {
 }
 
 /**
- * Returns the YouTube captions tracklist when the API exposes it, an empty
- * array when the video has no tracks, or null when unknown (player not
- * ready / older embed without getOption). Callers should only disable the
- * CC button on a confirmed empty array, never on null.
+ * Reads the YouTube captions tracklist when exposed. WARNING: in this
+ * chromeless embed the getter returns [] / undefined even while captions
+ * demonstrably render (verified headless against usRA-xASQPI), so a []
+ * result means "unknown", never "no captions". Only used as a
+ * best-effort language hint inside enableWatchCaptions — never for
+ * availability UI.
  */
 export const getWatchCaptionTracks = (player) => {
   if (!player) return null

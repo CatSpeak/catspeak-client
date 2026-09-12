@@ -72,18 +72,15 @@ test("CC defaults to OFF and round-trips through storage (Q8=A)", () => {
   assert.equal(readWatchCcEnabled(storage), false)
 })
 
-test("CC OFF loads the module then clears the track (queryable, hidden)", () => {
+test("CC OFF unloads the module (only proven off-switch; track {} is rejected)", () => {
   const calls = []
   const player = {
     loadModule: (m) => calls.push(["load", m]),
     setOption: (mod, name, value) => calls.push([mod, name, value]),
-    unloadModule: () => calls.push(["unload"]),
+    unloadModule: (m) => calls.push(["unload", m]),
   }
   assert.equal(applyWatchCcPreference(player, false), true)
-  assert.deepEqual(calls, [
-    ["load", "captions"],
-    ["captions", "track", {}],
-  ])
+  assert.deepEqual(calls, [["unload", "captions"]])
   assert.equal(applyWatchCcPreference(null, true), false)
 })
 
@@ -125,11 +122,13 @@ test("CC ON selects the picked track; no tracks returns false", () => {
       throw new Error("must not select when there is no track")
     },
   }
-  assert.equal(enableWatchCaptions(noTracks), false)
+  // No reliable "has captions" signal exists (tracklist reads [] while
+  // captions render), so ON is a harmless no-op there — never a failure.
+  assert.equal(enableWatchCaptions(noTracks), true)
   assert.equal(disableWatchCaptions(null), false)
 })
 
-test("CC ON with not-ready tracklist returns true provisionally (poll asserts later)", () => {
+test("CC ON with not-ready tracklist still loads the module (default shows)", () => {
   const calls = []
   const player = {
     loadModule: (m) => calls.push(["load", m]),

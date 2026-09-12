@@ -8,9 +8,12 @@ import { TriangleAlert, MousePointerClick, Play } from "lucide-react"
 import { buildWatchPlayerVars } from "@/features/video-call/utils/watchPlayerVars"
 import {
   applyWatchCcPreference,
+  disableWatchCaptions,
+  enableWatchCaptions,
   getWatchCaptionTracks,
   readWatchCcEnabled,
 } from "@/features/video-call/utils/watchPlayerVars"
+import { YT_PLAYER_STATE } from "@/features/video-call/utils/hostSync"
 
 let iframeApiPromise = null
 
@@ -128,18 +131,42 @@ const SyncedYouTubePlayer = forwardRef(
                   }
                   pendingVideoRef.current = null
                 }
-                // Local-only CC (Q6=A, Q8=A): default OFF, remembered per
-                // device. Applied AFTER any pending cue (cueing resets the
-                // captions module). OFF loads the module then clears the
-                // track, so the toolbar can still query the tracklist —
-                // without the load, YouTube reports an empty list and the
-                // CC button wrongly disables on captioned videos.
-                applyWatchCcPreference(player, readWatchCcEnabled())
+                // NOTE: no captions call here. load/unload before the video
+                // is cued either no-ops or fires player error 2 (which the
+                // room surfaces as an error card). The preference is applied
+                // on CUED below, when the module actually exists.
               },
               onError: (event) => {
+                // Code 2 = invalid player parameter (app-side misuse, e.g. a
+                // call racing module creation). Playback continues, so it
+                // must never surface as a room error card.
+                if (event?.data === 2) return
                 callbacksRef.current.onError?.(event?.data)
               },
               onStateChange: (event) => {
+                // Local-only CC (Q6=A, Q8=A): default OFF, remembered per
+                // device. Split by state (verified headless vs usRA-xASQPI):
+                // - ON: seed at CUED (creation-time, disruption-free).
+                //   Post-load the embed defaults captions ON anyway, and
+                //   mid-playback loadModule provokes a rebuffer, so never
+                //   re-assert while playing.
+                // - OFF: unload on PLAYING/PAUSED, when the module is
+                //   settled-present. Creation-time calls (onReady/CUED/
+                //   BUFFERING, i.e. inside the load) hit a mid-creation
+                //   module: unload no-ops and the load recreates it
+                //   default-ON. Every (re)load — initial play, seek,
+                //   rebuffer, tap-to-sync staging — settles in PLAYING or
+                //   a staged PAUSED, so these two cover all paths. A
+                //   redundant unload on an absent module can fire error 2,
+                //   which the onError forwarder above keeps off the card.
+                if (event?.data === YT_PLAYER_STATE.CUED) {
+                  if (readWatchCcEnabled()) enableWatchCaptions(player)
+                } else if (
+                  event?.data === YT_PLAYER_STATE.PLAYING ||
+                  event?.data === YT_PLAYER_STATE.PAUSED
+                ) {
+                  if (!readWatchCcEnabled()) disableWatchCaptions(player)
+                }
                 callbacksRef.current.onStateChange?.(event?.data)
               },
             },
@@ -166,7 +193,9 @@ const SyncedYouTubePlayer = forwardRef(
     // Auto-cue when a video is (first) supplied or swapped — survives the
     // player not being ready yet via pendingVideoRef. This is the load path
     // for the host (custom toolbar) and a safe complement for viewers whose
-    // machine already cued the same id.
+    // machine already cued the same id. The CC preference is (re)applied by
+    // the CUED handler above, never here: applying pre-cue races module
+    // creation (no-op or error 2) and cueing resets the module anyway.
     useEffect(() => {
       if (!videoId) return
       if (readyRef.current && playerRef.current) {
@@ -175,9 +204,6 @@ const SyncedYouTubePlayer = forwardRef(
         } catch {
           // Player torn down mid-cue; teardown below cleans up.
         }
-        // Cueing can reset the captions module — re-apply the local
-        // preference so a new video honors the remembered choice.
-        applyWatchCcPreference(playerRef.current, readWatchCcEnabled())
       } else {
         pendingVideoRef.current = videoId
       }
