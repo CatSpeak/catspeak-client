@@ -4,7 +4,8 @@ import {
   useImperativeHandle,
   useRef,
 } from "react"
-import { TriangleAlert, MousePointerClick } from "lucide-react"
+import { TriangleAlert, MousePointerClick, Play } from "lucide-react"
+import { buildWatchPlayerVars } from "@/features/video-call/utils/watchPlayerVars"
 
 let iframeApiPromise = null
 
@@ -67,6 +68,9 @@ const SyncedYouTubePlayer = forwardRef(
       needsTapToSync = false,
       onTapToSync = null,
       onError = null,
+      onStateChange = null,
+      showCenterPlay = false,
+      onCenterPlay = null,
       syncError = null,
       videoId = null,
       t = null,
@@ -82,9 +86,13 @@ const SyncedYouTubePlayer = forwardRef(
     useEffect(() => {
       callbacksRef.current.onError = onError
     }, [onError])
+    useEffect(() => {
+      callbacksRef.current.onStateChange = onStateChange
+    }, [onStateChange])
 
     const strings = t?.rooms?.videoCall?.watchTogether ?? {}
     const tapLabel = strings.tapToSync || "Nhấn để đồng bộ"
+    const tapPlayLabel = strings.play || "Phát"
     const embedBlockedLabel =
       strings.embedBlocked || "Video này không cho phép phát chung."
     const syncErrorLabel =
@@ -101,21 +109,20 @@ const SyncedYouTubePlayer = forwardRef(
           player = new YT.Player(mountRef.current, {
             width: "100%",
             height: "100%",
-            playerVars: {
-              rel: 0,
-              playsinline: 1,
-              modestbranding: 1,
-              enablejsapi: 1,
-              controls: 0,
-              disablekb: 1,
-              fs: 0,
-              iv_load_policy: 3,
-              origin:
-                typeof window !== "undefined" ? window.location.origin : undefined,
-            },
+            playerVars: buildWatchPlayerVars(
+              typeof window !== "undefined" ? window.location.origin : undefined,
+            ),
             events: {
               onReady: () => {
                 readyRef.current = true
+                try {
+                  // Captions have no playerVars off-switch; unload the module
+                  // so forced subtitles never cover the shared video.
+                  player.unloadModule?.("captions")
+                } catch {
+                  // Older embed builds may lack unloadModule; captions then
+                  // follow the viewer's own YouTube default.
+                }
                 if (pendingVideoRef.current) {
                   try {
                     player.cueVideoById(pendingVideoRef.current)
@@ -127,6 +134,9 @@ const SyncedYouTubePlayer = forwardRef(
               },
               onError: (event) => {
                 callbacksRef.current.onError?.(event?.data)
+              },
+              onStateChange: (event) => {
+                callbacksRef.current.onStateChange?.(event?.data)
               },
             },
           })
@@ -275,6 +285,23 @@ const SyncedYouTubePlayer = forwardRef(
     return (
       <div className={`relative aspect-video w-full overflow-hidden bg-black ${className}`}>
         <div ref={mountRef} className="h-full w-full" />
+        {/* Interaction shield: transparent click-capture over the iframe so
+            no native gesture (title/share/endscreen/click-to-play) can bypass
+            watch-sync. Branding stays visible underneath; only clicks are
+            intercepted. Tap/error gates render above it. */}
+        <div data-testid="watch-shield" aria-hidden className="absolute inset-0 z-10" />
+        {showCenterPlay && !syncError && !needsTapToSync ? (
+          <button
+            type="button"
+            onClick={onCenterPlay ?? undefined}
+            aria-label={tapPlayLabel}
+            className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center bg-transparent"
+          >
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 shadow-lg">
+              <Play size={26} className="ml-1 text-white" fill="currentColor" />
+            </span>
+          </button>
+        ) : null}
         {syncError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/85 px-6 text-center text-white">
             <TriangleAlert size={28} className="text-amber-400" />
