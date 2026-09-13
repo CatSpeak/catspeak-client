@@ -149,8 +149,16 @@ export const useAiSend = () => {
         const threadHistory = getConversationThread(interactionId)
         // Remove the last entry (current user prompt) — it goes as `message`
         const conversations = threadHistory.slice(0, -1)
+        const roomLanguage = room?.languageType || room?.language || "en"
+        const userTier = user?.tier || user?.Tier || "Free"
 
-        const payload = { roomName, message: text, conversations }
+        const payload = {
+          roomName,
+          message: text,
+          conversations,
+          language: roomLanguage,
+          tier: userTier,
+        }
 
         if (isPublic) {
           await chatPublicAi(payload).unwrap()
@@ -159,9 +167,15 @@ export const useAiSend = () => {
         }
       } catch (error) {
         console.error("AI chat error", error)
+        const errorMsg =
+          (typeof error?.data?.detail === "string" ? error.data.detail : null) ||
+          error?.data?.message ||
+          error?.data?.error ||
+          "All models are unavailable."
+
         updateAiInteraction(interactionId, {
           status: "error",
-          response: error?.data?.message || "All models are unavailable.",
+          response: errorMsg,
           aiFrom: { name: "Cat Speak", isSystem: true, isAi: true },
         })
       } finally {
@@ -183,6 +197,10 @@ export const useAiSend = () => {
       startNewThread,
       continueThread,
       getConversationThread,
+      room,
+      roomIdFromContext,
+      user,
+      isHostFromContext,
     ],
   )
 
