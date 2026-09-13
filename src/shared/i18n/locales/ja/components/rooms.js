@@ -1097,6 +1097,7 @@ export default {
       COHOST_TARGET_NOT_CONFIRMED: "承認済み（Confirmed）の生徒のみコーホストに指名できます。",
       COHOST_NO_ASSIGNMENT: "コーホストはまだ指名されていません。",
       COHOST_FORBIDDEN: "コーホストにはこの操作の権限がありません。",
+      ROOM_NOT_CREATED: "このクラスにはまだルームがありません。ルーム作成後にもう一度お試しください。",
     },
   },
   notifications: {

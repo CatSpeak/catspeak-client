@@ -1132,6 +1132,7 @@ export default {
       COHOST_TARGET_NOT_CONFIRMED: "Only confirmed students can be co-hosts.",
       COHOST_NO_ASSIGNMENT: "No co-host assigned yet.",
       COHOST_FORBIDDEN: "Co-host does not have permission for this action.",
+      ROOM_NOT_CREATED: "This class does not have a room yet. Please try again once the room is created.",
     },
   },
   notifications: {

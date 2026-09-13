@@ -1068,6 +1068,7 @@ export default {
       COHOST_TARGET_NOT_CONFIRMED: "只有已确认的学生才能担任助教。",
       COHOST_NO_ASSIGNMENT: "尚未指派助教。",
       COHOST_FORBIDDEN: "助教没有执行此操作的权限。",
+      ROOM_NOT_CREATED: "该班级尚无房间，请在房间创建后重试。",
     },
   },
   notifications: {

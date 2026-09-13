@@ -16,6 +16,7 @@ export const COHOST_ERROR_CODES = {
   TARGET_NOT_CONFIRMED: "COHOST_TARGET_NOT_CONFIRMED",
   NO_ASSIGNMENT: "COHOST_NO_ASSIGNMENT",
   FORBIDDEN: "COHOST_FORBIDDEN",
+  ROOM_NOT_CREATED: "ROOM_NOT_CREATED",
 }
 
 const VI_FALLBACKS = {
@@ -35,6 +36,8 @@ const VI_FALLBACKS = {
     "Chỉ học viên đã xác nhận (Confirmed) mới được làm co-host.",
   [COHOST_ERROR_CODES.NO_ASSIGNMENT]: "Chưa có co-host được phân công.",
   [COHOST_ERROR_CODES.FORBIDDEN]: "Co-host không có quyền thực hiện thao tác này.",
+  [COHOST_ERROR_CODES.ROOM_NOT_CREATED]:
+    "Lớp học chưa có phòng. Vui lòng thử lại sau khi phòng được tạo.",
 }
 
 /**

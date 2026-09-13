@@ -1109,6 +1109,7 @@ export default {
       COHOST_TARGET_NOT_CONFIRMED: "Chỉ học viên đã xác nhận (Confirmed) mới được làm co-host.",
       COHOST_NO_ASSIGNMENT: "Chưa có co-host được phân công.",
       COHOST_FORBIDDEN: "Co-host không có quyền thực hiện thao tác này.",
+      ROOM_NOT_CREATED: "Lớp học chưa có phòng. Vui lòng thử lại sau khi phòng được tạo.",
     },
   },
   notifications: {
