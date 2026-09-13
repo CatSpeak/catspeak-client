@@ -31,6 +31,7 @@ import {
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
+import { useSubscriptionPolicy } from "@/features/video-call/hooks/useSubscriptionPolicy"
 import {
   getNavigate,
   getLocation,
@@ -201,6 +202,9 @@ const GlobalCallContent = ({
     }
   }, [layoutMode, maxTiles, hideEmptyTiles])
 
+  // Ticket 02: participant the user pinned (spotlight) for the capped profile
+  const [pinnedParticipantId, setPinnedParticipantId] = useState(null)
+
   // ── LiveKit hooks & Device Selection ──
   let lkRoom = null
   try {
@@ -216,6 +220,15 @@ const GlobalCallContent = ({
   const allParticipants = useParticipants()
   const localPart = useLocalParticipant()
   const localParticipant = localPart?.localParticipant ?? null
+
+  // Ticket 02: cap remote video subscriptions for standard (foreign) profiles
+  useSubscriptionPolicy({
+    room: lkRoom,
+    country: callInfo?.country ?? callInfo?.user?.country,
+    egressProfile: callInfo?.egressProfile,
+    highQuality: callInfo?.highQuality ?? false,
+    pinnedParticipantId,
+  })
 
   // Ticket 02: voice restriction forces the mic off and keeps it off — the
   // participant can still hear others. The ControlBar also blocks re-enabling.
@@ -1250,6 +1263,8 @@ const GlobalCallContent = ({
     startedByAccountId: startedByAccountId,
     layoutMode,
     setLayoutMode,
+    pinnedParticipantId,
+    setPinnedParticipantId,
     maxTiles,
     setMaxTiles,
     hideEmptyTiles,

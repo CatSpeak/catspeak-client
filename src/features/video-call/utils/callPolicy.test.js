@@ -8,9 +8,13 @@ import {
   EGRESS_PROFILE_FULL,
   EGRESS_PROFILE_STANDARD,
   MAX_FOREIGN_VIDEO_TILES,
+  TRACK_SOURCE_CAMERA,
+  TRACK_SOURCE_SCREEN_SHARE,
+  VIDEO_QUALITY_LOW,
   isDomesticCountry,
   normalizeEgressProfile,
   resolveCallPolicy,
+  resolveSubscriptionPlan,
 } from "./callPolicy.js"
 
 test("standard profile caps publish and subscription settings", () => {
@@ -85,4 +89,283 @@ test("empty or unknown country counts as domestic", () => {
   }
 
   assert.equal(resolveCallPolicy("", "standard", false).isForeign, false)
+})
+
+const camera = (participantId, trackSid = `TR_${participantId}`) => ({
+  trackSid,
+  participantId,
+  source: TRACK_SOURCE_CAMERA,
+  isLocal: false,
+})
+
+const screenShare = (participantId, trackSid = `TR_SS_${participantId}`) => ({
+  trackSid,
+  participantId,
+  source: TRACK_SOURCE_SCREEN_SHARE,
+  isLocal: false,
+})
+
+const cameraSubscriptions = (plan) =>
+  plan.filter(
+    (decision) =>
+      decision.source === TRACK_SOURCE_CAMERA && decision.subscribed,
+  )
+
+const decisionOf = (plan, trackSid) =>
+  plan.find((decision) => decision.trackSid === trackSid)
+
+test("standard plan subscribes active speaker and pinned camera tiles at LOW", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    camera("dave"),
+  ]
+
+  const plan = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+
+  assert.deepEqual(
+    cameraSubscriptions(plan)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["bob", "carol"],
+  )
+  assert.equal(decisionOf(plan, "TR_bob").quality, VIDEO_QUALITY_LOW)
+  assert.equal(decisionOf(plan, "TR_carol").quality, VIDEO_QUALITY_LOW)
+
+  const alice = decisionOf(plan, "TR_alice")
+  assert.equal(alice.subscribed, false)
+  assert.equal(alice.quality, null)
+})
+
+test("standard plan recomputes when the active speaker changes", () => {
+  const publications = [camera("alice"), camera("bob"), camera("carol")]
+
+  const before = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    "carol",
+    2,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.deepEqual(
+    cameraSubscriptions(before)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["alice", "carol"],
+  )
+
+  const after = resolveSubscriptionPlan(
+    publications,
+    "bob",
+    "carol",
+    2,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.deepEqual(
+    cameraSubscriptions(after)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["bob", "carol"],
+  )
+  assert.equal(decisionOf(after, "TR_alice").subscribed, false)
+  assert.equal(decisionOf(after, "TR_bob").quality, VIDEO_QUALITY_LOW)
+})
+
+test("standard plan recomputes when the pinned participant changes", () => {
+  const publications = [camera("alice"), camera("bob"), camera("carol")]
+
+  const before = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "alice",
+    2,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.deepEqual(
+    cameraSubscriptions(before)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["alice", "carol"],
+  )
+
+  const after = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    2,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.deepEqual(
+    cameraSubscriptions(after)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["bob", "carol"],
+  )
+  assert.equal(decisionOf(after, "TR_alice").subscribed, false)
+})
+
+test("standard plan never exceeds the camera tile cap", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    camera("dave"),
+  ]
+
+  const capped = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.equal(cameraSubscriptions(capped).length, MAX_FOREIGN_VIDEO_TILES)
+
+  const defaulted = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    null,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.equal(cameraSubscriptions(defaulted).length, MAX_FOREIGN_VIDEO_TILES)
+
+  const pinnedOnly = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    1,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.deepEqual(
+    cameraSubscriptions(pinnedOnly).map((decision) => decision.participantId),
+    ["bob"],
+  )
+
+  const sameTile = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "carol",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.equal(cameraSubscriptions(sameTile).length, 1)
+})
+
+test("standard plan keeps screen shares and audio fully subscribed", () => {
+  const publications = [
+    camera("alice"),
+    screenShare("bob"),
+    {
+      trackSid: "TR_mic_alice",
+      participantId: "alice",
+      source: "microphone",
+      isLocal: false,
+    },
+  ]
+
+  const plan = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    null,
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+
+  const screen = decisionOf(plan, "TR_SS_bob")
+  assert.equal(screen.subscribed, true)
+  assert.equal(screen.quality, VIDEO_QUALITY_LOW)
+
+  const mic = decisionOf(plan, "TR_mic_alice")
+  assert.equal(mic.subscribed, true)
+  assert.equal(mic.quality, null)
+})
+
+test("standard plan leaves the local self-view publication untouched", () => {
+  const publications = [
+    {
+      trackSid: "TR_local_cam",
+      participantId: "me",
+      source: TRACK_SOURCE_CAMERA,
+      isLocal: true,
+    },
+    camera("alice"),
+    camera("bob"),
+  ]
+
+  const plan = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    null,
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+
+  const local = decisionOf(plan, "TR_local_cam")
+  assert.equal(local.subscribed, true)
+  assert.equal(local.quality, null)
+})
+
+test("standard plan ignores unknown speaker and pinned identities", () => {
+  const publications = [camera("alice"), camera("bob")]
+
+  const plan = resolveSubscriptionPlan(
+    publications,
+    "ghost",
+    "nobody",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+
+  assert.equal(cameraSubscriptions(plan).length, 0)
+})
+
+test("missing, unknown or empty country/profile keeps the full grid", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    screenShare("carol"),
+  ]
+
+  for (const profile of [
+    undefined,
+    null,
+    "",
+    "bogus",
+    EGRESS_PROFILE_FULL,
+  ]) {
+    const plan = resolveSubscriptionPlan(
+      publications,
+      "alice",
+      "bob",
+      null,
+      profile,
+    )
+    assert.ok(
+      plan.every(
+        (decision) => decision.subscribed === true && decision.quality === null,
+      ),
+      `profile ${String(profile)} should keep every publication subscribed`,
+    )
+  }
+
+  const emptyCountryPolicy = resolveCallPolicy("", undefined, false)
+  assert.equal(emptyCountryPolicy.egressProfile, EGRESS_PROFILE_FULL)
+  assert.equal(emptyCountryPolicy.subscribe.maxVideoTiles, null)
+
+  const plan = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    "bob",
+    emptyCountryPolicy.subscribe.maxVideoTiles,
+    emptyCountryPolicy.egressProfile,
+  )
+  assert.equal(cameraSubscriptions(plan).length, 2)
 })
