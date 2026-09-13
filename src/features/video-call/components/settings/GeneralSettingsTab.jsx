@@ -23,7 +23,7 @@ import {
   CO_HOST_PERMISSIONS,
 } from "@/features/co-host/constants"
 import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
-import { toast } from "react-hot-toast"
+import { toast } from "@/components/ui/toast"
 
 const GeneralSettingsTab = ({
   receiveSystemMsgs = true,

@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
-import { VideoPresets } from "livekit-client"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
+import { buildRoomOptions } from "@/features/video-call/utils/roomOptions"
 import {
   subscribeToCallBroadcast,
   broadcastCallEvent,
@@ -211,28 +211,13 @@ export const GlobalVideoCallProvider = ({ children }) => {
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
   const callPolicy = resolveCallPolicy(
-    callInfo?.country ?? callInfo?.user?.country,
     callInfo?.egressProfile,
     callInfo?.highQuality ?? false,
   )
 
-  const publishDefaults = { simulcast: !isMobileDevice }
-  if (callPolicy.publish.simulcastPresets) {
-    publishDefaults.videoSimulcastLayers =
-      callPolicy.publish.simulcastPresets.map((preset) => VideoPresets[preset])
-  }
-  if (callPolicy.publish.screenShareEncoding) {
-    publishDefaults.screenShareEncoding = callPolicy.publish.screenShareEncoding
-  }
-
-  const roomOptions = {
-    adaptiveStream: callPolicy.adaptiveStream,
-    dynacast: callPolicy.dynacast,
-    videoCaptureDefaults: {
-      resolution: VideoPresets[callPolicy.publish.cameraPreset].resolution,
-    },
-    publishDefaults,
-  }
+  const roomOptions = buildRoomOptions(callPolicy, {
+    simulcast: !isMobileDevice,
+  })
 
   return (
     <LiveKitRoom

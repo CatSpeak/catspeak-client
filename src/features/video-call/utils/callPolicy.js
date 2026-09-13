@@ -10,22 +10,15 @@ export const VIDEO_QUALITY_LOW = "low"
 export const CONNECTION_QUALITY_POOR = "poor"
 export const CONNECTION_QUALITY_LOST = "lost"
 
-const DOMESTIC_COUNTRY_VALUES = new Set(["vietnam", "vn", "việt nam"])
-
 export function normalizeEgressProfile(egressProfile) {
   return egressProfile === EGRESS_PROFILE_STANDARD
     ? EGRESS_PROFILE_STANDARD
     : EGRESS_PROFILE_FULL
 }
 
-export function isDomesticCountry(country) {
-  if (typeof country !== "string") return true
-  const normalized = country.trim().toLowerCase()
-  if (!normalized) return true
-  return DOMESTIC_COUNTRY_VALUES.has(normalized)
-}
-
-export function resolveCallPolicy(country, egressProfile, highQuality = false) {
+// The server's egressProfile is authoritative: the client does not classify
+// countries itself. `country` stays informational only (token metadata/UI).
+export function resolveCallPolicy(egressProfile, highQuality = false) {
   const profile = normalizeEgressProfile(egressProfile)
   const capped = profile === EGRESS_PROFILE_STANDARD
   // Ticket 04: a high-quality room lifts the publish cap only. The foreign
@@ -34,7 +27,7 @@ export function resolveCallPolicy(country, egressProfile, highQuality = false) {
 
   return {
     egressProfile: profile,
-    isForeign: !isDomesticCountry(country),
+    isForeign: capped,
     highQuality: Boolean(highQuality),
     adaptiveStream: true,
     dynacast: true,
