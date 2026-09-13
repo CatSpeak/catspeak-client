@@ -8,7 +8,7 @@ import {
   useConnectionState,
   RoomAudioRenderer,
 } from "@livekit/components-react"
-import { ConnectionState, RoomEvent } from "livekit-client"
+import { ConnectionState, RoomEvent, Track, VideoPresets } from "livekit-client"
 import { toast } from "react-hot-toast"
 import { Clock } from "lucide-react"
 
@@ -44,6 +44,7 @@ import {
   useGetStudentSharePolicyQuery,
   useGetMemberRecordingPolicyQuery,
   useGetRoomParticipantsQuery,
+  useGetHighQualityPolicyQuery,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -58,6 +59,7 @@ import {
 } from "@/features/video-call/utils/roomSettingHelpers"
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -221,14 +223,85 @@ const GlobalCallContent = ({
   const localPart = useLocalParticipant()
   const localParticipant = localPart?.localParticipant ?? null
 
+  // Ticket 04 (egress): live high-quality state. Initialised from the token
+  // (server-sourced room policy) and kept in sync through the moderation
+  // channel + the room policy query.
+  const [roomHighQuality, setRoomHighQuality] = useState(
+    callInfo?.highQuality ?? false,
+  )
+  const roomHighQualityRef = useRef(roomHighQuality)
+  useEffect(() => {
+    roomHighQualityRef.current = roomHighQuality
+  }, [roomHighQuality])
+
+  const { data: highQualityPolicyData } = useGetHighQualityPolicyQuery(
+    currentRoomId,
+    { skip: !currentRoomId },
+  )
+  const serverHighQuality =
+    highQualityPolicyData?.data?.highQuality ??
+    highQualityPolicyData?.highQuality
+  useEffect(() => {
+    if (serverHighQuality !== undefined) {
+      setRoomHighQuality(serverHighQuality === true)
+    }
+  }, [serverHighQuality])
+
+  const callPolicy = React.useMemo(
+    () =>
+      resolveCallPolicy(
+        callInfo?.country ?? callInfo?.user?.country,
+        callInfo?.egressProfile,
+        roomHighQuality,
+      ),
+    [
+      callInfo?.country,
+      callInfo?.user?.country,
+      callInfo?.egressProfile,
+      roomHighQuality,
+    ],
+  )
+
   // Ticket 02: cap remote video subscriptions for standard (foreign) profiles
   useSubscriptionPolicy({
     room: lkRoom,
     country: callInfo?.country ?? callInfo?.user?.country,
     egressProfile: callInfo?.egressProfile,
-    highQuality: callInfo?.highQuality ?? false,
+    highQuality: roomHighQuality,
     pinnedParticipantId,
   })
+
+  // Ticket 04 (egress): apply the live high-quality state to the local
+  // publisher without a rejoin. LiveKit reads the room capture/publish
+  // defaults when a camera track is created, so keep them in sync too and
+  // restart an already-live camera track at the new target resolution.
+  useEffect(() => {
+    if (!lkRoom || !localParticipant) return
+
+    const preset = VideoPresets[callPolicy.publish.cameraPreset]
+    if (!preset?.resolution) return
+
+    lkRoom.options.videoCaptureDefaults.resolution = preset.resolution
+    if (callPolicy.publish.simulcastPresets) {
+      lkRoom.options.publishDefaults.videoSimulcastLayers =
+        callPolicy.publish.simulcastPresets.map((name) => VideoPresets[name])
+    } else {
+      delete lkRoom.options.publishDefaults.videoSimulcastLayers
+    }
+
+    const publication = localParticipant.getTrackPublication(Track.Source.Camera)
+    const track = publication?.videoTrack
+    if (!track?.restartTrack || publication?.isMuted) return
+
+    const settings = track.mediaStreamTrack?.getSettings?.()
+    if (
+      settings?.width === preset.resolution.width &&
+      settings?.height === preset.resolution.height
+    ) {
+      return
+    }
+    track.restartTrack({ resolution: preset.resolution }).catch(() => {})
+  }, [lkRoom, localParticipant, callPolicy])
 
   // Ticket 02: voice restriction forces the mic off and keeps it off — the
   // participant can still hear others. The ControlBar also blocks re-enabling.
@@ -706,6 +779,26 @@ const GlobalCallContent = ({
           return
         }
 
+        // Ticket 04 (egress): high-quality room policy changed live — apply
+        // immediately (publish 720p; the foreign tile cap still wins).
+        if (data.action === "HIGH_QUALITY_POLICY") {
+          const enabled = data.enabled === true
+          setRoomHighQuality(enabled)
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "HighQualityPolicy", id: currentRoomId },
+            ])
+          )
+          toast.info(
+            enabled
+              ? (pl.hostHighQualityOn ||
+                  "Host đã BẬT chế độ chất lượng cao cho phòng.")
+              : (pl.hostHighQualityOff ||
+                  "Host đã TẮT chế độ chất lượng cao cho phòng.")
+          )
+          return
+        }
+
         // Ticket 04: room lock changed — refetch lock state + toast.
         if (data.action === "ROOM_LOCK_CHANGED") {
           dispatch(
@@ -841,6 +934,7 @@ const GlobalCallContent = ({
                       currentRoomId,
                       ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
                     ),
+                    highQuality: roomHighQualityRef.current,
                   },
                   targetIdentity: participant?.identity,
                 }),
@@ -895,6 +989,10 @@ const GlobalCallContent = ({
               window.dispatchEvent(
                 new Event("catspeak_member_private_ai_allowed_changed"),
               )
+            }
+            // Ticket 04 (egress): high-quality state synced from the host.
+            if (data.settings.highQuality !== undefined) {
+              setRoomHighQuality(data.settings.highQuality === true)
             }
           }
           return
@@ -1050,6 +1148,7 @@ const GlobalCallContent = ({
                   currentRoomId,
                   ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
                 ),
+                highQuality: roomHighQualityRef.current,
               },
               targetIdentity: participant.identity,
             }),
@@ -1265,6 +1364,9 @@ const GlobalCallContent = ({
     setLayoutMode,
     pinnedParticipantId,
     setPinnedParticipantId,
+    // Ticket 04 (egress): live high-quality room policy
+    roomHighQuality,
+    setRoomHighQuality,
     maxTiles,
     setMaxTiles,
     hideEmptyTiles,

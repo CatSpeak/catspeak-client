@@ -28,6 +28,9 @@ export function isDomesticCountry(country) {
 export function resolveCallPolicy(country, egressProfile, highQuality = false) {
   const profile = normalizeEgressProfile(egressProfile)
   const capped = profile === EGRESS_PROFILE_STANDARD
+  // Ticket 04: a high-quality room lifts the publish cap only. The foreign
+  // subscription cap below is never lifted by this flag.
+  const publishCapped = capped && !highQuality
 
   return {
     egressProfile: profile,
@@ -36,8 +39,8 @@ export function resolveCallPolicy(country, egressProfile, highQuality = false) {
     adaptiveStream: true,
     dynacast: true,
     publish: {
-      cameraPreset: capped ? "h360" : "h720",
-      simulcastPresets: capped ? ["h180", "h360"] : null,
+      cameraPreset: publishCapped ? "h360" : "h720",
+      simulcastPresets: publishCapped ? ["h180", "h360"] : null,
       screenShareEncoding: capped
         ? { maxBitrate: 400000, maxFramerate: 15 }
         : null,

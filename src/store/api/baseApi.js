@@ -432,6 +432,7 @@ export const baseApi = createApi({
     "StudentSharePolicy",
     "MemberRecordingPolicy",
     "GamePolicy",
+    "HighQualityPolicy",
     "RoomParticipants",
   ],
   endpoints: () => ({}),

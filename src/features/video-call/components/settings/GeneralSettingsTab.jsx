@@ -15,6 +15,7 @@ import {
   useUpdateMemberRecordingPolicyMutation,
   useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
+  useUpdateHighQualityPolicyMutation,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -38,9 +39,15 @@ const GeneralSettingsTab = ({
     lkRoom,
     showAiSuggestions,
     setShowAiSuggestions,
+    roomHighQuality,
+    setRoomHighQuality,
   } = useVideoCallContext()
   const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
+
+  // Ticket 04 (egress): host-only high-quality room policy. Persisted via
+  // REST, then broadcast live on the moderation channel (no rejoin needed).
+  const [updateHighQualityApi] = useUpdateHighQualityPolicyMutation()
 
   // Ticket 05: member recording gate is server-side; co-host with
   // record manages it alongside the host (local toggle kept as fallback).
@@ -254,6 +261,49 @@ const GeneralSettingsTab = ({
     }
   }
 
+  // Ticket 04 (egress): host-only. The REST call is authoritative; once it
+  // succeeds the toggle is broadcast live on the moderation channel so every
+  // participant applies it without rejoining.
+  const handleToggleHighQuality = async (e) => {
+    const val = e.target.checked
+    setRoomHighQuality?.(val)
+
+    try {
+      if (currentRoomId) {
+        await updateHighQualityApi({ id: currentRoomId, enabled: val }).unwrap()
+      }
+    } catch (err) {
+      setRoomHighQuality?.(!val)
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          t?.rooms?.videoCall?.participantList?.forbiddenHighQuality ||
+            "Chỉ chủ phòng mới có quyền bật/tắt chế độ chất lượng cao."
+        )
+      )
+      return
+    }
+
+    if (lkRoom?.localParticipant) {
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({
+            action: "HIGH_QUALITY_POLICY",
+            enabled: val,
+            roomId: currentRoomId,
+          })
+        )
+        lkRoom.localParticipant.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch (err) {
+        console.error("Failed to broadcast HIGH_QUALITY_POLICY:", err)
+      }
+    }
+  }
+
   return (
     <div className="bg-white rounded-xl border border-[#e5e5e5] flex flex-col divide-y divide-[#e5e5e5]">
       <ListItem
@@ -373,6 +423,26 @@ const GeneralSettingsTab = ({
             <span className="text-sm text-[#606060]">
               {gt.allowGameDesc ||
                 "Khi tắt, thành viên không thể bắt đầu ván game mới. Ván đang chạy vẫn tiếp tục."}
+            </span>
+          </ListItem>
+          )}
+          {isHost && (
+          <ListItem
+            lines="auto"
+            rightContent={
+              <Switch
+                checked={roomHighQuality === true}
+                onChange={handleToggleHighQuality}
+                colorClass="peer-checked:bg-green-500"
+              />
+            }
+          >
+            <span>
+              {gt.allowHighQuality || "Chế độ chất lượng cao (720p)"}
+            </span>
+            <span className="text-sm text-[#606060]">
+              {gt.allowHighQualityDesc ||
+                "Khi bật, người tham gia publish camera lên 720p. Người ở nước ngoài vẫn chỉ nhận tối đa 2 tile video."}
             </span>
           </ListItem>
           )}
