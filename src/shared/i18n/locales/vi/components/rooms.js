@@ -660,7 +660,7 @@ export default {
       successDisableJoinSound: "Đã TẮT âm thanh khi có người vào/ra phòng",
       kickedByHost: "Bạn đã bị Host mời ra khỏi phòng.",
       successMuteAll: "Đã tắt mic tất cả mọi người",
-      successLowerAllHands: "Đã hạ tất cả các tay xuống",
+      successLowerAllHands: "Đã hạ {count} tay xuống",
       confirmLowerHandsTitle: "Hạ tất cả tay",
       confirmLowerHands:
         "Bạn có chắc muốn hạ tay của {count} người đang giơ tay?",

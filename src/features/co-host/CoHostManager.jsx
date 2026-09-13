@@ -106,33 +106,35 @@ const CoHostManager = ({
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex w-full flex-col gap-2">
         {!hasCoHost && (
-          <span className="hidden sm:inline text-xs font-medium text-gray-400">
+          <div className="w-full rounded-lg border border-dashed border-gray-300 bg-gray-50/70 px-3 py-2 text-xs font-medium text-gray-500">
             {emptyLabel}
-          </span>
+          </div>
         )}
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 hover:border-amber-400 active:scale-[0.97] transition-all duration-150 shadow-sm"
-        >
-          {hasCoHost ? (
-            <Crown size={12} className="shrink-0" />
-          ) : (
-            <UserPlus size={12} className="shrink-0" />
-          )}
-          {buttonLabel}
-        </button>
-        {hasCoHost && (
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setConfirmOpen(true)}
-            className="text-xs font-semibold text-red-500 hover:text-red-700 hover:underline transition-colors duration-150"
+            onClick={() => setModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 hover:border-amber-400 active:scale-[0.97] transition-all duration-150 shadow-sm"
           >
-            {t.rooms?.coHost?.remove || "Gỡ"}
+            {hasCoHost ? (
+              <Crown size={12} className="shrink-0" />
+            ) : (
+              <UserPlus size={12} className="shrink-0" />
+            )}
+            {buttonLabel}
           </button>
-        )}
+          {hasCoHost && (
+            <button
+              type="button"
+              onClick={() => setConfirmOpen(true)}
+              className="text-xs font-semibold text-red-500 hover:text-red-700 hover:underline transition-colors duration-150"
+            >
+              {t.rooms?.coHost?.remove || "Gỡ"}
+            </button>
+          )}
+        </div>
       </div>
 
       <CoHostModal

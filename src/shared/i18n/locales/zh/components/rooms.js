@@ -623,7 +623,7 @@ export default {
       successDisableJoinSound: "已关闭成员进出提示音",
       kickedByHost: "您已被主持人移出房间。",
       successMuteAll: "已静音所有人",
-      successLowerAllHands: "已放下所有举起的手",
+      successLowerAllHands: "已放下 {count} 只手",
       confirmLowerHandsTitle: "放下所有手",
       confirmLowerHands: "您确定要放下 {count} 名参与者举起的手吗？",
       noHandsRaised: "没有人举手。",

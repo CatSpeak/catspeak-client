@@ -613,7 +613,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     setLowerHandsConfirmOpen(false)
     if (!roomId) return
     try {
-      await lowerAllHandsApi(roomId).unwrap()
+      const res = await lowerAllHandsApi(roomId).unwrap()
       // Update local LiveKit metadata for all raised participants (best-effort)
       if (lkRoom?.localParticipant) {
         safeSetLiveKitMetadata(lkRoom.localParticipant, { handRaised: false, handRaisedAt: 0 })
@@ -625,7 +625,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         }
       }
       // Also lower for each participant via metadata clear (client will sync via data channel)
-      toast.success(pl.successLowerAllHands)
+      const loweredCount =
+        res?.data?.loweredCount ?? res?.loweredCount ?? raisedHandParticipants.length
+      toast.success(pl.successLowerAllHands.replace("{count}", String(loweredCount)))
     } catch (err) {
       toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenLowerHands))
     }

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useUpdateCustomRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { validateRoomName } from "@/features/rooms/utils/roomNameValidation"
 
 const getLanguageName = (langCode) => {
   switch (langCode) {
@@ -71,23 +72,13 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
   }, [open, room])
 
   const handleChange = (field, value) => {
-    setFormData((prev) => {
-      const next = { ...prev, [field]: value }
-      if (field === "languageType") {
-        next.selectedLevel = ""
-      }
-      return next
-    })
+    setFormData((prev) => ({ ...prev, [field]: value }))
     if (field === "name") {
-      const trimmed = (value || "").trim()
-      if (trimmed.length > 50) {
-        setNameError(
-          t.rooms?.customRooms?.nameMaxLength ||
-            "Room name must be 50 characters or fewer",
-        )
-      } else {
-        setNameError("")
-      }
+      setNameError(
+        validateRoomName(value, {
+          messages: { tooLong: t.rooms?.customRooms?.nameMaxLength },
+        }),
+      )
     }
     if (field === "password" && value.trim()) {
       setPasswordError("")
@@ -108,14 +99,15 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     if (!room) return
     let hasError = false
 
-    if (!formData.name.trim()) {
-      setNameError(t.rooms?.createRoom?.nameRequired || "Room name is required")
-      hasError = true
-    } else if (formData.name.trim().length > 50) {
-      setNameError(
-        t.rooms?.customRooms?.nameMaxLength ||
-          "Room name must be 50 characters or fewer",
-      )
+    const nameValidationError = validateRoomName(formData.name, {
+      required: true,
+      messages: {
+        required: t.rooms?.createRoom?.nameRequired,
+        tooLong: t.rooms?.customRooms?.nameMaxLength,
+      },
+    })
+    if (nameValidationError) {
+      setNameError(nameValidationError)
       hasError = true
     } else {
       setNameError("")

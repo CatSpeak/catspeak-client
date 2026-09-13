@@ -682,7 +682,7 @@ export default {
       successDisableJoinSound: "Turned OFF join/leave sound alerts",
       kickedByHost: "You have been removed from the room by the Host.",
       successMuteAll: "Muted all participants",
-      successLowerAllHands: "Lowered all hands",
+      successLowerAllHands: "Lowered {count} hands",
       confirmLowerHandsTitle: "Lower all hands",
       confirmLowerHands: "Are you sure you want to lower the hands of {count} participants?",
       noHandsRaised: "No one has raised a hand.",

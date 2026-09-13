@@ -638,7 +638,7 @@ export default {
       successDisableJoinSound: "参加・退出のサウンドアラートをオフにしました",
       kickedByHost: "ホストによってルームから削除されました。",
       successMuteAll: "すべての参加者をミュートしました",
-      successLowerAllHands: "すべての手を下げました",
+      successLowerAllHands: "{count}名の手を下げました",
       confirmLowerHandsTitle: "全員の手を下げる",
       confirmLowerHands:
         "手を挙げている{count}名の手を下げてもよろしいですか？",

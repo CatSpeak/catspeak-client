@@ -28,6 +28,10 @@ import CustomRoomCard from "../components/CustomRoomCard";
 import RoomCard from "../components/RoomCard";
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
+import {
+  buildCustomRoomQuota,
+  isCustomRoomQuotaFull,
+} from "../utils/customRoomQuota";
 
 const WorkspaceRoomsContent = () => {
   const { t } = useLanguage();
@@ -174,14 +178,12 @@ const WorkspaceRoomsContent = () => {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   // Quota for custom rooms
-  const quota = {
-    used:
-      customRoomsData?.currentCustomRoomsCount ??
-      myRoomsResponse?.data?.totalCount ??
-      rawTargetRooms.length,
-    max: limits.maxActiveCustomRooms,
-  };
-  const isQuotaFull = customRoomsData?.canCreateCustomRoom === false;
+  const quota = buildCustomRoomQuota({
+    customRoomsData,
+    limits,
+    fallbackUsed: myRoomsResponse?.data?.totalCount ?? rawTargetRooms.length,
+  });
+  const isQuotaFull = isCustomRoomQuotaFull(customRoomsData);
 
   // Tab definition
   const tabs = useMemo(
