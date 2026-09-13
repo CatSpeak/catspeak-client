@@ -74,7 +74,7 @@ export function formatSuggestionItem(questionItem, topicIcon, targetLang = "en")
   return {
     id: questionItem.id,
     level: questionItem.level,
-    icon: topicIcon || "💬",
+    icon: questionItem.icon || topicIcon || "💬",
     vi: questionItem.vi,
     targetText: targetText,
     displayText: isViOnly ? questionItem.vi : `${questionItem.vi} / ${targetText}`,
@@ -90,7 +90,7 @@ export function getInitialMeetingSuggestions({
   targetLanguage = "en",
   usedIds = new Set(),
   chatCount = 0,
-  count = 4,
+  count = 5,
 } = {}) {
   let matchedKey = normalizeTopicKey(roomTopic)
 

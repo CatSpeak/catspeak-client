@@ -34,6 +34,7 @@ const splitEmojis = (str) => {
 
 /**
  * Renders Meeting Starter Greeting with bilingual topic suggestion cards and Load More chip (FR-001, FR-007)
+ * Directly matches design in reference mockup (no colored background wrapper).
  */
 const StarterGreetingBubble = ({
   msg,
@@ -43,62 +44,70 @@ const StarterGreetingBubble = ({
 }) => {
   const topicInfo = msg.topicInfo
   const suggestions = msg.suggestions || []
+  const topicLabel = t.rooms?.chatBox?.aiTopicLabel || "Chủ đề:"
+  const topicName =
+    topicInfo?.topicNameVi || topicInfo?.topicNameEn || "Du lịch & Giao tiếp"
 
   return (
-    <div className="flex flex-col mb-4 items-start w-full">
-      {/* Header Label (FR-001) */}
-      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-        <span className="text-xs font-bold text-cath-red-700 tracking-wide uppercase flex items-center gap-1 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">
-          {t.rooms?.chatBox?.aiMeetingSuggestionLabel || "🗣️ GỢI Ý CÂU CHO BUỔI HỌC"}
-        </span>
-        {topicInfo && (
-          <span className="text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md flex items-center gap-1">
-            <span>{topicInfo.topicIcon}</span>
-            <span>{topicInfo.topicNameVi || topicInfo.topicNameEn}</span>
+    <div className="flex flex-col mb-4 items-start w-full gap-2">
+      {/* 1. Header: Icon + Title on left, Solid Maroon Topic Badge on right */}
+      <div className="flex items-center justify-between gap-2 w-full">
+        <div className="flex items-center gap-1.5 font-bold text-[13px] text-cath-red-700 tracking-tight">
+          <span>🎓</span>
+          <span>
+            {t.rooms?.chatBox?.aiMeetingSuggestionLabel ||
+              "GỢI Ý CÂU CHO BUỔI HỌC"}
           </span>
-        )}
+        </div>
+        <div className="bg-cath-red-700 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow-2xs whitespace-nowrap">
+          {topicLabel} {topicName}
+        </div>
       </div>
 
-      {/* Main Container */}
-      <div className="max-w-[95%] rounded-2xl p-3.5 bg-gradient-to-br from-red-50/60 via-amber-50/40 to-white text-gray-900 border border-red-100 shadow-sm flex flex-col gap-2.5">
-        <p className="m-0 text-xs text-gray-700 leading-relaxed font-medium">
-          {t.rooms?.chatBox?.aiGreetingIntro ||
-            "Dưới đây là một số gợi ý câu để bạn dễ dàng bắt đầu trò chuyện trong buổi học:"}
-        </p>
+      {/* 2. Intro Box: Light subtle gray background with clean border */}
+      <div className="w-full bg-[#fbfbfa] border border-gray-200/90 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-800 leading-snug">
+        {t.rooms?.chatBox?.aiGreetingIntro ||
+          "Xin chào! Dưới đây là các câu gợi ý theo chủ đề buổi học hôm nay để bạn luyện nói hoặc gửi vào phòng học:"}
+      </div>
 
-        {/* Suggestion Cards List */}
-        <div className="flex flex-col gap-2 mt-1">
-          {suggestions.map((item, idx) => (
-            <button
-              key={item.id || idx}
-              type="button"
-              onClick={() => onSendSuggestedSentence?.(item.targetText || item.displayText || item.vi)}
-              title="Click để gửi ngay vào phòng học"
-              className="group text-left text-xs bg-white hover:bg-red-50/80 active:scale-[0.99] border border-red-200/80 hover:border-red-300 rounded-xl px-3 py-2.5 transition-all shadow-xs flex items-start gap-2 cursor-pointer"
-            >
-              <span className="text-base shrink-0 leading-none mt-0.5">{item.icon || "💬"}</span>
-              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                <span className="font-semibold text-gray-900 group-hover:text-cath-red-700 transition-colors break-words">
-                  {item.targetText || item.vi}
-                </span>
-                {item.targetText && item.vi && item.targetText !== item.vi && (
-                  <span className="text-[11px] text-gray-500 font-normal break-words">
-                    {item.vi}
-                  </span>
-                )}
-              </div>
-            </button>
-          ))}
-
-          {/* Load More Suggestions Chip (FR-007 - Load More Pattern) */}
+      {/* 3. Suggestion Cards List */}
+      <div className="w-full flex flex-col gap-2">
+        {suggestions.map((item, idx) => (
           <button
+            key={item.id || idx}
             type="button"
-            onClick={() => onLoadMoreSuggestions?.()}
-            className="w-full text-center text-xs py-2 px-3 border border-dashed border-red-300/80 hover:border-red-400 bg-red-50/30 hover:bg-red-50 text-red-800 font-medium rounded-xl opacity-80 hover:opacity-100 transition-all cursor-pointer shadow-2xs"
+            onClick={() =>
+              onSendSuggestedSentence?.(
+                item.targetText || item.displayText || item.vi,
+              )
+            }
+            title="Click để gửi vào phòng học"
+            className="group w-full text-left bg-white hover:bg-red-50/40 active:scale-[0.99] border border-red-200 hover:border-red-300 rounded-xl px-3.5 py-2.5 transition-all shadow-2xs flex flex-col gap-0.5 cursor-pointer"
           >
-            {t.rooms?.chatBox?.aiLoadMoreSuggestions || "＋ Gợi ý thêm"}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[14px] leading-none shrink-0">
+                {item.icon || "🎓"}
+              </span>
+              <span className="font-bold text-[13.5px] text-cath-red-800 group-hover:text-cath-red-900 leading-snug break-words">
+                {item.vi || item.targetText}
+              </span>
+            </div>
+            {item.targetText && item.vi && item.targetText !== item.vi && (
+              <div className="text-[12px] text-gray-600 font-normal leading-tight pl-5 break-words">
+                {item.targetText}
+              </div>
+            )}
           </button>
-        </div>
+        ))}
+
+        {/* 4. Load More Suggestions Chip (FR-007) */}
+        <button
+          type="button"
+          onClick={() => onLoadMoreSuggestions?.()}
+          className="w-full text-center text-[13px] py-2 border border-dashed border-red-200 hover:border-red-300 bg-transparent hover:bg-red-50/30 text-gray-600 hover:text-gray-800 font-medium rounded-xl transition-all cursor-pointer mt-0.5"
+        >
+          {t.rooms?.chatBox?.aiLoadMoreSuggestions || "+ Gợi ý thêm"}
+        </button>
       </div>
     </div>
   )
