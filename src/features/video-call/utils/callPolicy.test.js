@@ -56,15 +56,19 @@ test("kill switch off (foreign country + full profile) removes all caps", () => 
   assert.equal(policy.subscribe.maxVideoTiles, null)
 })
 
-test("high-quality flag never lifts the standard cap", () => {
+test("high-quality room lifts the publish cap but never the foreign subscription cap", () => {
   const foreign = resolveCallPolicy("Japan", "standard", true)
   assert.equal(foreign.highQuality, true)
-  assert.equal(foreign.publish.cameraPreset, "h360")
+  assert.equal(foreign.publish.cameraPreset, "h720")
+  assert.equal(foreign.publish.simulcastPresets, null)
   assert.equal(foreign.subscribe.maxVideoTiles, MAX_FOREIGN_VIDEO_TILES)
+  assert.equal(foreign.subscribe.videoQuality, "low")
 
-  const domestic = resolveCallPolicy("Vietnam", "standard", true)
-  assert.equal(domestic.publish.cameraPreset, "h360")
-  assert.equal(domestic.publish.simulcastPresets.length, 2)
+  const domestic = resolveCallPolicy("Vietnam", "full", true)
+  assert.equal(domestic.highQuality, true)
+  assert.equal(domestic.publish.cameraPreset, "h720")
+  assert.equal(domestic.subscribe.maxVideoTiles, null)
+  assert.equal(domestic.subscribe.videoQuality, null)
 })
 
 test("missing or unknown egress profile falls back to full", () => {
@@ -368,4 +372,66 @@ test("missing, unknown or empty country/profile keeps the full grid", () => {
     emptyCountryPolicy.egressProfile,
   )
   assert.equal(cameraSubscriptions(plan).length, 2)
+})
+
+test("high-quality foreign plan still caps at two low-quality camera tiles", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    camera("dave"),
+    screenShare("carol"),
+  ]
+
+  const policy = resolveCallPolicy("Japan", "standard", true)
+  assert.equal(policy.highQuality, true)
+
+  const plan = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    policy.subscribe.maxVideoTiles,
+    policy.egressProfile,
+  )
+
+  assert.deepEqual(
+    cameraSubscriptions(plan)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["bob", "carol"],
+  )
+  assert.equal(decisionOf(plan, "TR_bob").quality, VIDEO_QUALITY_LOW)
+  assert.equal(decisionOf(plan, "TR_carol").quality, VIDEO_QUALITY_LOW)
+  assert.equal(decisionOf(plan, "TR_alice").subscribed, false)
+  assert.equal(decisionOf(plan, "TR_dave").subscribed, false)
+
+  // Screen shares stay subscribed but reduced, audio is untouched.
+  assert.equal(decisionOf(plan, "TR_SS_carol").subscribed, true)
+  assert.equal(decisionOf(plan, "TR_SS_carol").quality, VIDEO_QUALITY_LOW)
+})
+
+test("high-quality domestic plan keeps the full grid", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    screenShare("dave"),
+  ]
+
+  const policy = resolveCallPolicy("Vietnam", "full", true)
+  assert.equal(policy.highQuality, true)
+
+  const plan = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    policy.subscribe.maxVideoTiles,
+    policy.egressProfile,
+  )
+
+  assert.ok(
+    plan.every(
+      (decision) => decision.subscribed === true && decision.quality === null,
+    ),
+  )
 })
