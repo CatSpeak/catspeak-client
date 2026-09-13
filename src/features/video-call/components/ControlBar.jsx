@@ -49,6 +49,7 @@ const VideoCallControlBar = () => {
     isTogglingMic,
     isTogglingCam,
     isTogglingScreenShare,
+    canShareScreen = true,
     showChat,
     setShowChat,
     showParticipants,
@@ -199,10 +200,14 @@ const VideoCallControlBar = () => {
           isActive={isLocalScreenShare}
           isLoading={isTogglingScreenShare}
           onClick={handleToggleScreenShare}
+          disabled={!canShareScreen}
           title={
-            isLocalScreenShare
-              ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
-              : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
+            !canShareScreen
+              ? t.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
+                "Bạn không có quyền chia sẻ màn hình."
+              : isLocalScreenShare
+                ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
+                : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
           }
           iconActive={<MonitorOff className={iconClass} />}
           iconInactive={<MonitorUp className={iconClass} />}

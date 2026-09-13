@@ -89,6 +89,13 @@ export const useScreenShare = ({
   const [isTogglingScreenShare, setIsTogglingScreenShare] = useState(false)
   const [showTakeoverModal, setShowTakeoverModal] = useState(false)
 
+  // Ticket 06 (G7): co-host screen-share capability follows share_screen.
+  // Host and students are unaffected (server-side grant is authoritative).
+  const isSelfCoHost = isCoHostUser(coHost, user?.accountId)
+  const canShareScreen =
+    !isSelfCoHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.SHARE_SCREEN)
+
   const startScreenShare = useCallback(async () => {
     setIsTogglingScreenShare(true)
     try {
@@ -120,17 +127,12 @@ export const useScreenShare = ({
     // Ticket 05: self-share gate — host bypasses; co-host needs
     // share_screen; students share by default while the student-share
     // gate is open (host/co-host always bypass that gate).
-    const isSelfCoHost = isCoHostUser(coHost, user?.accountId)
-    if (!isHost && isSelfCoHost) {
-      if (
-        !hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.SHARE_SCREEN)
-      ) {
-        toast.error(
-          t?.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
-            "Bạn không có quyền chia sẻ màn hình."
-        )
-        return
-      }
+    if (!isHost && !canShareScreen) {
+      toast.error(
+        t?.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
+          "Bạn không có quyền chia sẻ màn hình."
+      )
+      return
     } else if (!isHost && !isSelfCoHost && !allowStudentShare) {
       toast.error(
         t?.rooms?.videoCall?.participantList?.studentShareBlocked ||
@@ -163,8 +165,8 @@ export const useScreenShare = ({
     isLocalScreenShare,
     isPresenterHost,
     isHost,
-    coHost,
-    user?.accountId,
+    isSelfCoHost,
+    canShareScreen,
     allowStudentShare,
     t,
     stopScreenShare,
@@ -178,6 +180,7 @@ export const useScreenShare = ({
     presenterId: presenter?.identity ?? null,
     isLocalScreenShare,
     isTogglingScreenShare,
+    canShareScreen,
     toggleScreenShare,
     presenterDisplayName,
     showTakeoverModal,

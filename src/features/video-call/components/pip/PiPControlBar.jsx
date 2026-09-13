@@ -21,6 +21,7 @@ const PiPControlBar = ({
   isPiPChatOpen,
   isLocalScreenShare,
   onToggleScreenShare,
+  canShareScreen = true,
 }) => {
   const baseBtnClass =
     "flex shrink-0 items-center justify-center w-10 h-10 rounded-full border-none cursor-pointer transition-all duration-150 pointer-events-auto"
@@ -57,11 +58,12 @@ const PiPControlBar = ({
 
       {/* Screen Share */}
       <button
-        className={`${baseBtnClass} ${isLocalScreenShare ? activeBtnClass : defaultBtnClass}`}
+        className={`${baseBtnClass} ${isLocalScreenShare ? activeBtnClass : defaultBtnClass} ${!canShareScreen ? "opacity-50 cursor-not-allowed" : ""}`}
         onClick={(e) => {
           e.stopPropagation()
           onToggleScreenShare()
         }}
+        disabled={!canShareScreen}
         title={isLocalScreenShare ? "Stop sharing" : "Share screen"}
       >
         {isLocalScreenShare ? <MonitorOff size={20} /> : <MonitorUp size={20} />}

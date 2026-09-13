@@ -29,6 +29,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
     screenShareTracks,
     isLocalScreenShare,
     handleToggleScreenShare,
+    canShareScreen = true,
     isHandRaised,
     sessionId,
     unreadRoomChat,
@@ -145,6 +146,7 @@ const PiPWidgetContent = ({ isNativeWindow }) => {
           isPiPChatOpen={isPiPChatOpen}
           isLocalScreenShare={isLocalScreenShare}
           onToggleScreenShare={handleToggleScreenShare}
+          canShareScreen={canShareScreen}
         />
       </div>
     </div>
