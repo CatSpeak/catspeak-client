@@ -25,7 +25,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
   const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
     ? lang
     : "en"
-  const selectedLanguage = room?.languageType || getLanguageName(supportedLangCode)
+  const defaultLanguage = getLanguageName(supportedLangCode)
 
   const [updateCustomRoom, { isLoading: isUpdating }] =
     useUpdateCustomRoomMutation()
@@ -37,7 +37,9 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     isPrivate: false,
     password: "",
     maxParticipants: 10,
+    languageType: "",
   })
+  const selectedLanguage = formData.languageType || defaultLanguage
   const [thumbnailFile, setThumbnailFile] = useState(null)
   const [nameError, setNameError] = useState("")
   const [passwordError, setPasswordError] = useState("")
@@ -60,6 +62,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
         isPrivate: isPrivate,
         password: room.password || "",
         maxParticipants: room.maxParticipants || 10,
+        languageType: room.languageType || room.LanguageType || "",
       })
       setThumbnailFile(room.thumbnailUrl || null)
       setNameError("")
@@ -68,9 +71,23 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
   }, [open, room])
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    if (field === "name" && value.trim()) {
-      setNameError("")
+    setFormData((prev) => {
+      const next = { ...prev, [field]: value }
+      if (field === "languageType") {
+        next.selectedLevel = ""
+      }
+      return next
+    })
+    if (field === "name") {
+      const trimmed = (value || "").trim()
+      if (trimmed.length > 50) {
+        setNameError(
+          t.rooms?.customRooms?.nameMaxLength ||
+            "Room name must be 50 characters or fewer",
+        )
+      } else {
+        setNameError("")
+      }
     }
     if (field === "password" && value.trim()) {
       setPasswordError("")
@@ -93,6 +110,12 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
 
     if (!formData.name.trim()) {
       setNameError(t.rooms?.createRoom?.nameRequired || "Room name is required")
+      hasError = true
+    } else if (formData.name.trim().length > 50) {
+      setNameError(
+        t.rooms?.customRooms?.nameMaxLength ||
+          "Room name must be 50 characters or fewer",
+      )
       hasError = true
     } else {
       setNameError("")

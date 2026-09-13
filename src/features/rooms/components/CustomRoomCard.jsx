@@ -241,8 +241,8 @@ const CustomRoomCard = ({
               </div>
             ) : (
               <div className="flex items-center gap-1 bg-black/50 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-md opacity-0 group-hover/card:opacity-100 transition-opacity duration-200">
-                {/* Edit Button */}
-                {onEdit && (
+                {/* Edit Button — only room owner (BR-ML-01) */}
+                {onEdit && isRoomOwner && (
                   <button
                     type="button"
                     onClick={(e) => {

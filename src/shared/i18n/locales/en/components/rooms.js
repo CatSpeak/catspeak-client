@@ -346,6 +346,11 @@ export default {
     maxParticipantsLimit: "Max: {max} participants",
     people: "people",
     unlimited: "Unlimited",
+    roomLifetime: "Room Lifetime",
+    roomLifetimeForever: "Forever",
+    languageLabel: "Language",
+    optional: "Optional",
+    nameMaxLength: "Room name must be 50 characters or fewer",
   },
   aiSettings: {
     title: "AI Session Settings",

@@ -321,6 +321,11 @@ export default {
     maxParticipantsLimit: "最大: {max}人",
     people: "人",
     unlimited: "無制限",
+    roomLifetime: "ルームの有効期間",
+    roomLifetimeForever: "無期限",
+    languageLabel: "言語",
+    optional: "任意",
+    nameMaxLength: "ルーム名は50文字以内で入力してください",
   },
   aiSettings: {
     title: "AIセッション設定",
