@@ -2,9 +2,9 @@ import { useEffect, useState } from "react"
 import { RoomEvent, Track, TrackPublication, VideoQuality } from "livekit-client"
 
 import {
-  EGRESS_PROFILE_STANDARD,
   VIDEO_QUALITY_LOW,
   resolveCallPolicy,
+  resolveEffectiveSubscriptionPlan,
   resolveSubscriptionPlan,
 } from "@/features/video-call/utils/callPolicy"
 
@@ -19,6 +19,12 @@ const VIDEO_QUALITY_VALUES = {
  * (active speaker + pinned camera tiles at LOW, screen share at LOW). Audio
  * publications and the local self-view are never touched; "full" participants
  * keep LiveKit's default full-grid behavior.
+ *
+ * Independently of the egress profile, the local participant's connection
+ * quality degrades every remote video subscription: POOR drops non-essential
+ * tiles and lowers the rest to LOW, LOST switches to audio-only, and both
+ * recover automatically once quality improves. This applies to every
+ * participant regardless of country.
  */
 export const useSubscriptionPolicy = ({
   room,
@@ -41,6 +47,7 @@ export const useSubscriptionPolicy = ({
       RoomEvent.TrackSubscribed,
       RoomEvent.TrackUnsubscribed,
       RoomEvent.ActiveSpeakersChanged,
+      RoomEvent.ConnectionQualityChanged,
     ]
 
     events.forEach((event) => room.on(event, handleChange))
@@ -50,11 +57,24 @@ export const useSubscriptionPolicy = ({
     }
   }, [room])
 
+  // Dev-only QA handle: __catspeakSimulateScenario("subscriber-bandwidth", bps)
+  useEffect(() => {
+    if (!import.meta.env.DEV || typeof room?.simulateScenario !== "function") {
+      return undefined
+    }
+
+    window.__catspeakSimulateScenario = (scenario, arg) =>
+      room.simulateScenario(scenario, arg)
+
+    return () => {
+      delete window.__catspeakSimulateScenario
+    }
+  }, [room])
+
   useEffect(() => {
     if (!room) return
 
     const policy = resolveCallPolicy(country, egressProfile, highQuality)
-    if (policy.egressProfile !== EGRESS_PROFILE_STANDARD) return
 
     const publications = []
     const publicationBySid = new Map()
@@ -77,12 +97,17 @@ export const useSubscriptionPolicy = ({
       (participant) => !participant.isLocal,
     )
 
-    const plan = resolveSubscriptionPlan(
+    const basePlan = resolveSubscriptionPlan(
       publications,
       activeSpeaker?.identity ?? null,
       pinnedParticipantId,
       policy.subscribe.maxVideoTiles,
       policy.egressProfile,
+    )
+
+    const plan = resolveEffectiveSubscriptionPlan(
+      room.localParticipant?.connectionQuality,
+      basePlan,
     )
 
     plan.forEach((decision) => {
@@ -97,13 +122,15 @@ export const useSubscriptionPolicy = ({
         publication.setSubscribed(decision.subscribed)
       }
 
+      if (!decision.subscribed) return
+
       const quality = VIDEO_QUALITY_VALUES[decision.quality]
-      if (
-        decision.subscribed &&
-        quality !== undefined &&
-        publication.videoQuality !== quality
-      ) {
-        publication.setVideoQuality(quality)
+      if (quality !== undefined) {
+        if (publication.videoQuality !== quality) {
+          publication.setVideoQuality(quality)
+        }
+      } else if (publication.videoQuality !== VideoQuality.HIGH) {
+        publication.setVideoQuality(undefined)
       }
     })
   }, [
