@@ -1,4 +1,5 @@
 import { socialApi } from "./socialApi"
+import { maskBody } from "@/shared/utils/moderation"
 
 // Conversations API slice
 export const conversationsApi = socialApi.injectEndpoints({
@@ -59,11 +60,19 @@ export const conversationsApi = socialApi.injectEndpoints({
 
     // Send a message in a conversation
     sendMessage: builder.mutation({
-      query: ({ conversationId, messageData }) => ({
-        url: `/conversations/${conversationId}/messages`,
-        method: "POST",
-        body: messageData,
-      }),
+      // [Moderation] Che ★ trước khi gửi. Social API là microservice riêng, không
+      // có chỗ nào phía server để chen kiểm duyệt vào — xem shared/utils/moderation.js
+      queryFn: async (
+        { conversationId, messageData },
+        api,
+        extraOptions,
+        baseQuery,
+      ) =>
+        baseQuery({
+          url: `/conversations/${conversationId}/messages`,
+          method: "POST",
+          body: await maskBody(api, messageData),
+        }),
       invalidatesTags: (result, error, { conversationId }) => [
         { type: "Messages", id: Number(conversationId) },
         { type: "Messages", id: String(conversationId) },
@@ -73,11 +82,18 @@ export const conversationsApi = socialApi.injectEndpoints({
 
     // Send a media message in a conversation (multipart/form-data)
     sendMediaMessage: builder.mutation({
-      query: ({ conversationId, formData }) => ({
-        url: `/conversations/${conversationId}/messages/media`,
-        method: "POST",
-        body: formData,
-      }),
+      // [Moderation] Chú thích kèm ảnh/tệp cũng là text người dùng gõ.
+      queryFn: async (
+        { conversationId, formData },
+        api,
+        extraOptions,
+        baseQuery,
+      ) =>
+        baseQuery({
+          url: `/conversations/${conversationId}/messages/media`,
+          method: "POST",
+          body: await maskBody(api, formData),
+        }),
       invalidatesTags: (result, error, { conversationId }) => [
         { type: "Messages", id: Number(conversationId) },
         { type: "Messages", id: String(conversationId) },

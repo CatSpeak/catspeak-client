@@ -1,4 +1,5 @@
 import { socialApi } from "./socialApi"
+import { maskBody } from "@/shared/utils/moderation"
 import {
   updatePostInCaches,
   updateCommentInCaches,
@@ -145,11 +146,22 @@ export const postsApi = socialApi.injectEndpoints({
       },
     }),
     createPostComment: builder.mutation({
-      query: ({ postId, content, parentCommentId, replyToAccountId }) => ({
-        url: `/Post/${postId}/comments`,
-        method: "POST",
-        body: { content, parentCommentId, replyToAccountId },
-      }),
+      // [Moderation] Che ★ nội dung bình luận trước khi gửi.
+      queryFn: async (
+        { postId, content, parentCommentId, replyToAccountId },
+        api,
+        extraOptions,
+        baseQuery,
+      ) =>
+        baseQuery({
+          url: `/Post/${postId}/comments`,
+          method: "POST",
+          body: await maskBody(api, {
+            content,
+            parentCommentId,
+            replyToAccountId,
+          }),
+        }),
       invalidatesTags: (result, error, { postId }) => [
         { type: "PostComment", id: `LIST-${postId}` },
       ],
@@ -209,11 +221,18 @@ export const postsApi = socialApi.injectEndpoints({
       ],
     }),
     editPostComment: builder.mutation({
-      query: ({ postId, commentId, content }) => ({
-        url: `/Post/${postId}/comments/${commentId}`,
-        method: "PUT",
-        body: { content },
-      }),
+      // [Moderation] Sửa bình luận đi qua cùng một lớp như lúc tạo.
+      queryFn: async (
+        { postId, commentId, content },
+        api,
+        extraOptions,
+        baseQuery,
+      ) =>
+        baseQuery({
+          url: `/Post/${postId}/comments/${commentId}`,
+          method: "PUT",
+          body: await maskBody(api, { content }),
+        }),
       invalidatesTags: (result, error, { postId }) => [
         { type: "PostComment", id: `LIST-${postId}` },
       ],

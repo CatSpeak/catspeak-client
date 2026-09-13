@@ -3,12 +3,17 @@ import { baseApi } from "./baseApi"
 /**
  * Kiểm duyệt nội dung (TASK-AI-10).
  *
- * Chỉ phục vụ chat phòng meet. Mọi luồng khác — bình luận, tiêu đề reel, video —
- * đã được backend duyệt trước khi lưu, client không phải làm gì.
+ * Endpoint này nằm bên catspeak-api và chuyển tiếp tới dịch vụ kiểm duyệt. Client
+ * gọi nó ở những luồng KHÔNG có chỗ nào phía server chen kiểm duyệt vào được:
  *
- * Chat phòng meet là ngoại lệ vì tin đi thẳng client → LiveKit → client qua data
- * channel, không có chỗ nào bên .NET chen vào được. Nên client phải tự gọi mask
- * trước rồi mới gửi bản sạch vào phòng.
+ *   - chat phòng meet — tin đi client → LiveKit → client qua data channel
+ *   - chat 1-1, bài post, bình luận post, thư (stories) — đi tới `Catspeak Social
+ *     API`, một microservice riêng ngoài tầm ba repo của nhóm AI
+ *
+ * Reel (tiêu đề, mô tả, video, ảnh bìa) và bình luận reel thì KHÔNG dùng đường này:
+ * catspeak-api đã duyệt trước khi lưu, client không phải làm gì.
+ *
+ * Cách dùng: `maskBody` trong shared/utils/moderation.js, đừng gọi hook này thẳng.
  */
 export const moderationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
