@@ -84,6 +84,7 @@ const CoHostModal = ({
   const [listOpen, setListOpen] = useState(false)
   const [selectedId, setSelectedId] = useState(initialAccountId)
   const [permissions, setPermissions] = useState(initialPermissions || [])
+  const [confirmClear, setConfirmClear] = useState(false)
   const searchInputRef = useRef(null)
 
   // Reset form mỗi lần mở modal (render-time adjustment thay vì effect,
@@ -98,6 +99,7 @@ const CoHostModal = ({
     setListOpen(false)
     setSelectedId(initialAccountId)
     setPermissions(initialPermissions || [])
+    setConfirmClear(false)
   }
   if (!open && prevOpenKey !== null) {
     setPrevOpenKey(null)
@@ -183,12 +185,14 @@ const CoHostModal = ({
     setSelectedId(id)
     setListOpen(false)
     setQuery("")
+    setConfirmClear(false)
   }
 
   const handleClearUser = () => {
     setSelectedId(null)
     setQuery("")
     setListOpen(true)
+    setConfirmClear(false)
   }
 
   // Helper giải thích lý do khi nút bị disable
@@ -304,7 +308,7 @@ const CoHostModal = ({
           {selectedUser && (
             <button
               type="button"
-              onClick={handleClearUser}
+              onClick={() => setConfirmClear(true)}
               className="text-xs font-semibold text-gray-500 hover:text-cath-red-700 transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 rounded-lg px-2 py-0.5"
             >
               <RefreshCw size={12} />
@@ -315,45 +319,74 @@ const CoHostModal = ({
 
         {/* TRẠNG THÁI A: ĐÃ CHỌN NGƯỜI DÙNG -> SELECTED USER CARD */}
         {selectedUser ? (
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80 shadow-xs transition-all animate-in fade-in-50 duration-150">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="relative shrink-0">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-xs">
-                  {(selectedUser.name || "?").slice(0, 2).toUpperCase()}
-                </div>
-                <span
-                  className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white"
-                  title={t.rooms?.coHost?.inRoomStatus || "Đang trong phòng"}
-                />
+          confirmClear ? (
+            /* XÁC NHẬN BỎ NGƯỜI DÙNG ĐANG CHỌN (SRS 1.1.3) */
+            <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-red-50/70 border border-red-200 shadow-xs animate-in fade-in-50 duration-150">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <AlertTriangle size={16} className="text-red-600 shrink-0" />
+                <p className="text-xs font-semibold text-red-800 leading-snug">
+                  {t.rooms?.coHost?.confirmClearMessage ||
+                    "Bỏ người dùng đang chọn khỏi biểu mẫu?"}
+                </p>
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-gray-900 truncate">
-                    {selectedUser.name}
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200">
-                    <Crown size={10} />
-                    {t.rooms?.coHost?.designatedBadge || "Co-host chỉ định"}
-                  </span>
-                </div>
-                {selectedUser.email && (
-                  <span className="text-xs text-gray-500 truncate block mt-0.5">
-                    {selectedUser.email}
-                  </span>
-                )}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setConfirmClear(false)}
+                  className="text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors rounded-lg px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300"
+                >
+                  {t.rooms?.coHost?.cancel || "Hủy"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClearUser}
+                  className="text-xs font-bold text-white bg-red-600 hover:bg-red-700 transition-colors rounded-lg px-3 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                >
+                  {t.rooms?.coHost?.clearSelection || "Bỏ chọn"}
+                </button>
               </div>
             </div>
+          ) : (
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80 shadow-xs transition-all animate-in fade-in-50 duration-150">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-xs">
+                    {(selectedUser.name || "?").slice(0, 2).toUpperCase()}
+                  </div>
+                  <span
+                    className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white"
+                    title={t.rooms?.coHost?.inRoomStatus || "Đang trong phòng"}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-gray-900 truncate">
+                      {selectedUser.name}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200">
+                      <Crown size={10} />
+                      {t.rooms?.coHost?.designatedBadge || "Co-host chỉ định"}
+                    </span>
+                  </div>
+                  {selectedUser.email && (
+                    <span className="text-xs text-gray-500 truncate block mt-0.5">
+                      {selectedUser.email}
+                    </span>
+                  )}
+                </div>
+              </div>
 
-            <button
-              type="button"
-              onClick={handleClearUser}
-              aria-label={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
-              className="p-1.5 rounded-xl hover:bg-amber-100/70 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
-              title={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
-            >
-              <X size={16} />
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setConfirmClear(true)}
+                aria-label={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
+                className="p-1.5 rounded-xl hover:bg-amber-100/70 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+                title={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )
         ) : (
           /* TRẠNG THÁI B: CHƯA CHỌN NGƯỜI DÙNG -> SEARCH & CANDIDATE PICKER */
           <div className="relative">

@@ -364,11 +364,11 @@ const CustomRoomCard = ({
             className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-[11px] text-gray-400 leading-snug">
-              {roomCoHost?.coHostAccountId
-                ? (customRooms.assignedCoHost || "Đã phân công Co-host")
-                : (customRooms.noCoHost || "Chưa có Co-host")}
-            </p>
+            {roomCoHost?.coHostAccountId && (
+              <p className="text-[11px] text-gray-400 leading-snug">
+                {customRooms.assignedCoHost || "Đã phân công Co-host"}
+              </p>
+            )}
             <CoHostManager
               roomName={room.name}
               roomType="room"

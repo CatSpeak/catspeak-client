@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from "react"
 import { toast } from "react-hot-toast"
-import { Crown, UserPlus } from "lucide-react"
+import { CheckCircle2, Crown, UserPlus } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
+import Modal from "@/shared/components/ui/Modal"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 import CoHostModal from "./CoHostModal"
 import CoHostBadge from "./CoHostBadge"
 import { resolveCoHostErrorMessage } from "./errors"
@@ -34,9 +36,16 @@ const CoHostManager = ({
   const { t } = useLanguage()
   const [modalOpen, setModalOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [revokeSuccessOpen, setRevokeSuccessOpen] = useState(false)
 
   const hasCoHost = coHost?.coHostAccountId != null
   const buttonLabel = hasCoHost ? (t.rooms?.coHost?.manage || "Quản lý co-host") : (t.rooms?.coHost?.add || "Thêm Co-host")
+  const emptyLabel =
+    roomType === "class"
+      ? (t.rooms?.coHost?.emptyClass ||
+        "Chưa có Co-host được phân công cho lớp học")
+      : (t.rooms?.coHost?.emptyRoom ||
+        "Chưa có Co-host được phân công cho phòng này")
 
   const initialAccountId = coHost?.coHostAccountId ?? null
   const initialPermissions = useMemo(
@@ -76,9 +85,9 @@ const CoHostManager = ({
   const handleRevoke = async () => {
     try {
       await onRevoke?.()
-      toast.success(t.rooms?.coHost?.revoked || "Đã gỡ phân công co-host.")
       setConfirmOpen(false)
       setModalOpen(false)
+      setRevokeSuccessOpen(true)
     } catch (err) {
       toast.error(
         resolveCoHostErrorMessage(
@@ -98,6 +107,11 @@ const CoHostManager = ({
   return (
     <>
       <div className="flex items-center gap-2">
+        {!hasCoHost && (
+          <span className="hidden sm:inline text-xs font-medium text-gray-400">
+            {emptyLabel}
+          </span>
+        )}
         <button
           type="button"
           onClick={() => setModalOpen(true)}
@@ -148,6 +162,34 @@ const CoHostManager = ({
         confirmVariant="destructive"
         isPending={isRevoking}
       />
+
+      {/* Modal thành công sau khi thu hồi (SRS 1.1.3); phân công/update giữ toast. */}
+      <Modal
+        open={revokeSuccessOpen}
+        onClose={() => setRevokeSuccessOpen(false)}
+        showCloseButton={false}
+        bodyClassName="p-6 !mb-0"
+        className="max-w-md"
+      >
+        <div className="flex flex-col items-center justify-center text-center">
+          <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-3 animate-in zoom-in-75">
+            <CheckCircle2 size={30} />
+          </div>
+          <h3 className="text-lg font-bold text-gray-800 mb-1.5">
+            {t.rooms?.coHost?.revokeSuccessTitle || "Đã gỡ phân công Co-host!"}
+          </h3>
+          <p className="text-sm text-gray-500 mb-5 max-w-sm leading-relaxed">
+            {t.rooms?.coHost?.revokeSuccessMessage ||
+              "Phân công Co-host đã được gỡ thành công."}
+          </p>
+          <PillButton
+            onClick={() => setRevokeSuccessOpen(false)}
+            className="w-full"
+          >
+            {t.rooms?.coHost?.done || "Hoàn tất"}
+          </PillButton>
+        </div>
+      </Modal>
     </>
   )
 }
