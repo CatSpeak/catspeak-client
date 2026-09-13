@@ -28,7 +28,6 @@ const VIDEO_QUALITY_VALUES = {
  */
 export const useSubscriptionPolicy = ({
   room,
-  country,
   egressProfile,
   highQuality,
   pinnedParticipantId,
@@ -74,7 +73,7 @@ export const useSubscriptionPolicy = ({
   useEffect(() => {
     if (!room) return
 
-    const policy = resolveCallPolicy(country, egressProfile, highQuality)
+    const policy = resolveCallPolicy(egressProfile, highQuality)
 
     const publications = []
     const publicationBySid = new Map()
@@ -135,7 +134,6 @@ export const useSubscriptionPolicy = ({
     })
   }, [
     room,
-    country,
     egressProfile,
     highQuality,
     pinnedParticipantId,

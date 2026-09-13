@@ -13,7 +13,6 @@ import {
   TRACK_SOURCE_CAMERA,
   TRACK_SOURCE_SCREEN_SHARE,
   VIDEO_QUALITY_LOW,
-  isDomesticCountry,
   normalizeConnectionQuality,
   normalizeEgressProfile,
   resolveCallPolicy,
@@ -22,7 +21,7 @@ import {
 } from "./callPolicy.js"
 
 test("standard profile caps publish and subscription settings", () => {
-  const policy = resolveCallPolicy("Japan", "standard", false)
+  const policy = resolveCallPolicy("standard", false)
 
   assert.equal(policy.egressProfile, EGRESS_PROFILE_STANDARD)
   assert.equal(policy.isForeign, true)
@@ -39,7 +38,7 @@ test("standard profile caps publish and subscription settings", () => {
 })
 
 test("full profile keeps full-quality publish and subscription settings", () => {
-  const policy = resolveCallPolicy("Vietnam", "full", false)
+  const policy = resolveCallPolicy("full", false)
 
   assert.equal(policy.egressProfile, EGRESS_PROFILE_FULL)
   assert.equal(policy.isForeign, false)
@@ -50,10 +49,10 @@ test("full profile keeps full-quality publish and subscription settings", () => 
   assert.equal(policy.subscribe.videoQuality, null)
 })
 
-test("kill switch off (foreign country + full profile) removes all caps", () => {
-  const policy = resolveCallPolicy("Japan", "full", true)
+test("kill switch off (full profile) removes all caps", () => {
+  const policy = resolveCallPolicy("full", true)
 
-  assert.equal(policy.isForeign, true)
+  assert.equal(policy.isForeign, false)
   assert.equal(policy.egressProfile, EGRESS_PROFILE_FULL)
   assert.equal(policy.publish.cameraPreset, "h720")
   assert.equal(policy.publish.simulcastPresets, null)
@@ -61,14 +60,14 @@ test("kill switch off (foreign country + full profile) removes all caps", () => 
 })
 
 test("high-quality room lifts the publish cap but never the foreign subscription cap", () => {
-  const foreign = resolveCallPolicy("Japan", "standard", true)
+  const foreign = resolveCallPolicy("standard", true)
   assert.equal(foreign.highQuality, true)
   assert.equal(foreign.publish.cameraPreset, "h720")
   assert.equal(foreign.publish.simulcastPresets, null)
   assert.equal(foreign.subscribe.maxVideoTiles, MAX_FOREIGN_VIDEO_TILES)
   assert.equal(foreign.subscribe.videoQuality, "low")
 
-  const domestic = resolveCallPolicy("Vietnam", "full", true)
+  const domestic = resolveCallPolicy("full", true)
   assert.equal(domestic.highQuality, true)
   assert.equal(domestic.publish.cameraPreset, "h720")
   assert.equal(domestic.subscribe.maxVideoTiles, null)
@@ -82,21 +81,29 @@ test("missing or unknown egress profile falls back to full", () => {
   assert.equal(normalizeEgressProfile("bogus"), "full")
   assert.equal(normalizeEgressProfile("standard"), "standard")
 
-  const policy = resolveCallPolicy("Japan", undefined, false)
+  const policy = resolveCallPolicy(undefined, false)
   assert.equal(policy.egressProfile, EGRESS_PROFILE_FULL)
   assert.equal(policy.publish.cameraPreset, "h720")
 })
 
-test("empty or unknown country counts as domestic", () => {
-  for (const country of [undefined, null, "", "   ", "Vietnam", "vietnam", "  VN  ", "Việt Nam"]) {
-    assert.equal(isDomesticCountry(country), true)
-  }
+test("policy is driven by the server egress profile, not the client country list", () => {
+  // The server resolves the profile; the client must not re-classify by
+  // country. A standard profile is capped even for Vietnam, and a full
+  // profile stays uncapped for a foreign country.
+  const standard = resolveCallPolicy(EGRESS_PROFILE_STANDARD, false)
+  assert.equal(standard.isForeign, true)
+  assert.equal(standard.subscribe.maxVideoTiles, MAX_FOREIGN_VIDEO_TILES)
+  assert.equal(standard.subscribe.videoQuality, VIDEO_QUALITY_LOW)
 
-  for (const country of ["Japan", "Singapore", "United States"]) {
-    assert.equal(isDomesticCountry(country), false)
-  }
+  const full = resolveCallPolicy(EGRESS_PROFILE_FULL, false)
+  assert.equal(full.isForeign, false)
+  assert.equal(full.subscribe.maxVideoTiles, null)
+  assert.equal(full.subscribe.videoQuality, null)
 
-  assert.equal(resolveCallPolicy("", "standard", false).isForeign, false)
+  // Missing/unknown profile keeps the full grid (server said nothing cap-worthy).
+  const unknown = resolveCallPolicy("bogus", false)
+  assert.equal(unknown.isForeign, false)
+  assert.equal(unknown.subscribe.maxVideoTiles, null)
 })
 
 const camera = (participantId, trackSid = `TR_${participantId}`) => ({
@@ -364,7 +371,7 @@ test("missing, unknown or empty country/profile keeps the full grid", () => {
     )
   }
 
-  const emptyCountryPolicy = resolveCallPolicy("", undefined, false)
+  const emptyCountryPolicy = resolveCallPolicy(undefined, false)
   assert.equal(emptyCountryPolicy.egressProfile, EGRESS_PROFILE_FULL)
   assert.equal(emptyCountryPolicy.subscribe.maxVideoTiles, null)
 
@@ -614,7 +621,7 @@ test("high-quality foreign plan still caps at two low-quality camera tiles", () 
     screenShare("carol"),
   ]
 
-  const policy = resolveCallPolicy("Japan", "standard", true)
+  const policy = resolveCallPolicy("standard", true)
   assert.equal(policy.highQuality, true)
 
   const plan = resolveSubscriptionPlan(
@@ -649,7 +656,7 @@ test("high-quality domestic plan keeps the full grid", () => {
     screenShare("dave"),
   ]
 
-  const policy = resolveCallPolicy("Vietnam", "full", true)
+  const policy = resolveCallPolicy("full", true)
   assert.equal(policy.highQuality, true)
 
   const plan = resolveSubscriptionPlan(

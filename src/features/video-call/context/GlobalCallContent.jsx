@@ -60,6 +60,7 @@ import {
 import RoomSettingsModal from "@/features/video-call/components/settings/RoomSettingsModal"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
+import { buildRoomOptions } from "@/features/video-call/utils/roomOptions"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -248,24 +249,13 @@ const GlobalCallContent = ({
   }, [serverHighQuality])
 
   const callPolicy = React.useMemo(
-    () =>
-      resolveCallPolicy(
-        callInfo?.country ?? callInfo?.user?.country,
-        callInfo?.egressProfile,
-        roomHighQuality,
-      ),
-    [
-      callInfo?.country,
-      callInfo?.user?.country,
-      callInfo?.egressProfile,
-      roomHighQuality,
-    ],
+    () => resolveCallPolicy(callInfo?.egressProfile, roomHighQuality),
+    [callInfo?.egressProfile, roomHighQuality],
   )
 
   // Ticket 02: cap remote video subscriptions for standard (foreign) profiles
   useSubscriptionPolicy({
     room: lkRoom,
-    country: callInfo?.country ?? callInfo?.user?.country,
     egressProfile: callInfo?.egressProfile,
     highQuality: roomHighQuality,
     pinnedParticipantId,
@@ -281,10 +271,13 @@ const GlobalCallContent = ({
     const preset = VideoPresets[callPolicy.publish.cameraPreset]
     if (!preset?.resolution) return
 
-    lkRoom.options.videoCaptureDefaults.resolution = preset.resolution
-    if (callPolicy.publish.simulcastPresets) {
+    const { videoCaptureDefaults, publishDefaults } =
+      buildRoomOptions(callPolicy)
+    lkRoom.options.videoCaptureDefaults.resolution =
+      videoCaptureDefaults.resolution
+    if (publishDefaults.videoSimulcastLayers) {
       lkRoom.options.publishDefaults.videoSimulcastLayers =
-        callPolicy.publish.simulcastPresets.map((name) => VideoPresets[name])
+        publishDefaults.videoSimulcastLayers
     } else {
       delete lkRoom.options.publishDefaults.videoSimulcastLayers
     }
@@ -792,9 +785,9 @@ const GlobalCallContent = ({
           toast.info(
             enabled
               ? (pl.hostHighQualityOn ||
-                  "Host đã BẬT chế độ chất lượng cao cho phòng.")
+                  "Host đã bật chế độ chất lượng cao cho phòng.")
               : (pl.hostHighQualityOff ||
-                  "Host đã TẮT chế độ chất lượng cao cho phòng.")
+                  "Host đã tắt chế độ chất lượng cao cho phòng.")
           )
           return
         }

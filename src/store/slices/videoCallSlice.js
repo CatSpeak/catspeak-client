@@ -24,7 +24,7 @@ const initialState = {
     showRoomSubtitles: false,
     /** Egress profile resolved by the token API ("standard" | "full") */
     egressProfile: null,
-    /** Participant country used by the call policy module */
+    /** Participant country — informational only; the server's egressProfile decides caps */
     country: null,
     /** Room-level high-quality flag (ticket 04) */
     highQuality: false,
