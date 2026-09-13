@@ -25,7 +25,7 @@ import {
 import CreateRoomModal from "../components/CreateRoomModal";
 import EditRoomModal from "../components/EditRoomModal";
 import CustomRoomCard from "../components/CustomRoomCard";
-import RoomCard from "../components/RoomCard";
+import CommunityRoomCard from "../components/CommunityRoomCard";
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
 import { buildCustomRoomQuota } from "../utils/customRoomQuota";
@@ -302,7 +302,7 @@ const WorkspaceRoomsContent = () => {
       <CreateRoomModal
         open={isCreateModalOpen}
         onCancel={() => setIsCreateModalOpen(false)}
-        initialMode="custom"
+        initialMode="group"
       />
 
       <EditRoomModal
@@ -480,7 +480,7 @@ const WorkspaceRoomsContent = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                   {displayedRooms.map((room) => (
-                    <RoomCard
+                    <CommunityRoomCard
                       key={room.id || room.roomId}
                       room={room}
                     />

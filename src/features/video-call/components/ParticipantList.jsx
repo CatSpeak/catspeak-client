@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
+import { motion as Motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import {
   Mic,
   MicOff,
@@ -8,8 +8,6 @@ import {
   Hand,
   UserPlus,
   Ellipsis,
-  DoorOpen,
-  Loader2,
   Lock,
   LockOpen,
   PhoneOff,
@@ -21,6 +19,9 @@ import {
   CircleDot,
   Gamepad2,
   Gauge,
+  Search,
+  X,
+  AlertTriangle,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useDispatch } from "react-redux"
@@ -31,7 +32,6 @@ import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantActionPopover } from "./ParticipantActionPopover"
-import { IconButton } from "@/shared/components/ui/buttons"
 import PolicyRow from "./settings/PolicyRow"
 import BannedListTab from "./settings/BannedListTab"
 import { canViewBannedList } from "@/features/video-call/utils/roomAccess"
@@ -54,8 +54,6 @@ import {
   useGetSelfUnmutePolicyQuery,
   useUpdateSelfUnmutePolicyMutation,
   useGetWaitingQueueQuery,
-  useGetMyWaitingStatusQuery,
-  useKnockWaitingMutation,
   useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
@@ -76,7 +74,7 @@ import {
 } from "@/features/co-host/constants"
 import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
 import WaitingQueueTab from "./waiting/WaitingQueueTab"
-import { normalizeWaitingEntry, normalizeWaitingQueue, knockWithToast } from "./waiting/waitingUtils"
+import { normalizeWaitingQueue } from "./waiting/waitingUtils"
 
 /**
  * A single row in the participant list.
@@ -84,13 +82,6 @@ import { normalizeWaitingEntry, normalizeWaitingQueue, knockWithToast } from "./
  */
 const ParticipantItem = ({ participant }) => {
   const { t } = useLanguage()
-  let navigate
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    navigate = useNavigate()
-  } catch {
-    navigate = getNavigate()
-  }
   const {
     micOn: localMicOn,
     cameraOn: localCameraOn,
@@ -130,7 +121,6 @@ const ParticipantItem = ({ participant }) => {
   const isChatRestricted = restriction.isChatRestricted === true
   const isVoiceRestricted = restriction.isVoiceRestricted === true
 
-  const isParticipantHost = isRoomHost(room, accountId)
   const isCurrentUserHost = isRoomHost(room, user?.accountId)
 
   const name =
@@ -172,7 +162,7 @@ const ParticipantItem = ({ participant }) => {
         </span>
       )}
       {isHandRaised && (
-        <motion.div
+        <Motion.div
           animate={
             prefersReducedMotion
               ? undefined
@@ -192,7 +182,7 @@ const ParticipantItem = ({ participant }) => {
           className="flex flex-shrink-0 items-center justify-center"
         >
           <Hand size={18} className="text-amber-500" aria-hidden="true" />
-        </motion.div>
+        </Motion.div>
       )}
       <span title={isMicOn ? pl.micOn : pl.micOff}>
         {isMicOn ? (
@@ -284,15 +274,39 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const raisedHandParticipants = participants.filter((p) => {
-    const meta = parseMetadata(p.metadata)
-    return meta.handRaised === true
-  })
+  const [searchQuery, setSearchQuery] = React.useState("")
 
-  const otherParticipants = participants.filter((p) => {
-    const meta = parseMetadata(p.metadata)
-    return meta.handRaised !== true
-  })
+  const filteredParticipants = useMemo(() => {
+    if (!searchQuery.trim()) return participants
+    const q = searchQuery.toLowerCase().trim()
+    return participants.filter((p) => {
+      const name = (p.name || p.identity || "").toLowerCase()
+      const meta = parseMetadata(p.metadata)
+      const accountId = String(meta.accountId || "")
+      return name.includes(q) || accountId.includes(q)
+    })
+  }, [participants, searchQuery])
+
+  const raisedHandParticipants = useMemo(() => {
+    return filteredParticipants.filter((p) => {
+      const meta = parseMetadata(p.metadata)
+      return meta.handRaised === true
+    })
+  }, [filteredParticipants])
+
+  const otherParticipants = useMemo(() => {
+    return filteredParticipants.filter((p) => {
+      const meta = parseMetadata(p.metadata)
+      return meta.handRaised !== true
+    })
+  }, [filteredParticipants])
+
+  const totalRaisedHands = useMemo(() => {
+    return participants.filter((p) => {
+      const meta = parseMetadata(p.metadata)
+      return meta.handRaised === true
+    }).length
+  }, [participants])
 
   // Ticket 05: số participant sẽ bị tác động bởi Restrict Voice – All
   // (loại trừ host/người thao tác, chủ phòng và người đã bị hạn chế).
@@ -307,7 +321,6 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
   const [muteAllConfirmOpen, setMuteAllConfirmOpen] = React.useState(false)
-  const [managementOpen, setManagementOpen] = React.useState(false)
   const dispatch = useDispatch()
   let navigate
   try {
@@ -352,13 +365,6 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     normalizeWaitingQueue(waitingQueueData)?.pendingCount ??
     normalizeWaitingQueue(waitingQueueData)?.pending?.length ??
     0
-  const { data: myWaitingData } = useGetMyWaitingStatusQuery(roomId, {
-    skip: !roomId || isHost,
-  })
-  const myWaitingEntry = normalizeWaitingEntry(myWaitingData)
-  const [knockWaiting, { isLoading: isKnocking }] = useKnockWaitingMutation()
-
-  const handleKnock = () => knockWithToast({ roomId, knockWaiting, t })
 
   const [muteAllApi, { isLoading: isMutingAll }] =
     useMuteAllParticipantsMutation()
@@ -649,6 +655,28 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   // High quality is host-only server-side (co-hosts never get the override).
   const canManageHighQuality = isHost
 
+  const canManagePolicies =
+    isHost ||
+    canMuteAll ||
+    canToggleSelfUnmute ||
+    canManageLock ||
+    canEndLive ||
+    canManageStudentShare ||
+    canManageMemberRecording ||
+    canManageGame
+
+  React.useEffect(() => {
+    if (activeTab === "settings" && !canManagePolicies) {
+      setActiveTab("members")
+    }
+    if (activeTab === "waiting" && !canViewWaiting) {
+      setActiveTab("members")
+    }
+    if (activeTab === "banned" && !canViewBanned) {
+      setActiveTab("members")
+    }
+  }, [activeTab, canManagePolicies, canViewWaiting, canViewBanned])
+
   const [memberPrivateAiAllowed, setMemberPrivateAiAllowed] = React.useState(
     () => getRoomSetting(roomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
   )
@@ -831,7 +859,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           })
         )
         lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
-      } catch {}
+      } catch {
+        /* ignore broadcast errors */
+      }
       const restrictedCount =
         res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceRestrictAllCount
       toast.success(pl.successRestrictVoiceAll.replace("{count}", String(restrictedCount)))
@@ -848,323 +878,433 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full bg-white">
-      {!hideTitle && (
-        <ListItem
-          lines={1}
-          className="border-b border-border shrink-0"
-        >
-          <div className="flex items-center justify-between">
-            {canViewWaiting || canViewBanned ? (
-              <div className="flex items-center gap-1 overflow-x-auto scrollbar-hidden" role="tablist" aria-label={pl.title}>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === "members"}
-                  onClick={() => setActiveTab("members")}
-                  className={`shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 ${activeTab === "members" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
-                >
-                  {pl.title} ({participants.length})
-                </button>
-                {canViewWaiting && (
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={activeTab === "waiting"}
-                    onClick={() => setActiveTab("waiting")}
-                    className={`shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 ${activeTab === "waiting" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
-                  >
-                    {t?.rooms?.videoCall?.waitingQueue?.tab}
-                    {pendingCount > 0 ? ` (${pendingCount})` : ""}
-                  </button>
-                )}
-                {canViewBanned && (
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={activeTab === "banned"}
-                    onClick={() => setActiveTab("banned")}
-                    className={`shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 ${activeTab === "banned" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
-                  >
-                    {pl.bannedTabShort || "Bị cấm"}
-                  </button>
-                )}
-              </div>
-            ) : (
-              <span className="font-semibold">
-                {pl.title} ({participants.length})
-              </span>
-            )}
-            <div className="flex items-center gap-1">
-              <IconButton
-                variant="ghost"
-                size="xs"
-                onClick={() => setIsInviteModalOpen(true)}
-                title={t.rooms?.videoCall?.inviteParticipant || "Invite"}
-                aria-label={t.rooms?.videoCall?.inviteParticipant || "Invite"}
-              >
-                <UserPlus size={22} />
-              </IconButton>
-            </div>
-          </div>
-        </ListItem>
-      )}
-
-      {/* Ticket 03: knock banner for non-hosts with no request yet. */}
-      {!isHost && activeTab === "members" && !myWaitingEntry && (
-        <div className="mx-2 mt-2 flex items-center gap-2 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2 shrink-0">
-          <DoorOpen size={16} className="shrink-0 text-blue-600" />
-          <span className="min-w-0 flex-1 text-xs font-medium text-blue-900">
-            {t?.rooms?.videoCall?.waitingQueue?.knockHint}
-          </span>
-          <button
-            type="button"
-            onClick={handleKnock}
-            disabled={isKnocking}
-            className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+    <div className="flex flex-col h-full w-full bg-white overflow-hidden">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between border-b border-neutral-200/80 px-2.5 py-1.5 bg-white shrink-0 gap-1.5">
+        {canViewWaiting || canViewBanned || canManagePolicies ? (
+          <div
+            className="flex items-center gap-1 overflow-x-auto scrollbar-hidden flex-1 min-w-0"
+            role="tablist"
+            aria-label={pl.membersTab || pl.title}
           >
-            {isKnocking && <Loader2 size={12} className="animate-spin" />}
-            <span>{t?.rooms?.videoCall?.waitingQueue?.knock}</span>
-          </button>
-        </div>
-      )}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "members"}
+              onClick={() => setActiveTab("members")}
+              className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all ${
+                activeTab === "members"
+                  ? "bg-cath-red-700 text-white shadow-xs"
+                  : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+              }`}
+            >
+              {pl.membersTab || pl.title} ({participants.length})
+            </button>
 
-      {/* Host / Co-host moderation controls.
-          Quick actions stay visible; policy switches + destructive actions
-          collapse behind a disclosure so the participant list keeps its space. */}
-      {(canMuteAll || canToggleSelfUnmute || canManageLock || canEndLive || canManageStudentShare || canManageMemberRecording || isHost) && (
-        <div className="flex shrink-0 flex-col gap-2 border-b border-[#E5E5E5] bg-gray-50/90 p-2.5">
-          <h3 className="sr-only">{pl.quickActions}</h3>
-          <div className="flex items-center gap-2">
-            {canMuteAll && (
+            {canViewWaiting && (
               <button
-                onClick={handleMuteAll}
-                disabled={isMutingAll}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-red-700 bg-red-50/80 hover:bg-red-100 border border-red-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "waiting"}
+                onClick={() => setActiveTab("waiting")}
+                className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all flex items-center gap-1 ${
+                  activeTab === "waiting"
+                    ? "bg-cath-red-700 text-white shadow-xs"
+                    : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+                }`}
               >
-                <MicOff size={15} className="text-red-500 shrink-0" aria-hidden="true" />
-                <span>{pl.muteAll}</span>
+                <span>{t?.rooms?.videoCall?.waitingQueue?.tab || "Chờ"}</span>
+                {pendingCount > 0 && (
+                  <span
+                    className={`inline-flex items-center justify-center px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                      activeTab === "waiting"
+                        ? "bg-white text-cath-red-700"
+                        : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    {pendingCount}
+                  </span>
+                )}
               </button>
             )}
 
-            <button
-              onClick={handleLowerAllHands}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
-            >
-              <Hand size={15} className="text-amber-500 shrink-0" aria-hidden="true" />
-              <span>{pl.lowerAllHands}{raisedHandParticipants.length > 0 ? ` (${raisedHandParticipants.length})` : ""}</span>
-            </button>
-          </div>
+            {canViewBanned && (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "banned"}
+                onClick={() => setActiveTab("banned")}
+                className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all ${
+                  activeTab === "banned"
+                    ? "bg-cath-red-700 text-white shadow-xs"
+                    : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+                }`}
+              >
+                {pl.bannedTabShort || "Bị cấm"}
+              </button>
+            )}
 
-          <div className="overflow-hidden rounded-xl border border-neutral-200/80 bg-white">
-            <button
-              type="button"
-              onClick={() => setManagementOpen((prev) => !prev)}
-              aria-expanded={managementOpen}
-              aria-controls="participant-management-options"
-              className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cath-red-700/40"
-            >
-              <span className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-700">
-                <Settings2 size={15} className="text-neutral-500" aria-hidden="true" />
-                {pl.management}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
+            {canManagePolicies && (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "settings"}
+                onClick={() => setActiveTab("settings")}
+                className={`shrink-0 rounded-lg px-2 py-1 text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === "settings"
+                    ? "bg-cath-red-700 text-white shadow-xs"
+                    : "text-neutral-600 hover:bg-cath-red-700/[0.08] hover:text-cath-red-700"
+                }`}
+              >
+                <Settings2 size={13} className="shrink-0" />
+                <span>{pl.settingsTab || "Cài đặt"}</span>
                 {isLocked && (
                   <span
-                    title={pl.lockRoom}
-                    className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-red-100 bg-red-50 text-red-600"
-                  >
-                    <Lock size={11} aria-hidden="true" />
-                    <span className="sr-only">{pl.lockRoom}</span>
-                  </span>
+                    className={`flex h-1.5 w-1.5 rounded-full shrink-0 ${
+                      activeTab === "settings" ? "bg-white" : "bg-cath-red-700"
+                    }`}
+                  />
                 )}
-                <motion.span
-                  animate={{ rotate: managementOpen ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-neutral-400"
-                >
-                  <ChevronDown size={16} aria-hidden="true" />
-                </motion.span>
-              </span>
-            </button>
-
-            <AnimatePresence initial={false}>
-              {managementOpen && (
-                <motion.div
-                  id="participant-management-options"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="overflow-hidden"
-                >
-                  <div className="flex flex-col gap-1.5 border-t border-neutral-100 p-2.5">
-                    <span className="px-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
-                      {pl.groupStudentPermissions || "Quyền học viên"}
-                    </span>
-
-                    {canToggleSelfUnmute && (
-                      <PolicyRow
-                        icon={<Mic size={14} aria-hidden="true" />}
-                        label={pl.allowSelfUnmute}
-                        checked={allowSelfUnmute}
-                        disabled={isTogglingSelfUnmute}
-                        onChange={handleToggleSelfUnmute}
-                      />
-                    )}
-
-                    {/* Ticket 05: student share gate (manage_student_share) — default mở. */}
-                    {canManageStudentShare && (
-                      <PolicyRow
-                        icon={<MonitorUp size={14} aria-hidden="true" />}
-                        label={pl.allowStudentShare}
-                        checked={allowStudentShare}
-                        disabled={isTogglingStudentShare}
-                        onChange={handleToggleStudentShare}
-                      />
-                    )}
-
-                    {/* Moved from the old "Chung" settings tab. */}
-                    {canManagePrivateAi && (
-                      <PolicyRow
-                        icon={<MessageSquareOff size={14} aria-hidden="true" />}
-                        label={gt.allowMemberPrivateAi || "Cho phép thành viên sử dụng AI Chat riêng tư"}
-                        description={gt.allowMemberPrivateAiDesc}
-                        checked={memberPrivateAiAllowed}
-                        onChange={handleToggleMemberPrivateAi}
-                      />
-                    )}
-
-                    {canManageGame && (
-                      <PolicyRow
-                        icon={<Gamepad2 size={14} aria-hidden="true" />}
-                        label={gt.allowGame || "Cho phép trò chơi trong phòng"}
-                        description={gt.allowGameDesc}
-                        checked={allowGame}
-                        disabled={isTogglingGame}
-                        onChange={handleToggleGame}
-                      />
-                    )}
-
-                    <span className="px-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
-                      {pl.groupRoomSecurity || "Phòng & ghi hình"}
-                    </span>
-
-                    {/* Ticket 04: lock toggle (lock_class) — khóa thì chặn người mới, người trong phòng ở lại. */}
-                    {canManageLock && (
-                      <PolicyRow
-                        icon={
-                          isLocked ? (
-                            <Lock size={14} className="text-cath-red-700" aria-hidden="true" />
-                          ) : (
-                            <LockOpen size={14} aria-hidden="true" />
-                          )
-                        }
-                        label={pl.lockRoom}
-                        checked={isLocked}
-                        disabled={isTogglingLock}
-                        onChange={handleToggleLock}
-                        colorClass="peer-checked:bg-cath-red-700"
-                      />
-                    )}
-
-                    {/* Ticket 05: member recording gate, server-side (record). */}
-                    {canManageMemberRecording && (
-                      <PolicyRow
-                        icon={<CircleDot size={14} aria-hidden="true" />}
-                        label={pl.allowMemberRecording}
-                        description={gt.allowMemberRecordingDesc}
-                        checked={allowMemberRecording}
-                        disabled={isTogglingMemberRecording}
-                        onChange={handleToggleMemberRecording}
-                      />
-                    )}
-
-                    {canManageHighQuality && (
-                      <PolicyRow
-                        icon={<Gauge size={14} aria-hidden="true" />}
-                        label={gt.allowHighQuality || "Chế độ chất lượng cao (720p)"}
-                        description={gt.allowHighQualityDesc}
-                        checked={roomHighQuality === true}
-                        disabled={isTogglingHighQuality}
-                        onChange={handleToggleHighQuality}
-                      />
-                    )}
-
-                    {(canMuteAll || isHost) && (
-                      <button
-                        type="button"
-                        onClick={handleRestrictVoiceAll}
-                        disabled={isRestrictingVoiceAll}
-                        className="mt-0.5 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-orange-200/80 bg-orange-50/70 px-3 text-xs font-semibold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40"
-                      >
-                        <MicOff size={15} className="shrink-0 text-orange-500" aria-hidden="true" />
-                        <span>{pl.restrictVoiceAll}</span>
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+              </button>
+            )}
           </div>
+        ) : !hideTitle ? (
+          <span className="text-xs font-bold text-neutral-800 px-1 truncate flex-1">
+            {pl.membersTab || pl.title} ({participants.length})
+          </span>
+        ) : (
+          <div className="flex-1" />
+        )}
 
-          {/* Ticket 04: end live for all (end_class) — chỉ end session live, join lại tạo phiên mới. */}
-          {canEndLive && (
-            <button
-              type="button"
-              onClick={() => setEndLiveConfirmOpen(true)}
-              disabled={isEndingLive}
-              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 transition-all hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
-            >
-              <PhoneOff size={15} className="shrink-0 rotate-[135deg]" aria-hidden="true" />
-              <span>{pl.endLive}</span>
-            </button>
+        {/* Invite action button separated from tabs */}
+        <div className="flex items-center shrink-0 pl-1.5 border-l border-neutral-200/80">
+          <button
+            type="button"
+            onClick={() => setIsInviteModalOpen(true)}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-cath-red-700 hover:text-white bg-cath-red-700/10 hover:bg-cath-red-700 active:scale-[0.95] transition-all shadow-xs shrink-0"
+            title={t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"}
+            aria-label={t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"}
+          >
+            <UserPlus size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Tab 1: Members */}
+      {activeTab === "members" && (
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Contextual Hand-Raised Banner (Only when hands are raised) */}
+          {totalRaisedHands > 0 && (
+            <div className="mx-2.5 mt-2 flex items-center justify-between gap-2 rounded-xl border border-amber-200/90 bg-amber-50/80 px-2.5 py-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 text-amber-700 shrink-0">
+                  <Hand size={13} />
+                </div>
+                <span className="text-xs font-semibold text-amber-950 truncate">
+                  {totalRaisedHands} {pl.raisedHandsSection?.toLowerCase() || "đang giơ tay"}
+                </span>
+              </div>
+              {(canMuteAll || isHost) && (
+                <button
+                  type="button"
+                  onClick={handleLowerAllHands}
+                  className="inline-flex h-6.5 items-center gap-1 rounded-lg bg-amber-600 hover:bg-amber-700 active:scale-[0.98] px-2 text-[11px] font-semibold text-white transition-all shadow-xs shrink-0"
+                >
+                  <Hand size={11} />
+                  <span>{pl.lowerAllHands}</span>
+                </button>
+              )}
+            </div>
           )}
+
+          {/* Integrated Search Input (only when room has > 5 participants or active query) */}
+          {(participants.length > 5 || searchQuery) && (
+            <div className="px-2.5 pt-2 shrink-0">
+              <div className="relative flex items-center">
+                <Search size={13} className="absolute left-2.5 text-neutral-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={pl.searchPlaceholder || "Tìm theo tên..."}
+                  className="w-full h-7.5 pl-8 pr-7 text-xs bg-neutral-100/90 hover:bg-neutral-100 focus:bg-white border border-transparent focus:border-cath-red-700 rounded-lg outline-none transition-all placeholder:text-neutral-400"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 text-neutral-400 hover:text-neutral-600 p-0.5"
+                    aria-label="Clear search"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Subheader: Host Mute All action */}
+          {canMuteAll && (
+            <div className="flex items-center justify-end px-3 py-1.5 shrink-0 border-b border-neutral-100 bg-neutral-50/40">
+              <button
+                type="button"
+                onClick={handleMuteAll}
+                disabled={isMutingAll}
+                className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-semibold text-neutral-700 hover:text-cath-red-700 bg-white hover:bg-red-50 border border-neutral-200/90 hover:border-red-200 rounded-lg transition-all active:scale-[0.98] disabled:opacity-50"
+                title={pl.muteAll}
+              >
+                <MicOff size={13} className="text-neutral-500 hover:text-cath-red-700 shrink-0" />
+                <span>{pl.muteAll}</span>
+              </button>
+            </div>
+          )}
+
+          {/* Participant list items */}
+          <div className="flex-1 overflow-y-auto p-1.5">
+            {/* Empty search */}
+            {filteredParticipants.length === 0 && searchQuery && (
+              <div className="flex flex-col items-center justify-center py-10 px-4 text-center gap-2">
+                <Search size={24} className="text-neutral-300" />
+                <span className="text-xs text-neutral-500">
+                  {pl.noSearchResults || "Không tìm thấy thành viên nào."}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="text-xs text-cath-red-700 font-medium hover:underline"
+                >
+                  Xóa tìm kiếm
+                </button>
+              </div>
+            )}
+
+            {/* Section: Đang giơ tay */}
+            {raisedHandParticipants.length > 0 && (
+              <div className="mb-2">
+                <div className="flex items-center px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-amber-600 gap-1.5">
+                  <Hand size={12} className="text-amber-500" />
+                  <span>{pl.raisedHandsSection || "Đang giơ tay"} ({raisedHandParticipants.length})</span>
+                </div>
+                <ul className="flex flex-col gap-1">
+                  {raisedHandParticipants.map((participant) => (
+                    <li key={participant.identity} className="w-full rounded-xl bg-amber-50/30">
+                      <ParticipantActionPopover participant={participant}>
+                        <ParticipantItem participant={participant} />
+                      </ParticipantActionPopover>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Divider between sections */}
+            {raisedHandParticipants.length > 0 && otherParticipants.length > 0 && (
+              <div className="my-2 mx-1 border-t border-neutral-100" />
+            )}
+
+            {/* Section: Các thành viên khác */}
+            {otherParticipants.length > 0 && (
+              <div>
+                {raisedHandParticipants.length > 0 && (
+                  <div className="flex items-center px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-neutral-400">
+                    <span>{pl.membersSection || "Thành viên trong phòng"} ({otherParticipants.length})</span>
+                  </div>
+                )}
+                <ul className="flex flex-col gap-1">
+                  {otherParticipants.map((participant) => (
+                    <li key={participant.identity} className="w-full">
+                      <ParticipantActionPopover participant={participant}>
+                        <ParticipantItem participant={participant} />
+                      </ParticipantActionPopover>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       )}
-      {(!(canViewWaiting || canViewBanned) || activeTab === "members") && (
-      <div className="flex-1 overflow-y-auto p-1">
-        {raisedHandParticipants.length > 0 && (
-          <ul className="flex flex-col gap-1">
-            {raisedHandParticipants.map((participant) => (
-              <li key={participant.identity} className="w-full">
-                <ParticipantActionPopover participant={participant}>
-                  <ParticipantItem participant={participant} />
-                </ParticipantActionPopover>
-              </li>
-            ))}
-          </ul>
-        )}
 
-        {raisedHandParticipants.length > 0 && otherParticipants.length > 0 && (
-          <div className="my-2 mx-1 border-t border-border" />
-        )}
-
-        {otherParticipants.length > 0 && (
-          <ul className="flex flex-col gap-1">
-            {otherParticipants.map((participant) => (
-              <li key={participant.identity} className="w-full">
-                <ParticipantActionPopover participant={participant}>
-                  <ParticipantItem participant={participant} />
-                </ParticipantActionPopover>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      )}
-
-      {/* Ticket 03: host/co-host "Chờ" tab — knock list + Duyệt/Từ chối. */}
+      {/* Tab 2: Waiting Queue */}
       {canViewWaiting && activeTab === "waiting" && (
         <div className="flex-1 overflow-y-auto">
           <WaitingQueueTab roomId={roomId} externalPending={externalPending} />
         </div>
       )}
 
-      {/* "Bị cấm" tab — host or co-host with remove_student/mute_all. */}
+      {/* Tab 3: Banned List */}
       {canViewBanned && activeTab === "banned" && (
         <div className="flex-1 overflow-y-auto p-3">
           <BannedListTab />
+        </div>
+      )}
+
+      {/* Tab 4: Settings & Policies */}
+      {canManagePolicies && activeTab === "settings" && (
+        <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-4">
+          {isLocked && (
+            <div className="flex items-center gap-2 rounded-xl bg-red-50/60 border border-cath-red-700/20 px-3 py-2 text-xs font-semibold text-cath-red-700">
+              <Lock size={14} className="shrink-0 text-cath-red-700" />
+              <span>Phòng đang được khóa. Người dùng mới sẽ vào hàng đợi chờ duyệt.</span>
+            </div>
+          )}
+
+          {/* Group 1: Quyền học viên */}
+          <div className="flex flex-col gap-2">
+            <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+              {pl.groupStudentPermissions || "Quyền học viên"}
+            </span>
+            <div className="flex flex-col gap-1.5">
+              {canToggleSelfUnmute && (
+                <PolicyRow
+                  icon={<Mic size={15} aria-hidden="true" />}
+                  label={pl.allowSelfUnmute}
+                  checked={allowSelfUnmute}
+                  disabled={isTogglingSelfUnmute}
+                  onChange={handleToggleSelfUnmute}
+                />
+              )}
+              {canManageStudentShare && (
+                <PolicyRow
+                  icon={<MonitorUp size={15} aria-hidden="true" />}
+                  label={pl.allowStudentShare}
+                  checked={allowStudentShare}
+                  disabled={isTogglingStudentShare}
+                  onChange={handleToggleStudentShare}
+                />
+              )}
+              {canManagePrivateAi && (
+                <PolicyRow
+                  icon={<MessageSquareOff size={15} aria-hidden="true" />}
+                  label={gt.allowMemberPrivateAi || "Cho phép thành viên sử dụng AI Chat riêng tư"}
+                  description={gt.allowMemberPrivateAiDesc}
+                  checked={memberPrivateAiAllowed}
+                  onChange={handleToggleMemberPrivateAi}
+                />
+              )}
+              {canManageGame && (
+                <PolicyRow
+                  icon={<Gamepad2 size={15} aria-hidden="true" />}
+                  label={gt.allowGame || "Cho phép trò chơi trong phòng"}
+                  description={gt.allowGameDesc}
+                  checked={allowGame}
+                  disabled={isTogglingGame}
+                  onChange={handleToggleGame}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Group 2: Phòng & Ghi hình */}
+          <div className="flex flex-col gap-2">
+            <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+              {pl.groupRoomSecurity || "Phòng & ghi hình"}
+            </span>
+            <div className="flex flex-col gap-1.5">
+              {canManageLock && (
+                <PolicyRow
+                  icon={
+                    isLocked ? (
+                      <Lock size={15} className="text-cath-red-700" aria-hidden="true" />
+                    ) : (
+                      <LockOpen size={15} aria-hidden="true" />
+                    )
+                  }
+                  label={pl.lockRoom}
+                  checked={isLocked}
+                  disabled={isTogglingLock}
+                  onChange={handleToggleLock}
+                  colorClass="peer-checked:bg-cath-red-700"
+                />
+              )}
+              {canManageMemberRecording && (
+                <PolicyRow
+                  icon={<CircleDot size={15} aria-hidden="true" />}
+                  label={pl.allowMemberRecording}
+                  description={gt.allowMemberRecordingDesc}
+                  checked={allowMemberRecording}
+                  disabled={isTogglingMemberRecording}
+                  onChange={handleToggleMemberRecording}
+                />
+              )}
+              {canManageHighQuality && (
+                <PolicyRow
+                  icon={<Gauge size={15} aria-hidden="true" />}
+                  label={gt.allowHighQuality || "Chế độ chất lượng cao (720p)"}
+                  description={gt.allowHighQualityDesc}
+                  checked={roomHighQuality === true}
+                  disabled={isTogglingHighQuality}
+                  onChange={handleToggleHighQuality}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Group 3: Thao tác nâng cao */}
+          {(canMuteAll || isHost) && (
+            <div className="flex flex-col gap-2">
+              <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                Thao tác nâng cao
+              </span>
+              <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
+                    <MicOff size={16} />
+                  </div>
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-xs font-semibold text-orange-950">
+                      {pl.restrictVoiceAll}
+                    </span>
+                    <span className="text-[11px] text-orange-800/80 leading-relaxed">
+                      {pl.restrictVoiceAllDesc || "Tắt mic và chặn tất cả học viên tự bật lại mic."}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRestrictVoiceAll}
+                  disabled={isRestrictingVoiceAll}
+                  className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
+                >
+                  <MicOff size={13} />
+                  <span>{pl.restrictVoiceAll}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Group 4: Khu vực nguy hiểm */}
+          {canEndLive && (
+            <div className="flex flex-col gap-2 pt-1 pb-4">
+              <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-cath-red-700">
+                {pl.dangerZone || "Khu vực nguy hiểm"}
+              </span>
+              <div className="rounded-2xl border border-cath-red-700/20 bg-red-50/50 p-3 flex flex-col gap-2.5">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cath-red-700/10 text-cath-red-700 shrink-0 mt-0.5">
+                    <AlertTriangle size={16} />
+                  </div>
+                  <div className="flex flex-col gap-0.5 min-w-0">
+                    <span className="text-xs font-semibold text-neutral-900">
+                      {pl.endLive}
+                    </span>
+                    <span className="text-[11px] text-neutral-600 leading-relaxed">
+                      {pl.endLiveDesc || "Đóng phiên họp trực tiếp cho toàn bộ học viên và người tham gia."}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEndLiveConfirmOpen(true)}
+                  disabled={isEndingLive}
+                  className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-cath-red-700 hover:bg-cath-red-800 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
+                >
+                  <PhoneOff size={13} className="rotate-[135deg]" />
+                  <span>{pl.endLive}</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

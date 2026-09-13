@@ -162,7 +162,7 @@ const VideoCallControlBar = () => {
   const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 bg-white p-2  border-t border-border">
+    <div className="flex w-full shrink-0 items-center justify-center gap-2 bg-white p-2 pb-[calc(0.5rem_+_env(safe-area-inset-bottom,0px))] border-t border-border">
       <div className="flex gap-2 w-full items-center md:justify-center justify-center">
         <ControlButton
           isActive={micOn}
