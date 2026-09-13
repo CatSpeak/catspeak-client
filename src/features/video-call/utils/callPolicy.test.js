@@ -5,6 +5,8 @@ import test from "node:test"
 import assert from "node:assert/strict"
 
 import {
+  CONNECTION_QUALITY_LOST,
+  CONNECTION_QUALITY_POOR,
   EGRESS_PROFILE_FULL,
   EGRESS_PROFILE_STANDARD,
   MAX_FOREIGN_VIDEO_TILES,
@@ -12,8 +14,10 @@ import {
   TRACK_SOURCE_SCREEN_SHARE,
   VIDEO_QUALITY_LOW,
   isDomesticCountry,
+  normalizeConnectionQuality,
   normalizeEgressProfile,
   resolveCallPolicy,
+  resolveEffectiveSubscriptionPlan,
   resolveSubscriptionPlan,
 } from "./callPolicy.js"
 
@@ -368,4 +372,231 @@ test("missing, unknown or empty country/profile keeps the full grid", () => {
     emptyCountryPolicy.egressProfile,
   )
   assert.equal(cameraSubscriptions(plan).length, 2)
+})
+
+const microphone = (participantId, trackSid = `TR_mic_${participantId}`) => ({
+  trackSid,
+  participantId,
+  source: "microphone",
+  isLocal: false,
+})
+
+test("subscription plan flags essential tiles independently of the profile", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    screenShare("dave"),
+    microphone("alice"),
+  ]
+
+  const standard = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+  assert.equal(decisionOf(standard, "TR_alice").essential, true)
+  assert.equal(decisionOf(standard, "TR_bob").essential, true)
+  assert.equal(decisionOf(standard, "TR_carol").essential, false)
+  assert.equal(decisionOf(standard, "TR_SS_dave").essential, true)
+  assert.equal(decisionOf(standard, "TR_mic_alice").essential, true)
+
+  const full = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_FULL,
+  )
+  assert.equal(decisionOf(full, "TR_alice").essential, true)
+  assert.equal(decisionOf(full, "TR_bob").essential, true)
+  assert.equal(decisionOf(full, "TR_carol").essential, false)
+  assert.equal(decisionOf(full, "TR_SS_dave").essential, true)
+  assert.equal(decisionOf(full, "TR_carol").subscribed, true)
+})
+
+test("normalizeConnectionQuality lowercases and trims unknown values", () => {
+  assert.equal(normalizeConnectionQuality("POOR"), CONNECTION_QUALITY_POOR)
+  assert.equal(normalizeConnectionQuality(" Lost "), CONNECTION_QUALITY_LOST)
+  assert.equal(normalizeConnectionQuality(undefined), "")
+  assert.equal(normalizeConnectionQuality(null), "")
+  assert.equal(normalizeConnectionQuality("bogus"), "bogus")
+})
+
+test("effective plan is the base plan while the connection is not degraded", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    screenShare("dave"),
+    microphone("alice"),
+  ]
+  const base = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+  const snapshot = JSON.parse(JSON.stringify(base))
+
+  for (const quality of ["excellent", "good", "unknown", undefined, null, ""]) {
+    assert.deepEqual(resolveEffectiveSubscriptionPlan(quality, base), base)
+  }
+
+  assert.deepEqual(base, snapshot, "base plan must not be mutated")
+})
+
+test("POOR keeps essentials at LOW and drops non-essential video for every profile", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    camera("dave"),
+    screenShare("erin"),
+    microphone("erin"),
+  ]
+  const base = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_FULL,
+  )
+  assert.equal(
+    base.filter((decision) => decision.subscribed).length,
+    publications.length,
+  )
+
+  const plan = resolveEffectiveSubscriptionPlan(
+    CONNECTION_QUALITY_POOR,
+    base,
+  )
+
+  for (const trackSid of ["TR_carol", "TR_bob", "TR_SS_erin"]) {
+    const decision = decisionOf(plan, trackSid)
+    assert.equal(decision.subscribed, true, `${trackSid} stays subscribed`)
+    assert.equal(decision.quality, VIDEO_QUALITY_LOW, `${trackSid} is LOW`)
+  }
+
+  for (const trackSid of ["TR_alice", "TR_dave"]) {
+    const decision = decisionOf(plan, trackSid)
+    assert.equal(decision.subscribed, false, `${trackSid} is dropped`)
+    assert.equal(decision.quality, null)
+  }
+
+  const mic = decisionOf(plan, "TR_mic_erin")
+  assert.equal(mic.subscribed, true)
+  assert.equal(mic.quality, null)
+})
+
+test("POOR keeps the standard subscription cap untouched", () => {
+  const publications = [camera("alice"), camera("bob"), camera("carol")]
+  const base = resolveSubscriptionPlan(
+    publications,
+    "carol",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_STANDARD,
+  )
+
+  const plan = resolveEffectiveSubscriptionPlan(
+    CONNECTION_QUALITY_POOR,
+    base,
+  )
+  assert.deepEqual(
+    cameraSubscriptions(plan)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["bob", "carol"],
+  )
+  assert.ok(
+    cameraSubscriptions(plan).every(
+      (decision) => decision.quality === VIDEO_QUALITY_LOW,
+    ),
+  )
+  assert.equal(decisionOf(plan, "TR_alice").subscribed, false)
+})
+
+test("LOST switches every video subscription to audio-only", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    screenShare("carol"),
+    microphone("carol"),
+  ]
+  const base = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_FULL,
+  )
+
+  const plan = resolveEffectiveSubscriptionPlan(
+    CONNECTION_QUALITY_LOST,
+    base,
+  )
+
+  for (const trackSid of ["TR_alice", "TR_bob", "TR_SS_carol"]) {
+    const decision = decisionOf(plan, trackSid)
+    assert.equal(decision.subscribed, false, `${trackSid} is dropped`)
+    assert.equal(decision.quality, null)
+  }
+
+  const mic = decisionOf(plan, "TR_mic_carol")
+  assert.equal(mic.subscribed, true)
+  assert.equal(mic.quality, null)
+})
+
+test("audio-only recovers when the connection quality improves", () => {
+  const publications = [
+    camera("alice"),
+    camera("bob"),
+    camera("carol"),
+    screenShare("dave"),
+    microphone("alice"),
+  ]
+  const base = resolveSubscriptionPlan(
+    publications,
+    "alice",
+    "bob",
+    MAX_FOREIGN_VIDEO_TILES,
+    EGRESS_PROFILE_FULL,
+  )
+
+  const lost = resolveEffectiveSubscriptionPlan(CONNECTION_QUALITY_LOST, base)
+  assert.equal(cameraSubscriptions(lost).length, 0)
+
+  const poor = resolveEffectiveSubscriptionPlan(CONNECTION_QUALITY_POOR, lost)
+  assert.deepEqual(
+    cameraSubscriptions(poor)
+      .map((decision) => decision.participantId)
+      .sort(),
+    ["alice", "bob"],
+  )
+  assert.equal(decisionOf(poor, "TR_alice").quality, VIDEO_QUALITY_LOW)
+  assert.equal(decisionOf(poor, "TR_SS_dave").subscribed, true)
+
+  const recovered = resolveEffectiveSubscriptionPlan("excellent", base)
+  assert.deepEqual(recovered, base)
+  assert.equal(decisionOf(recovered, "TR_alice").subscribed, true)
+  assert.equal(decisionOf(recovered, "TR_alice").quality, null)
+  assert.equal(decisionOf(recovered, "TR_carol").subscribed, true)
+  assert.equal(decisionOf(recovered, "TR_mic_alice").subscribed, true)
+})
+
+test("degenerate base plans resolve to an empty plan", () => {
+  for (const base of [undefined, null, "bogus"]) {
+    assert.deepEqual(
+      resolveEffectiveSubscriptionPlan(CONNECTION_QUALITY_POOR, base),
+      [],
+    )
+    assert.deepEqual(
+      resolveEffectiveSubscriptionPlan(CONNECTION_QUALITY_LOST, base),
+      [],
+    )
+  }
 })
