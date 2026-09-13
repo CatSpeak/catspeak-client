@@ -160,10 +160,24 @@ export const useAiSend = () => {
           tier: userTier,
         }
 
+        let res
         if (isPublic) {
-          await chatPublicAi(payload).unwrap()
+          res = await chatPublicAi(payload).unwrap()
         } else {
-          await chatPrivateAi(payload).unwrap()
+          res = await chatPrivateAi(payload).unwrap()
+        }
+
+        if (res && res.answer) {
+          updateAiInteraction(interactionId, {
+            status: "done",
+            response: res.answer,
+            followUpSuggestions: res.follow_up_questions || [],
+            aiFrom: {
+              name: isPublic ? "Public AI" : "Private AI",
+              isSystem: false,
+              isAi: true,
+            },
+          })
         }
       } catch (error) {
         console.error("AI chat error", error)

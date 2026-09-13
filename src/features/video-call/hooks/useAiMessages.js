@@ -173,13 +173,17 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
 
         const fromName = topic === "public-ai" ? "Public AI" : "Private AI"
 
-        let answerText = json.message || ""
-        let followUps = json.follow_up_questions || json.followUpSuggestions || []
+        let answerText = json.answer || json.message || ""
+        let followUps = Array.isArray(json.follow_up_questions)
+          ? json.follow_up_questions
+          : Array.isArray(json.followUpSuggestions)
+            ? json.followUpSuggestions
+            : []
 
-        // Parse structured JSON inside message if present (FR-005)
-        if (typeof json.message === "string" && json.message.trim().startsWith("{")) {
+        // Parse structured JSON inside message if present (fallback)
+        if (typeof answerText === "string" && answerText.trim().startsWith("{")) {
           try {
-            const parsed = JSON.parse(json.message)
+            const parsed = JSON.parse(answerText)
             if (parsed.answer) {
               answerText = parsed.answer
               if (Array.isArray(parsed.follow_up_questions)) {
