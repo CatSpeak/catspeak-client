@@ -1226,6 +1226,7 @@ const GlobalCallContent = ({
     presenterDisplayName: screenShareState.presenterDisplayName,
     handleToggleScreenShare: actions.handleToggleScreenShare,
     isTogglingScreenShare: screenShareState.isTogglingScreenShare,
+    canShareScreen: screenShareState.canShareScreen,
     // Watch together (YouTube)
     mediaActive: watchTogether.isMediaActive,
     mediaParticipant: watchTogether.mediaParticipant,

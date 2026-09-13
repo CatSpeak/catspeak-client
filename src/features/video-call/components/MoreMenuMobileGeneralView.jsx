@@ -37,6 +37,7 @@ const MoreMenuMobileGeneralView = ({
     isLocalScreenShare,
     isTogglingScreenShare,
     handleToggleScreenShare,
+    canShareScreen = true,
     isAISession,
     showCC,
     setShowCC,
@@ -131,10 +132,16 @@ const MoreMenuMobileGeneralView = ({
             handleToggleScreenShare()
             setShowMoreMenu(false)
           }}
-          disabled={isTogglingScreenShare}
+          disabled={isTogglingScreenShare || !canShareScreen}
+          title={
+            !canShareScreen
+              ? t.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
+                "Bạn không có quyền chia sẻ màn hình."
+              : undefined
+          }
           className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
             isLocalScreenShare ? "bg-red-100 text-red-600" : "bg-[#F5F5F5]"
-          }`}
+          } ${!canShareScreen ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           {isLocalScreenShare ? (
             <MonitorOff size={24} />
