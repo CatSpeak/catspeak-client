@@ -1,14 +1,18 @@
 import { socialApi } from "@/store/api/social/socialApi"
+import { maskBody } from "@/shared/utils/moderation"
 
 export const storiesApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     // Create a new story
     createStory: builder.mutation({
-      query: (data) => ({
-        url: "/stories",
-        method: "POST",
-        body: data,
-      }),
+      // [Moderation] Thư gửi đi hiện cho cả cộng đồng thấy (danmaku), nên đây là
+      // một trong những chỗ cần che ★ nhất.
+      queryFn: async (data, api, extraOptions, baseQuery) =>
+        baseQuery({
+          url: "/stories",
+          method: "POST",
+          body: await maskBody(api, data),
+        }),
       invalidatesTags: ["Stories", "MyStories"],
     }),
 
