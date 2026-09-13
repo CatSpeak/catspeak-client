@@ -6,6 +6,7 @@ export default {
   seeMore: "See more",
   back: "Back",
   cancel: "Cancel",
+  confirm: "Confirm",
   reload: "Reload page",
   cancelUploadConfirmTitle: "Processing Tasks",
   cancelUploadConfirmDesc:

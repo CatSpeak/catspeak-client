@@ -6,6 +6,7 @@ export default {
   seeMore: "Xem thêm",
   back: "Quay lại",
   cancel: "Hủy",
+  confirm: "Xác nhận",
   reload: "Tải lại trang",
   cancelUploadConfirmTitle: "Đang xử lý tác vụ",
   cancelUploadConfirmDesc:

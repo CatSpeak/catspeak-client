@@ -233,6 +233,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     user,
     lkRoom,
     isHost: isHostFromContext,
+    restrictionByAccountId,
   } = useVideoCallContext()
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
   const pl = t.rooms.videoCall.participantList
@@ -255,6 +256,17 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     const meta = parseMetadata(p.metadata)
     return meta.handRaised !== true
   })
+
+  // Ticket 05: số participant sẽ bị tác động bởi Restrict Voice – All
+  // (loại trừ host/người thao tác, chủ phòng và người đã bị hạn chế).
+  const voiceRestrictAllCount = participants.filter((p) => {
+    const meta = parseMetadata(p.metadata)
+    const accountId = meta.accountId
+    if (accountId == null || accountId === "") return false
+    if (String(accountId) === String(user?.accountId)) return false
+    if (String(accountId) === String(room?.creatorId)) return false
+    return restrictionByAccountId?.[String(accountId)]?.isVoiceRestricted !== true
+  }).length
 
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
   const [muteAllConfirmOpen, setMuteAllConfirmOpen] = React.useState(false)
@@ -331,7 +343,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenMuteAll || "Bạn không có quyền tắt toàn bộ mic."
+          pl.forbiddenMuteAll
         )
       )
       return
@@ -353,7 +365,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         console.error("Failed to broadcast MUTE_ALL:", e)
       }
     }
-    toast.success(pl.successMuteAll || "Đã tắt mic tất cả mọi người")
+    toast.success(pl.successMuteAll)
   }
 
   const handleToggleSelfUnmute = async () => {
@@ -375,15 +387,15 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? (pl.selfUnmuteOn || "Đã cho phép học viên tự bật mic.")
-          : (pl.selfUnmuteOff || "Đã tắt quyền học viên tự bật mic.")
+          ? pl.selfUnmuteOn
+          : pl.selfUnmuteOff
       )
     } catch (err) {
       toast.error(
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenSelfUnmute || "Bạn không có quyền đổi chính sách này."
+          pl.forbiddenSelfUnmute
         )
       )
     }
@@ -457,15 +469,15 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? (pl.lockOn || "Đã khóa phòng. Người mới không thể tham gia.")
-          : (pl.lockOff || "Đã mở khóa phòng.")
+          ? pl.lockOn
+          : pl.lockOff
       )
     } catch (err) {
       toast.error(
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenLock || "Bạn không có quyền khóa/mở phòng."
+          pl.forbiddenLock
         )
       )
     }
@@ -481,7 +493,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenEnd || "Bạn không có quyền kết thúc buổi live."
+          pl.forbiddenEnd
         )
       )
       return
@@ -508,7 +520,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       /* ignore disconnect errors */
     }
     dispatch(leaveCallAction())
-    toast.success(pl.endLiveSuccess || "Đã kết thúc buổi live.")
+    toast.success(pl.endLiveSuccess)
     const nav = navigate ?? getNavigate()
     if (nav && window.location.pathname.includes("/meet/")) {
       nav(window.location.pathname, {
@@ -537,15 +549,15 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? (pl.studentShareOn || "Đã cho phép học viên chia sẻ màn hình.")
-          : (pl.studentShareOff || "Đã tắt quyền học viên chia sẻ màn hình.")
+          ? pl.studentShareOn
+          : pl.studentShareOff
       )
     } catch (err) {
       toast.error(
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenStudentShare || "Bạn không có quyền đổi chính sách này."
+          pl.forbiddenStudentShare
         )
       )
     }
@@ -570,15 +582,15 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? (pl.memberRecordingOn || "Đã cho phép học viên ghi hình.")
-          : (pl.memberRecordingOff || "Đã tắt quyền học viên ghi hình.")
+          ? pl.memberRecordingOn
+          : pl.memberRecordingOff
       )
     } catch (err) {
       toast.error(
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenRecord || "Bạn không có quyền đổi chính sách này."
+          pl.forbiddenRecord
         )
       )
     }
@@ -591,7 +603,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const handleLowerAllHands = () => {
     if (raisedHandParticipants.length === 0) {
-      toast(pl.noHandsRaised || "Không có ai đang giơ tay.")
+      toast(pl.noHandsRaised)
       return
     }
     setLowerHandsConfirmOpen(true)
@@ -601,7 +613,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     setLowerHandsConfirmOpen(false)
     if (!roomId) return
     try {
-      const res = await lowerAllHandsApi(roomId).unwrap()
+      await lowerAllHandsApi(roomId).unwrap()
       // Update local LiveKit metadata for all raised participants (best-effort)
       if (lkRoom?.localParticipant) {
         safeSetLiveKitMetadata(lkRoom.localParticipant, { handRaised: false, handRaisedAt: 0 })
@@ -613,9 +625,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         }
       }
       // Also lower for each participant via metadata clear (client will sync via data channel)
-      toast.success(res?.message || pl.successLowerAllHands || `Đã hạ ${res?.data?.loweredCount ?? raisedHandParticipants.length} tay`)
+      toast.success(pl.successLowerAllHands)
     } catch (err) {
-      toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenLowerHands || "Bạn không có quyền hạ tay."))
+      toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenLowerHands))
     }
   }
 
@@ -641,15 +653,17 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         )
         lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
       } catch {}
-      toast.success(res?.message || `Đã hạn chế voice ${res?.data?.restrictedCount ?? res?.restrictedCount ?? ""} thành viên`)
+      const restrictedCount =
+        res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceRestrictAllCount
+      toast.success(pl.successRestrictVoiceAll.replace("{count}", String(restrictedCount)))
     } catch (err) {
       const msg = err?.data?.message || err?.error || ""
       if (err?.status === 404) {
-        toast.error("Không có phiên live đang diễn ra.")
+        toast.error(pl.noActiveSession)
       } else if (err?.status === 409) {
-        toast.error(msg || "Đã ở trạng thái hạn chế.")
+        toast.error(msg || pl.alreadyVoiceRestricted)
       } else {
-        toast.error(resolveCoHostErrorMessage(err, t, "Bạn không có quyền hạn chế voice."))
+        toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenRestrictVoice))
       }
     }
   }
@@ -676,7 +690,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   onClick={() => setActiveTab("waiting")}
                   className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${activeTab === "waiting" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
                 >
-                  {t?.rooms?.videoCall?.waitingQueue?.tab || "Chờ"}
+                  {t?.rooms?.videoCall?.waitingQueue?.tab}
                   {pendingCount > 0 ? ` (${pendingCount})` : ""}
                 </button>
               </div>
@@ -703,7 +717,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         <div className="mx-2 mt-2 flex items-center gap-2 rounded-xl border border-blue-200/80 bg-blue-50/70 px-3 py-2 shrink-0">
           <DoorOpen size={16} className="shrink-0 text-blue-600" />
           <span className="min-w-0 flex-1 text-xs font-medium text-blue-900">
-            {t?.rooms?.videoCall?.waitingQueue?.knockHint || "Phòng bật chế độ duyệt? Gõ cửa để xin vào."}
+            {t?.rooms?.videoCall?.waitingQueue?.knockHint}
           </span>
           <button
             type="button"
@@ -712,7 +726,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             className="inline-flex h-7 shrink-0 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {isKnocking && <Loader2 size={12} className="animate-spin" />}
-            <span>{t?.rooms?.videoCall?.waitingQueue?.knock || "Gõ cửa"}</span>
+            <span>{t?.rooms?.videoCall?.waitingQueue?.knock}</span>
           </button>
         </div>
       )}
@@ -728,7 +742,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                 className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-red-700 bg-red-50/80 hover:bg-red-100 border border-red-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
               >
                 <MicOff size={15} className="text-red-500 shrink-0" />
-                <span>{pl.muteAll || "Tắt tất cả mic"}</span>
+                <span>{pl.muteAll}</span>
               </button>
             )}
 
@@ -737,7 +751,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
             >
               <Hand size={15} className="text-amber-500 shrink-0" />
-              <span>{pl.lowerAllHands || "Hạ tất cả tay"}{raisedHandParticipants.length > 0 ? ` (${raisedHandParticipants.length})` : ""}</span>
+              <span>{pl.lowerAllHands}{raisedHandParticipants.length > 0 ? ` (${raisedHandParticipants.length})` : ""}</span>
             </button>
           </div>
           {(canMuteAll || isHost) && (
@@ -747,13 +761,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               className="w-full inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-orange-700 bg-orange-50/80 hover:bg-orange-100 border border-orange-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
             >
               <MicOff size={15} className="text-orange-500 shrink-0" />
-              <span>{pl.restrictVoiceAll || "Cấm voice tất cả"}</span>
+              <span>{pl.restrictVoiceAll}</span>
             </button>
           )}
 
           {canToggleSelfUnmute && (
             <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
-              <span>{pl.allowSelfUnmute || "Cho phép học viên tự bật mic"}</span>
+              <span>{pl.allowSelfUnmute}</span>
               <input
                 type="checkbox"
                 checked={allowSelfUnmute}
@@ -769,7 +783,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
               <span className="inline-flex items-center gap-1.5">
                 {isLocked ? <Lock size={14} className="text-red-600" /> : <LockOpen size={14} className="text-neutral-500" />}
-                {pl.lockRoom || "Khóa phòng (chặn người mới)"}
+                {pl.lockRoom}
               </span>
               <input
                 type="checkbox"
@@ -790,14 +804,14 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border border-red-600 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
             >
               <PhoneOff size={15} className="shrink-0 rotate-[135deg]" />
-              <span>{pl.endLive || "Kết thúc buổi live"}</span>
+              <span>{pl.endLive}</span>
             </button>
           )}
 
           {/* Ticket 05: student share gate (manage_student_share) — default mở. */}
           {canManageStudentShare && (
             <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
-              <span>{pl.allowStudentShare || "Cho phép học viên chia sẻ màn hình"}</span>
+              <span>{pl.allowStudentShare}</span>
               <input
                 type="checkbox"
                 checked={allowStudentShare}
@@ -811,7 +825,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           {/* Ticket 05: member recording gate, server-side (record). */}
           {canManageMemberRecording && (
             <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
-              <span>{pl.allowMemberRecording || "Cho phép học viên ghi hình"}</span>
+              <span>{pl.allowMemberRecording}</span>
               <input
                 type="checkbox"
                 checked={allowMemberRecording}
@@ -872,9 +886,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         open={muteAllConfirmOpen}
         onClose={() => setMuteAllConfirmOpen(false)}
         onConfirm={confirmMuteAll}
-        title={pl.confirmMuteAllTitle || pl.muteAll || "Tắt tất cả mic"}
-        message={pl.confirmMuteAll || "Bạn có chắc chắn muốn tắt tiếng tất cả thành viên trong phòng?"}
-        confirmText={pl.muteAll || "Tắt tất cả mic"}
+        title={pl.confirmMuteAllTitle || pl.muteAll}
+        message={pl.confirmMuteAll}
+        confirmText={pl.muteAll}
         confirmVariant="destructive"
       />
 
@@ -883,9 +897,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         open={endLiveConfirmOpen}
         onClose={() => setEndLiveConfirmOpen(false)}
         onConfirm={confirmEndLive}
-        title={pl.confirmEndLiveTitle || pl.endLive || "Kết thúc buổi live"}
-        message={pl.confirmEndLive || "Kết thúc buổi live cho tất cả mọi người? Mọi người sẽ về màn hình kết thúc, tham gia lại sẽ tạo phiên mới. Lớp/phòng và điểm danh không đổi."}
-        confirmText={pl.endLive || "Kết thúc buổi live"}
+        title={pl.confirmEndLiveTitle || pl.endLive}
+        message={pl.confirmEndLive}
+        confirmText={pl.endLive}
         confirmVariant="destructive"
       />
 
@@ -893,9 +907,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         open={lowerHandsConfirmOpen}
         onClose={() => setLowerHandsConfirmOpen(false)}
         onConfirm={confirmLowerAllHands}
-        title={pl.confirmLowerHandsTitle || "Hạ tất cả tay"}
-        message={(pl.confirmLowerHands || "Bạn có chắc muốn hạ tay của {count} người đang giơ tay?").replace("{count}", String(raisedHandParticipants.length))}
-        confirmText={pl.lowerAllHands || "Hạ tất cả tay"}
+        title={pl.confirmLowerHandsTitle || pl.lowerAllHands}
+        message={pl.confirmLowerHands.replace("{count}", String(raisedHandParticipants.length))}
+        confirmText={pl.lowerAllHands}
         confirmVariant="default"
         isPending={isLoweringHands}
       />
@@ -904,9 +918,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         open={restrictVoiceAllConfirmOpen}
         onClose={() => setRestrictVoiceAllConfirmOpen(false)}
         onConfirm={confirmRestrictVoiceAll}
-        title={pl.confirmRestrictVoiceAllTitle || "Cấm voice tất cả"}
-        message={pl.confirmRestrictVoiceAll || "Bạn có chắc muốn hạn chế quyền bật mic của tất cả thành viên trong phòng? Họ sẽ không thể tự bật mic cho đến khi được gỡ."}
-        confirmText={pl.restrictVoiceAll || "Cấm voice tất cả"}
+        title={pl.confirmRestrictVoiceAllTitle || pl.restrictVoiceAll}
+        message={pl.confirmRestrictVoiceAll.replace("{count}", String(voiceRestrictAllCount))}
+        confirmText={pl.restrictVoiceAll}
         confirmVariant="destructive"
         isPending={isRestrictingVoiceAll}
       />
