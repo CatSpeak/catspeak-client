@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import { useUpdateCustomRoomMutation } from "@/store/api/roomsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { validateRoomName } from "@/features/rooms/utils/roomNameValidation"
 
 const getLanguageName = (langCode) => {
   switch (langCode) {
@@ -25,7 +26,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
   const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
     ? lang
     : "en"
-  const selectedLanguage = room?.languageType || getLanguageName(supportedLangCode)
+  const defaultLanguage = getLanguageName(supportedLangCode)
 
   const [updateCustomRoom, { isLoading: isUpdating }] =
     useUpdateCustomRoomMutation()
@@ -37,7 +38,9 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     isPrivate: false,
     password: "",
     maxParticipants: 10,
+    languageType: "",
   })
+  const selectedLanguage = formData.languageType || defaultLanguage
   const [thumbnailFile, setThumbnailFile] = useState(null)
   const [nameError, setNameError] = useState("")
   const [passwordError, setPasswordError] = useState("")
@@ -60,6 +63,7 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
         isPrivate: isPrivate,
         password: room.password || "",
         maxParticipants: room.maxParticipants || 10,
+        languageType: room.languageType || room.LanguageType || "",
       })
       setThumbnailFile(room.thumbnailUrl || null)
       setNameError("")
@@ -69,8 +73,12 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    if (field === "name" && value.trim()) {
-      setNameError("")
+    if (field === "name") {
+      setNameError(
+        validateRoomName(value, {
+          messages: { tooLong: t.rooms?.customRooms?.nameMaxLength },
+        }),
+      )
     }
     if (field === "password" && value.trim()) {
       setPasswordError("")
@@ -91,8 +99,15 @@ export const useEditCustomRoomForm = (room, open, onClose) => {
     if (!room) return
     let hasError = false
 
-    if (!formData.name.trim()) {
-      setNameError(t.rooms?.createRoom?.nameRequired || "Room name is required")
+    const nameValidationError = validateRoomName(formData.name, {
+      required: true,
+      messages: {
+        required: t.rooms?.createRoom?.nameRequired,
+        tooLong: t.rooms?.customRooms?.nameMaxLength,
+      },
+    })
+    if (nameValidationError) {
+      setNameError(nameValidationError)
       hasError = true
     } else {
       setNameError("")

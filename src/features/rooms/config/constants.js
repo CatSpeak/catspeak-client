@@ -22,6 +22,8 @@ export const TOPICS = [
   "Productivity",
 ]
 
+export const LANGUAGES = ["English", "Chinese", "Japanese", "Vietnamese"]
+
 export const LEVELS = {
   English: [
     { label: "A1", value: "A1" },

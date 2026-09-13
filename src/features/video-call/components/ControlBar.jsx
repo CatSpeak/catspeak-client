@@ -49,6 +49,7 @@ const VideoCallControlBar = () => {
     isTogglingMic,
     isTogglingCam,
     isTogglingScreenShare,
+    canShareScreen = true,
     showChat,
     setShowChat,
     showParticipants,
@@ -81,6 +82,7 @@ const VideoCallControlBar = () => {
     isAISession,
     isHost: isHostFromContext,
     id: roomId,
+    isVoiceRestricted,
   } = useVideoCallContext()
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall)
@@ -106,6 +108,14 @@ const VideoCallControlBar = () => {
 
   const handleMicWithGate = async () => {
     const tryingToUnmute = !micOn
+    // Ticket 02: voice-restricted users cannot re-enable their mic.
+    if (tryingToUnmute && isVoiceRestricted) {
+      toast.error(
+        t.rooms?.videoCall?.participantList?.voiceRestrictedBlocked ||
+          "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế."
+      )
+      return
+    }
     if (
       tryingToUnmute &&
       !allowSelfUnmute &&
@@ -159,9 +169,12 @@ const VideoCallControlBar = () => {
           isLoading={isTogglingMic}
           onClick={handleMicWithGate}
           title={
-            micOn
-              ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
-              : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
+            isVoiceRestricted
+              ? t.rooms?.videoCall?.participantList?.voiceRestrictedBlocked ||
+                "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế."
+              : micOn
+                ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
+                : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
           }
           iconActive={<Mic className={iconClass} />}
           iconInactive={<MicOff className={iconClass} />}
@@ -187,10 +200,14 @@ const VideoCallControlBar = () => {
           isActive={isLocalScreenShare}
           isLoading={isTogglingScreenShare}
           onClick={handleToggleScreenShare}
+          disabled={!canShareScreen}
           title={
-            isLocalScreenShare
-              ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
-              : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
+            !canShareScreen
+              ? t.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
+                "Bạn không có quyền chia sẻ màn hình."
+              : isLocalScreenShare
+                ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
+                : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
           }
           iconActive={<MonitorOff className={iconClass} />}
           iconInactive={<MonitorUp className={iconClass} />}

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate, useParams, Outlet } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
 import { AnimatePresence } from "framer-motion";
 import { FluentAnimation } from "@/shared/components/ui/animations";
 import {
@@ -27,9 +28,14 @@ import CustomRoomCard from "../components/CustomRoomCard";
 import RoomCard from "../components/RoomCard";
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
+import {
+  buildCustomRoomQuota,
+  isCustomRoomQuotaFull,
+} from "../utils/customRoomQuota";
 
 const WorkspaceRoomsContent = () => {
   const { t } = useLanguage();
+  const { limits } = usePlanFeatures();
   const { lang, id } = useParams();
   const navigate = useNavigate();
   const ct = t.rooms?.customRooms || {};
@@ -172,14 +178,12 @@ const WorkspaceRoomsContent = () => {
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   // Quota for custom rooms
-  const quota = {
-    used:
-      customRoomsData?.currentCustomRoomsCount ??
-      myRoomsResponse?.data?.totalCount ??
-      rawTargetRooms.length,
-    max: customRoomsData?.maxCustomRooms ?? 3,
-  };
-  const isQuotaFull = customRoomsData?.canCreateCustomRoom === false;
+  const quota = buildCustomRoomQuota({
+    customRoomsData,
+    limits,
+    fallbackUsed: myRoomsResponse?.data?.totalCount ?? rawTargetRooms.length,
+  });
+  const isQuotaFull = isCustomRoomQuotaFull(customRoomsData);
 
   // Tab definition
   const tabs = useMemo(
