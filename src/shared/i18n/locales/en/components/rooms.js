@@ -283,6 +283,9 @@ export default {
     mentionHint: "↑↓ navigate, Enter select",
     mentionNotFound: "No matching participants found",
     mentionAllDesc: "Everyone in the room",
+    chatRestrictedPlaceholder: "You are restricted from chatting",
+    chatRestrictedReason:
+      "The Host has restricted you from sending chat messages.",
   },
   sessionActions: {
     connect11: "Connect 1:1",
@@ -672,6 +675,16 @@ export default {
       endLiveSuccess: "Live session ended.",
       forbiddenEnd: "You do not have permission to end the live session.",
       hostEndedSession: "Host ended the live session.",
+      hostRestrictedChat:
+        "You have been restricted from sending chat messages by the Host.",
+      hostUnrestrictedChat: "The Host lifted your chat restriction.",
+      hostRestrictedVoice: "You have been restricted from speaking by the Host.",
+      hostUnrestrictedVoice: "The Host lifted your microphone restriction.",
+      hostRestrictedVoiceAll: "The Host restricted everyone from speaking.",
+      voiceRestrictedBlocked:
+        "You are voice-restricted. Please wait for the Host to lift it.",
+      chatRestrictedBadge: "Chat restricted",
+      voiceRestrictedBadge: "Voice restricted",
     },
     waitingQueue: {
       tab: "Waiting",

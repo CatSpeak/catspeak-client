@@ -14,6 +14,8 @@ import {
   Lock,
   LockOpen,
   PhoneOff,
+  MessageSquareOff,
+  ShieldAlert,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useDispatch } from "react-redux"
@@ -78,6 +80,7 @@ const ParticipantItem = ({ participant }) => {
     cameraOn: localCameraOn,
     room,
     user,
+    restrictionByAccountId,
   } = useVideoCallContext()
   const isSpeaking = useIsSpeaking(participant)
   const pl = t.rooms.videoCall.participantList
@@ -102,6 +105,13 @@ const ParticipantItem = ({ participant }) => {
   const accountId = meta.accountId || (isLocal ? user?.accountId : null)
   const isHandRaised = meta.handRaised === true
   const avatarUrl = sanitizeAvatarUrl(meta.avatarImageUrl)
+
+  // Ticket 02: live chat/voice restriction badges.
+  const restriction = accountId != null
+    ? restrictionByAccountId?.[String(accountId)] || {}
+    : {}
+  const isChatRestricted = restriction.isChatRestricted === true
+  const isVoiceRestricted = restriction.isVoiceRestricted === true
 
   const isParticipantHost = isRoomHost(room, accountId)
   const isCurrentUserHost = isRoomHost(room, user?.accountId)
@@ -128,6 +138,22 @@ const ParticipantItem = ({ participant }) => {
 
   const rightContent = (
     <div className="flex items-center gap-2 shrink-0">
+      {isChatRestricted && (
+        <span
+          title={pl.chatRestrictedBadge || "Chat restricted"}
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100"
+        >
+          <MessageSquareOff size={13} className="text-amber-600" />
+        </span>
+      )}
+      {isVoiceRestricted && (
+        <span
+          title={pl.voiceRestrictedBadge || "Voice restricted"}
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100"
+        >
+          <ShieldAlert size={13} className="text-amber-600" />
+        </span>
+      )}
       {isHandRaised && (
         <motion.div
           animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
@@ -603,10 +629,19 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     try {
       const res = await restrictVoiceAllApi(roomId).unwrap()
       try {
-        const payload = new TextEncoder().encode(JSON.stringify({ action: "RESTRICT_VOICE_ALL" }))
+        const restrictedAccountIds =
+          res?.restrictedAccountIds ?? res?.data?.restrictedAccountIds ?? []
+        const payload = new TextEncoder().encode(
+          JSON.stringify({
+            action: "RESTRICT_VOICE_ALL",
+            senderId: String(user?.accountId ?? ""),
+            senderIdentity: String(lkRoom?.localParticipant?.identity ?? ""),
+            restrictedAccountIds,
+          })
+        )
         lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
       } catch {}
-      toast.success(res?.message || `Đã hạn chế voice ${res?.data?.restrictedCount ?? ""} thành viên`)
+      toast.success(res?.message || `Đã hạn chế voice ${res?.data?.restrictedCount ?? res?.restrictedCount ?? ""} thành viên`)
     } catch (err) {
       const msg = err?.data?.message || err?.error || ""
       if (err?.status === 404) {
