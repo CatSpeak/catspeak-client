@@ -11,6 +11,7 @@ export const livekitApi = baseApi.injectEndpoints({
       transformResponse: (response) => ({
         serverUrl: response.server_url,
         participantToken: response.participant_token,
+        egressProfile: response.egress_profile,
         sessionId: response.cathspeak?.session_id,
         activeSubSessionId: response.cathspeak?.active_sub_session_id,
         activeSubSessionName: response.cathspeak?.active_sub_session_name,
