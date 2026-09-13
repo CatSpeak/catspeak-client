@@ -40,14 +40,27 @@ const VI_FALLBACKS = {
     "Lớp học chưa có phòng. Vui lòng thử lại sau khi phòng được tạo.",
 }
 
+const VI_FALLBACKS_ROOM = {
+  [COHOST_ERROR_CODES.TARGET_NOT_CONFIRMED]:
+    "Chỉ thành viên đã xác nhận (Confirmed) mới được làm co-host.",
+}
+
 /**
  * Map backend errorCode -> localized message.
  * @param {object} err RTK Query error
  * @param {object} t language object (useLanguage().t)
  * @param {string} fallback message khi không map được code
+ * @param {string} roomType "room" | "class" — room dùng copy thành viên/phòng
  */
-export function resolveCoHostErrorMessage(err, t, fallback) {
+export function resolveCoHostErrorMessage(err, t, fallback, roomType) {
   const messages = t?.rooms?.coHost?.errors || {}
+  const { errorCode } = parseApiError(err)
+  // Room (Custom): ưu tiên key *_ROOM rồi tới Room fallback, giữ Class nguyên.
+  if (roomType && roomType !== "class" && errorCode) {
+    const roomKey = `${errorCode}_ROOM`
+    if (messages[roomKey]) return messages[roomKey]
+    if (VI_FALLBACKS_ROOM[errorCode]) return VI_FALLBACKS_ROOM[errorCode]
+  }
   return resolveLocalizedError(
     err,
     (e, code) => messages[code] || VI_FALLBACKS[code],

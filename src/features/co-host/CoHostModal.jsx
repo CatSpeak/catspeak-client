@@ -32,6 +32,12 @@ import {
   CO_HOST_PERMISSION_META,
   CO_HOST_ALL,
   CO_HOST_PRESETS,
+  CO_HOST_PERMISSION_LABELS_ROOM,
+  CO_HOST_PERMISSION_HELPERS_ROOM,
+  CO_HOST_GROUP_TITLES_ROOM,
+  CO_HOST_PRESET_ASSISTANT_LABEL_ROOM,
+  CO_HOST_HEADER_SUBTITLE_ROOM,
+  CO_HOST_NOTE_DESC_ROOM,
   countByGroup,
 } from "./constants"
 
@@ -60,6 +66,25 @@ const PERMISSION_ICONS = {
  * - Checkbox tùy biến chuẩn Accessibility (Touch target >= 44px, Focus indicator).
  * - Scope notice banner thích ứng tên phòng và đếm tổng quyền hạn.
  */
+
+const getCandidateDisplayName = (c) => {
+  if (!c || typeof c !== "object") return ""
+  const name = typeof c.name === "string" ? c.name.trim() : ""
+  if (name) return name
+  const email = typeof c.email === "string" ? c.email.trim() : ""
+  if (email) return email
+  if (c.accountId != null && String(c.accountId).trim() !== "")
+    return `Account ${String(c.accountId).trim()}`
+  return ""
+}
+
+const getCandidateInitials = (c) => {
+  const display = getCandidateDisplayName(c)
+  if (!display) return "?"
+  // Email không tên: lấy phần trước @ để làm initials cho dễ nhận diện.
+  const base = display.includes("@") ? display.split("@")[0] : display
+  return base.slice(0, 2).toUpperCase() || "?"
+}
 const CoHostModal = ({
   open,
   onClose,
@@ -121,7 +146,9 @@ const CoHostModal = ({
     const q = query.trim().toLowerCase()
     if (!q) return candidates
     return candidates.filter((c) =>
-      `${c.name || ""} ${c.email || ""}`.toLowerCase().includes(q),
+      `${getCandidateDisplayName(c)} ${c.email || ""} ${c.accountId ?? ""}`
+        .toLowerCase()
+        .includes(q),
     )
   }, [candidates, query])
 
@@ -248,8 +275,12 @@ const CoHostModal = ({
               </p>
             ) : (
               <p className="text-xs text-gray-400 mt-0.5">
-                {t.rooms?.coHost?.headerSubtitle ||
-                  "Chỉ định trợ giảng và quản lý quyền hạn điều hành phòng"}
+                {roomType === "class"
+                  ? (t.rooms?.coHost?.headerSubtitle ||
+                    "Chỉ định trợ giảng và quản lý quyền hạn điều hành phòng")
+                  : (t.rooms?.coHost?.headerSubtitleRoom ||
+                    t.rooms?.coHost?.headerSubtitle ||
+                    CO_HOST_HEADER_SUBTITLE_ROOM)}
               </p>
             )}
           </div>
@@ -351,7 +382,7 @@ const CoHostModal = ({
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative shrink-0">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-xs">
-                    {(selectedUser.name || "?").slice(0, 2).toUpperCase()}
+                    {getCandidateInitials(selectedUser)}
                   </div>
                   <span
                     className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white"
@@ -361,7 +392,7 @@ const CoHostModal = ({
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-gray-900 truncate">
-                      {selectedUser.name}
+                      {getCandidateDisplayName(selectedUser)}
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200">
                       <Crown size={10} />
@@ -462,11 +493,11 @@ const CoHostModal = ({
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <span className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800 text-[11px] font-bold flex items-center justify-center shrink-0 border border-amber-300/60">
-                              {(c.name || "?").slice(0, 2).toUpperCase()}
+                              {getCandidateInitials(c)}
                             </span>
                             <div className="min-w-0">
                               <span className="block truncate text-xs font-bold text-gray-800 group-hover:text-amber-900">
-                                {c.name}
+                                {getCandidateDisplayName(c)}
                               </span>
                               {c.email && (
                                 <span className="block truncate text-[11px] text-gray-400">
@@ -536,10 +567,22 @@ const CoHostModal = ({
                   ? "bg-amber-100 border-amber-300 text-amber-900 shadow-xs ring-2 ring-amber-200/60"
                   : "bg-white border-gray-200 text-gray-700 hover:bg-amber-50/80 hover:border-amber-300 hover:text-amber-900"
               }`}
-              title={t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"}
+              title={
+                roomType === "class"
+                  ? t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"
+                  : t.rooms?.coHost?.presetAssistantRoom ||
+                    t.rooms?.coHost?.presetAssistant ||
+                    CO_HOST_PRESET_ASSISTANT_LABEL_ROOM
+              }
             >
               <Sparkles size={12} className="text-amber-600" />
-              <span>{t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"}</span>
+              <span>
+                {roomType === "class"
+                  ? t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"
+                  : t.rooms?.coHost?.presetAssistantRoom ||
+                    t.rooms?.coHost?.presetAssistant ||
+                    CO_HOST_PRESET_ASSISTANT_LABEL_ROOM}
+              </span>
             </button>
             <button
               type="button"
@@ -572,9 +615,18 @@ const CoHostModal = ({
             const isFullGroup = groupCount === g.total
             const isPartialGroup = groupCount > 0 && !isFullGroup
             const GroupIcon = isStudentGroup ? Users : ShieldCheck
+            // Room (Custom) uses member/room copy, Class keeps student/class copy.
             const groupTitle =
-              g.id === "room_security" && roomType === "room"
-                ? (t.rooms?.coHost?.groupRoomSecurity || "Bảo mật phòng")
+              roomType === "room"
+                ? g.id === "room_security"
+                  ? t.rooms?.coHost?.groupRoomSecurity ||
+                    CO_HOST_GROUP_TITLES_ROOM[g.id] ||
+                    t.rooms?.coHost?.groups?.[g.id] ||
+                    g.title
+                  : t.rooms?.coHost?.groupStudentManagementRoom ||
+                    CO_HOST_GROUP_TITLES_ROOM[g.id] ||
+                    t.rooms?.coHost?.groups?.[g.id] ||
+                    g.title
                 : t.rooms?.coHost?.groups?.[g.id] || g.title
 
             return (
@@ -637,7 +689,13 @@ const CoHostModal = ({
                     const isDanger = meta.severity === "danger"
                     const isWarning = meta.severity === "warning"
                     const helperText =
-                      t.rooms?.coHost?.permissionHelpers?.[code] || meta.helper
+                      roomType === "room"
+                        ? t.rooms?.coHost?.permissionHelpersRoom?.[code] ||
+                          CO_HOST_PERMISSION_HELPERS_ROOM[code] ||
+                          t.rooms?.coHost?.permissionHelpers?.[code] ||
+                          meta.helper
+                        : t.rooms?.coHost?.permissionHelpers?.[code] ||
+                          meta.helper
 
                     return (
                       <div
@@ -690,8 +748,13 @@ const CoHostModal = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="text-xs font-semibold leading-tight block truncate">
-                              {t.rooms?.coHost?.permissions?.[code] ||
-                                CO_HOST_PERMISSION_LABELS[code]}
+                              {roomType === "room"
+                                ? t.rooms?.coHost?.permissionsRoom?.[code] ||
+                                  CO_HOST_PERMISSION_LABELS_ROOM[code] ||
+                                  t.rooms?.coHost?.permissions?.[code] ||
+                                  CO_HOST_PERMISSION_LABELS[code]
+                                : t.rooms?.coHost?.permissions?.[code] ||
+                                  CO_HOST_PERMISSION_LABELS[code]}
                             </span>
                             {isDanger && (
                               <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-red-100 text-red-700 shrink-0">
@@ -734,7 +797,12 @@ const CoHostModal = ({
                     : (t.rooms?.coHost?.scopeNoticeRoom ||
                       'Quyền của Co-host chỉ có hiệu lực trong phòng "{name}".')
                   ).replace("{name}", roomName)
-                : (t.rooms?.coHost?.noteDesc || "Quyền của co-host chỉ áp dụng cho mỗi lớp học.")}
+                : roomType === "class"
+                  ? t.rooms?.coHost?.noteDesc ||
+                    "Quyền của co-host chỉ áp dụng cho mỗi lớp học."
+                  : t.rooms?.coHost?.noteDescRoom ||
+                    CO_HOST_NOTE_DESC_ROOM ||
+                    "Quyền của co-host chỉ áp dụng cho mỗi phòng."}
             </p>
           </div>
           <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-full shrink-0 border border-amber-200/60">
