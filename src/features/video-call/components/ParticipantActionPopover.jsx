@@ -168,6 +168,8 @@ export const ParticipantActionPopover = ({ participant, children }) => {
 
   const meta = parseMetadata(participant?.metadata)
   const targetAccountId = meta.accountId || participant?.identity
+  const participantName =
+    participant?.name || participant?.identity || String(targetAccountId ?? "")
 
   // ── Co-host in-live (ticket 01): host phân công / thay thế ngay trong live ──
   // Ticket 02: fetch cho mọi thành viên để co-host biết quyền media của mình.
@@ -237,16 +239,16 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         const payload = new TextEncoder().encode(JSON.stringify({ action: actionMap[type], targetId: String(targetAccountId), targetIdentity: String(participant.identity) }))
         lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
       } catch {}
-      const msgMap = { chat: "Đã hạn chế chat", voice: "Đã hạn chế voice", unrestrict_chat: "Đã gỡ hạn chế chat", unrestrict_voice: "Đã gỡ hạn chế voice" }
-      toast.success(msgMap[type] || "Thành công")
+      const msgMap = { chat: pl.successRestrictChat, voice: pl.successRestrictVoice, unrestrict_chat: pl.successUnrestrictChat, unrestrict_voice: pl.successUnrestrictVoice }
+      toast.success(msgMap[type])
     } catch (err) {
       if (err?.status === 404) {
-        toast.error(pl.participantNotFound || "Người tham gia đã rời phòng. Đang làm mới danh sách.")
+        toast.error(pl.participantNotFound)
         // trigger refresh via broadcast?
       } else if (err?.status === 409) {
-        toast.error(err?.data?.message || pl.alreadyRestricted || "Đã ở trạng thái đó.")
+        toast.error(err?.data?.message || pl.alreadyRestricted)
       } else {
-        toast.error(resolveCoHostErrorMessage(err, t, "Bạn không có quyền thực hiện thao tác này."))
+        toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenModerate))
       }
     }
   }
@@ -269,8 +271,8 @@ export const ParticipantActionPopover = ({ participant, children }) => {
           err,
           t,
           trackKind === "screen"
-            ? (pl.forbiddenStopScreen || pl.forbiddenMedia || "Bạn không có quyền dừng chia sẻ màn hình.")
-            : (pl.forbiddenMedia || "Bạn không có quyền điều khiển mic/camera.")
+            ? pl.forbiddenStopScreen
+            : pl.forbiddenMedia
         )
       )
       return
@@ -301,16 +303,16 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     if (muted) {
       toast.success(
         trackKind === "audio"
-          ? (pl.successMuteMic || "Đã tắt mic người dùng")
+          ? pl.successMuteMic
           : trackKind === "screen"
-          ? (pl.successStopScreen || "Đã dừng chia sẻ màn hình người dùng")
-          : (pl.successMuteCam || "Đã tắt camera người dùng")
+          ? pl.successStopScreen
+          : pl.successMuteCam
       )
     } else {
       toast.success(
         trackKind === "audio"
-          ? (pl.successUnmuteMic || "Đã bật mic người dùng")
-          : (pl.successUnmuteCam || "Đã bật camera người dùng")
+          ? pl.successUnmuteMic
+          : pl.successUnmuteCam
       )
     }
   }
@@ -339,7 +341,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenKick || "Bạn không có quyền mời thành viên ra khỏi phòng."
+          pl.forbiddenKick
         )
       )
       return
@@ -364,7 +366,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       }
     }
 
-    toast.success(banRejoin ? (pl.successBan || "Đã mời người dùng ra khỏi phòng và cấm vào lại") : (pl.successKick || "Đã mời người dùng ra khỏi phòng"))
+    toast.success(banRejoin ? pl.successBan : pl.successKick)
   }
 
 
@@ -382,9 +384,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             >
               <MicOff size={18} className="text-neutral-500 shrink-0" />
               <span>
-                {isTargetMicOn
-                  ? (pl.mute || "Tắt tiếng")
-                  : (pl.unmute || "Bật mic giùm")}
+                {isTargetMicOn ? pl.mute : pl.unmute}
               </span>
             </button>
           )}
@@ -397,9 +397,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             >
               <VideoOff size={18} className="text-neutral-500 shrink-0" />
               <span>
-                {isTargetCamOn
-                  ? (pl.muteCam || "Tắt camera")
-                  : (pl.unmuteCam || "Bật camera giùm")}
+                {isTargetCamOn ? pl.muteCam : pl.unmuteCam}
               </span>
             </button>
           )}
@@ -414,7 +412,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <MessageSquareOff size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.restrictChat || "Hạn chế chat"}</span>
+            <span>{pl.restrictChat}</span>
           </button>
           <button
             onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_chat" })}
@@ -422,7 +420,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <MessageSquareOff size={18} className="text-emerald-600 shrink-0" />
-            <span>{pl.unrestrictChat || "Gỡ hạn chế chat"}</span>
+            <span>{pl.unrestrictChat}</span>
           </button>
           <button
             onClick={() => setRestrictConfirm({ open: true, type: "voice" })}
@@ -430,7 +428,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <Mic size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.restrictVoice || "Hạn chế voice"}</span>
+            <span>{pl.restrictVoice}</span>
           </button>
           <button
             onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_voice" })}
@@ -438,7 +436,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <Mic size={18} className="text-emerald-600 shrink-0" />
-            <span>{pl.unrestrictVoice || "Gỡ hạn chế voice"}</span>
+            <span>{pl.unrestrictVoice}</span>
           </button>
         </div>
       )}
@@ -451,7 +449,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <MonitorUp size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.stopScreenShare || "Dừng chia sẻ màn hình"}</span>
+            <span>{pl.stopScreenShare}</span>
           </button>
 
           <button
@@ -460,7 +458,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <UserX size={18} className="text-red-500 shrink-0" />
-            <span>{pl.kick || "Mời ra khỏi phòng"}</span>
+            <span>{pl.kick}</span>
           </button>
 
           <button
@@ -469,7 +467,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <UserX size={18} className="text-red-600 shrink-0" />
-            <span>{pl.ban || "Xóa & Cấm vào lại"}</span>
+            <span>{pl.ban}</span>
           </button>
 
           <button
@@ -505,7 +503,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
               className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
             >
               <MonitorUp size={18} className="text-neutral-500 shrink-0" />
-              <span>{pl.stopScreenShare || "Dừng chia sẻ màn hình"}</span>
+              <span>{pl.stopScreenShare}</span>
             </button>
           )}
           {canKick && (
@@ -515,7 +513,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full disabled:opacity-50"
           >
             <UserX size={18} className="text-red-500 shrink-0" />
-            <span>{pl.kick || "Mời ra khỏi phòng"}</span>
+            <span>{pl.kick}</span>
           </button>
           )}
         </div>
@@ -540,9 +538,9 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       open={kickConfirm.open}
       onClose={() => setKickConfirm({ open: false, banRejoin: false })}
       onConfirm={confirmKick}
-      title={kickConfirm.banRejoin ? (pl.confirmBanTitle || "Xóa & Cấm vào lại") : (pl.confirmKickTitle || "Mời ra khỏi phòng")}
-      message={kickConfirm.banRejoin ? (pl.confirmBan || "Bạn có chắc chắn muốn mời người dùng ra khỏi phòng và CẤM VÀO LẠI?") : (pl.confirmKick || "Bạn có chắc chắn muốn mời người dùng ra khỏi phòng?")}
-      confirmText={kickConfirm.banRejoin ? (pl.ban || "Xóa & Cấm vào lại") : (pl.kick || "Mời ra khỏi phòng")}
+      title={kickConfirm.banRejoin ? pl.confirmBanTitle : pl.confirmKickTitle}
+      message={(kickConfirm.banRejoin ? pl.confirmBan : pl.confirmKick).replace("{name}", participantName)}
+      confirmText={kickConfirm.banRejoin ? pl.ban : pl.kick}
       confirmVariant="destructive"
       isPending={isKicking}
     />
@@ -556,18 +554,18 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         handleRestrict(t2)
       }}
       title={
-        restrictConfirm.type === "chat" ? (pl.confirmRestrictChatTitle || "Hạn chế chat") :
-        restrictConfirm.type === "unrestrict_chat" ? (pl.confirmUnrestrictChatTitle || "Gỡ hạn chế chat") :
-        restrictConfirm.type === "voice" ? (pl.confirmRestrictVoiceTitle || "Hạn chế voice") :
-        (pl.confirmUnrestrictVoiceTitle || "Gỡ hạn chế voice")
+        restrictConfirm.type === "chat" ? pl.confirmRestrictChatTitle :
+        restrictConfirm.type === "unrestrict_chat" ? pl.confirmUnrestrictChatTitle :
+        restrictConfirm.type === "voice" ? pl.confirmRestrictVoiceTitle :
+        pl.confirmUnrestrictVoiceTitle
       }
       message={
-        restrictConfirm.type === "chat" ? `Bạn có chắc muốn hạn chế chat của ${participant?.name || targetAccountId}?` :
-        restrictConfirm.type === "unrestrict_chat" ? `Bạn có chắc muốn gỡ hạn chế chat của ${participant?.name || targetAccountId}?` :
-        restrictConfirm.type === "voice" ? `Bạn có chắc muốn hạn chế voice của ${participant?.name || targetAccountId}?` :
-        `Bạn có chắc muốn gỡ hạn chế voice của ${participant?.name || targetAccountId}?`
+        restrictConfirm.type === "chat" ? pl.confirmRestrictChat.replace("{name}", participantName) :
+        restrictConfirm.type === "unrestrict_chat" ? pl.confirmUnrestrictChat.replace("{name}", participantName) :
+        restrictConfirm.type === "voice" ? pl.confirmRestrictVoice.replace("{name}", participantName) :
+        pl.confirmUnrestrictVoice.replace("{name}", participantName)
       }
-      confirmText={pl.confirm || "Xác nhận"}
+      confirmText={t.confirm}
       confirmVariant={restrictConfirm.type?.startsWith("unrestrict") ? "default" : "destructive"}
       isPending={isRestrictingChat || isRestrictingVoice || isUnrestrictingChat || isUnrestrictingVoice}
     />

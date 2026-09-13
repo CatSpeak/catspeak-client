@@ -6,6 +6,7 @@ export default {
   seeMore: "もっと見る",
   back: "戻る",
   cancel: "キャンセル",
+  confirm: "確認",
   reload: "ページを再読み込み",
   cancelUploadConfirmTitle: "処理中のタスク",
   cancelUploadConfirmDesc:
