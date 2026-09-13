@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react"
-import { Mic, Settings, UserX } from "lucide-react"
+import { Mic, Settings } from "lucide-react"
 import { motion, LayoutGroup } from "framer-motion"
 import Modal from "@/shared/components/ui/Modal"
 import ListItem from "@/shared/components/ui/ListItem"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import AudioVideoTab from "./AudioVideoTab"
-import GeneralSettingsTab from "./GeneralSettingsTab"
-import BannedListTab from "./BannedListTab"
+import PersonalSettingsTab from "./PersonalSettingsTab"
+
+// Legacy tab ids were renamed: "general" is now the personal preferences tab.
+const normalizeTab = (tab) => (tab === "general" ? "personal" : tab)
 
 const RoomSettingsModal = ({
   open,
@@ -19,27 +20,19 @@ const RoomSettingsModal = ({
 }) => {
   const { t } = useLanguage()
   const waitingT = t?.rooms?.waitingScreen || {}
-  const pl = t?.rooms?.videoCall?.participantList || {}
 
-  const {
-    room,
-    user,
-    isHost: isHostFromContext,
-    deviceSelection,
-    receiveSystemMsgs,
-    setReceiveSystemMsgs,
-  } = useGlobalVideoCall()
+  const { deviceSelection, receiveSystemMsgs, setReceiveSystemMsgs } =
+    useGlobalVideoCall()
 
-  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
-
-  const [activeTab, setActiveTab] = useState(initialTab)
+  const [activeTab, setActiveTab] = useState(() => normalizeTab(initialTab))
 
   useEffect(() => {
     if (open) {
-      setActiveTab(initialTab)
+      setActiveTab(normalizeTab(initialTab))
     }
   }, [open, initialTab])
 
+  // Personal settings only. Room-wide policies live in the participant panel.
   const tabs = [
     {
       id: "audio-video",
@@ -47,19 +40,10 @@ const RoomSettingsModal = ({
       icon: Mic,
     },
     {
-      id: "general",
-      label: waitingT.generalTab || "Chung",
+      id: "personal",
+      label: waitingT.myPreferences || "Tùy chọn của tôi",
       icon: Settings,
     },
-    ...(isHost
-      ? [
-          {
-            id: "banned",
-            label: waitingT.bannedListTab || pl.bannedListTitle || "Danh sách bị cấm",
-            icon: UserX,
-          },
-        ]
-      : []),
   ]
 
   return (
@@ -84,7 +68,12 @@ const RoomSettingsModal = ({
 
       <div className="flex flex-col md:flex-row w-full h-full min-h-0 overflow-hidden flex-1">
         {/* Left Sidebar Navigation (Desktop Only) */}
-        <div className="hidden md:flex w-[300px] bg-white border-r border-border p-4 flex-col gap-1 shrink-0 overflow-y-auto">
+        <div
+          role="tablist"
+          aria-orientation="vertical"
+          aria-label={waitingT.deviceSettings || "Settings"}
+          className="hidden md:flex w-[300px] bg-white border-r border-border p-4 flex-col gap-1 shrink-0 overflow-y-auto"
+        >
           <LayoutGroup id="roomSettingsSidebarNav">
             {tabs.map((tab) => {
               const Icon = tab.icon
@@ -108,15 +97,27 @@ const RoomSettingsModal = ({
                   <ListItem
                     onClick={() => setActiveTab(tab.id)}
                     lines={1}
-                    leftContent={<span>{Icon && <Icon size={20} />}</span>}
-                    className="w-full rounded-xl transition-all duration-200"
+                    role="tab"
+                    aria-selected={isActive}
+                    id={`room-settings-tab-${tab.id}`}
+                    aria-controls="room-settings-panel"
+                    leftContent={
+                      <span className={isActive ? "text-cath-red-700" : "text-neutral-500"}>
+                        {Icon && <Icon size={20} />}
+                      </span>
+                    }
+                    className="w-full rounded-xl transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
                     contentClassName={`rounded-xl transition-all duration-200 px-4 ${
                       isActive
-                        ? "bg-primaryBg hover:bg-[#e6e6e6]"
+                        ? "bg-cath-red-700/[0.07] hover:bg-cath-red-700/10"
                         : "hover:bg-primaryBg"
                     }`}
                   >
-                    <span className="whitespace-nowrap text-base flex-1">
+                    <span
+                      className={`whitespace-nowrap text-base flex-1 ${
+                        isActive ? "font-semibold text-neutral-900" : ""
+                      }`}
+                    >
                       {tab.label}
                     </span>
                   </ListItem>
@@ -127,7 +128,12 @@ const RoomSettingsModal = ({
         </div>
 
         {/* Content Area */}
-        <div className="bg-primaryBg flex-1 p-4 sm:p-6 overflow-y-auto min-h-0 h-full">
+        <div
+          role="tabpanel"
+          id="room-settings-panel"
+          aria-labelledby={`room-settings-tab-${activeTab}`}
+          className="bg-primaryBg flex-1 p-4 sm:p-6 overflow-y-auto min-h-0 h-full"
+        >
           {activeTab === "audio-video" && (
             <AudioVideoTab
               waitingT={waitingT}
@@ -137,14 +143,12 @@ const RoomSettingsModal = ({
             />
           )}
 
-          {activeTab === "general" && (
-            <GeneralSettingsTab
+          {activeTab === "personal" && (
+            <PersonalSettingsTab
               receiveSystemMsgs={receiveSystemMsgs}
               setReceiveSystemMsgs={setReceiveSystemMsgs}
             />
           )}
-
-          {activeTab === "banned" && isHost && <BannedListTab />}
         </div>
       </div>
     </Modal>

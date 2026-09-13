@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 import {
   Mic,
   MicOff,
@@ -7,7 +7,6 @@ import {
   VideoOff,
   Hand,
   UserPlus,
-  Crown,
   Ellipsis,
   DoorOpen,
   Loader2,
@@ -16,6 +15,12 @@ import {
   PhoneOff,
   MessageSquareOff,
   ShieldAlert,
+  Settings2,
+  ChevronDown,
+  MonitorUp,
+  CircleDot,
+  Gamepad2,
+  Gauge,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useDispatch } from "react-redux"
@@ -26,7 +31,15 @@ import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantActionPopover } from "./ParticipantActionPopover"
-import { IconButton, PillButton } from "@/shared/components/ui/buttons"
+import { IconButton } from "@/shared/components/ui/buttons"
+import PolicyRow from "./settings/PolicyRow"
+import BannedListTab from "./settings/BannedListTab"
+import { canViewBannedList } from "@/features/video-call/utils/roomAccess"
+import {
+  getRoomSetting,
+  setRoomSetting,
+  ROOM_SETTING_KEYS,
+} from "@/features/video-call/utils/roomSettingHelpers"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { sanitizeAvatarUrl } from "@/features/video-call/utils/livekitMetadataUtils"
 import { safeSetLiveKitMetadata } from "@/features/video-call/utils/livekitMetadataUtils"
@@ -50,6 +63,9 @@ import {
   useUpdateStudentSharePolicyMutation,
   useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
+  useGetGamePolicyQuery,
+  useUpdateGamePolicyMutation,
+  useUpdateHighQualityPolicyMutation,
   useLowerAllHandsMutation,
   useRestrictVoiceAllMutation,
 } from "@/store/api/roomsApi"
@@ -83,6 +99,7 @@ const ParticipantItem = ({ participant }) => {
     restrictionByAccountId,
   } = useVideoCallContext()
   const isSpeaking = useIsSpeaking(participant)
+  const prefersReducedMotion = useReducedMotion()
   const pl = t.rooms.videoCall.participantList
 
   const isLocal = participant.isLocal
@@ -156,31 +173,48 @@ const ParticipantItem = ({ participant }) => {
       )}
       {isHandRaised && (
         <motion.div
-          animate={{ rotate: [0, 20, -10, 20, -10, 0] }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.5,
-            ease: "easeInOut",
-            repeatDelay: 1,
-          }}
+          animate={
+            prefersReducedMotion
+              ? undefined
+              : { rotate: [0, 20, -10, 20, -10, 0] }
+          }
+          transition={
+            prefersReducedMotion
+              ? undefined
+              : {
+                  repeat: Infinity,
+                  duration: 1.5,
+                  ease: "easeInOut",
+                  repeatDelay: 1,
+                }
+          }
           style={{ originX: 0.7, originY: 0.7 }}
           className="flex flex-shrink-0 items-center justify-center"
         >
-          <Hand size={18} className="text-amber-500" />
+          <Hand size={18} className="text-amber-500" aria-hidden="true" />
         </motion.div>
       )}
-      {isMicOn ? (
-        <Mic size={18} className="text-cath-red-700" />
-      ) : (
-        <MicOff size={18} className="text-[#8E8E93]" />
-      )}
-      {isCameraOn ? (
-        <Video size={18} className="text-cath-red-700" />
-      ) : (
-        <VideoOff size={18} className="text-[#8E8E93]" />
-      )}
+      <span title={isMicOn ? pl.micOn : pl.micOff}>
+        {isMicOn ? (
+          <Mic size={18} className="text-cath-red-700" aria-hidden="true" />
+        ) : (
+          <MicOff size={18} className="text-[#8E8E93]" aria-hidden="true" />
+        )}
+        <span className="sr-only">{isMicOn ? pl.micOn : pl.micOff}</span>
+      </span>
+      <span title={isCameraOn ? pl.camOn : pl.camOff}>
+        {isCameraOn ? (
+          <Video size={18} className="text-cath-red-700" aria-hidden="true" />
+        ) : (
+          <VideoOff size={18} className="text-[#8E8E93]" aria-hidden="true" />
+        )}
+        <span className="sr-only">{isCameraOn ? pl.camOn : pl.camOff}</span>
+      </span>
       {!isLocal && isCurrentUserHost && (
-        <div className="p-1 hover:bg-gray-200/60 rounded-lg text-gray-400 hover:text-gray-700 transition-colors ml-0.5">
+        <div
+          aria-hidden="true"
+          className="p-1 hover:bg-gray-200/60 rounded-lg text-gray-400 hover:text-gray-700 transition-colors ml-0.5"
+        >
           <Ellipsis size={18} />
         </div>
       )}
@@ -198,21 +232,21 @@ const ParticipantItem = ({ participant }) => {
       rightContent={rightContent}
     >
       <div className="flex items-center gap-1.5 truncate">
-        <span
-          onClick={(e) => {
-            if (accountId) {
-              e.stopPropagation()
-              window.open(
-                `/profile/${accountId}`,
-                "_blank",
-                "noopener,noreferrer",
-              )
-            }
-          }}
-          className={`truncate ${accountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}
-        >
-          {name} {isLocal && pl.youSuffix}
-        </span>
+        {accountId ? (
+          <a
+            href={`/profile/${accountId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="truncate cursor-pointer hover:underline hover:text-cath-red-700 transition-colors"
+          >
+            {name} {isLocal && pl.youSuffix}
+          </a>
+        ) : (
+          <span className="truncate">
+            {name} {isLocal && pl.youSuffix}
+          </span>
+        )}
       </div>
     </ListItem>
   )
@@ -234,9 +268,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     lkRoom,
     isHost: isHostFromContext,
     restrictionByAccountId,
+    roomHighQuality,
+    setRoomHighQuality,
   } = useVideoCallContext()
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
   const pl = t.rooms.videoCall.participantList
+  const gt = t.rooms.videoCall.general || {}
 
   const parseMetadata = (metadata) => {
     if (!metadata) return {}
@@ -270,6 +307,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
   const [muteAllConfirmOpen, setMuteAllConfirmOpen] = React.useState(false)
+  const [managementOpen, setManagementOpen] = React.useState(false)
   const dispatch = useDispatch()
   let navigate
   try {
@@ -300,6 +338,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const canViewWaiting =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.ADMIT_WAITING)
+  // Bị cấm tab: mirrors the server (host, or co-host with remove_student/mute_all).
+  const canViewBanned = canViewBannedList({
+    isHost,
+    coHost,
+    accountId: user?.accountId,
+  })
   const { data: waitingQueueData } = useGetWaitingQueueQuery(roomId, {
     skip: !roomId || !canViewWaiting,
     pollingInterval: 10000,
@@ -596,6 +640,139 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
+  // ── Room policies moved out of the Settings modal ("Chung" tab) ──
+  const canManagePrivateAi = isHost
+  const canManageGame =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.MUTE_ALL) ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
+  // High quality is host-only server-side (co-hosts never get the override).
+  const canManageHighQuality = isHost
+
+  const [memberPrivateAiAllowed, setMemberPrivateAiAllowed] = React.useState(
+    () => getRoomSetting(roomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
+  )
+  React.useEffect(() => {
+    const handlePrivateAiChange = () => {
+      setMemberPrivateAiAllowed(
+        getRoomSetting(roomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI)
+      )
+    }
+    window.addEventListener(
+      "catspeak_member_private_ai_allowed_changed",
+      handlePrivateAiChange
+    )
+    return () =>
+      window.removeEventListener(
+        "catspeak_member_private_ai_allowed_changed",
+        handlePrivateAiChange
+      )
+  }, [roomId])
+
+  const { data: gamePolicyData } = useGetGamePolicyQuery(roomId, {
+    skip: !roomId,
+  })
+  const [updateGamePolicy, { isLoading: isTogglingGame }] =
+    useUpdateGamePolicyMutation()
+  const serverAllowGame =
+    gamePolicyData?.data?.allowGame ?? gamePolicyData?.allowGame ?? true
+  const [allowGame, setAllowGame] = React.useState(true)
+  React.useEffect(() => {
+    if (serverAllowGame !== undefined) setAllowGame(serverAllowGame)
+  }, [serverAllowGame])
+
+  const [updateHighQualityPolicy, { isLoading: isTogglingHighQuality }] =
+    useUpdateHighQualityPolicyMutation()
+
+  const handleToggleMemberPrivateAi = () => {
+    const next = !memberPrivateAiAllowed
+    setMemberPrivateAiAllowed(next)
+    setRoomSetting(roomId, ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI, next)
+    window.dispatchEvent(new Event("catspeak_member_private_ai_allowed_changed"))
+    try {
+      const payload = new TextEncoder().encode(
+        JSON.stringify({
+          action: "TOGGLE_MEMBER_PRIVATE_AI",
+          allowed: next,
+          roomId,
+        })
+      )
+      lkRoom?.localParticipant?.publishData(payload, {
+        topic: "moderation",
+        reliable: true,
+      })
+    } catch {
+      /* ignore broadcast errors */
+    }
+  }
+
+  const handleToggleGame = async () => {
+    const next = !allowGame
+    setAllowGame(next)
+    try {
+      if (roomId) {
+        await updateGamePolicy({ id: roomId, allow: next }).unwrap()
+      }
+    } catch (err) {
+      setAllowGame(!next)
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenGame || "Bạn không có quyền thay đổi chính sách trò chơi."
+        )
+      )
+      return
+    }
+    try {
+      const payload = new TextEncoder().encode(
+        JSON.stringify({ action: "GAME_POLICY", allow: next })
+      )
+      lkRoom?.localParticipant?.publishData(payload, {
+        topic: "moderation",
+        reliable: true,
+      })
+    } catch {
+      /* ignore broadcast errors */
+    }
+  }
+
+  const handleToggleHighQuality = async () => {
+    const next = roomHighQuality !== true
+    setRoomHighQuality?.(next)
+    try {
+      if (roomId) {
+        await updateHighQualityPolicy({ id: roomId, enabled: next }).unwrap()
+      }
+    } catch (err) {
+      setRoomHighQuality?.(!next)
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          t?.rooms?.videoCall?.participantList?.forbiddenHighQuality ||
+            "Chỉ chủ phòng mới có quyền bật/tắt chế độ chất lượng cao."
+        )
+      )
+      return
+    }
+    try {
+      const payload = new TextEncoder().encode(
+        JSON.stringify({
+          action: "HIGH_QUALITY_POLICY",
+          enabled: next,
+          roomId,
+        })
+      )
+      lkRoom?.localParticipant?.publishData(payload, {
+        topic: "moderation",
+        reliable: true,
+      })
+    } catch {
+      /* ignore broadcast errors */
+    }
+  }
+
   const [lowerAllHandsApi, { isLoading: isLoweringHands }] = useLowerAllHandsMutation()
   const [restrictVoiceAllApi, { isLoading: isRestrictingVoiceAll }] = useRestrictVoiceAllMutation()
   const [lowerHandsConfirmOpen, setLowerHandsConfirmOpen] = React.useState(false)
@@ -678,23 +855,40 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           className="border-b border-border shrink-0"
         >
           <div className="flex items-center justify-between">
-            {canViewWaiting ? (
-              <div className="flex items-center gap-1">
+            {canViewWaiting || canViewBanned ? (
+              <div className="flex items-center gap-1 overflow-x-auto scrollbar-hidden" role="tablist" aria-label={pl.title}>
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={activeTab === "members"}
                   onClick={() => setActiveTab("members")}
-                  className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${activeTab === "members" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
+                  className={`shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 ${activeTab === "members" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
                 >
                   {pl.title} ({participants.length})
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("waiting")}
-                  className={`rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors ${activeTab === "waiting" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
-                >
-                  {t?.rooms?.videoCall?.waitingQueue?.tab}
-                  {pendingCount > 0 ? ` (${pendingCount})` : ""}
-                </button>
+                {canViewWaiting && (
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "waiting"}
+                    onClick={() => setActiveTab("waiting")}
+                    className={`shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 ${activeTab === "waiting" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
+                  >
+                    {t?.rooms?.videoCall?.waitingQueue?.tab}
+                    {pendingCount > 0 ? ` (${pendingCount})` : ""}
+                  </button>
+                )}
+                {canViewBanned && (
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "banned"}
+                    onClick={() => setActiveTab("banned")}
+                    className={`shrink-0 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 ${activeTab === "banned" ? "bg-neutral-900 text-white" : "text-neutral-600 hover:bg-neutral-100"}`}
+                  >
+                    {pl.bannedTabShort || "Bị cấm"}
+                  </button>
+                )}
               </div>
             ) : (
               <span className="font-semibold">
@@ -706,6 +900,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                 variant="ghost"
                 size="xs"
                 onClick={() => setIsInviteModalOpen(true)}
+                title={t.rooms?.videoCall?.inviteParticipant || "Invite"}
+                aria-label={t.rooms?.videoCall?.inviteParticipant || "Invite"}
               >
                 <UserPlus size={22} />
               </IconButton>
@@ -733,69 +929,184 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         </div>
       )}
 
-      {/* Host / Co-host Quick Moderation Actions (ticket 02 per-perm, ticket 04 lock/end, ticket 05 share/record) */}
+      {/* Host / Co-host moderation controls.
+          Quick actions stay visible; policy switches + destructive actions
+          collapse behind a disclosure so the participant list keeps its space. */}
       {(canMuteAll || canToggleSelfUnmute || canManageLock || canEndLive || canManageStudentShare || canManageMemberRecording || isHost) && (
-        <div className="p-2.5 border-b border-[#E5E5E5] flex flex-col gap-2 bg-gray-50/90 shrink-0">
+        <div className="flex shrink-0 flex-col gap-2 border-b border-[#E5E5E5] bg-gray-50/90 p-2.5">
+          <h3 className="sr-only">{pl.quickActions}</h3>
           <div className="flex items-center gap-2">
             {canMuteAll && (
               <button
                 onClick={handleMuteAll}
                 disabled={isMutingAll}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-red-700 bg-red-50/80 hover:bg-red-100 border border-red-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-red-700 bg-red-50/80 hover:bg-red-100 border border-red-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
               >
-                <MicOff size={15} className="text-red-500 shrink-0" />
+                <MicOff size={15} className="text-red-500 shrink-0" aria-hidden="true" />
                 <span>{pl.muteAll}</span>
               </button>
             )}
 
             <button
               onClick={handleLowerAllHands}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-amber-800 bg-amber-50/80 hover:bg-amber-100 border border-amber-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40"
             >
-              <Hand size={15} className="text-amber-500 shrink-0" />
+              <Hand size={15} className="text-amber-500 shrink-0" aria-hidden="true" />
               <span>{pl.lowerAllHands}{raisedHandParticipants.length > 0 ? ` (${raisedHandParticipants.length})` : ""}</span>
             </button>
           </div>
-          {(canMuteAll || isHost) && (
+
+          <div className="overflow-hidden rounded-xl border border-neutral-200/80 bg-white">
             <button
-              onClick={handleRestrictVoiceAll}
-              disabled={isRestrictingVoiceAll}
-              className="w-full inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-orange-700 bg-orange-50/80 hover:bg-orange-100 border border-orange-200/80 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+              type="button"
+              onClick={() => setManagementOpen((prev) => !prev)}
+              aria-expanded={managementOpen}
+              aria-controls="participant-management-options"
+              className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cath-red-700/40"
             >
-              <MicOff size={15} className="text-orange-500 shrink-0" />
-              <span>{pl.restrictVoiceAll}</span>
-            </button>
-          )}
-
-          {canToggleSelfUnmute && (
-            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
-              <span>{pl.allowSelfUnmute}</span>
-              <input
-                type="checkbox"
-                checked={allowSelfUnmute}
-                disabled={isTogglingSelfUnmute}
-                onChange={handleToggleSelfUnmute}
-                className="h-4 w-4 accent-blue-600"
-              />
-            </label>
-          )}
-
-          {/* Ticket 04: lock toggle (lock_class) — khóa thì chặn người mới, người trong phòng ở lại. */}
-          {canManageLock && (
-            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
-              <span className="inline-flex items-center gap-1.5">
-                {isLocked ? <Lock size={14} className="text-red-600" /> : <LockOpen size={14} className="text-neutral-500" />}
-                {pl.lockRoom}
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-neutral-700">
+                <Settings2 size={15} className="text-neutral-500" aria-hidden="true" />
+                {pl.management}
               </span>
-              <input
-                type="checkbox"
-                checked={isLocked}
-                disabled={isTogglingLock}
-                onChange={handleToggleLock}
-                className="h-4 w-4 accent-red-600"
-              />
-            </label>
-          )}
+              <span className="inline-flex items-center gap-1.5">
+                {isLocked && (
+                  <span
+                    title={pl.lockRoom}
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-red-100 bg-red-50 text-red-600"
+                  >
+                    <Lock size={11} aria-hidden="true" />
+                    <span className="sr-only">{pl.lockRoom}</span>
+                  </span>
+                )}
+                <motion.span
+                  animate={{ rotate: managementOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-neutral-400"
+                >
+                  <ChevronDown size={16} aria-hidden="true" />
+                </motion.span>
+              </span>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {managementOpen && (
+                <motion.div
+                  id="participant-management-options"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-col gap-1.5 border-t border-neutral-100 p-2.5">
+                    <span className="px-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+                      {pl.groupStudentPermissions || "Quyền học viên"}
+                    </span>
+
+                    {canToggleSelfUnmute && (
+                      <PolicyRow
+                        icon={<Mic size={14} aria-hidden="true" />}
+                        label={pl.allowSelfUnmute}
+                        checked={allowSelfUnmute}
+                        disabled={isTogglingSelfUnmute}
+                        onChange={handleToggleSelfUnmute}
+                      />
+                    )}
+
+                    {/* Ticket 05: student share gate (manage_student_share) — default mở. */}
+                    {canManageStudentShare && (
+                      <PolicyRow
+                        icon={<MonitorUp size={14} aria-hidden="true" />}
+                        label={pl.allowStudentShare}
+                        checked={allowStudentShare}
+                        disabled={isTogglingStudentShare}
+                        onChange={handleToggleStudentShare}
+                      />
+                    )}
+
+                    {/* Moved from the old "Chung" settings tab. */}
+                    {canManagePrivateAi && (
+                      <PolicyRow
+                        icon={<MessageSquareOff size={14} aria-hidden="true" />}
+                        label={gt.allowMemberPrivateAi || "Cho phép thành viên sử dụng AI Chat riêng tư"}
+                        description={gt.allowMemberPrivateAiDesc}
+                        checked={memberPrivateAiAllowed}
+                        onChange={handleToggleMemberPrivateAi}
+                      />
+                    )}
+
+                    {canManageGame && (
+                      <PolicyRow
+                        icon={<Gamepad2 size={14} aria-hidden="true" />}
+                        label={gt.allowGame || "Cho phép trò chơi trong phòng"}
+                        description={gt.allowGameDesc}
+                        checked={allowGame}
+                        disabled={isTogglingGame}
+                        onChange={handleToggleGame}
+                      />
+                    )}
+
+                    <span className="px-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+                      {pl.groupRoomSecurity || "Phòng & ghi hình"}
+                    </span>
+
+                    {/* Ticket 04: lock toggle (lock_class) — khóa thì chặn người mới, người trong phòng ở lại. */}
+                    {canManageLock && (
+                      <PolicyRow
+                        icon={
+                          isLocked ? (
+                            <Lock size={14} className="text-cath-red-700" aria-hidden="true" />
+                          ) : (
+                            <LockOpen size={14} aria-hidden="true" />
+                          )
+                        }
+                        label={pl.lockRoom}
+                        checked={isLocked}
+                        disabled={isTogglingLock}
+                        onChange={handleToggleLock}
+                        colorClass="peer-checked:bg-cath-red-700"
+                      />
+                    )}
+
+                    {/* Ticket 05: member recording gate, server-side (record). */}
+                    {canManageMemberRecording && (
+                      <PolicyRow
+                        icon={<CircleDot size={14} aria-hidden="true" />}
+                        label={pl.allowMemberRecording}
+                        description={gt.allowMemberRecordingDesc}
+                        checked={allowMemberRecording}
+                        disabled={isTogglingMemberRecording}
+                        onChange={handleToggleMemberRecording}
+                      />
+                    )}
+
+                    {canManageHighQuality && (
+                      <PolicyRow
+                        icon={<Gauge size={14} aria-hidden="true" />}
+                        label={gt.allowHighQuality || "Chế độ chất lượng cao (720p)"}
+                        description={gt.allowHighQualityDesc}
+                        checked={roomHighQuality === true}
+                        disabled={isTogglingHighQuality}
+                        onChange={handleToggleHighQuality}
+                      />
+                    )}
+
+                    {(canMuteAll || isHost) && (
+                      <button
+                        type="button"
+                        onClick={handleRestrictVoiceAll}
+                        disabled={isRestrictingVoiceAll}
+                        className="mt-0.5 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-orange-200/80 bg-orange-50/70 px-3 text-xs font-semibold text-orange-700 transition-all hover:bg-orange-100 active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/40"
+                      >
+                        <MicOff size={15} className="shrink-0 text-orange-500" aria-hidden="true" />
+                        <span>{pl.restrictVoiceAll}</span>
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Ticket 04: end live for all (end_class) — chỉ end session live, join lại tạo phiên mới. */}
           {canEndLive && (
@@ -803,43 +1114,15 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               type="button"
               onClick={() => setEndLiveConfirmOpen(true)}
               disabled={isEndingLive}
-              className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border border-red-600 rounded-xl transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+              className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 transition-all hover:bg-red-50 active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
             >
-              <PhoneOff size={15} className="shrink-0 rotate-[135deg]" />
+              <PhoneOff size={15} className="shrink-0 rotate-[135deg]" aria-hidden="true" />
               <span>{pl.endLive}</span>
             </button>
           )}
-
-          {/* Ticket 05: student share gate (manage_student_share) — default mở. */}
-          {canManageStudentShare && (
-            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
-              <span>{pl.allowStudentShare}</span>
-              <input
-                type="checkbox"
-                checked={allowStudentShare}
-                disabled={isTogglingStudentShare}
-                onChange={handleToggleStudentShare}
-                className="h-4 w-4 accent-blue-600"
-              />
-            </label>
-          )}
-
-          {/* Ticket 05: member recording gate, server-side (record). */}
-          {canManageMemberRecording && (
-            <label className="flex items-center justify-between gap-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200/80 rounded-xl px-3 py-2 cursor-pointer">
-              <span>{pl.allowMemberRecording}</span>
-              <input
-                type="checkbox"
-                checked={allowMemberRecording}
-                disabled={isTogglingMemberRecording}
-                onChange={handleToggleMemberRecording}
-                className="h-4 w-4 accent-blue-600"
-              />
-            </label>
-          )}
         </div>
       )}
-      {(!canViewWaiting || activeTab === "members") && (
+      {(!(canViewWaiting || canViewBanned) || activeTab === "members") && (
       <div className="flex-1 overflow-y-auto p-1">
         {raisedHandParticipants.length > 0 && (
           <ul className="flex flex-col gap-1">
@@ -875,6 +1158,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       {canViewWaiting && activeTab === "waiting" && (
         <div className="flex-1 overflow-y-auto">
           <WaitingQueueTab roomId={roomId} externalPending={externalPending} />
+        </div>
+      )}
+
+      {/* "Bị cấm" tab — host or co-host with remove_student/mute_all. */}
+      {canViewBanned && activeTab === "banned" && (
+        <div className="flex-1 overflow-y-auto p-3">
+          <BannedListTab />
         </div>
       )}
 

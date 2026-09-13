@@ -1,8 +1,4 @@
-import { useEffect, useRef, useState } from "react"
-import {
-  getRoomSetting,
-  ROOM_SETTING_KEYS,
-} from "@/features/video-call/utils/roomSettingHelpers"
+import { useEffect, useRef } from "react"
 
 export const globalSounds = {
   correct: new Audio("/sounds/correct.mp3"),
@@ -45,31 +41,9 @@ export const playGlobalSound = (name) => {
     audio.play().catch(() => {})
   }
 }
-export const useParticipantAudioEffect = (participants, roomId = null) => {
+export const useParticipantAudioEffect = (participants, isSoundEnabled = false) => {
   const prevParticipantsRef = useRef(participants)
   const isInitialMountRef = useRef(true)
-  const [isSoundEnabled, setIsSoundEnabled] = useState(() => {
-    return getRoomSetting(roomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND)
-  })
-
-  useEffect(() => {
-    const handleSoundChange = () => {
-      setIsSoundEnabled(
-        getRoomSetting(roomId, ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND),
-      )
-    }
-    handleSoundChange()
-    window.addEventListener(
-      "catspeak_join_leave_sound_changed",
-      handleSoundChange,
-    )
-    return () => {
-      window.removeEventListener(
-        "catspeak_join_leave_sound_changed",
-        handleSoundChange,
-      )
-    }
-  }, [roomId])
 
   useEffect(() => {
     const prevParticipants = prevParticipantsRef.current

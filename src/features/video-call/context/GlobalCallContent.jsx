@@ -77,6 +77,8 @@ const GlobalCallContent = ({
   setReceiveSystemMsgs,
   showAiSuggestions,
   setShowAiSuggestions,
+  joinLeaveSound,
+  setJoinLeaveSound,
   panelState,
 }) => {
   const { t, language } = useLanguage()
@@ -613,8 +615,8 @@ const GlobalCallContent = ({
     localParticipant,
   )
 
-  // ── Join/Leave Audio ──
-  useParticipantAudioEffect(participants, currentRoomId)
+  // ── Join/Leave Audio (personal preference, off by default) ──
+  useParticipantAudioEffect(participants, joinLeaveSound)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
@@ -846,23 +848,6 @@ const GlobalCallContent = ({
           return
         }
 
-        if (data.action === "TOGGLE_JOIN_SOUND") {
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-            data.enabled,
-          )
-          window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
-          toast.info(
-            data.enabled
-              ? pl.hostEnabledJoinSound ||
-                  "Host đã BẬT âm thanh khi có người vào/ra phòng."
-              : pl.hostDisabledJoinSound ||
-                  "Host đã TẮT âm thanh khi có người vào/ra phòng.",
-          )
-          return
-        }
-
         if (data.action === "TOGGLE_MEMBER_RECORDING") {
           setRoomSetting(
             currentRoomId,
@@ -915,10 +900,6 @@ const GlobalCallContent = ({
                 JSON.stringify({
                   action: "SYNC_ROOM_SETTINGS",
                   settings: {
-                    joinLeaveSound: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                    ),
                     memberRecording: getRoomSetting(
                       currentRoomId,
                       ROOM_SETTING_KEYS.MEMBER_RECORDING,
@@ -953,16 +934,6 @@ const GlobalCallContent = ({
             !data.targetIdentity ||
             String(data.targetIdentity) === String(localParticipant?.identity)
           if (isTargetMe && data.settings) {
-            if (data.settings.joinLeaveSound !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                data.settings.joinLeaveSound,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_join_leave_sound_changed"),
-              )
-            }
             if (data.settings.memberRecording !== undefined) {
               setRoomSetting(
                 currentRoomId,
@@ -1129,10 +1100,6 @@ const GlobalCallContent = ({
             JSON.stringify({
               action: "SYNC_ROOM_SETTINGS",
               settings: {
-                joinLeaveSound: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                ),
                 memberRecording: getRoomSetting(
                   currentRoomId,
                   ROOM_SETTING_KEYS.MEMBER_RECORDING,
@@ -1154,31 +1121,6 @@ const GlobalCallContent = ({
         }
       }
 
-      try {
-        const isSoundEnabled = getRoomSetting(
-          currentRoomId,
-          ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-        )
-        if (!isSoundEnabled) return
-
-        const AudioContext = window.AudioContext || window.webkitAudioContext
-        if (!AudioContext) return
-        const ctx = new AudioContext()
-        const now = ctx.currentTime
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.type = "sine"
-        osc.frequency.setValueAtTime(523.25, now)
-        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15)
-        gain.gain.setValueAtTime(0.15, now)
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-        osc.start(now)
-        osc.stop(now + 0.3)
-      } catch (e) {
-        // autoplay restriction fallback
-      }
     }
 
     // Request settings sync from Host on join if not Host
@@ -1309,6 +1251,8 @@ const GlobalCallContent = ({
     setReceiveSystemMsgs,
     showAiSuggestions,
     setShowAiSuggestions,
+    joinLeaveSound,
+    setJoinLeaveSound,
     updateAiInteraction,
     isCurrentUserPrompting,
     startNewThread,

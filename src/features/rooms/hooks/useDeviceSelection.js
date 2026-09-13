@@ -1,4 +1,18 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { pickDeviceId } from "@/features/rooms/utils/deviceSelectionUtils"
+
+// Device ids are machine-specific, so this preference is stored per browser
+// (not per account) and reused across rooms.
+const DEVICE_STORAGE_KEY = "catspeak_device_selection"
+
+const readStoredDevices = () => {
+  if (typeof window === "undefined") return {}
+  try {
+    return JSON.parse(localStorage.getItem(DEVICE_STORAGE_KEY) || "{}") || {}
+  } catch {
+    return {}
+  }
+}
 
 export const useDeviceSelection = () => {
   const [devices, setDevices] = useState({
@@ -6,6 +20,7 @@ export const useDeviceSelection = () => {
     audiooutput: [],
     videoinput: [],
   })
+  const hydratedRef = useRef(false)
 
   const [selectedMic, setSelectedMic] = useState("")
   const [selectedSpeaker, setSelectedSpeaker] = useState("")
@@ -38,24 +53,59 @@ export const useDeviceSelection = () => {
 
       setDevices(grouped)
 
-      setSelectedMic((prev) => {
-        if (prev && prev !== "default" && grouped.audioinput.some((d) => d.deviceId === prev)) return prev
-        return ""
-      })
+      // Restore the last used devices (per browser) when they still exist.
+      const stored = readStoredDevices()
 
-      setSelectedSpeaker((prev) => {
-        if (prev && prev !== "default" && grouped.audiooutput.some((d) => d.deviceId === prev)) return prev
-        return ""
-      })
+      setSelectedMic((prev) =>
+        pickDeviceId({
+          current: prev,
+          stored: stored.mic,
+          available: grouped.audioinput,
+          fallback: "",
+        })
+      )
 
-      setSelectedCamera((prev) => {
-        if (prev && prev !== "default" && grouped.videoinput.some((d) => d.deviceId === prev)) return prev
-        return grouped.videoinput[0]?.deviceId || ""
-      })
+      setSelectedSpeaker((prev) =>
+        pickDeviceId({
+          current: prev,
+          stored: stored.speaker,
+          available: grouped.audiooutput,
+          fallback: "",
+        })
+      )
+
+      setSelectedCamera((prev) =>
+        pickDeviceId({
+          current: prev,
+          stored: stored.camera,
+          available: grouped.videoinput,
+          fallback: grouped.videoinput[0]?.deviceId || "",
+        })
+      )
+
+      hydratedRef.current = true
     } catch (err) {
       console.error("Failed to enumerate devices:", err)
     }
   }, [])
+
+  // Persist selection for the next room / reload (skip the pre-hydration render
+  // so the empty initial state does not overwrite what we are about to restore).
+  useEffect(() => {
+    if (!hydratedRef.current || typeof window === "undefined") return
+    try {
+      localStorage.setItem(
+        DEVICE_STORAGE_KEY,
+        JSON.stringify({
+          mic: selectedMic,
+          speaker: selectedSpeaker,
+          camera: selectedCamera,
+        })
+      )
+    } catch {
+      /* ignore storage errors */
+    }
+  }, [selectedMic, selectedSpeaker, selectedCamera])
 
   useEffect(() => {
     queueMicrotask(() => {

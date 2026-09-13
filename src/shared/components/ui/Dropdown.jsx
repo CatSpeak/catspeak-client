@@ -44,6 +44,7 @@ const Dropdown = ({
   loading = false, // Boolean - Loading indicator when fetching dynamic options
   searchDebounceMs = 300, // Debounce delay in ms for handleSearch
   closeOnSelect, // Optional boolean override for closing dropdown on select
+  ariaLabel, // Optional accessible name for the default trigger
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -324,7 +325,10 @@ const Dropdown = ({
             }`}
         />
       }
-      className={`w-full ${triggerClassName}`}
+      aria-label={ariaLabel}
+      aria-haspopup="listbox"
+      aria-expanded={isOpen}
+      className={`w-full focus-visible:ring-2 focus-visible:ring-cath-red-700/40 focus-visible:ring-offset-1 ${triggerClassName}`}
     >
       {renderDefaultTriggerContent()}
     </PillButton>

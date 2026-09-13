@@ -153,6 +153,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
   const pl = t.rooms?.videoCall?.participantList || {}
   const { room, user, id: roomId, lkRoom, isHost: isCurrentHostFromContext } = useVideoCallContext()
   const isCurrentHost = isCurrentHostFromContext || isRoomHost(room, user?.accountId)
+  const [popoverOpen, setPopoverOpen] = useState(false)
 
   const [kickParticipant, { isLoading: isKicking }] = useKickParticipantMutation()
   const [muteParticipant, { isLoading: isMuting }] = useMuteParticipantMutation()
@@ -528,8 +529,21 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     <Popover
       className="w-full"
       triggerClassName="w-full text-left"
+      onOpenChange={setPopoverOpen}
       trigger={
-        <div className="w-full text-left cursor-pointer focus:outline-none">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-haspopup="true"
+          aria-expanded={popoverOpen}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              e.currentTarget.click()
+            }
+          }}
+          className="w-full text-left cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
+        >
           {children}
         </div>
       }
