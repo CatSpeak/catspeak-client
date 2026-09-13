@@ -69,7 +69,7 @@ const CustomRoomsPage = () => {
     }
   };
 
-  if (!isPlanLoading && !limits.allowCustomRooms) {
+  if (!isPlanLoading && limits.maxActiveCustomRooms <= 0) {
     return (
       <PlanRequiredState
         pageTitle={ct.myRoomsTitle || "My Custom Rooms"}
