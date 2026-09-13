@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from "react"
-import { Send, Smile, Sparkles } from "lucide-react"
+import { Send, Smile, Sparkles, MessageSquareOff } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import { IconButton } from "@/shared/components/ui/buttons"
@@ -36,7 +36,7 @@ const ChatInput = ({
   const { t } = useLanguage()
   const { sendAiMessage, isBlocked: isAiBlocked } = useAiSend()
   const { insertEmoji, addRecent } = useEmojiPicker()
-  const { room, id: roomIdFromContext, user, participants = [], isHost: isHostFromContext } = useGlobalVideoCall()
+  const { room, id: roomIdFromContext, user, participants = [], isHost: isHostFromContext, isChatRestricted } = useGlobalVideoCall()
   const currentRoomId = room?.id || roomIdFromContext
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
@@ -436,7 +436,7 @@ const ChatInput = ({
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      if (hasContent && isConnected && (!isAiInput || !isAiBlocked)) {
+      if (hasContent && !isInputDisabled) {
         handleSend()
       }
     }
@@ -452,9 +452,15 @@ const ChatInput = ({
           : isPrivateAi
             ? t.rooms?.chatBox?.privateAiPlaceholder || "Ask AI (Private)"
             : t.rooms?.chatBox?.publicAiPlaceholder || "Ask AI (Public)"
-      : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
+      : isChatRestricted === true
+        ? t.rooms?.chatBox?.chatRestrictedPlaceholder ||
+          "You are restricted from chatting"
+        : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
 
-  const isInputDisabled = !isConnected || (isAiInput && isAiBlocked)
+  const isInputDisabled =
+    !isConnected ||
+    (isAiInput && isAiBlocked) ||
+    (!isAiInput && isChatRestricted === true)
 
   return (
     <div className="p-3 bg-white flex flex-col gap-2 relative shrink-0 border-t border-[#E5E5E5]">
@@ -474,6 +480,17 @@ const ChatInput = ({
           content={replyTarget.message}
           onCancel={onCancelReply}
         />
+      )}
+
+      {/* Ticket 02: chat restriction reason — visible to the restricted user. */}
+      {!isAiInput && isChatRestricted === true && (
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800">
+          <MessageSquareOff size={14} className="shrink-0" />
+          <span>
+            {t.rooms?.chatBox?.chatRestrictedReason ||
+              "Host đã hạn chế quyền gửi tin nhắn chat của bạn."}
+          </span>
+        </div>
       )}
 
       {/* Unified Input Box */}

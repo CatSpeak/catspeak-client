@@ -42,6 +42,7 @@ import {
   useGetRoomCoHostQuery,
   useGetStudentSharePolicyQuery,
   useGetMemberRecordingPolicyQuery,
+  useGetRoomParticipantsQuery,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -80,6 +81,54 @@ const GlobalCallContent = ({
   const { roomData, user } = callInfo ?? {}
   const currentRoomId = callInfo?.roomId || roomData?.id
   const isAISession = callInfo?.isAISession ?? false
+
+  // ── Ticket 02: chat/voice restriction state ──
+  // Fetched on join (and refreshed when moderation changes) so late joiners see
+  // the correct state; packet events layer optimistic overrides on top.
+  const [restrictionOverrides, setRestrictionOverrides] = useState({})
+  const { data: participantsRestrictionData } = useGetRoomParticipantsQuery(
+    currentRoomId,
+    { skip: !currentRoomId },
+  )
+
+  const applyRestrictionOverride = useCallback((accountId, patch) => {
+    if (accountId == null || accountId === "") return
+    const key = String(accountId)
+    setRestrictionOverrides((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] || {}), ...patch },
+    }))
+  }, [])
+
+  const restrictionByAccountId = React.useMemo(() => {
+    const map = {}
+    const list = Array.isArray(participantsRestrictionData)
+      ? participantsRestrictionData
+      : Array.isArray(participantsRestrictionData?.data)
+        ? participantsRestrictionData.data
+        : []
+    list.forEach((p) => {
+      if (p?.accountId == null) return
+      map[String(p.accountId)] = {
+        isChatRestricted: !!p.isChatRestricted,
+        isVoiceRestricted: !!p.isVoiceRestricted,
+      }
+    })
+    Object.entries(restrictionOverrides).forEach(([id, patch]) => {
+      map[id] = {
+        isChatRestricted: false,
+        isVoiceRestricted: false,
+        ...(map[id] || {}),
+        ...patch,
+      }
+    })
+    return map
+  }, [participantsRestrictionData, restrictionOverrides])
+
+  const localRestriction = restrictionByAccountId[String(user?.accountId)] || {
+    isChatRestricted: false,
+    isVoiceRestricted: false,
+  }
 
   // ── UI state ──
   const [showCC, setShowCC] = useState(false)
@@ -167,6 +216,18 @@ const GlobalCallContent = ({
   const allParticipants = useParticipants()
   const localPart = useLocalParticipant()
   const localParticipant = localPart?.localParticipant ?? null
+
+  // Ticket 02: voice restriction forces the mic off and keeps it off — the
+  // participant can still hear others. The ControlBar also blocks re-enabling.
+  useEffect(() => {
+    if (localRestriction.isVoiceRestricted && localParticipant) {
+      try {
+        localParticipant.setMicrophoneEnabled(false)
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [localRestriction.isVoiceRestricted, localParticipant])
 
   // Refresh hardware device list & sync active devices with LiveKit when settings modal opens
   useEffect(() => {
@@ -826,6 +887,89 @@ const GlobalCallContent = ({
           return
         }
 
+        // Ticket 02: chat/voice restriction sync (applies to every target so
+        // the participant list badge updates too).
+        if (
+          data.action === "CHAT_RESTRICTED" ||
+          data.action === "CHAT_UNRESTRICTED"
+        ) {
+          const restricted = data.action === "CHAT_RESTRICTED"
+          applyRestrictionOverride(data.targetId, {
+            isChatRestricted: restricted,
+          })
+          if (isTarget) {
+            toast.error(
+              restricted
+                ? (pl.hostRestrictedChat ||
+                    "Bạn đã bị Host hạn chế gửi tin nhắn chat.")
+                : (pl.hostUnrestrictedChat ||
+                    "Host đã gỡ hạn chế chat cho bạn.")
+            )
+          }
+          return
+        }
+
+        if (
+          data.action === "VOICE_RESTRICTED" ||
+          data.action === "VOICE_UNRESTRICTED"
+        ) {
+          const restricted = data.action === "VOICE_RESTRICTED"
+          applyRestrictionOverride(data.targetId, {
+            isVoiceRestricted: restricted,
+          })
+          if (restricted && isTarget && localParticipant) {
+            try {
+              localParticipant.setMicrophoneEnabled(false)
+            } catch {
+              /* ignore */
+            }
+          }
+          if (isTarget) {
+            toast.error(
+              restricted
+                ? (pl.hostRestrictedVoice ||
+                    "Bạn đã bị Host hạn chế bật mic.")
+                : (pl.hostUnrestrictedVoice ||
+                    "Host đã gỡ hạn chế mic cho bạn.")
+            )
+          }
+          return
+        }
+
+        if (data.action === "RESTRICT_VOICE_ALL") {
+          const senderIsMe =
+            (data.senderId != null && String(data.senderId) === currentAccId) ||
+            (data.senderIdentity != null &&
+              String(data.senderIdentity) === localIdent)
+          const ids = Array.isArray(data.restrictedAccountIds)
+            ? data.restrictedAccountIds
+            : null
+          if (ids && ids.length > 0) {
+            setRestrictionOverrides((prev) => {
+              const next = { ...prev }
+              ids.forEach((accountId) => {
+                const key = String(accountId)
+                next[key] = { ...(next[key] || {}), isVoiceRestricted: true }
+              })
+              return next
+            })
+          }
+          const shouldRestrictSelf =
+            !senderIsMe &&
+            !isHost &&
+            (ids == null || ids.some((x) => String(x) === currentAccId))
+          if (shouldRestrictSelf) {
+            applyRestrictionOverride(currentAccId, {
+              isVoiceRestricted: true,
+            })
+            toast.error(
+              pl.hostRestrictedVoiceAll ||
+                "Host đã hạn chế quyền bật mic của tất cả mọi người."
+            )
+          }
+          return
+        }
+
         if (!isTarget) return
 
         if (data.action === "KICK_PARTICIPANT") {
@@ -956,7 +1100,14 @@ const GlobalCallContent = ({
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
       lkRoom.off(RoomEvent.ParticipantConnected, handleParticipantJoined)
     }
-  }, [lkRoom, localParticipant, user?.accountId, roomData, actions])
+  }, [
+    lkRoom,
+    localParticipant,
+    user?.accountId,
+    roomData,
+    actions,
+    applyRestrictionOverride,
+  ])
 
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
@@ -999,6 +1150,11 @@ const GlobalCallContent = ({
     localParticipant,
     participants,
     isHandRaised,
+
+    // Ticket 02: moderation restriction state
+    restrictionByAccountId,
+    isChatRestricted: localRestriction.isChatRestricted,
+    isVoiceRestricted: localRestriction.isVoiceRestricted,
 
     // Media state
     micOn: videoCallState.micOn,

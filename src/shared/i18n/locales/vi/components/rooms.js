@@ -258,6 +258,9 @@ export default {
     mentionHint: "↑↓ di chuyển, Enter chọn",
     mentionNotFound: "Không tìm thấy thành viên phù hợp",
     mentionAllDesc: "Tất cả thành viên trong phòng",
+    chatRestrictedPlaceholder: "Bạn đang bị hạn chế gửi tin nhắn chat",
+    chatRestrictedReason:
+      "Host đã hạn chế quyền gửi tin nhắn chat của bạn.",
   },
   sessionActions: {
     connect11: "Kết nối 1:1",
@@ -649,6 +652,15 @@ export default {
       endLiveSuccess: "Đã kết thúc buổi live.",
       forbiddenEnd: "Bạn không có quyền kết thúc buổi live.",
       hostEndedSession: "Host đã kết thúc buổi live.",
+      hostRestrictedChat: "Bạn đã bị Host hạn chế gửi tin nhắn chat.",
+      hostUnrestrictedChat: "Host đã gỡ hạn chế chat cho bạn.",
+      hostRestrictedVoice: "Bạn đã bị Host hạn chế bật mic.",
+      hostUnrestrictedVoice: "Host đã gỡ hạn chế mic cho bạn.",
+      hostRestrictedVoiceAll: "Host đã hạn chế quyền bật mic của mọi người.",
+      voiceRestrictedBlocked:
+        "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế.",
+      chatRestrictedBadge: "Hạn chế chat",
+      voiceRestrictedBadge: "Hạn chế voice",
     },
     waitingQueue: {
       tab: "Chờ",

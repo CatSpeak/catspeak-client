@@ -465,6 +465,9 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "POST",
         body: { targetAccountId, reason },
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
     }),
     unrestrictChat: builder.mutation({
       query: ({ id, targetAccountId }) => ({
@@ -472,6 +475,9 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "POST",
         body: { targetAccountId },
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
     }),
     restrictVoice: builder.mutation({
       query: ({ id, targetAccountId, reason }) => ({
@@ -479,6 +485,9 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "POST",
         body: { targetAccountId, reason },
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
     }),
     unrestrictVoice: builder.mutation({
       query: ({ id, targetAccountId }) => ({
@@ -486,12 +495,24 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "POST",
         body: { targetAccountId },
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
     }),
     restrictVoiceAll: builder.mutation({
       query: (id) => ({
         url: `/rooms/${id}/moderation/restrict-voice-all`,
         method: "POST",
       }),
+      invalidatesTags: (result, error, id) => [
+        { type: "RoomParticipants", id },
+      ],
+    }),
+    // Ticket 02: participant list with chat/voice restriction flags for
+    // bootstrap on join (and refresh after moderation changes).
+    getRoomParticipants: builder.query({
+      query: (id) => `/rooms/${id}/participants`,
+      providesTags: (result, error, id) => [{ type: "RoomParticipants", id }],
     }),
     lowerAllHands: builder.mutation({
       query: (id) => ({
@@ -661,6 +682,8 @@ export const {
   useLowerAllHandsMutation,
   useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
+  // Ticket 02: participant restriction bootstrap
+  useGetRoomParticipantsQuery,
   // Co-host foundation
   useGetRoomCoHostQuery,
   useLazyGetRoomCoHostQuery,
