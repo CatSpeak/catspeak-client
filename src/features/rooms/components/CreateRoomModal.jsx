@@ -142,11 +142,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
           handleTopicChange={activeForm.handleTopicChange}
           isQuotaFull={customForm.isQuotaFull}
           selectedLanguage={activeForm.selectedLanguage}
-          nameError={
-            activeForm.nameError
-              ? t.rooms?.createRoom?.nameRequired || activeForm.nameError
-              : ""
-          }
+          nameError={activeForm.nameError || ""}
           passwordError={activeForm.passwordError}
           t={t}
         />

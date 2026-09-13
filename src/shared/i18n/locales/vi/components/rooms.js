@@ -324,6 +324,11 @@ export default {
     maxParticipantsLimit: "Tối đa: {max} người",
     people: "người",
     unlimited: "Vĩnh viễn",
+    roomLifetime: "Vòng đời phòng",
+    roomLifetimeForever: "Mãi mãi",
+    languageLabel: "Ngôn ngữ",
+    optional: "Tùy chọn",
+    nameMaxLength: "Tên phòng tối đa 50 ký tự",
   },
   aiSettings: {
     title: "Cài đặt phiên AI",

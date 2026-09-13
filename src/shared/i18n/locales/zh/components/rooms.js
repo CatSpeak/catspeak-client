@@ -319,6 +319,11 @@ export default {
     maxParticipantsLimit: "最大: {max} 人",
     people: "人",
     unlimited: "无限制",
+    roomLifetime: "房间有效期",
+    roomLifetimeForever: "永久",
+    languageLabel: "语言",
+    optional: "可选",
+    nameMaxLength: "房间名称最多 50 个字符",
   },
   aiSettings: {
     title: "AI 会话设置",

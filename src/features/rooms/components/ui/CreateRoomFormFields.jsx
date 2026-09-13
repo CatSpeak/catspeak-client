@@ -5,8 +5,9 @@ import ImageUploadInput from "@/shared/components/ui/inputs/ImageUploadInput"
 import Switch from "@/shared/components/ui/inputs/Switch"
 import TopicSelect from "./TopicSelect"
 import LevelSelector from "./LevelSelector"
+import LanguageSelect from "./LanguageSelect"
 import { TOPICS, LEVELS } from "../../config/constants"
-import { Crown } from "lucide-react"
+import { Crown, Clock } from "lucide-react"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 
 /**
@@ -88,7 +89,19 @@ const CreateRoomFormFields = ({
           autoComplete="off"
           variant="rounded-xl"
           disabled={isDisabled}
+          maxLength={isCustomMode ? 50 : undefined}
+          showCount={isCustomMode}
         />
+
+        {/* Language Selection (Custom Mode Only, optional) */}
+        {isCustomMode && (
+          <LanguageSelect
+            value={formData.languageType}
+            onChange={(language) => handleChange("languageType", language)}
+            disabled={isDisabled}
+            t={t}
+          />
+        )}
 
         {/* Room Privacy & Password Group (Custom Mode Only) */}
         {isCustomMode && (
@@ -164,6 +177,19 @@ const CreateRoomFormFields = ({
                   <span>5</span>
                   <span>{maxParticipantsLimit}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Room Lifetime (read-only, Custom rooms never expire) */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-gray-800">
+                {ct.roomLifetime || "Room Lifetime"}
+              </label>
+              <div className="flex items-center gap-3 rounded-xl border border-border px-4 min-h-[56px] bg-gray-50">
+                <Clock size={16} className="text-gray-400 shrink-0" />
+                <span className="text-gray-700">
+                  {ct.roomLifetimeForever || "Forever"}
+                </span>
               </div>
             </div>
           </div>
