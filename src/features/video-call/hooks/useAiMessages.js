@@ -2,14 +2,21 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { RoomEvent } from "livekit-client"
 import { useConversationThreads } from "./useConversationThreads"
 import { flattenAiInteractions } from "../utils/flattenAiInteractions"
+import {
+  getInitialMeetingSuggestions,
+  getMoreMeetingSuggestions,
+} from "../utils/meetingSuggestionHelpers"
 
 /**
  * Orchestrates AI interactions: optimistic messages, LiveKit data handling,
- * conversation threads, and flat message output for rendering.
+ * conversation threads, meeting starter greeting, and flat message output.
  */
 export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
   const [aiInteractions, setAiInteractions] = useState([])
   const currentUserIdRef = useRef(currentUserId)
+  const hasSentGreetingRef = useRef(false)
+  const usedSuggestionIdsRef = useRef(new Set())
+  const chatCountRef = useRef(0)
 
   // ── Sub-hooks ──
   const {
@@ -35,6 +42,80 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
     )
   }, [])
 
+  // ── Starter Greeting (FR-001, BR-004) ──
+  const triggerStarterGreeting = useCallback(
+    (roomTopic = null, targetLanguage = "en") => {
+      if (hasSentGreetingRef.current) return
+
+      try {
+        const { topicKey, topicNameVi, topicNameEn, topicIcon, suggestions } =
+          getInitialMeetingSuggestions({
+            roomTopic,
+            targetLanguage,
+            usedIds: usedSuggestionIdsRef.current,
+            chatCount: chatCountRef.current,
+          })
+
+        suggestions.forEach((s) => usedSuggestionIdsRef.current.add(s.id))
+        hasSentGreetingRef.current = true
+
+        setAiInteractions((prev) => [
+          {
+            id: "ai-starter-greeting",
+            type: "starter-greeting",
+            timestamp: Date.now(),
+            topicInfo: {
+              topicKey,
+              topicNameVi,
+              topicNameEn,
+              topicIcon,
+            },
+            suggestions,
+            status: "done",
+            aiFrom: { name: "Cat Speak", isSystem: false, isAi: true },
+          },
+          ...prev,
+        ])
+      } catch (err) {
+        console.warn("[useAiMessages] Failed to generate starter greeting:", err)
+        // E-001: silent fail — do not block the chat flow
+      }
+    },
+    [],
+  )
+
+  // ── Load More Meeting Suggestions (FR-007) ──
+  const loadMoreMeetingSuggestions = useCallback(
+    (roomTopic = null, targetLanguage = "en") => {
+      try {
+        const moreItems = getMoreMeetingSuggestions({
+          roomTopic,
+          targetLanguage,
+          usedIds: usedSuggestionIdsRef.current,
+          chatCount: chatCountRef.current,
+          count: 3,
+        })
+
+        moreItems.forEach((s) => usedSuggestionIdsRef.current.add(s.id))
+
+        setAiInteractions((prev) =>
+          prev.map((item) => {
+            if (item.type === "starter-greeting") {
+              return {
+                ...item,
+                suggestions: [...(item.suggestions || []), ...moreItems],
+              }
+            }
+            return item
+          }),
+        )
+      } catch (err) {
+        console.warn("[useAiMessages] Failed to load more suggestions:", err)
+      }
+    },
+    [],
+  )
+
   // ── LiveKit data handler ──
 
   useEffect(() => {
@@ -56,6 +137,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
               type: "interaction",
               timestamp: Date.now(),
               prompt: json.message,
+              promptRaw: json.message,
               topic: "public-ai",
               questioner: json.questioner,
               response: null,
@@ -91,6 +173,26 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
 
         const fromName = topic === "public-ai" ? "Public AI" : "Private AI"
 
+        let answerText = json.message || ""
+        let followUps = json.follow_up_questions || json.followUpSuggestions || []
+
+        // Parse structured JSON inside message if present (FR-005)
+        if (typeof json.message === "string" && json.message.trim().startsWith("{")) {
+          try {
+            const parsed = JSON.parse(json.message)
+            if (parsed.answer) {
+              answerText = parsed.answer
+              if (Array.isArray(parsed.follow_up_questions)) {
+                followUps = parsed.follow_up_questions
+              }
+            }
+          } catch {
+            // E-002: silent fail for follow-up parsing
+          }
+        }
+
+        chatCountRef.current += 1
+
         setAiInteractions((prev) => {
           const newInteractions = [...prev]
           let found = false
@@ -102,13 +204,14 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
             ) {
               newInteractions[i] = {
                 ...newInteractions[i],
-                response: json.message,
+                response: answerText,
+                followUpSuggestions: followUps,
                 status: "done",
                 responseTimestamp: json.timestamp || Date.now(),
                 aiFrom: { name: fromName, isSystem: false, isAi: true },
               }
               // Append the assistant turn to the conversation thread
-              appendAssistantTurn(newInteractions[i].id, json.message)
+              appendAssistantTurn(newInteractions[i].id, answerText)
               found = true
               break
             }
@@ -122,7 +225,8 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
               prompt: "...",
               topic: topic,
               questioner: json.questioner,
-              response: json.message,
+              response: answerText,
+              followUpSuggestions: followUps,
               status: "done",
               from: { name: "Unknown", isLocal: false, isAi: false },
               aiFrom: { name: fromName, isSystem: false, isAi: true },
@@ -159,5 +263,7 @@ export const useAiMessages = (lkRoom, currentUserId, participants = []) => {
     startNewThread,
     continueThread,
     getConversationThread,
+    triggerStarterGreeting,
+    loadMoreMeetingSuggestions,
   }
 }

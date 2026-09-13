@@ -1,5 +1,5 @@
 import React from "react"
-import { Reply } from "lucide-react"
+import { Reply, Globe, RotateCw, Sparkles } from "lucide-react"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
@@ -33,200 +33,108 @@ const splitEmojis = (str) => {
 }
 
 /**
- * Renders vocabulary suggestions inside dynamic cat-head styled pills
+ * Renders Meeting Starter Greeting with bilingual topic suggestion cards and Load More chip (FR-001, FR-007)
  */
-const VocabularySuggestions = ({
-  vocabulary,
-  introMessage,
-  expandedIdx,
-  setExpandedIdx,
+const StarterGreetingBubble = ({
+  msg,
+  t,
+  onSendSuggestedSentence,
+  onLoadMoreSuggestions,
 }) => {
+  const topicInfo = msg.topicInfo
+  const suggestions = msg.suggestions || []
+
   return (
-    <div className="flex flex-col gap-2 py-0.5">
-      <p className="m-0 text-sm font-medium leading-relaxed">
-        {introMessage || "Hoàng thượng gợi ý cho sen vài từ nè:"}
-      </p>
-      <div className="flex flex-wrap gap-x-1.5 gap-y-3 mt-2.5">
-        {vocabulary.map((vocabItem, idx) => {
-          const isObject = typeof vocabItem === "object" && vocabItem !== null
-          const word = isObject ? vocabItem.word : vocabItem
-          const meaning = isObject ? vocabItem.meaning : null
-          const isExpanded = expandedIdx === idx && !!meaning
+    <div className="flex flex-col mb-4 items-start w-full">
+      {/* Header Label (FR-001) */}
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <span className="text-xs font-bold text-cath-red-700 tracking-wide uppercase flex items-center gap-1 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">
+          {t.rooms?.chatBox?.aiMeetingSuggestionLabel || "🗣️ GỢI Ý CÂU CHO BUỔI HỌC"}
+        </span>
+        {topicInfo && (
+          <span className="text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md flex items-center gap-1">
+            <span>{topicInfo.topicIcon}</span>
+            <span>{topicInfo.topicNameVi || topicInfo.topicNameEn}</span>
+          </span>
+        )}
+      </div>
 
-          const colors = [
-            "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100/90 active:bg-rose-200",
-            "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100/90 active:bg-blue-200",
-            "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/90 active:bg-emerald-200",
-            "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100/90 active:bg-violet-200",
-            "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100/90 active:bg-amber-200",
-            "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100/90 active:bg-cyan-200",
-          ]
-          const colorClass = colors[idx % colors.length]
-          return (
+      {/* Main Container */}
+      <div className="max-w-[95%] rounded-2xl p-3.5 bg-gradient-to-br from-red-50/60 via-amber-50/40 to-white text-gray-900 border border-red-100 shadow-sm flex flex-col gap-2.5">
+        <p className="m-0 text-xs text-gray-700 leading-relaxed font-medium">
+          {t.rooms?.chatBox?.aiGreetingIntro ||
+            "Dưới đây là một số gợi ý câu để bạn dễ dàng bắt đầu trò chuyện trong buổi học:"}
+        </p>
+
+        {/* Suggestion Cards List */}
+        <div className="flex flex-col gap-2 mt-1">
+          {suggestions.map((item, idx) => (
             <button
-              key={word}
+              key={item.id || idx}
               type="button"
-              onClick={() => {
-                if (meaning) {
-                  setExpandedIdx(isExpanded ? null : idx)
-                }
-                navigator.clipboard.writeText(word)
-              }}
-              title={meaning ? "Click to view meaning & copy" : "Click to copy"}
-              className={`relative px-3 text-xs font-semibold border cursor-pointer transition-all shadow-sm select-none active:scale-95 ${isExpanded ? "rounded-2xl py-1.5" : "rounded-full py-1"
-                } ${colorClass}`}
+              onClick={() => onSendSuggestedSentence?.(item.targetText || item.displayText || item.vi)}
+              title="Click để gửi ngay vào phòng học"
+              className="group text-left text-xs bg-white hover:bg-red-50/80 active:scale-[0.99] border border-red-200/80 hover:border-red-300 rounded-xl px-3 py-2.5 transition-all shadow-xs flex items-start gap-2 cursor-pointer"
             >
-              {/* Cat ears */}
-              <span className="absolute -top-1 left-2.5 w-2 h-2 bg-inherit border-t border-l border-inherit rotate-45 rounded-tl-[2px]" />
-              <span className="absolute -top-1 right-2.5 w-2 h-2 bg-inherit border-t border-l border-inherit rotate-45 rounded-tl-[2px]" />
-
-              <div className="flex flex-col items-center">
-                <span>{word}</span>
-                {isExpanded && (
-                  <span className="mt-1 pt-1 border-t border-dashed border-inherit font-normal text-[10px] opacity-90 max-w-[150px] break-words text-center">
-                    {meaning}
+              <span className="text-base shrink-0 leading-none mt-0.5">{item.icon || "💬"}</span>
+              <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                <span className="font-semibold text-gray-900 group-hover:text-cath-red-700 transition-colors break-words">
+                  {item.targetText || item.vi}
+                </span>
+                {item.targetText && item.vi && item.targetText !== item.vi && (
+                  <span className="text-[11px] text-gray-500 font-normal break-words">
+                    {item.vi}
                   </span>
                 )}
               </div>
             </button>
-          )
-        })}
+          ))}
+
+          {/* Load More Suggestions Chip (FR-007 - Load More Pattern) */}
+          <button
+            type="button"
+            onClick={() => onLoadMoreSuggestions?.()}
+            className="w-full text-center text-xs py-2 px-3 border border-dashed border-red-300/80 hover:border-red-400 bg-red-50/30 hover:bg-red-50 text-red-800 font-medium rounded-xl opacity-80 hover:opacity-100 transition-all cursor-pointer shadow-2xs"
+          >
+            {t.rooms?.chatBox?.aiLoadMoreSuggestions || "＋ Gợi ý thêm"}
+          </button>
+        </div>
       </div>
     </div>
   )
 }
 
 /**
- * Renders suggested sentence bubbles popping up sequentially with writing animation
+ * Message Bubble component rendering chat messages, follow-up buttons, and exception warning labels
  */
-const SentenceSuggestions = ({
-  suggestedSentences,
-  showText,
-  hideText,
-  renderFormattedMessage,
+const MessageBubble = ({
+  msg,
+  t,
+  onReplyTo,
+  onSendSuggestedSentence,
+  onLoadMoreSuggestions,
+  onSelectFollowUp,
+  onRetryAi,
+  isUserTyping = false,
 }) => {
-  const [visibleCount, setVisibleCount] = React.useState(1)
-  const [isTypingNext, setIsTypingNext] = React.useState(false)
-  const [expandedSentenceIdx, setExpandedSentenceIdx] = React.useState(null)
-  const containerRef = React.useRef(null)
-
-  React.useEffect(() => {
-    if (!suggestedSentences || suggestedSentences.length === 0) return
-
-    setVisibleCount(1)
-    setIsTypingNext(suggestedSentences.length > 1)
-
-    if (suggestedSentences.length <= 1) return
-
-    let currentVisible = 1
-    const interval = setInterval(() => {
-      currentVisible += 1
-      setVisibleCount(currentVisible)
-      if (currentVisible >= suggestedSentences.length) {
-        setIsTypingNext(false)
-        clearInterval(interval)
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [suggestedSentences])
-
-  React.useEffect(() => {
-    if (suggestedSentences) {
-      if (containerRef.current) {
-        const lastChild = containerRef.current.lastElementChild
-        if (lastChild) {
-          lastChild.scrollIntoView({ behavior: "smooth", block: "nearest" })
-        }
-      }
-    }
-  }, [visibleCount, isTypingNext, suggestedSentences])
-
-  return (
-    <div ref={containerRef} className="flex flex-col gap-1.5 w-full items-start">
-      {suggestedSentences.slice(0, visibleCount).map((item, idx) => {
-        const isObj = typeof item === "object" && item !== null
-        const question = isObj ? item.question : item
-        const meaning = isObj ? item.meaning : null
-        const isExpanded = expandedSentenceIdx === idx
-
-        return (
-          <div
-            key={idx}
-            className="max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words bg-orange-100 text-orange-900 border border-orange-200/50 shadow-sm"
-          >
-            <p className="m-0 whitespace-pre-wrap">
-              {renderFormattedMessage(question)}
-            </p>
-            {meaning && (
-              <div className="mt-1 flex flex-col items-start gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setExpandedSentenceIdx(isExpanded ? null : idx)
-                  }}
-                  className="text-[10px] font-semibold text-orange-700 hover:text-orange-900 underline cursor-pointer select-none transition-colors"
-                >
-                  {isExpanded ? hideText : showText}
-                </button>
-                {isExpanded && (
-                  <p className="m-0 pt-1 text-xs border-t border-orange-300 text-orange-800 w-full">
-                    {meaning}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )
-      })}
-
-      {isTypingNext && (
-        <div className="max-w-[85%] rounded-2xl px-3 py-2 bg-orange-100 text-orange-950 border border-orange-200/50 shadow-sm">
-          <div className="flex gap-1 items-center h-2 px-1 py-1">
-            <span
-              className="w-1.5 h-1.5 bg-orange-600/60 rounded-full animate-bounce"
-              style={{
-                animationDelay: "0s",
-                animationDuration: "0.8s",
-              }}
-            ></span>
-            <span
-              className="w-1.5 h-1.5 bg-orange-600/60 rounded-full animate-bounce"
-              style={{
-                animationDelay: "0.15s",
-                animationDuration: "0.8s",
-              }}
-            ></span>
-            <span
-              className="w-1.5 h-1.5 bg-orange-600/60 rounded-full animate-bounce"
-              style={{
-                animationDelay: "0.3s",
-                animationDuration: "0.8s",
-              }}
-            ></span>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-/**
- * Message Bubble component rendering chat messages and suggestions
- */
-const MessageBubble = ({ msg, t, onReplyTo }) => {
   const { formatTime } = useTimezone()
   const { user } = useGlobalVideoCall()
-  const [expandedIdx, setExpandedIdx] = React.useState(null)
 
-  const currentUserName = user?.fullName || user?.username || user?.nickname || user?.email || ""
+  // Special rendering: Starter Greeting (FR-001)
+  if (msg.isStarterGreeting) {
+    return (
+      <StarterGreetingBubble
+        msg={msg}
+        t={t}
+        onSendSuggestedSentence={onSendSuggestedSentence}
+        onLoadMoreSuggestions={onLoadMoreSuggestions}
+      />
+    )
+  }
+
+  const currentUserName =
+    user?.fullName || user?.username || user?.nickname || user?.email || ""
   const isMe = msg.from?.isLocal ?? false
-
-  const isMentionedMe = React.useMemo(() => {
-    if (!currentUserName || isMe || !msg.message) return false
-    const regex = new RegExp(`@${currentUserName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, "i")
-    return regex.test(msg.message)
-  }, [currentUserName, isMe, msg.message])
 
   const renderFormattedMessage = (text) => {
     if (!text) return text
@@ -235,26 +143,25 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
     let mainText = text
 
     if (text.startsWith("@AIPublic")) {
-      prefixNode = <span className="font-bold pr-1">@AIPublic</span>
       mainText = text.slice(9)
     } else if (text.startsWith("@AIPrivate")) {
-      prefixNode = <span className="font-bold pr-1">@AIPrivate</span>
       mainText = text.slice(10)
     } else if (text.startsWith("@public-ai")) {
-      prefixNode = <span className="font-bold pr-1">@public-ai</span>
       mainText = text.slice(10)
     } else if (text.startsWith("@private-ai")) {
-      prefixNode = <span className="font-bold pr-1">@private-ai</span>
       mainText = text.slice(11)
     } else if (text.startsWith("@AISystem")) {
-      prefixNode = <span className="font-bold pr-1">@AISystem</span>
       mainText = text.slice(9)
     }
 
     return (
       <>
         {prefixNode}
-        <FormattedText text={mainText} isOwn={isMe} currentUserName={currentUserName} />
+        <FormattedText
+          text={mainText.trim()}
+          isOwn={isMe}
+          currentUserName={currentUserName}
+        />
       </>
     )
   }
@@ -262,9 +169,8 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
   const isSystem =
     msg.from?.isSystem || msg.isSystem || (!msg.from && !msg.topic)
   const isAi = msg.from?.isAi || false
-  let senderName = isMe
-    ? t.rooms?.chatBox?.you || "You"
-    : msg.from?.name || msg.from?.identity || `User`
+
+  let senderName = msg.from?.name || msg.from?.identity || `User`
 
   if (
     senderName === "System (AI Gợi ý)" ||
@@ -277,153 +183,184 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
     senderName = "Cat Speak"
   }
 
-  const isVi = t.rooms?.chatBox?.reply === "Trả lời"
-  const isZh = t.rooms?.chatBox?.reply === "回复" || t.rooms?.chatBox?.reply === "回覆"
+  const isEmoji =
+    !msg.replyTo &&
+    !msg.status &&
+    !msg.vocabulary &&
+    !msg.suggestedSentences &&
+    isEmojiOnly(msg.message)
 
-  const showText = isVi ? "Xem nghĩa" : isZh ? "显示解释" : "Show meaning"
-  const hideText = isVi ? "Ẩn nghĩa" : isZh ? "隐藏解释" : "Hide meaning"
-
-  const isEmoji = !msg.replyTo && !msg.status && !msg.vocabulary && !msg.suggestedSentences && isEmojiOnly(msg.message)
+  const isError = msg.status === "error"
 
   return (
-    <div className={`flex flex-col mb-2 ${isMe ? "items-end" : "items-start"}`}>
-      <div className="flex items-center gap-1 mb-1 max-w-full">
-        <span
-          className="text-xs font-bold truncate shrink flex items-center gap-1"
-          title={senderName}
-        >
-          {senderName}
-        </span>
-        <span className="text-xs text-[#606060] shrink-0">
-          {formatTime(msg.timestamp)}
-        </span>
-      </div>
+    <div className={`flex flex-col mb-2.5 ${isMe ? "items-end" : "items-start"}`}>
+      {/* Header Info: Sender Name & Exception Warning (FR-006) */}
+      {!isMe ? (
+        <div className="flex items-center gap-1 mb-1 max-w-full">
+          <span
+            className="text-xs font-bold truncate shrink flex items-center gap-1"
+            title={senderName}
+          >
+            {senderName}
+          </span>
+          <span className="text-xs text-[#606060] shrink-0">
+            {formatTime(msg.timestamp)}
+          </span>
+        </div>
+      ) : msg.isPublic ? (
+        /* Exception Warning: Public warning badge when user asks Public AI */
+        <div className="flex items-center gap-1 text-[11px] text-red-600 font-semibold mb-1">
+          <Globe size={12} className="shrink-0" />
+          <span>{t.rooms?.chatBox?.aiPublicWarningBadge || "🌐 Công khai với phòng"}</span>
+          <span className="text-xs text-[#606060] font-normal ml-1">
+            {formatTime(msg.timestamp)}
+          </span>
+        </div>
+      ) : (
+        /* Private mode: Clean, minimal header (timestamp only) */
+        <div className="flex items-center gap-1 mb-1 max-w-full">
+          <span className="text-xs text-[#606060] shrink-0">
+            {formatTime(msg.timestamp)}
+          </span>
+        </div>
+      )}
 
       {/* Main Bubble */}
-      <div className={`group flex items-center gap-2 max-w-full ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-        {msg.suggestedSentences ? (
-          <SentenceSuggestions
-            suggestedSentences={msg.suggestedSentences}
-            showText={showText}
-            hideText={hideText}
-            renderFormattedMessage={renderFormattedMessage}
-          />
-        ) : (
-          <div
-            className={
-              isEmoji
-                ? "bg-transparent p-0 text-3xl md:text-4xl leading-relaxed select-text border-0 shadow-none min-h-0 min-w-0"
-                : `max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words transition-all ${isMe
-                  ? "bg-[#990011] text-white"
-                  : msg.status === "error"
-                    ? "bg-red-100 text-red-900 border border-red-200"
-                    : isSystem
-                      ? "bg-orange-100 text-orange-900"
-                      : isAi
-                        ? "bg-amber-50 text-amber-900"
-                        : "bg-[#F0F0F0] text-black"
-                  }`
-            }
-          >
-            {/* Reply Context */}
-            {msg.replyTo && (
-              <RepliedMessage
-                senderName={msg.replyTo.name}
-                content={msg.replyTo.message}
-                isOwn={isMe}
-              />
-            )}
+      <div
+        className={`group flex items-center gap-2 max-w-full ${
+          isMe ? "flex-row-reverse" : "flex-row"
+        }`}
+      >
+        <div
+          className={
+            isEmoji
+              ? "bg-transparent p-0 text-3xl md:text-4xl leading-relaxed select-text border-0 shadow-none min-h-0 min-w-0"
+              : `max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words transition-all ${
+                  isMe
+                    ? "bg-[#990011] text-white"
+                    : isError
+                      ? "bg-red-50 text-red-950 border border-red-200"
+                      : isSystem
+                        ? "bg-orange-100 text-orange-900"
+                        : isAi
+                          ? "bg-amber-50/70 text-amber-950 border border-amber-100"
+                          : "bg-[#F0F0F0] text-black"
+                }`
+          }
+        >
+          {/* Reply Context */}
+          {msg.replyTo && (
+            <RepliedMessage
+              senderName={msg.replyTo.name}
+              content={msg.replyTo.message}
+              isOwn={isMe}
+            />
+          )}
 
-            {msg.status === "loading" ? (
-              <div className="flex gap-1 items-center h-2 px-1 py-1">
-                <span
-                  className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                  style={{
-                    animationDelay: "0s",
-                    animationDuration: "0.8s",
-                  }}
-                ></span>
-                <span
-                  className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                  style={{
-                    animationDelay: "0.15s",
-                    animationDuration: "0.8s",
-                  }}
-                ></span>
-                <span
-                  className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                  style={{
-                    animationDelay: "0.3s",
-                    animationDuration: "0.8s",
-                  }}
-                ></span>
-              </div>
-            ) : msg.vocabulary ? (
-              <VocabularySuggestions
-                vocabulary={msg.vocabulary}
-                introMessage={msg.introMessage}
-                expandedIdx={expandedIdx}
-                setExpandedIdx={setExpandedIdx}
-              />
-            ) : isEmoji ? (
-              <span className="inline-flex flex-wrap items-center -space-x-2 md:-space-x-2.5 text-3xl md:text-4xl leading-none select-text">
-                {splitEmojis(msg.message).map((emoji, idx) => (
-                  <span key={idx} className="inline-block">{emoji}</span>
-                ))}
-              </span>
-            ) : (
-              <div>
-                {msg.message &&
-                  (() => {
-                    const urlDetailsList = findUrlsInText(msg.message)
-                    if (urlDetailsList.length === 0) return null
-                    return (
-                      <div className="mb-1 flex flex-col gap-1 w-full">
-                        {urlDetailsList.map((urlDetails, idx) => {
-                          if (urlDetails.type === "youtube") {
-                            return (
-                              <YouTubeEmbed
-                                key={idx}
-                                videoId={urlDetails.youtube.videoId}
-                                timestamp={urlDetails.youtube.timestamp}
-                                originalUrl={urlDetails.originalUrl}
-                                isOwn={isMe}
-                                hasCaption={Boolean(msg.message)}
-                              />
-                            )
-                          }
+          {msg.status === "loading" ? (
+            <div className="flex gap-1 items-center h-2 px-1 py-1">
+              <span
+                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
+                style={{
+                  animationDelay: "0s",
+                  animationDuration: "0.8s",
+                }}
+              ></span>
+              <span
+                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
+                style={{
+                  animationDelay: "0.15s",
+                  animationDuration: "0.8s",
+                }}
+              ></span>
+              <span
+                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
+                style={{
+                  animationDelay: "0.3s",
+                  animationDuration: "0.8s",
+                }}
+              ></span>
+            </div>
+          ) : isError ? (
+            /* AI Error Bubble + Retry Button (E-003) */
+            <div className="flex flex-col gap-2">
+              <p className="m-0 text-xs leading-relaxed text-red-900 font-medium">
+                {msg.message ||
+                  t.rooms?.chatBox?.aiErrorResponse ||
+                  "Trợ lý AI tạm thời không phản hồi. Vui lòng thử lại."}
+              </p>
+              {onRetryAi && (
+                <button
+                  type="button"
+                  onClick={() => onRetryAi(msg.promptRaw || msg.message, msg.interactionId)}
+                  className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 text-xs font-semibold text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors shadow-2xs cursor-pointer"
+                >
+                  <RotateCw size={12} />
+                  <span>{t.rooms?.chatBox?.aiRetry || "🔄 Thử lại"}</span>
+                </button>
+              )}
+            </div>
+          ) : isEmoji ? (
+            <span className="inline-flex flex-wrap items-center -space-x-2 md:-space-x-2.5 text-3xl md:text-4xl leading-none select-text">
+              {splitEmojis(msg.message).map((emoji, idx) => (
+                <span key={idx} className="inline-block">
+                  {emoji}
+                </span>
+              ))}
+            </span>
+          ) : (
+            <div>
+              {msg.message &&
+                (() => {
+                  const urlDetailsList = findUrlsInText(msg.message)
+                  if (urlDetailsList.length === 0) return null
+                  return (
+                    <div className="mb-1 flex flex-col gap-1 w-full">
+                      {urlDetailsList.map((urlDetails, idx) => {
+                        if (urlDetails.type === "youtube") {
                           return (
-                            <LinkPreviewCard
+                            <YouTubeEmbed
                               key={idx}
-                              urlDetails={urlDetails}
+                              videoId={urlDetails.youtube.videoId}
+                              timestamp={urlDetails.youtube.timestamp}
+                              originalUrl={urlDetails.originalUrl}
                               isOwn={isMe}
                               hasCaption={Boolean(msg.message)}
                             />
                           )
-                        })}
-                      </div>
-                    )
-                  })()}
-                <p className="m-0 whitespace-pre-wrap break-words">
-                  {renderFormattedMessage(msg.message)}
-                </p>
-              </div>
-            )}
+                        }
+                        return (
+                          <LinkPreviewCard
+                            key={idx}
+                            urlDetails={urlDetails}
+                            isOwn={isMe}
+                            hasCaption={Boolean(msg.message)}
+                          />
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
+              <p className="m-0 whitespace-pre-wrap break-words">
+                {renderFormattedMessage(msg.message)}
+              </p>
+            </div>
+          )}
 
-            {msg.translatedMessage && (
-              <p
-                className={`m-0 mt-1 pt-1 text-xs border-t ${isMe
+          {msg.translatedMessage && (
+            <p
+              className={`m-0 mt-1 pt-1 text-xs border-t ${
+                isMe
                   ? "border-white/20 text-white/90"
                   : isSystem
                     ? "border-orange-300 text-orange-800"
                     : "border-black/10 text-black/70"
-                  }`}
-              >
-                {msg.translatedMessage}
-              </p>
-            )}
-          </div>
-        )}
+              }`}
+            >
+              {msg.translatedMessage}
+            </p>
+          )}
+        </div>
 
         {/* Reply button */}
         {onReplyTo && (!isAi || msg.status === "done") && (
@@ -437,6 +374,33 @@ const MessageBubble = ({ msg, t, onReplyTo }) => {
           </button>
         )}
       </div>
+
+      {/* Follow-up Question Buttons (FR-002, FR-005) */}
+      {isAi &&
+        msg.status === "done" &&
+        Array.isArray(msg.followUpSuggestions) &&
+        msg.followUpSuggestions.length > 0 &&
+        !isUserTyping && (
+          <div className="flex flex-col gap-1.5 mt-2 w-full max-w-[85%] items-start animate-fadeIn">
+            {msg.followUpSuggestions.slice(0, 3).map((q, idx) => {
+              const qText = typeof q === "string" ? q : q.question || q.text || ""
+              if (!qText) return null
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => onSelectFollowUp?.(qText)}
+                  className="w-full text-left text-xs bg-white hover:bg-red-50/70 border border-red-200 text-red-900 rounded-xl px-3 py-2 transition-all shadow-2xs hover:border-red-300 active:scale-[0.99] flex items-center justify-between gap-2 group/btn cursor-pointer"
+                >
+                  <span className="line-clamp-2">{qText}</span>
+                  <span className="text-red-400 group-hover/btn:translate-x-0.5 transition-transform shrink-0">
+                    →
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
     </div>
   )
 }
