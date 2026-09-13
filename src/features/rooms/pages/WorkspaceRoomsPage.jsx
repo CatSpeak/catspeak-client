@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate, useParams, Outlet } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
 import { AnimatePresence } from "framer-motion";
 import { FluentAnimation } from "@/shared/components/ui/animations";
 import {
@@ -30,6 +31,7 @@ import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
 
 const WorkspaceRoomsContent = () => {
   const { t } = useLanguage();
+  const { limits } = usePlanFeatures();
   const { lang, id } = useParams();
   const navigate = useNavigate();
   const ct = t.rooms?.customRooms || {};
@@ -177,7 +179,7 @@ const WorkspaceRoomsContent = () => {
       customRoomsData?.currentCustomRoomsCount ??
       myRoomsResponse?.data?.totalCount ??
       rawTargetRooms.length,
-    max: customRoomsData?.maxCustomRooms ?? 3,
+    max: limits.maxActiveCustomRooms,
   };
   const isQuotaFull = customRoomsData?.canCreateCustomRoom === false;
 

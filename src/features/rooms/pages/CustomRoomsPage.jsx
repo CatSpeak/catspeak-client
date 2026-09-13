@@ -37,7 +37,7 @@ const CustomRoomsPage = () => {
   const customRooms = customRoomsData?.customRooms || [];
   const quota = {
     used: customRoomsData?.currentCustomRoomsCount ?? 0,
-    max: customRoomsData?.maxCustomRooms ?? 3,
+    max: limits.maxActiveCustomRooms,
   };
   const isQuotaFull = false; // customRoomsData?.canCreateCustomRoom === false
 
