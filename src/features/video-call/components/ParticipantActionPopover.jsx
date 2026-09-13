@@ -6,7 +6,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Slider from "@/shared/components/ui/Slider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { isRoomHost, isClassOrCustom } from "@/features/video-call/utils/roomTypeHelpers"
 import {
   useKickParticipantMutation,
   useMuteParticipantMutation,
@@ -470,17 +470,20 @@ export const ParticipantActionPopover = ({ participant, children }) => {
             <span>{pl.ban}</span>
           </button>
 
-          <button
-            onClick={() => setCoHostModalOpen(true)}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-lg transition-colors text-left w-full"
-          >
-            <Shield size={18} className="text-amber-600 shrink-0" />
-            <span>
-              {isTargetCoHost ? "Quản lý co-host" : "Phân công làm Co-host"}
-            </span>
-          </button>
+          {/* Co-host chỉ hỗ trợ phòng Lớp học (3) và Custom (4) — ẩn ở phòng 1:1/Group. */}
+          {isClassOrCustom(room?.roomType) && (
+            <button
+              onClick={() => setCoHostModalOpen(true)}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-lg transition-colors text-left w-full"
+            >
+              <Shield size={18} className="text-amber-600 shrink-0" />
+              <span>
+                {isTargetCoHost ? "Quản lý co-host" : "Phân công làm Co-host"}
+              </span>
+            </button>
+          )}
 
-          {isTargetCoHost && (
+          {isClassOrCustom(room?.roomType) && isTargetCoHost && (
             <button
               onClick={() => setRevokeCoHostConfirm(true)}
               className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left w-full"
