@@ -11,7 +11,7 @@ import {
   useMediaPreview,
   useDeviceSelection,
 } from "@/features/rooms"
-import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
+import { useVerifyJoinRoomMutation, roomsApi, useGetRoomStateQuery } from "@/store/api/roomsApi"
 import {
   useGetClassDetailQuery,
   useGetStudentClassDetailQuery,
@@ -37,8 +37,10 @@ import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import PasswordScreen from "../components/PasswordScreen"
 import CallEndedScreen from "../components/CallEndedScreen"
+import { PreJoinWaitingGate } from "../components/waiting/WaitingScreen"
 import VideoCallErrorBoundary from "@/shared/components/VideoCallErrorBoundary"
 import { isRoomExpired } from "@/shared/utils/dateUtils"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Phases:
@@ -227,6 +229,23 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const isLoadingRoomData = isClassRoom ? isLoadingClass : isLoadingRoom
   const errorRoomData = isClassRoom ? classError : roomError
 
+  // Ticket 04: cath-api RoomId used by the waiting/approval endpoints. Class
+  // rooms expose it as classData.roomId (distinct from the URL "class-{id}").
+  const apiRoomId = isClassRoom
+    ? (Number(classData?.roomId) > 0 ? Number(classData.roomId) : null)
+    : (Number(roomId) > 0 ? Number(roomId) : null)
+
+  // Ticket 04: pre-join approval gate state, read from the RoomState cache.
+  const { data: roomStateData } = useGetRoomStateQuery(apiRoomId, {
+    skip: !apiRoomId,
+  })
+  const roomStatePayload = roomStateData?.data ?? roomStateData
+  const requireApproval = roomStatePayload?.settings?.requireApproval ?? false
+  const isViewerCoHost = roomStatePayload?.coHost?.isCoHost === true
+  const isHost = isRoomHost(room, user?.accountId)
+  // Once admitted, don't re-open the approval gate on the follow-up join.
+  const approvalAdmittedRef = useRef(false)
+
   // --- Device Selection ---
   const deviceSelection = useDeviceSelection()
 
@@ -278,6 +297,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // ── Privacy verification: run once when room data is available ──
   const verifyTriggered = useRef(false)
+
   useEffect(() => {
     if (
       phase !== "verifying" ||
@@ -366,6 +386,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     skipRoomFullCheck = false,
     confirmedSwitch = false,
     isAutoJoin = false,
+    skipApproval = false,
   } = {}) => {
     // Synchronously unlock WebAudio AudioContext on user gesture for iOS Safari
     unlockAudioContext()
@@ -394,10 +415,25 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       return
     }
 
+    // Ticket 04: require-approval gate. Knock and wait BEFORE any token is
+    // fetched / LiveKit connects (no mic/camera publish while pending).
+    // Host/co-host/invited bypass (server also enforces this).
+    if (
+      !skipApproval &&
+      requireApproval &&
+      apiRoomId &&
+      !isHost &&
+      !isViewerCoHost &&
+      !approvalAdmittedRef.current
+    ) {
+      setPhase("approval")
+      return
+    }
+
     setPhase("joining")
 
     try {
-      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName, egressProfile, highQuality
+      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName, egressProfile, highQuality, roomState
 
       if (isClassRoom) {
         // Fetch LiveKit token using the appropriate endpoint based on user role
@@ -411,6 +447,22 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         activeSubSessionName = tokenRes?.activeSubSessionName
         egressProfile = tokenRes?.egressProfile ?? tokenRes?.egress_profile
         highQuality = tokenRes?.highQuality ?? tokenRes?.high_quality
+        // Ticket 02: the class-room gRPC join path now carries the governance
+        // snapshot too (as JSON); parse it so class late joiners get the
+        // correct media policies immediately, same as the token path.
+        const rawClassRoomState =
+          tokenRes?.roomState ??
+          tokenRes?.roomStateJson ??
+          tokenRes?.room_state_json
+        if (rawClassRoomState && typeof rawClassRoomState === "string") {
+          try {
+            roomState = JSON.parse(rawClassRoomState)
+          } catch {
+            roomState = null
+          }
+        } else {
+          roomState = rawClassRoomState
+        }
       } else {
         // Fetch LiveKit token to validate connectivity and join
         const livekitTokenBody = {
@@ -424,10 +476,19 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         activeSubSessionName = tokenRes?.activeSubSessionName
         egressProfile = tokenRes?.egressProfile
         highQuality = tokenRes?.highQuality
+        // Ticket 01: seed the RoomState cache from the join snapshot so the
+        // correct policy (mic lock etc.) is known immediately, no handshake.
+        roomState = tokenRes?.roomState
       }
 
       if (!token || typeof token !== "string") {
         throw new Error("Invalid LiveKit token received from backend")
+      }
+
+      if (roomState && apiRoomId) {
+        dispatch(
+          roomsApi.util.upsertQueryData("getRoomState", apiRoomId, roomState),
+        )
       }
 
       console.log("[VideoCallProvider] LiveKit token fetched successfully:", {
@@ -454,6 +515,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           livekitToken: token,
           livekitServerUrl: serverUrl,
           roomId,
+          // Ticket 04: numeric room id for room-governance endpoints / SignalR
+          // room group. Class rooms keep "class-{id}" only for navigation/URL.
+          apiRoomId,
           sessionId,
           callPath,
           roomData: room,
@@ -479,6 +543,14 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       }
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
+
+      // Ticket 04: server-side approval gate — show the waiting room instead
+      // of a generic error (covers the race where requireApproval wasn't loaded).
+      if (err?.data?.errorCode === "WAITING_NOT_ADMITTED") {
+        setPhase("approval")
+        return
+      }
+
       const backendMessage = err?.data?.message || err?.data
       const isBanned =
         err?.status === 403 &&
@@ -621,9 +693,25 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     )
   }
 
+  // ---- PHASE: APPROVAL (pre-join waiting room) ----
+  if (phase === "approval") {
+    return (
+      <>
+        {switchModal}
+        <PreJoinWaitingGate
+          apiRoomId={apiRoomId}
+          onAdmitted={() => {
+            approvalAdmittedRef.current = true
+            handleJoinClick({ skipApproval: true })
+          }}
+          onCancel={() => setPhase("waiting")}
+        />
+      </>
+    )
+  }
+
   // ---- PHASE: WAITING ----
-  if (phase === "waiting") {
-    const displaySession = {
+  if (phase === "waiting") {    const displaySession = {
       name: room.name,
       roomName: room.name,
       topic: room.topic,

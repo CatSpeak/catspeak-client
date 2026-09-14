@@ -22,6 +22,7 @@ import {
   Search,
   X,
   AlertTriangle,
+  UserCheck,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useDispatch } from "react-redux"
@@ -30,7 +31,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { isRoomHost, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantActionPopover } from "./ParticipantActionPopover"
 import PolicyRow from "./settings/PolicyRow"
 import BannedListTab from "./settings/BannedListTab"
@@ -51,19 +52,18 @@ import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import {
   useGetRoomCoHostQuery,
   useMuteAllParticipantsMutation,
-  useGetSelfUnmutePolicyQuery,
+  useCameraOffAllMutation,
+  useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
+  useUpdateSelfCameraPolicyMutation,
   useGetWaitingQueueQuery,
-  useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
-  useGetStudentSharePolicyQuery,
   useUpdateStudentSharePolicyMutation,
-  useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
-  useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
   useUpdateHighQualityPolicyMutation,
+  useUpdateRequireApprovalPolicyMutation,
   useLowerAllHandsMutation,
   useRestrictVoiceAllMutation,
 } from "@/store/api/roomsApi"
@@ -264,6 +264,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
   const pl = t.rooms.videoCall.participantList
   const gt = t.rooms.videoCall.general || {}
+  // Custom=4 (backend enum) dùng copy phòng/thành viên. Class=3 giữ học viên/
+  // buổi live. Group/1-1 giữ nguyên copy cũ (Q1-B, Q5-A).
+  const isCustom = isCustomRoom(room?.roomType)
 
   const parseMetadata = (metadata) => {
     if (!metadata) return {}
@@ -345,6 +348,14 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       user?.accountId,
       CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
     )
+  // Ticket 02: camera self-toggle is a separate code (allow_self_camera).
+  const canToggleSelfCamera =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA
+    )
 
   // Ticket 03: waiting queue — host "Chờ" tab + waiter knock banner.
   const [activeTab, setActiveTab] = React.useState("members")
@@ -359,7 +370,6 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   })
   const { data: waitingQueueData } = useGetWaitingQueueQuery(roomId, {
     skip: !roomId || !canViewWaiting,
-    pollingInterval: 10000,
   })
   const pendingCount =
     normalizeWaitingQueue(waitingQueueData)?.pendingCount ??
@@ -368,15 +378,21 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const [muteAllApi, { isLoading: isMutingAll }] =
     useMuteAllParticipantsMutation()
-  const { data: selfUnmutePolicy } = useGetSelfUnmutePolicyQuery(roomId, {
+  const [cameraOffAllApi, { isLoading: isCameraOffAll }] =
+    useCameraOffAllMutation()
+  const [cameraOffAllConfirmOpen, setCameraOffAllConfirmOpen] =
+    React.useState(false)
+  // Ticket 01: policy comes from the room-state cache (single store).
+  const { data: roomState } = useGetRoomStateQuery(roomId, {
     skip: !roomId,
   })
   const [updateSelfUnmute, { isLoading: isTogglingSelfUnmute }] =
     useUpdateSelfUnmutePolicyMutation()
-  const allowSelfUnmute =
-    selfUnmutePolicy?.data?.allowSelfUnmute ??
-    selfUnmutePolicy?.allowSelfUnmute ??
-    true
+  const [updateSelfCamera, { isLoading: isTogglingSelfCamera }] =
+    useUpdateSelfCameraPolicyMutation()
+  const roomStatePayload = roomState?.data ?? roomState
+  const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
+  const allowSelfCamera = roomStatePayload?.settings?.allowSelfCamera ?? true
 
   const handleMuteAll = () => {
     setMuteAllConfirmOpen(true)
@@ -418,6 +434,45 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     toast.success(pl.successMuteAll)
   }
 
+  // Ticket 03: room-scope "tắt camera toàn bộ" — server mutes every published
+  // camera track (sender/host spared); broadcast is a UX hint only.
+  const confirmCameraOffAll = async () => {
+    setCameraOffAllConfirmOpen(false)
+    if (!roomId) return
+    try {
+      await cameraOffAllApi(roomId).unwrap()
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenCameraOffAll || pl.forbiddenMedia
+        )
+      )
+      return
+    }
+    if (lkRoom?.localParticipant) {
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({
+            action: "CAMERA_OFF_ALL",
+            senderId: String(user?.accountId ?? ""),
+            senderIdentity: String(lkRoom.localParticipant.identity ?? ""),
+          })
+        )
+        lkRoom.localParticipant.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch (e) {
+        console.error("Failed to broadcast CAMERA_OFF_ALL:", e)
+      }
+    }
+    toast.success(
+      pl.successCameraOffAll || "Đã tắt camera tất cả mọi người (trừ bạn)."
+    )
+  }
+
   const handleToggleSelfUnmute = async () => {
     if (!roomId) return
     try {
@@ -437,8 +492,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? pl.selfUnmuteOn
-          : pl.selfUnmuteOff
+          ? isCustom
+            ? pl.selfUnmuteOnRoom || pl.selfUnmuteOn
+            : pl.selfUnmuteOn
+          : isCustom
+            ? pl.selfUnmuteOffRoom || pl.selfUnmuteOff
+            : pl.selfUnmuteOff,
       )
     } catch (err) {
       toast.error(
@@ -451,6 +510,43 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
+  // Ticket 02: student self-camera gate (mirrors self-unmute).
+  const handleToggleSelfCamera = async () => {
+    if (!roomId) return
+    try {
+      const next = !allowSelfCamera
+      await updateSelfCamera({ id: roomId, allow: next }).unwrap()
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({ action: "SELF_CAMERA_POLICY", allow: next })
+        )
+        lkRoom?.localParticipant?.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch {
+        /* ignore broadcast errors */
+      }
+      toast.success(
+        next
+          ? isCustom
+            ? pl.selfCameraOnRoom || pl.selfCameraOn
+            : pl.selfCameraOn
+          : isCustom
+            ? pl.selfCameraOffRoom || pl.selfCameraOff
+            : pl.selfCameraOff,
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenSelfCamera
+        )
+      )
+    }
+  }
+
   // Ticket 04: room lock (lock_class) + end live for all (end_class).
   const canManageLock =
     isHost ||
@@ -458,6 +554,10 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const canEndLive =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.END_CLASS)
+  // Ticket 03: room-scope "tắt camera toàn bộ" is gated by camera_toggle.
+  const canCameraOffAll =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.CAMERA_TOGGLE)
 
   // Ticket 05: student share gate (manage_student_share) + member
   // recording gate, server-side (record). Both default open.
@@ -471,30 +571,15 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const canManageMemberRecording =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.RECORD)
-  const { data: studentSharePolicy } = useGetStudentSharePolicyQuery(roomId, {
-    skip: !roomId,
-  })
   const [updateStudentShare, { isLoading: isTogglingStudentShare }] =
     useUpdateStudentSharePolicyMutation()
-  const allowStudentShare =
-    studentSharePolicy?.data?.allowStudentShare ??
-    studentSharePolicy?.allowStudentShare ??
-    true
-  const { data: memberRecordingPolicy } = useGetMemberRecordingPolicyQuery(
-    roomId,
-    { skip: !roomId }
-  )
+  const allowStudentShare = roomStatePayload?.settings?.allowStudentShare ?? true
   const [updateMemberRecording, { isLoading: isTogglingMemberRecording }] =
     useUpdateMemberRecordingPolicyMutation()
   const allowMemberRecording =
-    memberRecordingPolicy?.data?.allowMemberRecording ??
-    memberRecordingPolicy?.allowMemberRecording ??
-    true
-  const { data: roomLockData } = useGetRoomLockQuery(roomId, {
-    skip: !roomId,
-  })
-  const isLocked =
-    roomLockData?.data?.isLocked ?? roomLockData?.isLocked ?? false
+    roomStatePayload?.settings?.allowMemberRecording ?? true
+  // Ticket 03: lock state is read from the room-state cache (single store).
+  const isLocked = roomStatePayload?.settings?.roomLocked ?? false
   const [updateRoomLock, { isLoading: isTogglingLock }] =
     useUpdateRoomLockMutation()
   const [endLiveApi, { isLoading: isEndingLive }] = useEndLiveSessionMutation()
@@ -533,8 +618,34 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const confirmEndLive = async () => {
-    setEndLiveConfirmOpen(false)
+  // Ticket 04: pre-join require-approval gate (host-only, default off).
+  const requireApproval = roomStatePayload?.settings?.requireApproval ?? false
+  const [updateRequireApproval, { isLoading: isTogglingRequireApproval }] =
+    useUpdateRequireApprovalPolicyMutation()
+  const canManageRequireApproval = isHost
+
+  const handleToggleRequireApproval = async () => {
+    if (!roomId) return
+    try {
+      const next = !requireApproval
+      await updateRequireApproval({ id: roomId, requireApproval: next }).unwrap()
+      toast.success(
+        next
+          ? pl.requireApprovalOn || "Đã bật duyệt thủ công khi vào phòng."
+          : pl.requireApprovalOff || "Đã tắt duyệt thủ công khi vào phòng.",
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenRequireApproval || pl.forbiddenLock,
+        ),
+      )
+    }
+  }
+
+  const confirmEndLive = async () => {    setEndLiveConfirmOpen(false)
     if (!roomId) return
     try {
       await endLiveApi(roomId).unwrap()
@@ -543,8 +654,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenEnd
-        )
+          isCustom ? pl.forbiddenEndRoom || pl.forbiddenEnd : pl.forbiddenEnd,
+        ),
       )
       return
     }
@@ -570,7 +681,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       /* ignore disconnect errors */
     }
     dispatch(leaveCallAction())
-    toast.success(pl.endLiveSuccess)
+    toast.success(isCustom ? pl.endLiveSuccessRoom || pl.endLiveSuccess : pl.endLiveSuccess)
     const nav = navigate ?? getNavigate()
     if (nav && window.location.pathname.includes("/meet/")) {
       nav(window.location.pathname, {
@@ -599,8 +710,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? pl.studentShareOn
-          : pl.studentShareOff
+          ? isCustom
+            ? pl.studentShareOnRoom || pl.studentShareOn
+            : pl.studentShareOn
+          : isCustom
+            ? pl.studentShareOffRoom || pl.studentShareOff
+            : pl.studentShareOff,
       )
     } catch (err) {
       toast.error(
@@ -632,8 +747,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? pl.memberRecordingOn
-          : pl.memberRecordingOff
+          ? isCustom
+            ? pl.memberRecordingOnRoom || pl.memberRecordingOn
+            : pl.memberRecordingOn
+          : isCustom
+            ? pl.memberRecordingOffRoom || pl.memberRecordingOff
+            : pl.memberRecordingOff,
       )
     } catch (err) {
       toast.error(
@@ -648,10 +767,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   // ── Room policies moved out of the Settings modal ("Chung" tab) ──
   const canManagePrivateAi = isHost
-  const canManageGame =
-    isHost ||
-    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.MUTE_ALL) ||
-    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
+  // Ticket 03: Game is host-only — co-hosts neither see nor operate it.
+  const canManageGame = isHost
   // High quality is host-only server-side (co-hosts never get the override).
   const canManageHighQuality = isHost
 
@@ -659,6 +776,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     isHost ||
     canMuteAll ||
     canToggleSelfUnmute ||
+    canToggleSelfCamera ||
     canManageLock ||
     canEndLive ||
     canManageStudentShare ||
@@ -697,16 +815,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       )
   }, [roomId])
 
-  const { data: gamePolicyData } = useGetGamePolicyQuery(roomId, {
-    skip: !roomId,
-  })
   const [updateGamePolicy, { isLoading: isTogglingGame }] =
     useUpdateGamePolicyMutation()
-  const serverAllowGame =
-    gamePolicyData?.data?.allowGame ?? gamePolicyData?.allowGame ?? true
+  // Ticket 03: game policy is read from the room-state cache (no standalone GET).
+  const serverAllowGame = roomStatePayload?.settings?.allowGame ?? true
   const [allowGame, setAllowGame] = React.useState(true)
   React.useEffect(() => {
-    if (serverAllowGame !== undefined) setAllowGame(serverAllowGame)
+    setAllowGame(serverAllowGame)
   }, [serverAllowGame])
 
   const [updateHighQualityPolicy, { isLoading: isTogglingHighQuality }] =
@@ -864,7 +979,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       const restrictedCount =
         res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceRestrictAllCount
-      toast.success(pl.successRestrictVoiceAll.replace("{count}", String(restrictedCount)))
+      toast.success(
+        (isCustom
+          ? pl.successRestrictVoiceAllRoom || pl.successRestrictVoiceAll
+          : pl.successRestrictVoiceAll
+        ).replace("{count}", String(restrictedCount)),
+      )
     } catch (err) {
       const msg = err?.data?.message || err?.error || ""
       if (err?.status === 404) {
@@ -1149,25 +1269,56 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             </div>
           )}
 
-          {/* Group 1: Quyền học viên */}
+          {/* Group 1: Quyền học viên (Class) / Quyền thành viên (Custom) */}
           <div className="flex flex-col gap-2">
             <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
-              {pl.groupStudentPermissions || "Quyền học viên"}
+              {isCustom
+                ? pl.groupStudentPermissionsRoom ||
+                  pl.groupStudentPermissions ||
+                  "Quyền thành viên"
+                : pl.groupStudentPermissions || "Quyền học viên"}
             </span>
             <div className="flex flex-col gap-1.5">
               {canToggleSelfUnmute && (
                 <PolicyRow
                   icon={<Mic size={15} aria-hidden="true" />}
-                  label={pl.allowSelfUnmute}
+                  label={
+                    isCustom
+                      ? pl.allowSelfUnmuteRoom ||
+                        pl.allowSelfUnmute ||
+                        "Cho phép thành viên tự bật mic"
+                      : pl.allowSelfUnmute
+                  }
                   checked={allowSelfUnmute}
                   disabled={isTogglingSelfUnmute}
                   onChange={handleToggleSelfUnmute}
                 />
               )}
+              {canToggleSelfCamera && (
+                <PolicyRow
+                  icon={<Video size={15} aria-hidden="true" />}
+                  label={
+                    isCustom
+                      ? pl.allowSelfCameraRoom ||
+                        pl.allowSelfCamera ||
+                        "Cho phép thành viên tự bật camera"
+                      : pl.allowSelfCamera
+                  }
+                  checked={allowSelfCamera}
+                  disabled={isTogglingSelfCamera}
+                  onChange={handleToggleSelfCamera}
+                />
+              )}
               {canManageStudentShare && (
                 <PolicyRow
                   icon={<MonitorUp size={15} aria-hidden="true" />}
-                  label={pl.allowStudentShare}
+                  label={
+                    isCustom
+                      ? pl.allowStudentShareRoom ||
+                        pl.allowStudentShare ||
+                        "Cho phép thành viên chia sẻ màn hình"
+                      : pl.allowStudentShare
+                  }
                   checked={allowStudentShare}
                   disabled={isTogglingStudentShare}
                   onChange={handleToggleStudentShare}
@@ -1217,10 +1368,29 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   colorClass="peer-checked:bg-cath-red-700"
                 />
               )}
+              {canManageRequireApproval && (
+                <PolicyRow
+                  icon={<UserCheck size={15} aria-hidden="true" />}
+                  label={
+                    pl.requireApproval ||
+                    "Yêu cầu duyệt khi vào phòng"
+                  }
+                  description={pl.requireApprovalDesc}
+                  checked={requireApproval}
+                  disabled={isTogglingRequireApproval}
+                  onChange={handleToggleRequireApproval}
+                />
+              )}
               {canManageMemberRecording && (
                 <PolicyRow
                   icon={<CircleDot size={15} aria-hidden="true" />}
-                  label={pl.allowMemberRecording}
+                  label={
+                    isCustom
+                      ? pl.allowMemberRecordingRoom ||
+                        pl.allowMemberRecording ||
+                        "Cho phép thành viên ghi hình"
+                      : pl.allowMemberRecording
+                  }
                   description={gt.allowMemberRecordingDesc}
                   checked={allowMemberRecording}
                   disabled={isTogglingMemberRecording}
@@ -1241,35 +1411,94 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           </div>
 
           {/* Group 3: Thao tác nâng cao */}
-          {(canMuteAll || isHost) && (
+          {(canMuteAll || isHost || canCameraOffAll) && (
             <div className="flex flex-col gap-2">
               <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
                 Thao tác nâng cao
               </span>
-              <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
-                <div className="flex items-start gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
-                    <MicOff size={16} />
+              {(canMuteAll || isHost) && (
+                <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
+                      <MicOff size={16} />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-xs font-semibold text-orange-950">
+                        {isCustom
+                          ? pl.restrictVoiceAllRoom ||
+                            pl.restrictVoiceAll ||
+                            "Tắt mic tất cả thành viên"
+                          : pl.restrictVoiceAll}
+                      </span>
+                      <span className="text-[11px] text-orange-800/80 leading-relaxed">
+                        {isCustom
+                          ? pl.restrictVoiceAllDescRoom ||
+                            "Tắt mic và chặn tất cả thành viên tự bật lại mic."
+                          : pl.restrictVoiceAllDesc ||
+                            "Tắt mic và chặn tất cả học viên tự bật lại mic."}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-xs font-semibold text-orange-950">
-                      {pl.restrictVoiceAll}
+                  <button
+                    type="button"
+                    onClick={handleRestrictVoiceAll}
+                    disabled={isRestrictingVoiceAll}
+                    className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
+                  >
+                    <MicOff size={13} />
+                    <span>
+                      {isCustom
+                        ? pl.restrictVoiceAllRoom ||
+                          pl.restrictVoiceAll ||
+                          "Tắt mic tất cả thành viên"
+                        : pl.restrictVoiceAll}
                     </span>
-                    <span className="text-[11px] text-orange-800/80 leading-relaxed">
-                      {pl.restrictVoiceAllDesc || "Tắt mic và chặn tất cả học viên tự bật lại mic."}
-                    </span>
-                  </div>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleRestrictVoiceAll}
-                  disabled={isRestrictingVoiceAll}
-                  className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
-                >
-                  <MicOff size={13} />
-                  <span>{pl.restrictVoiceAll}</span>
-                </button>
-              </div>
+              )}
+
+              {/* Ticket 03: room-scope "tắt camera toàn bộ" (camera_toggle). */}
+              {canCameraOffAll && (
+                <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
+                      <VideoOff size={16} />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-xs font-semibold text-orange-950">
+                        {isCustom
+                          ? pl.cameraOffAllRoom ||
+                            pl.cameraOffAll ||
+                            "Tắt camera tất cả thành viên"
+                          : pl.cameraOffAll || "Tắt camera tất cả học viên"}
+                      </span>
+                      <span className="text-[11px] text-orange-800/80 leading-relaxed">
+                        {isCustom
+                          ? pl.cameraOffAllDescRoom ||
+                            pl.cameraOffAllDesc ||
+                            "Tắt camera của tất cả thành viên trong phòng."
+                          : pl.cameraOffAllDesc ||
+                            "Tắt camera của tất cả học viên trong phòng."}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCameraOffAllConfirmOpen(true)}
+                    disabled={isCameraOffAll}
+                    className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
+                  >
+                    <VideoOff size={13} />
+                    <span>
+                      {isCustom
+                        ? pl.cameraOffAllRoom ||
+                          pl.cameraOffAll ||
+                          "Tắt camera tất cả thành viên"
+                        : pl.cameraOffAll || "Tắt camera tất cả học viên"}
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -1286,10 +1515,16 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   </div>
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span className="text-xs font-semibold text-neutral-900">
-                      {pl.endLive}
+                      {isCustom
+                        ? pl.endLiveRoom || pl.endLive || "Kết thúc phòng"
+                        : pl.endLive}
                     </span>
                     <span className="text-[11px] text-neutral-600 leading-relaxed">
-                      {pl.endLiveDesc || "Đóng phiên họp trực tiếp cho toàn bộ học viên và người tham gia."}
+                      {isCustom
+                        ? pl.endLiveDescRoom ||
+                          "Đóng phòng và kết thúc phiên hoạt động cho toàn bộ thành viên."
+                        : pl.endLiveDesc ||
+                          "Đóng phiên họp trực tiếp cho toàn bộ học viên và người tham gia."}
                     </span>
                   </div>
                 </div>
@@ -1300,7 +1535,11 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-cath-red-700 hover:bg-cath-red-800 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
                 >
                   <PhoneOff size={13} className="rotate-[135deg]" />
-                  <span>{pl.endLive}</span>
+                  <span>
+                    {isCustom
+                      ? pl.endLiveRoom || pl.endLive || "Kết thúc phòng"
+                      : pl.endLive}
+                  </span>
                 </button>
               </div>
             </div>
@@ -1324,14 +1563,44 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         confirmVariant="destructive"
       />
 
+      {/* Ticket 03: camera-off-all confirm. */}
+      <ConfirmationModal
+        open={cameraOffAllConfirmOpen}
+        onClose={() => setCameraOffAllConfirmOpen(false)}
+        onConfirm={confirmCameraOffAll}
+        title={pl.confirmCameraOffAllTitle || pl.cameraOffAll || "Tắt camera tất cả"}
+        message={
+          pl.confirmCameraOffAll ||
+          "Bạn có chắc muốn tắt camera của tất cả mọi người trong phòng?"
+        }
+        confirmText={pl.cameraOffAll || "Tắt camera tất cả"}
+        confirmVariant="destructive"
+        isPending={isCameraOffAll}
+      />
+
       {/* Ticket 04: end-live confirm — mọi người về màn hình kết thúc, join lại tạo phiên mới. */}
       <ConfirmationModal
         open={endLiveConfirmOpen}
         onClose={() => setEndLiveConfirmOpen(false)}
         onConfirm={confirmEndLive}
-        title={pl.confirmEndLiveTitle || pl.endLive}
-        message={pl.confirmEndLive}
-        confirmText={pl.endLive}
+        title={
+          isCustom
+            ? pl.confirmEndLiveTitleRoom ||
+              pl.endLiveRoom ||
+              pl.confirmEndLiveTitle ||
+              pl.endLive
+            : pl.confirmEndLiveTitle || pl.endLive
+        }
+        message={
+          isCustom
+            ? pl.confirmEndLiveRoom || pl.confirmEndLive
+            : pl.confirmEndLive
+        }
+        confirmText={
+          isCustom
+            ? pl.endLiveRoom || pl.endLive
+            : pl.endLive
+        }
         confirmVariant="destructive"
       />
 
@@ -1350,9 +1619,27 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         open={restrictVoiceAllConfirmOpen}
         onClose={() => setRestrictVoiceAllConfirmOpen(false)}
         onConfirm={confirmRestrictVoiceAll}
-        title={pl.confirmRestrictVoiceAllTitle || pl.restrictVoiceAll}
-        message={pl.confirmRestrictVoiceAll.replace("{count}", String(voiceRestrictAllCount))}
-        confirmText={pl.restrictVoiceAll}
+        title={
+          isCustom
+            ? pl.confirmRestrictVoiceAllTitleRoom ||
+              pl.restrictVoiceAllRoom ||
+              pl.confirmRestrictVoiceAllTitle ||
+              pl.restrictVoiceAll
+            : pl.confirmRestrictVoiceAllTitle || pl.restrictVoiceAll
+        }
+        message={
+          isCustom
+            ? (pl.confirmRestrictVoiceAllRoom || pl.confirmRestrictVoiceAll).replace(
+                "{count}",
+                String(voiceRestrictAllCount),
+              )
+            : pl.confirmRestrictVoiceAll.replace("{count}", String(voiceRestrictAllCount))
+        }
+        confirmText={
+          isCustom
+            ? pl.restrictVoiceAllRoom || pl.restrictVoiceAll
+            : pl.restrictVoiceAll
+        }
         confirmVariant="destructive"
         isPending={isRestrictingVoiceAll}
       />

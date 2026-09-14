@@ -10,10 +10,6 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx"
 import {
-  getRoomSetting,
-  ROOM_SETTING_KEYS,
-} from "@/features/video-call/utils/roomSettingHelpers"
-import {
   hasCoHostPermission,
   CO_HOST_PERMISSIONS,
 } from "@/features/co-host/constants"
@@ -56,36 +52,21 @@ export function useRecording(lkRoom = null, syncState = {}) {
       return
     }
 
-    const currentRoomId = syncState?.roomId || lkRoom?.name
     const isHost = syncState?.isHost
     const coHost = syncState?.coHost ?? null
     const localAccountId = syncState?.accountId
-    // Ticket 05: server-side member recording gate (default open).
-    // Host or co-host with record always bypass (shared recording);
-    // anyone else may record only while the gate is open. The legacy
-    // local toggle stays as an additional gate for the host's room.
-    const allowMemberRecording =
-      syncState?.allowMemberRecording ?? true
+    // Ticket 02: the member recording gate is read from the room-state cache
+    // (passed in via syncState). Host or co-host with record always bypass
+    // (shared recording); anyone else may record only while the gate is open.
+    const allowMemberRecording = syncState?.allowMemberRecording ?? true
     const canSharedRecord =
       isHost ||
       hasCoHostPermission(coHost, localAccountId, CO_HOST_PERMISSIONS.RECORD)
-    const isMemberRecordingAllowed = getRoomSetting(
-      currentRoomId,
-      ROOM_SETTING_KEYS.MEMBER_RECORDING
-    )
 
     if (!isRecording && !canSharedRecord && !allowMemberRecording) {
       toast.error(
         t.rooms?.videoCall?.participantList?.memberRecordingBlocked ||
           t.rooms?.videoCall?.recordingDisabledByHost ||
-          "Host đã tắt quyền ghi hình phòng họp đối với thành viên."
-      )
-      return
-    }
-
-    if (!isRecording && !isHost && !canSharedRecord && !isMemberRecordingAllowed) {
-      toast.error(
-        t.rooms?.videoCall?.recordingDisabledByHost ||
           "Host đã tắt quyền ghi hình phòng họp đối với thành viên."
       )
       return

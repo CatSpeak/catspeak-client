@@ -1,11 +1,12 @@
 import { useGame } from "@/features/games/context/GameContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
-import { useGetGamePolicyQuery } from "@/store/api/roomsApi"
+import { useGetRoomStateQuery } from "@/store/api/roomsApi"
 
 /**
  * Custom hook to get room host status, game progress, and game launch permissions.
- * Ticket 01: when game policy is off, new games are blocked with GAME_DISABLED (host sees switch, others see disabled button + tooltip).
+ * Ticket 03: game is host-only (co-host neither sees nor operates it) and the
+ * allowGame policy is read from the RoomState cache (no standalone GET).
  */
 export const useGameControlStatus = () => {
   const { gameState } = useGame()
@@ -14,14 +15,16 @@ export const useGameControlStatus = () => {
 
   const isHost = isHostFromContext ?? isRoomHost(room, user)
 
-  const { data: gamePolicyData } = useGetGamePolicyQuery(currentRoomId, { skip: !currentRoomId })
-  const allowGame = gamePolicyData?.data?.allowGame ?? gamePolicyData?.allowGame ?? true
+  const { data: roomState } = useGetRoomStateQuery(currentRoomId, { skip: !currentRoomId })
+  const roomStatePayload = roomState?.data ?? roomState
+  const allowGame = roomStatePayload?.settings?.allowGame ?? true
 
   const isGameInProgress = Boolean(gameState && gameState !== "idle")
-  let canStartGame = !isGameInProgress
+  // Ticket 03: host-only; a co-host must not see or operate games.
+  let canStartGame = isHost && !isGameInProgress
   let gameDisabledReason = isGameInProgress
     ? "Đang có trò chơi trong phòng, không thể mở thêm"
-    : null
+    : (!isHost ? "Chỉ chủ phòng mới có thể bắt đầu trò chơi." : null)
 
   if (!allowGame) {
     canStartGame = false

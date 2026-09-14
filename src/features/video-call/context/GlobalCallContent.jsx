@@ -47,10 +47,8 @@ import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.j
 import { roomsApi } from "@/store/api/roomsApi"
 import {
   useGetRoomCoHostQuery,
-  useGetStudentSharePolicyQuery,
-  useGetMemberRecordingPolicyQuery,
+  useGetRoomStateQuery,
   useGetRoomParticipantsQuery,
-  useGetHighQualityPolicyQuery,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -59,7 +57,6 @@ import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
 import {
-  getRoomSetting,
   setRoomSetting,
   ROOM_SETTING_KEYS,
 } from "@/features/video-call/utils/roomSettingHelpers"
@@ -96,7 +93,12 @@ const GlobalCallContent = ({
   const dispatch = useDispatch()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
-  const currentRoomId = callInfo?.roomId || roomData?.id
+  // Class rooms keep "class-{id}" as the URL roomId but carry the numeric
+  // cath-api room id separately (callInfo.apiRoomId). Every room-governance
+  // call and the SignalR room group must use the numeric id.
+  const urlRoomId = callInfo?.roomId || roomData?.id
+  const apiRoomId = callInfo?.apiRoomId ?? (Number(urlRoomId) > 0 ? Number(urlRoomId) : null)
+  const currentRoomId = apiRoomId ?? urlRoomId
   const isAISession = callInfo?.isAISession ?? false
 
   // ── Ticket 02: chat/voice restriction state ──
@@ -238,8 +240,7 @@ const GlobalCallContent = ({
   const localParticipant = localPart?.localParticipant ?? null
 
   // Ticket 04 (egress): live high-quality state. Initialised from the token
-  // (server-sourced room policy) and kept in sync through the moderation
-  // channel + the room policy query.
+  // and kept in sync from the RoomState cache (single store) + moderation channel.
   const [roomHighQuality, setRoomHighQuality] = useState(
     callInfo?.highQuality ?? false,
   )
@@ -247,19 +248,6 @@ const GlobalCallContent = ({
   useEffect(() => {
     roomHighQualityRef.current = roomHighQuality
   }, [roomHighQuality])
-
-  const { data: highQualityPolicyData } = useGetHighQualityPolicyQuery(
-    currentRoomId,
-    { skip: !currentRoomId },
-  )
-  const serverHighQuality =
-    highQualityPolicyData?.data?.highQuality ??
-    highQualityPolicyData?.highQuality
-  useEffect(() => {
-    if (serverHighQuality !== undefined) {
-      setRoomHighQuality(serverHighQuality === true)
-    }
-  }, [serverHighQuality])
 
   const callPolicy = React.useMemo(
     () => resolveCallPolicy(callInfo?.egressProfile, roomHighQuality),
@@ -570,6 +558,143 @@ const GlobalCallContent = ({
   }, [sessionRecordings, t])
 
   useVideoChatSignalR(sessionId, token, (event, data) => {
+    if (event === "RoomSettingsChanged") {
+      // Ticket 01: single store = RTK Query cache. Patch the room state in
+      // place so every client (incl. late joiners) reflects policy instantly.
+      const settings = data?.settings
+      if (settings && currentRoomId) {
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomState",
+            currentRoomId,
+            (draft) => {
+              if (!draft?.settings) return
+              draft.settings = { ...draft.settings, ...settings }
+            },
+          ),
+        )
+      }
+      return
+    }
+    if (event === "CoHostChanged") {
+      // Ticket 03: host changed the co-host slice mid-session. Apply it to the
+      // state store (and the co-host query used by the 12-code gates) at once.
+      const coHost = data?.coHost ?? null
+      if (currentRoomId) {
+        const myAccountId = user?.accountId
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomState",
+            currentRoomId,
+            (draft) => {
+              draft.coHost = coHost
+                ? {
+                    accountId: coHost.accountId,
+                    permissions: coHost.permissions ?? [],
+                    isCoHost:
+                      String(coHost.accountId) === String(myAccountId),
+                  }
+                : null
+            },
+          ),
+        )
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomCoHost",
+            currentRoomId,
+            () =>
+              coHost
+                ? {
+                    coHostAccountId: coHost.accountId,
+                    permissions: coHost.permissions ?? [],
+                  }
+                : null,
+          ),
+        )
+      }
+      return
+    }
+    if (event === "WaitingQueueChanged") {
+      // Ticket 04: real-time queue update (no 10s polling). Refetch the
+      // WaitingQueue cache for host/co-host.
+      if (currentRoomId) {
+        dispatch(
+          roomsApi.util.invalidateTags([
+            { type: "WaitingQueue", id: currentRoomId },
+          ]),
+        )
+      }
+      return
+    }
+    if (event === "ParticipantRestrictionChanged") {
+      // Ticket 05: room-scoped chat/voice restriction changed. Patch the
+      // participant-list cache in place (no reload) so badges and the chat
+      // input react immediately; late joiners read the same table on join.
+      const restriction = data?.restriction
+      if (restriction?.accountId != null && currentRoomId) {
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomParticipants",
+            currentRoomId,
+            (draft) => {
+              const list = Array.isArray(draft)
+                ? draft
+                : Array.isArray(draft?.data)
+                  ? draft.data
+                  : null
+              if (!list) return
+              const item = list.find(
+                (p) => String(p.accountId) === String(restriction.accountId),
+              )
+              if (item) {
+                item.isChatRestricted = !!restriction.isChatRestricted
+                item.isVoiceRestricted = !!restriction.isVoiceRestricted
+              } else {
+                list.push({
+                  accountId: restriction.accountId,
+                  isChatRestricted: !!restriction.isChatRestricted,
+                  isVoiceRestricted: !!restriction.isVoiceRestricted,
+                })
+              }
+            },
+          ),
+        )
+      }
+
+      const isTarget =
+        restriction?.accountId != null &&
+        String(restriction.accountId) === String(user?.accountId)
+      // A voice-restricted user's mic is forced off and cannot be re-enabled.
+      if (
+        restriction?.isVoiceRestricted === true &&
+        isTarget &&
+        localParticipant
+      ) {
+        try {
+          localParticipant.setMicrophoneEnabled(false)
+        } catch {
+          /* ignore */
+        }
+      }
+      if (isTarget) {
+        const pl = t.rooms?.videoCall?.participantList || {}
+        if (restriction?.isVoiceRestricted) {
+          toast.error(
+            pl.hostRestrictedVoice || "Bạn đã bị Host hạn chế bật mic.",
+          )
+        } else if (restriction?.isChatRestricted) {
+          toast.error(
+            pl.hostRestrictedChat ||
+              "Bạn đã bị Host hạn chế gửi tin nhắn chat.",
+          )
+        } else {
+          toast.info(
+            pl.hostUnrestrictedChat || "Host đã gỡ hạn chế cho bạn.",
+          )
+        }
+      }
+      return
+    }
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
@@ -608,7 +733,7 @@ const GlobalCallContent = ({
       // host could not publish a stop message itself.
       watchTogether.stopLocal?.()
     }
-  })
+  }, currentRoomId)
 
   const prevConnectionState = useRef(connectionState)
   useEffect(() => {
@@ -641,22 +766,24 @@ const GlobalCallContent = ({
     skip: !currentRoomId,
   })
   const liveCoHost = normalizeCoHost(liveCoHostData)
-  const { data: studentSharePolicyData } = useGetStudentSharePolicyQuery(
-    currentRoomId,
-    { skip: !currentRoomId }
-  )
-  const allowStudentShare =
-    studentSharePolicyData?.data?.allowStudentShare ??
-    studentSharePolicyData?.allowStudentShare ??
-    true
-  const { data: memberRecordingPolicyData } = useGetMemberRecordingPolicyQuery(
-    currentRoomId,
-    { skip: !currentRoomId }
-  )
-  const allowMemberRecording =
-    memberRecordingPolicyData?.data?.allowMemberRecording ??
-    memberRecordingPolicyData?.allowMemberRecording ??
-    true
+  // Ticket 02: student-share + member-recording gates come from the room-state
+  // cache (single store) instead of standalone policy GETs.
+  const { data: roomStateData } = useGetRoomStateQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const roomStateSettings =
+    (roomStateData?.data ?? roomStateData)?.settings ?? {}
+  const allowStudentShare = roomStateSettings.allowStudentShare ?? true
+  const allowMemberRecording = roomStateSettings.allowMemberRecording ?? true
+
+  // Ticket 03: high-quality room policy now comes from the RoomState cache.
+  const serverHighQuality = roomStateSettings.highQuality
+  useEffect(() => {
+    if (serverHighQuality !== undefined) {
+      setRoomHighQuality(serverHighQuality === true)
+    }
+  }, [serverHighQuality])
+
   const screenShareState = useScreenShare({
     roomData,
     user,
@@ -811,6 +938,22 @@ const GlobalCallContent = ({
           return
         }
 
+        // Ticket 03: room-scope "tắt camera toàn bộ" (camera_toggle).
+        if (data.action === "CAMERA_OFF_ALL") {
+          const senderIsMe =
+            (data.senderId != null && String(data.senderId) === currentAccId) ||
+            (data.senderIdentity != null &&
+              String(data.senderIdentity) === localIdent)
+          if (!senderIsMe && !isHost && localParticipant) {
+            localParticipant.setCameraEnabled(false)
+            toast.error(
+              pl.hostCameraOffAll ||
+                "Host đã tắt camera tất cả mọi người trong phòng."
+            )
+          }
+          return
+        }
+
         if (data.action === "SELF_UNMUTE_POLICY") {
           toast.info(
             data.allow
@@ -820,13 +963,33 @@ const GlobalCallContent = ({
           return
         }
 
-        // Ticket 05: student share gate changed — refetch + toast.
-        // Students with an active share keep it; new starts are gated.
+        // Ticket 02: self-camera gate changed — state arrives via the server
+        // RoomSettingsChanged push; this data-channel event is just a toast.
+        if (data.action === "SELF_CAMERA_POLICY") {
+          toast.info(
+            data.allow
+              ? (pl.selfCameraOn || "Host đã cho phép học viên tự bật camera.")
+              : (pl.selfCameraOff || "Host đã tắt quyền học viên tự bật camera.")
+          )
+          return
+        }
+
+        // Ticket 02: student share gate changed — patch the room-state cache
+        // (single store). Students with an active share keep it; new starts
+        // are gated.
         if (data.action === "STUDENT_SHARE_POLICY") {
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "StudentSharePolicy", id: currentRoomId },
-            ])
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowStudentShare: data.allow !== false,
+                }
+              }
+            )
           )
           toast.info(
             data.allow
@@ -836,21 +999,21 @@ const GlobalCallContent = ({
           return
         }
 
-        // Ticket 05: member recording gate changed server-side — refetch +
-        // toast + keep the legacy local toggle in sync for older clients.
+        // Ticket 02: member recording gate changed — patch the room-state
+        // cache (single store) + toast.
         if (data.action === "MEMBER_RECORDING_POLICY") {
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "MemberRecordingPolicy", id: currentRoomId },
-            ])
-          )
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.MEMBER_RECORDING,
-            data.allow !== false
-          )
-          window.dispatchEvent(
-            new Event("catspeak_member_recording_allowed_changed")
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowMemberRecording: data.allow !== false,
+                }
+              }
+            )
           )
           toast.info(
             data.allow !== false
@@ -867,10 +1030,16 @@ const GlobalCallContent = ({
         if (data.action === "HIGH_QUALITY_POLICY") {
           const enabled = data.enabled === true
           setRoomHighQuality(enabled)
+          // Ticket 03: high-quality now lives in the room-state cache.
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "HighQualityPolicy", id: currentRoomId },
-            ])
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = { ...draft.settings, highQuality: enabled }
+              }
+            )
           )
           toast.info(
             enabled
@@ -882,15 +1051,21 @@ const GlobalCallContent = ({
           return
         }
 
-        // Ticket 04: room lock changed — refetch lock state + toast.
+        // Ticket 04: room lock changed — patch the room-state cache + toast.
         if (data.action === "ROOM_LOCK_CHANGED") {
+          const locked = data.locked === true
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "RoomLock", id: currentRoomId },
-            ])
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = { ...draft.settings, roomLocked: locked }
+              }
+            )
           )
           toast.info(
-            data.locked
+            locked
               ? (pl.hostLockedRoom ||
                   "Host đã khóa phòng. Người mới không thể tham gia.")
               : (pl.hostUnlockedRoom || "Host đã mở khóa phòng.")
@@ -936,14 +1111,21 @@ const GlobalCallContent = ({
           return
         }
 
+        // Ticket 02: legacy local toggle — member recording now lives in the
+        // room-state cache, so patch it there (no localStorage).
         if (data.action === "TOGGLE_MEMBER_RECORDING") {
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.MEMBER_RECORDING,
-            data.allowed,
-          )
-          window.dispatchEvent(
-            new Event("catspeak_member_recording_allowed_changed"),
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowMemberRecording: data.allowed !== false,
+                }
+              }
+            )
           )
           toast.info(
             data.allowed
@@ -974,79 +1156,6 @@ const GlobalCallContent = ({
               : pl.hostDisabledPrivateAi ||
                   "Host đã TẮT quyền sử dụng AI Chat riêng tư đối với thành viên.",
           )
-          return
-        }
-
-        if (data.action === "REQUEST_ROOM_SETTINGS_SYNC") {
-          if (
-            isHost &&
-            localParticipant &&
-            lkRoom?.state === ConnectionState.Connected
-          ) {
-            try {
-              const syncPayload = new TextEncoder().encode(
-                JSON.stringify({
-                  action: "SYNC_ROOM_SETTINGS",
-                  settings: {
-                    memberRecording: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                    ),
-                    memberPrivateAi: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                    ),
-                    highQuality: roomHighQualityRef.current,
-                  },
-                  targetIdentity: participant?.identity,
-                }),
-              )
-              localParticipant
-                .publishData(syncPayload, {
-                  topic: "moderation",
-                  reliable: true,
-                })
-                .catch(() => {})
-            } catch (err) {
-              console.error(
-                "Error responding to REQUEST_ROOM_SETTINGS_SYNC:",
-                err,
-              )
-            }
-          }
-          return
-        }
-
-        if (data.action === "SYNC_ROOM_SETTINGS") {
-          const isTargetMe =
-            !data.targetIdentity ||
-            String(data.targetIdentity) === String(localParticipant?.identity)
-          if (isTargetMe && data.settings) {
-            if (data.settings.memberRecording !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                data.settings.memberRecording,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_member_recording_allowed_changed"),
-              )
-            }
-            if (data.settings.memberPrivateAi !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                data.settings.memberPrivateAi,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_member_private_ai_allowed_changed"),
-              )
-            }
-            // Ticket 04 (egress): high-quality state synced from the host.
-            if (data.settings.highQuality !== undefined) {
-              setRoomHighQuality(data.settings.highQuality === true)
-            }
-          }
           return
         }
 
@@ -1176,64 +1285,11 @@ const GlobalCallContent = ({
       }
     }
 
-    const handleParticipantJoined = (participant) => {
-      const isHost = isRoomHost(roomData, user?.accountId)
-      if (
-        isHost &&
-        localParticipant &&
-        lkRoom?.state === ConnectionState.Connected
-      ) {
-        try {
-          const syncPayload = new TextEncoder().encode(
-            JSON.stringify({
-              action: "SYNC_ROOM_SETTINGS",
-              settings: {
-                memberRecording: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                ),
-                memberPrivateAi: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                ),
-                highQuality: roomHighQualityRef.current,
-              },
-              targetIdentity: participant.identity,
-            }),
-          )
-          localParticipant
-            .publishData(syncPayload, { topic: "moderation", reliable: true })
-            .catch(() => {})
-        } catch (err) {
-          console.error("Error syncing room settings to new participant:", err)
-        }
-      }
-
-    }
-
-    // Request settings sync from Host on join if not Host
-    if (
-      lkRoom?.state === ConnectionState.Connected &&
-      localParticipant &&
-      !isRoomHost(roomData, user?.accountId)
-    ) {
-      try {
-        const reqPayload = new TextEncoder().encode(
-          JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" }),
-        )
-        localParticipant
-          .publishData(reqPayload, { topic: "moderation", reliable: true })
-          .catch(() => {})
-      } catch (e) {
-        // ignore
-      }
-    }
-
+    // Ticket 01: the settings handshake is gone — policy now arrives via the
+    // GET /rooms/{id}/state snapshot + SignalR RoomSettingsChanged.
     lkRoom.on(RoomEvent.DataReceived, handleModerationData)
-    lkRoom.on(RoomEvent.ParticipantConnected, handleParticipantJoined)
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
-      lkRoom.off(RoomEvent.ParticipantConnected, handleParticipantJoined)
     }
   }, [
     lkRoom,
@@ -1304,7 +1360,7 @@ const GlobalCallContent = ({
     cancelLeaveCall,
 
     // Session
-    id: callInfo?.roomId,
+    id: currentRoomId,
     sessionId: callInfo?.sessionId || localMetadata?.sessionId,
     closingRemainingSeconds,
     navigate: getNavigate(),

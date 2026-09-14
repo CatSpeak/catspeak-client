@@ -28,7 +28,6 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
 
   const { data, isLoading, refetch } = useGetWaitingQueueQuery(roomId, {
     skip: !roomId,
-    pollingInterval: 10000,
   })
   const [admitWaiting, { isLoading: isAdmitting }] = useAdmitWaitingMutation()
   const [rejectWaiting, { isLoading: isRejecting }] = useRejectWaitingMutation()

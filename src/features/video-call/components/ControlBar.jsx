@@ -19,13 +19,17 @@ import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
 import {
   useGetRoomCoHostQuery,
-  useGetSelfUnmutePolicyQuery,
+  useGetRoomStateQuery,
 } from "@/store/api/roomsApi"
 import {
   isBreakoutSupported,
   isRoomHost,
 } from "@/features/video-call/utils/roomTypeHelpers"
-import { normalizeCoHost, isCoHostUser } from "@/features/co-host/constants"
+import {
+  normalizeCoHost,
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -97,14 +101,31 @@ const VideoCallControlBar = () => {
   const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
     skip: !roomId,
   })
-  const { data: selfUnmutePolicy } = useGetSelfUnmutePolicyQuery(roomId, {
+  // Ticket 01: policy comes from the room-state cache (single store).
+  const { data: roomState } = useGetRoomStateQuery(roomId, {
     skip: !roomId,
   })
-  const allowSelfUnmute =
-    selfUnmutePolicy?.data?.allowSelfUnmute ??
-    selfUnmutePolicy?.allowSelfUnmute ??
-    true
-  const isSelfCoHost = isCoHostUser(normalizeCoHost(coHostData), user?.accountId)
+  const roomStatePayload = roomState?.data ?? roomState
+  const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
+  // Ticket 02: separate gate for the student self-camera toggle.
+  const allowSelfCamera = roomStatePayload?.settings?.allowSelfCamera ?? true
+  // Ticket 03: bypass the self-media lock by *permission*, never by co-host
+  // identity — a co-host only self-unmutes if granted allow_self_unmute.
+  const coHost = normalizeCoHost(coHostData)
+  const canSelfUnmute =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
+    )
+  const canSelfCamera =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA
+    )
 
   const handleMicWithGate = async () => {
     const tryingToUnmute = !micOn
@@ -116,12 +137,7 @@ const VideoCallControlBar = () => {
       )
       return
     }
-    if (
-      tryingToUnmute &&
-      !allowSelfUnmute &&
-      !isHost &&
-      !isSelfCoHost
-    ) {
+    if (tryingToUnmute && !allowSelfUnmute && !canSelfUnmute) {
       toast.error(
         t.rooms?.videoCall?.participantList?.selfUnmuteBlocked ||
           "Host đã tắt quyền tự bật mic. Vui lòng chờ host bật giùm."
@@ -129,6 +145,21 @@ const VideoCallControlBar = () => {
       return
     }
     await handleToggleMic()
+  }
+
+  // Ticket 02: gate the camera self toggle the same way as the mic one. When
+  // the host turns off allow_self_camera, students can no longer turn it on;
+  // host/co-host can still turn it on for them via the participant popover.
+  const handleCameraWithGate = async () => {
+    const tryingToEnable = !cameraOn
+    if (tryingToEnable && !allowSelfCamera && !canSelfCamera) {
+      toast.error(
+        t.rooms?.videoCall?.participantList?.selfCameraBlocked ||
+          "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm."
+      )
+      return
+    }
+    await handleToggleCam()
   }
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
@@ -185,11 +216,14 @@ const VideoCallControlBar = () => {
         <ControlButton
           isActive={cameraOn}
           isLoading={isTogglingCam}
-          onClick={handleToggleCam}
+          onClick={handleCameraWithGate}
           title={
-            cameraOn
-              ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
-              : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
+            !allowSelfCamera && !canSelfCamera
+              ? t.rooms?.videoCall?.participantList?.selfCameraBlocked ||
+                "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm."
+              : cameraOn
+                ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
+                : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
           }
           iconActive={<Video className={iconClass} />}
           iconInactive={<VideoOff className={iconClass} />}

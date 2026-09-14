@@ -49,6 +49,7 @@ const PERMISSION_ICONS = {
   camera_toggle: Video,
   mute_all: MicOff,
   allow_self_unmute: Volume2,
+  allow_self_camera: Video,
   remove_student: UserX,
   admit_waiting: UserCheck,
   lock_class: Lock,
@@ -179,6 +180,13 @@ const CoHostModal = ({
     selectedId != null && permissions.length > 0 && isDirty && !isSaving
 
   const counts = useMemo(() => countByGroup(permissions), [permissions])
+
+  // Ticket 02: dynamic "x/12" — the denominator follows the catalog size.
+  const permissionCountLabel = (
+    t.rooms?.coHost?.permissionsCount || "{count}/{total} quyền"
+  )
+    .replace("{count}", String(permissions.length))
+    .replace("{total}", String(CO_HOST_ALL.length))
 
   // Smart Presets
   const applyPreset = (presetKey) => {
@@ -535,10 +543,7 @@ const CoHostModal = ({
                 {t.rooms?.coHost?.permissionSectionTitle || "Thiết lập quyền hạn"}
               </p>
               <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-                {(t.rooms?.coHost?.permissionsCount || "{count}/11 quyền").replace(
-                  "{count}",
-                  permissions.length,
-                )}
+                {permissionCountLabel}
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-1 pl-7">
@@ -808,10 +813,7 @@ const CoHostModal = ({
             </p>
           </div>
           <span className="text-[11px] font-bold text-slate-700 bg-white px-2.5 py-0.5 rounded-full shrink-0 border border-slate-200 shadow-2xs">
-            {(t.rooms?.coHost?.permissionsCount || "{count}/11 quyền").replace(
-              "{count}",
-              permissions.length,
-            )}
+            {permissionCountLabel}
           </span>
         </div>
 

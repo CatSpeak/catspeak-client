@@ -341,10 +341,22 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // Ticket 02: session-level self-unmute gate (default open)
-    getSelfUnmutePolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/self-unmute-policy`,
-      providesTags: (result, error, id) => [{ type: "SelfUnmutePolicy", id }],
+    // Ticket 03: room-scope "turn off all cameras" (camera_toggle). Server
+    // mutes published camera tracks via LiveKit.
+    cameraOffAll: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/camera-off-all`,
+        method: "POST",
+      }),
+    }),
+
+    // Ticket 01: single source of truth for room governance state
+    // (settings + co-host slice + my waiting status). Replaces the standalone
+    // self-unmute GET; the SignalR RoomSettingsChanged handler updates this
+    // cache in place.
+    getRoomState: builder.query({
+      query: (id) => `/rooms/${id}/state`,
+      providesTags: (result, error, id) => [{ type: "RoomState", id }],
     }),
     updateSelfUnmutePolicy: builder.mutation({
       query: ({ id, allow }) => ({
@@ -352,9 +364,17 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "SelfUnmutePolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+    // Ticket 02: student self-camera gate (mirrors self-unmute). Read from the
+    // room-state cache; the PUT invalidates it so the toggler refetches.
+    updateSelfCameraPolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/self-camera-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
     // Get list of banned participants for a room
@@ -406,20 +426,25 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
     }),
+    // Ticket 04: the waiting user withdraws their own request.
+    cancelWaiting: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/waiting/cancel`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
 
     // --- Ticket 04: room lock + end live for all ---
-    // Lock persists until manually unlocked; end closes the live session only.
-    getRoomLock: builder.query({
-      query: (id) => `/rooms/${id}/lock`,
-      providesTags: (result, error, id) => [{ type: "RoomLock", id }],
-    }),
+    // Ticket 03: lock state is read from the RoomState cache (settings.roomLocked);
+    // only the mutation remains.
     updateRoomLock: builder.mutation({
       query: ({ id, locked }) => ({
         url: `/rooms/${id}/lock`,
         method: "PUT",
         body: { locked },
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "RoomLock", id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
     endLiveSession: builder.mutation({
       query: (id) => ({
@@ -428,41 +453,28 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // --- Ticket 05: student screen-share gate (default open, session-scoped) ---
-    // Host or co-host with manage_student_share toggles.
-    getStudentSharePolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/student-share-policy`,
-      providesTags: (result, error, id) => [{ type: "StudentSharePolicy", id }],
-    }),
+    // --- Ticket 02: student screen-share gate (default open, session-scoped) ---
+    // Host or co-host with manage_student_share toggles. The value is read from
+    // the room-state cache (no standalone GET) and the PUT invalidates it.
     updateStudentSharePolicy: builder.mutation({
       query: ({ id, allow }) => ({
         url: `/rooms/${id}/moderation/student-share-policy`,
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "StudentSharePolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
-    // --- Ticket 05: member recording gate, server-side (default open) ---
+    // --- Ticket 02: member recording gate, server-side (default open) ---
     // Host or co-host with record toggles; shared recording start is gated
-    // server-side via EnsureRecordingAllowedAsync.
-    getMemberRecordingPolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/member-recording-policy`,
-      providesTags: (result, error, id) => [
-        { type: "MemberRecordingPolicy", id },
-      ],
-    }),
+    // server-side via EnsureRecordingAllowedAsync. Value read from room state.
     updateMemberRecordingPolicy: builder.mutation({
       query: ({ id, allow }) => ({
         url: `/rooms/${id}/moderation/member-recording-policy`,
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "MemberRecordingPolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
     // --- Ticket 01: Restrict Chat/Voice + Hands + Game Policy ---
@@ -527,35 +539,37 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "POST",
       }),
     }),
-    getGamePolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/game-policy`,
-      providesTags: (result, error, id) => [{ type: "GamePolicy", id }],
-    }),
     updateGamePolicy: builder.mutation({
       query: ({ id, allow }) => ({
         url: `/rooms/${id}/moderation/game-policy`,
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "GamePolicy", id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
     // --- Ticket 04 (egress): room-level high-quality policy (host-only) ---
-    // Default off; when on, publishers use 720p and the foreign tile cap
-    // still wins. The toggle is broadcast live via the moderation channel.
-    getHighQualityPolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/high-quality-policy`,
-      providesTags: (result, error, id) => [{ type: "HighQualityPolicy", id }],
-    }),
+    // Ticket 03: default off and read from the RoomState cache
+    // (settings.highQuality); only the host-only mutation remains.
     updateHighQualityPolicy: builder.mutation({
       query: ({ id, enabled }) => ({
         url: `/rooms/${id}/moderation/high-quality-policy`,
         method: "PUT",
         body: { enabled },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "HighQualityPolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+
+    // --- Ticket 04: pre-join require-approval toggle (host-only) ---
+    // Read from the RoomState cache (settings.requireApproval); the PUT
+    // invalidates it so the toggler refetches.
+    updateRequireApprovalPolicy: builder.mutation({
+      query: ({ id, requireApproval }) => ({
+        url: `/rooms/${id}/moderation/require-approval-policy`,
+        method: "PUT",
+        body: { requireApproval },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
 
@@ -1024,8 +1038,10 @@ export const {
   useKickParticipantMutation,
   useMuteParticipantMutation,
   useMuteAllParticipantsMutation,
-  useGetSelfUnmutePolicyQuery,
+  useCameraOffAllMutation,
+  useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
+  useUpdateSelfCameraPolicyMutation,
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,
   useInviteToRoomMutation,
@@ -1044,14 +1060,14 @@ export const {
   useKnockWaitingMutation,
   useAdmitWaitingMutation,
   useRejectWaitingMutation,
+  // Ticket 04: waiter cancel + host-only require-approval toggle
+  useCancelWaitingMutation,
+  useUpdateRequireApprovalPolicyMutation,
   // Ticket 04: room lock + end live
-  useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
-  // Ticket 05: student share + member recording policies
-  useGetStudentSharePolicyQuery,
+  // Ticket 02: student share + member recording policies (state-backed)
   useUpdateStudentSharePolicyMutation,
-  useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
   useRestrictChatMutation,
   useUnrestrictChatMutation,
@@ -1059,10 +1075,8 @@ export const {
   useUnrestrictVoiceMutation,
   useRestrictVoiceAllMutation,
   useLowerAllHandsMutation,
-  useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
   // Ticket 04 (egress): high-quality room policy
-  useGetHighQualityPolicyQuery,
   useUpdateHighQualityPolicyMutation,
   // Ticket 02: participant restriction bootstrap
   useGetRoomParticipantsQuery,
