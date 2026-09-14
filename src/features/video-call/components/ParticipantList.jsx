@@ -30,7 +30,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
-import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { isRoomHost, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
 import { ParticipantActionPopover } from "./ParticipantActionPopover"
 import PolicyRow from "./settings/PolicyRow"
 import BannedListTab from "./settings/BannedListTab"
@@ -264,6 +264,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false)
   const pl = t.rooms.videoCall.participantList
   const gt = t.rooms.videoCall.general || {}
+  // Custom=4 (backend enum) dùng copy phòng/thành viên. Class=3 giữ học viên/
+  // buổi live. Group/1-1 giữ nguyên copy cũ (Q1-B, Q5-A).
+  const isCustom = isCustomRoom(room?.roomType)
 
   const parseMetadata = (metadata) => {
     if (!metadata) return {}
@@ -437,8 +440,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? pl.selfUnmuteOn
-          : pl.selfUnmuteOff
+          ? isCustom
+            ? pl.selfUnmuteOnRoom || pl.selfUnmuteOn
+            : pl.selfUnmuteOn
+          : isCustom
+            ? pl.selfUnmuteOffRoom || pl.selfUnmuteOff
+            : pl.selfUnmuteOff,
       )
     } catch (err) {
       toast.error(
@@ -543,8 +550,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         resolveCoHostErrorMessage(
           err,
           t,
-          pl.forbiddenEnd
-        )
+          isCustom ? pl.forbiddenEndRoom || pl.forbiddenEnd : pl.forbiddenEnd,
+        ),
       )
       return
     }
@@ -570,7 +577,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       /* ignore disconnect errors */
     }
     dispatch(leaveCallAction())
-    toast.success(pl.endLiveSuccess)
+    toast.success(isCustom ? pl.endLiveSuccessRoom || pl.endLiveSuccess : pl.endLiveSuccess)
     const nav = navigate ?? getNavigate()
     if (nav && window.location.pathname.includes("/meet/")) {
       nav(window.location.pathname, {
@@ -599,8 +606,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? pl.studentShareOn
-          : pl.studentShareOff
+          ? isCustom
+            ? pl.studentShareOnRoom || pl.studentShareOn
+            : pl.studentShareOn
+          : isCustom
+            ? pl.studentShareOffRoom || pl.studentShareOff
+            : pl.studentShareOff,
       )
     } catch (err) {
       toast.error(
@@ -632,8 +643,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       toast.success(
         next
-          ? pl.memberRecordingOn
-          : pl.memberRecordingOff
+          ? isCustom
+            ? pl.memberRecordingOnRoom || pl.memberRecordingOn
+            : pl.memberRecordingOn
+          : isCustom
+            ? pl.memberRecordingOffRoom || pl.memberRecordingOff
+            : pl.memberRecordingOff,
       )
     } catch (err) {
       toast.error(
@@ -864,7 +879,12 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       const restrictedCount =
         res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceRestrictAllCount
-      toast.success(pl.successRestrictVoiceAll.replace("{count}", String(restrictedCount)))
+      toast.success(
+        (isCustom
+          ? pl.successRestrictVoiceAllRoom || pl.successRestrictVoiceAll
+          : pl.successRestrictVoiceAll
+        ).replace("{count}", String(restrictedCount)),
+      )
     } catch (err) {
       const msg = err?.data?.message || err?.error || ""
       if (err?.status === 404) {
@@ -1149,16 +1169,26 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             </div>
           )}
 
-          {/* Group 1: Quyền học viên */}
+          {/* Group 1: Quyền học viên (Class) / Quyền thành viên (Custom) */}
           <div className="flex flex-col gap-2">
             <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
-              {pl.groupStudentPermissions || "Quyền học viên"}
+              {isCustom
+                ? pl.groupStudentPermissionsRoom ||
+                  pl.groupStudentPermissions ||
+                  "Quyền thành viên"
+                : pl.groupStudentPermissions || "Quyền học viên"}
             </span>
             <div className="flex flex-col gap-1.5">
               {canToggleSelfUnmute && (
                 <PolicyRow
                   icon={<Mic size={15} aria-hidden="true" />}
-                  label={pl.allowSelfUnmute}
+                  label={
+                    isCustom
+                      ? pl.allowSelfUnmuteRoom ||
+                        pl.allowSelfUnmute ||
+                        "Cho phép thành viên tự bật mic"
+                      : pl.allowSelfUnmute
+                  }
                   checked={allowSelfUnmute}
                   disabled={isTogglingSelfUnmute}
                   onChange={handleToggleSelfUnmute}
@@ -1167,7 +1197,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               {canManageStudentShare && (
                 <PolicyRow
                   icon={<MonitorUp size={15} aria-hidden="true" />}
-                  label={pl.allowStudentShare}
+                  label={
+                    isCustom
+                      ? pl.allowStudentShareRoom ||
+                        pl.allowStudentShare ||
+                        "Cho phép thành viên chia sẻ màn hình"
+                      : pl.allowStudentShare
+                  }
                   checked={allowStudentShare}
                   disabled={isTogglingStudentShare}
                   onChange={handleToggleStudentShare}
@@ -1220,7 +1256,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
               {canManageMemberRecording && (
                 <PolicyRow
                   icon={<CircleDot size={15} aria-hidden="true" />}
-                  label={pl.allowMemberRecording}
+                  label={
+                    isCustom
+                      ? pl.allowMemberRecordingRoom ||
+                        pl.allowMemberRecording ||
+                        "Cho phép thành viên ghi hình"
+                      : pl.allowMemberRecording
+                  }
                   description={gt.allowMemberRecordingDesc}
                   checked={allowMemberRecording}
                   disabled={isTogglingMemberRecording}
@@ -1253,10 +1295,18 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   </div>
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span className="text-xs font-semibold text-orange-950">
-                      {pl.restrictVoiceAll}
+                      {isCustom
+                        ? pl.restrictVoiceAllRoom ||
+                          pl.restrictVoiceAll ||
+                          "Tắt mic tất cả thành viên"
+                        : pl.restrictVoiceAll}
                     </span>
                     <span className="text-[11px] text-orange-800/80 leading-relaxed">
-                      {pl.restrictVoiceAllDesc || "Tắt mic và chặn tất cả học viên tự bật lại mic."}
+                      {isCustom
+                        ? pl.restrictVoiceAllDescRoom ||
+                          "Tắt mic và chặn tất cả thành viên tự bật lại mic."
+                        : pl.restrictVoiceAllDesc ||
+                          "Tắt mic và chặn tất cả học viên tự bật lại mic."}
                     </span>
                   </div>
                 </div>
@@ -1267,7 +1317,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
                 >
                   <MicOff size={13} />
-                  <span>{pl.restrictVoiceAll}</span>
+                  <span>
+                    {isCustom
+                      ? pl.restrictVoiceAllRoom ||
+                        pl.restrictVoiceAll ||
+                        "Tắt mic tất cả thành viên"
+                      : pl.restrictVoiceAll}
+                  </span>
                 </button>
               </div>
             </div>
@@ -1286,10 +1342,16 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   </div>
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span className="text-xs font-semibold text-neutral-900">
-                      {pl.endLive}
+                      {isCustom
+                        ? pl.endLiveRoom || pl.endLive || "Kết thúc phòng"
+                        : pl.endLive}
                     </span>
                     <span className="text-[11px] text-neutral-600 leading-relaxed">
-                      {pl.endLiveDesc || "Đóng phiên họp trực tiếp cho toàn bộ học viên và người tham gia."}
+                      {isCustom
+                        ? pl.endLiveDescRoom ||
+                          "Đóng phòng và kết thúc phiên hoạt động cho toàn bộ thành viên."
+                        : pl.endLiveDesc ||
+                          "Đóng phiên họp trực tiếp cho toàn bộ học viên và người tham gia."}
                     </span>
                   </div>
                 </div>
@@ -1300,7 +1362,11 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-cath-red-700 hover:bg-cath-red-800 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
                 >
                   <PhoneOff size={13} className="rotate-[135deg]" />
-                  <span>{pl.endLive}</span>
+                  <span>
+                    {isCustom
+                      ? pl.endLiveRoom || pl.endLive || "Kết thúc phòng"
+                      : pl.endLive}
+                  </span>
                 </button>
               </div>
             </div>
@@ -1329,9 +1395,24 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         open={endLiveConfirmOpen}
         onClose={() => setEndLiveConfirmOpen(false)}
         onConfirm={confirmEndLive}
-        title={pl.confirmEndLiveTitle || pl.endLive}
-        message={pl.confirmEndLive}
-        confirmText={pl.endLive}
+        title={
+          isCustom
+            ? pl.confirmEndLiveTitleRoom ||
+              pl.endLiveRoom ||
+              pl.confirmEndLiveTitle ||
+              pl.endLive
+            : pl.confirmEndLiveTitle || pl.endLive
+        }
+        message={
+          isCustom
+            ? pl.confirmEndLiveRoom || pl.confirmEndLive
+            : pl.confirmEndLive
+        }
+        confirmText={
+          isCustom
+            ? pl.endLiveRoom || pl.endLive
+            : pl.endLive
+        }
         confirmVariant="destructive"
       />
 
@@ -1350,9 +1431,27 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         open={restrictVoiceAllConfirmOpen}
         onClose={() => setRestrictVoiceAllConfirmOpen(false)}
         onConfirm={confirmRestrictVoiceAll}
-        title={pl.confirmRestrictVoiceAllTitle || pl.restrictVoiceAll}
-        message={pl.confirmRestrictVoiceAll.replace("{count}", String(voiceRestrictAllCount))}
-        confirmText={pl.restrictVoiceAll}
+        title={
+          isCustom
+            ? pl.confirmRestrictVoiceAllTitleRoom ||
+              pl.restrictVoiceAllRoom ||
+              pl.confirmRestrictVoiceAllTitle ||
+              pl.restrictVoiceAll
+            : pl.confirmRestrictVoiceAllTitle || pl.restrictVoiceAll
+        }
+        message={
+          isCustom
+            ? (pl.confirmRestrictVoiceAllRoom || pl.confirmRestrictVoiceAll).replace(
+                "{count}",
+                String(voiceRestrictAllCount),
+              )
+            : pl.confirmRestrictVoiceAll.replace("{count}", String(voiceRestrictAllCount))
+        }
+        confirmText={
+          isCustom
+            ? pl.restrictVoiceAllRoom || pl.restrictVoiceAll
+            : pl.restrictVoiceAll
+        }
         confirmVariant="destructive"
         isPending={isRestrictingVoiceAll}
       />
