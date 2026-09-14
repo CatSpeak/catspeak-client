@@ -21,6 +21,12 @@ const initialState = {
     initMicOn: false,
     initCamOn: false,
     isAISession: false,
+    /** Egress profile resolved by the token API ("standard" | "full") */
+    egressProfile: null,
+    /** Participant country — informational only; the server's egressProfile decides caps */
+    country: null,
+    /** Room-level high-quality flag (ticket 04) */
+    highQuality: false,
   },
   /** Breakout Rooms State */
   isBreakoutActive: false,
@@ -49,6 +55,9 @@ const videoCallSlice = createSlice({
         initMicOn,
         initCamOn,
         isAISession,
+        egressProfile,
+        country,
+        highQuality,
       } = action.payload
 
       state.isInCall = true
@@ -64,6 +73,9 @@ const videoCallSlice = createSlice({
         initMicOn: initMicOn ?? false,
         initCamOn: initCamOn ?? false,
         isAISession: isAISession ?? false,
+        egressProfile: egressProfile ?? null,
+        country: country ?? null,
+        highQuality: highQuality ?? false,
       }
       state.isBreakoutActive = false
       state.breakoutRoomName = null

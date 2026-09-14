@@ -2,7 +2,7 @@ import React from "react"
 import OptionGroupSelect from "@/shared/components/ui/OptionGroupSelect"
 import { LANGUAGES } from "../../config/constants"
 
-const LanguageSelect = ({ value, onChange, disabled, t }) => {
+const LanguageSelect = ({ value, onChange, disabled, labelClassName, t }) => {
   const ct = t.rooms?.customRooms || {}
   const handleChange = (language) => {
     onChange(language)
@@ -17,6 +17,7 @@ const LanguageSelect = ({ value, onChange, disabled, t }) => {
       onChange={handleChange}
       multiple={false}
       disabled={disabled}
+      labelClassName={labelClassName}
       getOptionLabel={(language) =>
         t.rooms?.filters?.languages?.[language] || language
       }

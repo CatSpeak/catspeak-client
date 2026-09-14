@@ -15,7 +15,12 @@ import {
   useUpdateClassCoHostMutation,
   useRevokeClassCoHostMutation,
 } from "@/store/api/coursesApi"
-import { formatCurrency } from "../utils/courseUtils"
+import {
+  formatCurrency,
+  getMemberDisplayName,
+  getMemberEmail,
+  getMemberId,
+} from "../utils/courseUtils"
 import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
@@ -26,7 +31,6 @@ import CreatePostTypeModal from "../components/CreatePostTypeModal"
 
 import { useAuth } from "@/features/auth"
 import { useRoleOverride } from "../components/RoleSwitcher"
-import CoHostManager from "@/features/co-host/CoHostManager"
 import { normalizeCoHost } from "@/features/co-host/constants"
 
 const ClassLectureHallPage = lazy(
@@ -227,9 +231,9 @@ const ClassDetailPage = () => {
         return st == null || Number(st) === 1
       })
       .map((s) => ({
-        accountId: s?.accountId ?? s?.id ?? s?.studentId ?? s?.userId,
-        name: s?.name ?? s?.fullName ?? s?.studentName ?? "",
-        email: s?.email ?? "",
+        accountId: getMemberId(s),
+        name: getMemberDisplayName(s),
+        email: getMemberEmail(s),
       }))
       .filter((s) => s.accountId != null && !ownerIds.has(String(s.accountId)))
   }, [classData])
@@ -303,35 +307,6 @@ const ClassDetailPage = () => {
             </h1>
 
             <div className="flex items-center gap-3">
-              {/* Co-host: Thêm khi chưa có, Quản lý khi đã có (chi tiết lớp) */}
-              {isClassTeacher && (
-                <CoHostManager
-                  roomName={classData.name}
-                  roomType="class"
-                  coHost={classCoHost}
-                  candidates={coHostCandidates}
-                  isTeacher={isClassTeacher}
-                  isSaving={isAssigningCoHost || isUpdatingCoHost}
-                  isRevoking={isRevokingCoHost}
-                  onAssign={(body) =>
-                    assignClassCoHost({ classId: id, ...body }).unwrap()
-                  }
-                  onUpdate={(body) =>
-                    updateClassCoHost({ classId: id, ...body }).unwrap()
-                  }
-                  onRevoke={() => revokeClassCoHost(id).unwrap()}
-                />
-              )}
-              {/* Vào phòng học button */}
-              {/* <button
-                type="button"
-                onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
-                className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
-              >
-                <Video size={14} className="fill-white" />
-                <span>{cd.joinRoom || c.joinRoom || "Vào phòng học"}</span>
-              </button> */}
-
               {/* Trò chuyện button */}
               <button
                 type="button"
@@ -416,7 +391,27 @@ const ClassDetailPage = () => {
         )}
 
         {activeTab === "members" && (
-          <ClassMembersTab classData={classData} isStudent={false} />
+          <ClassMembersTab
+            classData={classData}
+            isStudent={false}
+            isClassTeacher={isClassTeacher}
+            coHost={classCoHost}
+            coHostCandidates={coHostCandidates}
+            isSavingCoHost={isAssigningCoHost || isUpdatingCoHost}
+            isRevokingCoHost={isRevokingCoHost}
+            onAssignCoHost={(body) =>
+              assignClassCoHost({ classId: id, ...body }).unwrap()
+            }
+            onUpdateCoHost={(body) =>
+              updateClassCoHost({ classId: id, ...body }).unwrap()
+            }
+            onRevokeCoHost={() => revokeClassCoHost(id).unwrap()}
+            onInviteStudents={
+              isClassTeacher
+                ? () => handleTabChange("invite-friends")
+                : undefined
+            }
+          />
         )}
 
         {activeTab === "lecture-hall" && (

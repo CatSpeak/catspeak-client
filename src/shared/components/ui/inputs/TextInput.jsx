@@ -56,6 +56,13 @@ const TextInput = forwardRef(({
   const errorClass = error
     ? "!border-red-500 focus:!ring-red-500 hover:!border-red-500 animate-shake"
     : ""
+  const errorId = id ? `${id}-error` : undefined
+  const errorAriaProps = error
+    ? {
+        "aria-invalid": true,
+        "aria-describedby": errorId,
+      }
+    : {}
   const leftContentPadding = leftContent ? leftContentWidthClass : ""
   const rightContentPadding = rightContent ? rightContentWidthClass : ""
   const hasCustomHeight = className
@@ -117,6 +124,7 @@ const TextInput = forwardRef(({
             onChange={onChange}
             onInput={handleInput}
             rows={1}
+            {...errorAriaProps}
             {...props}
           />
         ) : (
@@ -135,6 +143,7 @@ const TextInput = forwardRef(({
             className={finalClassName}
             value={value}
             onChange={onChange}
+            {...errorAriaProps}
             {...props}
           />
         )}
@@ -191,7 +200,13 @@ const TextInput = forwardRef(({
         <div className="flex justify-between items-start px-4 w-full">
           <div className="flex-1">
             {error ? (
-              <span className="text-xs text-red-500 block">{error}</span>
+              <span
+                id={errorId}
+                role="alert"
+                className="text-xs text-red-500 block"
+              >
+                {error}
+              </span>
             ) : helperText ? (
               <span
                 className={`text-xs block ${

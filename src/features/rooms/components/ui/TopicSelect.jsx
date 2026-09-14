@@ -1,21 +1,31 @@
 import React from "react"
 import OptionGroupSelect from "@/shared/components/ui/OptionGroupSelect"
 
-const TopicSelect = ({ value, onChange, options, disabled, t }) => {
+const MAX_TOPICS = 3
+
+const TopicSelect = ({ value, onChange, options, disabled, labelClassName, t }) => {
   const handleChange = (newTopics) => {
     onChange({ target: { value: newTopics } })
   }
 
+  const selectedCount = Array.isArray(value) ? value.length : 0
+  const selectedText = (
+    t.rooms.createRoom.topicSelected || "{{count}}/{{max}}"
+  )
+    .replace("{{count}}", selectedCount)
+    .replace("{{max}}", MAX_TOPICS)
+
   return (
     <OptionGroupSelect
       label={t.rooms.createRoom.topicsLabel}
-      subLabel={`(${t.rooms.createRoom.topicLimit})`}
+      subLabel={`(${selectedText})`}
       options={options}
       value={value}
       onChange={handleChange}
       multiple={true}
-      maxSelect={3}
+      maxSelect={MAX_TOPICS}
       disabled={disabled}
+      labelClassName={labelClassName}
       getOptionLabel={(topic) => t.rooms.createRoom.topics[topic.toLowerCase()] || topic}
       getOptionValue={(topic) => topic}
     />
@@ -23,4 +33,3 @@ const TopicSelect = ({ value, onChange, options, disabled, t }) => {
 }
 
 export default TopicSelect
-

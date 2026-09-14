@@ -8,7 +8,7 @@ import {
   useConnectionState,
   RoomAudioRenderer,
 } from "@livekit/components-react"
-import { ConnectionState, RoomEvent } from "livekit-client"
+import { ConnectionState, RoomEvent, Track, VideoPresets } from "livekit-client"
 import { toast } from "react-hot-toast"
 import { Clock } from "lucide-react"
 
@@ -36,6 +36,7 @@ import {
 } from "@/store/api/assistantApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
+import { useSubscriptionPolicy } from "@/features/video-call/hooks/useSubscriptionPolicy"
 import {
   getNavigate,
   getLocation,
@@ -49,6 +50,7 @@ import {
   useGetStudentSharePolicyQuery,
   useGetMemberRecordingPolicyQuery,
   useGetRoomParticipantsQuery,
+  useGetHighQualityPolicyQuery,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -66,6 +68,8 @@ import {
   isRoomHost,
   isSpeakingTimeBalanceSupported,
 } from "@/features/video-call/utils/roomTypeHelpers"
+import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
+import { buildRoomOptions } from "@/features/video-call/utils/roomOptions"
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -82,6 +86,8 @@ const GlobalCallContent = ({
   setReceiveSystemMsgs,
   showAiSuggestions,
   setShowAiSuggestions,
+  joinLeaveSound,
+  setJoinLeaveSound,
   panelState,
   speakingAssistantEnabled,
   setSpeakingAssistantEnabled,
@@ -212,6 +218,9 @@ const GlobalCallContent = ({
     }
   }, [layoutMode, maxTiles, hideEmptyTiles])
 
+  // Ticket 02: participant the user pinned (spotlight) for the capped profile
+  const [pinnedParticipantId, setPinnedParticipantId] = useState(null)
+
   // ── LiveKit hooks & Device Selection ──
   let lkRoom = null
   try {
@@ -227,6 +236,78 @@ const GlobalCallContent = ({
   const allParticipants = useParticipants()
   const localPart = useLocalParticipant()
   const localParticipant = localPart?.localParticipant ?? null
+
+  // Ticket 04 (egress): live high-quality state. Initialised from the token
+  // (server-sourced room policy) and kept in sync through the moderation
+  // channel + the room policy query.
+  const [roomHighQuality, setRoomHighQuality] = useState(
+    callInfo?.highQuality ?? false,
+  )
+  const roomHighQualityRef = useRef(roomHighQuality)
+  useEffect(() => {
+    roomHighQualityRef.current = roomHighQuality
+  }, [roomHighQuality])
+
+  const { data: highQualityPolicyData } = useGetHighQualityPolicyQuery(
+    currentRoomId,
+    { skip: !currentRoomId },
+  )
+  const serverHighQuality =
+    highQualityPolicyData?.data?.highQuality ??
+    highQualityPolicyData?.highQuality
+  useEffect(() => {
+    if (serverHighQuality !== undefined) {
+      setRoomHighQuality(serverHighQuality === true)
+    }
+  }, [serverHighQuality])
+
+  const callPolicy = React.useMemo(
+    () => resolveCallPolicy(callInfo?.egressProfile, roomHighQuality),
+    [callInfo?.egressProfile, roomHighQuality],
+  )
+
+  // Ticket 02: cap remote video subscriptions for standard (foreign) profiles
+  useSubscriptionPolicy({
+    room: lkRoom,
+    egressProfile: callInfo?.egressProfile,
+    highQuality: roomHighQuality,
+    pinnedParticipantId,
+  })
+
+  // Ticket 04 (egress): apply the live high-quality state to the local
+  // publisher without a rejoin. LiveKit reads the room capture/publish
+  // defaults when a camera track is created, so keep them in sync too and
+  // restart an already-live camera track at the new target resolution.
+  useEffect(() => {
+    if (!lkRoom || !localParticipant) return
+
+    const preset = VideoPresets[callPolicy.publish.cameraPreset]
+    if (!preset?.resolution) return
+
+    const { videoCaptureDefaults, publishDefaults } =
+      buildRoomOptions(callPolicy)
+    lkRoom.options.videoCaptureDefaults.resolution =
+      videoCaptureDefaults.resolution
+    if (publishDefaults.videoSimulcastLayers) {
+      lkRoom.options.publishDefaults.videoSimulcastLayers =
+        publishDefaults.videoSimulcastLayers
+    } else {
+      delete lkRoom.options.publishDefaults.videoSimulcastLayers
+    }
+
+    const publication = localParticipant.getTrackPublication(Track.Source.Camera)
+    const track = publication?.videoTrack
+    if (!track?.restartTrack || publication?.isMuted) return
+
+    const settings = track.mediaStreamTrack?.getSettings?.()
+    if (
+      settings?.width === preset.resolution.width &&
+      settings?.height === preset.resolution.height
+    ) {
+      return
+    }
+    track.restartTrack({ resolution: preset.resolution }).catch(() => {})
+  }, [lkRoom, localParticipant, callPolicy])
 
   // Ticket 02: voice restriction forces the mic off and keeps it off — the
   // participant can still hear others. The ControlBar also blocks re-enabling.
@@ -620,8 +701,8 @@ const GlobalCallContent = ({
     localParticipant,
   )
 
-  // ── Join/Leave Audio ──
-  useParticipantAudioEffect(participants, currentRoomId)
+  // ── Join/Leave Audio (personal preference, off by default) ──
+  useParticipantAudioEffect(participants, joinLeaveSound)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
@@ -779,6 +860,26 @@ const GlobalCallContent = ({
           return
         }
 
+        // Ticket 04 (egress): high-quality room policy changed live — apply
+        // immediately (publish 720p; the foreign tile cap still wins).
+        if (data.action === "HIGH_QUALITY_POLICY") {
+          const enabled = data.enabled === true
+          setRoomHighQuality(enabled)
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "HighQualityPolicy", id: currentRoomId },
+            ])
+          )
+          toast.info(
+            enabled
+              ? (pl.hostHighQualityOn ||
+                  "Host đã bật chế độ chất lượng cao cho phòng.")
+              : (pl.hostHighQualityOff ||
+                  "Host đã tắt chế độ chất lượng cao cho phòng.")
+          )
+          return
+        }
+
         // Ticket 04: room lock changed — refetch lock state + toast.
         if (data.action === "ROOM_LOCK_CHANGED") {
           dispatch(
@@ -829,23 +930,6 @@ const GlobalCallContent = ({
           actions.setIsHandRaised?.(false)
           toast.info(
             pl.hostLoweredAllHands || "Host đã hạ tất cả các tay xuống.",
-          )
-          return
-        }
-
-        if (data.action === "TOGGLE_JOIN_SOUND") {
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-            data.enabled,
-          )
-          window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
-          toast.info(
-            data.enabled
-              ? pl.hostEnabledJoinSound ||
-                  "Host đã BẬT âm thanh khi có người vào/ra phòng."
-              : pl.hostDisabledJoinSound ||
-                  "Host đã TẮT âm thanh khi có người vào/ra phòng.",
           )
           return
         }
@@ -902,10 +986,6 @@ const GlobalCallContent = ({
                 JSON.stringify({
                   action: "SYNC_ROOM_SETTINGS",
                   settings: {
-                    joinLeaveSound: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                    ),
                     memberRecording: getRoomSetting(
                       currentRoomId,
                       ROOM_SETTING_KEYS.MEMBER_RECORDING,
@@ -914,6 +994,7 @@ const GlobalCallContent = ({
                       currentRoomId,
                       ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
                     ),
+                    highQuality: roomHighQualityRef.current,
                   },
                   targetIdentity: participant?.identity,
                 }),
@@ -939,16 +1020,6 @@ const GlobalCallContent = ({
             !data.targetIdentity ||
             String(data.targetIdentity) === String(localParticipant?.identity)
           if (isTargetMe && data.settings) {
-            if (data.settings.joinLeaveSound !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                data.settings.joinLeaveSound,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_join_leave_sound_changed"),
-              )
-            }
             if (data.settings.memberRecording !== undefined) {
               setRoomSetting(
                 currentRoomId,
@@ -968,6 +1039,10 @@ const GlobalCallContent = ({
               window.dispatchEvent(
                 new Event("catspeak_member_private_ai_allowed_changed"),
               )
+            }
+            // Ticket 04 (egress): high-quality state synced from the host.
+            if (data.settings.highQuality !== undefined) {
+              setRoomHighQuality(data.settings.highQuality === true)
             }
           }
           return
@@ -1111,10 +1186,6 @@ const GlobalCallContent = ({
             JSON.stringify({
               action: "SYNC_ROOM_SETTINGS",
               settings: {
-                joinLeaveSound: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                ),
                 memberRecording: getRoomSetting(
                   currentRoomId,
                   ROOM_SETTING_KEYS.MEMBER_RECORDING,
@@ -1123,6 +1194,7 @@ const GlobalCallContent = ({
                   currentRoomId,
                   ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
                 ),
+                highQuality: roomHighQualityRef.current,
               },
               targetIdentity: participant.identity,
             }),
@@ -1135,31 +1207,6 @@ const GlobalCallContent = ({
         }
       }
 
-      try {
-        const isSoundEnabled = getRoomSetting(
-          currentRoomId,
-          ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-        )
-        if (!isSoundEnabled) return
-
-        const AudioContext = window.AudioContext || window.webkitAudioContext
-        if (!AudioContext) return
-        const ctx = new AudioContext()
-        const now = ctx.currentTime
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.type = "sine"
-        osc.frequency.setValueAtTime(523.25, now)
-        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15)
-        gain.gain.setValueAtTime(0.15, now)
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-        osc.start(now)
-        osc.stop(now + 0.3)
-      } catch (e) {
-        // autoplay restriction fallback
-      }
     }
 
     // Request settings sync from Host on join if not Host
@@ -1353,6 +1400,8 @@ const GlobalCallContent = ({
     setReceiveSystemMsgs,
     showAiSuggestions,
     setShowAiSuggestions,
+    joinLeaveSound,
+    setJoinLeaveSound,
     speakingAssistantEnabled,
     setSpeakingAssistantEnabled,
     updateAiInteraction,
@@ -1405,6 +1454,11 @@ const GlobalCallContent = ({
     startedByAccountId: startedByAccountId,
     layoutMode,
     setLayoutMode,
+    pinnedParticipantId,
+    setPinnedParticipantId,
+    // Ticket 04 (egress): live high-quality room policy
+    roomHighQuality,
+    setRoomHighQuality,
     maxTiles,
     setMaxTiles,
     hideEmptyTiles,

@@ -53,8 +53,17 @@ const UpcomingClassCardItem = ({
   const students = useMemo(() => {
     if (!Array.isArray(rawStudents)) return []
     return rawStudents.map((s) => ({
-      id: s.id ?? s.accountId ?? s.userId,
-      name: s.name ?? s.fullName ?? s.studentName ?? "",
+      id: s?.id ?? s?.accountId ?? s?.userId,
+      name: (
+        s?.name ??
+        s?.fullName ??
+        s?.studentName ??
+        s?.nickname ??
+        s?.username ??
+        s?.displayName ??
+        s?.email ??
+        ""
+      ).toString().trim(),
       avatarUrl:
         getSafeMediaUrl(s.avatar ?? s.avatarUrl ?? s.avatarImageUrl) ||
         (s.avatar ?? s.avatarUrl ?? s.avatarImageUrl),

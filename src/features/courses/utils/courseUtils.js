@@ -363,3 +363,77 @@ export const getFileIconColorClass = (fileName) => {
   if (["png", "jpg", "jpeg", "gif", "svg"].includes(ext)) return "text-violet-500"
   return "text-gray-500"
 }
+
+const pickDisplayText = (value) => {
+  if (typeof value !== "string" && typeof value !== "number") return ""
+  const text = String(value).trim()
+  return text
+}
+
+/**
+ * Display name chung cho members/students/co-host candidates.
+ * Bao phủ mọi shape API đã từng xuất hiện: name/fullName/studentName/teacherName,
+ * nickname/username/displayName (+ PascalCase), và cuối cùng là email.
+ * Không bao giờ trả về chuỗi toàn khoảng trắng.
+ */
+export const getMemberDisplayName = (person) => {
+  if (!person || typeof person !== "object") return ""
+  const direct =
+    pickDisplayText(person.name) ||
+    pickDisplayText(person.Name) ||
+    pickDisplayText(person.fullName) ||
+    pickDisplayText(person.FullName) ||
+    pickDisplayText(person.studentName) ||
+    pickDisplayText(person.StudentName) ||
+    pickDisplayText(person.teacherName) ||
+    pickDisplayText(person.TeacherName) ||
+    pickDisplayText(person.nickname) ||
+    pickDisplayText(person.Nickname) ||
+    pickDisplayText(person.username) ||
+    pickDisplayText(person.Username) ||
+    pickDisplayText(person.displayName) ||
+    pickDisplayText(person.DisplayName) ||
+    pickDisplayText(person.display_name)
+  if (direct) return direct
+  const email =
+    pickDisplayText(person.email) ||
+    pickDisplayText(person.Email) ||
+    pickDisplayText(person.studentEmail) ||
+    pickDisplayText(person.mail)
+  return email
+}
+
+export const getMemberId = (person) =>
+  person?.id ??
+  person?.Id ??
+  person?.accountId ??
+  person?.AccountId ??
+  person?.studentId ??
+  person?.StudentId ??
+  person?.userId ??
+  person?.UserId
+
+export const getMemberEmail = (person) => {
+  if (!person || typeof person !== "object") return ""
+  return (
+    pickDisplayText(person.email) ||
+    pickDisplayText(person.Email) ||
+    pickDisplayText(person.studentEmail) ||
+    pickDisplayText(person.StudentEmail) ||
+    pickDisplayText(person.mail) ||
+    ""
+  )
+}
+
+export const getMemberAvatar = (person) => {
+  if (!person || typeof person !== "object") return ""
+  return (
+    pickDisplayText(person.avatar) ||
+    pickDisplayText(person.Avatar) ||
+    pickDisplayText(person.avatarUrl) ||
+    pickDisplayText(person.AvatarUrl) ||
+    pickDisplayText(person.avatarImageUrl) ||
+    pickDisplayText(person.AvatarImageUrl) ||
+    ""
+  )
+}

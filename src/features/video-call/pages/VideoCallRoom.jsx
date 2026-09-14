@@ -253,7 +253,7 @@ const VideoCallRoomContent = () => {
   }
 
   return (
-    <div className="flex h-full w-full flex-col relative">
+    <div className="flex h-full w-full flex-col relative overflow-hidden">
       {/* Ticket 03: waiter lobby gate (pending/rejected see WaitingScreen). */}
       <WaitingGate>
       {isReconnecting && (
@@ -272,8 +272,9 @@ const VideoCallRoomContent = () => {
       {/* Top Bar */}
       <RoomHeader />
 
-      {/* Main Content Area */}
-      <div className="p-4 relative flex flex-1 flex-col overflow-hidden md:flex-row md:bg-primaryBg bg-white gap-4">
+      {/* Main Content Area — the only scrollable region; header above and
+          control bar below stay pinned to the viewport */}
+      <div className="p-4 relative flex flex-1 min-h-0 flex-col overflow-y-auto overflow-x-hidden overscroll-contain md:flex-row md:bg-primaryBg bg-white gap-4">
         <div className="absolute inset-0 bg-[url('/bg-pattern.svg')] opacity-[0.03] pointer-events-none" />
         {/* Video Area */}
         <div className="relative flex flex-1 flex-col min-h-0 overflow-hidden">
@@ -474,7 +475,7 @@ const VideoCallRoomContent = () => {
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
                 transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-                className="flex h-[70vh] w-full flex-col bg-white shadow-xl rounded-t-[24px] overflow-hidden"
+                className="flex h-[75vh] w-full flex-col bg-white shadow-xl rounded-t-[24px] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div
@@ -508,9 +509,12 @@ const VideoCallRoomContent = () => {
                     className="flex-1 min-h-0 w-full rounded-t-[24px]"
                     hideTitle
                   />
+                ) : showParticipants ? (
+                  <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white">
+                    <ParticipantList hideTitle />
+                  </div>
                 ) : (
                   <div className="flex-1 overflow-y-auto bg-white min-h-0">
-                    {showParticipants && <ParticipantList hideTitle />}
                     {showSpeakingTimeBalance && isHost && isSpeakingTimeBalanceSupported(room) && (
                       <SpeakingTimeBalancePanel
                         onClose={() => setActiveSidePanel(null)}

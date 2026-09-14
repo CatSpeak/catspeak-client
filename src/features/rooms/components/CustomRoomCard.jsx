@@ -13,7 +13,6 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import CoHostManager from "@/features/co-host/CoHostManager"
-import CoHostBadge from "@/features/co-host/CoHostBadge"
 import { normalizeCoHost } from "@/features/co-host/constants"
 import {
   useGetRoomCoHostQuery,
@@ -337,22 +336,19 @@ const CustomRoomCard = ({
             {/* Participants */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Users size={14} className="text-[#8B5A2B]" />
+                <Users size={14} className="text-[#8B5A2B]" aria-hidden="true" />
               </div>
               <span className="text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
                 {maxParticipantsDisplay
                   ? `${currentCount}/${maxParticipantsDisplay} ${t.rooms?.people || "người"}`
                   : `${currentCount} ${t.rooms?.people || "người"}`}
               </span>
-              {roomCoHost?.coHostAccountId && (
-                <CoHostBadge />
-              )}
             </div>
 
             {/* Duration */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="flex shrink-0 items-center justify-center h-7 w-7 rounded-full bg-amber-50 border border-[#EDC589]">
-                <Clock size={14} className="text-[#8B5A2B]" />
+                <Clock size={14} className="text-[#8B5A2B]" aria-hidden="true" />
               </div>
               <div className="flex items-center text-[13px] sm:text-[14px] font-medium text-black whitespace-nowrap">
                 <span>{durationText}</span>
@@ -360,33 +356,31 @@ const CustomRoomCard = ({
             </div>
           </div>
 
-          {/* Co-host row */}
-          <div
-            className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between gap-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {roomCoHost?.coHostAccountId && (
-              <p className="text-[11px] text-gray-400 leading-snug">
-                {customRooms.assignedCoHost || "Đã phân công Co-host"}
-              </p>
-            )}
-            <CoHostManager
-              roomName={room.name}
-              roomType="room"
-              coHost={roomCoHost}
-              candidates={coHostCandidates}
-              isTeacher={isRoomOwner}
-              isSaving={isAssigningCoHost || isUpdatingCoHost}
-              isRevoking={isRevokingCoHost}
-              onAssign={(body) =>
-                assignRoomCoHost({ id: roomId, ...body }).unwrap()
-              }
-              onUpdate={(body) =>
-                updateRoomCoHost({ id: roomId, ...body }).unwrap()
-              }
-              onRevoke={() => revokeRoomCoHost(roomId).unwrap()}
-            />
-          </div>
+          {/* Co-host row — owner hoặc khi đã có co-host mới hiển thị */}
+          {(isRoomOwner || roomCoHost?.coHostAccountId) && (
+            <div
+              className="mt-3 pt-3 border-t border-gray-100"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CoHostManager
+                variant="card"
+                roomName={room.name}
+                roomType="room"
+                coHost={roomCoHost}
+                candidates={coHostCandidates}
+                isTeacher={isRoomOwner}
+                isSaving={isAssigningCoHost || isUpdatingCoHost}
+                isRevoking={isRevokingCoHost}
+                onAssign={(body) =>
+                  assignRoomCoHost({ id: roomId, ...body }).unwrap()
+                }
+                onUpdate={(body) =>
+                  updateRoomCoHost({ id: roomId, ...body }).unwrap()
+                }
+                onRevoke={() => revokeRoomCoHost(roomId).unwrap()}
+              />
+            </div>
+          )}
         </div>
       </Animated3DCard>
 

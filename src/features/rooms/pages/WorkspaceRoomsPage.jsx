@@ -25,13 +25,10 @@ import {
 import CreateRoomModal from "../components/CreateRoomModal";
 import EditRoomModal from "../components/EditRoomModal";
 import CustomRoomCard from "../components/CustomRoomCard";
-import RoomCard from "../components/RoomCard";
+import CommunityRoomCard from "../components/CommunityRoomCard";
 import WorkspaceRoomFilterModal from "../components/WorkspaceRoomFilterModal";
 import WorkspaceRoomSortModal from "../components/WorkspaceRoomSortModal";
-import {
-  buildCustomRoomQuota,
-  isCustomRoomQuotaFull,
-} from "../utils/customRoomQuota";
+import { buildCustomRoomQuota } from "../utils/customRoomQuota";
 
 const WorkspaceRoomsContent = () => {
   const { t } = useLanguage();
@@ -183,7 +180,6 @@ const WorkspaceRoomsContent = () => {
     limits,
     fallbackUsed: myRoomsResponse?.data?.totalCount ?? rawTargetRooms.length,
   });
-  const isQuotaFull = isCustomRoomQuotaFull(customRoomsData);
 
   // Tab definition
   const tabs = useMemo(
@@ -306,7 +302,7 @@ const WorkspaceRoomsContent = () => {
       <CreateRoomModal
         open={isCreateModalOpen}
         onCancel={() => setIsCreateModalOpen(false)}
-        initialMode="custom"
+        initialMode="group"
       />
 
       <EditRoomModal
@@ -355,7 +351,6 @@ const WorkspaceRoomsContent = () => {
               {activeTab === "created" && (
                 <PillButton
                   onClick={() => setIsCreateModalOpen(true)}
-                  disabled={isQuotaFull}
                   startIcon={<Plus size={18} />}
                   className="h-10 text-sm mb-3 ml-4 shrink-0"
                 >
@@ -474,7 +469,6 @@ const WorkspaceRoomsContent = () => {
                   !(appliedSearch || activeFilterCount > 0) && (
                     <button
                       onClick={() => setIsCreateModalOpen(true)}
-                      disabled={isQuotaFull}
                       className="bg-cath-red-700 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cath-red-600 transition-colors flex items-center space-x-1 text-sm shadow disabled:opacity-50"
                     >
                       <Plus size={16} />
@@ -486,7 +480,7 @@ const WorkspaceRoomsContent = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                   {displayedRooms.map((room) => (
-                    <RoomCard
+                    <CommunityRoomCard
                       key={room.id || room.roomId}
                       room={room}
                     />

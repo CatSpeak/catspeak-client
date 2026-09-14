@@ -3,12 +3,40 @@ import { useSelector, useDispatch } from "react-redux"
 import { LiveKitRoom } from "@livekit/components-react"
 import { useSidePanelState } from "@/features/video-call/hooks/useSidePanelState"
 import { leaveCall } from "@/store/slices/videoCallSlice"
+import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
+import { buildRoomOptions } from "@/features/video-call/utils/roomOptions"
 import {
   subscribeToCallBroadcast,
   broadcastCallEvent,
   BROADCAST_EVENT_TYPES,
 } from "@/features/video-call/services/callBroadcastChannel"
+import {
+  getUserPref,
+  setUserPref,
+} from "@/features/video-call/utils/userPreferences"
 import GlobalCallContent from "./GlobalCallContent"
+
+const PREF_KEYS = {
+  RECEIVE_SYSTEM_MSGS: "receiveSystemMsgs",
+  SHOW_AI_SUGGESTIONS: "showAiSuggestions",
+  JOIN_LEAVE_SOUND: "joinLeaveSound",
+}
+
+const readPrefs = (accountId) => ({
+  receiveSystemMsgs: getUserPref(accountId, PREF_KEYS.RECEIVE_SYSTEM_MSGS, {
+    defaultValue: true,
+    legacyKey: PREF_KEYS.RECEIVE_SYSTEM_MSGS,
+  }),
+  showAiSuggestions: getUserPref(accountId, PREF_KEYS.SHOW_AI_SUGGESTIONS, {
+    defaultValue: true,
+    legacyKey: PREF_KEYS.SHOW_AI_SUGGESTIONS,
+  }),
+  // User-level join/leave chime: each participant chooses for themselves and
+  // it is off by default (previously a host-controlled room policy).
+  joinLeaveSound: getUserPref(accountId, PREF_KEYS.JOIN_LEAVE_SOUND, {
+    defaultValue: false,
+  }),
+})
 
 const GlobalVideoCallContext = createContext(null)
 
@@ -130,6 +158,8 @@ const IDLE_VALUE = {
   activeSettingsTab: "audio-video",
   setActiveSettingsTab: () => {},
   deviceSelection: null,
+  joinLeaveSound: false,
+  setJoinLeaveSound: () => {},
 }
 
 const IdleCallContent = ({
@@ -140,6 +170,8 @@ const IdleCallContent = ({
   setSpeakingAssistantEnabled,
   showAiSuggestions,
   setShowAiSuggestions,
+  joinLeaveSound,
+  setJoinLeaveSound,
 }) => (
   <GlobalVideoCallContext.Provider
     value={{
@@ -150,6 +182,8 @@ const IdleCallContent = ({
       setSpeakingAssistantEnabled,
       showAiSuggestions,
       setShowAiSuggestions,
+      joinLeaveSound,
+      setJoinLeaveSound,
     }}
   >
     {children}
@@ -165,11 +199,31 @@ export const GlobalVideoCallProvider = ({ children }) => {
   )
 
   const panelState = useSidePanelState()
+  const accountId = useSelector((s) => s.auth?.user?.accountId)
 
-  const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(() => {
-    const saved = localStorage.getItem("receiveSystemMsgs")
-    return saved !== null ? JSON.parse(saved) : true
-  })
+  // Personal preferences are account-scoped and reused across rooms. Legacy
+  // global keys are migrated on first read (see userPreferences util).
+  const [initialPrefs] = useState(() => readPrefs(accountId))
+  const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(
+    initialPrefs.receiveSystemMsgs,
+  )
+  const [showAiSuggestions, setShowAiSuggestions] = useState(
+    initialPrefs.showAiSuggestions,
+  )
+  const [joinLeaveSound, setJoinLeaveSound] = useState(
+    initialPrefs.joinLeaveSound,
+  )
+
+  // Reload preferences when the signed-in account changes (shared browser).
+  // Render-time adjustment, the React-recommended alternative to an effect.
+  const [prefsAccountId, setPrefsAccountId] = useState(accountId)
+  if (prefsAccountId !== accountId) {
+    setPrefsAccountId(accountId)
+    const next = readPrefs(accountId)
+    setReceiveSystemMsgs(next.receiveSystemMsgs)
+    setShowAiSuggestions(next.showAiSuggestions)
+    setJoinLeaveSound(next.joinLeaveSound)
+  }
 
   const [speakingAssistantEnabled, setSpeakingAssistantEnabled] = useState(() => {
     const saved = localStorage.getItem("speakingAssistantEnabled")
@@ -177,8 +231,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
   })
 
   useEffect(() => {
-    localStorage.setItem("receiveSystemMsgs", JSON.stringify(receiveSystemMsgs))
-  }, [receiveSystemMsgs])
+    setUserPref(accountId, PREF_KEYS.RECEIVE_SYSTEM_MSGS, receiveSystemMsgs)
+  }, [accountId, receiveSystemMsgs])
 
   useEffect(() => {
     localStorage.setItem(
@@ -187,14 +241,13 @@ export const GlobalVideoCallProvider = ({ children }) => {
     )
   }, [speakingAssistantEnabled])
 
-  const [showAiSuggestions, setShowAiSuggestions] = useState(() => {
-    const saved = localStorage.getItem("showAiSuggestions")
-    return saved !== null ? JSON.parse(saved) : true
-  })
+  useEffect(() => {
+    setUserPref(accountId, PREF_KEYS.SHOW_AI_SUGGESTIONS, showAiSuggestions)
+  }, [accountId, showAiSuggestions])
 
   useEffect(() => {
-    localStorage.setItem("showAiSuggestions", JSON.stringify(showAiSuggestions))
-  }, [showAiSuggestions])
+    setUserPref(accountId, PREF_KEYS.JOIN_LEAVE_SOUND, joinLeaveSound)
+  }, [accountId, joinLeaveSound])
 
   // Cross-tab call state broadcast listener
   useEffect(() => {
@@ -224,6 +277,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
         setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
         showAiSuggestions={showAiSuggestions}
         setShowAiSuggestions={setShowAiSuggestions}
+        joinLeaveSound={joinLeaveSound}
+        setJoinLeaveSound={setJoinLeaveSound}
       >
         {children}
       </IdleCallContent>
@@ -234,6 +289,15 @@ export const GlobalVideoCallProvider = ({ children }) => {
     typeof window !== "undefined" &&
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
+  const callPolicy = resolveCallPolicy(
+    callInfo?.egressProfile,
+    callInfo?.highQuality ?? false,
+  )
+
+  const roomOptions = buildRoomOptions(callPolicy, {
+    simulcast: !isMobileDevice,
+  })
+
   return (
     <LiveKitRoom
       key={callInfo?.sessionId}
@@ -243,7 +307,7 @@ export const GlobalVideoCallProvider = ({ children }) => {
       audio={callInfo?.initMicOn ?? false}
       video={callInfo?.initCamOn ?? false}
       className="contents"
-      options={{ publishDefaults: { simulcast: !isMobileDevice } }}
+      options={roomOptions}
       onDisconnected={(reason) => {
         console.error(
           "[GlobalVideoCallProvider] LiveKitRoom onDisconnected:",
@@ -265,6 +329,8 @@ export const GlobalVideoCallProvider = ({ children }) => {
         setReceiveSystemMsgs={setReceiveSystemMsgs}
         showAiSuggestions={showAiSuggestions}
         setShowAiSuggestions={setShowAiSuggestions}
+        joinLeaveSound={joinLeaveSound}
+        setJoinLeaveSound={setJoinLeaveSound}
         panelState={panelState}
         speakingAssistantEnabled={speakingAssistantEnabled}
         setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}

@@ -540,6 +540,24 @@ export const roomsApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [{ type: "GamePolicy", id }],
     }),
 
+    // --- Ticket 04 (egress): room-level high-quality policy (host-only) ---
+    // Default off; when on, publishers use 720p and the foreign tile cap
+    // still wins. The toggle is broadcast live via the moderation channel.
+    getHighQualityPolicy: builder.query({
+      query: (id) => `/rooms/${id}/moderation/high-quality-policy`,
+      providesTags: (result, error, id) => [{ type: "HighQualityPolicy", id }],
+    }),
+    updateHighQualityPolicy: builder.mutation({
+      query: ({ id, enabled }) => ({
+        url: `/rooms/${id}/moderation/high-quality-policy`,
+        method: "PUT",
+        body: { enabled },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "HighQualityPolicy", id },
+      ],
+    }),
+
 
 
     // Invite user(s) to a room
@@ -1043,6 +1061,9 @@ export const {
   useLowerAllHandsMutation,
   useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
+  // Ticket 04 (egress): high-quality room policy
+  useGetHighQualityPolicyQuery,
+  useUpdateHighQualityPolicyMutation,
   // Ticket 02: participant restriction bootstrap
   useGetRoomParticipantsQuery,
   // Co-host foundation

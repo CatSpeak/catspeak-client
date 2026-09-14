@@ -397,7 +397,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     setPhase("joining")
 
     try {
-      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName
+      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName, egressProfile, highQuality
 
       if (isClassRoom) {
         // Fetch LiveKit token using the appropriate endpoint based on user role
@@ -409,6 +409,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         sessionId = tokenRes?.sessionId
         activeSubSessionId = tokenRes?.activeSubSessionId
         activeSubSessionName = tokenRes?.activeSubSessionName
+        egressProfile = tokenRes?.egressProfile ?? tokenRes?.egress_profile
+        highQuality = tokenRes?.highQuality ?? tokenRes?.high_quality
       } else {
         // Fetch LiveKit token to validate connectivity and join
         const livekitTokenBody = {
@@ -420,6 +422,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         sessionId = tokenRes?.sessionId
         activeSubSessionId = tokenRes?.activeSubSessionId
         activeSubSessionName = tokenRes?.activeSubSessionName
+        egressProfile = tokenRes?.egressProfile
+        highQuality = tokenRes?.highQuality
       }
 
       if (!token || typeof token !== "string") {
@@ -457,6 +461,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           initMicOn: micOn,
           initCamOn: cameraOn,
           isAISession,
+          egressProfile,
+          highQuality: highQuality ?? false,
+          country: user?.country,
         }),
       )
 

@@ -32,6 +32,12 @@ import {
   CO_HOST_PERMISSION_META,
   CO_HOST_ALL,
   CO_HOST_PRESETS,
+  CO_HOST_PERMISSION_LABELS_ROOM,
+  CO_HOST_PERMISSION_HELPERS_ROOM,
+  CO_HOST_GROUP_TITLES_ROOM,
+  CO_HOST_PRESET_ASSISTANT_LABEL_ROOM,
+  CO_HOST_HEADER_SUBTITLE_ROOM,
+  CO_HOST_NOTE_DESC_ROOM,
   countByGroup,
 } from "./constants"
 
@@ -60,6 +66,25 @@ const PERMISSION_ICONS = {
  * - Checkbox tùy biến chuẩn Accessibility (Touch target >= 44px, Focus indicator).
  * - Scope notice banner thích ứng tên phòng và đếm tổng quyền hạn.
  */
+
+const getCandidateDisplayName = (c) => {
+  if (!c || typeof c !== "object") return ""
+  const name = typeof c.name === "string" ? c.name.trim() : ""
+  if (name) return name
+  const email = typeof c.email === "string" ? c.email.trim() : ""
+  if (email) return email
+  if (c.accountId != null && String(c.accountId).trim() !== "")
+    return `Account ${String(c.accountId).trim()}`
+  return ""
+}
+
+const getCandidateInitials = (c) => {
+  const display = getCandidateDisplayName(c)
+  if (!display) return "?"
+  // Email không tên: lấy phần trước @ để làm initials cho dễ nhận diện.
+  const base = display.includes("@") ? display.split("@")[0] : display
+  return base.slice(0, 2).toUpperCase() || "?"
+}
 const CoHostModal = ({
   open,
   onClose,
@@ -121,7 +146,9 @@ const CoHostModal = ({
     const q = query.trim().toLowerCase()
     if (!q) return candidates
     return candidates.filter((c) =>
-      `${c.name || ""} ${c.email || ""}`.toLowerCase().includes(q),
+      `${getCandidateDisplayName(c)} ${c.email || ""} ${c.accountId ?? ""}`
+        .toLowerCase()
+        .includes(q),
     )
   }, [candidates, query])
 
@@ -248,8 +275,12 @@ const CoHostModal = ({
               </p>
             ) : (
               <p className="text-xs text-gray-400 mt-0.5">
-                {t.rooms?.coHost?.headerSubtitle ||
-                  "Chỉ định trợ giảng và quản lý quyền hạn điều hành phòng"}
+                {roomType === "class"
+                  ? (t.rooms?.coHost?.headerSubtitle ||
+                    "Chỉ định trợ giảng và quản lý quyền hạn điều hành phòng")
+                  : (t.rooms?.coHost?.headerSubtitleRoom ||
+                    t.rooms?.coHost?.headerSubtitle ||
+                    CO_HOST_HEADER_SUBTITLE_ROOM)}
               </p>
             )}
           </div>
@@ -262,7 +293,7 @@ const CoHostModal = ({
           <div className="text-xs text-gray-400 text-center sm:text-left truncate w-full sm:w-auto">
             {validationHint && (
               <span className="inline-flex items-center gap-1.5 text-amber-700 font-medium">
-                <AlertTriangle size={13} className="shrink-0" />
+                <AlertTriangle size={13} className="shrink-0 text-amber-600" />
                 <span>{validationHint}</span>
               </span>
             )}
@@ -302,14 +333,14 @@ const CoHostModal = ({
             <p className="text-sm font-bold text-gray-900">
               {t.rooms?.coHost?.userSectionTitle || "Người dùng đảm nhiệm"}
             </p>
-            <span className="text-xs text-cath-red-700 font-bold" title="Bắt buộc">*</span>
+            <span className="text-xs text-red-500 font-bold" title="Bắt buộc">*</span>
           </div>
 
           {selectedUser && (
             <button
               type="button"
               onClick={() => setConfirmClear(true)}
-              className="text-xs font-semibold text-gray-500 hover:text-cath-red-700 transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40 rounded-lg px-2 py-0.5"
+              className="text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 rounded-lg px-2 py-0.5"
             >
               <RefreshCw size={12} />
               <span>{t.rooms?.coHost?.changeUser || "Đổi người khác"}</span>
@@ -347,11 +378,11 @@ const CoHostModal = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80 shadow-xs transition-all animate-in fade-in-50 duration-150">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-gray-200/90 shadow-xs transition-all animate-in fade-in-50 duration-150">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative shrink-0">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-xs">
-                    {(selectedUser.name || "?").slice(0, 2).toUpperCase()}
+                    {getCandidateInitials(selectedUser)}
                   </div>
                   <span
                     className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white"
@@ -361,9 +392,9 @@ const CoHostModal = ({
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-gray-900 truncate">
-                      {selectedUser.name}
+                      {getCandidateDisplayName(selectedUser)}
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200/80">
                       <Crown size={10} />
                       {t.rooms?.coHost?.designatedBadge || "Co-host chỉ định"}
                     </span>
@@ -380,7 +411,7 @@ const CoHostModal = ({
                 type="button"
                 onClick={() => setConfirmClear(true)}
                 aria-label={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
-                className="p-1.5 rounded-xl hover:bg-amber-100/70 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+                className="p-1.5 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
                 title={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
               >
                 <X size={16} />
@@ -406,7 +437,7 @@ const CoHostModal = ({
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus-within:border-cath-red-700 focus-within:ring-2 focus-within:ring-cath-red-700/20 transition-all shadow-xs">
+                <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus-within:border-gray-400 focus-within:ring-2 focus-within:ring-gray-200 transition-all shadow-xs">
                   <Search size={16} className="text-gray-400 shrink-0" />
                   <input
                     ref={searchInputRef}
@@ -458,15 +489,15 @@ const CoHostModal = ({
                           key={c.accountId}
                           type="button"
                           onClick={() => handleSelect(c.accountId)}
-                          className="w-full flex items-center justify-between px-3.5 py-2.5 text-left hover:bg-amber-50/50 transition-colors group"
+                          className="w-full flex items-center justify-between px-3.5 py-2.5 text-left hover:bg-gray-50 transition-colors group"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <span className="h-8 w-8 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800 text-[11px] font-bold flex items-center justify-center shrink-0 border border-amber-300/60">
-                              {(c.name || "?").slice(0, 2).toUpperCase()}
+                            <span className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 text-[11px] font-bold flex items-center justify-center shrink-0 border border-gray-200">
+                              {getCandidateInitials(c)}
                             </span>
                             <div className="min-w-0">
-                              <span className="block truncate text-xs font-bold text-gray-800 group-hover:text-amber-900">
-                                {c.name}
+                              <span className="block truncate text-xs font-bold text-gray-800 group-hover:text-gray-900">
+                                {getCandidateDisplayName(c)}
                               </span>
                               {c.email && (
                                 <span className="block truncate text-[11px] text-gray-400">
@@ -476,7 +507,7 @@ const CoHostModal = ({
                             </div>
                           </div>
                           {c.badge && (
-                            <span className="rounded-full bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 font-bold shrink-0">
+                            <span className="rounded-full bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 font-bold border border-gray-200 shrink-0">
                               {c.badge}
                             </span>
                           )}
@@ -503,7 +534,7 @@ const CoHostModal = ({
               <p className="text-sm font-bold text-gray-900">
                 {t.rooms?.coHost?.permissionSectionTitle || "Thiết lập quyền hạn"}
               </p>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200/80">
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
                 {(t.rooms?.coHost?.permissionsCount || "{count}/11 quyền").replace(
                   "{count}",
                   permissions.length,
@@ -523,7 +554,7 @@ const CoHostModal = ({
         {/* Thanh Preset Thiết Lập Nhanh (Dedicated Toolbar) */}
         <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-2xl bg-gray-50/90 border border-gray-200/70 shadow-xs">
           <div className="flex items-center gap-1.5 text-xs text-gray-600 font-semibold pl-0.5">
-            <Sparkles size={13} className="text-amber-600 shrink-0" />
+            <Sparkles size={13} className="text-amber-500 shrink-0" />
             <span>{t.rooms?.coHost?.quickPresetsLabel || "Gợi ý chọn nhanh:"}</span>
           </div>
 
@@ -533,32 +564,50 @@ const CoHostModal = ({
               onClick={() => applyPreset("ASSISTANT")}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                 isAssistantPreset
-                  ? "bg-amber-100 border-amber-300 text-amber-900 shadow-xs ring-2 ring-amber-200/60"
-                  : "bg-white border-gray-200 text-gray-700 hover:bg-amber-50/80 hover:border-amber-300 hover:text-amber-900"
+                  ? "bg-cath-red-700 border-cath-red-700 text-white shadow-xs font-bold hover:bg-cath-red-800"
+                  : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
               }`}
-              title={t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"}
+              title={
+                roomType === "class"
+                  ? t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"
+                  : t.rooms?.coHost?.presetAssistantRoom ||
+                    t.rooms?.coHost?.presetAssistant ||
+                    CO_HOST_PRESET_ASSISTANT_LABEL_ROOM
+              }
             >
-              <Sparkles size={12} className="text-amber-600" />
-              <span>{t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"}</span>
+              <Sparkles
+                size={12}
+                className={isAssistantPreset ? "text-white" : "text-gray-400"}
+              />
+              <span>
+                {roomType === "class"
+                  ? t.rooms?.coHost?.presetAssistant || "Gói Trợ giảng"
+                  : t.rooms?.coHost?.presetAssistantRoom ||
+                    t.rooms?.coHost?.presetAssistant ||
+                    CO_HOST_PRESET_ASSISTANT_LABEL_ROOM}
+              </span>
             </button>
             <button
               type="button"
               onClick={() => applyPreset("ALL")}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                 isAllPreset
-                  ? "bg-cath-red-50 border-cath-red-300 text-cath-red-700 shadow-xs ring-2 ring-cath-red-200/60"
+                  ? "bg-cath-red-700 border-cath-red-700 text-white shadow-xs font-bold hover:bg-cath-red-800"
                   : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
               }`}
             >
-              <Check size={12} />
+              <Check
+                size={12}
+                className={isAllPreset ? "text-white stroke-[2.5]" : "text-gray-400"}
+              />
               <span>{t.rooms?.coHost?.selectAll || "Chọn tất cả"}</span>
             </button>
             <button
               type="button"
               onClick={() => applyPreset("CLEAR")}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all border bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-800 hover:border-gray-300"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all border bg-white border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
             >
-              <RefreshCw size={11} />
+              <RefreshCw size={11} className="text-gray-400" />
               <span>{t.rooms?.coHost?.deselectAll || "Bỏ chọn"}</span>
             </button>
           </div>
@@ -572,9 +621,18 @@ const CoHostModal = ({
             const isFullGroup = groupCount === g.total
             const isPartialGroup = groupCount > 0 && !isFullGroup
             const GroupIcon = isStudentGroup ? Users : ShieldCheck
+            // Room (Custom) uses member/room copy, Class keeps student/class copy.
             const groupTitle =
-              g.id === "room_security" && roomType === "room"
-                ? (t.rooms?.coHost?.groupRoomSecurity || "Bảo mật phòng")
+              roomType === "room"
+                ? g.id === "room_security"
+                  ? t.rooms?.coHost?.groupRoomSecurity ||
+                    CO_HOST_GROUP_TITLES_ROOM[g.id] ||
+                    t.rooms?.coHost?.groups?.[g.id] ||
+                    g.title
+                  : t.rooms?.coHost?.groupStudentManagementRoom ||
+                    CO_HOST_GROUP_TITLES_ROOM[g.id] ||
+                    t.rooms?.coHost?.groups?.[g.id] ||
+                    g.title
                 : t.rooms?.coHost?.groups?.[g.id] || g.title
 
             return (
@@ -585,13 +643,7 @@ const CoHostModal = ({
                 {/* Header nhóm quyền kèm nút Toggle nhóm */}
                 <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div
-                      className={`h-7 w-7 rounded-xl flex items-center justify-center shrink-0 ${
-                        isStudentGroup
-                          ? "bg-blue-50 text-blue-700"
-                          : "bg-rose-50 text-rose-700"
-                      }`}
-                    >
+                    <div className="h-7 w-7 rounded-xl flex items-center justify-center shrink-0 border bg-gray-100 text-gray-700 border-gray-200/80">
                       <GroupIcon size={14} />
                     </div>
                     <span className="text-xs font-bold text-gray-900 truncate">
@@ -603,10 +655,10 @@ const CoHostModal = ({
                     <span
                       className={`text-[11px] font-bold px-2 py-0.5 rounded-full transition-colors ${
                         isFullGroup
-                          ? "bg-emerald-100 text-emerald-800"
+                          ? "bg-red-50 text-cath-red-700 border border-red-200/70 font-bold"
                           : isPartialGroup
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-gray-100 text-gray-500"
+                            ? "bg-gray-100 text-gray-700 border border-gray-200 font-semibold"
+                            : "bg-gray-50 text-gray-400 border border-gray-200"
                       }`}
                     >
                       {groupCount}/{g.total}
@@ -637,7 +689,13 @@ const CoHostModal = ({
                     const isDanger = meta.severity === "danger"
                     const isWarning = meta.severity === "warning"
                     const helperText =
-                      t.rooms?.coHost?.permissionHelpers?.[code] || meta.helper
+                      roomType === "room"
+                        ? t.rooms?.coHost?.permissionHelpersRoom?.[code] ||
+                          CO_HOST_PERMISSION_HELPERS_ROOM[code] ||
+                          t.rooms?.coHost?.permissionHelpers?.[code] ||
+                          meta.helper
+                        : t.rooms?.coHost?.permissionHelpers?.[code] ||
+                          meta.helper
 
                     return (
                       <div
@@ -652,21 +710,21 @@ const CoHostModal = ({
                             togglePerm(code)
                           }
                         }}
-                        className={`flex items-start gap-2.5 p-2 rounded-xl cursor-pointer transition-all min-h-[44px] select-none ${
+                        className={`flex items-start gap-2.5 p-2 rounded-xl cursor-pointer transition-all min-h-[44px] select-none border ${
                           isChecked
                             ? isDanger
-                              ? "bg-red-50/50 border border-red-200/70 text-red-950"
-                              : "bg-amber-50/40 border border-amber-200/60 text-gray-950"
-                            : "hover:bg-gray-50 border border-transparent text-gray-700"
-                        } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/50`}
+                              ? "bg-red-50/40 border-red-200/90 text-gray-900 shadow-2xs"
+                              : "bg-white border-gray-200/90 text-gray-900 shadow-2xs"
+                            : isDanger
+                              ? "bg-transparent border-transparent hover:border-red-200 hover:bg-red-50/30 text-gray-700"
+                              : "bg-transparent border-transparent hover:border-gray-200 hover:bg-gray-50/70 text-gray-700"
+                        } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40`}
                       >
-                        {/* Custom Checkbox */}
+                        {/* Custom Checkbox: All checked checkboxes share the SAME primary brand color */}
                         <div
                           className={`mt-0.5 h-4 w-4 rounded-md flex items-center justify-center shrink-0 transition-all ${
                             isChecked
-                              ? isDanger
-                                ? "bg-red-600 text-white shadow-xs"
-                                : "bg-cath-red-700 text-white shadow-xs"
+                              ? "bg-cath-red-700 text-white shadow-xs"
                               : "border border-gray-300 bg-white hover:border-gray-400"
                           }`}
                         >
@@ -678,9 +736,11 @@ const CoHostModal = ({
                           className={`h-5 w-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
                             isChecked
                               ? isDanger
-                                ? "bg-red-100 text-red-700"
-                                : "bg-amber-100 text-amber-800"
-                              : "bg-gray-100 text-gray-500"
+                                ? "bg-red-100 text-cath-red-700 border border-red-200/70"
+                                : "bg-gray-100 text-gray-700 border border-gray-200"
+                              : isDanger
+                                ? "bg-red-50/50 text-cath-red-700/70"
+                                : "bg-gray-100 text-gray-400"
                           }`}
                         >
                           <IconComponent size={12} />
@@ -690,16 +750,21 @@ const CoHostModal = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="text-xs font-semibold leading-tight block truncate">
-                              {t.rooms?.coHost?.permissions?.[code] ||
-                                CO_HOST_PERMISSION_LABELS[code]}
+                              {roomType === "room"
+                                ? t.rooms?.coHost?.permissionsRoom?.[code] ||
+                                  CO_HOST_PERMISSION_LABELS_ROOM[code] ||
+                                  t.rooms?.coHost?.permissions?.[code] ||
+                                  CO_HOST_PERMISSION_LABELS[code]
+                                : t.rooms?.coHost?.permissions?.[code] ||
+                                  CO_HOST_PERMISSION_LABELS[code]}
                             </span>
                             {isDanger && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-red-100 text-red-700 shrink-0">
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-cath-red-700 border border-red-200/80 shrink-0">
                                 {t.rooms?.coHost?.badgeSensitive || "Nhạy cảm"}
                               </span>
                             )}
                             {isWarning && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 shrink-0">
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
                                 {t.rooms?.coHost?.badgeCaution || "Chú ý"}
                               </span>
                             )}
@@ -720,13 +785,13 @@ const CoHostModal = ({
         </div>
 
         {/* Scope notice banner */}
-        <div className="rounded-2xl bg-gradient-to-r from-amber-50/90 to-orange-50/70 border border-amber-200/80 text-amber-900 text-xs px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-xs">
+        <div className="rounded-2xl bg-slate-50 border border-slate-200/90 text-slate-700 text-xs px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="p-1 rounded-lg bg-amber-100 text-amber-800 shrink-0">
+            <div className="p-1 rounded-lg bg-slate-200/70 text-slate-700 shrink-0">
               <Info size={15} />
             </div>
-            <p className="text-xs text-amber-950 leading-relaxed truncate">
-              <span className="font-bold">{t.rooms?.coHost?.note || "Lưu ý:"}</span>{" "}
+            <p className="text-xs text-slate-700 leading-relaxed truncate">
+              <span className="font-bold text-slate-900">{t.rooms?.coHost?.note || "Lưu ý:"}</span>{" "}
               {roomName
                 ? (roomType === "class"
                     ? (t.rooms?.coHost?.scopeNoticeClass ||
@@ -734,10 +799,15 @@ const CoHostModal = ({
                     : (t.rooms?.coHost?.scopeNoticeRoom ||
                       'Quyền của Co-host chỉ có hiệu lực trong phòng "{name}".')
                   ).replace("{name}", roomName)
-                : (t.rooms?.coHost?.noteDesc || "Quyền của co-host chỉ áp dụng cho mỗi lớp học.")}
+                : roomType === "class"
+                  ? t.rooms?.coHost?.noteDesc ||
+                    "Quyền của co-host chỉ áp dụng cho mỗi lớp học."
+                  : t.rooms?.coHost?.noteDescRoom ||
+                    CO_HOST_NOTE_DESC_ROOM ||
+                    "Quyền của co-host chỉ áp dụng cho mỗi phòng."}
             </p>
           </div>
-          <span className="text-[11px] font-bold text-amber-900 bg-amber-100/90 px-2.5 py-0.5 rounded-full shrink-0 border border-amber-200/60">
+          <span className="text-[11px] font-bold text-slate-700 bg-white px-2.5 py-0.5 rounded-full shrink-0 border border-slate-200 shadow-2xs">
             {(t.rooms?.coHost?.permissionsCount || "{count}/11 quyền").replace(
               "{count}",
               permissions.length,

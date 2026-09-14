@@ -1,5 +1,6 @@
+// Room-wide policies only. Personal preferences (join/leave chime, ...) live in
+// the account-scoped userPreferences util instead.
 export const ROOM_SETTING_KEYS = {
-  JOIN_LEAVE_SOUND: "catspeak_join_leave_sound",
   MEMBER_RECORDING: "catspeak_member_recording_allowed",
   MEMBER_PRIVATE_AI: "catspeak_member_private_ai_allowed",
 }

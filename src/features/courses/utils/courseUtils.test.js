@@ -6,6 +6,10 @@ import assert from "node:assert/strict"
 
 import {
   getClassEnrollmentIssue,
+  getMemberAvatar,
+  getMemberDisplayName,
+  getMemberEmail,
+  getMemberId,
   getSafeMediaUrl,
   isClosingSoon,
 } from "./courseUtils.js"
@@ -94,6 +98,23 @@ test("safe media URLs reject executable schemes and embedded credentials", () =>
     getSafeMediaUrl("https://cdn.example.com/file.png"),
     "https://cdn.example.com/file.png",
   )
+})
+
+test("member display name never returns whitespace and falls back to nickname/username/email", () => {
+  assert.equal(getMemberDisplayName({ id: 2, name: "An" }), "An")
+  assert.equal(getMemberDisplayName({ id: 2, name: "  An  " }), "An")
+  assert.equal(getMemberDisplayName({ id: 2, name: null, nickname: "AnNick" }), "AnNick")
+  assert.equal(getMemberDisplayName({ id: 2, username: "an123" }), "an123")
+  assert.equal(
+    getMemberDisplayName({ id: 2, name: "   ", email: "an@example.com" }),
+    "an@example.com",
+  )
+  assert.equal(getMemberDisplayName({ id: 2, name: null, avatar: "x" }), "")
+  assert.equal(getMemberDisplayName({ Id: 2, FullName: "Binh" }), "Binh")
+  assert.equal(getMemberId({ Id: 2 }), 2)
+  assert.equal(getMemberId({ AccountId: 3 }), 3)
+  assert.equal(getMemberEmail({ Email: "a@b.co" }), "a@b.co")
+  assert.equal(getMemberAvatar({ AvatarImageUrl: "https://cdn.example.com/a.png" }), "https://cdn.example.com/a.png")
 })
 
 test("isClosingSoon flags deadlines within threshold and ignores past/far deadlines", () => {

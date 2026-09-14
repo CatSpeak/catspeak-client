@@ -75,12 +75,32 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
     }
   }
 
+  const handleAdmitAll = async () => {
+    if (pending.length === 0) return
+    const toastId = toast.loading(wq.admittingAll || "Đang duyệt tất cả...")
+    let successCount = 0
+    for (const entry of pending) {
+      try {
+        await admitWaiting({ id: roomId, targetAccountId: Number(entry.accountId) }).unwrap()
+        successCount++
+      } catch (e) {
+        console.error("Admit error for", entry.accountId, e)
+      }
+    }
+    toast.dismiss(toastId)
+    if (successCount > 0) {
+      toast.success(wq.admitAllSuccess ? wq.admitAllSuccess.replace("{count}", String(successCount)) : `Đã duyệt ${successCount} người vào phòng.`)
+    } else {
+      toast.error(wq.admitAllFailed || "Không thể duyệt danh sách. Vui lòng thử lại.")
+    }
+  }
+
   const busy = isAdmitting || isRejecting || isInviting
 
   if (isLoading && !queue) {
     return (
-      <div className="flex items-center justify-center gap-2 py-8 text-sm text-neutral-500">
-        <Loader2 size={16} className="animate-spin" />
+      <div className="flex flex-col items-center justify-center gap-3 py-12 text-sm text-neutral-400">
+        <Loader2 size={22} className="animate-spin text-cath-red-700" />
         <span>{wq.loading || "Đang tải danh sách chờ..."}</span>
       </div>
     )
@@ -88,75 +108,107 @@ const WaitingQueueTab = ({ roomId, externalPending = [] }) => {
 
   if (pending.length === 0 && mergedExternal.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 py-8 px-4 text-center">
-        <Clock size={28} className="text-neutral-300" />
-        <p className="text-sm text-neutral-500">{wq.empty || "Chưa có ai đang chờ duyệt."}</p>
+      <div className="p-4">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-neutral-200/80 bg-neutral-50/50 p-8 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+            <Clock size={24} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-semibold text-neutral-800">
+              {wq.empty || "Chưa có ai đang chờ duyệt"}
+            </span>
+            <span className="text-xs text-neutral-500 max-w-xs">
+              {wq.emptyDesc || "Những người tham gia gửi yêu cầu vào phòng sẽ xuất hiện tại đây."}
+            </span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <ul className="flex flex-col gap-1 p-1">
-      {pending.map((entry) => (
-        <li
-          key={entry.accountId}
-          className="flex items-center gap-2 rounded-xl border border-amber-200/70 bg-amber-50/60 px-3 py-2"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-neutral-800">
-              {wq.userLabel || "Người dùng"} #{entry.accountId}
-            </p>
-            <p className="text-xs text-neutral-500">
-              {(wq.pendingLabel || "Đang chờ duyệt")}
-              {entry.decidedBy != null ? ` • ${wq.rejectedLabel || "Đã từ chối trước đó"}` : ""}
-            </p>
-          </div>
+    <div className="flex flex-col gap-2 p-2">
+      {pending.length > 1 && (
+        <div className="flex items-center justify-between px-1 pb-1">
+          <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+            {pending.length} {wq.pendingCountLabel || "yêu cầu chờ"}
+          </span>
           <button
             type="button"
-            onClick={() => handleAdmit(entry.accountId)}
+            onClick={handleAdmitAll}
             disabled={busy}
-            className="inline-flex h-8 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+            className="inline-flex h-7 items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3 text-xs font-semibold text-white transition-all shadow-xs active:scale-[0.98] disabled:opacity-50"
           >
-            <UserCheck size={14} />
-            <span>{wq.admit || "Duyệt"}</span>
+            <UserCheck size={13} />
+            <span>{wq.admitAll || "Duyệt tất cả"}</span>
           </button>
-          <button
-            type="button"
-            onClick={() => handleReject(entry.accountId)}
-            disabled={busy}
-            className="inline-flex h-8 items-center gap-1 rounded-lg bg-white px-2.5 text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50"
-          >
-            <UserX size={14} />
-            <span>{wq.reject || "Từ chối"}</span>
-          </button>
-        </li>
-      ))}
+        </div>
+      )}
 
-      {mergedExternal.map((p) => (
-        <li
-          key={`ext-${p.accountId}`}
-          className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-neutral-800">
-              {p.name || `${wq.userLabel || "Người dùng"} #${p.accountId}`}
-            </p>
-            <p className="truncate text-xs text-neutral-500">
-              {p.email || (wq.enrollmentPending || "Chờ duyệt ghi danh")}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => handleInvite(p.accountId)}
-            disabled={busy}
-            className="inline-flex h-8 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+      <ul className="flex flex-col gap-1.5">
+        {pending.map((entry) => (
+          <li
+            key={entry.accountId}
+            className="flex items-center justify-between gap-2.5 rounded-xl border border-amber-200/80 bg-amber-50/40 p-2.5 transition-colors hover:bg-amber-50/70"
           >
-            <Send size={14} />
-            <span>{wq.invite || "Mời"}</span>
-          </button>
-        </li>
-      ))}
-    </ul>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-neutral-800">
+                {wq.userLabel || "Người dùng"} #{entry.accountId}
+              </p>
+              <p className="text-[11px] text-neutral-500">
+                {(wq.pendingLabel || "Đang chờ duyệt")}
+                {entry.decidedBy != null ? ` • ${wq.rejectedLabel || "Đã từ chối trước đó"}` : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleAdmit(entry.accountId)}
+                disabled={busy}
+                className="inline-flex h-8 items-center gap-1 rounded-lg bg-emerald-600 px-2.5 text-xs font-semibold text-white hover:bg-emerald-700 active:scale-[0.97] transition-all disabled:opacity-50"
+              >
+                <UserCheck size={14} />
+                <span>{wq.admit || "Duyệt"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleReject(entry.accountId)}
+                disabled={busy}
+                className="inline-flex h-8 items-center gap-1 rounded-lg bg-white px-2.5 text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 active:scale-[0.97] transition-all disabled:opacity-50"
+              >
+                <UserX size={14} />
+                <span>{wq.reject || "Từ chối"}</span>
+              </button>
+            </div>
+          </li>
+        ))}
+
+        {mergedExternal.map((p) => (
+          <li
+            key={`ext-${p.accountId}`}
+            className="flex items-center justify-between gap-2.5 rounded-xl border border-neutral-200/90 bg-white p-2.5 transition-colors hover:bg-neutral-50"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-neutral-800">
+                {p.name || `${wq.userLabel || "Người dùng"} #${p.accountId}`}
+              </p>
+              <p className="truncate text-[11px] text-neutral-500">
+                {p.email || (wq.enrollmentPending || "Chờ duyệt ghi danh")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleInvite(p.accountId)}
+              disabled={busy}
+              className="inline-flex h-8 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.97] transition-all disabled:opacity-50 shrink-0"
+            >
+              <Send size={14} />
+              <span>{wq.invite || "Mời"}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

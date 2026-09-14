@@ -7,6 +7,18 @@ import {
   mapDevicesToOptions,
 } from "@/shared/utils/mediaConstraintUtils"
 
+const DeviceSection = ({ icon, title, children }) => (
+  <section className="flex flex-col gap-3 rounded-xl border border-[#e5e5e5] bg-white p-4">
+    <div className="flex items-center gap-2.5">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cath-red-700/10 text-cath-red-700">
+        {icon}
+      </span>
+      <h3 className="text-sm font-semibold text-neutral-900">{title}</h3>
+    </div>
+    {children}
+  </section>
+)
+
 const AudioVideoTab = ({
   waitingT = {},
   deviceSelection = {},
@@ -30,6 +42,22 @@ const AudioVideoTab = ({
   const isSinkSupported =
     typeof HTMLAudioElement !== "undefined" &&
     typeof HTMLAudioElement.prototype.setSinkId === "function"
+
+  const systemDefaultLabel =
+    waitingT.systemDefault ||
+    waitingT.systemDefaultSpeaker ||
+    "System default"
+
+  const selectedMicLabel =
+    devices.audioinput?.find((d) => d.deviceId === selectedMic)?.label ||
+    systemDefaultLabel
+  const selectedSpeakerLabel =
+    devices.audiooutput?.find((d) => d.deviceId === selectedSpeaker)?.label ||
+    systemDefaultLabel
+  const selectedCameraLabel =
+    devices.videoinput?.find((d) => d.deviceId === selectedCamera)?.label ||
+    waitingT.unknownDevice ||
+    "Unknown Device"
 
   // Microphone playback test effect
   useEffect(() => {
@@ -99,34 +127,48 @@ const AudioVideoTab = ({
   }, [isOpen])
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6">
-      <div className="flex flex-col gap-1">
-        <span>{waitingT.selectMicrophone || "Microphone"}</span>
+    <div className="flex flex-col gap-3 sm:gap-4">
+      <DeviceSection icon={<Mic size={16} aria-hidden="true" />} title={waitingT.selectMicrophone || "Microphone"}>
         <Dropdown
           options={mapDevicesToOptions(
             devices.audioinput,
             <Mic size={20} />,
             true,
-            waitingT.systemDefaultSpeaker,
+            systemDefaultLabel,
             waitingT.unknownDevice
           )}
           value={selectedMic}
           onChange={(val) => setSelectedMic?.(val)}
           placeholder={waitingT.selectMicrophone || "Select Microphone"}
+          ariaLabel={`${waitingT.selectMicrophone || "Microphone"}: ${selectedMicLabel}`}
           className="w-full"
           roundedClass="rounded-xl"
           dropdownClassName="w-full"
         />
-      </div>
 
-      <div className="flex flex-col gap-1">
-        <span>{waitingT.selectSpeaker || "Speaker (Audio Output)"}</span>
+        <MicTestVisualizer
+          testMic={testMic}
+          onToggleTest={() => setTestMic(!testMic)}
+          stream={testStreamRef.current || localStream}
+          selectedMic={selectedMic}
+          label={waitingT.testMic || "Test mic"}
+          stopLabel={waitingT.stopTest || "Stop testing"}
+          hint={waitingT.micTestHint}
+          listeningLabel={waitingT.micTestListening}
+          detectedLabel={waitingT.micTestDetected}
+        />
+      </DeviceSection>
+
+      <DeviceSection
+        icon={<Volume2 size={16} aria-hidden="true" />}
+        title={waitingT.selectSpeaker || "Speaker (Audio Output)"}
+      >
         <Dropdown
           options={mapDevicesToOptions(
             devices.audiooutput,
             <Volume2 size={20} />,
             true,
-            waitingT.systemDefaultSpeaker,
+            systemDefaultLabel,
             waitingT.unknownDevice
           )}
           value={selectedSpeaker}
@@ -136,47 +178,39 @@ const AudioVideoTab = ({
               ? waitingT.selectSpeaker || "Select Speaker"
               : waitingT.systemDefaultSpeaker || "System Default Speaker"
           }
+          ariaLabel={`${waitingT.selectSpeaker || "Speaker"}: ${selectedSpeakerLabel}`}
           disabled={!isSinkSupported}
           className="w-full"
           roundedClass="rounded-xl"
           dropdownClassName="w-full"
         />
         {!isSinkSupported && (
-          <p className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
-            <Info size={13} className="shrink-0" />{" "}
+          <p className="text-[11px] text-gray-500 flex items-center gap-1">
+            <Info size={13} className="shrink-0" aria-hidden="true" />{" "}
             {waitingT.speakerNotSupported ||
               "Speaker selection is not supported in your browser."}
           </p>
         )}
-      </div>
+      </DeviceSection>
 
-      <div className="flex flex-col gap-1">
-        <span>{waitingT.selectCamera || "Camera"}</span>
+      <DeviceSection icon={<Video size={16} aria-hidden="true" />} title={waitingT.selectCamera || "Camera"}>
         <Dropdown
           options={mapDevicesToOptions(
             devices.videoinput,
             <Video size={20} />,
             false,
-            waitingT.systemDefaultSpeaker,
+            systemDefaultLabel,
             waitingT.unknownDevice
           )}
           value={selectedCamera}
           onChange={(val) => setSelectedCamera?.(val)}
           placeholder={waitingT.selectCamera || "Select Camera"}
+          ariaLabel={`${waitingT.selectCamera || "Camera"}: ${selectedCameraLabel}`}
           className="w-full"
           roundedClass="rounded-xl"
           dropdownClassName="w-full"
         />
-      </div>
-
-      <MicTestVisualizer
-        testMic={testMic}
-        onToggleTest={() => setTestMic(!testMic)}
-        stream={testStreamRef.current || localStream}
-        selectedMic={selectedMic}
-        label={waitingT.testMic || "Test mic"}
-        stopLabel={waitingT.stopTest || "Stop testing"}
-      />
+      </DeviceSection>
 
       <audio
         ref={audioRef}

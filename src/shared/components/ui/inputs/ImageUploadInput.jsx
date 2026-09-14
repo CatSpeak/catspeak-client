@@ -16,6 +16,7 @@ const formatFileSize = (bytes) => {
 
 const ImageUploadInput = ({
   label,
+  labelClassName = "",
   value,
   onChange,
   disabled = false,
@@ -28,6 +29,7 @@ const ImageUploadInput = ({
   accept = "image/*",
   maxSizeMB = 5,
   fullAspect = false,
+  frameClassName = "aspect-video min-h-[240px] sm:min-h-[280px]",
   enableCrop = true,
   cropPreset = "thumbnail",
   cropAspect,
@@ -179,7 +181,7 @@ const ImageUploadInput = ({
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      {label && <label>{label}</label>}
+      {label && <label className={labelClassName}>{label}</label>}
 
       <input
         ref={fileInputRef}
@@ -199,7 +201,7 @@ const ImageUploadInput = ({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`relative flex flex-col items-center justify-center text-center p-6 rounded-xl border-2 border-dashed aspect-video w-full max-sm:aspect-auto max-sm:flex-1 min-h-[240px] sm:min-h-[280px] cursor-pointer ${isDragging
+            className={`relative flex flex-col items-center justify-center text-center p-6 rounded-xl border-2 border-dashed ${frameClassName} w-full max-sm:aspect-auto max-sm:flex-1 cursor-pointer ${isDragging
               ? "border-cath-red-700 bg-red-50/40 scale-[0.99]"
               : "border-border bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300"
               }`}
@@ -232,7 +234,7 @@ const ImageUploadInput = ({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`relative rounded-xl overflow-hidden border aspect-video w-full max-sm:aspect-auto max-sm:flex-1 min-h-[240px] sm:min-h-[280px] bg-gray-900 ${isDragging
+            className={`relative rounded-xl overflow-hidden border ${frameClassName} w-full max-sm:aspect-auto max-sm:flex-1 bg-gray-900 ${isDragging
               ? "border-cath-red-700 ring-2 ring-cath-red-700/20"
               : "border-border"
               }`}
