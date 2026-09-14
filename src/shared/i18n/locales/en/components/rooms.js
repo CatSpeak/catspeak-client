@@ -239,6 +239,7 @@ export default {
     aiRetry: "Retry",
     aiErrorTitle: "Cannot connect to assistant",
     aiErrorResponse: "Timeout or network error while AI assistant was processing your question. Please try again.",
+    aiQuotaExceeded: "You have reached your daily AI token limit. Please upgrade your plan to continue!",
     aiFollowUpHeader: "SUGGESTED FOLLOW-UP QUESTIONS FOR AI:",
     aiTypingResponse: "AI is composing a response...",
     privateModeLabel: "Private",

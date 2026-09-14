@@ -10,9 +10,16 @@ export function parseApiError(err) {
   const res = err?.data
   return {
     res,
-    statusCode: res?.statusCode || err?.status,
-    errorCode: res?.errorCode,
-    message: res?.message || err?.message,
+    statusCode: res?.statusCode || res?.status || err?.status,
+    errorCode:
+      res?.errorCode ||
+      res?.error_code ||
+      (typeof res?.detail === "object" ? res?.detail?.errorCode || res?.detail?.error_code : undefined) ||
+      res?.code,
+    message:
+      res?.message ||
+      (typeof res?.detail === "string" ? res.detail : res?.detail?.message) ||
+      err?.message,
     validationErrors: res?.validationErrors || res?.errors,
     traceId: res?.traceId,
   }

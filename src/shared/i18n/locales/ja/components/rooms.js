@@ -208,6 +208,7 @@ export default {
     aiRetry: "再試行",
     aiErrorTitle: "アシスタントに接続できません",
     aiErrorResponse: "AIアシスタントの処理中にタイムアウトまたはネットワークエラーが発生しました。再試行してください。",
+    aiQuotaExceeded: "本日の AI 利用制限に達しました。引き続きご利用いただくにはプランをアップグレードしてください。",
     aiFollowUpHeader: "AIへの次の質問の提案：",
     aiTypingResponse: "AIが回答を作成中...",
     privateModeLabel: "非公開",

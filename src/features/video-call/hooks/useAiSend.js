@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { parseApiError } from "@/shared/utils/apiError"
 import { toast } from "react-hot-toast"
 import {
   getRoomSetting,
@@ -181,15 +182,20 @@ export const useAiSend = () => {
         }
       } catch (error) {
         console.error("AI chat error", error)
-        const errorMsg =
-          (typeof error?.data?.detail === "string" ? error.data.detail : null) ||
-          error?.data?.message ||
-          error?.data?.error ||
-          "All models are unavailable."
+        const { statusCode, errorCode } = parseApiError(error)
+        const isQuotaExceeded =
+          statusCode === 429 ||
+          errorCode === "AI_DAILY_TOKEN_LIMIT_EXCEEDED" ||
+          errorCode === "AI_QUOTA_EXCEEDED"
+
+        const errorMsg = isQuotaExceeded
+          ? t?.rooms?.chatBox?.aiQuotaExceeded || "Daily AI token limit exceeded."
+          : t?.rooms?.chatBox?.aiErrorResponse || "All models are unavailable."
 
         updateAiInteraction(interactionId, {
           status: "error",
           response: errorMsg,
+          errorCode: errorCode || (isQuotaExceeded ? "AI_DAILY_TOKEN_LIMIT_EXCEEDED" : "AI_SERVICE_ERROR"),
           aiFrom: { name: "Cat Speak", isSystem: true, isAi: true },
         })
       } finally {

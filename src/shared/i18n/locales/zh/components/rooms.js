@@ -211,6 +211,7 @@ export default {
     aiRetry: "重试",
     aiErrorTitle: "无法连接到助手",
     aiErrorResponse: "AI 助手处理问题时发生超时或网络错误，请重试。",
+    aiQuotaExceeded: "您已达到今日 AI 使用额度上限。请升级套餐以继续使用！",
     aiFollowUpHeader: "AI后续问题建议：",
     aiTypingResponse: "AI 正在撰写回复...",
     privateModeLabel: "私密",
