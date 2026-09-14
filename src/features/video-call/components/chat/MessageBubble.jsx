@@ -49,23 +49,23 @@ const StarterGreetingBubble = ({
     topicInfo?.topicNameVi || topicInfo?.topicNameEn || "Du lịch & Giao tiếp"
 
   return (
-    <div className="flex flex-col mb-4 items-start w-full gap-2">
+    <div className="flex flex-col mb-4 items-start w-full gap-2.5">
       {/* 1. Header: Icon + Title on left, Solid Maroon Topic Badge on right */}
       <div className="flex items-center justify-between gap-2 w-full">
-        <div className="flex items-center gap-1.5 font-bold text-[13px] text-cath-red-700 tracking-tight">
+        <div className="flex items-center gap-1.5 font-bold text-[13px] text-[#b91c1c] tracking-tight">
           <span>🎓</span>
           <span>
             {t.rooms?.chatBox?.aiMeetingSuggestionLabel ||
               "GỢI Ý CÂU CHO BUỔI HỌC"}
           </span>
         </div>
-        <div className="bg-cath-red-700 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow-2xs whitespace-nowrap">
+        <div className="bg-[#b91c1c] text-white text-[11px] font-bold px-2 py-0.5 rounded shadow-2xs whitespace-nowrap">
           {topicLabel} {topicName}
         </div>
       </div>
 
       {/* 2. Intro Box: Light subtle gray background with clean border */}
-      <div className="w-full bg-[#fbfbfa] border border-gray-200/90 rounded-xl px-3.5 py-2.5 text-[13px] text-gray-800 leading-snug">
+      <div className="w-full bg-[#fbfbfa] border border-gray-200/90 rounded-2xl px-4 py-3 text-[13px] text-gray-800 leading-snug">
         {t.rooms?.chatBox?.aiGreetingIntro ||
           "Xin chào! Dưới đây là các câu gợi ý theo chủ đề buổi học hôm nay để bạn luyện nói hoặc gửi vào phòng học:"}
       </div>
@@ -82,13 +82,13 @@ const StarterGreetingBubble = ({
               )
             }
             title="Click để gửi vào phòng học"
-            className="group w-full text-left bg-white hover:bg-red-50/40 active:scale-[0.99] border border-red-200 hover:border-red-300 rounded-xl px-3.5 py-2.5 transition-all shadow-2xs flex flex-col gap-0.5 cursor-pointer"
+            className="group w-full text-left bg-white hover:bg-red-50/40 active:scale-[0.99] border border-red-200 hover:border-red-300 rounded-2xl px-4 py-2.5 transition-all shadow-2xs flex flex-col gap-0.5 cursor-pointer"
           >
             <div className="flex items-baseline gap-1.5">
               <span className="text-[14px] leading-none shrink-0">
                 {item.icon || "🎓"}
               </span>
-              <span className="font-bold text-[13.5px] text-cath-red-800 group-hover:text-cath-red-900 leading-snug break-words">
+              <span className="font-bold text-[13.5px] text-[#b91c1c] group-hover:text-red-800 leading-snug break-words">
                 {item.vi || item.targetText}
               </span>
             </div>
@@ -104,7 +104,7 @@ const StarterGreetingBubble = ({
         <button
           type="button"
           onClick={() => onLoadMoreSuggestions?.()}
-          className="w-full text-center text-[13px] py-2 border border-dashed border-red-200 hover:border-red-300 bg-transparent hover:bg-red-50/30 text-gray-600 hover:text-gray-800 font-medium rounded-xl transition-all cursor-pointer mt-0.5"
+          className="w-full text-center text-[13px] py-2.5 border border-dashed border-red-300/80 hover:border-red-400 bg-transparent hover:bg-red-50/30 text-gray-600 hover:text-gray-800 font-medium rounded-2xl transition-all cursor-pointer mt-0.5"
         >
           {t.rooms?.chatBox?.aiLoadMoreSuggestions || "+ Gợi ý thêm"}
         </button>
@@ -188,8 +188,12 @@ const MessageBubble = ({
     senderName === "Cat Speak gợi ý"
   ) {
     senderName = t.rooms?.chatBox?.systemName || "Cat Speak gợi ý"
-  } else if (senderName === "Public AI" || senderName === "Private AI") {
-    senderName = "Cat Speak"
+  } else if (
+    senderName === "Public AI" ||
+    senderName === "Private AI" ||
+    senderName === "Cat Speak"
+  ) {
+    senderName = t.rooms?.chatBox?.aiAssistant || "Trợ lý Cat Speak"
   }
 
   const isEmoji =
@@ -207,7 +211,7 @@ const MessageBubble = ({
       {!isMe ? (
         <div className="flex items-center gap-1 mb-1 max-w-full">
           <span
-            className="text-xs font-bold truncate shrink flex items-center gap-1"
+            className={`text-xs ${isAi ? "text-gray-500 font-medium" : "font-bold text-gray-800"} truncate shrink flex items-center gap-1`}
             title={senderName}
           >
             {senderName}
@@ -244,15 +248,15 @@ const MessageBubble = ({
           className={
             isEmoji
               ? "bg-transparent p-0 text-3xl md:text-4xl leading-relaxed select-text border-0 shadow-none min-h-0 min-w-0"
-              : `max-w-[85%] rounded-2xl px-3 py-2 text-sm break-words transition-all ${
+              : `max-w-[85%] rounded-2xl px-4 py-3 text-sm break-words transition-all ${
                   isMe
                     ? "bg-[#990011] text-white"
                     : isError
-                      ? "bg-red-50 text-red-950 border border-red-200"
+                      ? "bg-[#fff5f5] text-gray-900 border border-red-200 shadow-2xs"
                       : isSystem
                         ? "bg-orange-100 text-orange-900"
                         : isAi
-                          ? "bg-amber-50/70 text-amber-950 border border-amber-100"
+                          ? "bg-[#fbfbfa] text-gray-900 border border-gray-200/90 shadow-2xs"
                           : "bg-[#F0F0F0] text-black"
                 }`
           }
@@ -267,47 +271,50 @@ const MessageBubble = ({
           )}
 
           {msg.status === "loading" ? (
-            <div className="flex gap-1 items-center h-2 px-1 py-1">
-              <span
-                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                style={{
-                  animationDelay: "0s",
-                  animationDuration: "0.8s",
-                }}
-              ></span>
-              <span
-                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                style={{
-                  animationDelay: "0.15s",
-                  animationDuration: "0.8s",
-                }}
-              ></span>
-              <span
-                className="w-1.5 h-1.5 bg-amber-600/60 rounded-full animate-bounce"
-                style={{
-                  animationDelay: "0.3s",
-                  animationDuration: "0.8s",
-                }}
-              ></span>
+            <div className="flex gap-2 items-center py-0.5 text-xs text-gray-500 font-medium select-none">
+              <div className="flex gap-1 items-center shrink-0">
+                <span
+                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  style={{
+                    animationDelay: "0s",
+                    animationDuration: "0.8s",
+                  }}
+                ></span>
+                <span
+                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  style={{
+                    animationDelay: "0.15s",
+                    animationDuration: "0.8s",
+                  }}
+                ></span>
+                <span
+                  className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                  style={{
+                    animationDelay: "0.3s",
+                    animationDuration: "0.8s",
+                  }}
+                ></span>
+              </div>
+              <span className="italic">
+                {t.rooms?.chatBox?.aiTypingResponse ||
+                  "AI đang soạn câu trả lời..."}
+              </span>
             </div>
           ) : isError ? (
-            /* AI Error Bubble + Retry Button (E-003) */
-            <div className="flex flex-col gap-2">
-              <p className="m-0 text-xs leading-relaxed text-red-900 font-medium">
+            /* AI Error Card (E-003) */
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1.5 font-bold text-[13.5px] text-[#b91c1c]">
+                <span className="text-[14px]">⚠️</span>
+                <span>
+                  {t.rooms?.chatBox?.aiErrorTitle ||
+                    "Không thể kết nối trợ lý"}
+                </span>
+              </div>
+              <p className="m-0 text-[13px] leading-relaxed text-gray-800 font-normal">
                 {msg.message ||
                   t.rooms?.chatBox?.aiErrorResponse ||
-                  "Trợ lý AI tạm thời không phản hồi. Vui lòng thử lại."}
+                  "Timeout hoặc lỗi mạng khi trợ lý AI xử lý câu hỏi. Vui lòng thử lại."}
               </p>
-              {onRetryAi && (
-                <button
-                  type="button"
-                  onClick={() => onRetryAi(msg.promptRaw || msg.message, msg.interactionId)}
-                  className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 text-xs font-semibold text-red-700 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors shadow-2xs cursor-pointer"
-                >
-                  <RotateCw size={12} />
-                  <span>{t.rooms?.chatBox?.aiRetry || "🔄 Thử lại"}</span>
-                </button>
-              )}
             </div>
           ) : isEmoji ? (
             <span className="inline-flex flex-wrap items-center -space-x-2 md:-space-x-2.5 text-3xl md:text-4xl leading-none select-text">
@@ -384,30 +391,57 @@ const MessageBubble = ({
         )}
       </div>
 
+      {/* Retry Button on Error (E-003) */}
+      {isError && onRetryAi && (
+        <button
+          type="button"
+          onClick={() =>
+            onRetryAi(msg.promptRaw || msg.message, msg.interactionId)
+          }
+          className="mt-2 inline-flex items-center gap-1.5 self-start px-3 py-1.5 text-xs font-medium text-[#990011] bg-white border border-[#990011] rounded-lg hover:bg-red-50 active:scale-[0.99] transition-all shadow-2xs cursor-pointer"
+        >
+          <RotateCw size={13} className="text-blue-500 shrink-0" />
+          <span>{t.rooms?.chatBox?.aiRetry || "Thử lại"}</span>
+        </button>
+      )}
+
       {/* Follow-up Question Buttons (FR-002, FR-005) */}
       {isAi &&
         msg.status === "done" &&
         Array.isArray(msg.followUpSuggestions) &&
         msg.followUpSuggestions.length > 0 &&
         !isUserTyping && (
-          <div className="flex flex-col gap-1.5 mt-2 w-full max-w-[85%] items-start animate-fadeIn">
-            {msg.followUpSuggestions.slice(0, 3).map((q, idx) => {
-              const qText = typeof q === "string" ? q : q.question || q.text || ""
-              if (!qText) return null
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => onSelectFollowUp?.(qText)}
-                  className="w-full text-left text-xs bg-white hover:bg-red-50/70 border border-red-200 text-red-900 rounded-xl px-3 py-2 transition-all shadow-2xs hover:border-red-300 active:scale-[0.99] flex items-center justify-between gap-2 group/btn cursor-pointer"
-                >
-                  <span className="line-clamp-2">{qText}</span>
-                  <span className="text-red-400 group-hover/btn:translate-x-0.5 transition-transform shrink-0">
-                    →
-                  </span>
-                </button>
-              )
-            })}
+          <div className="flex flex-col gap-2 mt-2.5 w-full max-w-[85%] items-start animate-fadeIn">
+            {/* Section Header: 💡 GỢI Ý CÂU HỎI TIẾP THEO CHO AI: */}
+            <div className="flex items-center gap-1.5 text-[11.5px] font-bold text-gray-500 tracking-wide uppercase">
+              <span>💡</span>
+              <span>
+                {t.rooms?.chatBox?.aiFollowUpHeader ||
+                  "GỢI Ý CÂU HỎI TIẾP THEO CHO AI:"}
+              </span>
+            </div>
+
+            {/* Questions Pill List */}
+            <div className="w-full flex flex-col gap-2">
+              {msg.followUpSuggestions.slice(0, 3).map((q, idx) => {
+                const qText =
+                  typeof q === "string" ? q : q.question || q.text || ""
+                if (!qText) return null
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => onSelectFollowUp?.(qText)}
+                    className="group/btn w-full text-left bg-white hover:bg-gray-50 active:scale-[0.99] border border-gray-200 hover:border-gray-300 rounded-full px-4 py-2 transition-all shadow-2xs flex items-center gap-2 cursor-pointer"
+                  >
+                    <span className="text-[14px] leading-none shrink-0">❓</span>
+                    <span className="text-[13px] text-gray-800 group-hover/btn:text-gray-900 font-medium leading-snug break-words">
+                      {qText}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
     </div>
