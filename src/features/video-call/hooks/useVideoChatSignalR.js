@@ -21,9 +21,9 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
   }, [onEventReceived])
 
   useEffect(() => {
-    if (!sessionId || !token) {
+    if (!token) {
       console.warn(
-        "[VideoChatSignalR] Missing sessionId or token — skipping hub instantiation.",
+        "[VideoChatSignalR] Missing token — skipping hub instantiation.",
       )
       return
     }
@@ -132,10 +132,49 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
       }
     })
 
-    const joinGroups = () => {
-      connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
-        console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
+    // Ticket 04: host/co-host waiting queue changed in real time.
+    connection.on("WaitingQueueChanged", (changedRoomId, queue) => {
+      if (
+        (String(changedRoomId) === String(roomId) ||
+          Number(changedRoomId) === Number(roomId)) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("WaitingQueueChanged", {
+          roomId: changedRoomId,
+          queue,
+        })
+      }
+    })
+
+    // Ticket 04: personal waiting outcomes (user_{accountId}), no room filter —
+    // the account can only be waiting in one room at a time.
+    connection.on("WaitingAdmitted", (changedRoomId, entry) => {
+      onEventReceivedRef.current?.("WaitingAdmitted", {
+        roomId: changedRoomId,
+        entry,
       })
+    })
+
+    connection.on("WaitingRejected", (changedRoomId, entry) => {
+      onEventReceivedRef.current?.("WaitingRejected", {
+        roomId: changedRoomId,
+        entry,
+      })
+    })
+
+    connection.on("WaitingCancelled", (changedRoomId, entry) => {
+      onEventReceivedRef.current?.("WaitingCancelled", {
+        roomId: changedRoomId,
+        entry,
+      })
+    })
+
+    const joinGroups = () => {
+      if (sessionId) {
+        connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
+          console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
+        })
+      }
       if (roomId) {
         connection.invoke("JoinRoom", Number(roomId)).catch((err) => {
           console.error("[VideoChatSignalR] Failed to invoke JoinRoom:", err)

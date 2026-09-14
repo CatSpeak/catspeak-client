@@ -419,6 +419,14 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
     }),
+    // Ticket 04: the waiting user withdraws their own request.
+    cancelWaiting: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/waiting/cancel`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
 
     // --- Ticket 04: room lock + end live for all ---
     // Ticket 03: lock state is read from the RoomState cache (settings.roomLocked);
@@ -541,6 +549,18 @@ export const roomsApi = baseApi.injectEndpoints({
         url: `/rooms/${id}/moderation/high-quality-policy`,
         method: "PUT",
         body: { enabled },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+
+    // --- Ticket 04: pre-join require-approval toggle (host-only) ---
+    // Read from the RoomState cache (settings.requireApproval); the PUT
+    // invalidates it so the toggler refetches.
+    updateRequireApprovalPolicy: builder.mutation({
+      query: ({ id, requireApproval }) => ({
+        url: `/rooms/${id}/moderation/require-approval-policy`,
+        method: "PUT",
+        body: { requireApproval },
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
@@ -679,6 +699,9 @@ export const {
   useKnockWaitingMutation,
   useAdmitWaitingMutation,
   useRejectWaitingMutation,
+  // Ticket 04: waiter cancel + host-only require-approval toggle
+  useCancelWaitingMutation,
+  useUpdateRequireApprovalPolicyMutation,
   // Ticket 04: room lock + end live
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,

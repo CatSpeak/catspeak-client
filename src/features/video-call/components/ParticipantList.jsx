@@ -22,6 +22,7 @@ import {
   Search,
   X,
   AlertTriangle,
+  UserCheck,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useDispatch } from "react-redux"
@@ -62,6 +63,7 @@ import {
   useUpdateMemberRecordingPolicyMutation,
   useUpdateGamePolicyMutation,
   useUpdateHighQualityPolicyMutation,
+  useUpdateRequireApprovalPolicyMutation,
   useLowerAllHandsMutation,
   useRestrictVoiceAllMutation,
 } from "@/store/api/roomsApi"
@@ -368,7 +370,6 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   })
   const { data: waitingQueueData } = useGetWaitingQueueQuery(roomId, {
     skip: !roomId || !canViewWaiting,
-    pollingInterval: 10000,
   })
   const pendingCount =
     normalizeWaitingQueue(waitingQueueData)?.pendingCount ??
@@ -617,8 +618,34 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const confirmEndLive = async () => {
-    setEndLiveConfirmOpen(false)
+  // Ticket 04: pre-join require-approval gate (host-only, default off).
+  const requireApproval = roomStatePayload?.settings?.requireApproval ?? false
+  const [updateRequireApproval, { isLoading: isTogglingRequireApproval }] =
+    useUpdateRequireApprovalPolicyMutation()
+  const canManageRequireApproval = isHost
+
+  const handleToggleRequireApproval = async () => {
+    if (!roomId) return
+    try {
+      const next = !requireApproval
+      await updateRequireApproval({ id: roomId, requireApproval: next }).unwrap()
+      toast.success(
+        next
+          ? pl.requireApprovalOn || "Đã bật duyệt thủ công khi vào phòng."
+          : pl.requireApprovalOff || "Đã tắt duyệt thủ công khi vào phòng.",
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenRequireApproval || pl.forbiddenLock,
+        ),
+      )
+    }
+  }
+
+  const confirmEndLive = async () => {    setEndLiveConfirmOpen(false)
     if (!roomId) return
     try {
       await endLiveApi(roomId).unwrap()
@@ -1339,6 +1366,19 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   disabled={isTogglingLock}
                   onChange={handleToggleLock}
                   colorClass="peer-checked:bg-cath-red-700"
+                />
+              )}
+              {canManageRequireApproval && (
+                <PolicyRow
+                  icon={<UserCheck size={15} aria-hidden="true" />}
+                  label={
+                    pl.requireApproval ||
+                    "Yêu cầu duyệt khi vào phòng"
+                  }
+                  description={pl.requireApprovalDesc}
+                  checked={requireApproval}
+                  disabled={isTogglingRequireApproval}
+                  onChange={handleToggleRequireApproval}
                 />
               )}
               {canManageMemberRecording && (

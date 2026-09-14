@@ -7,6 +7,7 @@ export const WAITING_STATUS = {
   PENDING: "pending",
   ADMITTED: "admitted",
   REJECTED: "rejected",
+  CANCELLED: "cancelled",
 }
 
 export const normalizeWaitingQueue = (payload) => {

@@ -11,7 +11,7 @@ import {
   useMediaPreview,
   useDeviceSelection,
 } from "@/features/rooms"
-import { useVerifyJoinRoomMutation, roomsApi } from "@/store/api/roomsApi"
+import { useVerifyJoinRoomMutation, roomsApi, useGetRoomStateQuery } from "@/store/api/roomsApi"
 import {
   useGetClassDetailQuery,
   useGetStudentClassDetailQuery,
@@ -37,8 +37,10 @@ import VideoCallLoading from "../components/VideoCallLoading"
 import RoomNotFoundScreen from "../components/RoomNotFoundScreen"
 import PasswordScreen from "../components/PasswordScreen"
 import CallEndedScreen from "../components/CallEndedScreen"
+import { PreJoinWaitingGate } from "../components/waiting/WaitingScreen"
 import VideoCallErrorBoundary from "@/shared/components/VideoCallErrorBoundary"
 import { isRoomExpired } from "@/shared/utils/dateUtils"
+import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
 
 /**
  * Phases:
@@ -227,6 +229,23 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const isLoadingRoomData = isClassRoom ? isLoadingClass : isLoadingRoom
   const errorRoomData = isClassRoom ? classError : roomError
 
+  // Ticket 04: cath-api RoomId used by the waiting/approval endpoints. Class
+  // rooms expose it as classData.roomId (distinct from the URL "class-{id}").
+  const apiRoomId = isClassRoom
+    ? (Number(classData?.roomId) > 0 ? Number(classData.roomId) : null)
+    : (Number(roomId) > 0 ? Number(roomId) : null)
+
+  // Ticket 04: pre-join approval gate state, read from the RoomState cache.
+  const { data: roomStateData } = useGetRoomStateQuery(apiRoomId, {
+    skip: !apiRoomId,
+  })
+  const roomStatePayload = roomStateData?.data ?? roomStateData
+  const requireApproval = roomStatePayload?.settings?.requireApproval ?? false
+  const isViewerCoHost = roomStatePayload?.coHost?.isCoHost === true
+  const isHost = isRoomHost(room, user?.accountId)
+  // Once admitted, don't re-open the approval gate on the follow-up join.
+  const approvalAdmittedRef = useRef(false)
+
   // --- Device Selection ---
   const deviceSelection = useDeviceSelection()
 
@@ -274,6 +293,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // ── Privacy verification: run once when room data is available ──
   const verifyTriggered = useRef(false)
+
   useEffect(() => {
     if (
       phase !== "verifying" ||
@@ -362,6 +382,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     skipRoomFullCheck = false,
     confirmedSwitch = false,
     isAutoJoin = false,
+    skipApproval = false,
   } = {}) => {
     // Synchronously unlock WebAudio AudioContext on user gesture for iOS Safari
     unlockAudioContext()
@@ -387,6 +408,21 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     // Room full check (moved from deleted useJoinVideoSession hook)
     if (isRoomFull && !skipRoomFullCheck) {
       toast.error(t.rooms.waitingScreen.roomFull)
+      return
+    }
+
+    // Ticket 04: require-approval gate. Knock and wait BEFORE any token is
+    // fetched / LiveKit connects (no mic/camera publish while pending).
+    // Host/co-host/invited bypass (server also enforces this).
+    if (
+      !skipApproval &&
+      requireApproval &&
+      apiRoomId &&
+      !isHost &&
+      !isViewerCoHost &&
+      !approvalAdmittedRef.current
+    ) {
+      setPhase("approval")
       return
     }
 
@@ -498,6 +534,14 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       }
     } catch (err) {
       console.error("[VideoCall] LiveKit token fetch failed:", err)
+
+      // Ticket 04: server-side approval gate — show the waiting room instead
+      // of a generic error (covers the race where requireApproval wasn't loaded).
+      if (err?.data?.errorCode === "WAITING_NOT_ADMITTED") {
+        setPhase("approval")
+        return
+      }
+
       const backendMessage = err?.data?.message || err?.data
       const isBanned =
         err?.status === 403 &&
@@ -640,9 +684,25 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     )
   }
 
+  // ---- PHASE: APPROVAL (pre-join waiting room) ----
+  if (phase === "approval") {
+    return (
+      <>
+        {switchModal}
+        <PreJoinWaitingGate
+          apiRoomId={apiRoomId}
+          onAdmitted={() => {
+            approvalAdmittedRef.current = true
+            handleJoinClick({ skipApproval: true })
+          }}
+          onCancel={() => setPhase("waiting")}
+        />
+      </>
+    )
+  }
+
   // ---- PHASE: WAITING ----
-  if (phase === "waiting") {
-    const displaySession = {
+  if (phase === "waiting") {    const displaySession = {
       name: room.name,
       roomName: room.name,
       topic: room.topic,

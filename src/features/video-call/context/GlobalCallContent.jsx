@@ -525,6 +525,18 @@ const GlobalCallContent = ({
       }
       return
     }
+    if (event === "WaitingQueueChanged") {
+      // Ticket 04: real-time queue update (no 10s polling). Refetch the
+      // WaitingQueue cache for host/co-host.
+      if (currentRoomId) {
+        dispatch(
+          roomsApi.util.invalidateTags([
+            { type: "WaitingQueue", id: currentRoomId },
+          ]),
+        )
+      }
+      return
+    }
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
