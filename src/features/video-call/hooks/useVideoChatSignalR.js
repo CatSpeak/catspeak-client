@@ -146,6 +146,20 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
       }
     })
 
+    // Ticket 05: room-scoped chat/voice restriction changed mid-session.
+    connection.on("ParticipantRestrictionChanged", (changedRoomId, restriction) => {
+      if (
+        (String(changedRoomId) === String(roomId) ||
+          Number(changedRoomId) === Number(roomId)) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("ParticipantRestrictionChanged", {
+          roomId: changedRoomId,
+          restriction,
+        })
+      }
+    })
+
     // Ticket 04: personal waiting outcomes (user_{accountId}), no room filter —
     // the account can only be waiting in one room at a time.
     connection.on("WaitingAdmitted", (changedRoomId, entry) => {

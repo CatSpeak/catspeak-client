@@ -537,6 +537,75 @@ const GlobalCallContent = ({
       }
       return
     }
+    if (event === "ParticipantRestrictionChanged") {
+      // Ticket 05: room-scoped chat/voice restriction changed. Patch the
+      // participant-list cache in place (no reload) so badges and the chat
+      // input react immediately; late joiners read the same table on join.
+      const restriction = data?.restriction
+      if (restriction?.accountId != null && currentRoomId) {
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomParticipants",
+            currentRoomId,
+            (draft) => {
+              const list = Array.isArray(draft)
+                ? draft
+                : Array.isArray(draft?.data)
+                  ? draft.data
+                  : null
+              if (!list) return
+              const item = list.find(
+                (p) => String(p.accountId) === String(restriction.accountId),
+              )
+              if (item) {
+                item.isChatRestricted = !!restriction.isChatRestricted
+                item.isVoiceRestricted = !!restriction.isVoiceRestricted
+              } else {
+                list.push({
+                  accountId: restriction.accountId,
+                  isChatRestricted: !!restriction.isChatRestricted,
+                  isVoiceRestricted: !!restriction.isVoiceRestricted,
+                })
+              }
+            },
+          ),
+        )
+      }
+
+      const isTarget =
+        restriction?.accountId != null &&
+        String(restriction.accountId) === String(user?.accountId)
+      // A voice-restricted user's mic is forced off and cannot be re-enabled.
+      if (
+        restriction?.isVoiceRestricted === true &&
+        isTarget &&
+        localParticipant
+      ) {
+        try {
+          localParticipant.setMicrophoneEnabled(false)
+        } catch {
+          /* ignore */
+        }
+      }
+      if (isTarget) {
+        const pl = t.rooms?.videoCall?.participantList || {}
+        if (restriction?.isVoiceRestricted) {
+          toast.error(
+            pl.hostRestrictedVoice || "Bạn đã bị Host hạn chế bật mic.",
+          )
+        } else if (restriction?.isChatRestricted) {
+          toast.error(
+            pl.hostRestrictedChat ||
+              "Bạn đã bị Host hạn chế gửi tin nhắn chat.",
+          )
+        } else {
+          toast.info(
+            pl.hostUnrestrictedChat || "Host đã gỡ hạn chế cho bạn.",
+          )
+        }
+      }
+      return
+    }
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
