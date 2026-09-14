@@ -726,6 +726,16 @@ export default {
       hostDisabledPrivateAi: "Host đã TẮT quyền sử dụng AI Chat riêng tư đối với thành viên.",
       kickedByHost: "Bạn đã bị Host mời ra khỏi phòng.",
       successMuteAll: "Đã tắt mic tất cả mọi người",
+      cameraOffAll: "Tắt camera tất cả",
+      cameraOffAllRoom: "Tắt camera tất cả thành viên",
+      cameraOffAllDesc: "Tắt camera của tất cả học viên trong phòng.",
+      cameraOffAllDescRoom: "Tắt camera của tất cả thành viên trong phòng.",
+      confirmCameraOffAllTitle: "Tắt camera tất cả",
+      confirmCameraOffAll:
+        "Bạn có chắc muốn tắt camera của tất cả mọi người trong phòng?",
+      successCameraOffAll: "Đã tắt camera tất cả mọi người (trừ bạn).",
+      forbiddenCameraOffAll: "Bạn không có quyền tắt toàn bộ camera.",
+      hostCameraOffAll: "Host đã tắt camera tất cả mọi người trong phòng.",
       successLowerAllHands: "Đã hạ {count} tay xuống",
       confirmLowerHandsTitle: "Hạ tất cả tay",
       confirmLowerHands:

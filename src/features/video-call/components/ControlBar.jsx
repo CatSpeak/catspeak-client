@@ -25,7 +25,11 @@ import {
   isBreakoutSupported,
   isRoomHost,
 } from "@/features/video-call/utils/roomTypeHelpers"
-import { normalizeCoHost, isCoHostUser } from "@/features/co-host/constants"
+import {
+  normalizeCoHost,
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -105,9 +109,23 @@ const VideoCallControlBar = () => {
   const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
   // Ticket 02: separate gate for the student self-camera toggle.
   const allowSelfCamera = roomStatePayload?.settings?.allowSelfCamera ?? true
-  const isSelfCoHost =
-    roomStatePayload?.coHost?.isCoHost ??
-    isCoHostUser(normalizeCoHost(coHostData), user?.accountId)
+  // Ticket 03: bypass the self-media lock by *permission*, never by co-host
+  // identity — a co-host only self-unmutes if granted allow_self_unmute.
+  const coHost = normalizeCoHost(coHostData)
+  const canSelfUnmute =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
+    )
+  const canSelfCamera =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA
+    )
 
   const handleMicWithGate = async () => {
     const tryingToUnmute = !micOn
@@ -119,12 +137,7 @@ const VideoCallControlBar = () => {
       )
       return
     }
-    if (
-      tryingToUnmute &&
-      !allowSelfUnmute &&
-      !isHost &&
-      !isSelfCoHost
-    ) {
+    if (tryingToUnmute && !allowSelfUnmute && !canSelfUnmute) {
       toast.error(
         t.rooms?.videoCall?.participantList?.selfUnmuteBlocked ||
           "Host đã tắt quyền tự bật mic. Vui lòng chờ host bật giùm."
@@ -139,12 +152,7 @@ const VideoCallControlBar = () => {
   // host/co-host can still turn it on for them via the participant popover.
   const handleCameraWithGate = async () => {
     const tryingToEnable = !cameraOn
-    if (
-      tryingToEnable &&
-      !allowSelfCamera &&
-      !isHost &&
-      !isSelfCoHost
-    ) {
+    if (tryingToEnable && !allowSelfCamera && !canSelfCamera) {
       toast.error(
         t.rooms?.videoCall?.participantList?.selfCameraBlocked ||
           "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm."
@@ -210,7 +218,7 @@ const VideoCallControlBar = () => {
           isLoading={isTogglingCam}
           onClick={handleCameraWithGate}
           title={
-            !allowSelfCamera && !isHost && !isSelfCoHost
+            !allowSelfCamera && !canSelfCamera
               ? t.rooms?.videoCall?.participantList?.selfCameraBlocked ||
                 "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm."
               : cameraOn

@@ -696,6 +696,16 @@ export default {
       hostDisabledPrivateAi: "ホストがメンバーのプライベートAIチャットを無効にしました。",
       kickedByHost: "ホストによってルームから削除されました。",
       successMuteAll: "すべての参加者をミュートしました",
+      cameraOffAll: "全員のカメラをオフ",
+      cameraOffAllRoom: "全メンバーのカメラをオフ",
+      cameraOffAllDesc: "ルーム内のすべての生徒のカメラをオフにします。",
+      cameraOffAllDescRoom: "ルーム内のすべてのメンバーのカメラをオフにします。",
+      confirmCameraOffAllTitle: "全員のカメラをオフ",
+      confirmCameraOffAll:
+        "ルーム内の全員のカメラをオフにしてもよろしいですか？",
+      successCameraOffAll: "全員のカメラをオフにしました（あなたを除く）。",
+      forbiddenCameraOffAll: "全員のカメラをオフにする権限がありません。",
+      hostCameraOffAll: "ホストがルーム内の全員のカメラをオフにしました。",
       successLowerAllHands: "{count}名の手を下げました",
       confirmLowerHandsTitle: "全員の手を下げる",
       confirmLowerHands:

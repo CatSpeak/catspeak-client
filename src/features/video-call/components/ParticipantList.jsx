@@ -51,16 +51,15 @@ import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import {
   useGetRoomCoHostQuery,
   useMuteAllParticipantsMutation,
+  useCameraOffAllMutation,
   useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
   useUpdateSelfCameraPolicyMutation,
   useGetWaitingQueueQuery,
-  useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
   useUpdateStudentSharePolicyMutation,
   useUpdateMemberRecordingPolicyMutation,
-  useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
   useUpdateHighQualityPolicyMutation,
   useLowerAllHandsMutation,
@@ -378,6 +377,10 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const [muteAllApi, { isLoading: isMutingAll }] =
     useMuteAllParticipantsMutation()
+  const [cameraOffAllApi, { isLoading: isCameraOffAll }] =
+    useCameraOffAllMutation()
+  const [cameraOffAllConfirmOpen, setCameraOffAllConfirmOpen] =
+    React.useState(false)
   // Ticket 01: policy comes from the room-state cache (single store).
   const { data: roomState } = useGetRoomStateQuery(roomId, {
     skip: !roomId,
@@ -428,6 +431,45 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
     }
     toast.success(pl.successMuteAll)
+  }
+
+  // Ticket 03: room-scope "tắt camera toàn bộ" — server mutes every published
+  // camera track (sender/host spared); broadcast is a UX hint only.
+  const confirmCameraOffAll = async () => {
+    setCameraOffAllConfirmOpen(false)
+    if (!roomId) return
+    try {
+      await cameraOffAllApi(roomId).unwrap()
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenCameraOffAll || pl.forbiddenMedia
+        )
+      )
+      return
+    }
+    if (lkRoom?.localParticipant) {
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({
+            action: "CAMERA_OFF_ALL",
+            senderId: String(user?.accountId ?? ""),
+            senderIdentity: String(lkRoom.localParticipant.identity ?? ""),
+          })
+        )
+        lkRoom.localParticipant.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch (e) {
+        console.error("Failed to broadcast CAMERA_OFF_ALL:", e)
+      }
+    }
+    toast.success(
+      pl.successCameraOffAll || "Đã tắt camera tất cả mọi người (trừ bạn)."
+    )
   }
 
   const handleToggleSelfUnmute = async () => {
@@ -511,6 +553,10 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const canEndLive =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.END_CLASS)
+  // Ticket 03: room-scope "tắt camera toàn bộ" is gated by camera_toggle.
+  const canCameraOffAll =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.CAMERA_TOGGLE)
 
   // Ticket 05: student share gate (manage_student_share) + member
   // recording gate, server-side (record). Both default open.
@@ -531,11 +577,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     useUpdateMemberRecordingPolicyMutation()
   const allowMemberRecording =
     roomStatePayload?.settings?.allowMemberRecording ?? true
-  const { data: roomLockData } = useGetRoomLockQuery(roomId, {
-    skip: !roomId,
-  })
-  const isLocked =
-    roomLockData?.data?.isLocked ?? roomLockData?.isLocked ?? false
+  // Ticket 03: lock state is read from the room-state cache (single store).
+  const isLocked = roomStatePayload?.settings?.roomLocked ?? false
   const [updateRoomLock, { isLoading: isTogglingLock }] =
     useUpdateRoomLockMutation()
   const [endLiveApi, { isLoading: isEndingLive }] = useEndLiveSessionMutation()
@@ -697,10 +740,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   // ── Room policies moved out of the Settings modal ("Chung" tab) ──
   const canManagePrivateAi = isHost
-  const canManageGame =
-    isHost ||
-    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.MUTE_ALL) ||
-    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
+  // Ticket 03: Game is host-only — co-hosts neither see nor operate it.
+  const canManageGame = isHost
   // High quality is host-only server-side (co-hosts never get the override).
   const canManageHighQuality = isHost
 
@@ -747,16 +788,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       )
   }, [roomId])
 
-  const { data: gamePolicyData } = useGetGamePolicyQuery(roomId, {
-    skip: !roomId,
-  })
   const [updateGamePolicy, { isLoading: isTogglingGame }] =
     useUpdateGamePolicyMutation()
-  const serverAllowGame =
-    gamePolicyData?.data?.allowGame ?? gamePolicyData?.allowGame ?? true
+  // Ticket 03: game policy is read from the room-state cache (no standalone GET).
+  const serverAllowGame = roomStatePayload?.settings?.allowGame ?? true
   const [allowGame, setAllowGame] = React.useState(true)
   React.useEffect(() => {
-    if (serverAllowGame !== undefined) setAllowGame(serverAllowGame)
+    setAllowGame(serverAllowGame)
   }, [serverAllowGame])
 
   const [updateHighQualityPolicy, { isLoading: isTogglingHighQuality }] =
@@ -1333,49 +1371,94 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           </div>
 
           {/* Group 3: Thao tác nâng cao */}
-          {(canMuteAll || isHost) && (
+          {(canMuteAll || isHost || canCameraOffAll) && (
             <div className="flex flex-col gap-2">
               <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
                 Thao tác nâng cao
               </span>
-              <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
-                <div className="flex items-start gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
-                    <MicOff size={16} />
+              {(canMuteAll || isHost) && (
+                <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
+                      <MicOff size={16} />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-xs font-semibold text-orange-950">
+                        {isCustom
+                          ? pl.restrictVoiceAllRoom ||
+                            pl.restrictVoiceAll ||
+                            "Tắt mic tất cả thành viên"
+                          : pl.restrictVoiceAll}
+                      </span>
+                      <span className="text-[11px] text-orange-800/80 leading-relaxed">
+                        {isCustom
+                          ? pl.restrictVoiceAllDescRoom ||
+                            "Tắt mic và chặn tất cả thành viên tự bật lại mic."
+                          : pl.restrictVoiceAllDesc ||
+                            "Tắt mic và chặn tất cả học viên tự bật lại mic."}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-xs font-semibold text-orange-950">
+                  <button
+                    type="button"
+                    onClick={handleRestrictVoiceAll}
+                    disabled={isRestrictingVoiceAll}
+                    className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
+                  >
+                    <MicOff size={13} />
+                    <span>
                       {isCustom
                         ? pl.restrictVoiceAllRoom ||
                           pl.restrictVoiceAll ||
                           "Tắt mic tất cả thành viên"
                         : pl.restrictVoiceAll}
                     </span>
-                    <span className="text-[11px] text-orange-800/80 leading-relaxed">
-                      {isCustom
-                        ? pl.restrictVoiceAllDescRoom ||
-                          "Tắt mic và chặn tất cả thành viên tự bật lại mic."
-                        : pl.restrictVoiceAllDesc ||
-                          "Tắt mic và chặn tất cả học viên tự bật lại mic."}
-                    </span>
-                  </div>
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleRestrictVoiceAll}
-                  disabled={isRestrictingVoiceAll}
-                  className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
-                >
-                  <MicOff size={13} />
-                  <span>
-                    {isCustom
-                      ? pl.restrictVoiceAllRoom ||
-                        pl.restrictVoiceAll ||
-                        "Tắt mic tất cả thành viên"
-                      : pl.restrictVoiceAll}
-                  </span>
-                </button>
-              </div>
+              )}
+
+              {/* Ticket 03: room-scope "tắt camera toàn bộ" (camera_toggle). */}
+              {canCameraOffAll && (
+                <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
+                      <VideoOff size={16} />
+                    </div>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-xs font-semibold text-orange-950">
+                        {isCustom
+                          ? pl.cameraOffAllRoom ||
+                            pl.cameraOffAll ||
+                            "Tắt camera tất cả thành viên"
+                          : pl.cameraOffAll || "Tắt camera tất cả học viên"}
+                      </span>
+                      <span className="text-[11px] text-orange-800/80 leading-relaxed">
+                        {isCustom
+                          ? pl.cameraOffAllDescRoom ||
+                            pl.cameraOffAllDesc ||
+                            "Tắt camera của tất cả thành viên trong phòng."
+                          : pl.cameraOffAllDesc ||
+                            "Tắt camera của tất cả học viên trong phòng."}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCameraOffAllConfirmOpen(true)}
+                    disabled={isCameraOffAll}
+                    className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
+                  >
+                    <VideoOff size={13} />
+                    <span>
+                      {isCustom
+                        ? pl.cameraOffAllRoom ||
+                          pl.cameraOffAll ||
+                          "Tắt camera tất cả thành viên"
+                        : pl.cameraOffAll || "Tắt camera tất cả học viên"}
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -1438,6 +1521,21 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         message={pl.confirmMuteAll}
         confirmText={pl.muteAll}
         confirmVariant="destructive"
+      />
+
+      {/* Ticket 03: camera-off-all confirm. */}
+      <ConfirmationModal
+        open={cameraOffAllConfirmOpen}
+        onClose={() => setCameraOffAllConfirmOpen(false)}
+        onConfirm={confirmCameraOffAll}
+        title={pl.confirmCameraOffAllTitle || pl.cameraOffAll || "Tắt camera tất cả"}
+        message={
+          pl.confirmCameraOffAll ||
+          "Bạn có chắc muốn tắt camera của tất cả mọi người trong phòng?"
+        }
+        confirmText={pl.cameraOffAll || "Tắt camera tất cả"}
+        confirmVariant="destructive"
+        isPending={isCameraOffAll}
       />
 
       {/* Ticket 04: end-live confirm — mọi người về màn hình kết thúc, join lại tạo phiên mới. */}

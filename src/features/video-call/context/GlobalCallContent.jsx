@@ -43,7 +43,6 @@ import {
   useGetRoomCoHostQuery,
   useGetRoomStateQuery,
   useGetRoomParticipantsQuery,
-  useGetHighQualityPolicyQuery,
 } from "@/store/api/roomsApi"
 import {
   normalizeCoHost,
@@ -225,8 +224,7 @@ const GlobalCallContent = ({
   const localParticipant = localPart?.localParticipant ?? null
 
   // Ticket 04 (egress): live high-quality state. Initialised from the token
-  // (server-sourced room policy) and kept in sync through the moderation
-  // channel + the room policy query.
+  // and kept in sync from the RoomState cache (single store) + moderation channel.
   const [roomHighQuality, setRoomHighQuality] = useState(
     callInfo?.highQuality ?? false,
   )
@@ -234,19 +232,6 @@ const GlobalCallContent = ({
   useEffect(() => {
     roomHighQualityRef.current = roomHighQuality
   }, [roomHighQuality])
-
-  const { data: highQualityPolicyData } = useGetHighQualityPolicyQuery(
-    currentRoomId,
-    { skip: !currentRoomId },
-  )
-  const serverHighQuality =
-    highQualityPolicyData?.data?.highQuality ??
-    highQualityPolicyData?.highQuality
-  useEffect(() => {
-    if (serverHighQuality !== undefined) {
-      setRoomHighQuality(serverHighQuality === true)
-    }
-  }, [serverHighQuality])
 
   const callPolicy = React.useMemo(
     () => resolveCallPolicy(callInfo?.egressProfile, roomHighQuality),
@@ -502,6 +487,44 @@ const GlobalCallContent = ({
       }
       return
     }
+    if (event === "CoHostChanged") {
+      // Ticket 03: host changed the co-host slice mid-session. Apply it to the
+      // state store (and the co-host query used by the 12-code gates) at once.
+      const coHost = data?.coHost ?? null
+      if (currentRoomId) {
+        const myAccountId = user?.accountId
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomState",
+            currentRoomId,
+            (draft) => {
+              draft.coHost = coHost
+                ? {
+                    accountId: coHost.accountId,
+                    permissions: coHost.permissions ?? [],
+                    isCoHost:
+                      String(coHost.accountId) === String(myAccountId),
+                  }
+                : null
+            },
+          ),
+        )
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomCoHost",
+            currentRoomId,
+            () =>
+              coHost
+                ? {
+                    coHostAccountId: coHost.accountId,
+                    permissions: coHost.permissions ?? [],
+                  }
+                : null,
+          ),
+        )
+      }
+      return
+    }
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
@@ -580,6 +603,15 @@ const GlobalCallContent = ({
     (roomStateData?.data ?? roomStateData)?.settings ?? {}
   const allowStudentShare = roomStateSettings.allowStudentShare ?? true
   const allowMemberRecording = roomStateSettings.allowMemberRecording ?? true
+
+  // Ticket 03: high-quality room policy now comes from the RoomState cache.
+  const serverHighQuality = roomStateSettings.highQuality
+  useEffect(() => {
+    if (serverHighQuality !== undefined) {
+      setRoomHighQuality(serverHighQuality === true)
+    }
+  }, [serverHighQuality])
+
   const screenShareState = useScreenShare({
     roomData,
     user,
@@ -731,6 +763,22 @@ const GlobalCallContent = ({
           return
         }
 
+        // Ticket 03: room-scope "tắt camera toàn bộ" (camera_toggle).
+        if (data.action === "CAMERA_OFF_ALL") {
+          const senderIsMe =
+            (data.senderId != null && String(data.senderId) === currentAccId) ||
+            (data.senderIdentity != null &&
+              String(data.senderIdentity) === localIdent)
+          if (!senderIsMe && !isHost && localParticipant) {
+            localParticipant.setCameraEnabled(false)
+            toast.error(
+              pl.hostCameraOffAll ||
+                "Host đã tắt camera tất cả mọi người trong phòng."
+            )
+          }
+          return
+        }
+
         if (data.action === "SELF_UNMUTE_POLICY") {
           toast.info(
             data.allow
@@ -807,10 +855,16 @@ const GlobalCallContent = ({
         if (data.action === "HIGH_QUALITY_POLICY") {
           const enabled = data.enabled === true
           setRoomHighQuality(enabled)
+          // Ticket 03: high-quality now lives in the room-state cache.
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "HighQualityPolicy", id: currentRoomId },
-            ])
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = { ...draft.settings, highQuality: enabled }
+              }
+            )
           )
           toast.info(
             enabled
@@ -822,15 +876,21 @@ const GlobalCallContent = ({
           return
         }
 
-        // Ticket 04: room lock changed — refetch lock state + toast.
+        // Ticket 04: room lock changed — patch the room-state cache + toast.
         if (data.action === "ROOM_LOCK_CHANGED") {
+          const locked = data.locked === true
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "RoomLock", id: currentRoomId },
-            ])
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = { ...draft.settings, roomLocked: locked }
+              }
+            )
           )
           toast.info(
-            data.locked
+            locked
               ? (pl.hostLockedRoom ||
                   "Host đã khóa phòng. Người mới không thể tham gia.")
               : (pl.hostUnlockedRoom || "Host đã mở khóa phòng.")

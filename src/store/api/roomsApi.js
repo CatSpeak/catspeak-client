@@ -334,6 +334,15 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // Ticket 03: room-scope "turn off all cameras" (camera_toggle). Server
+    // mutes published camera tracks via LiveKit.
+    cameraOffAll: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/camera-off-all`,
+        method: "POST",
+      }),
+    }),
+
     // Ticket 01: single source of truth for room governance state
     // (settings + co-host slice + my waiting status). Replaces the standalone
     // self-unmute GET; the SignalR RoomSettingsChanged handler updates this
@@ -412,18 +421,15 @@ export const roomsApi = baseApi.injectEndpoints({
     }),
 
     // --- Ticket 04: room lock + end live for all ---
-    // Lock persists until manually unlocked; end closes the live session only.
-    getRoomLock: builder.query({
-      query: (id) => `/rooms/${id}/lock`,
-      providesTags: (result, error, id) => [{ type: "RoomLock", id }],
-    }),
+    // Ticket 03: lock state is read from the RoomState cache (settings.roomLocked);
+    // only the mutation remains.
     updateRoomLock: builder.mutation({
       query: ({ id, locked }) => ({
         url: `/rooms/${id}/lock`,
         method: "PUT",
         body: { locked },
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "RoomLock", id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
     endLiveSession: builder.mutation({
       query: (id) => ({
@@ -518,35 +524,25 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "POST",
       }),
     }),
-    getGamePolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/game-policy`,
-      providesTags: (result, error, id) => [{ type: "GamePolicy", id }],
-    }),
     updateGamePolicy: builder.mutation({
       query: ({ id, allow }) => ({
         url: `/rooms/${id}/moderation/game-policy`,
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "GamePolicy", id }],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
     // --- Ticket 04 (egress): room-level high-quality policy (host-only) ---
-    // Default off; when on, publishers use 720p and the foreign tile cap
-    // still wins. The toggle is broadcast live via the moderation channel.
-    getHighQualityPolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/high-quality-policy`,
-      providesTags: (result, error, id) => [{ type: "HighQualityPolicy", id }],
-    }),
+    // Ticket 03: default off and read from the RoomState cache
+    // (settings.highQuality); only the host-only mutation remains.
     updateHighQualityPolicy: builder.mutation({
       query: ({ id, enabled }) => ({
         url: `/rooms/${id}/moderation/high-quality-policy`,
         method: "PUT",
         body: { enabled },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "HighQualityPolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
 
@@ -670,6 +666,7 @@ export const {
   useKickParticipantMutation,
   useMuteParticipantMutation,
   useMuteAllParticipantsMutation,
+  useCameraOffAllMutation,
   useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
   useUpdateSelfCameraPolicyMutation,
@@ -683,7 +680,6 @@ export const {
   useAdmitWaitingMutation,
   useRejectWaitingMutation,
   // Ticket 04: room lock + end live
-  useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
   // Ticket 02: student share + member recording policies (state-backed)
@@ -695,10 +691,8 @@ export const {
   useUnrestrictVoiceMutation,
   useRestrictVoiceAllMutation,
   useLowerAllHandsMutation,
-  useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
   // Ticket 04 (egress): high-quality room policy
-  useGetHighQualityPolicyQuery,
   useUpdateHighQualityPolicyMutation,
   // Ticket 02: participant restriction bootstrap
   useGetRoomParticipantsQuery,

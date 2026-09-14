@@ -119,6 +119,19 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
       }
     })
 
+    // Ticket 03: co-host assignment/permission change (null on revoke).
+    connection.on("CoHostChanged", (changedRoomId, coHost) => {
+      if (
+        Number(changedRoomId) === Number(roomId) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("CoHostChanged", {
+          roomId: changedRoomId,
+          coHost,
+        })
+      }
+    })
+
     const joinGroups = () => {
       connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
         console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
