@@ -5,7 +5,7 @@ export const aiApi = baseApi.injectEndpoints({
     // Send a message to public AI
     chatPublicAi: builder.mutation({
       query: (data) => ({
-        url: "/conversations/ai/public-ai",
+        url: "/room-chat/public",
         method: "POST",
         body: data,
       }),
@@ -14,9 +14,17 @@ export const aiApi = baseApi.injectEndpoints({
     // Send a message to private AI
     chatPrivateAi: builder.mutation({
       query: (data) => ({
-        url: "/conversations/ai/private-ai",
+        url: "/room-chat/private",
         method: "POST",
         body: data,
+      }),
+    }),
+
+    // Get room chat quota state
+    getRoomChatQuota: builder.query({
+      query: (tier) => ({
+        url: `/room-chat/quota${tier ? `?tier=${encodeURIComponent(tier)}` : ""}`,
+        method: "GET",
       }),
     }),
   }),
@@ -25,4 +33,6 @@ export const aiApi = baseApi.injectEndpoints({
 export const {
   useChatPublicAiMutation,
   useChatPrivateAiMutation,
+  useGetRoomChatQuotaQuery,
 } = aiApi
+

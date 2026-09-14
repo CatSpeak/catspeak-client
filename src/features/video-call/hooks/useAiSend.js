@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { parseApiError } from "@/shared/utils/apiError"
 import { toast } from "react-hot-toast"
 import {
   getRoomSetting,
@@ -149,19 +150,52 @@ export const useAiSend = () => {
         const threadHistory = getConversationThread(interactionId)
         // Remove the last entry (current user prompt) — it goes as `message`
         const conversations = threadHistory.slice(0, -1)
+        const roomLanguage = room?.languageType || room?.language || "en"
+        const userTier = user?.tier || user?.Tier || "Free"
 
-        const payload = { roomName, message: text, conversations }
+        const payload = {
+          roomName,
+          message: text,
+          conversations,
+          language: roomLanguage,
+          tier: userTier,
+        }
 
+        let res
         if (isPublic) {
-          await chatPublicAi(payload).unwrap()
+          res = await chatPublicAi(payload).unwrap()
         } else {
-          await chatPrivateAi(payload).unwrap()
+          res = await chatPrivateAi(payload).unwrap()
+        }
+
+        if (res && res.answer) {
+          updateAiInteraction(interactionId, {
+            status: "done",
+            response: res.answer,
+            followUpSuggestions: res.follow_up_questions || [],
+            aiFrom: {
+              name: isPublic ? "Public AI" : "Private AI",
+              isSystem: false,
+              isAi: true,
+            },
+          })
         }
       } catch (error) {
         console.error("AI chat error", error)
+        const { statusCode, errorCode } = parseApiError(error)
+        const isQuotaExceeded =
+          statusCode === 429 ||
+          errorCode === "AI_DAILY_TOKEN_LIMIT_EXCEEDED" ||
+          errorCode === "AI_QUOTA_EXCEEDED"
+
+        const errorMsg = isQuotaExceeded
+          ? t?.rooms?.chatBox?.aiQuotaExceeded || "Daily AI token limit exceeded."
+          : t?.rooms?.chatBox?.aiErrorResponse || "All models are unavailable."
+
         updateAiInteraction(interactionId, {
           status: "error",
-          response: error?.data?.message || "All models are unavailable.",
+          response: errorMsg,
+          errorCode: errorCode || (isQuotaExceeded ? "AI_DAILY_TOKEN_LIMIT_EXCEEDED" : "AI_SERVICE_ERROR"),
           aiFrom: { name: "Cat Speak", isSystem: true, isAi: true },
         })
       } finally {
@@ -183,6 +217,10 @@ export const useAiSend = () => {
       startNewThread,
       continueThread,
       getConversationThread,
+      room,
+      roomIdFromContext,
+      user,
+      isHostFromContext,
     ],
   )
 

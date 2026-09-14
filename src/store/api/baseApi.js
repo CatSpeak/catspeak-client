@@ -393,10 +393,12 @@ const baseQueryWithReauth = createReauthBaseQuery(
       (lowerUrl.includes("speaking-stats") ||
         lowerUrl.includes("speaking-analytics") ||
         lowerUrl.includes("speaking-history") ||
+        lowerUrl.includes("room-chat") ||
         lowerUrl.startsWith("/ai/") ||
         lowerUrl.startsWith("ai/") ||
         lowerUrl.startsWith("/v1/ai/") ||
         lowerUrl.startsWith("v1/ai/"))
+
 
     const isCoursesRoute =
       lowerUrl &&

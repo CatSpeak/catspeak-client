@@ -726,6 +726,8 @@ const GlobalCallContent = ({
     startNewThread,
     continueThread,
     getConversationThread,
+    triggerStarterGreeting,
+    loadMoreMeetingSuggestions,
     chatPublicAi,
     chatPrivateAi,
     unreadRoomChat,
@@ -1409,6 +1411,8 @@ const GlobalCallContent = ({
     startNewThread,
     continueThread,
     getConversationThread,
+    triggerStarterGreeting,
+    loadMoreMeetingSuggestions,
 
     // Actions
     handleToggleMic: actions.handleToggleMic,
