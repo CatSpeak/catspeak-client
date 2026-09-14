@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "react-hot-toast"
 import { Loader2, UserX, DoorOpen, CheckCircle2, X } from "lucide-react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { selectCurrentToken } from "@/store/slices/authSlice"
 import {
   useGetMyWaitingStatusQuery,
   useKnockWaitingMutation,
   useCancelWaitingMutation,
+  roomsApi,
 } from "@/store/api/roomsApi"
 import { useVideoChatSignalR } from "@/features/video-call/hooks/useVideoChatSignalR"
 import { normalizeWaitingEntry, WAITING_STATUS } from "./waitingUtils"
@@ -104,6 +105,7 @@ export const PreJoinWaitingGate = ({ apiRoomId, onAdmitted, onCancel }) => {
   const { t } = useLanguage()
   const wq = t?.rooms?.videoCall?.waitingQueue || {}
   const token = useSelector(selectCurrentToken)
+  const dispatch = useDispatch()
 
   const [knockWaiting, { isLoading: isKnocking }] = useKnockWaitingMutation()
   const [cancelWaiting] = useCancelWaitingMutation()
@@ -168,10 +170,20 @@ export const PreJoinWaitingGate = ({ apiRoomId, onAdmitted, onCancel }) => {
     } else if (event === "WaitingRejected") {
       setEntry((prev) => ({ ...(prev || {}), status: WAITING_STATUS.REJECTED }))
     } else if (event === "WaitingCancelled") {
-      setEntry(null)
-      knockTriggered.current = false
+      // Explicit cancelled status (never null) so the server snapshot cannot
+      // resurrect a stale pending entry and re-trigger the admission path.
+      setEntry((prev) => ({
+        ...(prev || {}),
+        status: WAITING_STATUS.CANCELLED,
+      }))
+      // Pull the authoritative waiting-status snapshot in line with the event.
+      if (apiRoomId) {
+        dispatch(
+          roomsApi.util.invalidateTags([{ type: "WaitingQueue", id: apiRoomId }]),
+        )
+      }
     }
-  }, [])
+  }, [apiRoomId, dispatch])
 
   // Personal outcomes arrive on user_{accountId}; room group for queue changes.
   useVideoChatSignalR(null, token, handleEvent, apiRoomId)

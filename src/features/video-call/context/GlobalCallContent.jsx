@@ -82,7 +82,12 @@ const GlobalCallContent = ({
   const dispatch = useDispatch()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
-  const currentRoomId = callInfo?.roomId || roomData?.id
+  // Class rooms keep "class-{id}" as the URL roomId but carry the numeric
+  // cath-api room id separately (callInfo.apiRoomId). Every room-governance
+  // call and the SignalR room group must use the numeric id.
+  const urlRoomId = callInfo?.roomId || roomData?.id
+  const apiRoomId = callInfo?.apiRoomId ?? (Number(urlRoomId) > 0 ? Number(urlRoomId) : null)
+  const currentRoomId = apiRoomId ?? urlRoomId
   const isAISession = callInfo?.isAISession ?? false
 
   // ── Ticket 02: chat/voice restriction state ──
@@ -480,7 +485,8 @@ const GlobalCallContent = ({
             "getRoomState",
             currentRoomId,
             (draft) => {
-              draft.settings = { ...(draft.settings || {}), ...settings }
+              if (!draft?.settings) return
+              draft.settings = { ...draft.settings, ...settings }
             },
           ),
         )
@@ -1229,7 +1235,7 @@ const GlobalCallContent = ({
     cancelLeaveCall,
 
     // Session
-    id: callInfo?.roomId,
+    id: currentRoomId,
     sessionId: callInfo?.sessionId || localMetadata?.sessionId,
     closingRemainingSeconds,
     navigate: getNavigate(),

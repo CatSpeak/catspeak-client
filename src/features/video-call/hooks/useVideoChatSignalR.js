@@ -160,6 +160,24 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
       }
     })
 
+    // Ticket 05: batch variant (restrict-voice-all) — one message carries a
+    // list; fan it out as individual restriction events for consumers.
+    connection.on("ParticipantRestrictionsChanged", (changedRoomId, restrictions) => {
+      if (
+        (String(changedRoomId) === String(roomId) ||
+          Number(changedRoomId) === Number(roomId)) &&
+        onEventReceivedRef.current
+      ) {
+        const list = Array.isArray(restrictions) ? restrictions : []
+        list.forEach((restriction) => {
+          onEventReceivedRef.current("ParticipantRestrictionChanged", {
+            roomId: changedRoomId,
+            restriction,
+          })
+        })
+      }
+    })
+
     // Ticket 04: personal waiting outcomes (user_{accountId}), no room filter —
     // the account can only be waiting in one room at a time.
     connection.on("WaitingAdmitted", (changedRoomId, entry) => {

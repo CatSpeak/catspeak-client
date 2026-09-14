@@ -481,8 +481,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         throw new Error("Invalid LiveKit token received from backend")
       }
 
-      if (roomState && roomId) {
-        dispatch(roomsApi.util.upsertQueryData("getRoomState", roomId, roomState))
+      if (roomState && apiRoomId) {
+        dispatch(
+          roomsApi.util.upsertQueryData("getRoomState", apiRoomId, roomState),
+        )
       }
 
       console.log("[VideoCallProvider] LiveKit token fetched successfully:", {
@@ -509,6 +511,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           livekitToken: token,
           livekitServerUrl: serverUrl,
           roomId,
+          // Ticket 04: numeric room id for room-governance endpoints / SignalR
+          // room group. Class rooms keep "class-{id}" only for navigation/URL.
+          apiRoomId,
           sessionId,
           callPath,
           roomData: room,
