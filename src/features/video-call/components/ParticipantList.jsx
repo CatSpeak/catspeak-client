@@ -53,13 +53,12 @@ import {
   useMuteAllParticipantsMutation,
   useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
+  useUpdateSelfCameraPolicyMutation,
   useGetWaitingQueueQuery,
   useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
-  useGetStudentSharePolicyQuery,
   useUpdateStudentSharePolicyMutation,
-  useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
   useGetGamePolicyQuery,
   useUpdateGamePolicyMutation,
@@ -348,6 +347,14 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       user?.accountId,
       CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
     )
+  // Ticket 02: camera self-toggle is a separate code (allow_self_camera).
+  const canToggleSelfCamera =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA
+    )
 
   // Ticket 03: waiting queue — host "Chờ" tab + waiter knock banner.
   const [activeTab, setActiveTab] = React.useState("members")
@@ -377,8 +384,11 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   })
   const [updateSelfUnmute, { isLoading: isTogglingSelfUnmute }] =
     useUpdateSelfUnmutePolicyMutation()
+  const [updateSelfCamera, { isLoading: isTogglingSelfCamera }] =
+    useUpdateSelfCameraPolicyMutation()
   const roomStatePayload = roomState?.data ?? roomState
   const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
+  const allowSelfCamera = roomStatePayload?.settings?.allowSelfCamera ?? true
 
   const handleMuteAll = () => {
     setMuteAllConfirmOpen(true)
@@ -457,6 +467,43 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
+  // Ticket 02: student self-camera gate (mirrors self-unmute).
+  const handleToggleSelfCamera = async () => {
+    if (!roomId) return
+    try {
+      const next = !allowSelfCamera
+      await updateSelfCamera({ id: roomId, allow: next }).unwrap()
+      try {
+        const payload = new TextEncoder().encode(
+          JSON.stringify({ action: "SELF_CAMERA_POLICY", allow: next })
+        )
+        lkRoom?.localParticipant?.publishData(payload, {
+          topic: "moderation",
+          reliable: true,
+        })
+      } catch {
+        /* ignore broadcast errors */
+      }
+      toast.success(
+        next
+          ? isCustom
+            ? pl.selfCameraOnRoom || pl.selfCameraOn
+            : pl.selfCameraOn
+          : isCustom
+            ? pl.selfCameraOffRoom || pl.selfCameraOff
+            : pl.selfCameraOff,
+      )
+    } catch (err) {
+      toast.error(
+        resolveCoHostErrorMessage(
+          err,
+          t,
+          pl.forbiddenSelfCamera
+        )
+      )
+    }
+  }
+
   // Ticket 04: room lock (lock_class) + end live for all (end_class).
   const canManageLock =
     isHost ||
@@ -477,25 +524,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const canManageMemberRecording =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.RECORD)
-  const { data: studentSharePolicy } = useGetStudentSharePolicyQuery(roomId, {
-    skip: !roomId,
-  })
   const [updateStudentShare, { isLoading: isTogglingStudentShare }] =
     useUpdateStudentSharePolicyMutation()
-  const allowStudentShare =
-    studentSharePolicy?.data?.allowStudentShare ??
-    studentSharePolicy?.allowStudentShare ??
-    true
-  const { data: memberRecordingPolicy } = useGetMemberRecordingPolicyQuery(
-    roomId,
-    { skip: !roomId }
-  )
+  const allowStudentShare = roomStatePayload?.settings?.allowStudentShare ?? true
   const [updateMemberRecording, { isLoading: isTogglingMemberRecording }] =
     useUpdateMemberRecordingPolicyMutation()
   const allowMemberRecording =
-    memberRecordingPolicy?.data?.allowMemberRecording ??
-    memberRecordingPolicy?.allowMemberRecording ??
-    true
+    roomStatePayload?.settings?.allowMemberRecording ?? true
   const { data: roomLockData } = useGetRoomLockQuery(roomId, {
     skip: !roomId,
   })
@@ -673,6 +708,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     isHost ||
     canMuteAll ||
     canToggleSelfUnmute ||
+    canToggleSelfCamera ||
     canManageLock ||
     canEndLive ||
     canManageStudentShare ||
@@ -1191,6 +1227,21 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   checked={allowSelfUnmute}
                   disabled={isTogglingSelfUnmute}
                   onChange={handleToggleSelfUnmute}
+                />
+              )}
+              {canToggleSelfCamera && (
+                <PolicyRow
+                  icon={<Video size={15} aria-hidden="true" />}
+                  label={
+                    isCustom
+                      ? pl.allowSelfCameraRoom ||
+                        pl.allowSelfCamera ||
+                        "Cho phép thành viên tự bật camera"
+                      : pl.allowSelfCamera
+                  }
+                  checked={allowSelfCamera}
+                  disabled={isTogglingSelfCamera}
+                  onChange={handleToggleSelfCamera}
                 />
               )}
               {canManageStudentShare && (

@@ -1,7 +1,7 @@
-// Co-host permission catalog (ticket 01 foundation).
-// 11 codes shared with backend (cath + instructor). Grouped per SRS image 3:
-// "Phân công Co-host" popup: Quản lý học viên (6) + Bảo mật lớp học (5) for Class.
-// Custom room (roomType="room") reuses same 11 codes with room/member copy
+// Co-host permission catalog (ticket 02 adds allow_self_camera).
+// 12 codes shared with backend (cath + instructor). Grouped per SRS image 3:
+// "Phân công Co-host" popup: Quản lý học viên (7) + Bảo mật lớp học (5) for Class.
+// Custom room (roomType="room") reuses same 12 codes with room/member copy
 // (Quản lý thành viên + Bảo mật phòng). See getPermissionLabel/getGroupTitle.
 
 export const CO_HOST_PERMISSIONS = {
@@ -9,6 +9,7 @@ export const CO_HOST_PERMISSIONS = {
   CAMERA_TOGGLE: "camera_toggle",
   MUTE_ALL: "mute_all",
   ALLOW_SELF_UNMUTE: "allow_self_unmute",
+  ALLOW_SELF_CAMERA: "allow_self_camera",
   REMOVE_STUDENT: "remove_student",
   ADMIT_WAITING: "admit_waiting",
   LOCK_CLASS: "lock_class",
@@ -23,6 +24,7 @@ export const CO_HOST_ALL = [
   CO_HOST_PERMISSIONS.CAMERA_TOGGLE,
   CO_HOST_PERMISSIONS.MUTE_ALL,
   CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE,
+  CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA,
   CO_HOST_PERMISSIONS.REMOVE_STUDENT,
   CO_HOST_PERMISSIONS.ADMIT_WAITING,
   CO_HOST_PERMISSIONS.LOCK_CLASS,
@@ -49,12 +51,13 @@ export const CO_HOST_GROUPS = [
   {
     id: "student_management",
     title: "Quản lý học viên",
-    total: 6,
+    total: 7,
     permissions: [
       CO_HOST_PERMISSIONS.MIC_TOGGLE,
       CO_HOST_PERMISSIONS.CAMERA_TOGGLE,
       CO_HOST_PERMISSIONS.MUTE_ALL,
       CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA,
       CO_HOST_PERMISSIONS.REMOVE_STUDENT,
       CO_HOST_PERMISSIONS.ADMIT_WAITING,
     ],
@@ -78,6 +81,7 @@ export const CO_HOST_PERMISSION_LABELS = {
   [CO_HOST_PERMISSIONS.CAMERA_TOGGLE]: "Bật/tắt quyền sử dụng camera",
   [CO_HOST_PERMISSIONS.MUTE_ALL]: "Tắt toàn bộ mic của học viên",
   [CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE]: "Cho phép học viên tự bật mic",
+  [CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA]: "Cho phép học viên tự bật camera",
   [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: "Xóa học viên khỏi lớp học",
   [CO_HOST_PERMISSIONS.ADMIT_WAITING]: "Duyệt học viên từ phòng chờ",
   [CO_HOST_PERMISSIONS.LOCK_CLASS]: "Khóa lớp học",
@@ -88,13 +92,14 @@ export const CO_HOST_PERMISSION_LABELS = {
   [CO_HOST_PERMISSIONS.RECORD]: "Bắt đầu/dừng ghi hình",
 }
 
-// Room (Custom) copy: phòng / thành viên. Same 11 codes, different labels.
+// Room (Custom) copy: phòng / thành viên. Same 12 codes, different labels.
 // Used when roomType === "room". Class keeps CO_HOST_PERMISSION_LABELS above.
 export const CO_HOST_PERMISSION_LABELS_ROOM = {
   [CO_HOST_PERMISSIONS.MIC_TOGGLE]: "Bật/tắt quyền sử dụng mic",
   [CO_HOST_PERMISSIONS.CAMERA_TOGGLE]: "Bật/tắt quyền sử dụng camera",
   [CO_HOST_PERMISSIONS.MUTE_ALL]: "Tắt toàn bộ mic của thành viên",
   [CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE]: "Cho phép thành viên tự bật mic",
+  [CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA]: "Cho phép thành viên tự bật camera",
   [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: "Xóa thành viên khỏi phòng",
   [CO_HOST_PERMISSIONS.ADMIT_WAITING]: "Duyệt thành viên từ phòng chờ",
   [CO_HOST_PERMISSIONS.LOCK_CLASS]: "Khóa phòng",
@@ -125,6 +130,11 @@ export const CO_HOST_PERMISSION_META = {
     icon: "Volume2",
     isSensitive: false,
     helper: "Cho phép học viên tự mở lại mic",
+  },
+  [CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA]: {
+    icon: "Video",
+    isSensitive: false,
+    helper: "Cho phép học viên tự bật lại camera",
   },
   [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: {
     icon: "UserX",
@@ -174,6 +184,8 @@ export const CO_HOST_PERMISSION_HELPERS_ROOM = {
   [CO_HOST_PERMISSIONS.MUTE_ALL]: "Tắt mic tất cả thành viên trong phòng",
   [CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE]:
     "Cho phép thành viên tự mở lại mic",
+  [CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA]:
+    "Cho phép thành viên tự bật lại camera",
   [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: "Mời thành viên rời khỏi phòng",
   [CO_HOST_PERMISSIONS.ADMIT_WAITING]:
     "Duyệt thành viên từ phòng chờ vào phòng",

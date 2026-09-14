@@ -41,8 +41,7 @@ import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.j
 import { roomsApi } from "@/store/api/roomsApi"
 import {
   useGetRoomCoHostQuery,
-  useGetStudentSharePolicyQuery,
-  useGetMemberRecordingPolicyQuery,
+  useGetRoomStateQuery,
   useGetRoomParticipantsQuery,
   useGetHighQualityPolicyQuery,
 } from "@/store/api/roomsApi"
@@ -572,22 +571,15 @@ const GlobalCallContent = ({
     skip: !currentRoomId,
   })
   const liveCoHost = normalizeCoHost(liveCoHostData)
-  const { data: studentSharePolicyData } = useGetStudentSharePolicyQuery(
-    currentRoomId,
-    { skip: !currentRoomId }
-  )
-  const allowStudentShare =
-    studentSharePolicyData?.data?.allowStudentShare ??
-    studentSharePolicyData?.allowStudentShare ??
-    true
-  const { data: memberRecordingPolicyData } = useGetMemberRecordingPolicyQuery(
-    currentRoomId,
-    { skip: !currentRoomId }
-  )
-  const allowMemberRecording =
-    memberRecordingPolicyData?.data?.allowMemberRecording ??
-    memberRecordingPolicyData?.allowMemberRecording ??
-    true
+  // Ticket 02: student-share + member-recording gates come from the room-state
+  // cache (single store) instead of standalone policy GETs.
+  const { data: roomStateData } = useGetRoomStateQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const roomStateSettings =
+    (roomStateData?.data ?? roomStateData)?.settings ?? {}
+  const allowStudentShare = roomStateSettings.allowStudentShare ?? true
+  const allowMemberRecording = roomStateSettings.allowMemberRecording ?? true
   const screenShareState = useScreenShare({
     roomData,
     user,
@@ -748,13 +740,33 @@ const GlobalCallContent = ({
           return
         }
 
-        // Ticket 05: student share gate changed — refetch + toast.
-        // Students with an active share keep it; new starts are gated.
+        // Ticket 02: self-camera gate changed — state arrives via the server
+        // RoomSettingsChanged push; this data-channel event is just a toast.
+        if (data.action === "SELF_CAMERA_POLICY") {
+          toast.info(
+            data.allow
+              ? (pl.selfCameraOn || "Host đã cho phép học viên tự bật camera.")
+              : (pl.selfCameraOff || "Host đã tắt quyền học viên tự bật camera.")
+          )
+          return
+        }
+
+        // Ticket 02: student share gate changed — patch the room-state cache
+        // (single store). Students with an active share keep it; new starts
+        // are gated.
         if (data.action === "STUDENT_SHARE_POLICY") {
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "StudentSharePolicy", id: currentRoomId },
-            ])
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowStudentShare: data.allow !== false,
+                }
+              }
+            )
           )
           toast.info(
             data.allow
@@ -764,21 +776,21 @@ const GlobalCallContent = ({
           return
         }
 
-        // Ticket 05: member recording gate changed server-side — refetch +
-        // toast + keep the legacy local toggle in sync for older clients.
+        // Ticket 02: member recording gate changed — patch the room-state
+        // cache (single store) + toast.
         if (data.action === "MEMBER_RECORDING_POLICY") {
           dispatch(
-            roomsApi.util.invalidateTags([
-              { type: "MemberRecordingPolicy", id: currentRoomId },
-            ])
-          )
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.MEMBER_RECORDING,
-            data.allow !== false
-          )
-          window.dispatchEvent(
-            new Event("catspeak_member_recording_allowed_changed")
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowMemberRecording: data.allow !== false,
+                }
+              }
+            )
           )
           toast.info(
             data.allow !== false
@@ -864,14 +876,21 @@ const GlobalCallContent = ({
           return
         }
 
+        // Ticket 02: legacy local toggle — member recording now lives in the
+        // room-state cache, so patch it there (no localStorage).
         if (data.action === "TOGGLE_MEMBER_RECORDING") {
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.MEMBER_RECORDING,
-            data.allowed,
-          )
-          window.dispatchEvent(
-            new Event("catspeak_member_recording_allowed_changed"),
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowMemberRecording: data.allowed !== false,
+                }
+              }
+            )
           )
           toast.info(
             data.allowed

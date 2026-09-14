@@ -407,6 +407,22 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         activeSubSessionName = tokenRes?.activeSubSessionName
         egressProfile = tokenRes?.egressProfile ?? tokenRes?.egress_profile
         highQuality = tokenRes?.highQuality ?? tokenRes?.high_quality
+        // Ticket 02: the class-room gRPC join path now carries the governance
+        // snapshot too (as JSON); parse it so class late joiners get the
+        // correct media policies immediately, same as the token path.
+        const rawClassRoomState =
+          tokenRes?.roomState ??
+          tokenRes?.roomStateJson ??
+          tokenRes?.room_state_json
+        if (rawClassRoomState && typeof rawClassRoomState === "string") {
+          try {
+            roomState = JSON.parse(rawClassRoomState)
+          } catch {
+            roomState = null
+          }
+        } else {
+          roomState = rawClassRoomState
+        }
       } else {
         // Fetch LiveKit token to validate connectivity and join
         const livekitTokenBody = {

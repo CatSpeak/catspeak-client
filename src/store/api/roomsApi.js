@@ -350,6 +350,16 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
+    // Ticket 02: student self-camera gate (mirrors self-unmute). Read from the
+    // room-state cache; the PUT invalidates it so the toggler refetches.
+    updateSelfCameraPolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/self-camera-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
 
     // Get list of banned participants for a room
     getBannedParticipants: builder.query({
@@ -422,41 +432,28 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // --- Ticket 05: student screen-share gate (default open, session-scoped) ---
-    // Host or co-host with manage_student_share toggles.
-    getStudentSharePolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/student-share-policy`,
-      providesTags: (result, error, id) => [{ type: "StudentSharePolicy", id }],
-    }),
+    // --- Ticket 02: student screen-share gate (default open, session-scoped) ---
+    // Host or co-host with manage_student_share toggles. The value is read from
+    // the room-state cache (no standalone GET) and the PUT invalidates it.
     updateStudentSharePolicy: builder.mutation({
       query: ({ id, allow }) => ({
         url: `/rooms/${id}/moderation/student-share-policy`,
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "StudentSharePolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
-    // --- Ticket 05: member recording gate, server-side (default open) ---
+    // --- Ticket 02: member recording gate, server-side (default open) ---
     // Host or co-host with record toggles; shared recording start is gated
-    // server-side via EnsureRecordingAllowedAsync.
-    getMemberRecordingPolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/member-recording-policy`,
-      providesTags: (result, error, id) => [
-        { type: "MemberRecordingPolicy", id },
-      ],
-    }),
+    // server-side via EnsureRecordingAllowedAsync. Value read from room state.
     updateMemberRecordingPolicy: builder.mutation({
       query: ({ id, allow }) => ({
         url: `/rooms/${id}/moderation/member-recording-policy`,
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "MemberRecordingPolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
     // --- Ticket 01: Restrict Chat/Voice + Hands + Game Policy ---
@@ -675,6 +672,7 @@ export const {
   useMuteAllParticipantsMutation,
   useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
+  useUpdateSelfCameraPolicyMutation,
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,
   useInviteToRoomMutation,
@@ -688,10 +686,8 @@ export const {
   useGetRoomLockQuery,
   useUpdateRoomLockMutation,
   useEndLiveSessionMutation,
-  // Ticket 05: student share + member recording policies
-  useGetStudentSharePolicyQuery,
+  // Ticket 02: student share + member recording policies (state-backed)
   useUpdateStudentSharePolicyMutation,
-  useGetMemberRecordingPolicyQuery,
   useUpdateMemberRecordingPolicyMutation,
   useRestrictChatMutation,
   useUnrestrictChatMutation,

@@ -429,8 +429,6 @@ export const baseApi = createApi({
     "BannedParticipants",
     "WaitingQueue",
     "RoomLock",
-    "StudentSharePolicy",
-    "MemberRecordingPolicy",
     "GamePolicy",
     "HighQualityPolicy",
     "RoomParticipants",
