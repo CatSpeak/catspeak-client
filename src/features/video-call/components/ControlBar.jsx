@@ -19,7 +19,7 @@ import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
 import {
   useGetRoomCoHostQuery,
-  useGetSelfUnmutePolicyQuery,
+  useGetRoomStateQuery,
 } from "@/store/api/roomsApi"
 import {
   isBreakoutSupported,
@@ -97,14 +97,15 @@ const VideoCallControlBar = () => {
   const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
     skip: !roomId,
   })
-  const { data: selfUnmutePolicy } = useGetSelfUnmutePolicyQuery(roomId, {
+  // Ticket 01: policy comes from the room-state cache (single store).
+  const { data: roomState } = useGetRoomStateQuery(roomId, {
     skip: !roomId,
   })
-  const allowSelfUnmute =
-    selfUnmutePolicy?.data?.allowSelfUnmute ??
-    selfUnmutePolicy?.allowSelfUnmute ??
-    true
-  const isSelfCoHost = isCoHostUser(normalizeCoHost(coHostData), user?.accountId)
+  const roomStatePayload = roomState?.data ?? roomState
+  const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
+  const isSelfCoHost =
+    roomStatePayload?.coHost?.isCoHost ??
+    isCoHostUser(normalizeCoHost(coHostData), user?.accountId)
 
   const handleMicWithGate = async () => {
     const tryingToUnmute = !micOn

@@ -11,7 +11,7 @@ import {
   useMediaPreview,
   useDeviceSelection,
 } from "@/features/rooms"
-import { useVerifyJoinRoomMutation } from "@/store/api/roomsApi"
+import { useVerifyJoinRoomMutation, roomsApi } from "@/store/api/roomsApi"
 import {
   useGetClassDetailQuery,
   useGetStudentClassDetailQuery,
@@ -393,7 +393,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     setPhase("joining")
 
     try {
-      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName, egressProfile, highQuality
+      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName, egressProfile, highQuality, roomState
 
       if (isClassRoom) {
         // Fetch LiveKit token using the appropriate endpoint based on user role
@@ -420,10 +420,17 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         activeSubSessionName = tokenRes?.activeSubSessionName
         egressProfile = tokenRes?.egressProfile
         highQuality = tokenRes?.highQuality
+        // Ticket 01: seed the RoomState cache from the join snapshot so the
+        // correct policy (mic lock etc.) is known immediately, no handshake.
+        roomState = tokenRes?.roomState
       }
 
       if (!token || typeof token !== "string") {
         throw new Error("Invalid LiveKit token received from backend")
+      }
+
+      if (roomState && roomId) {
+        dispatch(roomsApi.util.upsertQueryData("getRoomState", roomId, roomState))
       }
 
       console.log("[VideoCallProvider] LiveKit token fetched successfully:", {

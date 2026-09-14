@@ -334,10 +334,13 @@ export const roomsApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // Ticket 02: session-level self-unmute gate (default open)
-    getSelfUnmutePolicy: builder.query({
-      query: (id) => `/rooms/${id}/moderation/self-unmute-policy`,
-      providesTags: (result, error, id) => [{ type: "SelfUnmutePolicy", id }],
+    // Ticket 01: single source of truth for room governance state
+    // (settings + co-host slice + my waiting status). Replaces the standalone
+    // self-unmute GET; the SignalR RoomSettingsChanged handler updates this
+    // cache in place.
+    getRoomState: builder.query({
+      query: (id) => `/rooms/${id}/state`,
+      providesTags: (result, error, id) => [{ type: "RoomState", id }],
     }),
     updateSelfUnmutePolicy: builder.mutation({
       query: ({ id, allow }) => ({
@@ -345,9 +348,7 @@ export const roomsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: { allow },
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: "SelfUnmutePolicy", id },
-      ],
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
     // Get list of banned participants for a room
@@ -672,7 +673,7 @@ export const {
   useKickParticipantMutation,
   useMuteParticipantMutation,
   useMuteAllParticipantsMutation,
-  useGetSelfUnmutePolicyQuery,
+  useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,

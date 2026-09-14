@@ -16,6 +16,8 @@ export const livekitApi = baseApi.injectEndpoints({
         sessionId: response.cathspeak?.session_id,
         activeSubSessionId: response.cathspeak?.active_sub_session_id,
         activeSubSessionName: response.cathspeak?.active_sub_session_name,
+        // Ticket 01: governance snapshot embedded in the join response.
+        roomState: response.cathspeak?.room_state,
       }),
     }),
     raiseHand: builder.mutation({

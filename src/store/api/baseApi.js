@@ -425,7 +425,7 @@ export const baseApi = createApi({
     "VoucherUsages",
     "CoHost",
     "ClassCoHost",
-    "SelfUnmutePolicy",
+    "RoomState",
     "BannedParticipants",
     "WaitingQueue",
     "RoomLock",

@@ -53,7 +53,6 @@ import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
 import {
-  getRoomSetting,
   setRoomSetting,
   ROOM_SETTING_KEYS,
 } from "@/features/video-call/utils/roomSettingHelpers"
@@ -487,6 +486,23 @@ const GlobalCallContent = ({
   }, [sessionRecordings, t])
 
   useVideoChatSignalR(sessionId, token, (event, data) => {
+    if (event === "RoomSettingsChanged") {
+      // Ticket 01: single store = RTK Query cache. Patch the room state in
+      // place so every client (incl. late joiners) reflects policy instantly.
+      const settings = data?.settings
+      if (settings && currentRoomId) {
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomState",
+            currentRoomId,
+            (draft) => {
+              draft.settings = { ...(draft.settings || {}), ...settings }
+            },
+          ),
+        )
+      }
+      return
+    }
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
@@ -523,7 +539,7 @@ const GlobalCallContent = ({
       // The media ingress participant leaves the room; the spotlight auto-hides
       // once the track is gone, and the media status query re-fetches.
     }
-  })
+  }, currentRoomId)
 
   const prevConnectionState = useRef(connectionState)
   useEffect(() => {
@@ -889,79 +905,6 @@ const GlobalCallContent = ({
           return
         }
 
-        if (data.action === "REQUEST_ROOM_SETTINGS_SYNC") {
-          if (
-            isHost &&
-            localParticipant &&
-            lkRoom?.state === ConnectionState.Connected
-          ) {
-            try {
-              const syncPayload = new TextEncoder().encode(
-                JSON.stringify({
-                  action: "SYNC_ROOM_SETTINGS",
-                  settings: {
-                    memberRecording: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                    ),
-                    memberPrivateAi: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                    ),
-                    highQuality: roomHighQualityRef.current,
-                  },
-                  targetIdentity: participant?.identity,
-                }),
-              )
-              localParticipant
-                .publishData(syncPayload, {
-                  topic: "moderation",
-                  reliable: true,
-                })
-                .catch(() => {})
-            } catch (err) {
-              console.error(
-                "Error responding to REQUEST_ROOM_SETTINGS_SYNC:",
-                err,
-              )
-            }
-          }
-          return
-        }
-
-        if (data.action === "SYNC_ROOM_SETTINGS") {
-          const isTargetMe =
-            !data.targetIdentity ||
-            String(data.targetIdentity) === String(localParticipant?.identity)
-          if (isTargetMe && data.settings) {
-            if (data.settings.memberRecording !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                data.settings.memberRecording,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_member_recording_allowed_changed"),
-              )
-            }
-            if (data.settings.memberPrivateAi !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                data.settings.memberPrivateAi,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_member_private_ai_allowed_changed"),
-              )
-            }
-            // Ticket 04 (egress): high-quality state synced from the host.
-            if (data.settings.highQuality !== undefined) {
-              setRoomHighQuality(data.settings.highQuality === true)
-            }
-          }
-          return
-        }
-
         // Ticket 02: chat/voice restriction sync (applies to every target so
         // the participant list badge updates too).
         if (
@@ -1088,64 +1031,11 @@ const GlobalCallContent = ({
       }
     }
 
-    const handleParticipantJoined = (participant) => {
-      const isHost = isRoomHost(roomData, user?.accountId)
-      if (
-        isHost &&
-        localParticipant &&
-        lkRoom?.state === ConnectionState.Connected
-      ) {
-        try {
-          const syncPayload = new TextEncoder().encode(
-            JSON.stringify({
-              action: "SYNC_ROOM_SETTINGS",
-              settings: {
-                memberRecording: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                ),
-                memberPrivateAi: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                ),
-                highQuality: roomHighQualityRef.current,
-              },
-              targetIdentity: participant.identity,
-            }),
-          )
-          localParticipant
-            .publishData(syncPayload, { topic: "moderation", reliable: true })
-            .catch(() => {})
-        } catch (err) {
-          console.error("Error syncing room settings to new participant:", err)
-        }
-      }
-
-    }
-
-    // Request settings sync from Host on join if not Host
-    if (
-      lkRoom?.state === ConnectionState.Connected &&
-      localParticipant &&
-      !isRoomHost(roomData, user?.accountId)
-    ) {
-      try {
-        const reqPayload = new TextEncoder().encode(
-          JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" }),
-        )
-        localParticipant
-          .publishData(reqPayload, { topic: "moderation", reliable: true })
-          .catch(() => {})
-      } catch (e) {
-        // ignore
-      }
-    }
-
+    // Ticket 01: the settings handshake is gone — policy now arrives via the
+    // GET /rooms/{id}/state snapshot + SignalR RoomSettingsChanged.
     lkRoom.on(RoomEvent.DataReceived, handleModerationData)
-    lkRoom.on(RoomEvent.ParticipantConnected, handleParticipantJoined)
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
-      lkRoom.off(RoomEvent.ParticipantConnected, handleParticipantJoined)
     }
   }, [
     lkRoom,

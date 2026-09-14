@@ -51,7 +51,7 @@ import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 import {
   useGetRoomCoHostQuery,
   useMuteAllParticipantsMutation,
-  useGetSelfUnmutePolicyQuery,
+  useGetRoomStateQuery,
   useUpdateSelfUnmutePolicyMutation,
   useGetWaitingQueueQuery,
   useGetRoomLockQuery,
@@ -371,15 +371,14 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const [muteAllApi, { isLoading: isMutingAll }] =
     useMuteAllParticipantsMutation()
-  const { data: selfUnmutePolicy } = useGetSelfUnmutePolicyQuery(roomId, {
+  // Ticket 01: policy comes from the room-state cache (single store).
+  const { data: roomState } = useGetRoomStateQuery(roomId, {
     skip: !roomId,
   })
   const [updateSelfUnmute, { isLoading: isTogglingSelfUnmute }] =
     useUpdateSelfUnmutePolicyMutation()
-  const allowSelfUnmute =
-    selfUnmutePolicy?.data?.allowSelfUnmute ??
-    selfUnmutePolicy?.allowSelfUnmute ??
-    true
+  const roomStatePayload = roomState?.data ?? roomState
+  const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
 
   const handleMuteAll = () => {
     setMuteAllConfirmOpen(true)

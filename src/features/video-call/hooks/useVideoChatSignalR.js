@@ -11,7 +11,7 @@ import * as signalR from "@microsoft/signalr"
  * @param {function} onEventReceived - Callback fired when high-priority SignalR event is parsed.
  * @returns {boolean} connection status
  */
-export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
+export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) => {
   const [isConnected, setIsConnected] = useState(false)
   const connectionRef = useRef(null)
   const onEventReceivedRef = useRef(onEventReceived)
@@ -106,17 +106,40 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
       }
     })
 
+    // Ticket 01: room governance group + settings event.
+    connection.on("RoomSettingsChanged", (changedRoomId, settings) => {
+      if (
+        Number(changedRoomId) === Number(roomId) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("RoomSettingsChanged", {
+          roomId: changedRoomId,
+          settings,
+        })
+      }
+    })
+
+    const joinGroups = () => {
+      connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
+        console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
+      })
+      if (roomId) {
+        connection.invoke("JoinRoom", Number(roomId)).catch((err) => {
+          console.error("[VideoChatSignalR] Failed to invoke JoinRoom:", err)
+        })
+      }
+    }
+
     connection
       .start()
       .then(() => {
         setIsConnected(true)
         console.log(
-          "[VideoChatSignalR] Connected successfully. Joining SignalR session:",
+          "[VideoChatSignalR] Connected successfully. Joining session/room:",
           sessionId,
+          roomId,
         )
-        connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
-          console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
-        })
+        joinGroups()
       })
       .catch((err) => {
         console.error("[VideoChatSignalR] Connection failed:", err)
@@ -124,15 +147,11 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
 
     connection.onreconnected((connectionId) => {
       console.log(
-        "[VideoChatSignalR] Automatically reconnected. Re-joining SignalR session:",
+        "[VideoChatSignalR] Automatically reconnected. Re-joining session/room:",
         sessionId,
+        roomId,
       )
-      connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
-        console.error(
-          "[VideoChatSignalR] Failed to re-invoke JoinSession after reconnect:",
-          err,
-        )
-      })
+      joinGroups()
     })
 
     connectionRef.current = connection
@@ -143,7 +162,7 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
         connectionRef.current.stop()
       }
     }
-  }, [sessionId, token])
+  }, [sessionId, token, roomId])
 
   return { isConnected, connection: connectionRef.current }
 }
