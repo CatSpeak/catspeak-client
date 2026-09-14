@@ -835,6 +835,8 @@ export const websites = [
         label: "Corodomo",
         path: "/resources/corodomo",
         description: "Biến mọi Video yêu thích thành bài học",
+        color: "#00c972",
+        img: "https://corodomo.com/favicon.ico",
       },
     ],
   },
