@@ -830,6 +830,12 @@ export const websites = [
         path: "/resources/mlc-japanese",
         description: "Giáo trình học tiếng Nhật bằng tiếng Nhật N5 - N1.",
       },
+      {
+        key: "corodomo",
+        label: "Corodomo",
+        path: "/resources/corodomo",
+        description: "Biến mọi Video yêu thích thành bài học",
+      },
     ],
   },
   // {
@@ -953,6 +959,15 @@ export const websites = [
         path: "/resources/hansha-dojo",
         description:
           "Đề là câu tiếng Việt. Bạn nói thành tiếng câu tiếng Nhật tương ứng — không gõ gì cả — rồi mở đáp án và tự chấm. 253 mẫu ngữ pháp thông dụng nhất, luyện bằng 256 câu, từ N5 lên N1 — 十級 tới 名人.",
+        img: "https://gametiengnhat.onhat.vn/favicon.svg",
+        color: "#c73e3a",
+      },
+      {
+        key: "wakamono",
+        label: "Hiểu tiếng lóng giới trẻ 若者言葉",
+        path: "/resources/wakamono",
+        description:
+          "それな, 草, 推し, ワンチャン — thứ tiếng Nhật phủ kín YouTube, X và LINE mà giáo trình không bao giờ nhắc. 50 từ, kèm cảnh báo từ nào tuyệt đối đừng dùng với sếp.",
         img: "https://gametiengnhat.onhat.vn/favicon.svg",
         color: "#c73e3a",
       },
