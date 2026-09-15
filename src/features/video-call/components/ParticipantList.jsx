@@ -317,7 +317,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   // Ticket 05: số participant sẽ bị tác động bởi Restrict Voice – All
   // (loại trừ host/người thao tác, chủ phòng và người đã bị hạn chế).
-  const voiceRestrictAllCount = participants.filter((p) => {
+  const voiceBlockAllMicsCount = participants.filter((p) => {
     const meta = parseMetadata(p.metadata)
     const accountId = meta.accountId
     if (accountId == null || accountId === "") return false
@@ -925,9 +925,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   }
 
   const [lowerAllHandsApi, { isLoading: isLoweringHands }] = useLowerAllHandsMutation()
-  const [restrictVoiceAllApi, { isLoading: isRestrictingVoiceAll }] = useRestrictVoiceAllMutation()
+  const [blockAllMicsApi, { isLoading: isBlockingAllMics }] = useRestrictVoiceAllMutation()
   const [lowerHandsConfirmOpen, setLowerHandsConfirmOpen] = React.useState(false)
-  const [restrictVoiceAllConfirmOpen, setRestrictVoiceAllConfirmOpen] = React.useState(false)
+  const [blockAllMicsConfirmOpen, setBlockAllMicsConfirmOpen] = React.useState(false)
 
   const handleLowerAllHands = () => {
     if (totalRaisedHands === 0) {
@@ -961,32 +961,17 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const handleRestrictVoiceAll = () => {
-    setRestrictVoiceAllConfirmOpen(true)
+  const handleBlockAllMics = () => {
+    setBlockAllMicsConfirmOpen(true)
   }
 
-  const confirmRestrictVoiceAll = async () => {
-    setRestrictVoiceAllConfirmOpen(false)
+  const confirmBlockAllMics = async () => {
+    setBlockAllMicsConfirmOpen(false)
     if (!roomId) return
     try {
-      const res = await restrictVoiceAllApi(roomId).unwrap()
-      try {
-        const restrictedAccountIds =
-          res?.restrictedAccountIds ?? res?.data?.restrictedAccountIds ?? []
-        const payload = new TextEncoder().encode(
-          JSON.stringify({
-            action: "RESTRICT_VOICE_ALL",
-            senderId: String(user?.accountId ?? ""),
-            senderIdentity: String(lkRoom?.localParticipant?.identity ?? ""),
-            restrictedAccountIds,
-          })
-        )
-        lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
-      } catch {
-        /* ignore broadcast errors */
-      }
+      const res = await blockAllMicsApi(roomId).unwrap()
       const restrictedCount =
-        res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceRestrictAllCount
+        res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceBlockAllMicsCount
       toast.success(
         (isCustom
           ? pl.successRestrictVoiceAllRoom || pl.successRestrictVoiceAll
@@ -1205,8 +1190,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   {(isHost || canMuteAll) && (
                     <button
                       type="button"
-                      onClick={handleRestrictVoiceAll}
-                      disabled={isRestrictingVoiceAll}
+                      onClick={handleBlockAllMics}
+                      disabled={isBlockingAllMics}
                       title={pl.restrictVoiceAll}
                       aria-label={pl.restrictVoiceAll}
                       className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
@@ -1565,9 +1550,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       />
 
       <ConfirmationModal
-        open={restrictVoiceAllConfirmOpen}
-        onClose={() => setRestrictVoiceAllConfirmOpen(false)}
-        onConfirm={confirmRestrictVoiceAll}
+        open={blockAllMicsConfirmOpen}
+        onClose={() => setBlockAllMicsConfirmOpen(false)}
+        onConfirm={confirmBlockAllMics}
         title={
           isCustom
             ? pl.confirmRestrictVoiceAllTitleRoom ||
@@ -1580,9 +1565,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           isCustom
             ? (pl.confirmRestrictVoiceAllRoom || pl.confirmRestrictVoiceAll).replace(
                 "{count}",
-                String(voiceRestrictAllCount),
+                String(voiceBlockAllMicsCount),
               )
-            : pl.confirmRestrictVoiceAll.replace("{count}", String(voiceRestrictAllCount))
+            : pl.confirmRestrictVoiceAll.replace("{count}", String(voiceBlockAllMicsCount))
         }
         confirmText={
           isCustom
@@ -1590,7 +1575,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             : pl.restrictVoiceAll
         }
         confirmVariant="destructive"
-        isPending={isRestrictingVoiceAll}
+        isPending={isBlockingAllMics}
       />
     </div>
   );

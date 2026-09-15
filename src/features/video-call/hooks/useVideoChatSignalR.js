@@ -160,20 +160,17 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
       }
     })
 
-    // Ticket 05: batch variant (restrict-voice-all) — one message carries a
-    // list; fan it out as individual restriction events for consumers.
+    // Ticket 05: batch variant (Block All Mics) — one message carries the
+    // list of members it restricted.
     connection.on("ParticipantRestrictionsChanged", (changedRoomId, restrictions) => {
       if (
         (String(changedRoomId) === String(roomId) ||
           Number(changedRoomId) === Number(roomId)) &&
         onEventReceivedRef.current
       ) {
-        const list = Array.isArray(restrictions) ? restrictions : []
-        list.forEach((restriction) => {
-          onEventReceivedRef.current("ParticipantRestrictionChanged", {
-            roomId: changedRoomId,
-            restriction,
-          })
+        onEventReceivedRef.current("ParticipantRestrictionsChanged", {
+          roomId: changedRoomId,
+          restrictions: Array.isArray(restrictions) ? restrictions : [],
         })
       }
     })

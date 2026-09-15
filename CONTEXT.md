@@ -21,6 +21,10 @@ _Avoid_: Owner (when you mean the authority set)
 **Co-host**:
 A member delegated a subset of the Host's powers inside one Room. Cannot assign other Co-hosts.
 
+**Session**:
+One live run of a Room, from the moment it starts until it ends. A Room outlives its Sessions.
+_Avoid_: Room (when you mean one run), meeting
+
 ## Moderation vocabulary
 
 **Moderation Action**:
@@ -30,6 +34,14 @@ _Avoid_: Toggle, setting, policy
 **Room Policy**:
 A persistent on/off setting of a Room that changes what members may do, and holds until changed.
 _Avoid_: Action, command
+
+**Participant Restriction**:
+A restriction on one member of a Room — their chat, their voice, or both — that holds until the Host lifts it. Bounded by the Room, not by the session.
+_Avoid_: Ban (a heavier power that also blocks re-entry), Mute (a one-shot action that leaves no state)
+
+**Moderation Notice**:
+The message a member receives when the Host changes what they may do in a Room — a Moderation Action, a Participant Restriction, or the lifting of one. It reports something done to them, not something they attempted and failed at. Removal from the Room and the end of a live are not Moderation Notices: they end participation rather than limit a capability.
+_Avoid_: Error, alert
 
 **Raise Hand**:
 A member's signal that they want to speak. A member raises and lowers their own hand.

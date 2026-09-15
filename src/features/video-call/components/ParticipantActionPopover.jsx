@@ -250,11 +250,6 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       else if (type === "voice") await restrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
       else if (type === "unrestrict_chat") await unrestrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
       else if (type === "unrestrict_voice") await unrestrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
-      const actionMap = { chat: "CHAT_RESTRICTED", voice: "VOICE_RESTRICTED", unrestrict_chat: "CHAT_UNRESTRICTED", unrestrict_voice: "VOICE_UNRESTRICTED" }
-      try {
-        const payload = new TextEncoder().encode(JSON.stringify({ action: actionMap[type], targetId: String(targetAccountId), targetIdentity: String(participant.identity) }))
-        lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
-      } catch {}
       const msgMap = { chat: pl.successRestrictChat, voice: pl.successRestrictVoice, unrestrict_chat: pl.successUnrestrictChat, unrestrict_voice: pl.successUnrestrictVoice }
       toast.success(msgMap[type])
     } catch (err) {
