@@ -1168,18 +1168,18 @@ const GlobalCallContent = ({
           const shouldMute = data.muted !== false
           if (data.trackKind === "audio" && localParticipant) {
             localParticipant.setMicrophoneEnabled(!shouldMute)
-            toast.error(
-              shouldMute
-                ? (pl.hostMutedMic || "Host đã tắt mic của bạn.")
-                : (pl.hostUnmutedMic || "Host đã bật mic của bạn.")
-            )
+            const msg = shouldMute
+              ? (pl.hostMutedMic || "Host đã tắt mic của bạn.")
+              : (pl.hostUnmutedMic || "Host đã bật mic của bạn.")
+            if (shouldMute) toast.error(msg)
+            else toast.info(msg)
           } else if (data.trackKind === "video" && localParticipant) {
             localParticipant.setCameraEnabled(!shouldMute)
-            toast.error(
-              shouldMute
-                ? (pl.hostMutedCam || "Host đã tắt camera của bạn.")
-                : (pl.hostUnmutedCam || "Host đã bật camera của bạn.")
-            )
+            const msg = shouldMute
+              ? (pl.hostMutedCam || "Host đã tắt camera của bạn.")
+              : (pl.hostUnmutedCam || "Host đã bật camera của bạn.")
+            if (shouldMute) toast.error(msg)
+            else toast.info(msg)
           } else if (
             (data.trackKind === "screen" ||
               data.trackKind === "screen_share") &&
