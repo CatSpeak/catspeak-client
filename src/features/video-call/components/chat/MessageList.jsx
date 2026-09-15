@@ -2,7 +2,17 @@ import React, { useRef, useEffect, useState } from "react"
 import { ArrowDown } from "lucide-react"
 import MessageBubble from "./MessageBubble"
 
-const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
+const MessageList = ({
+  messages,
+  t,
+  emptyText,
+  onReplyTo,
+  onSendSuggestedSentence,
+  onLoadMoreSuggestions,
+  onSelectFollowUp,
+  onRetryAi,
+  isUserTyping = false,
+}) => {
   const scrollRef = useRef(null)
   const prevMessagesLength = useRef(0)
   const [showScrollBottom, setShowScrollBottom] = useState(false)
@@ -67,6 +77,11 @@ const MessageList = ({ messages, t, emptyText, onReplyTo }) => {
                   index={index}
                   t={t}
                   onReplyTo={onReplyTo}
+                  onSendSuggestedSentence={onSendSuggestedSentence}
+                  onLoadMoreSuggestions={onLoadMoreSuggestions}
+                  onSelectFollowUp={onSelectFollowUp}
+                  onRetryAi={onRetryAi}
+                  isUserTyping={isUserTyping}
                 />
               ))}
             </div>

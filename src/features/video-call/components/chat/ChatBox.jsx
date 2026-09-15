@@ -1,6 +1,7 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
+import { useAiSend } from "@/features/video-call/hooks/useAiSend"
 import MessageList from "./MessageList"
 import ChatInput from "./ChatInput"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
@@ -15,10 +16,20 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
     unreadAiChat,
     activeChatTab,
     setActiveChatTab,
+    room,
+    triggerStarterGreeting,
+    loadMoreMeetingSuggestions,
   } = useGlobalVideoCall()
 
-  const [aiReplyTarget, setAiReplyTarget] = React.useState(null)
-  const [roomReplyTarget, setRoomReplyTarget] = React.useState(null)
+  const { sendAiMessage } = useAiSend()
+  const [aiReplyTarget, setAiReplyTarget] = useState(null)
+  const [roomReplyTarget, setRoomReplyTarget] = useState(null)
+  const [isUserTyping, setIsUserTyping] = useState(false)
+
+  const roomTopic =
+    room?.topic ||
+    (Array.isArray(room?.topics) && room?.topics.length > 0 ? room?.topics[0] : null)
+  const roomLanguage = room?.languageType || room?.language || "en"
 
   // Bridge tab state → collapse state so useUnreadTracking works correctly
   useEffect(() => {
@@ -28,8 +39,19 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
     } else {
       setIsChatCollapsed(true)
       setIsAiCollapsed(false)
+      // FR-001, BR-004: Trigger starter greeting once per session when opening AI tab
+      if (typeof triggerStarterGreeting === "function") {
+        triggerStarterGreeting(roomTopic, roomLanguage)
+      }
     }
-  }, [activeChatTab, setIsChatCollapsed, setIsAiCollapsed])
+  }, [
+    activeChatTab,
+    setIsChatCollapsed,
+    setIsAiCollapsed,
+    triggerStarterGreeting,
+    roomTopic,
+    roomLanguage,
+  ])
 
   const roomLabel = t.rooms?.chatBox?.title || "Tin nhắn phòng"
   const aiLabel = t.rooms?.chatBox?.aiAssistant || "Trợ lý Cat Speak"
@@ -57,6 +79,31 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
     },
   ]
 
+  // Handler to auto-send a suggested sentence into the meeting room chat (FR-001)
+  const handleSendSuggestedSentence = (sentenceText) => {
+    if (!sentenceText) return
+    onSendMessage(sentenceText)
+  }
+
+  // Handler to load more suggestions from dataset (FR-007)
+  const handleLoadMoreSuggestions = () => {
+    if (typeof loadMoreMeetingSuggestions === "function") {
+      loadMoreMeetingSuggestions(roomTopic, roomLanguage)
+    }
+  }
+
+  // Handler when user clicks a follow-up question button (FR-002, FR-005)
+  const handleSelectFollowUp = (questionText) => {
+    if (!questionText) return
+    sendAiMessage(questionText, { isPrivateAi: true })
+  }
+
+  // Handler to retry a failed AI prompt (E-003)
+  const handleRetryAi = (promptText) => {
+    if (!promptText) return
+    sendAiMessage(promptText, { isPrivateAi: true })
+  }
+
   return (
     <div className={`relative flex h-full flex-col bg-white ${className}`}>
       {/* Tab Bar */}
@@ -81,6 +128,11 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
                 "Ask the AI by typing @public-ai or @private-ai in the chat."
               }
               onReplyTo={(msg) => setAiReplyTarget(msg)}
+              onSendSuggestedSentence={handleSendSuggestedSentence}
+              onLoadMoreSuggestions={handleLoadMoreSuggestions}
+              onSelectFollowUp={handleSelectFollowUp}
+              onRetryAi={handleRetryAi}
+              isUserTyping={isUserTyping}
             />
             <ChatInput
               onSendMessage={onSendMessage}
@@ -88,6 +140,7 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
               isAiInput={true}
               replyTarget={aiReplyTarget}
               onCancelReply={() => setAiReplyTarget(null)}
+              onTypingChange={setIsUserTyping}
             />
           </>
         )}

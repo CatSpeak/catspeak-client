@@ -51,6 +51,8 @@ const IDLE_VALUE = {
   startNewThread: () => {},
   continueThread: () => {},
   getConversationThread: () => [],
+  triggerStarterGreeting: () => {},
+  loadMoreMeetingSuggestions: () => {},
 
   isConnected: false,
   micOn: false,

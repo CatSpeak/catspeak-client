@@ -1,5 +1,5 @@
-import React, { useState, useRef, useCallback } from "react"
-import { Send, Smile, Sparkles } from "lucide-react"
+import React, { useState, useRef, useCallback, useEffect } from "react"
+import { Send, Smile, Sparkles, Lock, Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import Switch from "@/shared/components/ui/inputs/Switch"
@@ -26,9 +26,10 @@ const ChatInput = ({
   isAiInput,
   replyTarget,
   onCancelReply,
+  onTypingChange,
 }) => {
   const [message, setMessage] = useState("")
-  const [isPrivateAi, setIsPrivateAi] = useState(false)
+  const [isPrivateAi, setIsPrivateAi] = useState(true)
   const [isMultiline, setIsMultiline] = useState(false)
   const sendingRef = useRef(false)
   const editableRef = useRef(null)
@@ -441,6 +442,24 @@ const ChatInput = ({
     }
   }
 
+  React.useEffect(() => {
+    onTypingChange?.(hasContent)
+  }, [hasContent, onTypingChange])
+
+  const roomLangType = room?.languageType || room?.language || "English"
+  const langDisplayName =
+    roomLangType === "en" || roomLangType === "English"
+      ? (t.rooms?.languages?.en || "tiếng Anh")
+      : roomLangType === "zh" || roomLangType === "Chinese"
+        ? (t.rooms?.languages?.zh || "tiếng Trung")
+        : roomLangType === "ja" || roomLangType === "Japanese"
+          ? (t.rooms?.languages?.ja || "tiếng Nhật")
+          : (roomLangType || "tiếng Anh")
+
+  const aiDynamicPlaceholder =
+    t.rooms?.chatBox?.aiPlaceholderDynamic?.replace("{language}", langDisplayName) ||
+    `Hỏi gì cũng được về ${langDisplayName}...`
+
   const placeholderText = !isConnected
     ? t.rooms?.chatBox?.connectingPlaceholder || "Connecting..."
     : isAiInput
@@ -448,9 +467,7 @@ const ChatInput = ({
         ? t.rooms?.chatBox?.aiGeneratingPlaceholder || "AI is typing..."
         : replyTarget?.from?.isSystem
           ? "Reply to system..."
-          : isPrivateAi
-            ? t.rooms?.chatBox?.privateAiPlaceholder || "Ask AI (Private)"
-            : t.rooms?.chatBox?.publicAiPlaceholder || "Ask AI (Public)"
+          : aiDynamicPlaceholder
       : t.rooms?.chatBox?.inputPlaceholder || "Type a message..."
 
   const isInputDisabled = !isConnected || (isAiInput && isAiBlocked)
@@ -488,17 +505,17 @@ const ChatInput = ({
             : "border-border bg-gray-50/60"
         }`}
       >
-        {/* Left AI Switch Control */}
+        {/* Left AI Switch Control (FR-006) */}
         {isAiInput && (
           <div
-            className={`flex items-center gap-1.5 pr-1 shrink-0 ${
+            className={`flex items-center gap-1.5 pr-1.5 shrink-0 select-none ${
               isMultiline
                 ? "col-start-1 row-start-2 self-center"
                 : "col-start-1 row-start-1 h-full"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="origin-left flex items-center justify-center">
+            <div className="flex items-center gap-1.5">
               <Switch
                 checked={isPrivateAi}
                 disabled={!isHost && !isMemberPrivateAiAllowed}
@@ -514,6 +531,25 @@ const ChatInput = ({
                 }}
                 colorClass="peer-checked:bg-red-700"
               />
+              <div
+                className="flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer"
+                onClick={() => {
+                  if (!isHost && !isMemberPrivateAiAllowed && !isPrivateAi) return
+                  setIsPrivateAi(!isPrivateAi)
+                }}
+              >
+                {isPrivateAi ? (
+                  <span className="flex items-center gap-0.5 text-gray-700">
+                    <Lock size={12} className="text-gray-500" />
+                    <span>{t.rooms?.chatBox?.privateModeLabel || "Riêng tư"}</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-0.5 text-red-700 font-semibold">
+                    <Globe size={12} className="text-red-700" />
+                    <span>{t.rooms?.chatBox?.publicModeLabel || "Công khai"}</span>
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}

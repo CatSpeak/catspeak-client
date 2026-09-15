@@ -28,6 +28,8 @@ export const useChatManager = ({
     startNewThread,
     continueThread,
     getConversationThread,
+    triggerStarterGreeting,
+    loadMoreMeetingSuggestions,
   } = useAiMessages(lkRoom, currentUserId, participants)
 
   const [chatPublicAi] = useChatPublicAiMutation()
@@ -70,6 +72,8 @@ export const useChatManager = ({
     startNewThread,
     continueThread,
     getConversationThread,
+    triggerStarterGreeting,
+    loadMoreMeetingSuggestions,
     chatPublicAi,
     chatPrivateAi,
     unreadRoomChat,
