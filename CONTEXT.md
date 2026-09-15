@@ -51,11 +51,26 @@ Temporarily mutes every member's microphone. Members may turn it back on themsel
 _Avoid_: Mute all mics (ambiguous with Block All Mics)
 
 **Block All Mics**:
-Mutes every member's microphone and stops them turning it back on. One-way and session-scoped.
+Mutes every member's microphone and stops them turning it back on. One-way and room-scoped, not session-scoped: the restriction is stored on the Room and survives the end of a Session.
 _Avoid_: Restrict Voice All, Mute all (both ambiguous)
+
+**Restrict Chat**:
+Stops one member sending messages to the Room. Holds until lifted, and is bounded by the Room.
+
+**Stop Member Share**:
+Ends one member's ongoing screen share. A one-shot action with no on/off state.
+_Avoid_: Manage Student Share (that is the policy that allows sharing at all)
 
 **Camera Off All**:
 Turns off every member's camera.
 
 **Lower All Hands**:
 Clears the raised-hand signal of every member currently raising a hand.
+
+**Session Recording**:
+A Co-host recording the Session itself. Distinct from Member Recording: this one is the recorder's own capability, not a permission granted to members.
+_Avoid_: Record (when you mean the member-facing policy), Recording
+
+**Member Recording**:
+A Room Policy: whether members may record the Session themselves. Set by the Host or a Co-host, and read by every member.
+_Avoid_: Session Recording, Recording

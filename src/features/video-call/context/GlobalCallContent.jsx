@@ -861,7 +861,7 @@ const GlobalCallContent = ({
           return
         }
 
-        // Ticket 03: room-scope "tắt camera toàn bộ" (camera_toggle).
+        // Room-scope "tắt camera toàn bộ" (camera_off_all).
         if (data.action === "CAMERA_OFF_ALL") {
           const senderIsMe =
             (data.senderId != null && String(data.senderId) === currentAccId) ||

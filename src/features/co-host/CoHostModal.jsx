@@ -12,15 +12,22 @@ import {
   Info,
   Mic,
   Video,
+  VideoOff,
   MicOff,
   Volume2,
+  VolumeX,
   UserX,
   UserCheck,
   Lock,
   Power,
   MonitorUp,
+  MonitorOff,
   Sliders,
   Disc,
+  CircleDot,
+  Hand,
+  Gavel,
+  MessageSquareOff,
   AlertTriangle,
 } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
@@ -52,11 +59,32 @@ const PERMISSION_ICONS = {
   allow_self_camera: Video,
   remove_student: UserX,
   admit_waiting: UserCheck,
+  camera_off_all: VideoOff,
+  block_all_mics: VolumeX,
+  lower_all_hands: Hand,
+  restrict_chat: MessageSquareOff,
+  restrict_voice: MicOff,
+  stop_member_share: MonitorOff,
   lock_class: Lock,
   end_class: Power,
   share_screen: MonitorUp,
   manage_student_share: Sliders,
+  allow_member_recording: CircleDot,
   record: Disc,
+}
+
+/** Icon theo nhóm quyền */
+const GROUP_ICONS = {
+  student_management: Users,
+  member_moderation: Gavel,
+  room_security: ShieldCheck,
+}
+
+/** Key i18n tiêu đề nhóm cho phòng Custom (roomType="room") */
+const GROUP_ROOM_TITLE_KEYS = {
+  student_management: "groupStudentManagementRoom",
+  member_moderation: "groupMemberModerationRoom",
+  room_security: "groupRoomSecurity",
 }
 
 /**
@@ -621,24 +649,18 @@ const CoHostModal = ({
         {/* 2 Nhóm quyền xếp dạng thẻ Grid */}
         <div className="grid sm:grid-cols-2 gap-3.5">
           {CO_HOST_GROUPS.map((g) => {
-            const isStudentGroup = g.id === "student_management"
             const groupCount = counts[g.id] ?? 0
             const isFullGroup = groupCount === g.total
             const isPartialGroup = groupCount > 0 && !isFullGroup
-            const GroupIcon = isStudentGroup ? Users : ShieldCheck
+            const GroupIcon = GROUP_ICONS[g.id] || ShieldCheck
             // Room (Custom) uses member/room copy, Class keeps student/class copy.
             const groupTitle =
-              roomType === "room"
-                ? g.id === "room_security"
-                  ? t.rooms?.coHost?.groupRoomSecurity ||
-                    CO_HOST_GROUP_TITLES_ROOM[g.id] ||
-                    t.rooms?.coHost?.groups?.[g.id] ||
-                    g.title
-                  : t.rooms?.coHost?.groupStudentManagementRoom ||
-                    CO_HOST_GROUP_TITLES_ROOM[g.id] ||
-                    t.rooms?.coHost?.groups?.[g.id] ||
-                    g.title
-                : t.rooms?.coHost?.groups?.[g.id] || g.title
+              (roomType === "room"
+                ? t.rooms?.coHost?.[GROUP_ROOM_TITLE_KEYS[g.id]] ||
+                  CO_HOST_GROUP_TITLES_ROOM[g.id]
+                : null) ||
+              t.rooms?.coHost?.groups?.[g.id] ||
+              g.title
 
             return (
               <div

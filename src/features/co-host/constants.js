@@ -1,8 +1,10 @@
-// Co-host permission catalog (ticket 02 adds allow_self_camera).
-// 12 codes shared with backend (cath + instructor). Grouped per SRS image 3:
-// "Phân công Co-host" popup: Quản lý học viên (7) + Bảo mật lớp học (5) for Class.
-// Custom room (roomType="room") reuses same 12 codes with room/member copy
-// (Quản lý thành viên + Bảo mật phòng). See getPermissionLabel/getGroupTitle.
+// Co-host permission catalog.
+// 19 codes shared with backend `cath-service` (the instructor API is a thin
+// proxy that forwards them verbatim). Each code maps to exactly one in-room
+// capability: granting "lower all hands" no longer implies "mute all".
+// Grouped as: Quản lý học viên (7) + Kiểm duyệt (6) + Bảo mật lớp học (6) for
+// Class. Custom room (roomType="room") reuses the same codes with room/member
+// copy. See getPermissionLabel/getGroupTitle.
 
 export const CO_HOST_PERMISSIONS = {
   MIC_TOGGLE: "mic_toggle",
@@ -12,10 +14,17 @@ export const CO_HOST_PERMISSIONS = {
   ALLOW_SELF_CAMERA: "allow_self_camera",
   REMOVE_STUDENT: "remove_student",
   ADMIT_WAITING: "admit_waiting",
+  CAMERA_OFF_ALL: "camera_off_all",
+  BLOCK_ALL_MICS: "block_all_mics",
+  LOWER_ALL_HANDS: "lower_all_hands",
+  RESTRICT_CHAT: "restrict_chat",
+  RESTRICT_VOICE: "restrict_voice",
+  STOP_MEMBER_SHARE: "stop_member_share",
   LOCK_CLASS: "lock_class",
   END_CLASS: "end_class",
   SHARE_SCREEN: "share_screen",
   MANAGE_STUDENT_SHARE: "manage_student_share",
+  ALLOW_MEMBER_RECORDING: "allow_member_recording",
   RECORD: "record",
 }
 
@@ -27,10 +36,17 @@ export const CO_HOST_ALL = [
   CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA,
   CO_HOST_PERMISSIONS.REMOVE_STUDENT,
   CO_HOST_PERMISSIONS.ADMIT_WAITING,
+  CO_HOST_PERMISSIONS.CAMERA_OFF_ALL,
+  CO_HOST_PERMISSIONS.BLOCK_ALL_MICS,
+  CO_HOST_PERMISSIONS.LOWER_ALL_HANDS,
+  CO_HOST_PERMISSIONS.RESTRICT_CHAT,
+  CO_HOST_PERMISSIONS.RESTRICT_VOICE,
+  CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE,
   CO_HOST_PERMISSIONS.LOCK_CLASS,
   CO_HOST_PERMISSIONS.END_CLASS,
   CO_HOST_PERMISSIONS.SHARE_SCREEN,
   CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE,
+  CO_HOST_PERMISSIONS.ALLOW_MEMBER_RECORDING,
   CO_HOST_PERMISSIONS.RECORD,
 ]
 
@@ -63,14 +79,28 @@ export const CO_HOST_GROUPS = [
     ],
   },
   {
+    id: "member_moderation",
+    title: "Kiểm duyệt thành viên",
+    total: 6,
+    permissions: [
+      CO_HOST_PERMISSIONS.CAMERA_OFF_ALL,
+      CO_HOST_PERMISSIONS.BLOCK_ALL_MICS,
+      CO_HOST_PERMISSIONS.LOWER_ALL_HANDS,
+      CO_HOST_PERMISSIONS.RESTRICT_CHAT,
+      CO_HOST_PERMISSIONS.RESTRICT_VOICE,
+      CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE,
+    ],
+  },
+  {
     id: "room_security",
     title: "Bảo mật lớp học",
-    total: 5,
+    total: 6,
     permissions: [
       CO_HOST_PERMISSIONS.LOCK_CLASS,
       CO_HOST_PERMISSIONS.END_CLASS,
       CO_HOST_PERMISSIONS.SHARE_SCREEN,
       CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE,
+      CO_HOST_PERMISSIONS.ALLOW_MEMBER_RECORDING,
       CO_HOST_PERMISSIONS.RECORD,
     ],
   },
@@ -84,11 +114,19 @@ export const CO_HOST_PERMISSION_LABELS = {
   [CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA]: "Cho phép học viên tự bật camera",
   [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: "Xóa học viên khỏi lớp học",
   [CO_HOST_PERMISSIONS.ADMIT_WAITING]: "Duyệt học viên từ phòng chờ",
+  [CO_HOST_PERMISSIONS.CAMERA_OFF_ALL]: "Tắt toàn bộ camera của học viên",
+  [CO_HOST_PERMISSIONS.BLOCK_ALL_MICS]: "Chặn mic toàn bộ học viên",
+  [CO_HOST_PERMISSIONS.LOWER_ALL_HANDS]: "Hạ tay toàn bộ học viên",
+  [CO_HOST_PERMISSIONS.RESTRICT_CHAT]: "Hạn chế chat của học viên",
+  [CO_HOST_PERMISSIONS.RESTRICT_VOICE]: "Hạn chế voice của học viên",
+  [CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE]:
+    "Dừng chia sẻ màn hình của học viên",
   [CO_HOST_PERMISSIONS.LOCK_CLASS]: "Khóa lớp học",
   [CO_HOST_PERMISSIONS.END_CLASS]: "Kết thúc lớp học",
   [CO_HOST_PERMISSIONS.SHARE_SCREEN]: "Chia sẻ màn hình/cửa sổ",
   [CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE]:
     "Quản lý quyền chia sẻ màn hình/cửa sổ của học viên",
+  [CO_HOST_PERMISSIONS.ALLOW_MEMBER_RECORDING]: "Cho phép học viên ghi hình",
   [CO_HOST_PERMISSIONS.RECORD]: "Bắt đầu/dừng ghi hình",
 }
 
@@ -102,11 +140,19 @@ export const CO_HOST_PERMISSION_LABELS_ROOM = {
   [CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA]: "Cho phép thành viên tự bật camera",
   [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: "Xóa thành viên khỏi phòng",
   [CO_HOST_PERMISSIONS.ADMIT_WAITING]: "Duyệt thành viên từ phòng chờ",
+  [CO_HOST_PERMISSIONS.CAMERA_OFF_ALL]: "Tắt toàn bộ camera của thành viên",
+  [CO_HOST_PERMISSIONS.BLOCK_ALL_MICS]: "Chặn mic toàn bộ thành viên",
+  [CO_HOST_PERMISSIONS.LOWER_ALL_HANDS]: "Hạ tay toàn bộ thành viên",
+  [CO_HOST_PERMISSIONS.RESTRICT_CHAT]: "Hạn chế chat của thành viên",
+  [CO_HOST_PERMISSIONS.RESTRICT_VOICE]: "Hạn chế voice của thành viên",
+  [CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE]:
+    "Dừng chia sẻ màn hình của thành viên",
   [CO_HOST_PERMISSIONS.LOCK_CLASS]: "Khóa phòng",
   [CO_HOST_PERMISSIONS.END_CLASS]: "Kết thúc phòng",
   [CO_HOST_PERMISSIONS.SHARE_SCREEN]: "Chia sẻ màn hình/cửa sổ",
   [CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE]:
     "Quản lý quyền chia sẻ màn hình/cửa sổ của thành viên",
+  [CO_HOST_PERMISSIONS.ALLOW_MEMBER_RECORDING]: "Cho phép thành viên ghi hình",
   [CO_HOST_PERMISSIONS.RECORD]: "Bắt đầu/dừng ghi hình",
 }
 
@@ -147,6 +193,39 @@ export const CO_HOST_PERMISSION_META = {
     isSensitive: false,
     helper: "Duyệt học viên từ phòng chờ vào lớp",
   },
+  [CO_HOST_PERMISSIONS.CAMERA_OFF_ALL]: {
+    icon: "VideoOff",
+    isSensitive: false,
+    helper: "Tắt camera của toàn bộ học viên đang bật",
+  },
+  [CO_HOST_PERMISSIONS.BLOCK_ALL_MICS]: {
+    icon: "MicOff",
+    isSensitive: true,
+    severity: "danger",
+    helper: "Tắt mic toàn bộ và không cho học viên tự bật lại",
+  },
+  [CO_HOST_PERMISSIONS.LOWER_ALL_HANDS]: {
+    icon: "Hand",
+    isSensitive: false,
+    helper: "Hạ tay của toàn bộ học viên đang giơ tay",
+  },
+  [CO_HOST_PERMISSIONS.RESTRICT_CHAT]: {
+    icon: "MessageSquareOff",
+    isSensitive: true,
+    severity: "warning",
+    helper: "Không cho học viên gửi tin nhắn trong phòng",
+  },
+  [CO_HOST_PERMISSIONS.RESTRICT_VOICE]: {
+    icon: "MicOff",
+    isSensitive: true,
+    severity: "warning",
+    helper: "Tắt mic của học viên và không cho tự bật lại",
+  },
+  [CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE]: {
+    icon: "MonitorOff",
+    isSensitive: false,
+    helper: "Dừng phần chia sẻ màn hình đang diễn ra của học viên",
+  },
   [CO_HOST_PERMISSIONS.LOCK_CLASS]: {
     icon: "Lock",
     isSensitive: true,
@@ -167,7 +246,12 @@ export const CO_HOST_PERMISSION_META = {
   [CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE]: {
     icon: "Sliders",
     isSensitive: false,
-    helper: "Quản lý quyền chia sẻ màn hình của học viên",
+    helper: "Bật/tắt quyền cho học viên chia sẻ màn hình",
+  },
+  [CO_HOST_PERMISSIONS.ALLOW_MEMBER_RECORDING]: {
+    icon: "Disc",
+    isSensitive: false,
+    helper: "Bật/tắt quyền cho học viên tự ghi hình",
   },
   [CO_HOST_PERMISSIONS.RECORD]: {
     icon: "Disc",
@@ -189,18 +273,33 @@ export const CO_HOST_PERMISSION_HELPERS_ROOM = {
   [CO_HOST_PERMISSIONS.REMOVE_STUDENT]: "Mời thành viên rời khỏi phòng",
   [CO_HOST_PERMISSIONS.ADMIT_WAITING]:
     "Duyệt thành viên từ phòng chờ vào phòng",
+  [CO_HOST_PERMISSIONS.CAMERA_OFF_ALL]:
+    "Tắt camera của toàn bộ thành viên đang bật",
+  [CO_HOST_PERMISSIONS.BLOCK_ALL_MICS]:
+    "Tắt mic toàn bộ và không cho thành viên tự bật lại",
+  [CO_HOST_PERMISSIONS.LOWER_ALL_HANDS]:
+    "Hạ tay của toàn bộ thành viên đang giơ tay",
+  [CO_HOST_PERMISSIONS.RESTRICT_CHAT]:
+    "Không cho thành viên gửi tin nhắn trong phòng",
+  [CO_HOST_PERMISSIONS.RESTRICT_VOICE]:
+    "Tắt mic của thành viên và không cho tự bật lại",
+  [CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE]:
+    "Dừng phần chia sẻ màn hình đang diễn ra của thành viên",
   [CO_HOST_PERMISSIONS.LOCK_CLASS]: "Khóa phòng, không cho thêm người vào",
   [CO_HOST_PERMISSIONS.END_CLASS]: "Đóng phòng và kết thúc phiên hoạt động",
   [CO_HOST_PERMISSIONS.SHARE_SCREEN]:
     "Chia sẻ màn hình hoặc cửa sổ trong phòng",
   [CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE]:
-    "Quản lý quyền chia sẻ màn hình của thành viên",
+    "Bật/tắt quyền cho thành viên chia sẻ màn hình",
+  [CO_HOST_PERMISSIONS.ALLOW_MEMBER_RECORDING]:
+    "Bật/tắt quyền cho thành viên tự ghi hình",
   [CO_HOST_PERMISSIONS.RECORD]: "Bắt đầu hoặc dừng ghi hình trong phòng",
 }
 
 // Room group titles + preset/header fallbacks (VI).
 export const CO_HOST_GROUP_TITLES_ROOM = {
   student_management: "Quản lý thành viên",
+  member_moderation: "Kiểm duyệt thành viên",
   room_security: "Bảo mật phòng",
 }
 
