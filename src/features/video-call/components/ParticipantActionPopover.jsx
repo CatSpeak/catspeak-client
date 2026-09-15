@@ -151,7 +151,14 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
 export const ParticipantActionPopover = ({ participant, children }) => {
   const { t } = useLanguage()
   const pl = t.rooms?.videoCall?.participantList || {}
-  const { room, user, id: roomId, lkRoom, isHost: isCurrentHostFromContext } = useVideoCallContext()
+  const {
+    room,
+    user,
+    id: roomId,
+    lkRoom,
+    isHost: isCurrentHostFromContext,
+    restrictionByAccountId,
+  } = useVideoCallContext()
   const isCurrentHost = isCurrentHostFromContext || isRoomHost(room, user?.accountId)
   const [popoverOpen, setPopoverOpen] = useState(false)
 
@@ -171,6 +178,14 @@ export const ParticipantActionPopover = ({ participant, children }) => {
   const targetAccountId = meta.accountId || participant?.identity
   const participantName =
     participant?.name || participant?.identity || String(targetAccountId ?? "")
+
+  // Ticket 02: only offer the action that matches the target's current state,
+  // so "restrict" does not sit next to "unrestrict" for the same channel.
+  const targetRestriction = targetAccountId != null
+    ? restrictionByAccountId?.[String(targetAccountId)] || {}
+    : {}
+  const isTargetChatRestricted = targetRestriction.isChatRestricted === true
+  const isTargetVoiceRestricted = targetRestriction.isVoiceRestricted === true
 
   // ── Co-host in-live (ticket 01): host phân công / thay thế ngay trong live ──
   // Ticket 02: fetch cho mọi thành viên để co-host biết quyền media của mình.
@@ -407,38 +422,44 @@ export const ParticipantActionPopover = ({ participant, children }) => {
 
       {canRestrict && (
         <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
-          <button
-            onClick={() => setRestrictConfirm({ open: true, type: "chat" })}
-            disabled={isRestrictingChat}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <MessageSquareOff size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.restrictChat}</span>
-          </button>
-          <button
-            onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_chat" })}
-            disabled={isUnrestrictingChat}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <MessageSquareOff size={18} className="text-emerald-600 shrink-0" />
-            <span>{pl.unrestrictChat}</span>
-          </button>
-          <button
-            onClick={() => setRestrictConfirm({ open: true, type: "voice" })}
-            disabled={isRestrictingVoice}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <Mic size={18} className="text-neutral-500 shrink-0" />
-            <span>{pl.restrictVoice}</span>
-          </button>
-          <button
-            onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_voice" })}
-            disabled={isUnrestrictingVoice}
-            className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
-          >
-            <Mic size={18} className="text-emerald-600 shrink-0" />
-            <span>{pl.unrestrictVoice}</span>
-          </button>
+          {!isTargetChatRestricted ? (
+            <button
+              onClick={() => setRestrictConfirm({ open: true, type: "chat" })}
+              disabled={isRestrictingChat}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            >
+              <MessageSquareOff size={18} className="text-neutral-500 shrink-0" />
+              <span>{pl.restrictChat}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_chat" })}
+              disabled={isUnrestrictingChat}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            >
+              <MessageSquareOff size={18} className="text-emerald-600 shrink-0" />
+              <span>{pl.unrestrictChat}</span>
+            </button>
+          )}
+          {!isTargetVoiceRestricted ? (
+            <button
+              onClick={() => setRestrictConfirm({ open: true, type: "voice" })}
+              disabled={isRestrictingVoice}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            >
+              <Mic size={18} className="text-neutral-500 shrink-0" />
+              <span>{pl.restrictVoice}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setRestrictConfirm({ open: true, type: "unrestrict_voice" })}
+              disabled={isUnrestrictingVoice}
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors text-left w-full disabled:opacity-50"
+            >
+              <Mic size={18} className="text-emerald-600 shrink-0" />
+              <span>{pl.unrestrictVoice}</span>
+            </button>
+          )}
         </div>
       )}
 

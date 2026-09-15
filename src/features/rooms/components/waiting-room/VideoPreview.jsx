@@ -147,7 +147,7 @@ const VideoPreview = ({
   }, [micOn])
 
   return (
-    <div className="relative w-full max-w-[440px] lg:max-w-none flex flex-col items-center rounded-xl border border-[#F5F5F5] bg-[#FCFCFC]">
+    <div className="relative w-full max-w-[min(440px,42dvh)] lg:max-w-none flex flex-col items-center rounded-xl border border-[#F5F5F5] bg-[#FCFCFC]">
       {/* Mobile portrait: 3/4 vertical for face cam; desktop/tablet keeps 16:9 */}
       <div className="relative w-full aspect-[3/4] md:aspect-video overflow-hidden rounded-xl max-h-[65vh] md:max-h-none">
         {showIphoneDiag && (
@@ -194,7 +194,7 @@ const VideoPreview = ({
       </div>
 
       {/* Controls Overlay */}
-      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
+      <div className="mt-1.5 flex max-w-full flex-row flex-wrap justify-center gap-2.5 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:mt-0 min-[426px]:-translate-x-1/2 min-[426px]:gap-3">
         <button
           onClick={onToggleMic}
           className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${

@@ -700,6 +700,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         {switchModal}
         <PreJoinWaitingGate
           apiRoomId={apiRoomId}
+          roomName={room?.name}
           onAdmitted={() => {
             approvalAdmittedRef.current = true
             handleJoinClick({ skipApproval: true })

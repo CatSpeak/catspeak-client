@@ -92,10 +92,10 @@ const WaitingScreen = ({
         room={room}
         participants={participants}
         participantCount={participantCount}
-        className="block lg:hidden mb-4"
+        className="block lg:hidden mb-3 sm:mb-4"
       />
 
-      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 w-full items-center">
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-4 lg:gap-8 w-full items-center">
         {/* Left Column: Video Preview & Nickname */}
         <div className="flex flex-col items-center w-full lg:col-span-7 gap-3">
           <VideoPreview
@@ -119,7 +119,7 @@ const WaitingScreen = ({
         </div>
 
         {/* Right Column: Room Details & Action Container */}
-        <div className="flex flex-col items-center justify-center w-full lg:col-span-5 h-full gap-6">
+        <div className="flex flex-col items-center justify-center w-full lg:col-span-5 h-full gap-3 lg:gap-6">
           {/* Desktop Only: Room name, topic & participants preview */}
           <RoomInformation
             session={session}

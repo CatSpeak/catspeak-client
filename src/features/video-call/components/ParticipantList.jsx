@@ -32,6 +32,10 @@ import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  markLocalEndLive,
+  resetLocalEndLive,
+} from "@/features/video-call/utils/endLiveIntent"
 import { ParticipantActionPopover } from "./ParticipantActionPopover"
 import PolicyRow from "./settings/PolicyRow"
 import BannedListTab from "./settings/BannedListTab"
@@ -647,9 +651,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const confirmEndLive = async () => {    setEndLiveConfirmOpen(false)
     if (!roomId) return
+    // Suppress the participant-facing "host ended" toast for this client while
+    // the backend tears the room down (see endLiveIntent).
+    markLocalEndLive()
     try {
       await endLiveApi(roomId).unwrap()
     } catch (err) {
+      resetLocalEndLive()
       toast.error(
         resolveCoHostErrorMessage(
           err,
@@ -922,7 +930,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const [restrictVoiceAllConfirmOpen, setRestrictVoiceAllConfirmOpen] = React.useState(false)
 
   const handleLowerAllHands = () => {
-    if (raisedHandParticipants.length === 0) {
+    if (totalRaisedHands === 0) {
       toast(pl.noHandsRaised)
       return
     }
@@ -946,7 +954,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       }
       // Also lower for each participant via metadata clear (client will sync via data channel)
       const loweredCount =
-        res?.data?.loweredCount ?? res?.loweredCount ?? raisedHandParticipants.length
+        res?.data?.loweredCount ?? res?.loweredCount ?? totalRaisedHands
       toast.success(pl.successLowerAllHands.replace("{count}", String(loweredCount)))
     } catch (err) {
       toast.error(resolveCoHostErrorMessage(err, t, pl.forbiddenLowerHands))
@@ -1113,30 +1121,6 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       {/* Tab 1: Members */}
       {activeTab === "members" && (
         <div className="flex flex-col flex-1 min-h-0">
-          {/* Contextual Hand-Raised Banner (Only when hands are raised) */}
-          {totalRaisedHands > 0 && (
-            <div className="mx-2.5 mt-2 flex items-center justify-between gap-2 rounded-xl border border-amber-200/90 bg-amber-50/80 px-2.5 py-1.5 shrink-0">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-100 text-amber-700 shrink-0">
-                  <Hand size={13} />
-                </div>
-                <span className="text-xs font-semibold text-amber-950 truncate">
-                  {totalRaisedHands} {pl.raisedHandsSection?.toLowerCase() || "đang giơ tay"}
-                </span>
-              </div>
-              {(canMuteAll || isHost) && (
-                <button
-                  type="button"
-                  onClick={handleLowerAllHands}
-                  className="inline-flex h-6.5 items-center gap-1 rounded-lg bg-amber-600 hover:bg-amber-700 active:scale-[0.98] px-2 text-[11px] font-semibold text-white transition-all shadow-xs shrink-0"
-                >
-                  <Hand size={11} />
-                  <span>{pl.lowerAllHands}</span>
-                </button>
-              )}
-            </div>
-          )}
-
           {/* Integrated Search Input (only when room has > 5 participants or active query) */}
           {(participants.length > 5 || searchQuery) && (
             <div className="px-2.5 pt-2 shrink-0">
@@ -1163,19 +1147,76 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             </div>
           )}
 
-          {/* Subheader: Host Mute All action */}
-          {canMuteAll && (
-            <div className="flex items-center justify-end px-3 py-1.5 shrink-0 border-b border-neutral-100 bg-neutral-50/40">
-              <button
-                type="button"
-                onClick={handleMuteAll}
-                disabled={isMutingAll}
-                className="inline-flex items-center gap-1.5 h-7 px-2.5 text-xs font-semibold text-neutral-700 hover:text-cath-red-700 bg-white hover:bg-red-50 border border-neutral-200/90 hover:border-red-200 rounded-lg transition-all active:scale-[0.98] disabled:opacity-50"
-                title={pl.muteAll}
-              >
-                <MicOff size={13} className="text-neutral-500 hover:text-cath-red-700 shrink-0" />
-                <span>{pl.muteAll}</span>
-              </button>
+          {/* Thao tác nâng cao — luôn hiển thị, lưới 2 cột */}
+          {(isHost || canMuteAll || canCameraOffAll) && (
+            <div className="px-2.5 pt-2 shrink-0">
+              <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50/50 p-2">
+                <span className="px-0.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                  {pl.advancedActions || "Thao tác nâng cao"}
+                </span>
+                <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+                  {(isHost || canMuteAll) && (
+                    <button
+                      type="button"
+                      onClick={handleMuteAll}
+                      disabled={isMutingAll}
+                      title={pl.muteAll}
+                      aria-label={pl.muteAll}
+                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <MicOff size={13} className="shrink-0" />
+                      <span className="truncate">{pl.muteAll}</span>
+                    </button>
+                  )}
+
+                  {canCameraOffAll && (
+                    <button
+                      type="button"
+                      onClick={() => setCameraOffAllConfirmOpen(true)}
+                      disabled={isCameraOffAll}
+                      title={pl.cameraOffAll}
+                      aria-label={pl.cameraOffAll}
+                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <VideoOff size={13} className="shrink-0" />
+                      <span className="truncate">{pl.cameraOffAll}</span>
+                    </button>
+                  )}
+
+                  {(isHost || canMuteAll) && (
+                    <button
+                      type="button"
+                      onClick={handleLowerAllHands}
+                      disabled={totalRaisedHands === 0}
+                      title={pl.lowerAllHands}
+                      aria-label={pl.lowerAllHands}
+                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Hand size={13} className="shrink-0" />
+                      <span className="truncate">{pl.lowerAllHands}</span>
+                      {totalRaisedHands > 0 && (
+                        <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-100 px-1 text-[10px] font-bold text-amber-800">
+                          {totalRaisedHands}
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+                  {(isHost || canMuteAll) && (
+                    <button
+                      type="button"
+                      onClick={handleRestrictVoiceAll}
+                      disabled={isRestrictingVoiceAll}
+                      title={pl.restrictVoiceAll}
+                      aria-label={pl.restrictVoiceAll}
+                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <ShieldAlert size={13} className="shrink-0" />
+                      <span className="truncate">{pl.restrictVoiceAll}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -1410,99 +1451,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             </div>
           </div>
 
-          {/* Group 3: Thao tác nâng cao */}
-          {(canMuteAll || isHost || canCameraOffAll) && (
-            <div className="flex flex-col gap-2">
-              <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
-                Thao tác nâng cao
-              </span>
-              {(canMuteAll || isHost) && (
-                <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
-                  <div className="flex items-start gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
-                      <MicOff size={16} />
-                    </div>
-                    <div className="flex flex-col gap-0.5 min-w-0">
-                      <span className="text-xs font-semibold text-orange-950">
-                        {isCustom
-                          ? pl.restrictVoiceAllRoom ||
-                            pl.restrictVoiceAll ||
-                            "Tắt mic tất cả thành viên"
-                          : pl.restrictVoiceAll}
-                      </span>
-                      <span className="text-[11px] text-orange-800/80 leading-relaxed">
-                        {isCustom
-                          ? pl.restrictVoiceAllDescRoom ||
-                            "Tắt mic và chặn tất cả thành viên tự bật lại mic."
-                          : pl.restrictVoiceAllDesc ||
-                            "Tắt mic và chặn tất cả học viên tự bật lại mic."}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleRestrictVoiceAll}
-                    disabled={isRestrictingVoiceAll}
-                    className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
-                  >
-                    <MicOff size={13} />
-                    <span>
-                      {isCustom
-                        ? pl.restrictVoiceAllRoom ||
-                          pl.restrictVoiceAll ||
-                          "Tắt mic tất cả thành viên"
-                        : pl.restrictVoiceAll}
-                    </span>
-                  </button>
-                </div>
-              )}
-
-              {/* Ticket 03: room-scope "tắt camera toàn bộ" (camera_toggle). */}
-              {canCameraOffAll && (
-                <div className="rounded-2xl border border-orange-200/90 bg-orange-50/40 p-3 flex flex-col gap-2.5">
-                  <div className="flex items-start gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-700 shrink-0 mt-0.5">
-                      <VideoOff size={16} />
-                    </div>
-                    <div className="flex flex-col gap-0.5 min-w-0">
-                      <span className="text-xs font-semibold text-orange-950">
-                        {isCustom
-                          ? pl.cameraOffAllRoom ||
-                            pl.cameraOffAll ||
-                            "Tắt camera tất cả thành viên"
-                          : pl.cameraOffAll || "Tắt camera tất cả học viên"}
-                      </span>
-                      <span className="text-[11px] text-orange-800/80 leading-relaxed">
-                        {isCustom
-                          ? pl.cameraOffAllDescRoom ||
-                            pl.cameraOffAllDesc ||
-                            "Tắt camera của tất cả thành viên trong phòng."
-                          : pl.cameraOffAllDesc ||
-                            "Tắt camera của tất cả học viên trong phòng."}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCameraOffAllConfirmOpen(true)}
-                    disabled={isCameraOffAll}
-                    className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] px-3 text-xs font-semibold text-white transition-all shadow-xs disabled:opacity-50"
-                  >
-                    <VideoOff size={13} />
-                    <span>
-                      {isCustom
-                        ? pl.cameraOffAllRoom ||
-                          pl.cameraOffAll ||
-                          "Tắt camera tất cả thành viên"
-                        : pl.cameraOffAll || "Tắt camera tất cả học viên"}
-                    </span>
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Group 4: Khu vực nguy hiểm */}
+          {/* Group 3: Khu vực nguy hiểm */}
           {canEndLive && (
             <div className="flex flex-col gap-2 pt-1 pb-4">
               <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-cath-red-700">
@@ -1609,7 +1558,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
         onClose={() => setLowerHandsConfirmOpen(false)}
         onConfirm={confirmLowerAllHands}
         title={pl.confirmLowerHandsTitle || pl.lowerAllHands}
-        message={pl.confirmLowerHands.replace("{count}", String(raisedHandParticipants.length))}
+        message={pl.confirmLowerHands.replace("{count}", String(totalRaisedHands))}
         confirmText={pl.lowerAllHands}
         confirmVariant="default"
         isPending={isLoweringHands}

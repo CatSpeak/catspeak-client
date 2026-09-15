@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { RoomEvent } from "livekit-client"
+import { RoomEvent, DisconnectReason } from "livekit-client"
 import { toast } from "react-hot-toast"
+import { consumeLocalEndLive } from "@/features/video-call/utils/endLiveIntent"
 import {
   leaveCall,
   enterBreakout,
@@ -344,16 +345,41 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
   useEffect(() => {
     if (!lkRoom) return
 
-    const handleDisconnected = () => {
+    const handleDisconnected = (reason) => {
+      // The client that tapped "End live" already got its own success toast.
+      const endedByThisClient = consumeLocalEndLive()
       dispatch(leaveCall())
       dispatch(roomsApi.util.invalidateTags(["Rooms"]))
       const navigateFn = getNavigate()
       const locationObj = getLocation()
       if (locationObj && locationObj.pathname.includes("/meet/")) {
         navigateFn(getCommunityPath(language), { replace: true })
-        if (closingRemainingSeconds !== null && closingRemainingSeconds <= 0) {
+
+        const createDate = callInfo?.roomData?.createDate
+        const duration = callInfo?.roomData?.duration
+        const timeExpired =
+          (closingRemainingSeconds !== null && closingRemainingSeconds <= 0) ||
+          (createDate &&
+            typeof duration === "number" &&
+            Date.now() >=
+              new Date(createDate).getTime() + duration * 60 * 1000)
+
+        if (timeExpired) {
           toast.error(
-            t?.rooms?.callEnded?.expiredToast ?? "Cuộc gọi đã kết thúc do hết thời lượng phòng",
+            t?.rooms?.callEnded?.expiredToast ??
+              "Cuộc gọi đã kết thúc do hết thời lượng phòng",
+            { id: "room-ended" },
+          )
+        } else if (
+          !endedByThisClient &&
+          reason === DisconnectReason.ROOM_DELETED
+        ) {
+          // Host/co-host ended the live for everyone: the backend deleted the
+          // room, so the members' only signal is this disconnect.
+          toast.error(
+            t?.rooms?.videoCall?.participantList?.hostEndedSession ??
+              "Host đã kết thúc buổi live.",
+            { id: "room-ended", duration: 5000 },
           )
         }
       }
@@ -363,7 +389,7 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
     return () => {
       lkRoom.off(RoomEvent.Disconnected, handleDisconnected)
     }
-  }, [lkRoom, dispatch, closingRemainingSeconds, language, t])
+  }, [lkRoom, dispatch, closingRemainingSeconds, language, t, callInfo])
 
   return {
     closingRemainingSeconds,
