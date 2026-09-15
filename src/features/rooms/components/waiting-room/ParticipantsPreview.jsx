@@ -17,7 +17,7 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
   return (
     <div className="flex w-full flex-col items-center">
       {/* Participant List - Overlapping Avatars */}
-      <div className="mb-2 flex flex-row items-center justify-center">
+      <div className="mb-1.5 sm:mb-2 flex flex-row items-center justify-center">
         {visibleParticipants.map((p, index) => (
           <div key={p.accountId || index} title={p.username} className={`relative ${index !== 0 ? "-ml-3" : ""}`}>
             <Avatar

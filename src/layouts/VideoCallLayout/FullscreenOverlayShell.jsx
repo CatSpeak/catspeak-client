@@ -22,7 +22,7 @@ const FullscreenOverlayShell = ({
     >
       <div className="fixed inset-0 bg-[#111111]/40 blur-sm" />
 
-      <div className="relative z-50 w-full p-5 flex justify-start shrink-0">
+      <div className="relative z-50 w-full p-3 sm:p-5 flex justify-start shrink-0">
         <button
           onClick={onBack}
           className="group flex items-center gap-2 px-4 py-2.5 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-md border border-white/10 text-white transition-all duration-300 shadow-sm"
@@ -36,7 +36,7 @@ const FullscreenOverlayShell = ({
       </div>
 
       <div
-        className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center p-5 ${contentClassName}`}
+        className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-5 ${contentClassName}`}
       >
         <FluentCard
           className={`shadow-2xl w-full ${maxWidthClass} items-center ${cardClassName}`}
