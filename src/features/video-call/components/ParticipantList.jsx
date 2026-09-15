@@ -32,6 +32,10 @@ import Avatar from "@/shared/components/ui/Avatar"
 import ListItem from "@/shared/components/ui/ListItem"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost, isCustomRoom } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  markLocalEndLive,
+  resetLocalEndLive,
+} from "@/features/video-call/utils/endLiveIntent"
 import { ParticipantActionPopover } from "./ParticipantActionPopover"
 import PolicyRow from "./settings/PolicyRow"
 import BannedListTab from "./settings/BannedListTab"
@@ -647,9 +651,13 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   const confirmEndLive = async () => {    setEndLiveConfirmOpen(false)
     if (!roomId) return
+    // Suppress the participant-facing "host ended" toast for this client while
+    // the backend tears the room down (see endLiveIntent).
+    markLocalEndLive()
     try {
       await endLiveApi(roomId).unwrap()
     } catch (err) {
+      resetLocalEndLive()
       toast.error(
         resolveCoHostErrorMessage(
           err,

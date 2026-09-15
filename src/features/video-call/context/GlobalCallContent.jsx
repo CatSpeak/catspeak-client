@@ -990,6 +990,7 @@ const GlobalCallContent = ({
         // creates a brand-new session; room/class state untouched).
         if (data.action === "ROOM_ENDED") {
           toast.error(pl.hostEndedSession || "Host đã kết thúc buổi live.", {
+            id: "room-ended",
             duration: 5000,
           })
           try {
