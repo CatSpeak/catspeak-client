@@ -1,4 +1,5 @@
 import { socialApi } from "./socialApi"
+import { maskBody } from "@/shared/utils/moderation"
 import { updatePostInCaches } from "./utils/postsCacheUtils"
 
 export const profilePostsApi = socialApi.injectEndpoints({
@@ -47,19 +48,24 @@ export const profilePostsApi = socialApi.injectEndpoints({
       ],
     }),
     createPost: builder.mutation({
-      query: (formData) => ({
-        url: "/Post",
-        method: "POST",
-        body: formData,
-      }),
+      // [Moderation] Che ★ title/content trong FormData trước khi đăng.
+      queryFn: async (formData, api, extraOptions, baseQuery) =>
+        baseQuery({
+          url: "/Post",
+          method: "POST",
+          body: await maskBody(api, formData),
+        }),
       invalidatesTags: ["Post", "PostMedia"],
     }),
     updatePost: builder.mutation({
-      query: ({ postId, formData }) => ({
-        url: `/Post/${postId}`,
-        method: "PUT",
-        body: formData,
-      }),
+      // [Moderation] Sửa bài cũng phải duyệt lại — nếu không thì đăng sạch rồi sửa
+      // thành nội dung tục là đi vòng được qua lớp kiểm duyệt.
+      queryFn: async ({ postId, formData }, api, extraOptions, baseQuery) =>
+        baseQuery({
+          url: `/Post/${postId}`,
+          method: "PUT",
+          body: await maskBody(api, formData),
+        }),
       invalidatesTags: ["Post", "PostMedia"],
       async onQueryStarted(
         { postId },
