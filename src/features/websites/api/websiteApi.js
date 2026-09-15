@@ -473,6 +473,11 @@ const resources = [
     lang: "ja",
     url: "https://www.mlcjapanese.co.jp/",
   },
+  {
+    id: "corodomo",
+    lang: "ja",
+    url: "https://corodomo.com/",
+  },
 
   // 3. Luyện đọc hiểu & Dokkai
 
@@ -531,6 +536,11 @@ const resources = [
     id: "hansha-dojo",
     lang: "ja",
     url: "https://gametiengnhat.onhat.vn/games/hansha-dojo/",
+  },
+  {
+    id: "wakamono",
+    lang: "ja",
+    url: "https://gametiengnhat.onhat.vn/games/wakamono/",
   },
 
   // 10. Dành cho trẻ em / Nhập môn
