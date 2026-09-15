@@ -822,6 +822,8 @@ export default {
       cancel: "Hủy yêu cầu",
       cancelSuccess: "Đã hủy yêu cầu vào phòng.",
       cancelledHint: "Yêu cầu đã hủy. Bạn có thể gõ cửa lại.",
+      back: "Quay lại",
+      waitingElapsed: "Đang chờ {time}",
     },
     webviewBlock: {
       title: "Mở trong trình duyệt",

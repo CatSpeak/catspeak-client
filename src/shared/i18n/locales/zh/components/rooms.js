@@ -791,6 +791,8 @@ export default {
       cancel: "取消请求",
       cancelSuccess: "已取消入房请求。",
       cancelledHint: "请求已取消，您可以再次敲门。",
+      back: "返回",
+      waitingElapsed: "等待 {time}",
     },
     webviewBlock: {
       title: "请在浏览器中打开",

@@ -845,6 +845,8 @@ export default {
       cancel: "Cancel request",
       cancelSuccess: "Waiting request cancelled.",
       cancelledHint: "Request cancelled. You can knock again.",
+      back: "Back",
+      waitingElapsed: "Waiting {time}",
     },
     webviewBlock: {
       title: "Open in Browser",

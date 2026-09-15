@@ -812,6 +812,8 @@ export default {
       cancel: "リクエストをキャンセル",
       cancelSuccess: "参加リクエストをキャンセルしました。",
       cancelledHint: "リクエストをキャンセルしました。もう一度ノックできます。",
+      back: "戻る",
+      waitingElapsed: "待機中 {time}",
     },
     webviewBlock: {
       title: "ブラウザで開く",
