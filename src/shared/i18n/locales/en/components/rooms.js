@@ -876,8 +876,13 @@ export default {
     },
     inviteParticipant: "Invite participant",
     sendInvite: "Send invite",
+    inviteSubtitle: "Send a join invite to your friends",
     inviteDescription:
-      "Enter the email address of the person you want to invite to this room. They will receive a notification with a link to join.",
+      "Choose the friends you want to invite to this room. They will receive a notification with a link to join.",
+    inviteSelectedTitle: "Selected",
+    inviteEmptyHint: "Select at least one friend to send an invite.",
+    inviteReadyHint: "Ready to invite {{count}} friend(s).",
+    inviteRemove: "Remove {{name}}",
   },
   notifications: {
     inviteSent: "Invite sent",

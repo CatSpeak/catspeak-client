@@ -853,7 +853,13 @@ export default {
     },
     inviteParticipant: "Mời tham gia phòng",
     sendInvite: "Gửi lời mời",
-    inviteDescription: "Nhập địa chỉ email của người bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
+    inviteSubtitle: "Gửi lời mời tham gia đến bạn bè của bạn",
+    inviteDescription:
+      "Chọn bạn bè bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia.",
+    inviteSelectedTitle: "Đã chọn",
+    inviteEmptyHint: "Chọn ít nhất một người bạn để gửi lời mời.",
+    inviteReadyHint: "Sẵn sàng gửi lời mời đến {{count}} người bạn.",
+    inviteRemove: "Bỏ chọn {{name}}",
   },
   notifications: {
     inviteSent: "Đã gửi lời mời",

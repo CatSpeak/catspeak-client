@@ -843,8 +843,13 @@ export default {
     },
     inviteParticipant: "参加者を招待",
     sendInvite: "招待を送信",
+    inviteSubtitle: "友達に参加の招待を送る",
     inviteDescription:
-      "このルームに招待したい人のメールアドレスを入力してください。参加リンクのある通知が届きます。",
+      "このルームに招待したい友達を選択してください。参加リンク付きの通知が届きます。",
+    inviteSelectedTitle: "選択中",
+    inviteEmptyHint: "招待を送るには少なくとも1人の友達を選択してください。",
+    inviteReadyHint: "{{count}} 人の友達に招待を送る準備ができました。",
+    inviteRemove: "{{name}} を削除",
   },
   notifications: {
     inviteSent: "招待を送信しました",

@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Send, X } from "lucide-react"
+import { Check, Send, UserPlus, Users, X } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import InvititeDropdown from "@/shared/components/ui/InvititeDropdown"
 import Avatar from "@/shared/components/ui/Avatar"
@@ -112,54 +112,107 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
     }
   }
 
+  const title = t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"
+  const selectedCount = selectedAccountIds.length
+  const hasSelection = selectedCount > 0
+
+  const readyHint =
+    t.rooms?.videoCall?.inviteReadyHint ||
+    "Sẵn sàng gửi lời mời đến {{count}} người bạn."
+
   return (
     <Modal
       open={open}
       onClose={handleModalClose}
-      title={t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"}
-      size="sm"
+      ariaLabel={title}
+      showCloseButton
       fullScreenOnMobile={false}
+      className="md:max-w-lg rounded-3xl"
+      headerClassName="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 border-b border-gray-100"
+      title={
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cath-red-700 to-cath-red-500 text-white shadow-sm ring-4 ring-red-50">
+            <UserPlus size={20} className="stroke-[2.2]" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 leading-tight">
+              {title}
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5 truncate">
+              {t.rooms?.videoCall?.inviteSubtitle ||
+                "Gửi lời mời tham gia đến bạn bè của bạn"}
+            </p>
+          </div>
+        </div>
+      }
+      bodyClassName="px-5 sm:px-6 py-5 flex flex-col gap-4 flex-1 overflow-y-auto"
+      footerClassName="px-5 sm:px-6 py-4 bg-gray-50/70 border-t border-gray-100"
       footer={
-        <div className="flex justify-end gap-3 w-full">
-          <PillButton onClick={handleModalClose} variant="secondary">
-            {t.cancel || "Hủy"}
-          </PillButton>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full">
+          <div className="hidden sm:flex items-center gap-2 min-w-0 text-xs">
+            {hasSelection ? (
+              <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100">
+                  <Check size={11} strokeWidth={3} />
+                </span>
+                {readyHint.replace("{{count}}", String(selectedCount))}
+              </span>
+            ) : (
+              <span className="text-gray-400 truncate">
+                {t.rooms?.videoCall?.inviteEmptyHint ||
+                  "Chọn ít nhất một người bạn để gửi lời mời."}
+              </span>
+            )}
+          </div>
 
-          <PillButton
-            onClick={handleInvite}
-            disabled={isInviting || selectedAccountIds.length === 0}
-            variant="primary"
-            startIcon={<Send size={18} />}
-            className="!border-transparent !text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isInviting
-              ? t.common?.sending || "Đang gửi..."
-              : `${t.rooms?.videoCall?.sendInvite || "Gửi lời mời"}${
-                  selectedAccountIds.length > 0
-                    ? ` (${selectedAccountIds.length})`
-                    : ""
-                }`}
-          </PillButton>
+          <div className="flex items-center justify-end gap-2.5 shrink-0">
+            <PillButton onClick={handleModalClose} variant="secondary">
+              {t.cancel || "Hủy"}
+            </PillButton>
+
+            <PillButton
+              onClick={handleInvite}
+              disabled={isInviting || !hasSelection}
+              loading={isInviting}
+              loadingText={t.common?.sending || "Đang gửi..."}
+              variant="primary"
+              startIcon={<Send size={18} />}
+              className="min-w-[132px]"
+            >
+              {`${t.rooms?.videoCall?.sendInvite || "Gửi lời mời"}${
+                hasSelection ? ` (${selectedCount})` : ""
+              }`}
+            </PillButton>
+          </div>
         </div>
       }
     >
-      <div className="flex flex-col gap-4 pb-2">
-        <p className="text-sm text-gray-600">
-          {t.rooms?.videoCall?.inviteDescription ||
-            "Chọn bạn bè bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia."}
-        </p>
+      <p className="text-sm leading-relaxed text-gray-600">
+        {t.rooms?.videoCall?.inviteDescription ||
+          "Chọn bạn bè bạn muốn mời vào phòng này. Họ sẽ nhận được thông báo kèm liên kết để tham gia."}
+      </p>
 
-        <div className="flex flex-col gap-2">
-          <InvititeDropdown
-            mode="friends"
-            value={selectedAccountIds}
-            onChange={handleSelectChange}
-            disabled={isInviting}
-          />
+      <div className="flex flex-col gap-2.5">
+        <InvititeDropdown
+          mode="friends"
+          value={selectedAccountIds}
+          onChange={handleSelectChange}
+          disabled={isInviting}
+        />
 
-          {/* Selected Friends Tags */}
-          {selectedAccountIds.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1 max-h-[100px] overflow-y-auto">
+        {hasSelection ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-gray-500">
+                {t.rooms?.videoCall?.inviteSelectedTitle || "Đã chọn"}
+              </span>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-50 text-cath-red-700 border border-red-100">
+                {selectedCount}
+              </span>
+            </div>
+
+            {/* Chip collection reflows with flex-wrap so labels are never clipped */}
+            <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
               {selectedAccountIds.map((val) => {
                 const user = selectedUsers[val]
                 const displayName =
@@ -167,7 +220,7 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
                 return (
                   <span
                     key={val}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-[#990011] border border-red-100"
+                    className="group inline-flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full text-xs font-medium bg-white text-gray-800 border border-gray-200 shadow-xs transition-colors hover:border-cath-red-200 hover:bg-red-50/60"
                   >
                     <Avatar
                       src={
@@ -176,25 +229,37 @@ const InviteParticipantModal = ({ open, onClose, roomId }) => {
                         user?.meetingAvatarUrl
                       }
                       name={displayName}
-                      size={16}
+                      size={20}
                       clickable={false}
                     />
-                    <span className="max-w-[120px] truncate">
+                    <span className="max-w-[120px] truncate font-semibold">
                       {displayName}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleRemoveSelected(val)}
-                      className="hover:text-red-900 transition-colors ml-0.5"
+                      aria-label={(t.rooms?.videoCall?.inviteRemove ||
+                        "Bỏ chọn {{name}}").replace("{{name}}", displayName)}
+                      className="ml-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-100 hover:text-cath-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
                     >
-                      <X size={12} />
+                      <X size={12} strokeWidth={2.5} />
                     </button>
                   </span>
                 )
               })}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 rounded-2xl border border-dashed border-gray-200 bg-gray-50/60 px-3.5 py-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-400">
+              <Users size={16} />
+            </div>
+            <p className="text-xs leading-relaxed text-gray-500">
+              {t.rooms?.videoCall?.inviteEmptyHint ||
+                "Chọn ít nhất một người bạn để gửi lời mời."}
+            </p>
+          </div>
+        )}
       </div>
     </Modal>
   )

@@ -820,7 +820,13 @@ export default {
     },
     inviteParticipant: "邀请参加房间",
     sendInvite: "发送邀请",
-    inviteDescription: "输入您想邀请参加此房间的人的电子邮件地址。他们将收到带有链接的通知以加入。",
+    inviteSubtitle: "向你的好友发送加入邀请",
+    inviteDescription:
+      "选择你想邀请进入此房间的好友。他们将收到带有加入链接的通知。",
+    inviteSelectedTitle: "已选择",
+    inviteEmptyHint: "请至少选择一位好友以发送邀请。",
+    inviteReadyHint: "准备向 {{count}} 位好友发送邀请。",
+    inviteRemove: "移除 {{name}}",
   },
   notifications: {
     inviteSent: "已发送邀请",
