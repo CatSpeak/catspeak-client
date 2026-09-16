@@ -1,13 +1,42 @@
 import React, { useMemo, useState } from "react"
 import { toast } from "react-hot-toast"
 import { CheckCircle2, Crown, Plus, UserPlus } from "lucide-react"
+import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { useGetBannedParticipantsQuery } from "@/store/api/roomsApi"
+import { useGetFriendsQuery } from "@/store/api/social/friendshipApi"
 import CoHostModal from "./CoHostModal"
 import CoHostBadge from "./CoHostBadge"
 import { resolveCoHostErrorMessage } from "./errors"
+
+const mapFriendCandidate = (item) => {
+  const friend = item?.friend || item?.user || item || {}
+  const accountId = friend.accountId ?? friend.id ?? friend.userId ?? item?.accountId
+  if (accountId == null) return null
+  return {
+    accountId,
+    name: friend.username || friend.name || friend.nickname || friend.email || "",
+    email: friend.email || "",
+    avatar:
+      friend.avatarImageUrl || friend.avatarUrl || friend.meetingAvatarUrl || "",
+  }
+}
+
+const extractBannedIds = (payload) => {
+  const list = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.data)
+      ? payload.data
+      : Array.isArray(payload?.data?.data)
+        ? payload.data.data
+        : []
+  return list
+    .map((item) => item?.accountId ?? item?.bannedAccountId ?? item?.id)
+    .filter((id) => id != null)
+}
 
 /**
  * Reusable co-host manager (ticket 01).
@@ -22,11 +51,14 @@ import { resolveCoHostErrorMessage } from "./errors"
  * - pending flags
  */
 const CoHostManager = ({
+  roomId,
   roomName = "",
   roomType = "room",
   variant = "default",
   coHost,
   candidates = [],
+  enableFriendSearch = false,
+  excludeAccountIds = [],
   isTeacher = false,
   onAssign,
   onUpdate,
@@ -36,9 +68,23 @@ const CoHostManager = ({
   serverError = "",
 }) => {
   const { t } = useLanguage()
+  const { user } = useAuth()
   const [modalOpen, setModalOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [revokeSuccessOpen, setRevokeSuccessOpen] = useState(false)
+
+  const currentUserId = user?.accountId ?? user?.id ?? user?.userId
+
+  // Co-host candidates = people in the room (passed in) + the host's friends,
+  // so the host is no longer limited to whoever is currently present. The
+  // friends call returns the full list; the modal filters it as you type.
+  const { data: friendsData, isFetching: isFriendsFetching } =
+    useGetFriendsQuery(currentUserId, {
+      skip: !enableFriendSearch || !currentUserId || !modalOpen,
+    })
+  const { data: bannedData } = useGetBannedParticipantsQuery(roomId, {
+    skip: !enableFriendSearch || roomId == null || !modalOpen,
+  })
 
   const hasCoHost = coHost?.coHostAccountId != null
   const buttonLabel = hasCoHost ? (t.rooms?.coHost?.manage || "Quản lý co-host") : (t.rooms?.coHost?.add || "Thêm Co-host")
@@ -55,13 +101,93 @@ const CoHostManager = ({
     [coHost],
   )
 
-  // Compact variants resolve the assigned co-host from the candidate list.
+  const participantIds = useMemo(
+    () =>
+      new Set(
+        (candidates || [])
+          .map((c) => c?.accountId)
+          .filter((id) => id != null)
+          .map(String),
+      ),
+    [candidates],
+  )
+
+  // Merge sources with priority: assigned co-host > in-room participants >
+  // friends. Self, the host and banned accounts are filtered out of the pickable
+  // pool, but the current co-host is always kept so they stay manageable.
+  const mergedCandidates = useMemo(() => {
+    const excluded = new Set(
+      [...excludeAccountIds, currentUserId]
+        .filter((id) => id != null)
+        .map(String),
+    )
+    const banned = new Set(extractBannedIds(bannedData).map(String))
+    const byId = new Map()
+
+    const add = (candidate, { keep = false } = {}) => {
+      if (!candidate || candidate.accountId == null) return
+      const key = String(candidate.accountId)
+      if (byId.has(key)) return
+      if (!keep && (excluded.has(key) || banned.has(key))) return
+      byId.set(key, candidate)
+    }
+
+    if (coHost?.coHostAccountId != null) {
+      const assignedId = String(coHost.coHostAccountId)
+      add(
+        {
+          accountId: coHost.coHostAccountId,
+          name: coHost.coHostName || coHost.name || "",
+          email: coHost.coHostEmail || coHost.email || "",
+          avatar: coHost.coHostAvatarUrl || coHost.avatar || "",
+          inRoom: participantIds.has(assignedId),
+        },
+        { keep: true },
+      )
+    }
+
+    ;(candidates || []).forEach((p) =>
+      add({
+        accountId: p?.accountId,
+        name: p?.name ?? p?.nickname ?? p?.username ?? "",
+        email: p?.email ?? "",
+        avatar: p?.avatar ?? p?.avatarUrl ?? "",
+        inRoom: true,
+      }),
+    )
+
+    if (enableFriendSearch) {
+      const friends = Array.isArray(friendsData)
+        ? friendsData
+        : Array.isArray(friendsData?.data)
+          ? friendsData.data
+          : []
+      friends.forEach((item) => {
+        const friend = mapFriendCandidate(item)
+        if (friend) add({ ...friend, inRoom: false })
+      })
+    }
+
+    return [...byId.values()]
+  }, [
+    candidates,
+    coHost,
+    excludeAccountIds,
+    currentUserId,
+    bannedData,
+    participantIds,
+    enableFriendSearch,
+    friendsData,
+  ])
+
+  // Resolve the assigned co-host from DTO identity, so the card never falls
+  // back to a nameless "assigned" label when the account left the room.
   const assignedCandidate = useMemo(
     () =>
-      candidates.find(
+      mergedCandidates.find(
         (c) => String(c.accountId) === String(coHost?.coHostAccountId),
       ),
-    [candidates, coHost],
+    [mergedCandidates, coHost],
   )
   const assignedName =
     assignedCandidate?.name || coHost?.coHostName || coHost?.name || ""
@@ -130,7 +256,9 @@ const CoHostManager = ({
         title={t.rooms?.coHost?.assignCoHost || "Phân công Co-host"}
         roomName={roomName}
         roomType={roomType}
-        candidates={candidates}
+        candidates={mergedCandidates}
+        isSearchingCandidates={isFriendsFetching}
+        allowOutOfRoom={enableFriendSearch}
         initialAccountId={initialAccountId}
         initialPermissions={initialPermissions}
         confirmLabel={hasCoHost ? (t.rooms?.coHost?.saveChanges || "Lưu thay đổi") : (t.rooms?.coHost?.assignCoHost || "Phân công Co-host")}
