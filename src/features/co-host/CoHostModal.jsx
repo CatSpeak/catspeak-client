@@ -322,7 +322,7 @@ const CoHostModal = ({
           </div>
         </div>
       }
-      bodyClassName="px-5 sm:px-6 py-5 flex flex-col gap-4.5 flex-1 overflow-y-auto max-h-[75vh] scrollbar-thin scrollbar-thumb-gray-200"
+      bodyClassName="px-5 sm:px-6 py-5 flex flex-col gap-4 flex-1 overflow-y-auto max-h-[75vh] scrollbar-thin scrollbar-thumb-gray-200"
       footerClassName="px-6 py-4 bg-gray-50/70 border-t border-gray-100 flex items-center justify-between"
       footer={
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
@@ -363,7 +363,7 @@ const CoHostModal = ({
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-white text-[10px] font-bold shadow-xs">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-white text-[10px] font-bold shadow-sm">
               1
             </span>
             <p className="text-sm font-bold text-gray-900">
@@ -388,7 +388,7 @@ const CoHostModal = ({
         {selectedUser ? (
           confirmClear ? (
             /* XÁC NHẬN BỎ NGƯỜI DÙNG ĐANG CHỌN (SRS 1.1.3) */
-            <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-red-50/70 border border-red-200 shadow-xs animate-in fade-in-50 duration-150">
+            <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-red-50/70 border border-red-200 shadow-sm animate-in fade-in-50 duration-150">
               <div className="flex items-center gap-2.5 min-w-0">
                 <AlertTriangle size={16} className="text-red-600 shrink-0" />
                 <p className="text-xs font-semibold text-red-800 leading-snug">
@@ -414,10 +414,10 @@ const CoHostModal = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-gray-200/90 shadow-xs transition-all animate-in fade-in-50 duration-150">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-gray-200/90 shadow-sm transition-all animate-in fade-in-50 duration-150">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-xs">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-sm">
                     {getCandidateInitials(selectedUser)}
                   </div>
                   <span
@@ -473,7 +473,7 @@ const CoHostModal = ({
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus-within:border-gray-400 focus-within:ring-2 focus-within:ring-gray-200 transition-all shadow-xs">
+                <div className="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm focus-within:border-gray-400 focus-within:ring-2 focus-within:ring-gray-200 transition-all shadow-sm">
                   <Search size={16} className="text-gray-400 shrink-0" />
                   <input
                     ref={searchInputRef}
@@ -564,7 +564,7 @@ const CoHostModal = ({
         <div className="flex items-center justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-white text-[10px] font-bold shadow-xs">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cath-red-700 text-white text-[10px] font-bold shadow-sm">
                 2
               </span>
               <p className="text-sm font-bold text-gray-900">
@@ -585,7 +585,7 @@ const CoHostModal = ({
         </div>
 
         {/* Thanh Preset Thiết Lập Nhanh (Dedicated Toolbar) */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-2xl bg-gray-50/90 border border-gray-200/70 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 rounded-2xl bg-gray-50/90 border border-gray-200/70 shadow-sm">
           <div className="flex items-center gap-1.5 text-xs text-gray-600 font-semibold pl-0.5">
             <Sparkles size={13} className="text-amber-500 shrink-0" />
             <span>{t.rooms?.coHost?.quickPresetsLabel || "Gợi ý chọn nhanh:"}</span>
@@ -597,7 +597,7 @@ const CoHostModal = ({
               onClick={() => applyPreset("ASSISTANT")}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                 isAssistantPreset
-                  ? "bg-cath-red-700 border-cath-red-700 text-white shadow-xs font-bold hover:bg-cath-red-800"
+                  ? "bg-cath-red-700 border-cath-red-700 text-white shadow-sm font-bold hover:bg-cath-red-800"
                   : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
               }`}
               title={
@@ -625,7 +625,7 @@ const CoHostModal = ({
               onClick={() => applyPreset("ALL")}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                 isAllPreset
-                  ? "bg-cath-red-700 border-cath-red-700 text-white shadow-xs font-bold hover:bg-cath-red-800"
+                  ? "bg-cath-red-700 border-cath-red-700 text-white shadow-sm font-bold hover:bg-cath-red-800"
                   : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300"
               }`}
             >
@@ -646,8 +646,9 @@ const CoHostModal = ({
           </div>
         </div>
 
-        {/* 2 Nhóm quyền xếp dạng thẻ Grid */}
-        <div className="grid sm:grid-cols-2 gap-3.5">
+        {/* 3 nhóm quyền: thẻ full-width, quyền bên trong xếp 2 cột.
+            Tránh grid 2 cột ngoài vì nhóm thứ 3 sẽ để lại ô trống lớn. */}
+        <div className="flex flex-col gap-3">
           {CO_HOST_GROUPS.map((g) => {
             const groupCount = counts[g.id] ?? 0
             const isFullGroup = groupCount === g.total
@@ -665,10 +666,10 @@ const CoHostModal = ({
             return (
               <div
                 key={g.id}
-                className="rounded-2xl border border-gray-200 bg-white p-3.5 flex flex-col gap-2.5 shadow-xs transition-shadow hover:shadow-sm"
+                className="rounded-2xl border border-gray-200 bg-white p-3.5 flex flex-col gap-2.5 shadow-sm transition-shadow hover:shadow-md"
               >
                 {/* Header nhóm quyền kèm nút Toggle nhóm */}
-                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                <div className="flex items-center justify-between gap-3 pb-2 border-b border-gray-100">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="h-7 w-7 rounded-xl flex items-center justify-center shrink-0 border bg-gray-100 text-gray-700 border-gray-200/80">
                       <GroupIcon size={14} />
@@ -676,11 +677,8 @@ const CoHostModal = ({
                     <span className="text-xs font-bold text-gray-900 truncate">
                       {groupTitle}
                     </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full transition-colors ${
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
                         isFullGroup
                           ? "bg-red-50 text-cath-red-700 border border-red-200/70 font-bold"
                           : isPartialGroup
@@ -690,25 +688,26 @@ const CoHostModal = ({
                     >
                       {groupCount}/{g.total}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleGroup(g)}
-                      className="text-[11px] font-semibold text-gray-500 hover:text-cath-red-700 hover:underline transition-colors"
-                      title={
-                        isFullGroup
-                          ? (t.rooms?.coHost?.deselectGroup || "Bỏ nhóm")
-                          : (t.rooms?.coHost?.selectGroup || "Chọn nhóm")
-                      }
-                    >
-                      {isFullGroup
-                        ? (t.rooms?.coHost?.deselectGroup || "Bỏ nhóm")
-                        : (t.rooms?.coHost?.selectGroup || "Chọn nhóm")}
-                    </button>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleGroup(g)}
+                    className="text-[11px] font-semibold text-gray-500 hover:text-cath-red-700 hover:underline transition-colors shrink-0"
+                    title={
+                      isFullGroup
+                        ? (t.rooms?.coHost?.deselectGroup || "Bỏ nhóm")
+                        : (t.rooms?.coHost?.selectGroup || "Chọn nhóm")
+                    }
+                  >
+                    {isFullGroup
+                      ? (t.rooms?.coHost?.deselectGroup || "Bỏ nhóm")
+                      : (t.rooms?.coHost?.selectGroup || "Chọn nhóm")}
+                  </button>
                 </div>
 
                 {/* Danh sách từng quyền trong nhóm */}
-                <div className="flex flex-col gap-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                   {g.permissions.map((code) => {
                     const isChecked = permissions.includes(code)
                     const meta = CO_HOST_PERMISSION_META[code] || {}
@@ -740,8 +739,8 @@ const CoHostModal = ({
                         className={`flex items-start gap-2.5 p-2 rounded-xl cursor-pointer transition-all min-h-[44px] select-none border ${
                           isChecked
                             ? isDanger
-                              ? "bg-red-50/40 border-red-200/90 text-gray-900 shadow-2xs"
-                              : "bg-white border-gray-200/90 text-gray-900 shadow-2xs"
+                              ? "bg-red-50/40 border-red-200/90 text-gray-900 shadow-sm"
+                              : "bg-white border-gray-200/90 text-gray-900 shadow-sm"
                             : isDanger
                               ? "bg-transparent border-transparent hover:border-red-200 hover:bg-red-50/30 text-gray-700"
                               : "bg-transparent border-transparent hover:border-gray-200 hover:bg-gray-50/70 text-gray-700"
@@ -751,7 +750,7 @@ const CoHostModal = ({
                         <div
                           className={`mt-0.5 h-4 w-4 rounded-md flex items-center justify-center shrink-0 transition-all ${
                             isChecked
-                              ? "bg-cath-red-700 text-white shadow-xs"
+                              ? "bg-cath-red-700 text-white shadow-sm"
                               : "border border-gray-300 bg-white hover:border-gray-400"
                           }`}
                         >
@@ -812,7 +811,7 @@ const CoHostModal = ({
         </div>
 
         {/* Scope notice banner */}
-        <div className="rounded-2xl bg-slate-50 border border-slate-200/90 text-slate-700 text-xs px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-xs">
+        <div className="rounded-2xl bg-slate-50 border border-slate-200/90 text-slate-700 text-xs px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-1 rounded-lg bg-slate-200/70 text-slate-700 shrink-0">
               <Info size={15} />
@@ -834,7 +833,7 @@ const CoHostModal = ({
                     "Quyền của co-host chỉ áp dụng cho mỗi phòng."}
             </p>
           </div>
-          <span className="text-[11px] font-bold text-slate-700 bg-white px-2.5 py-0.5 rounded-full shrink-0 border border-slate-200 shadow-2xs">
+          <span className="text-[11px] font-bold text-slate-700 bg-white px-2.5 py-0.5 rounded-full shrink-0 border border-slate-200 shadow-sm">
             {permissionCountLabel}
           </span>
         </div>
