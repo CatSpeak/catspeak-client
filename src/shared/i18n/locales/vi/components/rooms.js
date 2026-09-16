@@ -790,6 +790,10 @@ export default {
         "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế.",
       chatRestrictedBadge: "Hạn chế chat",
       voiceRestrictedBadge: "Hạn chế voice",
+      hostBadge: "Chủ phòng",
+      coHostBadge: "Co-host",
+      emptyRoomTitle: "Chỉ có bạn trong phòng",
+      emptyRoomHint: "Mời thành viên tham gia để bắt đầu trò chuyện.",
     },
     waitingQueue: {
       tab: "Chờ",

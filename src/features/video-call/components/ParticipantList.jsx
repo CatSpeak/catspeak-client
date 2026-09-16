@@ -23,6 +23,8 @@ import {
   X,
   AlertTriangle,
   UserCheck,
+  Users,
+  SlidersHorizontal,
 } from "lucide-react"
 import { useIsSpeaking } from "@livekit/components-react"
 import { useDispatch } from "react-redux"
@@ -84,7 +86,7 @@ import { normalizeWaitingQueue } from "./waiting/waitingUtils"
  * A single row in the participant list.
  * Uses LiveKit Participant object properties directly.
  */
-const ParticipantItem = ({ participant }) => {
+const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
   const { t } = useLanguage()
   const {
     micOn: localMicOn,
@@ -124,6 +126,17 @@ const ParticipantItem = ({ participant }) => {
   const isChatRestricted = restriction.isChatRestricted === true
   const isVoiceRestricted = restriction.isVoiceRestricted === true
 
+  // Role chip: host wins over co-host; a participant can only be one of them.
+  const isThisHost =
+    accountId != null &&
+    hostAccountId != null &&
+    String(accountId) === String(hostAccountId)
+  const isThisCoHost =
+    !isThisHost &&
+    accountId != null &&
+    coHostAccountId != null &&
+    String(accountId) === String(coHostAccountId)
+
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
 
@@ -144,22 +157,36 @@ const ParticipantItem = ({ participant }) => {
     </div>
   )
 
+  const statusChip = (on, onTitle, offTitle, onIcon, offIcon) => (
+    <span
+      title={on ? onTitle : offTitle}
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors [&_svg]:!h-4 [&_svg]:!w-4 ${
+        on
+          ? "bg-cath-red-700/10 text-cath-red-700"
+          : "bg-neutral-100 text-neutral-400"
+      }`}
+    >
+      {on ? onIcon : offIcon}
+      <span className="sr-only">{on ? onTitle : offTitle}</span>
+    </span>
+  )
+
   const rightContent = (
-    <div className="flex items-center gap-2 shrink-0">
+    <div className="flex items-center gap-1.5 shrink-0">
       {isChatRestricted && (
         <span
           title={pl.chatRestrictedBadge || "Chat restricted"}
-          className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100"
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 [&_svg]:!h-3.5 [&_svg]:!w-3.5"
         >
-          <MessageSquareOff size={13} className="text-amber-600" />
+          <MessageSquareOff className="text-amber-600" />
         </span>
       )}
       {isVoiceRestricted && (
         <span
           title={pl.voiceRestrictedBadge || "Voice restricted"}
-          className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100"
+          className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 [&_svg]:!h-3.5 [&_svg]:!w-3.5"
         >
-          <ShieldAlert size={13} className="text-amber-600" />
+          <ShieldAlert className="text-amber-600" />
         </span>
       )}
       {isHandRaised && (
@@ -185,28 +212,14 @@ const ParticipantItem = ({ participant }) => {
           <Hand size={18} className="text-amber-500" aria-hidden="true" />
         </Motion.div>
       )}
-      <span title={isMicOn ? pl.micOn : pl.micOff}>
-        {isMicOn ? (
-          <Mic size={18} className="text-cath-red-700" aria-hidden="true" />
-        ) : (
-          <MicOff size={18} className="text-[#8E8E93]" aria-hidden="true" />
-        )}
-        <span className="sr-only">{isMicOn ? pl.micOn : pl.micOff}</span>
-      </span>
-      <span title={isCameraOn ? pl.camOn : pl.camOff}>
-        {isCameraOn ? (
-          <Video size={18} className="text-cath-red-700" aria-hidden="true" />
-        ) : (
-          <VideoOff size={18} className="text-[#8E8E93]" aria-hidden="true" />
-        )}
-        <span className="sr-only">{isCameraOn ? pl.camOn : pl.camOff}</span>
-      </span>
+      {statusChip(isMicOn, pl.micOn, pl.micOff, <Mic />, <MicOff />)}
+      {statusChip(isCameraOn, pl.camOn, pl.camOff, <Video />, <VideoOff />)}
       {!isLocal && (
         <div
           aria-hidden="true"
-          className="p-1 hover:bg-gray-200/60 rounded-lg text-gray-400 hover:text-gray-700 transition-colors ml-0.5"
+          className="ml-0.5 flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 transition-colors group-hover:bg-neutral-200/70 group-hover:text-neutral-600 [&_svg]:!h-4 [&_svg]:!w-4"
         >
-          <Ellipsis size={18} />
+          <Ellipsis />
         </div>
       )}
     </div>
@@ -222,24 +235,82 @@ const ParticipantItem = ({ participant }) => {
       leftContent={leftContent}
       rightContent={rightContent}
     >
-      <div className="flex items-center gap-1.5 truncate">
+      <div className="flex min-w-0 items-center gap-1.5">
         {accountId ? (
           <a
             href={`/profile/${accountId}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="truncate cursor-pointer hover:underline hover:text-cath-red-700 transition-colors"
+            className="min-w-0 truncate cursor-pointer hover:underline hover:text-cath-red-700 transition-colors"
           >
             {name} {isLocal && pl.youSuffix}
           </a>
         ) : (
-          <span className="truncate">
+          <span className="min-w-0 truncate">
             {name} {isLocal && pl.youSuffix}
+          </span>
+        )}
+        {isThisHost && (
+          <span className="shrink-0 rounded-md bg-cath-red-700/10 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-cath-red-700">
+            {pl.hostBadge || "Chủ phòng"}
+          </span>
+        )}
+        {isThisCoHost && (
+          <span className="shrink-0 rounded-md bg-amber-100 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-amber-700">
+            {pl.coHostBadge || "Co-host"}
           </span>
         )}
       </div>
     </ListItem>
+  )
+}
+
+/**
+ * One advanced moderation action rendered as a compact tile: a tinted icon
+ * badge plus a truncated label, so a 2-column grid reads as a toolbar rather
+ * than a stack of empty input fields.
+ */
+const ADVANCED_ACTION_TONES = {
+  danger: {
+    tile: "enabled:hover:border-red-200 enabled:hover:bg-red-50/40",
+    icon: "bg-red-50 text-cath-red-700",
+  },
+  warning: {
+    tile: "enabled:hover:border-amber-200 enabled:hover:bg-amber-50/40",
+    icon: "bg-amber-50 text-amber-600",
+  },
+}
+
+const AdvancedAction = ({
+  icon,
+  label,
+  title,
+  onClick,
+  disabled,
+  tone = "danger",
+  badge,
+}) => {
+  const toneStyles = ADVANCED_ACTION_TONES[tone] || ADVANCED_ACTION_TONES.danger
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title || label}
+      aria-label={label}
+      className={`inline-flex h-9 min-w-0 items-center gap-2 rounded-xl border border-neutral-200/90 bg-white pl-1.5 pr-2 text-left transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${toneStyles.tile}`}
+    >
+      <span
+        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg transition-colors [&_svg]:!h-3.5 [&_svg]:!w-3.5 ${toneStyles.icon}`}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-[11px] font-semibold text-neutral-700">
+        {label}
+      </span>
+      {badge}
+    </button>
   )
 }
 
@@ -279,6 +350,8 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   }
 
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [advancedOpen, setAdvancedOpen] = React.useState(true)
+  const prefersReducedMotion = useReducedMotion()
 
   const filteredParticipants = useMemo(() => {
     if (!searchQuery.trim()) return participants
@@ -1148,79 +1221,107 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             </div>
           )}
 
-          {/* Thao tác nâng cao — luôn hiển thị, lưới 2 cột */}
+          {/* Thao tác nâng cao — thu gọn được để nhường chỗ cho danh sách */}
           {(isHost ||
             canMuteAll ||
             canCameraOffAll ||
             canBlockAllMics ||
             canLowerAllHands) && (
             <div className="px-2.5 pt-2 shrink-0">
-              <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50/50 p-2">
-                <span className="px-0.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
-                  {pl.advancedActions || "Thao tác nâng cao"}
-                </span>
-                <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-                  {(isHost || canMuteAll) && (
-                    <button
-                      type="button"
-                      onClick={handleMuteAll}
-                      disabled={isMutingAll}
-                      title={pl.muteAll}
-                      aria-label={pl.muteAll}
-                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <MicOff size={13} className="shrink-0" />
-                      <span className="truncate">{pl.muteAll}</span>
-                    </button>
-                  )}
+              <div className="overflow-hidden rounded-2xl border border-neutral-200/80 bg-neutral-50/60">
+                <button
+                  type="button"
+                  onClick={() => setAdvancedOpen((v) => !v)}
+                  aria-expanded={advancedOpen}
+                  className="flex w-full items-center justify-between px-2.5 py-1.5 text-left transition-colors hover:bg-neutral-100/70"
+                >
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                    <SlidersHorizontal
+                      size={12}
+                      className="text-neutral-400"
+                      aria-hidden="true"
+                    />
+                    <span>{pl.advancedActions || "Thao tác nâng cao"}</span>
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    aria-hidden="true"
+                    className={`shrink-0 text-neutral-400 transition-transform duration-200 ${
+                      advancedOpen ? "" : "-rotate-90"
+                    }`}
+                  />
+                </button>
 
-                  {canCameraOffAll && (
-                    <button
-                      type="button"
-                      onClick={() => setCameraOffAllConfirmOpen(true)}
-                      disabled={isCameraOffAll}
-                      title={pl.cameraOffAll}
-                      aria-label={pl.cameraOffAll}
-                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                <AnimatePresence initial={false}>
+                  {advancedOpen && (
+                    <Motion.div
+                      key="advanced-actions"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={
+                        prefersReducedMotion
+                          ? { duration: 0 }
+                          : { duration: 0.18, ease: "easeInOut" }
+                      }
+                      className="overflow-hidden"
                     >
-                      <VideoOff size={13} className="shrink-0" />
-                      <span className="truncate">{pl.cameraOffAll}</span>
-                    </button>
-                  )}
+                      <div className="grid grid-cols-2 gap-1.5 px-2 pb-2">
+                        {(isHost || canMuteAll) && (
+                          <AdvancedAction
+                            icon={<MicOff aria-hidden="true" />}
+                            label={pl.muteAll}
+                            onClick={handleMuteAll}
+                            disabled={isMutingAll}
+                            tone="danger"
+                          />
+                        )}
 
-                  {(isHost || canLowerAllHands) && (
-                    <button
-                      type="button"
-                      onClick={handleLowerAllHands}
-                      disabled={totalRaisedHands === 0}
-                      title={pl.lowerAllHands}
-                      aria-label={pl.lowerAllHands}
-                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-amber-200 hover:bg-amber-50 hover:text-amber-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <Hand size={13} className="shrink-0" />
-                      <span className="truncate">{pl.lowerAllHands}</span>
-                      {totalRaisedHands > 0 && (
-                        <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-100 px-1 text-[10px] font-bold text-amber-800">
-                          {totalRaisedHands}
-                        </span>
-                      )}
-                    </button>
-                  )}
+                        {canCameraOffAll && (
+                          <AdvancedAction
+                            icon={<VideoOff aria-hidden="true" />}
+                            label={pl.cameraOffAll}
+                            onClick={() => setCameraOffAllConfirmOpen(true)}
+                            disabled={isCameraOffAll}
+                            tone="danger"
+                          />
+                        )}
 
-                  {(isHost || canBlockAllMics) && (
-                    <button
-                      type="button"
-                      onClick={handleBlockAllMics}
-                      disabled={isBlockingAllMics}
-                      title={pl.restrictVoiceAll}
-                      aria-label={pl.restrictVoiceAll}
-                      className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <ShieldAlert size={13} className="shrink-0" />
-                      <span className="truncate">{pl.restrictVoiceAll}</span>
-                    </button>
+                        {(isHost || canLowerAllHands) && (
+                          <AdvancedAction
+                            icon={<Hand aria-hidden="true" />}
+                            label={pl.lowerAllHands}
+                            title={
+                              totalRaisedHands === 0
+                                ? pl.noHandsRaised
+                                : pl.lowerAllHands
+                            }
+                            onClick={handleLowerAllHands}
+                            disabled={totalRaisedHands === 0}
+                            tone="warning"
+                            badge={
+                              totalRaisedHands > 0 ? (
+                                <span className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-amber-100 px-1 text-[10px] font-bold text-amber-800">
+                                  {totalRaisedHands}
+                                </span>
+                              ) : null
+                            }
+                          />
+                        )}
+
+                        {(isHost || canBlockAllMics) && (
+                          <AdvancedAction
+                            icon={<ShieldAlert aria-hidden="true" />}
+                            label={pl.restrictVoiceAll}
+                            onClick={handleBlockAllMics}
+                            disabled={isBlockingAllMics}
+                            tone="danger"
+                          />
+                        )}
+                      </div>
+                    </Motion.div>
                   )}
-                </div>
+                </AnimatePresence>
               </div>
             </div>
           )}
@@ -1255,7 +1356,11 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   {raisedHandParticipants.map((participant) => (
                     <li key={participant.identity} className="w-full rounded-xl bg-amber-50/30">
                       <ParticipantActionPopover participant={participant}>
-                        <ParticipantItem participant={participant} />
+                        <ParticipantItem
+                          participant={participant}
+                          hostAccountId={room?.creatorId}
+                          coHostAccountId={coHost?.coHostAccountId}
+                        />
                       </ParticipantActionPopover>
                     </li>
                   ))}
@@ -1280,13 +1385,45 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                   {otherParticipants.map((participant) => (
                     <li key={participant.identity} className="w-full">
                       <ParticipantActionPopover participant={participant}>
-                        <ParticipantItem participant={participant} />
+                        <ParticipantItem
+                          participant={participant}
+                          hostAccountId={room?.creatorId}
+                          coHostAccountId={coHost?.coHostAccountId}
+                        />
                       </ParticipantActionPopover>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
+
+            {/* Empty state: bạn là người duy nhất trong phòng */}
+            {!searchQuery &&
+              raisedHandParticipants.length === 0 &&
+              otherParticipants.length === 0 && (
+                <div className="flex flex-col items-center justify-center gap-2 px-6 py-12 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-neutral-100 text-neutral-400">
+                    <Users size={22} aria-hidden="true" />
+                  </div>
+                  <span className="text-xs font-semibold text-neutral-700">
+                    {pl.emptyRoomTitle || "Chỉ có bạn trong phòng"}
+                  </span>
+                  <span className="text-[11px] leading-relaxed text-neutral-500">
+                    {pl.emptyRoomHint ||
+                      "Mời thành viên tham gia để bắt đầu trò chuyện."}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsInviteModalOpen(true)}
+                    className="mt-1 inline-flex h-8 items-center gap-1.5 rounded-lg bg-cath-red-700 px-3 text-xs font-semibold text-white transition-all hover:bg-cath-red-800 active:scale-[0.98]"
+                  >
+                    <UserPlus size={14} aria-hidden="true" />
+                    <span>
+                      {t.rooms?.videoCall?.inviteParticipant || "Mời tham gia phòng"}
+                    </span>
+                  </button>
+                </div>
+              )}
           </div>
         </div>
       )}

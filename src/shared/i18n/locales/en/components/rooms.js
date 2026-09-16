@@ -813,6 +813,10 @@ export default {
         "You are voice-restricted. Please wait for the Host to lift it.",
       chatRestrictedBadge: "Chat restricted",
       voiceRestrictedBadge: "Voice restricted",
+      hostBadge: "Host",
+      coHostBadge: "Co-host",
+      emptyRoomTitle: "You're the only one here",
+      emptyRoomHint: "Invite members to start the conversation.",
     },
     waitingQueue: {
       tab: "Waiting",
