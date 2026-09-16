@@ -89,7 +89,6 @@ const ParticipantItem = ({ participant }) => {
   const {
     micOn: localMicOn,
     cameraOn: localCameraOn,
-    room,
     user,
     restrictionByAccountId,
   } = useVideoCallContext()
@@ -124,8 +123,6 @@ const ParticipantItem = ({ participant }) => {
     : {}
   const isChatRestricted = restriction.isChatRestricted === true
   const isVoiceRestricted = restriction.isVoiceRestricted === true
-
-  const isCurrentUserHost = isRoomHost(room, user?.accountId)
 
   const name =
     participant.name || participant.identity || (isLocal ? pl.you : pl.guest)
@@ -204,7 +201,7 @@ const ParticipantItem = ({ participant }) => {
         )}
         <span className="sr-only">{isCameraOn ? pl.camOn : pl.camOff}</span>
       </span>
-      {!isLocal && isCurrentUserHost && (
+      {!isLocal && (
         <div
           aria-hidden="true"
           className="p-1 hover:bg-gray-200/60 rounded-lg text-gray-400 hover:text-gray-700 transition-colors ml-0.5"
@@ -317,7 +314,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
 
   // Ticket 05: số participant sẽ bị tác động bởi Restrict Voice – All
   // (loại trừ host/người thao tác, chủ phòng và người đã bị hạn chế).
-  const voiceRestrictAllCount = participants.filter((p) => {
+  const voiceBlockAllMicsCount = participants.filter((p) => {
     const meta = parseMetadata(p.metadata)
     const accountId = meta.accountId
     if (accountId == null || accountId === "") return false
@@ -361,12 +358,26 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA
     )
 
+  // Ticket 01: policy comes from the room-state cache (single store).
+  const { data: roomState } = useGetRoomStateQuery(roomId, {
+    skip: !roomId,
+  })
+  const roomStatePayload = roomState?.data ?? roomState
+  const requireApproval = roomStatePayload?.settings?.requireApproval ?? false
+
   // Ticket 03: waiting queue — host "Chờ" tab + waiter knock banner.
+  // The tab only exists while the room actually requires approval to join;
+  // turning the policy off hides it again (pending entries auto-admit).
   const [activeTab, setActiveTab] = React.useState("members")
   const canViewWaiting =
-    isHost ||
-    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.ADMIT_WAITING)
-  // Bị cấm tab: mirrors the server (host, or co-host with remove_student/mute_all).
+    requireApproval &&
+    (isHost ||
+      hasCoHostPermission(
+        coHost,
+        user?.accountId,
+        CO_HOST_PERMISSIONS.ADMIT_WAITING
+      ))
+  // Bị cấm tab: mirrors the server (host, or co-host with remove_student).
   const canViewBanned = canViewBannedList({
     isHost,
     coHost,
@@ -386,15 +397,10 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     useCameraOffAllMutation()
   const [cameraOffAllConfirmOpen, setCameraOffAllConfirmOpen] =
     React.useState(false)
-  // Ticket 01: policy comes from the room-state cache (single store).
-  const { data: roomState } = useGetRoomStateQuery(roomId, {
-    skip: !roomId,
-  })
   const [updateSelfUnmute, { isLoading: isTogglingSelfUnmute }] =
     useUpdateSelfUnmutePolicyMutation()
   const [updateSelfCamera, { isLoading: isTogglingSelfCamera }] =
     useUpdateSelfCameraPolicyMutation()
-  const roomStatePayload = roomState?.data ?? roomState
   const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
   const allowSelfCamera = roomStatePayload?.settings?.allowSelfCamera ?? true
 
@@ -558,13 +564,20 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   const canEndLive =
     isHost ||
     hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.END_CLASS)
-  // Ticket 03: room-scope "tắt camera toàn bộ" is gated by camera_toggle.
+  // Room-scope moderation: each action has its own code, so "tắt camera toàn
+  // bộ" no longer rides on the per-member camera_toggle.
   const canCameraOffAll =
     isHost ||
-    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.CAMERA_TOGGLE)
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.CAMERA_OFF_ALL)
+  const canBlockAllMics =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.BLOCK_ALL_MICS)
+  const canLowerAllHands =
+    isHost ||
+    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.LOWER_ALL_HANDS)
 
-  // Ticket 05: student share gate (manage_student_share) + member
-  // recording gate, server-side (record). Both default open.
+  // Student share policy (manage_student_share) + member recording policy
+  // (allow_member_recording), server-side. Both default open.
   const canManageStudentShare =
     isHost ||
     hasCoHostPermission(
@@ -574,7 +587,11 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     )
   const canManageMemberRecording =
     isHost ||
-    hasCoHostPermission(coHost, user?.accountId, CO_HOST_PERMISSIONS.RECORD)
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_MEMBER_RECORDING
+    )
   const [updateStudentShare, { isLoading: isTogglingStudentShare }] =
     useUpdateStudentSharePolicyMutation()
   const allowStudentShare = roomStatePayload?.settings?.allowStudentShare ?? true
@@ -623,7 +640,6 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   }
 
   // Ticket 04: pre-join require-approval gate (host-only, default off).
-  const requireApproval = roomStatePayload?.settings?.requireApproval ?? false
   const [updateRequireApproval, { isLoading: isTogglingRequireApproval }] =
     useUpdateRequireApprovalPolicyMutation()
   const canManageRequireApproval = isHost
@@ -736,7 +752,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  // Ticket 05: member recording gate, server-side (record).
+  // Member recording policy, server-side (allow_member_recording).
   const handleToggleMemberRecording = async () => {
     if (!roomId) return
     try {
@@ -925,9 +941,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
   }
 
   const [lowerAllHandsApi, { isLoading: isLoweringHands }] = useLowerAllHandsMutation()
-  const [restrictVoiceAllApi, { isLoading: isRestrictingVoiceAll }] = useRestrictVoiceAllMutation()
+  const [blockAllMicsApi, { isLoading: isBlockingAllMics }] = useRestrictVoiceAllMutation()
   const [lowerHandsConfirmOpen, setLowerHandsConfirmOpen] = React.useState(false)
-  const [restrictVoiceAllConfirmOpen, setRestrictVoiceAllConfirmOpen] = React.useState(false)
+  const [blockAllMicsConfirmOpen, setBlockAllMicsConfirmOpen] = React.useState(false)
 
   const handleLowerAllHands = () => {
     if (totalRaisedHands === 0) {
@@ -961,32 +977,17 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
     }
   }
 
-  const handleRestrictVoiceAll = () => {
-    setRestrictVoiceAllConfirmOpen(true)
+  const handleBlockAllMics = () => {
+    setBlockAllMicsConfirmOpen(true)
   }
 
-  const confirmRestrictVoiceAll = async () => {
-    setRestrictVoiceAllConfirmOpen(false)
+  const confirmBlockAllMics = async () => {
+    setBlockAllMicsConfirmOpen(false)
     if (!roomId) return
     try {
-      const res = await restrictVoiceAllApi(roomId).unwrap()
-      try {
-        const restrictedAccountIds =
-          res?.restrictedAccountIds ?? res?.data?.restrictedAccountIds ?? []
-        const payload = new TextEncoder().encode(
-          JSON.stringify({
-            action: "RESTRICT_VOICE_ALL",
-            senderId: String(user?.accountId ?? ""),
-            senderIdentity: String(lkRoom?.localParticipant?.identity ?? ""),
-            restrictedAccountIds,
-          })
-        )
-        lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
-      } catch {
-        /* ignore broadcast errors */
-      }
+      const res = await blockAllMicsApi(roomId).unwrap()
       const restrictedCount =
-        res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceRestrictAllCount
+        res?.data?.restrictedCount ?? res?.restrictedCount ?? voiceBlockAllMicsCount
       toast.success(
         (isCustom
           ? pl.successRestrictVoiceAllRoom || pl.successRestrictVoiceAll
@@ -1148,7 +1149,11 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           )}
 
           {/* Thao tác nâng cao — luôn hiển thị, lưới 2 cột */}
-          {(isHost || canMuteAll || canCameraOffAll) && (
+          {(isHost ||
+            canMuteAll ||
+            canCameraOffAll ||
+            canBlockAllMics ||
+            canLowerAllHands) && (
             <div className="px-2.5 pt-2 shrink-0">
               <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50/50 p-2">
                 <span className="px-0.5 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
@@ -1183,7 +1188,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                     </button>
                   )}
 
-                  {(isHost || canMuteAll) && (
+                  {(isHost || canLowerAllHands) && (
                     <button
                       type="button"
                       onClick={handleLowerAllHands}
@@ -1202,11 +1207,11 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
                     </button>
                   )}
 
-                  {(isHost || canMuteAll) && (
+                  {(isHost || canBlockAllMics) && (
                     <button
                       type="button"
-                      onClick={handleRestrictVoiceAll}
-                      disabled={isRestrictingVoiceAll}
+                      onClick={handleBlockAllMics}
+                      disabled={isBlockingAllMics}
                       title={pl.restrictVoiceAll}
                       aria-label={pl.restrictVoiceAll}
                       className="inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-neutral-200/90 bg-white px-2 text-[11px] font-semibold text-neutral-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-cath-red-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
@@ -1565,9 +1570,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
       />
 
       <ConfirmationModal
-        open={restrictVoiceAllConfirmOpen}
-        onClose={() => setRestrictVoiceAllConfirmOpen(false)}
-        onConfirm={confirmRestrictVoiceAll}
+        open={blockAllMicsConfirmOpen}
+        onClose={() => setBlockAllMicsConfirmOpen(false)}
+        onConfirm={confirmBlockAllMics}
         title={
           isCustom
             ? pl.confirmRestrictVoiceAllTitleRoom ||
@@ -1580,9 +1585,9 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
           isCustom
             ? (pl.confirmRestrictVoiceAllRoom || pl.confirmRestrictVoiceAll).replace(
                 "{count}",
-                String(voiceRestrictAllCount),
+                String(voiceBlockAllMicsCount),
               )
-            : pl.confirmRestrictVoiceAll.replace("{count}", String(voiceRestrictAllCount))
+            : pl.confirmRestrictVoiceAll.replace("{count}", String(voiceBlockAllMicsCount))
         }
         confirmText={
           isCustom
@@ -1590,7 +1595,7 @@ const ParticipantList = ({ hideTitle, externalPending }) => {
             : pl.restrictVoiceAll
         }
         confirmVariant="destructive"
-        isPending={isRestrictingVoiceAll}
+        isPending={isBlockingAllMics}
       />
     </div>
   );

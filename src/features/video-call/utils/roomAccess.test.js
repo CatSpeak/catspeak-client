@@ -20,14 +20,15 @@ test("co-host with remove_student can view the banned list", () => {
   )
 })
 
-test("co-host with mute_all can view the banned list", () => {
+test("co-host with mute_all cannot view the banned list", () => {
+  // Kick/ban/unban are one family: remove_student, and only it.
   assert.equal(
     canViewBannedList({
       isHost: false,
       coHost: { coHostAccountId: 5, permissions: ["mute_all"] },
       accountId: 5,
     }),
-    true,
+    false,
   )
 })
 
@@ -56,7 +57,7 @@ test("a regular participant cannot view the banned list", () => {
 test("missing co-host or account id is denied", () => {
   assert.equal(canViewBannedList({}), false)
   assert.equal(
-    canViewBannedList({ coHost: { coHostAccountId: 5, permissions: ["mute_all"] }, accountId: null }),
+    canViewBannedList({ coHost: { coHostAccountId: 5, permissions: ["remove_student"] }, accountId: null }),
     false,
   )
 })

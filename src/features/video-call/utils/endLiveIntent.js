@@ -15,6 +15,8 @@ export const resetLocalEndLive = () => {
   endedLocally = false
 }
 
+export const isLocalEndLive = () => endedLocally
+
 export const consumeLocalEndLive = () => {
   const value = endedLocally
   endedLocally = false

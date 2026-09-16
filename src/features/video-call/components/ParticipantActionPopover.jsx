@@ -220,22 +220,26 @@ export const ParticipantActionPopover = ({ participant, children }) => {
     isCurrentHost ||
     hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
 
-  // Ticket 05: co-host with manage_student_share stops an ongoing
-  // student share (server mute path now requires manage_student_share).
+  // Stopping an ongoing member share has its own code; manage_student_share is
+  // only the "allow members to share" policy.
   const canStopScreen =
     isCurrentHost ||
     hasCoHostPermission(
       liveCoHost,
       user?.accountId,
-      CO_HOST_PERMISSIONS.MANAGE_STUDENT_SHARE
+      CO_HOST_PERMISSIONS.STOP_MEMBER_SHARE
     )
 
   const [kickConfirm, setKickConfirm] = React.useState({ open: false, banRejoin: false })
 
-  // Ticket 01: restrict chat/voice — host or co-host with mute_all/remove_student
-  const canRestrict = isCurrentHost ||
-    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.MUTE_ALL) ||
-    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.REMOVE_STUDENT)
+  // Restrict chat and restrict voice are separate codes; mute_all/remove_student
+  // no longer imply either.
+  const canRestrictChat =
+    isCurrentHost ||
+    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.RESTRICT_CHAT)
+  const canRestrictVoice =
+    isCurrentHost ||
+    hasCoHostPermission(liveCoHost, user?.accountId, CO_HOST_PERMISSIONS.RESTRICT_VOICE)
   const [restrictChatApi, { isLoading: isRestrictingChat }] = useRestrictChatMutation()
   const [unrestrictChatApi, { isLoading: isUnrestrictingChat }] = useUnrestrictChatMutation()
   const [restrictVoiceApi, { isLoading: isRestrictingVoice }] = useRestrictVoiceMutation()
@@ -250,11 +254,6 @@ export const ParticipantActionPopover = ({ participant, children }) => {
       else if (type === "voice") await restrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
       else if (type === "unrestrict_chat") await unrestrictChatApi({ id: roomId, targetAccountId: idNum }).unwrap()
       else if (type === "unrestrict_voice") await unrestrictVoiceApi({ id: roomId, targetAccountId: idNum }).unwrap()
-      const actionMap = { chat: "CHAT_RESTRICTED", voice: "VOICE_RESTRICTED", unrestrict_chat: "CHAT_UNRESTRICTED", unrestrict_voice: "VOICE_UNRESTRICTED" }
-      try {
-        const payload = new TextEncoder().encode(JSON.stringify({ action: actionMap[type], targetId: String(targetAccountId), targetIdentity: String(participant.identity) }))
-        lkRoom?.localParticipant?.publishData(payload, { topic: "moderation", reliable: true })
-      } catch {}
       const msgMap = { chat: pl.successRestrictChat, voice: pl.successRestrictVoice, unrestrict_chat: pl.successUnrestrictChat, unrestrict_voice: pl.successUnrestrictVoice }
       toast.success(msgMap[type])
     } catch (err) {
@@ -420,9 +419,9 @@ export const ParticipantActionPopover = ({ participant, children }) => {
         </div>
       )}
 
-      {canRestrict && (
+      {(canRestrictChat || canRestrictVoice) && (
         <div className="border-t border-neutral-100 pt-2 flex flex-col gap-1">
-          {!isTargetChatRestricted ? (
+          {canRestrictChat && (!isTargetChatRestricted ? (
             <button
               onClick={() => setRestrictConfirm({ open: true, type: "chat" })}
               disabled={isRestrictingChat}
@@ -440,8 +439,8 @@ export const ParticipantActionPopover = ({ participant, children }) => {
               <MessageSquareOff size={18} className="text-emerald-600 shrink-0" />
               <span>{pl.unrestrictChat}</span>
             </button>
-          )}
-          {!isTargetVoiceRestricted ? (
+          ))}
+          {canRestrictVoice && (!isTargetVoiceRestricted ? (
             <button
               onClick={() => setRestrictConfirm({ open: true, type: "voice" })}
               disabled={isRestrictingVoice}
@@ -459,7 +458,7 @@ export const ParticipantActionPopover = ({ participant, children }) => {
               <Mic size={18} className="text-emerald-600 shrink-0" />
               <span>{pl.unrestrictVoice}</span>
             </button>
-          )}
+          ))}
         </div>
       )}
 

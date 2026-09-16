@@ -2,7 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { RoomEvent, DisconnectReason } from "livekit-client"
 import { toast } from "react-hot-toast"
-import { consumeLocalEndLive } from "@/features/video-call/utils/endLiveIntent"
+import {
+  consumeLocalEndLive,
+  isLocalEndLive,
+} from "@/features/video-call/utils/endLiveIntent"
 import {
   leaveCall,
   enterBreakout,
@@ -317,6 +320,52 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
     [t],
   )
 
+  // Server push: host/co-host ended the live for everyone. The backend sends
+  // this before it drops participants from LiveKit, so the toast lands while we
+  // are still connected. The client that ended it is skipped.
+  const handleSessionEnded = useCallback(
+    (sessionId) => {
+      console.info("[SignalR] SessionEnded received:", { sessionId })
+      if (isLocalEndLive()) return
+      toast.error(
+        t?.rooms?.videoCall?.participantList?.hostEndedSession ??
+          "Host đã kết thúc buổi live.",
+        { id: "room-ended", duration: 5000 },
+      )
+      try {
+        lkRoom?.disconnect()
+      } catch {
+        /* ignore disconnect errors */
+      }
+    },
+    [lkRoom, t],
+  )
+
+  // Server push: a host/co-host removed this user. Sent to us only, right
+  // before LiveKit drops us.
+  const handleParticipantKicked = useCallback(
+    (sessionId, accountId, banRejoin) => {
+      console.info("[SignalR] ParticipantKicked received:", {
+        sessionId,
+        accountId,
+        banRejoin,
+      })
+      const myId = callInfo?.user?.accountId
+      if (myId != null && String(accountId) !== String(myId)) return
+      toast.error(
+        t?.rooms?.videoCall?.participantList?.kickedByHost ??
+          "Bạn đã bị Host mời ra khỏi phòng.",
+        { id: "participant-kicked", duration: 5000 },
+      )
+      try {
+        lkRoom?.disconnect()
+      } catch {
+        /* ignore disconnect errors */
+      }
+    },
+    [callInfo, lkRoom, t],
+  )
+
   const signaling = useVideoCallSignaling({
     RoomClosingWarning: handleRoomClosingWarning,
     JoinBreakoutRoom: handleJoinBreakoutRoom,
@@ -324,6 +373,8 @@ export const useRoomLifecycle = ({ lkRoom, activeSessionId, language, t }) => {
     BreakoutStatusChanged: handleBreakoutStatusChanged,
     ParticipantLeft: handleParticipantLeft,
     BroadcastNotification: handleBroadcastNotification,
+    SessionEnded: handleSessionEnded,
+    ParticipantKicked: handleParticipantKicked,
   })
 
   useEffect(() => {

@@ -20,7 +20,8 @@ const BannedListTab = () => {
   const currentRoomId = room?.id || roomId
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
-  // Mirror the server contract: host + co-host with remove_student OR mute_all.
+  // Mirror the server contract: host + co-host with remove_student (kick/ban/
+  // unban are one family; mute_all no longer grants access).
   const { data: coHostData } = useGetRoomCoHostQuery(currentRoomId, {
     skip: !currentRoomId,
   })

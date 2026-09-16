@@ -194,7 +194,7 @@ const VideoPreview = ({
       </div>
 
       {/* Controls Overlay */}
-      <div className="mt-1.5 flex max-w-full flex-row flex-wrap justify-center gap-2.5 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:mt-0 min-[426px]:-translate-x-1/2 min-[426px]:gap-3">
+      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
         <button
           onClick={onToggleMic}
           className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
