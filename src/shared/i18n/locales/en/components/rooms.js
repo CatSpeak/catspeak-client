@@ -1244,6 +1244,13 @@ export default {
     removeUser: "Remove user",
     noCandidatesTitle: "No available participants in the room",
     noCandidatesDesc: "Only participants currently online in the room can be assigned as co-host.",
+    noCandidatesRoomTitle: "No one to choose yet",
+    noCandidatesRoomDesc:
+      "No friends or members to choose from. Add friends or invite them to the room first.",
+    inRoomBadge: "In room",
+    absentStatus: "Not in the room",
+    notInRoomHint:
+      "This person is not in the room. Co-host permissions apply once they join.",
     quickPresetsLabel: "Quick presets:",
     presetAssistant: "Assistant Preset",
     presetAssistantRoom: "Support Preset",

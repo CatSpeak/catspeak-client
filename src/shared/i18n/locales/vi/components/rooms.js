@@ -1222,6 +1222,13 @@ export default {
     removeUser: "Gỡ người dùng này",
     noCandidatesTitle: "Chưa có thành viên khả dụng trong phòng",
     noCandidatesDesc: "Chỉ những thành viên đang trực tuyến trong phòng mới có thể được chỉ định làm Co-host.",
+    noCandidatesRoomTitle: "Chưa có ai để chọn",
+    noCandidatesRoomDesc:
+      "Chưa có bạn bè hoặc thành viên nào để chọn. Hãy kết bạn hoặc mời họ vào phòng trước.",
+    inRoomBadge: "Trong phòng",
+    absentStatus: "Không ở trong phòng",
+    notInRoomHint:
+      "Người này không ở trong phòng. Quyền Co-host sẽ áp dụng khi họ vào phòng.",
     quickPresetsLabel: "Gợi ý chọn nhanh:",
     presetAssistant: "Gói Trợ giảng",
     presetAssistantRoom: "Gói Hỗ trợ điều hành",

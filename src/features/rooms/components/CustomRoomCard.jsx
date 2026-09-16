@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import {
   Users,
   Check,
@@ -45,12 +45,13 @@ const CustomRoomCard = ({
   const isCopied = copiedId === roomId
   const [imageError, setImageError] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const creatorAccountId =
+    room.creatorId ?? room.creator?.accountId ?? room.creator?.id
   // BR-ML-01: chỉ chủ phòng thấy nút phân công.
   const isRoomOwner =
     user?.accountId != null &&
-    (room.creatorId ?? room.creator?.accountId ?? room.creator?.id) != null &&
-    String(user.accountId) ===
-      String(room.creatorId ?? room.creator?.accountId ?? room.creator?.id)
+    creatorAccountId != null &&
+    String(user.accountId) === String(creatorAccountId)
 
   // ── Co-host foundation (ticket 01): assign từ chi tiết phòng (card) ──
   const { data: roomCoHostData } = useGetRoomCoHostQuery(roomId, {
@@ -63,16 +64,31 @@ const CustomRoomCard = ({
   const [revokeRoomCoHost, { isLoading: isRevokingCoHost }] =
     useRevokeRoomCoHostMutation()
   const roomCoHost = normalizeCoHost(roomCoHostData)
-  const coHostCandidates = (Array.isArray(room.currentParticipants)
-    ? room.currentParticipants
-    : []
+  // Candidates = people in the room. CoHostManager adds the host's friends on
+  // top (and filters self/host/banned), so a co-host need not be present.
+  const coHostCandidates = useMemo(
+    () =>
+      (Array.isArray(room.currentParticipants)
+        ? room.currentParticipants
+        : []
+      )
+        .map((p) => ({
+          accountId: p?.accountId ?? p?.id ?? p?.userId,
+          name: p?.name ?? p?.nickname ?? p?.username ?? "",
+          email: p?.email ?? "",
+          avatar: p?.avatar ?? p?.avatarUrl ?? "",
+        }))
+        .filter(
+          (p) =>
+            p.accountId != null &&
+            String(p.accountId) !== String(creatorAccountId),
+        ),
+    [room.currentParticipants, creatorAccountId],
   )
-    .map((p) => ({
-      accountId: p?.accountId ?? p?.id ?? p?.userId,
-      name: p?.name ?? p?.nickname ?? p?.username ?? "",
-      email: p?.email ?? "",
-    }))
-    .filter((p) => p.accountId != null && String(p.accountId) !== String(room.creatorId))
+  const coHostExcludeIds = useMemo(
+    () => (creatorAccountId != null ? [creatorAccountId] : []),
+    [creatorAccountId],
+  )
 
   // Thumbnail fallback handling
   const fallbackThumbnail =
@@ -363,10 +379,13 @@ const CustomRoomCard = ({
             >
               <CoHostManager
                 variant="card"
+                roomId={roomId}
                 roomName={room.name}
                 roomType="room"
                 coHost={roomCoHost}
                 candidates={coHostCandidates}
+                enableFriendSearch
+                excludeAccountIds={coHostExcludeIds}
                 isTeacher={isRoomOwner}
                 isSaving={isAssigningCoHost || isUpdatingCoHost}
                 isRevoking={isRevokingCoHost}

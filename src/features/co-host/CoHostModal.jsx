@@ -29,6 +29,7 @@ import {
   Gavel,
   MessageSquareOff,
   AlertTriangle,
+  Loader2,
 } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
@@ -121,6 +122,8 @@ const CoHostModal = ({
   roomName = "",
   roomType = "room", // "room" | "class"
   candidates = [],
+  isSearchingCandidates = false,
+  allowOutOfRoom = false,
   initialAccountId = null,
   initialPermissions = [],
   confirmLabel,
@@ -414,44 +417,63 @@ const CoHostModal = ({
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-gray-200/90 shadow-sm transition-all animate-in fade-in-50 duration-150">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="relative shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-sm">
-                    {getCandidateInitials(selectedUser)}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white border border-gray-200/90 shadow-sm transition-all animate-in fade-in-50 duration-150">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                      {getCandidateInitials(selectedUser)}
+                    </div>
+                    <span
+                      className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white ${
+                        selectedUser.inRoom === false
+                          ? "bg-gray-300"
+                          : "bg-emerald-500"
+                      }`}
+                      title={
+                        selectedUser.inRoom === false
+                          ? t.rooms?.coHost?.absentStatus || "Không ở trong phòng"
+                          : t.rooms?.coHost?.inRoomStatus || "Đang trong phòng"
+                      }
+                    />
                   </div>
-                  <span
-                    className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white"
-                    title={t.rooms?.coHost?.inRoomStatus || "Đang trong phòng"}
-                  />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-900 truncate">
-                      {getCandidateDisplayName(selectedUser)}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200/80">
-                      <Crown size={10} />
-                      {t.rooms?.coHost?.designatedBadge || "Co-host chỉ định"}
-                    </span>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-gray-900 truncate">
+                        {getCandidateDisplayName(selectedUser)}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-900 text-[10px] font-bold px-2 py-0.5 border border-amber-200/80">
+                        <Crown size={10} />
+                        {t.rooms?.coHost?.designatedBadge || "Co-host chỉ định"}
+                      </span>
+                    </div>
+                    {selectedUser.email && (
+                      <span className="text-xs text-gray-500 truncate block mt-0.5">
+                        {selectedUser.email}
+                      </span>
+                    )}
                   </div>
-                  {selectedUser.email && (
-                    <span className="text-xs text-gray-500 truncate block mt-0.5">
-                      {selectedUser.email}
-                    </span>
-                  )}
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setConfirmClear(true)}
-                aria-label={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
-                className="p-1.5 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
-                title={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
-              >
-                <X size={16} />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmClear(true)}
+                  aria-label={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
+                  className="p-1.5 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+                  title={t.rooms?.coHost?.removeUser || "Gỡ người dùng này"}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              {allowOutOfRoom && selectedUser.inRoom === false && (
+                <p className="flex items-start gap-1.5 text-[11px] text-amber-700 bg-amber-50/70 border border-amber-200/70 rounded-xl px-3 py-2 leading-snug">
+                  <AlertTriangle size={13} className="shrink-0 mt-0.5 text-amber-600" />
+                  <span>
+                    {t.rooms?.coHost?.notInRoomHint ||
+                      "Người này không ở trong phòng. Quyền Co-host sẽ áp dụng khi họ vào phòng."}
+                  </span>
+                </p>
+              )}
             </div>
           )
         ) : (
@@ -463,12 +485,18 @@ const CoHostModal = ({
                   <Users size={16} />
                 </div>
                 <p className="text-xs font-semibold text-gray-700">
-                  {t.rooms?.coHost?.noCandidatesTitle ||
-                    "Chưa có thành viên khả dụng trong phòng"}
+                  {allowOutOfRoom
+                    ? (t.rooms?.coHost?.noCandidatesRoomTitle ||
+                      "Chưa có ai để chọn")
+                    : (t.rooms?.coHost?.noCandidatesTitle ||
+                      "Chưa có thành viên khả dụng trong phòng")}
                 </p>
                 <p className="text-[11px] text-gray-400 max-w-sm">
-                  {t.rooms?.coHost?.noCandidatesDesc ||
-                    "Chỉ những thành viên đang trực tuyến trong phòng mới có thể được chỉ định làm Co-host."}
+                  {allowOutOfRoom
+                    ? (t.rooms?.coHost?.noCandidatesRoomDesc ||
+                      "Chưa có bạn bè hoặc thành viên nào để chọn. Hãy kết bạn hoặc mời họ vào phòng trước.")
+                    : (t.rooms?.coHost?.noCandidatesDesc ||
+                      "Chỉ những thành viên đang trực tuyến trong phòng mới có thể được chỉ định làm Co-host.")}
                 </p>
               </div>
             ) : (
@@ -490,6 +518,13 @@ const CoHostModal = ({
                     }
                     className="w-full text-sm outline-none bg-transparent placeholder:text-gray-400 text-gray-800"
                   />
+                  {isSearchingCandidates && (
+                    <Loader2
+                      size={14}
+                      className="animate-spin text-gray-400 shrink-0"
+                      aria-hidden="true"
+                    />
+                  )}
                   {query && (
                     <button
                       type="button"
@@ -542,11 +577,18 @@ const CoHostModal = ({
                               )}
                             </div>
                           </div>
-                          {c.badge && (
-                            <span className="rounded-full bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 font-bold border border-gray-200 shrink-0">
-                              {c.badge}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {c.inRoom && (
+                              <span className="rounded-full bg-emerald-50 text-emerald-700 text-[10px] px-2 py-0.5 font-bold border border-emerald-200">
+                                {t.rooms?.coHost?.inRoomBadge || "Trong phòng"}
+                              </span>
+                            )}
+                            {c.badge && (
+                              <span className="rounded-full bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 font-bold border border-gray-200">
+                                {c.badge}
+                              </span>
+                            )}
+                          </div>
                         </button>
                       ))
                     )}
