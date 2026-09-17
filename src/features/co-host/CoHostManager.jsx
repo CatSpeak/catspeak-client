@@ -149,7 +149,7 @@ const CoHostManager = ({
     ;(candidates || []).forEach((p) =>
       add({
         accountId: p?.accountId,
-        name: p?.name ?? p?.nickname ?? p?.username ?? "",
+        name: p?.name ?? p?.fullName ?? p?.nickname ?? p?.username ?? p?.email ?? "",
         email: p?.email ?? "",
         avatar: p?.avatar ?? p?.avatarUrl ?? "",
         inRoom: true,

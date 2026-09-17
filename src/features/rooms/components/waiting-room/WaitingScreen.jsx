@@ -67,37 +67,6 @@ const WaitingScreen = ({
     })
   }
 
-  // Single source of truth for the two primary actions, rendered twice:
-  // inline in the desktop right column, and in the fixed mobile bar.
-  const ctaButtons = (
-    <div className="flex w-full flex-col sm:flex-row gap-2.5">
-      <PillButton
-        onClick={onJoin}
-        disabled={isFull}
-        aria-disabled={isFull}
-        title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
-        className="w-full sm:flex-1 py-2.5"
-      >
-        {t.rooms.waitingScreen.joinNow}
-      </PillButton>
-      <PillButton
-        onClick={handleCopyLink}
-        variant="secondary"
-        startIcon={<Copy />}
-        className="w-full sm:flex-1 py-2.5"
-      >
-        {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
-      </PillButton>
-    </div>
-  )
-
-  const fullNotice = isFull ? (
-    <p className="text-sm text-red-600">
-      {t.rooms.waitingScreen.roomFull} ({effectiveParticipantCount}/
-      {maxParticipants})
-    </p>
-  ) : null
-
   return (
     <FullscreenOverlayShell
       backgroundImageUrl={room?.thumbnailUrl || meetingFallbackImage}
@@ -160,33 +129,43 @@ const WaitingScreen = ({
             className="hidden lg:block"
           />
 
-          {/* Desktop: Copy Link, Join Buttons (mobile uses the fixed bar below) */}
-          <div className="hidden lg:flex flex-col items-center gap-3 w-full max-w-[360px]">
-            {ctaButtons}
+          {/* Copy Link, Join Buttons */}
+          <div className="flex flex-col items-center gap-3 w-full max-w-[360px]">
+            <div className="flex w-full flex-col sm:flex-row gap-2.5">
+              <PillButton
+                onClick={onJoin}
+                disabled={isFull}
+                aria-disabled={isFull}
+                title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
+                className="w-full sm:flex-1 py-2.5"
+              >
+                {t.rooms.waitingScreen.joinNow}
+              </PillButton>
+              <PillButton
+                onClick={handleCopyLink}
+                variant="secondary"
+                startIcon={<Copy />}
+                className="w-full sm:flex-1 py-2.5"
+              >
+                {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
+              </PillButton>
+            </div>
 
-            {fullNotice}
+            {isFull && (
+              <p className="text-sm text-red-600">
+                {t.rooms.waitingScreen.roomFull} ({effectiveParticipantCount}/
+                {maxParticipants})
+              </p>
+            )}
+
+            <EditNickname
+              user={user}
+              onEditName={() => setIsEditingName(true)}
+              className="flex lg:hidden mt-1"
+            />
           </div>
-
-          <EditNickname
-            user={user}
-            onEditName={() => setIsEditingName(true)}
-            className="flex lg:hidden mt-1"
-          />
         </div>
       </div>
-
-      {/* Mobile: keep Join / Copy permanently on screen while the preview
-          scrolls. It is fixed (out of flow) so it never shrinks the camera
-          preview's aspect box; the spacer below reserves its height. */}
-      <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 backdrop-blur-md px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
-        <div className="mx-auto flex w-full max-w-[360px] flex-col items-center gap-3">
-          {ctaButtons}
-          {fullNotice}
-        </div>
-      </div>
-
-      {/* Clears the fixed bar so no content hides behind it on mobile */}
-      <div aria-hidden="true" className="h-44 shrink-0 lg:hidden" />
 
       <EditNicknameModal
         open={isEditingName}
