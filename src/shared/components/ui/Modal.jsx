@@ -11,6 +11,7 @@ const ModalContent = ({
   className = "",
   headerClassName = "flex items-center justify-between p-4 sm:p-6",
   title,
+  description,
   ariaLabel = "Dialog",
   showCloseButton = true,
   subHeader,
@@ -25,6 +26,7 @@ const ModalContent = ({
   const previousFocusRef = useRef(null)
   const onCloseRef = useRef(onClose)
   const titleId = useId()
+  const descriptionId = useId()
 
   useEffect(() => {
     onCloseRef.current = onClose
@@ -33,10 +35,11 @@ const ModalContent = ({
   useEffect(() => {
     previousFocusRef.current = document.activeElement
     const focusFrame = window.requestAnimationFrame(() => {
+      const preferred = dialogRef.current?.querySelector("[data-autofocus]")
       const firstFocusable = dialogRef.current?.querySelector(
         "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
       )
-      const focusTarget = firstFocusable || dialogRef.current
+      const focusTarget = preferred || firstFocusable || dialogRef.current
       focusTarget?.focus()
     })
 
@@ -126,22 +129,32 @@ const ModalContent = ({
         aria-modal="true"
         aria-labelledby={typeof title === "string" ? titleId : undefined}
         aria-label={typeof title === "string" ? undefined : ariaLabel}
+        aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        {(title || showCloseButton) && (
+        {(title || description || showCloseButton) && (
           <div className={headerClassName}>
-            {title ? (
-              typeof title === "string" ? (
-                <h2
-                  id={titleId}
-                  className="text-[20px] leading-[26px] font-semibold"
-                >
-                  {title}
-                </h2>
-              ) : (
-                title
-              )
+            {title || description ? (
+              <div className="flex min-w-0 flex-col gap-1">
+                {title ? (
+                  typeof title === "string" ? (
+                    <h2
+                      id={titleId}
+                      className="text-[20px] leading-[26px] font-semibold"
+                    >
+                      {title}
+                    </h2>
+                  ) : (
+                    title
+                  )
+                ) : null}
+                {description && (
+                  <p id={descriptionId} className="text-sm text-secondary">
+                    {description}
+                  </p>
+                )}
+              </div>
             ) : (
               <div />
             )}

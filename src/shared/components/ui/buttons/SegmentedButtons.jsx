@@ -1,5 +1,4 @@
 import React from "react"
-import colors from "@/shared/utils/colors"
 
 /**
  * A reusable segmented buttons control tab selector.
@@ -54,6 +53,7 @@ const SegmentedButtons = ({
             key={option.value}
             type="button"
             onClick={() => onChange(option.value)}
+            aria-pressed={isSelected}
             className={`group relative flex-1 flex items-center justify-center h-12 focus:outline-none ${
               !isFirst ? "-ml-[1px]" : ""
             } ${isSelected ? "z-10" : "z-0"}`}

@@ -75,8 +75,17 @@ const UpcomingSessionSection = ({
           ? classData.enrollments
           : []
     return list.map((s) => ({
-      id: s.id ?? s.accountId ?? s.userId,
-      name: s.name ?? s.fullName ?? s.studentName ?? "",
+      id: s?.id ?? s?.accountId ?? s?.userId,
+      name: (
+        s?.name ??
+        s?.fullName ??
+        s?.studentName ??
+        s?.nickname ??
+        s?.username ??
+        s?.displayName ??
+        s?.email ??
+        ""
+      ).toString().trim(),
       avatarUrl:
         getSafeMediaUrl(s.avatarUrl ?? s.avatar ?? s.avatarImageUrl) ||
         (s.avatarUrl ?? s.avatar ?? s.avatarImageUrl),

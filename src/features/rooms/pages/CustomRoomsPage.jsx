@@ -19,6 +19,7 @@ import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
 import CreateRoomModal from "../components/CreateRoomModal";
 import EditRoomModal from "../components/EditRoomModal";
 import CustomRoomCard from "../components/CustomRoomCard";
+import { buildCustomRoomQuota } from "../utils/customRoomQuota";
 
 const CustomRoomsPage = () => {
   const { t } = useLanguage();
@@ -35,10 +36,7 @@ const CustomRoomsPage = () => {
     useDeleteCustomRoomMutation();
 
   const customRooms = customRoomsData?.customRooms || [];
-  const quota = {
-    used: customRoomsData?.currentCustomRoomsCount ?? 0,
-    max: customRoomsData?.maxCustomRooms ?? 3,
-  };
+  const quota = buildCustomRoomQuota({ customRoomsData, limits });
   const isQuotaFull = false; // customRoomsData?.canCreateCustomRoom === false
 
   // Local state
@@ -71,7 +69,7 @@ const CustomRoomsPage = () => {
     }
   };
 
-  if (!isPlanLoading && !limits.allowCustomRooms) {
+  if (!isPlanLoading && limits.maxActiveCustomRooms <= 0) {
     return (
       <PlanRequiredState
         pageTitle={ct.myRoomsTitle || "My Custom Rooms"}

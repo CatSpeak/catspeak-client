@@ -1,29 +1,30 @@
+// Room-scoped, in-session policy store for client-only policies.
+//
+// Ticket 02: server-authoritative policies (member recording, student share,
+// self-media gates, ...) now live in the room-state RTK cache. The only policy
+// still kept client-side is the host-only private-AI gate, which is held in
+// memory for the current session — it is no longer persisted to localStorage.
+const memoryStore = new Map()
+
+const storageKey = (roomId, keyName) => `${keyName}_${roomId}`
+
 export const ROOM_SETTING_KEYS = {
-  JOIN_LEAVE_SOUND: "catspeak_join_leave_sound",
-  MEMBER_RECORDING: "catspeak_member_recording_allowed",
-  MEMBER_PRIVATE_AI: "catspeak_member_private_ai_allowed",
+  MEMBER_PRIVATE_AI: "member_private_ai_allowed",
 }
 
 /**
- * Get room-scoped setting from localStorage with fallback default.
- * Each room maintains its own independent settings.
+ * Get a room-scoped, in-session setting with fallback default.
  */
 export const getRoomSetting = (roomId, keyName, defaultValue = true) => {
-  if (typeof window === "undefined") return defaultValue
-  if (roomId) {
-    const roomVal = localStorage.getItem(`${keyName}_${roomId}`)
-    if (roomVal !== null) return roomVal !== "false"
-  }
-  return defaultValue
+  if (roomId == null) return defaultValue
+  const value = memoryStore.get(storageKey(roomId, keyName))
+  return value === undefined ? defaultValue : value
 }
 
 /**
- * Set room-scoped setting in localStorage.
+ * Set a room-scoped, in-session setting.
  */
 export const setRoomSetting = (roomId, keyName, value) => {
-  if (typeof window === "undefined") return
-  const strVal = value ? "true" : "false"
-  if (roomId) {
-    localStorage.setItem(`${keyName}_${roomId}`, strVal)
-  }
+  if (roomId == null) return
+  memoryStore.set(storageKey(roomId, keyName), value === true)
 }

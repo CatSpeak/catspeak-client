@@ -10,8 +10,17 @@ import {
   useGetClassDetailQuery,
   useUpdateClassMutation,
   useDeleteClassMutation,
+  useGetClassCoHostQuery,
+  useAssignClassCoHostMutation,
+  useUpdateClassCoHostMutation,
+  useRevokeClassCoHostMutation,
 } from "@/store/api/coursesApi"
-import { formatCurrency } from "../utils/courseUtils"
+import {
+  formatCurrency,
+  getMemberDisplayName,
+  getMemberEmail,
+  getMemberId,
+} from "../utils/courseUtils"
 import { getClassLanguageCode } from "@/shared/utils/navigation"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
@@ -22,6 +31,7 @@ import CreatePostTypeModal from "../components/CreatePostTypeModal"
 
 import { useAuth } from "@/features/auth"
 import { useRoleOverride } from "../components/RoleSwitcher"
+import { normalizeCoHost } from "@/features/co-host/constants"
 
 const ClassLectureHallPage = lazy(
   () => import("../components/lecture-hall/pages/ClassLectureHallPage"),
@@ -186,6 +196,44 @@ const ClassDetailPage = () => {
   const getWeeklyScheduleText = () =>
     formatWeeklySchedule(classData || {}, ui.tba)
 
+  // ── Co-host foundation (ticket 01) ──
+  const { data: classCoHostData } = useGetClassCoHostQuery(id, { skip: !id })
+  const [assignClassCoHost, { isLoading: isAssigningCoHost }] =
+    useAssignClassCoHostMutation()
+  const [updateClassCoHost, { isLoading: isUpdatingCoHost }] =
+    useUpdateClassCoHostMutation()
+  const [revokeClassCoHost, { isLoading: isRevokingCoHost }] =
+    useRevokeClassCoHostMutation()
+  const classCoHost =
+    normalizeCoHost(classCoHostData)
+  const coHostCandidates = React.useMemo(() => {
+    const raw =
+      classData?.students ?? classData?.members ?? classData?.enrollments ?? []
+    const ownerIds = new Set(
+      [
+        classData?.teacherId,
+        classData?.instructorId,
+        classData?.teacher?.id,
+        classData?.teacher?.accountId,
+      ]
+        .filter((v) => v != null)
+        .map(String),
+    )
+    return (Array.isArray(raw) ? raw : [])
+      .filter((s) => {
+        // Chỉ học viên Confirmed (Status === 1); entry không có trường
+        // status (members view-model) thì giữ lại, server validate tiếp.
+        const st = s?.status ?? s?.enrollmentStatus
+        return st == null || Number(st) === 1
+      })
+      .map((s) => ({
+        accountId: getMemberId(s),
+        name: getMemberDisplayName(s),
+        email: getMemberEmail(s),
+      }))
+      .filter((s) => s.accountId != null && !ownerIds.has(String(s.accountId)))
+  }, [classData])
+
   if (isDetailLoading || (isDetailFetching && detailResponse === undefined)) {
     return (
       <LoadingSpinner className="flex justify-center items-center min-h-[400px]" />
@@ -255,16 +303,6 @@ const ClassDetailPage = () => {
             </h1>
 
             <div className="flex items-center gap-3">
-              {/* Vào phòng học button */}
-              {/* <button
-                type="button"
-                onClick={() => navigate(`/${encodeURIComponent(getClassLanguageCode(classData?.language) || "en")}/meet/${encodeURIComponent(`class-${id}`)}`)}
-                className="h-10 px-5 bg-[#990011] hover:bg-[#80000e] text-white font-extrabold text-xs rounded-full flex items-center gap-2 transition-all active:scale-95 shadow-sm"
-              >
-                <Video size={14} className="fill-white" />
-                <span>{cd.joinRoom || c.joinRoom || "Vào phòng học"}</span>
-              </button> */}
-
               {/* Trò chuyện button */}
               <button
                 type="button"
@@ -349,7 +387,27 @@ const ClassDetailPage = () => {
         )}
 
         {activeTab === "members" && (
-          <ClassMembersTab classData={classData} isStudent={false} />
+          <ClassMembersTab
+            classData={classData}
+            isStudent={false}
+            isClassTeacher={isClassTeacher}
+            coHost={classCoHost}
+            coHostCandidates={coHostCandidates}
+            isSavingCoHost={isAssigningCoHost || isUpdatingCoHost}
+            isRevokingCoHost={isRevokingCoHost}
+            onAssignCoHost={(body) =>
+              assignClassCoHost({ classId: id, ...body }).unwrap()
+            }
+            onUpdateCoHost={(body) =>
+              updateClassCoHost({ classId: id, ...body }).unwrap()
+            }
+            onRevokeCoHost={() => revokeClassCoHost(id).unwrap()}
+            onInviteStudents={
+              isClassTeacher
+                ? () => handleTabChange("invite-friends")
+                : undefined
+            }
+          />
         )}
 
         {activeTab === "lecture-hall" && (

@@ -58,7 +58,7 @@ const EditRoomModal = ({ open, room, onClose }) => {
         isQuotaFull={false}
         selectedLanguage={selectedLanguage}
         passwordPlaceholder={passwordPlaceholder}
-        nameError={nameError ? t.rooms?.createRoom?.nameRequired || nameError : ""}
+        nameError={nameError || ""}
         passwordError={passwordError}
         t={t}
       />

@@ -62,6 +62,7 @@ export const useGameSignaling = (handlers = {}) => {
       "RATING_OPEN",
       "ROUND_SKIPPED",
       "PICTURE_IT_ERROR",
+      "GAME_ERROR",
       "PLAYER_SPECTATING",
       "SPECTATOR_LEFT",
     ]

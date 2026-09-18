@@ -309,7 +309,20 @@ export const GameProvider = ({ children, roomLanguage = "en" }) => {
       startRatingTimer(seconds);
     },
     PICTURE_IT_ERROR: (payload) => {
-      toast.error(payload.message || "An error occurred.");
+      if (payload.code === "GAME_DISABLED") {
+        toast.error(payload.message || "Trò chơi đã bị tắt bởi Host.");
+      } else {
+        toast.error(payload.message || "An error occurred.");
+      }
+      setGameState("idle");
+      resetGameStates();
+    },
+    GAME_ERROR: (payload) => {
+      if (payload.code === "GAME_DISABLED") {
+        toast.error(payload.message || "Trò chơi đã bị tắt bởi Host.");
+      } else {
+        toast.error(payload.message || "An error occurred.");
+      }
       setGameState("idle");
       resetGameStates();
     },

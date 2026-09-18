@@ -1,3 +1,5 @@
+import { useEffect } from "react"
+
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useSpotlight } from "@/features/video-call/hooks/useSpotlight"
 import { useGame } from "@/features/games/context/GameContext"
@@ -17,7 +19,7 @@ import PiPLayout from "./layouts/PiPLayout"
  *  - "sidebar"   → always SpotlightLayout with first item as spotlight
  */
 const VideoGrid = () => {
-  const { participants, screenShareTracks, layoutMode, setLayoutMode, maxTiles, hideEmptyTiles } = useVideoCallContext()
+  const { participants, screenShareTracks, layoutMode, setLayoutMode, maxTiles, hideEmptyTiles, setPinnedParticipantId } = useVideoCallContext()
   const { gameState, gameType } = useGame()
   const isGameActive = gameState !== "idle" && !!gameType
 
@@ -25,6 +27,16 @@ const VideoGrid = () => {
     screenShareTracks,
     participants,
   )
+
+  useEffect(() => {
+    if (!setPinnedParticipantId) return
+
+    setPinnedParticipantId(
+      spotlightItem?.type === "video"
+        ? (spotlightItem.participant?.identity ?? null)
+        : null,
+    )
+  }, [spotlightItem, setPinnedParticipantId])
 
   const filteredParticipants = hideEmptyTiles
     ? participants.filter((p) => p.isLocal || p.isCameraEnabled)

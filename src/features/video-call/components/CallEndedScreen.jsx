@@ -11,7 +11,9 @@ const CallEndedScreen = () => {
   const location = useLocation()
   const { t, language } = useLanguage()
 
-  const isExpired = location.state?.reason === "expired"
+  const reason = location.state?.reason
+  const isExpired = reason === "expired"
+  const isEnded = reason === "ended"
 
   return (
     <div className="flex items-center justify-center h-screen bg-primaryBg animate-fadeIn">
@@ -20,12 +22,18 @@ const CallEndedScreen = () => {
           <PhoneOff size={40} strokeWidth={1.5} />
         </div>
         <h1 className="text-2xl font-bold text-black leading-tight">
-          {isExpired ? t.rooms.callEnded.titleExpired : t.rooms.callEnded.titleLeft}
+          {isExpired
+            ? t.rooms.callEnded.titleExpired
+            : isEnded
+              ? (t.rooms.callEnded.titleEnded || t.rooms.callEnded.titleLeft)
+              : t.rooms.callEnded.titleLeft}
         </h1>
         <p className="text-[15px] text-gray-500 leading-relaxed mb-6">
           {isExpired
             ? t.rooms.callEnded.descExpired
-            : t.rooms.callEnded.descLeft}
+            : isEnded
+              ? (t.rooms.callEnded.descEnded || t.rooms.callEnded.descLeft)
+              : t.rooms.callEnded.descLeft}
         </p>
         <div className="flex flex-col gap-3 w-full sm:flex-row sm:justify-center">
           {!isExpired && (

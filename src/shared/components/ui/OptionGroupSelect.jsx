@@ -11,6 +11,7 @@ const OptionGroupSelect = ({
   multiple = false,
   maxSelect = Infinity,
   disabled = false,
+  labelClassName = "text-sm font-medium text-gray-800",
   getOptionLabel = (option) =>
     typeof option === "object" ? option.label : option,
   getOptionValue = (option) =>
@@ -39,8 +40,8 @@ const OptionGroupSelect = ({
   return (
     <div className={`text-left flex flex-col gap-2 ${className}`}>
       {(label || subLabel) && (
-        <div className="flex items-center gap-2">
-          {label && <label className="text-base font-normal">{label}</label>}
+        <div className="flex flex-wrap items-center gap-2">
+          {label && <label className={labelClassName}>{label}</label>}
           {subLabel && (
             <p
               className="m-0 text-sm transition-opacity"
@@ -70,6 +71,7 @@ const OptionGroupSelect = ({
               type="button"
               onClick={() => handleSelect(optValue)}
               disabled={isDisabled}
+              aria-pressed={isSelected}
               variant={isSelected ? "primary" : "secondary"}
               className="h-12"
             >

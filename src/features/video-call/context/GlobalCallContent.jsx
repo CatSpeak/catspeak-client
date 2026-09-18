@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { selectCurrentToken } from "@/store/slices/authSlice"
 import {
@@ -8,7 +8,7 @@ import {
   useConnectionState,
   RoomAudioRenderer,
 } from "@livekit/components-react"
-import { ConnectionState, RoomEvent } from "livekit-client"
+import { ConnectionState, RoomEvent, Track, VideoPresets } from "livekit-client"
 import { toast } from "react-hot-toast"
 import { Clock } from "lucide-react"
 
@@ -36,6 +36,7 @@ import {
 } from "@/store/api/assistantApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
+import { useSubscriptionPolicy } from "@/features/video-call/hooks/useSubscriptionPolicy"
 import {
   getNavigate,
   getLocation,
@@ -43,11 +44,19 @@ import {
 import { useSpeakingStats } from "@/features/video-call/hooks/useSpeakingStats"
 import RoomClosingWarningModal from "@/features/video-call/components/RoomClosingWarningModal"
 import { useRoomLifecycle } from "@/features/video-call/hooks/useRoomLifecycle.jsx"
+import { roomsApi } from "@/store/api/roomsApi"
+import {
+  useGetRoomCoHostQuery,
+  useGetRoomStateQuery,
+  useGetRoomParticipantsQuery,
+} from "@/store/api/roomsApi"
+import {
+  normalizeCoHost,
+} from "@/features/co-host/constants"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
 import {
-  getRoomSetting,
   setRoomSetting,
   ROOM_SETTING_KEYS,
 } from "@/features/video-call/utils/roomSettingHelpers"
@@ -56,6 +65,40 @@ import {
   isRoomHost,
   isSpeakingTimeBalanceSupported,
 } from "@/features/video-call/utils/roomTypeHelpers"
+import { resolveCallPolicy } from "@/features/video-call/utils/callPolicy"
+import {
+  moderationNoticeSeverity,
+  resolveBlockAllMicsNotice,
+  resolveRestrictionNotice,
+} from "@/features/video-call/utils/moderationNotice"
+import { buildRoomOptions } from "@/features/video-call/utils/roomOptions"
+
+const roomParticipantsList = (draft) =>
+  Array.isArray(draft)
+    ? draft
+    : Array.isArray(draft?.data)
+      ? draft.data
+      : null
+
+// Writes one restriction snapshot into the cached participant list, creating
+// the row when the list has not seen that account yet. Returns the flags it
+// replaced — the previous state a notice is derived from.
+const writeCachedRestriction = (list, restriction) => {
+  const cached = list.find(
+    (p) => String(p.accountId) === String(restriction.accountId),
+  )
+  const previous = cached
+    ? {
+        isChatRestricted: !!cached.isChatRestricted,
+        isVoiceRestricted: !!cached.isVoiceRestricted,
+      }
+    : null
+  const row = cached ?? { accountId: restriction.accountId }
+  row.isChatRestricted = !!restriction.isChatRestricted
+  row.isVoiceRestricted = !!restriction.isVoiceRestricted
+  if (!cached) list.push(row)
+  return previous
+}
 
 /**
  * Rendered inside <LiveKitRoom> when a call is active.
@@ -72,15 +115,53 @@ const GlobalCallContent = ({
   setReceiveSystemMsgs,
   showAiSuggestions,
   setShowAiSuggestions,
+  joinLeaveSound,
+  setJoinLeaveSound,
   panelState,
   speakingAssistantEnabled,
   setSpeakingAssistantEnabled,
 }) => {
   const { t, language } = useLanguage()
+  const dispatch = useDispatch()
   const { isInCall, isPiP, callInfo } = useSelector((s) => s.videoCall)
   const { roomData, user } = callInfo ?? {}
-  const currentRoomId = callInfo?.roomId || roomData?.id
+  // Class rooms keep "class-{id}" as the URL roomId but carry the numeric
+  // cath-api room id separately (callInfo.apiRoomId). Every room-governance
+  // call and the SignalR room group must use the numeric id.
+  const urlRoomId = callInfo?.roomId || roomData?.id
+  const apiRoomId = callInfo?.apiRoomId ?? (Number(urlRoomId) > 0 ? Number(urlRoomId) : null)
+  const currentRoomId = apiRoomId ?? urlRoomId
   const isAISession = callInfo?.isAISession ?? false
+
+  // ── Ticket 02: chat/voice restriction state ──
+  // Fetched on join (and refreshed when moderation changes) so late joiners see
+  // the correct state; SignalR patches this cache in place.
+  const { data: participantsRestrictionData } = useGetRoomParticipantsQuery(
+    currentRoomId,
+    { skip: !currentRoomId },
+  )
+
+  const restrictionByAccountId = React.useMemo(() => {
+    const map = {}
+    const list = Array.isArray(participantsRestrictionData)
+      ? participantsRestrictionData
+      : Array.isArray(participantsRestrictionData?.data)
+        ? participantsRestrictionData.data
+        : []
+    list.forEach((p) => {
+      if (p?.accountId == null) return
+      map[String(p.accountId)] = {
+        isChatRestricted: !!p.isChatRestricted,
+        isVoiceRestricted: !!p.isVoiceRestricted,
+      }
+    })
+    return map
+  }, [participantsRestrictionData])
+
+  const localRestriction = restrictionByAccountId[String(user?.accountId)] || {
+    isChatRestricted: false,
+    isVoiceRestricted: false,
+  }
 
   // ── UI state ──
   const [showCC, setShowCC] = useState(false)
@@ -153,6 +234,9 @@ const GlobalCallContent = ({
     }
   }, [layoutMode, maxTiles, hideEmptyTiles])
 
+  // Ticket 02: participant the user pinned (spotlight) for the capped profile
+  const [pinnedParticipantId, setPinnedParticipantId] = useState(null)
+
   // ── LiveKit hooks & Device Selection ──
   let lkRoom = null
   try {
@@ -168,6 +252,76 @@ const GlobalCallContent = ({
   const allParticipants = useParticipants()
   const localPart = useLocalParticipant()
   const localParticipant = localPart?.localParticipant ?? null
+
+  // Ticket 04 (egress): live high-quality state. Initialised from the token
+  // and kept in sync from the RoomState cache (single store) + moderation channel.
+  const [roomHighQuality, setRoomHighQuality] = useState(
+    callInfo?.highQuality ?? false,
+  )
+  const roomHighQualityRef = useRef(roomHighQuality)
+  useEffect(() => {
+    roomHighQualityRef.current = roomHighQuality
+  }, [roomHighQuality])
+
+  const callPolicy = React.useMemo(
+    () => resolveCallPolicy(callInfo?.egressProfile, roomHighQuality),
+    [callInfo?.egressProfile, roomHighQuality],
+  )
+
+  // Ticket 02: cap remote video subscriptions for standard (foreign) profiles
+  useSubscriptionPolicy({
+    room: lkRoom,
+    egressProfile: callInfo?.egressProfile,
+    highQuality: roomHighQuality,
+    pinnedParticipantId,
+  })
+
+  // Ticket 04 (egress): apply the live high-quality state to the local
+  // publisher without a rejoin. LiveKit reads the room capture/publish
+  // defaults when a camera track is created, so keep them in sync too and
+  // restart an already-live camera track at the new target resolution.
+  useEffect(() => {
+    if (!lkRoom || !localParticipant) return
+
+    const preset = VideoPresets[callPolicy.publish.cameraPreset]
+    if (!preset?.resolution) return
+
+    const { videoCaptureDefaults, publishDefaults } =
+      buildRoomOptions(callPolicy)
+    lkRoom.options.videoCaptureDefaults.resolution =
+      videoCaptureDefaults.resolution
+    if (publishDefaults.videoSimulcastLayers) {
+      lkRoom.options.publishDefaults.videoSimulcastLayers =
+        publishDefaults.videoSimulcastLayers
+    } else {
+      delete lkRoom.options.publishDefaults.videoSimulcastLayers
+    }
+
+    const publication = localParticipant.getTrackPublication(Track.Source.Camera)
+    const track = publication?.videoTrack
+    if (!track?.restartTrack || publication?.isMuted) return
+
+    const settings = track.mediaStreamTrack?.getSettings?.()
+    if (
+      settings?.width === preset.resolution.width &&
+      settings?.height === preset.resolution.height
+    ) {
+      return
+    }
+    track.restartTrack({ resolution: preset.resolution }).catch(() => {})
+  }, [lkRoom, localParticipant, callPolicy])
+
+  // Ticket 02: voice restriction forces the mic off and keeps it off — the
+  // participant can still hear others. The ControlBar also blocks re-enabling.
+  useEffect(() => {
+    if (localRestriction.isVoiceRestricted && localParticipant) {
+      try {
+        localParticipant.setMicrophoneEnabled(false)
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [localRestriction.isVoiceRestricted, localParticipant])
 
   // Refresh hardware device list & sync active devices with LiveKit when settings modal opens
   useEffect(() => {
@@ -418,6 +572,140 @@ const GlobalCallContent = ({
   }, [sessionRecordings, t])
 
   useVideoChatSignalR(sessionId, token, (event, data) => {
+    if (event === "RoomSettingsChanged") {
+      // Ticket 01: single store = RTK Query cache. Patch the room state in
+      // place so every client (incl. late joiners) reflects policy instantly.
+      const settings = data?.settings
+      if (settings && currentRoomId) {
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomState",
+            currentRoomId,
+            (draft) => {
+              if (!draft?.settings) return
+              draft.settings = { ...draft.settings, ...settings }
+            },
+          ),
+        )
+      }
+      return
+    }
+    if (event === "CoHostChanged") {
+      // Ticket 03: host changed the co-host slice mid-session. Apply it to the
+      // state store (and the co-host query used by the 12-code gates) at once.
+      const coHost = data?.coHost ?? null
+      if (currentRoomId) {
+        const myAccountId = user?.accountId
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomState",
+            currentRoomId,
+            (draft) => {
+              draft.coHost = coHost
+                ? {
+                    accountId: coHost.accountId,
+                    permissions: coHost.permissions ?? [],
+                    isCoHost:
+                      String(coHost.accountId) === String(myAccountId),
+                  }
+                : null
+            },
+          ),
+        )
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomCoHost",
+            currentRoomId,
+            () =>
+              coHost
+                ? {
+                    coHostAccountId: coHost.accountId,
+                    permissions: coHost.permissions ?? [],
+                  }
+                : null,
+          ),
+        )
+      }
+      return
+    }
+    if (event === "WaitingQueueChanged") {
+      // Ticket 04: real-time queue update (no 10s polling). Refetch the
+      // WaitingQueue cache for host/co-host.
+      if (currentRoomId) {
+        dispatch(
+          roomsApi.util.invalidateTags([
+            { type: "WaitingQueue", id: currentRoomId },
+          ]),
+        )
+      }
+      return
+    }
+    if (event === "ParticipantRestrictionChanged") {
+      // Ticket 05: room-scoped chat/voice restriction changed. Patch the
+      // participant-list cache in place (no reload) so badges and the chat
+      // input react immediately; late joiners read the same table on join.
+      const restriction = data?.restriction
+      let notice = null
+      if (restriction?.accountId != null && currentRoomId) {
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomParticipants",
+            currentRoomId,
+            (draft) => {
+              const list = roomParticipantsList(draft)
+              if (!list) return
+              notice = resolveRestrictionNotice(
+                writeCachedRestriction(list, restriction),
+                restriction,
+              )
+            },
+          ),
+        )
+      }
+
+      const isTarget =
+        restriction?.accountId != null &&
+        String(restriction.accountId) === String(user?.accountId)
+      if (isTarget && notice) {
+        const pl = t.rooms?.videoCall?.participantList || {}
+        toast[notice.severity](pl[notice.messageKey])
+      }
+      return
+    }
+
+    if (event === "ParticipantRestrictionsChanged") {
+      // Ticket 05: Block All Mics — one message carries the whole list, so it
+      // announces itself once instead of once per restricted member.
+      const restrictions = Array.isArray(data?.restrictions)
+        ? data.restrictions
+        : []
+      if (restrictions.length > 0 && currentRoomId) {
+        dispatch(
+          roomsApi.util.updateQueryData(
+            "getRoomParticipants",
+            currentRoomId,
+            (draft) => {
+              const list = roomParticipantsList(draft)
+              if (!list) return
+              restrictions.forEach((restriction) => {
+                if (restriction?.accountId == null) return
+                writeCachedRestriction(list, restriction)
+              })
+            },
+          ),
+        )
+      }
+
+      const notice = resolveBlockAllMicsNotice(
+        restrictions.map((restriction) => restriction?.accountId),
+        user?.accountId,
+      )
+      if (notice) {
+        const pl = t.rooms?.videoCall?.participantList || {}
+        toast[notice.severity](pl[notice.messageKey])
+      }
+      return
+    }
     if (event === "RecordingStatusChanged") {
       const isActive = data.status === "started" || data.status === "active"
       setIsRecording(isActive)
@@ -456,7 +744,7 @@ const GlobalCallContent = ({
       // host could not publish a stop message itself.
       watchTogether.stopLocal?.()
     }
-  })
+  }, currentRoomId)
 
   const prevConnectionState = useRef(connectionState)
   useEffect(() => {
@@ -484,10 +772,35 @@ const GlobalCallContent = ({
 
   const videoCallState = useVideoCall(t)
   const isHostUser = isRoomHost(roomData, user?.accountId)
+  // Ticket 05: co-host + server policies for share/record gates.
+  const { data: liveCoHostData } = useGetRoomCoHostQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const liveCoHost = normalizeCoHost(liveCoHostData)
+  // Ticket 02: student-share + member-recording gates come from the room-state
+  // cache (single store) instead of standalone policy GETs.
+  const { data: roomStateData } = useGetRoomStateQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const roomStateSettings =
+    (roomStateData?.data ?? roomStateData)?.settings ?? {}
+  const allowStudentShare = roomStateSettings.allowStudentShare ?? true
+  const allowMemberRecording = roomStateSettings.allowMemberRecording ?? true
+
+  // Ticket 03: high-quality room policy now comes from the RoomState cache.
+  const serverHighQuality = roomStateSettings.highQuality
+  useEffect(() => {
+    if (serverHighQuality !== undefined) {
+      setRoomHighQuality(serverHighQuality === true)
+    }
+  }, [serverHighQuality])
+
   const screenShareState = useScreenShare({
     roomData,
     user,
     isHost: isHostUser,
+    coHost: liveCoHost,
+    allowStudentShare,
     t,
   })
   const watchTogether = useWatchTogether({
@@ -506,6 +819,9 @@ const GlobalCallContent = ({
     sessionId,
     roomId: currentRoomId,
     isHost: isRoomHost(roomData, user?.accountId),
+    accountId: user?.accountId,
+    coHost: liveCoHost,
+    allowMemberRecording,
   })
 
   const subtitleControls = useSubtitleControls({
@@ -523,8 +839,8 @@ const GlobalCallContent = ({
     localParticipant,
   )
 
-  // ── Join/Leave Audio ──
-  useParticipantAudioEffect(participants, currentRoomId)
+  // ── Join/Leave Audio (personal preference, off by default) ──
+  useParticipantAudioEffect(participants, joinLeaveSound)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
@@ -616,13 +932,179 @@ const GlobalCallContent = ({
         const pl = t.rooms?.videoCall?.participantList || {}
         const isHost = isRoomHost(roomData, user?.accountId)
 
-        if (data.action === "MUTE_ALL" && !isHost) {
-          if (localParticipant) {
+        // Ticket 02: mute-all từ host hoặc co-host có mute_all.
+        // Không tự mute (khong tu khoa) + host không bị co-host mute.
+        if (data.action === "MUTE_ALL") {
+          const senderIsMe =
+            (data.senderId != null && String(data.senderId) === currentAccId) ||
+            (data.senderIdentity != null &&
+              String(data.senderIdentity) === localIdent)
+          if (!senderIsMe && !isHost && localParticipant) {
             localParticipant.setMicrophoneEnabled(false)
-            toast.error(
+            toast[moderationNoticeSeverity(data.action)](
               pl.hostMutedAll ||
-                "Host đã tắt tiếng tất cả mọi người trong phòng.",
+                "Host đã tắt tiếng tất cả mọi người trong phòng."
             )
+          }
+          return
+        }
+
+        // Room-scope "tắt camera toàn bộ" (camera_off_all).
+        if (data.action === "CAMERA_OFF_ALL") {
+          const senderIsMe =
+            (data.senderId != null && String(data.senderId) === currentAccId) ||
+            (data.senderIdentity != null &&
+              String(data.senderIdentity) === localIdent)
+          if (!senderIsMe && !isHost && localParticipant) {
+            localParticipant.setCameraEnabled(false)
+            toast[moderationNoticeSeverity(data.action)](
+              pl.hostCameraOffAll ||
+                "Host đã tắt camera tất cả mọi người trong phòng."
+            )
+          }
+          return
+        }
+
+        if (data.action === "SELF_UNMUTE_POLICY") {
+          toast.info(
+            data.allow
+              ? (pl.selfUnmuteOn || "Host đã cho phép học viên tự bật mic.")
+              : (pl.selfUnmuteOff || "Host đã tắt quyền học viên tự bật mic.")
+          )
+          return
+        }
+
+        // Ticket 02: self-camera gate changed — state arrives via the server
+        // RoomSettingsChanged push; this data-channel event is just a toast.
+        if (data.action === "SELF_CAMERA_POLICY") {
+          toast.info(
+            data.allow
+              ? (pl.selfCameraOn || "Host đã cho phép học viên tự bật camera.")
+              : (pl.selfCameraOff || "Host đã tắt quyền học viên tự bật camera.")
+          )
+          return
+        }
+
+        // Ticket 02: student share gate changed — patch the room-state cache
+        // (single store). Students with an active share keep it; new starts
+        // are gated.
+        if (data.action === "STUDENT_SHARE_POLICY") {
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowStudentShare: data.allow !== false,
+                }
+              }
+            )
+          )
+          toast.info(
+            data.allow
+              ? (pl.studentShareOn || "Host đã cho phép học viên chia sẻ màn hình.")
+              : (pl.studentShareOff || "Host đã tắt quyền học viên chia sẻ màn hình.")
+          )
+          return
+        }
+
+        // Ticket 02: member recording gate changed — patch the room-state
+        // cache (single store) + toast.
+        if (data.action === "MEMBER_RECORDING_POLICY") {
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowMemberRecording: data.allow !== false,
+                }
+              }
+            )
+          )
+          toast.info(
+            data.allow !== false
+              ? (pl.hostAllowedRecording ||
+                  "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
+              : (pl.hostDisabledRecording ||
+                  "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
+          )
+          return
+        }
+
+        // Ticket 04 (egress): high-quality room policy changed live — apply
+        // immediately (publish 720p; the foreign tile cap still wins).
+        if (data.action === "HIGH_QUALITY_POLICY") {
+          const enabled = data.enabled === true
+          setRoomHighQuality(enabled)
+          // Ticket 03: high-quality now lives in the room-state cache.
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = { ...draft.settings, highQuality: enabled }
+              }
+            )
+          )
+          toast.info(
+            enabled
+              ? (pl.hostHighQualityOn ||
+                  "Host đã bật chế độ chất lượng cao cho phòng.")
+              : (pl.hostHighQualityOff ||
+                  "Host đã tắt chế độ chất lượng cao cho phòng.")
+          )
+          return
+        }
+
+        // Ticket 04: room lock changed — patch the room-state cache + toast.
+        if (data.action === "ROOM_LOCK_CHANGED") {
+          const locked = data.locked === true
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = { ...draft.settings, roomLocked: locked }
+              }
+            )
+          )
+          toast.info(
+            locked
+              ? (pl.hostLockedRoom ||
+                  "Host đã khóa phòng. Người mới không thể tham gia.")
+              : (pl.hostUnlockedRoom || "Host đã mở khóa phòng.")
+          )
+          return
+        }
+
+        // Ticket 04: host/co-host ended the live for everyone —
+        // drop the LiveKit room and land on the end screen (rejoin
+        // creates a brand-new session; room/class state untouched).
+        if (data.action === "ROOM_ENDED") {
+          toast.error(pl.hostEndedSession || "Host đã kết thúc buổi live.", {
+            id: "room-ended",
+            duration: 5000,
+          })
+          try {
+            lkRoom?.disconnect()
+          } catch {
+            /* ignore disconnect errors */
+          }
+          dispatch(leaveCall())
+          const nav = getNavigate()
+          const loc = getLocation()
+          if (nav && loc && loc.pathname.includes("/meet/")) {
+            nav(loc.pathname, {
+              replace: true,
+              state: { callEnded: true, reason: "ended" },
+            })
           }
           return
         }
@@ -641,31 +1123,21 @@ const GlobalCallContent = ({
           return
         }
 
-        if (data.action === "TOGGLE_JOIN_SOUND") {
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-            data.enabled,
-          )
-          window.dispatchEvent(new Event("catspeak_join_leave_sound_changed"))
-          toast.info(
-            data.enabled
-              ? pl.hostEnabledJoinSound ||
-                  "Host đã BẬT âm thanh khi có người vào/ra phòng."
-              : pl.hostDisabledJoinSound ||
-                  "Host đã TẮT âm thanh khi có người vào/ra phòng.",
-          )
-          return
-        }
-
+        // Ticket 02: legacy local toggle — member recording now lives in the
+        // room-state cache, so patch it there (no localStorage).
         if (data.action === "TOGGLE_MEMBER_RECORDING") {
-          setRoomSetting(
-            currentRoomId,
-            ROOM_SETTING_KEYS.MEMBER_RECORDING,
-            data.allowed,
-          )
-          window.dispatchEvent(
-            new Event("catspeak_member_recording_allowed_changed"),
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = {
+                  ...draft.settings,
+                  allowMemberRecording: data.allowed !== false,
+                }
+              }
+            )
           )
           toast.info(
             data.allowed
@@ -699,88 +1171,6 @@ const GlobalCallContent = ({
           return
         }
 
-        if (data.action === "REQUEST_ROOM_SETTINGS_SYNC") {
-          if (
-            isHost &&
-            localParticipant &&
-            lkRoom?.state === ConnectionState.Connected
-          ) {
-            try {
-              const syncPayload = new TextEncoder().encode(
-                JSON.stringify({
-                  action: "SYNC_ROOM_SETTINGS",
-                  settings: {
-                    joinLeaveSound: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                    ),
-                    memberRecording: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                    ),
-                    memberPrivateAi: getRoomSetting(
-                      currentRoomId,
-                      ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                    ),
-                  },
-                  targetIdentity: participant?.identity,
-                }),
-              )
-              localParticipant
-                .publishData(syncPayload, {
-                  topic: "moderation",
-                  reliable: true,
-                })
-                .catch(() => {})
-            } catch (err) {
-              console.error(
-                "Error responding to REQUEST_ROOM_SETTINGS_SYNC:",
-                err,
-              )
-            }
-          }
-          return
-        }
-
-        if (data.action === "SYNC_ROOM_SETTINGS") {
-          const isTargetMe =
-            !data.targetIdentity ||
-            String(data.targetIdentity) === String(localParticipant?.identity)
-          if (isTargetMe && data.settings) {
-            if (data.settings.joinLeaveSound !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                data.settings.joinLeaveSound,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_join_leave_sound_changed"),
-              )
-            }
-            if (data.settings.memberRecording !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                data.settings.memberRecording,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_member_recording_allowed_changed"),
-              )
-            }
-            if (data.settings.memberPrivateAi !== undefined) {
-              setRoomSetting(
-                currentRoomId,
-                ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                data.settings.memberPrivateAi,
-              )
-              window.dispatchEvent(
-                new Event("catspeak_member_private_ai_allowed_changed"),
-              )
-            }
-          }
-          return
-        }
-
         if (!isTarget) return
 
         if (data.action === "KICK_PARTICIPANT") {
@@ -789,21 +1179,32 @@ const GlobalCallContent = ({
           })
           actions.handleLeaveSession()
         } else if (data.action === "MUTE_PARTICIPANT") {
+          // Ticket 02: host/co-host mute (muted=true) hoặc bật giùm (muted=false).
+          // Bật giùm luôn được phép kể cả khi gate tự bật mic đang tắt.
+          const shouldMute = data.muted !== false
           if (data.trackKind === "audio" && localParticipant) {
-            localParticipant.setMicrophoneEnabled(false)
-            toast.error(pl.hostMutedMic || "Host đã tắt mic của bạn.")
+            localParticipant.setMicrophoneEnabled(!shouldMute)
+            const msg = shouldMute
+              ? (pl.hostMutedMic || "Host đã tắt mic của bạn.")
+              : (pl.hostUnmutedMic || "Host đã bật mic của bạn.")
+            toast[moderationNoticeSeverity(data.action)](msg)
           } else if (data.trackKind === "video" && localParticipant) {
-            localParticipant.setCameraEnabled(false)
-            toast.error(pl.hostMutedCam || "Host đã tắt camera của bạn.")
+            localParticipant.setCameraEnabled(!shouldMute)
+            const msg = shouldMute
+              ? (pl.hostMutedCam || "Host đã tắt camera của bạn.")
+              : (pl.hostUnmutedCam || "Host đã bật camera của bạn.")
+            toast[moderationNoticeSeverity(data.action)](msg)
           } else if (
             (data.trackKind === "screen" ||
               data.trackKind === "screen_share") &&
             localParticipant
           ) {
-            localParticipant.setScreenShareEnabled(false)
-            toast.error(
-              pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn.",
-            )
+            if (shouldMute) {
+              localParticipant.setScreenShareEnabled(false)
+              toast[moderationNoticeSeverity(data.action)](
+                pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn."
+              )
+            }
           }
         }
       } catch (err) {
@@ -811,94 +1212,19 @@ const GlobalCallContent = ({
       }
     }
 
-    const handleParticipantJoined = (participant) => {
-      const isHost = isRoomHost(roomData, user?.accountId)
-      if (
-        isHost &&
-        localParticipant &&
-        lkRoom?.state === ConnectionState.Connected
-      ) {
-        try {
-          const syncPayload = new TextEncoder().encode(
-            JSON.stringify({
-              action: "SYNC_ROOM_SETTINGS",
-              settings: {
-                joinLeaveSound: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-                ),
-                memberRecording: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.MEMBER_RECORDING,
-                ),
-                memberPrivateAi: getRoomSetting(
-                  currentRoomId,
-                  ROOM_SETTING_KEYS.MEMBER_PRIVATE_AI,
-                ),
-              },
-              targetIdentity: participant.identity,
-            }),
-          )
-          localParticipant
-            .publishData(syncPayload, { topic: "moderation", reliable: true })
-            .catch(() => {})
-        } catch (err) {
-          console.error("Error syncing room settings to new participant:", err)
-        }
-      }
-
-      try {
-        const isSoundEnabled = getRoomSetting(
-          currentRoomId,
-          ROOM_SETTING_KEYS.JOIN_LEAVE_SOUND,
-        )
-        if (!isSoundEnabled) return
-
-        const AudioContext = window.AudioContext || window.webkitAudioContext
-        if (!AudioContext) return
-        const ctx = new AudioContext()
-        const now = ctx.currentTime
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.type = "sine"
-        osc.frequency.setValueAtTime(523.25, now)
-        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15)
-        gain.gain.setValueAtTime(0.15, now)
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-        osc.start(now)
-        osc.stop(now + 0.3)
-      } catch (e) {
-        // autoplay restriction fallback
-      }
-    }
-
-    // Request settings sync from Host on join if not Host
-    if (
-      lkRoom?.state === ConnectionState.Connected &&
-      localParticipant &&
-      !isRoomHost(roomData, user?.accountId)
-    ) {
-      try {
-        const reqPayload = new TextEncoder().encode(
-          JSON.stringify({ action: "REQUEST_ROOM_SETTINGS_SYNC" }),
-        )
-        localParticipant
-          .publishData(reqPayload, { topic: "moderation", reliable: true })
-          .catch(() => {})
-      } catch (e) {
-        // ignore
-      }
-    }
-
+    // Ticket 01: the settings handshake is gone — policy now arrives via the
+    // GET /rooms/{id}/state snapshot + SignalR RoomSettingsChanged.
     lkRoom.on(RoomEvent.DataReceived, handleModerationData)
-    lkRoom.on(RoomEvent.ParticipantConnected, handleParticipantJoined)
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
-      lkRoom.off(RoomEvent.ParticipantConnected, handleParticipantJoined)
     }
-  }, [lkRoom, localParticipant, user?.accountId, roomData, actions])
+  }, [
+    lkRoom,
+    localParticipant,
+    user?.accountId,
+    roomData,
+    actions,
+  ])
 
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
@@ -960,7 +1286,7 @@ const GlobalCallContent = ({
     cancelLeaveCall,
 
     // Session
-    id: callInfo?.roomId,
+    id: currentRoomId,
     sessionId: callInfo?.sessionId || localMetadata?.sessionId,
     closingRemainingSeconds,
     navigate: getNavigate(),
@@ -1001,6 +1327,11 @@ const GlobalCallContent = ({
     localParticipant,
     participants,
     isHandRaised,
+
+    // Ticket 02: moderation restriction state
+    restrictionByAccountId,
+    isChatRestricted: localRestriction.isChatRestricted,
+    isVoiceRestricted: localRestriction.isVoiceRestricted,
 
     // Media state
     micOn: videoCallState.micOn,
@@ -1055,6 +1386,8 @@ const GlobalCallContent = ({
     setShowAiSuggestions,
     speakingAssistantEnabled,
     setSpeakingAssistantEnabled,
+    joinLeaveSound,
+    setJoinLeaveSound,
     updateAiInteraction,
     isCurrentUserPrompting,
     startNewThread,
@@ -1079,6 +1412,7 @@ const GlobalCallContent = ({
     presenterDisplayName: screenShareState.presenterDisplayName,
     handleToggleScreenShare: actions.handleToggleScreenShare,
     isTogglingScreenShare: screenShareState.isTogglingScreenShare,
+    canShareScreen: screenShareState.canShareScreen,
     // Watch together (YouTube, client-sync over the watch-sync DataChannel)
     mediaActive: watchTogether.isMediaActive,
     mediaVideoId: watchTogether.videoId,
@@ -1106,6 +1440,11 @@ const GlobalCallContent = ({
     startedByAccountId: startedByAccountId,
     layoutMode,
     setLayoutMode,
+    pinnedParticipantId,
+    setPinnedParticipantId,
+    // Ticket 04 (egress): live high-quality room policy
+    roomHighQuality,
+    setRoomHighQuality,
     maxTiles,
     setMaxTiles,
     hideEmptyTiles,

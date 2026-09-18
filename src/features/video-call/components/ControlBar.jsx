@@ -17,7 +17,19 @@ import {
 } from "lucide-react"
 import { useRaiseHandMutation } from "@/store/api/livekitApi"
 import { useGetBreakoutStatusQuery } from "@/store/api/roomsApi"
-import { isBreakoutSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  useGetRoomCoHostQuery,
+  useGetRoomStateQuery,
+} from "@/store/api/roomsApi"
+import {
+  isBreakoutSupported,
+  isRoomHost,
+} from "@/features/video-call/utils/roomTypeHelpers"
+import {
+  normalizeCoHost,
+  hasCoHostPermission,
+  CO_HOST_PERMISSIONS,
+} from "@/features/co-host/constants"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import ControlBarMoreMenu from "./ControlBarMoreMenu"
 import StopRecordingModal from "./StopRecordingModal"
@@ -41,6 +53,7 @@ const VideoCallControlBar = () => {
     isTogglingMic,
     isTogglingCam,
     isTogglingScreenShare,
+    canShareScreen = true,
     showChat,
     setShowChat,
     showParticipants,
@@ -72,14 +85,82 @@ const VideoCallControlBar = () => {
     participants,
     isAISession,
     isHost: isHostFromContext,
+    id: roomId,
+    isVoiceRestricted,
   } = useVideoCallContext()
 
   const { isBreakoutActive, parentSessionId } = useSelector((s) => s.videoCall)
-  const isHost = isHostFromContext
+  const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
   const { data: breakoutStatus } = useGetBreakoutStatusQuery(parentSessionId, {
     skip: !parentSessionId,
   })
+
+  // Ticket 02: gate tự bật mic — khi tắt, học viên đang mute không tự bật lại được.
+  // Host/co-host vẫn bật giùm được (qua popover + MUTE_PARTICIPANT muted=false).
+  const { data: coHostData } = useGetRoomCoHostQuery(roomId, {
+    skip: !roomId,
+  })
+  // Ticket 01: policy comes from the room-state cache (single store).
+  const { data: roomState } = useGetRoomStateQuery(roomId, {
+    skip: !roomId,
+  })
+  const roomStatePayload = roomState?.data ?? roomState
+  const allowSelfUnmute = roomStatePayload?.settings?.allowSelfUnmute ?? true
+  // Ticket 02: separate gate for the student self-camera toggle.
+  const allowSelfCamera = roomStatePayload?.settings?.allowSelfCamera ?? true
+  // Ticket 03: bypass the self-media lock by *permission*, never by co-host
+  // identity — a co-host only self-unmutes if granted allow_self_unmute.
+  const coHost = normalizeCoHost(coHostData)
+  const canSelfUnmute =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
+    )
+  const canSelfCamera =
+    isHost ||
+    hasCoHostPermission(
+      coHost,
+      user?.accountId,
+      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA
+    )
+
+  const handleMicWithGate = async () => {
+    const tryingToUnmute = !micOn
+    // Ticket 02: voice-restricted users cannot re-enable their mic.
+    if (tryingToUnmute && isVoiceRestricted) {
+      toast.error(
+        t.rooms?.videoCall?.participantList?.voiceRestrictedBlocked ||
+          "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế."
+      )
+      return
+    }
+    if (tryingToUnmute && !allowSelfUnmute && !canSelfUnmute) {
+      toast.error(
+        t.rooms?.videoCall?.participantList?.selfUnmuteBlocked ||
+          "Host đã tắt quyền tự bật mic. Vui lòng chờ host bật giùm."
+      )
+      return
+    }
+    await handleToggleMic()
+  }
+
+  // Ticket 02: gate the camera self toggle the same way as the mic one. When
+  // the host turns off allow_self_camera, students can no longer turn it on;
+  // host/co-host can still turn it on for them via the participant popover.
+  const handleCameraWithGate = async () => {
+    const tryingToEnable = !cameraOn
+    if (tryingToEnable && !allowSelfCamera && !canSelfCamera) {
+      toast.error(
+        t.rooms?.videoCall?.participantList?.selfCameraBlocked ||
+          "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm."
+      )
+      return
+    }
+    await handleToggleCam()
+  }
 
   const [raiseHand, { isLoading: isTogglingHand }] = useRaiseHandMutation()
   const [showMoreMenu, setShowMoreMenu] = useState(false)
@@ -112,16 +193,19 @@ const VideoCallControlBar = () => {
   const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full items-center justify-center gap-2 bg-white p-2  border-t border-border">
+    <div className="flex w-full shrink-0 items-center justify-center gap-2 bg-white p-2 pb-[calc(0.5rem_+_env(safe-area-inset-bottom,0px))] border-t border-border">
       <div className="flex gap-2 w-full items-center md:justify-center justify-center">
         <ControlButton
           isActive={micOn}
           isLoading={isTogglingMic}
-          onClick={handleToggleMic}
+          onClick={handleMicWithGate}
           title={
-            micOn
-              ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
-              : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
+            isVoiceRestricted
+              ? t.rooms?.videoCall?.participantList?.voiceRestrictedBlocked ||
+                "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế."
+              : micOn
+                ? t.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
+                : t.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
           }
           iconActive={<Mic className={iconClass} />}
           iconInactive={<MicOff className={iconClass} />}
@@ -132,11 +216,14 @@ const VideoCallControlBar = () => {
         <ControlButton
           isActive={cameraOn}
           isLoading={isTogglingCam}
-          onClick={handleToggleCam}
+          onClick={handleCameraWithGate}
           title={
-            cameraOn
-              ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
-              : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
+            !allowSelfCamera && !canSelfCamera
+              ? t.rooms?.videoCall?.participantList?.selfCameraBlocked ||
+                "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm."
+              : cameraOn
+                ? t.rooms?.videoCall?.controls?.camOff || "Turn camera off"
+                : t.rooms?.videoCall?.controls?.camOn || "Turn camera on"
           }
           iconActive={<Video className={iconClass} />}
           iconInactive={<VideoOff className={iconClass} />}
@@ -147,10 +234,14 @@ const VideoCallControlBar = () => {
           isActive={isLocalScreenShare}
           isLoading={isTogglingScreenShare}
           onClick={handleToggleScreenShare}
+          disabled={!canShareScreen}
           title={
-            isLocalScreenShare
-              ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
-              : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
+            !canShareScreen
+              ? t.rooms?.videoCall?.participantList?.shareDeniedNoPerm ||
+                "Bạn không có quyền chia sẻ màn hình."
+              : isLocalScreenShare
+                ? t.rooms?.videoCall?.controls?.shareOff || "Stop sharing"
+                : t.rooms?.videoCall?.controls?.shareOn || "Share screen"
           }
           iconActive={<MonitorOff className={iconClass} />}
           iconInactive={<MonitorUp className={iconClass} />}

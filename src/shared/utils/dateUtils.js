@@ -317,15 +317,19 @@ export const calculateEndDate = (startDate, durationMinutes) => {
 }
 
 /**
- * Check if a room is expired (past its scheduled duration)
+ * Check if a room is expired (past its scheduled duration + 120s grace).
+ * The +120s matches the API worker's manual-track delete threshold
+ * (CreateDate+Duration+120s), so the badge and the worker agree on "expired".
  */
+export const ROOM_EXPIRY_GRACE_SECONDS = 120
+
 export const isRoomExpired = (room) => {
   if (!room) return false
   if (room.duration === null || room.duration === undefined) return false
   const startDate = ensureDate(room.createDate || room.createdAt)
   if (!startDate) return false
   const endDate = calculateEndDate(startDate, room.duration)
-  return Date.now() > endDate.getTime()
+  return Date.now() > endDate.getTime() + ROOM_EXPIRY_GRACE_SECONDS * 1000
 }
 
 /**

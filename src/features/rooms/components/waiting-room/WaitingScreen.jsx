@@ -73,6 +73,8 @@ const WaitingScreen = ({
       onBack={() => navigate(-1)}
       backLabel={t.rooms.waitingScreen.backToCommunity}
       maxWidthClass="max-w-[520px] lg:max-w-6xl"
+      contentClassName="max-md:min-h-0"
+      cardClassName="h-full md:h-auto"
     >
       {webview.isWebView && (
         <div className="mb-4 w-full rounded-lg bg-amber-500/15 border border-amber-500/30 p-3 text-amber-200 text-sm flex items-start gap-2.5 shadow-sm">
@@ -92,12 +94,14 @@ const WaitingScreen = ({
         room={room}
         participants={participants}
         participantCount={participantCount}
-        className="block lg:hidden mb-4"
+        className="block lg:hidden mb-4 shrink-0"
       />
 
-      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 w-full items-center">
+      {/* Mobile: flex-1 + min-h-0 lets this row shrink so the card fits the
+          viewport; from md up it goes back to its natural height. */}
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 w-full items-center flex-1 min-h-0 md:flex-none">
         {/* Left Column: Video Preview & Nickname */}
-        <div className="flex flex-col items-center w-full lg:col-span-7 gap-3">
+        <div className="flex flex-col items-center w-full lg:col-span-7 gap-3 flex-1 min-h-0 md:flex-none">
           <VideoPreview
             user={user}
             localStream={localStream}
@@ -119,7 +123,7 @@ const WaitingScreen = ({
         </div>
 
         {/* Right Column: Room Details & Action Container */}
-        <div className="flex flex-col items-center justify-center w-full lg:col-span-5 h-full gap-6">
+        <div className="flex flex-col items-center justify-center w-full lg:col-span-5 h-auto md:h-full gap-6 shrink-0">
           {/* Desktop Only: Room name, topic & participants preview */}
           <RoomInformation
             session={session}

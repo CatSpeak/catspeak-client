@@ -6,6 +6,7 @@ export default {
   seeMore: "查看更多",
   back: "返回",
   cancel: "取消",
+  confirm: "确认",
   reload: "重新加载",
   cancelUploadConfirmTitle: "正在处理任务",
   cancelUploadConfirmDesc:

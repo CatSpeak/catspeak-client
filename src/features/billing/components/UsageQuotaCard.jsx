@@ -21,16 +21,7 @@ const FEATURE_CONFIG_MAP = {
     actionPath: "/workspace/recordings",
     gradient: "from-purple-500 to-pink-600",
   },
-  MAX_ACTIVE_CUSTOM_ROOMS: {
-    icon: DoorOpen,
-    titleKey: "customRooms",
-    defaultTitle: "Phòng Custom Hoạt Động",
-    actionTextKey: "actionCreateRoom",
-    defaultActionText: "Tạo Phòng Mới",
-    actionPath: "/workspace/rooms",
-    gradient: "from-amber-500 to-orange-600",
-  },
-  MAX_CUSTOM_ROOMS: {
+  MAX_ACTIVE_ROOMS: {
     icon: DoorOpen,
     titleKey: "customRooms",
     defaultTitle: "Phòng Custom Hoạt Động",
@@ -104,6 +95,11 @@ const UsageQuotaCard = ({ feature }) => {
 
   const isCapacityOnly = config.isCapacityOnly || usedValue === "N/A"
 
+  // MAX_ACTIVE_ROOMS: 0 means the entitlement is forbidden, not "unlimited".
+  const zeroMeansForbidden = codeKey === "MAX_ACTIVE_ROOMS"
+  const displayLimit = limitValue == null || limitValue === "" ? "0" : limitValue
+  const showUnlimited = (limitValue === "0" || !limitValue) && !zeroMeansForbidden
+
   // Calculate percentage
   let percentage = 0
   const limitNum = parseFloat(limitValue) || 0
@@ -169,7 +165,7 @@ const UsageQuotaCard = ({ feature }) => {
         ) : (
           <div className="flex items-baseline gap-1.5 my-3">
             <span className="text-2xl font-extrabold text-gray-900">{usedValue}</span>
-            <span className="text-gray-400 text-sm font-medium">/ {limitValue === "0" || !limitValue ? (quotasT.unlimited || "Không giới hạn") : `${limitValue} ${unit}`}</span>
+            <span className="text-gray-400 text-sm font-medium">/ {showUnlimited ? (quotasT.unlimited || "Không giới hạn") : `${displayLimit} ${unit}`}</span>
           </div>
         )}
 

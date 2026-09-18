@@ -11,7 +11,7 @@ import * as signalR from "@microsoft/signalr"
  * @param {function} onEventReceived - Callback fired when high-priority SignalR event is parsed.
  * @returns {boolean} connection status
  */
-export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
+export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) => {
   const [isConnected, setIsConnected] = useState(false)
   const connectionRef = useRef(null)
   const onEventReceivedRef = useRef(onEventReceived)
@@ -21,9 +21,9 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
   }, [onEventReceived])
 
   useEffect(() => {
-    if (!sessionId || !token) {
+    if (!token) {
       console.warn(
-        "[VideoChatSignalR] Missing sessionId or token — skipping hub instantiation.",
+        "[VideoChatSignalR] Missing token — skipping hub instantiation.",
       )
       return
     }
@@ -106,17 +106,121 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
       }
     })
 
+    // Ticket 01: room governance group + settings event.
+    connection.on("RoomSettingsChanged", (changedRoomId, settings) => {
+      if (
+        Number(changedRoomId) === Number(roomId) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("RoomSettingsChanged", {
+          roomId: changedRoomId,
+          settings,
+        })
+      }
+    })
+
+    // Ticket 03: co-host assignment/permission change (null on revoke).
+    connection.on("CoHostChanged", (changedRoomId, coHost) => {
+      if (
+        Number(changedRoomId) === Number(roomId) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("CoHostChanged", {
+          roomId: changedRoomId,
+          coHost,
+        })
+      }
+    })
+
+    // Ticket 04: host/co-host waiting queue changed in real time.
+    connection.on("WaitingQueueChanged", (changedRoomId, queue) => {
+      if (
+        (String(changedRoomId) === String(roomId) ||
+          Number(changedRoomId) === Number(roomId)) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("WaitingQueueChanged", {
+          roomId: changedRoomId,
+          queue,
+        })
+      }
+    })
+
+    // Ticket 05: room-scoped chat/voice restriction changed mid-session.
+    connection.on("ParticipantRestrictionChanged", (changedRoomId, restriction) => {
+      if (
+        (String(changedRoomId) === String(roomId) ||
+          Number(changedRoomId) === Number(roomId)) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("ParticipantRestrictionChanged", {
+          roomId: changedRoomId,
+          restriction,
+        })
+      }
+    })
+
+    // Ticket 05: batch variant (Block All Mics) — one message carries the
+    // list of members it restricted.
+    connection.on("ParticipantRestrictionsChanged", (changedRoomId, restrictions) => {
+      if (
+        (String(changedRoomId) === String(roomId) ||
+          Number(changedRoomId) === Number(roomId)) &&
+        onEventReceivedRef.current
+      ) {
+        onEventReceivedRef.current("ParticipantRestrictionsChanged", {
+          roomId: changedRoomId,
+          restrictions: Array.isArray(restrictions) ? restrictions : [],
+        })
+      }
+    })
+
+    // Ticket 04: personal waiting outcomes (user_{accountId}), no room filter —
+    // the account can only be waiting in one room at a time.
+    connection.on("WaitingAdmitted", (changedRoomId, entry) => {
+      onEventReceivedRef.current?.("WaitingAdmitted", {
+        roomId: changedRoomId,
+        entry,
+      })
+    })
+
+    connection.on("WaitingRejected", (changedRoomId, entry) => {
+      onEventReceivedRef.current?.("WaitingRejected", {
+        roomId: changedRoomId,
+        entry,
+      })
+    })
+
+    connection.on("WaitingCancelled", (changedRoomId, entry) => {
+      onEventReceivedRef.current?.("WaitingCancelled", {
+        roomId: changedRoomId,
+        entry,
+      })
+    })
+
+    const joinGroups = () => {
+      if (sessionId) {
+        connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
+          console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
+        })
+      }
+      if (roomId) {
+        connection.invoke("JoinRoom", Number(roomId)).catch((err) => {
+          console.error("[VideoChatSignalR] Failed to invoke JoinRoom:", err)
+        })
+      }
+    }
+
     connection
       .start()
       .then(() => {
         setIsConnected(true)
         console.log(
-          "[VideoChatSignalR] Connected successfully. Joining SignalR session:",
+          "[VideoChatSignalR] Connected successfully. Joining session/room:",
           sessionId,
+          roomId,
         )
-        connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
-          console.error("[VideoChatSignalR] Failed to invoke JoinSession:", err)
-        })
+        joinGroups()
       })
       .catch((err) => {
         console.error("[VideoChatSignalR] Connection failed:", err)
@@ -124,15 +228,11 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
 
     connection.onreconnected((connectionId) => {
       console.log(
-        "[VideoChatSignalR] Automatically reconnected. Re-joining SignalR session:",
+        "[VideoChatSignalR] Automatically reconnected. Re-joining session/room:",
         sessionId,
+        roomId,
       )
-      connection.invoke("JoinSession", Number(sessionId)).catch((err) => {
-        console.error(
-          "[VideoChatSignalR] Failed to re-invoke JoinSession after reconnect:",
-          err,
-        )
-      })
+      joinGroups()
     })
 
     connectionRef.current = connection
@@ -143,7 +243,7 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived) => {
         connectionRef.current.stop()
       }
     }
-  }, [sessionId, token])
+  }, [sessionId, token, roomId])
 
   return { isConnected, connection: connectionRef.current }
 }

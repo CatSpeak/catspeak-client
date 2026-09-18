@@ -14,6 +14,8 @@ const initialState = {
   /** Static info about the active call */
   callInfo: {
     roomId: null,
+    // Numeric cath-api room id (differs from roomId for class rooms).
+    apiRoomId: null,
     sessionId: null,
     callPath: null, // e.g. "/en/meet/42"
     roomData: null, // room object snapshot
@@ -21,6 +23,12 @@ const initialState = {
     initMicOn: false,
     initCamOn: false,
     isAISession: false,
+    /** Egress profile resolved by the token API ("standard" | "full") */
+    egressProfile: null,
+    /** Participant country — informational only; the server's egressProfile decides caps */
+    country: null,
+    /** Room-level high-quality flag (ticket 04) */
+    highQuality: false,
   },
   /** Breakout Rooms State */
   isBreakoutActive: false,
@@ -42,6 +50,7 @@ const videoCallSlice = createSlice({
         livekitToken,
         livekitServerUrl,
         roomId,
+        apiRoomId,
         sessionId,
         callPath,
         roomData,
@@ -49,6 +58,9 @@ const videoCallSlice = createSlice({
         initMicOn,
         initCamOn,
         isAISession,
+        egressProfile,
+        country,
+        highQuality,
       } = action.payload
 
       state.isInCall = true
@@ -57,6 +69,10 @@ const videoCallSlice = createSlice({
       state.livekitServerUrl = livekitServerUrl ?? state.livekitServerUrl
       state.callInfo = {
         roomId,
+        // Ticket 04: numeric cath-api room id used for room-governance calls.
+        // Class rooms keep "class-{id}" as the URL roomId but expose the numeric
+        // id here so governance endpoints / the SignalR room group stay valid.
+        apiRoomId: apiRoomId ?? (Number(roomId) > 0 ? Number(roomId) : null),
         sessionId,
         callPath,
         roomData,
@@ -64,6 +80,9 @@ const videoCallSlice = createSlice({
         initMicOn: initMicOn ?? false,
         initCamOn: initCamOn ?? false,
         isAISession: isAISession ?? false,
+        egressProfile: egressProfile ?? null,
+        country: country ?? null,
+        highQuality: highQuality ?? false,
       }
       state.isBreakoutActive = false
       state.breakoutRoomName = null

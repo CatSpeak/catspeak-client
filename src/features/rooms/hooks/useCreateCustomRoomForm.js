@@ -6,6 +6,7 @@ import {
   useGetMyCustomRoomsQuery,
   useCreateAdvancedRoomMutation,
 } from "@/store/api/roomsApi"
+import { validateRoomName } from "@/features/rooms/utils/roomNameValidation"
 
 const getLanguageName = (langCode) => {
   switch (langCode) {
@@ -35,6 +36,7 @@ export const useCreateCustomRoomForm = (open = true) => {
     password: "",
     maxParticipants: 10,
     description: "",
+    languageType: "",
   })
   const [thumbnailFile, setThumbnailFile] = useState(null)
   const [nameError, setNameError] = useState("")
@@ -43,7 +45,8 @@ export const useCreateCustomRoomForm = (open = true) => {
   const supportedLangCode = ["zh", "vi", "en", "ja"].includes(lang)
     ? lang
     : "en"
-  const selectedLanguage = getLanguageName(supportedLangCode)
+  const defaultLanguage = getLanguageName(supportedLangCode)
+  const selectedLanguage = formData.languageType || defaultLanguage
 
   const { data: customRoomsData } = useGetMyCustomRoomsQuery(undefined, {
     skip: !open,
@@ -62,6 +65,7 @@ export const useCreateCustomRoomForm = (open = true) => {
       password: "",
       maxParticipants: 10,
       description: "",
+      languageType: "",
     })
     setThumbnailFile(null)
     setNameError("")
@@ -76,8 +80,12 @@ export const useCreateCustomRoomForm = (open = true) => {
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    if (field === "name" && value.trim()) {
-      setNameError("")
+    if (field === "name") {
+      setNameError(
+        validateRoomName(value, {
+          messages: { tooLong: t.rooms?.customRooms?.nameMaxLength },
+        }),
+      )
     }
     if (field === "password" && value.trim()) {
       setPasswordError("")
@@ -95,8 +103,15 @@ export const useCreateCustomRoomForm = (open = true) => {
   const submitCreate = async (onSuccess) => {
     let hasError = false
 
-    if (!formData.name.trim()) {
-      setNameError(t.rooms?.createRoom?.nameRequired || "Room name is required")
+    const nameValidationError = validateRoomName(formData.name, {
+      required: true,
+      messages: {
+        required: t.rooms?.createRoom?.nameRequired,
+        tooLong: t.rooms?.customRooms?.nameMaxLength,
+      },
+    })
+    if (nameValidationError) {
+      setNameError(nameValidationError)
       hasError = true
     } else {
       setNameError("")

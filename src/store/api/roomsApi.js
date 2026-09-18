@@ -269,6 +269,47 @@ export const roomsApi = baseApi.injectEndpoints({
       invalidatesTags: ["CustomRooms", "Rooms"],
     }),
 
+    // --- Co-host foundation (ticket 01) ---
+    getRoomCoHost: builder.query({
+      query: (id) => `/rooms/${id}/co-host`,
+      providesTags: (result, error, id) => [{ type: "CoHost", id }],
+    }),
+    assignRoomCoHost: builder.mutation({
+      query: ({ id, coHostAccountId, permissions }) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "POST",
+        body: { coHostAccountId, permissions },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+    updateRoomCoHost: builder.mutation({
+      query: ({ id, permissions }) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "PUT",
+        body: { permissions },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+    revokeRoomCoHost: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/co-host`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "CoHost", id },
+        "Rooms",
+        "CustomRooms",
+      ],
+    }),
+
     // --- Host Moderation ---
     // Kick a participant from a room
     kickParticipant: builder.mutation({
@@ -283,12 +324,57 @@ export const roomsApi = baseApi.injectEndpoints({
     }),
 
     // Mute audio/video track of a participant
+    // Ticket 02: body { targetAccountId, trackSid?, trackKind?: 'audio'|'video', muted }
     muteParticipant: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `/rooms/${id}/moderation/mute`,
         method: "POST",
         body,
       }),
+    }),
+
+    // Ticket 02: mute all mics at once (verify sender holds mute_all, excludes self)
+    muteAllParticipants: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/mute-all`,
+        method: "POST",
+      }),
+    }),
+
+    // Ticket 03: room-scope "turn off all cameras" (camera_toggle). Server
+    // mutes published camera tracks via LiveKit.
+    cameraOffAll: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/camera-off-all`,
+        method: "POST",
+      }),
+    }),
+
+    // Ticket 01: single source of truth for room governance state
+    // (settings + co-host slice + my waiting status). Replaces the standalone
+    // self-unmute GET; the SignalR RoomSettingsChanged handler updates this
+    // cache in place.
+    getRoomState: builder.query({
+      query: (id) => `/rooms/${id}/state`,
+      providesTags: (result, error, id) => [{ type: "RoomState", id }],
+    }),
+    updateSelfUnmutePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/self-unmute-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+    // Ticket 02: student self-camera gate (mirrors self-unmute). Read from the
+    // room-state cache; the PUT invalidates it so the toggler refetches.
+    updateSelfCameraPolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/self-camera-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
     // Get list of banned participants for a room
@@ -305,6 +391,185 @@ export const roomsApi = baseApi.injectEndpoints({
         body: { targetAccountId },
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "BannedParticipants", id }],
+    }),
+
+    // --- Ticket 03: waiting queue ---
+    // Class pre-fills client-side from Pending enrollments; Custom fills on knock.
+    getWaitingQueue: builder.query({
+      query: (id) => `/rooms/${id}/waiting`,
+      providesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    getMyWaitingStatus: builder.query({
+      query: (id) => `/rooms/${id}/waiting/me`,
+      providesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    knockWaiting: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/waiting/knock`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+    admitWaiting: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/waiting/admit`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
+    }),
+    rejectWaiting: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/waiting/reject`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "WaitingQueue", id }],
+    }),
+    // Ticket 04: the waiting user withdraws their own request.
+    cancelWaiting: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/waiting/cancel`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "WaitingQueue", id }],
+    }),
+
+    // --- Ticket 04: room lock + end live for all ---
+    // Ticket 03: lock state is read from the RoomState cache (settings.roomLocked);
+    // only the mutation remains.
+    updateRoomLock: builder.mutation({
+      query: ({ id, locked }) => ({
+        url: `/rooms/${id}/lock`,
+        method: "PUT",
+        body: { locked },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+    endLiveSession: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/end-live`,
+        method: "POST",
+      }),
+    }),
+
+    // --- Ticket 02: student screen-share gate (default open, session-scoped) ---
+    // Host or co-host with manage_student_share toggles. The value is read from
+    // the room-state cache (no standalone GET) and the PUT invalidates it.
+    updateStudentSharePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/student-share-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+
+    // --- Ticket 02: member recording gate, server-side (default open) ---
+    // Host or co-host with record toggles; shared recording start is gated
+    // server-side via EnsureRecordingAllowedAsync. Value read from room state.
+    updateMemberRecordingPolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/member-recording-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+
+    // --- Ticket 01: Restrict Chat/Voice + Hands + Game Policy ---
+    restrictChat: builder.mutation({
+      query: ({ id, targetAccountId, reason }) => ({
+        url: `/rooms/${id}/moderation/restrict-chat`,
+        method: "POST",
+        body: { targetAccountId, reason },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
+    }),
+    unrestrictChat: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/moderation/unrestrict-chat`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
+    }),
+    restrictVoice: builder.mutation({
+      query: ({ id, targetAccountId, reason }) => ({
+        url: `/rooms/${id}/moderation/restrict-voice`,
+        method: "POST",
+        body: { targetAccountId, reason },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
+    }),
+    unrestrictVoice: builder.mutation({
+      query: ({ id, targetAccountId }) => ({
+        url: `/rooms/${id}/moderation/unrestrict-voice`,
+        method: "POST",
+        body: { targetAccountId },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RoomParticipants", id },
+      ],
+    }),
+    restrictVoiceAll: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/restrict-voice-all`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "RoomParticipants", id },
+      ],
+    }),
+    // Ticket 02: participant list with chat/voice restriction flags for
+    // bootstrap on join (and refresh after moderation changes).
+    getRoomParticipants: builder.query({
+      query: (id) => `/rooms/${id}/participants`,
+      providesTags: (result, error, id) => [{ type: "RoomParticipants", id }],
+    }),
+    lowerAllHands: builder.mutation({
+      query: (id) => ({
+        url: `/rooms/${id}/moderation/lower-all-hands`,
+        method: "POST",
+      }),
+    }),
+    updateGamePolicy: builder.mutation({
+      query: ({ id, allow }) => ({
+        url: `/rooms/${id}/moderation/game-policy`,
+        method: "PUT",
+        body: { allow },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+
+    // --- Ticket 04 (egress): room-level high-quality policy (host-only) ---
+    // Ticket 03: default off and read from the RoomState cache
+    // (settings.highQuality); only the host-only mutation remains.
+    updateHighQualityPolicy: builder.mutation({
+      query: ({ id, enabled }) => ({
+        url: `/rooms/${id}/moderation/high-quality-policy`,
+        method: "PUT",
+        body: { enabled },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
+    }),
+
+    // --- Ticket 04: pre-join require-approval toggle (host-only) ---
+    // Read from the RoomState cache (settings.requireApproval); the PUT
+    // invalidates it so the toggler refetches.
+    updateRequireApprovalPolicy: builder.mutation({
+      query: ({ id, requireApproval }) => ({
+        url: `/rooms/${id}/moderation/require-approval-policy`,
+        method: "PUT",
+        body: { requireApproval },
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "RoomState", id }],
     }),
 
 
@@ -772,6 +1037,11 @@ export const {
   // Host Moderation
   useKickParticipantMutation,
   useMuteParticipantMutation,
+  useMuteAllParticipantsMutation,
+  useCameraOffAllMutation,
+  useGetRoomStateQuery,
+  useUpdateSelfUnmutePolicyMutation,
+  useUpdateSelfCameraPolicyMutation,
   useGetBannedParticipantsQuery,
   useUnbanParticipantMutation,
   useInviteToRoomMutation,
@@ -784,6 +1054,38 @@ export const {
   useGetClassSessionsSpeakingAnalyticsQuery,
   useGetStudentSpeakingHistoryQuery,
   useGetSessionSpeakingStatsQuery,
+  // Ticket 03: waiting queue
+  useGetWaitingQueueQuery,
+  useGetMyWaitingStatusQuery,
+  useKnockWaitingMutation,
+  useAdmitWaitingMutation,
+  useRejectWaitingMutation,
+  // Ticket 04: waiter cancel + host-only require-approval toggle
+  useCancelWaitingMutation,
+  useUpdateRequireApprovalPolicyMutation,
+  // Ticket 04: room lock + end live
+  useUpdateRoomLockMutation,
+  useEndLiveSessionMutation,
+  // Ticket 02: student share + member recording policies (state-backed)
+  useUpdateStudentSharePolicyMutation,
+  useUpdateMemberRecordingPolicyMutation,
+  useRestrictChatMutation,
+  useUnrestrictChatMutation,
+  useRestrictVoiceMutation,
+  useUnrestrictVoiceMutation,
+  useRestrictVoiceAllMutation,
+  useLowerAllHandsMutation,
+  useUpdateGamePolicyMutation,
+  // Ticket 04 (egress): high-quality room policy
+  useUpdateHighQualityPolicyMutation,
+  // Ticket 02: participant restriction bootstrap
+  useGetRoomParticipantsQuery,
+  // Co-host foundation
+  useGetRoomCoHostQuery,
+  useLazyGetRoomCoHostQuery,
+  useAssignRoomCoHostMutation,
+  useUpdateRoomCoHostMutation,
+  useRevokeRoomCoHostMutation,
   // My Rooms & Bookmarks & Advanced Room Creation
   useGetMyRoomsQuery,
   useLazyGetMyRoomsQuery,

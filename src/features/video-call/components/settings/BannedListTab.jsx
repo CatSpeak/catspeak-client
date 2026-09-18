@@ -1,12 +1,15 @@
 import React from "react"
-import { ShieldCheck, UserCheck } from "lucide-react"
+import { ShieldAlert, ShieldCheck, UserCheck } from "lucide-react"
 import { toast } from "react-hot-toast"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
+import { canViewBannedList } from "@/features/video-call/utils/roomAccess"
+import { normalizeCoHost } from "@/features/co-host/constants"
 import {
   useGetBannedParticipantsQuery,
+  useGetRoomCoHostQuery,
   useUnbanParticipantMutation,
 } from "@/store/api/roomsApi"
 
@@ -17,8 +20,24 @@ const BannedListTab = () => {
   const currentRoomId = room?.id || roomId
   const isHost = isHostFromContext || isRoomHost(room, user?.accountId)
 
-  const { data: bannedData, isLoading: isBannedLoading } =
-    useGetBannedParticipantsQuery(currentRoomId, { skip: !isHost || !currentRoomId })
+  // Mirror the server contract: host + co-host with remove_student (kick/ban/
+  // unban are one family; mute_all no longer grants access).
+  const { data: coHostData } = useGetRoomCoHostQuery(currentRoomId, {
+    skip: !currentRoomId,
+  })
+  const canView = canViewBannedList({
+    isHost,
+    coHost: normalizeCoHost(coHostData),
+    accountId: user?.accountId,
+  })
+
+  const {
+    data: bannedData,
+    isLoading: isBannedLoading,
+    isError: isBannedError,
+  } = useGetBannedParticipantsQuery(currentRoomId, {
+    skip: !canView || !currentRoomId,
+  })
   const [unbanParticipant, { isLoading: isUnbanning }] =
     useUnbanParticipantMutation()
 
@@ -53,6 +72,16 @@ const BannedListTab = () => {
       {isBannedLoading ? (
         <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 text-center text-sm text-neutral-400">
           {t?.rooms?.waitingScreen?.loading || pl.loading || "Đang tải..."}
+        </div>
+      ) : isBannedError ? (
+        <div className="bg-white rounded-xl border border-[#e5e5e5] p-8 flex flex-col items-center justify-center text-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center">
+            <ShieldAlert size={24} />
+          </div>
+          <span className="text-sm text-neutral-600 max-w-sm">
+            {pl.forbiddenBannedList ||
+              "Bạn không có quyền xem danh sách bị cấm của phòng này."}
+          </span>
         </div>
       ) : bannedList.length === 0 ? (
         /* Clean Empty State */

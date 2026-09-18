@@ -55,7 +55,7 @@ export const usePlanFeatures = () => {
 
   // Pre-parsed limits for easy access in components
   const limits = {
-    maxActiveCustomRooms: getNumericLimit(PLAN_FEATURES.MAX_ACTIVE_CUSTOM_ROOMS, 0),
+    maxActiveCustomRooms: getNumericLimit(PLAN_FEATURES.MAX_ACTIVE_ROOMS, 0),
     maxParticipantsInCustomRooms: getNumericLimit(PLAN_FEATURES.MAX_PARTICIPANTS_IN_CUSTOM_ROOMS, 0),
     maxActiveStories: getNumericLimit(PLAN_FEATURES.MAX_ACTIVE_STORIES, 0),
     maxAiMessages: getNumericLimit(PLAN_FEATURES.MAX_AI_MESSAGES, 10),
@@ -63,7 +63,6 @@ export const usePlanFeatures = () => {
     maxRecordingStorageMb: getNumericLimit(PLAN_FEATURES.MAX_RECORDING_STORAGE_MB, 0),
     maxStorageMb: getNumericLimit(PLAN_FEATURES.MAX_RECORDING_STORAGE_MB, 0),
     allowRecording: hasFeature(PLAN_FEATURES.ALLOW_RECORDING),
-    allowCustomRooms: hasFeature(PLAN_FEATURES.ALLOW_CUSTOM_ROOMS),
     supportPriority: getFeatureLimit(PLAN_FEATURES.SUPPORT_PRIORITY) || "Standard",
   }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useGetRoomsQuery } from "@/store/api/roomsApi"
-import RoomCard from "../RoomCard"
+import CommunityRoomCard from "../CommunityRoomCard"
 import EmptyRoomState from "../EmptyRoomState"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import useResponsiveItemsPerPage from "@/features/rooms/hooks/useResponsiveItemsPerPage"
@@ -256,7 +256,7 @@ const CategoryRoomSection = ({
               key={room.roomId}
               className="w-[85%] sm:w-[45%] md:w-[320px] flex-shrink-0 snap-center sm:snap-start flex"
             >
-              <RoomCard room={room} />
+              <CommunityRoomCard room={room} />
             </div>
           ))}
           {(isLoading || isFetching) &&
@@ -321,7 +321,7 @@ const CategoryRoomSection = ({
                   />
                 ))
               : displayRooms.map((room) => (
-                  <RoomCard key={room.roomId} room={room} />
+                  <CommunityRoomCard key={room.roomId} room={room} />
                 ))}
           </Motion.div>
         </AnimatePresence>
