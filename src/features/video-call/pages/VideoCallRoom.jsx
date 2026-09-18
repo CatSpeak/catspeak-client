@@ -25,8 +25,9 @@ import VirtualBackgroundPicker from "@/features/video-call/components/VirtualBac
 import AvatarUrlPicker from "@/features/video-call/components/AvatarUrlPicker"
 import SubtitleOverlay from "@/features/video-call/components/SubtitleOverlay"
 import SubtitleOverlayNonAI from "@/features/video-call/components/SubtitleOverlayNonAI"
-import MediaSpotlightTile from "@/features/video-call/components/MediaSpotlightTile"
+import SyncedYouTubePlayer from "@/features/video-call/components/SyncedYouTubePlayer"
 import MediaParticipantStrip from "@/features/video-call/components/MediaParticipantStrip"
+import WatchTogetherToolbar from "@/features/video-call/components/WatchTogetherToolbar"
 import WatchTogetherPanel from "@/features/video-call/components/WatchTogetherPanel"
 import BreakoutBanner from "@/features/video-call/components/breakout-rooms/active/BreakoutBanner"
 import BreakoutSidebarPanel from "@/features/video-call/components/breakout-rooms/BreakoutSidebarPanel"
@@ -43,6 +44,8 @@ import {
   isSpeakingTimeBalanceSupported,
 } from "@/features/video-call/utils/roomTypeHelpers"
 import { useBreakoutTimer } from "@/features/video-call/hooks/useBreakoutTimer"
+import { shouldShowCenterPlay } from "@/features/video-call/utils/watchPlayerVars"
+import { getWatchMediaUnitClass } from "@/features/video-call/utils/watchMediaLayout"
 
 const VideoCallRoomContent = () => {
   const { t } = useLanguage()
@@ -85,15 +88,20 @@ const VideoCallRoomContent = () => {
     confirmStopRecording,
     participants,
     isHost: isHostFromContext,
-    // Watch together (YouTube)
+    // Watch together (YouTube, client-sync)
     mediaActive,
-    mediaTrackRef,
+    mediaVideoId,
     mediaTitle,
     isMediaHost,
     isStartingMedia,
     isStoppingMedia,
     startMedia,
     stopMedia,
+    mediaPlayerRef,
+    needsTapToSync,
+    syncError,
+    tapToSync,
+    reportSyncError,
     showWatchTogether,
     setShowWatchTogether,
   } = useVideoCallContext()
@@ -102,9 +110,30 @@ const VideoCallRoomContent = () => {
     (s) => s.videoCall,
   )
   const isHost = isHostFromContext
+  const mediaRef = useRef(null)
+  // Native YT state of the host copy (viewers follow via watch-sync and never
+  // report). Drives the host-only center play button over the shield.
+  const [hostPlayerState, setHostPlayerState] = useState(null)
 
   const dispatch = useDispatch()
   const [stopBreakoutRooms] = useStopBreakoutRoomsMutation()
+
+  // Auto-close the panel on success only (Q2=A, Q10=A). Failures return
+  // null/false from the hook, leaving the panel open to fix the link (Q5=A).
+  // The panel also closes itself; this covers the toolbar Stop button.
+  const handleStartWatchTogether = useCallback(
+    async (url) => {
+      const result = await startMedia(url)
+      if (result) setShowWatchTogether(false)
+      return result
+    },
+    [startMedia, setShowWatchTogether],
+  )
+  const handleStopWatchTogether = useCallback(async () => {
+    const result = await stopMedia()
+    if (result) setShowWatchTogether(false)
+    return result
+  }, [stopMedia, setShowWatchTogether])
 
   const handleTimerEnd = useCallback(() => {
     if (isHost && parentSessionId) {
@@ -254,14 +283,49 @@ const VideoCallRoomContent = () => {
             />
           )}
           <div className="flex flex-1 min-h-0 relative">
-            {mediaActive && mediaTrackRef ? (
-              <div className="relative h-full w-full">
-                <MediaSpotlightTile
-                  trackRef={mediaTrackRef}
-                  title={mediaTitle}
-                  onStop={isMediaHost ? stopMedia : undefined}
-                />
-                <MediaParticipantStrip participants={participants} />
+            {mediaActive && mediaVideoId ? (
+              <div className="flex h-full w-full min-h-0 flex-col overflow-y-auto p-3 sm:p-4">
+                <div className={getWatchMediaUnitClass()}>
+                  {/* Cinematic fullscreen: only this card (video + toolbar)
+                      goes fullscreen on a deep-black stage. Participant strip
+                      stays in the normal layout behind. */}
+                  <div
+                    ref={mediaRef}
+                    className="watch-fs-card w-full shrink-0 overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/[0.06]"
+                  >
+                    <SyncedYouTubePlayer
+                      ref={mediaPlayerRef}
+                      videoId={mediaVideoId}
+                      needsTapToSync={isMediaHost ? false : needsTapToSync}
+                      onTapToSync={tapToSync}
+                      onError={reportSyncError}
+                      onStateChange={isMediaHost ? setHostPlayerState : undefined}
+                      showCenterPlay={shouldShowCenterPlay(hostPlayerState, {
+                        isHost: isMediaHost,
+                        needsTapToSync: isMediaHost ? false : needsTapToSync,
+                        hasError: !!syncError,
+                      })}
+                      onCenterPlay={() => mediaPlayerRef.current?.play?.()}
+                      syncError={syncError}
+                      t={t}
+                      className="rounded-none watch-fs-video"
+                    />
+                    <WatchTogetherToolbar
+                      isHost={isMediaHost}
+                      mediaTitle={mediaTitle}
+                      playerRef={mediaPlayerRef}
+                      mediaRef={mediaRef}
+                      onChangeVideo={() => setShowWatchTogether(true)}
+                      onStop={handleStopWatchTogether}
+                      isStopping={isStoppingMedia}
+                      needsTapToSync={isMediaHost ? false : needsTapToSync}
+                      onTapToSync={tapToSync}
+                      playerState={isMediaHost ? hostPlayerState : null}
+                      t={t}
+                    />
+                  </div>
+                  <MediaParticipantStrip participants={participants} />
+                </div>
               </div>
             ) : (
               <VideoGrid />
@@ -288,8 +352,8 @@ const VideoCallRoomContent = () => {
             isHost={isMediaHost}
             isStarting={isStartingMedia}
             isStopping={isStoppingMedia}
-            onStart={startMedia}
-            onStop={stopMedia}
+            onStart={handleStartWatchTogether}
+            onStop={handleStopWatchTogether}
           />
           {/* AI Room subtitles — only show in AI rooms when enabled */}
           {isAISession && showCC && <SubtitleOverlay />}
