@@ -1,5 +1,5 @@
 import { baseApi } from "@/store/api/baseApi"
-import { createSessionMock } from "./mockAdapter"
+import { createSessionMock, submitTurnMock } from "./mockAdapter"
 
 export const placementTestApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -7,8 +7,12 @@ export const placementTestApi = baseApi.injectEndpoints({
       queryFn: (args) => createSessionMock(args),
       invalidatesTags: ["PlacementSession"],
     }),
+    submitTurn: builder.mutation({
+      queryFn: (args) => submitTurnMock(args),
+      invalidatesTags: ["PlacementSession"],
+    }),
   }),
   overrideExisting: false,
 })
 
-export const { useCreateSessionMutation } = placementTestApi
+export const { useCreateSessionMutation, useSubmitTurnMutation } = placementTestApi
