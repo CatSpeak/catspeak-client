@@ -16,6 +16,7 @@ import { voucherTranslations } from "@/features/vouchers/i18n"
 import { bugReportTranslations } from "@/features/bug-report/i18n"
 import { chatAssistantTranslations } from "@/features/chat-assistant/i18n"
 import { helpTranslations } from "@/features/help/i18n"
+import { placementTestTranslations } from "@/features/placement-test/i18n"
 
 const isObject = (item) =>
   Boolean(item && typeof item === "object" && !Array.isArray(item))
@@ -56,6 +57,7 @@ export const translations = {
     bugReportTranslations.vi,
     chatAssistantTranslations.vi,
     helpTranslations.vi,
+    placementTestTranslations.vi,
   ),
   en: deepMerge(
     en,
@@ -72,6 +74,7 @@ export const translations = {
     bugReportTranslations.en,
     chatAssistantTranslations.en,
     helpTranslations.en,
+    placementTestTranslations.en,
   ),
   zh: deepMerge(
     zh,
@@ -88,6 +91,7 @@ export const translations = {
     bugReportTranslations.zh,
     chatAssistantTranslations.zh,
     helpTranslations.zh,
+    placementTestTranslations.zh,
   ),
   ja: deepMerge(
     ja,
@@ -104,6 +108,7 @@ export const translations = {
     bugReportTranslations.ja,
     chatAssistantTranslations.ja,
     helpTranslations.ja,
+    placementTestTranslations.ja,
   ),
 }
 

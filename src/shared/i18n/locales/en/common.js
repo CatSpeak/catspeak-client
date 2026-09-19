@@ -65,6 +65,8 @@ export default {
     myLearning: "My Learning",
     manageMaterials: "Manage Materials",
     exploreCourses: "Explore Courses",
+    aiTutor: "AI Tutor",
+    placementTest: "Level Assessment",
     messages: "Messages",
     settings: "Settings",
     help: "Help",

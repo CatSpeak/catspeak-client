@@ -32,7 +32,7 @@ import LanguageLayout from "./LanguageLayout";
 import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
 import { Navigate } from "react-router-dom";
-import { AuthGuard, RoleGuard } from "@/shared/components";
+import { AuthGuard, CommunityGuard, RoleGuard } from "@/shared/components";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
@@ -44,6 +44,21 @@ import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/Li
 import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage";
 
 import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton";
+const PlacementTestPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementTestPage"),
+);
+const PlacementSessionPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementSessionPage"),
+);
+const PlacementScoringPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementScoringPage"),
+);
+const PlacementResultPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementResultPage"),
+);
+const PlacementProfilePage = lazy(
+  () => import("@/features/placement-test/pages/PlacementProfilePage"),
+);
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
@@ -275,6 +290,66 @@ const routesConfig = [
               <LazyRoute>
                 <WebsitePage />
               </LazyRoute>
+            ),
+          },
+          {
+            path: "placement-test",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementTestPage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
+            ),
+          },
+          {
+            path: "placement-test/session",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementSessionPage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
+            ),
+          },
+          {
+            path: "placement-test/scoring",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementScoringPage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
+            ),
+          },
+          {
+            path: "placement-test/result",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementResultPage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
+            ),
+          },
+          {
+            path: "placement-test/profile",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementProfilePage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
             ),
           },
           {
