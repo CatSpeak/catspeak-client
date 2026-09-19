@@ -2,6 +2,7 @@ import { baseApi } from "@/store/api/baseApi"
 import {
   adjustLevelMock,
   createSessionMock,
+  getRetakeStatusMock,
   scoreSessionMock,
   submitTurnMock,
 } from "./mockAdapter"
@@ -11,6 +12,10 @@ export const placementTestApi = baseApi.injectEndpoints({
     createSession: builder.mutation({
       queryFn: (args) => createSessionMock(args),
       invalidatesTags: ["PlacementSession"],
+    }),
+    getRetakeStatus: builder.query({
+      queryFn: () => getRetakeStatusMock(),
+      providesTags: ["PlacementResult"],
     }),
     submitTurn: builder.mutation({
       queryFn: (args) => submitTurnMock(args),
@@ -30,6 +35,7 @@ export const placementTestApi = baseApi.injectEndpoints({
 
 export const {
   useCreateSessionMutation,
+  useGetRetakeStatusQuery,
   useSubmitTurnMutation,
   useScoreSessionMutation,
   useAdjustLevelMutation,

@@ -5,6 +5,7 @@ import {
   adjustLevelMock,
   buildSession,
   createSessionMock,
+  getRetakeStatusMock,
   isScoringFailureForced,
   scoreSessionMock,
   submitTurnMock,
@@ -114,6 +115,56 @@ describe("submitTurnMock", () => {
     )
 
     expect(result.error.status).toBe(404)
+  })
+})
+
+describe("getRetakeStatusMock", () => {
+  const DAY_MS = 24 * 60 * 60 * 1000
+
+  it("reports a cooling cooldown from the persisted test timestamp", async () => {
+    const scoredAt = 1700000000000
+    const response = await getRetakeStatusMock({
+      delayMs: 0,
+      readResult: () => ({ scoredAt }),
+      now: () => scoredAt + 12 * DAY_MS,
+    })
+
+    expect(response.data).toMatchObject({
+      eligible: false,
+      lastTestedAt: scoredAt,
+      eligibleRetakeAt: scoredAt + 14 * DAY_MS,
+      daysRemaining: 2,
+      daysElapsed: 12,
+      progress: 85,
+      totalDays: 14,
+      hasHistory: true,
+    })
+  })
+
+  it("reports eligibility once 14 days have elapsed", async () => {
+    const scoredAt = 1700000000000
+    const response = await getRetakeStatusMock({
+      delayMs: 0,
+      readResult: () => ({ scoredAt }),
+      now: () => scoredAt + 20 * DAY_MS,
+    })
+
+    expect(response.data.eligible).toBe(true)
+    expect(response.data.daysRemaining).toBe(0)
+  })
+
+  it("marks a student without a result as eligible with no history", async () => {
+    const response = await getRetakeStatusMock({
+      delayMs: 0,
+      readResult: () => null,
+      now: () => 1,
+    })
+
+    expect(response.data).toMatchObject({
+      eligible: true,
+      lastTestedAt: null,
+      hasHistory: false,
+    })
   })
 })
 

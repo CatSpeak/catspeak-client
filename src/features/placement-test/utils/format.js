@@ -10,3 +10,11 @@ export const formatClock = (ms = 0) => {
   const seconds = totalSeconds % 60
   return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
 }
+
+export const formatDate = (value) => {
+  const date = value instanceof Date ? value : new Date(Number(value))
+  if (Number.isNaN(date.getTime())) return ""
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  return `${day}/${month}/${date.getFullYear()}`
+}

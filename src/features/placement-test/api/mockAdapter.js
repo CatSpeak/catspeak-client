@@ -1,6 +1,7 @@
 import { SESSION_STATUS } from "../constants/session"
 import { applySelfAdjust, clampHsk, scoreSession } from "../engine"
 import { createSessionCode } from "../utils/session"
+import { getRetakeEligibility } from "../utils/cooldown"
 import {
   readActiveSession,
   readResult,
@@ -59,6 +60,31 @@ export const createSessionMock = async (
   const session = buildSession({ targetBand, studentId, ...sessionDeps })
   persist(session)
   return { data: session }
+}
+
+export const getRetakeStatusMock = async ({
+  delayMs = MOCK_LATENCY_MS,
+  readResult: readStoredResult = readResult,
+  now = Date.now,
+} = {}) => {
+  await wait(delayMs)
+  const result = readStoredResult()
+  const lastTestedAt =
+    Number(result?.scoredAt) || Number(result?.adjustedAt) || null
+  const eligibility = getRetakeEligibility({ lastTestedAt, now })
+
+  return {
+    data: {
+      eligible: eligibility.eligible,
+      lastTestedAt: eligibility.lastTestedAt,
+      eligibleRetakeAt: eligibility.eligibleAt,
+      daysRemaining: eligibility.daysRemaining,
+      daysElapsed: eligibility.daysElapsed,
+      progress: eligibility.progress,
+      totalDays: eligibility.totalDays,
+      hasHistory: eligibility.hasHistory,
+    },
+  }
 }
 
 export const submitTurnMock = async (
