@@ -1,10 +1,28 @@
 import { SESSION_STATUS } from "../constants/session"
+import { scoreSession } from "../engine"
 import { createSessionCode } from "../utils/session"
-import { readActiveSession, saveActiveSession } from "../utils/sessionStorage"
+import {
+  readActiveSession,
+  saveActiveSession,
+  saveResult,
+} from "../utils/sessionStorage"
 
 export const MOCK_LATENCY_MS = 400
+export const MOCK_SCORING_LATENCY_MS = 1800
+export const SCORING_FAILURE_FLAG_KEY = "catspeak_pt_force_scoring_failure"
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export const isScoringFailureForced = ({ storage } = {}) => {
+  const target =
+    storage ?? (typeof window !== "undefined" ? window.localStorage : null)
+  if (!target) return false
+  try {
+    return target.getItem(SCORING_FAILURE_FLAG_KEY) === "1"
+  } catch {
+    return false
+  }
+}
 
 export const buildSession = ({
   targetBand,
@@ -99,4 +117,49 @@ export const submitTurnMock = async (
       status: SESSION_STATUS.IN_PROGRESS,
     },
   }
+}
+
+export const scoreSessionMock = async (
+  { sessionId, fail } = {},
+  {
+    delayMs = MOCK_SCORING_LATENCY_MS,
+    read = readActiveSession,
+    persist = saveActiveSession,
+    persistResult = saveResult,
+    forcedFailure = isScoringFailureForced,
+    now = Date.now,
+  } = {},
+) => {
+  await wait(delayMs)
+  const session = read()
+  if (!session || (sessionId && session.id !== sessionId)) {
+    return {
+      error: { status: 404, data: { message: "placement_session_not_found" } },
+    }
+  }
+  if (fail || forcedFailure()) {
+    return {
+      error: { status: 503, data: { message: "placement_scoring_failed" } },
+    }
+  }
+
+  const timestamp = typeof now === "function" ? now() : now
+  const turns = Array.isArray(session.turns) ? session.turns : []
+  const result = {
+    ...scoreSession({ turns, now }),
+    sessionId: session.id,
+    code: session.code,
+    answeredCount: turns.length,
+  }
+  persistResult(result)
+
+  const completed = {
+    ...session,
+    status: SESSION_STATUS.COMPLETED,
+    finalBand: result.band,
+    updatedAt: timestamp,
+  }
+  persist(completed)
+
+  return { data: { result, session: completed } }
 }

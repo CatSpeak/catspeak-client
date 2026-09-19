@@ -208,9 +208,38 @@ export default {
       reconnectRetryCta: "今すぐ再接続 🔄",
     },
     scoring: {
-      title: "採点中",
-      body: "システムが 5 つの回答を分析しています。結果レポートは次のステップで完成します。",
-      backCta: "試験ルームに戻る",
+      title: "スピーキング結果を計算中",
+      subtitle: "HSK 3.0 能力評価",
+      analyzingPill: "● データを分析中...",
+      heading: "スピーキング能力を集計中...",
+      body: "AI モデルがあなたの 5 つの回答をネイティブ音声バンクと HSK 3.0 評価基準に照合しています。",
+      stepPronunciation: "発音と四声の分析",
+      stepVocabulary: "語彙と文法の評価",
+      stepRanking: "HSK 3.0 レベル判定",
+      statusDone: "完了",
+      statusActive: "計算中（{{percent}}%）...",
+      statusPending: "待機中...",
+      errorTitle: "採点サーバー接続エラー",
+      errorSubtitle: "サーバー接続障害",
+      helpCta: "技術サポート",
+      helpNotice:
+        "技術サポートのリクエストを送信しました。CatSpeak チームが折り返しご連絡します。",
+      errorHeading: "評価結果を読み込めません",
+      errorBody:
+        "試験データは安全に保存されていますが、AI 採点サーバーとの接続が中断されました。再送信して結果を取得してください。",
+      safeTitle:
+        "音声回答 {{answered}}/{{total}} 件すべてが安全に保存されています",
+      safeBody:
+        "CatSpeak クラウドに音声ファイルが完全に保存されています。再試行すると、最初から試験をやり直すことなく AI が分析を続行します。",
+      safeMeta:
+        "セッションコード：#{{code}}  ·  PDPA 準拠のセキュリティ  ·  ネットワーク安定時に自動再試行",
+      retryCta: "今すぐ採点を再試行",
+      saveLaterCta: "保存してダッシュボードで後で見る",
+    },
+    result: {
+      title: "レベル評価結果",
+      body: "HSK スピーキングの結果レポートができました。詳細画面は次のステップで完成します。",
+      backCta: "レベル評価に戻る",
     },
   },
 }

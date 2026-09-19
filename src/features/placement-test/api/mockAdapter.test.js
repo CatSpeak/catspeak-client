@@ -1,6 +1,13 @@
 import { describe, expect, it, vi } from "vitest"
 import { SESSION_STATUS } from "../constants/session"
-import { buildSession, createSessionMock, submitTurnMock } from "./mockAdapter"
+import {
+  SCORING_FAILURE_FLAG_KEY,
+  buildSession,
+  createSessionMock,
+  isScoringFailureForced,
+  scoreSessionMock,
+  submitTurnMock,
+} from "./mockAdapter"
 
 describe("buildSession", () => {
   it("builds the persisted session shape", () => {
@@ -106,5 +113,113 @@ describe("submitTurnMock", () => {
     )
 
     expect(result.error.status).toBe(404)
+  })
+})
+
+describe("isScoringFailureForced", () => {
+  it("reads the forced-failure flag from storage", () => {
+    expect(
+      isScoringFailureForced({ storage: { getItem: () => "1" } }),
+    ).toBe(true)
+    expect(
+      isScoringFailureForced({ storage: { getItem: () => null } }),
+    ).toBe(false)
+  })
+
+  it("uses the documented storage key", () => {
+    const getItem = vi.fn(() => "1")
+    isScoringFailureForced({ storage: { getItem } })
+    expect(getItem).toHaveBeenCalledWith(SCORING_FAILURE_FLAG_KEY)
+  })
+})
+
+describe("scoreSessionMock", () => {
+  const scoredSession = () => ({
+    ...buildSession({ targetBand: "hsk3_4", now: () => 1, random: () => 0.5 }),
+    id: "session-1",
+    code: "CS-PT-2026-8891",
+    turns: [
+      {
+        order: 1,
+        questionId: "q1-name",
+        level: 3,
+        transcript: "我喜欢学习中文",
+        durationMs: 4200,
+        retryCount: 0,
+      },
+    ],
+  })
+
+  it("scores the session, persists the result and completes the session", async () => {
+    const persist = vi.fn()
+    const persistResult = vi.fn()
+
+    const result = await scoreSessionMock(
+      { sessionId: "session-1" },
+      {
+        delayMs: 0,
+        read: () => scoredSession(),
+        persist,
+        persistResult,
+        forcedFailure: () => false,
+        now: () => 123,
+      },
+    )
+
+    expect(result.data.result).toMatchObject({
+      sessionId: "session-1",
+      code: "CS-PT-2026-8891",
+      answeredCount: 1,
+      scoredAt: 123,
+    })
+    expect(typeof result.data.result.band).toBe("number")
+    expect(persistResult).toHaveBeenCalledWith(result.data.result)
+    expect(result.data.session.status).toBe(SESSION_STATUS.COMPLETED)
+    expect(result.data.session.finalBand).toBe(result.data.result.band)
+    expect(persist).toHaveBeenCalledWith(result.data.session)
+  })
+
+  it("rejects when there is no active session", async () => {
+    const result = await scoreSessionMock(
+      { sessionId: "missing" },
+      { delayMs: 0, read: () => null, persistResult: vi.fn() },
+    )
+
+    expect(result.error.status).toBe(404)
+  })
+
+  it("fails with 503 when an explicit fail flag is passed", async () => {
+    const persistResult = vi.fn()
+
+    const result = await scoreSessionMock(
+      { sessionId: "session-1", fail: true },
+      {
+        delayMs: 0,
+        read: () => scoredSession(),
+        persist: vi.fn(),
+        persistResult,
+        forcedFailure: () => false,
+        now: () => 1,
+      },
+    )
+
+    expect(result.error.status).toBe(503)
+    expect(persistResult).not.toHaveBeenCalled()
+  })
+
+  it("fails with 503 when forced failure is set", async () => {
+    const result = await scoreSessionMock(
+      { sessionId: "session-1" },
+      {
+        delayMs: 0,
+        read: () => scoredSession(),
+        persist: vi.fn(),
+        persistResult: vi.fn(),
+        forcedFailure: () => true,
+        now: () => 1,
+      },
+    )
+
+    expect(result.error.status).toBe(503)
   })
 })

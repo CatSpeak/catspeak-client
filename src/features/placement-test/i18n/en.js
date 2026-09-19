@@ -213,9 +213,38 @@ export default {
       reconnectRetryCta: "Reconnect Now 🔄",
     },
     scoring: {
-      title: "Scoring",
-      body: "The system is analysing your 5 answers. The result report will be finished in the next step.",
-      backCta: "Back to the exam room",
+      title: "Calculating Your Speaking Result",
+      subtitle: "HSK 3.0 Proficiency Assessment",
+      analyzingPill: "● Analysing data...",
+      heading: "Compiling Your Speaking Proficiency...",
+      body: "The AI model is cross-checking your 5 answers against the native speech bank and the HSK 3.0 assessment standard.",
+      stepPronunciation: "Pronunciation & 4 Tones analysis",
+      stepVocabulary: "Vocabulary & Grammar scoring",
+      stepRanking: "HSK 3.0 level ranking",
+      statusDone: "Completed",
+      statusActive: "Calculating ({{percent}}%)...",
+      statusPending: "Waiting...",
+      errorTitle: "Scoring Server Connection Error",
+      errorSubtitle: "Server Connection Incident",
+      helpCta: "Technical help",
+      helpNotice:
+        "Your technical help request has been sent. The CatSpeak team will reach out shortly.",
+      errorHeading: "Unable to Load the Assessment Result",
+      errorBody:
+        "Your exam data is safely stored, but the connection to the AI scoring server was interrupted. Please resubmit to receive your result.",
+      safeTitle:
+        "All {{answered}}/{{total}} spoken answers have been safely preserved",
+      safeBody:
+        "The CatSpeak cloud has fully stored your audio files. When you retry, the AI will continue the analysis without you redoing the test from the start.",
+      safeMeta:
+        "Session code: #{{code}}  ·  PDPA-compliant security  ·  Auto-retry once the network is stable",
+      retryCta: "Retry scoring now",
+      saveLaterCta: "Save & view later on Dashboard",
+    },
+    result: {
+      title: "Placement Assessment Result",
+      body: "Your HSK speaking result report is ready. The detailed screen will be finished in the next step.",
+      backCta: "Back to Placement Test",
     },
   },
 }

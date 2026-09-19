@@ -212,9 +212,38 @@ export default {
       reconnectRetryCta: "Thử Kết Nối Lại Ngay 🔄",
     },
     scoring: {
-      title: "Đang chấm điểm",
-      body: "Hệ thống đang phân tích 5 câu trả lời của bạn. Báo cáo kết quả sẽ được hoàn thiện ở bước tiếp theo.",
-      backCta: "Quay lại phòng thi",
+      title: "Đang Tính Toán Kết Quả Khẩu Ngữ",
+      subtitle: "Đánh Giá Năng Lực Chuẩn HSK 3.0",
+      analyzingPill: "● Đang phân tích dữ liệu...",
+      heading: "Đang Tổng Hợp Năng Lực Khẩu Ngữ...",
+      body: "Mô hình AI đang đối chiếu 5 câu trả lời của bạn với ngân hàng ngữ âm bản xứ và chuẩn đánh giá HSK 3.0.",
+      stepPronunciation: "Phân tích Phát âm & 4 Thanh điệu",
+      stepVocabulary: "Đánh giá Vốn từ vựng & Ngữ pháp",
+      stepRanking: "Quy chuẩn xếp loại cấp độ HSK 3.0",
+      statusDone: "Hoàn thành",
+      statusActive: "Đang tính ({{percent}}%)...",
+      statusPending: "Đang chờ...",
+      errorTitle: "Lỗi Kết Nối Máy Chủ Tính Điểm",
+      errorSubtitle: "Sự Cố Kết Nối Máy Chủ",
+      helpCta: "Trợ giúp kỹ thuật",
+      helpNotice:
+        "Đã gửi yêu cầu trợ giúp kỹ thuật. Đội ngũ CatSpeak sẽ liên hệ sớm.",
+      errorHeading: "Không Thể Tải Kết Quả Đánh Giá",
+      errorBody:
+        "Dữ liệu bài thi của bạn đã được lưu an toàn, nhưng kết nối tới máy chủ AI bị gián đoạn. Vui lòng thử gửi lại để nhận kết quả.",
+      safeTitle:
+        "Toàn bộ {{answered}}/{{total}} câu trả lời bằng giọng nói đã được bảo lưu an toàn",
+      safeBody:
+        "Hệ thống đám mây CatSpeak đã lưu trữ đầy đủ các tệp âm thanh của bạn. Khi bấm thử lại, AI sẽ tiếp tục phân tích mà bạn không cần phải làm lại bài thi từ đầu.",
+      safeMeta:
+        "Mã phiên: #{{code}}  ·  Bảo mật chuẩn PDPA  ·  Tự động retry khi mạng ổn định",
+      retryCta: "Thử tính điểm lại ngay",
+      saveLaterCta: "Lưu & Xem sau trên Dashboard",
+    },
+    result: {
+      title: "Kết quả Đánh giá Trình độ",
+      body: "Báo cáo kết quả khẩu ngữ HSK của bạn đã sẵn sàng. Màn hình chi tiết sẽ được hoàn thiện ở bước tiếp theo.",
+      backCta: "Về trang Đánh giá trình độ",
     },
   },
 }
