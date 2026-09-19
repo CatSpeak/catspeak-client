@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
+import { clampScore } from "../engine"
 import {
   buildAdjustOptions,
-  clampScore,
   computeOverallScore,
   getBandDescriptor,
   getCefr,

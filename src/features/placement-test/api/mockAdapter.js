@@ -1,7 +1,15 @@
 import { SESSION_STATUS } from "../constants/session"
-import { applySelfAdjust, clampHsk, scoreSession } from "../engine"
+import {
+  TOTAL_TURNS,
+  applySelfAdjust,
+  clampHsk,
+  scoreSession,
+  selectNextQuestion,
+} from "../engine"
 import { createSessionCode } from "../utils/session"
 import { getRetakeEligibility } from "../utils/cooldown"
+import { isUnfinishedSession } from "../utils/sessionLifecycle"
+import { upsertTurn } from "../utils/turns"
 import {
   readActiveSession,
   readResult,
@@ -87,6 +95,39 @@ export const getRetakeStatusMock = async ({
   }
 }
 
+export const getActiveSessionMock = async ({
+  delayMs = MOCK_LATENCY_MS,
+  read = readActiveSession,
+} = {}) => {
+  await wait(delayMs)
+  const session = read()
+  return { data: isUnfinishedSession(session) ? session : null }
+}
+
+export const resumeSessionMock = async (
+  { sessionId } = {},
+  {
+    delayMs = MOCK_LATENCY_MS,
+    read = readActiveSession,
+    totalTurns = TOTAL_TURNS,
+  } = {},
+) => {
+  await wait(delayMs)
+  const session = read()
+  if (!session || (sessionId && session.id !== sessionId)) {
+    return {
+      error: { status: 404, data: { message: "placement_session_not_found" } },
+    }
+  }
+  const answeredCount = Array.isArray(session.turns) ? session.turns.length : 0
+  return {
+    data: {
+      session,
+      remainingTurns: Math.max(0, totalTurns - answeredCount),
+    },
+  }
+}
+
 export const submitTurnMock = async (
   {
     sessionId,
@@ -103,6 +144,7 @@ export const submitTurnMock = async (
     persist = saveActiveSession,
     read = readActiveSession,
     now = Date.now,
+    random = Math.random,
   } = {},
 ) => {
   await wait(delayMs)
@@ -123,10 +165,7 @@ export const submitTurnMock = async (
     submittedAt: timestamp,
   }
 
-  const turns = (Array.isArray(session.turns) ? session.turns : [])
-    .filter((entry) => entry.order !== turn.order)
-    .concat(turn)
-    .sort((a, b) => a.order - b.order)
+  const turns = upsertTurn(session.turns, turn)
 
   const updated = {
     ...session,
@@ -136,11 +175,20 @@ export const submitTurnMock = async (
   }
   persist(updated)
 
+  const nextQuestion =
+    selectNextQuestion({
+      targetBand: updated.targetBand,
+      turns,
+      order: turn.order + 1,
+      random,
+    }) || null
+
   return {
     data: {
       accepted: true,
       turn,
       session: updated,
+      nextQuestion,
       status: SESSION_STATUS.IN_PROGRESS,
     },
   }

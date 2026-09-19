@@ -1,11 +1,11 @@
 import { Play, ShieldCheck } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 import { PillButton } from "@/shared/components/ui/buttons"
-import { formatTemplate } from "../../utils/format"
 import {
   formatDurationShort,
   formatExpiryStamp,
-} from "../../utils/sessionLifecycle"
+  formatTemplate,
+} from "../../utils/format"
 
 const ResumeSessionModal = ({
   open,

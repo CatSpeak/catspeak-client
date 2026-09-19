@@ -10,10 +10,6 @@ const defaultChannelFactory = () => {
   }
 }
 
-/**
- * Injectable transport over BroadcastChannel so the cross-tab session
- * takeover logic can be driven by a fake channel in tests.
- */
 export const createSessionBroadcast = ({
   createChannel = defaultChannelFactory,
   now = Date.now,
@@ -47,7 +43,7 @@ export const createSessionBroadcast = ({
         try {
           target.removeEventListener("message", onMessage)
         } catch {
-          // ignore teardown errors
+          return
         }
       }
     },
@@ -55,7 +51,7 @@ export const createSessionBroadcast = ({
       try {
         channel?.close()
       } catch {
-        // ignore teardown errors
+        return
       }
       channel = null
     },

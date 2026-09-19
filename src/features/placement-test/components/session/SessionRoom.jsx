@@ -20,7 +20,7 @@ const SessionRoom = () => {
   const loop = useConversationLoop()
 
   const handleConfigure = () => {
-    if (copy.configureNotice) toast(copy.configureNotice)
+    if (copy.configureNotice) toast.info(copy.configureNotice)
   }
 
   if (!loop.ready) {

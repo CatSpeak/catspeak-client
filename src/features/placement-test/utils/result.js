@@ -1,4 +1,4 @@
-import { clampHsk } from "../engine"
+import { clampHsk, clampScore } from "../engine"
 
 export const DIMENSION_KEYS = ["pronunciation", "vocabulary", "grammar", "fluency"]
 
@@ -23,12 +23,6 @@ const CEFR_BY_BAND = {
 const ADJUST_DELTAS = { down: -1, keep: 0, up: 1 }
 
 export const ADJUST_OPTION_KEYS = ["down", "keep", "up"]
-
-export const clampScore = (value) => {
-  const number = Number(value)
-  if (!Number.isFinite(number)) return 0
-  return Math.min(100, Math.max(0, Math.round(number)))
-}
 
 export const getTierKey = (band) => TIER_BY_BAND[clampHsk(band)]
 

@@ -130,7 +130,7 @@ const PlacementProfilePage = () => {
       setConfirmOpen(false)
       navigate(PLACEMENT_TEST_SESSION_PATH)
     } catch {
-      toast(copy.confirm?.errorToast)
+      toast.error(copy.confirm?.errorToast)
     }
   }, [createSession, navigate, result, user, copy.confirm])
 

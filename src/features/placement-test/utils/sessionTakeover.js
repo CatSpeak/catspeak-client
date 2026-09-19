@@ -1,4 +1,4 @@
-import { SESSION_BROADCAST_TYPES } from "../constants/lifecycle"
+import { SESSION_BROADCAST_TYPES, TAKEOVER_SETTLE_MS } from "../constants/lifecycle"
 
 export const TAKEOVER_PHASE = {
   DETECTING: "detecting",
@@ -25,12 +25,21 @@ export const createTakeoverState = ({
   tabId = null,
   sessionId = null,
   phase = TAKEOVER_PHASE.DETECTING,
+  startedAt = 0,
+  settleAt = 0,
 } = {}) => ({
   tabId,
   sessionId,
   phase,
   peerTabId: null,
+  startedAt,
+  settleAt,
 })
+
+const toMs = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
 
 const isPeerMessage = (state, payload) => {
   const fromTab = payload?.tabId || null
@@ -45,11 +54,24 @@ export const reduceTakeover = (state = createTakeoverState(), message = {}) => {
   const noChange = { state, effects: [] }
 
   if (type === TAKEOVER_LOCAL.MOUNT) {
-    return { state, effects: [TAKEOVER_EFFECT.POST_PING] }
+    const now = toMs(payload.now)
+    return {
+      state: {
+        ...state,
+        phase: TAKEOVER_PHASE.DETECTING,
+        startedAt: now,
+        settleAt: now + TAKEOVER_SETTLE_MS,
+      },
+      effects: [TAKEOVER_EFFECT.POST_PING],
+    }
   }
 
   if (type === TAKEOVER_LOCAL.SETTLE) {
     if (state.phase !== TAKEOVER_PHASE.DETECTING) return noChange
+    const now = toMs(payload.now)
+    if (state.settleAt && now < state.settleAt) {
+      return { state, effects: [TAKEOVER_EFFECT.POST_PING] }
+    }
     return {
       state: { ...state, phase: TAKEOVER_PHASE.ACTIVE },
       effects: [],
@@ -72,7 +94,12 @@ export const reduceTakeover = (state = createTakeoverState(), message = {}) => {
   }
 
   if (type === SESSION_BROADCAST_TYPES.PONG) {
-    if (state.phase !== TAKEOVER_PHASE.DETECTING) return noChange
+    if (
+      state.phase === TAKEOVER_PHASE.CONFLICT ||
+      state.phase === TAKEOVER_PHASE.TAKEN_OVER
+    ) {
+      return noChange
+    }
     return {
       state: {
         ...state,

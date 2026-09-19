@@ -10,6 +10,7 @@ import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useGetConversationsQuery } from "@/store/api/social/conversationsApi"
 import { selectTotalUnread } from "@/store/slices/notificationSlice"
 import { useActiveLink } from "../../hooks/useActiveLink"
+import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import {
   navSections,
   footerLinks,
@@ -47,7 +48,7 @@ const mainDockItems = [
     icon: ClipboardCheck,
     path: "/placement-test",
     hasSublinks: true,
-    lang: "zh",
+    lang: DEFAULT_COMMUNITY_LANG,
   },
 ]
 

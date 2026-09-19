@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { SESSION_BROADCAST_TYPES } from "../constants/lifecycle"
+import {
+  SESSION_BROADCAST_TYPES,
+  TAKEOVER_SETTLE_MS,
+} from "../constants/lifecycle"
 import {
   TAKEOVER_EFFECT,
   TAKEOVER_LOCAL,
@@ -27,6 +30,8 @@ describe("createTakeoverState", () => {
       sessionId: SESSION,
       phase: TAKEOVER_PHASE.DETECTING,
       peerTabId: null,
+      startedAt: 0,
+      settleAt: 0,
     })
   })
 })
@@ -36,6 +41,28 @@ describe("reduceTakeover local actions", () => {
     const result = reduceTakeover(state(), { type: TAKEOVER_LOCAL.MOUNT })
     expect(result.effects).toEqual([TAKEOVER_EFFECT.POST_PING])
     expect(result.state.phase).toBe(TAKEOVER_PHASE.DETECTING)
+  })
+
+  it("keeps pinging until a full settle window passes without a pong", () => {
+    const mounted = reduceTakeover(state(), {
+      type: TAKEOVER_LOCAL.MOUNT,
+      payload: { now: 1000 },
+    })
+    expect(mounted.state.settleAt).toBe(1000 + TAKEOVER_SETTLE_MS)
+
+    const early = reduceTakeover(mounted.state, {
+      type: TAKEOVER_LOCAL.SETTLE,
+      payload: { now: 1200 },
+    })
+    expect(early.state.phase).toBe(TAKEOVER_PHASE.DETECTING)
+    expect(early.effects).toEqual([TAKEOVER_EFFECT.POST_PING])
+
+    const settled = reduceTakeover(early.state, {
+      type: TAKEOVER_LOCAL.SETTLE,
+      payload: { now: 1600 },
+    })
+    expect(settled.state.phase).toBe(TAKEOVER_PHASE.ACTIVE)
+    expect(settled.effects).toEqual([])
   })
 
   it("becomes the active holder after the settle delay", () => {
@@ -84,6 +111,16 @@ describe("reduceTakeover peer messages", () => {
 
   it("raises a conflict on a peer pong", () => {
     const result = reduceTakeover(state(), peerMessage(SESSION_BROADCAST_TYPES.PONG))
+    expect(result.state.phase).toBe(TAKEOVER_PHASE.CONFLICT)
+    expect(result.state.peerTabId).toBe(PEER)
+    expect(result.effects).toEqual([TAKEOVER_EFFECT.OPEN_CONFLICT])
+  })
+
+  it("raises a conflict when a slow peer answers after activation", () => {
+    const result = reduceTakeover(
+      state(TAKEOVER_PHASE.ACTIVE),
+      peerMessage(SESSION_BROADCAST_TYPES.PONG),
+    )
     expect(result.state.phase).toBe(TAKEOVER_PHASE.CONFLICT)
     expect(result.state.peerTabId).toBe(PEER)
     expect(result.effects).toEqual([TAKEOVER_EFFECT.OPEN_CONFLICT])

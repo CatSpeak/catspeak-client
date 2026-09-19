@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { cn } from "@/lib/utils"
+import { formatTemplate } from "../utils/format"
 import useMicCapture from "../hooks/useMicCapture"
 import DeviceSelect from "./DeviceSelect"
 import MicLevelMeter from "./MicLevelMeter"
@@ -25,9 +26,6 @@ const FIX_TONES = [
   "bg-blue-50 text-blue-600",
   "bg-emerald-50 text-emerald-600",
 ]
-
-const formatTemplate = (template, token, value) =>
-  String(template || "").replace(`{{${token}}}`, value)
 
 const DeviceStep = ({ copy, onContinue }) => {
   const device = copy?.device || {}
@@ -71,11 +69,9 @@ const DeviceStep = ({ copy, onContinue }) => {
   const actionLabel = recording
     ? device.recording
     : recordingUrl
-      ? formatTemplate(
-          device.replay,
-          "duration",
-          (recordingMs / 1000).toFixed(1),
-        )
+      ? formatTemplate(device.replay, {
+          duration: (recordingMs / 1000).toFixed(1),
+        })
       : device.record
 
   const pill = isNoAudio

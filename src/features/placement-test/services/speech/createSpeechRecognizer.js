@@ -64,7 +64,7 @@ export const createSpeechRecognizer = ({
     try {
       handler(...args)
     } catch {
-      // listener errors must never break the recognition loop
+      return
     }
   }
 
@@ -152,7 +152,7 @@ export const createSpeechRecognizer = ({
       try {
         recognition.stop()
       } catch {
-        // stop can throw if recognition already ended
+        return
       }
     }
   }
@@ -162,12 +162,13 @@ export const createSpeechRecognizer = ({
     active = false
     clearMock()
     if (recognition) {
-      try {
-        recognition.abort()
-      } catch {
-        // abort can throw if recognition already ended
-      }
+      const target = recognition
       recognition = null
+      try {
+        target.abort()
+      } catch {
+        return
+      }
     }
   }
 

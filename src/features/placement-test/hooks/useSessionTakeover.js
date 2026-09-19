@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 import {
   SESSION_BROADCAST_TYPES,
-  TAKEOVER_SETTLE_MS,
+  TAKEOVER_PING_INTERVAL_MS,
 } from "../constants/lifecycle"
 import { createSessionBroadcast } from "../services/sessionBroadcastChannel"
 import {
@@ -62,15 +62,25 @@ const useSessionTakeover = ({ sessionId, onTakenOver } = {}) => {
   useEffect(() => {
     if (!sessionId) return undefined
     const unsubscribe = transport.subscribe((message) => dispatch(message))
-    dispatch({ type: TAKEOVER_LOCAL.MOUNT, payload: { tabId, sessionId } })
-    const timer = window.setTimeout(() => {
-      dispatch({ type: TAKEOVER_LOCAL.SETTLE, payload: { tabId, sessionId } })
-    }, TAKEOVER_SETTLE_MS)
-    return () => {
-      window.clearTimeout(timer)
-      unsubscribe()
-    }
+    dispatch({
+      type: TAKEOVER_LOCAL.MOUNT,
+      payload: { tabId, sessionId, now: Date.now() },
+    })
+    return unsubscribe
   }, [sessionId, tabId, transport])
+
+  useEffect(() => {
+    if (!sessionId || machine.state.phase !== TAKEOVER_PHASE.DETECTING) {
+      return undefined
+    }
+    const id = window.setInterval(() => {
+      dispatch({
+        type: TAKEOVER_LOCAL.SETTLE,
+        payload: { tabId, sessionId, now: Date.now() },
+      })
+    }, TAKEOVER_PING_INTERVAL_MS)
+    return () => window.clearInterval(id)
+  }, [sessionId, tabId, machine.state.phase])
 
   useEffect(() => () => transport.close(), [transport])
 

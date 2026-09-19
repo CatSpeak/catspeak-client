@@ -5,8 +5,10 @@ import {
   adjustLevelMock,
   buildSession,
   createSessionMock,
+  getActiveSessionMock,
   getRetakeStatusMock,
   isScoringFailureForced,
+  resumeSessionMock,
   scoreSessionMock,
   submitTurnMock,
 } from "./mockAdapter"
@@ -112,6 +114,107 @@ describe("submitTurnMock", () => {
     const result = await submitTurnMock(
       { sessionId: "missing", order: 1 },
       { delayMs: 0, persist: vi.fn(), read: () => null, now: () => 5 },
+    )
+
+    expect(result.error.status).toBe(404)
+  })
+
+  it("computes the next question from the persisted turns", async () => {
+    const session = baseSession()
+
+    const result = await submitTurnMock(
+      {
+        sessionId: "session-1",
+        order: 1,
+        level: 3,
+        transcript: "我叫小明",
+      },
+      {
+        delayMs: 0,
+        persist: vi.fn(),
+        read: () => session,
+        now: () => 5,
+        random: () => 0,
+      },
+    )
+
+    expect(result.data.nextQuestion).toMatchObject({ order: 2 })
+  })
+
+  it("returns a null next question once the session is complete", async () => {
+    const session = {
+      ...baseSession(),
+      turns: [{ order: 1 }, { order: 2 }, { order: 3 }, { order: 4 }],
+    }
+
+    const result = await submitTurnMock(
+      { sessionId: "session-1", order: 5, transcript: "最后一个答案" },
+      { delayMs: 0, persist: vi.fn(), read: () => session, now: () => 5 },
+    )
+
+    expect(result.data.nextQuestion).toBeNull()
+  })
+})
+
+describe("getActiveSessionMock", () => {
+  it("returns the persisted in-progress session", async () => {
+    const session = {
+      ...buildSession({ targetBand: "hsk3_4", now: () => 1, random: () => 0.5 }),
+      id: "session-1",
+    }
+    const result = await getActiveSessionMock({
+      delayMs: 0,
+      read: () => session,
+    })
+
+    expect(result.data).toBe(session)
+  })
+
+  it("returns null when there is no active session", async () => {
+    const result = await getActiveSessionMock({
+      delayMs: 0,
+      read: () => null,
+    })
+
+    expect(result.data).toBeNull()
+  })
+
+  it("returns null for a completed session", async () => {
+    const session = {
+      ...buildSession({ targetBand: "hsk3_4", now: () => 1, random: () => 0.5 }),
+      id: "session-1",
+      status: SESSION_STATUS.COMPLETED,
+    }
+    const result = await getActiveSessionMock({
+      delayMs: 0,
+      read: () => session,
+    })
+
+    expect(result.data).toBeNull()
+  })
+})
+
+describe("resumeSessionMock", () => {
+  it("returns the session and the remaining turn count", async () => {
+    const session = {
+      ...buildSession({ targetBand: "hsk3_4", now: () => 1, random: () => 0.5 }),
+      id: "session-1",
+      turns: [{ order: 1 }, { order: 2 }],
+    }
+
+    const result = await resumeSessionMock(
+      { sessionId: "session-1" },
+      { delayMs: 0, read: () => session, totalTurns: 5 },
+    )
+
+    expect(result.data.session).toBe(session)
+    expect(result.data.remainingTurns).toBe(3)
+  })
+
+  it("rejects when there is no active session", async () => {
+    const result = await resumeSessionMock(
+      { sessionId: "missing" },
+      { delayMs: 0, read: () => null },
     )
 
     expect(result.error.status).toBe(404)

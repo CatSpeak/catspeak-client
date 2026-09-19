@@ -1,11 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { createMicCapture } from "../services/audio"
-import { NO_AUDIO_TIMEOUT_MS, SILENCE_LEVEL } from "../services/audio/constants"
+import { createAudioTransport } from "../services/audio"
 
 const useMicCapture = () => {
-  const captureRef = useRef(null)
-  const watchdogRef = useRef(null)
-  const peakLevelRef = useRef(0)
+  const transportRef = useRef(null)
   const recordStartedAtRef = useRef(0)
 
   const [devices, setDevices] = useState([])
@@ -19,7 +16,7 @@ const useMicCapture = () => {
 
   useEffect(() => {
     let cancelled = false
-    createMicCapture()
+    createAudioTransport()
       .getDevices()
       .then((list) => {
         if (cancelled) return
@@ -33,52 +30,17 @@ const useMicCapture = () => {
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    let unsubscribe = () => {}
-    const capture = createMicCapture({ deviceId: deviceId || undefined })
-    captureRef.current = capture
-    peakLevelRef.current = 0
-
-    const armWatchdog = () => {
-      if (watchdogRef.current) clearTimeout(watchdogRef.current)
-      watchdogRef.current = setTimeout(() => {
-        if (peakLevelRef.current < SILENCE_LEVEL) setStatus("nosignal")
-      }, NO_AUDIO_TIMEOUT_MS)
-    }
-
-    const boot = async () => {
-      const result = await capture.start()
-      if (cancelled) return
-      if (!result.ok) {
-        setStatus("error")
-        return
-      }
-      setStatus("listening")
-      unsubscribe = capture.subscribeLevel((value) => {
-        setLevel(value)
-        if (value > peakLevelRef.current) peakLevelRef.current = value
-        if (value >= SILENCE_LEVEL) {
-          if (watchdogRef.current) {
-            clearTimeout(watchdogRef.current)
-            watchdogRef.current = null
-          }
-          setStatus("ready")
-        }
-      })
-      armWatchdog()
-    }
-
-    boot()
+    const transport = createAudioTransport({ deviceId: deviceId || undefined })
+    transportRef.current = transport
+    const unsubscribeLevel = transport.subscribeLevel(setLevel)
+    const unsubscribeStatus = transport.subscribeStatus(setStatus)
+    transport.start().catch(() => {})
 
     return () => {
-      cancelled = true
-      unsubscribe()
-      if (watchdogRef.current) {
-        clearTimeout(watchdogRef.current)
-        watchdogRef.current = null
-      }
-      capture.destroy()
-      if (captureRef.current === capture) captureRef.current = null
+      unsubscribeLevel()
+      unsubscribeStatus()
+      transport.destroy()
+      if (transportRef.current === transport) transportRef.current = null
     }
   }, [deviceId, sessionKey])
 
@@ -99,16 +61,16 @@ const useMicCapture = () => {
   )
 
   const startRecording = useCallback(() => {
-    const capture = captureRef.current
-    if (!capture || !capture.startRecording()) return
+    const transport = transportRef.current
+    if (!transport || !transport.startRecording()) return
     recordStartedAtRef.current = Date.now()
     setRecording(true)
   }, [])
 
   const stopRecording = useCallback(async () => {
-    const capture = captureRef.current
-    if (!capture) return null
-    const url = await capture.stopRecording()
+    const transport = transportRef.current
+    if (!transport) return null
+    const url = await transport.stopRecording()
     setRecordingMs(Date.now() - recordStartedAtRef.current)
     setRecordingUrl(url)
     setRecording(false)

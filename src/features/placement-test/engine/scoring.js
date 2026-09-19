@@ -11,7 +11,7 @@ import { computeAhi, matchGrammar } from "./matching"
 
 const clamp01 = (value) => Math.min(1, Math.max(0, value))
 
-const clampScore = (value) =>
+export const clampScore = (value) =>
   Math.min(100, Math.max(0, Math.round(Number.isFinite(value) ? value : 0)))
 
 const round1 = (value) => Math.round(value * 10) / 10
@@ -118,11 +118,8 @@ export const scoreSession = ({ turns = [], now = Date.now } = {}) => {
   }
 }
 
-export const applySelfAdjust = ({ band, level, selfAdjusted = false } = {}) => {
+export const applySelfAdjust = ({ band, level } = {}) => {
   const current = clampHsk(band)
-  if (selfAdjusted) {
-    return { band: current, selfAdjusted: true, applied: false }
-  }
   const requested = Number(level)
   if (!Number.isFinite(requested)) {
     return { band: current, selfAdjusted: false, applied: false }

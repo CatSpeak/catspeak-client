@@ -108,7 +108,7 @@ const PlacementScoringPage = () => {
   }, [navigate])
 
   const handleHelp = useCallback(() => {
-    if (copy.helpNotice) toast(copy.helpNotice)
+    if (copy.helpNotice) toast.info(copy.helpNotice)
   }, [copy.helpNotice])
 
   return (

@@ -25,10 +25,7 @@ import {
   MAX_ASR_RETRIES,
   canRetry,
   createSilenceTracker,
-  createSpeechRecognizer,
   nextRetryCount,
-  speak,
-  stopSpeaking,
 } from "../services/speech"
 import { readActiveSession, saveActiveSession } from "../utils/sessionStorage"
 import {
@@ -38,12 +35,8 @@ import {
   startReconnect,
   tickReconnect,
 } from "../utils/lifecycle"
-import useMicCapture from "./useMicCapture"
-
-const sortTurns = (list) => [...list].sort((a, b) => a.order - b.order)
-
-const upsertTurn = (list, turn) =>
-  sortTurns([...list.filter((entry) => entry.order !== turn.order), turn])
+import { upsertTurn } from "../utils/turns"
+import useAudioTransport from "./useAudioTransport"
 
 const isOnline = () =>
   typeof navigator === "undefined" || navigator.onLine !== false
@@ -72,11 +65,17 @@ const useConversationLoop = () => {
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
   const [submitTurn] = useSubmitTurnMutation()
-  const mic = useMicCapture()
+  const {
+    level: micLevel,
+    status: micStatus,
+    startListening: startAudioListening,
+    stopListening: stopAudioListening,
+    speak: speakText,
+    stopSpeaking: stopSpeakingText,
+  } = useAudioTransport()
 
   const levelRef = useRef(0)
   const micStatusRef = useRef("connecting")
-  const recognizerRef = useRef(null)
   const trackerRef = useRef(null)
   const deadlineRef = useRef(0)
   const listenStartedAtRef = useRef(0)
@@ -90,6 +89,7 @@ const useConversationLoop = () => {
   const pauseSpentRef = useRef(pauseSpentMs)
   const handleReconnectSuccessRef = useRef(() => {})
   const handleResumeRef = useRef(() => {})
+  const handleLeaveRef = useRef(() => {})
 
   const finishTurnRef = useRef(() => {})
   const handleNoSpeechRef = useRef(() => {})
@@ -97,12 +97,12 @@ const useConversationLoop = () => {
   const stateRef = useRef({})
 
   useEffect(() => {
-    levelRef.current = mic.level
-  }, [mic.level])
+    levelRef.current = micLevel
+  }, [micLevel])
 
   useEffect(() => {
-    micStatusRef.current = mic.status
-  }, [mic.status])
+    micStatusRef.current = micStatus
+  }, [micStatus])
 
   useEffect(() => {
     stateRef.current = {
@@ -116,13 +116,6 @@ const useConversationLoop = () => {
     }
   }, [session, turns, order, question, transcript, retryCount, phase])
 
-  const stopRecognizer = useCallback(() => {
-    if (recognizerRef.current) {
-      recognizerRef.current.destroy()
-      recognizerRef.current = null
-    }
-  }, [])
-
   const clearRestart = useCallback(() => {
     if (restartTimerRef.current) {
       window.clearTimeout(restartTimerRef.current)
@@ -132,7 +125,7 @@ const useConversationLoop = () => {
 
   const startListening = useCallback(
     (nextQuestion, { preserveRetry = false, remainingMs: initialRemaining } = {}) => {
-      stopRecognizer()
+      stopAudioListening()
       finishingRef.current = false
       silentSinceRef.current = null
       const budget = Number.isFinite(initialRemaining)
@@ -154,7 +147,7 @@ const useConversationLoop = () => {
       tracker.reset(listenStartedAtRef.current)
       trackerRef.current = tracker
 
-      const recognizer = createSpeechRecognizer({
+      startAudioListening({
         level: nextQuestion?.level,
         onResult: (text) => setTranscript(text),
         onEnd: (finalText) => {
@@ -164,21 +157,21 @@ const useConversationLoop = () => {
           else handleNoSpeechRef.current()
         },
       })
-      recognizerRef.current = recognizer
-      recognizer.start()
     },
-    [stopRecognizer],
+    [startAudioListening, stopAudioListening],
   )
 
   const loadQuestion = useCallback(
-    (nextOrder, sourceTurns) => {
+    (nextOrder, sourceTurns, preferredQuestion) => {
       const current = stateRef.current
       const turnsForSelection = sourceTurns || current.turns
-      const nextQuestion = selectNextQuestion({
-        targetBand: current.session?.targetBand,
-        turns: turnsForSelection,
-        order: nextOrder,
-      })
+      const nextQuestion =
+        preferredQuestion ||
+        selectNextQuestion({
+          targetBand: current.session?.targetBand,
+          turns: turnsForSelection,
+          order: nextOrder,
+        })
       if (!nextQuestion) {
         navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
         return
@@ -186,17 +179,19 @@ const useConversationLoop = () => {
       setOrder(nextOrder)
       setQuestion(nextQuestion)
       startListening(nextQuestion)
-      speak(nextQuestion.hanzi)
+      speakText(nextQuestion.hanzi)
     },
-    [navigate, startListening],
+    [navigate, startListening, speakText],
   )
 
   const handleNoSpeech = useCallback(() => {
     if (finishingRef.current) return
     const current = stateRef.current
-    if (canRetry(current.retryCount)) {
-      setRetryCount(nextRetryCount(current.retryCount))
+    if (!canRetry(current.retryCount)) {
+      finishTurnRef.current({ transcript: "" })
+      return
     }
+    setRetryCount(nextRetryCount(current.retryCount))
     setNotice(CONVERSATION_NOTICE.RETRY)
     clearRestart()
     restartTimerRef.current = window.setTimeout(() => {
@@ -210,8 +205,8 @@ const useConversationLoop = () => {
       if (finishingRef.current) return
       finishingRef.current = true
       clearRestart()
-      stopRecognizer()
-      stopSpeaking()
+      stopAudioListening()
+      stopSpeakingText()
 
       const current = stateRef.current
       const clean = String(rawTranscript || "").trim()
@@ -238,12 +233,14 @@ const useConversationLoop = () => {
       }
       const nextTurns = upsertTurn(current.turns, turn)
       const startedAt = Date.now()
+      let nextQuestion = null
 
       try {
         const result = await submitTurn({
           sessionId: current.session?.id,
           ...turn,
         }).unwrap()
+        nextQuestion = result?.nextQuestion ?? null
         if (result?.session) {
           setSession(result.session)
           setTurns(result.session.turns || nextTurns)
@@ -267,9 +264,9 @@ const useConversationLoop = () => {
         navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
         return
       }
-      loadQuestionRef.current(nextOrder, nextTurns)
+      loadQuestionRef.current(nextOrder, nextTurns, nextQuestion)
     },
-    [clearRestart, navigate, stopRecognizer, submitTurn],
+    [clearRestart, navigate, stopAudioListening, stopSpeakingText, submitTurn],
   )
 
   useEffect(() => {
@@ -286,14 +283,14 @@ const useConversationLoop = () => {
 
   const suspendSession = useCallback(() => {
     clearRestart()
-    stopRecognizer()
-    stopSpeaking()
+    stopAudioListening()
+    stopSpeakingText()
     frozenRemainingRef.current = remainingQuestionMs(
       deadlineRef.current,
       Date.now(),
     )
     setSuspended(true)
-  }, [clearRestart, stopRecognizer])
+  }, [clearRestart, stopAudioListening, stopSpeakingText])
 
   const resumeSession = useCallback(() => {
     const current = stateRef.current
@@ -330,10 +327,10 @@ const useConversationLoop = () => {
       })
     }
     clearRestart()
-    stopRecognizer()
-    stopSpeaking()
+    stopAudioListening()
+    stopSpeakingText()
     navigate(PLACEMENT_TEST_PATH, { replace: true })
-  }, [clearRestart, navigate, pauseSpentMs, stopRecognizer])
+  }, [clearRestart, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText])
 
   const handleConnectionLost = useCallback(() => {
     if (connectionLost) return
@@ -365,6 +362,10 @@ const useConversationLoop = () => {
   useEffect(() => {
     handleResumeRef.current = handleResume
   }, [handleResume])
+
+  useEffect(() => {
+    handleLeaveRef.current = handleLeave
+  }, [handleLeave])
 
   useEffect(() => {
     const handleOffline = () => handleConnectionLost()
@@ -435,10 +436,10 @@ const useConversationLoop = () => {
     return () => {
       mountedRef.current = false
       clearRestart()
-      stopRecognizer()
-      stopSpeaking()
+      stopAudioListening()
+      stopSpeakingText()
     }
-  }, [navigate, clearRestart, stopRecognizer])
+  }, [navigate, clearRestart, stopAudioListening, stopSpeakingText])
 
   useEffect(() => {
     if (phase !== CONVERSATION_PHASE.LISTENING || suspended) return undefined
@@ -460,7 +461,7 @@ const useConversationLoop = () => {
           if (silentSinceRef.current == null) silentSinceRef.current = now
           const silentMs = now - silentSinceRef.current
           if (silentMs >= NOT_HEARING_EXIT_MS) {
-            finishTurnRef.current({ transcript: "" })
+            handleLeaveRef.current()
             return
           }
           if (silentMs >= NOT_HEARING_BANNER_MS) {
@@ -491,8 +492,8 @@ const useConversationLoop = () => {
 
   const handleReplay = useCallback(() => {
     const hanzi = stateRef.current.question?.hanzi
-    if (hanzi) speak(hanzi)
-  }, [])
+    if (hanzi) speakText(hanzi)
+  }, [speakText])
 
   const toggleHanzi = useCallback(() => setShowHanzi((value) => !value), [])
   const togglePinyin = useCallback(() => setShowPinyin((value) => !value), [])

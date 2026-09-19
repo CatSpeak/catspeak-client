@@ -78,7 +78,7 @@ const PlacementResultPage = () => {
     copy.studentFallback
 
   const handleShare = useCallback(() => {
-    if (copy.shareNotice) toast(copy.shareNotice)
+    if (copy.shareNotice) toast.info(copy.shareNotice)
   }, [copy.shareNotice])
 
   const handleStart = useCallback(() => {
@@ -104,17 +104,17 @@ const PlacementResultPage = () => {
         }).unwrap()
         setResult(response.result)
         setAdjustOpen(false)
-        toast(formatTemplate(successToast, { band: response.band }))
+        toast.success(formatTemplate(successToast, { band: response.band }))
       } catch (error) {
         if (error?.status === 409) {
           setResult((current) =>
             current ? { ...current, selfAdjusted: true } : current,
           )
           setAdjustOpen(false)
-          toast(alreadyAdjustedToast)
+          toast.info(alreadyAdjustedToast)
           return
         }
-        toast(errorToast)
+        toast.error(errorToast)
       }
     },
     [result, adjustLevel, successToast, alreadyAdjustedToast, errorToast],

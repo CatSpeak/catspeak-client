@@ -241,10 +241,4 @@ describe("applySelfAdjust", () => {
     expect(applySelfAdjust({ band: 6, level: 9 })).toMatchObject({ band: 6, applied: false })
     expect(applySelfAdjust({ band: 6, level: 5 })).toMatchObject({ band: 5, applied: true })
   })
-
-  it("locks after the one-time adjustment", () => {
-    expect(
-      applySelfAdjust({ band: 3, level: 4, selfAdjusted: true }),
-    ).toMatchObject({ band: 3, applied: false, selfAdjusted: true })
-  })
 })

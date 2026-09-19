@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "@/components/ui/toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import { PLACEMENT_TEST_STEPS } from "../constants/steps"
@@ -35,13 +36,15 @@ const PlacementTestPage = () => {
   }
 
   const handleStartSession = async (targetBand) => {
-    await createSession({
-      targetBand,
-      studentId: user?.id ?? user?.accountId ?? null,
-    })
-      .unwrap()
-      .then(() => navigate(PLACEMENT_TEST_SESSION_PATH))
-      .catch(() => {})
+    try {
+      await createSession({
+        targetBand,
+        studentId: user?.id ?? user?.accountId ?? null,
+      }).unwrap()
+      navigate(PLACEMENT_TEST_SESSION_PATH)
+    } catch {
+      toast.error(lifecycleCopy.errorToast)
+    }
   }
 
   return (

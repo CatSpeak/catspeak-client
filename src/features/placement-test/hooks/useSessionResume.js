@@ -1,22 +1,32 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "@/components/ui/toast"
 import { useAuth } from "@/features/auth/hooks/useAuth"
-import { useCreateSessionMutation } from "../api"
+import {
+  useCreateSessionMutation,
+  useGetActiveSessionQuery,
+  useResumeSessionMutation,
+} from "../api"
 import { DEFAULT_TARGET_BAND } from "../constants/bands"
 import {
   PLACEMENT_TEST_PROFILE_PATH,
   PLACEMENT_TEST_SESSION_PATH,
 } from "../constants/routes"
 import { getSessionLifecycle } from "../utils/sessionLifecycle"
-import { clearActiveSession, readActiveSession } from "../utils/sessionStorage"
+import { clearActiveSession } from "../utils/sessionStorage"
 
 const useSessionResume = ({ copy = {} } = {}) => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
-  const [lifecycle] = useState(() =>
-    getSessionLifecycle({ session: readActiveSession() }),
+  const [resumeSession] = useResumeSessionMutation()
+  const { data: activeSession } = useGetActiveSessionQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
+
+  const lifecycle = useMemo(
+    () => getSessionLifecycle({ session: activeSession ?? null }),
+    [activeSession],
   )
 
   useEffect(() => {
@@ -25,8 +35,9 @@ const useSessionResume = ({ copy = {} } = {}) => {
 
   const resume = useCallback(() => {
     if (!lifecycle || lifecycle.expired) return
+    resumeSession({ sessionId: lifecycle.session.id })
     navigate(PLACEMENT_TEST_SESSION_PATH)
-  }, [lifecycle, navigate])
+  }, [lifecycle, navigate, resumeSession])
 
   const restart = useCallback(async () => {
     clearActiveSession()
@@ -37,7 +48,7 @@ const useSessionResume = ({ copy = {} } = {}) => {
       }).unwrap()
       navigate(PLACEMENT_TEST_SESSION_PATH)
     } catch {
-      toast(copy.errorToast)
+      toast.error(copy.errorToast)
     }
   }, [createSession, copy.errorToast, lifecycle, navigate, user])
 

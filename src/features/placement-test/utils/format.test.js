@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { formatClock, formatDate, formatTemplate } from "./format"
+import {
+  formatClock,
+  formatDate,
+  formatDurationShort,
+  formatExpiryStamp,
+  formatTemplate,
+} from "./format"
 
 describe("formatTemplate", () => {
   it("replaces every token occurrence", () => {
@@ -41,5 +47,33 @@ describe("formatDate", () => {
   it("returns an empty string for invalid input", () => {
     expect(formatDate(undefined)).toBe("")
     expect(formatDate("not-a-date")).toBe("")
+  })
+})
+
+describe("formatDurationShort", () => {
+  it("formats hours and minutes", () => {
+    expect(formatDurationShort(18 * 60 * 60 * 1000 + 24 * 60 * 1000)).toBe(
+      "18h 24m",
+    )
+  })
+
+  it("formats sub-hour durations in minutes", () => {
+    expect(formatDurationShort(45 * 60 * 1000)).toBe("45m")
+  })
+
+  it("clamps negative and missing values", () => {
+    expect(formatDurationShort(-1)).toBe("0m")
+    expect(formatDurationShort(undefined)).toBe("0m")
+  })
+})
+
+describe("formatExpiryStamp", () => {
+  it("formats a timestamp as HH:mm - DD/MM/YYYY", () => {
+    const stamp = new Date(2026, 8, 16, 6, 30).getTime()
+    expect(formatExpiryStamp(stamp)).toBe("06:30 - 16/09/2026")
+  })
+
+  it("returns an empty string for invalid input", () => {
+    expect(formatExpiryStamp(undefined)).toBe("")
   })
 })

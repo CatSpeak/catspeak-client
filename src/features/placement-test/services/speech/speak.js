@@ -25,6 +25,6 @@ export const stopSpeaking = ({ win } = {}) => {
   try {
     target?.speechSynthesis?.cancel()
   } catch {
-    // speech synthesis can be unavailable in some browsers
+    return
   }
 }

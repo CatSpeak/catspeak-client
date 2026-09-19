@@ -10,64 +10,46 @@ const getStorage = () => {
   }
 }
 
-export const saveActiveSession = (session) => {
-  const storage = getStorage()
-  if (!storage) return
-  try {
-    storage.setItem(ACTIVE_SESSION_STORAGE_KEY, JSON.stringify(session))
-  } catch {
-    // Storage can be unavailable in strict private/security modes.
-  }
-}
-
-export const readActiveSession = () => {
+const readKey = (key) => {
   const storage = getStorage()
   if (!storage) return null
   try {
-    const raw = storage.getItem(ACTIVE_SESSION_STORAGE_KEY)
+    const raw = storage.getItem(key)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
   }
 }
 
-export const clearActiveSession = () => {
+const writeKey = (key, value) => {
   const storage = getStorage()
   if (!storage) return
   try {
-    storage.removeItem(ACTIVE_SESSION_STORAGE_KEY)
+    storage.setItem(key, JSON.stringify(value))
   } catch {
-    // ignore storage errors
+    return
   }
 }
 
-export const saveResult = (result) => {
+const removeKey = (key) => {
   const storage = getStorage()
   if (!storage) return
   try {
-    storage.setItem(RESULT_STORAGE_KEY, JSON.stringify(result))
+    storage.removeItem(key)
   } catch {
-    // Storage can be unavailable in strict private/security modes.
+    return
   }
 }
 
-export const readResult = () => {
-  const storage = getStorage()
-  if (!storage) return null
-  try {
-    const raw = storage.getItem(RESULT_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
-}
+export const saveActiveSession = (session) =>
+  writeKey(ACTIVE_SESSION_STORAGE_KEY, session)
 
-export const clearResult = () => {
-  const storage = getStorage()
-  if (!storage) return
-  try {
-    storage.removeItem(RESULT_STORAGE_KEY)
-  } catch {
-    // ignore storage errors
-  }
-}
+export const readActiveSession = () => readKey(ACTIVE_SESSION_STORAGE_KEY)
+
+export const clearActiveSession = () => removeKey(ACTIVE_SESSION_STORAGE_KEY)
+
+export const saveResult = (result) => writeKey(RESULT_STORAGE_KEY, result)
+
+export const readResult = () => readKey(RESULT_STORAGE_KEY)
+
+export const clearResult = () => removeKey(RESULT_STORAGE_KEY)
