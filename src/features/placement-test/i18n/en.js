@@ -192,6 +192,25 @@ export default {
         "The AI could not hear your voice. Please check your microphone or raise the input volume.",
       volumeHint:
         "The volume is quite low. Speak louder or increase the microphone volume.",
+      configureNotice: "AI settings will be available soon.",
+      pauseTitle: "Survey Paused",
+      pauseBody:
+        "The timer for the current question has stopped. You can grab a drink or take a break before continuing.",
+      pauseSafeData:
+        "Data is safe: Your previous answers ({{answered}} questions) have been encrypted and stored successfully on the server.",
+      pauseBudgetLabel: "Maximum pause time remaining:",
+      pauseBudgetChip: "⏳ {{time}} min",
+      pauseLeaveCta: "Leave Exam Room Temporarily",
+      pauseResumeCta: "Resume the Test Now ▷",
+      reconnectTitle: "Connection Lost",
+      reconnectBody:
+        "The audio connection to the AI exam room was interrupted by an unstable network signal. The system is trying to reconnect.",
+      reconnectSafeData:
+        "Progress saved: All previous answer data ({{answered}} questions) has been safely stored at Question {{order}}/{{total}}. Your score will not be affected.",
+      reconnectProgressLabel: "Automatic reconnection progress:",
+      reconnectProgressChip:
+        "🔄 In {{seconds}} seconds... (Attempt {{attempt}}/{{max}})",
+      reconnectRetryCta: "Reconnect Now 🔄",
     },
     scoring: {
       title: "Scoring",

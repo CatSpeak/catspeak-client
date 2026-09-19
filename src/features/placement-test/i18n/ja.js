@@ -188,6 +188,24 @@ export default {
       noHearingBanner:
         "AI があなたの声を聞き取れませんでした。マイクを確認するか、入力音量を上げてください。",
       volumeHint: "音量が小さめです。もう少し大きな声で話すか、マイク音量を上げてください。",
+      configureNotice: "AI 設定は近日公開予定です。",
+      pauseTitle: "調査を一時停止しました",
+      pauseBody:
+        "現在の問題のタイマーが停止しました。再開する前に水分補給や休憩をとって構いません。",
+      pauseSafeData:
+        "データは安全です：これまでの回答（{{answered}} 問）は暗号化され、サーバーに正常に保存されています。",
+      pauseBudgetLabel: "残り一時停止可能時間：",
+      pauseBudgetChip: "⏳ {{time}} 分",
+      pauseLeaveCta: "一時的に試験室を離れる",
+      pauseResumeCta: "今すぐ試験を再開 ▷",
+      reconnectTitle: "接続が切断されました",
+      reconnectBody:
+        "ネットワーク信号が不安定なため、AI 試験室との音声接続が中断されました。システムが再接続を試みています。",
+      reconnectSafeData:
+        "進捗は保存済み：これまでの回答データ（{{answered}} 問）は第 {{order}}/{{total}} 問で安全に保存されています。スコアに影響はありません。",
+      reconnectProgressLabel: "自動再接続の進行状況：",
+      reconnectProgressChip: "🔄 {{seconds}} 秒後...（{{attempt}}/{{max}} 回目）",
+      reconnectRetryCta: "今すぐ再接続 🔄",
     },
     scoring: {
       title: "採点中",

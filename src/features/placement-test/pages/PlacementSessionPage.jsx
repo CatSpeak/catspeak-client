@@ -1,4 +1,5 @@
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { toast } from "@/components/ui/toast"
 import useConversationLoop from "../hooks/useConversationLoop"
 import {
   CONVERSATION_NOTICE,
@@ -10,11 +11,17 @@ import SessionNoticeBanner from "../components/session/SessionNoticeBanner"
 import AiAvatarPanel from "../components/session/AiAvatarPanel"
 import TranscriptCards from "../components/session/TranscriptCards"
 import SessionControlRow from "../components/session/SessionControlRow"
+import PauseSessionModal from "../components/session/PauseSessionModal"
+import ConnectionLostModal from "../components/session/ConnectionLostModal"
 
 const PlacementSessionPage = () => {
   const { t } = useLanguage()
   const copy = t.placementTest?.room || {}
   const loop = useConversationLoop()
+
+  const handleConfigure = () => {
+    if (copy.configureNotice) toast(copy.configureNotice)
+  }
 
   if (!loop.ready) {
     return (
@@ -36,7 +43,11 @@ const PlacementSessionPage = () => {
   return (
     <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-6 md:px-8">
       <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-3">
-        <SessionTopbar copy={copy} />
+        <SessionTopbar
+          copy={copy}
+          onPause={loop.handlePause}
+          onConfigure={handleConfigure}
+        />
         <SessionModeTabs copy={copy} currentOrder={loop.order} />
 
         <div className="flex flex-col gap-4 rounded-3xl bg-slate-50 p-4 shadow-[0_2px_8px_rgba(15,23,42,0.03)] md:p-6">
@@ -69,6 +80,25 @@ const PlacementSessionPage = () => {
           />
         </div>
       </div>
+
+      <PauseSessionModal
+        open={loop.paused}
+        copy={copy}
+        pauseRemainingMs={loop.pauseRemainingMs}
+        answeredCount={loop.answeredCount}
+        onResume={loop.handleResume}
+        onLeave={loop.handleLeave}
+      />
+      <ConnectionLostModal
+        open={loop.connectionLost}
+        copy={copy}
+        reconnectAttempt={loop.reconnectAttempt}
+        reconnectRemainingMs={loop.reconnectRemainingMs}
+        currentOrder={loop.order}
+        answeredCount={loop.answeredCount}
+        onRetry={loop.handleReconnectNow}
+        onLeave={loop.handleLeave}
+      />
     </div>
   )
 }

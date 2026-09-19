@@ -191,6 +191,25 @@ export default {
       noHearingBanner:
         "AI chưa nghe thấy giọng bạn nói. Vui lòng kiểm tra lại micrô hoặc tăng âm lượng phản xạ.",
       volumeHint: "Âm lượng hơi nhỏ. Hãy nói to hơn hoặc tăng âm lượng micrô.",
+      configureNotice: "Tính năng cấu hình AI sẽ sớm được cập nhật.",
+      pauseTitle: "Đã Tạm Dừng Khảo Sát",
+      pauseBody:
+        "Bộ đếm giờ của câu hỏi hiện tại đã dừng lại. Bạn có thể uống nước hoặc nghỉ ngơi trước khi tiếp tục làm bài.",
+      pauseSafeData:
+        "Dữ liệu an toàn: Các câu trả lời trước đó ({{answered}} câu) đã được mã hóa và lưu trữ thành công trên máy chủ.",
+      pauseBudgetLabel: "Thời gian tạm dừng tối đa còn lại:",
+      pauseBudgetChip: "⏳ {{time}} phút",
+      pauseLeaveCta: "Rời Phòng Thi Tạm Thời",
+      pauseResumeCta: "Tiếp Tục Làm Bài Ngay ▷",
+      reconnectTitle: "Mất Kết Nối Đường Truyền",
+      reconnectBody:
+        "Kết nối âm thanh với phòng thi AI bị gián đoạn do tín hiệu mạng không ổn định. Hệ thống đang thử tái lập kết nối.",
+      reconnectSafeData:
+        "Bảo lưu tiến trình: Toàn bộ dữ liệu các câu trả lời trước đó ({{answered}} câu) đã được lưu an toàn tại Câu {{order}}/{{total}}. Điểm số của bạn không bị ảnh hưởng.",
+      reconnectProgressLabel: "Tiến trình tự động kết nối lại:",
+      reconnectProgressChip:
+        "🔄 Sau {{seconds}} giây... (Lần {{attempt}}/{{max}})",
+      reconnectRetryCta: "Thử Kết Nối Lại Ngay 🔄",
     },
     scoring: {
       title: "Đang chấm điểm",

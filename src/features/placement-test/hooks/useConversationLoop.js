@@ -16,6 +16,8 @@ import {
   PLACEMENT_TEST_PATH,
   PLACEMENT_TEST_SCORING_PATH,
 } from "../constants/routes"
+import { SESSION_STATUS } from "../constants/session"
+import { CONNECTION_LOST_EVENT } from "../constants/lifecycle"
 import { TOTAL_TURNS, evaluateTurn, selectNextQuestion } from "../engine"
 import { useSubmitTurnMutation } from "../api"
 import { SILENCE_LEVEL } from "../services/audio/constants"
@@ -28,13 +30,23 @@ import {
   speak,
   stopSpeaking,
 } from "../services/speech"
-import { readActiveSession } from "../utils/sessionStorage"
+import { readActiveSession, saveActiveSession } from "../utils/sessionStorage"
+import {
+  advancePauseBudget,
+  remainingPauseBudget,
+  remainingQuestionMs,
+  startReconnect,
+  tickReconnect,
+} from "../utils/lifecycle"
 import useMicCapture from "./useMicCapture"
 
 const sortTurns = (list) => [...list].sort((a, b) => a.order - b.order)
 
 const upsertTurn = (list, turn) =>
   sortTurns([...list.filter((entry) => entry.order !== turn.order), turn])
+
+const isOnline = () =>
+  typeof navigator === "undefined" || navigator.onLine !== false
 
 const useConversationLoop = () => {
   const navigate = useNavigate()
@@ -52,6 +64,13 @@ const useConversationLoop = () => {
   const [remainingMs, setRemainingMs] = useState(QUESTION_DURATION_MS)
   const [showHanzi, setShowHanzi] = useState(true)
   const [showPinyin, setShowPinyin] = useState(true)
+  const [paused, setPaused] = useState(false)
+  const [pauseSpentMs, setPauseSpentMs] = useState(
+    () => readActiveSession()?.pauseSpentMs || 0,
+  )
+  const [connectionLost, setConnectionLost] = useState(false)
+  const [reconnect, setReconnect] = useState(() => startReconnect())
+  const [suspended, setSuspended] = useState(false)
   const [submitTurn] = useSubmitTurnMutation()
   const mic = useMicCapture()
 
@@ -65,6 +84,12 @@ const useConversationLoop = () => {
   const finishingRef = useRef(false)
   const restartTimerRef = useRef(null)
   const mountedRef = useRef(true)
+  const frozenRemainingRef = useRef(QUESTION_DURATION_MS)
+  const connectionLostRef = useRef(false)
+  const reconnectRef = useRef(startReconnect())
+  const pauseSpentRef = useRef(pauseSpentMs)
+  const handleReconnectSuccessRef = useRef(() => {})
+  const handleResumeRef = useRef(() => {})
 
   const finishTurnRef = useRef(() => {})
   const handleNoSpeechRef = useRef(() => {})
@@ -87,8 +112,9 @@ const useConversationLoop = () => {
       question,
       transcript,
       retryCount,
+      phase,
     }
-  }, [session, turns, order, question, transcript, retryCount])
+  }, [session, turns, order, question, transcript, retryCount, phase])
 
   const stopRecognizer = useCallback(() => {
     if (recognizerRef.current) {
@@ -105,13 +131,16 @@ const useConversationLoop = () => {
   }, [])
 
   const startListening = useCallback(
-    (nextQuestion, { preserveRetry = false } = {}) => {
+    (nextQuestion, { preserveRetry = false, remainingMs: initialRemaining } = {}) => {
       stopRecognizer()
       finishingRef.current = false
       silentSinceRef.current = null
+      const budget = Number.isFinite(initialRemaining)
+        ? Math.max(0, Math.min(QUESTION_DURATION_MS, initialRemaining))
+        : QUESTION_DURATION_MS
       listenStartedAtRef.current = Date.now()
-      deadlineRef.current = Date.now() + QUESTION_DURATION_MS
-      setRemainingMs(QUESTION_DURATION_MS)
+      deadlineRef.current = listenStartedAtRef.current + budget
+      setRemainingMs(budget)
       setTranscript("")
       if (!preserveRetry) setRetryCount(0)
       setNotice(null)
@@ -255,6 +284,137 @@ const useConversationLoop = () => {
     loadQuestionRef.current = loadQuestion
   }, [loadQuestion])
 
+  const suspendSession = useCallback(() => {
+    clearRestart()
+    stopRecognizer()
+    stopSpeaking()
+    frozenRemainingRef.current = remainingQuestionMs(
+      deadlineRef.current,
+      Date.now(),
+    )
+    setSuspended(true)
+  }, [clearRestart, stopRecognizer])
+
+  const resumeSession = useCallback(() => {
+    const current = stateRef.current
+    setSuspended(false)
+    if (finishingRef.current || current.phase !== CONVERSATION_PHASE.LISTENING) {
+      return
+    }
+    startListening(current.question, {
+      preserveRetry: true,
+      remainingMs: frozenRemainingRef.current,
+    })
+  }, [startListening])
+
+  const handlePause = useCallback(() => {
+    if (connectionLost) return
+    setPaused(true)
+    suspendSession()
+  }, [connectionLost, suspendSession])
+
+  const handleResume = useCallback(() => {
+    setPaused(false)
+    resumeSession()
+  }, [resumeSession])
+
+  const handleLeave = useCallback(() => {
+    const current = stateRef.current
+    if (current.session) {
+      saveActiveSession({
+        ...current.session,
+        status: SESSION_STATUS.PAUSED,
+        turns: current.turns,
+        pauseSpentMs,
+        pausedAt: Date.now(),
+      })
+    }
+    clearRestart()
+    stopRecognizer()
+    stopSpeaking()
+    navigate(PLACEMENT_TEST_PATH, { replace: true })
+  }, [clearRestart, navigate, pauseSpentMs, stopRecognizer])
+
+  const handleConnectionLost = useCallback(() => {
+    if (connectionLost) return
+    reconnectRef.current = startReconnect()
+    setReconnect(reconnectRef.current)
+    setConnectionLost(true)
+    suspendSession()
+  }, [connectionLost, suspendSession])
+
+  const handleReconnectSuccess = useCallback(() => {
+    reconnectRef.current = startReconnect()
+    setReconnect(reconnectRef.current)
+    setConnectionLost(false)
+    resumeSession()
+  }, [resumeSession])
+
+  const handleReconnectNow = useCallback(() => {
+    handleReconnectSuccess()
+  }, [handleReconnectSuccess])
+
+  useEffect(() => {
+    connectionLostRef.current = connectionLost
+  }, [connectionLost])
+
+  useEffect(() => {
+    handleReconnectSuccessRef.current = handleReconnectSuccess
+  }, [handleReconnectSuccess])
+
+  useEffect(() => {
+    handleResumeRef.current = handleResume
+  }, [handleResume])
+
+  useEffect(() => {
+    const handleOffline = () => handleConnectionLost()
+    const handleOnline = () => {
+      if (connectionLostRef.current) handleReconnectSuccess()
+    }
+    window.addEventListener("offline", handleOffline)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener(CONNECTION_LOST_EVENT, handleOffline)
+    return () => {
+      window.removeEventListener("offline", handleOffline)
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener(CONNECTION_LOST_EVENT, handleOffline)
+    }
+  }, [handleConnectionLost, handleReconnectSuccess])
+
+  useEffect(() => {
+    if (!connectionLost) return undefined
+    const id = window.setInterval(() => {
+      const previous = reconnectRef.current
+      const next = tickReconnect(previous, 1000)
+      if (next.exhausted) {
+        reconnectRef.current = startReconnect()
+        setReconnect(reconnectRef.current)
+        setConnectionLost(false)
+        setPaused(true)
+        return
+      }
+      reconnectRef.current = next
+      setReconnect(next)
+      if (next.attempt !== previous.attempt && isOnline()) {
+        handleReconnectSuccessRef.current()
+      }
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [connectionLost])
+
+  useEffect(() => {
+    if (!paused) return undefined
+    const id = window.setInterval(() => {
+      const next = advancePauseBudget(pauseSpentRef.current, 1000)
+      pauseSpentRef.current = next
+      setPauseSpentMs(next)
+      if (remainingPauseBudget(next) <= 0) {
+        handleResumeRef.current()
+      }
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [paused])
+
   useEffect(() => {
     mountedRef.current = true
     const stored = readActiveSession()
@@ -281,7 +441,7 @@ const useConversationLoop = () => {
   }, [navigate, clearRestart, stopRecognizer])
 
   useEffect(() => {
-    if (phase !== CONVERSATION_PHASE.LISTENING) return undefined
+    if (phase !== CONVERSATION_PHASE.LISTENING || suspended) return undefined
     const id = window.setInterval(() => {
       const now = Date.now()
       setRemainingMs(Math.max(0, deadlineRef.current - now))
@@ -319,7 +479,7 @@ const useConversationLoop = () => {
       }
     }, TICK_MS)
     return () => window.clearInterval(id)
-  }, [phase])
+  }, [phase, suspended])
 
   const handleSubmit = useCallback(() => {
     finishTurnRef.current({ transcript: stateRef.current.transcript })
@@ -355,6 +515,16 @@ const useConversationLoop = () => {
     toggleHanzi,
     togglePinyin,
     canSkip,
+    answeredCount: turns.length,
+    paused,
+    pauseRemainingMs: remainingPauseBudget(pauseSpentMs),
+    connectionLost,
+    reconnectAttempt: reconnect.attempt,
+    reconnectRemainingMs: reconnect.remainingMs,
+    handlePause,
+    handleResume,
+    handleLeave,
+    handleReconnectNow,
     handleSubmit,
     handleSkip,
     handleReplay,

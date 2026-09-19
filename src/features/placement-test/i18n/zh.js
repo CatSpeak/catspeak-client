@@ -183,6 +183,24 @@ export default {
       retryBanner: "AI 没有听清你的回答，请再说一遍。（第 {{attempt}} / {{max}} 次）",
       noHearingBanner: "AI 没有听到你的声音。请检查麦克风或调高输入音量。",
       volumeHint: "音量偏小。请说得更大声，或调高麦克风音量。",
+      configureNotice: "AI 设置功能即将上线。",
+      pauseTitle: "调查已暂停",
+      pauseBody:
+        "当前题目的计时器已停止。你可以喝口水或休息一下，然后再继续作答。",
+      pauseSafeData:
+        "数据安全：你之前的回答（{{answered}} 题）已加密并成功存储到服务器。",
+      pauseBudgetLabel: "剩余最长暂停时间：",
+      pauseBudgetChip: "⏳ {{time}} 分钟",
+      pauseLeaveCta: "暂时离开考场",
+      pauseResumeCta: "立即继续答题 ▷",
+      reconnectTitle: "网络连接中断",
+      reconnectBody:
+        "由于网络信号不稳定，与 AI 考场的音频连接已中断。系统正在尝试重新连接。",
+      reconnectSafeData:
+        "进度已保留：之前所有回答数据（{{answered}} 题）已安全保存在第 {{order}}/{{total}} 题。你的成绩不会受到影响。",
+      reconnectProgressLabel: "自动重连进度：",
+      reconnectProgressChip: "🔄 {{seconds}} 秒后...（第 {{attempt}}/{{max}} 次）",
+      reconnectRetryCta: "立即重新连接 🔄",
     },
     scoring: {
       title: "评分中",
