@@ -47,6 +47,9 @@ import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkelet
 const PlacementTestPage = lazy(
   () => import("@/features/placement-test/pages/PlacementTestPage"),
 );
+const PlacementSessionPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementSessionPage"),
+);
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
@@ -287,6 +290,18 @@ const routesConfig = [
                 <AuthGuard>
                   <LazyRoute>
                     <PlacementTestPage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
+            ),
+          },
+          {
+            path: "placement-test/session",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementSessionPage />
                   </LazyRoute>
                 </AuthGuard>
               </CommunityGuard>

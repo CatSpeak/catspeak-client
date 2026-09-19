@@ -1,3 +1,5 @@
 export * from "./constants/routes"
+export * from "./api"
 export { default as PlacementTestPage } from "./pages/PlacementTestPage"
+export { default as PlacementSessionPage } from "./pages/PlacementSessionPage"
 export { placementTestTranslations } from "./i18n"

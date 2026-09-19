@@ -1,16 +1,24 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth/hooks/useAuth"
 import { PLACEMENT_TEST_STEPS } from "../constants/steps"
+import { PLACEMENT_TEST_SESSION_PATH } from "../constants/routes"
 import useMicrophonePermission from "../hooks/useMicrophonePermission"
+import { useCreateSessionMutation } from "../api"
 import ConsentStep from "../components/ConsentStep"
 import PermissionBlockedStep from "../components/PermissionBlockedStep"
 import DeviceStep from "../components/DeviceStep"
+import BandStep from "../components/BandStep"
 
 const PlacementTestPage = () => {
   const { t } = useLanguage()
   const copy = t.placementTest || {}
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [step, setStep] = useState(PLACEMENT_TEST_STEPS.CONSENT)
   const { requesting, request } = useMicrophonePermission()
+  const [createSession, { isLoading: creating }] = useCreateSessionMutation()
 
   const handleStart = async () => {
     const granted = await request()
@@ -19,6 +27,16 @@ const PlacementTestPage = () => {
         ? PLACEMENT_TEST_STEPS.DEVICE
         : PLACEMENT_TEST_STEPS.PERMISSION_DENIED,
     )
+  }
+
+  const handleStartSession = async (targetBand) => {
+    await createSession({
+      targetBand,
+      studentId: user?.id ?? user?.accountId ?? null,
+    })
+      .unwrap()
+      .then(() => navigate(PLACEMENT_TEST_SESSION_PATH))
+      .catch(() => {})
   }
 
   return (
@@ -38,7 +56,15 @@ const PlacementTestPage = () => {
             requesting={requesting}
           />
         )}
-        {step === PLACEMENT_TEST_STEPS.DEVICE && <DeviceStep copy={copy} />}
+        {step === PLACEMENT_TEST_STEPS.DEVICE && (
+          <DeviceStep
+            copy={copy}
+            onContinue={() => setStep(PLACEMENT_TEST_STEPS.BAND)}
+          />
+        )}
+        {step === PLACEMENT_TEST_STEPS.BAND && (
+          <BandStep copy={copy} onStart={handleStartSession} creating={creating} />
+        )}
       </div>
     </div>
   )

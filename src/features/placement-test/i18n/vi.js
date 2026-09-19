@@ -62,9 +62,99 @@ export default {
       trust: "CatSpeak cam kết mã hóa và bảo mật 100% dữ liệu âm thanh.",
     },
     device: {
-      grantedTitle: "Đã cấp quyền Microphone",
-      grantedBody:
-        "Microphone đã sẵn sàng. Bước kiểm tra thiết bị sẽ được bổ sung ở giai đoạn tiếp theo.",
+      title: "Thử Giọng Khẩu Ngữ",
+      statusReady: "Âm lượng đạt chuẩn",
+      statusListening: "Đang lắng nghe…",
+      statusNoSignal: "Chưa phát hiện giọng nói",
+      statusError: "Không truy cập được micro",
+      instruction:
+        "Hãy đọc to câu tiếng Trung mẫu bên dưới để kiểm tra chất lượng giọng nói:",
+      sampleHanzi: "你好！欢迎来到 CatSpeak。",
+      samplePinyin: "Nǐ hǎo! Huānyíng lái dào CatSpeak.",
+      sampleTranslation: "(Xin chào! Chào mừng bạn đến với CatSpeak.)",
+      record: "Nhấn để ghi âm giọng mẫu",
+      recording: "Đang ghi âm… nhấn để dừng",
+      replay: "Nghe lại đoạn thử giọng vừa thu ({{duration}}s)",
+      deviceTitle: "Cấu hình Thiết bị Đầu vào",
+      deviceCaption: "Mặc định hệ điều hành · Đang hoạt động tốt",
+      devicePlaceholder: "Chưa tìm thấy microphone",
+      checklist: [
+        "Tín hiệu âm thanh rõ ràng, không tạp âm",
+        "Đường truyền ổn định, kết nối nhanh chóng",
+        "Thiết bị thu âm sẵn sàng cho bài thi",
+      ],
+      continueCta: "Âm Thanh Đã Tốt, Tiếp Tục",
+      errorTitle: "Không thể truy cập Microphone",
+      errorBody:
+        "CatSpeak không thể kết nối tới thiết bị thu âm. Hãy kiểm tra quyền truy cập micro và thử lại.",
+      errorRetryCta: "Thử Lại Kiểm Tra Micro",
+    },
+    noAudio: {
+      instruction:
+        "Hệ thống không nhận được âm thanh từ microphone sau 5 giây thu mẫu.",
+      meterLabel: "Không có tín hiệu âm thanh (0 dB)",
+      info: "Vui lòng thử các bước khắc phục bên cạnh trước khi thử lại.",
+      guideTitle: "Hướng Dẫn Khắc Phục Lỗi Thu Âm",
+      switchHint: "Nhấp để đổi nguồn microphone khác",
+      fixes: [
+        {
+          title: "1. Kiểm tra công tắc Mute vật lý",
+          desc: "Gạt mở nút mic trên dây tai nghe hoặc bàn phím máy tính.",
+        },
+        {
+          title: "2. Cắm chặt lại jack cắm micrô",
+          desc: "Rút và cắm lại chắc chắn đầu cắm 3.5mm hoặc cổng USB.",
+        },
+        {
+          title: "3. Tăng âm lượng trong Sound Settings",
+          desc: "Nâng mức âm lượng đầu vào (Input Volume) lên 80 - 100%.",
+        },
+      ],
+      retryCta: "Nói Thử Lại Lần Nữa",
+    },
+    band: {
+      title: "Chọn Cấp Độ Mục Tiêu Ước Lượng của Bạn",
+      subtitle:
+        "AI Tutor sẽ khởi tạo câu hỏi đầu tiên theo mốc này, sau đó tự động điều chỉnh độ khó theo phản xạ thực tế.",
+      difficultyLabel: "Độ khó:",
+      startCta: "Bắt Đầu Luyện Nói ({{band}})",
+      lockedNote:
+        "Khảo sát thích ứng gồm 5 câu hỏi · Độ khó tự động điều chỉnh theo phản xạ của bạn",
+      items: {
+        hsk1_2: {
+          level: "Sơ cấp · Beginner",
+          title: "HSK 1 - 2",
+          desc: "Khởi đầu ngữ âm, làm quen các câu chào hỏi và từ vựng căn bản.",
+          vocab: "Vốn từ mục tiêu: 150 – 300 từ",
+          time: "Thời gian học: 0 – 3 tháng",
+          topics: ["Chào hỏi", "Mua sắm"],
+          difficulty: "Nhẹ nhàng",
+        },
+        hsk3_4: {
+          level: "Khuyên dùng phổ biến",
+          title: "HSK 3 - 4",
+          desc: "Đã học 6–12 tháng, có thể giao tiếp tự nhiên trong đời sống và du lịch.",
+          vocab: "Vốn từ mục tiêu: 600 – 1.200 từ",
+          time: "Thời gian học: 6 – 12 tháng",
+          topics: ["Công việc", "Du lịch", "Sở thích"],
+          difficulty: "Cân bằng",
+        },
+        hsk5_6: {
+          level: "Cao cấp · Advanced",
+          title: "HSK 5 - 6",
+          desc: "Phản xạ nhanh, tranh luận và đàm phán chuyên sâu về kinh tế, văn hóa.",
+          vocab: "Vốn từ mục tiêu: 2.500 – 5.000 từ",
+          time: "Thời gian học: Trên 1.5 năm",
+          topics: ["Thuyết trình", "Đàm phán"],
+          difficulty: "Thử thách",
+        },
+      },
+    },
+    session: {
+      title: "Phòng thi Khẩu ngữ",
+      body: "Phiên thi đã được tạo và lưu an toàn. Màn hình phòng thi đàm thoại sẽ được hoàn thiện ở bước tiếp theo.",
+      codeLabel: "Mã phiên thi",
+      backCta: "Quay lại bước kiểm tra thiết bị",
     },
   },
 }
