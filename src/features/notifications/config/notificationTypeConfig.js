@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  BadgeCheck,
   CalendarClock,
   PenSquare,
   CheckCircle2,
@@ -566,6 +567,52 @@ export const NOTIFICATION_TYPES = {
       return `${editNote} (${requestTypeLabel})`;
     },
     resolveUrl: () => INSTRUCTOR_PROFILE_URL,
+  },
+  subscription_purchased: {
+    icon: BadgeCheck,
+    color: "text-green-500",
+    resolveTitle: (m, t) =>
+      (t.notifications?.subscription_purchased?.title || "Nâng cấp gói {planName} thành công").replace(
+        "{planName}",
+        m.planName || "",
+      ),
+    resolveBody: (m, t) =>
+      (t.notifications?.subscription_purchased?.body ||
+        'Quyền lợi của gói "{planName}" đã được kích hoạt. Hạn dùng đến {endDate}.')
+        .replace("{planName}", m.planName || "")
+        .replace("{endDate}", m.endDate || ""),
+    resolveUrl: () => "/billing",
+  },
+  subscription_expiring_soon: {
+    icon: CalendarClock,
+    color: "text-amber-500",
+    resolveTitle: (m, t) =>
+      (t.notifications?.subscription_expiring_soon?.title || "Gói {planName} sắp hết hạn").replace(
+        "{planName}",
+        m.planName || "",
+      ),
+    resolveBody: (m, t) =>
+      (t.notifications?.subscription_expiring_soon?.body ||
+        'Gói "{planName}" sẽ hết hạn ngày {endDate}. Hãy gia hạn để không bị gián đoạn.')
+        .replace("{planName}", m.planName || "")
+        .replace("{endDate}", m.endDate || "")
+        .replace("{remainingDays}", m.remainingDays || ""),
+    resolveUrl: () => "/pricing",
+  },
+  subscription_expired: {
+    icon: XCircle,
+    color: "text-red-500",
+    resolveTitle: (m, t) =>
+      (t.notifications?.subscription_expired?.title || "Gói {planName} đã hết hạn").replace(
+        "{planName}",
+        m.planName || "",
+      ),
+    resolveBody: (m, t) =>
+      (t.notifications?.subscription_expired?.body ||
+        'Gói "{planName}" đã hết hạn ngày {endDate}. Đăng ký lại để tiếp tục sử dụng.')
+        .replace("{planName}", m.planName || "")
+        .replace("{endDate}", m.endDate || ""),
+    resolveUrl: () => "/pricing",
   },
 };
 

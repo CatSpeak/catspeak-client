@@ -254,7 +254,24 @@ const PlanCard = ({
               {features.map((feature, index) => {
                 const isString = typeof feature === "string";
                 const isBoolean = !isString && feature.valueType === "boolean";
-                const isFalsy = isBoolean && feature.limitValue === "false";
+                // Struck-through when the feature is effectively unavailable:
+                // missing from this plan's union, deactivated, boolean false,
+                // or a numeric limit of 0.
+                const isMissing = !isString && feature.isMissing === true;
+                const isInactive = !isString && feature.isActive === false;
+                const isFalseBoolean =
+                  isBoolean &&
+                  String(feature.limitValue).toLowerCase() === "false";
+                const numericLimit =
+                  !isString && feature.limitValue !== undefined && feature.limitValue !== null && feature.limitValue !== ""
+                    ? Number(feature.limitValue)
+                    : NaN;
+                const isZeroLimit = !isBoolean && !Number.isNaN(numericLimit) && numericLimit === 0;
+                const isFalsy =
+                  isMissing ||
+                  isInactive ||
+                  isFalseBoolean ||
+                  isZeroLimit;
                 const featureKey = isString
                   ? `${feature}-${index}`
                   : feature.id || index;

@@ -216,5 +216,17 @@ export default {
       requestTypeInitial: "Đăng ký mới",
       requestTypeUpdate: "Cập nhật giảng dạy",
     },
+    subscription_purchased: {
+      title: "Nâng cấp gói {planName} thành công",
+      body: 'Quyền lợi của gói "{planName}" đã được kích hoạt. Hạn dùng đến {endDate}.',
+    },
+    subscription_expiring_soon: {
+      title: "Gói {planName} sắp hết hạn",
+      body: 'Gói "{planName}" sẽ hết hạn ngày {endDate}. Hãy gia hạn để không bị gián đoạn.',
+    },
+    subscription_expired: {
+      title: "Gói {planName} đã hết hạn",
+      body: 'Gói "{planName}" đã hết hạn ngày {endDate}. Đăng ký lại để tiếp tục sử dụng.',
+    },
   },
 }

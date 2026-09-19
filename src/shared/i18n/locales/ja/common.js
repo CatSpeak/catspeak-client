@@ -217,5 +217,17 @@ export default {
       requestTypeInitial: "新規登録",
       requestTypeUpdate: "指導内容の更新",
     },
+    subscription_purchased: {
+      title: "{planName}へのアップグレードが完了しました",
+      body: "「{planName}」の特典が有効になりました。有効期限は{endDate}までです。",
+    },
+    subscription_expiring_soon: {
+      title: "{planName}の有効期限が近づいています",
+      body: "「{planName}」は{endDate}に期限切れとなります。中断を避けるため更新してください。",
+    },
+    subscription_expired: {
+      title: "{planName}の有効期限が切れました",
+      body: "「{planName}」は{endDate}に期限切れとなりました。引き続き利用するには再登録してください。",
+    },
   },
 }

@@ -214,5 +214,17 @@ export default {
       requestTypeInitial: "新注册",
       requestTypeUpdate: "教学更新",
     },
+    subscription_purchased: {
+      title: "已成功升级到{planName}",
+      body: "“{planName}”的权益已激活，有效期至{endDate}。",
+    },
+    subscription_expiring_soon: {
+      title: "{planName}即将到期",
+      body: "您的“{planName}”将于{endDate}到期，请及时续费以免中断。",
+    },
+    subscription_expired: {
+      title: "{planName}已到期",
+      body: "您的“{planName}”已于{endDate}到期，请重新订阅以继续使用。",
+    },
   },
 };
