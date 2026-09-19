@@ -32,7 +32,7 @@ import LanguageLayout from "./LanguageLayout";
 import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
 import { Navigate } from "react-router-dom";
-import { AuthGuard, RoleGuard } from "@/shared/components";
+import { AuthGuard, CommunityGuard, RoleGuard } from "@/shared/components";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
@@ -44,6 +44,9 @@ import LinkYoutubePage from "@/features/courses/components/lecture-hall/pages/Li
 import MyCalendarPage from "@/features/calendar/pages/MyCalendarPage";
 
 import ProfilePageSkeleton from "@/features/profile/components/ProfilePageSkeleton";
+const PlacementTestPage = lazy(
+  () => import("@/features/placement-test/pages/PlacementTestPage"),
+);
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
@@ -275,6 +278,18 @@ const routesConfig = [
               <LazyRoute>
                 <WebsitePage />
               </LazyRoute>
+            ),
+          },
+          {
+            path: "placement-test",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementTestPage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
             ),
           },
           {

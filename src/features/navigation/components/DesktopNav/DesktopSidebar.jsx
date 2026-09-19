@@ -22,6 +22,7 @@ import {
   Globe,
   Settings,
   Compass,
+  ClipboardCheck,
 } from "lucide-react"
 import DesktopNavItem from "./DesktopNavItem"
 import ListItem from "@/shared/components/ui/ListItem"
@@ -40,6 +41,13 @@ const mainDockItems = [
     icon: Briefcase,
     path: "/workspace",
     hasSublinks: true,
+  },
+  {
+    key: "aiTutor",
+    icon: ClipboardCheck,
+    path: "/placement-test",
+    hasSublinks: true,
+    lang: "zh",
   },
 ]
 
@@ -77,6 +85,7 @@ const getActiveDockSection = (pathname) => {
   if (pathname.includes("/chat")) return "messages"
   if (pathname.includes("/explore-courses")) return "exploreCourses"
   if (pathname.includes("/resources")) return "learningResources"
+  if (pathname.includes("/placement-test")) return "aiTutor"
   if (pathname.includes("/community")) return "community"
   return "community"
 }
@@ -288,6 +297,7 @@ const DesktopSidebar = () => {
         <div className="flex-1 flex flex-col gap-3 w-full px-3">
           {mainDockItems
             .filter((item) => {
+              if (item.lang && item.lang !== currentLang) return false
               const teacherTabs = [
                 "dashboard",
                 "myCourses",

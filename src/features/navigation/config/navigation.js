@@ -19,6 +19,7 @@ import {
   Compass,
   Folder,
   Ticket,
+  ClipboardCheck,
 } from "lucide-react"
 
 export const navSections = [
@@ -52,6 +53,20 @@ export const navSections = [
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "events", path: "/cat-speak/calendar", icon: Calendar },
+    ],
+  },
+  {
+    key: "aiTutor",
+    labelKey: "aiTutor",
+    defaultLabel: "Gia sư AI",
+    maxInitial: 5,
+    items: [
+      {
+        key: "placementTest",
+        path: "/placement-test",
+        icon: ClipboardCheck,
+        lang: "zh",
+      },
     ],
   },
   {
@@ -167,6 +182,12 @@ export const navLinks = [
     get subItems() {
       return this.groups.flatMap((g) => g.items)
     },
+  },
+  {
+    key: "placementTest",
+    path: "/placement-test",
+    icon: ClipboardCheck,
+    lang: "zh",
   },
   {
     key: "horizontalBar",

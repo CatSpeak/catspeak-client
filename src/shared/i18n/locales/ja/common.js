@@ -65,6 +65,8 @@ export default {
     myLearning: "マイ学習",
     manageMaterials: "教材の管理",
     exploreCourses: "コースを探索",
+    aiTutor: "AI チューター",
+    placementTest: "レベル診断",
     messages: "メッセージ",
     settings: "設定",
     help: "ヘルプ",

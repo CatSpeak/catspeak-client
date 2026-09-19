@@ -65,6 +65,8 @@ export default {
     myLearning: "Góc học tập",
     manageMaterials: "Quản lý tài liệu",
     exploreCourses: "Khám phá khóa học",
+    aiTutor: "Gia sư AI",
+    placementTest: "Đánh giá trình độ",
     messages: "Tin nhắn",
     settings: "Cài đặt",
     help: "Trợ giúp",
