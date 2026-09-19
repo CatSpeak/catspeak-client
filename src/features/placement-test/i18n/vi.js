@@ -241,9 +241,79 @@ export default {
       saveLaterCta: "Lưu & Xem sau trên Dashboard",
     },
     result: {
-      title: "Kết quả Đánh giá Trình độ",
-      body: "Báo cáo kết quả khẩu ngữ HSK của bạn đã sẵn sàng. Màn hình chi tiết sẽ được hoàn thiện ở bước tiếp theo.",
-      backCta: "Về trang Đánh giá trình độ",
+      topbarTitle: "Báo Cáo Năng Lực HSK 3.0",
+      topbarSub: "Học viên: {{name}} · Mã bài thi: #{{code}}",
+      studentFallback: "Học viên",
+      shareCta: "Chia sẻ kết quả",
+      shareNotice: "Đã tạo liên kết chia sẻ kết quả của bạn.",
+      badge: "CHUẨN HSK 3.0",
+      scoreLabel: "Điểm: {{score}} / 100",
+      bandTitle: "HSK {{band}} · {{tier}}",
+      cefrLabel: "Khung tham chiếu Châu Âu: CEFR {{cefr}}",
+      heroDescription:
+        "Khả năng giao tiếp trong ngữ cảnh hàng ngày, phát âm và phản xạ phù hợp trình độ HSK {{band}}. Vốn từ vựng khẩu ngữ được tích lũy tốt.",
+      feedbackTitle: "Nhận xét sư phạm từ AI Tutor",
+      strengthLabel: "Điểm mạnh:",
+      attentionLabel: "Cần chú ý:",
+      strengthLine: "{{dimension}} đạt {{score}}/100 — nền tảng tốt để bứt phá.",
+      weaknessLine:
+        "{{dimension}} mới đạt {{score}}/100 — cần luyện thêm mỗi ngày.",
+      noWeaknessLine:
+        "Chưa phát hiện điểm yếu đáng kể, hãy duy trì phong độ hiện tại.",
+      roadmapTitle: "Lộ trình 5 ngày bứt phá lên HSK {{band}}",
+      roadmapDays: [
+        { tag: "D 1-2", text: "Khẩu ngữ chuyên đề công việc & phỏng vấn" },
+        { tag: "D 3-4", text: "Phản xạ câu ghép phức cùng AI Tutor" },
+        { tag: "D 5", text: "Thử thách mô phỏng bài thi HSKK Trung cấp" },
+      ],
+      skillsTitle: "Phân Tích 4 Chiều Kỹ Năng Khẩu Ngữ",
+      skillsSubtitle: "Đánh giá chuẩn hóa qua mô hình AI Speech Recognition",
+      dimensions: {
+        pronunciation: "Ngữ âm & 4 Thanh điệu",
+        vocabulary: "Vốn từ vựng khẩu ngữ",
+        grammar: "Cấu trúc ngữ pháp câu",
+        fluency: "Độ trôi chảy & Phản xạ",
+      },
+      scoreOf: "{{score}} / 100",
+      aiNote:
+        "Khuyến nghị AI: Trình độ HSK {{band}} rất phù hợp để bắt đầu luyện phản xạ giao tiếp tự nhiên cùng AI Tutor.",
+      startCta: "Bắt Đầu Học Lộ Trình HSK {{band}} →",
+      adjustCta: "Điều Chỉnh Trình Độ (±1 Cấp Độ)",
+      adjustCaption:
+        "* Học viên có tối đa 1 lần điều chỉnh cấp độ trước khi khóa lộ trình.",
+      adjustLocked:
+        "Bạn đã sử dụng quyền điều chỉnh cấp độ. Lộ trình hiện được khóa.",
+      emptyTitle: "Chưa có kết quả đánh giá",
+      emptyBody:
+        "Hãy hoàn thành bài khảo sát khẩu ngữ để xem báo cáo năng lực HSK 3.0.",
+      emptyCta: "Về trang Đánh giá trình độ",
+    },
+    tiers: {
+      tierBeginner: "SƠ CẤP",
+      tierIntermediate: "TRUNG CẤP",
+      tierAdvanced: "CAO CẤP",
+    },
+    adjust: {
+      title: "Điều Chỉnh Trình Độ Học Tập",
+      currentSub: "Trình độ AI đánh giá hiện tại: HSK {{band}} ({{tier}})",
+      intro:
+        "Quy định nghiệp vụ CatSpeak cho phép điều chỉnh tối đa ±1 cấp độ HSK so với kết quả AI đánh giá. Bạn chỉ được điều chỉnh duy nhất 1 lần.",
+      optionDown: "Giảm 1 cấp (Học nhẹ nhàng, củng cố nền tảng)",
+      optionKeep: "Giữ nguyên kết quả AI đề xuất",
+      optionUp: "Tăng 1 cấp (Thử thách cao hơn, bứt phá)",
+      recommended: "Khuyến nghị",
+      warning:
+        "Lưu ý: Sau khi xác nhận, lộ trình 5 ngày sẽ được tạo mới theo cấp độ này và quyền điều chỉnh sẽ bị khóa vĩnh viễn.",
+      cancelCta: "Hủy bỏ / Giữ HSK {{band}}",
+      confirmCta: "Xác Nhận Đổi Trình Độ",
+      successToast: "Đã cập nhật trình độ học tập sang HSK {{band}}.",
+      alreadyAdjustedToast: "Bạn đã sử dụng quyền điều chỉnh trình độ.",
+      errorToast: "Không thể cập nhật trình độ. Vui lòng thử lại.",
+    },
+    profile: {
+      title: "Hồ Sơ Năng Lực",
+      body: "Hồ sơ năng lực và lộ trình học tập của bạn sẽ được hoàn thiện ở bước tiếp theo.",
+      backCta: "Về trang kết quả",
     },
   },
 }

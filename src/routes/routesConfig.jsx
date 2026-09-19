@@ -56,6 +56,9 @@ const PlacementScoringPage = lazy(
 const PlacementResultPage = lazy(
   () => import("@/features/placement-test/pages/PlacementResultPage"),
 );
+const PlacementProfilePage = lazy(
+  () => import("@/features/placement-test/pages/PlacementProfilePage"),
+);
 const Profile = lazy(() => import("@/features/profile/pages/Profile"));
 const AccountInfoPage = lazy(
   () => import("@/features/settings/pages/AccountInfoPage"),
@@ -332,6 +335,18 @@ const routesConfig = [
                 <AuthGuard>
                   <LazyRoute>
                     <PlacementResultPage />
+                  </LazyRoute>
+                </AuthGuard>
+              </CommunityGuard>
+            ),
+          },
+          {
+            path: "placement-test/profile",
+            element: (
+              <CommunityGuard>
+                <AuthGuard>
+                  <LazyRoute>
+                    <PlacementProfilePage />
                   </LazyRoute>
                 </AuthGuard>
               </CommunityGuard>

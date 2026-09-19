@@ -1,8 +1,9 @@
 import { SESSION_STATUS } from "../constants/session"
-import { scoreSession } from "../engine"
+import { applySelfAdjust, clampHsk, scoreSession } from "../engine"
 import { createSessionCode } from "../utils/session"
 import {
   readActiveSession,
+  readResult,
   saveActiveSession,
   saveResult,
 } from "../utils/sessionStorage"
@@ -162,4 +163,68 @@ export const scoreSessionMock = async (
   persist(completed)
 
   return { data: { result, session: completed } }
+}
+
+export const adjustLevelMock = async (
+  { sessionId, level } = {},
+  {
+    delayMs = MOCK_LATENCY_MS,
+    read = readActiveSession,
+    persist = saveActiveSession,
+    readResult: readStoredResult = readResult,
+    persistResult = saveResult,
+    now = Date.now,
+  } = {},
+) => {
+  await wait(delayMs)
+  const session = read()
+  if (!session || (sessionId && session.id !== sessionId)) {
+    return {
+      error: { status: 404, data: { message: "placement_session_not_found" } },
+    }
+  }
+
+  const result = readStoredResult()
+  if (!result || (sessionId && result.sessionId !== sessionId)) {
+    return {
+      error: { status: 404, data: { message: "placement_result_not_found" } },
+    }
+  }
+
+  if (session.selfAdjusted || result.selfAdjusted) {
+    return {
+      error: { status: 409, data: { message: "placement_adjust_locked" } },
+    }
+  }
+
+  const aiBand = clampHsk(session.finalBand ?? result.band)
+  const { band: finalBand, applied } = applySelfAdjust({ band: aiBand, level })
+  const timestamp = typeof now === "function" ? now() : now
+
+  const updatedSession = {
+    ...session,
+    finalBand,
+    selfAdjusted: true,
+    updatedAt: timestamp,
+  }
+  persist(updatedSession)
+
+  const updatedResult = {
+    ...result,
+    band: finalBand,
+    aiBand: result.aiBand ?? aiBand,
+    selfAdjusted: true,
+    adjustedAt: timestamp,
+  }
+  persistResult(updatedResult)
+
+  return {
+    data: {
+      session: updatedSession,
+      result: updatedResult,
+      band: finalBand,
+      applied,
+      selfAdjusted: true,
+    },
+  }
 }

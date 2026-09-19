@@ -1,5 +1,10 @@
 import { baseApi } from "@/store/api/baseApi"
-import { createSessionMock, scoreSessionMock, submitTurnMock } from "./mockAdapter"
+import {
+  adjustLevelMock,
+  createSessionMock,
+  scoreSessionMock,
+  submitTurnMock,
+} from "./mockAdapter"
 
 export const placementTestApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -15,6 +20,10 @@ export const placementTestApi = baseApi.injectEndpoints({
       queryFn: (args) => scoreSessionMock(args),
       invalidatesTags: ["PlacementSession", "PlacementResult"],
     }),
+    adjustLevel: builder.mutation({
+      queryFn: (args) => adjustLevelMock(args),
+      invalidatesTags: ["PlacementSession", "PlacementResult"],
+    }),
   }),
   overrideExisting: false,
 })
@@ -23,4 +32,5 @@ export const {
   useCreateSessionMutation,
   useSubmitTurnMutation,
   useScoreSessionMutation,
+  useAdjustLevelMutation,
 } = placementTestApi

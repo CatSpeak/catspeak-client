@@ -237,9 +237,79 @@ export default {
       saveLaterCta: "保存してダッシュボードで後で見る",
     },
     result: {
-      title: "レベル評価結果",
-      body: "HSK スピーキングの結果レポートができました。詳細画面は次のステップで完成します。",
-      backCta: "レベル評価に戻る",
+      topbarTitle: "HSK 3.0 能力レポート",
+      topbarSub: "受講者：{{name}} · 試験コード：#{{code}}",
+      studentFallback: "受講者",
+      shareCta: "結果を共有",
+      shareNotice: "結果の共有リンクを作成しました。",
+      badge: "HSK 3.0 準拠",
+      scoreLabel: "スコア：{{score}} / 100",
+      bandTitle: "HSK {{band}} · {{tier}}",
+      cefrLabel: "ヨーロッパ言語参照枠：CEFR {{cefr}}",
+      heroDescription:
+        "日常の場面で会話でき、発音と反応は HSK {{band}} のレベルに適合しています。口語語彙も十分に蓄積されています。",
+      feedbackTitle: "AI チューターからの指導コメント",
+      strengthLabel: "強み：",
+      attentionLabel: "注意点：",
+      strengthLine: "{{dimension}} は {{score}}/100 —— 飛躍のための良い土台です。",
+      weaknessLine:
+        "{{dimension}} は {{score}}/100 にとどまっています —— 毎日の練習が必要です。",
+      noWeaknessLine:
+        "目立った弱点は検出されませんでした。現在の調子を維持しましょう。",
+      roadmapTitle: "HSK {{band}} へ飛躍する 5 日間ロードマップ",
+      roadmapDays: [
+        { tag: "D 1-2", text: "仕事・面接のスピーキング特訓" },
+        { tag: "D 3-4", text: "AI チューターと複文の反応練習" },
+        { tag: "D 5", text: "中級 HSKK 模擬試験チャレンジ" },
+      ],
+      skillsTitle: "スピーキング 4 軸スキル分析",
+      skillsSubtitle: "AI 音声認識モデルによる標準化評価",
+      dimensions: {
+        pronunciation: "発音と四声",
+        vocabulary: "口語語彙力",
+        grammar: "文の文法構造",
+        fluency: "流暢さと反応",
+      },
+      scoreOf: "{{score}} / 100",
+      aiNote:
+        "AI の提案：HSK {{band}} は AI チューターと自然な会話反応を練習するのに最適なレベルです。",
+      startCta: "HSK {{band}} 学習ロードマップを開始 →",
+      adjustCta: "レベル調整（±1 レベル）",
+      adjustCaption:
+        "* 受講者はロードマップがロックされる前に 1 回だけレベルを調整できます。",
+      adjustLocked:
+        "1 回限りのレベル調整を使用しました。ロードマップはロックされています。",
+      emptyTitle: "評価結果がありません",
+      emptyBody:
+        "スピーキング評価を完了すると、HSK 3.0 能力レポートが表示されます。",
+      emptyCta: "レベル診断に戻る",
+    },
+    tiers: {
+      tierBeginner: "初級",
+      tierIntermediate: "中級",
+      tierAdvanced: "上級",
+    },
+    adjust: {
+      title: "学習レベルの調整",
+      currentSub: "AI の現在の評価レベル：HSK {{band}}（{{tier}}）",
+      intro:
+        "CatSpeak のポリシーでは、AI の評価結果から最大 ±1 レベルまで調整できます。調整は 1 回のみです。",
+      optionDown: "1 レベル下げる（ゆったり学習し基礎を固める）",
+      optionKeep: "AI の提案どおり維持する",
+      optionUp: "1 レベル上げる（より高い挑戦で飛躍する）",
+      recommended: "おすすめ",
+      warning:
+        "注意：確定すると、5 日間のロードマップがこのレベルで再作成され、調整権限は永久にロックされます。",
+      cancelCta: "キャンセル / HSK {{band}} を維持",
+      confirmCta: "レベルの変更を確定",
+      successToast: "学習レベルを HSK {{band}} に更新しました。",
+      alreadyAdjustedToast: "レベル調整権限はすでに使用済みです。",
+      errorToast: "レベルを更新できませんでした。もう一度お試しください。",
+    },
+    profile: {
+      title: "能力プロフィール",
+      body: "能力プロフィールと学習ロードマップは次のステップで完成します。",
+      backCta: "結果に戻る",
     },
   },
 }

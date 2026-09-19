@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { SESSION_STATUS } from "../constants/session"
 import {
   SCORING_FAILURE_FLAG_KEY,
+  adjustLevelMock,
   buildSession,
   createSessionMock,
   isScoringFailureForced,
@@ -221,5 +222,145 @@ describe("scoreSessionMock", () => {
     )
 
     expect(result.error.status).toBe(503)
+  })
+})
+
+describe("adjustLevelMock", () => {
+  const adjustedSession = (extra = {}) => ({
+    ...buildSession({ targetBand: "hsk3_4", now: () => 1, random: () => 0.5 }),
+    id: "session-1",
+    status: SESSION_STATUS.COMPLETED,
+    finalBand: 3,
+    selfAdjusted: false,
+    ...extra,
+  })
+
+  const scoredResult = (extra = {}) => ({
+    sessionId: "session-1",
+    code: "CS-PT-2026-8891",
+    band: 3,
+    ...extra,
+  })
+
+  it("applies the delta clamped to ±1 and persists both records", async () => {
+    const session = adjustedSession()
+    const result = scoredResult()
+    const persist = vi.fn()
+    const persistResult = vi.fn()
+
+    const response = await adjustLevelMock(
+      { sessionId: "session-1", level: 6 },
+      {
+        delayMs: 0,
+        read: () => session,
+        persist,
+        readResult: () => result,
+        persistResult,
+        now: () => 1710000000000,
+      },
+    )
+
+    expect(response.data.band).toBe(4)
+    expect(response.data.applied).toBe(true)
+    expect(response.data.session).toMatchObject({
+      finalBand: 4,
+      selfAdjusted: true,
+      updatedAt: 1710000000000,
+    })
+    expect(response.data.result).toMatchObject({
+      band: 4,
+      aiBand: 3,
+      selfAdjusted: true,
+      adjustedAt: 1710000000000,
+    })
+    expect(persist).toHaveBeenCalledWith(response.data.session)
+    expect(persistResult).toHaveBeenCalledWith(response.data.result)
+  })
+
+  it("clamps the result to HSK 1-6", async () => {
+    const response = await adjustLevelMock(
+      { sessionId: "session-1", level: 0 },
+      {
+        delayMs: 0,
+        read: () => adjustedSession({ finalBand: 1 }),
+        persist: vi.fn(),
+        readResult: () => scoredResult({ band: 1 }),
+        persistResult: vi.fn(),
+        now: () => 1,
+      },
+    )
+
+    expect(response.data.band).toBe(1)
+    expect(response.data.applied).toBe(false)
+    expect(response.data.selfAdjusted).toBe(true)
+  })
+
+  it("locks after the one-time adjustment and rejects a second call", async () => {
+    const persist = vi.fn()
+    const persistResult = vi.fn()
+
+    const response = await adjustLevelMock(
+      { sessionId: "session-1", level: 4 },
+      {
+        delayMs: 0,
+        read: () => adjustedSession({ selfAdjusted: true }),
+        persist,
+        readResult: () => scoredResult(),
+        persistResult,
+        now: () => 1,
+      },
+    )
+
+    expect(response.error.status).toBe(409)
+    expect(persist).not.toHaveBeenCalled()
+    expect(persistResult).not.toHaveBeenCalled()
+  })
+
+  it("locks even when the keep option leaves the band unchanged", async () => {
+    const response = await adjustLevelMock(
+      { sessionId: "session-1", level: 3 },
+      {
+        delayMs: 0,
+        read: () => adjustedSession(),
+        persist: vi.fn(),
+        readResult: () => scoredResult(),
+        persistResult: vi.fn(),
+        now: () => 1,
+      },
+    )
+
+    expect(response.data.band).toBe(3)
+    expect(response.data.applied).toBe(false)
+    expect(response.data.result.selfAdjusted).toBe(true)
+  })
+
+  it("rejects when there is no persisted result", async () => {
+    const response = await adjustLevelMock(
+      { sessionId: "session-1", level: 4 },
+      {
+        delayMs: 0,
+        read: () => adjustedSession(),
+        persist: vi.fn(),
+        readResult: () => null,
+        persistResult: vi.fn(),
+      },
+    )
+
+    expect(response.error.status).toBe(404)
+  })
+
+  it("rejects when there is no active session", async () => {
+    const response = await adjustLevelMock(
+      { sessionId: "missing", level: 4 },
+      {
+        delayMs: 0,
+        read: () => null,
+        persist: vi.fn(),
+        readResult: () => scoredResult(),
+        persistResult: vi.fn(),
+      },
+    )
+
+    expect(response.error.status).toBe(404)
   })
 })

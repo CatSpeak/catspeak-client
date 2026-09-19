@@ -242,9 +242,81 @@ export default {
       saveLaterCta: "Save & view later on Dashboard",
     },
     result: {
-      title: "Placement Assessment Result",
-      body: "Your HSK speaking result report is ready. The detailed screen will be finished in the next step.",
-      backCta: "Back to Placement Test",
+      topbarTitle: "HSK 3.0 Proficiency Report",
+      topbarSub: "Student: {{name}} · Exam code: #{{code}}",
+      studentFallback: "Student",
+      shareCta: "Share result",
+      shareNotice: "Your result share link is ready.",
+      badge: "HSK 3.0 STANDARD",
+      scoreLabel: "Score: {{score}} / 100",
+      bandTitle: "HSK {{band}} · {{tier}}",
+      cefrLabel: "European Reference Framework: CEFR {{cefr}}",
+      heroDescription:
+        "You can communicate in daily contexts with pronunciation and reflexes suited to HSK {{band}}. Your spoken vocabulary is well developed.",
+      feedbackTitle: "Pedagogical feedback from AI Tutor",
+      strengthLabel: "Strengths:",
+      attentionLabel: "Needs attention:",
+      strengthLine:
+        "{{dimension}} scored {{score}}/100 — a solid base to break through.",
+      weaknessLine:
+        "{{dimension}} scored only {{score}}/100 — needs daily practice.",
+      noWeaknessLine:
+        "No significant weakness detected — keep up the current form.",
+      roadmapTitle: "5-day roadmap to break through to HSK {{band}}",
+      roadmapDays: [
+        { tag: "D 1-2", text: "Work & interview speaking topics" },
+        { tag: "D 3-4", text: "Compound-sentence reflexes with the AI Tutor" },
+        { tag: "D 5", text: "Intermediate HSKK simulation challenge" },
+      ],
+      skillsTitle: "4-Dimension Speaking Skill Analysis",
+      skillsSubtitle:
+        "Standardised assessment via the AI Speech Recognition model",
+      dimensions: {
+        pronunciation: "Pronunciation & 4 tones",
+        vocabulary: "Spoken vocabulary",
+        grammar: "Sentence grammar structures",
+        fluency: "Fluency & reflexes",
+      },
+      scoreOf: "{{score}} / 100",
+      aiNote:
+        "AI recommendation: HSK {{band}} is a great level to start practising natural conversational reflexes with the AI Tutor.",
+      startCta: "Start the HSK {{band}} Learning Roadmap →",
+      adjustCta: "Adjust Level (±1 Level)",
+      adjustCaption:
+        "* Students may adjust their level once before the roadmap is locked.",
+      adjustLocked:
+        "You have used your one-time level adjustment. The roadmap is now locked.",
+      emptyTitle: "No assessment result yet",
+      emptyBody:
+        "Complete the speaking assessment to see your HSK 3.0 proficiency report.",
+      emptyCta: "Back to Level Assessment",
+    },
+    tiers: {
+      tierBeginner: "BEGINNER",
+      tierIntermediate: "INTERMEDIATE",
+      tierAdvanced: "ADVANCED",
+    },
+    adjust: {
+      title: "Adjust Learning Level",
+      currentSub: "Current AI-evaluated level: HSK {{band}} ({{tier}})",
+      intro:
+        "CatSpeak policy allows adjusting up to ±1 HSK level from the AI result. You may adjust only once.",
+      optionDown: "Go down 1 level (lighter study, strengthen foundations)",
+      optionKeep: "Keep the AI-recommended result",
+      optionUp: "Go up 1 level (higher challenge, break through)",
+      recommended: "Recommended",
+      warning:
+        "Note: After confirming, the 5-day roadmap will be regenerated for this level and the adjustment right will be locked permanently.",
+      cancelCta: "Cancel / Keep HSK {{band}}",
+      confirmCta: "Confirm Level Change",
+      successToast: "Your learning level was updated to HSK {{band}}.",
+      alreadyAdjustedToast: "You have already used your level adjustment.",
+      errorToast: "Could not update the level. Please try again.",
+    },
+    profile: {
+      title: "Proficiency Profile",
+      body: "Your proficiency profile and learning roadmap will be finished in the next step.",
+      backCta: "Back to result",
     },
   },
 }
