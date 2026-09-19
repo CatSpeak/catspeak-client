@@ -382,5 +382,43 @@ export default {
           "新しいテストを開始できませんでした。もう一度お試しください。",
       },
     },
+    lifecycle: {
+      errorToast:
+        "新しいセッションを開始できませんでした。もう一度お試しください。",
+      resume: {
+        title: "未完了のテストを検出しました",
+        body: "未完了の受験セッションが見つかりました（{{answered}} / {{total}} 問完了）。このセッションはあと {{remaining}} 有効です。",
+        safeTitle: "受験データは安全に保存されています：",
+        safeBody:
+          "第 {{order}} 問からそのまま再開でき、得点も提出済みの {{answered}} 問分の録音も失われません。",
+        deadlineLabel: "セッションの保持期限：",
+        autoCancel: "自動キャンセル：{{date}}",
+        remainingChip: "⏳ 残り {{remaining}}",
+        discardCta: "破棄して最初から",
+        resumeCta: "第 {{order}} 問を再開 →",
+      },
+      expired: {
+        title: "セッションの有効期限が切れました（>24h）",
+        body: "前回の受験セッションは 24 時間の保持期限を超えました。一時的な録音データはセキュリティ規定に従って自動的に破棄されました。",
+        securityTitle: "CAT 試験のセキュリティ規定：",
+        securityBody:
+          "評価の客観性とレベル判定の正確性を保つため、受講者は第 1 問から完全に新しい試験を受ける必要があります。",
+        startCta: "最初から新しい試験を開始 →",
+        homeCta: "能力プロフィールに戻る",
+      },
+      takeover: {
+        title: "複数のタブが同時に開かれています",
+        body: "安定性を保ちマイクの競合を避けるため、CatSpeak ではスピーキングルームを同時に 1 つだけ開けます。",
+        mechanismTitle: "旧セッションの切断機構（Session Takeover）：",
+        mechanismBody:
+          "このタブで続行を選ぶと、開いているもう一方のタブは直ちに切断され、データの重複を防ぐためロックされます。",
+        continueCta: "このタブで続行 →",
+        closeCta: "このタブを閉じる",
+        takenOverTitle: "セッションは別のタブで引き継がれました",
+        takenOverBody:
+          "試験は別のタブで実行中です。データの重複を防ぐため、このタブのセッションは一時停止されロックされました。",
+        takenOverCta: "能力プロフィールに戻る",
+      },
+    },
   },
 }

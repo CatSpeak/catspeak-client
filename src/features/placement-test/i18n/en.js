@@ -392,5 +392,42 @@ export default {
         errorToast: "Could not start a new test. Please try again.",
       },
     },
+    lifecycle: {
+      errorToast: "Could not start a new session. Please try again.",
+      resume: {
+        title: "Unfinished Test Detected",
+        body: "We found an unfinished session of yours ({{answered}} / {{total}} questions completed). This session stays valid for another {{remaining}}.",
+        safeTitle: "Your test data is safely preserved:",
+        safeBody:
+          "You will resume at Question {{order}} with no lost points, including the recordings of the {{answered}} submitted questions.",
+        deadlineLabel: "Session retention deadline:",
+        autoCancel: "Auto-cancels after: {{date}}",
+        remainingChip: "⏳ {{remaining}} left",
+        discardCta: "Discard & Restart",
+        resumeCta: "Resume Question {{order}} →",
+      },
+      expired: {
+        title: "Session Expired (>24h)",
+        body: "Your previous session exceeded the 24-hour retention window. The temporary audio data was automatically destroyed under our security policy.",
+        securityTitle: "CAT exam security rule:",
+        securityBody:
+          "To keep the assessment objective and the level ranking accurate, students must take a completely new test starting from Question 1.",
+        startCta: "Start a New Test from the Beginning →",
+        homeCta: "Back to Profile Home",
+      },
+      takeover: {
+        title: "Multiple Tabs Detected",
+        body: "To stay stable and avoid microphone conflicts, CatSpeak allows only one speaking room open at a time.",
+        mechanismTitle: "Old session disconnect mechanism (Session Takeover):",
+        mechanismBody:
+          "If you continue in this tab, the other open tab will be disconnected and locked immediately to prevent duplicate data.",
+        continueCta: "Continue in This Tab →",
+        closeCta: "Close This Tab",
+        takenOverTitle: "Session Taken Over in Another Tab",
+        takenOverBody:
+          "Your test is now running in another tab. The session in this tab has been paused and locked to prevent duplicate data.",
+        takenOverCta: "Back to Profile Home",
+      },
+    },
   },
 }

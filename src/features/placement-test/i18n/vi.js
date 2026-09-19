@@ -385,5 +385,42 @@ export default {
         errorToast: "Không thể bắt đầu bài thi mới. Vui lòng thử lại.",
       },
     },
+    lifecycle: {
+      errorToast: "Không thể bắt đầu phiên thi mới. Vui lòng thử lại.",
+      resume: {
+        title: "Phát Hiện Bài Thi Chưa Hoàn Thành",
+        body: "Hệ thống tìm thấy một phiên làm bài dở dang của bạn (đã hoàn thành câu {{answered}} / {{total}}). Phiên thi này vẫn còn hiệu lực trong {{remaining}} tới.",
+        safeTitle: "Dữ liệu làm bài được bảo lưu an toàn:",
+        safeBody:
+          "Bạn sẽ tiếp tục ngay tại Câu hỏi số {{order}} mà không mất điểm và file ghi âm của {{answered}} câu đã nộp.",
+        deadlineLabel: "Thời hạn bảo lưu phiên thi:",
+        autoCancel: "Tự động hủy sau: {{date}}",
+        remainingChip: "⏳ Còn {{remaining}}",
+        discardCta: "Hủy & Thi Lại Từ Đầu",
+        resumeCta: "Tiếp Tục Làm Câu {{order}} →",
+      },
+      expired: {
+        title: "Phiên Bài Thi Đã Hết Hạn (>24h)",
+        body: "Phiên làm bài trước đó của bạn đã vượt quá thời hạn bảo lưu 24 giờ. Dữ liệu ghi âm tạm thời đã được tự động hủy theo quy chế bảo mật.",
+        securityTitle: "Quy định bảo mật đề thi CAT:",
+        securityBody:
+          "Để đảm bảo tính khách quan và độ chính xác phân cấp, học viên cần thực hiện bài thi mới hoàn toàn từ Câu 1.",
+        startCta: "Bắt Đầu Bài Thi Mới Từ Đầu →",
+        homeCta: "Quay Về Trang Chủ Hồ Sơ",
+      },
+      takeover: {
+        title: "Phát Hiện Mở Nhiều Tab Cùng Lúc",
+        body: "Để đảm bảo ổn định và tránh xung đột micro, CatSpeak chỉ cho phép mở một phòng luyện nói tại một thời điểm.",
+        mechanismTitle: "Cơ chế ngắt kết nối phiên cũ (Session Takeover):",
+        mechanismBody:
+          "Nếu bạn chọn tiếp tục tại tab này, tab cũ đang mở sẽ lập tức bị ngắt kết nối và khóa để tránh trùng lặp dữ liệu.",
+        continueCta: "Tiếp Tục Làm Bài Tại Tab Này →",
+        closeCta: "Đóng Tab Này Lại",
+        takenOverTitle: "Phiên Đã Được Tiếp Quản Ở Tab Khác",
+        takenOverBody:
+          "Bài thi của bạn đang được thực hiện ở một tab khác. Phiên tại tab này đã được tạm dừng và khóa để tránh trùng lặp dữ liệu.",
+        takenOverCta: "Quay Về Trang Chủ Hồ Sơ",
+      },
+    },
   },
 }

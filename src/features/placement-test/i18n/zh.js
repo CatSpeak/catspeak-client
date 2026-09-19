@@ -365,5 +365,42 @@ export default {
         errorToast: "无法开始新考试，请重试。",
       },
     },
+    lifecycle: {
+      errorToast: "无法开始新的考试会话，请重试。",
+      resume: {
+        title: "检测到未完成的考试",
+        body: "系统发现了你未完成的答题会话（已完成第 {{answered}} / {{total}} 题）。该会话在接下来的 {{remaining}} 内仍然有效。",
+        safeTitle: "答题数据已安全保留：",
+        safeBody:
+          "你将直接在第 {{order}} 题继续，不会丢失分数，已提交的 {{answered}} 题录音也会保留。",
+        deadlineLabel: "会话保留期限：",
+        autoCancel: "自动取消时间：{{date}}",
+        remainingChip: "⏳ 剩余 {{remaining}}",
+        discardCta: "放弃并重新开始",
+        resumeCta: "继续第 {{order}} 题 →",
+      },
+      expired: {
+        title: "考试会话已过期（>24h）",
+        body: "你之前的答题会话已超过 24 小时的保留期限。临时录音数据已按安全规定自动销毁。",
+        securityTitle: "CAT 考试安全规定：",
+        securityBody:
+          "为确保评估的客观性与分级的准确性，学员需要从第 1 题开始参加全新的考试。",
+        startCta: "从头开始新考试 →",
+        homeCta: "返回能力档案主页",
+      },
+      takeover: {
+        title: "检测到同时打开多个标签页",
+        body: "为确保稳定并避免麦克风冲突，CatSpeak 同一时间只允许打开一个口语房间。",
+        mechanismTitle: "旧会话断开机制（Session Takeover）：",
+        mechanismBody:
+          "如果你选择在此标签页继续，另一个已打开的标签页将立即断开并锁定，以避免数据重复。",
+        continueCta: "在此标签页继续 →",
+        closeCta: "关闭此标签页",
+        takenOverTitle: "会话已在其他标签页接管",
+        takenOverBody:
+          "你的考试正在另一个标签页进行。此标签页的会话已暂停并锁定，以避免数据重复。",
+        takenOverCta: "返回能力档案主页",
+      },
+    },
   },
 }
