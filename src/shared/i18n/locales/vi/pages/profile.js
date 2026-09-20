@@ -242,6 +242,42 @@ export default {
     contactConfirmError: "Không thể cập nhật thông tin. Vui lòng thử lại.",
     contactEmailUpdated: "Cập nhật email thành công",
     contactPhoneUpdated: "Cập nhật số điện thoại thành công",
+    bankChangeTitle: "Thay đổi Tài khoản ngân hàng",
+    bankVerifyTitle: "Xác thực Tài khoản ngân hàng mới",
+    bankCurrentAccount: "Tài khoản hiện tại",
+    bankLabel: "Ngân hàng",
+    bankNewAccountNumber: "Số tài khoản mới",
+    bankAccountNumber: "Số tài khoản",
+    bankAccountHolder: "Tên chủ tài khoản",
+    bankAccountNumberPlaceholder: "Nhập số tài khoản...",
+    bankSelectPlaceholder: "Chọn ngân hàng",
+    bankSearchPlaceholder: "Tìm kiếm ngân hàng...",
+    bankCheckAccount: "Kiểm tra tài khoản",
+    bankStep1Banner:
+      "Hệ thống sẽ kiểm tra thông tin tài khoản trước khi gửi mã xác thực đến bạn.",
+    bankStep2Banner:
+      "Thông tin tài khoản mới đã được xác thực với ngân hàng. Vui lòng kiểm tra kỹ thông tin bên dưới trước khi gửi mã xác thực.",
+    bankVerifiedInfo: "Thông tin tài khoản mới (đã được xác thực)",
+    bankCurrentBadge: "Hiện tại",
+    bankConsent:
+      "Tôi xác nhận thông tin tài khoản trên là chính xác và đồng ý sử dụng tài khoản này để nhận thanh toán từ Cat Speak.",
+    bankOtpWillSendTo:
+      "Mã xác thực (OTP) sẽ được gửi về số điện thoại đã xác thực của bạn:",
+    bankOtpHelper:
+      "Mã xác thực đã được gửi đến số điện thoại hiện tại đã xác thực của bạn theo mặc định.",
+    bankOtpInputLabel: "Nhập mã xác thực (OTP)",
+    bankAccountNumberInvalid: "Số tài khoản phải có từ 6 đến 20 chữ số",
+    bankNoAccount: "Chưa có tài khoản ngân hàng",
+    bankOtpRequired: "Vui lòng nhập mã xác thực",
+    bankOtpInvalid: "Mã xác thực không hợp lệ hoặc đã hết hạn",
+    bankOtpAttemptsExceeded:
+      "Bạn đã nhập sai quá số lần cho phép. Vui lòng lấy mã mới.",
+    bankVerifyError:
+      "Không thể xác thực tài khoản ngân hàng. Vui lòng kiểm tra lại số tài khoản.",
+    bankRequestError: "Không thể gửi mã xác thực. Vui lòng thử lại.",
+    bankConfirmError:
+      "Không thể cập nhật tài khoản ngân hàng. Vui lòng thử lại.",
+    bankUpdated: "Cập nhật tài khoản ngân hàng thành công",
   },
   friends: {
     teacher: "Giảng viên",

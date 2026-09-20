@@ -221,6 +221,43 @@ export default {
     contactConfirmError: "情報を更新できませんでした。もう一度お試しください。",
     contactEmailUpdated: "メールアドレスを更新しました",
     contactPhoneUpdated: "電話番号を更新しました",
+    bankChangeTitle: "銀行口座の変更",
+    bankVerifyTitle: "新しい銀行口座の認証",
+    bankCurrentAccount: "現在の口座",
+    bankLabel: "銀行",
+    bankNewAccountNumber: "新しい口座番号",
+    bankAccountNumber: "口座番号",
+    bankAccountHolder: "口座名義",
+    bankAccountNumberPlaceholder: "口座番号を入力...",
+    bankSelectPlaceholder: "銀行を選択",
+    bankSearchPlaceholder: "銀行を検索...",
+    bankCheckAccount: "口座を確認",
+    bankStep1Banner:
+      "認証コードを送信する前に、システムが口座情報を確認します。",
+    bankStep2Banner:
+      "新しい口座情報は銀行によって認証されました。認証コードを送信する前に、以下の情報をよく確認してください。",
+    bankVerifiedInfo: "新しい口座情報（認証済み）",
+    bankCurrentBadge: "現在",
+    bankConsent:
+      "上記の口座情報が正確であることを確認し、Cat Speak からの支払いを受け取るためにこの口座を使用することに同意します。",
+    bankOtpWillSendTo:
+      "認証コード（OTP）は認証済みの電話番号に送信されます：",
+    bankOtpHelper:
+      "認証コードは、現在認証済みの電話番号に既定で送信されました。",
+    bankOtpInputLabel: "認証コード（OTP）を入力",
+    bankAccountNumberInvalid: "口座番号は6〜20桁の数字で入力してください",
+    bankNoAccount: "銀行口座がまだありません",
+    bankOtpRequired: "認証コードを入力してください",
+    bankOtpInvalid: "認証コードが無効または期限切れです",
+    bankOtpAttemptsExceeded:
+      "入力回数の上限を超えました。新しいコードをリクエストしてください。",
+    bankVerifyError:
+      "銀行口座を認証できませんでした。口座番号を確認してもう一度お試しください。",
+    bankRequestError:
+      "認証コードを送信できませんでした。もう一度お試しください。",
+    bankConfirmError:
+      "銀行口座を更新できませんでした。もう一度お試しください。",
+    bankUpdated: "銀行口座を更新しました",
   },
   friends: {
     teacher: "先生",
