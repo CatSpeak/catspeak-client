@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { ChevronDown, Globe, MapPin, Pencil, User } from "lucide-react"
+import React, { useMemo, useState } from "react"
+import { ChevronDown, Globe, Languages, MapPin, Pencil, User } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Dropdown from "@/shared/components/ui/Dropdown"
@@ -47,7 +47,30 @@ const PersonalInfoCard = ({ profile, t }) => {
     nationality: "",
     address: "",
     introduction: "",
+    nativeLanguage: "",
   })
+
+  const nativeLanguageOptions = useMemo(
+    () => [
+      {
+        value: "English",
+        label: t?.courses?.student?.languages?.English || "English",
+      },
+      {
+        value: "中文",
+        label: t?.courses?.student?.languages?.Chinese || "中文",
+      },
+      {
+        value: "Tiếng Việt",
+        label: t?.courses?.student?.languages?.Vietnamese || "Tiếng Việt",
+      },
+      {
+        value: "日本語",
+        label: t?.courses?.student?.languages?.Japanese || "日本語",
+      },
+    ],
+    [t],
+  )
 
   const startEdit = () => {
     setForm({
@@ -55,6 +78,8 @@ const PersonalInfoCard = ({ profile, t }) => {
       nationality: toCountryValue(pick(profile, "nationality", "Nationality")),
       address: String(pick(profile, "address", "Address") || ""),
       introduction: String(pick(profile, "introduction", "Introduction") || ""),
+      nativeLanguage:
+        pick(profile, "nativeLanguage", "NativeLanguage") || "",
     })
     setErrors({})
     setIsEditing(true)
@@ -89,6 +114,16 @@ const PersonalInfoCard = ({ profile, t }) => {
         ins.approvedNationalityRequired || "Vui lòng chọn quốc tịch"
     }
 
+    if (
+      !form.nativeLanguage ||
+      !nativeLanguageOptions.some(
+        (option) => option.value === form.nativeLanguage,
+      )
+    ) {
+      next.nativeLanguage =
+        ins.approvedNativeLanguageRequired || "Vui lòng chọn ngôn ngữ mẹ đẻ"
+    }
+
     const address = form.address.trim()
     if (!address) {
       next.address = ins.approvedAddressRequired || "Vui lòng nhập địa chỉ"
@@ -116,7 +151,7 @@ const PersonalInfoCard = ({ profile, t }) => {
         Nationality: form.nationality,
         Address: form.address.trim(),
         Introduction: form.introduction.trim(),
-        NativeLanguage: pick(profile, "nativeLanguage", "NativeLanguage"),
+        NativeLanguage: form.nativeLanguage,
       }).unwrap()
       setIsEditing(false)
       toast.success(
@@ -213,6 +248,49 @@ const PersonalInfoCard = ({ profile, t }) => {
               <p className="mt-1 text-xs text-red-500">{errors.nationality}</p>
             )}
           </Row>
+          <Row icon={<Languages size={20} />} label={ins.nativeLanguage || "Ngôn ngữ mẹ đẻ"}>
+            <Dropdown
+              options={nativeLanguageOptions}
+              value={form.nativeLanguage}
+              onChange={(value) => handleChange("nativeLanguage", value)}
+              disabled={isSaving}
+              placeholder={ins.selectNativeLanguage || "Chọn ngôn ngữ mẹ đẻ"}
+              dropdownClassName="w-full min-w-[260px]"
+              trigger={(isOpen, selectedOption, toggle) => (
+                <button
+                  type="button"
+                  onClick={toggle}
+                  disabled={isSaving}
+                  className={`flex h-9 w-full items-center justify-between gap-2 rounded-[7px] border bg-white px-3 text-xs transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-60 ${
+                    errors.nativeLanguage ? "border-red-500" : "border-[#D0D5DD]"
+                  }`}
+                >
+                  <span
+                    className={`flex min-w-0 flex-1 items-center gap-2 truncate ${
+                      selectedOption ? "text-[#101828]" : "text-[#98A2B3]"
+                    }`}
+                  >
+                    <span className="truncate">
+                      {selectedOption
+                        ? selectedOption.label
+                        : ins.selectNativeLanguage || "Chọn ngôn ngữ mẹ đẻ"}
+                    </span>
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    className={`shrink-0 text-[#667085] transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              )}
+            />
+            {errors.nativeLanguage && (
+              <p className="mt-1 text-xs text-red-500">
+                {errors.nativeLanguage}
+              </p>
+            )}
+          </Row>
           <Row icon={<MapPin size={20} />} label={ins.address || "Địa chỉ"}>
             <TextInput
               name="address"
@@ -242,6 +320,14 @@ const PersonalInfoCard = ({ profile, t }) => {
           >
             <span className="break-words text-xs text-[#101828]">
               {pick(profile, "nationality", "Nationality") || "—"}
+            </span>
+          </Row>
+          <Row
+            icon={<Languages size={20} />}
+            label={ins.nativeLanguage || "Ngôn ngữ mẹ đẻ"}
+          >
+            <span className="break-words text-xs text-[#101828]">
+              {pick(profile, "nativeLanguage", "NativeLanguage") || "—"}
             </span>
           </Row>
           <Row icon={<MapPin size={20} />} label={ins.address || "Địa chỉ"}>

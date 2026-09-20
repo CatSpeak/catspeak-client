@@ -305,6 +305,24 @@ export default {
     languageCertificateFileType: "PDFファイルのみ対応しています",
     languageCertificateFileSize: "証明書は5MBを超えることはできません",
     languageCertificateFileInvalid: "PDFファイルが無効か読み取れません",
+    approvedNativeLanguageRequired: "母語を選択してください",
+    approvedRequestDetailTitle: "更新リクエストの詳細",
+    approvedRequestCurrentInfo: "現在の情報",
+    approvedRequestWantedInfo: "リクエスト情報",
+    approvedRequestNewLevel: "新しいレベル",
+    approvedRequestNewCredential: "新しい証明書",
+    approvedRequestPendingInfo:
+      "リクエストは管理者による審査待ちです。現在承認されている情報は引き続き有効です。",
+    approvedRequestRejectReason: "却下理由",
+    approvedRequestDelete: "リクエストを削除",
+    approvedRequestClose: "閉じる",
+    approvedRequestDeleteTitle: "リクエストを削除",
+    approvedRequestDeleteMessage:
+      "このリクエストを削除してもよろしいですか？この操作は元に戻せません。",
+    approvedRequestDeleteConfirm: "削除",
+    approvedRequestDeleted: "リクエストを削除しました",
+    approvedRequestDeleteError:
+      "リクエストを削除できませんでした。もう一度お試しください。",
   },
   friends: {
     teacher: "先生",

@@ -467,7 +467,7 @@ const InstructorPage = () => {
       if (!effectiveCanEdit) return;
       const files = Array.from(e.target.files || []);
       if (!files.length) return;
-      const CRED_MAX_MB = 100;
+      const CRED_MAX_MB = 5;
       // Spec Q12: only PDF (accept=".pdf" is advisory — enforce here too).
       const nonPdf = files.find(
         (f) => !(f.type === "application/pdf" || f.name?.toLowerCase().endsWith(".pdf")),
@@ -645,7 +645,7 @@ const InstructorPage = () => {
       newErrors.introduction = ins.introOrVideoRequired || "Cần có lời giới thiệu hoặc video giới thiệu";
 
     // Spec Q12: block Save when credentials violate the kept rule
-    // (max 4 files, PDF only, each <=100MB). File-picker errors set
+    // (max 4 files, PDF only, each <=5MB). File-picker errors set
     // errors.credentials, but a Save must not wipe them via setErrors(newErrors).
     if (formData.credentials?.length > 4) {
       newErrors.credentials =
@@ -654,7 +654,7 @@ const InstructorPage = () => {
       const badCred = (formData.credentials || []).find(
         (c) =>
           c instanceof File &&
-          (c.size > 100 * 1024 * 1024 ||
+          (c.size > 5 * 1024 * 1024 ||
             !(c.type === "application/pdf" || c.name?.toLowerCase().endsWith(".pdf"))),
       );
       if (badCred) {
@@ -669,9 +669,9 @@ const InstructorPage = () => {
           const actualMb = (badCred.size / 1024 / 1024).toFixed(1);
           newErrors.credentials =
             ins.credentialSizeLimit
-              ?.replace("{max}", 100)
+              ?.replace("{max}", 5)
               ?.replace("{actual}", actualMb) ||
-            `Mỗi chứng chỉ phải nhỏ hơn 100MB (hiện tại ${actualMb}MB).`;
+            `Mỗi chứng chỉ phải nhỏ hơn 5MB (hiện tại ${actualMb}MB).`;
         }
       }
     }

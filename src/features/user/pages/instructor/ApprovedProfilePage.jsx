@@ -20,17 +20,22 @@ import BankAccountDrawer from "@/features/user/components/instructor/approved/Ba
 import IdCardDrawer from "@/features/user/components/instructor/approved/IdCardDrawer"
 import AddLanguageDrawer from "@/features/user/components/instructor/approved/AddLanguageDrawer"
 import UpdateLanguageDrawer from "@/features/user/components/instructor/approved/UpdateLanguageDrawer"
+import RequestDetailDrawer from "@/features/user/components/instructor/approved/RequestDetailDrawer"
 import {
   fileNameFromUrl,
   normalizeLanguagesTeach,
   pick,
   requestStatus,
+  safeParseArray,
 } from "@/features/user/components/instructor/approved/utils"
 import { toast } from "@/shared/utils/toastBridge"
 import { parseApiError } from "@/shared/utils/apiError"
 
 const VIDEO_MAX_BYTES = 50 * 1024 * 1024
 const VIDEO_EXTENSIONS = ["mp4", "mov"]
+
+const requestIdOf = (request) =>
+  pick(request, "requestId", "RequestId", "id", "Id")
 
 const videoExtensionOf = (name) => {
   const parts = String(name || "").toLowerCase().split(".")
@@ -67,6 +72,8 @@ const ApprovedProfilePage = () => {
   const [addLanguageSession, setAddLanguageSession] = useState(0)
   const [updateLanguageTarget, setUpdateLanguageTarget] = useState(null)
   const [updateLanguageSession, setUpdateLanguageSession] = useState(0)
+  const [viewRequestId, setViewRequestId] = useState(null)
+  const [viewRequestSession, setViewRequestSession] = useState(0)
   const [videoViewerOpen, setVideoViewerOpen] = useState(false)
   const [confirmRemoveVideo, setConfirmRemoveVideo] = useState(false)
   const [videoMeta, setVideoMeta] = useState(null)
@@ -101,6 +108,13 @@ const ApprovedProfilePage = () => {
     const raw = languageRequestsData?.data ?? languageRequestsData
     return Array.isArray(raw) ? raw : []
   }, [languageRequestsData])
+
+  const currentCredentialUrl = useMemo(() => {
+    const list = safeParseArray(
+      profile?.credentialUrls ?? profile?.CredentialUrls,
+    )
+    return list[0] || null
+  }, [profile])
 
   const bankAccount = useMemo(() => {
     const list = Array.isArray(bankAccountsData) ? bankAccountsData : []
@@ -152,7 +166,16 @@ const ApprovedProfilePage = () => {
     setUpdateLanguageSession((session) => session + 1)
     setUpdateLanguageTarget(live)
   }
-  const handleViewRequest = () => {}
+  const handleViewRequest = (request) => {
+    const id = requestIdOf(request)
+    if (!id) return
+    setViewRequestSession((session) => session + 1)
+    setViewRequestId(id)
+  }
+  const handleRequestDeleted = () => {
+    setViewRequestId(null)
+    refetchRequests()
+  }
   const handlePlayVideo = () => setVideoViewerOpen(true)
   const handleReplaceVideo = () => videoInputRef.current?.click()
   const handleRemoveVideo = () => setConfirmRemoveVideo(true)
@@ -265,6 +288,7 @@ const ApprovedProfilePage = () => {
       <LanguagesCard
         languagesTeach={profile?.languagesTeach ?? profile?.LanguagesTeach}
         requests={requests}
+        currentCredentialUrl={currentCredentialUrl}
         t={t}
         isLoading={isLoadingRequests}
         isError={isRequestsError}
@@ -327,6 +351,18 @@ const ApprovedProfilePage = () => {
         onClose={() => setUpdateLanguageTarget(null)}
         language={updateLanguageTarget?.language}
         currentLevel={updateLanguageTarget?.level}
+        t={t}
+      />
+      <RequestDetailDrawer
+        key={`request-detail-${viewRequestSession}`}
+        open={Boolean(viewRequestId)}
+        onClose={() => setViewRequestId(null)}
+        requestId={viewRequestId}
+        request={
+          requests.find((request) => requestIdOf(request) === viewRequestId) ||
+          null
+        }
+        onDeleted={handleRequestDeleted}
         t={t}
       />
 

@@ -323,6 +323,24 @@ export default {
     languageCertificateFileType: "Chỉ chấp nhận tệp PDF",
     languageCertificateFileSize: "Chứng chỉ không được vượt quá 5MB",
     languageCertificateFileInvalid: "Tệp PDF không hợp lệ hoặc không đọc được",
+    approvedNativeLanguageRequired: "Vui lòng chọn ngôn ngữ mẹ đẻ",
+    approvedRequestDetailTitle: "Chi tiết yêu cầu cập nhật",
+    approvedRequestCurrentInfo: "Thông tin hiện tại",
+    approvedRequestWantedInfo: "Thông tin yêu cầu",
+    approvedRequestNewLevel: "Trình độ mới",
+    approvedRequestNewCredential: "Chứng chỉ mới",
+    approvedRequestPendingInfo:
+      "Yêu cầu của bạn đang chờ quản trị viên xem xét. Thông tin đã được duyệt hiện tại vẫn đang có hiệu lực.",
+    approvedRequestRejectReason: "Lý do từ chối",
+    approvedRequestDelete: "Xóa đơn yêu cầu",
+    approvedRequestClose: "Đóng",
+    approvedRequestDeleteTitle: "Xóa đơn yêu cầu",
+    approvedRequestDeleteMessage:
+      "Bạn có chắc chắn muốn xóa đơn yêu cầu này không? Hành động này không thể hoàn tác.",
+    approvedRequestDeleteConfirm: "Xóa",
+    approvedRequestDeleted: "Đã xóa đơn yêu cầu",
+    approvedRequestDeleteError:
+      "Không thể xóa đơn yêu cầu. Vui lòng thử lại.",
   },
   friends: {
     teacher: "Giảng viên",
