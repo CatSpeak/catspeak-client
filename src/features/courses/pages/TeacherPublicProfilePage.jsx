@@ -27,6 +27,8 @@ import {
 import { openWidget } from "@/store/slices/messageWidgetSlice"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import TeacherOpenClassCard from "../components/TeacherOpenClassCard"
+import TeacherClassesModal from "../components/TeacherClassesModal"
+import TeacherReviewsModal from "../components/TeacherReviewsModal"
 import {
   getTeacherInitials,
   getTeacherHeadline,
@@ -79,6 +81,8 @@ const TeacherPublicProfilePage = () => {
 
   // Unfollow Confirmation Modal State (BR-EX-GV-12)
   const [isUnfollowModalOpen, setIsUnfollowModalOpen] = useState(false)
+  const [isClassesModalOpen, setIsClassesModalOpen] = useState(false)
+  const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false)
   const [avatarError, setAvatarError] = useState(false)
 
   // ─── Action Handlers ───
@@ -434,10 +438,7 @@ const TeacherPublicProfilePage = () => {
             {totalOpenClasses > 0 && (
               <button
                 type="button"
-                onClick={() => {
-                  // Ticket 08 will open TeacherClassesModal
-                  navigate(`/explore-courses?teacher=${encodeURIComponent(slugOrId)}`)
-                }}
+                onClick={() => setIsClassesModalOpen(true)}
                 className="text-xs sm:text-sm font-bold text-[#990011] hover:text-[#80000e] transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <span>
@@ -603,13 +604,10 @@ const TeacherPublicProfilePage = () => {
                 </div>
               )}
 
-              {/* View all reviews button (Ticket 08 triggers modal) */}
+              {/* View all reviews button */}
               <button
                 type="button"
-                onClick={() => {
-                  // Will trigger TeacherReviewsModal in Ticket 08
-                  navigate(`/explore-courses?teacher=${encodeURIComponent(slugOrId)}`)
-                }}
+                onClick={() => setIsReviewsModalOpen(true)}
                 className="w-full py-2.5 px-4 rounded-xl border border-[#990011] text-[#990011] hover:bg-[#990011]/5 transition-colors text-xs sm:text-sm font-bold text-center cursor-pointer active:scale-[0.99]"
               >
                 {t.courses?.viewAllReviews || "Xem tất cả nhận xét"}
@@ -618,6 +616,26 @@ const TeacherPublicProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* ─── All Open Classes Modal (Ticket 08) ─── */}
+      <TeacherClassesModal
+        isOpen={isClassesModalOpen}
+        onClose={() => setIsClassesModalOpen(false)}
+        slugOrId={slugOrId}
+        teacherName={fullName}
+        initialClasses={activeClasses}
+      />
+
+      {/* ─── All Student Reviews Modal (Ticket 08) ─── */}
+      <TeacherReviewsModal
+        isOpen={isReviewsModalOpen}
+        onClose={() => setIsReviewsModalOpen(false)}
+        slugOrId={slugOrId}
+        teacherName={fullName}
+        initialRating={teacher.rating}
+        initialReviewCount={teacher.reviewCount}
+        initialStarDistribution={teacher.starDistribution}
+      />
 
       {/* ─── Unfollow Confirmation Modal (BR-EX-GV-12) ─── */}
       <ConfirmationModal
