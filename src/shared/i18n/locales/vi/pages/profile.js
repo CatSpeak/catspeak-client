@@ -305,6 +305,24 @@ export default {
     idCardFileType: "Chỉ chấp nhận ảnh JPG, PNG, WEBP",
     idCardFileSize: "Ảnh không được vượt quá 5MB",
     idCardFileInvalid: "Tệp ảnh không hợp lệ hoặc không đọc được",
+    languageSelectPlaceholder: "Chọn ngôn ngữ",
+    languageLevelPlaceholder: "Chọn trình độ",
+    languageCertificateLabel: "Chứng chỉ / Bằng cấp",
+    languageCertificateNewLabel: "Chứng chỉ / Bằng cấp mới",
+    languageCertificateConstraint: "PDF tối đa 5MB",
+    languageUpdateTitle: "Cập nhật {language}",
+    languageNewLevelLabel: "Trình độ mới",
+    languageInfoBox:
+      "Thông tin cũ đã được duyệt sẽ tiếp tục được sử dụng cho đến khi yêu cầu cập nhật mới được phê duyệt.",
+    languageRequestSubmit: "Gửi yêu cầu",
+    languageRequestSubmitted:
+      "Đã gửi yêu cầu cho quản trị viên duyệt. Vui lòng chờ trong giây lát.",
+    languageRequestError: "Không thể gửi yêu cầu. Vui lòng thử lại.",
+    languageRequestConflict:
+      "Ngôn ngữ này đã có yêu cầu đang chờ duyệt. Vui lòng xoá đơn cũ trước khi gửi yêu cầu mới.",
+    languageCertificateFileType: "Chỉ chấp nhận tệp PDF",
+    languageCertificateFileSize: "Chứng chỉ không được vượt quá 5MB",
+    languageCertificateFileInvalid: "Tệp PDF không hợp lệ hoặc không đọc được",
   },
   friends: {
     teacher: "Giảng viên",

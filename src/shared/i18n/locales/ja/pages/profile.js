@@ -286,6 +286,25 @@ export default {
     idCardFileType: "JPG、PNG、WEBP 画像のみ対応しています",
     idCardFileSize: "画像は5MBを超えることはできません",
     idCardFileInvalid: "画像ファイルが無効か読み取れません",
+    languageSelectPlaceholder: "言語を選択",
+    languageLevelPlaceholder: "レベルを選択",
+    languageCertificateLabel: "証明書・学位",
+    languageCertificateNewLabel: "新しい証明書・学位",
+    languageCertificateConstraint: "PDF 最大5MB",
+    languageUpdateTitle: "{language}を更新",
+    languageNewLevelLabel: "新しいレベル",
+    languageInfoBox:
+      "以前に承認された情報は、新しい更新リクエストが承認されるまで引き続き有効です。",
+    languageRequestSubmit: "リクエストを送信",
+    languageRequestSubmitted:
+      "リクエストを管理者に送信しました。しばらくお待ちください。",
+    languageRequestError:
+      "リクエストを送信できませんでした。もう一度お試しください。",
+    languageRequestConflict:
+      "この言語にはすでに審査中のリクエストがあります。新しいリクエストを送信する前に、古いリクエストを削除してください。",
+    languageCertificateFileType: "PDFファイルのみ対応しています",
+    languageCertificateFileSize: "証明書は5MBを超えることはできません",
+    languageCertificateFileInvalid: "PDFファイルが無効か読み取れません",
   },
   friends: {
     teacher: "先生",

@@ -306,6 +306,24 @@ export default {
     idCardFileType: "Only JPG, PNG, WEBP images are accepted",
     idCardFileSize: "The image must not exceed 5MB",
     idCardFileInvalid: "The image file is invalid or unreadable",
+    languageSelectPlaceholder: "Select a language",
+    languageLevelPlaceholder: "Select a level",
+    languageCertificateLabel: "Certificate / Degree",
+    languageCertificateNewLabel: "New certificate / degree",
+    languageCertificateConstraint: "PDF up to 5MB",
+    languageUpdateTitle: "Update {language}",
+    languageNewLevelLabel: "New level",
+    languageInfoBox:
+      "Your previously approved information remains in effect until the new update request is approved.",
+    languageRequestSubmit: "Submit request",
+    languageRequestSubmitted:
+      "Request sent for administrator review. Please wait a moment.",
+    languageRequestError: "Could not submit the request. Please try again.",
+    languageRequestConflict:
+      "This language already has a pending request. Please delete the old request before submitting a new one.",
+    languageCertificateFileType: "Only PDF files are accepted",
+    languageCertificateFileSize: "The certificate must not exceed 5MB",
+    languageCertificateFileInvalid: "The PDF file is invalid or unreadable",
   },
   friends: {
     teacher: "Teacher",

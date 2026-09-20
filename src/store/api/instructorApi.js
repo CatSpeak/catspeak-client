@@ -225,6 +225,30 @@ export const instructorApi = baseApi.injectEndpoints({
       providesTags: ["LanguageRequests"],
     }),
 
+    getInstructorLanguages: builder.query({
+      query: () => ({
+        url: "/InstructorProfile/languages",
+        method: "GET",
+      }),
+    }),
+
+    getInstructorLanguageLevels: builder.query({
+      query: (languageId) => ({
+        url: `/InstructorProfile/languages/${languageId}/levels`,
+        method: "GET",
+      }),
+    }),
+
+    submitLanguageRequest: builder.mutation({
+      query: (formData) => ({
+        url: "/InstructorProfile/language-requests",
+        method: "POST",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["LanguageRequests"],
+    }),
+
     getHonoredInstructors: builder.query({
       query: (params) => {
         const limit = typeof params === "number" ? params : params?.limit
@@ -252,5 +276,8 @@ export const {
   useSubmitTeachingUpdateMutation,
   useCancelTeachingUpdateMutation,
   useGetLanguageRequestsQuery,
+  useGetInstructorLanguagesQuery,
+  useGetInstructorLanguageLevelsQuery,
+  useSubmitLanguageRequestMutation,
   useGetHonoredInstructorsQuery,
 } = instructorApi

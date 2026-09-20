@@ -18,9 +18,13 @@ import ChangeEmailDrawer from "@/features/user/components/instructor/approved/co
 import ChangePhoneDrawer from "@/features/user/components/instructor/approved/contact/ChangePhoneDrawer"
 import BankAccountDrawer from "@/features/user/components/instructor/approved/BankAccountDrawer"
 import IdCardDrawer from "@/features/user/components/instructor/approved/IdCardDrawer"
+import AddLanguageDrawer from "@/features/user/components/instructor/approved/AddLanguageDrawer"
+import UpdateLanguageDrawer from "@/features/user/components/instructor/approved/UpdateLanguageDrawer"
 import {
   fileNameFromUrl,
+  normalizeLanguagesTeach,
   pick,
+  requestStatus,
 } from "@/features/user/components/instructor/approved/utils"
 import { toast } from "@/shared/utils/toastBridge"
 import { parseApiError } from "@/shared/utils/apiError"
@@ -59,6 +63,10 @@ const ApprovedProfilePage = () => {
   const [idCardDrawerOpen, setIdCardDrawerOpen] = useState(false)
   const [idCardSession, setIdCardSession] = useState(0)
   const [idCardUpdated, setIdCardUpdated] = useState(false)
+  const [addLanguageOpen, setAddLanguageOpen] = useState(false)
+  const [addLanguageSession, setAddLanguageSession] = useState(0)
+  const [updateLanguageTarget, setUpdateLanguageTarget] = useState(null)
+  const [updateLanguageSession, setUpdateLanguageSession] = useState(0)
   const [videoViewerOpen, setVideoViewerOpen] = useState(false)
   const [confirmRemoveVideo, setConfirmRemoveVideo] = useState(false)
   const [videoMeta, setVideoMeta] = useState(null)
@@ -99,6 +107,23 @@ const ApprovedProfilePage = () => {
     return list.find((account) => account.isDefault) || list[0] || null
   }, [bankAccountsData])
 
+  const excludedLanguages = useMemo(() => {
+    const names = new Set(
+      normalizeLanguagesTeach(
+        profile?.languagesTeach ?? profile?.LanguagesTeach,
+      )
+        .map((row) => row.language)
+        .filter(Boolean),
+    )
+    for (const request of requests) {
+      if (requestStatus(request) === "Pending") {
+        const language = pick(request, "language", "Language")
+        if (language) names.add(language)
+      }
+    }
+    return Array.from(names)
+  }, [profile, requests])
+
   const isIdCardVerified = pick(profile, "isIdCardVerified", "IsIdCardVerified")
   const showIdCardUpdatedNote = idCardUpdated || isIdCardVerified === false
   const videoUrl = pick(profile, "introVideoUrl", "IntroVideoUrl")
@@ -118,8 +143,15 @@ const ApprovedProfilePage = () => {
     setIdCardSession((session) => session + 1)
     setIdCardDrawerOpen(true)
   }
-  const handleAddLanguage = () => {}
-  const handleUpdateLanguage = () => {}
+  const handleAddLanguage = () => {
+    setAddLanguageSession((session) => session + 1)
+    setAddLanguageOpen(true)
+  }
+  const handleUpdateLanguage = (live) => {
+    if (!live) return
+    setUpdateLanguageSession((session) => session + 1)
+    setUpdateLanguageTarget(live)
+  }
   const handleViewRequest = () => {}
   const handlePlayVideo = () => setVideoViewerOpen(true)
   const handleReplaceVideo = () => videoInputRef.current?.click()
@@ -280,6 +312,21 @@ const ApprovedProfilePage = () => {
         currentFrontUrl={pick(profile, "idCardFrontUrl", "IdCardFrontUrl")}
         currentBackUrl={pick(profile, "idCardBackUrl", "IdCardBackUrl")}
         onUpdated={() => setIdCardUpdated(true)}
+        t={t}
+      />
+      <AddLanguageDrawer
+        key={`add-language-${addLanguageSession}`}
+        open={addLanguageOpen}
+        onClose={() => setAddLanguageOpen(false)}
+        excludedLanguages={excludedLanguages}
+        t={t}
+      />
+      <UpdateLanguageDrawer
+        key={`update-language-${updateLanguageSession}`}
+        open={Boolean(updateLanguageTarget)}
+        onClose={() => setUpdateLanguageTarget(null)}
+        language={updateLanguageTarget?.language}
+        currentLevel={updateLanguageTarget?.level}
         t={t}
       />
 
