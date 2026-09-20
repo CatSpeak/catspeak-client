@@ -16,7 +16,7 @@ import { useAuth } from "@/features/auth";
 
 const DesktopNavItems = () => {
   const { t } = useLanguage();
-  const { isStudent } = useRoleOverride();
+  const { isStudent, activeRole } = useRoleOverride();
   const { resolvePath, pathname, currentLang } = useActiveLink();
   const { isAuthenticated } = useAuth();
 
@@ -43,6 +43,7 @@ const DesktopNavItems = () => {
                 if (item.hideInSidebar) return false;
                 if (item.lang && item.lang !== currentLang) return false;
                 if (item.isPrivate && !isAuthenticated) return false;
+                if (item.roles && !item.roles.includes(activeRole)) return false;
                 return true;
               })
               .map((item) => {

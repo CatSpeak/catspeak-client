@@ -48,7 +48,7 @@ const MobileNavItems = ({
   isHorizontal = false,
 }) => {
   const { t } = useLanguage()
-  const { isTeacher } = useRoleOverride()
+  const { isTeacher, activeRole } = useRoleOverride()
   const { resolvePath, checkIsActive, pathname, currentLang } = useActiveLink()
   const { isAuthenticated } = useAuth()
   const [activeDrilldownItem, setActiveDrilldownItem] = useState(null)
@@ -109,6 +109,7 @@ const MobileNavItems = ({
       if (sub.lang && sub.lang !== currentLang) return false
       if (isHorizontal && sub.showOnHorizontalBar === false) return false
       if (sub.isPrivate && !isAuthenticated) return false
+      if (sub.roles && !sub.roles.includes(activeRole)) return false
       return true
     }
 
