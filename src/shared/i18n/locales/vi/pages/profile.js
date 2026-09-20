@@ -196,6 +196,18 @@ export default {
     approvedNoVideo: "Chưa có video giới thiệu",
     approvedOptions: "Tùy chọn",
     approvedReplaceVideo: "Thay thế video",
+    approvedSaveChanges: "Lưu thay đổi",
+    approvedCancelEdit: "Hủy",
+    approvedFullNameRequired: "Vui lòng nhập họ và tên",
+    approvedFullNameLength: "Họ và tên phải có từ 2 đến 100 ký tự",
+    approvedFullNameInvalid:
+      "Họ và tên chỉ được chứa chữ cái, khoảng trắng, dấu gạch nối và dấu nháy đơn",
+    approvedNationalityRequired: "Vui lòng chọn quốc tịch",
+    approvedAddressRequired: "Vui lòng nhập địa chỉ",
+    approvedAddressLength: "Địa chỉ phải có từ 5 đến 255 ký tự",
+    approvedIntroMax: "Giới thiệu bản thân tối đa 300 ký tự",
+    approvedPersonalInfoSaved: "Cập nhật thông tin cá nhân thành công",
+    approvedPersonalInfoSaveError: "Không thể cập nhật thông tin cá nhân",
   },
   friends: {
     teacher: "Giảng viên",

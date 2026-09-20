@@ -193,6 +193,18 @@ export default {
     approvedNoVideo: "No intro video yet",
     approvedOptions: "Options",
     approvedReplaceVideo: "Replace video",
+    approvedSaveChanges: "Save changes",
+    approvedCancelEdit: "Cancel",
+    approvedFullNameRequired: "Please enter your full name",
+    approvedFullNameLength: "Full name must be between 2 and 100 characters",
+    approvedFullNameInvalid:
+      "Full name can only contain letters, spaces, hyphens and apostrophes",
+    approvedNationalityRequired: "Please select your nationality",
+    approvedAddressRequired: "Please enter your address",
+    approvedAddressLength: "Address must be between 5 and 255 characters",
+    approvedIntroMax: "Introduction must be at most 300 characters",
+    approvedPersonalInfoSaved: "Personal information updated successfully",
+    approvedPersonalInfoSaveError: "Could not update personal information",
   },
   friends: {
     teacher: "Teacher",
