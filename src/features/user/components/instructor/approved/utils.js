@@ -70,6 +70,39 @@ export function formatBytes(bytes) {
   return `${Math.max(1, Math.round(bytes / 1024))} KB`
 }
 
+export const CERTIFICATE_MAX_BYTES = 5 * 1024 * 1024
+
+export function certificateExtensionOf(name) {
+  const parts = String(name || "").toLowerCase().split(".")
+  return parts.length > 1 ? parts.pop() : ""
+}
+
+/**
+ * PDF files start with the ASCII signature "%PDF-". Validating the magic bytes
+ * (not just the extension) blocks a renamed non-PDF file.
+ */
+export async function certificateMagicOk(file) {
+  try {
+    const bytes = new Uint8Array(await file.slice(0, 5).arrayBuffer())
+    return String.fromCharCode(...bytes) === "%PDF-"
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Validates a language certificate against the server rules: PDF extension,
+ * max 5MB and a real PDF signature. Returns an i18n error key or "".
+ */
+export async function validateCertificateFile(file) {
+  if (!file || certificateExtensionOf(file.name) !== "pdf") {
+    return "languageCertificateFileType"
+  }
+  if (file.size > CERTIFICATE_MAX_BYTES) return "languageCertificateFileSize"
+  if (!(await certificateMagicOk(file))) return "languageCertificateFileInvalid"
+  return ""
+}
+
 export function requestStatus(request) {
   const raw = pick(request, "status", "Status")
   if (typeof raw === "number") {

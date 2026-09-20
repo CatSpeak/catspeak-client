@@ -261,6 +261,23 @@ export default {
     idCardFileType: "仅接受 JPG、PNG、WEBP 图片",
     idCardFileSize: "图片不得超过 5MB",
     idCardFileInvalid: "图片文件无效或无法读取",
+    languageSelectPlaceholder: "选择语言",
+    languageLevelPlaceholder: "选择水平",
+    languageCertificateLabel: "证书 / 学位",
+    languageCertificateNewLabel: "新的证书 / 学位",
+    languageCertificateConstraint: "PDF 最大 5MB",
+    languageUpdateTitle: "更新{language}",
+    languageNewLevelLabel: "新水平",
+    languageInfoBox:
+      "您之前已批准的信息将继续有效，直到新的更新申请获得批准。",
+    languageRequestSubmit: "提交申请",
+    languageRequestSubmitted: "申请已提交，请等待管理员审核。",
+    languageRequestError: "无法提交申请。请重试。",
+    languageRequestConflict:
+      "该语言已有待审核的申请。请先删除旧申请，再提交新的申请。",
+    languageCertificateFileType: "仅接受 PDF 文件",
+    languageCertificateFileSize: "证书不得超过 5MB",
+    languageCertificateFileInvalid: "PDF 文件无效或无法读取",
   },
   friends: {
     teacher: "教师",
