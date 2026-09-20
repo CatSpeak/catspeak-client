@@ -13,6 +13,7 @@ import VideoCard from "@/features/user/components/instructor/approved/VideoCard"
 import ChangeEmailDrawer from "@/features/user/components/instructor/approved/contact/ChangeEmailDrawer"
 import ChangePhoneDrawer from "@/features/user/components/instructor/approved/contact/ChangePhoneDrawer"
 import BankAccountDrawer from "@/features/user/components/instructor/approved/BankAccountDrawer"
+import IdCardDrawer from "@/features/user/components/instructor/approved/IdCardDrawer"
 import { pick } from "@/features/user/components/instructor/approved/utils"
 
 const ApprovedProfilePage = () => {
@@ -22,6 +23,9 @@ const ApprovedProfilePage = () => {
   const [contactSession, setContactSession] = useState(0)
   const [bankDrawerOpen, setBankDrawerOpen] = useState(false)
   const [bankSession, setBankSession] = useState(0)
+  const [idCardDrawerOpen, setIdCardDrawerOpen] = useState(false)
+  const [idCardSession, setIdCardSession] = useState(0)
+  const [idCardUpdated, setIdCardUpdated] = useState(false)
 
   const {
     data: instructorData,
@@ -54,6 +58,9 @@ const ApprovedProfilePage = () => {
     return list.find((account) => account.isDefault) || list[0] || null
   }, [bankAccountsData])
 
+  const isIdCardVerified = pick(profile, "isIdCardVerified", "IsIdCardVerified")
+  const showIdCardUpdatedNote = idCardUpdated || isIdCardVerified === false
+
   const handleEditPersonalInfo = () => {}
   const openContactDrawer = (which) => {
     setContactSession((session) => session + 1)
@@ -65,7 +72,10 @@ const ApprovedProfilePage = () => {
     setBankSession((session) => session + 1)
     setBankDrawerOpen(true)
   }
-  const handleUpdateIdCard = () => {}
+  const handleUpdateIdCard = () => {
+    setIdCardSession((session) => session + 1)
+    setIdCardDrawerOpen(true)
+  }
   const handleAddLanguage = () => {}
   const handleUpdateLanguage = () => {}
   const handleViewRequest = () => {}
@@ -122,6 +132,7 @@ const ApprovedProfilePage = () => {
           onChangePhone={handleChangePhone}
           onChangeBank={handleChangeBank}
           onUpdateIdCard={handleUpdateIdCard}
+          showIdCardUpdated={showIdCardUpdatedNote}
         />
       </div>
 
@@ -165,6 +176,15 @@ const ApprovedProfilePage = () => {
         onClose={() => setBankDrawerOpen(false)}
         currentBank={bankAccount}
         currentPhone={pick(profile, "phoneNumber", "PhoneNumber")}
+        t={t}
+      />
+      <IdCardDrawer
+        key={`id-card-${idCardSession}`}
+        open={idCardDrawerOpen}
+        onClose={() => setIdCardDrawerOpen(false)}
+        currentFrontUrl={pick(profile, "idCardFrontUrl", "IdCardFrontUrl")}
+        currentBackUrl={pick(profile, "idCardBackUrl", "IdCardBackUrl")}
+        onUpdated={() => setIdCardUpdated(true)}
         t={t}
       />
     </div>

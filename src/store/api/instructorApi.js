@@ -163,6 +163,16 @@ export const instructorApi = baseApi.injectEndpoints({
       invalidatesTags: ["InstructorProfile"],
     }),
 
+    updateInstructorIdCard: builder.mutation({
+      query: (formData) => ({
+        url: "/InstructorProfile/my/id-card",
+        method: "PUT",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["InstructorProfile"],
+    }),
+
     getPendingTeachingUpdate: builder.query({
       query: () => ({
         url: "/InstructorProfile/my/teaching-update",
@@ -217,6 +227,7 @@ export const {
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
   useUpdateInstructorBasicInfoMutation,
+  useUpdateInstructorIdCardMutation,
   useGetPendingTeachingUpdateQuery,
   useSubmitTeachingUpdateMutation,
   useCancelTeachingUpdateMutation,
