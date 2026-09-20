@@ -63,6 +63,13 @@ export function formatUtcDate(value) {
   return `${day}/${month}/${date.getUTCFullYear()}`
 }
 
+export function formatBytes(bytes) {
+  if (typeof bytes !== "number" || Number.isNaN(bytes)) return ""
+  const mb = bytes / (1024 * 1024)
+  if (mb >= 1) return `${mb.toFixed(2)} MB`
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`
+}
+
 export function requestStatus(request) {
   const raw = pick(request, "status", "Status")
   if (typeof raw === "number") {

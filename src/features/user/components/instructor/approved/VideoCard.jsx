@@ -1,13 +1,45 @@
 import React, { useEffect, useRef, useState } from "react"
-import { MoreVertical, Play } from "lucide-react"
+import { MoreVertical, Play, UploadCloud } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
-import { fileNameFromUrl, pick } from "./utils"
+import {
+  fileNameFromUrl,
+  formatBytes,
+  formatUtcDate,
+  pick,
+} from "./utils"
 
-const VideoCard = ({ profile, t, onPlay, onReplace, onRemove }) => {
+const VideoCard = ({
+  profile,
+  t,
+  videoMeta,
+  onPlay,
+  onReplace,
+  onRemove,
+}) => {
   const ins = t.profile?.instructor || {}
   const videoUrl = pick(profile, "introVideoUrl", "IntroVideoUrl")
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
+
+  // The API returns neither the file size nor the upload date. Prefer those
+  // fields if the backend ever provides them, otherwise fall back to the
+  // metadata of a file replaced during this session (size + the moment it was
+  // uploaded) — never fabricate a value.
+  const rawSize = pick(profile, "introVideoSize", "IntroVideoSize")
+  const size = typeof rawSize === "number" ? rawSize : videoMeta?.size
+  const uploadedAt =
+    pick(
+      profile,
+      "introVideoUploadedAt",
+      "IntroVideoUploadedAt",
+      "introVideoCreatedAt",
+      "IntroVideoCreatedAt",
+    ) || videoMeta?.uploadedAt
+  const metaParts = []
+  if (typeof size === "number") metaParts.push(formatBytes(size))
+  const dateText = formatUtcDate(uploadedAt)
+  if (dateText) metaParts.push(dateText)
+  const metaLine = metaParts.join(" · ")
 
   useEffect(() => {
     if (!menuOpen) return
@@ -51,46 +83,66 @@ const VideoCard = ({ profile, t, onPlay, onReplace, onRemove }) => {
             <span className="truncate text-xs font-medium text-[#101828]">
               {fileNameFromUrl(videoUrl)}
             </span>
+            {metaLine && (
+              <span className="truncate text-[10px] text-[#667085]">
+                {metaLine}
+              </span>
+            )}
           </div>
           <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
               aria-label={ins.approvedOptions || "Tùy chọn"}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
               className="flex h-8 w-8 items-center justify-center rounded-full text-[#101828] transition-colors hover:bg-[#F2F4F7]"
             >
               <MoreVertical size={18} />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-full z-10 mt-1 w-44 overflow-hidden rounded-lg border border-[#E2E2E2] bg-white py-1 shadow-lg">
+              <div
+                role="menu"
+                className="absolute right-0 top-full z-10 mt-1 w-44 overflow-hidden rounded-lg border border-[#E2E2E2] bg-white py-1 shadow-lg"
+              >
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => {
                     setMenuOpen(false)
                     onReplace?.()
                   }}
                   className="block w-full px-4 py-2 text-left text-sm text-[#101828] transition-colors hover:bg-[#F9FAFB]"
                 >
-                  {ins.approvedReplaceVideo || "Thay thế video"}
+                  {ins.approvedReplaceVideo || "Thay video"}
                 </button>
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => {
                     setMenuOpen(false)
                     onRemove?.()
                   }}
                   className="block w-full px-4 py-2 text-left text-sm text-[#F52235] transition-colors hover:bg-[#FEF3F2]"
                 >
-                  {ins.remove || "Xóa"}
+                  {ins.approvedDeleteVideo || "Xóa video"}
                 </button>
               </div>
             )}
           </div>
         </div>
       ) : (
-        <div className="rounded-[7px] border border-dashed border-[#D0D5DD] py-6 text-center text-sm text-[#667085]">
-          {ins.approvedNoVideo || "Chưa có video giới thiệu"}
-        </div>
+        <button
+          type="button"
+          onClick={onReplace}
+          className="flex w-full flex-col items-center justify-center gap-1.5 rounded-[7px] border border-dashed border-[#D0D5DD] py-6 text-center text-sm text-[#667085] transition-colors hover:border-[#990011] hover:bg-[#990011]/5"
+        >
+          <UploadCloud size={22} className="text-[#667085]" />
+          <span>{ins.approvedNoVideo || "Chưa có video giới thiệu"}</span>
+          <span className="text-xs font-semibold text-[#990011]">
+            {ins.approvedUploadVideo || "Chọn video"}
+          </span>
+        </button>
       )}
     </FluentCard>
   )
