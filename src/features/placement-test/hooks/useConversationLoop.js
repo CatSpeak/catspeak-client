@@ -1,16 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "@/components/ui/toast"
 import {
   ANALYZE_MIN_MS,
   CONVERSATION_NOTICE,
   CONVERSATION_PHASE,
   NOT_HEARING_BANNER_MS,
-  NOT_HEARING_EXIT_MS,
   QUESTION_DURATION_MS,
-  RETRY_RESTART_MS,
   TICK_MS,
-  VAD_GRACE_MS,
-  VAD_SILENCE_MS,
 } from "../constants/conversation"
 import {
   PLACEMENT_TEST_PATH,
@@ -19,14 +16,9 @@ import {
 import { SESSION_STATUS } from "../constants/session"
 import { CONNECTION_LOST_EVENT } from "../constants/lifecycle"
 import { TOTAL_TURNS, evaluateTurn, selectNextQuestion } from "../engine"
-import { useSubmitTurnMutation } from "../api"
+import { placementTestApi, useSubmitTurnMutation } from "../api"
 import { SILENCE_LEVEL } from "../services/audio/constants"
-import {
-  MAX_ASR_RETRIES,
-  canRetry,
-  createSilenceTracker,
-  nextRetryCount,
-} from "../services/speech"
+import { createSilenceTracker } from "../services/speech"
 import { readActiveSession, saveActiveSession } from "../utils/sessionStorage"
 import {
   advancePauseBudget,
@@ -41,19 +33,42 @@ import useAudioTransport from "./useAudioTransport"
 const isOnline = () =>
   typeof navigator === "undefined" || navigator.onLine !== false
 
+const normalizeQuestion = (q, fallbackOrder = 1) => {
+  if (!q) return null
+  const parsedOrder = Number(
+    q.turn_index ?? q.turnIndex ?? q.current_turn,
+  )
+  const effectiveOrder =
+    Number.isFinite(parsedOrder) && parsedOrder > 0 ? parsedOrder : fallbackOrder
+  return {
+    id: q.question_id || q.id || `turn_${effectiveOrder}`,
+    order: effectiveOrder,
+    turnIndex: effectiveOrder,
+    level: Number(q.target_hsk_level || q.hsk_level || q.level) || 1,
+    hanzi: q.text || q.hanzi || "",
+    pinyin: q.pinyin || "",
+    audioBase64: q.audio_base64 || q.audioBase64 || null,
+    audioFormat: q.audio_format || q.audioFormat || "audio/wav",
+  }
+}
+
 const useConversationLoop = () => {
   const navigate = useNavigate()
 
   const [session, setSession] = useState(readActiveSession)
   const [turns, setTurns] = useState(() => readActiveSession()?.turns || [])
-  const [order, setOrder] = useState(
-    () => (readActiveSession()?.turns?.length || 0) + 1,
-  )
+  const [order, setOrder] = useState(() => {
+    const s = readActiveSession()
+    return Number(s?.currentOrder) || (s?.turns?.length || 0) + 1
+  })
   const [question, setQuestion] = useState(null)
   const [transcript, setTranscript] = useState("")
   const [phase, setPhase] = useState(CONVERSATION_PHASE.LOADING)
   const [notice, setNotice] = useState(null)
   const [retryCount, setRetryCount] = useState(0)
+  const [isRecording, setIsRecording] = useState(false)
+  const [hasRecorded, setHasRecorded] = useState(false)
+  const [recordedMs, setRecordedMs] = useState(0)
   const [remainingMs, setRemainingMs] = useState(QUESTION_DURATION_MS)
   const [showHanzi, setShowHanzi] = useState(true)
   const [showPinyin, setShowPinyin] = useState(true)
@@ -65,6 +80,8 @@ const useConversationLoop = () => {
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
   const [submitTurn] = useSubmitTurnMutation()
+  const [triggerGetQuestion] = placementTestApi.useLazyGetQuestionQuery()
+
   const {
     level: micLevel,
     status: micStatus,
@@ -72,16 +89,25 @@ const useConversationLoop = () => {
     stopListening: stopAudioListening,
     speak: speakText,
     stopSpeaking: stopSpeakingText,
+    playAudioBase64,
+    stopAudio,
+    startRecording,
+    stopRecording,
+    getRecordedBlob,
+    getRecordingUrl,
   } = useAudioTransport()
+
+  const [isPlayingUserAudio, setIsPlayingUserAudio] = useState(false)
+  const userAudioRef = useRef(null)
 
   const levelRef = useRef(0)
   const micStatusRef = useRef("connecting")
   const trackerRef = useRef(null)
-  const deadlineRef = useRef(0)
-  const listenStartedAtRef = useRef(0)
+  const recordingStartedAtRef = useRef(0)
+  const isRecordingRef = useRef(false)
   const silentSinceRef = useRef(null)
   const finishingRef = useRef(false)
-  const restartTimerRef = useRef(null)
+  const recordingStoppedRef = useRef(false)
   const mountedRef = useRef(true)
   const frozenRemainingRef = useRef(QUESTION_DURATION_MS)
   const connectionLostRef = useRef(false)
@@ -92,9 +118,57 @@ const useConversationLoop = () => {
   const handleLeaveRef = useRef(() => {})
 
   const finishTurnRef = useRef(() => {})
-  const handleNoSpeechRef = useRef(() => {})
   const loadQuestionRef = useRef(() => {})
   const stateRef = useRef({})
+
+  const handleStopUserAudio = useCallback(() => {
+    if (userAudioRef.current) {
+      try {
+        userAudioRef.current.pause()
+        userAudioRef.current.currentTime = 0
+      } catch {
+        // Audio pause error ignore
+      }
+      userAudioRef.current = null
+    }
+    setIsPlayingUserAudio(false)
+  }, [])
+
+  const handlePlayUserAudio = useCallback(() => {
+    handleStopUserAudio()
+    stopSpeakingText()
+    stopAudio()
+
+    const url =
+      getRecordingUrl() ||
+      (getRecordedBlob() ? URL.createObjectURL(getRecordedBlob()) : null)
+    if (!url) return
+
+    try {
+      const audio = new Audio(url)
+      userAudioRef.current = audio
+      audio.onended = () => {
+        setIsPlayingUserAudio(false)
+        userAudioRef.current = null
+      }
+      audio.onerror = () => {
+        setIsPlayingUserAudio(false)
+        userAudioRef.current = null
+      }
+      audio
+        .play()
+        .then(() => {
+          setIsPlayingUserAudio(true)
+        })
+        .catch(() => {
+          setIsPlayingUserAudio(false)
+          userAudioRef.current = null
+        })
+    } catch {
+      setIsPlayingUserAudio(false)
+      userAudioRef.current = null
+    }
+  }, [getRecordedBlob, getRecordingUrl, handleStopUserAudio, stopAudio, stopSpeakingText])
 
   useEffect(() => {
     levelRef.current = micLevel
@@ -105,6 +179,10 @@ const useConversationLoop = () => {
   }, [micStatus])
 
   useEffect(() => {
+    isRecordingRef.current = isRecording
+  }, [isRecording])
+
+  useEffect(() => {
     stateRef.current = {
       session,
       turns,
@@ -113,105 +191,193 @@ const useConversationLoop = () => {
       transcript,
       retryCount,
       phase,
+      isRecording,
+      hasRecorded,
+      recordedMs,
     }
-  }, [session, turns, order, question, transcript, retryCount, phase])
+  }, [
+    session,
+    turns,
+    order,
+    question,
+    transcript,
+    retryCount,
+    phase,
+    isRecording,
+    hasRecorded,
+    recordedMs,
+  ])
 
-  const clearRestart = useCallback(() => {
-    if (restartTimerRef.current) {
-      window.clearTimeout(restartTimerRef.current)
-      restartTimerRef.current = null
-    }
-  }, [])
-
-  const startListening = useCallback(
-    (nextQuestion, { preserveRetry = false, remainingMs: initialRemaining } = {}) => {
-      stopAudioListening()
-      finishingRef.current = false
-      silentSinceRef.current = null
-      const budget = Number.isFinite(initialRemaining)
-        ? Math.max(0, Math.min(QUESTION_DURATION_MS, initialRemaining))
-        : QUESTION_DURATION_MS
-      listenStartedAtRef.current = Date.now()
-      deadlineRef.current = listenStartedAtRef.current + budget
-      setRemainingMs(budget)
-      setTranscript("")
-      if (!preserveRetry) setRetryCount(0)
-      setNotice(null)
-      setPhase(CONVERSATION_PHASE.LISTENING)
-
-      const tracker = createSilenceTracker({
-        silenceMs: VAD_SILENCE_MS,
-        graceMs: VAD_GRACE_MS,
-        threshold: SILENCE_LEVEL,
-      })
-      tracker.reset(listenStartedAtRef.current)
-      trackerRef.current = tracker
-
-      startAudioListening({
-        level: nextQuestion?.level,
-        onResult: (text) => setTranscript(text),
-        onEnd: (finalText) => {
-          if (finishingRef.current) return
-          const clean = String(finalText || "").trim()
-          if (clean) finishTurnRef.current({ transcript: clean })
-          else handleNoSpeechRef.current()
-        },
-      })
+  const playQuestionAudio = useCallback(
+    (q) => {
+      handleStopUserAudio()
+      if (q?.audioBase64) {
+        playAudioBase64(q.audioBase64, q.audioFormat)
+      } else if (q?.hanzi) {
+        speakText(q.hanzi)
+      }
     },
-    [startAudioListening, stopAudioListening],
+    [handleStopUserAudio, playAudioBase64, speakText],
   )
 
+  const handleStartRecord = useCallback(async () => {
+    if (finishingRef.current) return
+    handleStopUserAudio()
+    stopSpeakingText()
+    stopAudio()
+    finishingRef.current = false
+    recordingStoppedRef.current = false
+
+    const recordSuccess = await startRecording()
+    if (!recordSuccess) {
+      toast.error(
+        "Trình duyệt chưa có quyền truy cập Micro. Vui lòng cấp quyền micro cho trang web để trả lời bài thi.",
+      )
+      setIsRecording(false)
+      return
+    }
+
+    const now = Date.now()
+    recordingStartedAtRef.current = now
+    setIsRecording(true)
+    setHasRecorded(false)
+    setNotice(null)
+    setRecordedMs(0)
+    setTranscript("")
+
+    const tracker = createSilenceTracker({ threshold: SILENCE_LEVEL })
+    tracker.reset(now)
+    trackerRef.current = tracker
+
+    startAudioListening({
+      level: stateRef.current.question?.level,
+      onResult: (text) => {
+        if (text) setTranscript(text)
+      },
+      onEnd: (finalText) => {
+        if (finalText) setTranscript(finalText)
+      },
+    })
+  }, [startAudioListening, startRecording, stopAudio, stopSpeakingText])
+
+  const handleStopRecord = useCallback(async () => {
+    if (!isRecordingRef.current) return
+    setIsRecording(false)
+    setHasRecorded(true)
+    stopAudioListening()
+    await stopRecording()
+    const elapsed = Math.min(
+      Date.now() - (recordingStartedAtRef.current || Date.now()),
+      QUESTION_DURATION_MS,
+    )
+    setRecordedMs(Math.max(0, elapsed))
+    setNotice(null)
+  }, [stopAudioListening, stopRecording])
+
+  const handleToggleRecord = useCallback(() => {
+    if (isRecordingRef.current) {
+      handleStopRecord()
+    } else {
+      handleStartRecord()
+    }
+  }, [handleStartRecord, handleStopRecord])
+
+  const handleReRecord = useCallback(async () => {
+    const current = stateRef.current
+    if (current.question && phase === CONVERSATION_PHASE.LISTENING) {
+      setRetryCount((prev) => prev + 1)
+      handleStopUserAudio()
+      stopAudioListening()
+      await stopRecording()
+      await handleStartRecord()
+    }
+  }, [handleStartRecord, handleStopUserAudio, phase, stopAudioListening, stopRecording])
+
   const loadQuestion = useCallback(
-    (nextOrder, sourceTurns, preferredQuestion) => {
+    async (nextOrder, sourceTurns, preferredQuestion) => {
+      finishingRef.current = false
+      recordingStoppedRef.current = false
       const current = stateRef.current
-      const turnsForSelection = sourceTurns || current.turns
-      const nextQuestion =
-        preferredQuestion ||
-        selectNextQuestion({
+      let rawQuestion = preferredQuestion
+
+      if (!rawQuestion && nextOrder === 1 && current.session?.initialQuestion) {
+        rawQuestion = current.session.initialQuestion
+      }
+
+      if (!rawQuestion && current.session?.id) {
+        try {
+          const res = await triggerGetQuestion({ sessionId: current.session.id }).unwrap()
+          rawQuestion = res
+        } catch {
+          rawQuestion = null
+        }
+      }
+
+      if (!rawQuestion) {
+        rawQuestion = selectNextQuestion({
           targetBand: current.session?.targetBand,
-          turns: turnsForSelection,
+          turns: sourceTurns || current.turns,
           order: nextOrder,
         })
+      }
+
+      const effectiveOrder =
+        Number(
+          rawQuestion?.turn_index ??
+            rawQuestion?.turnIndex ??
+            rawQuestion?.current_turn,
+        ) || nextOrder
+
+      const nextQuestion = normalizeQuestion(rawQuestion, effectiveOrder)
       if (!nextQuestion) {
         navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
         return
       }
-      setOrder(nextOrder)
+
+      handleStopUserAudio()
+      stopAudioListening()
+      stopAudio()
+      await stopRecording()
+
+      setOrder(effectiveOrder)
       setQuestion(nextQuestion)
-      startListening(nextQuestion)
-      speakText(nextQuestion.hanzi)
+      setTranscript("")
+      setNotice(null)
+      setIsRecording(false)
+      setHasRecorded(false)
+      setRecordedMs(0)
+      setRemainingMs(QUESTION_DURATION_MS)
+      setPhase(CONVERSATION_PHASE.LISTENING)
+      playQuestionAudio(nextQuestion)
     },
-    [navigate, startListening, speakText],
+    [
+      handleStopUserAudio,
+      navigate,
+      playQuestionAudio,
+      stopAudio,
+      stopAudioListening,
+      stopRecording,
+      triggerGetQuestion,
+    ],
   )
 
-  const handleNoSpeech = useCallback(() => {
-    if (finishingRef.current) return
-    const current = stateRef.current
-    if (!canRetry(current.retryCount)) {
-      finishTurnRef.current({ transcript: "" })
-      return
-    }
-    setRetryCount(nextRetryCount(current.retryCount))
-    setNotice(CONVERSATION_NOTICE.RETRY)
-    clearRestart()
-    restartTimerRef.current = window.setTimeout(() => {
-      restartTimerRef.current = null
-      startListening(current.question, { preserveRetry: true })
-    }, RETRY_RESTART_MS)
-  }, [clearRestart, startListening])
-
   const finishTurn = useCallback(
-    async ({ transcript: rawTranscript = "" } = {}) => {
+    async ({ transcript: rawTranscript = "", skipped = false } = {}) => {
       if (finishingRef.current) return
       finishingRef.current = true
-      clearRestart()
+      handleStopUserAudio()
+      setIsRecording(false)
       stopAudioListening()
       stopSpeakingText()
+      stopAudio()
+      await stopRecording()
+      const audioBlob = getRecordedBlob()
 
       const current = stateRef.current
       const clean = String(rawTranscript || "").trim()
-      const durationMs = Math.max(0, Date.now() - listenStartedAtRef.current)
+      const durationMs = current.recordedMs || 0
       const level = current.question?.level || 1
+      const turnOrder = current.question?.turnIndex || current.order || 1
       const evaluation = evaluateTurn({
         question: current.question,
         transcript: clean,
@@ -223,7 +389,7 @@ const useConversationLoop = () => {
       setPhase(CONVERSATION_PHASE.ANALYZING)
 
       const turn = {
-        order: current.order,
+        order: turnOrder,
         questionId: current.question?.id || null,
         level,
         transcript: clean,
@@ -233,21 +399,57 @@ const useConversationLoop = () => {
       }
       const nextTurns = upsertTurn(current.turns, turn)
       const startedAt = Date.now()
-      let nextQuestion = null
+      let result = null
 
       try {
-        const result = await submitTurn({
+        result = await submitTurn({
           sessionId: current.session?.id,
+          order: turnOrder,
+          turnIndex: turnOrder,
+          audioBlob,
+          durationMs,
+          retryCount: current.retryCount,
+          skipped: Boolean(skipped),
           ...turn,
         }).unwrap()
-        nextQuestion = result?.nextQuestion ?? null
-        if (result?.session) {
-          setSession(result.session)
-          setTurns(result.session.turns || nextTurns)
-        } else {
-          setTurns(nextTurns)
-        }
       } catch {
+        // Network or server error: stay on current question and allow retrying submit
+        finishingRef.current = false
+        setPhase(CONVERSATION_PHASE.LISTENING)
+        setNotice(CONVERSATION_NOTICE.NO_HEARING)
+        return
+      }
+
+      // Check if server asked to retry because no speech was detected
+      if (
+        result?.accepted === false ||
+        result?.canRetry === true ||
+        result?.speechDetected === false
+      ) {
+        finishingRef.current = false
+        setPhase(CONVERSATION_PHASE.LISTENING)
+        setNotice(CONVERSATION_NOTICE.RETRY)
+        if (typeof result?.retryCount === "number") {
+          setRetryCount(result.retryCount)
+        } else {
+          setRetryCount((prev) => prev + 1)
+        }
+        setIsRecording(false)
+        setHasRecorded(false)
+        setRecordedMs(0)
+        return
+      }
+
+      // Successful score submission
+      if (result?.turnResult?.transcript) {
+        setTranscript(result.turnResult.transcript)
+      }
+      const isCompleted = Boolean(result?.isCompleted)
+      const nextQuestion = result?.nextQuestion ?? null
+      if (result?.session) {
+        setSession(result.session)
+        setTurns(result.session.turns || nextTurns)
+      } else {
         setTurns(nextTurns)
       }
 
@@ -259,14 +461,32 @@ const useConversationLoop = () => {
       }
       if (!mountedRef.current) return
 
-      const nextOrder = current.order + 1
-      if (nextOrder > TOTAL_TURNS) {
+      const nextOrder =
+        Number(
+          nextQuestion?.turn_index ??
+            nextQuestion?.turnIndex ??
+            nextQuestion?.current_turn,
+        ) || (turnOrder + 1)
+
+      if (nextOrder > TOTAL_TURNS || isCompleted) {
         navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
         return
       }
-      loadQuestionRef.current(nextOrder, nextTurns, nextQuestion)
+      loadQuestionRef.current(
+        nextOrder,
+        result?.session?.turns || nextTurns,
+        nextQuestion,
+      )
     },
-    [clearRestart, navigate, stopAudioListening, stopSpeakingText, submitTurn],
+    [
+      navigate,
+      stopAudioListening,
+      stopSpeakingText,
+      stopAudio,
+      stopRecording,
+      getRecordedBlob,
+      submitTurn,
+    ],
   )
 
   useEffect(() => {
@@ -274,35 +494,25 @@ const useConversationLoop = () => {
   }, [finishTurn])
 
   useEffect(() => {
-    handleNoSpeechRef.current = handleNoSpeech
-  }, [handleNoSpeech])
-
-  useEffect(() => {
     loadQuestionRef.current = loadQuestion
   }, [loadQuestion])
 
   const suspendSession = useCallback(() => {
-    clearRestart()
+    handleStopUserAudio()
     stopAudioListening()
     stopSpeakingText()
-    frozenRemainingRef.current = remainingQuestionMs(
-      deadlineRef.current,
-      Date.now(),
-    )
+    stopAudio()
+    if (isRecordingRef.current) {
+      stopRecording()
+      setIsRecording(false)
+      setHasRecorded(true)
+    }
     setSuspended(true)
-  }, [clearRestart, stopAudioListening, stopSpeakingText])
+  }, [handleStopUserAudio, stopAudioListening, stopSpeakingText, stopAudio, stopRecording])
 
   const resumeSession = useCallback(() => {
-    const current = stateRef.current
     setSuspended(false)
-    if (finishingRef.current || current.phase !== CONVERSATION_PHASE.LISTENING) {
-      return
-    }
-    startListening(current.question, {
-      preserveRetry: true,
-      remainingMs: frozenRemainingRef.current,
-    })
-  }, [startListening])
+  }, [])
 
   const handlePause = useCallback(() => {
     if (connectionLost) return
@@ -320,17 +530,17 @@ const useConversationLoop = () => {
     if (current.session) {
       saveActiveSession({
         ...current.session,
-        status: SESSION_STATUS.PAUSED,
         turns: current.turns,
         pauseSpentMs,
         pausedAt: Date.now(),
       })
     }
-    clearRestart()
+    handleStopUserAudio()
     stopAudioListening()
     stopSpeakingText()
+    stopAudio()
     navigate(PLACEMENT_TEST_PATH, { replace: true })
-  }, [clearRestart, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText])
+  }, [handleStopUserAudio, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText, stopAudio])
 
   const handleConnectionLost = useCallback(() => {
     if (connectionLost) return
@@ -425,7 +635,8 @@ const useConversationLoop = () => {
         mountedRef.current = false
       }
     }
-    const startOrder = (stored.turns?.length || 0) + 1
+    const startOrder =
+      Number(stored.currentOrder) || (stored.turns?.length || 0) + 1
     if (startOrder > TOTAL_TURNS) {
       navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
       return () => {
@@ -435,71 +646,64 @@ const useConversationLoop = () => {
     loadQuestionRef.current(startOrder, stored.turns || [])
     return () => {
       mountedRef.current = false
-      clearRestart()
+      handleStopUserAudio()
       stopAudioListening()
       stopSpeakingText()
+      stopAudio()
     }
-  }, [navigate, clearRestart, stopAudioListening, stopSpeakingText])
+  }, [handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
 
+  // Tick loop: smoothly updates recording timer
   useEffect(() => {
-    if (phase !== CONVERSATION_PHASE.LISTENING || suspended) return undefined
+    if (phase !== CONVERSATION_PHASE.LISTENING || suspended || !isRecording) {
+      return undefined
+    }
     const id = window.setInterval(() => {
       const now = Date.now()
-      setRemainingMs(Math.max(0, deadlineRef.current - now))
+      const elapsed = Math.max(0, now - recordingStartedAtRef.current)
+      const clamped = Math.min(elapsed, QUESTION_DURATION_MS)
+      setRecordedMs(clamped)
+      setRemainingMs(Math.max(0, QUESTION_DURATION_MS - clamped))
 
-      const tracker = trackerRef.current
-      if (tracker) {
-        const state = tracker.push(levelRef.current)
-        if (state.shouldSubmit) {
-          finishTurnRef.current({ transcript: stateRef.current.transcript })
-          return
-        }
-      }
-
-      if (micStatusRef.current !== "connecting") {
-        if (levelRef.current < SILENCE_LEVEL) {
-          if (silentSinceRef.current == null) silentSinceRef.current = now
-          const silentMs = now - silentSinceRef.current
-          if (silentMs >= NOT_HEARING_EXIT_MS) {
-            handleLeaveRef.current()
-            return
-          }
-          if (silentMs >= NOT_HEARING_BANNER_MS) {
-            setNotice(CONVERSATION_NOTICE.NO_HEARING)
-          }
-        } else {
-          silentSinceRef.current = null
-          setNotice((previous) =>
-            previous === CONVERSATION_NOTICE.NO_HEARING ? null : previous,
-          )
-        }
-      }
-
-      if (deadlineRef.current - now <= 0) {
-        finishTurnRef.current({ transcript: stateRef.current.transcript })
+      if (elapsed >= QUESTION_DURATION_MS) {
+        setIsRecording(false)
+        setHasRecorded(true)
+        stopAudioListening()
+        stopRecording()
       }
     }, TICK_MS)
     return () => window.clearInterval(id)
-  }, [phase, suspended])
+  }, [phase, suspended, isRecording, stopAudioListening, stopRecording])
 
-  const handleSubmit = useCallback(() => {
+  // User explicitly clicks "Hoàn tất câu trả lời"
+  const handleSubmit = useCallback(async () => {
+    if (isRecordingRef.current) {
+      setIsRecording(false)
+      setHasRecorded(true)
+      stopAudioListening()
+      await stopRecording()
+    }
     finishTurnRef.current({ transcript: stateRef.current.transcript })
-  }, [])
+  }, [stopAudioListening, stopRecording])
 
-  const handleSkip = useCallback(() => {
-    finishTurnRef.current({ transcript: "" })
-  }, [])
+  // User explicitly clicks "Bỏ qua"
+  const handleSkip = useCallback(async () => {
+    if (isRecordingRef.current) {
+      setIsRecording(false)
+      setHasRecorded(true)
+      stopAudioListening()
+      await stopRecording()
+    }
+    finishTurnRef.current({ transcript: "", skipped: true })
+  }, [stopAudioListening, stopRecording])
 
   const handleReplay = useCallback(() => {
-    const hanzi = stateRef.current.question?.hanzi
-    if (hanzi) speakText(hanzi)
-  }, [speakText])
+    const q = stateRef.current.question
+    if (q) playQuestionAudio(q)
+  }, [playQuestionAudio])
 
   const toggleHanzi = useCallback(() => setShowHanzi((value) => !value), [])
   const togglePinyin = useCallback(() => setShowPinyin((value) => !value), [])
-
-  const canSkip =
-    notice === CONVERSATION_NOTICE.NO_HEARING || retryCount >= MAX_ASR_RETRIES
 
   return {
     ready: Boolean(question),
@@ -510,12 +714,17 @@ const useConversationLoop = () => {
     phase,
     notice,
     retryCount,
+    isRecording,
+    hasRecorded,
+    recordedMs,
     remainingMs,
+    maxDurationMs: QUESTION_DURATION_MS,
+    isPlayingUserAudio,
     showHanzi,
     showPinyin,
     toggleHanzi,
     togglePinyin,
-    canSkip,
+    canSkip: true,
     answeredCount: turns.length,
     paused,
     pauseRemainingMs: remainingPauseBudget(pauseSpentMs),
@@ -526,8 +735,14 @@ const useConversationLoop = () => {
     handleResume,
     handleLeave,
     handleReconnectNow,
+    handleToggleRecord,
+    handleStartRecord,
+    handleStopRecord,
+    handlePlayUserAudio,
+    handleStopUserAudio,
     handleSubmit,
     handleSkip,
+    handleReRecord,
     handleReplay,
   }
 }

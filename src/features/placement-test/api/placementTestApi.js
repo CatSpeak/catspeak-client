@@ -1,46 +1,52 @@
 /**
- * Bảy endpoint của bài kiểm tra đầu vào.
+ * REST API Endpoints cho bài kiểm tra đầu vào (Placement Test Subsystem).
  *
- * Hai trong số đó — `submitTurn` và `scoreSession` — nay đi tới động cơ chấm
- * điểm thật ở `catspeak-ai`. Năm cái còn lại vẫn là mock trên localStorage, vì
- * chúng cần bảng vòng đời phía máy chủ mà `PlacementController` chưa tồn tại.
- *
- *     createSession     mock   cần bảng ai.placement_sessions
- *     getActiveSession  mock   nt
- *     resumeSession     mock   nt
- *     getRetakeStatus   mock   cần lịch sử bài thi trong database
- *     submitTurn        THẬT   POST /placement/score-turn
- *     scoreSession      THẬT   POST /placement/finalize
- *     adjustLevel       mock   cần cột self_adjusted phía máy chủ
- *
- * Tham số thứ tư của `queryFn` là `baseQuery` — dùng nó thay vì `fetch` trần thì
- * được cả ba thứ của baseApi: header Authorization, luồng làm mới token, và
- * việc định tuyến sang `VITE_AI_API_BASE_URL`. Xem `isAiRoute` trong
- * `store/api/baseApi.js`, `/placement/*` đã được thêm vào đó.
- *
- * Đặt `VITE_PLACEMENT_USE_REAL_ENGINE=0` để quay lại mock hoàn toàn — dùng khi
- * làm giao diện mà không muốn dựng backend.
+ * Hỗ trợ chuyển đổi mượt mà giữa REST Backend thật (`catspeak-ai` v2.0)
+ * và Mock Adapter (`localStorage`) qua cờ `VITE_PLACEMENT_USE_REAL_ENGINE`.
  */
 import { baseApi } from "@/store/api/baseApi"
 import {
   adjustLevelMock,
   createSessionMock,
   getActiveSessionMock,
+  getQuestionMock,
   getRetakeStatusMock,
   resumeSessionMock,
   scoreSessionMock,
   submitTurnMock,
 } from "./mockAdapter"
-import { USE_REAL_ENGINE, scoreSessionReal, submitTurnReal } from "./realAdapter"
+import {
+  USE_REAL_ENGINE,
+  adjustLevelReal,
+  createSessionReal,
+  getActiveSessionReal,
+  getQuestionReal,
+  getRetakeStatusReal,
+  scoreSessionReal,
+  submitTurnReal,
+} from "./realAdapter"
 
 export const placementTestApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     createSession: builder.mutation({
-      queryFn: (args) => createSessionMock(args),
+      queryFn: (args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? createSessionReal(args, { baseQuery, api, extraOptions })
+          : createSessionMock(args),
       invalidatesTags: ["PlacementSession"],
     }),
     getActiveSession: builder.query({
-      queryFn: () => getActiveSessionMock(),
+      queryFn: (_args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? getActiveSessionReal({ baseQuery, api, extraOptions })
+          : getActiveSessionMock(),
+      providesTags: ["PlacementSession"],
+    }),
+    getQuestion: builder.query({
+      queryFn: (args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? getQuestionReal(args, { baseQuery, api, extraOptions })
+          : getQuestionMock(args),
       providesTags: ["PlacementSession"],
     }),
     resumeSession: builder.mutation({
@@ -48,7 +54,17 @@ export const placementTestApi = baseApi.injectEndpoints({
       invalidatesTags: ["PlacementSession"],
     }),
     getRetakeStatus: builder.query({
-      queryFn: () => getRetakeStatusMock(),
+      queryFn: (_args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? getRetakeStatusReal({ baseQuery, api, extraOptions })
+          : getRetakeStatusMock(),
+      providesTags: ["PlacementResult"],
+    }),
+    getProfile: builder.query({
+      queryFn: (_args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? getRetakeStatusReal({ baseQuery, api, extraOptions })
+          : getRetakeStatusMock(),
       providesTags: ["PlacementResult"],
     }),
 
@@ -68,7 +84,10 @@ export const placementTestApi = baseApi.injectEndpoints({
     }),
 
     adjustLevel: builder.mutation({
-      queryFn: (args) => adjustLevelMock(args),
+      queryFn: (args, api, extraOptions, baseQuery) =>
+        USE_REAL_ENGINE
+          ? adjustLevelReal(args, { baseQuery, api, extraOptions })
+          : adjustLevelMock(args),
       invalidatesTags: ["PlacementSession", "PlacementResult"],
     }),
   }),
@@ -78,8 +97,10 @@ export const placementTestApi = baseApi.injectEndpoints({
 export const {
   useCreateSessionMutation,
   useGetActiveSessionQuery,
+  useGetQuestionQuery,
   useResumeSessionMutation,
   useGetRetakeStatusQuery,
+  useGetProfileQuery,
   useSubmitTurnMutation,
   useScoreSessionMutation,
   useAdjustLevelMutation,
