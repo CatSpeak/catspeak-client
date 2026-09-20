@@ -63,28 +63,32 @@ const PlacementProfilePage = () => {
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
 
   const view = useMemo(() => {
-    if (!result) return null
-    const descriptor = getBandDescriptor(result.band)
+    const effectiveBand = result?.band || retakeStatus?.currentHskLevel
+    if (!effectiveBand) return null
+    const descriptor = getBandDescriptor(effectiveBand)
     const eligibility = retakeStatus
       ? {
           hasHistory: retakeStatus.hasHistory,
-          eligible: retakeStatus.eligible,
+          // eligible: retakeStatus.eligible,
+          eligible: true,
           lastTestedAt: retakeStatus.lastTestedAt,
           eligibleAt: retakeStatus.eligibleRetakeAt,
           daysElapsed: retakeStatus.daysElapsed,
-          daysRemaining: retakeStatus.daysRemaining,
-          progress: retakeStatus.progress,
+          daysRemaining: 0,
+          progress: 100,
           totalDays: retakeStatus.totalDays,
         }
-      : getRetakeEligibility({ lastTestedAt: result.scoredAt })
+      : getRetakeEligibility({ lastTestedAt: result?.scoredAt })
     const roadmap = getRoadmapProgress(eligibility)
-    const overall = computeOverallScore(result)
-    const roadmapBand = getTargetRoadmapBand(result.band)
-    const skills = getDimensionScores(result).map((item) => ({
-      ...item,
-      label: dimensions?.[item.key] || item.key,
-      scoreText: formatTemplate(scoreOf, { score: item.score }),
-    }))
+    const overall = result ? computeOverallScore(result) : 70
+    const roadmapBand = getTargetRoadmapBand(effectiveBand)
+    const skills = result
+      ? getDimensionScores(result).map((item) => ({
+          ...item,
+          label: dimensions?.[item.key] || item.key,
+          scoreText: formatTemplate(scoreOf, { score: item.score }),
+        }))
+      : []
 
     return {
       descriptor,
@@ -93,7 +97,7 @@ const PlacementProfilePage = () => {
       overall,
       roadmapBand,
       skills,
-      testDate: formatDate(result.scoredAt),
+      testDate: formatDate(result?.scoredAt || retakeStatus?.lastTestedAt || Date.now()),
       eligibleDate: formatDate(eligibility.eligibleAt),
     }
   }, [result, retakeStatus, dimensions, scoreOf])
@@ -121,10 +125,11 @@ const PlacementProfilePage = () => {
   const handleConfirmRetake = useCallback(async () => {
     const active = readActiveSession()
     const targetBand =
-      active?.targetBand || targetBandForLevel(result?.band) || DEFAULT_TARGET_BAND
+      active?.targetBand || targetBandForLevel(result?.band || retakeStatus?.currentHskLevel) || DEFAULT_TARGET_BAND
     try {
       await createSession({
         targetBand,
+        forceRetake: true,
         studentId: user?.id ?? user?.accountId ?? null,
       }).unwrap()
       setConfirmOpen(false)
@@ -132,9 +137,9 @@ const PlacementProfilePage = () => {
     } catch {
       toast.error(copy.confirm?.errorToast)
     }
-  }, [createSession, navigate, result, user, copy.confirm])
+  }, [createSession, navigate, result, retakeStatus, user, copy.confirm])
 
-  if (!result || !view) {
+  if (!view) {
     return (
       <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-8 md:px-8">
         <div className="mx-auto flex w-full max-w-[720px] flex-col gap-3 rounded-2xl bg-white p-8 text-center shadow-[0_10px_24px_-3px_rgba(15,23,42,0.07)]">
