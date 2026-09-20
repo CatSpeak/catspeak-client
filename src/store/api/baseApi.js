@@ -447,6 +447,7 @@ export const baseApi = createApi({
     "Storage",
     "Media",
     "InstructorProfile",
+    "LanguageRequests",
     "TeachingUpdate",
     "Locations",
     "Reels",
