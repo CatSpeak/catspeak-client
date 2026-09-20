@@ -205,6 +205,44 @@ export default {
     approvedIntroMax: "Introduction must be at most 300 characters",
     approvedPersonalInfoSaved: "Personal information updated successfully",
     approvedPersonalInfoSaveError: "Could not update personal information",
+    contactChangeEmailTitle: "Change Email",
+    contactVerifyEmailTitle: "Verify new Email",
+    contactChangePhoneTitle: "Change Phone Number",
+    contactVerifyPhoneTitle: "Verify new Phone Number",
+    contactCurrentEmail: "Current email",
+    contactNewEmail: "New email",
+    contactCurrentPhone: "Current phone number",
+    contactNewPhone: "New phone number",
+    contactEmailHelper:
+      "The new email will need to be verified before it takes effect.",
+    contactPhoneHelper:
+      "The new phone number will need to be verified before it takes effect.",
+    contactOtpSentTo: "The verification code has been sent to {value}.",
+    contactOtpLabel: "Enter verification code",
+    contactResendCountdown: "Resend code in {time}",
+    contactResend: "Resend code",
+    contactCancel: "Cancel",
+    contactSendOtp: "Send verification code",
+    contactConfirm: "Confirm",
+    contactEmailInvalid: "Email is not in a valid format",
+    contactEmailSame: "The new email must differ from the current email",
+    contactEmailExists:
+      "This email is already used by another account",
+    contactPhoneInvalid: "Phone number is invalid",
+    contactPhoneSame:
+      "The new phone number must differ from the current one",
+    contactPhoneExists:
+      "This phone number is already used by another account",
+    contactPhoneRateLimit:
+      "You can only change your phone number once per month.",
+    contactOtpRequired: "Please enter the verification code",
+    contactOtpInvalid: "The verification code is invalid or has expired",
+    contactOtpAttemptsExceeded:
+      "You have entered the code incorrectly too many times. Please request a new code.",
+    contactRequestError: "Could not send the verification code. Please try again.",
+    contactConfirmError: "Could not update the information. Please try again.",
+    contactEmailUpdated: "Email updated successfully",
+    contactPhoneUpdated: "Phone number updated successfully",
   },
   friends: {
     teacher: "Teacher",

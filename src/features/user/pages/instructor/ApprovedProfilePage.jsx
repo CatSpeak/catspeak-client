@@ -1,4 +1,4 @@
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   useGetInstructorProfileQuery,
@@ -10,10 +10,15 @@ import PersonalInfoCard from "@/features/user/components/instructor/approved/Per
 import VerificationCard from "@/features/user/components/instructor/approved/VerificationCard"
 import LanguagesCard from "@/features/user/components/instructor/approved/LanguagesCard"
 import VideoCard from "@/features/user/components/instructor/approved/VideoCard"
+import ChangeEmailDrawer from "@/features/user/components/instructor/approved/contact/ChangeEmailDrawer"
+import ChangePhoneDrawer from "@/features/user/components/instructor/approved/contact/ChangePhoneDrawer"
+import { pick } from "@/features/user/components/instructor/approved/utils"
 
 const ApprovedProfilePage = () => {
   const { t } = useLanguage()
   const ins = t.profile?.instructor || {}
+  const [contactDrawer, setContactDrawer] = useState(null)
+  const [contactSession, setContactSession] = useState(0)
 
   const {
     data: instructorData,
@@ -47,8 +52,12 @@ const ApprovedProfilePage = () => {
   }, [bankAccountsData])
 
   const handleEditPersonalInfo = () => {}
-  const handleChangeEmail = () => {}
-  const handleChangePhone = () => {}
+  const openContactDrawer = (which) => {
+    setContactSession((session) => session + 1)
+    setContactDrawer(which)
+  }
+  const handleChangeEmail = () => openContactDrawer("email")
+  const handleChangePhone = () => openContactDrawer("phone")
   const handleChangeBank = () => {}
   const handleUpdateIdCard = () => {}
   const handleAddLanguage = () => {}
@@ -128,6 +137,21 @@ const ApprovedProfilePage = () => {
         onPlay={handlePlayVideo}
         onReplace={handleReplaceVideo}
         onRemove={handleRemoveVideo}
+      />
+
+      <ChangeEmailDrawer
+        key={`email-${contactSession}`}
+        open={contactDrawer === "email"}
+        onClose={() => setContactDrawer(null)}
+        currentEmail={pick(profile, "email", "Email")}
+        t={t}
+      />
+      <ChangePhoneDrawer
+        key={`phone-${contactSession}`}
+        open={contactDrawer === "phone"}
+        onClose={() => setContactDrawer(null)}
+        currentPhone={pick(profile, "phoneNumber", "PhoneNumber")}
+        t={t}
       />
     </div>
   )

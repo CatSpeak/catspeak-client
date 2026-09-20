@@ -47,6 +47,36 @@ export const userApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    requestEmailChangeOtp: builder.mutation({
+      query: (body) => ({
+        url: "/user-profile/email/request-otp",
+        method: "POST",
+        body,
+      }),
+    }),
+    confirmEmailChange: builder.mutation({
+      query: (body) => ({
+        url: "/user-profile/email/confirm",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["UserProfile", "InstructorProfile"],
+    }),
+    requestPhoneChangeOtp: builder.mutation({
+      query: (body) => ({
+        url: "/user-profile/phone/request-otp",
+        method: "POST",
+        body,
+      }),
+    }),
+    confirmPhoneChange: builder.mutation({
+      query: (body) => ({
+        url: "/user-profile/phone/confirm",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["UserProfile", "InstructorProfile"],
+    }),
     updateSecurityProfile: builder.mutation({
       query: (data) => {
         const body = data instanceof FormData ? data : (() => {
@@ -140,6 +170,10 @@ export const {
   useUpdateUserProfileMutation,
   useChangePasswordMutation,
   useRequestUserProfileOtpMutation,
+  useRequestEmailChangeOtpMutation,
+  useConfirmEmailChangeMutation,
+  useRequestPhoneChangeOtpMutation,
+  useConfirmPhoneChangeMutation,
   useUpdateSecurityProfileMutation,
   useUpdateMeetingAvatarMutation,
   useUpdateAvatarMutation,
