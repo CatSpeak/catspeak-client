@@ -24,6 +24,7 @@ export const createAudioTransport = ({
   let status = "connecting"
   let watchdogId = null
   let peakLevel = 0
+  let currentAudio = null
   const statusSubscribers = new Set()
 
   const setStatus = (next) => {
@@ -36,6 +37,29 @@ export const createAudioTransport = ({
     if (watchdogId != null) {
       timers.clearTimeout(watchdogId)
       watchdogId = null
+    }
+  }
+
+  const stopAudio = () => {
+    if (currentAudio) {
+      try {
+        currentAudio.pause()
+        currentAudio.currentTime = 0
+      } catch {}
+      currentAudio = null
+    }
+  }
+
+  const playAudioBase64 = (base64Data, format = "audio/wav") => {
+    stopAudio()
+    if (!base64Data || typeof Audio === "undefined") return null
+    try {
+      const audio = new Audio(`data:${format};base64,${base64Data}`)
+      currentAudio = audio
+      audio.play().catch(() => {})
+      return audio
+    } catch {
+      return null
     }
   }
 
@@ -75,13 +99,22 @@ export const createAudioTransport = ({
 
   const startListening = ({ level, onResult, onEnd, onError } = {}) => {
     stopListening()
-    recognizer = createRecognizer({ lang, level, onResult, onEnd, onError, random })
+    recognizer = createRecognizer({
+      lang,
+      level,
+      onResult,
+      onEnd,
+      onError,
+      random,
+      fallbackOnError: false,
+    })
     recognizer.start()
   }
 
   const destroy = () => {
     clearWatchdog()
     stopListening()
+    stopAudio()
     capture.destroy()
     statusSubscribers.clear()
   }
@@ -90,6 +123,7 @@ export const createAudioTransport = ({
     start,
     stop: () => {
       clearWatchdog()
+      stopAudio()
       capture.stop()
     },
     destroy,
@@ -105,10 +139,13 @@ export const createAudioTransport = ({
     startRecording: capture.startRecording,
     stopRecording: capture.stopRecording,
     getRecordingUrl: capture.getRecordingUrl,
+    getRecordedBlob: capture.getRecordedBlob,
     isRecording: capture.isRecording,
     startListening,
     stopListening,
     speak: (text, options) => speakText(text, { lang, ...options }),
     stopSpeaking: () => stopSpeak(),
+    playAudioBase64,
+    stopAudio,
   }
 }

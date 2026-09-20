@@ -104,6 +104,38 @@ export const getActiveSessionMock = async ({
   return { data: isUnfinishedSession(session) ? session : null }
 }
 
+export const getQuestionMock = async ({
+  sessionId,
+  delayMs = MOCK_LATENCY_MS,
+  read = readActiveSession,
+} = {}) => {
+  await wait(delayMs)
+  const session = read()
+  if (!session || (sessionId && session.id !== sessionId)) {
+    return {
+      error: { status: 404, data: { message: "placement_session_not_found" } },
+    }
+  }
+  const turnOrder = (session.turns?.length || 0) + 1
+  const question = selectNextQuestion({
+    targetBand: session.targetBand,
+    turns: session.turns || [],
+    order: turnOrder,
+  })
+  return {
+    data: {
+      session_id: session.id,
+      turn_index: turnOrder,
+      target_hsk_level: question?.level || 1,
+      text: question?.hanzi || "",
+      pinyin: question?.pinyin || "",
+      audio_base64: null,
+      audio_format: "audio/wav",
+      source: "bank",
+    },
+  }
+}
+
 export const resumeSessionMock = async (
   { sessionId } = {},
   {

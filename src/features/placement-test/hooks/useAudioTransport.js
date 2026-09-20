@@ -29,13 +29,51 @@ const useAudioTransport = ({ deviceId } = {}) => {
     () => transportRef.current?.stopListening(),
     [],
   )
-  const speak = useCallback((text) => transportRef.current?.speak(text), [])
+  const speak = useCallback((text, options) => transportRef.current?.speak(text, options), [])
   const stopSpeaking = useCallback(
     () => transportRef.current?.stopSpeaking(),
     [],
   )
+  const playAudioBase64 = useCallback(
+    (base64Data, format) =>
+      transportRef.current?.playAudioBase64(base64Data, format),
+    [],
+  )
+  const stopAudio = useCallback(
+    () => transportRef.current?.stopAudio(),
+    [],
+  )
+  const startRecording = useCallback(
+    () => transportRef.current?.startRecording(),
+    [],
+  )
+  const stopRecording = useCallback(
+    () => transportRef.current?.stopRecording(),
+    [],
+  )
+  const getRecordedBlob = useCallback(
+    () => transportRef.current?.getRecordedBlob(),
+    [],
+  )
+  const getRecordingUrl = useCallback(
+    () => transportRef.current?.getRecordingUrl(),
+    [],
+  )
 
-  return { level, status, startListening, stopListening, speak, stopSpeaking }
+  return {
+    level,
+    status,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    playAudioBase64,
+    stopAudio,
+    startRecording,
+    stopRecording,
+    getRecordedBlob,
+    getRecordingUrl,
+  }
 }
 
 export default useAudioTransport

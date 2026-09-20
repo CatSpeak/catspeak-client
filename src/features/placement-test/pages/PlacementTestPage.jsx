@@ -42,7 +42,12 @@ const PlacementTestPage = () => {
         studentId: user?.id ?? user?.accountId ?? null,
       }).unwrap()
       navigate(PLACEMENT_TEST_SESSION_PATH)
-    } catch {
+    } catch (err) {
+      if (err?.status === 403 && err?.data?.detail?.code === "COOLDOWN_ACTIVE") {
+        const days = err.data.detail.days_remaining || 14
+        toast.error(`Bạn cần đợi thêm ${days} ngày nữa để thi lại theo quy tắc 14 ngày Cooldown.`)
+        return
+      }
       toast.error(lifecycleCopy.errorToast)
     }
   }
