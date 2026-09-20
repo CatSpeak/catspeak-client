@@ -202,6 +202,23 @@ export const instructorApi = baseApi.injectEndpoints({
       },
       providesTags: ["HonoredInstructors"],
     }),
+
+    getInstructorCompetency: builder.query({
+      query: () => ({
+        url: "/InstructorProfile/my/competency",
+        method: "GET",
+      }),
+      providesTags: ["InstructorCompetency"],
+    }),
+
+    updateInstructorCompetency: builder.mutation({
+      query: (body) => ({
+        url: "/InstructorProfile/my/competency",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["InstructorCompetency", "InstructorProfile"],
+    }),
   }),
 })
 
@@ -220,4 +237,6 @@ export const {
   useGetInstructorLanguageLevelsQuery,
   useSubmitLanguageRequestMutation,
   useGetHonoredInstructorsQuery,
+  useGetInstructorCompetencyQuery,
+  useUpdateInstructorCompetencyMutation,
 } = instructorApi

@@ -487,6 +487,8 @@ export const baseApi = createApi({
     "BannedParticipants",
     "WaitingQueue",
     "RoomParticipants",
+    "ExploreTeachers",
+    "InstructorCompetency",
   ],
   endpoints: () => ({}),
 })
