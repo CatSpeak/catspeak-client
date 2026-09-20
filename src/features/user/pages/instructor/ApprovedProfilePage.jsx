@@ -12,6 +12,7 @@ import LanguagesCard from "@/features/user/components/instructor/approved/Langua
 import VideoCard from "@/features/user/components/instructor/approved/VideoCard"
 import ChangeEmailDrawer from "@/features/user/components/instructor/approved/contact/ChangeEmailDrawer"
 import ChangePhoneDrawer from "@/features/user/components/instructor/approved/contact/ChangePhoneDrawer"
+import BankAccountDrawer from "@/features/user/components/instructor/approved/BankAccountDrawer"
 import { pick } from "@/features/user/components/instructor/approved/utils"
 
 const ApprovedProfilePage = () => {
@@ -19,6 +20,8 @@ const ApprovedProfilePage = () => {
   const ins = t.profile?.instructor || {}
   const [contactDrawer, setContactDrawer] = useState(null)
   const [contactSession, setContactSession] = useState(0)
+  const [bankDrawerOpen, setBankDrawerOpen] = useState(false)
+  const [bankSession, setBankSession] = useState(0)
 
   const {
     data: instructorData,
@@ -58,7 +61,10 @@ const ApprovedProfilePage = () => {
   }
   const handleChangeEmail = () => openContactDrawer("email")
   const handleChangePhone = () => openContactDrawer("phone")
-  const handleChangeBank = () => {}
+  const handleChangeBank = () => {
+    setBankSession((session) => session + 1)
+    setBankDrawerOpen(true)
+  }
   const handleUpdateIdCard = () => {}
   const handleAddLanguage = () => {}
   const handleUpdateLanguage = () => {}
@@ -150,6 +156,14 @@ const ApprovedProfilePage = () => {
         key={`phone-${contactSession}`}
         open={contactDrawer === "phone"}
         onClose={() => setContactDrawer(null)}
+        currentPhone={pick(profile, "phoneNumber", "PhoneNumber")}
+        t={t}
+      />
+      <BankAccountDrawer
+        key={`bank-${bankSession}`}
+        open={bankDrawerOpen}
+        onClose={() => setBankDrawerOpen(false)}
+        currentBank={bankAccount}
         currentPhone={pick(profile, "phoneNumber", "PhoneNumber")}
         t={t}
       />

@@ -243,6 +243,41 @@ export default {
     contactConfirmError: "Could not update the information. Please try again.",
     contactEmailUpdated: "Email updated successfully",
     contactPhoneUpdated: "Phone number updated successfully",
+    bankChangeTitle: "Change bank account",
+    bankVerifyTitle: "Verify new bank account",
+    bankCurrentAccount: "Current account",
+    bankLabel: "Bank",
+    bankNewAccountNumber: "New account number",
+    bankAccountNumber: "Account number",
+    bankAccountHolder: "Account holder name",
+    bankAccountNumberPlaceholder: "Enter account number...",
+    bankSelectPlaceholder: "Select a bank",
+    bankSearchPlaceholder: "Search banks...",
+    bankCheckAccount: "Check account",
+    bankStep1Banner:
+      "The system will verify the account details before sending you a verification code.",
+    bankStep2Banner:
+      "The new account details have been verified with the bank. Please review the information below carefully before sending the verification code.",
+    bankVerifiedInfo: "New account details (verified)",
+    bankCurrentBadge: "Current",
+    bankConsent:
+      "I confirm that the account details above are correct and agree to use this account to receive payments from Cat Speak.",
+    bankOtpWillSendTo:
+      "The verification code (OTP) will be sent to your verified phone number:",
+    bankOtpHelper:
+      "The verification code has been sent to your current verified phone number by default.",
+    bankOtpInputLabel: "Enter verification code (OTP)",
+    bankAccountNumberInvalid: "The account number must be 6 to 20 digits",
+    bankNoAccount: "No bank account yet",
+    bankOtpRequired: "Please enter the verification code",
+    bankOtpInvalid: "The verification code is invalid or has expired",
+    bankOtpAttemptsExceeded:
+      "You have entered the code incorrectly too many times. Please request a new code.",
+    bankVerifyError:
+      "We could not verify the bank account. Please check the account number and try again.",
+    bankRequestError: "Could not send the verification code. Please try again.",
+    bankConfirmError: "Could not update the bank account. Please try again.",
+    bankUpdated: "Bank account updated successfully",
   },
   friends: {
     teacher: "Teacher",
