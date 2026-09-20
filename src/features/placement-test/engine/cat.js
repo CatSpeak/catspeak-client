@@ -57,10 +57,23 @@ const pickQuestion = (level, turns, random) => {
   return candidates[index]
 }
 
+/**
+ * Chọn câu hỏi tiếp theo.
+ *
+ * `level` là tuỳ chọn, và đó là điểm nối với động cơ phía máy chủ: truyền vào thì
+ * dùng nguyên, không truyền thì tự ước lượng trong client như trước.
+ *
+ * Vì sao nên truyền: ước lượng trong client là `±1 mỗi lượt` dựa trên
+ * `evaluateTurn`, tức là "có khớp một từ hoặc một mẫu ngữ pháp ở cấp đang hỏi
+ * không". Động cơ máy chủ chọn cấp từ sàn ngữ pháp, trần bằng chứng và AHI của
+ * cả phiên — cùng bộ số dùng để ra cấp cuối. Hai cách chọn khác nhau nghĩa là
+ * bài thi hỏi theo một thang còn chấm theo một thang khác.
+ */
 export const selectNextQuestion = ({
   targetBand,
   turns = [],
   order,
+  level: forcedLevel,
   random = Math.random,
 } = {}) => {
   const nextOrder = Number.isFinite(order)
@@ -72,7 +85,15 @@ export const selectNextQuestion = ({
   let level
   let role
 
-  if (nextOrder <= INITIAL_TURNS) {
+  if (Number.isFinite(Number(forcedLevel))) {
+    level = clampHsk(forcedLevel)
+    role =
+      nextOrder <= INITIAL_TURNS
+        ? CAT_ROLES.INITIAL
+        : nextOrder === TOTAL_TURNS - 1
+          ? CAT_ROLES.BOUNDARY
+          : CAT_ROLES.CEILING
+  } else if (nextOrder <= INITIAL_TURNS) {
     level = runningEstimate(startLevel, turns)
     role = CAT_ROLES.INITIAL
   } else if (nextOrder === TOTAL_TURNS - 1) {

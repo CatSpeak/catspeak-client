@@ -394,6 +394,9 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.includes("speaking-analytics") ||
         lowerUrl.includes("speaking-history") ||
         lowerUrl.includes("room-chat") ||
+        // TASK-AI-14: dong co cham diem bai kiem tra dau vao nam trong ai-api.
+        lowerUrl.startsWith("/placement/") ||
+        lowerUrl.startsWith("placement/") ||
         lowerUrl.startsWith("/ai/") ||
         lowerUrl.startsWith("ai/") ||
         lowerUrl.startsWith("/v1/ai/") ||
