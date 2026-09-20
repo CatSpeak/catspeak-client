@@ -173,6 +173,24 @@ export const instructorApi = baseApi.injectEndpoints({
       invalidatesTags: ["InstructorProfile"],
     }),
 
+    replaceInstructorIntroVideo: builder.mutation({
+      query: (formData) => ({
+        url: "/InstructorProfile/my/intro-video",
+        method: "PUT",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["InstructorProfile"],
+    }),
+
+    removeInstructorIntroVideo: builder.mutation({
+      query: () => ({
+        url: "/InstructorProfile/my/intro-video",
+        method: "DELETE",
+      }),
+      invalidatesTags: ["InstructorProfile"],
+    }),
+
     getPendingTeachingUpdate: builder.query({
       query: () => ({
         url: "/InstructorProfile/my/teaching-update",
@@ -228,6 +246,8 @@ export const {
   useUpdateInstructorProfileMutation,
   useUpdateInstructorBasicInfoMutation,
   useUpdateInstructorIdCardMutation,
+  useReplaceInstructorIntroVideoMutation,
+  useRemoveInstructorIntroVideoMutation,
   useGetPendingTeachingUpdateQuery,
   useSubmitTeachingUpdateMutation,
   useCancelTeachingUpdateMutation,
