@@ -21,6 +21,9 @@ import IdCardDrawer from "@/features/user/components/instructor/approved/IdCardD
 import AddLanguageDrawer from "@/features/user/components/instructor/approved/AddLanguageDrawer"
 import UpdateLanguageDrawer from "@/features/user/components/instructor/approved/UpdateLanguageDrawer"
 import RequestDetailDrawer from "@/features/user/components/instructor/approved/RequestDetailDrawer"
+import CompetencyCard from "@/features/user/components/instructor/approved/CompetencyCard"
+import CompetencyDrawer from "@/features/user/components/instructor/approved/CompetencyDrawer"
+import { useGetInstructorCompetencyQuery } from "@/store/api/instructorApi"
 import {
   fileNameFromUrl,
   normalizeLanguagesTeach,
@@ -77,6 +80,8 @@ const ApprovedProfilePage = () => {
   const [videoViewerOpen, setVideoViewerOpen] = useState(false)
   const [confirmRemoveVideo, setConfirmRemoveVideo] = useState(false)
   const [videoMeta, setVideoMeta] = useState(null)
+  const [competencyDrawerOpen, setCompetencyDrawerOpen] = useState(false)
+  const [competencySession, setCompetencySession] = useState(0)
   const videoInputRef = useRef(null)
 
   const [replaceIntroVideo] = useReplaceInstructorIntroVideoMutation()
@@ -98,6 +103,7 @@ const ApprovedProfilePage = () => {
   } = useGetLanguageRequestsQuery()
 
   const { data: bankAccountsData } = useGetInstructorBankAccountsQuery()
+  const { data: competencyData } = useGetInstructorCompetencyQuery()
 
   const profile = useMemo(
     () => instructorData?.data || instructorData || null,
@@ -179,6 +185,10 @@ const ApprovedProfilePage = () => {
   const handlePlayVideo = () => setVideoViewerOpen(true)
   const handleReplaceVideo = () => videoInputRef.current?.click()
   const handleRemoveVideo = () => setConfirmRemoveVideo(true)
+  const handleEditCompetency = () => {
+    setCompetencySession((session) => session + 1)
+    setCompetencyDrawerOpen(true)
+  }
 
   const handleVideoFileChange = async (event) => {
     const file = event.target.files?.[0]
@@ -305,6 +315,21 @@ const ApprovedProfilePage = () => {
         onPlay={handlePlayVideo}
         onReplace={handleReplaceVideo}
         onRemove={handleRemoveVideo}
+      />
+
+      <CompetencyCard
+        competencyData={competencyData}
+        profile={profile}
+        t={t}
+        onEdit={handleEditCompetency}
+      />
+
+      <CompetencyDrawer
+        key={`competency-${competencySession}`}
+        open={competencyDrawerOpen}
+        onClose={() => setCompetencyDrawerOpen(false)}
+        competencyData={competencyData}
+        t={t}
       />
 
       <ChangeEmailDrawer
