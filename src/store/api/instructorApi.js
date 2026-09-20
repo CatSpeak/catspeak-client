@@ -74,55 +74,6 @@ export function buildInstructorFormData({
   return fd
 }
 
-/**
- * Build a FormData object with teaching-only fields (Approved-teacher updates).
- * No personal fields, no OTP — the live profile keeps serving meanwhile.
- */
-export function buildTeachingFormData({
-  languagesTeach,
-  nativeLanguage,
-  introduction,
-  credentials,
-  introVideo,
-  introVideoUrl,
-  removeIntroVideo,
-}) {
-  const fd = new FormData()
-
-  if (nativeLanguage) fd.append("NativeLanguage", nativeLanguage)
-  if (introduction) fd.append("Introduction", introduction)
-
-  if (languagesTeach) {
-    fd.append(
-      "LanguagesTeach",
-      typeof languagesTeach === "string"
-        ? languagesTeach
-        : JSON.stringify(languagesTeach),
-    )
-  }
-
-  // Credentials: keep existing URLs + append newly selected files.
-  if (Array.isArray(credentials)) {
-    let sentUrlCount = 0
-    credentials.forEach((item) => {
-      if (item instanceof File) fd.append("Credentials", item)
-      else if (typeof item === "string" && item) {
-        fd.append("CredentialUrls", item)
-        sentUrlCount += 1
-      }
-    })
-    // Signal an explicitly-empty list (teacher removed every certificate).
-    if (sentUrlCount === 0) fd.append("CredentialUrls", "")
-  }
-
-  if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
-  else if (typeof introVideo === "string" && introVideo) fd.append("IntroVideoUrl", introVideo)
-  else if (typeof introVideoUrl === "string" && introVideoUrl) fd.append("IntroVideoUrl", introVideoUrl)
-  if (removeIntroVideo === true) fd.append("RemoveIntroVideo", "true")
-
-  return fd
-}
-
 export const instructorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getInstructorProfile: builder.query({
@@ -191,38 +142,28 @@ export const instructorApi = baseApi.injectEndpoints({
       invalidatesTags: ["InstructorProfile"],
     }),
 
-    getPendingTeachingUpdate: builder.query({
-      query: () => ({
-        url: "/InstructorProfile/my/teaching-update",
-        method: "GET",
-      }),
-      providesTags: ["TeachingUpdate"],
-    }),
-
-    submitTeachingUpdate: builder.mutation({
-      query: (data) => ({
-        url: "/InstructorProfile/my/teaching",
-        method: "PUT",
-        body: data instanceof FormData ? data : buildTeachingFormData(data),
-        formData: true,
-      }),
-      invalidatesTags: ["TeachingUpdate"],
-    }),
-
-    cancelTeachingUpdate: builder.mutation({
-      query: () => ({
-        url: "/InstructorProfile/my/teaching-update",
-        method: "DELETE",
-      }),
-      invalidatesTags: ["TeachingUpdate"],
-    }),
-
     getLanguageRequests: builder.query({
       query: () => ({
         url: "/InstructorProfile/language-requests",
         method: "GET",
       }),
       providesTags: ["LanguageRequests"],
+    }),
+
+    getLanguageRequestDetail: builder.query({
+      query: (id) => ({
+        url: `/InstructorProfile/language-requests/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["LanguageRequests"],
+    }),
+
+    deleteLanguageRequest: builder.mutation({
+      query: (id) => ({
+        url: `/InstructorProfile/language-requests/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["LanguageRequests"],
     }),
 
     getInstructorLanguages: builder.query({
@@ -272,10 +213,9 @@ export const {
   useUpdateInstructorIdCardMutation,
   useReplaceInstructorIntroVideoMutation,
   useRemoveInstructorIntroVideoMutation,
-  useGetPendingTeachingUpdateQuery,
-  useSubmitTeachingUpdateMutation,
-  useCancelTeachingUpdateMutation,
   useGetLanguageRequestsQuery,
+  useGetLanguageRequestDetailQuery,
+  useDeleteLanguageRequestMutation,
   useGetInstructorLanguagesQuery,
   useGetInstructorLanguageLevelsQuery,
   useSubmitLanguageRequestMutation,

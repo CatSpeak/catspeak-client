@@ -68,6 +68,7 @@ const CredentialCell = ({ url }) =>
 const LanguagesCard = ({
   languagesTeach,
   requests,
+  currentCredentialUrl,
   t,
   isLoading = false,
   isError = false,
@@ -202,7 +203,7 @@ const LanguagesCard = ({
                       {live.level || "—"}
                     </div>
                     <div className="pr-3">
-                      <CredentialCell url={null} />
+                      <CredentialCell url={currentCredentialUrl} />
                     </div>
                     <div>
                       <StatusBadge status="Approved" ins={ins} />

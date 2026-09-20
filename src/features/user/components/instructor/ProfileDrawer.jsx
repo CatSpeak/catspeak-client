@@ -139,13 +139,15 @@ const DrawerContent = ({
         <div className="flex-1 overflow-y-auto p-6">{children}</div>
 
         <div className="flex h-[101px] shrink-0 items-center gap-4 border-t border-[#E2E2E2] px-6">
-          <button
-            type="button"
-            onClick={onSecondary}
-            className="h-[50px] w-[130px] shrink-0 rounded-[7px] border border-[#D0D5DD] bg-white text-xs font-semibold text-[#101828] transition-colors hover:bg-[#F9FAFB]"
-          >
-            {secondaryLabel}
-          </button>
+          {secondaryLabel ? (
+            <button
+              type="button"
+              onClick={onSecondary}
+              className="h-[50px] w-[130px] shrink-0 rounded-[7px] border border-[#D0D5DD] bg-white text-xs font-semibold text-[#101828] transition-colors hover:bg-[#F9FAFB]"
+            >
+              {secondaryLabel}
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={onPrimary}

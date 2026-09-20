@@ -324,6 +324,23 @@ export default {
     languageCertificateFileType: "Only PDF files are accepted",
     languageCertificateFileSize: "The certificate must not exceed 5MB",
     languageCertificateFileInvalid: "The PDF file is invalid or unreadable",
+    approvedNativeLanguageRequired: "Please select your native language",
+    approvedRequestDetailTitle: "Update request details",
+    approvedRequestCurrentInfo: "Current information",
+    approvedRequestWantedInfo: "Request information",
+    approvedRequestNewLevel: "New level",
+    approvedRequestNewCredential: "New certificate",
+    approvedRequestPendingInfo:
+      "Your request is awaiting administrator review. Your currently approved information remains in effect.",
+    approvedRequestRejectReason: "Rejection reason",
+    approvedRequestDelete: "Delete request",
+    approvedRequestClose: "Close",
+    approvedRequestDeleteTitle: "Delete request",
+    approvedRequestDeleteMessage:
+      "Are you sure you want to delete this request? This action cannot be undone.",
+    approvedRequestDeleteConfirm: "Delete",
+    approvedRequestDeleted: "Request deleted",
+    approvedRequestDeleteError: "Could not delete the request. Please try again.",
   },
   friends: {
     teacher: "Teacher",
