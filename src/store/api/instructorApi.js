@@ -180,6 +180,14 @@ export const instructorApi = baseApi.injectEndpoints({
       invalidatesTags: ["TeachingUpdate"],
     }),
 
+    getLanguageRequests: builder.query({
+      query: () => ({
+        url: "/InstructorProfile/language-requests",
+        method: "GET",
+      }),
+      providesTags: ["LanguageRequests"],
+    }),
+
     getHonoredInstructors: builder.query({
       query: (params) => {
         const limit = typeof params === "number" ? params : params?.limit
@@ -202,5 +210,6 @@ export const {
   useGetPendingTeachingUpdateQuery,
   useSubmitTeachingUpdateMutation,
   useCancelTeachingUpdateMutation,
+  useGetLanguageRequestsQuery,
   useGetHonoredInstructorsQuery,
 } = instructorApi
