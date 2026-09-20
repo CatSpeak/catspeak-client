@@ -18,6 +18,7 @@ import {
 import MentionPopover from "./MentionPopover"
 import { parseMetadata } from "@/features/video-call/hooks/useParticipantList"
 import { isNonHumanParticipant } from "@/features/video-call/utils/participantIdentity"
+import { useMaskTextMutation } from "@/store/api/moderationApi"
 
 const ChatInput = ({
   onSendMessage,
@@ -332,6 +333,12 @@ const ChatInput = ({
     }
   }, [isHost, currentRoomId])
 
+  // [Moderation] Gọi thẳng hook thay vì `maskBody` trong shared/utils/moderation.js:
+  // `maskBody` cần đối tượng `api` của RTK Query, chỉ có trong `queryFn` của một
+  // endpoint. Tin chat phòng meet không đi qua endpoint nào — nó đi thẳng vào data
+  // channel của LiveKit — nên ở đây hook là đường duy nhất.
+  const [maskText] = useMaskTextMutation()
+
   const currentInputText = (message || editableRef.current?.innerText || "").replace(/\u00a0/g, " ").trim()
   const hasContent = currentInputText.length > 0
 
@@ -371,8 +378,32 @@ const ChatInput = ({
     }
 
     // Normal chat message
+    //
+    // [Moderation] Che ★ TRƯỚC khi đẩy vào data channel của LiveKit.
+    //
+    // Tin chat phòng meet đi client -> LiveKit -> client, không qua backend, nên
+    // không có chỗ nào phía server chen kiểm duyệt vào được. Endpoint
+    // POST /api/moderation/text bên catspeak-api (context "meet-chat") sinh ra
+    // đúng cho tình huống này, nhưng từ lúc có nó tới giờ client chưa gọi lần nào.
+    //
+    // Phải che ở ĐÂY chứ không phải ở useChatManager: tin nhắn trả lời được bọc
+    // JSON ({isReply, text, replyTo}) ở tầng trên, che cả chuỗi JSON sẽ làm hỏng
+    // nó. Chỗ này `text` còn là nguyên văn người dùng gõ.
+    //
+    // Fail-open: API lỗi, chậm hay chưa đăng nhập thì gửi nguyên văn. Không ai bị
+    // chặn gửi tin vì một dịch vụ phụ trợ hỏng — cùng nguyên tắc với `maskBody`
+    // trong shared/utils/moderation.js.
+    let outgoing = text
     try {
-      await onSendMessage(text)
+      const res = await maskText({ text }).unwrap()
+      // Backend bọc phản hồi trong ApiResponse ({ data: {...} }); đọc cả hai dạng.
+      outgoing = res?.data?.masked ?? res?.masked ?? text
+    } catch {
+      // giữ nguyên văn
+    }
+
+    try {
+      await onSendMessage(outgoing)
     } catch (err) {
       console.error("Failed to send message:", err)
     }
@@ -387,6 +418,7 @@ const ChatInput = ({
   }, [
     message,
     onSendMessage,
+    maskText,
     sendAiMessage,
     isAiBlocked,
     onAiMessageSent,
