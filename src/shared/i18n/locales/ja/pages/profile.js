@@ -174,6 +174,18 @@ export default {
     approvedNoVideo: "紹介動画がありません",
     approvedOptions: "オプション",
     approvedReplaceVideo: "動画を差し替え",
+    approvedSaveChanges: "変更を保存",
+    approvedCancelEdit: "キャンセル",
+    approvedFullNameRequired: "氏名を入力してください",
+    approvedFullNameLength: "氏名は2〜100文字で入力してください",
+    approvedFullNameInvalid:
+      "氏名には文字、スペース、ハイフン、アポストロフィのみ使用できます",
+    approvedNationalityRequired: "国籍を選択してください",
+    approvedAddressRequired: "住所を入力してください",
+    approvedAddressLength: "住所は5〜255文字で入力してください",
+    approvedIntroMax: "自己紹介は300文字以内で入力してください",
+    approvedPersonalInfoSaved: "個人情報を更新しました",
+    approvedPersonalInfoSaveError: "個人情報を更新できませんでした",
   },
   friends: {
     teacher: "先生",
