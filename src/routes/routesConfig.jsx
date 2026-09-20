@@ -103,6 +103,9 @@ const MyCoursesPage = lazy(
 const ExploreCoursesPage = lazy(
   () => import("@/features/courses/pages/ExploreCoursesPage"),
 );
+const TeacherPublicProfilePage = lazy(
+  () => import("@/features/courses/pages/TeacherPublicProfilePage"),
+);
 const CreateCoursePage = lazy(
   () => import("@/features/courses/pages/CreateCoursePage"),
 );
@@ -232,6 +235,22 @@ const routesConfig = [
             element: (
               <LazyRoute>
                 <ExploreCoursesPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore/teachers/:slugOrId",
+            element: (
+              <LazyRoute>
+                <TeacherPublicProfilePage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/teachers/:slugOrId",
+            element: (
+              <LazyRoute>
+                <TeacherPublicProfilePage />
               </LazyRoute>
             ),
           },
@@ -452,6 +471,22 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <ExploreCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore/teachers/:slugOrId",
+                element: (
+                  <LazyRoute>
+                    <TeacherPublicProfilePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/teachers/:slugOrId",
+                element: (
+                  <LazyRoute>
+                    <TeacherPublicProfilePage />
                   </LazyRoute>
                 ),
               },

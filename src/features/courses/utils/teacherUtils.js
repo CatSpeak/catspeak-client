@@ -52,3 +52,49 @@ export const formatRating = (rating) => {
   const val = Number(rating)
   return val.toFixed(1)
 }
+
+/**
+ * BR-EX-GV-08: Màu trạng thái số chỗ còn lại
+ * - Còn > 5 chỗ: Xanh lá ("green", #10B981)
+ * - Còn 1 - 5 chỗ: Vàng cam ("yellow", #F59E0B)
+ * - Hết chỗ (0): Đỏ ("red", #DC2626)
+ */
+export const getSlotStatusColor = (remainingSlots) => {
+  const slots = Number(remainingSlots) || 0
+  if (slots > 5) {
+    return {
+      status: "green",
+      textColor: "text-emerald-700",
+      bgColor: "bg-emerald-50",
+      borderColor: "border-emerald-200",
+      hex: "#10B981",
+    }
+  }
+  if (slots >= 1) {
+    return {
+      status: "yellow",
+      textColor: "text-amber-700",
+      bgColor: "bg-amber-50",
+      borderColor: "border-amber-200",
+      hex: "#F59E0B",
+    }
+  }
+  return {
+    status: "red",
+    textColor: "text-red-700",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
+    hex: "#DC2626",
+  }
+}
+
+/**
+ * Format giá tiền VNĐ (ví dụ 900000 -> "900.000đ")
+ */
+export const formatTeacherPrice = (price) => {
+  if (price == null || isNaN(Number(price))) return "0đ"
+  const val = Number(price)
+  if (val === 0) return "Miễn phí"
+  return `${val.toLocaleString("vi-VN")}đ`
+}
+
