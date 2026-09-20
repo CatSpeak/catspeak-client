@@ -1,4 +1,4 @@
-import { Check, Languages, RotateCcw } from "lucide-react"
+import { Check, Languages, RotateCcw, Square, Volume2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   CONVERSATION_NOTICE,
@@ -6,17 +6,26 @@ import {
 } from "../../constants/conversation"
 import { formatTemplate } from "../../utils/format"
 
-const statusFor = (copy, { phase, notice, transcript }) => {
-  if (notice === CONVERSATION_NOTICE.NO_HEARING) {
-    return { label: copy.statusNoAudio, tone: "amber" }
-  }
+const statusFor = (
+  copy,
+  { phase, notice, transcript, isRecording, hasRecorded },
+) => {
   if (phase === CONVERSATION_PHASE.ANALYZING) {
-    return { label: copy.statusSubmitted, tone: "green" }
+    return { label: copy.statusSubmitted || "Đã nộp bài", tone: "green" }
+  }
+  if (isRecording) {
+    return { label: "● Đang ghi âm...", tone: "green" }
+  }
+  if (hasRecorded) {
+    return { label: "✓ Đã ghi âm", tone: "green" }
+  }
+  if (notice === CONVERSATION_NOTICE.NO_HEARING && isRecording) {
+    return { label: copy.statusNoAudio || "Chưa có âm thanh", tone: "amber" }
   }
   if (transcript) {
-    return { label: copy.statusRecognized, tone: "green" }
+    return { label: copy.statusRecognized || "● Nhận diện rõ", tone: "green" }
   }
-  return { label: copy.statusWaiting, tone: "slate" }
+  return { label: copy.statusWaiting || "Sẵn sàng", tone: "slate" }
 }
 
 const STATUS_TONES = {
@@ -47,17 +56,32 @@ const TranscriptCards = ({
   transcript,
   phase,
   notice,
+  isRecording = false,
+  hasRecorded = false,
+  isPlayingUserAudio = false,
+  onPlayUserAudio,
+  onStopUserAudio,
   showHanzi,
   showPinyin,
   onToggleHanzi,
   onTogglePinyin,
   onReplay,
 }) => {
-  const status = statusFor(copy, { phase, notice, transcript })
+  const status = statusFor(copy, {
+    phase,
+    notice,
+    transcript,
+    isRecording,
+    hasRecorded,
+  })
   const subline =
-    phase === CONVERSATION_PHASE.ANALYZING || transcript
+    phase === CONVERSATION_PHASE.ANALYZING
       ? copy.analyzingSubline
-      : copy.waitingSubline
+      : isRecording
+        ? "Nói to và rõ ràng vào micro..."
+        : hasRecorded
+          ? "Đã thu âm câu trả lời. Bạn có thể bấm 'Hoàn tất câu trả lời' để nộp."
+          : copy.waitingSubline
 
   return (
     <div className="grid w-full gap-3 md:grid-cols-2">
@@ -108,14 +132,40 @@ const TranscriptCards = ({
             <Check size={13} strokeWidth={2} />
             {copy.youLabel}
           </span>
-          <span
-            className={cn(
-              "text-[11px] font-medium",
-              STATUS_TONES[status.tone],
+          <div className="flex items-center gap-2">
+            {hasRecorded && !isRecording && onPlayUserAudio && (
+              <button
+                type="button"
+                onClick={isPlayingUserAudio ? onStopUserAudio : onPlayUserAudio}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold transition-colors",
+                  isPlayingUserAudio
+                    ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                    : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
+                )}
+              >
+                {isPlayingUserAudio ? (
+                  <>
+                    <Square size={11} className="fill-emerald-700 text-emerald-700" />
+                    {copy.stopUserAudio || "Dừng phát"}
+                  </>
+                ) : (
+                  <>
+                    <Volume2 size={12} strokeWidth={2} className="text-emerald-600" />
+                    {copy.playUserAudio || "Nghe lại bản thu"}
+                  </>
+                )}
+              </button>
             )}
-          >
-            {status.label}
-          </span>
+            <span
+              className={cn(
+                "text-[11px] font-medium",
+                STATUS_TONES[status.tone],
+              )}
+            >
+              {status.label}
+            </span>
+          </div>
         </div>
 
         <p

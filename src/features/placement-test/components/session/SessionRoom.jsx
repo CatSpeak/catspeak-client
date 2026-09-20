@@ -32,13 +32,32 @@ const SessionRoom = () => {
   }
 
   const analyzing = loop.phase === CONVERSATION_PHASE.ANALYZING
-  const notHearing = loop.notice === CONVERSATION_NOTICE.NO_HEARING
-  const tone = analyzing ? "analyzing" : notHearing ? "notHearing" : "listening"
-  const statusText = analyzing
-    ? copy.aiAnalyzing
-    : notHearing
-      ? copy.aiNotHearing
-      : copy.aiListening
+  const notHearing =
+    loop.notice === CONVERSATION_NOTICE.NO_HEARING && loop.isRecording
+  const isRecording = loop.isRecording
+  const hasRecorded = loop.hasRecorded
+
+  let tone = "listening"
+  let statusText = copy.aiListening
+
+  if (analyzing) {
+    tone = "analyzing"
+    statusText = copy.aiAnalyzing
+  } else if (notHearing) {
+    tone = "notHearing"
+    statusText = copy.aiNotHearing
+  } else if (isRecording) {
+    tone = "listening"
+    statusText = copy.aiListening || "AI đang lắng nghe giọng nói của bạn..."
+  } else if (hasRecorded) {
+    tone = "analyzing"
+    statusText =
+      "Đã thu âm câu trả lời. Bạn có thể kiểm tra, thu âm lại hoặc bấm hoàn tất để nộp."
+  } else {
+    tone = "listening"
+    statusText =
+      "Hãy lắng nghe câu hỏi và nhấn biểu tượng Micro để bắt đầu trả lời."
+  }
 
   return (
     <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-6 md:px-8">
@@ -63,6 +82,11 @@ const SessionRoom = () => {
             transcript={loop.transcript}
             phase={loop.phase}
             notice={loop.notice}
+            isRecording={loop.isRecording}
+            hasRecorded={loop.hasRecorded}
+            isPlayingUserAudio={loop.isPlayingUserAudio}
+            onPlayUserAudio={loop.handlePlayUserAudio}
+            onStopUserAudio={loop.handleStopUserAudio}
             showHanzi={loop.showHanzi}
             showPinyin={loop.showPinyin}
             onToggleHanzi={loop.toggleHanzi}
@@ -73,8 +97,17 @@ const SessionRoom = () => {
             copy={copy}
             phase={loop.phase}
             notice={loop.notice}
+            isRecording={loop.isRecording}
+            hasRecorded={loop.hasRecorded}
+            recordedMs={loop.recordedMs}
             remainingMs={loop.remainingMs}
+            maxDurationMs={loop.maxDurationMs}
             canSkip={loop.canSkip}
+            isPlayingUserAudio={loop.isPlayingUserAudio}
+            onPlayUserAudio={loop.handlePlayUserAudio}
+            onStopUserAudio={loop.handleStopUserAudio}
+            onToggleRecord={loop.handleToggleRecord}
+            onReRecord={loop.handleReRecord}
             onSubmit={loop.handleSubmit}
             onSkip={loop.handleSkip}
           />
