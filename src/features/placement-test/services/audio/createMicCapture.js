@@ -9,6 +9,7 @@ export const createMicCapture = ({ deviceId } = {}) => {
   let recorder = null
   let chunks = []
   let recordingUrl = null
+  let recordedBlob = null
   let frameId = null
   let sampleBuffer = null
   let level = 0
@@ -59,9 +60,16 @@ export const createMicCapture = ({ deviceId } = {}) => {
     }
   }
 
+  const isStreamActive = () =>
+    Boolean(
+      stream &&
+        stream.getAudioTracks().length > 0 &&
+        stream.getAudioTracks().some((t) => t.readyState === "live" && t.enabled),
+    )
+
   const start = async () => {
     if (destroyed) return { ok: false, error: "destroyed" }
-    if (stream) return { ok: true }
+    if (isStreamActive()) return { ok: true }
     if (!isSupported()) return { ok: false, error: "unsupported" }
 
     try {
@@ -121,15 +129,36 @@ export const createMicCapture = ({ deviceId } = {}) => {
     return () => levelSubscribers.delete(subscriber)
   }
 
-  const startRecording = () => {
-    if (!stream || typeof MediaRecorder === "undefined") return false
+  const startRecording = async () => {
+    if (destroyed) return false
+    if (!isStreamActive()) {
+      const startResult = await start()
+      if (!startResult.ok || !stream) {
+        return false
+      }
+    }
+    if (typeof MediaRecorder === "undefined") return false
+
     try {
       chunks = []
-      recorder = new MediaRecorder(stream)
+      recordedBlob = null
+
+      let options = {}
+      if (typeof MediaRecorder.isTypeSupported === "function") {
+        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+          options = { mimeType: "audio/webm;codecs=opus" }
+        } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+          options = { mimeType: "audio/webm" }
+        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          options = { mimeType: "audio/mp4" }
+        }
+      }
+
+      recorder = new MediaRecorder(stream, options)
       recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) chunks.push(event.data)
       }
-      recorder.start()
+      recorder.start(100)
       return true
     } catch {
       recorder = null
@@ -145,9 +174,9 @@ export const createMicCapture = ({ deviceId } = {}) => {
       }
       recorder.onstop = () => {
         const type = recorder?.mimeType || "audio/webm"
-        const blob = new Blob(chunks, { type })
+        recordedBlob = new Blob(chunks, { type })
         if (recordingUrl) URL.revokeObjectURL(recordingUrl)
-        recordingUrl = URL.createObjectURL(blob)
+        recordingUrl = URL.createObjectURL(recordedBlob)
         resolve(recordingUrl)
       }
       try {
@@ -158,6 +187,7 @@ export const createMicCapture = ({ deviceId } = {}) => {
     })
 
   const getRecordingUrl = () => recordingUrl
+  const getRecordedBlob = () => recordedBlob
 
   const destroy = () => {
     destroyed = true
@@ -170,6 +200,7 @@ export const createMicCapture = ({ deviceId } = {}) => {
     sourceNode = null
     recorder = null
     chunks = []
+    recordedBlob = null
     if (recordingUrl) {
       URL.revokeObjectURL(recordingUrl)
       recordingUrl = null
@@ -185,6 +216,7 @@ export const createMicCapture = ({ deviceId } = {}) => {
     startRecording,
     stopRecording,
     getRecordingUrl,
+    getRecordedBlob,
     subscribeLevel,
     isRecording: () => Boolean(recorder && recorder.state === "recording"),
     destroy,

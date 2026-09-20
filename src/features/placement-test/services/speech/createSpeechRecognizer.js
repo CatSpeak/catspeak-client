@@ -125,7 +125,7 @@ export const createSpeechRecognizer = ({
     try {
       recognition = new Ctor()
       recognition.lang = lang
-      recognition.continuous = false
+      recognition.continuous = true
       recognition.interimResults = true
       recognition.onresult = handleResult
       recognition.onerror = handleError
