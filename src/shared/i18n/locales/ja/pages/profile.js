@@ -258,6 +258,22 @@ export default {
     bankConfirmError:
       "銀行口座を更新できませんでした。もう一度お試しください。",
     bankUpdated: "銀行口座を更新しました",
+    idCardDrawerTitle: "IDカードの更新",
+    idCardCurrentInfo: "現在の情報",
+    idCardWantedInfo: "更新する情報",
+    idCardFrontNew: "新しい表面",
+    idCardBackNew: "新しい裏面",
+    idCardDropHint: "ドラッグ＆ドロップまたは",
+    idCardChooseFile: "ファイルを選択",
+    idCardConstraint: "JPG、PNG 最大5MB",
+    idCardSubmit: "認証を送信",
+    idCardUpdatedNote: "画像を更新しました",
+    idCardUpdatedToast: "IDカード画像を更新しました",
+    idCardUpdateError:
+      "IDカード画像を更新できませんでした。もう一度お試しください。",
+    idCardFileType: "JPG、PNG、WEBP 画像のみ対応しています",
+    idCardFileSize: "画像は5MBを超えることはできません",
+    idCardFileInvalid: "画像ファイルが無効か読み取れません",
   },
   friends: {
     teacher: "先生",

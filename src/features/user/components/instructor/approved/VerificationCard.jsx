@@ -47,6 +47,7 @@ const VerificationCard = ({
   onChangePhone,
   onChangeBank,
   onUpdateIdCard,
+  showIdCardUpdated = false,
 }) => {
   const ins = t.profile?.instructor || {}
 
@@ -94,14 +95,21 @@ const VerificationCard = ({
         <span className="text-[13px] font-semibold text-[#101828]">
           {ins.idCard || "Căn cước công dân"}
         </span>
-        <button
-          type="button"
-          onClick={onUpdateIdCard}
-          className="inline-flex h-8 shrink-0 items-center gap-2 rounded-[7px] border border-[#990011] px-3 text-xs font-semibold text-[#990011] transition-colors hover:bg-[#990011]/5"
-        >
-          <CreditCard size={14} />
-          <span>{ins.approvedUpdate || "Cập nhật"}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {showIdCardUpdated && (
+            <span className="text-[11px] text-[#667085]">
+              {ins.idCardUpdatedNote || "Ảnh đã cập nhật"}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={onUpdateIdCard}
+            className="inline-flex h-8 shrink-0 items-center gap-2 rounded-[7px] border border-[#990011] px-3 text-xs font-semibold text-[#990011] transition-colors hover:bg-[#990011]/5"
+          >
+            <CreditCard size={14} />
+            <span>{ins.approvedUpdate || "Cập nhật"}</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-5">
