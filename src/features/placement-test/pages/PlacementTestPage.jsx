@@ -22,12 +22,28 @@ const PlacementTestPage = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [step, setStep] = useState(PLACEMENT_TEST_STEPS.CONSENT)
+  const [hasGrantedMic, setHasGrantedMic] = useState(false)
   const { requesting, request } = useMicrophonePermission()
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
   const entry = useSessionResume({ copy: lifecycleCopy })
 
-  const handleStart = async () => {
+  const handleRequestMic = async () => {
     const granted = await request()
+    setHasGrantedMic(granted)
+    return granted
+  }
+
+  const handlePermissionDenied = () => {
+    setStep(PLACEMENT_TEST_STEPS.PERMISSION_DENIED)
+  }
+
+  const handleStart = async () => {
+    if (hasGrantedMic) {
+      setStep(PLACEMENT_TEST_STEPS.DEVICE)
+      return
+    }
+    const granted = await request()
+    setHasGrantedMic(granted)
     setStep(
       granted
         ? PLACEMENT_TEST_STEPS.DEVICE
@@ -59,6 +75,8 @@ const PlacementTestPage = () => {
           <ConsentStep
             copy={copy}
             onStart={handleStart}
+            onRequestPermission={handleRequestMic}
+            onPermissionDenied={handlePermissionDenied}
             requesting={requesting}
           />
         )}

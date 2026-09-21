@@ -14,27 +14,39 @@ const useMicCapture = () => {
   const [recordingMs, setRecordingMs] = useState(0)
   const [sessionKey, setSessionKey] = useState(0)
 
-  useEffect(() => {
-    let cancelled = false
-    createAudioTransport()
-      .getDevices()
-      .then((list) => {
-        if (cancelled) return
+  const refreshDevices = useCallback(async () => {
+    try {
+      const list = await createAudioTransport().getDevices()
+      if (Array.isArray(list) && list.length > 0) {
         setDevices(list)
-        setDeviceId((previous) => previous || list[0]?.deviceId || "")
-      })
-      .catch(() => {})
-    return () => {
-      cancelled = true
-    }
+      }
+    } catch {}
   }, [])
+
+  useEffect(() => {
+    refreshDevices()
+    const handleDeviceChange = () => {
+      refreshDevices()
+    }
+    navigator?.mediaDevices?.addEventListener?.("devicechange", handleDeviceChange)
+    return () => {
+      navigator?.mediaDevices?.removeEventListener?.("devicechange", handleDeviceChange)
+    }
+  }, [refreshDevices])
 
   useEffect(() => {
     const transport = createAudioTransport({ deviceId: deviceId || undefined })
     transportRef.current = transport
     const unsubscribeLevel = transport.subscribeLevel(setLevel)
-    const unsubscribeStatus = transport.subscribeStatus(setStatus)
-    transport.start().catch(() => {})
+    const unsubscribeStatus = transport.subscribeStatus((nextStatus) => {
+      setStatus(nextStatus)
+      if (nextStatus === "listening" || nextStatus === "ready") {
+        refreshDevices()
+      }
+    })
+    transport.start().then(() => {
+      refreshDevices()
+    }).catch(() => {})
 
     return () => {
       unsubscribeLevel()
@@ -42,7 +54,7 @@ const useMicCapture = () => {
       transport.destroy()
       if (transportRef.current === transport) transportRef.current = null
     }
-  }, [deviceId, sessionKey])
+  }, [deviceId, sessionKey, refreshDevices])
 
   const resetLocalState = useCallback(() => {
     setLevel(0)

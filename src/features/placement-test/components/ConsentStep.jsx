@@ -12,10 +12,35 @@ const FEATURE_ICON_TONES = [
   "bg-emerald-50 text-emerald-600",
 ]
 
-const ConsentStep = ({ copy, onStart, requesting }) => {
+const ConsentStep = ({
+  copy,
+  onStart,
+  onRequestPermission,
+  onPermissionDenied,
+  requesting,
+}) => {
   const [agreed, setAgreed] = useState(false)
   const consent = copy?.consent || {}
   const features = consent.features || []
+
+  const handleCheckboxChange = async () => {
+    if (agreed) {
+      setAgreed(false)
+      return
+    }
+
+    if (onRequestPermission) {
+      const granted = await onRequestPermission()
+      if (granted) {
+        setAgreed(true)
+      } else {
+        setAgreed(false)
+        if (onPermissionDenied) onPermissionDenied()
+      }
+    } else {
+      setAgreed(true)
+    }
+  }
 
   return (
     <>
@@ -76,7 +101,7 @@ const ConsentStep = ({ copy, onStart, requesting }) => {
         <div className="flex items-center gap-3">
           <Checkbox
             checked={agreed}
-            onChange={() => setAgreed((value) => !value)}
+            onChange={handleCheckboxChange}
             aria-label={consent.checkbox}
           />
           <span className="text-xs font-semibold leading-[18px] text-[#09090B]">

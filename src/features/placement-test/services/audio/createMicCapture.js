@@ -73,8 +73,12 @@ export const createMicCapture = ({ deviceId } = {}) => {
     if (!isSupported()) return { ok: false, error: "unsupported" }
 
     try {
+      const audioConstraint =
+        !deviceId || deviceId === "default"
+          ? true
+          : { deviceId: { ideal: deviceId } }
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+        audio: audioConstraint,
       })
     } catch (error) {
       return { ok: false, error: error?.name || "getUserMedia" }
