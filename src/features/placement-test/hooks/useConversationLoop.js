@@ -718,6 +718,7 @@ const useConversationLoop = () => {
     notice,
     retryCount,
     isRecording,
+    micLevel,
     hasRecorded,
     recordedMs,
     remainingMs,

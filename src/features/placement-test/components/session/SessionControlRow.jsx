@@ -20,6 +20,7 @@ const SessionControlRow = ({
   phase,
   notice,
   isRecording = false,
+  micLevel = 0,
   hasRecorded = false,
   recordedMs = 0,
   maxDurationMs = 45000,
@@ -85,45 +86,65 @@ const SessionControlRow = ({
       </span>
 
       {/* Mic Button: Start / Stop / Re-record */}
-      <button
-        type="button"
-        onClick={onToggleRecord}
-        disabled={analyzing}
-        aria-label={
-          isRecording
-            ? copy.stopRecordCta || "Dừng ghi âm"
-            : hasRecorded
-              ? copy.reRecordCta || "Ghi âm lại"
-              : copy.startRecordCta || "Bắt đầu nói"
-        }
-        title={
-          isRecording
-            ? copy.stopRecordCta || "Dừng ghi âm"
-            : hasRecorded
-              ? copy.reRecordCta || "Ghi âm lại"
-              : copy.startRecordCta || "Bắt đầu nói"
-        }
-        className={cn(
-          "flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-white transition-all",
-          analyzing
-            ? "bg-slate-300 shadow-none cursor-not-allowed"
-            : isRecording
-              ? "bg-red-600 hover:bg-red-700 animate-pulse shadow-[0_6px_20px_rgba(220,38,38,0.5)] scale-105"
+      <div className="relative flex items-center justify-center">
+        {isRecording && (
+          <>
+            <span
+              className="absolute -inset-1.5 rounded-full bg-red-500/30 border border-red-500/50 transition-all duration-100 ease-out pointer-events-none"
+              style={{
+                transform: `scale(${1 + Math.min(0.15, (micLevel || 0) * 0.4)})`,
+                opacity: Math.max(0.6, Math.min(1.0, 0.5 + (micLevel || 0) * 0.5)),
+              }}
+            />
+            <span
+              className="absolute -inset-3 rounded-full bg-red-500/20 border border-red-400/40 transition-all duration-150 ease-out pointer-events-none"
+              style={{
+                transform: `scale(${1 + Math.min(0.25, (micLevel || 0) * 0.6)})`,
+                opacity: Math.max(0.4, Math.min(0.9, 0.3 + (micLevel || 0) * 0.6)),
+              }}
+            />
+          </>
+        )}
+        <button
+          type="button"
+          onClick={onToggleRecord}
+          disabled={analyzing}
+          aria-label={
+            isRecording
+              ? copy.stopRecordCta || "Dừng ghi âm"
               : hasRecorded
-                ? "bg-slate-700 hover:bg-slate-800 shadow-[0_4px_14px_rgba(51,65,85,0.3)]"
-                : "bg-cath-red-700 hover:bg-[#85000f] shadow-[0_6px_18px_rgba(153,0,17,0.33)] hover:scale-105",
-        )}
-      >
-        {analyzing ? (
-          <Loader2 size={22} className="animate-spin" />
-        ) : isRecording ? (
-          <Square size={20} className="fill-white" />
-        ) : hasRecorded ? (
-          <RotateCcw size={22} strokeWidth={2} />
-        ) : (
-          <Mic size={22} strokeWidth={2} />
-        )}
-      </button>
+                ? copy.reRecordCta || "Ghi âm lại"
+                : copy.startRecordCta || "Bắt đầu nói"
+          }
+          title={
+            isRecording
+              ? copy.stopRecordCta || "Dừng ghi âm"
+              : hasRecorded
+                ? copy.reRecordCta || "Ghi âm lại"
+                : copy.startRecordCta || "Bắt đầu nói"
+          }
+          className={cn(
+            "flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-white transition-all",
+            analyzing
+              ? "bg-slate-300 shadow-none cursor-not-allowed"
+              : isRecording
+                ? "bg-red-600 hover:bg-red-700 shadow-[0_0_16px_rgba(239,68,68,0.45)]"
+                : hasRecorded
+                  ? "bg-slate-700 hover:bg-slate-800 shadow-[0_4px_14px_rgba(51,65,85,0.3)]"
+                  : "bg-cath-red-700 hover:bg-[#85000f] shadow-[0_6px_18px_rgba(153,0,17,0.33)] hover:scale-105",
+          )}
+        >
+          {analyzing ? (
+            <Loader2 size={22} className="animate-spin" />
+          ) : isRecording ? (
+            <Square size={20} className="fill-white" />
+          ) : hasRecorded ? (
+            <RotateCcw size={22} strokeWidth={2} />
+          ) : (
+            <Mic size={22} strokeWidth={2} />
+          )}
+        </button>
+      </div>
 
       <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center">
         {canSkip && (

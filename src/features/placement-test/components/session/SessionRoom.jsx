@@ -75,7 +75,12 @@ const SessionRoom = () => {
             notice={loop.notice}
             retryCount={loop.retryCount}
           />
-          <AiAvatarPanel tone={tone} statusText={statusText} />
+          <AiAvatarPanel
+            tone={tone}
+            statusText={statusText}
+            isRecording={loop.isRecording}
+            micLevel={loop.micLevel}
+          />
           <TranscriptCards
             copy={copy}
             question={loop.question}
@@ -100,6 +105,7 @@ const SessionRoom = () => {
             phase={loop.phase}
             notice={loop.notice}
             isRecording={loop.isRecording}
+            micLevel={loop.micLevel}
             hasRecorded={loop.hasRecorded}
             recordedMs={loop.recordedMs}
             remainingMs={loop.remainingMs}
