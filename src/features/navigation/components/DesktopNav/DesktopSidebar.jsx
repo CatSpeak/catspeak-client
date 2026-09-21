@@ -116,7 +116,7 @@ const DesktopSidebar = () => {
   const { pathname } = useLocation()
   const { t } = useLanguage()
   const { isAuthenticated, user } = useAuth()
-  const { isStudent, isTeacher } = useRoleOverride()
+  const { isStudent, isTeacher, activeRole } = useRoleOverride()
   const { resolvePath, currentLang } = useActiveLink()
   const {
     isDesktopExpanded,
@@ -465,6 +465,8 @@ const DesktopSidebar = () => {
                           if (item.lang && item.lang !== currentLang)
                             return false
                           if (item.isPrivate && !isAuthenticated) return false
+                          if (item.roles && !item.roles.includes(activeRole))
+                            return false
                           return true
                         })
                         .map((item) => {

@@ -118,6 +118,12 @@ const MyCoursesPage = lazy(
 const ExploreCoursesPage = lazy(
   () => import("@/features/courses/pages/ExploreCoursesPage"),
 );
+const TeacherPublicProfilePage = lazy(
+  () => import("@/features/courses/pages/TeacherPublicProfilePage"),
+);
+const TeacherCompetencyPage = lazy(
+  () => import("@/features/courses/pages/TeacherCompetencyPage"),
+);
 const CreateCoursePage = lazy(
   () => import("@/features/courses/pages/CreateCoursePage"),
 );
@@ -247,6 +253,38 @@ const routesConfig = [
             element: (
               <LazyRoute>
                 <ExploreCoursesPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore/teachers/:slugOrId",
+            element: (
+              <LazyRoute>
+                <TeacherPublicProfilePage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/teachers/:slugOrId",
+            element: (
+              <LazyRoute>
+                <TeacherPublicProfilePage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore/teachers/:slugOrId/competency",
+            element: (
+              <LazyRoute>
+                <TeacherCompetencyPage />
+              </LazyRoute>
+            ),
+          },
+          {
+            path: "explore-courses/teachers/:slugOrId/competency",
+            element: (
+              <LazyRoute>
+                <TeacherCompetencyPage />
               </LazyRoute>
             ),
           },
@@ -527,6 +565,38 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <ExploreCoursesPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore/teachers/:slugOrId",
+                element: (
+                  <LazyRoute>
+                    <TeacherPublicProfilePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/teachers/:slugOrId",
+                element: (
+                  <LazyRoute>
+                    <TeacherPublicProfilePage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore/teachers/:slugOrId/competency",
+                element: (
+                  <LazyRoute>
+                    <TeacherCompetencyPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "explore-courses/teachers/:slugOrId/competency",
+                element: (
+                  <LazyRoute>
+                    <TeacherCompetencyPage />
                   </LazyRoute>
                 ),
               },
@@ -1066,9 +1136,14 @@ const routesConfig = [
                   {
                     path: "account",
                     element: (
-                      <LazyRoute>
-                        <AccountInfoPage />
-                      </LazyRoute>
+                      <RoleGuard
+                        allowedRoles={["Student"]}
+                        fallbackPath="/setting/instructor"
+                      >
+                        <LazyRoute>
+                          <AccountInfoPage />
+                        </LazyRoute>
+                      </RoleGuard>
                     ),
                   },
                   {
