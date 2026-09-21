@@ -19,8 +19,8 @@ import {
   Compass,
   Folder,
   Ticket,
-  ClipboardCheck,
 } from "lucide-react"
+import { RobotIcon } from "@/shared/assets/icons/RobotIcon"
 import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 
 export const navSections = [
@@ -65,7 +65,7 @@ export const navSections = [
       {
         key: "placementTest",
         path: "/placement-test",
-        icon: ClipboardCheck,
+        icon: RobotIcon,
         lang: DEFAULT_COMMUNITY_LANG,
       },
     ],
@@ -187,7 +187,7 @@ export const navLinks = [
   {
     key: "placementTest",
     path: "/placement-test",
-    icon: ClipboardCheck,
+    icon: RobotIcon,
     lang: DEFAULT_COMMUNITY_LANG,
   },
   {

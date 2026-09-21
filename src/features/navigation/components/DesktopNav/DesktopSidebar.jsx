@@ -23,8 +23,8 @@ import {
   Globe,
   Settings,
   Compass,
-  ClipboardCheck,
 } from "lucide-react"
+import { RobotIcon } from "@/shared/assets/icons/RobotIcon"
 import DesktopNavItem from "./DesktopNavItem"
 import ListItem from "@/shared/components/ui/ListItem"
 
@@ -45,7 +45,7 @@ const mainDockItems = [
   },
   {
     key: "aiTutor",
-    icon: ClipboardCheck,
+    icon: RobotIcon,
     path: "/placement-test",
     hasSublinks: true,
     lang: DEFAULT_COMMUNITY_LANG,
