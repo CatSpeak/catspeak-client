@@ -324,7 +324,8 @@ export const getActiveSessionReal = async ({
           transcript: t.transcript || "",
           durationMs: t.speech_duration_ms || 0,
           retryCount: t.retry_count || 0,
-          submittedAt: t.answered_at ? new Date(t.answered_at).getTime() : Date.now(),
+          answeredAt: t.answered_at ? new Date(t.answered_at).getTime() : null,
+          submittedAt: t.answered_at ? new Date(t.answered_at).getTime() : null,
         }))
       : [],
   }
