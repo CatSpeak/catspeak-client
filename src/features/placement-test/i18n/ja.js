@@ -169,6 +169,7 @@ export default {
       pinyinLabel: "ピンイン：{{pinyin}}",
       scriptHanzi: "漢字",
       scriptPinyin: "ピンイン",
+      scriptMeaning: "ベトナム語",
       youLabel: "あなた",
       statusWaiting: "聞き取り中...",
       statusRecognized: "● 認識良好",

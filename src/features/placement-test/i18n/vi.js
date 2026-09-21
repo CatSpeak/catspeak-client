@@ -172,6 +172,7 @@ export default {
       pinyinLabel: "Pinyin: {{pinyin}}",
       scriptHanzi: "Chữ Hán",
       scriptPinyin: "Pinyin",
+      scriptMeaning: "Tiếng Việt",
       youLabel: "BẠN",
       statusWaiting: "Đang lắng nghe...",
       statusRecognized: "● Nhận diện rõ",

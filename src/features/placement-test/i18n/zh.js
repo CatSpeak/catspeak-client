@@ -166,6 +166,7 @@ export default {
       pinyinLabel: "拼音：{{pinyin}}",
       scriptHanzi: "汉字",
       scriptPinyin: "拼音",
+      scriptMeaning: "越南语",
       youLabel: "你",
       statusWaiting: "正在聆听...",
       statusRecognized: "● 识别清晰",

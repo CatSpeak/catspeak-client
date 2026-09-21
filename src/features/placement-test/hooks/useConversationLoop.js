@@ -47,6 +47,7 @@ const normalizeQuestion = (q, fallbackOrder = 1) => {
     level: Number(q.target_hsk_level || q.hsk_level || q.level) || 1,
     hanzi: q.text || q.hanzi || "",
     pinyin: q.pinyin || "",
+    meaningVi: q.meaning_vi || q.meaningVi || q.translation_vi || q.vi || "",
     audioBase64: q.audio_base64 || q.audioBase64 || null,
     audioFormat: q.audio_format || q.audioFormat || "audio/wav",
   }
@@ -72,6 +73,7 @@ const useConversationLoop = () => {
   const [remainingMs, setRemainingMs] = useState(QUESTION_DURATION_MS)
   const [showHanzi, setShowHanzi] = useState(true)
   const [showPinyin, setShowPinyin] = useState(true)
+  const [showMeaning, setShowMeaning] = useState(true)
   const [paused, setPaused] = useState(false)
   const [pauseSpentMs, setPauseSpentMs] = useState(
     () => readActiveSession()?.pauseSpentMs || 0,
@@ -704,6 +706,7 @@ const useConversationLoop = () => {
 
   const toggleHanzi = useCallback(() => setShowHanzi((value) => !value), [])
   const togglePinyin = useCallback(() => setShowPinyin((value) => !value), [])
+  const toggleMeaning = useCallback(() => setShowMeaning((value) => !value), [])
 
   return {
     ready: Boolean(question),
@@ -722,8 +725,10 @@ const useConversationLoop = () => {
     isPlayingUserAudio,
     showHanzi,
     showPinyin,
+    showMeaning,
     toggleHanzi,
     togglePinyin,
+    toggleMeaning,
     canSkip: true,
     answeredCount: turns.length,
     paused,

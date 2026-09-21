@@ -89,8 +89,10 @@ const SessionRoom = () => {
             onStopUserAudio={loop.handleStopUserAudio}
             showHanzi={loop.showHanzi}
             showPinyin={loop.showPinyin}
+            showMeaning={loop.showMeaning}
             onToggleHanzi={loop.toggleHanzi}
             onTogglePinyin={loop.togglePinyin}
+            onToggleMeaning={loop.toggleMeaning}
             onReplay={loop.handleReplay}
           />
           <SessionControlRow

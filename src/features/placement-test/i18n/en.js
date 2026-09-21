@@ -172,6 +172,7 @@ export default {
       pinyinLabel: "Pinyin: {{pinyin}}",
       scriptHanzi: "Hanzi",
       scriptPinyin: "Pinyin",
+      scriptMeaning: "Vietnamese",
       youLabel: "YOU",
       statusWaiting: "Listening...",
       statusRecognized: "● Recognised",
