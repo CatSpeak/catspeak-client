@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import { Shuffle, Languages, Lightbulb } from "lucide-react"
 import { cn } from "@/lib/utils"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
@@ -7,6 +7,7 @@ import { MOCK_SCRIPTS_POOL } from "../mock/mockScripts"
 import WordLookupPopover from "./WordLookupPopover"
 import TranslationPanel from "./TranslationPanel"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useInteractiveScript } from "../hooks/useInteractiveScript"
 
 const InteractiveScriptWidget = ({
   scriptsPool = MOCK_SCRIPTS_POOL,
@@ -14,15 +15,19 @@ const InteractiveScriptWidget = ({
   className = "",
 }) => {
   const { t } = useLanguage()
-  const [currentScriptIndex, setCurrentScriptIndex] = useState(0)
-  const [isFading, setIsFading] = useState(false)
-  const [showHint, setShowHint] = useState(() => {
-    return localStorage.getItem("catspeak_script_hint_seen") !== "true"
-  })
-  const [showTranslation, setShowTranslation] = useState(false)
-  const [activePopoverKey, setActivePopoverKey] = useState(null)
-
-  const currentScript = scriptsPool[currentScriptIndex] || scriptsPool[0]
+  
+  const {
+    currentScript,
+    isFading,
+    showHint,
+    showTranslation,
+    activePopoverKey,
+    handleShuffleScript,
+    dismissHint,
+    resolveVocabData,
+    toggleTranslation,
+    togglePopover,
+  } = useInteractiveScript(scriptsPool)
 
   const renderTitle = (title) => {
     const titleStr = title || t.rooms?.welcome?.title || "Happy Halloween"
@@ -39,44 +44,6 @@ const InteractiveScriptWidget = ({
       )
     }
     return titleStr
-  }
-
-  const handleShuffleScript = () => {
-    if (scriptsPool.length <= 1) return
-
-    setIsFading(true)
-    setTimeout(() => {
-      let nextIndex = Math.floor(Math.random() * scriptsPool.length)
-      if (nextIndex === currentScriptIndex) {
-        nextIndex = (currentScriptIndex + 1) % scriptsPool.length
-      }
-      setCurrentScriptIndex(nextIndex)
-      setShowTranslation(false)
-      setIsFading(false)
-    }, 150)
-  }
-
-  /** Ẩn hint khi user click lần đầu vào từ */
-  const dismissHint = () => {
-    if (showHint) {
-      setShowHint(false)
-      localStorage.setItem("catspeak_script_hint_seen", "true")
-    }
-  }
-
-  /** Tra cứu dữ liệu từ vựng cho một segment / từ */
-  const resolveVocabData = (segment, wordToken = null) => {
-    const clickedText = wordToken || segment.text.trim()
-    const vocabKey = segment.vocabKey || clickedText.toLowerCase().replace(/[^a-z0-9]/g, "")
-
-    if (currentScript.dictionary?.[vocabKey]) {
-      return currentScript.dictionary[vocabKey]
-    }
-
-    return {
-      word: clickedText,
-      notFound: true,
-    }
   }
 
   /** Tạo content cho Popover – nhận hàm close từ shared Popover */
@@ -110,14 +77,7 @@ const InteractiveScriptWidget = ({
           placement="bottom-left"
           className="!inline mx-0.5"
           triggerClassName="inline"
-          onOpenChange={(open) => {
-            if (open) {
-              setActivePopoverKey(popoverKey)
-              dismissHint()
-            } else {
-              setActivePopoverKey((prev) => prev === popoverKey ? null : prev)
-            }
-          }}
+          onOpenChange={(open) => togglePopover(popoverKey, open)}
           trigger={
             <span
               className={cn(
@@ -144,7 +104,8 @@ const InteractiveScriptWidget = ({
             return chunk
           }
 
-          const cleanWord = chunk.replace(/[.,/#!$%^&*;:{}=\-_`~()?"']/g, "")
+          // Sử dụng Regex hỗ trợ Unicode để loại bỏ tất cả dấu câu (Punctuation) và ký hiệu (Symbol)
+          const cleanWord = chunk.replace(/[\p{P}\p{S}]/gu, "")
           const vocabData = resolveVocabData({ text: cleanWord, isHighlighted: false }, cleanWord)
 
           const popoverKey = `w-${sIdx}-${wIdx}`
@@ -156,14 +117,7 @@ const InteractiveScriptWidget = ({
               placement="bottom-left"
               className="!inline"
               triggerClassName="inline"
-              onOpenChange={(open) => {
-                if (open) {
-                  setActivePopoverKey(popoverKey)
-                  dismissHint()
-                } else {
-                  setActivePopoverKey((prev) => prev === popoverKey ? null : prev)
-                }
-              }}
+              onOpenChange={(open) => togglePopover(popoverKey, open)}
               trigger={
                 <span
                   className={cn(
@@ -207,7 +161,7 @@ const InteractiveScriptWidget = ({
 
         {currentScript.allowTranslation && (
           <IconButton
-            onClick={() => setShowTranslation((prev) => !prev)}
+            onClick={toggleTranslation}
             size="xs"
             variant={showTranslation ? "primary" : "outline"}
             title="Dịch cả đoạn văn"
