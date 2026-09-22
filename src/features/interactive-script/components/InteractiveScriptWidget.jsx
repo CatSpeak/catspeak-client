@@ -154,7 +154,7 @@ const InteractiveScriptWidget = ({
           onClick={handleShuffleScript}
           size="xs"
           variant="outline"
-          title="Đổi chủ đề ngẫu nhiên"
+          title={t.widget?.shuffleTopic || "Đổi chủ đề ngẫu nhiên"}
         >
           <Shuffle className="w-3.5 h-3.5" />
         </IconButton>
@@ -164,7 +164,7 @@ const InteractiveScriptWidget = ({
             onClick={toggleTranslation}
             size="xs"
             variant={showTranslation ? "primary" : "outline"}
-            title="Dịch cả đoạn văn"
+            title={t.widget?.translateFull || "Dịch cả đoạn văn"}
           >
             <Languages className="w-3.5 h-3.5" />
           </IconButton>
@@ -177,7 +177,7 @@ const InteractiveScriptWidget = ({
 
       <div className="flex items-center gap-2 mt-2 text-sm">
         <Lightbulb className="w-4 h-4 text-[#F59E0B]" />
-        <span className="text-[#6B7280]">Nhấn vào từ bất kỳ để xem nghĩa và lưu vào danh sách học tập cá nhân</span>
+        <span className="text-[#6B7280]">{t.widget?.hint || "Nhấn vào từ bất kỳ để xem nghĩa và lưu vào danh sách học tập cá nhân"}</span>
       </div>
       <div className="text-base md:text-lg mt-2 leading-relaxed font-sans">
         {currentScript.contentSegments?.map((seg, idx) => renderSegment(seg, idx))}

@@ -48,5 +48,69 @@ export default {
       cancel: "Hủy",
       confirm: "Xóa từ"
     }
+  },
+  widget: {
+    shuffleTopic: "Đổi chủ đề ngẫu nhiên",
+    translateFull: "Dịch cả đoạn văn",
+    hint: "Nhấn vào từ bất kỳ để xem nghĩa và lưu vào danh sách học tập cá nhân",
+    translationPanel: {
+      title: "Bản dịch tham khảo",
+      featuredQuote: "Câu nói nổi bật",
+      hideBtn: "Ẩn bản dịch",
+      reportInaccurate: "Báo dịch chưa chuẩn",
+      reportTitle: "Góp ý bản dịch chưa chuẩn:",
+      reportSuccess: "Cảm ơn bạn đã đóng góp ý kiến!",
+      reportPlaceholder: "Nhập góp ý bản dịch chính xác hơn...",
+      cancel: "Hủy",
+      submitReport: "Gửi góp ý",
+      aiDisclaimer: "Bản dịch AI mang tính chất tham khảo",
+      reasons: {
+        wrongMeaning: "Dịch sai nghĩa",
+        unnatural: "Bản dịch không tự nhiên",
+        missingWords: "Thiếu hoặc thừa từ",
+        other: "Lý do khác"
+      }
+    },
+    langPairs: {
+      "en-vi": "Tiếng Anh → Tiếng Việt",
+      "en-zh": "Tiếng Anh → 中文",
+      "en-ja": "Tiếng Anh → 日本語",
+      "vi-en": "Tiếng Việt → Tiếng Anh"
+    },
+    lookup: {
+      meaning: "NGHĨA",
+      instructorNote: "GIẢI THÍCH CHI TIẾT (GIẢNG VIÊN CAT SPEAK)",
+      example: "VÍ DỤ",
+      relatedWords: "Từ liên quan:",
+      saved: "Đã lưu vào sổ",
+      save: "Thêm vào sổ từ",
+      collapseExamples: "Thu gọn ví dụ",
+      moreExamples: "Xem thêm ví dụ",
+      langPlaceholder: "Tiếng Anh -> Tiếng Việt",
+      listenBtn: "Nghe phát âm",
+      closeBtn: "Đóng popup"
+    },
+    notFound: {
+      title: "Không tìm thấy định nghĩa cho từ này.",
+      desc: "Hệ thống chưa có dữ liệu giải nghĩa cho từ đơn này trong từ điển hiện tại.",
+      tryOther: "Thử ngôn ngữ khác:",
+      contribute: "Đóng góp định nghĩa",
+      openDict: "Tra cứu trên từ điển mở",
+      contributeNew: "Đóng góp định nghĩa mới",
+      type: "Loại đóng góp:",
+      defaultType: "Định nghĩa thông thường",
+      meaningYouKnow: "Nghĩa bạn biết:",
+      meaningPlaceholder: "Nhập định nghĩa hoặc giải thích cho từ này...",
+      cancel: "Hủy",
+      submitting: "Đang gửi...",
+      submit: "Gửi đóng góp",
+      errorEmpty: "Vui lòng nhập định nghĩa của từ.",
+      success: "Cảm ơn bạn đã đóng góp định nghĩa!",
+      types: {
+        definition: "Định nghĩa thông thường",
+        context: "Thuật ngữ / Văn cảnh đặc biệt",
+        example: "Ví dụ câu minh họa"
+      }
+    }
   }
 };

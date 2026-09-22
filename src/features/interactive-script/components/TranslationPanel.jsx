@@ -3,34 +3,41 @@ import { Globe, AlertCircle, ChevronDown, Check, Flag } from "lucide-react"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import { DEFAULT_LANGUAGE_PAIRS } from "../mock/mockVocabulary"
 import { PillButton } from "@/shared/components/ui/buttons"
-
-const REPORT_REASONS = [
-  { value: "Dịch sai nghĩa", label: "Dịch sai nghĩa" },
-  { value: "Bản dịch không tự nhiên", label: "Bản dịch không tự nhiên" },
-  { value: "Thiếu hoặc thừa từ", label: "Thiếu hoặc thừa từ" },
-  { value: "Khác", label: "Lý do khác" },
-]
+import { useLanguage } from "@/shared/context/LanguageContext"
+import { LANGUAGE_PAIR_KEYS } from "../constants"
 
 const TranslationPanel = ({
   fullTranslation = {},
   featuredQuoteTranslation = "",
-  languagePairs = DEFAULT_LANGUAGE_PAIRS,
   selectedLanguagePair = "en-vi",
   onLanguageChange,
   className = "",
 }) => {
+  const { t } = useLanguage()
+
+  const REPORT_REASONS = [
+    { value: "wrongMeaning", label: t.widget?.translationPanel?.reasons?.wrongMeaning || "Dịch sai nghĩa" },
+    { value: "unnatural", label: t.widget?.translationPanel?.reasons?.unnatural || "Bản dịch không tự nhiên" },
+    { value: "missingWords", label: t.widget?.translationPanel?.reasons?.missingWords || "Thiếu hoặc thừa từ" },
+    { value: "other", label: t.widget?.translationPanel?.reasons?.other || "Lý do khác" },
+  ]
+
+  const languagePairs = LANGUAGE_PAIR_KEYS.map((key) => ({
+    value: key,
+    label: t.widget?.langPairs?.[key] || key
+  }))
+
   const [currentLangPair, setCurrentLangPair] = useState(selectedLanguagePair)
   const [showReportForm, setShowReportForm] = useState(false)
-  const [reportReason, setReportReason] = useState("Dịch sai nghĩa")
+  const [reportReason, setReportReason] = useState("wrongMeaning")
   const [reportText, setReportText] = useState("")
   const [reportSent, setReportSent] = useState(false)
 
   const translationData =
     fullTranslation[currentLangPair] ||
     fullTranslation["en-vi"] || {
-      body: "Chưa có bản dịch cho ngôn ngữ này.",
+      body: t.widget?.translationPanel?.title || "Chưa có bản dịch cho ngôn ngữ này.",
       highlightedMatches: [],
     }
 
@@ -77,7 +84,7 @@ const TranslationPanel = ({
 
   const currentLangLabel =
     languagePairs.find((p) => p.value === currentLangPair)?.label ||
-    "Tiếng Anh → Tiếng Việt"
+    (t.widget?.lookup?.langPlaceholder || "Tiếng Anh → Tiếng Việt")
 
   return (
     <FluentAnimation direction="down" distance={10} duration={0.2} exit>
@@ -88,7 +95,7 @@ const TranslationPanel = ({
         <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#FECACA]">
           <div className="flex items-center gap-2 text-xs font-bold text-[#1E293B] uppercase">
             <Globe className="w-5 h-5 text-cath-red-700 shrink-0" />
-            <span>BẢN DỊCH CẢ ĐOẠN VĂN</span>
+            <span>{t.widget?.translateFull || "BẢN DỊCH CẢ ĐOẠN VĂN"}</span>
           </div>
 
           <div className="shrink-0">
@@ -124,7 +131,7 @@ const TranslationPanel = ({
         <div className="flex items-center justify-between gap-2 text-xs sm:text-sm text-[#64748B] mt-2 border-t border-[#FECACA]">
           <div className="flex items-center gap-1 h-12">
             <AlertCircle className="w-5 h-5 text-red-700 shrink-0" />
-            <span>Bản dịch AI mang tính chất tham khảo</span>
+            <span>{t.widget?.translationPanel?.aiDisclaimer || "Bản dịch AI mang tính chất tham khảo"}</span>
           </div>
 
           {!showReportForm && (
@@ -133,7 +140,7 @@ const TranslationPanel = ({
               variant="secondary-no-outline"
               startIcon={<Flag className="w-5 h-5 text-red-700 shrink-0" />}
             >
-              Báo dịch chưa chuẩn
+              {t.widget?.translationPanel?.reportInaccurate || "Báo dịch chưa chuẩn"}
             </PillButton>
           )}
         </div>
@@ -145,13 +152,13 @@ const TranslationPanel = ({
             className="mt-3 pt-3 border-t border-border flex flex-col gap-2.5 rounded-xl animate-fadeIn"
           >
             <div className="flex items-center justify-between text-base font-semibold text-slate-800">
-              <span>Góp ý bản dịch chưa chuẩn:</span>
+              <span>{t.widget?.translationPanel?.reportTitle || "Góp ý bản dịch chưa chuẩn:"}</span>
             </div>
 
             {reportSent ? (
               <div className="flex items-center gap-1.5 text-emerald-600 text-sm font-medium py-2">
                 <Check className="w-4 h-4 stroke-[2.5]" />
-                <span>Cảm ơn bạn đã đóng góp ý kiến!</span>
+                <span>{t.widget?.translationPanel?.reportSuccess || "Cảm ơn bạn đã đóng góp ý kiến!"}</span>
               </div>
             ) : (
               <>
@@ -167,7 +174,7 @@ const TranslationPanel = ({
                   rows={3}
                   value={reportText}
                   onChange={(e) => setReportText(e.target.value)}
-                  placeholder="Nhập góp ý bản dịch chính xác hơn..."
+                  placeholder={t.widget?.translationPanel?.reportPlaceholder || "Nhập góp ý bản dịch chính xác hơn..."}
                   variant="rounded-xl"
                 />
 
@@ -177,13 +184,13 @@ const TranslationPanel = ({
                     onClick={() => setShowReportForm(false)}
                     variant="outline"
                   >
-                    Hủy
+                    {t.widget?.translationPanel?.cancel || "Hủy"}
                   </PillButton>
                   <PillButton
                     type="submit"
                     variant="primary"
                   >
-                    Gửi góp ý
+                    {t.widget?.translationPanel?.submitReport || "Gửi góp ý"}
                   </PillButton>
                 </div>
               </>

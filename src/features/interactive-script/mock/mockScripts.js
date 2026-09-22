@@ -1,7 +1,3 @@
-/**
- * Mock data pool for Interactive Scripts (IS-LN-01 -> IS-LN-05)
- */
-
 export const MOCK_SCRIPTS_POOL = [
   {
     id: "script-halloween",

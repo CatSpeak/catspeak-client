@@ -16,15 +16,13 @@ import Dropdown from "@/shared/components/ui/Dropdown"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { cn } from "@/lib/utils"
-import {
-  MOCK_WORD_LOOKUP_DATA,
-  DEFAULT_LANGUAGE_PAIRS,
-} from "../mock/mockVocabulary"
+import { MOCK_WORD_LOOKUP_DATA } from "../mock/mockVocabulary"
+import { LANGUAGE_PAIR_KEYS } from "../constants"
 import WordNotFoundPopover from "./WordNotFoundPopover"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const WordLookupPopover = ({
   data = MOCK_WORD_LOOKUP_DATA,
-  languagePairs = DEFAULT_LANGUAGE_PAIRS,
   selectedLanguagePair = "en-vi",
   isSaved = false,
   showAllExamples = false,
@@ -38,6 +36,13 @@ const WordLookupPopover = ({
   className = "",
   style = {},
 }) => {
+  const { t } = useLanguage()
+
+  const languagePairs = LANGUAGE_PAIR_KEYS.map((key) => ({
+    value: key,
+    label: t.widget?.langPairs?.[key] || key
+  }))
+
   if (data?.notFound || !data?.meaning) {
     return (
       <WordNotFoundPopover
@@ -64,7 +69,7 @@ const WordLookupPopover = ({
 
   const currentLangLabel =
     languagePairs.find((p) => p.value === selectedLanguagePair)?.label ||
-    "Tiếng Anh -> Tiếng Việt"
+    (t.widget?.lookup?.langPlaceholder || "Tiếng Anh -> Tiếng Việt")
 
   return (
     <FluentAnimation direction="up" distance={10} duration={0.2} exit>
@@ -93,7 +98,7 @@ const WordLookupPopover = ({
               onClick={onClose}
               size="xs"
               variant="ghost"
-              title="Đóng popup"
+              title={t.widget?.lookup?.closeBtn || "Đóng popup"}
               className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
             >
               <X className="w-4 h-4" />
@@ -112,7 +117,7 @@ const WordLookupPopover = ({
                 onClick={onPronounce}
                 size="xs"
                 variant="cathRed"
-                title="Nghe phát âm"
+                title={t.widget?.lookup?.listenBtn || "Nghe phát âm"}
 
               >
                 <Volume2 className="w-4 h-4" />
@@ -142,7 +147,7 @@ const WordLookupPopover = ({
           <div>
             <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
               <BookOpen className="w-3.5 h-3.5 text-slate-400" />
-              <span>NGHĨA</span>
+              <span>{t.widget?.lookup?.meaning || "NGHĨA"}</span>
             </div>
             <div className="mt-1 text-[15px] font-medium text-slate-800 leading-snug">
               {meaning}{" "}
@@ -158,7 +163,7 @@ const WordLookupPopover = ({
             <div className="rounded-2xl bg-[#FFFBF3] border border-amber-200/70 p-3.5 transition-all">
               <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-amber-800 uppercase">
                 <GraduationCap className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>GIẢI THÍCH CHI TIẾT (GIẢNG VIÊN CAT SPEAK)</span>
+                <span>{t.widget?.lookup?.instructorNote || "GIẢI THÍCH CHI TIẾT (GIẢNG VIÊN CAT SPEAK)"}</span>
               </div>
               <p className="mt-1.5 text-xs sm:text-[13px] text-amber-950/85 leading-relaxed font-normal">
                 {instructorNote}
@@ -170,7 +175,7 @@ const WordLookupPopover = ({
             <div>
               <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1.5">
                 <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
-                <span>VÍ DỤ</span>
+                <span>{t.widget?.lookup?.example || "VÍ DỤ"}</span>
               </div>
               <div className="flex flex-col gap-2">
                 {/* Ví dụ đầu tiên (mặc định) */}
@@ -196,7 +201,7 @@ const WordLookupPopover = ({
           {relatedWords && relatedWords.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap pt-0.5">
               <span className="text-xs text-slate-500 font-medium shrink-0">
-                Từ liên quan:
+                {t.widget?.lookup?.relatedWords || "Từ liên quan:"}
               </span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {relatedWords.map((item, index) => (
@@ -231,7 +236,7 @@ const WordLookupPopover = ({
             roundedClass="rounded-xl"
             className="flex-1 h-10"
           >
-            <span>{isSaved ? "Đã lưu vào sổ" : "Thêm vào sổ từ"}</span>
+            <span>{isSaved ? (t.widget?.lookup?.saved || "Đã lưu vào sổ") : (t.widget?.lookup?.save || "Thêm vào sổ từ")}</span>
           </PillButton>
 
           {/* Nút 2: Xem thêm ví dụ  */}
@@ -243,7 +248,7 @@ const WordLookupPopover = ({
             className="h-10 shrink-0"
           >
             <span>
-              {showAllExamples ? "Thu gọn ví dụ" : "Xem thêm ví dụ"}
+              {showAllExamples ? (t.widget?.lookup?.collapseExamples || "Thu gọn ví dụ") : (t.widget?.lookup?.moreExamples || "Xem thêm ví dụ")}
             </span>
           </PillButton>
         </div>

@@ -16,18 +16,13 @@ import Divider from "@/shared/components/ui/Divider"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { cn } from "@/lib/utils"
 import { toast } from "@/shared/utils/toastBridge"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const DEFAULT_SUGGESTED_LANGUAGES = [
   { id: "vi", label: "Tiếng Việt", code: "vi" },
   { id: "zh", label: "Tiếng Trung", code: "zh" },
   { id: "ja", label: "Tiếng Nhật", code: "ja" },
   { id: "en", label: "Tiếng Anh", code: "en" },
-]
-
-const CONTRIBUTION_TYPE_OPTIONS = [
-  { value: "definition", label: "Định nghĩa thông thường" },
-  { value: "context", label: "Thuật ngữ / Văn cảnh đặc biệt" },
-  { value: "example", label: "Ví dụ câu minh họa" },
 ]
 
 const WordNotFoundPopover = ({
@@ -40,12 +35,19 @@ const WordNotFoundPopover = ({
   className = "",
   style,
 }) => {
+  const { t } = useLanguage()
   const [isContributing, setIsContributing] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [contributionMeaning, setContributionMeaning] = useState("")
   const [contributionType, setContributionType] = useState("definition")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasInputError, setHasInputError] = useState(false)
+
+  const CONTRIBUTION_TYPE_OPTIONS = [
+    { value: "definition", label: t.widget?.notFound?.types?.definition || "Định nghĩa thông thường" },
+    { value: "context", label: t.widget?.notFound?.types?.context || "Thuật ngữ / Văn cảnh đặc biệt" },
+    { value: "example", label: t.widget?.notFound?.types?.example || "Ví dụ câu minh họa" },
+  ]
 
   const handleOpenExternalDictionary = (e) => {
     e.preventDefault()
@@ -60,7 +62,7 @@ const WordNotFoundPopover = ({
     e.preventDefault()
     if (!contributionMeaning.trim()) {
       setHasInputError(true)
-      toast.warning("Vui lòng nhập định nghĩa của từ.")
+      toast.warning(t.widget?.notFound?.errorEmpty || "Vui lòng nhập định nghĩa của từ.")
       return
     }
 
@@ -76,7 +78,7 @@ const WordNotFoundPopover = ({
         meaning: contributionMeaning.trim(),
         type: selectedTypeLabel,
       })
-      toast.success("Cảm ơn bạn đã đóng góp định nghĩa!")
+      toast.success(t.widget?.notFound?.success || "Cảm ơn bạn đã đóng góp định nghĩa!")
       setIsSubmitting(false)
       setIsContributing(false)
       setContributionMeaning("")
@@ -86,7 +88,7 @@ const WordNotFoundPopover = ({
 
   const selectedTypeLabel =
     CONTRIBUTION_TYPE_OPTIONS.find((opt) => opt.value === contributionType)?.label ||
-    "Định nghĩa thông thường"
+    (t.widget?.notFound?.defaultType || "Định nghĩa thông thường")
 
   return (
     <FluentAnimation direction="up" distance={10} duration={0.2} exit>
@@ -107,7 +109,7 @@ const WordNotFoundPopover = ({
             onClick={onClose}
             size="xs"
             variant="ghost"
-            title="Đóng popup"
+            title={t.widget?.lookup?.closeBtn || "Đóng popup"}
             className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
           >
             <X className="w-4 h-4" />
@@ -129,10 +131,10 @@ const WordNotFoundPopover = ({
 
               <div className="flex flex-col gap-1">
                 <h4 className="text-base sm:text-base font-semibold text-[#374151] leading-snug">
-                  Không tìm thấy định nghĩa cho từ này.
+                  {t.widget?.notFound?.title || "Không tìm thấy định nghĩa cho từ này."}
                 </h4>
                 <p className="text-xs sm:text-sm text-[#6B7280] leading-relaxed">
-                  Hệ thống chưa có dữ liệu giải nghĩa cho từ đơn này trong từ điển hiện tại.
+                  {t.widget?.notFound?.desc || "Hệ thống chưa có dữ liệu giải nghĩa cho từ đơn này trong từ điển hiện tại."}
                 </p>
               </div>
             </div>
@@ -140,7 +142,7 @@ const WordNotFoundPopover = ({
             {/* Gợi ý thử ngôn ngữ khác */}
             <div className="flex flex-col gap-2">
               <span className="text-xs sm:text-sm font-medium text-[#6B7280]">
-                Thử ngôn ngữ khác:
+                {t.widget?.notFound?.tryOther || "Thử ngôn ngữ khác:"}
               </span>
               <div className="flex items-center gap-2 flex-wrap">
                 {suggestedLanguages.map((lang) => (
@@ -170,7 +172,7 @@ const WordNotFoundPopover = ({
                   textColor="#990011"
                   className="!h-auto !p-0"
                 >
-                  Đóng góp định nghĩa
+                  {t.widget?.notFound?.contribute || "Đóng góp định nghĩa"}
                 </PillButton>
 
                 <PillButton
@@ -180,7 +182,7 @@ const WordNotFoundPopover = ({
                   textColor="#6B7280"
                   className="!h-auto !p-0"
                 >
-                  Tra cứu trên từ điển mở
+                  {t.widget?.notFound?.openDict || "Tra cứu trên từ điển mở"}
                 </PillButton>
               </div>
             </div>
@@ -194,13 +196,13 @@ const WordNotFoundPopover = ({
           >
             <div className="flex items-center gap-1.5 text-sm font-semibold text-cath-red-700 uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Đóng góp định nghĩa mới</span>
+              <span>{t.widget?.notFound?.contributeNew || "Đóng góp định nghĩa mới"}</span>
             </div>
 
             {/* Dropdown loại đóng góp */}
             <div className="flex flex-col gap-1 relative">
               <span className="text-sm font-medium text-[#374151]">
-                Loại đóng góp:
+                {t.widget?.notFound?.type || "Loại đóng góp:"}
               </span>
               <div
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -248,7 +250,7 @@ const WordNotFoundPopover = ({
 
             {/* TextInput đa dòng cho nghĩa bạn biết */}
             <span className="text-sm font-medium text-[#374151]">
-              Nghĩa bạn biết:
+              {t.widget?.notFound?.meaningYouKnow || "Nghĩa bạn biết:"}
             </span>
             <TextInput
               error={hasInputError}
@@ -261,7 +263,7 @@ const WordNotFoundPopover = ({
                   setHasInputError(false)
                 }
               }}
-              placeholder="Nhập định nghĩa hoặc giải thích cho từ này..."
+              placeholder={t.widget?.notFound?.meaningPlaceholder || "Nhập định nghĩa hoặc giải thích cho từ này..."}
               variant="rounded-xl"
               labelClassName="text-[#374151] font-medium"
               className="!text-xs sm:!text-sm !h-auto !py-2.5 !px-3 text-[#374151]"
@@ -280,7 +282,7 @@ const WordNotFoundPopover = ({
                 roundedClass="rounded-xl"
                 className="!h-9 text-xs"
               >
-                <span>Hủy</span>
+                <span>{t.widget?.notFound?.cancel || "Hủy"}</span>
               </PillButton>
 
               <PillButton
@@ -291,7 +293,7 @@ const WordNotFoundPopover = ({
                 roundedClass="rounded-xl"
                 className="!h-9 text-xs"
               >
-                <span>{isSubmitting ? "Đang gửi..." : "Gửi đóng góp"}</span>
+                <span>{isSubmitting ? (t.widget?.notFound?.submitting || "Đang gửi...") : (t.widget?.notFound?.submit || "Gửi đóng góp")}</span>
               </PillButton>
             </div>
           </form>

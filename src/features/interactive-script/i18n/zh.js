@@ -48,5 +48,69 @@ export default {
       cancel: "取消",
       confirm: "删除"
     }
+  },
+  widget: {
+    shuffleTopic: "随机切换主题",
+    translateFull: "翻译全文",
+    hint: "点击任意单词以查看含义并将其保存到您的个人学习列表中",
+    translationPanel: {
+      title: "参考翻译",
+      featuredQuote: "精选名言",
+      hideBtn: "隐藏翻译",
+      reportInaccurate: "报告翻译不准",
+      reportTitle: "提供更好的翻译建议:",
+      reportSuccess: "感谢您的反馈意见！",
+      reportPlaceholder: "输入更准确的翻译...",
+      cancel: "取消",
+      submitReport: "发送反馈",
+      aiDisclaimer: "AI 翻译仅供参考",
+      reasons: {
+        wrongMeaning: "含义错误",
+        unnatural: "翻译不自然",
+        missingWords: "遗漏或多余词汇",
+        other: "其他原因"
+      }
+    },
+    langPairs: {
+      "en-vi": "英语 → 越南语",
+      "en-zh": "英语 → 中文",
+      "en-ja": "英语 → 日语",
+      "vi-en": "越南语 → 英语"
+    },
+    lookup: {
+      meaning: "含义",
+      instructorNote: "详细说明 (CAT SPEAK 讲师)",
+      example: "例句",
+      relatedWords: "相关词汇:",
+      saved: "已保存到词汇本",
+      save: "添加到词汇本",
+      collapseExamples: "收起例句",
+      moreExamples: "查看更多例句",
+      langPlaceholder: "英语 -> 中文",
+      listenBtn: "听发音",
+      closeBtn: "关闭弹出窗口"
+    },
+    notFound: {
+      title: "未找到此词的定义。",
+      desc: "系统当前的字典中没有此词的含义数据。",
+      tryOther: "尝试其他语言:",
+      contribute: "贡献含义",
+      openDict: "在开放词典中查找",
+      contributeNew: "贡献新含义",
+      type: "贡献类型:",
+      defaultType: "标准定义",
+      meaningYouKnow: "您知道的含义:",
+      meaningPlaceholder: "输入此单词的定义或解释...",
+      cancel: "取消",
+      submitting: "提交中...",
+      submit: "提交贡献",
+      errorEmpty: "请输入单词的定义。",
+      success: "感谢您的贡献！",
+      types: {
+        definition: "标准定义",
+        context: "特定术语 / 语境",
+        example: "例句"
+      }
+    }
   }
 };

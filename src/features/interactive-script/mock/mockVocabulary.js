@@ -1,17 +1,6 @@
-/**
- * Mock data for Interactive Script Vocabulary Lookup (IS-LN-02 & IS-LN-03)
- */
 
-export const DEFAULT_LANGUAGE_PAIRS = [
-  { value: "en-vi", label: "Tiếng Anh → Tiếng Việt" },
-  { value: "en-zh", label: "Tiếng Anh → 中文" },
-  { value: "en-ja", label: "Tiếng Anh → 日本語" },
-  { value: "vi-en", label: "Tiếng Việt → Tiếng Anh" },
-]
 
-/**
- * Cụm từ nổi bật có ghi chú giảng viên (IS-LN-03) - Theo mockup Halloween
- */
+
 export const MOCK_CHRISTIAN_HOLIDAY = {
   id: "vocab-001",
   word: "Christian holiday",
@@ -30,9 +19,6 @@ export const MOCK_CHRISTIAN_HOLIDAY = {
   relatedWords: ["trick-or-treat", "costume", "ghost"],
 }
 
-/**
- * Từ đơn thông thường (IS-LN-02)
- */
 export const MOCK_SINGLE_WORD = {
   id: "vocab-002",
   word: "costume",
@@ -49,7 +35,4 @@ export const MOCK_SINGLE_WORD = {
   relatedWords: ["mask", "outfit", "disguise"],
 }
 
-/**
- * Default mock data dùng cho WordLookupPopover
- */
 export const MOCK_WORD_LOOKUP_DATA = MOCK_CHRISTIAN_HOLIDAY
