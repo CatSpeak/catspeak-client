@@ -1,6 +1,9 @@
 export default {
   placementTest: {
     title: "水平评估",
+    planRequiredTitle: "需要 Pro 会员计划",
+    planRequiredSubtext:
+      "AI 口语水平测试功能仅面向 Pro 会员开放。请升级您的会员计划以解锁此功能！",
     consent: {
       pill: "与 AI 实时对话",
       heading: "与 AI 进行自适应 HSK 口语测试",

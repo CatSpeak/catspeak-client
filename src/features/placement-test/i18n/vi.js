@@ -1,6 +1,9 @@
 export default {
   placementTest: {
     title: "Đánh giá trình độ",
+    planRequiredTitle: "Yêu cầu Gói Pro",
+    planRequiredSubtext:
+      "Tính năng Đánh giá trình độ (Placement Test) cùng AI chỉ dành cho người dùng gói Pro. Vui lòng nâng cấp gói để trải nghiệm tính năng này!",
     consent: {
       pill: "Đàm thoại trực tiếp cùng AI",
       heading: "Kiểm tra Khẩu ngữ HSK Thích ứng cùng AI",

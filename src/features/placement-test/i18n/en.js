@@ -1,6 +1,9 @@
 export default {
   placementTest: {
     title: "Level Assessment",
+    planRequiredTitle: "Pro Plan Required",
+    planRequiredSubtext:
+      "The AI Placement Test feature is exclusively available for Pro subscribers. Please upgrade your plan to unlock this feature!",
     consent: {
       pill: "Live conversation with AI",
       heading: "Adaptive HSK Speaking Test with AI",

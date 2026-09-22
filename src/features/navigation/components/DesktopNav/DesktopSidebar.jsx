@@ -158,6 +158,8 @@ const DesktopSidebar = () => {
       setLastSublink("catSpeak", cleanPath)
     } else if (pathname.includes("/workspace")) {
       setLastSublink("workspace", cleanPath)
+    } else if (pathname.includes("/placement-test")) {
+      setLastSublink("aiTutor", cleanPath)
     }
   }, [pathname, setLastSublink])
 

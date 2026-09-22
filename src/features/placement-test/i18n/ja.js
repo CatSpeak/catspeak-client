@@ -1,6 +1,9 @@
 export default {
   placementTest: {
     title: "レベル診断",
+    planRequiredTitle: "Proプランが必要です",
+    planRequiredSubtext:
+      "AIプレースメントテスト機能はProプラン限定です。この機能を利用するにはプランをアップグレードしてください！",
     consent: {
       pill: "AI とライブ会話",
       heading: "AI と受ける適応型 HSK スピーキングテスト",

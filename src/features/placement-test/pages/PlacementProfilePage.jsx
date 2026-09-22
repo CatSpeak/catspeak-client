@@ -2,6 +2,9 @@ import { useCallback, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth/hooks/useAuth"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
+import { PlanRequiredState } from "@/shared/components/ui/indicators"
 import { toast } from "@/components/ui/toast"
 import { useCreateSessionMutation, useGetRetakeStatusQuery } from "../api"
 import {
@@ -56,6 +59,8 @@ const PlacementProfilePage = () => {
   const studentFallback = root.result?.studentFallback
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { hasFeature, isLoading: isPlanLoading } = usePlanFeatures()
+  const canAccessPlacement = hasFeature(PLAN_FEATURES.ALLOW_PLACEMENT_TEST)
 
   const [result] = useState(readResult)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -138,6 +143,29 @@ const PlacementProfilePage = () => {
       toast.error(copy.confirm?.errorToast)
     }
   }, [createSession, navigate, result, retakeStatus, user, copy.confirm])
+
+  if (isPlanLoading) {
+    return (
+      <div className="min-h-[calc(100vh-200px)] bg-primaryBg flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-cath-red-600 border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!canAccessPlacement) {
+    return (
+      <PlanRequiredState
+        pageTitle={root.title || "Đánh giá trình độ"}
+        title={root.planRequiredTitle || "Yêu cầu Gói Pro"}
+        subtext={
+          root.planRequiredSubtext ||
+          "Tính năng Đánh giá trình độ (Placement Test) cùng AI chỉ dành cho người dùng gói Pro. Vui lòng nâng cấp gói để trải nghiệm tính năng này!"
+        }
+        featureName="Placement Test"
+        animationKey="placement-profile-pro-required"
+      />
+    )
+  }
 
   if (!view) {
     return (
