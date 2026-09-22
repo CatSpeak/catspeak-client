@@ -185,6 +185,9 @@ const StudentTakeQuizView = lazy(
 const ReviewClassPage = lazy(
   () => import("@/features/courses/pages/ReviewClassPage"),
 );
+const VocabularyNotebookPage = lazy(
+  () => import("@/features/interactive-script/pages/VocabularyNotebookPage"),
+);
 
 const routesConfig = [
   {
@@ -506,6 +509,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <MyCalendarPage />
+                  </LazyRoute>
+                )
+              },
+              {
+                path: "vocabulary",
+                element: (
+                  <LazyRoute>
+                    <VocabularyNotebookPage />
                   </LazyRoute>
                 )
               },

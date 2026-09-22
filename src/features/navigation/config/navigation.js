@@ -19,6 +19,7 @@ import {
   Compass,
   Folder,
   Ticket,
+  Bookmark,
 } from "lucide-react"
 
 export const navSections = [
@@ -88,6 +89,7 @@ export const navSections = [
         items: [
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",
@@ -153,6 +155,7 @@ export const navLinks = [
         items: [
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",

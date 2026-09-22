@@ -3,4 +3,4 @@ export { default as WordNotFoundPopover } from "./components/WordNotFoundPopover
 export { default as InteractiveScriptWidget } from "./components/InteractiveScriptWidget"
 export { default as TranslationPanel } from "./components/TranslationPanel"
 export * from "./mock"
-
+export { default as VocabularyNotebookPage } from "./pages/VocabularyNotebookPage"

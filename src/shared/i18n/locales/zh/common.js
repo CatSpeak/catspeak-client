@@ -63,6 +63,7 @@ export default {
     teachingTasks: "教学任务",
     vouchers: "优惠券与活动",
     myLearning: "我的学习",
+    vocabularyNotebook: "词汇本",
     manageMaterials: "资料管理",
     exploreCourses: "探索课程",
     messages: "消息",
