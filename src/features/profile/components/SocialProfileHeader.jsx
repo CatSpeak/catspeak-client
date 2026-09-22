@@ -50,8 +50,7 @@ const SocialProfileHeader = ({
 
   const isTeacher = Boolean(
     profile?.isTeacher ||
-    profile?.accountType === "Teacher" ||
-    profile?.roleName === "Teacher"
+    profile?.accountType === "Teacher"
   )
   const headline = profile?.headline || null
   const introduction = profile?.introduction || null
