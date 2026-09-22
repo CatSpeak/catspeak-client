@@ -15,18 +15,20 @@ const InteractiveScriptWidget = ({
   className = "",
 }) => {
   const { t } = useLanguage()
-  
+
   const {
     currentScript,
     isFading,
     showHint,
     showTranslation,
     activePopoverKey,
+    selectedLanguagePair,
     handleShuffleScript,
     dismissHint,
     resolveVocabData,
     toggleTranslation,
     togglePopover,
+    handleLanguageChange,
   } = useInteractiveScript(scriptsPool)
 
   const renderTitle = (title) => {
@@ -50,11 +52,10 @@ const InteractiveScriptWidget = ({
   const buildPopoverContent = (vocabData, sIdx, wIdx = null) => (close) => (
     <WordLookupPopover
       data={vocabData}
+      selectedLanguagePair={selectedLanguagePair}
       onClose={close}
       onSave={(vocab) => onSaveWord?.(vocab)}
-      onLanguageChange={(lang) => {
-        // Xử lý đổi ngôn ngữ tra cứu
-      }}
+      onLanguageChange={handleLanguageChange}
       onSubmitContribution={(contribution) => {
         console.log("Submitted vocabulary contribution:", contribution)
       }}
@@ -193,6 +194,8 @@ const InteractiveScriptWidget = ({
         <TranslationPanel
           fullTranslation={currentScript.fullTranslation}
           featuredQuoteTranslation={currentScript.featuredQuoteTranslation}
+          selectedLanguagePair={selectedLanguagePair}
+          onLanguageChange={handleLanguageChange}
         />
       )}
     </div>

@@ -8,6 +8,10 @@ export const useInteractiveScript = (scriptsPool) => {
   })
   const [showTranslation, setShowTranslation] = useState(false)
   const [activePopoverKey, setActivePopoverKey] = useState(null)
+  
+  const [selectedLanguagePair, setSelectedLanguagePair] = useState(() => {
+    return localStorage.getItem("catspeak_lang_pair") || "en-vi"
+  })
 
   const currentScript = scriptsPool[currentScriptIndex] || scriptsPool[0]
 
@@ -63,16 +67,23 @@ export const useInteractiveScript = (scriptsPool) => {
     }
   }, [dismissHint])
 
+  const handleLanguageChange = useCallback((lang) => {
+    setSelectedLanguagePair(lang)
+    localStorage.setItem("catspeak_lang_pair", lang)
+  }, [])
+
   return {
     currentScript,
     isFading,
     showHint,
     showTranslation,
     activePopoverKey,
+    selectedLanguagePair,
     handleShuffleScript,
     dismissHint,
     resolveVocabData,
     toggleTranslation,
     togglePopover,
+    handleLanguageChange,
   }
 }

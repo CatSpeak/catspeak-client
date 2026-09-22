@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useRef } from "react"
 import {
   Volume2,
   X,
@@ -12,9 +12,9 @@ import {
 } from "lucide-react"
 
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
-import Dropdown from "@/shared/components/ui/Dropdown"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import useClickOutside from "@/shared/hooks/useClickOutside"
 import { cn } from "@/lib/utils"
 import { MOCK_WORD_LOOKUP_DATA } from "../mock/mockVocabulary"
 import { LANGUAGE_PAIR_KEYS } from "../constants"
@@ -37,6 +37,10 @@ const WordLookupPopover = ({
   style = {},
 }) => {
   const { t } = useLanguage()
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false)
+  const langDropdownRef = useRef(null)
+
+  useClickOutside(langDropdownRef, () => setIsLangDropdownOpen(false))
 
   const languagePairs = LANGUAGE_PAIR_KEYS.map((key) => ({
     value: key,
@@ -124,21 +128,53 @@ const WordLookupPopover = ({
               </IconButton>
             </div>
 
-            {/* Language Switcher Dropdown */}
-            <div className="shrink-0">
-              <Dropdown
-                options={languagePairs}
-                value={selectedLanguagePair}
-                onChange={onLanguageChange}
-                dropdownClassName="min-w-[210px]"
-                roundedClass="rounded-xl"
-                trigger={
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer">
-                    <span>{currentLangLabel}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                  </div>
-                }
-              />
+            {/* Language Switcher Dropdown (Inline) */}
+            <div className="shrink-0 relative" ref={langDropdownRef}>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsLangDropdownOpen(!isLangDropdownOpen)
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer select-none"
+              >
+                <span>{currentLangLabel}</span>
+                <ChevronDown
+                  className={cn(
+                    "w-3.5 h-3.5 text-slate-400 transition-transform duration-200",
+                    isLangDropdownOpen && "rotate-180 text-cath-red-700"
+                  )}
+                />
+              </div>
+
+              {/* Menu Inline */}
+              {isLangDropdownOpen && (
+                <div className="absolute top-full right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 animate-fadeIn overflow-hidden">
+                  {languagePairs.map((pair) => {
+                    const isSelected = selectedLanguagePair === pair.value
+                    return (
+                      <div
+                        key={pair.value}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onLanguageChange?.(pair.value)
+                          setIsLangDropdownOpen(false)
+                        }}
+                        className={cn(
+                          "px-3.5 py-2 text-xs sm:text-sm flex items-center justify-between cursor-pointer transition-colors",
+                          isSelected
+                            ? "bg-rose-50 text-cath-red-700 font-semibold"
+                            : "text-[#374151] hover:bg-slate-50 hover:text-cath-red-700"
+                        )}
+                      >
+                        <span>{pair.label}</span>
+                        {isSelected && (
+                          <Check className="w-3.5 h-3.5 text-cath-red-700 stroke-[2.5]" />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
