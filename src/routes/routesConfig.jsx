@@ -1061,14 +1061,9 @@ const routesConfig = [
                   {
                     path: "account",
                     element: (
-                      <RoleGuard
-                        allowedRoles={["Student"]}
-                        fallbackPath="/setting/instructor"
-                      >
-                        <LazyRoute>
-                          <AccountInfoPage />
-                        </LazyRoute>
-                      </RoleGuard>
+                      <LazyRoute>
+                        <AccountInfoPage />
+                      </LazyRoute>
                     ),
                   },
                   {
