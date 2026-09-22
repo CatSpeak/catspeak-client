@@ -71,27 +71,76 @@ const PricingPage = () => {
 
   const isProcessing = isProfileLoading || isPlansLoading;
 
-  const formattedPlans = plansResponse
-    .filter((plan) => plan.packageStatus === "Published")
-    .map((plan) => ({
+  const publishedPlans = plansResponse.filter(
+    (plan) => plan.packageStatus === "Published",
+  );
+
+  // Union of features per applicableRole (sorted by displayOrder).
+  // A plan renders the full union of its role group: features missing from
+  // the plan (or inactive / false / zero) are shown struck-through in PlanCard.
+  const unionByRole = {};
+  publishedPlans.forEach((plan) => {
+    const role = (plan.applicableRole || "__all__").toLowerCase();
+    if (!unionByRole[role]) unionByRole[role] = new Map();
+    (plan.subscriptionFeatures || []).forEach((f) => {
+      const key = (f.featureCode || "").toUpperCase();
+      if (!key || unionByRole[role].has(key)) return;
+      unionByRole[role].set(key, {
+        code: f.featureCode,
+        name: f.featureName,
+        displayOrder: f.displayOrder ?? 999,
+      });
+    });
+  });
+  Object.values(unionByRole).forEach((map) => {
+    const sorted = [...map.entries()].sort(
+      (a, b) => a[1].displayOrder - b[1].displayOrder,
+    );
+    map.clear();
+    sorted.forEach(([k, v]) => map.set(k, v));
+  });
+
+  const formattedPlans = publishedPlans.map((plan) => {
+    const role = (plan.applicableRole || "__all__").toLowerCase();
+    const union = unionByRole[role] || new Map();
+    const ownByCode = new Map(
+      (plan.subscriptionFeatures || []).map((f) => [
+        (f.featureCode || "").toUpperCase(),
+        f,
+      ]),
+    );
+    const features = [...union.entries()].map(([key, u]) => {
+      const own = ownByCode.get(key);
+      if (!own) {
+        return {
+          id: `missing-${key}`,
+          name: u.name,
+          code: u.code,
+          isMissing: true,
+        };
+      }
+      return {
+        id: own.id,
+        name: own.featureName,
+        limitValue: own.limitValue,
+        valueType: own.valueType?.toLowerCase(),
+        code: own.featureCode,
+        isActive: own.isActive,
+        displayOrder: own.displayOrder,
+      };
+    });
+    return {
       id: plan.planId,
       name: plan.planName,
       price: plan.priceVnd,
       interval: plan.billingCycle,
       description: plan.description,
-      features: plan.subscriptionFeatures
-        ? plan.subscriptionFeatures.map((f) => ({
-          id: f.id,
-          name: f.featureName,
-          limitValue: f.limitValue,
-          valueType: f.valueType?.toLowerCase(),
-          code: f.featureCode,
-        }))
-        : [],
+      features,
       applicableRole: plan.applicableRole?.toLowerCase(),
       iconUrl: plan.iconUrl,
       brandColor: plan.brandColor,
-    }));
+    };
+  });
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-70px)]">

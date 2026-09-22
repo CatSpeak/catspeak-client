@@ -218,5 +218,17 @@ export default {
       requestTypeInitial: "New application",
       requestTypeUpdate: "Teaching update",
     },
+    subscription_purchased: {
+      title: "Successfully upgraded to {planName}",
+      body: 'The benefits of "{planName}" are now active. Valid until {endDate}.',
+    },
+    subscription_expiring_soon: {
+      title: "{planName} is expiring soon",
+      body: 'Your "{planName}" plan expires on {endDate}. Renew now to avoid interruption.',
+    },
+    subscription_expired: {
+      title: "{planName} has expired",
+      body: 'Your "{planName}" plan expired on {endDate}. Resubscribe to keep using it.',
+    },
   },
 }
