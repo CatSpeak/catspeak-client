@@ -2,11 +2,15 @@ import React from 'react';
 import { Gamepad } from 'lucide-react';
 import Breadcrumb from '@/shared/components/ui/navigation/Breadcrumb';
 import PillButton from '@/shared/components/ui/buttons/PillButton';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 export const VocabularyNotebookHeader = ({ totalWords }) => {
+  const { t } = useLanguage();
+  const v = t.vocabularyNotebook;
+
   const breadcrumbItems = [
-    { label: 'Trang chủ', href: '/' },
-    { label: 'Sổ từ vựng', href: '/workspace/vocabulary' }
+    { label: t.nav?.home || 'Trang chủ', href: '/' },
+    { label: v?.title || 'Sổ từ vựng', href: '/workspace/vocabulary' }
   ];
 
   return (
@@ -16,9 +20,9 @@ export const VocabularyNotebookHeader = ({ totalWords }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Sổ từ vựng</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{v?.title}</h1>
             <p className="text-sm text-gray-500">
-              Lưu trữ và ôn tập toàn bộ từ vựng đã lưu trong các buổi trò chuyện và script phòng học.
+              {v?.subtitle}
             </p>
           </div>
         </div>
@@ -27,7 +31,7 @@ export const VocabularyNotebookHeader = ({ totalWords }) => {
           variant="primary"
           startIcon={<Gamepad className="w-6 h-6" />}
         >
-          Ôn tập ngay <span className='rounded-full shadow-faq-card px-3 py-1 bg-cath-red-400'>{totalWords} từ</span>
+          {v?.reviewNow} <span className='rounded-full shadow-faq-card px-3 py-1 bg-cath-red-400'>{v?.wordCount?.replace('{{count}}', totalWords) || `${totalWords} từ`}</span>
         </PillButton>
       </div>
     </div>

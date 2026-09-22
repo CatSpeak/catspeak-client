@@ -4,6 +4,7 @@ import Dropdown from '@/shared/components/ui/Dropdown';
 import IconButton from '@/shared/components/ui/buttons/IconButton';
 import { LayoutGrid, List } from 'lucide-react';
 import { PillButton } from '@/shared/components/ui/buttons';
+import { useLanguage } from '@/shared/context/LanguageContext';
 
 export const VocabularyNotebookFilters = ({
   searchQuery,
@@ -18,27 +19,31 @@ export const VocabularyNotebookFilters = ({
   viewMode,
   setViewMode
 }) => {
+  const { t } = useLanguage();
+  const v = t.vocabularyNotebook?.filters;
+  const common = t.header?.languages;
+
   const languageOptions = [
-    { label: 'Tất cả ngôn ngữ', value: 'all' },
-    { label: 'Tiếng Anh (EN)', value: 'en' },
-    { label: 'Tiếng Trung (ZH)', value: 'zh' },
-    { label: 'Tiếng Nhật (JA)', value: 'ja' }
+    { label: `${v?.all || 'Tất cả'} ${v?.language?.toLowerCase() || 'ngôn ngữ'}`, value: 'all' },
+    { label: `${common?.en || 'Tiếng Anh'} (EN)`, value: 'en' },
+    { label: `${common?.zh || 'Tiếng Trung'} (ZH)`, value: 'zh' },
+    { label: `${common?.ja || 'Tiếng Nhật'} (JA)`, value: 'ja' }
   ];
 
   const scriptOptions = [
-    { label: 'Tất cả kịch bản', value: 'all' },
+    { label: `${v?.all || 'Tất cả'} ${v?.script?.toLowerCase() || 'kịch bản'}`, value: 'all' },
     ...availableScripts.map(script => ({
-      label: `${script.name} (${script.count} từ)`,
+      label: `${script.name} (${script.count} ${t.vocabularyNotebook?.wordCount?.split(' ')?.[1] || 'từ'})`,
       value: script.id
     }))
   ];
 
   const sortOptions = [
-    { label: 'Mới lưu nhất', value: 'newest' },
-    { label: 'Cũ nhất', value: 'oldest' },
-    { label: 'A → Z', value: 'a-z' },
-    { label: 'Z → A', value: 'z-a' },
-    { label: "Độ dài từ", value: "length" }
+    { label: v?.sortOptions?.newest || 'Mới lưu nhất', value: 'newest' },
+    { label: v?.sortOptions?.oldest || 'Cũ nhất', value: 'oldest' },
+    { label: v?.sortOptions?.az || 'A → Z', value: 'a-z' },
+    { label: v?.sortOptions?.za || 'Z → A', value: 'z-a' },
+    { label: v?.sortOptions?.length || 'Độ dài từ', value: 'length' }
   ];
 
   return (
@@ -47,7 +52,7 @@ export const VocabularyNotebookFilters = ({
         <SearchInput
           value={searchQuery}
           onChange={setSearchQuery}
-          placeholder="Tìm kiếm từ vựng, ý nghĩa..."
+          placeholder={v?.searchPlaceholder || 'Tìm kiếm từ vựng, ý nghĩa...'}
         />
       </div>
 
@@ -56,7 +61,7 @@ export const VocabularyNotebookFilters = ({
           options={languageOptions}
           value={languageFilter}
           onChange={(val) => setLanguageFilter(val)}
-          placeholder="Ngôn ngữ"
+          placeholder={v?.language || 'Ngôn ngữ'}
           dropdownClassName="w-48"
         />
 
@@ -64,7 +69,7 @@ export const VocabularyNotebookFilters = ({
           options={scriptOptions}
           value={scriptFilter}
           onChange={(val) => setScriptFilter(val)}
-          placeholder="Kịch bản"
+          placeholder={v?.script || 'Kịch bản'}
           dropdownClassName="w-64"
         />
 
@@ -72,7 +77,7 @@ export const VocabularyNotebookFilters = ({
           options={sortOptions}
           value={sortBy}
           onChange={(val) => setSortBy(val)}
-          placeholder="Sắp xếp"
+          placeholder={v?.sort || 'Sắp xếp'}
           dropdownClassName="w-48"
         />
 
