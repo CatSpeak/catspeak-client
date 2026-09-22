@@ -143,7 +143,10 @@ const SocialProfileHeader = ({
           </PillButton>
 
           {isTeacher && (
-            <Link to={`/explore/teachers/${encodeURIComponent(teacherSlug)}`}>
+            <Link
+              to={`/explore/teachers/${encodeURIComponent(teacherSlug)}`}
+              className="inline-flex items-center max-[425px]:flex-1"
+            >
               <PillButton
                 variant="secondary"
                 startIcon={<GraduationCap className="w-4 h-4" />}
@@ -188,13 +191,17 @@ const SocialProfileHeader = ({
           </PillButton>
 
           {isTeacher && (
-            <Link to={`/explore/teachers/${encodeURIComponent(teacherSlug)}`}>
-              <PillButton
-                variant="ghost"
-                startIcon={<ExternalLink className="w-4 h-4" />}
-                title={t.profile?.instructor?.viewPublicPage || "Xem trang giảng viên công khai"}
-                className="px-2.5"
-              />
+            <Link
+              to={`/explore/teachers/${encodeURIComponent(teacherSlug)}`}
+              title={t.profile?.instructor?.viewPublicPage || "Xem trang giảng viên công khai"}
+              aria-label={t.profile?.instructor?.viewPublicPage || "Xem trang giảng viên công khai"}
+              className="inline-flex items-center justify-center h-12 shrink-0"
+            >
+              <div
+                className="w-10 h-10 rounded-full bg-cath-red-700 text-white hover:brightness-90 active:brightness-75 transition flex items-center justify-center shadow-xs cursor-pointer"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </div>
             </Link>
           )}
         </div>
@@ -203,7 +210,7 @@ const SocialProfileHeader = ({
   )
 
   const headerInfo = (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5 pt-3 md:pt-4">
       {/* Name and Badges */}
       <div className="flex items-center flex-wrap gap-2.5">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight truncate max-w-full">
