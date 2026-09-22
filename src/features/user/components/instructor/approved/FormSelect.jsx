@@ -11,11 +11,12 @@ const FormSelect = ({
   disabled = false,
 }) => (
   <Dropdown
+    className="w-full"
     options={options}
     value={value}
     onChange={onChange}
     disabled={disabled}
-    dropdownClassName="max-w-[400px]"
+    dropdownClassName="w-full min-w-full"
     trigger={(isOpen, selectedOption, toggle) => (
       <button
         type="button"

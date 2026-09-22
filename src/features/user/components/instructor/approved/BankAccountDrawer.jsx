@@ -504,6 +504,7 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
               {ins.bankLabel || "Ngân hàng"}
             </span>
             <Dropdown
+              className="w-full"
               options={bankOptions}
               value={bankBin}
               onChange={setBankBin}
@@ -514,7 +515,7 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
                 ins.bankSearchPlaceholder || "Tìm kiếm ngân hàng..."
               }
               maxHeightClass="max-h-[280px]"
-              dropdownClassName="w-[360px]"
+              dropdownClassName="w-full min-w-full"
               renderOption={(option) => (
                 <div className="flex w-full items-center gap-2.5 px-3 py-2">
                   <BankLogo logo={option.logo} name={option.label} />

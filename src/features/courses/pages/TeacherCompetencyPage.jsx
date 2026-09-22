@@ -259,7 +259,7 @@ const TeacherCompetencyPage = () => {
           {/* Avatar + Identity + Stats */}
           <div className="flex items-center gap-4 min-w-0">
             {/* Avatar 72x72 */}
-            <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-2xs shrink-0 flex items-center justify-center select-none">
+            <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shadow-2xs shrink-0 flex items-center justify-center select-none">
               {teacher.avatarUrl && !avatarError ? (
                 <img
                   src={teacher.avatarUrl}

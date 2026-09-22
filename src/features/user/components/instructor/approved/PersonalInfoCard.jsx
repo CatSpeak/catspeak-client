@@ -3,7 +3,7 @@ import { ChevronDown, Globe, Languages, MapPin, Pencil, User } from "lucide-reac
 import FluentCard from "@/shared/components/ui/FluentCard"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { countryOptions } from "@/shared/constants/countriesOptions"
+import { countryOptions, getCountryOption } from "@/shared/constants/countriesOptions"
 import { useUpdateInstructorBasicInfoMutation } from "@/store/api/instructorApi"
 import { parseApiError } from "@/shared/utils/apiError"
 import { toast } from "@/shared/utils/toastBridge"
@@ -70,6 +70,12 @@ const PersonalInfoCard = ({ profile, t }) => {
       },
     ],
     [t],
+  )
+
+  const rawNationality = pick(profile, "nationality", "Nationality")
+  const nationalityOption = useMemo(
+    () => getCountryOption(rawNationality),
+    [rawNationality],
   )
 
   const startEdit = () => {
@@ -318,9 +324,16 @@ const PersonalInfoCard = ({ profile, t }) => {
             icon={<Globe size={20} />}
             label={ins.nationality || "Quốc tịch"}
           >
-            <span className="break-words text-xs text-[#101828]">
-              {pick(profile, "nationality", "Nationality") || "—"}
-            </span>
+            {nationalityOption ? (
+              <span className="inline-flex items-center gap-2 text-xs text-[#101828]">
+                {nationalityOption.icon}
+                <span>{nationalityOption.label}</span>
+              </span>
+            ) : (
+              <span className="break-words text-xs text-[#101828]">
+                {rawNationality || "—"}
+              </span>
+            )}
           </Row>
           <Row
             icon={<Languages size={20} />}
