@@ -15,9 +15,8 @@ import { BankAccountList } from "@/features/bank-accounts"
 const AccountInfoPage = () => {
   const { t } = useLanguage()
   const { isTeacher } = useRoleOverride()
-  // Teacher accounts no longer use this page (redirected to
-  // /setting/instructor). Hide the teacher-profile concerns here so no copy
-  // remains if the URL is reached before the redirect resolves.
+  // Teacher accounts manage professional/verification details on /setting/instructor.
+  // This page provides account-level settings (username, nickname, password).
   const isTeacherAccount = isTeacher === true
 
   // Fetch private profile

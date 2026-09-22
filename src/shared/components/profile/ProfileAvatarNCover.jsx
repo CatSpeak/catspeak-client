@@ -42,6 +42,7 @@ const ProfileAvatarNCover = ({
   coverClassName = "",
   avatarClassName = "",
   actions = null,
+  headerInfo = null,
   children = null,
 }) => {
   const profileData = profile ?? formData ?? user ?? {}
@@ -195,7 +196,7 @@ const ProfileAvatarNCover = ({
     }
   }
 
-  const hasBottomContent = Boolean(children || actions)
+  const hasBottomContent = Boolean(children || actions || headerInfo)
 
   const renderCover = (hasFullBorder = false) => (
     <div
@@ -245,8 +246,8 @@ const ProfileAvatarNCover = ({
       className={`${
         isFloating
           ? "absolute -bottom-14 md:-bottom-16 left-6 sm:left-8 z-20 group"
-          : "-mt-24 md:-mt-28 mb-5 relative z-10"
-      } p-1 bg-white rounded-full w-fit shadow-sm`}
+          : "-mt-16 sm:-mt-20 md:-mt-24 mb-2 md:mb-0 relative z-10"
+      } p-1 bg-white rounded-full w-fit shadow-md shrink-0`}
     >
       <div
         className={`relative rounded-full overflow-hidden ${
@@ -361,17 +362,34 @@ const ProfileAvatarNCover = ({
     >
       {renderCover(false)}
 
-      {/* Main Profile Info / Avatar Area */}
-      <div className="p-4 sm:p-6 relative border-b border-gray-100 flex flex-wrap sm:flex-nowrap items-start sm:items-end justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          {renderAvatar(false)}
-          {children}
+      {/* Main Profile Info / Avatar Area (Facebook layout) */}
+      <div className="px-4 sm:px-6 md:px-8 pb-5 pt-0 relative border-b border-gray-100">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          {/* Avatar + Primary Info */}
+          <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-5 flex-1 min-w-0">
+            {renderAvatar(false)}
+            {headerInfo && <div className="flex-1 min-w-0 pb-1">{headerInfo}</div>}
+          </div>
+
+          {/* Right side Actions (Edit, Follow, Request buttons) */}
+          {actions && (
+            <div className="flex items-center gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-wrap md:flex-nowrap md:pb-1">
+              {actions}
+            </div>
+          )}
         </div>
 
-        {/* Right side Actions (Edit, Follow, Request buttons) */}
-        {actions && (
-          <div className="ml-auto flex items-center justify-end gap-2 max-[425px]:w-full max-[425px]:justify-start shrink-0 flex-nowrap">
-            {actions}
+        {/* Fallback if no headerInfo passed: render children in place */}
+        {!headerInfo && children && (
+          <div className="mt-3">
+            {children}
+          </div>
+        )}
+
+        {/* Extended Section (Bio, Motto, Badges) */}
+        {headerInfo && children && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            {children}
           </div>
         )}
       </div>

@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react"
-import { ChevronDown, Globe, Languages, MapPin, Pencil, User } from "lucide-react"
+import { Calendar, ChevronDown, Globe, Languages, MapPin, Pencil, User } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
+import { DatePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { countryOptions, getCountryOption } from "@/shared/constants/countriesOptions"
 import { useUpdateInstructorBasicInfoMutation } from "@/store/api/instructorApi"
@@ -11,6 +12,16 @@ import { pick } from "./utils"
 
 const NAME_PATTERN = /^[\p{L}\s'’-]+$/u
 const NAME_HAS_LETTER = /\p{L}/u
+
+const formatDateDisplay = (raw) => {
+  if (!raw) return "—"
+  const str = String(raw).split("T")[0]
+  const parts = str.split("-")
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`
+  }
+  return str
+}
 
 const toCountryValue = (raw) => {
   if (!raw) return ""
@@ -48,6 +59,7 @@ const PersonalInfoCard = ({ profile, t }) => {
     address: "",
     introduction: "",
     nativeLanguage: "",
+    dateOfBirth: "",
   })
 
   const nativeLanguageOptions = useMemo(
@@ -79,6 +91,7 @@ const PersonalInfoCard = ({ profile, t }) => {
   )
 
   const startEdit = () => {
+    const rawDob = pick(profile, "dateOfBirth", "DateOfBirth")
     setForm({
       fullName: String(pick(profile, "fullName", "FullName") || ""),
       nationality: toCountryValue(pick(profile, "nationality", "Nationality")),
@@ -86,6 +99,7 @@ const PersonalInfoCard = ({ profile, t }) => {
       introduction: String(pick(profile, "introduction", "Introduction") || ""),
       nativeLanguage:
         pick(profile, "nativeLanguage", "NativeLanguage") || "",
+      dateOfBirth: rawDob ? String(rawDob).split("T")[0] : "",
     })
     setErrors({})
     setIsEditing(true)
@@ -113,6 +127,21 @@ const PersonalInfoCard = ({ profile, t }) => {
       next.fullName =
         ins.approvedFullNameInvalid ||
         "Họ và tên chỉ được chứa chữ cái, khoảng trắng, dấu gạch nối và dấu nháy đơn"
+    }
+
+    if (form.dateOfBirth) {
+      const dobDate = new Date(form.dateOfBirth)
+      const today = new Date()
+      let age = today.getFullYear() - dobDate.getFullYear()
+      const m = today.getMonth() - dobDate.getMonth()
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--
+      }
+      if (isNaN(dobDate.getTime())) {
+        next.dateOfBirth = ins.approvedDateOfBirthInvalid || "Ngày sinh không hợp lệ"
+      } else if (age < 18) {
+        next.dateOfBirth = ins.approvedDateOfBirthAge || "Giảng viên phải từ 18 tuổi trở lên"
+      }
     }
 
     if (!form.nationality) {
@@ -158,6 +187,7 @@ const PersonalInfoCard = ({ profile, t }) => {
         Address: form.address.trim(),
         Introduction: form.introduction.trim(),
         NativeLanguage: form.nativeLanguage,
+        DateOfBirth: form.dateOfBirth || null,
       }).unwrap()
       setIsEditing(false)
       toast.success(
@@ -209,6 +239,21 @@ const PersonalInfoCard = ({ profile, t }) => {
               containerClassName="!gap-1"
               disabled={isSaving}
             />
+          </Row>
+          <Row icon={<Calendar size={20} />} label={t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}>
+            <DatePicker
+              value={form.dateOfBirth}
+              onChange={(d) => {
+                if (!d) return
+                const formattedDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0')
+                handleChange("dateOfBirth", formattedDate)
+              }}
+              disabled={isSaving}
+              className={`w-full flex ${errors.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-[#D0D5DD]"} [&>button]:!h-9 [&>button]:!rounded-[7px] [&>button]:!bg-white [&>button]:w-full [&>button]:justify-between [&>button]:!text-xs`}
+            />
+            {errors.dateOfBirth && (
+              <p className="mt-1 text-xs text-red-500">{errors.dateOfBirth}</p>
+            )}
           </Row>
           <Row icon={<Globe size={20} />} label={ins.nationality || "Quốc tịch"}>
             <Dropdown
@@ -318,6 +363,14 @@ const PersonalInfoCard = ({ profile, t }) => {
           >
             <span className="break-words text-xs text-[#101828]">
               {pick(profile, "fullName", "FullName") || "—"}
+            </span>
+          </Row>
+          <Row
+            icon={<Calendar size={20} />}
+            label={t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}
+          >
+            <span className="break-words text-xs text-[#101828]">
+              {formatDateDisplay(pick(profile, "dateOfBirth", "DateOfBirth"))}
             </span>
           </Row>
           <Row

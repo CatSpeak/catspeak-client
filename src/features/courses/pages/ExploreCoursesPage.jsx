@@ -80,6 +80,11 @@ const ExploreCoursesPage = () => {
     sort: teacherSort !== "default" ? teacherSort : undefined,
   })
 
+  const isTeachersLoading = exploreTeachersQuery.isLoading
+  const isTeachersFetching = exploreTeachersQuery.isFetching
+  const teachersError = exploreTeachersQuery.error
+  const refetchTeachers = exploreTeachersQuery.refetch
+
   const teachersList = useMemo(() => {
     const raw = exploreTeachersQuery.data?.data
     return Array.isArray(raw) ? raw : []

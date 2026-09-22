@@ -212,7 +212,7 @@ export const navLinks = [
 ]
 
 export const settingNavLinks = [
-  { key: "accountInfo", path: "/setting/account", icon: User, roles: ["Student"] },
+  { key: "accountInfo", path: "/setting/account", icon: User },
   { key: "pricing", path: "/pricing", icon: CreditCard },
   { key: "instructor", path: "/setting/instructor", icon: GraduationCap },
   { key: "billing", path: "/billing", icon: CreditCard },
