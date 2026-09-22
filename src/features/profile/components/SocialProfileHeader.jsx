@@ -12,7 +12,6 @@ import {
   Sparkles,
   Quote,
   Globe,
-  MapPin,
   ExternalLink,
   ChevronDown,
   ChevronUp,
@@ -237,7 +236,7 @@ const SocialProfileHeader = ({
         )}
       </div>
 
-      {/* Stats & Location Meta */}
+      {/* Stats Meta */}
       <div className="flex items-center flex-wrap gap-2 text-sm text-gray-500 mt-0.5">
         <span className="font-semibold text-gray-800">
           {friendsCount}{" "}
@@ -252,15 +251,6 @@ const SocialProfileHeader = ({
             {t.profile?.friends?.subTabs?.followers || "người theo dõi"}
           </span>
         </span>
-        {profile?.address && (
-          <>
-            <span className="w-1 h-1 rounded-full bg-gray-300" />
-            <span className="inline-flex items-center gap-1 text-xs text-gray-500">
-              <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              {profile.address}
-            </span>
-          </>
-        )}
       </div>
     </div>
   )
