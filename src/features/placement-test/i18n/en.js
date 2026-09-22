@@ -210,6 +210,7 @@ export default {
       pauseBudgetChip: "⏳ {{time}} min",
       pauseLeaveCta: "Leave Exam Room Temporarily",
       pauseResumeCta: "Resume the Test Now ▷",
+      pauseCancelCta: "Cancel test and restart from beginning",
       reconnectTitle: "Connection Lost",
       reconnectBody:
         "The audio connection to the AI exam room was interrupted by an unstable network signal. The system is trying to reconnect.",

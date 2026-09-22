@@ -16,10 +16,18 @@ import {
 import { SESSION_STATUS } from "../constants/session"
 import { CONNECTION_LOST_EVENT } from "../constants/lifecycle"
 import { TOTAL_TURNS, evaluateTurn, selectNextQuestion } from "../engine"
-import { placementTestApi, useSubmitTurnMutation } from "../api"
+import {
+  placementTestApi,
+  useCancelSessionMutation,
+  useSubmitTurnMutation,
+} from "../api"
 import { SILENCE_LEVEL } from "../services/audio/constants"
 import { createSilenceTracker } from "../services/speech"
-import { readActiveSession, saveActiveSession } from "../utils/sessionStorage"
+import {
+  clearActiveSession,
+  readActiveSession,
+  saveActiveSession,
+} from "../utils/sessionStorage"
 import {
   advancePauseBudget,
   remainingPauseBudget,
@@ -82,6 +90,7 @@ const useConversationLoop = () => {
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
   const [submitTurn] = useSubmitTurnMutation()
+  const [cancelSession] = useCancelSessionMutation()
   const [triggerGetQuestion] = placementTestApi.useLazyGetQuestionQuery()
 
   const {
@@ -544,6 +553,23 @@ const useConversationLoop = () => {
     navigate(PLACEMENT_TEST_PATH, { replace: true })
   }, [handleStopUserAudio, navigate, pauseSpentMs, stopAudioListening, stopSpeakingText, stopAudio])
 
+  const handleCancel = useCallback(async () => {
+    const current = stateRef.current
+    if (current.session?.id) {
+      try {
+        await cancelSession({ sessionId: current.session.id }).unwrap()
+      } catch {
+        // Ignore network error on cancel
+      }
+    }
+    clearActiveSession()
+    handleStopUserAudio()
+    stopAudioListening()
+    stopSpeakingText()
+    stopAudio()
+    navigate(PLACEMENT_TEST_PATH, { replace: true })
+  }, [cancelSession, handleStopUserAudio, navigate, stopAudio, stopAudioListening, stopSpeakingText])
+
   const handleConnectionLost = useCallback(() => {
     if (connectionLost) return
     reconnectRef.current = startReconnect()
@@ -740,6 +766,7 @@ const useConversationLoop = () => {
     handlePause,
     handleResume,
     handleLeave,
+    handleCancel,
     handleReconnectNow,
     handleToggleRecord,
     handleStartRecord,

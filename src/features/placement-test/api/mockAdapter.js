@@ -11,6 +11,7 @@ import { getRetakeEligibility } from "../utils/cooldown"
 import { isUnfinishedSession } from "../utils/sessionLifecycle"
 import { upsertTurn } from "../utils/turns"
 import {
+  clearActiveSession,
   readActiveSession,
   readResult,
   saveActiveSession,
@@ -334,3 +335,25 @@ export const adjustLevelMock = async (
     },
   }
 }
+
+export const cancelSessionMock = async (
+  { sessionId } = {},
+  {
+    delayMs = MOCK_LATENCY_MS,
+    read = readActiveSession,
+    clear = clearActiveSession,
+  } = {},
+) => {
+  await wait(delayMs)
+  const session = read()
+  if (session && (!sessionId || session.id === sessionId)) {
+    clear()
+  }
+  return {
+    data: {
+      session_id: sessionId || session?.id,
+      status: SESSION_STATUS.CANCELLED,
+    },
+  }
+}
+

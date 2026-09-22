@@ -68,6 +68,11 @@ const PlacementTestPage = () => {
     }
   }
 
+  const handleDiscardSession = async () => {
+    await entry.cancelActiveSession()
+    setStep(PLACEMENT_TEST_STEPS.CONSENT)
+  }
+
   return (
     <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-8 md:px-8">
       <div className="mx-auto flex w-full max-w-[960px] flex-col items-start gap-6 lg:flex-row">
@@ -109,7 +114,7 @@ const PlacementTestPage = () => {
           expiresAt={entry.lifecycle.expiresAt}
           busy={entry.creating}
           onResume={entry.resume}
-          onDiscard={entry.restart}
+          onDiscard={handleDiscardSession}
         />
       )}
       {entry.lifecycle?.kind === "expired" && (

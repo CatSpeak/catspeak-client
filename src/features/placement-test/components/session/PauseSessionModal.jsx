@@ -11,6 +11,7 @@ const PauseSessionModal = ({
   answeredCount = 0,
   onResume,
   onLeave,
+  onCancel,
 }) => (
   <Modal
     open={open}
@@ -18,22 +19,33 @@ const PauseSessionModal = ({
     showCloseButton={false}
     className="md:max-w-lg"
     footer={
-      <div className="flex flex-col gap-2.5 sm:flex-row">
-        <PillButton
-          variant="secondary"
-          roundedClass="rounded-[10px]"
-          className="flex-1"
-          onClick={onLeave}
-        >
-          {copy.pauseLeaveCta}
-        </PillButton>
-        <PillButton
-          roundedClass="rounded-[10px]"
-          className="flex-1"
-          onClick={onResume}
-        >
-          {copy.pauseResumeCta}
-        </PillButton>
+      <div className="flex w-full flex-col gap-2.5">
+        <div className="flex flex-col gap-2.5 sm:flex-row">
+          <PillButton
+            variant="secondary"
+            roundedClass="rounded-[10px]"
+            className="flex-1"
+            onClick={onLeave}
+          >
+            {copy.pauseLeaveCta}
+          </PillButton>
+          <PillButton
+            roundedClass="rounded-[10px]"
+            className="flex-1"
+            onClick={onResume}
+          >
+            {copy.pauseResumeCta}
+          </PillButton>
+        </div>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-center text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline py-1"
+          >
+            {copy.pauseCancelCta || "Hủy bài thi và thi lại từ đầu"}
+          </button>
+        )}
       </div>
     }
   >

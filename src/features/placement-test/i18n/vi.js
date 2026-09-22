@@ -209,6 +209,7 @@ export default {
       pauseBudgetChip: "⏳ {{time}} phút",
       pauseLeaveCta: "Rời Phòng Thi Tạm Thời",
       pauseResumeCta: "Tiếp Tục Làm Bài Ngay ▷",
+      pauseCancelCta: "Hủy bài thi và thi lại từ đầu",
       reconnectTitle: "Mất Kết Nối Đường Truyền",
       reconnectBody:
         "Kết nối âm thanh với phòng thi AI bị gián đoạn do tín hiệu mạng không ổn định. Hệ thống đang thử tái lập kết nối.",

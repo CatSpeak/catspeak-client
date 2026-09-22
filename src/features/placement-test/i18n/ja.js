@@ -206,6 +206,7 @@ export default {
       pauseBudgetChip: "⏳ {{time}} 分",
       pauseLeaveCta: "一時的に試験室を離れる",
       pauseResumeCta: "今すぐ試験を再開 ▷",
+      pauseCancelCta: "テストを中止して最初からやり直す",
       reconnectTitle: "接続が切断されました",
       reconnectBody:
         "ネットワーク信号が不安定なため、AI 試験室との音声接続が中断されました。システムが再接続を試みています。",

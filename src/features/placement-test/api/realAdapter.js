@@ -13,6 +13,7 @@
 import { SESSION_STATUS } from "../constants/session"
 import { normalizeServerResult } from "../utils/result"
 import {
+  clearActiveSession,
   readActiveSession,
   readResult,
   saveActiveSession,
@@ -472,3 +473,48 @@ export const scoreSessionReal = async (
     },
   }
 }
+
+/** 8. Hủy phiên thi: POST /v1/placement/sessions/{id}/cancel */
+export const cancelSessionReal = async (
+  { sessionId } = {},
+  {
+    baseQuery,
+    api,
+    extraOptions,
+    read = readActiveSession,
+    clear = clearActiveSession,
+  } = {},
+) => {
+  const session = read()
+  const activeSessionId = sessionId || session?.id
+  if (!activeSessionId) {
+    clear()
+    return { data: { success: true, status: SESSION_STATUS.CANCELLED } }
+  }
+
+  const response = await baseQuery(
+    {
+      url: `/v1/placement/sessions/${activeSessionId}/cancel`,
+      method: "POST",
+    },
+    api,
+    extraOptions,
+  )
+
+  clear()
+
+  if (response.error) {
+    if (response.error.status === 404 || response.error.status === 410) {
+      return {
+        data: {
+          session_id: activeSessionId,
+          status: SESSION_STATUS.CANCELLED,
+        },
+      }
+    }
+    return normalizeError(response.error)
+  }
+
+  return { data: response.data }
+}
+

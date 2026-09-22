@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   adjustLevelReal,
+  cancelSessionReal,
   createSessionReal,
   getActiveSessionReal,
   getQuestionReal,
@@ -404,4 +405,32 @@ describe("realAdapter", () => {
 
     expect(res.data.result.band).toBe(3)
   })
+
+  it("cancelSessionReal makes POST /v1/placement/sessions/{id}/cancel and clears session", async () => {
+    inMemorySession = { id: "psess_12345" }
+    let cleared = false
+    const mockClear = () => {
+      cleared = true
+      inMemorySession = null
+    }
+
+    const mockBaseQuery = vi.fn().mockResolvedValue({
+      data: { session_id: "psess_12345", status: "cancelled" },
+    })
+
+    const res = await cancelSessionReal(
+      { sessionId: "psess_12345" },
+      { baseQuery: mockBaseQuery, read: mockRead, clear: mockClear },
+    )
+
+    expect(mockBaseQuery).toHaveBeenCalledWith(
+      { url: "/v1/placement/sessions/psess_12345/cancel", method: "POST" },
+      undefined,
+      undefined,
+    )
+    expect(res.data.status).toBe("cancelled")
+    expect(cleared).toBe(true)
+    expect(inMemorySession).toBeNull()
+  })
 })
+
