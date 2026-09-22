@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
@@ -11,8 +11,10 @@ const Popover = ({
   triggerClassName = "",
   animationDirection,
   onOpenChange,
+  openOnHover = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const hoverTimeoutRef = useRef(null)
 
   useEffect(() => {
     onOpenChange?.(isOpen)
@@ -26,6 +28,39 @@ const Popover = ({
   })
   const containerRef = useRef(null)
   const popoverRef = useRef(null)
+
+  const updateCoords = useCallback(() => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      const popoverEstimatedWidth = 220
+      const popoverEstimatedHeight = 120
+
+      let nextPlacement = placement
+      if (placement.endsWith("right") && rect.right < popoverEstimatedWidth) {
+        nextPlacement = placement.replace("right", "left")
+      } else if (
+        placement.endsWith("left") &&
+        window.innerWidth - rect.left < popoverEstimatedWidth
+      ) {
+        nextPlacement = placement.replace("left", "right")
+      }
+
+      if (
+        window.innerHeight - rect.bottom < popoverEstimatedHeight &&
+        rect.top > popoverEstimatedHeight
+      ) {
+        nextPlacement = nextPlacement.replace("bottom", "top")
+      }
+
+      setActualPlacement(nextPlacement)
+      setCoords({
+        topEdge: rect.top + window.scrollY,
+        bottomEdge: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        rightEdge: rect.right + window.scrollX,
+      })
+    }
+  }, [placement])
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -66,37 +101,24 @@ const Popover = ({
 
   const handleToggle = (e) => {
     e.stopPropagation()
-    if (!isOpen && containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect()
-      const popoverEstimatedWidth = 220
-      const popoverEstimatedHeight = 120 // Estimated height of content
-
-      let nextPlacement = placement
-      if (placement.endsWith("right") && rect.right < popoverEstimatedWidth) {
-        nextPlacement = placement.replace("right", "left")
-      } else if (
-        placement.endsWith("left") &&
-        window.innerWidth - rect.left < popoverEstimatedWidth
-      ) {
-        nextPlacement = placement.replace("left", "right")
-      }
-
-      if (
-        window.innerHeight - rect.bottom < popoverEstimatedHeight &&
-        rect.top > popoverEstimatedHeight
-      ) {
-        nextPlacement = nextPlacement.replace("bottom", "top")
-      }
-
-      setActualPlacement(nextPlacement)
-      setCoords({
-        topEdge: rect.top + window.scrollY,
-        bottomEdge: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
-        rightEdge: rect.right + window.scrollX,
-      })
+    if (!isOpen) {
+      updateCoords()
     }
     setIsOpen(!isOpen)
+  }
+
+  const handleMouseEnter = () => {
+    if (!openOnHover) return
+    clearTimeout(hoverTimeoutRef.current)
+    updateCoords()
+    setIsOpen(true)
+  }
+
+  const handleMouseLeave = () => {
+    if (!openOnHover) return
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsOpen(false)
+    }, 150)
   }
 
   const xTrans = actualPlacement.endsWith("right") ? "-100%" : "0"
@@ -118,6 +140,10 @@ const Popover = ({
           : `${coords.left}px`,
         transform,
       }}
+      onMouseEnter={() => {
+        if (openOnHover) clearTimeout(hoverTimeoutRef.current)
+      }}
+      onMouseLeave={handleMouseLeave}
     >
       <AnimatePresence>
         {isOpen && (
@@ -141,6 +167,8 @@ const Popover = ({
     <div
       className={`relative flex items-center justify-center ${className}`}
       ref={containerRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div
         onClick={handleToggle}

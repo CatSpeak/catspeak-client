@@ -1,13 +1,12 @@
 import React from "react"
-import { Pencil } from "lucide-react"
+import { Link } from "react-router-dom"
+import { Pencil, ChevronDown, Info } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import { DatePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
-import { ChevronDown } from "lucide-react"
 import { countryOptions, phonePrefixes } from "@/shared/constants/countriesOptions"
-import AccountIdentitySection from "./AccountIdentitySection"
 
 const AccountSettingsForm = ({
   formData,
@@ -21,12 +20,6 @@ const AccountSettingsForm = ({
   errors,
   t,
   isTeacherAccount = false,
-  showIdentitySection = false,
-  idCardFrontFile = null,
-  idCardBackFile = null,
-  onPickIdFile,
-  idCardFrontUrl = null,
-  idCardBackUrl = null,
 }) => {
   const isEditingPersonal = editingField === "personalInfo"
   const isEditingSecurity = editingField === "securityInfo"
@@ -44,7 +37,7 @@ const AccountSettingsForm = ({
             : "pl-[120px]"
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch">
+    <div className={isTeacherAccount ? "w-full flex flex-col gap-6" : "grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch"}>
       <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-border rounded-xl shadow-sm !justify-start">
       {/* 1. THÔNG TIN CÁ NHÂN */}
       <div className="flex flex-col gap-6">
@@ -80,24 +73,6 @@ const AccountSettingsForm = ({
           )}
         </div>
 
-        {isTeacherAccount && (
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-800">
-            {t.profile?.personalInfo?.fullName || "Họ tên"}
-          </label>
-          <TextInput
-            name="fullName"
-            value={formData.fullName || ""}
-            onChange={onChange}
-            disabled={!isEditingPersonal || isUpdating}
-            placeholder={t.profile?.personalInfo?.enterFullName || "Nhập họ tên..."}
-            error={errors?.fullName}
-            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.fullName ? "border-red-500" : "border-border"}`}
-            containerClassName="!gap-0"
-          />
-        </div>
-        )}
-
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-800">
@@ -132,77 +107,102 @@ const AccountSettingsForm = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.country || "Quốc tịch"}
-            </label>
-          <Dropdown
-            options={countryOptions}
-            value={formData.country}
-            onChange={(val) => onCountryChange(val)}
-            disabled={!isEditingPersonal || isUpdating}
-            enableSearch={true}
-            searchPlaceholder={t.profile?.personalInfo?.searchCountry || "Tìm kiếm quốc gia..."}
-            placeholder={t.profile?.personalInfo?.selectCountry || "Chọn quốc gia"}
-            trigger={(isOpen, selectedOption, toggle) => (
-              <button
-                type="button"
-                onClick={toggle}
-                disabled={!isEditingPersonal || isUpdating}
-                className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${
-                  errors?.country ? "border-red-500" : "border-border"
-                }`}
+        {isTeacherAccount && (
+          <div className="rounded-xl bg-blue-50/70 border border-blue-200/80 p-3.5 text-xs text-blue-800 flex items-start gap-2.5">
+            <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-600" />
+            <div>
+              <span>
+                {t.profile?.personalInfo?.teacherManagedNotice ||
+                  "Họ tên, ngày sinh, quốc tịch và địa chỉ của giảng viên được quản lý tại "}
+              </span>
+              <Link
+                to="/setting/instructor"
+                className="font-semibold text-cath-red-700 hover:underline"
               >
-                <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400" : ""}`}>
-                  {selectedOption?.icon}
-                  <span className="truncate">
-                    {selectedOption ? selectedOption.label : (t.profile?.personalInfo?.selectCountry || "Chọn quốc gia")}
-                  </span>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-              </button>
-            )}
-          />
-        </div>
+                {t.nav?.instructor || "Hồ sơ giáo viên"}
+              </Link>
+              .
+            </div>
+          </div>
+        )}
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-800">
-            {t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}
-          </label>
-          <DatePicker
-            value={formData.dateOfBirth}
-            onChange={(d) => {
-              if (!d) return;
-              const formattedDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
-              onChange({ target: { name: "dateOfBirth", value: formattedDate } })
-            }}
-            disabled={!isEditingPersonal || isUpdating}
-            className={`w-full flex ${errors?.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 [&>button]:w-full [&>button]:justify-between`}
-          />
-        </div>
-        </div>
+        {!isTeacherAccount && (
+          <>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-800">
+                  {t.profile?.personalInfo?.country || "Quốc tịch"}
+                </label>
+                <Dropdown
+                  options={countryOptions}
+                  value={formData.country}
+                  onChange={(val) => onCountryChange(val)}
+                  disabled={!isEditingPersonal || isUpdating}
+                  enableSearch={true}
+                  searchPlaceholder={t.profile?.personalInfo?.searchCountry || "Tìm kiếm quốc gia..."}
+                  placeholder={t.profile?.personalInfo?.selectCountry || "Chọn quốc gia"}
+                  trigger={(isOpen, selectedOption, toggle) => (
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      disabled={!isEditingPersonal || isUpdating}
+                      className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${
+                        errors?.country ? "border-red-500" : "border-border"
+                      }`}
+                    >
+                      <div className={`flex items-center gap-2 text-sm truncate min-w-0 flex-1 ${!selectedOption ? "text-gray-400" : ""}`}>
+                        {selectedOption?.icon}
+                        <span className="truncate">
+                          {selectedOption ? selectedOption.label : (t.profile?.personalInfo?.selectCountry || "Chọn quốc gia")}
+                        </span>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  )}
+                />
+              </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-800">
-            {t.profile?.personalInfo?.address || "Địa chỉ"}
-          </label>
-          <TextInput
-            name="address"
-            value={formData.address || ""}
-            onChange={onChange}
-            disabled={!isEditingPersonal || isUpdating}
-            placeholder={t.profile?.personalInfo?.enterAddress || "Nhập địa chỉ của bạn..."}
-            error={errors?.address}
-            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.address ? "border-red-500" : "border-border"}`}
-            containerClassName="!gap-0"
-          />
-        </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-800">
+                  {t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}
+                </label>
+                <DatePicker
+                  value={formData.dateOfBirth}
+                  onChange={(d) => {
+                    if (!d) return;
+                    const formattedDate = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0');
+                    onChange({ target: { name: "dateOfBirth", value: formattedDate } })
+                  }}
+                  disabled={!isEditingPersonal || isUpdating}
+                  className={`w-full flex ${errors?.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 [&>button]:w-full [&>button]:justify-between`}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-800">
+                {t.profile?.personalInfo?.address || "Địa chỉ"}
+              </label>
+              <TextInput
+                name="address"
+                value={formData.address || ""}
+                onChange={onChange}
+                disabled={!isEditingPersonal || isUpdating}
+                placeholder={t.profile?.personalInfo?.enterAddress || "Nhập địa chỉ của bạn..."}
+                error={errors?.address}
+                className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.address ? "border-red-500" : "border-border"}`}
+                containerClassName="!gap-0"
+              />
+            </div>
+          </>
+        )}
 
       </div>
     </FluentCard>
 
-      {/* 2. TÀI KHOẢN VÀ BẢO MẬT */}
+      {/* 2. TÀI KHOẢN VÀ BẢO MẬT — email/phone/CCCD moved to /setting/instructor
+          for teacher accounts, so this card only renders for non-teachers. */}
+      {!isTeacherAccount && (
       <FluentCard className="flex flex-col w-full h-full p-6 sm:p-8 gap-8 border-border rounded-xl shadow-sm !justify-start">
         <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
@@ -313,21 +313,9 @@ const AccountSettingsForm = ({
           </div>
         </div>
 
-        {isTeacherAccount && showIdentitySection && (
-        <div className="w-full pt-2 border-t border-border">
-          <AccountIdentitySection
-            frontFile={idCardFrontFile}
-            backFile={idCardBackFile}
-            frontUrl={idCardFrontUrl}
-            backUrl={idCardBackUrl}
-            t={t}
-            isEditing={isEditingSecurity}
-            onPickFile={onPickIdFile}
-          />
-        </div>
-        )}
         </div>
       </FluentCard>
+      )}
     </div>
   )
 }

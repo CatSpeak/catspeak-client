@@ -33,6 +33,7 @@ import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
+import InfoTooltip from "@/shared/components/ui/InfoTooltip"
 import {
   getInstructorFormLanguages,
   getLocalizedLanguageName,
@@ -324,6 +325,47 @@ const CreateClassPage = () => {
   const labelCommissionNote = (cc.commissionNote || "The platform will withhold a {{commission}}% commission fee on each successful student enrollment.")
     .replace("{{commission}}", feeDetails.commissionRate)
     .replace("{{amount}}", formatCurrency(feeDetails.commissionPerStudent))
+
+  const classCapacityNum = parseInt(capacity, 10) || 0
+
+  const feeTiersTooltipContent = useMemo(() => (
+    <div className="flex flex-col gap-2 min-w-[260px] p-1">
+      <div className="font-bold text-gray-900 border-b border-gray-100 pb-1.5 text-xs">
+        {cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
+      </div>
+      <table className="w-full text-left text-[11px] border-collapse">
+        <thead>
+          <tr className="border-b border-gray-100 text-gray-400 font-semibold">
+            <th className="py-1 pr-2">{cc.classOpeningFeeTierHeader || "Quy mô lớp"}</th>
+            <th className="py-1 px-2 text-right">{cc.classOpeningFeeHeader || "Phí mở lớp"}</th>
+            <th className="py-1 pl-2 text-right">{cc.commissionRateHeader || "Hoa hồng"}</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-50 text-gray-700">
+          <tr className={classCapacityNum >= 1 && classCapacityNum <= 6 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
+            <td className="py-1.5 pr-2">1 - 6 slots</td>
+            <td className="py-1.5 px-2 text-right text-emerald-600 font-semibold">{cc.free || "Miễn phí"}</td>
+            <td className="py-1.5 pl-2 text-right">10%</td>
+          </tr>
+          <tr className={classCapacityNum >= 7 && classCapacityNum <= 20 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
+            <td className="py-1.5 pr-2">7 - 20 slots</td>
+            <td className="py-1.5 px-2 text-right font-semibold">200.000đ</td>
+            <td className="py-1.5 pl-2 text-right">12%</td>
+          </tr>
+          <tr className={classCapacityNum >= 21 && classCapacityNum <= 50 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
+            <td className="py-1.5 pr-2">21 - 50 slots</td>
+            <td className="py-1.5 px-2 text-right font-semibold">500.000đ</td>
+            <td className="py-1.5 pl-2 text-right">15%</td>
+          </tr>
+          <tr className={classCapacityNum > 50 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
+            <td className="py-1.5 pr-2">&gt; 50 slots</td>
+            <td className="py-1.5 px-2 text-right text-emerald-600 font-semibold">{cc.free || "Miễn phí"}</td>
+            <td className="py-1.5 pl-2 text-right">20%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  ), [classCapacityNum, cc])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -922,7 +964,11 @@ const CreateClassPage = () => {
                   >
                     {cc.requireMinAttendanceLabel || "Yêu cầu tỷ lệ tham dự tối thiểu"}
                   </span>
-                  <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
+                  <InfoTooltip
+                    text={cc.requireMinAttendanceTooltip || "Học viên cần tham dự tối thiểu tỷ lệ số buổi này để đủ điều kiện hoàn thành lớp học."}
+                    placement="top-right"
+                    ariaLabel={cc.requireMinAttendanceLabel || "Yêu cầu tỷ lệ tham dự tối thiểu"}
+                  />
                 </div>
 
                 {/* Content row */}
@@ -963,7 +1009,11 @@ const CreateClassPage = () => {
                   <span className="font-bold text-sm text-gray-800 flex-1">
                     {cc.requireAttendanceTypeLabel || "Yêu cầu Lần tham dự"}
                   </span>
-                  <Info size={15} className="text-gray-400 cursor-pointer hover:text-gray-600 transition-colors shrink-0" />
+                  <InfoTooltip
+                    text={cc.requireAttendanceTypeTooltip || "Quy định cách tính khi học viên vào lớp muộn: có tính vào buổi tham dự hay không."}
+                    placement="top-right"
+                    ariaLabel={cc.requireAttendanceTypeLabel || "Yêu cầu Lần tham dự"}
+                  />
                 </div>
 
                 {/* Radio options */}
@@ -1344,25 +1394,49 @@ const CreateClassPage = () => {
           {/* Left Side: Fee detail (only shown when creating a new class) */}
           {!isEditMode && (
             <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="w-9 h-9 rounded-xl bg-[#15803D]/10 flex items-center justify-center text-[#15803D] shrink-0">
-                <Info size={17} />
-              </div>
+              <InfoTooltip
+                content={feeTiersTooltipContent}
+                placement="top-left"
+                trigger={
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
+                      feeDetails.openingFee > 0
+                        ? "bg-[#990011]/10 text-[#990011] hover:bg-[#990011]/20"
+                        : "bg-[#15803D]/10 text-[#15803D] hover:bg-[#15803D]/20"
+                    }`}
+                    title={cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
+                  >
+                    <Info size={17} />
+                  </div>
+                }
+              />
               <div className="flex flex-col gap-1 min-w-0">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
-                  {cc.classOpeningFee || "CLASS OPENING FEE"}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">
+                    {cc.classOpeningFee || "CLASS OPENING FEE"}
+                  </span>
+                  <InfoTooltip
+                    content={feeTiersTooltipContent}
+                    placement="top-left"
+                    size={13}
+                    ariaLabel={cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
+                  />
+                </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {feeDetails.openingFee > 0 && (
-                    <span className="text-gray-400 line-through font-bold text-sm leading-none">
+                  {feeDetails.openingFee > 0 ? (
+                    <span className="text-gray-950 font-black text-xl leading-none">
                       {formatCurrencyVND(feeDetails.openingFee)}
                     </span>
+                  ) : (
+                    <>
+                      <span className="text-[#15803D] font-black text-xl leading-none">
+                        {formatCurrencyVND(0)}
+                      </span>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E8F8F0] text-[#15803D] border border-[#15803D]/20">
+                        {cc.free || "Miễn phí"}
+                      </span>
+                    </>
                   )}
-                  <span className="text-[#15803D] font-black text-xl leading-none">
-                    {formatCurrencyVND(0)}
-                  </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#E8F8F0] text-[#15803D] border border-[#15803D]/20">
-                    {cc.currentlyFreeNote || "Currently free to open classes"}
-                  </span>
                 </div>
               </div>
             </div>
@@ -1399,7 +1473,11 @@ const CreateClassPage = () => {
               disabled={isFormBusy}
               className="w-full sm:w-auto h-11 px-7 bg-[#990011] hover:bg-[#80000e] text-white font-bold text-xs rounded-full transition-all active:scale-95 shadow-sm hover:shadow-md flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              {isEditMode ? (cc.saveChanges || "Save Changes") : (cc.confirmPay || "Confirm & Pay")}
+              {isEditMode
+                ? (cc.saveChanges || "Save Changes")
+                : (feeDetails.openingFee > 0
+                  ? (cc.confirmPay || "Confirm & Pay")
+                  : (cc.createClass || "Create Class"))}
             </button>
           </div>
         </div>

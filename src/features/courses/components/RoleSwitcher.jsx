@@ -27,7 +27,7 @@ export const useRoleOverride = () => {
   // isTeacherProfile determines if the account has teacher privileges
   const isTeacherProfile = isRoleResolved ? profile?.isTeacher : false
   const currentRole =
-    user?.accountType || (isTeacherProfile ? "Teacher" : "Student")
+    user?.accountType || "Student"
 
   const switchRole = useCallback(
     async (newRole) => {

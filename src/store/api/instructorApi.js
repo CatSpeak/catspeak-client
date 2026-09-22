@@ -74,55 +74,6 @@ export function buildInstructorFormData({
   return fd
 }
 
-/**
- * Build a FormData object with teaching-only fields (Approved-teacher updates).
- * No personal fields, no OTP — the live profile keeps serving meanwhile.
- */
-export function buildTeachingFormData({
-  languagesTeach,
-  nativeLanguage,
-  introduction,
-  credentials,
-  introVideo,
-  introVideoUrl,
-  removeIntroVideo,
-}) {
-  const fd = new FormData()
-
-  if (nativeLanguage) fd.append("NativeLanguage", nativeLanguage)
-  if (introduction) fd.append("Introduction", introduction)
-
-  if (languagesTeach) {
-    fd.append(
-      "LanguagesTeach",
-      typeof languagesTeach === "string"
-        ? languagesTeach
-        : JSON.stringify(languagesTeach),
-    )
-  }
-
-  // Credentials: keep existing URLs + append newly selected files.
-  if (Array.isArray(credentials)) {
-    let sentUrlCount = 0
-    credentials.forEach((item) => {
-      if (item instanceof File) fd.append("Credentials", item)
-      else if (typeof item === "string" && item) {
-        fd.append("CredentialUrls", item)
-        sentUrlCount += 1
-      }
-    })
-    // Signal an explicitly-empty list (teacher removed every certificate).
-    if (sentUrlCount === 0) fd.append("CredentialUrls", "")
-  }
-
-  if (introVideo instanceof File) fd.append("IntroVideo", introVideo)
-  else if (typeof introVideo === "string" && introVideo) fd.append("IntroVideoUrl", introVideo)
-  else if (typeof introVideoUrl === "string" && introVideoUrl) fd.append("IntroVideoUrl", introVideoUrl)
-  if (removeIntroVideo === true) fd.append("RemoveIntroVideo", "true")
-
-  return fd
-}
-
 export const instructorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getInstructorProfile: builder.query({
@@ -154,30 +105,89 @@ export const instructorApi = baseApi.injectEndpoints({
       invalidatesTags: ["InstructorProfile"],
     }),
 
-    getPendingTeachingUpdate: builder.query({
-      query: () => ({
-        url: "/InstructorProfile/my/teaching-update",
-        method: "GET",
+    updateInstructorBasicInfo: builder.mutation({
+      query: (body) => ({
+        url: "/InstructorProfile/my/basic-info",
+        method: "PUT",
+        body,
       }),
-      providesTags: ["TeachingUpdate"],
+      invalidatesTags: ["InstructorProfile"],
     }),
 
-    submitTeachingUpdate: builder.mutation({
-      query: (data) => ({
-        url: "/InstructorProfile/my/teaching",
+    updateInstructorIdCard: builder.mutation({
+      query: (formData) => ({
+        url: "/InstructorProfile/my/id-card",
         method: "PUT",
-        body: data instanceof FormData ? data : buildTeachingFormData(data),
+        body: formData,
         formData: true,
       }),
-      invalidatesTags: ["TeachingUpdate"],
+      invalidatesTags: ["InstructorProfile"],
     }),
 
-    cancelTeachingUpdate: builder.mutation({
+    replaceInstructorIntroVideo: builder.mutation({
+      query: (formData) => ({
+        url: "/InstructorProfile/my/intro-video",
+        method: "PUT",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["InstructorProfile"],
+    }),
+
+    removeInstructorIntroVideo: builder.mutation({
       query: () => ({
-        url: "/InstructorProfile/my/teaching-update",
+        url: "/InstructorProfile/my/intro-video",
         method: "DELETE",
       }),
-      invalidatesTags: ["TeachingUpdate"],
+      invalidatesTags: ["InstructorProfile"],
+    }),
+
+    getLanguageRequests: builder.query({
+      query: () => ({
+        url: "/InstructorProfile/language-requests",
+        method: "GET",
+      }),
+      providesTags: ["LanguageRequests"],
+    }),
+
+    getLanguageRequestDetail: builder.query({
+      query: (id) => ({
+        url: `/InstructorProfile/language-requests/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["LanguageRequests"],
+    }),
+
+    deleteLanguageRequest: builder.mutation({
+      query: (id) => ({
+        url: `/InstructorProfile/language-requests/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["LanguageRequests"],
+    }),
+
+    getInstructorLanguages: builder.query({
+      query: () => ({
+        url: "/InstructorProfile/languages",
+        method: "GET",
+      }),
+    }),
+
+    getInstructorLanguageLevels: builder.query({
+      query: (languageId) => ({
+        url: `/InstructorProfile/languages/${languageId}/levels`,
+        method: "GET",
+      }),
+    }),
+
+    submitLanguageRequest: builder.mutation({
+      query: (formData) => ({
+        url: "/InstructorProfile/language-requests",
+        method: "POST",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["LanguageRequests"],
     }),
 
     getHonoredInstructors: builder.query({
@@ -192,6 +202,23 @@ export const instructorApi = baseApi.injectEndpoints({
       },
       providesTags: ["HonoredInstructors"],
     }),
+
+    getInstructorCompetency: builder.query({
+      query: () => ({
+        url: "/InstructorProfile/my/competency",
+        method: "GET",
+      }),
+      providesTags: ["InstructorCompetency"],
+    }),
+
+    updateInstructorCompetency: builder.mutation({
+      query: (body) => ({
+        url: "/InstructorProfile/my/competency",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["InstructorCompetency", "InstructorProfile"],
+    }),
   }),
 })
 
@@ -199,8 +226,17 @@ export const {
   useGetInstructorProfileQuery,
   useApplyInstructorMutation,
   useUpdateInstructorProfileMutation,
-  useGetPendingTeachingUpdateQuery,
-  useSubmitTeachingUpdateMutation,
-  useCancelTeachingUpdateMutation,
+  useUpdateInstructorBasicInfoMutation,
+  useUpdateInstructorIdCardMutation,
+  useReplaceInstructorIntroVideoMutation,
+  useRemoveInstructorIntroVideoMutation,
+  useGetLanguageRequestsQuery,
+  useGetLanguageRequestDetailQuery,
+  useDeleteLanguageRequestMutation,
+  useGetInstructorLanguagesQuery,
+  useGetInstructorLanguageLevelsQuery,
+  useSubmitLanguageRequestMutation,
   useGetHonoredInstructorsQuery,
+  useGetInstructorCompetencyQuery,
+  useUpdateInstructorCompetencyMutation,
 } = instructorApi

@@ -7,9 +7,16 @@ import {
   GraduationCap,
   ArrowUpDown,
   Filter,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Globe,
 } from "lucide-react"
 
 import { useGetExploreCoursesQuery } from "@/store/api/coursesApi"
+import { useGetExploreTeachersQuery } from "@/store/api/exploreTeachersApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
@@ -18,6 +25,7 @@ import CourseSelectFilter from "../components/CourseSelectFilter"
 import ViewModeToggle from "../components/shared/ViewModeToggle"
 import StudentCourseCard from "../student/components/StudentCourseCard"
 import ClassCard from "../components/ClassCard"
+import TeacherCard from "../components/TeacherCard"
 import CourseTabs from "../components/CourseTabs"
 import ExploreCoursesFilterModal from "../components/ExploreCoursesFilterModal"
 import { resolveItemLayout } from "../utils/catalogLayout"
@@ -34,7 +42,7 @@ const ExploreCoursesPage = () => {
   const dict = t.nav || {}
 
   // Filter States
-  const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes"
+  const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes" | "teachers"
   const [selectedStatus, setSelectedStatus] = useState("all") // "all" | "open" | "upcoming" | "closed"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
@@ -42,10 +50,61 @@ const ExploreCoursesPage = () => {
   const [maxPriceInput, setMaxPriceInput] = useState("")
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
+  // Teacher Filter & Pagination States
+  const [teacherPage, setTeacherPage] = useState(1)
+  const [teacherLanguage, setTeacherLanguage] = useState("all")
+  const [teacherSort, setTeacherSort] = useState("default")
+  const catalogSectionRef = useRef(null)
+
   // Search input state (typing) vs applied search query (submitted on Enter / search button)
   const [searchInputValue, setSearchInputValue] = useState("")
   const [appliedSearchQuery, setAppliedSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+
+  // Debounce search when on teacher tab (300ms)
+  useEffect(() => {
+    if (contentType !== "teachers") return
+    const timer = setTimeout(() => {
+      setAppliedSearchQuery(searchInputValue.trim())
+      setTeacherPage(1)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchInputValue, contentType])
+
+  // Explore Teachers API Query
+  const exploreTeachersQuery = useGetExploreTeachersQuery({
+    page: teacherPage,
+    pageSize: 6,
+    search: appliedSearchQuery || undefined,
+    language: teacherLanguage !== "all" ? teacherLanguage : undefined,
+    sort: teacherSort !== "default" ? teacherSort : undefined,
+  })
+
+  const isTeachersLoading = exploreTeachersQuery.isLoading
+  const isTeachersFetching = exploreTeachersQuery.isFetching
+  const teachersError = exploreTeachersQuery.error
+  const refetchTeachers = exploreTeachersQuery.refetch
+
+  const teachersList = useMemo(() => {
+    const raw = exploreTeachersQuery.data?.data
+    return Array.isArray(raw) ? raw : []
+  }, [exploreTeachersQuery.data])
+
+  const teacherPagination = exploreTeachersQuery.data?.pagination || {}
+  const totalTeachers = Number(
+    teacherPagination.totalItems ||
+      teacherPagination.totalCount ||
+      exploreTeachersQuery.data?.total ||
+      0,
+  )
+  const teacherTotalPages = Math.max(
+    1,
+    Number(
+      teacherPagination.totalPages ||
+        Math.ceil(totalTeachers / 6) ||
+        1,
+    ),
+  )
 
   // Infinite Scroll State
   const [catalogItems, setCatalogItems] = useState([])
@@ -56,6 +115,26 @@ const ExploreCoursesPage = () => {
     { value: "default", label: sc.sortDefault || "Mới nhất" },
     { value: "price_asc", label: sc.sortPriceAsc || "Giá thấp đến cao" },
     { value: "relevance", label: sc.sortRelevance || "Độ tương quan" },
+  ]
+
+  const teacherSortOptions = [
+    {
+      value: "default",
+      label: sc.sortFeatured
+        ? `Sắp xếp: ${sc.sortFeatured}`
+        : "Sắp xếp: Nổi bật",
+    },
+    { value: "rating", label: sc.sortRating || "Đánh giá cao nhất" },
+    { value: "students", label: sc.sortStudents || "Nhiều học viên nhất" },
+    { value: "newest", label: sc.sortNewest || "Mới tham gia" },
+  ]
+
+  const teacherSubjectOptions = [
+    { value: "all", label: sc.allSubjects || "Tất cả môn học" },
+    { value: "english", label: "Tiếng Anh" },
+    { value: "chinese", label: "Tiếng Trung" },
+    { value: "japanese", label: "Tiếng Nhật" },
+    { value: "korean", label: "Tiếng Hàn" },
   ]
 
   const enrollmentStatusOptions = [
@@ -75,6 +154,12 @@ const ExploreCoursesPage = () => {
       value: "classes",
       label: sc.tabClasses || "Lớp học",
       icon: GraduationCap,
+    },
+    {
+      value: "teachers",
+      label: sc.tabTeachers || "Giảng viên",
+      icon: Users,
+      badge: totalTeachers > 0 ? totalTeachers : undefined,
     },
   ]
 
@@ -219,6 +304,27 @@ const ExploreCoursesPage = () => {
     }
   }
 
+  const handleTeacherPageChange = (newPage) => {
+    const validPage = Math.max(1, Math.min(teacherTotalPages, newPage))
+    setTeacherPage(validPage)
+    if (catalogSectionRef.current) {
+      catalogSectionRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
+  const handleClearTeacherFilters = () => {
+    setSearchInputValue("")
+    setAppliedSearchQuery("")
+    setTeacherLanguage("all")
+    setTeacherSort("default")
+    setTeacherPage(1)
+  }
+
   const handleClearFilters = () => {
     setSearchInputValue("")
     setAppliedSearchQuery("")
@@ -228,6 +334,9 @@ const ExploreCoursesPage = () => {
     setMinPriceInput("")
     setMaxPriceInput("")
     setCurrentPage(1)
+    setTeacherPage(1)
+    setTeacherLanguage("all")
+    setTeacherSort("default")
   }
 
   const handleShareCourse = async (item) => {
@@ -255,12 +364,16 @@ const ExploreCoursesPage = () => {
     contentType !== "all" ||
     sortOrder !== "default" ||
     selectedStatus !== "all" ||
-    hasPriceFilter
+    hasPriceFilter ||
+    teacherLanguage !== "all" ||
+    teacherSort !== "default"
 
   const modalEnrollmentStatus = selectedStatus
 
   // Check if we are loading initial page or after filter changes
   const isInitialLoading = (isLoading || isFetching) && currentPage === 1
+  const isInitialTeachersLoading =
+    (isTeachersLoading || isTeachersFetching) && teacherPage === 1
 
   return (
     <div
@@ -291,18 +404,20 @@ const ExploreCoursesPage = () => {
           }}
         />
 
-        {/* Filter Modal Trigger Button (>= sm only) */}
-        <button
-          type="button"
-          onClick={() => setIsFilterModalOpen(true)}
-          className="hidden sm:flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
-        >
-          <Filter size={16} className="text-[#b20a1c]" />
-          <span>{sc.filter || "Bộ lọc"}</span>
-          {hasActiveModalFilters && (
-            <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
-          )}
-        </button>
+        {/* Filter Modal Trigger Button (>= sm only, courses/classes only) */}
+        {contentType !== "teachers" && (
+          <button
+            type="button"
+            onClick={() => setIsFilterModalOpen(true)}
+            className="hidden sm:flex items-center gap-1.5 pb-3 text-sm font-bold text-[#b20a1c] hover:opacity-85 transition-all cursor-pointer bg-transparent border-0 outline-none"
+          >
+            <Filter size={16} className="text-[#b20a1c]" />
+            <span>{sc.filter || "Bộ lọc"}</span>
+            {hasActiveModalFilters && (
+              <span className="w-2 h-2 rounded-full bg-[#b20a1c]" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* ─── Explore Courses Filter Modal ─── */}
@@ -328,8 +443,11 @@ const ExploreCoursesPage = () => {
                 onChange={setSearchInputValue}
                 onSearch={handleSearchSubmit}
                 placeholder={
-                  sc.searchPlaceholder ||
-                  "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."
+                  contentType === "teachers"
+                    ? sc.searchTeacherPlaceholder ||
+                      "Tìm theo tên giảng viên, chuyên môn,..."
+                    : sc.searchPlaceholder ||
+                      "Tìm kiếm theo tên khóa học, lớp học hoặc giảng viên..."
                 }
                 className="w-full"
                 inputClassName="w-full h-11 pl-5 pr-11 bg-white border-0 outline-none rounded-full text-sm font-normal text-slate-800 placeholder:text-slate-400 shadow-2xs focus:ring-2 focus:ring-[#b20a1c]/20 transition-all"
@@ -337,72 +455,301 @@ const ExploreCoursesPage = () => {
             </div>
           </div>
 
-          {/* Right Controls: Sort Order & View Mode Toggle */}
-          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-            {/* Filter Modal Trigger Button (< sm only) */}
-            <button
-              type="button"
-              onClick={() => setIsFilterModalOpen(true)}
-              className="sm:hidden h-11 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer border-0 outline-none shadow-2xs active:scale-95 shrink-0"
-            >
-              <Filter size={15} className="text-white" />
-              <span>{sc.filter || "Bộ lọc"}</span>
-              {hasActiveModalFilters && (
-                <span className="w-2 h-2 rounded-full bg-white" />
-              )}
-            </button>
+          {/* Right Controls */}
+          {contentType === "teachers" ? (
+            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+              {/* Teacher Subject Filter */}
+              <CourseSelectFilter
+                value={teacherLanguage}
+                onChange={(val) => {
+                  setTeacherLanguage(val)
+                  setTeacherPage(1)
+                }}
+                options={teacherSubjectOptions}
+                icon={Globe}
+                variant="ghost"
+              />
 
-            {/* Sort Order Selector (ghost variant: no bg, border, font normal) */}
-            <CourseSelectFilter
-              value={sortOrder}
-              onChange={(val) => {
-                setSortOrder(val)
-                setCurrentPage(1)
-              }}
-              options={sortOptions}
-              icon={ArrowUpDown}
-              variant="ghost"
-            />
+              {/* Teacher Sort Filter */}
+              <CourseSelectFilter
+                value={teacherSort}
+                onChange={(val) => {
+                  setTeacherSort(val)
+                  setTeacherPage(1)
+                }}
+                options={teacherSortOptions}
+                icon={ArrowUpDown}
+                variant="ghost"
+              />
 
-            {/* View Mode Toggle (white bg, rounded-full container, circular buttons) */}
-            <ViewModeToggle
-              value={viewMode}
-              onChange={setViewMode}
-              className="hidden sm:flex"
-            />
-          </div>
-        </div>
-
-        {/* Row 2: Status single-select list (visible on >= sm screens, on < sm it is available inside the filter dropdown modal) */}
-        <div className="hidden sm:flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-slate-700 mr-1">
-            {sc.statusLabel || "Trạng thái:"}
-          </span>
-
-          {enrollmentStatusOptions.map((opt) => {
-            const isSelected = selectedStatus === opt.value
-
-            return (
+              {/* View Mode Toggle */}
+              <ViewModeToggle
+                value={viewMode}
+                onChange={setViewMode}
+                className="hidden sm:flex"
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+              {/* Filter Modal Trigger Button (< sm only) */}
               <button
-                key={opt.value}
                 type="button"
-                onClick={() => handleSelectStatus(opt.value)}
-                className={`h-8 px-4 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
-                  isSelected
-                    ? "bg-[#b20a1c] text-white shadow-xs"
-                    : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-0 shadow-2xs"
-                }`}
+                onClick={() => setIsFilterModalOpen(true)}
+                className="sm:hidden h-11 px-4 rounded-full bg-[#b20a1c] hover:bg-[#960817] text-white text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer border-0 outline-none shadow-2xs active:scale-95 shrink-0"
               >
-                <span>{opt.label}</span>
+                <Filter size={15} className="text-white" />
+                <span>{sc.filter || "Bộ lọc"}</span>
+                {hasActiveModalFilters && (
+                  <span className="w-2 h-2 rounded-full bg-white" />
+                )}
               </button>
-            )
-          })}
+
+              {/* Sort Order Selector (ghost variant: no bg, border, font normal) */}
+              <CourseSelectFilter
+                value={sortOrder}
+                onChange={(val) => {
+                  setSortOrder(val)
+                  setCurrentPage(1)
+                }}
+                options={sortOptions}
+                icon={ArrowUpDown}
+                variant="ghost"
+              />
+
+              {/* View Mode Toggle (white bg, rounded-full container, circular buttons) */}
+              <ViewModeToggle
+                value={viewMode}
+                onChange={setViewMode}
+                className="hidden sm:flex"
+              />
+            </div>
+          )}
         </div>
+
+        {/* Row 2: Status single-select list (only for courses/classes, visible on >= sm) */}
+        {contentType !== "teachers" && (
+          <div className="hidden sm:flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-slate-700 mr-1">
+              {sc.statusLabel || "Trạng thái:"}
+            </span>
+
+            {enrollmentStatusOptions.map((opt) => {
+              const isSelected = selectedStatus === opt.value
+
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => handleSelectStatus(opt.value)}
+                  className={`h-8 px-4 rounded-full text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isSelected
+                      ? "bg-[#b20a1c] text-white shadow-xs"
+                      : "bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border-0 shadow-2xs"
+                  }`}
+                >
+                  <span>{opt.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
-      {/* ─── Catalog Section with Infinite Scroll ─── */}
-      <div aria-busy={isFetching}>
-        {isInitialLoading ? (
+      {/* ─── Catalog Section ─── */}
+      <div
+        ref={catalogSectionRef}
+        aria-busy={contentType === "teachers" ? isTeachersFetching : isFetching}
+      >
+        {contentType === "teachers" ? (
+          /* ─────────────── TEACHERS VIEW ─────────────── */
+          isInitialTeachersLoading ? (
+            /* Teacher Skeleton Loader */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs flex flex-col items-center gap-3 animate-pulse"
+                >
+                  <div className="w-[72px] h-[72px] rounded-full bg-slate-200" />
+                  <div className="h-4 bg-slate-200 rounded-md w-32 mt-2" />
+                  <div className="h-3 bg-slate-100 rounded-md w-48" />
+                  <div className="h-3 bg-slate-100 rounded-md w-28" />
+                  <div className="h-8 bg-slate-100 rounded-xl w-full mt-2" />
+                  <div className="h-9 bg-slate-200 rounded-xl w-full mt-2" />
+                </div>
+              ))}
+            </div>
+          ) : teachersError && teachersList.length === 0 ? (
+            <div
+              role="alert"
+              className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-3xl border border-red-200 bg-red-50 p-6 text-center"
+            >
+              <h3 className="text-lg font-extrabold text-red-800">
+                {sc.loadErrorTitle || "Unable to load data"}
+              </h3>
+              <p className="max-w-sm text-sm font-semibold text-red-700">
+                {sc.loadErrorDescription ||
+                  "Check your connection and try again."}
+              </p>
+              <button
+                type="button"
+                onClick={() => refetchTeachers()}
+                disabled={isTeachersFetching}
+                className="mt-1 flex h-9 items-center gap-1.5 rounded-full border border-red-200 bg-white px-5 text-xs font-extrabold text-red-700 hover:bg-red-100 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <RefreshCw size={13} aria-hidden="true" />
+                <span>{isTeachersFetching ? "Retrying..." : "Retry"}</span>
+              </button>
+            </div>
+          ) : teachersList.length === 0 ? (
+            <div
+              role="status"
+              className="flex min-h-[320px] flex-col items-center justify-center gap-3 rounded-3xl border border-border/80 bg-white p-8 text-center shadow-xs"
+            >
+              <Users
+                size={52}
+                aria-hidden="true"
+                className="text-slate-300 stroke-[1.2]"
+              />
+              <h3 className="text-lg font-extrabold text-slate-800">
+                {sc.noTeachersFound || "Không tìm thấy giảng viên"}
+              </h3>
+              <p className="max-w-xs text-sm font-semibold text-slate-500">
+                {sc.noTeachersFoundDesc ||
+                  "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc môn học."}
+              </p>
+              {(appliedSearchQuery ||
+                teacherLanguage !== "all" ||
+                teacherSort !== "default") && (
+                <button
+                  type="button"
+                  onClick={handleClearTeacherFilters}
+                  className="mt-2 h-9 rounded-full bg-[#b20a1c] hover:bg-[#960817] px-5 text-xs font-extrabold text-white transition-all cursor-pointer active:scale-95"
+                >
+                  {sc.clearFilters || "Xóa bộ lọc"}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-8">
+              {/* Teachers Grid / List */}
+              <div
+                className={
+                  viewMode === "list"
+                    ? "flex flex-col gap-4"
+                    : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                }
+              >
+                {teachersList.map((teacher) => (
+                  <TeacherCard
+                    key={teacher.id || teacher.slug}
+                    teacher={teacher}
+                    t={sc}
+                  />
+                ))}
+              </div>
+
+              {/* Pagination & Count Summary (Matching Mockup) */}
+              <div className="flex flex-col items-center justify-center gap-4 pt-2">
+                {/* Text: Hiển thị 6 trên 48 giảng viên */}
+                <p className="text-xs text-slate-400 font-normal text-center">
+                  {sc.showingTeachers
+                    ? sc.showingTeachers
+                        .replace("{{count}}", String(teachersList.length))
+                        .replace("{{total}}", String(totalTeachers))
+                    : `Hiển thị ${teachersList.length} trên ${totalTeachers} giảng viên`}
+                </p>
+
+                {/* Pagination controls */}
+                {teacherTotalPages > 1 && (
+                  <div className="flex items-center justify-center gap-3 select-none flex-wrap">
+                    {/* First Page << */}
+                    <button
+                      type="button"
+                      aria-label="First page"
+                      onClick={() => handleTeacherPageChange(1)}
+                      disabled={teacherPage === 1}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
+                        teacherPage === 1
+                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
+                      }`}
+                    >
+                      <ChevronsLeft size={16} />
+                    </button>
+
+                    {/* Prev Page < */}
+                    <button
+                      type="button"
+                      aria-label="Previous page"
+                      onClick={() => handleTeacherPageChange(teacherPage - 1)}
+                      disabled={teacherPage === 1}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
+                        teacherPage === 1
+                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
+                      }`}
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+
+                    {/* Number buttons (e.g. 01, 02, 03) */}
+                    {Array.from(
+                      { length: teacherTotalPages },
+                      (_, i) => i + 1,
+                    ).map((p) => {
+                      const isActive = p === teacherPage
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => handleTeacherPageChange(p)}
+                          className={`w-[38px] h-[38px] rounded-full font-semibold text-sm flex items-center justify-center transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-[#990011] text-white shadow-xs"
+                              : "border border-[#990011] text-[#990011] hover:bg-red-50"
+                          }`}
+                        >
+                          {String(p).padStart(2, "0")}
+                        </button>
+                      )
+                    })}
+
+                    {/* Next Page > */}
+                    <button
+                      type="button"
+                      aria-label="Next page"
+                      onClick={() => handleTeacherPageChange(teacherPage + 1)}
+                      disabled={teacherPage === teacherTotalPages}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
+                        teacherPage === teacherTotalPages
+                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
+                      }`}
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+
+                    {/* Last Page >> */}
+                    <button
+                      type="button"
+                      aria-label="Last page"
+                      onClick={() => handleTeacherPageChange(teacherTotalPages)}
+                      disabled={teacherPage === teacherTotalPages}
+                      className={`w-[38px] h-[38px] rounded-full flex items-center justify-center transition-all ${
+                        teacherPage === teacherTotalPages
+                          ? "bg-[#7B7979] text-[#E2E2E2] opacity-35 cursor-not-allowed"
+                          : "border border-[#990011] text-[#990011] hover:bg-red-50 cursor-pointer"
+                      }`}
+                    >
+                      <ChevronsRight size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        ) : isInitialLoading ? (
           /* Initial / Filter Change Skeleton Loader */
           viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">

@@ -48,3 +48,21 @@ export const parsePhoneData = (fullPhone) => {
   
   return { phonePrefix: "+84", phoneNumber: fullPhone }
 }
+
+export const getCountryOption = (valueOrCode) => {
+  if (!valueOrCode) return null
+  const normalized = String(valueOrCode).trim().toLowerCase()
+  return (
+    countryOptions.find(
+      (c) =>
+        c.value?.toLowerCase() === normalized ||
+        c.key?.toLowerCase() === normalized ||
+        c.label?.toLowerCase() === normalized,
+    ) || null
+  )
+}
+
+export const getCountryLabel = (valueOrCode, fallback = "") => {
+  const opt = getCountryOption(valueOrCode)
+  return opt ? opt.label : (valueOrCode || fallback)
+}

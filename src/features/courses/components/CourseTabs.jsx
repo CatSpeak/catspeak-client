@@ -11,7 +11,7 @@ const CourseTabs = ({
     <div
       className={`flex gap-6 text-sm font-bold text-gray-400 overflow-x-auto whitespace-nowrap scrollbar-none ${className}`}
     >
-      {tabs.map(({ value, label, icon: Icon }) => {
+      {tabs.map(({ value, label, icon: Icon, badge }) => {
         const isActive = activeTab === value
 
         return (
@@ -28,6 +28,11 @@ const CourseTabs = ({
           >
             {Icon && <Icon size={15} />}
             <span>{label}</span>
+            {badge !== undefined && badge !== null && (
+              <span className="ml-1 px-2 py-0.5 text-[11px] font-bold rounded-full bg-[#FEF2F2] text-[#990011] border border-[#FEE2E2] leading-none">
+                {badge}
+              </span>
+            )}
           </button>
         )
       })}

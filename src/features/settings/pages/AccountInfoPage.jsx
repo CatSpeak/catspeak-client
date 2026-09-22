@@ -1,8 +1,7 @@
-import React, { useState } from "react"
+import React from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { useAuth } from "@/features/auth"
 import { useGetUserProfileQuery } from "@/store/api/userApi"
-import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useProfileState } from "@/features/settings/hooks/useProfileState"
 import { useProfileMutations } from "@/features/settings/hooks/useProfileMutations"
 
@@ -15,38 +14,17 @@ import { BankAccountList } from "@/features/bank-accounts"
 
 const AccountInfoPage = () => {
   const { t } = useLanguage()
-  const { user } = useAuth()
+  const { isTeacher } = useRoleOverride()
+  // Teacher accounts manage professional/verification details on /setting/instructor.
+  // This page provides account-level settings (username, nickname, password).
+  const isTeacherAccount = isTeacher === true
 
   // Fetch private profile
   const { data: privateProfileData, isLoading } = useGetUserProfileQuery()
   const profile = privateProfileData?.data ?? privateProfileData ?? null
 
-  // Teacher-only extras (FullName + ID card) show on the teacher account only
-  const isTeacherAccount =
-    user?.accountType === "Teacher" || (!user?.accountType && !!profile?.isTeacher)
-
-  const { data: instructorData } = useGetInstructorProfileQuery(undefined, {
-    skip: !isTeacherAccount,
-  })
-  const instructor = instructorData?.data ?? instructorData ?? null
-  // Show the ID section only on the teacher account with a live Approved
-  // profile (source accounts get a revision row → hidden by design).
-  const instructorStatus = (instructor?.status || instructor?.Status || "").toString().toLowerCase()
-  const isLiveApprovedProfile =
-    !!instructor && !instructor.isRevision && !instructor.IsRevision && instructorStatus === "approved"
-  const showIdentitySection = isTeacherAccount && isLiveApprovedProfile
-  const idCardFrontUrl = instructor?.idCardFrontUrl || instructor?.IdCardFrontUrl || null
-  const idCardBackUrl = instructor?.idCardBackUrl || instructor?.IdCardBackUrl || null
-
   const stateHooks = useProfileState(profile)
-
-  // CCCD picks live here so the card-level Save/Hủy buttons own them
-  const [idFiles, setIdFiles] = useState({ front: null, back: null })
-  const setIdFile = (side, file) =>
-    setIdFiles((prev) => ({ ...prev, [side]: file }))
-  const resetIdFiles = () => setIdFiles({ front: null, back: null })
-
-  const mutationHooks = useProfileMutations(t, profile, stateHooks, { idFiles, resetIdFiles })
+  const mutationHooks = useProfileMutations(t, profile, stateHooks)
 
   const {
     formData,
@@ -58,11 +36,6 @@ const AccountInfoPage = () => {
     handleCancel,
     handleChange,
   } = stateHooks
-
-  const handleCancelAll = () => {
-    handleCancel()
-    resetIdFiles()
-  }
 
   const {
     isUpdating,
@@ -92,19 +65,13 @@ const AccountInfoPage = () => {
           editingField={editingField}
           isUpdating={isUpdating}
           onEdit={handleEdit}
-          onCancel={handleCancelAll}
+          onCancel={handleCancel}
           onSave={handleSave}
           onChange={handleChange}
           onCountryChange={handleCountryChange}
           errors={errors}
           t={t}
           isTeacherAccount={isTeacherAccount}
-          showIdentitySection={showIdentitySection}
-          idCardFrontFile={idFiles.front}
-          idCardBackFile={idFiles.back}
-          onPickIdFile={setIdFile}
-          idCardFrontUrl={idCardFrontUrl}
-          idCardBackUrl={idCardBackUrl}
         />
       </div>
 
@@ -113,8 +80,9 @@ const AccountInfoPage = () => {
         <ChangePasswordSection t={t} />
       </FluentCard>
 
-      {/* Bank Accounts Section */}
-      <BankAccountList />
+      {/* Bank Accounts Section — teacher accounts manage this on
+          /setting/instructor (see BankAccountDrawer). */}
+      {!isTeacherAccount && <BankAccountList />}
 
       <ProfileOtpModal
         open={isOtpModalOpen}

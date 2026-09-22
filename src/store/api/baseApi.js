@@ -447,7 +447,7 @@ export const baseApi = createApi({
     "Storage",
     "Media",
     "InstructorProfile",
-    "TeachingUpdate",
+    "LanguageRequests",
     "Locations",
     "Reels",
     "ReelComments",
@@ -487,6 +487,8 @@ export const baseApi = createApi({
     "BannedParticipants",
     "WaitingQueue",
     "RoomParticipants",
+    "ExploreTeachers",
+    "InstructorCompetency",
   ],
   endpoints: () => ({}),
 })

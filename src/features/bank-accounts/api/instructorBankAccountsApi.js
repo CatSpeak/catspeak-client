@@ -23,6 +23,27 @@ export const instructorBankAccountsApi = baseApi.injectEndpoints({
       }),
     }),
 
+    // 2b. POST /api/v1/bank-accounts/request-otp - verify + send OTP to the
+    // teacher's current verified phone; returns the bank details with MaskedPhone
+    requestBankAccountOtp: builder.mutation({
+      query: (data) => ({
+        url: "v1/bank-accounts/request-otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // 2c. POST /api/v1/bank-accounts/confirm - verify the OTP and create the
+    // new account; the old account stays effective until this succeeds
+    confirmBankAccountChange: builder.mutation({
+      query: (data) => ({
+        url: "v1/bank-accounts/confirm",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: [{ type: "InstructorBankAccounts", id: "LIST" }],
+    }),
+
     // 3. GET /api/v1/bank-accounts - Get list of instructor bank accounts
     getInstructorBankAccounts: builder.query({
       query: () => "v1/bank-accounts",
@@ -81,6 +102,8 @@ export const instructorBankAccountsApi = baseApi.injectEndpoints({
 export const {
   useGetBanksQuery,
   useVerifyBankAccountMutation,
+  useRequestBankAccountOtpMutation,
+  useConfirmBankAccountChangeMutation,
   useGetInstructorBankAccountsQuery,
   useAddInstructorBankAccountMutation,
   useGetInstructorBankAccountByIdQuery,
