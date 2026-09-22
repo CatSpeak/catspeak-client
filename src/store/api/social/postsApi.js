@@ -5,10 +5,37 @@ import {
   updateCommentInCaches,
 } from "./utils/postsCacheUtils"
 
+/**
+ * @typedef {Object} Topic
+ * @property {number} topicId
+ * @property {string} title
+ * @property {string} slug
+ * @property {0|1|2|3} languageCommunity - 0: All, 1: English, 2: Chinese, 3: Japanese
+ */
+
 export const postsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
+    getTopics: builder.query({
+      query: ({ languageCommunity, keyword, page = 1, pageSize = 10 } = {}) => ({
+        url: "/topics",
+        params: {
+          languageCommunity,
+          keyword,
+          page,
+          pageSize,
+        },
+      }),
+      providesTags: ["Topic"],
+    }),
     getPosts: builder.query({
-      query: ({ page = 1, pageSize = 10, postType, searchKeyword, sortBy } = {}) => ({
+      query: ({
+        page = 1,
+        pageSize = 10,
+        postType,
+        searchKeyword,
+        sortBy,
+        topicIds,
+      } = {}) => ({
         url: "/Post",
         params: {
           page,
@@ -17,17 +44,21 @@ export const postsApi = socialApi.injectEndpoints({
           searchKeyword,
           sortBy,
           sortDesc: true,
+          topicIds,
         },
       }),
       providesTags: ["Post"],
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
-        return `${endpointName}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}`
+        const topicKey = Array.isArray(queryArgs?.topicIds)
+          ? queryArgs.topicIds.slice().sort().join(",")
+          : queryArgs?.topicIds || ""
+        return `${endpointName}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}_${topicKey}`
       },
       merge: (currentCache, newItems, { arg }) => {
         if (arg.page === 1) {
           currentCache.data = newItems.data
         } else {
-          const newPosts = newItems.data.filter(
+          const newPosts = (newItems?.data || []).filter(
             (newPost) =>
               !currentCache.data.some((p) => p.postId === newPost.postId),
           )
@@ -36,11 +67,18 @@ export const postsApi = socialApi.injectEndpoints({
         currentCache.hasMore = newItems.data.length === arg.pageSize
       },
       forceRefetch({ currentArg, previousArg }) {
+        const currentTopicKey = Array.isArray(currentArg?.topicIds)
+          ? currentArg.topicIds.slice().sort().join(",")
+          : currentArg?.topicIds || ""
+        const prevTopicKey = Array.isArray(previousArg?.topicIds)
+          ? previousArg.topicIds.slice().sort().join(",")
+          : previousArg?.topicIds || ""
         return (
           currentArg?.page !== previousArg?.page ||
           currentArg?.postType !== previousArg?.postType ||
           currentArg?.searchKeyword !== previousArg?.searchKeyword ||
-          currentArg?.sortBy !== previousArg?.sortBy
+          currentArg?.sortBy !== previousArg?.sortBy ||
+          currentTopicKey !== prevTopicKey
         )
       },
     }),
@@ -279,6 +317,7 @@ export const postsApi = socialApi.injectEndpoints({
 })
 
 export const {
+  useGetTopicsQuery,
   useGetPostsQuery,
   useGetLandingPostsQuery,
   useGetPostByIdQuery,

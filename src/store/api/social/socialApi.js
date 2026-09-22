@@ -37,6 +37,7 @@ export const socialApi = createApi({
   refetchOnReconnect: true,
   tagTypes: [
     "Post",
+    "Topic",
     "PostComment",
     "PostMedia",
     "Conversations",
