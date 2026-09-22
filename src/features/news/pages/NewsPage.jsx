@@ -37,6 +37,7 @@ const NewsPage = ({ postType = "1" }) => {
 
   const page = useSelector(selectNewsPage);
   const pageSize = 26;
+  const [isTopicDebouncing, setIsTopicDebouncing] = useState(false);
 
   const { data, error, isLoading, isFetching } = useGetPostsQuery({
     page,
@@ -228,78 +229,37 @@ const NewsPage = ({ postType = "1" }) => {
       <TopicFilter
         selectedTopicIds={filters.topicIds}
         onTopicChange={handleTopicChange}
+        onPendingChange={setIsTopicDebouncing}
       />
     </div>
   );
 
-  // ── Initial Loading State ─────────────────────────────────────────
-  if (isLoading && publicPosts.length === 0) {
-    const skeletonCols = Array.from({ length: columnsCount }, () => []);
+  const isInitialOrFilterLoading =
+    isLoading || (isFetching && page === 1) || isTopicDebouncing;
+
+  const skeletonCols = useMemo(() => {
+    const cols = Array.from({ length: columnsCount }, () => []);
     const totalSkeletons = columnsCount * 3;
     for (let i = 0; i < totalSkeletons; i++) {
-      skeletonCols[i % columnsCount].push(i);
+      cols[i % columnsCount].push(i);
     }
+    return cols;
+  }, [columnsCount]);
 
-    return (
-      <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
-        {filterBar}
-        <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
-          {skeletonCols.map((col, colIndex) => (
-            <div key={colIndex} className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0">
-              {col.map((itemIndex) => (
-                <NewsCardSkeleton key={itemIndex} index={itemIndex} />
-              ))}
-            </div>
+  const renderSkeletons = () => (
+    <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
+      {skeletonCols.map((col, colIndex) => (
+        <div
+          key={colIndex}
+          className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0"
+        >
+          {col.map((itemIndex) => (
+            <NewsCardSkeleton key={itemIndex} index={itemIndex} />
           ))}
         </div>
-      </div>
-    );
-  }
-
-  // ── Error State ───────────────────────────────────────────────────
-  if (error && page === 1) {
-    if (error?.status === 404) {
-      return (
-        <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6 min-h-[60vh] justify-center items-center">
-          <EmptyState
-            message={t.news?.empty?.title || "Chưa có tin tức nào"}
-            description={
-              t.news?.empty?.description ||
-              "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
-            }
-            icon={Newspaper}
-            variant="page"
-          />
-        </div>
-      );
-    }
-    if (error?.status === 401) {
-      return (
-        <EmptyState message={t.catSpeak?.newsLoginPrompt} variant="page" />
-      );
-    }
-    return <ErrorMessage message="Error loading posts" />;
-  }
-
-  // ── Empty State ───────────────────────────────────────────────────
-  if (!isLoading && publicPosts.length === 0) {
-    return (
-      <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6 min-h-[60vh] justify-center items-center">
-        {filterBar}
-        <div className="flex-1 flex flex-col justify-center items-center w-full">
-          <EmptyState
-            message={t.news?.empty?.title || "Chưa có tin tức nào"}
-            description={
-              t.news?.empty?.description ||
-              "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
-            }
-            icon={Newspaper}
-            variant="page"
-          />
-        </div>
-      </div>
-    );
-  }
+      ))}
+    </div>
+  );
 
   const secondLastPostId =
     publicPosts[publicPosts.length - 2]?.postId ??
@@ -310,31 +270,73 @@ const NewsPage = ({ postType = "1" }) => {
     <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
       {filterBar}
 
-      {/* Masonry Card Grid */}
-      <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
-        {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0">
-            {col.map((post) => {
-              const isSecondLast = post.postId === secondLastPostId;
-              return (
-                <div
-                  ref={isSecondLast ? secondLastPostElementRef : null}
-                  key={post.postId}
-                  className="w-full"
-                >
-                  <NewsCard news={post} />
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination Fetching Skeleton */}
-      {isFetching && publicPosts.length > 0 && (
-        <div className="flex justify-center py-4">
-          <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+      {/* ── 1. Skeleton Loading State (First load, filter change, topic debounce, fetching page 1) ── */}
+      {isInitialOrFilterLoading ? (
+        renderSkeletons()
+      ) : error && page === 1 ? (
+        /* ── 2. Error State ── */
+        <div className="flex flex-col w-full min-h-[50vh] justify-center items-center">
+          {error?.status === 404 ? (
+            <EmptyState
+              message={t.news?.empty?.title || "Chưa có tin tức nào"}
+              description={
+                t.news?.empty?.description ||
+                "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
+              }
+              icon={Newspaper}
+              variant="page"
+            />
+          ) : error?.status === 401 ? (
+            <EmptyState message={t.catSpeak?.newsLoginPrompt} variant="page" />
+          ) : (
+            <ErrorMessage message="Error loading posts" />
+          )}
         </div>
+      ) : publicPosts.length === 0 ? (
+        /* ── 3. Empty State ── */
+        <div className="flex-1 flex flex-col justify-center items-center w-full min-h-[50vh]">
+          <EmptyState
+            message={t.news?.empty?.title || "Chưa có tin tức nào"}
+            description={
+              t.news?.empty?.description ||
+              "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
+            }
+            icon={Newspaper}
+            variant="page"
+          />
+        </div>
+      ) : (
+        /* ── 4. Content Masonry Grid ── */
+        <>
+          <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
+            {columns.map((col, colIndex) => (
+              <div
+                key={colIndex}
+                className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0"
+              >
+                {col.map((post) => {
+                  const isSecondLast = post.postId === secondLastPostId;
+                  return (
+                    <div
+                      ref={isSecondLast ? secondLastPostElementRef : null}
+                      key={post.postId}
+                      className="w-full"
+                    >
+                      <NewsCard news={post} />
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Fetching Spinner (for infinite scroll page > 1) */}
+          {isFetching && page > 1 && (
+            <div className="flex justify-center py-4">
+              <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

@@ -19,6 +19,7 @@ import { useGetTopicsQuery } from "@/store/api/social/postsApi";
 const TopicFilter = ({
   selectedTopicIds = [],
   onTopicChange,
+  onPendingChange,
   className = "",
 }) => {
   const { t } = useLanguage();
@@ -42,6 +43,15 @@ const TopicFilter = ({
   useEffect(() => {
     setLocalSelectedIds(selectedTopicIds);
   }, [selectedTopicIds]);
+
+  // Clean up debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
 
   // 3. Dropdown state & click outside
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -129,6 +139,10 @@ const TopicFilter = ({
 
     setLocalSelectedIds(updated);
 
+    if (onPendingChange) {
+      onPendingChange(true);
+    }
+
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
@@ -136,6 +150,9 @@ const TopicFilter = ({
     debounceTimer.current = setTimeout(() => {
       if (onTopicChange) {
         onTopicChange(updated);
+      }
+      if (onPendingChange) {
+        onPendingChange(false);
       }
     }, 250);
   };
