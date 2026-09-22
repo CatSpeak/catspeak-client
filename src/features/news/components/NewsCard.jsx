@@ -14,6 +14,7 @@ import ReactionsPopover, {
 } from "@/shared/components/ui/ReactionsPopover";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useAuth } from "@/features/auth";
+import TopicChips from "./TopicChips";
 
 /**
  * NewsCard — Figma "Card_Bản tin Catspeak" layout.
@@ -139,6 +140,9 @@ const NewsCard = ({ news }) => {
 
       {/* ── Content ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-1.5 p-4 flex-1">
+        {news.topics && news.topics.length > 0 && (
+          <TopicChips topics={news.topics} className="mb-0.5" />
+        )}
         <h3 className="font-bold text-base text-foreground break-words leading-snug">
           {news.title}
         </h3>

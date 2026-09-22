@@ -7,6 +7,7 @@ import { useGetPostsQuery } from "@/store/api/social/postsApi";
 import { incrementPage, resetPage, selectNewsPage } from "@/store/slices/newsSlice";
 import NewsCard from "../components/NewsCard";
 import NewsCardSkeleton from "../components/NewsCardSkeleton";
+import TopicFilter from "../components/TopicFilter";
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
 import EmptyState from "@/shared/components/ui/indicators/EmptyState";
 import useColumnCount from "@/shared/hooks/useColumnCount";
@@ -43,6 +44,7 @@ const NewsPage = ({ postType = "1" }) => {
     postType,
     searchKeyword: filters.searchKeyword || undefined,
     sortBy: filters.sortBy,
+    topicIds: filters.topicIds && filters.topicIds.length > 0 ? filters.topicIds : undefined,
   });
 
   // Search input is local state (for snappy typing); URL only updates when the
@@ -62,7 +64,13 @@ const NewsPage = ({ postType = "1" }) => {
   const commitSearch = (keyword = searchInput) => {
     const currentKeyword = parseNewsFilter(window.location.search).searchKeyword;
     if (keyword === currentKeyword) return;
-    setSearchParams(applyNewsFilter(window.location.search, { searchKeyword: keyword }));
+    setSearchParams(
+      applyNewsFilter(window.location.search, {
+        searchKeyword: keyword,
+        sortBy: filters.sortBy,
+        topicIds: filters.topicIds,
+      }),
+    );
   };
 
   // Whenever the URL filters change, go back to page 1 and scroll to top.
@@ -74,7 +82,7 @@ const NewsPage = ({ postType = "1" }) => {
     }
     dispatch(resetPage());
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [filters.searchKeyword, filters.sortBy, dispatch]);
+  }, [filters.searchKeyword, filters.sortBy, filters.topicIds?.join(","), dispatch]);
 
   // Public posts filtered by current language community or "All"
   const publicPosts = useMemo(() => {
@@ -118,13 +126,23 @@ const NewsPage = ({ postType = "1" }) => {
     return () => observer.disconnect();
   }, [publicPosts, dispatch]);
 
-  const updateUrlFilters = ({ searchKeyword, sortBy }) => {
-    setSearchParams(applyNewsFilter(window.location.search, { searchKeyword, sortBy }));
+  const updateUrlFilters = ({ searchKeyword, sortBy, topicIds }) => {
+    setSearchParams(
+      applyNewsFilter(window.location.search, {
+        searchKeyword: searchKeyword !== undefined ? searchKeyword : filters.searchKeyword,
+        sortBy: sortBy !== undefined ? sortBy : filters.sortBy,
+        topicIds: topicIds !== undefined ? topicIds : filters.topicIds,
+      }),
+    );
   };
 
   const handleSortChange = (sortBy) => {
     if (sortBy === filters.sortBy) return;
-    updateUrlFilters({ searchKeyword: filters.searchKeyword, sortBy });
+    updateUrlFilters({ sortBy });
+  };
+
+  const handleTopicChange = (topicIds) => {
+    updateUrlFilters({ topicIds });
   };
 
   const handleSearchChange = (value) => {
@@ -148,61 +166,69 @@ const NewsPage = ({ postType = "1" }) => {
   };
 
   const filterBar = (
-    <div className="flex flex-col w-full gap-3 sm:flex-row sm:items-center sm:justify-between">
-      {/* Search box */}
-      <div className="relative w-full sm:max-w-xs">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]"
-        />
-        <input
-          type="text"
-          value={searchInput}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          onKeyDown={handleSearchKeyDown}
-          onBlur={handleSearchBlur}
-          placeholder={t.news?.filters?.searchPlaceholder || "Search articles..."}
-          className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-9 text-sm text-foreground placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/40"
-          aria-label={t.news?.filters?.searchPlaceholder || "Search articles..."}
-        />
-        {searchInput && (
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={handleClearSearch}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-foreground"
-            aria-label="Clear search"
-          >
-            <X size={16} />
-          </button>
-        )}
+    <div className="flex flex-col w-full gap-3">
+      <div className="flex flex-col w-full gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Search box */}
+        <div className="relative w-full sm:max-w-xs">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]"
+          />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            onBlur={handleSearchBlur}
+            placeholder={t.news?.filters?.searchPlaceholder || "Search articles..."}
+            className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-9 text-sm text-foreground placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/40"
+            aria-label={t.news?.filters?.searchPlaceholder || "Search articles..."}
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleClearSearch}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+
+        {/* Sort chips */}
+        <div className="flex items-center gap-2 overflow-x-auto">
+          {NEWS_SORT_OPTIONS.map((option) => {
+            const labelMap = {
+              createDate: t.news?.filters?.newest || "Newest",
+              viewCount: t.news?.filters?.mostViewed || "Most viewed",
+              reactionCount: t.news?.filters?.mostReactions || "Most reactions",
+            };
+            const isActive = filters.sortBy === option;
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => handleSortChange(option)}
+                className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-[#606060] hover:bg-gray-200"
+                }`}
+              >
+                {labelMap[option]}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Sort chips */}
-      <div className="flex items-center gap-2 overflow-x-auto">
-        {NEWS_SORT_OPTIONS.map((option) => {
-          const labelMap = {
-            createDate: t.news?.filters?.newest || "Newest",
-            viewCount: t.news?.filters?.mostViewed || "Most viewed",
-            reactionCount: t.news?.filters?.mostReactions || "Most reactions",
-          };
-          const isActive = filters.sortBy === option;
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => handleSortChange(option)}
-              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-[#606060] hover:bg-gray-200"
-              }`}
-            >
-              {labelMap[option]}
-            </button>
-          );
-        })}
-      </div>
+      {/* Topic Filter row */}
+      <TopicFilter
+        selectedTopicIds={filters.topicIds}
+        onTopicChange={handleTopicChange}
+      />
     </div>
   );
 

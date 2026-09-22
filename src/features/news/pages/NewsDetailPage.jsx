@@ -22,6 +22,7 @@ import FluentCard from "@/shared/components/ui/FluentCard";
 import { Skeleton } from "@/shared/components/ui/indicators";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useAuth } from "@/features/auth";
+import TopicChips from "../components/TopicChips";
 
 const NewsDetailSkeleton = () => (
   <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
@@ -262,8 +263,11 @@ const NewsDetailPage = () => {
                 >
                   {newsItem.title}
                 </h1>
+                {newsItem.topics && newsItem.topics.length > 0 && (
+                  <TopicChips topics={newsItem.topics} className="mt-2" />
+                )}
                 {/* Inline dot-separated metadata row */}
-                <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap mt-2">
                   {newsItem.viewCount !== undefined && (
                     <span className="font-medium text-sm text-[#7b7979]">
                       {newsItem.viewCount} lượt xem

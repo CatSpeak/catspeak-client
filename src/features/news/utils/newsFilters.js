@@ -10,14 +10,28 @@ export const parseNewsFilter = (search) => {
   const params = new URLSearchParams(search)
   const searchKeyword = params.get("q") || ""
   const sortBy = normalizeSort(params.get("sort"))
-  return { searchKeyword, sortBy }
+  const rawTopicIds = params.get("topicIds") || params.get("topicId")
+  const topicIds = rawTopicIds
+    ? rawTopicIds
+        .split(",")
+        .map((id) => parseInt(id.trim(), 10))
+        .filter((id) => !isNaN(id))
+    : []
+  return { searchKeyword, sortBy, topicIds }
 }
 
-export const serializeNewsFilter = ({ searchKeyword = "", sortBy = DEFAULT_SORT }) => {
+export const serializeNewsFilter = ({
+  searchKeyword = "",
+  sortBy = DEFAULT_SORT,
+  topicIds = [],
+}) => {
   const params = new URLSearchParams()
   if (searchKeyword) params.set("q", searchKeyword)
   const normalizedSort = normalizeSort(sortBy)
   if (normalizedSort !== DEFAULT_SORT) params.set("sort", normalizedSort)
+  if (Array.isArray(topicIds) && topicIds.length > 0) {
+    params.set("topicIds", topicIds.join(","))
+  }
   const query = params.toString()
   return query ? `?${query}` : ""
 }
@@ -26,6 +40,8 @@ export const applyNewsFilter = (currentParams, filters) => {
   const params = new URLSearchParams(currentParams)
   params.delete("q")
   params.delete("sort")
+  params.delete("topicIds")
+  params.delete("topicId")
   const serialized = serializeNewsFilter(filters)
   const extra = new URLSearchParams(serialized)
   for (const [key, value] of extra) params.set(key, value)
