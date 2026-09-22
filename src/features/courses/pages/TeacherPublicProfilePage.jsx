@@ -35,6 +35,7 @@ import {
   formatRating,
   formatTeacherNumber,
 } from "../utils/teacherUtils"
+import { getCountryLabel } from "@/shared/constants/countriesOptions"
 
 const TeacherPublicProfilePage = () => {
   const { slugOrId } = useParams()
@@ -188,7 +189,12 @@ const TeacherPublicProfilePage = () => {
   const studentCount = teacher.studentCount || 0
   const activeClassCount = teacher.activeClassCount || 0
   const courseCount = teacher.courseCount || activeClassCount || 0
-  const yearsExp = teacher.yearsOfExperience || 5
+  const yearsExp = Number(
+    teacher.yearsOfExperience ??
+      (Array.isArray(teacher.experience) && teacher.experience.length > 0
+        ? teacher.experience.length
+        : 0)
+  )
   const activeClasses = teacher.activeClasses || []
   const totalOpenClasses = teacher.totalOpenClasses || activeClasses.length
   const featuredReviews = teacher.featuredReviews || []
@@ -237,13 +243,13 @@ const TeacherPublicProfilePage = () => {
           </div>
 
           {/* Profile Overview & Stats Body */}
-          <div className="px-6 sm:px-8 pb-6">
+          <div className="relative px-6 sm:px-8 pb-6">
             {/* Profile Avatar + Identity + Action Buttons */}
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-slate-100">
               {/* Avatar + Info */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5 -mt-16 sm:-mt-20">
+              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
                 {/* Avatar (112x112 on desktop, 96x96 on mobile) */}
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-100 border-4 border-white shadow-md shrink-0 flex items-center justify-center select-none">
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28 -mt-12 sm:-mt-14 rounded-full overflow-hidden bg-slate-100 border-4 border-white shadow-md shrink-0 flex items-center justify-center select-none z-10">
                   {teacher.avatarUrl && !avatarError ? (
                     <img
                       src={teacher.avatarUrl}
@@ -259,7 +265,7 @@ const TeacherPublicProfilePage = () => {
                 </div>
 
                 {/* Name, Headline, Verified Badge Pill, Location */}
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 pt-2 sm:pt-3">
                   <div className="flex flex-wrap items-center gap-2.5">
                     <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                       {fullName}
@@ -287,7 +293,13 @@ const TeacherPublicProfilePage = () => {
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium pt-1">
                     <div className="flex items-center gap-1">
                       <MapPin size={13} className="text-slate-400" />
-                      <span>{teacher.country || "Việt Nam"}</span>
+                      <span>
+                        {teacher.address ||
+                          getCountryLabel(
+                            teacher.country || teacher.nationality,
+                            "Việt Nam",
+                          )}
+                      </span>
                     </div>
 
                     <span className="text-slate-300">•</span>
