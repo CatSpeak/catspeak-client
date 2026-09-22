@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
