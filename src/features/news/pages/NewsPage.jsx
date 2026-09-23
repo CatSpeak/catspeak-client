@@ -230,9 +230,9 @@ const NewsPage = ({ postType = "1" }) => {
 
   const filterBar = (
     <div className="flex flex-col w-full gap-3">
-      <div className="flex flex-col w-full gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col w-full gap-3 md:flex-row md:items-center md:justify-between">
         {/* Search box */}
-        <div className="relative w-full sm:max-w-xs">
+        <div className="relative w-full md:max-w-xs">
           <Search
             size={18}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]"
@@ -261,7 +261,7 @@ const NewsPage = ({ postType = "1" }) => {
         </div>
 
         {/* Sort chips */}
-        <div className="flex items-center gap-2 overflow-x-auto">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 w-full md:w-auto">
           {NEWS_SORT_OPTIONS.map((option) => {
             const labelMap = {
               createDate: t.news?.filters?.newest || "Newest",
@@ -274,7 +274,7 @@ const NewsPage = ({ postType = "1" }) => {
                 key={option}
                 type="button"
                 onClick={() => handleSortChange(option)}
-                className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                className={`whitespace-nowrap shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-[#606060] hover:bg-gray-200"
@@ -332,11 +332,11 @@ const NewsPage = ({ postType = "1" }) => {
       {filterBar}
 
       {/* ── Filter Transition Loading Progress Bar ── */}
-      {isFilterFetching && !isInitialLoading && (
+      {/* {isFilterFetching && !isInitialLoading && (
         <div className="w-full h-1 bg-primary/10 rounded-full overflow-hidden -mt-2">
           <div className="w-1/3 h-full bg-primary rounded-full animate-pulse" />
         </div>
-      )}
+      )} */}
 
       {/* ── 1. Skeleton Loading State (Only on initial load when no posts exist yet) ── */}
       {isInitialLoading ? (
