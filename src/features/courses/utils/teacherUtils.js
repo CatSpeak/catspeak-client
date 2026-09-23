@@ -54,6 +54,22 @@ export const formatRating = (rating) => {
 }
 
 /**
+ * Tổng số giảng viên từ envelope response explore/teachers (backend trả `pagination.total`).
+ */
+export const getExploreTeachersTotal = (data) => {
+  const pagination = data?.pagination || {}
+  return Number(pagination.total || data?.total || 0)
+}
+
+/**
+ * Text số lớp đang mở trên card (SRS EX-GV-01): = 0 hiển thị "Không có lớp đang mở"
+ */
+export const formatActiveClassesText = (count) => {
+  const n = Number(count) || 0
+  return n === 0 ? "Không có lớp đang mở" : `${n} lớp đang mở`
+}
+
+/**
  * BR-EX-GV-08: Màu trạng thái số chỗ còn lại
  * - Còn > 5 chỗ: Xanh lá ("green", #10B981)
  * - Còn 1 - 5 chỗ: Vàng cam ("yellow", #F59E0B)

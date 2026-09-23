@@ -12,7 +12,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Globe,
 } from "lucide-react"
 
 import { useGetExploreCoursesQuery } from "@/store/api/coursesApi"
@@ -29,6 +28,7 @@ import TeacherCard from "../components/TeacherCard"
 import CourseTabs from "../components/CourseTabs"
 import ExploreCoursesFilterModal from "../components/ExploreCoursesFilterModal"
 import { resolveItemLayout } from "../utils/catalogLayout"
+import { getExploreTeachersTotal } from "../utils/teacherUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const PAGE_SIZE = 24
@@ -41,6 +41,14 @@ const ExploreCoursesPage = () => {
   const sc = c.student || {}
   const dict = t.nav || {}
 
+  const resolvedLanguage = useMemo(() => {
+    const code = (communityLanguage || "en").toLowerCase()
+    if (code === "zh" || code === "chinese") return "chinese"
+    if (code === "en" || code === "english") return "english"
+    if (code === "ja" || code === "japanese") return "japanese"
+    return "english"
+  }, [communityLanguage])
+
   // Filter States
   const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes" | "teachers"
   const [selectedStatus, setSelectedStatus] = useState("all") // "all" | "open" | "upcoming" | "closed"
@@ -52,7 +60,6 @@ const ExploreCoursesPage = () => {
 
   // Teacher Filter & Pagination States
   const [teacherPage, setTeacherPage] = useState(1)
-  const [teacherLanguage, setTeacherLanguage] = useState("all")
   const [teacherSort, setTeacherSort] = useState("default")
   const catalogSectionRef = useRef(null)
 
@@ -76,7 +83,7 @@ const ExploreCoursesPage = () => {
     page: teacherPage,
     pageSize: 6,
     search: appliedSearchQuery || undefined,
-    language: teacherLanguage !== "all" ? teacherLanguage : undefined,
+    language: resolvedLanguage,
     sort: teacherSort !== "default" ? teacherSort : undefined,
   })
 
@@ -91,12 +98,7 @@ const ExploreCoursesPage = () => {
   }, [exploreTeachersQuery.data])
 
   const teacherPagination = exploreTeachersQuery.data?.pagination || {}
-  const totalTeachers = Number(
-    teacherPagination.totalItems ||
-      teacherPagination.totalCount ||
-      exploreTeachersQuery.data?.total ||
-      0,
-  )
+  const totalTeachers = getExploreTeachersTotal(exploreTeachersQuery.data)
   const teacherTotalPages = Math.max(
     1,
     Number(
@@ -127,14 +129,6 @@ const ExploreCoursesPage = () => {
     { value: "rating", label: sc.sortRating || "Đánh giá cao nhất" },
     { value: "students", label: sc.sortStudents || "Nhiều học viên nhất" },
     { value: "newest", label: sc.sortNewest || "Mới tham gia" },
-  ]
-
-  const teacherSubjectOptions = [
-    { value: "all", label: sc.allSubjects || "Tất cả môn học" },
-    { value: "english", label: "Tiếng Anh" },
-    { value: "chinese", label: "Tiếng Trung" },
-    { value: "japanese", label: "Tiếng Nhật" },
-    { value: "korean", label: "Tiếng Hàn" },
   ]
 
   const enrollmentStatusOptions = [
@@ -214,14 +208,6 @@ const ExploreCoursesPage = () => {
     return selectedStatus
   }, [selectedStatus])
 
-  const resolvedLanguage = useMemo(() => {
-    const code = (communityLanguage || "en").toLowerCase()
-    if (code === "zh" || code === "chinese") return "chinese"
-    if (code === "en" || code === "english") return "english"
-    if (code === "ja" || code === "japanese") return "japanese"
-    return "english"
-  }, [communityLanguage])
-
   // Explore Courses API Query
   const exploreCatalogQuery = useGetExploreCoursesQuery({
     page: currentPage,
@@ -242,6 +228,7 @@ const ExploreCoursesPage = () => {
   // Reset page when language changes
   useEffect(() => {
     setCurrentPage(1)
+    setTeacherPage(1)
   }, [resolvedLanguage])
 
   // Sync / Accumulate data for Infinite Scroll
@@ -320,7 +307,6 @@ const ExploreCoursesPage = () => {
   const handleClearTeacherFilters = () => {
     setSearchInputValue("")
     setAppliedSearchQuery("")
-    setTeacherLanguage("all")
     setTeacherSort("default")
     setTeacherPage(1)
   }
@@ -335,7 +321,6 @@ const ExploreCoursesPage = () => {
     setMaxPriceInput("")
     setCurrentPage(1)
     setTeacherPage(1)
-    setTeacherLanguage("all")
     setTeacherSort("default")
   }
 
@@ -365,7 +350,6 @@ const ExploreCoursesPage = () => {
     sortOrder !== "default" ||
     selectedStatus !== "all" ||
     hasPriceFilter ||
-    teacherLanguage !== "all" ||
     teacherSort !== "default"
 
   const modalEnrollmentStatus = selectedStatus
@@ -458,18 +442,6 @@ const ExploreCoursesPage = () => {
           {/* Right Controls */}
           {contentType === "teachers" ? (
             <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-              {/* Teacher Subject Filter */}
-              <CourseSelectFilter
-                value={teacherLanguage}
-                onChange={(val) => {
-                  setTeacherLanguage(val)
-                  setTeacherPage(1)
-                }}
-                options={teacherSubjectOptions}
-                icon={Globe}
-                variant="ghost"
-              />
-
               {/* Teacher Sort Filter */}
               <CourseSelectFilter
                 value={teacherSort}
@@ -616,11 +588,9 @@ const ExploreCoursesPage = () => {
               </h3>
               <p className="max-w-xs text-sm font-semibold text-slate-500">
                 {sc.noTeachersFoundDesc ||
-                  "Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc môn học."}
+                  "Thử thay đổi từ khóa tìm kiếm hoặc sắp xếp."}
               </p>
-              {(appliedSearchQuery ||
-                teacherLanguage !== "all" ||
-                teacherSort !== "default") && (
+              {(appliedSearchQuery || teacherSort !== "default") && (
                 <button
                   type="button"
                   onClick={handleClearTeacherFilters}
