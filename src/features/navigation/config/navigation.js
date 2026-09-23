@@ -67,7 +67,7 @@ export const navSections = [
     defaultLabel: "Gia sư AI",
     maxInitial: 5,
     items: [
-      { key: "placementTest", path: "/ai-tutor/placement-test", icon: Target },
+      { key: "levelAssessment", path: "/ai-tutor/level-assessment", icon: Target },
       { key: "learningPath", path: "/ai-tutor/learning-path", icon: CalendarDays },
       { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
       { key: "vocabularyNotebook", path: "/ai-tutor/vocabulary-notebook", icon: Layers },
@@ -148,7 +148,7 @@ export const navLinks = [
     hasDropdown: true,
     icon: Bot,
     subItems: [
-      { key: "placementTest", path: "/ai-tutor/placement-test", icon: Target },
+      { key: "levelAssessment", path: "/ai-tutor/level-assessment", icon: Target },
       { key: "learningPath", path: "/ai-tutor/learning-path", icon: CalendarDays },
       { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
       { key: "vocabularyNotebook", path: "/ai-tutor/vocabulary-notebook", icon: Layers },

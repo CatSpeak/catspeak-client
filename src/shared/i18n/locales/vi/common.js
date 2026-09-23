@@ -67,6 +67,7 @@ export default {
     exploreCourses: "Khám phá khóa học",
     aiTutor: "Gia sư AI",
     placementTest: "Đánh giá trình độ",
+    levelAssessment: "Đánh giá trình độ",
     learningPath: "Lộ trình 5 ngày",
     speakingRoom: "Phòng luyện nói",
     vocabularyNotebook: "Sổ tay từ vựng",

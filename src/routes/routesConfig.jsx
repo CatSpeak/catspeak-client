@@ -22,8 +22,8 @@ import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
 
 // AI Tutor Feature Pages
 import AiTutorLayout from "@/features/ai-tutor/layouts/AiTutorLayout";
-const AiPlacementTestPage = lazy(
-  () => import("@/features/ai-tutor/pages/PlacementTestPage"),
+const AiLevelAssessmentPage = lazy(
+  () => import("@/features/ai-tutor/pages/LevelAssessmentPage"),
 );
 const AiLearningPathPage = lazy(
   () => import("@/features/ai-tutor/pages/LearningPathPage"),
@@ -482,13 +482,13 @@ const routesConfig = [
                 children: [
                   {
                     index: true,
-                    element: <Navigate to="placement-test" replace />,
+                    element: <Navigate to="level-assessment" replace />,
                   },
                   {
-                    path: "placement-test",
+                    path: "level-assessment",
                     element: (
                       <LazyRoute>
-                        <AiPlacementTestPage />
+                        <AiLevelAssessmentPage />
                       </LazyRoute>
                     ),
                   },

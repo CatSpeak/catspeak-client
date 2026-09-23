@@ -67,6 +67,7 @@ export default {
     exploreCourses: "探索课程",
     aiTutor: "AI 导师",
     placementTest: "水平评估",
+    levelAssessment: "水平评估",
     learningPath: "5天学习路线",
     speakingRoom: "口语练习室",
     vocabularyNotebook: "生词本",

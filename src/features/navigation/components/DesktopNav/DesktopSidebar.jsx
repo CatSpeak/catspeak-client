@@ -46,7 +46,7 @@ const mainDockItems = [
   {
     key: "aiTutor",
     icon: Bot,
-    path: "/ai-tutor/placement-test",
+    path: "/ai-tutor/level-assessment",
     hasSublinks: true,
   },
 ]

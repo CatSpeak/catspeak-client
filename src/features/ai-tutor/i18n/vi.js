@@ -1,6 +1,6 @@
 export default {
   title: "Gia sư AI",
-  placementTest: {
+  levelAssessment: {
     title: "Đánh giá trình độ",
   },
   learningPath: {

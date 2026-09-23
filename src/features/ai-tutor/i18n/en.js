@@ -1,6 +1,6 @@
 export default {
   title: "AI Tutor",
-  placementTest: {
+  levelAssessment: {
     title: "Level Assessment",
   },
   learningPath: {

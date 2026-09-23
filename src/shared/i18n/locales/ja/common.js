@@ -67,6 +67,7 @@ export default {
     exploreCourses: "コースを探索",
     aiTutor: "AI チューター",
     placementTest: "レベル診断",
+    levelAssessment: "レベル診断",
     learningPath: "5日間学習ロードマップ",
     speakingRoom: "スピーキングルーム",
     vocabularyNotebook: "単語帳",

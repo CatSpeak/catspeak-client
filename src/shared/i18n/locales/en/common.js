@@ -67,6 +67,7 @@ export default {
     exploreCourses: "Explore Courses",
     aiTutor: "AI Tutor",
     placementTest: "Level Assessment",
+    levelAssessment: "Level Assessment",
     learningPath: "5-Day Learning Path",
     speakingRoom: "Speaking Room",
     vocabularyNotebook: "Vocabulary Notebook",

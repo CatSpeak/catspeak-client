@@ -1,6 +1,6 @@
 export default {
   title: "AI 导师",
-  placementTest: {
+  levelAssessment: {
     title: "水平评估",
   },
   learningPath: {
