@@ -79,9 +79,13 @@ const StarterGreetingBubble = ({
             onClick={() =>
               onSendSuggestedSentence?.(
                 item.targetText || item.displayText || item.vi,
+                item,
               )
             }
-            title="Click để gửi vào phòng học"
+            title={
+              t.rooms?.chatBox?.aiAskVocabularyTooltip ||
+              "Click để hỏi AI từ vựng cho câu này"
+            }
             className="group w-full text-left bg-white hover:bg-red-50/40 active:scale-[0.99] border border-red-200 hover:border-red-300 rounded-2xl px-4 py-2.5 transition-all shadow-2xs flex flex-col gap-0.5 cursor-pointer"
           >
             <div className="flex items-baseline gap-1.5">
