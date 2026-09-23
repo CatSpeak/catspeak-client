@@ -9,7 +9,16 @@ import { useState, useEffect } from "react"
 export const useColumnCount = (
   breakpoints = { xl: 1280, md: 768, sm: 480 },
 ) => {
-  const [cols, setCols] = useState(3)
+  const getInitialCols = () => {
+    if (typeof window === "undefined") return 3
+    const w = window.innerWidth
+    if (w >= (breakpoints.xl ?? 1280)) return 4
+    if (w >= (breakpoints.md ?? 768)) return 3
+    if (w >= (breakpoints.sm ?? 480)) return 2
+    return 1
+  }
+
+  const [cols, setCols] = useState(getInitialCols)
 
   useEffect(() => {
     const handleResize = () => {

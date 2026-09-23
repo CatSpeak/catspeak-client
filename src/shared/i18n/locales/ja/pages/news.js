@@ -10,6 +10,14 @@ export default {
     post: "投稿表示",
     article: "記事表示",
   },
+  filters: {
+    topics: "トピック",
+    searchPlaceholder: "記事を検索...",
+    newest: "最新",
+    mostViewed: "最も閲覧された",
+    mostReactions: "リアクション最多",
+    seeMore: "もっと見る",
+  },
   newsDetail: {
     back: "戻る",
     views: "閲覧",
@@ -29,7 +37,6 @@ export default {
     share: "共有",
     copy: "コピー",
     copied: "コピーしました！",
-    linkCopied: "リンクをクリップボードにコピーしました！",
     comment: "コメント",
     editComment: "コメントを編集",
     deleteComment: "コメントを削除",
