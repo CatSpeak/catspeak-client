@@ -6,6 +6,7 @@ import {
   getTeacherHeadline,
   formatTeacherNumber,
   formatRating,
+  formatActiveClassesText,
 } from "../utils/teacherUtils"
 
 const TeacherCard = ({
@@ -24,7 +25,8 @@ const TeacherCard = ({
   const rating = formatRating(teacher.rating || teacher.averageRating)
   const reviewCount = Number(teacher.reviewCount || teacher.totalReviews || 0)
   const totalStudents = teacher.totalStudents || teacher.studentCount || 0
-  const activeClassesCount = teacher.activeClassesCount || teacher.openClassesCount || 0
+  const activeClassesCount =
+    teacher.activeClassCount || teacher.activeClassesCount || teacher.openClassesCount || 0
   const slugOrId = teacher.slug || teacher.id
 
   const handleCardClick = (e) => {
@@ -97,7 +99,7 @@ const TeacherCard = ({
         {/* Số lớp đang mở */}
         <div className="flex items-center gap-1 text-[#990011] font-semibold truncate shrink-0">
           <GraduationCap size={14} className="text-[#990011] shrink-0" />
-          <span>{activeClassesCount} lớp đang mở</span>
+          <span>{formatActiveClassesText(activeClassesCount)}</span>
         </div>
       </div>
 
