@@ -42,6 +42,7 @@ const INITIAL_FORM_DATA = {
   phoneNumber: "",
   phonePrefix: "+84",
   nationality: "",
+  dateOfBirth: "",
   languagesTeach: [],
   nativeLanguage: "Tiếng Việt",
   idFrontFile: null,
@@ -71,25 +72,23 @@ function safeParseArray(value) {
 }
 
 /**
- * Normalize languagesTeach from the API into an array of {language, level, yearsExperience} objects.
+ * Normalize languagesTeach from the API into an array of {language, level} objects.
  * Supports:
- *  - Array of objects: [{language: "English", level: "B2", yearsExperience: 5}, ...]
- *  - Array of strings: ["English", "Japanese"] → [{language: "English", level: "", yearsExperience: 0}, ...]
- *  - JSON string of either format above (legacy items without yearsExperience default to 0)
+ *  - Array of objects: [{language: "English", level: "B2"}, ...]
+ *  - Array of strings: ["English", "Japanese"] → [{language: "English", level: ""}, ...]
+ *  - JSON string of either format above
  */
 function normalizeLanguagesTeach(raw) {
   const arr = safeParseArray(raw);
   return arr.map((item) => {
     if (typeof item === "object" && item !== null) {
-      const years = Number(item.yearsExperience);
       return {
         language: item.language || "",
         level: item.level || "",
-        yearsExperience: Number.isFinite(years) ? Math.max(0, Math.min(50, Math.trunc(years))) : 0,
       };
     }
     // Legacy format: plain string = language name only
-    return { language: String(item), level: "", yearsExperience: 0 };
+    return { language: String(item), level: "" };
   });
 }
 
@@ -98,6 +97,7 @@ function normalizeLanguagesTeach(raw) {
  */
 function mapApplicationToFormData(app) {
   if (!app) return null;
+  const rawDob = app.dateOfBirth || app.DateOfBirth;
   return {
     fullName: app.fullName || app.FullName || "",
     email: app.email || app.Email || "",
@@ -105,6 +105,7 @@ function mapApplicationToFormData(app) {
     phoneNumber: parsePhoneData(app.phoneNumber || app.PhoneNumber).phoneNumber,
     phonePrefix: parsePhoneData(app.phoneNumber || app.PhoneNumber).phonePrefix,
     nationality: app.nationality || app.Nationality || "",
+    dateOfBirth: rawDob ? String(rawDob).split("T")[0] : "",
     languagesTeach: normalizeLanguagesTeach(
       app.languagesTeach || app.LanguagesTeach,
     ),
@@ -244,6 +245,7 @@ const InstructorPage = () => {
         phoneNumber: parsePhoneData(profile.phoneNumber || prev.phoneNumber).phoneNumber,
         phonePrefix: parsePhoneData(profile.phoneNumber || prev.phoneNumber).phonePrefix,
         nationality: profile.country || prev.nationality,
+        dateOfBirth: profile.dateOfBirth ? String(profile.dateOfBirth).split("T")[0] : prev.dateOfBirth,
       }));
       setHasPreFilled(true);
       // Capture the auto-filled state as the original for new applications
@@ -309,6 +311,7 @@ const InstructorPage = () => {
       phoneNumber: formData.phoneNumber,
       phonePrefix: formData.phonePrefix,
       nationality: formData.nationality,
+      dateOfBirth: formData.dateOfBirth,
     };
     setIsEditingPersonalInfo(true);
   }, [formData]);
@@ -328,6 +331,7 @@ const InstructorPage = () => {
       delete newErr.address;
       delete newErr.phoneNumber;
       delete newErr.nationality;
+      delete newErr.dateOfBirth;
       return newErr;
     });
   }, []);
@@ -355,6 +359,23 @@ const InstructorPage = () => {
     if (!formData.nativeLanguage?.trim())
       newErrors.nativeLanguage = ins.requiredField || "Trường này là bắt buộc";
 
+    if (!formData.dateOfBirth) {
+      newErrors.dateOfBirth = ins.requiredField || "Trường này là bắt buộc";
+    } else {
+      const dobDate = new Date(formData.dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+      if (isNaN(dobDate.getTime())) {
+        newErrors.dateOfBirth = ins.invalidDateOfBirth || "Ngày sinh không hợp lệ";
+      } else if (age < 18) {
+        newErrors.dateOfBirth = ins.approvedDateOfBirthAge || "Giảng viên phải từ 18 tuổi trở lên";
+      }
+    }
+
     if (!formData.languagesTeach || formData.languagesTeach.length === 0) {
       newErrors.languagesTeach =
         ins.selectLanguagesError || ins.requiredField || "Vui lòng chọn ngôn ngữ giảng dạy";
@@ -363,12 +384,6 @@ const InstructorPage = () => {
         if (!lang.language || !lang.level) {
           newErrors.languagesTeachLevel =
             ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
-          break;
-        }
-        const years = Number(lang.yearsExperience);
-        if (!Number.isFinite(years) || years < 0 || years > 50) {
-          newErrors.languagesTeachExperience =
-            ins.experienceError || "Số năm kinh nghiệm mỗi ngôn ngữ phải từ 0 đến 50";
           break;
         }
       }
@@ -527,7 +542,7 @@ const InstructorPage = () => {
       if (!effectiveCanEdit) return;
       const file = e.target.files?.[0];
       if (!file) return;
-      const VIDEO_MAX_MB = 500;
+      const VIDEO_MAX_MB = 50;
       if (file.size > VIDEO_MAX_MB * 1024 * 1024) {
         const actualMb = (file.size / 1024 / 1024).toFixed(1);
         setErrors((prev) => ({
@@ -601,6 +616,7 @@ const InstructorPage = () => {
           ? `${formData.phonePrefix}${formData.phoneNumber.replace(/^0+/, "")}`
           : "",
         nationality: formData.nationality,
+        dateOfBirth: formData.dateOfBirth,
         languagesTeach: formData.languagesTeach,
         nativeLanguage: formData.nativeLanguage,
         introduction: formData.introduction,
@@ -630,12 +646,6 @@ const InstructorPage = () => {
         if (!lang.language || !lang.level) {
           newErrors.languagesTeachLevel =
             ins.selectLevelError || ins.requiredField || "Vui lòng chọn trình độ cho từng ngôn ngữ";
-          break;
-        }
-        const years = Number(lang.yearsExperience);
-        if (!Number.isFinite(years) || years < 0 || years > 50) {
-          newErrors.languagesTeachExperience =
-            ins.experienceError || "Số năm kinh nghiệm mỗi ngôn ngữ phải từ 0 đến 50";
           break;
         }
       }
@@ -743,9 +753,7 @@ const InstructorPage = () => {
       return;
     }
 
-    const newErrors = (isRequestEdit || isReapplying)
-      ? validateTeachingForm()
-      : validateForm();
+    const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setTimeout(() => {
         const firstErrorKey = Object.keys(newErrors)[0];
@@ -756,18 +764,17 @@ const InstructorPage = () => {
     }
 
     try {
-      if (isRequestEdit || isReapplying) {
-        // PUT /my for resubmission — teaching content only. Personal/identity
-        // fields are locked (owned by the account page) and stripped from the
-        // payload; the backend keeps the draft's submitted values. No OTP.
-        await updateInstructor(buildTeachingPayload()).unwrap();
+      if (isRequestEdit) {
+        // PUT /my for resubmission — full form payload (personal + identity + teaching)
+        await updateInstructor(buildPayload()).unwrap();
         toast.success(ins.statusPendingDesc || "Đã gửi lại đơn đăng ký thành công!");
         setShowForm(false);
         setAgreed(false);
         setErrors({});
         setIsReapplying(false);
+        store.dispatch(instructorApi.util.invalidateTags(["InstructorProfile"]));
       } else {
-        // POST /apply for new applications — Task Progress Bar
+        // POST /apply for new applications OR reapplying — Task Progress Bar
         const rawPayload = buildPayload();
         const formData = buildInstructorFormData(rawPayload);
 
@@ -968,8 +975,7 @@ const InstructorPage = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        {/* Personal/identity locked on resubmit (owned by the account page) */}
-        {!isApproved && !isRequestEdit && !isReapplying && (
+        {!isApproved && (
           <InstructorPersonalInfo
             formData={formData}
             onChange={handleChange}
@@ -992,7 +998,7 @@ const InstructorPage = () => {
           errors={errors}
           t={t}
         />
-        {!isApproved && !isRequestEdit && !isReapplying && (
+        {!isApproved && (
           <InstructorIdentity
             formData={formData}
             onEdit={handleEdit}

@@ -10,6 +10,7 @@ export function buildInstructorFormData({
   address,
   phoneNumber,
   nationality,
+  dateOfBirth,
   languagesTeach,
   nativeLanguage,
   introduction,
@@ -32,6 +33,7 @@ export function buildInstructorFormData({
   if (address) fd.append("Address", address)
   if (phoneNumber) fd.append("PhoneNumber", phoneNumber)
   if (nationality) fd.append("Nationality", nationality)
+  if (dateOfBirth) fd.append("DateOfBirth", dateOfBirth)
   if (nativeLanguage) fd.append("NativeLanguage", nativeLanguage)
   if (introduction) fd.append("Introduction", introduction)
 

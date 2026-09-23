@@ -25,6 +25,7 @@ import {
 } from "../../../store/api/social/friendshipApi"
 import { openWidget } from "@/store/slices/messageWidgetSlice"
 import ProfileAvatarNCover from "@/shared/components/profile/ProfileAvatarNCover"
+import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
 const SocialProfileHeader = ({
   profile = {},
@@ -51,6 +52,7 @@ const SocialProfileHeader = ({
     profile?.isTeacher ||
     profile?.accountType === "Teacher"
   )
+  const { isTeacher: isActiveTeacher } = useRoleOverride()
   const headline = profile?.headline || null
   const introduction = profile?.introduction || null
   const teachingMotto = profile?.teachingMotto || null
@@ -120,6 +122,8 @@ const SocialProfileHeader = ({
   const handleEdit = () => {
     if (onEditClick) {
       onEditClick()
+    } else if (isOwnProfile && (isActiveTeacher === true || (isActiveTeacher == null && isTeacher))) {
+      navigate("/setting/instructor")
     } else {
       navigate("/setting/account")
     }
