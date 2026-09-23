@@ -336,7 +336,7 @@ const MobileNavItems = ({
           {getVisibleGroupsForDrilldown(activeDrilldownItem).map(
             (group, groupIdx) => (
               <React.Fragment key={group.key}>
-                {groupIdx > 0 && (
+                {groupIdx > 0 && group.key === "general" && (
                   <div className="my-1 mx-3 h-px bg-border shrink-0" />
                 )}
                 {group.items.map((sub) => {

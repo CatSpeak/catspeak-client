@@ -36,15 +36,6 @@ const mainDockItems = [
     hasSublinks: true,
   },
   {
-    key: "workspace",
-    icon: Briefcase,
-    path: "/workspace",
-    hasSublinks: true,
-  },
-]
-
-const secondaryDockItems = [
-  {
     key: "exploreCourses",
     icon: Compass,
     path: "/explore-courses",
@@ -55,6 +46,15 @@ const secondaryDockItems = [
     icon: LayoutDashboard,
     path: "/resources",
     hasSublinks: false,
+  },
+]
+
+const secondaryDockItems = [
+  {
+    key: "workspace",
+    icon: Briefcase,
+    path: "/workspace",
+    hasSublinks: true,
   },
 ]
 
@@ -484,7 +484,7 @@ const DesktopSidebar = () => {
                     : getVisibleGroupsForSection(currentSectionKey).map(
                         (group, groupIdx) => (
                           <React.Fragment key={group.key}>
-                            {groupIdx > 0 && (
+                            {groupIdx > 0 && group.key === "general" && (
                               <div className="my-1 mx-2 h-px bg-border shrink-0" />
                             )}
                             {group.items.map((item) => {

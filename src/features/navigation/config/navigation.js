@@ -61,6 +61,10 @@ export const navSections = [
     maxInitial: 5,
     groups: [
       {
+        key: "profile",
+        items: [{ key: "profile", path: "/workspace/profile", icon: User }],
+      },
+      {
         key: "teaching",
         roles: ["Teacher"],
         items: [
@@ -86,7 +90,6 @@ export const navSections = [
       {
         key: "general",
         items: [
-          { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
           {
             key: "myCalendar",
@@ -124,11 +127,34 @@ export const navLinks = [
     ],
   },
   {
+    key: "exploreCourses",
+    label: "Explore Courses",
+    path: "/explore-courses",
+    icon: Compass,
+  },
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: Globe,
+    isPrivate: true,
+  },
+  {
+    key: "horizontalBar",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  {
     key: "workspace",
     hasDropdown: true,
     icon: Briefcase,
     requiresAuth: true,
     groups: [
+      {
+        key: "profile",
+        items: [{ key: "profile", path: "/workspace/profile", icon: User }],
+      },
       {
         key: "teaching",
         roles: ["Teacher"],
@@ -151,7 +177,6 @@ export const navLinks = [
       {
         key: "general",
         items: [
-          { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
           {
             key: "myCalendar",
@@ -167,25 +192,6 @@ export const navLinks = [
     get subItems() {
       return this.groups.flatMap((g) => g.items)
     },
-  },
-  {
-    key: "horizontalBar",
-    label: "Horizontal bar",
-    isHorizontalBar: true,
-    showOnHorizontalBar: false,
-  },
-  {
-    key: "exploreCourses",
-    label: "Explore Courses",
-    path: "/explore-courses",
-    icon: Compass,
-  },
-  {
-    key: "learningResources",
-    label: "Resource Hub",
-    path: "/resources",
-    icon: Globe,
-    isPrivate: true,
   },
 ]
 
