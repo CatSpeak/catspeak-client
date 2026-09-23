@@ -549,21 +549,21 @@ const ChatInput = ({
                 colorClass="peer-checked:bg-red-700"
               />
               <div
-                className="flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-[11px] font-medium transition-colors cursor-pointer select-none"
                 onClick={() => {
                   if (!isHost && !isMemberPrivateAiAllowed && !isPrivateAi) return
                   setIsPrivateAi(!isPrivateAi)
                 }}
               >
                 {isPrivateAi ? (
-                  <span className="flex items-center gap-0.5 text-gray-700 leading-none">
-                    <Lock size={12} className="text-gray-500 shrink-0 -translate-y-[1px]" />
-                    <span className="leading-none flex items-center">{t.rooms?.chatBox?.privateModeLabel || "Riêng tư"}</span>
+                  <span className="inline-flex items-center gap-0.5 text-gray-700">
+                    <Lock size={12} className="text-gray-500 shrink-0 -translate-y-[0.08em]" />
+                    <span>{t.rooms?.chatBox?.privateModeLabel || "Riêng tư"}</span>
                   </span>
                 ) : (
-                  <span className="flex items-center gap-0.5 text-red-700 font-semibold leading-none">
-                    <Globe size={12} className="text-red-700 shrink-0 -translate-y-[1px]" />
-                    <span className="leading-none flex items-center">{t.rooms?.chatBox?.publicModeLabel || "Công khai"}</span>
+                  <span className="inline-flex items-center gap-0.5 text-red-700 font-semibold">
+                    <Globe size={12} className="text-red-700 shrink-0 -translate-y-[0.08em]" />
+                    <span>{t.rooms?.chatBox?.publicModeLabel || "Công khai"}</span>
                   </span>
                 )}
               </div>
