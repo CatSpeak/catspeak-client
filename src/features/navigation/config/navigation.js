@@ -20,6 +20,10 @@ import {
   Folder,
   Ticket,
   ClipboardCheck,
+  Bot,
+  Target,
+  Layers,
+  History,
 } from "lucide-react"
 import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
@@ -63,12 +67,11 @@ export const navSections = [
     defaultLabel: "Gia sư AI",
     maxInitial: 5,
     items: [
-      {
-        key: "placementTest",
-        path: "/placement-test",
-        icon: ClipboardCheck,
-        lang: DEFAULT_COMMUNITY_LANG,
-      },
+      { key: "placementTest", path: "/ai-tutor/placement-test", icon: Target },
+      { key: "learningPath", path: "/ai-tutor/learning-path", icon: CalendarDays },
+      { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
+      { key: "vocabularyNotebook", path: "/ai-tutor/vocabulary-notebook", icon: Layers },
+      { key: "historyProgress", path: "/ai-tutor/history-progress", icon: History },
     ],
   },
   {
@@ -141,6 +144,18 @@ export const navLinks = [
     ],
   },
   {
+    key: "aiTutor",
+    hasDropdown: true,
+    icon: Bot,
+    subItems: [
+      { key: "placementTest", path: "/ai-tutor/placement-test", icon: Target },
+      { key: "learningPath", path: "/ai-tutor/learning-path", icon: CalendarDays },
+      { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
+      { key: "vocabularyNotebook", path: "/ai-tutor/vocabulary-notebook", icon: Layers },
+      { key: "historyProgress", path: "/ai-tutor/history-progress", icon: History },
+    ],
+  },
+  {
     key: "workspace",
     hasDropdown: true,
     icon: Briefcase,
@@ -184,12 +199,6 @@ export const navLinks = [
     get subItems() {
       return this.groups.flatMap((g) => g.items)
     },
-  },
-  {
-    key: "placementTest",
-    path: "/placement-test",
-    icon: ClipboardCheck,
-    lang: DEFAULT_COMMUNITY_LANG,
   },
   {
     key: "horizontalBar",

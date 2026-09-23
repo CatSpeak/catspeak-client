@@ -20,6 +20,24 @@ import SharedEventPage from "@/features/calendar/pages/SharedEventPage";
 import CalendarPage from "@/features/calendar/pages/CalendarPage";
 import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
 
+// AI Tutor Feature Pages
+import AiTutorLayout from "@/features/ai-tutor/layouts/AiTutorLayout";
+const AiPlacementTestPage = lazy(
+  () => import("@/features/ai-tutor/pages/PlacementTestPage"),
+);
+const AiLearningPathPage = lazy(
+  () => import("@/features/ai-tutor/pages/LearningPathPage"),
+);
+const AiSpeakingRoomPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
+);
+const AiVocabularyNotebookPage = lazy(
+  () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
+);
+const AiHistoryProgressPage = lazy(
+  () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
+);
+
 // Shared Pages
 import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages";
 
@@ -442,6 +460,69 @@ const routesConfig = [
                   {
                     path: "calendar/create",
                     element: <CreateEventPage />,
+                  },
+                  { path: "*", element: <PageNotFound /> },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+
+      // Language-prefixed ai-tutor routes
+      {
+        path: "/:lang/ai-tutor",
+        element: <LanguageLayout />,
+        children: [
+          {
+            element: <MainLayout />,
+            children: [
+              {
+                element: <AiTutorLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: <Navigate to="placement-test" replace />,
+                  },
+                  {
+                    path: "placement-test",
+                    element: (
+                      <LazyRoute>
+                        <AiPlacementTestPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning-path",
+                    element: (
+                      <LazyRoute>
+                        <AiLearningPathPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "speaking-room",
+                    element: (
+                      <LazyRoute>
+                        <AiSpeakingRoomPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "vocabulary-notebook",
+                    element: (
+                      <LazyRoute>
+                        <AiVocabularyNotebookPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "history-progress",
+                    element: (
+                      <LazyRoute>
+                        <AiHistoryProgressPage />
+                      </LazyRoute>
+                    ),
                   },
                   { path: "*", element: <PageNotFound /> },
                 ],

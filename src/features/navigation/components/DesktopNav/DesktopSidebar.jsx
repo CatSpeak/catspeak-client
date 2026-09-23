@@ -23,8 +23,8 @@ import {
   Globe,
   Settings,
   Compass,
+  Bot,
 } from "lucide-react"
-import { RobotIcon } from "@/shared/assets/icons/RobotIcon"
 import DesktopNavItem from "./DesktopNavItem"
 import ListItem from "@/shared/components/ui/ListItem"
 
@@ -45,10 +45,9 @@ const mainDockItems = [
   },
   {
     key: "aiTutor",
-    icon: RobotIcon,
-    path: "/placement-test",
+    icon: Bot,
+    path: "/ai-tutor/placement-test",
     hasSublinks: true,
-    lang: DEFAULT_COMMUNITY_LANG,
   },
 ]
 
@@ -69,7 +68,7 @@ const secondaryDockItems = [
 
 const normalizePath = (path) => {
   if (!path) return path
-  return path.replace(/^\/(?:zh|en|vi)(?=\/|$)/, "")
+  return path.replace(/^\/(?:zh|en|vi|ja)(?=\/|$)/, "")
 }
 
 const getActiveDockSection = (pathname) => {
@@ -86,7 +85,7 @@ const getActiveDockSection = (pathname) => {
   if (pathname.includes("/chat")) return "messages"
   if (pathname.includes("/explore-courses")) return "exploreCourses"
   if (pathname.includes("/resources")) return "learningResources"
-  if (pathname.includes("/placement-test")) return "aiTutor"
+  if (pathname.includes("/ai-tutor") || pathname.includes("/placement-test")) return "aiTutor"
   if (pathname.includes("/community")) return "community"
   return "community"
 }
@@ -158,7 +157,7 @@ const DesktopSidebar = () => {
       setLastSublink("catSpeak", cleanPath)
     } else if (pathname.includes("/workspace")) {
       setLastSublink("workspace", cleanPath)
-    } else if (pathname.includes("/placement-test")) {
+    } else if (pathname.includes("/ai-tutor") || pathname.includes("/placement-test")) {
       setLastSublink("aiTutor", cleanPath)
     }
   }, [pathname, setLastSublink])
