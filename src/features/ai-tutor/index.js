@@ -5,6 +5,5 @@ export { default as SpeakingRoomPage } from "./pages/SpeakingRoomPage"
 export { default as VocabularyNotebookPage } from "./pages/VocabularyNotebookPage"
 export { default as HistoryProgressPage } from "./pages/HistoryProgressPage"
 export * from "./components/speakingRoom"
-export * from "./mock-data/recommendTopics"
-export * from "./mock-data/speakingRoomConfig"
 export * from "./i18n"
+
