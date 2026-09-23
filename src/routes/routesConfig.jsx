@@ -33,6 +33,7 @@ import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
 import { Navigate } from "react-router-dom";
 import { AuthGuard, RoleGuard } from "@/shared/components";
+import SettingIndexRedirect from "./SettingIndexRedirect";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
@@ -1056,14 +1057,19 @@ const routesConfig = [
                 children: [
                   {
                     index: true,
-                    element: <Navigate to="account" replace />,
+                    element: <SettingIndexRedirect />,
                   },
                   {
                     path: "account",
                     element: (
-                      <LazyRoute>
-                        <AccountInfoPage />
-                      </LazyRoute>
+                      <RoleGuard
+                        allowedRoles={["Student", "Admin"]}
+                        fallbackPath="/setting/system"
+                      >
+                        <LazyRoute>
+                          <AccountInfoPage />
+                        </LazyRoute>
+                      </RoleGuard>
                     ),
                   },
                   {
