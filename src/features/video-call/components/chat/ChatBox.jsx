@@ -79,10 +79,17 @@ const ChatBox = ({ messages, onSendMessage, isConnected, className = "" }) => {
     },
   ]
 
-  // Handler to auto-send a suggested sentence into the meeting room chat (FR-001)
-  const handleSendSuggestedSentence = (sentenceText) => {
-    if (!sentenceText) return
-    onSendMessage(sentenceText)
+  // Handler when user clicks a suggested sentence -> ask AI about vocabulary (FR-001)
+  const handleSendSuggestedSentence = (sentenceText, item) => {
+    if (!sentenceText && !item) return
+    const textToAsk = item?.targetText || sentenceText
+    const template =
+      t.rooms?.chatBox?.aiAskVocabularyPrompt ||
+      'Gợi ý cho tôi các từ vựng phù hợp thường được sử dụng cho câu: "{{sentence}}"'
+    const prompt = template.includes("{{sentence}}")
+      ? template.replace("{{sentence}}", textToAsk)
+      : `${template} "${textToAsk}"`
+    sendAiMessage(prompt, { isPrivateAi: true })
   }
 
   // Handler to load more suggestions from dataset (FR-007)
