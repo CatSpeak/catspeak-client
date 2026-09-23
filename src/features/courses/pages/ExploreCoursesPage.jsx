@@ -28,6 +28,7 @@ import TeacherCard from "../components/TeacherCard"
 import CourseTabs from "../components/CourseTabs"
 import ExploreCoursesFilterModal from "../components/ExploreCoursesFilterModal"
 import { resolveItemLayout } from "../utils/catalogLayout"
+import { getExploreTeachersTotal } from "../utils/teacherUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const PAGE_SIZE = 24
@@ -97,12 +98,7 @@ const ExploreCoursesPage = () => {
   }, [exploreTeachersQuery.data])
 
   const teacherPagination = exploreTeachersQuery.data?.pagination || {}
-  const totalTeachers = Number(
-    teacherPagination.totalItems ||
-      teacherPagination.totalCount ||
-      exploreTeachersQuery.data?.total ||
-      0,
-  )
+  const totalTeachers = getExploreTeachersTotal(exploreTeachersQuery.data)
   const teacherTotalPages = Math.max(
     1,
     Number(
