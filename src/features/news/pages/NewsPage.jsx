@@ -1,10 +1,10 @@
 import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Newspaper, Search, X } from "lucide-react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetPostsQuery } from "@/store/api/social/postsApi";
-import { incrementPage, resetPage, selectNewsPage } from "@/store/slices/newsSlice";
+import { resetPage, setPage as setPageAction } from "@/store/slices/newsSlice";
 import NewsCard from "../components/NewsCard";
 import NewsCardSkeleton from "../components/NewsCardSkeleton";
 import TopicFilter from "../components/TopicFilter";
@@ -35,18 +35,46 @@ const NewsPage = ({ postType = "1" }) => {
     );
   }, [lang, language]);
 
-  const page = useSelector(selectNewsPage);
-  const pageSize = 26;
-  const [isTopicDebouncing, setIsTopicDebouncing] = useState(false);
+  const filterKey = useMemo(() => {
+    const topicsKey = (filters.topicIds || []).slice().sort().join(",");
+    return `${postType}_${filters.searchKeyword}_${filters.sortBy}_${topicsKey}`;
+  }, [postType, filters.searchKeyword, filters.sortBy, filters.topicIds]);
 
-  const { data, error, isLoading, isFetching } = useGetPostsQuery({
-    page,
-    pageSize,
-    postType,
-    searchKeyword: filters.searchKeyword || undefined,
-    sortBy: filters.sortBy,
-    topicIds: filters.topicIds && filters.topicIds.length > 0 ? filters.topicIds : undefined,
-  });
+  const [page, setPage] = useState(1);
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+
+  // Synchronously reset page to 1 during render when filterKey changes,
+  // preventing any outdated fetch with (newFilters, oldPage).
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  const pageSize = 26;
+
+  const queryArgs = useMemo(
+    () => ({
+      page,
+      pageSize,
+      postType,
+      searchKeyword: filters.searchKeyword || undefined,
+      sortBy: filters.sortBy,
+      topicIds:
+        filters.topicIds && filters.topicIds.length > 0
+          ? filters.topicIds
+          : undefined,
+    }),
+    [
+      page,
+      pageSize,
+      postType,
+      filters.searchKeyword,
+      filters.sortBy,
+      filters.topicIds,
+    ],
+  );
+
+  const { data, error, isLoading, isFetching } = useGetPostsQuery(queryArgs);
 
   // Search input is local state (for snappy typing); URL only updates when the
   // user commits the keyword (Enter key or leaving the field).
@@ -60,21 +88,41 @@ const NewsPage = ({ postType = "1" }) => {
     setSearchInput(filters.searchKeyword);
   }
 
-  // Commit a keyword to the URL (triggers refetch + page reset via the
-  // filter-change effect below). No-op when the value already matches the URL.
-  const commitSearch = (keyword = searchInput) => {
-    const currentKeyword = parseNewsFilter(window.location.search).searchKeyword;
-    if (keyword === currentKeyword) return;
+  // Update URL filters only when actual values have changed
+  const updateUrlFilters = ({ searchKeyword, sortBy, topicIds }) => {
+    const nextKeyword =
+      searchKeyword !== undefined ? searchKeyword : filters.searchKeyword;
+    const nextSortBy = sortBy !== undefined ? sortBy : filters.sortBy;
+    const nextTopicIds =
+      topicIds !== undefined ? topicIds : filters.topicIds;
+
+    const isSameKeyword = nextKeyword === filters.searchKeyword;
+    const isSameSort = nextSortBy === filters.sortBy;
+    const isSameTopics =
+      (nextTopicIds || []).slice().sort().join(",") ===
+      (filters.topicIds || []).slice().sort().join(",");
+
+    if (isSameKeyword && isSameSort && isSameTopics) {
+      return;
+    }
+
     setSearchParams(
-      applyNewsFilter(window.location.search, {
-        searchKeyword: keyword,
-        sortBy: filters.sortBy,
-        topicIds: filters.topicIds,
+      applyNewsFilter(searchParams, {
+        searchKeyword: nextKeyword,
+        sortBy: nextSortBy,
+        topicIds: nextTopicIds,
       }),
     );
   };
 
-  // Whenever the URL filters change, go back to page 1 and scroll to top.
+  // Commit a keyword to the URL. No-op when the value already matches the current filter.
+  const commitSearch = (keyword = searchInput) => {
+    const trimmed = (keyword || "").trim();
+    if (trimmed === filters.searchKeyword) return;
+    updateUrlFilters({ searchKeyword: trimmed });
+  };
+
+  // Whenever the URL filters change, scroll to top only if scrolled down, and reset Redux page.
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
@@ -82,12 +130,21 @@ const NewsPage = ({ postType = "1" }) => {
       return;
     }
     dispatch(resetPage());
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [filters.searchKeyword, filters.sortBy, filters.topicIds?.join(","), dispatch]);
+    if (
+      typeof window !== "undefined" &&
+      (window.scrollY > 150 || document.documentElement.scrollTop > 150)
+    ) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [filterKey, dispatch]);
 
   // Public posts filtered by current language community or "All"
   const publicPosts = useMemo(() => {
-    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+    const rawList = Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data)
+        ? data
+        : [];
     const targetCommunity = currentCommunity.toLowerCase();
 
     return rawList.filter((post) => {
@@ -111,31 +168,36 @@ const NewsPage = ({ postType = "1" }) => {
 
   // Infinite scroll observer — trigger fetch when the second-to-last post appears
   const secondLastPostElementRef = useRef(null);
+  const hasMore = data?.hasMore ?? (publicPosts.length >= pageSize);
+
   useEffect(() => {
-    if (!secondLastPostElementRef.current) return;
+    if (
+      !secondLastPostElementRef.current ||
+      isFetching ||
+      isLoading ||
+      !hasMore
+    ) {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          dispatch(incrementPage());
+        if (entry.isIntersecting && !isFetching && !isLoading && hasMore) {
+          setPage((prev) => {
+            const next = prev + 1;
+            dispatch(setPageAction(next));
+            return next;
+          });
         }
       },
       {
         rootMargin: "200px",
       },
     );
+
     observer.observe(secondLastPostElementRef.current);
     return () => observer.disconnect();
-  }, [publicPosts, dispatch]);
-
-  const updateUrlFilters = ({ searchKeyword, sortBy, topicIds }) => {
-    setSearchParams(
-      applyNewsFilter(window.location.search, {
-        searchKeyword: searchKeyword !== undefined ? searchKeyword : filters.searchKeyword,
-        sortBy: sortBy !== undefined ? sortBy : filters.sortBy,
-        topicIds: topicIds !== undefined ? topicIds : filters.topicIds,
-      }),
-    );
-  };
+  }, [publicPosts, isFetching, isLoading, hasMore, dispatch]);
 
   const handleSortChange = (sortBy) => {
     if (sortBy === filters.sortBy) return;
@@ -163,7 +225,7 @@ const NewsPage = ({ postType = "1" }) => {
 
   const handleClearSearch = () => {
     setSearchInput("");
-    commitSearch();
+    commitSearch("");
   };
 
   const filterBar = (
@@ -229,13 +291,12 @@ const NewsPage = ({ postType = "1" }) => {
       <TopicFilter
         selectedTopicIds={filters.topicIds}
         onTopicChange={handleTopicChange}
-        onPendingChange={setIsTopicDebouncing}
       />
     </div>
   );
 
-  const isInitialOrFilterLoading =
-    isLoading || (isFetching && page === 1) || isTopicDebouncing;
+  const isInitialLoading = isLoading && publicPosts.length === 0;
+  const isFilterFetching = isFetching && page === 1;
 
   const skeletonCols = useMemo(() => {
     const cols = Array.from({ length: columnsCount }, () => []);
@@ -270,8 +331,15 @@ const NewsPage = ({ postType = "1" }) => {
     <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
       {filterBar}
 
-      {/* ── 1. Skeleton Loading State (First load, filter change, topic debounce, fetching page 1) ── */}
-      {isInitialOrFilterLoading ? (
+      {/* ── Filter Transition Loading Progress Bar ── */}
+      {isFilterFetching && !isInitialLoading && (
+        <div className="w-full h-1 bg-primary/10 rounded-full overflow-hidden -mt-2">
+          <div className="w-1/3 h-full bg-primary rounded-full animate-pulse" />
+        </div>
+      )}
+
+      {/* ── 1. Skeleton Loading State (Only on initial load when no posts exist yet) ── */}
+      {isInitialLoading ? (
         renderSkeletons()
       ) : error && page === 1 ? (
         /* ── 2. Error State ── */
@@ -306,9 +374,13 @@ const NewsPage = ({ postType = "1" }) => {
           />
         </div>
       ) : (
-        /* ── 4. Content Masonry Grid ── */
+        /* ── 4. Content Masonry Grid (Preserved smoothly during filter fetch) ── */
         <>
-          <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
+          <div
+            className={`flex flex-row w-full gap-4 sm:gap-6 items-start transition-opacity duration-200 ${
+              isFilterFetching ? "opacity-60 pointer-events-none" : "opacity-100"
+            }`}
+          >
             {columns.map((col, colIndex) => (
               <div
                 key={colIndex}

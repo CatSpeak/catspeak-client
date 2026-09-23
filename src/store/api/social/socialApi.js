@@ -1,9 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { createReauthBaseQuery } from "../baseApi"
 import { getBrowserTimeZone } from "@/shared/constants/timezones"
+import { defaultParamsSerializer } from "../utils/paramsSerializer"
 
 const socialRawBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_SOCIAL_API_BASE_URL || "/api/social",
+  paramsSerializer: defaultParamsSerializer,
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token
     if (token) {

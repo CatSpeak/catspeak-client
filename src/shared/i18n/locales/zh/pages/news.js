@@ -10,6 +10,14 @@ export default {
     post: "帖子视图",
     article: "文章视图",
   },
+  filters: {
+    topics: "主题",
+    searchPlaceholder: "搜索文章...",
+    newest: "最新",
+    mostViewed: "最多观看",
+    mostReactions: "最多互动",
+    seeMore: "查看更多",
+  },
   newsDetail: {
     back: "返回",
     views: "次观看",
@@ -29,7 +37,6 @@ export default {
     share: "分享",
     copy: "复制",
     copied: "已复制！",
-    linkCopied: "链接已复制！",
     comment: "评论",
     editComment: "编辑评论",
     deleteComment: "删除评论",

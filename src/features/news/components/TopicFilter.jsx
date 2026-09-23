@@ -3,19 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetTopicsQuery } from "@/store/api/social/postsApi";
 
-/**
- * TopicFilter — Interactive topic selection bar for NewsPage.
- *
- * Rules:
- * - Fetches topics using `getTopics` API query.
- * - Renders chips in a single row without wrapping.
- * - Displays a "Xem thêm" (See more) dropdown chip for overflow topics.
- * - Multi-select supported.
- * - Short debounce (~250ms) before committing selection to `onTopicChange`.
- * - Chip styling:
- *   - Unselected: White background, gray border, no shadow (`bg-white border-slate-200 text-slate-700 shadow-none`).
- *   - Selected: Primary background, white text, primary border (`bg-primary text-white border-primary shadow-none`).
- */
+
 const TopicFilter = ({
   selectedTopicIds = [],
   onTopicChange,
@@ -36,13 +24,21 @@ const TopicFilter = ({
   }, [topicsData]);
 
   // 2. Local selection state for instant snappy UI feedback
-  const [localSelectedIds, setLocalSelectedIds] = useState(selectedTopicIds);
-  const debounceTimer = useRef(null);
+  const selectedKey = useMemo(
+    () => (selectedTopicIds || []).slice().sort().join(","),
+    [selectedTopicIds],
+  );
 
-  // Sync from parent props when URL changes externally
-  useEffect(() => {
+  const [localSelectedIds, setLocalSelectedIds] = useState(selectedTopicIds);
+  const [prevSelectedKey, setPrevSelectedKey] = useState(selectedKey);
+
+  // Sync from parent props when URL changes externally (storing information from previous renders)
+  if (selectedKey !== prevSelectedKey) {
+    setPrevSelectedKey(selectedKey);
     setLocalSelectedIds(selectedTopicIds);
-  }, [selectedTopicIds]);
+  }
+
+  const debounceTimer = useRef(null);
 
   // Clean up debounce timer on unmount
   useEffect(() => {
@@ -58,6 +54,7 @@ const TopicFilter = ({
   const dropdownRef = useRef(null);
   const containerRef = useRef(null);
   const measureContainerRef = useRef(null);
+  const labelRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -88,10 +85,13 @@ const TopicFilter = ({
     const containerWidth = containerRef.current.offsetWidth;
     if (containerWidth <= 0) return;
 
+    const gap = 8; // gap-2 = 8px
+    const labelWidth = labelRef.current ? labelRef.current.offsetWidth + gap : 0;
+    const availableWidth = Math.max(0, containerWidth - labelWidth);
+
     const measureChips = measureContainerRef.current.children;
     if (!measureChips || measureChips.length === 0) return;
 
-    const gap = 8; // gap-2 = 8px
     const moreBtnWidth = 110; // approximate width of "Xem thêm" chip with chevron
 
     let currentTotalWidth = 0;
@@ -102,13 +102,13 @@ const TopicFilter = ({
       const widthIfAdded = currentTotalWidth + (i > 0 ? gap : 0) + chipWidth;
 
       // If it's the last item and all items fit:
-      if (i === measureChips.length - 1 && widthIfAdded <= containerWidth) {
+      if (i === measureChips.length - 1 && widthIfAdded <= availableWidth) {
         count = measureChips.length;
         break;
       }
 
       // If adding this chip exceeds container width minus more button:
-      if (widthIfAdded + gap + moreBtnWidth > containerWidth) {
+      if (widthIfAdded + gap + moreBtnWidth > availableWidth) {
         break;
       }
 
@@ -128,6 +128,7 @@ const TopicFilter = ({
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics]);
 
   // 5. Toggle topic selection with short debounce
@@ -175,6 +176,7 @@ const TopicFilter = ({
   if (isLoading && topics.length === 0) {
     return (
       <div className={`flex items-center gap-2 overflow-hidden py-1 ${className}`}>
+        <div className="h-4 w-14 rounded bg-gray-200 animate-pulse shrink-0 mr-1" />
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
@@ -216,6 +218,13 @@ const TopicFilter = ({
         ref={containerRef}
         className="flex items-center gap-2 w-full overflow-visible flex-nowrap"
       >
+        <span
+          ref={labelRef}
+          className="text-sm font-semibold text-slate-700 select-none shrink-0 flex items-center gap-1.5 mr-1"
+        >
+          {t.news?.filters?.topics || "Chủ đề"}:
+        </span>
+
         {visibleTopics.map((topic) => {
           const id = topic.topicId ?? topic.TopicId ?? topic.id;
           const title = topic.title || topic.Title || topic.slug || "";

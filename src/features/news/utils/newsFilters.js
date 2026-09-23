@@ -10,14 +10,17 @@ export const parseNewsFilter = (search) => {
   const params = new URLSearchParams(search)
   const searchKeyword = params.get("q") || ""
   const sortBy = normalizeSort(params.get("sort"))
-  const rawTopicIds = params.get("topicIds") || params.get("topicId")
-  const topicIds = rawTopicIds
-    ? rawTopicIds
-        .split(",")
-        .map((id) => parseInt(id.trim(), 10))
-        .filter((id) => !isNaN(id))
-    : []
-  return { searchKeyword, sortBy, topicIds }
+  const allTopicValues = [
+    ...params.getAll("topicIds"),
+    ...params.getAll("topicId"),
+  ]
+  const topicIds = allTopicValues
+    .flatMap((val) => val.split(","))
+    .map((id) => parseInt(id.trim(), 10))
+    .filter((id) => !isNaN(id))
+
+  const uniqueTopicIds = Array.from(new Set(topicIds))
+  return { searchKeyword, sortBy, topicIds: uniqueTopicIds }
 }
 
 export const serializeNewsFilter = ({

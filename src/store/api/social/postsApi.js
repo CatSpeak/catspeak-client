@@ -44,7 +44,12 @@ export const postsApi = socialApi.injectEndpoints({
           searchKeyword,
           sortBy,
           sortDesc: true,
-          topicIds,
+          topicIds:
+            Array.isArray(topicIds) && topicIds.length > 0
+              ? topicIds
+              : topicIds !== undefined && topicIds !== null && topicIds !== ""
+                ? [topicIds]
+                : undefined,
         },
       }),
       providesTags: ["Post"],
@@ -54,32 +59,48 @@ export const postsApi = socialApi.injectEndpoints({
           : queryArgs?.topicIds || ""
         return `${endpointName}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}_${topicKey}`
       },
-      merge: (currentCache, newItems, { arg }) => {
-        if (arg.page === 1) {
-          currentCache.data = newItems.data
-        } else {
-          const newPosts = (newItems?.data || []).filter(
-            (newPost) =>
-              !currentCache.data.some((p) => p.postId === newPost.postId),
-          )
-          currentCache.data.push(...newPosts)
+      transformResponse: (response, meta, arg) => {
+        const items = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response)
+            ? response
+            : []
+        return {
+          ...(typeof response === "object" && response !== null && !Array.isArray(response)
+            ? response
+            : {}),
+          data: items,
+          hasMore: items.length >= (arg?.pageSize || 10),
         }
-        currentCache.hasMore = newItems.data.length === arg.pageSize
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        const items = Array.isArray(newItems?.data)
+          ? newItems.data
+          : Array.isArray(newItems)
+            ? newItems
+            : []
+        if (arg.page === 1) {
+          currentCache.data = items
+        } else {
+          const existingData = Array.isArray(currentCache.data)
+            ? currentCache.data
+            : Array.isArray(currentCache)
+              ? currentCache
+              : []
+          const newPosts = items.filter(
+            (newPost) =>
+              !existingData.some((p) => p.postId === newPost.postId),
+          )
+          if (Array.isArray(currentCache.data)) {
+            currentCache.data.push(...newPosts)
+          } else {
+            currentCache.data = [...existingData, ...newPosts]
+          }
+        }
+        currentCache.hasMore = items.length >= (arg?.pageSize || 10)
       },
       forceRefetch({ currentArg, previousArg }) {
-        const currentTopicKey = Array.isArray(currentArg?.topicIds)
-          ? currentArg.topicIds.slice().sort().join(",")
-          : currentArg?.topicIds || ""
-        const prevTopicKey = Array.isArray(previousArg?.topicIds)
-          ? previousArg.topicIds.slice().sort().join(",")
-          : previousArg?.topicIds || ""
-        return (
-          currentArg?.page !== previousArg?.page ||
-          currentArg?.postType !== previousArg?.postType ||
-          currentArg?.searchKeyword !== previousArg?.searchKeyword ||
-          currentArg?.sortBy !== previousArg?.sortBy ||
-          currentTopicKey !== prevTopicKey
-        )
+        return currentArg?.page !== previousArg?.page
       },
     }),
     getLandingPosts: builder.query({

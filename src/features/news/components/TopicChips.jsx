@@ -2,16 +2,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
-/**
- * TopicChips — Displays topics associated with a Post as clickable hashtag chips.
- *
- * Rules:
- * - Format: `#{title}`
- * - No border, no shadow
- * - Background: Primary color with 50% opacity (`bg-primary/50`)
- * - Text: Primary color (`text-primary`)
- * - Click: Navigates to `/cat-speak/news?topicIds={id}`
- */
+
 const TopicChips = ({ topics = [], className = "", onTopicClick }) => {
   const navigate = useNavigate();
   const { lang: paramLang } = useParams();
@@ -58,7 +49,7 @@ const TopicChips = ({ topics = [], className = "", onTopicClick }) => {
                 handleChipClick(e, topic);
               }
             }}
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/50 text-primary border-none shadow-none cursor-pointer transition-opacity hover:opacity-80 select-none"
+            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/20 text-primary border-none shadow-none cursor-pointer transition-opacity hover:opacity-80 select-none"
             title={`#${title}`}
           >
             #{title}
