@@ -562,7 +562,7 @@ const ChatInput = ({
                   </span>
                 ) : (
                   <span className="flex items-center gap-0.5 text-red-700 font-semibold leading-none">
-                    <Globe size={12} className="text-red-700 shrink-0" />
+                    <Globe size={12} className="text-red-700 shrink-0 -translate-y-[1px]" />
                     <span className="leading-none flex items-center">{t.rooms?.chatBox?.publicModeLabel || "Công khai"}</span>
                   </span>
                 )}
