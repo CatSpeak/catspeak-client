@@ -800,6 +800,15 @@ export const websites = [
         description:
           "Trung tâm tiếng Trung uy tín và chất lượng tại Mỹ Đình, Hà Nội. Chúng tôi tự hào đã giúp hàng nghìn học viên giao tiếp tiếng Trung thành thạo và thi đỗ HSK điểm cao",
       },
+      {
+        key: "tiengtrungpanda",
+        label: "Tiếng Trung Panda",
+        path: "/resources/tiengtrungpanda",
+        img: "https://tiengtrungpanda.vn/_astro/ch005-tiengtrung-panda.C_gRx6SK_Z1yMxzW.webp",
+        color: "#D1FAE5",
+        description:
+          "Học tiếng Trung theo HSK miễn phí, không cần cài app.",
+      },
     ],
   },
   {

@@ -458,6 +458,11 @@ const resources = [
     lang: "zh",
     url: "https://tiengtrungthuonghai.vn/",
   },
+  {
+    id: "tiengtrungpanda",
+    lang: "zh",
+    url: "https://tiengtrungpanda.vn/",
+  },
 
   // --- Tiếng Nhật (ja) ---
   // 1. Luyện thi JLPT
