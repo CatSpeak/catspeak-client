@@ -14,6 +14,7 @@ import {
   BookOpen,
   ArrowRight,
   Sparkles,
+  Flag,
 } from "lucide-react"
 import toast from "react-hot-toast"
 import { useAuth } from "@/features/auth"
@@ -29,6 +30,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import TeacherOpenClassCard from "../components/TeacherOpenClassCard"
 import TeacherClassesModal from "../components/TeacherClassesModal"
 import TeacherReviewsModal from "../components/TeacherReviewsModal"
+import TeacherReportModal from "../components/TeacherReportModal"
 import {
   getTeacherInitials,
   getTeacherHeadline,
@@ -84,9 +86,18 @@ const TeacherPublicProfilePage = () => {
   const [isUnfollowModalOpen, setIsUnfollowModalOpen] = useState(false)
   const [isClassesModalOpen, setIsClassesModalOpen] = useState(false)
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false)
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false)
   const [avatarError, setAvatarError] = useState(false)
 
   // ─── Action Handlers ───
+  const handleReportClick = () => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location } })
+      return
+    }
+    setIsReportModalOpen(true)
+  }
+
   const handleMessageClick = () => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: location } })
@@ -349,6 +360,18 @@ const TeacherPublicProfilePage = () => {
                         <span>{t.courses?.follow || "Theo dõi"}</span>
                       </>
                     )}
+                  </button>
+
+                  {/* Report Button */}
+                  <button
+                    type="button"
+                    onClick={handleReportClick}
+                    title="Báo cáo giảng viên"
+                    aria-label="Báo cáo giảng viên"
+                    className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:text-[#990011] hover:border-red-200 hover:bg-red-50/50 transition-colors font-bold text-sm flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-[0.98]"
+                  >
+                    <Flag size={16} />
+                    <span className="hidden sm:inline">Báo cáo</span>
                   </button>
                 </div>
               )}
@@ -663,6 +686,14 @@ const TeacherPublicProfilePage = () => {
         confirmText={t.courses?.unfollow || "Bỏ theo dõi"}
         confirmVariant="destructive"
         isPending={isFollowActionPending}
+      />
+
+      {/* ─── Teacher Report Modal ─── */}
+      <TeacherReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        teacherAccountId={teacherAccountId}
+        teacherName={fullName}
       />
     </div>
   )
