@@ -4,7 +4,22 @@ import test from "node:test"
 // eslint-disable-next-line import/no-unresolved
 import assert from "node:assert/strict"
 
-import { getExploreTeachersTotal, formatActiveClassesText } from "./teacherUtils.js"
+import {
+  getExploreTeachersTotal,
+  formatActiveClassesText,
+  getTeacherSlugOrId,
+} from "./teacherUtils.js"
+
+test("getTeacherSlugOrId falls back to accountId when slug is null and id is absent", () => {
+  // Real /explore/teachers list item shape: { accountId: 148, slug: null, ... }
+  assert.equal(getTeacherSlugOrId({ accountId: 148, slug: null }), 148)
+})
+
+test("getTeacherSlugOrId prefers slug, then id", () => {
+  assert.equal(getTeacherSlugOrId({ slug: "nguyen-binh", id: 9, accountId: 1 }), "nguyen-binh")
+  assert.equal(getTeacherSlugOrId({ slug: null, id: 9, accountId: 1 }), 9)
+  assert.equal(getTeacherSlugOrId({ slug: null }), undefined)
+})
 
 test("getExploreTeachersTotal reads backend pagination.total", () => {
   assert.equal(

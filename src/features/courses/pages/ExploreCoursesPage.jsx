@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import {
   Compass,
   RefreshCw,
@@ -32,11 +32,13 @@ import { getExploreTeachersTotal } from "../utils/teacherUtils"
 import { copyShareLink } from "@/shared/utils/shareUtils"
 
 const PAGE_SIZE = 24
+const TAB_TYPES = ["all", "courses", "classes", "teachers"]
 
 const ExploreCoursesPage = () => {
   const { t } = useLanguage()
   const communityLanguage = localStorage.getItem("communityLanguage") || "en"
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const c = t.courses || {}
   const sc = c.student || {}
   const dict = t.nav || {}
@@ -50,7 +52,11 @@ const ExploreCoursesPage = () => {
   }, [communityLanguage])
 
   // Filter States
-  const [contentType, setContentType] = useState("all") // "all" | "courses" | "classes" | "teachers"
+  const [contentType, setContentType] = useState(() =>
+    TAB_TYPES.includes(searchParams.get("type"))
+      ? searchParams.get("type")
+      : "all",
+  ) // "all" | "courses" | "classes" | "teachers"
   const [selectedStatus, setSelectedStatus] = useState("all") // "all" | "open" | "upcoming" | "closed"
   const [sortOrder, setSortOrder] = useState("default") // "default" | "price_asc" | "relevance"
   const [viewMode, setViewMode] = useState("grid") // "grid" | "list"
@@ -385,6 +391,7 @@ const ExploreCoursesPage = () => {
           onChange={(tab) => {
             setContentType(tab)
             setCurrentPage(1)
+            setSearchParams(tab === "all" ? {} : { type: tab }, { replace: true })
           }}
         />
 

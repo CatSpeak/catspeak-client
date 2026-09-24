@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useParams, useNavigate, useLocation, Link } from "react-router-dom"
+import React, { useContext, useState } from "react"
+import { useParams, useLocation, Link } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import {
   ChevronRight,
@@ -23,6 +23,7 @@ import {
 import toast from "react-hot-toast"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import AuthModalContext from "@/shared/context/AuthModalContext"
 import { useGetExploreTeacherCompetencyQuery } from "@/store/api/exploreTeachersApi"
 import {
   useGetConnectionStatusQuery,
@@ -45,11 +46,11 @@ import {
  */
 const TeacherCompetencyPage = () => {
   const { slugOrId } = useParams()
-  const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
   const { t } = useLanguage()
   const { user: authUser, isAuthenticated } = useAuth()
+  const authModalCtx = useContext(AuthModalContext)
 
   // ─── Query Hook: Competency Detail ───
   const {
@@ -94,7 +95,7 @@ const TeacherCompetencyPage = () => {
   // ─── Action Handlers ───
   const handleMessageClick = () => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: location } })
+      authModalCtx?.openAuthModal?.("login", location.pathname)
       return
     }
     dispatch(openWidget())
@@ -102,7 +103,7 @@ const TeacherCompetencyPage = () => {
 
   const handleFollowClick = async () => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: location } })
+      authModalCtx?.openAuthModal?.("login", location.pathname)
       return
     }
     if (isOwnProfile || !teacherAccountId || isFollowActionPending) return
@@ -222,10 +223,10 @@ const TeacherCompetencyPage = () => {
             </Link>
             <ChevronRight size={13} className="text-slate-400 shrink-0" />
             <Link
-              to="/explore-courses"
+              to="/explore-courses?type=teachers"
               className="hover:text-slate-900 transition-colors shrink-0"
             >
-              {t.courses?.exploreCourses || "Khám phá khóa học"}
+              {t.courses?.student?.tabTeachers || "Giảng viên"}
             </Link>
             <ChevronRight size={13} className="text-slate-400 shrink-0" />
             <Link

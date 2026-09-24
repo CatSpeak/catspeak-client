@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useParams, useNavigate, useLocation, Link } from "react-router-dom"
+import React, { useContext, useState } from "react"
+import { useParams, useLocation, Link } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import {
   ChevronRight,
@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast"
 import { useAuth } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import AuthModalContext from "@/shared/context/AuthModalContext"
 import { useGetExploreTeacherDetailQuery } from "@/store/api/exploreTeachersApi"
 import {
   useGetConnectionStatusQuery,
@@ -41,11 +42,11 @@ import { getCountryLabel } from "@/shared/constants/countriesOptions"
 
 const TeacherPublicProfilePage = () => {
   const { slugOrId } = useParams()
-  const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
   const { t } = useLanguage()
   const { user: authUser, isAuthenticated } = useAuth()
+  const authModalCtx = useContext(AuthModalContext)
 
   // ─── Fetch Teacher Details Query ───
   const {
@@ -92,7 +93,7 @@ const TeacherPublicProfilePage = () => {
   // ─── Action Handlers ───
   const handleReportClick = () => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: location } })
+      authModalCtx?.openAuthModal?.("login", location.pathname)
       return
     }
     setIsReportModalOpen(true)
@@ -100,7 +101,7 @@ const TeacherPublicProfilePage = () => {
 
   const handleMessageClick = () => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: location } })
+      authModalCtx?.openAuthModal?.("login", location.pathname)
       return
     }
     dispatch(openWidget())
@@ -108,7 +109,7 @@ const TeacherPublicProfilePage = () => {
 
   const handleFollowClick = async () => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: location } })
+      authModalCtx?.openAuthModal?.("login", location.pathname)
       return
     }
     if (isOwnProfile || !teacherAccountId || isFollowActionPending) return
@@ -227,10 +228,10 @@ const TeacherPublicProfilePage = () => {
           </Link>
           <ChevronRight size={13} className="text-slate-400 shrink-0" />
           <Link
-            to="/explore-courses"
+            to="/explore-courses?type=teachers"
             className="hover:text-slate-900 transition-colors"
           >
-            {t.courses?.exploreCourses || "Khám phá khóa học"}
+            {t.courses?.student?.tabTeachers || "Giảng viên"}
           </Link>
           <ChevronRight size={13} className="text-slate-400 shrink-0" />
           <span className="font-bold text-[#990011] truncate">{fullName}</span>
