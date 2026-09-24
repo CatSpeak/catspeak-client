@@ -42,5 +42,6 @@ export const mapReelDtoToFrontend = (dto) => {
     author,
     orientation: "portrait", // Default layout orientation for Reels
     connectedChallenges: dto.connectedChallenges || [], // Keep connected challenges for grouping
+    status: dto.status || "Public",
   }
 }

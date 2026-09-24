@@ -123,6 +123,8 @@ const WorkspaceMyReelsTab = ({ userId, formatDate, formatNumber, navigate, setIs
               formatNumber={formatNumber}
               onDeleteClick={handleDeleteClick}
               onPlay={handlePlay}
+              statusLabels={ws?.moderationStatus}
+              statusHints={ws?.moderationHint}
             />
           ))}
 

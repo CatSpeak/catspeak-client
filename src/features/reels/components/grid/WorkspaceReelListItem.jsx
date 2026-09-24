@@ -1,5 +1,12 @@
 import React, { memo, useCallback } from "react"
 import { Calendar, Eye, Heart, Play, Trash2, Film } from "lucide-react"
+import { isReelHidden, reelStatusTone } from "../../utils/moderationStatus"
+
+const TONE_CLASS = {
+  amber: "bg-amber-50 text-amber-700 border-amber-200",
+  orange: "bg-orange-50 text-orange-700 border-orange-200",
+  red: "bg-red-50 text-red-700 border-red-200",
+}
 
 const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
   reel,
@@ -7,15 +14,21 @@ const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
   formatNumber,
   onDeleteClick,
   onPlay,
+  statusLabels = {},
+  statusHints = {},
 }) {
+  // Reel đang kiểm duyệt / chờ duyệt / bị từ chối chưa có video để phát.
+  const hidden = isReelHidden(reel.status)
+  const tone = reelStatusTone(reel.status)
+
   const handleOpen = useCallback(() => {
-    onPlay(reel)
-  }, [onPlay, reel])
+    if (!hidden) onPlay(reel)
+  }, [hidden, onPlay, reel])
 
   const handlePlayClick = useCallback((event) => {
     event.stopPropagation()
-    onPlay(reel)
-  }, [onPlay, reel])
+    if (!hidden) onPlay(reel)
+  }, [hidden, onPlay, reel])
 
   const handleDeleteClick = useCallback((event) => {
     event.stopPropagation()
@@ -25,7 +38,7 @@ const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
   return (
     <div
       onClick={handleOpen}
-      className="group flex flex-col gap-3 rounded-lg border border-border bg-white p-4 sm:flex-row sm:items-center sm:justify-between hover:border-gray-300 hover:shadow-sm cursor-pointer transition-all duration-200"
+      className={`group flex flex-col gap-3 rounded-lg border border-border bg-white p-4 sm:flex-row sm:items-center sm:justify-between hover:border-gray-300 hover:shadow-sm transition-all duration-200 ${hidden ? "cursor-default" : "cursor-pointer"}`}
     >
       <div className="flex items-center gap-3 min-w-0">
         {reel.coverUrl ? (
@@ -42,13 +55,23 @@ const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
         )}
 
         <div className="flex flex-col min-w-0">
-          <span className="font-semibold text-gray-800 truncate text-sm sm:text-base">
-            {reel.title}
-          </span>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-semibold text-gray-800 truncate text-sm sm:text-base">
+              {reel.title}
+            </span>
+            {tone && (
+              <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${TONE_CLASS[tone]}`}>
+                {statusLabels[reel.status] || reel.status}
+              </span>
+            )}
+          </div>
           {reel.description && (
             <p className="text-xs text-textColor truncate max-w-[280px] sm:max-w-md md:max-w-lg mt-0.5">
               {reel.description}
             </p>
+          )}
+          {tone && statusHints[reel.status] && (
+            <p className="text-xs text-gray-500 mt-0.5">{statusHints[reel.status]}</p>
           )}
           <div className="flex items-center gap-3 text-xs text-lighttextGray mt-1.5 flex-wrap">
             <span className="flex items-center gap-1">
@@ -70,7 +93,8 @@ const WorkspaceReelListItem = memo(function WorkspaceReelListItem({
       <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
         <button
           onClick={handlePlayClick}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-300 transition-colors"
+          disabled={hidden}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gray-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
           title="Watch Reel"
           aria-label="Watch reel"
         >

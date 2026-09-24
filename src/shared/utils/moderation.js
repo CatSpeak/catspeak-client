@@ -1,4 +1,5 @@
 import { moderationApi } from "@/store/api/moderationApi"
+import { contextForKey } from "./moderationContext"
 
 /**
  * Che ★ nội dung người dùng gõ, TRƯỚC khi gửi lên server.
@@ -30,13 +31,13 @@ const TEXT_KEYS = [
 
 const isTextKey = (k) => TEXT_KEYS.includes(String(k).toLowerCase())
 
-async function maskOne(api, text) {
+async function maskOne(api, text, context) {
   if (typeof text !== "string" || !text.trim()) return text
   try {
     const res = await api
       .dispatch(
         // track: false — đây là lời gọi phụ trợ, không cần nằm lại trong cache
-        moderationApi.endpoints.maskText.initiate({ text }, { track: false }),
+        moderationApi.endpoints.maskText.initiate({ text, context }, { track: false }),
       )
       .unwrap()
     // Backend bọc phản hồi trong ApiResponse ({ data: {...} }); đọc cả hai dạng.
@@ -49,8 +50,11 @@ async function maskOne(api, text) {
 /**
  * Trả về body đã che ★. Nhận cả JSON lẫn FormData.
  * FormData bị sửa tại chỗ (không clone được kèm File), object thì trả bản sao.
+ *
+ * `context`: nơi phát sinh nội dung (xem moderationContext.js) — chuỗi, hoặc object
+ * theo tên trường như POST_FIELD_CONTEXTS.
  */
-export async function maskBody(api, body) {
+export async function maskBody(api, body, context) {
   if (!body) return body
 
   if (typeof FormData !== "undefined" && body instanceof FormData) {
@@ -60,7 +64,7 @@ export async function maskBody(api, body) {
       if (!isTextKey(key)) continue
       const value = body.get(key)
       if (typeof value !== "string") continue
-      const masked = await maskOne(api, value)
+      const masked = await maskOne(api, value, contextForKey(context, key))
       if (masked !== value) body.set(key, masked)
     }
     return body
@@ -69,7 +73,7 @@ export async function maskBody(api, body) {
   if (typeof body === "object") {
     const out = { ...body }
     for (const key of Object.keys(out)) {
-      if (isTextKey(key)) out[key] = await maskOne(api, out[key])
+      if (isTextKey(key)) out[key] = await maskOne(api, out[key], contextForKey(context, key))
     }
     return out
   }

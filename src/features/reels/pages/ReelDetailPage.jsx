@@ -45,6 +45,7 @@ import {
   writeReelPreference
 } from "../utils/preferences"
 import ReelDetailSlideMobile from "../components/detail/ReelDetailSlideMobile"
+import { isReelHidden } from "../utils/moderationStatus"
 
 
 const DETAIL_PAGE_SIZE = 20
@@ -203,7 +204,8 @@ export const ReelDetailPageBase = ({ source = "feed" } = {}) => {
         list = feedReels.map((r) => (r.id === currentReel.id ? currentReel : r))
       }
     }
-    return list.filter(r => !hiddenReelIds.has(r.id))
+    // Reel chưa qua kiểm duyệt không có video để phát (chỉ chủ reel mới nhận được).
+    return list.filter(r => !hiddenReelIds.has(r.id) && !isReelHidden(r.status))
   }, [currentReel, feedReels, hiddenReelIds])
 
   // Sync initialId if the URL ID changes to a reel not currently present in the list

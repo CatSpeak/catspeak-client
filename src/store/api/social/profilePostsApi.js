@@ -1,5 +1,6 @@
 import { socialApi } from "./socialApi"
 import { maskBody } from "@/shared/utils/moderation"
+import { POST_FIELD_CONTEXTS } from "@/shared/utils/moderationContext"
 import { updatePostInCaches } from "./utils/postsCacheUtils"
 
 export const profilePostsApi = socialApi.injectEndpoints({
@@ -53,7 +54,7 @@ export const profilePostsApi = socialApi.injectEndpoints({
         baseQuery({
           url: "/Post",
           method: "POST",
-          body: await maskBody(api, formData),
+          body: await maskBody(api, formData, POST_FIELD_CONTEXTS),
         }),
       invalidatesTags: ["Post", "PostMedia"],
     }),
@@ -64,7 +65,7 @@ export const profilePostsApi = socialApi.injectEndpoints({
         baseQuery({
           url: `/Post/${postId}`,
           method: "PUT",
-          body: await maskBody(api, formData),
+          body: await maskBody(api, formData, POST_FIELD_CONTEXTS),
         }),
       invalidatesTags: ["Post", "PostMedia"],
       async onQueryStarted(

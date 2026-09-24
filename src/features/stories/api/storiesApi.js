@@ -1,5 +1,6 @@
 import { socialApi } from "@/store/api/social/socialApi"
 import { maskBody } from "@/shared/utils/moderation"
+import { MODERATION_CONTEXT } from "@/shared/utils/moderationContext"
 
 export const storiesApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -11,7 +12,7 @@ export const storiesApi = socialApi.injectEndpoints({
         baseQuery({
           url: "/stories",
           method: "POST",
-          body: await maskBody(api, data),
+          body: await maskBody(api, data, MODERATION_CONTEXT.STORY),
         }),
       invalidatesTags: ["Stories", "MyStories"],
     }),

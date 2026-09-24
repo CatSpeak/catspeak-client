@@ -36,6 +36,7 @@ export default {
     titleRequiredError: "タイトルが必要です。",
     uploadFailed: "リールのアップロードに失敗しました。もう一度お試しください。",
     uploadSuccess: "リールをアップロードしました",
+    uploadModerating: "リールをアップロードしました。動画は審査中で、完了すると公開されます。",
     monthlyQuotaExceeded:
       "今月のアップロード上限（5本）に達しました。さらにアップロードするにはProにアップグレードしてください！",
     uploadFailedTitle: "アップロードに失敗しました",
@@ -260,6 +261,18 @@ export default {
       deleting: "リールを削除中...",
       deleteSuccess: "リールを削除しました！",
       deleteFailed: "リールの削除に失敗しました。",
+      moderationStatus: {
+        Moderating: "審査中",
+        PendingReview: "承認待ち",
+        Rejected: "却下",
+        Blocked: "ブロック済み",
+      },
+      moderationHint: {
+        Moderating: "動画を確認しています。通常数分で完了します。",
+        PendingReview: "公開前に管理者の確認が必要です。",
+        Rejected: "コミュニティ基準に違反しているため表示されません。",
+        Blocked: "このリールは管理者によってブロックされました。",
+      },
       totalPlaylists: "総プレイリスト数",
       totalSaved: "総保存数",
       noPlaylists: "プレイリストはまだありません",

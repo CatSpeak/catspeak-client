@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 
 import { handleMediaError } from "@/shared/utils/mediaErrorUtils";
 import { useMaskTextMutation } from "@/store/api/moderationApi";
+import { MODERATION_CONTEXT } from "@/shared/utils/moderationContext";
 import { getCommunityPath } from "@/shared/utils/navigation";
 import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import {
@@ -103,7 +104,7 @@ export const useCallActions = ({
         // im chỉ vì dịch vụ phụ trợ hỏng.
         let safeText = text;
         try {
-          const res = await maskText({ text }).unwrap();
+          const res = await maskText({ text, context: MODERATION_CONTEXT.MEET_CHAT }).unwrap();
           // Backend bọc phản hồi trong ApiResponse ({ data: {...} }); đọc cả hai
           // dạng để không phụ thuộc vào lớp bọc đó.
           safeText = res?.data?.masked ?? res?.masked ?? text;

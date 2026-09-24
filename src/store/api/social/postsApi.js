@@ -1,5 +1,6 @@
 import { socialApi } from "./socialApi"
 import { maskBody } from "@/shared/utils/moderation"
+import { MODERATION_CONTEXT } from "@/shared/utils/moderationContext"
 import {
   updatePostInCaches,
   updateCommentInCaches,
@@ -156,11 +157,11 @@ export const postsApi = socialApi.injectEndpoints({
         baseQuery({
           url: `/Post/${postId}/comments`,
           method: "POST",
-          body: await maskBody(api, {
-            content,
-            parentCommentId,
-            replyToAccountId,
-          }),
+          body: await maskBody(
+            api,
+            { content, parentCommentId, replyToAccountId },
+            MODERATION_CONTEXT.POST_COMMENT,
+          ),
         }),
       invalidatesTags: (result, error, { postId }) => [
         { type: "PostComment", id: `LIST-${postId}` },
@@ -231,7 +232,7 @@ export const postsApi = socialApi.injectEndpoints({
         baseQuery({
           url: `/Post/${postId}/comments/${commentId}`,
           method: "PUT",
-          body: await maskBody(api, { content }),
+          body: await maskBody(api, { content }, MODERATION_CONTEXT.POST_COMMENT),
         }),
       invalidatesTags: (result, error, { postId }) => [
         { type: "PostComment", id: `LIST-${postId}` },

@@ -20,6 +20,7 @@ import {
   useLazyCheckUploadEligibilityQuery,
 } from "@/store/api/reelsApi";
 import { useGlobalTask } from "@/shared/hooks/useGlobalTask.jsx";
+import { isReelHidden, reelStatusOf } from "../utils/moderationStatus";
 
 export const DESCRIPTION_TRIGGER_REGEX =
   /(^|[\s([{])([@#])([\p{L}\p{N}_.-]{0,50})$/u;
@@ -128,7 +129,7 @@ export const useCreateReelContext = () => useContext(CreateReelContext);
 export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   const { t } = useLanguage();
   // RTK Query Mutation Hook
-  const [createReel, { isLoading, isSuccess, error: apiError }] =
+  const [createReel, { isLoading, isSuccess, data: createdReel, error: apiError }] =
     useCreateReelMutation();
   const lockedChallengeHashtag = useMemo(
     () => normalizeChallengeHashtag(challenge),
@@ -369,14 +370,17 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
   useEffect(() => {
     if (isSuccess) {
       toast.success(
-        t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully",
+        isReelHidden(reelStatusOf(createdReel))
+          ? t?.catSpeak?.reels?.uploadModerating ||
+              "Reel uploaded. Your video is being reviewed and will go public once it's done."
+          : t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully",
       );
       const timer = setTimeout(() => {
         handleClose();
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [isSuccess, handleClose, t]);
+  }, [isSuccess, createdReel, handleClose, t]);
 
   // Discard/Clear video file
   const handleDiscardVideo = () => {
@@ -1088,9 +1092,13 @@ export const CreateReelProvider = ({ children, open, onClose, challenge }) => {
         method: "POST",
         data: formData,
         isHidden: false,
-        onSuccess: () => {
+        onSuccess: (res) => {
+          // Video còn đang được kiểm duyệt thì nói rõ để người đăng không tưởng reel đã công khai.
           toast.success(
-            t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!",
+            isReelHidden(reelStatusOf(res))
+              ? t?.catSpeak?.reels?.uploadModerating ||
+                  "Reel uploaded. Your video is being reviewed and will go public once it's done."
+              : t?.catSpeak?.reels?.uploadSuccess || "Reel uploaded successfully!",
           );
           const tags = [
             { type: "Reels", id: "FEED" },

@@ -1,5 +1,6 @@
 import { socialApi } from "./socialApi"
 import { maskBody } from "@/shared/utils/moderation"
+import { MODERATION_CONTEXT } from "@/shared/utils/moderationContext"
 
 // Conversations API slice
 export const conversationsApi = socialApi.injectEndpoints({
@@ -71,7 +72,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         baseQuery({
           url: `/conversations/${conversationId}/messages`,
           method: "POST",
-          body: await maskBody(api, messageData),
+          body: await maskBody(api, messageData, MODERATION_CONTEXT.DIRECT_CHAT),
         }),
       invalidatesTags: (result, error, { conversationId }) => [
         { type: "Messages", id: Number(conversationId) },
@@ -92,7 +93,7 @@ export const conversationsApi = socialApi.injectEndpoints({
         baseQuery({
           url: `/conversations/${conversationId}/messages/media`,
           method: "POST",
-          body: await maskBody(api, formData),
+          body: await maskBody(api, formData, MODERATION_CONTEXT.DIRECT_CHAT),
         }),
       invalidatesTags: (result, error, { conversationId }) => [
         { type: "Messages", id: Number(conversationId) },

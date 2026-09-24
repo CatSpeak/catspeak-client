@@ -21,7 +21,7 @@ export const moderationApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: "/moderation/text",
         method: "POST",
-        body: data, // { text: "..." }
+        body: data, // { text, context } — context: xem shared/utils/moderationContext.js
       }),
     }),
   }),
