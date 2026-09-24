@@ -144,7 +144,7 @@ const TeacherReportModal = ({
                   : "text-slate-400"
               }`}
             >
-              {description.length}/1000
+              {description.trim().length}/1000
             </span>
           </div>
           <textarea
