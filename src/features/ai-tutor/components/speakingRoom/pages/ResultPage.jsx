@@ -36,6 +36,11 @@ const ResultPage = ({
   onPracticeFlashcards,
   onGoHome,
   onViewPronunciationDetails,
+  // TASK-AI-15: ba prop dưới do SpeakingReportContainer truyền khi có dữ liệu thật.
+  // levelPrefix = "" vì cấp HSK ở đây là cấp của buổi nói, không phải một lần xếp cấp.
+  levelPrefix = "Đánh giá trình độ: ",
+  notice,
+  showPronunciationLink = true,
 }) => {
   return (
     <div className="w-full max-w-4xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
@@ -58,6 +63,12 @@ const ResultPage = ({
         </button>
       </div>
 
+      {notice ? (
+        <div className="w-full bg-blue-50/60 border border-blue-200/80 rounded-2xl px-4 py-3 text-xs sm:text-sm text-blue-900">
+          {notice}
+        </div>
+      ) : null}
+
       {/* 1. Score & Detailed Breakdown Card */}
       <div className="w-full bg-rose-50/20 border border-rose-100/60 rounded-3xl p-5 sm:p-7 flex flex-col md:flex-row items-center gap-6 sm:gap-8 shadow-2xs">
         {/* Score Circle */}
@@ -73,7 +84,7 @@ const ResultPage = ({
         {/* Detailed Metrics */}
         <div className="flex-1 w-full space-y-3.5">
           <h2 className="font-bold text-slate-800 text-sm sm:text-base">
-            Đánh giá trình độ: {cefrLevel}
+            {levelPrefix}{cefrLevel}
           </h2>
 
           <div className="space-y-3">
@@ -113,6 +124,7 @@ const ResultPage = ({
       </div>
 
       {/* 3. Areas for Improvement Card */}
+      {improvements.length > 0 || showPronunciationLink ? (
       <div className="w-full bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4 sm:p-5 space-y-2.5 shadow-2xs">
         <h3 className="text-xs sm:text-sm font-extrabold text-amber-900 tracking-wide flex items-center gap-1.5">
           <span>🔍</span> ĐIỂM CẦN LƯU Ý & KHẮC PHỤC NGỮ ÂM:
@@ -124,6 +136,7 @@ const ResultPage = ({
             </p>
           ))}
         </div>
+        {showPronunciationLink ? (
         <div className="pt-1">
           <button
             type="button"
@@ -133,7 +146,9 @@ const ResultPage = ({
             👉 Xem phân tích âm tiết chi tiết & Video khẩu hình 1-1 →
           </button>
         </div>
+        ) : null}
       </div>
+      ) : null}
 
       {/* 4. Saved Flashcards Card */}
       <div className="w-full bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-2xs">
@@ -146,7 +161,9 @@ const ResultPage = ({
               key={idx}
               className="bg-white border border-slate-200/80 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-800 shadow-2xs"
             >
-              {vocab.hanzi} <span className="text-slate-500 font-normal">({vocab.meaning})</span>
+              {vocab.hanzi}
+              {vocab.pinyin ? <span className="text-slate-400 font-normal"> {vocab.pinyin}</span> : null}
+              {vocab.meaning ? <span className="text-slate-500 font-normal"> ({vocab.meaning})</span> : null}
             </div>
           ))}
         </div>

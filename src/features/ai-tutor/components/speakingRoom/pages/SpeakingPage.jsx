@@ -4,6 +4,17 @@ import React, { useState } from "react"
  * SpeakingPage component - interactive live AI speaking session room
  * with AI cat tutor avatar, dialogue cards, error correction hints,
  * reflection timer, mic recording controls, and mode switcher.
+ *
+ * TASK-AI-15: phụ đề, gợi ý và mẹo sửa lỗi lấy từ hook useSpeakingAssist(lkRoom):
+ *   aiTurn      {text, pinyin, meaningVi}   câu AI đang nói, pinyin và nghĩa tới sau
+ *   learnerText câu học viên vừa nói (nếu agent gửi phụ đề của học viên)
+ *   hintMode    proactive | chip | none      BR-SS-009, theo cấp HSK
+ *   hints       [{id, text, pinyin, meaning_vi}]
+ *   correction  {original, corrected, note_vi} | null
+ *   onPlayHint(hintId)  agent đọc câu gợi ý tốc độ chậm (Q8)
+ *   onReplayAi()        agent đọc lại câu hỏi
+ *   autoOpenHint        HSK 3-4: im lặng 10 giây thì mở chip gợi ý (ss06)
+ * Không truyền aiTurn thì trang giữ dữ liệu mẫu của bản giao diện.
  */
 const SpeakingPage = ({
   topicTitle = "Mua hoa quả ở chợ",
@@ -13,14 +24,26 @@ const SpeakingPage = ({
   maxTime = "00:45",
   onEndSession,
   onSwitchMode,
+  aiTurn,
+  learnerText,
+  hintMode,
+  hints,
+  correction,
+  onPlayHint,
+  onReplayAi,
+  autoOpenHint = false,
 }) => {
   const [activeTab, setActiveTab] = useState("casual") // 'casual' | 'placement'
   const [isMicActive, setIsMicActive] = useState(true)
   const [isFreeTalk, setIsFreeTalk] = useState(true)
   const [volume, setVolume] = useState(100)
   const [isReplayingAi, setIsReplayingAi] = useState(false)
+  const [chipOpen, setChipOpen] = useState(false)
+  const isLive = aiTurn !== undefined
+  const showChipHints = chipOpen || autoOpenHint
 
   const handleReplayAi = () => {
+    onReplayAi?.()
     setIsReplayingAi(true)
     setTimeout(() => {
       setIsReplayingAi(false)
@@ -127,6 +150,19 @@ const SpeakingPage = ({
               </button>
             </div>
 
+            {isLive ? (
+              <div className="space-y-1.5">
+                <p className="text-base sm:text-lg font-bold text-[#990011] leading-snug">
+                  {aiTurn?.text ? `“${aiTurn.text}”` : "…"}
+                </p>
+                {aiTurn?.pinyin ? (
+                  <p className="text-xs sm:text-sm text-slate-500 font-medium">{aiTurn.pinyin}</p>
+                ) : null}
+                {aiTurn?.meaningVi ? (
+                  <p className="text-xs sm:text-sm text-slate-600 italic">{aiTurn.meaningVi}</p>
+                ) : null}
+              </div>
+            ) : (
             <div className="space-y-1.5">
               <p className="text-base sm:text-lg font-bold text-[#990011] leading-snug">
                 “你好！你想买什么苹果？这里的红富士很新鲜！”
@@ -138,6 +174,7 @@ const SpeakingPage = ({
                 Chào bạn! Bạn muốn mua táo gì? Táo Phú Sĩ ở đây rất tươi ngon!
               </p>
             </div>
+            )}
           </div>
 
           {/* 2. Student Dialogue Card */}
@@ -147,18 +184,25 @@ const SpeakingPage = ({
                 <span>👤</span>
                 <span>BẠN (HỌC VIÊN)</span>
               </div>
+              {!isLive && (
               <span className="bg-emerald-100/80 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
                 ✓ 94% Chuẩn
               </span>
+              )}
             </div>
 
             <div className="space-y-1">
               <p className="text-base sm:text-lg font-bold text-slate-800 leading-snug">
-                “我想买两斤。(Wǒ xiǎng mǎi liǎng jīn.)”
+                {isLive
+                  ? learnerText
+                    ? `“${learnerText}”`
+                    : <span className="text-slate-400 font-normal text-sm">Đến lượt bạn nói...</span>
+                  : "“我想买两斤。(Wǒ xiǎng mǎi liǎng jīn.)”"}
               </p>
             </div>
 
-            {/* Hint Row */}
+            {/* Hint Row: BR-SS-009, HSK 1-2 hiện sẵn, HSK 3-4 thu vào chip, HSK 5-6 ẩn */}
+            {!isLive ? (
             <div className="flex items-center gap-2 pt-1">
               <span className="text-xs font-semibold text-amber-600 shrink-0">
                 💡 Gợi ý:
@@ -170,10 +214,40 @@ const SpeakingPage = ({
                 “这个多少钱一斤？” (Bao nhiêu 1 cân?)
               </button>
             </div>
+            ) : hintMode !== "none" && hints?.length ? (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {hintMode === "chip" && !showChipHints ? (
+                <button
+                  type="button"
+                  onClick={() => setChipOpen(true)}
+                  className="bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100/70 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                >
+                  💡 Gợi ý
+                </button>
+              ) : (
+                <>
+                  <span className="text-xs font-semibold text-amber-600 shrink-0">💡 Gợi ý:</span>
+                  {hints.map((h) => (
+                    <button
+                      key={h.id}
+                      type="button"
+                      onClick={() => onPlayHint?.(h.id)}
+                      title="Bấm để nghe mẫu giọng AI tốc độ chậm"
+                      className="bg-blue-50/80 border border-blue-200 text-blue-700 hover:bg-blue-100/70 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-left"
+                    >
+                      🔊 “{h.text}”{h.meaning_vi ? ` (${h.meaning_vi})` : ""}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+            ) : null}
           </div>
         </div>
 
-        {/* Instant Error Correction Tip */}
+        {/* Instant Error Correction Tip: chỉ khi turn-assist trả correction
+            (lỗi cản trở hiểu nghĩa, ASR >= 0,8, dạng đúng không vượt cấp) */}
+        {(!isLive || correction) && (
         <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3.5 sm:p-4 flex items-start sm:items-center gap-2.5 text-xs sm:text-sm shadow-2xs">
           <span className="text-amber-600 font-bold shrink-0 text-base">⚡</span>
           <div className="flex flex-wrap items-center gap-1.5 text-amber-950">
@@ -181,10 +255,13 @@ const SpeakingPage = ({
               MẸO SỬA LỖI TỨC THÌ:
             </span>
             <span>
-              Sai: “我要二斤” ➔ Đúng: “我要两斤” (Lượng từ 斤 dùng 两, không dùng 二).
+              {isLive
+                ? `Bạn nói: “${correction.original}” ➔ Thử nói: “${correction.corrected}”. ${correction.note_vi || ""}`
+                : "Sai: “我要二斤” ➔ Đúng: “我要两斤” (Lượng từ 斤 dùng 两, không dùng 二)."}
             </span>
           </div>
         </div>
+        )}
 
         {/* Bottom Control Area */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">

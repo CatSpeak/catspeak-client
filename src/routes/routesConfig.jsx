@@ -31,6 +31,9 @@ const AiLearningPathPage = lazy(
 const AiSpeakingRoomPage = lazy(
   () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
 );
+const AiSpeakingReportPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingReportPage"),
+);
 const AiVocabularyNotebookPage = lazy(
   () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
 );
@@ -505,6 +508,15 @@ const routesConfig = [
                     element: (
                       <LazyRoute>
                         <AiSpeakingRoomPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    // TASK-AI-15: ss10 → ss11 (+ ss12, ss13) của một buổi nói
+                    path: "speaking-room/report/:sessionId",
+                    element: (
+                      <LazyRoute>
+                        <AiSpeakingReportPage />
                       </LazyRoute>
                     ),
                   },

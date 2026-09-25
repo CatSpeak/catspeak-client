@@ -38,20 +38,37 @@ const DEFAULT_ANALYSIS_DATA = {
   lastRetestResult: "Xuất sắc!",
 }
 
+/**
+ * ss12. Khi có dữ liệu thật (TASK-AI-15) container truyền thêm:
+ *   words, selectedIndex, onSelectWord   danh sách từ cần luyện, chọn từ đang xem
+ *   isRecording                           trạng thái thu âm do container giữ
+ *   onPlayUser, onPlayModel               nghe lại giọng mình / nghe mẫu chậm
+ *   loading, errorText                    lần mở đầu phải chờ chấm Azure vài giây
+ * Không truyền thì modal chạy như bản giao diện gốc với dữ liệu mẫu.
+ */
 const DeepPronunciationAnalysisModal = ({
   isOpen = false,
   onClose,
   data = DEFAULT_ANALYSIS_DATA,
   onRecordRetry,
   onWatchShorts,
+  words,
+  selectedIndex = 0,
+  onSelectWord,
+  isRecording: isRecordingProp,
+  onPlayUser,
+  onPlayModel,
+  loading = false,
+  errorText,
 }) => {
-  const [isRecording, setIsRecording] = useState(false)
+  const [isRecordingLocal, setIsRecordingLocal] = useState(false)
+  const isRecording = isRecordingProp ?? isRecordingLocal
   const analysis = { ...DEFAULT_ANALYSIS_DATA, ...data }
 
   if (typeof document === "undefined") return null
 
   const handleRecordClick = () => {
-    setIsRecording((prev) => !prev)
+    if (isRecordingProp === undefined) setIsRecordingLocal((prev) => !prev)
     onRecordRetry?.()
   }
 
@@ -92,6 +109,39 @@ const DeepPronunciationAnalysisModal = ({
               </button>
             </div>
 
+            {loading && (
+              <div className="mt-6 py-10 text-center text-sm text-slate-500 animate-pulse">
+                Đang phân tích từng âm tiết trong buổi nói của bạn...
+              </div>
+            )}
+
+            {!loading && errorText && (
+              <div className="mt-6 py-8 px-4 rounded-2xl bg-slate-50 border border-slate-100 text-center text-sm text-slate-600">
+                {errorText}
+              </div>
+            )}
+
+            {!loading && !errorText && (
+            <>
+            {Array.isArray(words) && words.length > 1 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {words.map((w, idx) => (
+                  <button
+                    key={`${w.seq}-${w.word}-${idx}`}
+                    type="button"
+                    onClick={() => onSelectWord?.(idx)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                      idx === selectedIndex
+                        ? "bg-[#990011] border-[#990011] text-white"
+                        : "bg-white border-slate-200 text-slate-700 hover:border-rose-200"
+                    }`}
+                  >
+                    {w.word}
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Word Banner */}
             <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-rose-50/40 border border-rose-100 flex items-center justify-between gap-3">
               <div className="flex items-baseline gap-2">
@@ -128,7 +178,7 @@ const DeepPronunciationAnalysisModal = ({
                       <strong>
                         {s.status} ({s.score}%)
                       </strong>
-                      {s.note ? ` — ${s.note}` : ""}
+                      {s.note ? ` - ${s.note}` : ""}
                     </span>
                   </div>
                 ))}
@@ -144,10 +194,16 @@ const DeepPronunciationAnalysisModal = ({
               <div className="space-y-2 text-xs sm:text-sm">
                 {/* User Voice Curve */}
                 <div className="flex items-center gap-2">
-                  <div className="w-24 shrink-0 flex items-center gap-1.5 text-slate-600 font-medium">
+                  <button
+                    type="button"
+                    onClick={onPlayUser}
+                    disabled={!onPlayUser}
+                    title="Nghe lại giọng bạn"
+                    className="w-24 shrink-0 flex items-center gap-1.5 text-slate-600 font-medium enabled:cursor-pointer enabled:hover:text-[#990011]"
+                  >
                     <Play className="w-3.5 h-3.5 text-slate-400" />
                     <span>Giọng bạn:</span>
-                  </div>
+                  </button>
                   <div className="flex-1 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 font-mono">
                     <span className="font-bold tracking-widest">{analysis.pitchComparison.userPitch}</span>{" "}
                     <span className="text-slate-500 font-sans text-xs">
@@ -158,10 +214,16 @@ const DeepPronunciationAnalysisModal = ({
 
                 {/* AI Model Curve */}
                 <div className="flex items-center gap-2">
-                  <div className="w-24 shrink-0 flex items-center gap-1.5 text-[#990011] font-semibold">
+                  <button
+                    type="button"
+                    onClick={onPlayModel}
+                    disabled={!onPlayModel}
+                    title="Nghe phát âm mẫu tốc độ chậm"
+                    className="w-24 shrink-0 flex items-center gap-1.5 text-[#990011] font-semibold enabled:cursor-pointer enabled:hover:underline"
+                  >
                     <Bot className="w-3.5 h-3.5 text-[#990011]" />
                     <span>AI mẫu:</span>
-                  </div>
+                  </button>
                   <div className="flex-1 p-2.5 rounded-xl bg-rose-50/50 border border-rose-100 text-[#990011] font-mono">
                     <span className="font-bold tracking-widest">{analysis.pitchComparison.aiPitch}</span>{" "}
                     <span className="font-sans text-xs font-semibold">
@@ -189,10 +251,23 @@ const DeepPronunciationAnalysisModal = ({
                 <Mic className="w-5 h-5" />
               </button>
 
-              <p className="text-xs font-semibold text-emerald-700">
-                Kết quả chấm lại vừa thực hiện: {analysis.lastRetestScore}% — {analysis.lastRetestResult}
-              </p>
+              {isRecording && (
+                <p className="text-xs text-slate-500">Đang thu âm... bấm lần nữa để dừng</p>
+              )}
+              {analysis.lastRetestScore != null ? (
+                <p className="text-xs font-semibold text-emerald-700">
+                  Kết quả chấm lại vừa thực hiện: {analysis.lastRetestScore}%
+                  {typeof analysis.lastRetestDelta === "number" && analysis.lastRetestDelta !== 0
+                    ? ` (${analysis.lastRetestDelta > 0 ? "+" : ""}${analysis.lastRetestDelta})`
+                    : ""}{" "}
+                  - {analysis.lastRetestResult}
+                </p>
+              ) : analysis.lastRetestResult ? (
+                <p className="text-xs font-semibold text-amber-700">{analysis.lastRetestResult}</p>
+              ) : null}
             </div>
+            </>
+            )}
 
             {/* Footer Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">

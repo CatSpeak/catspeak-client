@@ -15,6 +15,10 @@ const DEFAULT_GUIDE_DATA = {
   aiTip: "Hơi gật nhẹ đầu xuống khi hạ giọng ở bước 2 sẽ giúp âm chuẩn hơn nhiều!",
 }
 
+/**
+ * ss13. Dữ liệu thật (TASK-AI-15) có thêm youtubeId và startS. youtubeId = null là
+ * giáo viên chưa chọn clip: vẫn hiện ba bước khẩu hình, khung video báo đang cập nhật.
+ */
 const MouthShapeGuideModal = ({
   isOpen = false,
   onClose,
@@ -23,6 +27,7 @@ const MouthShapeGuideModal = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const guide = { ...DEFAULT_GUIDE_DATA, ...data }
+  const hasVideo = Boolean(guide.youtubeId) || !("youtubeId" in (data || {}))
 
   if (typeof document === "undefined") return null
 
@@ -75,23 +80,39 @@ const MouthShapeGuideModal = ({
                 </div>
 
                 {/* Center Play Button */}
-                <button
-                  type="button"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-14 h-14 rounded-full bg-[#990011] hover:bg-[#85000f] text-white flex items-center justify-center shadow-xl cursor-pointer hover:scale-105 active:scale-95 transition-all mx-auto"
-                  aria-label="Play video"
-                >
-                  <Play className="w-6 h-6 fill-white ml-0.5" />
-                </button>
+                {isPlaying && guide.youtubeId ? (
+                  <iframe
+                    title={guide.videoTitle}
+                    className="absolute inset-0 w-full h-full"
+                    src={`https://www.youtube.com/embed/${encodeURIComponent(guide.youtubeId)}?autoplay=1&start=${Number(guide.startS) || 0}`}
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : hasVideo ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsPlaying(!isPlaying)}
+                    className="w-14 h-14 rounded-full bg-[#990011] hover:bg-[#85000f] text-white flex items-center justify-center shadow-xl cursor-pointer hover:scale-105 active:scale-95 transition-all mx-auto"
+                    aria-label="Play video"
+                  >
+                    <Play className="w-6 h-6 fill-white ml-0.5" />
+                  </button>
+                ) : (
+                  <p className="text-center text-xs text-slate-300 px-4">
+                    Video khẩu hình đang được giáo viên cập nhật. Bạn làm theo ba bước bên cạnh nhé.
+                  </p>
+                )}
 
                 {/* Bottom Video Meta */}
                 <div className="space-y-0.5">
                   <h3 className="font-bold text-xs sm:text-sm leading-snug text-white">
                     {guide.videoTitle}
                   </h3>
-                  <p className="text-[11px] text-slate-400">
-                    Thời lượng: {guide.videoDuration} · CatSpeak
-                  </p>
+                  {guide.videoDuration ? (
+                    <p className="text-[11px] text-slate-400">
+                      Thời lượng: {guide.videoDuration} · CatSpeak
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
