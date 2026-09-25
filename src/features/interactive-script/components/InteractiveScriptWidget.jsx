@@ -94,18 +94,31 @@ const InteractiveScriptWidget = ({
       )
     }
 
-    // Từ thông thường: tách thành từng từ đơn để đều có thể click tra từ
-    const words = segment.text.split(/(\s+)/)
+    // Từ thông thường: tách thành từng từ đơn bằng Intl.Segmenter để hỗ trợ tiếng Nhật, Trung
+    const getLocale = (lang) => {
+      if (lang === 'Japanese') return 'ja-JP';
+      if (lang === 'Chinese') return 'zh-CN';
+      if (lang === 'Vietnamese') return 'vi-VN';
+      return 'en-US';
+    };
+    
+    const segmenter = new Intl.Segmenter(getLocale(currentScript.language), { granularity: 'word' });
+    const segments = Array.from(segmenter.segment(segment.text));
+
     return (
       <span key={`seg-${sIdx}`}>
-        {words.map((chunk, wIdx) => {
-          const isSpace = /^\s+$/.test(chunk)
-          if (isSpace || !chunk) {
-            return chunk
+        {segments.map((seg, wIdx) => {
+          if (!seg.isWordLike) {
+            return <span key={`w-${sIdx}-${wIdx}`}>{seg.segment}</span>;
           }
 
-          // Sử dụng Regex hỗ trợ Unicode để loại bỏ tất cả dấu câu (Punctuation) và ký hiệu (Symbol)
-          const cleanWord = chunk.replace(/[\p{P}\p{S}]/gu, "")
+          const chunk = seg.segment;
+          // Loại bỏ dấu câu cho từ sạch để gọi API
+          const cleanWord = chunk.replace(/[\p{P}\p{S}]/gu, "").trim();
+          
+          if (!cleanWord) {
+             return <span key={`w-${sIdx}-${wIdx}`}>{chunk}</span>;
+          }
 
           const popoverKey = `w-${sIdx}-${wIdx}`
           const isActive = activePopoverKey === popoverKey

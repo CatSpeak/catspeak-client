@@ -81,7 +81,7 @@ const VocabularyNotebookPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-8">
                   {words.map(word => (
                     <VocabularyGridCard
                       key={word.id}
@@ -94,7 +94,11 @@ const VocabularyNotebookPage = () => {
               )}
 
               {totalPages > 1 && (
-                <div className="flex justify-center mt-6 mb-8">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 mb-8">
+                  <button className="flex items-center gap-2 px-4 py-2 border border-[#D1D5DB] rounded-lg text-sm font-medium text-[#4B5563] bg-white hover:bg-gray-50 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Xem thêm 10 từ khác
+                  </button>
                   <Pagination
                     page={currentPage}
                     totalPages={totalPages}

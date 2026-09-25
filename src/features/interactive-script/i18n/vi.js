@@ -12,7 +12,7 @@ export default {
       sort: "Sắp xếp",
       all: "Tất cả",
       sortOptions: {
-        newest: "Mới lưu nhất",
+        newest: "Mới nhất",
         oldest: "Cũ nhất",
         az: "A → Z",
         za: "Z → A",
