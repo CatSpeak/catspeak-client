@@ -63,6 +63,7 @@ export default {
     teachingTasks: "授業タスク",
     vouchers: "バウチャー＆割引",
     myLearning: "マイ学習",
+    vocabularyNotebook: "単語帳",
     manageMaterials: "教材の管理",
     exploreCourses: "コースを探索",
     aiTutor: "AI チューター",
