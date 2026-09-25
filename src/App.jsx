@@ -17,6 +17,7 @@ import { LanguageProvider } from "@/shared/context/LanguageContext"
 // import { ScrollToTopButton } from "@/shared/components/ui/buttons";
 import { GlobalTaskSync } from "@/shared/hooks/useGlobalTask.jsx"
 import { AuthVisibilitySync } from "@/shared/hooks/useVisibilityReauth"
+import { ModerationWarmupSync } from "@/shared/hooks/useModerationWarmup"
 import GlobalTaskProgressWidget from "@/shared/components/ui/progress/GlobalTaskProgressWidget"
 import RecordingPoller from "@/features/video-call/components/RecordingPoller"
 import CompletionReviewPrompt from "@/features/courses/components/CompletionReviewPrompt"
@@ -50,6 +51,7 @@ function App() {
                     <GlobalTaskProgressWidget />
                     <RecordingPoller />
                     <GlobalTaskSync />
+                    <ModerationWarmupSync />
                     <AutoCrashReporterSync />
                     <HelpWidget />
                     {/* TASK-AI-08: nút nổi trợ lý chatbot, hiện trên mọi màn hình

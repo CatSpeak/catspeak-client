@@ -24,6 +24,14 @@ export const moderationApi = baseApi.injectEndpoints({
         body: data, // { text, context } — context: xem shared/utils/moderationContext.js
       }),
     }),
+    // Nhắc dịch vụ kiểm duyệt nạp sẵn model — xem shared/utils/moderationWarmup.js.
+    warmModeration: builder.mutation({
+      query: (data) => ({
+        url: "/moderation/warm",
+        method: "POST",
+        body: data, // { kinds: ["text"] | ["text", "text-zh"] }
+      }),
+    }),
   }),
 })
 
