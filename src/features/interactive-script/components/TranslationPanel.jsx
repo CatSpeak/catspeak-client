@@ -5,11 +5,17 @@ import TextInput from "@/shared/components/ui/inputs/TextInput"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
-import { LANGUAGE_PAIR_KEYS } from "../constants"
+import { useGetScriptTranslationQuery, useReportTranslationErrorMutation } from "@/store/api/interactiveScriptApi"
+
+const langCodeToName = {
+  vi: "Vietnamese",
+  en: "English",
+  zh: "Chinese",
+  ja: "Japanese"
+}
 
 const TranslationPanel = ({
-  fullTranslation = {},
-  featuredQuoteTranslation = "",
+  scriptId,
   selectedLanguagePair = "en-vi",
   onLanguageChange,
   className = "",
@@ -23,10 +29,19 @@ const TranslationPanel = ({
     { value: "other", label: t.widget?.translationPanel?.reasons?.other || "Lý do khác" },
   ]
 
-  const languagePairs = LANGUAGE_PAIR_KEYS.map((key) => ({
-    value: key,
-    label: t.widget?.langPairs?.[key] || key
-  }))
+  const sourceLang = selectedLanguagePair.split("-")[0] || 'en';
+  const ALL_LANGS = ['en', 'vi', 'zh', 'ja'];
+  const targetLangs = ALL_LANGS.filter(l => l !== sourceLang);
+  
+  const langNames = t.header?.languages || { en: 'Tiếng Anh', vi: 'Tiếng Việt', zh: 'Tiếng Trung', ja: 'Tiếng Nhật' };
+  
+  const languagePairs = targetLangs.map(target => {
+    const key = `${sourceLang}-${target}`;
+    return {
+      value: key,
+      label: t.widget?.langPairs?.[key] || `${langNames[sourceLang]} → ${langNames[target]}`
+    };
+  });
 
   const [currentLangPair, setCurrentLangPair] = useState(selectedLanguagePair)
   const [showReportForm, setShowReportForm] = useState(false)
@@ -34,20 +49,45 @@ const TranslationPanel = ({
   const [reportText, setReportText] = useState("")
   const [reportSent, setReportSent] = useState(false)
 
-  const translationData =
-    fullTranslation[currentLangPair] ||
-    fullTranslation["en-vi"] || {
-      body: t.widget?.translationPanel?.title || "Chưa có bản dịch cho ngôn ngữ này.",
-      highlightedMatches: [],
-    }
+  const targetLangCode = currentLangPair.split("-")[1] || "vi"
+  const targetLanguage = langCodeToName[targetLangCode] || "Vietnamese"
+
+  const { data: translationDataResponse, isFetching } = useGetScriptTranslationQuery({
+    id: scriptId,
+    targetLanguage
+  }, { skip: !scriptId })
+  
+  const [reportError] = useReportTranslationErrorMutation()
+
+  const translationData = {
+    body: translationDataResponse?.translatedText || "",
+    highlightedMatches: translationDataResponse?.translatedHighlight 
+      ? [translationDataResponse.translatedHighlight] 
+      : []
+  }
+  
+  const featuredQuoteTranslation = translationDataResponse?.translatedHighlight || ""
 
   const handleLangSelect = (newLang) => {
     setCurrentLangPair(newLang)
     onLanguageChange?.(newLang)
   }
 
-  const handleSendReport = (e) => {
+  const handleSendReport = async (e) => {
     e.preventDefault()
+    if (scriptId) {
+      try {
+        await reportError({
+          id: scriptId,
+          reportedTranslation: translationData.body,
+          errorDescription: reportText,
+          language: targetLanguage
+        }).unwrap()
+      } catch (err) {
+        console.error("Report failed", err)
+      }
+    }
+    
     setReportSent(true)
     setTimeout(() => {
       setShowReportForm(false)
@@ -58,8 +98,12 @@ const TranslationPanel = ({
 
   // Render text bản dịch với các từ nổi bật được highlight đỏ
   const renderFormattedBody = () => {
+    if (isFetching) {
+      return <span className="text-slate-400 italic">Đang dịch...</span>
+    }
     const { body = "", highlightedMatches = [] } = translationData
-    if (!highlightedMatches || highlightedMatches.length === 0) {
+    if (!body) return <span className="text-slate-400 italic">{t.widget?.translationPanel?.title || "Chưa có bản dịch cho ngôn ngữ này."}</span>
+    if (!highlightedMatches || highlightedMatches.length === 0 || highlightedMatches[0] === "") {
       return <span>{body}</span>
     }
 

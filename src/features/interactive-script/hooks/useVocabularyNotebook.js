@@ -1,55 +1,20 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { mockVocabularyData } from '../mock/mockVocabularyNotebook';
-
-const LOCAL_STORAGE_KEY = 'catspeak_vocabulary_notebook';
+import { useState, useMemo, useCallback } from 'react';
+import { useGetVocabulariesQuery, useDeleteVocabularyMutation } from '@/store/api/interactiveScriptApi';
 
 export const useVocabularyNotebook = () => {
-  const [words, setWords] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [languageFilter, setLanguageFilter] = useState('all');
   const [scriptFilter, setScriptFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // Adjustable
+  const itemsPerPage = 8;
 
-  // Initialize data from localStorage or mock data
-  useEffect(() => {
-    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (storedData) {
-      try {
-        const parsed = JSON.parse(storedData);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setWords(parsed);
-        } else {
-          // If empty, load mock data for UI testing purposes
-          setWords(mockVocabularyData);
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mockVocabularyData));
-        }
-      } catch (error) {
-        console.error('Failed to parse vocabulary from localStorage:', error);
-        setWords(mockVocabularyData);
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mockVocabularyData));
-      }
-    } else {
-      setWords(mockVocabularyData);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(mockVocabularyData));
-    }
-  }, []);
+  // We could do server-side filtering, but for now we'll do client-side filtering 
+  // since the API might not support all these filters natively yet.
+  const { data: apiResponse, isFetching, refetch } = useGetVocabulariesQuery();
+  const words = apiResponse?.items || apiResponse?.data || (Array.isArray(apiResponse) ? apiResponse : []);
 
-  // Save to localStorage whenever words change
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(words));
-  }, [words]);
-
-  // Handle search debounce
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-      setCurrentPage(1); // Reset to first page on search
-    }, 300);
-    return () => clearTimeout(handler);
-  }, [searchQuery]);
+  const [deleteVocabularyMutation] = useDeleteVocabularyMutation();
 
   // Derived state for available scripts based on current words
   const availableScripts = useMemo(() => {
@@ -58,7 +23,7 @@ export const useVocabularyNotebook = () => {
       if (!scriptMap.has(word.scriptId)) {
         scriptMap.set(word.scriptId, {
           id: word.scriptId,
-          name: word.scriptName,
+          name: word.scriptName || `Script ${word.scriptId}`,
           count: 0
         });
       }
@@ -72,8 +37,8 @@ export const useVocabularyNotebook = () => {
     let result = [...words];
 
     // Search filter
-    if (debouncedSearchQuery) {
-      const lowerQuery = debouncedSearchQuery.toLowerCase();
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
       result = result.filter(
         word =>
           word.word.toLowerCase().includes(lowerQuery) ||
@@ -83,7 +48,19 @@ export const useVocabularyNotebook = () => {
 
     // Language filter
     if (languageFilter !== 'all') {
-      result = result.filter(word => word.language === languageFilter);
+      const langMap = {
+        en: 'English',
+        vi: 'Vietnamese',
+        zh: 'Chinese',
+        ja: 'Japanese'
+      };
+      const langName = langMap[languageFilter];
+      result = result.filter(word => 
+        word.targetLanguage === languageFilter || 
+        word.sourceLanguage === languageFilter ||
+        word.targetLanguage === langName ||
+        word.sourceLanguage === langName
+      );
     }
 
     // Script filter
@@ -110,7 +87,7 @@ export const useVocabularyNotebook = () => {
     });
 
     return result;
-  }, [words, debouncedSearchQuery, languageFilter, scriptFilter, sortBy]);
+  }, [words, searchQuery, languageFilter, scriptFilter, sortBy]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedWords.length / itemsPerPage);
@@ -120,9 +97,13 @@ export const useVocabularyNotebook = () => {
   }, [filteredAndSortedWords, currentPage, itemsPerPage]);
 
   // Actions
-  const deleteWord = useCallback((id) => {
-    setWords(prev => prev.filter(word => word.id !== id));
-  }, []);
+  const deleteWord = useCallback(async (id) => {
+    try {
+      await deleteVocabularyMutation(id).unwrap();
+    } catch (e) {
+      console.error(e);
+    }
+  }, [deleteVocabularyMutation]);
 
   const playAudio = useCallback((text, language, audioUrl) => {
     if (audioUrl) {
@@ -138,7 +119,10 @@ export const useVocabularyNotebook = () => {
       const langMap = {
         'en': 'en-US',
         'zh': 'zh-CN',
-        'ja': 'ja-JP'
+        'ja': 'ja-JP',
+        'English': 'en-US',
+        'Chinese': 'zh-CN',
+        'Japanese': 'ja-JP'
       };
 
       utterance.lang = langMap[language] || 'en-US';
@@ -150,7 +134,6 @@ export const useVocabularyNotebook = () => {
 
   const resetFilters = useCallback(() => {
     setSearchQuery('');
-    setDebouncedSearchQuery('');
     setLanguageFilter('all');
     setScriptFilter('all');
     setSortBy('newest');
@@ -175,6 +158,7 @@ export const useVocabularyNotebook = () => {
     availableScripts,
     deleteWord,
     playAudio,
-    resetFilters
+    resetFilters,
+    isFetching
   };
 };

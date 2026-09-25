@@ -34,7 +34,8 @@ const VocabularyNotebookPage = () => {
     availableScripts,
     deleteWord,
     playAudio,
-    resetFilters
+    resetFilters,
+    isFetching
   } = useVocabularyNotebook();
 
   const handleDeleteConfirm = (id) => {
@@ -46,7 +47,11 @@ const VocabularyNotebookPage = () => {
     <div className="w-full">
       <VocabularyNotebookHeader totalWords={allWordsCount} />
 
-      {allWordsCount > 0 ? (
+      {isFetching && allWordsCount === 0 ? (
+        <div className="py-12 flex justify-center items-center text-slate-400 italic">
+          Đang tải danh sách từ vựng...
+        </div>
+      ) : allWordsCount > 0 ? (
         <>
           <VocabularyNotebookFilters
             searchQuery={searchQuery}

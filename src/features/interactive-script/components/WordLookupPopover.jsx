@@ -17,12 +17,21 @@ import PillButton from "@/shared/components/ui/buttons/PillButton"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import { cn } from "@/lib/utils"
 import { MOCK_WORD_LOOKUP_DATA } from "../mock/mockVocabulary"
-import { LANGUAGE_PAIR_KEYS } from "../constants"
 import WordNotFoundPopover from "./WordNotFoundPopover"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useLookupWordQuery, useContributeDefinitionMutation, useSaveVocabularyMutation } from "@/store/api/interactiveScriptApi"
+import { toast } from "@/shared/utils/toastBridge"
+
+const langCodeToName = {
+  vi: "Vietnamese",
+  en: "English",
+  zh: "Chinese",
+  ja: "Japanese"
+}
 
 const WordLookupPopover = ({
-  data = MOCK_WORD_LOOKUP_DATA,
+  wordText,
+  scriptId,
   selectedLanguagePair = "en-vi",
   isSaved = false,
   showAllExamples = false,
@@ -42,18 +51,103 @@ const WordLookupPopover = ({
 
   useClickOutside(langDropdownRef, () => setIsLangDropdownOpen(false))
 
-  const languagePairs = LANGUAGE_PAIR_KEYS.map((key) => ({
-    value: key,
-    label: t.widget?.langPairs?.[key] || key
-  }))
+  const sourceLangCode = selectedLanguagePair.split("-")[0] || 'en';
+  const ALL_LANGS = ['en', 'vi', 'zh', 'ja'];
+  const targetLangs = ALL_LANGS.filter(l => l !== sourceLangCode);
+  
+  const langNames = t.header?.languages || { en: 'Tiếng Anh', vi: 'Tiếng Việt', zh: 'Tiếng Trung', ja: 'Tiếng Nhật' };
+  
+  const languagePairs = targetLangs.map(target => {
+    const key = `${sourceLangCode}-${target}`;
+    return {
+      value: key,
+      label: t.widget?.langPairs?.[key] || `${langNames[sourceLangCode]} → ${langNames[target]}`
+    };
+  });
+
+  const targetLanguage = langCodeToName[selectedLanguagePair.split("-")[1]] || "Vietnamese"
+  const sourceLanguage = langCodeToName[selectedLanguagePair.split("-")[0]] || "English"
+  
+  const { data: apiData, isFetching } = useLookupWordQuery({
+    word: wordText,
+    sourceLanguage,
+    targetLanguage,
+    scriptId
+  }, { skip: !wordText })
+
+  const [contributeMutation] = useContributeDefinitionMutation()
+  const [saveVocabMutation] = useSaveVocabularyMutation()
+  const [isSavedLocal, setIsSavedLocal] = useState(isSaved)
+
+  const data = apiData ? {
+    word: apiData.word || wordText,
+    type: apiData.partOfSpeech,
+    ipa: apiData.phonetic,
+    meaning: apiData.meaning,
+    examples: apiData.exampleSentence ? [apiData.exampleSentence] : [],
+    relatedWords: apiData.relatedWords || [],
+    instructorNote: apiData.teacherNote,
+    notFound: !apiData.meaning,
+    audioUrl: apiData.audioUrl
+  } : { notFound: true, word: wordText }
+
+  const handleContribute = async (contribution) => {
+    try {
+      await contributeMutation({
+        word: wordText,
+        sourceLanguage,
+        targetLanguage,
+        scriptId,
+        definition: contribution.meaning,
+        example: contribution.example
+      }).unwrap()
+      onSubmitContribution?.(contribution)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleSave = async () => {
+    if (isSavedLocal) return
+    try {
+      await saveVocabMutation({
+        word: data.word,
+        sourceLanguage,
+        targetLanguage,
+        scriptId,
+        scriptName: "Tương tác từ vựng", // We don't have the script name in the popover easily, maybe backend can resolve it or we just send this.
+        meaning: data.meaning,
+        exampleSentence: data.examples?.[0] || null,
+        teacherNote: data.instructorNote || null,
+        partOfSpeech: data.type || null,
+        phonetic: data.ipa || null,
+        audioUrl: data.audioUrl || null,
+        relatedWords: data.relatedWords || []
+      }).unwrap()
+      setIsSavedLocal(true)
+      onSave?.(data)
+      toast.success(t.widget?.saveSuccess || "Đã thêm vào sổ từ thành công!")
+    } catch (e) {
+      console.error("Failed to save vocabulary", e)
+      toast.error(t.widget?.saveError || "Có lỗi xảy ra, vui lòng thử lại sau.")
+    }
+  }
+
+  if (isFetching) {
+    return (
+      <div className={cn("relative w-full max-w-[480px] sm:w-[480px] bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 flex justify-center items-center text-slate-400 font-medium italic", className)} style={style}>
+        Đang tra cứu "{wordText}"...
+      </div>
+    )
+  }
 
   if (data?.notFound || !data?.meaning) {
     return (
       <WordNotFoundPopover
-        word={data?.word || "that"}
+        word={data?.word || wordText}
         onClose={onClose}
         onSelectLanguage={onLanguageChange}
-        onSubmitContribution={onSubmitContribution}
+        onSubmitContribution={handleContribute}
         className={className}
         style={style}
       />
@@ -258,12 +352,12 @@ const WordLookupPopover = ({
         <div className="flex items-center gap-2.5 pt-2">
           {/* Nút 1: Thêm vào sổ từ / Đã lưu */}
           <PillButton
-            onClick={onSave}
-            variant={isSaved ? "secondary" : "primary"}
-            bgColor={isSaved ? "#059669" : undefined}
-            textColor={isSaved ? "#ffffff" : undefined}
+            onClick={handleSave}
+            variant={isSavedLocal ? "secondary" : "primary"}
+            bgColor={isSavedLocal ? "#059669" : undefined}
+            textColor={isSavedLocal ? "#ffffff" : undefined}
             startIcon={
-              isSaved ? (
+              isSavedLocal ? (
                 <Check className="w-4 h-4 stroke-[2.5]" />
               ) : (
                 <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -272,7 +366,7 @@ const WordLookupPopover = ({
             roundedClass="rounded-xl"
             className="flex-1 h-10"
           >
-            <span>{isSaved ? (t.widget?.lookup?.saved || "Đã lưu vào sổ") : (t.widget?.lookup?.save || "Thêm vào sổ từ")}</span>
+            <span>{isSavedLocal ? (t.widget?.lookup?.saved || "Đã lưu vào sổ") : (t.widget?.lookup?.save || "Thêm vào sổ từ")}</span>
           </PillButton>
 
           {/* Nút 2: Xem thêm ví dụ  */}

@@ -25,11 +25,10 @@ const InteractiveScriptWidget = ({
     selectedLanguagePair,
     handleShuffleScript,
     dismissHint,
-    resolveVocabData,
     toggleTranslation,
     togglePopover,
     handleLanguageChange,
-  } = useInteractiveScript(scriptsPool)
+  } = useInteractiveScript()
 
   const renderTitle = (title) => {
     const titleStr = title || t.rooms?.welcome?.title || "Happy Halloween"
@@ -49,9 +48,10 @@ const InteractiveScriptWidget = ({
   }
 
   /** Tạo content cho Popover – nhận hàm close từ shared Popover */
-  const buildPopoverContent = (vocabData, sIdx, wIdx = null) => (close) => (
+  const buildPopoverContent = (wordText) => (close) => (
     <WordLookupPopover
-      data={vocabData}
+      wordText={wordText}
+      scriptId={currentScript.id}
       selectedLanguagePair={selectedLanguagePair}
       onClose={close}
       onSave={(vocab) => onSaveWord?.(vocab)}
@@ -69,7 +69,6 @@ const InteractiveScriptWidget = ({
   // Render các từ trong segment (phân tách từ thường hoặc giữ nguyên cụm từ highlight)
   const renderSegment = (segment, sIdx) => {
     if (segment.isHighlighted) {
-      const vocabData = resolveVocabData(segment)
       const popoverKey = `seg-${sIdx}`
       const isActive = activePopoverKey === popoverKey
       return (
@@ -90,7 +89,7 @@ const InteractiveScriptWidget = ({
               {segment.text}
             </span>
           }
-          content={buildPopoverContent(vocabData)}
+          content={buildPopoverContent(segment.text)}
         />
       )
     }
@@ -107,7 +106,6 @@ const InteractiveScriptWidget = ({
 
           // Sử dụng Regex hỗ trợ Unicode để loại bỏ tất cả dấu câu (Punctuation) và ký hiệu (Symbol)
           const cleanWord = chunk.replace(/[\p{P}\p{S}]/gu, "")
-          const vocabData = resolveVocabData({ text: cleanWord, isHighlighted: false }, cleanWord)
 
           const popoverKey = `w-${sIdx}-${wIdx}`
           const isActive = activePopoverKey === popoverKey
@@ -130,7 +128,7 @@ const InteractiveScriptWidget = ({
                   {chunk}
                 </span>
               }
-              content={buildPopoverContent(vocabData)}
+              content={buildPopoverContent(cleanWord)}
             />
           )
         })}
@@ -146,7 +144,7 @@ const InteractiveScriptWidget = ({
         className
       )}
     >
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="inline-flex items-center px-3 py-1 rounded-xl text-sm font-bold bg-[#FFDAD6] text-cath-red-700">
           {currentScript.topic}
         </span>
@@ -172,7 +170,7 @@ const InteractiveScriptWidget = ({
         )}
       </div>
 
-      <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight md:leading-relaxed w-full">
+      <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight md:leading-relaxed w-full break-words">
         {renderTitle(currentScript.title)}
       </h1>
 
@@ -192,8 +190,7 @@ const InteractiveScriptWidget = ({
 
       {showTranslation && (
         <TranslationPanel
-          fullTranslation={currentScript.fullTranslation}
-          featuredQuoteTranslation={currentScript.featuredQuoteTranslation}
+          scriptId={currentScript.id}
           selectedLanguagePair={selectedLanguagePair}
           onLanguageChange={handleLanguageChange}
         />
