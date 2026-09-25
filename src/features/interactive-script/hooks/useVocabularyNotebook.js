@@ -72,9 +72,9 @@ export const useVocabularyNotebook = () => {
     result.sort((a, b) => {
       switch (sortBy) {
         case 'newest':
-          return new Date(b.savedAt) - new Date(a.savedAt);
+          return new Date(b.createdAt) - new Date(a.createdAt);
         case 'oldest':
-          return new Date(a.savedAt) - new Date(b.savedAt);
+          return new Date(a.createdAt) - new Date(b.createdAt);
         case 'a-z':
           return a.word.localeCompare(b.word);
         case 'z-a':

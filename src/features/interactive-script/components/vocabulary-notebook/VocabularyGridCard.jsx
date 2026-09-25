@@ -50,8 +50,16 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
             <Volume2 className="w-4 h-4 text-[#990011]" />
           </IconButton>
         </div>
-        <div className='bg-[#F3F4F6] border border-[#D1D5DB] text-[#4B5563] text-xs uppercase px-2 py-0.5 font-semibold rounded w-fit max-w-fit min-w-0'>
-          {type ? (v?.[type] || type) : (v?.noun || 'Danh từ')}
+        <div className="flex flex-wrap items-center gap-2 mt-1">
+          <div className='bg-[#F3F4F6] border border-[#D1D5DB] text-[#4B5563] text-xs uppercase px-2 py-0.5 font-semibold rounded shrink-0'>
+            {type ? (v?.[type] || type) : (v?.noun || 'Danh từ')}
+          </div>
+          {word.teacherNote && (
+            <div className="flex items-center gap-1 bg-[#FFF7ED] border border-[#FED7AA] text-[#C2410C] text-xs px-2 py-0.5 font-semibold rounded shrink-0">
+              <GraduationCap className="w-3 h-3 shrink-0" />
+              <span>{v?.hasTeacherNote || 'Có ghi chú GV'}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -68,47 +76,50 @@ export const VocabularyGridCard = ({ word, onPlayAudio, onDelete }) => {
             </div>
 
             <button
-              className="text-xs text-primary font-medium flex items-center gap-1 transition-colors"
+              className="text-xs text-[#990011] font-bold flex items-center transition-colors hover:underline"
               onClick={() => setExpanded(!expanded)}
             >
               {expanded ? (v?.collapse || 'Thu gọn') : (v?.expand || 'Chi tiết')}
-              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
           </div>
         )}
 
-        {expanded && hasExtraContent && (
-          <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col gap-3">
-            {example && (
-              <div className="text-sm bg-gray-50 rounded-xl p-2 text-[#1F2937] italic border-l-4 border-primary">
-                "{example}"
-              </div>
-            )}
-
-            {word.teacherNote && (
-              <div className="bg-[#fffcf1] p-2 rounded-xl border-l-4 border-[#f59e0b]">
-                <div className="flex items-center gap-1">
-                  <GraduationCap className="w-4 h-4 text-[#92400E] shrink-0" />
-                  <p className="text-xs font-semibold text-orange-700 mb-1">{v?.teacherNote || 'Ghi chú từ giáo viên'}</p>
+        <div 
+          className={`grid transition-all duration-300 ease-in-out ${expanded ? 'grid-rows-[1fr] opacity-100 mt-3 pt-3 border-t border-gray-100' : 'grid-rows-[0fr] opacity-0 mt-0 pt-0 border-t-0'}`}
+        >
+          <div className="overflow-hidden">
+            <div className="flex flex-col gap-3">
+              {example && (
+                <div className="text-sm bg-gray-50 rounded-xl p-2 text-[#1F2937] italic border-l-4 border-primary">
+                  "{example}"
                 </div>
-                <p className="text-xs text-gray-700">{word.teacherNote}</p>
-              </div>
-            )}
+              )}
 
-            {word.relatedWords && word.relatedWords.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {word.relatedWords.map((related, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2 py-1 bg-[#F3F4F6] rounded-md text-xs text-[#4B5563] font-medium"
-                  >
-                    {related}
-                  </span>
-                ))}
-              </div>
-            )}
+              {word.teacherNote && (
+                <div className="bg-[#fffcf1] p-2 rounded-xl border-l-4 border-[#f59e0b]">
+                  <div className="flex items-center gap-1">
+                    <GraduationCap className="w-4 h-4 text-[#92400E] shrink-0" />
+                    <p className="text-xs font-semibold text-orange-700 mb-1">{v?.teacherNote || 'Ghi chú từ giáo viên'}</p>
+                  </div>
+                  <p className="text-xs text-gray-700">{word.teacherNote}</p>
+                </div>
+              )}
+
+              {word.relatedWords && word.relatedWords.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {word.relatedWords.map((related, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-1 bg-[#F3F4F6] rounded-md text-xs text-[#4B5563] font-medium"
+                    >
+                      {related}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

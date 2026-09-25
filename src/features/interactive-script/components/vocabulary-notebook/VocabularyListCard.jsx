@@ -73,7 +73,7 @@ export const VocabularyListCard = ({ word, onPlayAudio, onDelete }) => {
               </div>
             )}
 
-            <div className='flex items-center justify-between'>
+            <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
               {word.relatedWords && word.relatedWords.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap mt-1">
                   <span className="text-sm text-[#9CA3AF] mr-1">{v?.relatedWords || 'Từ liên quan:'}</span>

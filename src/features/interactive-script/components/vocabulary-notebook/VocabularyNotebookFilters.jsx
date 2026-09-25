@@ -56,7 +56,7 @@ export const VocabularyNotebookFilters = ({
         />
       </div>
 
-      <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
+      <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto pb-2 sm:pb-0">
         <Dropdown
           options={languageOptions}
           value={languageFilter}

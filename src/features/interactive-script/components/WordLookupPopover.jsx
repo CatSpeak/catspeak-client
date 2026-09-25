@@ -133,6 +133,36 @@ const WordLookupPopover = ({
     }
   }
 
+  const handlePronounce = (e) => {
+    if (e) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+    if (onPronounce) {
+      onPronounce()
+      return
+    }
+    if (data?.audioUrl) {
+      const audio = new Audio(data.audioUrl)
+      audio.play().catch(console.error)
+      return
+    }
+    if (data?.word) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel() // Hủy các luồng cũ bị kẹt
+        const utterance = new SpeechSynthesisUtterance(data.word)
+        const localeMap = {
+          'English': 'en-US',
+          'Vietnamese': 'vi-VN',
+          'Chinese': 'zh-CN',
+          'Japanese': 'ja-JP'
+        }
+        utterance.lang = localeMap[sourceLanguage] || 'en-US'
+        window.speechSynthesis.speak(utterance)
+      }
+    }
+  }
+
   if (isFetching) {
     return (
       <div className={cn("relative w-full max-w-[480px] sm:w-[480px] bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 flex justify-center items-center text-slate-400 font-medium italic", className)} style={style}>
@@ -212,7 +242,7 @@ const WordLookupPopover = ({
                 </span>
               )}
               <IconButton
-                onClick={onPronounce}
+                onClick={handlePronounce}
                 size="xs"
                 variant="cathRed"
                 title={t.widget?.lookup?.listenBtn || "Nghe phát âm"}
