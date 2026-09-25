@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from "react"
-import { useLanguage } from "@/shared/context/LanguageContext"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import {
   SpeakingRoomHeader,
   SpeakingRoomQuotaBanner,
@@ -8,18 +7,19 @@ import {
   TopicList,
   SpeakingRoomStickyBottomBar,
 } from "../index"
+import { fetchSpeakingTopics, fetchSpeakingQuota } from "../../../api/speakingClient"
 
-// --- Mock Data & Configurations ---
-export const USER_QUOTA = {
+// --- Default Fallbacks & Configurations ---
+const DEFAULT_QUOTA = {
   currentPlan: "Gói Free: 2 buổi/ngày",
-  used: 1,
+  used: 0,
   total: 2,
-  percent: 50,
+  percent: 0,
   resetTime: "00:00 hàng ngày",
   upgradeUrl: "/pricing",
 }
 
-export const USER_LEVEL = {
+const USER_LEVEL = {
   current: "HSK 3 (B1)",
   options: [
     { label: "HSK 1 (A1)", value: "HSK 1" },
@@ -31,170 +31,156 @@ export const USER_LEVEL = {
   ],
 }
 
-export const FILTER_TABS = [
-  { id: "all", label: "Tất cả", count: 48 },
-  { id: "hsk1-2", label: "HSK 1-2", count: 12 },
-  { id: "hsk3", label: "HSK 3 (Khuyên dùng ★ 18)", count: 18, isRecommended: true },
-  { id: "hsk4-5", label: "HSK 4-5", count: 14 },
-  { id: "hsk6", label: "HSK 6", count: 4 },
-]
+const HSK_EMOJIS = {
+  1: ["☕", "🍎", "🏠", "🐱", "☀️"],
+  2: ["🍲", "🛒", "🚌", "🌦️", "⚽"],
+  3: ["🚇", "🏨", "🛍️", "🚕", "🏥", "☕"],
+  4: ["💼", "📱", "🏃", "✈️", "🎬"],
+  5: ["🤖", "🌿", "🎨", "🌍", "📚"],
+  6: ["📈", "🎓", "🌏", "🏛️", "💡"],
+}
 
-export const RECOMMEND_TOPICS = [
-  {
-    typeTitle: "⭐ AI GỢI Ý RIÊNG CHO BẠN",
-    badge: "2 chủ đề đề xuất",
-    topics: [
-      {
-        id: "buy-fruits",
-        emoji: "🍎",
-        title: "Mua hoa quả ở chợ",
-        sub: "买水果 · Mặc cả & Cân ký",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "苹果 (táo) · 多少钱 (bao nhiêu) · 太贵了 (đắt)",
-        hskLevel: "HSK 3",
-        isRecommended: true,
-      },
-      {
-        id: "order-food",
-        emoji: "🍲",
-        title: "Gọi món tại nhà hàng",
-        sub: "点菜 · Đặt món & Thanh toán",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "服务员 (phục vụ) · 买单 (tính tiền) · 菜单 (thực đơn)",
-        hskLevel: "HSK 3",
-        isRecommended: true,
-      },
-    ],
-  },
-  {
-    typeTitle: "📌 CHỦ ĐỀ HSK 3 PHỔ BIẾN",
-    badge: "18 chủ đề · Cuộn để xem thêm ▾",
-    topics: [
-      {
-        id: "ask-directions",
-        emoji: "🚇",
-        title: "Hỏi đường ga tàu ngầm",
-        sub: "问路 · Chỉ hướng & Di chuyển",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "地铁站 (ga tàu) · 怎么走 (đi sao) · 一直走 (đi thẳng)",
-        hskLevel: "HSK 3",
-      },
-      {
-        id: "book-hotel",
-        emoji: "🏨",
-        title: "Đặt phòng khách sạn",
-        sub: "订酒店 · Check-in & Thủ tục",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "预订 (đặt trước) · 单人房 (phòng đơn) · 押金 (tiền cọc)",
-        hskLevel: "HSK 3",
-      },
-      {
-        id: "shopping-clothes",
-        emoji: "🛍️",
-        title: "Mua sắm quần áo",
-        sub: "买衣服 · Thử đồ & Khuyến mãi",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "试衣间 (phòng thử) · 打折 (giảm giá) · 适合 (vừa vặn)",
-        hskLevel: "HSK 3",
-      },
-      {
-        id: "take-taxi",
-        emoji: "🚕",
-        title: "Bắt xe taxi di chuyển",
-        sub: "打车 · Điểm đến & Tính tiền",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "师傅 (bác tài) · 堵车 (kẹt xe) · 靠边停 (tấp lề)",
-        hskLevel: "HSK 3",
-      },
-      {
-        id: "doctor-visit",
-        emoji: "🏥",
-        title: "Khám bệnh tại bệnh viện",
-        sub: "看病 · Triệu chứng & Đơn thuốc",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "感冒 (cảm cúm) · 发烧 (sốt) · 吃药 (uống thuốc)",
-        hskLevel: "HSK 3",
-      },
-      {
-        id: "coffee-shop",
-        emoji: "☕",
-        title: "Hẹn cà phê cùng bạn bè",
-        sub: "喝咖啡 · Chọn thức uống & Trò chuyện",
-        tags: ["HSK 3", "💬 4-6 câu", "Đàm thoại 2 chiều"],
-        vocab: "拿铁 (latte) · 少糖 (ít đường) · 冰的 (đá)",
-        hskLevel: "HSK 3",
-      },
-    ],
-  },
-  {
-    typeTitle: "🔒 CHỦ ĐỀ CÔNG SỞ & THỬ THÁCH NÂNG CAO",
-    badge: "14 chủ đề · HSK 4+",
-    topics: [
-      {
-        id: "job-interview",
-        emoji: "💼",
-        title: "Phỏng vấn xin việc",
-        sub: "面试 · Trả lời phỏng vấn",
-        tags: ["HSK 4+", "Phỏng vấn"],
-        vocab: "简历 (sơ yếu lý lịch) · 经验 (kinh nghiệm) · 优势 (ưu điểm)",
-        isLocked: true,
-        lockBadge: "HSK 4+",
-        hskLevel: "HSK 4-5",
-      },
-      {
-        id: "business-negotiation",
-        emoji: "🤝",
-        title: "Đàm phán thương mại",
-        sub: "商务谈判 · Thỏa thuận hợp đồng",
-        tags: ["HSK 5+", "Thương mại"],
-        vocab: "合同 (hợp đồng) · 合作 (hợp tác) · 价格 (giá cả)",
-        isLocked: true,
-        lockBadge: "HSK 5+",
-        hskLevel: "HSK 4-5",
-      },
-      {
-        id: "project-presentation",
-        emoji: "📊",
-        title: "Báo cáo tiến độ dự án",
-        sub: "工作汇报 · Thuyết trình kết quả",
-        tags: ["HSK 5+", "Báo cáo"],
-        vocab: "项目 (dự án) · 进度 (tiến độ) · 达成 (đạt được)",
-        isLocked: true,
-        lockBadge: "HSK 5+",
-        hskLevel: "HSK 4-5",
-      },
-      {
-        id: "academic-debate",
-        emoji: "🎓",
-        title: "Tranh biện học thuật chuyên sâu",
-        sub: "学术辩论 · Luận điểm chuyên môn",
-        tags: ["HSK 6", "Học thuật"],
-        vocab: "观点 (quan điểm) · 逻辑 (logic) · 论证 (luận chứng)",
-        isLocked: true,
-        lockBadge: "HSK 6",
-        hskLevel: "HSK 6",
-      },
-    ],
-  },
-]
+function getTopicEmoji(topic, index = 0) {
+  const level = topic.hsk_level || 1
+  const list = HSK_EMOJIS[level] || HSK_EMOJIS[1]
+  return list[index % list.length]
+}
 
-const SelectionPage = () => {
-  const { currentLanguage } = useLanguage()
+function parseHskNumber(levelStr) {
+  if (typeof levelStr === "number") return levelStr
+  if (typeof levelStr === "string") {
+    const match = levelStr.match(/HSK\s*(\d)/i)
+    if (match) return parseInt(match[1], 10)
+  }
+  return 3
+}
 
+const SelectionPage = ({ onStartSpeaking }) => {
   // State management
-  const [selectedTopicId, setSelectedTopicId] = useState("buy-fruits")
-  const [selectedFilter, setSelectedFilter] = useState("hsk3")
+  const [rawTopics, setRawTopics] = useState([])
+  const [quotaData, setQuotaData] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [selectedTopicId, setSelectedTopicId] = useState("")
+  const [selectedFilter, setSelectedFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [currentLevel, setCurrentLevel] = useState(USER_LEVEL.current)
 
-  // Find all topics and currently selected topic
-  const allTopics = useMemo(() => {
-    return RECOMMEND_TOPICS.flatMap((section) => section.topics)
+  const currentHskNumber = useMemo(() => parseHskNumber(currentLevel), [currentLevel])
+
+  // Fetch topics and quota from AI API
+  const loadData = useCallback(async () => {
+    setIsLoading(true)
+    setErrorMessage(null)
+    try {
+      const [topicsRes, quotaRes] = await Promise.allSettled([
+        fetchSpeakingTopics(),
+        fetchSpeakingQuota(),
+      ])
+
+      if (topicsRes.status === "fulfilled" && Array.isArray(topicsRes.value)) {
+        setRawTopics(topicsRes.value)
+      } else {
+        const errorReason = topicsRes.reason?.message || "Không thể tải danh sách chủ đề từ máy chủ."
+        console.warn("[SelectionPage] Failed to fetch live topics:", errorReason)
+        setErrorMessage(errorReason)
+        setRawTopics([])
+      }
+
+      if (quotaRes.status === "fulfilled" && quotaRes.value) {
+        setQuotaData(quotaRes.value)
+      }
+    } catch (err) {
+      console.error("[SelectionPage] Error loading speaking data:", err)
+      setErrorMessage(err?.message || "Đã xảy ra lỗi khi tải dữ liệu.")
+      setRawTopics([])
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
-  const selectedTopic = useMemo(() => {
-    return allTopics.find((t) => t.id === selectedTopicId) || allTopics[0]
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  // Map raw API topics to UI card models
+  const allTopics = useMemo(() => {
+    return rawTopics.map((t, idx) => {
+      const hskNum = t.hsk_level || 1
+      const isHigherLevel = hskNum > currentHskNumber
+      return {
+        id: t.id,
+        emoji: getTopicEmoji(t, idx),
+        title: t.title_vi,
+        sub: `${t.title_zh}${t.opening_zh ? " · " + t.opening_zh : ""}`,
+        tags: [
+          `HSK ${hskNum}`,
+          `💬 ${t.script_turns || 3} câu`,
+          t.is_premium ? "⭐ Premium" : "Đàm thoại 2 chiều",
+        ],
+        vocab: Array.isArray(t.keywords) ? t.keywords.join(" · ") : (t.keywords || ""),
+        hskLevel: `HSK ${hskNum}`,
+        hskNumber: hskNum,
+        isLocked: isHigherLevel,
+        lockBadge: isHigherLevel ? `HSK ${hskNum}+` : undefined,
+        isRecommended: hskNum === currentHskNumber,
+        isPremium: t.is_premium,
+        scriptTurns: t.script_turns,
+        openingZh: t.opening_zh,
+        raw: t,
+      }
+    })
+  }, [rawTopics, currentHskNumber])
+
+  // Ensure an initial topic is selected once loaded
+  useEffect(() => {
+    if (allTopics.length > 0) {
+      const currentValid = allTopics.find((t) => t.id === selectedTopicId && !t.isLocked)
+      if (!currentValid) {
+        const firstAvailable = allTopics.find((t) => !t.isLocked) || allTopics[0]
+        if (firstAvailable) {
+          setSelectedTopicId(firstAvailable.id)
+        }
+      }
+    }
   }, [allTopics, selectedTopicId])
+
+  const selectedTopic = useMemo(() => {
+    return allTopics.find((t) => t.id === selectedTopicId) || null
+  }, [allTopics, selectedTopicId])
+
+  // Quota banner data calculation
+  const quota = useMemo(() => {
+    if (!quotaData) return DEFAULT_QUOTA
+    const used = quotaData.used_sessions ?? 0
+    const total = quotaData.max_sessions ?? 2
+    const isPremium = quotaData.is_premium
+    const percent = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0
+    return {
+      currentPlan: isPremium ? "Gói Pro: Không giới hạn" : `Gói Free: ${total} buổi/ngày`,
+      used,
+      total,
+      percent,
+      resetTime: "00:00 hàng ngày",
+      upgradeUrl: "/pricing",
+    }
+  }, [quotaData])
+
+  // Dynamic filter tabs with real topic counts
+  const filterTabs = useMemo(() => {
+    const hsk1_2 = allTopics.filter((t) => t.hskNumber <= 2).length
+    const hsk3 = allTopics.filter((t) => t.hskNumber === 3).length
+    const hsk4_5 = allTopics.filter((t) => t.hskNumber >= 4 && t.hskNumber <= 5).length
+    const hsk6 = allTopics.filter((t) => t.hskNumber === 6).length
+
+    return [
+      { id: "all", label: "Tất cả", count: allTopics.length },
+      { id: "hsk1-2", label: "HSK 1-2", count: hsk1_2 },
+      { id: "hsk3", label: `HSK 3${currentHskNumber === 3 ? " (Khuyên dùng ★)" : ""}`, count: hsk3, isRecommended: currentHskNumber === 3 },
+      { id: "hsk4-5", label: "HSK 4-5", count: hsk4_5 },
+      { id: "hsk6", label: "HSK 6", count: hsk6 },
+    ]
+  }, [allTopics, currentHskNumber])
 
   // Handle AI Random Topic Pick
   const handleRandomPick = () => {
@@ -211,43 +197,97 @@ const SelectionPage = () => {
     }
   }
 
-  // Filter topics based on active tab and search query
+  // Filter topics and group into structured sections
   const filteredSections = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
 
-    return RECOMMEND_TOPICS.map((section) => {
-      const filteredTopics = section.topics.filter((topic) => {
-        // Tab filtering
-        if (selectedFilter === "hsk1-2" && !["HSK 1", "HSK 2", "HSK 1-2"].includes(topic.hskLevel)) {
-          return false
-        }
-        if (selectedFilter === "hsk3" && topic.hskLevel !== "HSK 3") {
-          return false
-        }
-        if (selectedFilter === "hsk4-5" && !["HSK 4", "HSK 5", "HSK 4-5"].includes(topic.hskLevel)) {
-          return false
-        }
-        if (selectedFilter === "hsk6" && topic.hskLevel !== "HSK 6") {
-          return false
-        }
-
-        // Search filtering
-        if (query) {
-          const matchTitle = topic.title.toLowerCase().includes(query)
-          const matchSub = topic.sub.toLowerCase().includes(query)
-          const matchVocab = topic.vocab?.toLowerCase().includes(query)
-          return matchTitle || matchSub || matchVocab
-        }
-
-        return true
-      })
-
-      return {
-        ...section,
-        topics: filteredTopics,
+    const filtered = allTopics.filter((topic) => {
+      // Tab filtering
+      if (selectedFilter === "hsk1-2" && ![1, 2].includes(topic.hskNumber)) {
+        return false
       }
-    }).filter((section) => section.topics.length > 0)
-  }, [searchQuery, selectedFilter])
+      if (selectedFilter === "hsk3" && topic.hskNumber !== 3) {
+        return false
+      }
+      if (selectedFilter === "hsk4-5" && ![4, 5].includes(topic.hskNumber)) {
+        return false
+      }
+      if (selectedFilter === "hsk6" && topic.hskNumber !== 6) {
+        return false
+      }
+
+      // Search filtering
+      if (query) {
+        const matchTitle = topic.title?.toLowerCase().includes(query)
+        const matchSub = topic.sub?.toLowerCase().includes(query)
+        const matchVocab = topic.vocab?.toLowerCase().includes(query)
+        return matchTitle || matchSub || matchVocab
+      }
+
+      return true
+    })
+
+    if (query) {
+      return [
+        {
+          typeTitle: "🔍 KẾT QUẢ TÌM KIẾM",
+          badge: `${filtered.length} chủ đề phù hợp`,
+          topics: filtered,
+        },
+      ]
+    }
+
+    if (selectedFilter === "all") {
+      const rec = filtered.filter((t) => t.hskNumber === currentHskNumber)
+      const standard = filtered.filter((t) => t.hskNumber <= 3 && t.hskNumber !== currentHskNumber)
+      const advanced = filtered.filter((t) => t.hskNumber >= 4)
+
+      const result = []
+      if (rec.length > 0) {
+        result.push({
+          typeTitle: "⭐ AI GỢI Ý RIÊNG CHO BẠN",
+          badge: `${rec.length} chủ đề đề xuất (HSK ${currentHskNumber})`,
+          topics: rec,
+        })
+      }
+      if (standard.length > 0) {
+        result.push({
+          typeTitle: "📌 CHỦ ĐỀ GIAO TIẾP HSK 1-3",
+          badge: `${standard.length} chủ đề`,
+          topics: standard,
+        })
+      }
+      if (advanced.length > 0) {
+        result.push({
+          typeTitle: "🔒 CHỦ ĐỀ CÔNG SỞ & THỬ THÁCH NÂNG CAO (HSK 4+)",
+          badge: `${advanced.length} chủ đề`,
+          topics: advanced,
+        })
+      }
+      return result
+    }
+
+    // Specific tab selected
+    const recInTab = filtered.filter((t) => t.hskNumber === currentHskNumber)
+    const otherInTab = filtered.filter((t) => t.hskNumber !== currentHskNumber)
+
+    const result = []
+    if (recInTab.length > 0) {
+      result.push({
+        typeTitle: `⭐ ĐỀ XUẤT HSK ${currentHskNumber}`,
+        badge: `${recInTab.length} chủ đề`,
+        topics: recInTab,
+      })
+    }
+    if (otherInTab.length > 0) {
+      result.push({
+        typeTitle: `📌 CHỦ ĐỀ KHÁC`,
+        badge: `${otherInTab.length} chủ đề`,
+        topics: otherInTab,
+      })
+    }
+    return result.length > 0 ? result : [{ typeTitle: "DANH SÁCH CHỦ ĐỀ", topics: filtered }]
+  }, [allTopics, searchQuery, selectedFilter, currentHskNumber])
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 pb-12">
@@ -259,7 +299,7 @@ const SelectionPage = () => {
       />
 
       {/* 2. Quota & Usage Banner */}
-      <SpeakingRoomQuotaBanner quota={USER_QUOTA} />
+      <SpeakingRoomQuotaBanner quota={quota} />
 
       {/* 3. Search & Filter Controls */}
       <div className="space-y-2.5">
@@ -269,24 +309,34 @@ const SelectionPage = () => {
           onRandomPick={handleRandomPick}
         />
         <SpeakingRoomFilterTabs
-          tabs={FILTER_TABS}
+          tabs={filterTabs}
           selectedFilter={selectedFilter}
           onSelectFilter={setSelectedFilter}
         />
       </div>
 
       {/* 4. Topic List / Sections */}
-      <TopicList
-        sections={filteredSections}
-        selectedTopicId={selectedTopicId}
-        onSelectTopic={setSelectedTopicId}
-      />
+      {isLoading ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 space-y-3 shadow-2xs">
+          <div className="w-8 h-8 border-4 border-rose-200 border-t-[#990011] rounded-full animate-spin mx-auto" />
+          <p className="text-sm font-semibold text-slate-700">Đang tải danh sách chủ đề đàm thoại...</p>
+        </div>
+      ) : (
+        <TopicList
+          sections={filteredSections}
+          selectedTopicId={selectedTopicId}
+          onSelectTopic={setSelectedTopicId}
+          errorMessage={errorMessage}
+          hasTopics={allTopics.length > 0}
+          onRetry={loadData}
+        />
+      )}
 
       {/* 5. Sticky Floating Bottom Action Bar */}
       <SpeakingRoomStickyBottomBar
         selectedTopic={selectedTopic}
         onStartSpeaking={() => {
-          // Placeholder for starting speech session
+          onStartSpeaking?.(selectedTopic, currentLevel)
         }}
       />
     </div>
