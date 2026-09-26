@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useMemo } from "react"
+import { useNavigate } from "react-router-dom"
 import { toast } from "@/shared/utils/toastBridge"
 import {
   SpeakingRoomHeader,
@@ -7,9 +8,14 @@ import {
   SpeakingRoomFilterTabs,
   TopicList,
   SpeakingRoomStickyBottomBar,
-  QuotaExceededModal,
 } from "../index"
-import { fetchSpeakingTopics, fetchSpeakingQuota } from "../../../api/speakingClient"
+import {
+  useGetActiveSpeakingSessionQuery,
+  useGetSpeakingLevelQuery,
+  useGetSpeakingQuotaQuery,
+  useGetSpeakingTopicsQuery,
+  useEndSpeakingSessionMutation,
+} from "../../../api/speakingApi"
 
 
 // --- Default Fallbacks & Configurations ---
@@ -25,12 +31,12 @@ const DEFAULT_QUOTA = {
 const USER_LEVEL = {
   current: "HSK 3 (B1)",
   options: [
-    { label: "HSK 1 (A1)", value: "HSK 1" },
-    { label: "HSK 2 (A2)", value: "HSK 2" },
-    { label: "HSK 3 (B1)", value: "HSK 3" },
-    { label: "HSK 4 (B2)", value: "HSK 4" },
-    { label: "HSK 5 (C1)", value: "HSK 5" },
-    { label: "HSK 6 (C2)", value: "HSK 6" },
+    { label: "HSK 1 (A1)", value: 1 },
+    { label: "HSK 2 (A2)", value: 2 },
+    { label: "HSK 3 (B1)", value: 3 },
+    { label: "HSK 4 (B2)", value: 4 },
+    { label: "HSK 5 (C1)", value: 5 },
+    { label: "HSK 6 (C2)", value: 6 },
   ],
 }
 
@@ -49,70 +55,31 @@ function getTopicEmoji(topic, index = 0) {
   return list[index % list.length]
 }
 
-function parseHskNumber(levelStr) {
-  if (typeof levelStr === "number") return levelStr
-  if (typeof levelStr === "string") {
-    const match = levelStr.match(/HSK\s*(\d)/i)
-    if (match) return parseInt(match[1], 10)
-  }
-  return 3
-}
-
-const SelectionPage = ({ onStartSpeaking }) => {
-  // State management
-  const [rawTopics, setRawTopics] = useState([])
-  const [quotaData, setQuotaData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false)
+const SelectionPage = ({ onStartSpeaking, onQuotaExceeded }) => {
+  const navigate = useNavigate()
+  const { data: rawTopics = [], isLoading: isLoadingTopics, isError: topicsError, refetch: refetchTopics } = useGetSpeakingTopicsQuery()
+  const { data: quotaData } = useGetSpeakingQuotaQuery()
+  const { data: levelProfile } = useGetSpeakingLevelQuery()
+  const { data: activeSession } = useGetActiveSpeakingSessionQuery(undefined, { refetchOnMountOrArgChange: true })
+  const [endSession, { isLoading: isEndingSession }] = useEndSpeakingSessionMutation()
+  const [manualHskNumber, setManualHskNumber] = useState(null)
   const [selectedTopicId, setSelectedTopicId] = useState("")
   const [selectedFilter, setSelectedFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [currentLevel, setCurrentLevel] = useState(USER_LEVEL.current)
+  const profileLevel = Number(levelProfile?.current_hsk_level)
+  const currentHskNumber = manualHskNumber ?? (profileLevel >= 1 && profileLevel <= 6 ? profileLevel : 3)
 
-  const currentHskNumber = useMemo(() => parseHskNumber(currentLevel), [currentLevel])
-
-  // Fetch topics and quota from AI API
-  const loadData = useCallback(async () => {
-    setIsLoading(true)
-    setErrorMessage(null)
+  const hasActiveSession = activeSession && !["completed", "abandoned"].includes(activeSession.status)
+  const closeActiveSession = async () => {
+    if (isEndingSession) return
     try {
-      const [topicsRes, quotaRes] = await Promise.allSettled([
-        fetchSpeakingTopics(),
-        fetchSpeakingQuota(),
-      ])
-
-      if (topicsRes.status === "fulfilled" && Array.isArray(topicsRes.value)) {
-        setRawTopics(topicsRes.value)
-      } else {
-        const errorReason =
-          topicsRes.reason?.message || "Không thể tải danh sách chủ đề từ máy chủ."
-        console.warn("[SelectionPage] Failed to fetch live topics:", errorReason)
-        setErrorMessage(errorReason)
-        toast.error(errorReason)
-        setRawTopics([])
-      }
-
-      if (quotaRes.status === "fulfilled" && quotaRes.value) {
-        setQuotaData(quotaRes.value)
-      } else if (quotaRes.status === "rejected") {
-        console.warn("[SelectionPage] Failed to fetch quota:", quotaRes.reason)
-      }
-    } catch (err) {
-      console.error("[SelectionPage] Error loading speaking data:", err)
-      const msg = err?.message || "Đã xảy ra lỗi khi tải dữ liệu."
-      setErrorMessage(msg)
-      toast.error(msg)
-      setRawTopics([])
-    } finally {
-      setIsLoading(false)
+      await endSession({ sessionId: activeSession.session_id }).unwrap()
+    } catch (error) {
+      toast.error(error?.message || "Không thể đóng phiên cũ. Hãy thử lại.")
     }
-  }, [])
+  }
 
-
-  useEffect(() => {
-    loadData()
-  }, [loadData])
+  const currentLevel = USER_LEVEL.options.find((option) => option.value === currentHskNumber)?.label || USER_LEVEL.current
 
   // Map raw API topics to UI card models
   const allTopics = useMemo(() => {
@@ -143,21 +110,9 @@ const SelectionPage = ({ onStartSpeaking }) => {
     })
   }, [rawTopics, currentHskNumber])
 
-  // Ensure an initial topic is selected once loaded
-  useEffect(() => {
-    if (allTopics.length > 0) {
-      const currentValid = allTopics.find((t) => t.id === selectedTopicId && !t.isLocked)
-      if (!currentValid) {
-        const firstAvailable = allTopics.find((t) => !t.isLocked) || allTopics[0]
-        if (firstAvailable) {
-          setSelectedTopicId(firstAvailable.id)
-        }
-      }
-    }
-  }, [allTopics, selectedTopicId])
-
   const selectedTopic = useMemo(() => {
-    return allTopics.find((t) => t.id === selectedTopicId) || null
+    const selected = allTopics.find((t) => t.id === selectedTopicId && !t.isLocked)
+    return selected || allTopics.find((t) => !t.isLocked) || allTopics[0] || null
   }, [allTopics, selectedTopicId])
 
   // Quota banner data calculation
@@ -178,15 +133,9 @@ const SelectionPage = ({ onStartSpeaking }) => {
   }, [quotaData])
 
   // ponytail: Tạm thời comment logic kiểm tra giới hạn quota để tiện test tính năng
-  const isQuotaExceeded = false
-  /*
   const isQuotaExceeded = useMemo(() => {
-    if (!quotaData) return false
-    if (quotaData.is_premium) return false
-    if (quotaData.can_start_session === false) return true
-    return (quotaData.used_sessions ?? 0) >= (quotaData.max_sessions ?? 2)
+    return quotaData?.can_start_session === false
   }, [quotaData])
-  */
 
   // Dynamic filter tabs with real topic counts
   const filterTabs = useMemo(() => {
@@ -198,11 +147,11 @@ const SelectionPage = ({ onStartSpeaking }) => {
     return [
       { id: "all", label: "Tất cả", count: allTopics.length },
       { id: "hsk1-2", label: "HSK 1-2", count: hsk1_2 },
-      { id: "hsk3", label: `HSK 3${currentHskNumber === 3 ? " (Khuyên dùng ★)" : ""}`, count: hsk3, isRecommended: currentHskNumber === 3 },
+      { id: "hsk3", label: "HSK 3", count: hsk3 },
       { id: "hsk4-5", label: "HSK 4-5", count: hsk4_5 },
       { id: "hsk6", label: "HSK 6", count: hsk6 },
     ]
-  }, [allTopics, currentHskNumber])
+  }, [allTopics])
 
   // Handle AI Random Topic Pick
   const handleRandomPick = () => {
@@ -312,16 +261,26 @@ const SelectionPage = ({ onStartSpeaking }) => {
   }, [allTopics, searchQuery, selectedFilter, currentHskNumber])
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pb-12">
+    <div className="w-full max-w-7xl mx-auto space-y-6 pb-52 sm:pb-36">
       {/* 1. Header with title & level selector */}
       <SpeakingRoomHeader
         currentLevel={currentLevel}
-        onSelectLevel={setCurrentLevel}
+        onSelectLevel={setManualHskNumber}
         levelOptions={USER_LEVEL.options}
       />
 
       {/* 2. Quota & Usage Banner */}
       <SpeakingRoomQuotaBanner quota={quota} />
+
+      {hasActiveSession && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p>Bạn còn một phiên luyện nói chưa kết thúc. Hãy tiếp tục hoặc đóng phiên trước khi bắt đầu buổi mới.</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button type="button" disabled={isEndingSession} className="font-bold underline" onClick={() => navigate(`sessions/${activeSession.session_id}`)}>Tiếp tục phiên</button>
+            <button type="button" disabled={isEndingSession} className="font-bold underline disabled:opacity-50" onClick={closeActiveSession}>{isEndingSession ? "Đang đóng phiên..." : "Đóng phiên cũ"}</button>
+          </div>
+        </div>
+      )}
 
       {/* 3. Search & Filter Controls */}
       <div className="space-y-2.5">
@@ -338,7 +297,7 @@ const SelectionPage = ({ onStartSpeaking }) => {
       </div>
 
       {/* 4. Topic List / Sections */}
-      {isLoading ? (
+      {isLoadingTopics ? (
         <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 space-y-3 shadow-2xs">
           <div className="w-8 h-8 border-4 border-rose-200 border-t-[#990011] rounded-full animate-spin mx-auto" />
           <p className="text-sm font-semibold text-slate-700">Đang tải danh sách chủ đề đàm thoại...</p>
@@ -348,9 +307,9 @@ const SelectionPage = ({ onStartSpeaking }) => {
           sections={filteredSections}
           selectedTopicId={selectedTopicId}
           onSelectTopic={setSelectedTopicId}
-          errorMessage={errorMessage}
+          errorMessage={topicsError ? "Không thể tải danh sách chủ đề." : null}
           hasTopics={allTopics.length > 0}
-          onRetry={loadData}
+          onRetry={refetchTopics}
         />
       )}
 
@@ -359,22 +318,19 @@ const SelectionPage = ({ onStartSpeaking }) => {
         selectedTopic={selectedTopic}
         isQuotaExceeded={isQuotaExceeded}
         onStartSpeaking={() => {
-          if (isQuotaExceeded) {
-            setIsQuotaModalOpen(true)
+          if (hasActiveSession) {
+            toast.error("Hãy tiếp tục hoặc đóng phiên cũ trước khi bắt đầu buổi mới.")
             return
           }
-          onStartSpeaking?.(selectedTopic, currentLevel)
+          if (isQuotaExceeded) {
+            onQuotaExceeded?.()
+            return
+          }
+          onStartSpeaking?.(selectedTopic, currentHskNumber)
         }}
       />
 
       {/* 6. Quota Exceeded Modal */}
-      <QuotaExceededModal
-        isOpen={isQuotaModalOpen}
-        onClose={() => setIsQuotaModalOpen(false)}
-        onUpgrade={() => {
-          window.location.href = "/pricing"
-        }}
-      />
     </div>
   )
 }

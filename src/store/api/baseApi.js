@@ -402,7 +402,10 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("/ai/") ||
         lowerUrl.startsWith("ai/") ||
         lowerUrl.startsWith("/v1/ai/") ||
-        lowerUrl.startsWith("v1/ai/"))
+        lowerUrl.startsWith("v1/ai/") ||
+        lowerUrl.startsWith("/speaking/") ||
+        lowerUrl.startsWith("speaking/") ||
+        lowerUrl.startsWith("speaking?"))
 
 
     const isCoursesRoute =

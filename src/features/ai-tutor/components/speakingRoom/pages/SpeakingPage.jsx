@@ -18,13 +18,11 @@ const SpeakingPage = ({
   topicTitle = "Luyện nói tiếng Trung",
   onEndSession,
   onBackToSelection,
-  onSwitchMode,
+  onConnectionLost,
 }) => {
-  const [activeTab, setActiveTab] = useState("casual") // 'casual' | 'placement'
   const [isMicActive, setIsMicActive] = useState(false) // Mặc định tắt mic
   const [isRequestingMic, setIsRequestingMic] = useState(false)
   const [micError, setMicError] = useState(null)
-  const [isFreeTalk, setIsFreeTalk] = useState(true)
   const [volume, setVolume] = useState(100)
   const [isReplayingAi, setIsReplayingAi] = useState(false)
   const [isWrappingUp, setIsWrappingUp] = useState(false)
@@ -55,12 +53,16 @@ const SpeakingPage = ({
   const timerRef = useRef(null)
 
   const onEndSessionRef = useRef(onEndSession)
+  const onConnectionLostRef = useRef(onConnectionLost)
   const didFinishSessionRef = useRef(false)
   const wasConnectedRef = useRef(false)
   const isWrappingUpRef = useRef(false)
   useEffect(() => {
     onEndSessionRef.current = onEndSession
   }, [onEndSession])
+  useEffect(() => {
+    onConnectionLostRef.current = onConnectionLost
+  }, [onConnectionLost])
 
   const finishSessionOnce = useCallback(() => {
     if (didFinishSessionRef.current) return
@@ -115,7 +117,8 @@ const SpeakingPage = ({
     room.on(RoomEvent.Disconnected, () => {
       if (!isCancelled) {
         setConnectionStatus("disconnected")
-        if (wasConnectedRef.current || isWrappingUpRef.current) finishSessionOnce()
+        if (wasConnectedRef.current && !isWrappingUpRef.current) onConnectionLostRef.current?.()
+        if (isWrappingUpRef.current) finishSessionOnce()
       }
     })
 
@@ -307,6 +310,7 @@ const SpeakingPage = ({
   if (connectionStatus === "connecting") {
     return (
       <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <audio ref={audioRef} autoPlay className="hidden" />
         <div className="bg-white rounded-3xl p-8 sm:p-10 text-center shadow-2xl space-y-6 max-w-md w-full border border-slate-100">
           {/* Animated Spinner with Avatar */}
           <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
@@ -321,14 +325,14 @@ const SpeakingPage = ({
               Đang kết nối phòng luyện nói...
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto">
-              Đang thiết lập kết nối LiveKit SFU và đồng bộ AI Tutor cho chủ đề:{" "}
+              Đang kết nối với trợ lý cho chủ đề:{" "}
               <span className="font-semibold text-[#990011]">{topicTitle}</span>
             </p>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 py-2.5 px-4 rounded-xl border border-slate-200/80 max-w-xs mx-auto">
             <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            <span>Đang chờ hoàn tất kết nối LiveKit...</span>
+            <span>Vui lòng chờ trong giây lát...</span>
           </div>
 
           <div className="pt-2">
@@ -352,6 +356,7 @@ const SpeakingPage = ({
   if (connectionStatus === "failed") {
     return (
       <div className="w-full max-w-2xl mx-auto py-16 px-4">
+        <audio ref={audioRef} autoPlay className="hidden" />
         <div className="bg-white border border-rose-200 rounded-3xl p-8 sm:p-10 text-center shadow-lg space-y-6">
           <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-2xs">
             ⚠️
@@ -362,7 +367,7 @@ const SpeakingPage = ({
               Không thể kết nối vào phòng luyện nói
             </h2>
             <p className="text-sm text-slate-600 max-w-md mx-auto">
-              {connectError || "Đã xảy ra lỗi khi kết nối LiveKit với AI Tutor. Vui lòng kiểm tra lại mạng và thử lại."}
+              {connectError || "Không thể kết nối với trợ lý. Vui lòng kiểm tra mạng và thử lại."}
             </p>
           </div>
 
@@ -390,46 +395,29 @@ const SpeakingPage = ({
     )
   }
 
+  if (connectionStatus === "disconnected") {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-20 text-center">
+        <audio ref={audioRef} autoPlay className="hidden" />
+        <div className="rounded-3xl border border-amber-200 bg-white p-8 shadow-lg">
+          <h2 className="text-xl font-bold text-slate-900">Đang khôi phục kết nối</h2>
+          <p className="mt-2 text-sm text-slate-600">Phiên sẽ tự kết thúc nếu kết nối không được khôi phục trong 15 giây.</p>
+          <button type="button" className="mt-5 rounded-xl bg-[#990011] px-5 py-3 text-sm font-bold text-white" onClick={() => onConnectionLost?.()}>
+            Thử kết nối lại
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // ── Render Connected Speaking Room ────────────────────────────────────────
   return (
     <div className="w-full max-w-5xl mx-auto py-4 sm:py-6 px-4 sm:px-6 space-y-5">
       {/* Remote Audio Element for LiveKit Audio */}
       <audio ref={audioRef} autoPlay />
 
-      {/* Top Header Mode Bar & Round Status */}
+      {/* Top Header & Round Status */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        {/* Left Mode Tabs */}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab("casual")
-              onSwitchMode?.("casual")
-            }}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              activeTab === "casual"
-                ? "bg-white border border-rose-200 text-[#990011] shadow-2xs"
-                : "bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-white"
-            }`}
-          >
-            ☕ Giao tiếp (Casual Chat)
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab("placement")
-              onSwitchMode?.("placement")
-            }}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
-              activeTab === "placement"
-                ? "bg-white border border-rose-200 text-[#990011] font-bold shadow-2xs"
-                : "bg-slate-50 border border-slate-200/80 text-slate-600 hover:bg-white"
-            }`}
-          >
-            📄 Bài test đầu vào (Placement Test)
-          </button>
-        </div>
-
         {/* Right Topic & Round Pill */}
         <div className="flex items-center gap-3">
           <span
@@ -439,7 +427,7 @@ const SpeakingPage = ({
                 : "bg-amber-100 text-amber-800"
             }`}
           >
-            ● {connectionStatus === "connected" ? "LiveKit đã kết nối" : "Đang kết nối..."}
+            ● {connectionStatus === "connected" ? "Đã vào phòng luyện nói" : "Đang kết nối với trợ lý..."}
           </span>
           <div className="bg-rose-50/50 border border-rose-100 text-[#990011] text-xs sm:text-sm font-medium rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-2xs">
             <span>🍎 {topicTitle} · Lượt {currentRound}/{totalRounds}</span>
@@ -652,20 +640,8 @@ const SpeakingPage = ({
             </span>
           </div>
 
-          {/* Right Mode & Volume Controls */}
+          {/* Volume Control */}
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsFreeTalk(!isFreeTalk)}
-              className={`text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs ${
-                isFreeTalk
-                  ? "bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100/70"
-                  : "bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200"
-              }`}
-            >
-              <span>{isFreeTalk ? "🟢" : "⚪"}</span>
-              <span>Nói tự do: {isFreeTalk ? "BẬT" : "TẮT"}</span>
-            </button>
             <button
               type="button"
               onClick={() => setVolume(volume === 100 ? 50 : volume === 50 ? 0 : 100)}

@@ -31,6 +31,15 @@ const AiLearningPathPage = lazy(
 const AiSpeakingRoomPage = lazy(
   () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
 );
+const SpeakingSessionPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingSessionPage"),
+);
+const SpeakingResultPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingResultPage"),
+);
+const SpeakingRoomFlowLayout = lazy(
+  () => import("@/features/ai-tutor/layouts/SpeakingRoomFlowLayout"),
+);
 const AiVocabularyNotebookPage = lazy(
   () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
 );
@@ -502,11 +511,12 @@ const routesConfig = [
                   },
                   {
                     path: "speaking-room",
-                    element: (
-                      <LazyRoute>
-                        <AiSpeakingRoomPage />
-                      </LazyRoute>
-                    ),
+                    element: <LazyRoute><SpeakingRoomFlowLayout /></LazyRoute>,
+                    children: [
+                      { index: true, element: <LazyRoute><AiSpeakingRoomPage /></LazyRoute> },
+                      { path: "sessions/:sessionId", element: <LazyRoute><SpeakingSessionPage /></LazyRoute> },
+                      { path: "sessions/:sessionId/result", element: <LazyRoute><SpeakingResultPage /></LazyRoute> },
+                    ],
                   },
                   {
                     path: "vocabulary-notebook",

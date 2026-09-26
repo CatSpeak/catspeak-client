@@ -1,10 +1,12 @@
 import React from "react"
+import { useSidebar } from "@/shared/context/SidebarContext"
 
 const SpeakingRoomStickyBottomBar = ({
   selectedTopic,
   onStartSpeaking,
   isQuotaExceeded = false,
 }) => {
+  const { isDesktopExpanded } = useSidebar()
   if (!selectedTopic) return null
 
   // Extract Chinese title
@@ -13,8 +15,8 @@ const SpeakingRoomStickyBottomBar = ({
     : ""
 
   return (
-    <div className="sticky bottom-4 z-20 mt-8">
-      <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl p-4 sm:p-4.5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 sm:px-6 sm:pt-4 lg:transition-[left] lg:duration-200 ${isDesktopExpanded ? "lg:left-[352px]" : "lg:left-[72px]"}`}>
+      <div className="pointer-events-auto mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl sm:flex-row sm:gap-4 sm:p-4">
         {/* Left summary */}
         <div className="flex flex-col items-center sm:items-start text-center sm:text-left space-y-0.5">
           <div className="flex items-center gap-2 text-sm sm:text-base font-bold text-slate-900">
