@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react"
+import { toast } from "@/shared/utils/toastBridge"
 import {
   SpeakingRoomHeader,
   SpeakingRoomQuotaBanner,
@@ -6,8 +7,10 @@ import {
   SpeakingRoomFilterTabs,
   TopicList,
   SpeakingRoomStickyBottomBar,
+  QuotaExceededModal,
 } from "../index"
 import { fetchSpeakingTopics, fetchSpeakingQuota } from "../../../api/speakingClient"
+
 
 // --- Default Fallbacks & Configurations ---
 const DEFAULT_QUOTA = {
@@ -61,6 +64,7 @@ const SelectionPage = ({ onStartSpeaking }) => {
   const [quotaData, setQuotaData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [isQuotaModalOpen, setIsQuotaModalOpen] = useState(false)
   const [selectedTopicId, setSelectedTopicId] = useState("")
   const [selectedFilter, setSelectedFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -81,23 +85,30 @@ const SelectionPage = ({ onStartSpeaking }) => {
       if (topicsRes.status === "fulfilled" && Array.isArray(topicsRes.value)) {
         setRawTopics(topicsRes.value)
       } else {
-        const errorReason = topicsRes.reason?.message || "Không thể tải danh sách chủ đề từ máy chủ."
+        const errorReason =
+          topicsRes.reason?.message || "Không thể tải danh sách chủ đề từ máy chủ."
         console.warn("[SelectionPage] Failed to fetch live topics:", errorReason)
         setErrorMessage(errorReason)
+        toast.error(errorReason)
         setRawTopics([])
       }
 
       if (quotaRes.status === "fulfilled" && quotaRes.value) {
         setQuotaData(quotaRes.value)
+      } else if (quotaRes.status === "rejected") {
+        console.warn("[SelectionPage] Failed to fetch quota:", quotaRes.reason)
       }
     } catch (err) {
       console.error("[SelectionPage] Error loading speaking data:", err)
-      setErrorMessage(err?.message || "Đã xảy ra lỗi khi tải dữ liệu.")
+      const msg = err?.message || "Đã xảy ra lỗi khi tải dữ liệu."
+      setErrorMessage(msg)
+      toast.error(msg)
       setRawTopics([])
     } finally {
       setIsLoading(false)
     }
   }, [])
+
 
   useEffect(() => {
     loadData()
@@ -165,6 +176,17 @@ const SelectionPage = ({ onStartSpeaking }) => {
       upgradeUrl: "/pricing",
     }
   }, [quotaData])
+
+  // ponytail: Tạm thời comment logic kiểm tra giới hạn quota để tiện test tính năng
+  const isQuotaExceeded = false
+  /*
+  const isQuotaExceeded = useMemo(() => {
+    if (!quotaData) return false
+    if (quotaData.is_premium) return false
+    if (quotaData.can_start_session === false) return true
+    return (quotaData.used_sessions ?? 0) >= (quotaData.max_sessions ?? 2)
+  }, [quotaData])
+  */
 
   // Dynamic filter tabs with real topic counts
   const filterTabs = useMemo(() => {
@@ -335,8 +357,22 @@ const SelectionPage = ({ onStartSpeaking }) => {
       {/* 5. Sticky Floating Bottom Action Bar */}
       <SpeakingRoomStickyBottomBar
         selectedTopic={selectedTopic}
+        isQuotaExceeded={isQuotaExceeded}
         onStartSpeaking={() => {
+          if (isQuotaExceeded) {
+            setIsQuotaModalOpen(true)
+            return
+          }
           onStartSpeaking?.(selectedTopic, currentLevel)
+        }}
+      />
+
+      {/* 6. Quota Exceeded Modal */}
+      <QuotaExceededModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setIsQuotaModalOpen(false)}
+        onUpgrade={() => {
+          window.location.href = "/pricing"
         }}
       />
     </div>

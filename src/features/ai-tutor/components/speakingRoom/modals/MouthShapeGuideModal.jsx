@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { Play, Lightbulb, X } from "lucide-react"
 import { createPortal } from "react-dom"
-import { motion, AnimatePresence } from "framer-motion"
 
 const DEFAULT_GUIDE_DATA = {
   toneTitle: "HƯỚNG DẪN KHẨU HÌNH: THANH 3 (三声)",
@@ -24,29 +23,21 @@ const MouthShapeGuideModal = ({
   const [isPlaying, setIsPlaying] = useState(false)
   const guide = { ...DEFAULT_GUIDE_DATA, ...data }
 
-  if (typeof document === "undefined") return null
+  if (!isOpen || typeof document === "undefined") return null
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50"
-          />
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+      />
 
-          {/* Dialog Container */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="relative w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto"
-          >
+      {/* Dialog Container */}
+      <div
+        className="relative w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
+      >
+
             {/* Header */}
             <div className="flex items-center justify-between gap-4 mb-5">
               <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 uppercase">
@@ -134,12 +125,11 @@ const MouthShapeGuideModal = ({
                 </button>
               </div>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
+          </div>
+        </div>,
     document.body
   )
 }
+
 
 export default MouthShapeGuideModal

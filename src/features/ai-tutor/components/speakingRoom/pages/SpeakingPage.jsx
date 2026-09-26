@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useCallback } from "react"
 import { Room, RoomEvent, Track } from "livekit-client"
+import { toast } from "@/shared/utils/toastBridge"
+
+
 
 const TOPIC_SUBTITLE = "speaking-subtitle"
 const TOPIC_ASSIST = "speaking-assist"
@@ -12,43 +15,84 @@ const TOPIC_CONTROL = "speaking-control"
  */
 const SpeakingPage = ({
   sessionData,
-  topicTitle = "Mua hoa quả ở chợ",
+  topicTitle = "Luyện nói tiếng Trung",
   onEndSession,
+  onBackToSelection,
   onSwitchMode,
 }) => {
   const [activeTab, setActiveTab] = useState("casual") // 'casual' | 'placement'
-  const [isMicActive, setIsMicActive] = useState(true)
+  const [isMicActive, setIsMicActive] = useState(false) // Mặc định tắt mic
+  const [isRequestingMic, setIsRequestingMic] = useState(false)
+  const [micError, setMicError] = useState(null)
   const [isFreeTalk, setIsFreeTalk] = useState(true)
   const [volume, setVolume] = useState(100)
   const [isReplayingAi, setIsReplayingAi] = useState(false)
-  
+  const [isWrappingUp, setIsWrappingUp] = useState(false)
+
   // Realtime LiveKit Agent States
-  const [connectionStatus, setConnectionStatus] = useState(() => sessionData?.token ? "connecting" : "connected")
+  const [connectionStatus, setConnectionStatus] = useState("connecting") // 'connecting' | 'connected' | 'failed' | 'disconnected'
+  const [connectError, setConnectError] = useState(null)
   const [currentRound, setCurrentRound] = useState(1)
-  const [totalRounds, setTotalRounds] = useState(sessionData?.hskLevel > 4 ? 5 : 3)
-  const [aiText, setAiText] = useState("你好！准备好了吗？")
-  const [aiPinyin, setAiPinyin] = useState("Nǐ hǎo! Zhǔnbèi hǎole ma?")
-  const [aiMeaning, setAiMeaning] = useState("Chào bạn! Bạn đã sẵn sàng chưa?")
+  const [totalRounds, setTotalRounds] = useState(
+    () => sessionData?.topic?.script_turns || sessionData?.topic?.scriptTurns || 3
+  )
+  const [aiText, setAiText] = useState(
+    () => sessionData?.topic?.openingZh || sessionData?.topic?.opening_zh || "你好！准备好了吗？"
+  )
+  const [aiPinyin, setAiPinyin] = useState("")
+  const [aiMeaning, setAiMeaning] = useState(
+    () => (sessionData?.topic?.title_vi ? `Chủ đề: ${sessionData.topic.title_vi}` : "Chào bạn! Bạn đã sẵn sàng chưa?")
+  )
   const [hints, setHints] = useState([])
-  const [learnerText] = useState("Đang lắng nghe bạn nói...")
+  const [learnerText, setLearnerText] = useState("Micro đang tắt. Nhấn nút Micro bên dưới để bắt đầu nói...")
   const [isAiSpeaking, setIsAiSpeaking] = useState(false)
   const [warnMessage, setWarnMessage] = useState(null)
   const [sessionSeconds, setSessionSeconds] = useState(0)
+  const [retryCount, setRetryCount] = useState(0)
 
   const roomRef = useRef(null)
   const audioRef = useRef(null)
   const timerRef = useRef(null)
 
+  const onEndSessionRef = useRef(onEndSession)
+  const didFinishSessionRef = useRef(false)
+  const wasConnectedRef = useRef(false)
+  const isWrappingUpRef = useRef(false)
+  useEffect(() => {
+    onEndSessionRef.current = onEndSession
+  }, [onEndSession])
+
+  const finishSessionOnce = useCallback(() => {
+    if (didFinishSessionRef.current) return
+    didFinishSessionRef.current = true
+    onEndSessionRef.current?.()
+  }, [])
+
+  const token = sessionData?.livekit?.token || sessionData?.token
+  const serverUrl =
+    sessionData?.livekit?.url ||
+    sessionData?.serverUrl ||
+    import.meta.env.VITE_LIVEKIT_URL ||
+    "ws://localhost:7880"
+
   // ── LiveKit Room Connection & Event Listeners ─────────────────────────────
   useEffect(() => {
-    const token = sessionData?.token
-    const serverUrl = sessionData?.serverUrl || "ws://localhost:7880"
-
+    didFinishSessionRef.current = false
+    wasConnectedRef.current = false
+    isWrappingUpRef.current = false
     if (!token) {
+      setConnectionStatus("failed")
+      setConnectError("Không tìm thấy mã LiveKit token hợp lệ để kết nối vào phòng.")
       return
     }
 
-    let isMounted = true
+    let isCancelled = false
+
+    // Disconnect previous room if existing
+    if (roomRef.current && roomRef.current.state !== "disconnected") {
+      roomRef.current.disconnect()
+    }
+
     const room = new Room({
       adaptiveStream: true,
       dynacast: true,
@@ -60,7 +104,30 @@ const SpeakingPage = ({
     })
     roomRef.current = room
 
-    // 1. Data Packet Listener
+    // 1. Connection Lifecycle Listeners
+    room.on(RoomEvent.Connected, () => {
+      if (!isCancelled) {
+        wasConnectedRef.current = true
+        setConnectionStatus("connected")
+      }
+    })
+
+    room.on(RoomEvent.Disconnected, () => {
+      if (!isCancelled) {
+        setConnectionStatus("disconnected")
+        if (wasConnectedRef.current || isWrappingUpRef.current) finishSessionOnce()
+      }
+    })
+
+    room.on(RoomEvent.Reconnecting, () => {
+      if (!isCancelled) setConnectionStatus("connecting")
+    })
+
+    room.on(RoomEvent.Reconnected, () => {
+      if (!isCancelled) setConnectionStatus("connected")
+    })
+
+    // 2. Data Packet Listener from AI Agent
     room.on(RoomEvent.DataReceived, (payload, _participant, _kind, topic) => {
       try {
         const raw = new TextDecoder().decode(payload)
@@ -73,9 +140,9 @@ const SpeakingPage = ({
             setTimeout(() => setIsAiSpeaking(false), 3500)
           }
         } else if (topic === TOPIC_ASSIST) {
-          if (data.pinyin) setAiPinyin(data.pinyin)
-          if (data.meaning_vi) setAiMeaning(data.meaning_vi)
-          if (Array.isArray(data.hints)) setHints(data.hints)
+          setAiPinyin(data.pinyin || "")
+          setAiMeaning(data.meaning_vi || "")
+          setHints(Array.isArray(data.hints) ? data.hints : [])
         } else if (topic === TOPIC_STATE) {
           if (data.turn_index) setCurrentRound(data.turn_index)
           if (data.script_turns) setTotalRounds(data.script_turns)
@@ -87,52 +154,67 @@ const SpeakingPage = ({
             setWarnMessage(null)
           }
 
-          if (data.phase === "ended") {
-            setTimeout(() => {
-              onEndSession?.()
-            }, 2000)
+          if (data.phase === "wrapping_up") {
+            isWrappingUpRef.current = true
+            setIsWrappingUp(true)
           }
+          if (data.phase === "ended") finishSessionOnce()
         }
       } catch (err) {
         console.warn("[SpeakingPage] Error parsing data packet:", err)
       }
     })
 
-    // 2. Remote Audio Track Subscription
+    // 3. Remote Audio Track Subscription (AI Tutor Voice)
     room.on(RoomEvent.TrackSubscribed, (track) => {
       if (track.kind === Track.Kind.Audio && audioRef.current) {
         track.attach(audioRef.current)
       }
     })
 
-    // 3. Connect & Enable Mic
-    async function startRoom() {
-      try {
-        await room.connect(serverUrl, token)
-        if (!isMounted) return
-        setConnectionStatus("connected")
-        await room.localParticipant.setMicrophoneEnabled(true)
-      } catch (err) {
+    // 4. Perform Room Connection
+    setConnectionStatus("connecting")
+    setConnectError(null)
+
+    room.connect(serverUrl, token).catch((err) => {
+      if (!isCancelled) {
         console.error("[SpeakingPage] LiveKit connect error:", err)
-        if (isMounted) setConnectionStatus("connected") // fallback for standalone testing
+        const msg = err?.message || "Không thể kết nối đến máy chủ đàm thoại LiveKit."
+        setConnectionStatus("failed")
+        setConnectError(msg)
+        toast.error(msg)
       }
-    }
-
-    startRoom()
-
-    // 4. Session Timer
-    timerRef.current = setInterval(() => {
-      setSessionSeconds((prev) => prev + 1)
-    }, 1000)
+    })
 
     return () => {
-      isMounted = false
-      clearInterval(timerRef.current)
-      if (room.state !== "disconnected") {
+      isCancelled = true
+      if (room && room.state !== "disconnected") {
         room.disconnect()
       }
     }
-  }, [sessionData, onEndSession])
+  }, [token, serverUrl, retryCount, finishSessionOnce])
+
+  // Timer effect when connected
+  useEffect(() => {
+    if (connectionStatus === "connected") {
+      timerRef.current = setInterval(() => {
+        setSessionSeconds((prev) => prev + 1)
+      }, 1000)
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [connectionStatus])
+
+  // Volume control effect
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100
+    }
+  }, [volume])
 
   // ── Send Control Packet Helper ───────────────────────────────────────────
   const sendControlPacket = async (action, hintId = null) => {
@@ -149,6 +231,7 @@ const SpeakingPage = ({
 
   // ── Actions ──────────────────────────────────────────────────────────────
   const handleReplayAi = () => {
+    if (isWrappingUp) return
     setIsReplayingAi(true)
     sendControlPacket("replay_question")
     setTimeout(() => {
@@ -157,20 +240,62 @@ const SpeakingPage = ({
   }
 
   const handleToggleMic = async () => {
-    const nextState = !isMicActive
-    setIsMicActive(nextState)
-    if (roomRef.current?.localParticipant) {
-      await roomRef.current.localParticipant.setMicrophoneEnabled(nextState)
+    const room = roomRef.current
+    if (!room || connectionStatus !== "connected" || isWrappingUp) return
+
+    if (!isMicActive) {
+      // Yêu cầu và kiểm tra quyền truy cập microphone
+      try {
+        setIsRequestingMic(true)
+        setMicError(null)
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          const notSupportedMsg = "Trình duyệt không hỗ trợ truy cập Micro."
+          setMicError(notSupportedMsg)
+          toast.error(notSupportedMsg)
+          setIsRequestingMic(false)
+          return
+        }
+
+        // Xin quyền microphone từ người dùng
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach((track) => track.stop())
+
+        // Bật mic trên LiveKit participant
+        await room.localParticipant.setMicrophoneEnabled(true)
+        setIsMicActive(true)
+        setLearnerText("Micro đã bật · Đang lắng nghe giọng nói của bạn...")
+      } catch (err) {
+        console.warn("[SpeakingPage] Mic permission denied or error:", err)
+        const deniedMsg =
+          "Chưa cấp quyền Micro. Vui lòng cho phép trình duyệt truy cập mic để luyện nói."
+        setMicError(deniedMsg)
+        toast.error(deniedMsg)
+        setIsMicActive(false)
+      } finally {
+        setIsRequestingMic(false)
+      }
+    } else {
+      // Tắt mic
+      try {
+        await room.localParticipant.setMicrophoneEnabled(false)
+        setIsMicActive(false)
+        setLearnerText("Micro đang tắt · Nhấn nút Micro để bật lại.")
+      } catch (err) {
+        console.warn("[SpeakingPage] Error disabling mic:", err)
+      }
     }
   }
 
+
   const handleFinishEarly = () => {
+    if (isWrappingUp) return
+    isWrappingUpRef.current = true
+    setIsWrappingUp(true)
     sendControlPacket("finish_early")
-    setTimeout(() => {
-      if (roomRef.current) roomRef.current.disconnect()
-      onEndSession?.()
-    }, 1200)
   }
+
+
 
   const formattedTime = () => {
     const mins = String(Math.floor(sessionSeconds / 60)).padStart(2, "0")
@@ -178,6 +303,94 @@ const SpeakingPage = ({
     return `${mins}:${secs}`
   }
 
+  // ── Render Connecting State ───────────────────────────────────────────────
+  if (connectionStatus === "connecting") {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="bg-white rounded-3xl p-8 sm:p-10 text-center shadow-2xl space-y-6 max-w-md w-full border border-slate-100">
+          {/* Animated Spinner with Avatar */}
+          <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border-4 border-rose-200 animate-ping opacity-60" />
+            <div className="w-16 h-16 rounded-full border-4 border-rose-200 border-t-[#990011] animate-spin flex items-center justify-center">
+              <span className="text-2xl">🐱</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900">
+              Đang kết nối phòng luyện nói...
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto">
+              Đang thiết lập kết nối LiveKit SFU và đồng bộ AI Tutor cho chủ đề:{" "}
+              <span className="font-semibold text-[#990011]">{topicTitle}</span>
+            </p>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 py-2.5 px-4 rounded-xl border border-slate-200/80 max-w-xs mx-auto">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span>Đang chờ hoàn tất kết nối LiveKit...</span>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (roomRef.current) roomRef.current.disconnect()
+                onBackToSelection?.()
+              }}
+              className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors underline cursor-pointer"
+            >
+              Hủy và quay lại danh sách chủ đề
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Render Connection Error State ─────────────────────────────────────────
+  if (connectionStatus === "failed") {
+    return (
+      <div className="w-full max-w-2xl mx-auto py-16 px-4">
+        <div className="bg-white border border-rose-200 rounded-3xl p-8 sm:p-10 text-center shadow-lg space-y-6">
+          <div className="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-2xs">
+            ⚠️
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-slate-900">
+              Không thể kết nối vào phòng luyện nói
+            </h2>
+            <p className="text-sm text-slate-600 max-w-md mx-auto">
+              {connectError || "Đã xảy ra lỗi khi kết nối LiveKit với AI Tutor. Vui lòng kiểm tra lại mạng và thử lại."}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setRetryCount((k) => k + 1)}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-sm tracking-wide transition-all shadow-md cursor-pointer"
+            >
+              🔄 Thử kết nối lại
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (roomRef.current) roomRef.current.disconnect()
+                onBackToSelection?.()
+              }}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-all cursor-pointer"
+            >
+              Quay lại danh sách chủ đề
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Render Connected Speaking Room ────────────────────────────────────────
   return (
     <div className="w-full max-w-5xl mx-auto py-4 sm:py-6 px-4 sm:px-6 space-y-5">
       {/* Remote Audio Element for LiveKit Audio */}
@@ -219,7 +432,13 @@ const SpeakingPage = ({
 
         {/* Right Topic & Round Pill */}
         <div className="flex items-center gap-3">
-          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${connectionStatus === "connected" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+              connectionStatus === "connected"
+                ? "bg-emerald-100 text-emerald-800"
+                : "bg-amber-100 text-amber-800"
+            }`}
+          >
             ● {connectionStatus === "connected" ? "LiveKit đã kết nối" : "Đang kết nối..."}
           </span>
           <div className="bg-rose-50/50 border border-rose-100 text-[#990011] text-xs sm:text-sm font-medium rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-2xs">
@@ -238,12 +457,30 @@ const SpeakingPage = ({
           <button
             type="button"
             onClick={handleFinishEarly}
+            disabled={isWrappingUp}
             className="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold rounded-xl transition cursor-pointer"
           >
             Kết thúc
           </button>
         </div>
       </div>
+
+      {/* Mic Permission Warning Banner */}
+      {micError && (
+        <div className="p-3.5 bg-rose-50 border border-rose-300 rounded-2xl text-xs sm:text-sm text-rose-900 flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{micError}</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleMic}
+            className="px-3 py-1 bg-rose-200 hover:bg-rose-300 text-rose-900 font-bold rounded-lg text-xs cursor-pointer shrink-0"
+          >
+            Cấp quyền lại
+          </button>
+        </div>
+      )}
 
       {/* Main Speaking Room Card */}
       <div className="w-full bg-white border border-slate-200 rounded-3xl p-5 sm:p-8 space-y-6 shadow-xs">
@@ -253,8 +490,16 @@ const SpeakingPage = ({
           <div className="flex flex-col items-center justify-center select-none">
             {/* 2 Cat Ears */}
             <div className="flex items-center gap-8 mb-1">
-              <div className={`w-7 h-14 sm:w-8 sm:h-16 rounded-full shadow-inner transform -rotate-6 transition-transform ${isAiSpeaking ? "scale-110 bg-amber-500" : "bg-[#c85a5a]"}`} />
-              <div className={`w-7 h-14 sm:w-8 sm:h-16 rounded-full shadow-inner transform rotate-6 transition-transform ${isAiSpeaking ? "scale-110 bg-amber-500" : "bg-[#c85a5a]"}`} />
+              <div
+                className={`w-7 h-14 sm:w-8 sm:h-16 rounded-full shadow-inner transform -rotate-6 transition-transform ${
+                  isAiSpeaking ? "scale-110 bg-amber-500" : "bg-[#c85a5a]"
+                }`}
+              />
+              <div
+                className={`w-7 h-14 sm:w-8 sm:h-16 rounded-full shadow-inner transform rotate-6 transition-transform ${
+                  isAiSpeaking ? "scale-110 bg-amber-500" : "bg-[#c85a5a]"
+                }`}
+              />
             </div>
             {/* Cat Mouth */}
             <span className="text-3xl sm:text-4xl text-[#c85a5a] font-light leading-none tracking-widest">
@@ -276,7 +521,7 @@ const SpeakingPage = ({
           </div>
         </div>
 
-        {/* Warning Banner (Conditional) */}
+        {/* Warning Banner (Conditional from Agent) */}
         {warnMessage && (
           <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-center gap-2">
             <span>⚠️</span>
@@ -296,6 +541,7 @@ const SpeakingPage = ({
               <button
                 type="button"
                 onClick={handleReplayAi}
+                disabled={isWrappingUp || isReplayingAi}
                 className="border border-rose-200 text-[#990011] bg-rose-50/50 hover:bg-rose-100/70 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <span>🔊</span>
@@ -307,12 +553,16 @@ const SpeakingPage = ({
               <p className="text-base sm:text-lg font-bold text-[#990011] leading-snug">
                 “{aiText}”
               </p>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium">
-                {aiPinyin}
-              </p>
-              <p className="text-xs sm:text-sm text-slate-600 italic">
-                {aiMeaning}
-              </p>
+              {aiPinyin && (
+                <p className="text-xs sm:text-sm text-slate-500 font-medium">
+                  {aiPinyin}
+                </p>
+              )}
+              {aiMeaning && (
+                <p className="text-xs sm:text-sm text-slate-600 italic">
+                  {aiMeaning}
+                </p>
+              )}
             </div>
           </div>
 
@@ -323,8 +573,14 @@ const SpeakingPage = ({
                 <span>👤</span>
                 <span>BẠN (HỌC VIÊN)</span>
               </div>
-              <span className="bg-emerald-100/80 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                ✓ Đang kết nối mic
+              <span
+                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1 ${
+                  isMicActive
+                    ? "bg-emerald-100/80 text-emerald-800"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {isMicActive ? "✓ Micro đang bật" : "✕ Micro đang tắt"}
               </span>
             </div>
 
@@ -369,25 +625,30 @@ const SpeakingPage = ({
             <button
               type="button"
               onClick={handleToggleMic}
+              disabled={isRequestingMic || isWrappingUp}
               className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 cursor-pointer ${
                 isMicActive
-                  ? "bg-[#990011] hover:bg-[#85000f] ring-4 ring-rose-100"
-                  : "bg-slate-400 hover:bg-slate-500"
-              }`}
-              title={isMicActive ? "Nhấn để tắt mic" : "Nhấn để bật mic"}
+                  ? "bg-[#990011] hover:bg-[#85000f] ring-4 ring-rose-100 animate-pulse"
+                  : "bg-slate-500 hover:bg-slate-600 ring-2 ring-slate-200"
+              } ${isRequestingMic ? "opacity-75 cursor-wait" : ""}`}
+              title={isMicActive ? "Nhấn để tắt mic" : "Nhấn để bật mic và bắt đầu nói"}
             >
-              <svg
-                className="w-6 h-6 fill-current"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-              </svg>
+              {isRequestingMic ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg
+                  className="w-6 h-6 fill-current"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                </svg>
+              )}
             </button>
             <span className="text-[11px] text-slate-500 text-center mt-1.5 font-normal">
               {isMicActive
-                ? "Nhấn để tắt mic · Tự động nhận diện giọng nói"
-                : "Mic đang tắt · Nhấn để bật lại"}
+                ? "Micro đang bật · Nhấn để tắt"
+                : "Micro đang tắt · Nhấn để bật & cấp quyền"}
             </span>
           </div>
 
