@@ -9,8 +9,8 @@
  *
  * Hai gói của cùng một câu tới không theo thứ tự cố định: turn-assist có thể xong
  * trước khi FE nhận phụ đề (mạng chậm). Gói tới sớm được giữ theo turn_index rồi
- * ghép khi phụ đề tới. Hàm thuần để test; hook useSpeakingAssist chỉ nối nó với
- * LiveKit.
+ * ghép khi phụ đề tới. Hàm thuần để test; SpeakingPage gọi reducer này ngay trong
+ * listener DataReceived của phòng.
  */
 
 export const TOPICS = {

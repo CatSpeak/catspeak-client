@@ -1,57 +1,220 @@
-import React, { useState } from "react"
+import React, { useState, useEffect, useReducer, useRef } from "react"
+import { Room, RoomEvent, Track } from "livekit-client"
+import { assistReducer, initialAssistState } from "../../../utils/speakingAssist"
+
+const TOPIC_SUBTITLE = "speaking-subtitle"
+const TOPIC_ASSIST = "speaking-assist"
+const TOPIC_STATE = "speaking-state"
+const TOPIC_CONTROL = "speaking-control"
 
 /**
  * SpeakingPage component - interactive live AI speaking session room
- * with AI cat tutor avatar, dialogue cards, error correction hints,
- * reflection timer, mic recording controls, and mode switcher.
+ * connected with LiveKit Realtime Speaking Agent.
  *
- * TASK-AI-15: phụ đề, gợi ý và mẹo sửa lỗi lấy từ hook useSpeakingAssist(lkRoom):
- *   aiTurn      {text, pinyin, meaningVi}   câu AI đang nói, pinyin và nghĩa tới sau
- *   learnerText câu học viên vừa nói (nếu agent gửi phụ đề của học viên)
- *   hintMode    proactive | chip | none      BR-SS-009, theo cấp HSK
- *   hints       [{id, text, pinyin, meaning_vi}]
- *   correction  {original, corrected, note_vi} | null
- *   onPlayHint(hintId)  agent đọc câu gợi ý tốc độ chậm (Q8)
- *   onReplayAi()        agent đọc lại câu hỏi
- *   autoOpenHint        HSK 3-4: im lặng 10 giây thì mở chip gợi ý (ss06)
- * Không truyền aiTurn thì trang giữ dữ liệu mẫu của bản giao diện.
+ * Phụ đề, pinyin, nghĩa, gợi ý và mẹo sửa lỗi đi qua assistReducer
+ * (utils/speakingAssist.js): gói speaking-assist tới trước hay sau phụ đề đều
+ * được ghép đúng câu theo turn_index, và câu AI mới thì pinyin của câu cũ bị xóa
+ * chứ không hiện nhầm. Cách hiện gợi ý theo BR-SS-009: HSK 1-2 hiện sẵn, HSK 3-4
+ * thu vào nút "Gợi ý" (tự mở khi im lặng 10 giây), HSK 5-6 không hiện.
  */
+
+// Câu mẫu khi chưa có phụ đề nào (chưa nối phòng hoặc chạy thử không có token).
+const PLACEHOLDER_AI = {
+  text: "你好！准备好了吗？",
+  pinyin: "Nǐ hǎo! Zhǔnbèi hǎole ma?",
+  meaningVi: "Chào bạn! Bạn đã sẵn sàng chưa?",
+}
+
+const hintModeForLevel = (hskLevel) => {
+  const n = Number(hskLevel)
+  if (!n) return null
+  if (n <= 2) return "proactive"
+  if (n <= 4) return "chip"
+  return "none"
+}
 const SpeakingPage = ({
+  sessionData,
   topicTitle = "Mua hoa quả ở chợ",
-  currentRound = 2,
-  totalRounds = 4,
-  initialTime = "00:18",
-  maxTime = "00:45",
   onEndSession,
   onSwitchMode,
-  aiTurn,
-  learnerText,
-  hintMode,
-  hints,
-  correction,
-  onPlayHint,
-  onReplayAi,
-  autoOpenHint = false,
 }) => {
   const [activeTab, setActiveTab] = useState("casual") // 'casual' | 'placement'
   const [isMicActive, setIsMicActive] = useState(true)
   const [isFreeTalk, setIsFreeTalk] = useState(true)
   const [volume, setVolume] = useState(100)
   const [isReplayingAi, setIsReplayingAi] = useState(false)
-  const [chipOpen, setChipOpen] = useState(false)
-  const isLive = aiTurn !== undefined
-  const showChipHints = chipOpen || autoOpenHint
+  
+  // Realtime LiveKit Agent States
+  const [connectionStatus, setConnectionStatus] = useState(() => sessionData?.token ? "connecting" : "connected")
+  const [currentRound, setCurrentRound] = useState(1)
+  const [totalRounds, setTotalRounds] = useState(sessionData?.hskLevel > 4 ? 5 : 3)
+  const [assist, dispatchAssist] = useReducer(assistReducer, initialAssistState)
+  const [chipOpenForSeq, setChipOpenForSeq] = useState(null)
+  const [isAiSpeaking, setIsAiSpeaking] = useState(false)
+  const [warnMessage, setWarnMessage] = useState(null)
+  const [sessionSeconds, setSessionSeconds] = useState(0)
 
+  const roomRef = useRef(null)
+  const audioRef = useRef(null)
+  const timerRef = useRef(null)
+
+  // ── LiveKit Room Connection & Event Listeners ─────────────────────────────
+  useEffect(() => {
+    const token = sessionData?.token
+    const serverUrl = sessionData?.serverUrl || "ws://localhost:7880"
+
+    if (!token) {
+      return
+    }
+
+    let isMounted = true
+    const room = new Room({
+      adaptiveStream: true,
+      dynacast: true,
+      audioCaptureDefaults: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      },
+    })
+    roomRef.current = room
+
+    // 1. Data Packet Listener
+    room.on(RoomEvent.DataReceived, (payload, _participant, _kind, topic) => {
+      try {
+        const raw = new TextDecoder().decode(payload)
+        const data = JSON.parse(raw)
+
+        if (topic === TOPIC_SUBTITLE || topic === TOPIC_ASSIST || topic === TOPIC_STATE) {
+          dispatchAssist({ topic, data })
+        }
+
+        if (topic === TOPIC_SUBTITLE) {
+          if (data.text && data.role !== "learner") {
+            setIsAiSpeaking(true)
+            setTimeout(() => setIsAiSpeaking(false), 3500)
+          }
+        } else if (topic === TOPIC_STATE) {
+          if (data.turn_index) setCurrentRound(data.turn_index)
+          if (data.script_turns) setTotalRounds(data.script_turns)
+          if (data.warn === "silence_10s") {
+            setWarnMessage("Bạn có cần AI hỗ trợ không? Hãy thử phát âm một từ gợi ý nhé!")
+          } else if (data.warn === "time_4m") {
+            setWarnMessage("Phiên luyện nói sắp hết giờ (còn 1 phút).")
+          } else if (!data.warn) {
+            setWarnMessage(null)
+          }
+
+          if (data.phase === "ended") {
+            setTimeout(() => {
+              onEndSession?.()
+            }, 2000)
+          }
+        }
+      } catch (err) {
+        console.warn("[SpeakingPage] Error parsing data packet:", err)
+      }
+    })
+
+    // 2. Remote Audio Track Subscription
+    room.on(RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === Track.Kind.Audio && audioRef.current) {
+        track.attach(audioRef.current)
+      }
+    })
+
+    // 3. Connect & Enable Mic
+    async function startRoom() {
+      try {
+        await room.connect(serverUrl, token)
+        if (!isMounted) return
+        setConnectionStatus("connected")
+        await room.localParticipant.setMicrophoneEnabled(true)
+      } catch (err) {
+        console.error("[SpeakingPage] LiveKit connect error:", err)
+        if (isMounted) setConnectionStatus("connected") // fallback for standalone testing
+      }
+    }
+
+    startRoom()
+
+    // 4. Session Timer
+    timerRef.current = setInterval(() => {
+      setSessionSeconds((prev) => prev + 1)
+    }, 1000)
+
+    return () => {
+      isMounted = false
+      clearInterval(timerRef.current)
+      if (room.state !== "disconnected") {
+        room.disconnect()
+      }
+    }
+  }, [sessionData, onEndSession])
+
+  // ── Dữ liệu hiển thị ─────────────────────────────────────────────────────
+  const ai = assist.ai || PLACEHOLDER_AI
+  const aiText = ai.text
+  const aiPinyin = ai.pinyin || ""
+  const aiMeaning = ai.meaningVi || ""
+  const learnerText = assist.learner?.text || ""
+  const hints = assist.hints || []
+  const correction = assist.correction
+  // Cấp của buổi quyết định cách hiện gợi ý; chỉ khi không biết cấp mới dùng
+  // hint_mode trong gói assist.
+  const hintMode = hintModeForLevel(sessionData?.hskLevel) || assist.hintMode || "none"
+  const chipOpen =
+    (assist.ai && chipOpenForSeq === assist.ai.seq) || assist.warn === "silence_10s"
+
+  // ── Send Control Packet Helper ───────────────────────────────────────────
+  const sendControlPacket = async (action, hintId = null) => {
+    const room = roomRef.current
+    if (!room || !room.localParticipant) return
+    const payload = { action, hint_id: hintId }
+    try {
+      const raw = new TextEncoder().encode(JSON.stringify(payload))
+      await room.localParticipant.publishData(raw, { topic: TOPIC_CONTROL })
+    } catch (err) {
+      console.warn("[SpeakingPage] Failed to send control packet:", err)
+    }
+  }
+
+  // ── Actions ──────────────────────────────────────────────────────────────
   const handleReplayAi = () => {
-    onReplayAi?.()
     setIsReplayingAi(true)
+    sendControlPacket("replay_question")
     setTimeout(() => {
       setIsReplayingAi(false)
     }, 2000)
   }
 
+  const handleToggleMic = async () => {
+    const nextState = !isMicActive
+    setIsMicActive(nextState)
+    if (roomRef.current?.localParticipant) {
+      await roomRef.current.localParticipant.setMicrophoneEnabled(nextState)
+    }
+  }
+
+  const handleFinishEarly = () => {
+    sendControlPacket("finish_early")
+    setTimeout(() => {
+      if (roomRef.current) roomRef.current.disconnect()
+      onEndSession?.()
+    }, 1200)
+  }
+
+  const formattedTime = () => {
+    const mins = String(Math.floor(sessionSeconds / 60)).padStart(2, "0")
+    const secs = String(sessionSeconds % 60).padStart(2, "0")
+    return `${mins}:${secs}`
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto py-4 sm:py-6 px-4 sm:px-6 space-y-5">
+      {/* Remote Audio Element for LiveKit Audio */}
+      <audio ref={audioRef} autoPlay />
+
       {/* Top Header Mode Bar & Round Status */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         {/* Left Mode Tabs */}
@@ -87,18 +250,30 @@ const SpeakingPage = ({
         </div>
 
         {/* Right Topic & Round Pill */}
-        <div className="bg-rose-50/50 border border-rose-100 text-[#990011] text-xs sm:text-sm font-medium rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-2xs">
-          <span>🍎 {topicTitle} · Lượt {currentRound}/{totalRounds}</span>
-          <div className="flex items-center gap-1">
-            {Array.from({ length: totalRounds }).map((_, i) => (
-              <span
-                key={i}
-                className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                  i < currentRound ? "bg-[#990011]" : "bg-slate-200"
-                }`}
-              />
-            ))}
+        <div className="flex items-center gap-3">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${connectionStatus === "connected" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}>
+            ● {connectionStatus === "connected" ? "LiveKit đã kết nối" : "Đang kết nối..."}
+          </span>
+          <div className="bg-rose-50/50 border border-rose-100 text-[#990011] text-xs sm:text-sm font-medium rounded-xl px-3.5 py-2 flex items-center gap-2 shadow-2xs">
+            <span>🍎 {topicTitle} · Lượt {currentRound}/{totalRounds}</span>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalRounds }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    i < currentRound ? "bg-[#990011]" : "bg-slate-200"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={handleFinishEarly}
+            className="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold rounded-xl transition cursor-pointer"
+          >
+            Kết thúc
+          </button>
         </div>
       </div>
 
@@ -110,8 +285,8 @@ const SpeakingPage = ({
           <div className="flex flex-col items-center justify-center select-none">
             {/* 2 Cat Ears */}
             <div className="flex items-center gap-8 mb-1">
-              <div className="w-7 h-14 sm:w-8 sm:h-16 bg-[#c85a5a] rounded-full shadow-inner transform -rotate-6" />
-              <div className="w-7 h-14 sm:w-8 sm:h-16 bg-[#c85a5a] rounded-full shadow-inner transform rotate-6" />
+              <div className={`w-7 h-14 sm:w-8 sm:h-16 rounded-full shadow-inner transform -rotate-6 transition-transform ${isAiSpeaking ? "scale-110 bg-amber-500" : "bg-[#c85a5a]"}`} />
+              <div className={`w-7 h-14 sm:w-8 sm:h-16 rounded-full shadow-inner transform rotate-6 transition-transform ${isAiSpeaking ? "scale-110 bg-amber-500" : "bg-[#c85a5a]"}`} />
             </div>
             {/* Cat Mouth */}
             <span className="text-3xl sm:text-4xl text-[#c85a5a] font-light leading-none tracking-widest">
@@ -121,15 +296,25 @@ const SpeakingPage = ({
 
           {/* AI Speaking Status Pill */}
           <div className="bg-rose-50 border border-rose-200/70 text-[#990011] text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full inline-flex items-center gap-2 shadow-2xs">
-            <span>AI Tutor Cat Speak đang nói...</span>
-            <span className="flex items-center gap-0.5 text-xs text-[#990011]">
-              <span className="w-1 h-3 bg-[#990011] rounded-full animate-bounce [animation-delay:0ms]" />
-              <span className="w-1 h-4 bg-[#990011] rounded-full animate-bounce [animation-delay:150ms]" />
-              <span className="w-1 h-2 bg-[#990011] rounded-full animate-bounce [animation-delay:300ms]" />
-              <span className="w-1 h-3.5 bg-[#990011] rounded-full animate-bounce [animation-delay:450ms]" />
-            </span>
+            <span>{isAiSpeaking ? "AI Tutor Cat Speak đang nói..." : "AI đang lắng nghe bạn..."}</span>
+            {isAiSpeaking && (
+              <span className="flex items-center gap-0.5 text-xs text-[#990011]">
+                <span className="w-1 h-3 bg-[#990011] rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-1 h-4 bg-[#990011] rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1 h-2 bg-[#990011] rounded-full animate-bounce [animation-delay:300ms]" />
+                <span className="w-1 h-3.5 bg-[#990011] rounded-full animate-bounce [animation-delay:450ms]" />
+              </span>
+            )}
           </div>
         </div>
+
+        {/* Warning Banner (Conditional) */}
+        {warnMessage && (
+          <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-900 flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{warnMessage}</span>
+          </div>
+        )}
 
         {/* 2 Dialogue Cards (Left AI, Right Student) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
@@ -150,31 +335,17 @@ const SpeakingPage = ({
               </button>
             </div>
 
-            {isLive ? (
-              <div className="space-y-1.5">
-                <p className="text-base sm:text-lg font-bold text-[#990011] leading-snug">
-                  {aiTurn?.text ? `“${aiTurn.text}”` : "…"}
-                </p>
-                {aiTurn?.pinyin ? (
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium">{aiTurn.pinyin}</p>
-                ) : null}
-                {aiTurn?.meaningVi ? (
-                  <p className="text-xs sm:text-sm text-slate-600 italic">{aiTurn.meaningVi}</p>
-                ) : null}
-              </div>
-            ) : (
             <div className="space-y-1.5">
               <p className="text-base sm:text-lg font-bold text-[#990011] leading-snug">
-                “你好！你想买什么苹果？这里的红富士很新鲜！”
+                “{aiText}”
               </p>
               <p className="text-xs sm:text-sm text-slate-500 font-medium">
-                Nǐ hǎo! Nǐ xiǎng mǎi shénme píngguǒ? Zhèlǐ de hóngfùshì...
+                {aiPinyin}
               </p>
               <p className="text-xs sm:text-sm text-slate-600 italic">
-                Chào bạn! Bạn muốn mua táo gì? Táo Phú Sĩ ở đây rất tươi ngon!
+                {aiMeaning}
               </p>
             </div>
-            )}
           </div>
 
           {/* 2. Student Dialogue Card */}
@@ -184,83 +355,72 @@ const SpeakingPage = ({
                 <span>👤</span>
                 <span>BẠN (HỌC VIÊN)</span>
               </div>
-              {!isLive && (
               <span className="bg-emerald-100/80 text-emerald-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md flex items-center gap-1">
-                ✓ 94% Chuẩn
+                ✓ Đang kết nối mic
               </span>
-              )}
             </div>
 
             <div className="space-y-1">
-              <p className="text-base sm:text-lg font-bold text-slate-800 leading-snug">
-                {isLive
-                  ? learnerText
-                    ? `“${learnerText}”`
-                    : <span className="text-slate-400 font-normal text-sm">Đến lượt bạn nói...</span>
-                  : "“我想买两斤。(Wǒ xiǎng mǎi liǎng jīn.)”"}
-              </p>
-            </div>
-
-            {/* Hint Row: BR-SS-009, HSK 1-2 hiện sẵn, HSK 3-4 thu vào chip, HSK 5-6 ẩn */}
-            {!isLive ? (
-            <div className="flex items-center gap-2 pt-1">
-              <span className="text-xs font-semibold text-amber-600 shrink-0">
-                💡 Gợi ý:
-              </span>
-              <button
-                type="button"
-                className="bg-blue-50/80 border border-blue-200 text-blue-700 hover:bg-blue-100/70 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-left"
-              >
-                “这个多少钱一斤？” (Bao nhiêu 1 cân?)
-              </button>
-            </div>
-            ) : hintMode !== "none" && hints?.length ? (
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              {hintMode === "chip" && !showChipHints ? (
-                <button
-                  type="button"
-                  onClick={() => setChipOpen(true)}
-                  className="bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100/70 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
-                >
-                  💡 Gợi ý
-                </button>
+              {learnerText ? (
+                <p className="text-base sm:text-lg font-bold text-slate-800 leading-snug">
+                  “{learnerText}”
+                </p>
               ) : (
-                <>
-                  <span className="text-xs font-semibold text-amber-600 shrink-0">💡 Gợi ý:</span>
-                  {hints.map((h) => (
-                    <button
-                      key={h.id}
-                      type="button"
-                      onClick={() => onPlayHint?.(h.id)}
-                      title="Bấm để nghe mẫu giọng AI tốc độ chậm"
-                      className="bg-blue-50/80 border border-blue-200 text-blue-700 hover:bg-blue-100/70 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-left"
-                    >
-                      🔊 “{h.text}”{h.meaning_vi ? ` (${h.meaning_vi})` : ""}
-                    </button>
-                  ))}
-                </>
+                <p className="text-sm sm:text-base font-medium text-slate-700 leading-snug">
+                  Đang lắng nghe bạn nói...
+                </p>
               )}
             </div>
-            ) : null}
+
+            {/* Hint Chips Row: BR-SS-009, HSK 1-2 hiện sẵn, HSK 3-4 thu vào nút, HSK 5-6 ẩn */}
+            {hintMode !== "none" && hints.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {hintMode === "chip" && !chipOpen ? (
+                  <button
+                    type="button"
+                    onClick={() => setChipOpenForSeq(assist.ai?.seq ?? null)}
+                    className="bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100/70 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                  >
+                    💡 Gợi ý
+                  </button>
+                ) : (
+                  <>
+                    <span className="text-xs font-semibold text-amber-600 shrink-0">
+                      💡 Gợi ý:
+                    </span>
+                    {hints.map((hint, idx) => (
+                      <button
+                        key={hint.id || idx}
+                        type="button"
+                        onClick={() => sendControlPacket("play_hint", hint.id)}
+                        title="Bấm để nghe mẫu giọng AI tốc độ chậm"
+                        className="bg-blue-50/80 border border-blue-200 text-blue-700 hover:bg-blue-100/70 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-left flex items-center gap-1"
+                      >
+                        <span>🗣️</span>
+                        <span>“{hint.text}” ({hint.meaning_vi || hint.pinyin})</span>
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Instant Error Correction Tip: chỉ khi turn-assist trả correction
+        {/* Instant Error Correction Tip: chỉ hiện khi gói assist có correction
             (lỗi cản trở hiểu nghĩa, ASR >= 0,8, dạng đúng không vượt cấp) */}
-        {(!isLive || correction) && (
-        <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3.5 sm:p-4 flex items-start sm:items-center gap-2.5 text-xs sm:text-sm shadow-2xs">
-          <span className="text-amber-600 font-bold shrink-0 text-base">⚡</span>
-          <div className="flex flex-wrap items-center gap-1.5 text-amber-950">
-            <span className="font-extrabold text-amber-900 shrink-0">
-              MẸO SỬA LỖI TỨC THÌ:
-            </span>
-            <span>
-              {isLive
-                ? `Bạn nói: “${correction.original}” ➔ Thử nói: “${correction.corrected}”. ${correction.note_vi || ""}`
-                : "Sai: “我要二斤” ➔ Đúng: “我要两斤” (Lượng từ 斤 dùng 两, không dùng 二)."}
-            </span>
+        {correction && (
+          <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3.5 sm:p-4 flex items-start sm:items-center gap-2.5 text-xs sm:text-sm shadow-2xs">
+            <span className="text-amber-600 font-bold shrink-0 text-base">⚡</span>
+            <div className="flex flex-wrap items-center gap-1.5 text-amber-950">
+              <span className="font-extrabold text-amber-900 shrink-0">
+                MẸO SỬA LỖI TỨC THÌ:
+              </span>
+              <span>
+                Bạn nói: “{correction.original}” ➔ Thử nói: “{correction.corrected}”. {correction.note_vi || ""}
+              </span>
+            </div>
           </div>
-        </div>
         )}
 
         {/* Bottom Control Area */}
@@ -268,14 +428,14 @@ const SpeakingPage = ({
           {/* Left Timer Pill */}
           <div className="bg-rose-50/60 border border-rose-200/70 text-[#990011] text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-2xs">
             <span>⏱</span>
-            <span>{initialTime} / {maxTime} · Thu âm phản xạ</span>
+            <span>{formattedTime()} / 05:00 · Thu âm phản xạ</span>
           </div>
 
           {/* Center Big Mic Button & Caption */}
           <div className="flex flex-col items-center">
             <button
               type="button"
-              onClick={() => setIsMicActive(!isMicActive)}
+              onClick={handleToggleMic}
               className={`w-14 h-14 rounded-full flex items-center justify-center text-white shadow-lg transition-all active:scale-95 cursor-pointer ${
                 isMicActive
                   ? "bg-[#990011] hover:bg-[#85000f] ring-4 ring-rose-100"
