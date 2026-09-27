@@ -7,6 +7,7 @@ import {
   formatTeacherNumber,
   formatRating,
   formatActiveClassesText,
+  getTeacherSlugOrId,
 } from "../utils/teacherUtils"
 
 const TeacherCard = ({
@@ -27,7 +28,7 @@ const TeacherCard = ({
   const totalStudents = teacher.totalStudents || teacher.studentCount || 0
   const activeClassesCount =
     teacher.activeClassCount || teacher.activeClassesCount || teacher.openClassesCount || 0
-  const slugOrId = teacher.slug || teacher.id
+  const slugOrId = getTeacherSlugOrId(teacher)
 
   const handleCardClick = (e) => {
     e.stopPropagation()

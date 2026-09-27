@@ -1,5 +1,6 @@
 import React from "react"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
+import { DatePicker } from "@/shared/components/ui/inputs"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import { ChevronDown, Pencil } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
@@ -203,20 +204,47 @@ const InstructorPersonalInfo = ({
           </div>
         </div>
 
-        <div id="field-address" className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-gray-800">
-            {ins.address || "Địa chỉ của bạn"}
-          </label>
-          <TextInput
-            name="address"
-            value={formData.address}
-            onChange={onChange}
-            placeholder={ins.inputFieldPlaceholder || "Input field"}
-            disabled={effectiveReadOnly}
-            className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.address ? "border-red-500" : "border-border"}`}
-            containerClassName="!gap-0"
-          />
-          {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div id="field-dateOfBirth" className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-800">
+              {ins.dateOfBirth || t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}
+            </label>
+            <DatePicker
+              value={formData.dateOfBirth}
+              onChange={(d) => {
+                if (!d) {
+                  onChange({ target: { name: "dateOfBirth", value: "" } })
+                  return
+                }
+                const formattedDate =
+                  d.getFullYear() +
+                  "-" +
+                  String(d.getMonth() + 1).padStart(2, "0") +
+                  "-" +
+                  String(d.getDate()).padStart(2, "0")
+                onChange({ target: { name: "dateOfBirth", value: formattedDate } })
+              }}
+              disabled={effectiveReadOnly}
+              className={`w-full flex ${errors.dateOfBirth ? "[&>button]:!border-red-500" : "[&>button]:!border-border"} [&>button]:!h-11 [&>button]:!rounded-xl [&>button]:!bg-gray-50/50 [&>button]:w-full [&>button]:justify-between [&>button]:!text-sm`}
+            />
+            {errors.dateOfBirth && <p className="text-xs text-red-500">{errors.dateOfBirth}</p>}
+          </div>
+
+          <div id="field-address" className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-800">
+              {ins.address || "Địa chỉ của bạn"}
+            </label>
+            <TextInput
+              name="address"
+              value={formData.address}
+              onChange={onChange}
+              placeholder={ins.inputFieldPlaceholder || "Input field"}
+              disabled={effectiveReadOnly}
+              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors.address ? "border-red-500" : "border-border"}`}
+              containerClassName="!gap-0"
+            />
+            {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
+          </div>
         </div>
       </div>
     </FluentCard>

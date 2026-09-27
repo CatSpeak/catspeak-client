@@ -229,16 +229,21 @@ const PersonalInfoCard = ({ profile, t }) => {
       {isEditing ? (
         <div className="flex flex-col">
           <Row icon={<User size={20} />} label={ins.fullName || "Họ và tên"}>
-            <TextInput
-              name="fullName"
-              value={form.fullName}
-              onChange={(e) => handleChange("fullName", e.target.value)}
-              placeholder={ins.inputFieldPlaceholder || "Nhập thông tin"}
-              error={errors.fullName}
-              className={inputClass}
-              containerClassName="!gap-1"
-              disabled={isSaving}
-            />
+            <div className="flex flex-col gap-1 w-full">
+              <TextInput
+                name="fullName"
+                value={form.fullName}
+                onChange={(e) => handleChange("fullName", e.target.value)}
+                placeholder={ins.inputFieldPlaceholder || "Nhập thông tin"}
+                error={errors.fullName}
+                className={inputClass}
+                containerClassName="!gap-1"
+                disabled={true}
+              />
+              <p className="text-[11px] text-[#667085]">
+                {ins.fullNameKycNote || "Họ và tên gắn liền với định danh CCCD và không thể thay đổi."}
+              </p>
+            </div>
           </Row>
           <Row icon={<Calendar size={20} />} label={t.profile?.personalInfo?.dateOfBirth || t.auth?.dateOfBirthLabel || "Ngày sinh"}>
             <DatePicker

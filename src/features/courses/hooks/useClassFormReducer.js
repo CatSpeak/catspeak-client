@@ -335,11 +335,8 @@ export function useClassFormReducer({
 
   // ─── Derived values ───
   const minFee = useMemo(() => {
-    return (
-      50000 * (parseInt(state.capacity, 10) || 0) +
-      25000 * (parseInt(state.sessions, 10) || 0)
-    )
-  }, [state.capacity, state.sessions])
+    return 100000 + 50000 * (parseInt(state.sessions, 10) || 0)
+  }, [state.sessions])
 
   // ─── Auto min-fee enforcement (create mode only) ───
   useEffect(() => {

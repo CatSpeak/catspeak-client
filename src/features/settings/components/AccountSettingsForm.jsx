@@ -73,40 +73,6 @@ const AccountSettingsForm = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.username || "Tên đăng nhập"}
-            </label>
-            <TextInput
-              name="username"
-              value={formData.username}
-              onChange={onChange}
-              disabled={!isEditingPersonal || isUpdating}
-              placeholder={t.profile?.personalInfo?.enterUsername || "Nhập tên đăng nhập..."}
-              error={errors?.username}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.username ? "border-red-500" : "border-border"}`}
-              containerClassName="!gap-0"
-            />
-          </div>
-          
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800">
-              {t.profile?.personalInfo?.nickname || "Biệt danh"}
-            </label>
-            <TextInput
-              name="nickname"
-              value={formData.nickname}
-              onChange={onChange}
-              disabled={!isEditingPersonal || isUpdating}
-              placeholder={t.profile?.personalInfo?.enterNickname || "Nhập biệt danh..."}
-              error={errors?.nickname}
-              className={`!h-11 !rounded-xl bg-gray-50/50 border px-3 ${errors?.nickname ? "border-red-500" : "border-border"}`}
-              containerClassName="!gap-0"
-            />
-          </div>
-        </div>
-
         {isTeacherAccount && (
           <div className="rounded-xl bg-blue-50/70 border border-blue-200/80 p-3.5 text-xs text-blue-800 flex items-start gap-2.5">
             <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-600" />

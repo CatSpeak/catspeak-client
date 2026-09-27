@@ -54,6 +54,13 @@ export const formatRating = (rating) => {
 }
 
 /**
+ * Identifier dùng cho URL trang cá nhân GV (/explore/teachers/{slugOrId}).
+ * Item từ GET /explore/teachers có thể không có slug/id — fallback accountId.
+ */
+export const getTeacherSlugOrId = (teacher) =>
+  teacher?.slug || teacher?.id || teacher?.accountId
+
+/**
  * Tổng số giảng viên từ envelope response explore/teachers (backend trả `pagination.total`).
  */
 export const getExploreTeachersTotal = (data) => {

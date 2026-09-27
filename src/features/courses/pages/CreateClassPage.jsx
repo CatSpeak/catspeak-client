@@ -1338,7 +1338,7 @@ const CreateClassPage = () => {
                     value={fee ? parseInt(fee).toLocaleString("vi-VN") : ""}
                     onChange={(e) => formatFeeInput(e.target.value)}
                     placeholder="850.000"
-                    className="w-full h-11 pl-4 pr-12 bg-white border border-border hover:border-gray-300 focus:border-[#990011] outline-none rounded-xl text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400"
+                    className={`w-full h-11 pl-4 pr-12 bg-white border rounded-xl outline-none text-sm font-extrabold text-gray-800 transition-all placeholder:text-gray-400 ${feeNum < minFee ? "border-[#e11d48]" : "border-border hover:border-gray-300 focus:border-[#990011]"}`}
                   />
                   <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-extrabold text-xs">VND</span>
                 </div>
