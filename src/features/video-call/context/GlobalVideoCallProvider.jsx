@@ -18,7 +18,6 @@ import GlobalCallContent from "./GlobalCallContent"
 
 const PREF_KEYS = {
   RECEIVE_SYSTEM_MSGS: "receiveSystemMsgs",
-  SHOW_AI_SUGGESTIONS: "showAiSuggestions",
   JOIN_LEAVE_SOUND: "joinLeaveSound",
 }
 
@@ -26,10 +25,6 @@ const readPrefs = (accountId) => ({
   receiveSystemMsgs: getUserPref(accountId, PREF_KEYS.RECEIVE_SYSTEM_MSGS, {
     defaultValue: true,
     legacyKey: PREF_KEYS.RECEIVE_SYSTEM_MSGS,
-  }),
-  showAiSuggestions: getUserPref(accountId, PREF_KEYS.SHOW_AI_SUGGESTIONS, {
-    defaultValue: true,
-    legacyKey: PREF_KEYS.SHOW_AI_SUGGESTIONS,
   }),
   // User-level join/leave chime: each participant chooses for themselves and
   // it is off by default (previously a host-controlled room policy).
@@ -153,8 +148,6 @@ const IDLE_VALUE = {
   hideEmptyTiles: false,
   setHideEmptyTiles: () => {},
 
-  showAiSuggestions: true,
-  setShowAiSuggestions: () => {},
   showRoomSettings: false,
   setShowRoomSettings: () => {},
   activeSettingsTab: "audio-video",
@@ -170,8 +163,6 @@ const IdleCallContent = ({
   setReceiveSystemMsgs,
   speakingAssistantEnabled,
   setSpeakingAssistantEnabled,
-  showAiSuggestions,
-  setShowAiSuggestions,
   joinLeaveSound,
   setJoinLeaveSound,
 }) => (
@@ -182,8 +173,6 @@ const IdleCallContent = ({
       setReceiveSystemMsgs,
       speakingAssistantEnabled,
       setSpeakingAssistantEnabled,
-      showAiSuggestions,
-      setShowAiSuggestions,
       joinLeaveSound,
       setJoinLeaveSound,
     }}
@@ -209,9 +198,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
   const [receiveSystemMsgs, setReceiveSystemMsgs] = useState(
     initialPrefs.receiveSystemMsgs,
   )
-  const [showAiSuggestions, setShowAiSuggestions] = useState(
-    initialPrefs.showAiSuggestions,
-  )
   const [joinLeaveSound, setJoinLeaveSound] = useState(
     initialPrefs.joinLeaveSound,
   )
@@ -223,7 +209,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
     setPrefsAccountId(accountId)
     const next = readPrefs(accountId)
     setReceiveSystemMsgs(next.receiveSystemMsgs)
-    setShowAiSuggestions(next.showAiSuggestions)
     setJoinLeaveSound(next.joinLeaveSound)
   }
 
@@ -242,10 +227,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
       JSON.stringify(speakingAssistantEnabled),
     )
   }, [speakingAssistantEnabled])
-
-  useEffect(() => {
-    setUserPref(accountId, PREF_KEYS.SHOW_AI_SUGGESTIONS, showAiSuggestions)
-  }, [accountId, showAiSuggestions])
 
   useEffect(() => {
     setUserPref(accountId, PREF_KEYS.JOIN_LEAVE_SOUND, joinLeaveSound)
@@ -277,8 +258,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
         setReceiveSystemMsgs={setReceiveSystemMsgs}
         speakingAssistantEnabled={speakingAssistantEnabled}
         setSpeakingAssistantEnabled={setSpeakingAssistantEnabled}
-        showAiSuggestions={showAiSuggestions}
-        setShowAiSuggestions={setShowAiSuggestions}
         joinLeaveSound={joinLeaveSound}
         setJoinLeaveSound={setJoinLeaveSound}
       >
@@ -329,8 +308,6 @@ export const GlobalVideoCallProvider = ({ children }) => {
         ContextProvider={GlobalVideoCallContext.Provider}
         receiveSystemMsgs={receiveSystemMsgs}
         setReceiveSystemMsgs={setReceiveSystemMsgs}
-        showAiSuggestions={showAiSuggestions}
-        setShowAiSuggestions={setShowAiSuggestions}
         joinLeaveSound={joinLeaveSound}
         setJoinLeaveSound={setJoinLeaveSound}
         panelState={panelState}
