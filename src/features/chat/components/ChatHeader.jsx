@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, PanelRight } from "lucide-react"
+import { ArrowLeft, PanelRight, Search, Phone, Video } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import GroupAvatar from "./GroupAvatar"
 import { IconButton } from "@/shared/components/ui/buttons"
@@ -16,6 +16,9 @@ const ChatHeader = ({
   conversation,
   onBack,
   onToggleInfo,
+  onToggleSearch,
+  onStartCall,
+  isSearchOpen = false,
   friendOnlineStatus,
 }) => {
   const { t } = useLanguage()
@@ -110,17 +113,56 @@ const ChatHeader = ({
 
       {/* Action buttons */}
       <div className="flex items-center gap-0.5">
+        {/* Voice Call button */}
+        {onStartCall && (
+          <IconButton
+            onClick={() => onStartCall("audio")}
+            size="sm"
+            variant="ghost"
+            aria-label="Voice call"
+            title={t?.chat?.call?.voiceCall || "Voice Call"}
+            className="hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+          >
+            <Phone size={18} />
+          </IconButton>
+        )}
+
+        {/* Video Call button */}
+        {onStartCall && (
+          <IconButton
+            onClick={() => onStartCall("video")}
+            size="sm"
+            variant="ghost"
+            aria-label="Video call"
+            title={t?.chat?.call?.videoCall || "Video Call"}
+            className="hover:text-primary hover:bg-primary/10"
+          >
+            <Video size={18} />
+          </IconButton>
+        )}
+
+        {/* Search button */}
+        <IconButton
+          onClick={onToggleSearch}
+          size="sm"
+          variant={isSearchOpen ? "primary" : "ghost"}
+          aria-label="Search in conversation"
+          title={t?.chat?.searchMessages || "Search messages"}
+        >
+          <Search size={18} />
+        </IconButton>
+
         <IconButton
           onClick={onToggleInfo}
           size="sm"
           variant="ghost"
           aria-label="Toggle info panel"
         >
-          <PanelRight />
+          <PanelRight size={18} />
         </IconButton>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default ChatHeader;

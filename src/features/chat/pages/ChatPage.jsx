@@ -54,7 +54,8 @@ const ChatPage = () => {
     isFetchingMessages,
     hasMoreMessages,
     handleLoadMoreMessages,
-    page,
+    optimisticEditMessage,
+    optimisticToggleReaction,
   } = useChatMessages(selectedId)
 
   const { conversations, activeConversation, isLoadingConversations } =
@@ -68,11 +69,34 @@ const ChatPage = () => {
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
+    handleSendVoice,
     handleRetryUpload,
     handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
+    handleEditMessage: editMessageAction,
+    handleToggleReaction: toggleReactionAction,
+    handlePinMessage,
+    handleUnpinMessage,
   } = useChatMessageActions(selectedId)
+
+  const handleEditMessage = useCallback(
+    async (message, newContent) => {
+      const msgId = message?.id || message?.messageId
+      if (msgId) optimisticEditMessage(msgId, newContent)
+      await editMessageAction(message, newContent)
+    },
+    [optimisticEditMessage, editMessageAction],
+  )
+
+  const handleToggleReaction = useCallback(
+    async (message, emoji) => {
+      const msgId = message?.id || message?.messageId
+      if (msgId) optimisticToggleReaction(msgId, emoji)
+      await toggleReactionAction(message, emoji)
+    },
+    [optimisticToggleReaction, toggleReactionAction],
+  )
 
   const { startTyping, stopTyping, typingUsers } = useMessageSignalR({
     activeConversationId: selectedId,
@@ -96,7 +120,7 @@ const ChatPage = () => {
     return {
       id: authUser?.accountId,
       name: userProfile?.username || authUser?.username || t?.chat?.me || "Me",
-      avatar: userProfile?.avatarImageUrl || null,
+      avatar: userProfile?.avatarImageUrl || authUser?.avatarImageUrl || null,
       status: "online",
       about: userProfile?.level || t?.chat?.userPanel?.student || "Student",
     }
@@ -130,8 +154,8 @@ const ChatPage = () => {
   }, [navigate, dispatch, handleCancelReply])
 
   const handleSend = useCallback(
-    async (text, file) => {
-      await sendAction(text, file)
+    async (text, file, extraOptions) => {
+      await sendAction(text, file, extraOptions)
       setInputValue("")
     },
     [sendAction],
@@ -165,12 +189,13 @@ const ChatPage = () => {
           inputValue={inputValue}
           onInputChange={setInputValue}
           onSend={handleSend}
+          onSendVoice={handleSendVoice}
           onBack={handleBack}
           onToggleInfo={handleToggleInfo}
           showInfoActive={showInfoPanel}
           friendOnlineStatus={friendOnlineStatus}
-          isLoading={isLoadingMessages && page === 1}
-          isLoadingMore={isFetchingMessages && page > 1}
+          isLoading={isLoadingMessages}
+          isLoadingMore={isFetchingMessages}
           hasMoreMessages={hasMoreMessages}
           onLoadMoreMessages={handleLoadMoreMessages}
           typingUsers={typingUsers}
@@ -181,6 +206,10 @@ const ChatPage = () => {
           onCancelReply={handleCancelReply}
           onDeleteForMe={handleDeleteForMe}
           onRecall={handleRecall}
+          onEdit={handleEditMessage}
+          onToggleReaction={handleToggleReaction}
+          onPin={handlePinMessage}
+          onUnpin={handleUnpinMessage}
           pendingUpload={pendingUpload}
           onRetryUpload={handleRetryUpload}
           onCancelUpload={handleCancelUpload}

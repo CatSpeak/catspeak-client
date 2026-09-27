@@ -9,16 +9,19 @@ const MAX_VISIBLE_READERS = 4
 
 const ChatBubbleReadStatus = ({
   isLastMessageInChat,
-  hasBeenSeen,
   readers = [],
   isOwn,
 }) => {
-  if (!isLastMessageInChat || (!isOwn && (!hasBeenSeen || readers.length === 0))) {
+  const hasReaders = readers && readers.length > 0
+
+  // Show stacked avatars on any message where readers exist.
+  // If no readers, only show sent checkmark for user's own last message in chat.
+  if (!hasReaders && (!isLastMessageInChat || !isOwn)) {
     return null
   }
 
-  const visibleReaders = readers.slice(0, MAX_VISIBLE_READERS)
-  const extraCount = readers.length - visibleReaders.length
+  const visibleReaders = (readers || []).slice(0, MAX_VISIBLE_READERS)
+  const extraCount = (readers?.length || 0) - visibleReaders.length
 
   return (
     <div
@@ -26,8 +29,8 @@ const ChatBubbleReadStatus = ({
         isOwn ? "justify-end" : "justify-start pl-[48px]"
       }`}
     >
-      {hasBeenSeen && readers.length > 0 ? (
-        <div className="flex items-center -space-x-1 justify-end">
+      {hasReaders ? (
+        <div className="flex items-center -space-x-1 justify-end animate-in fade-in duration-200">
           {visibleReaders.map((u) => {
             const theme = getParticipantTheme(u.id || u.name || "")
             return (
@@ -37,7 +40,7 @@ const ChatBubbleReadStatus = ({
                 name={u.name}
                 src={u.avatar}
                 title={`Seen by ${u.name}`}
-                className={`border border-white dark:border-zinc-900 shadow-xs ${theme.avatarClass}`}
+                className={`border border-white dark:border-zinc-900 shadow-xs ring-1 ring-white/50 ${theme.avatarClass}`}
               />
             )
           })}

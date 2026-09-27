@@ -1,18 +1,26 @@
 import { memo, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { X, LogOut, ArrowLeft } from "lucide-react"
+import { X, LogOut, ArrowLeft, Edit3 } from "lucide-react"
 import GroupAvatar from "./GroupAvatar"
-import { useRemoveParticipantMutation } from "@/store/api/social/conversationsApi"
+import {
+  useRemoveParticipantMutation,
+  useLeaveGroupMutation,
+  useGetConversationMembersQuery,
+} from "@/store/api/social/conversationsApi"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import Drawer from "@/shared/components/ui/Drawer"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
 import AddMembersModal from "./modals/AddMembersModal"
+import EditGroupModal from "./modals/EditGroupModal"
+import TransferOwnershipModal from "./modals/TransferOwnershipModal"
 import MemberProfileView from "./MemberProfileView"
 import GroupMemberList from "./GroupMemberList"
+import SharedMediaGallery from "./gallery/SharedMediaGallery"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getProfilePath } from "@/shared/utils/navigation"
+import toast from "react-hot-toast"
 
 /**
  * ChatUserPanel — toggleable right-side info panel.
@@ -22,13 +30,15 @@ const ChatUserPanel = ({
   currentUser,
   onClose,
   onLeaveGroup,
-  friendOnlineStatus,
   isDrawer = false,
 }) => {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const [removeParticipant] = useRemoveParticipantMutation()
+  const [leaveGroupMutation, { isLoading: isLeaving }] = useLeaveGroupMutation()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isEditGroupModalOpen, setIsEditGroupModalOpen] = useState(false)
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState(null)
 
   const [prevConversationId, setPrevConversationId] = useState(conversation?.id)
@@ -37,31 +47,62 @@ const ChatUserPanel = ({
     setSelectedMember(null)
   }
 
+  const isGroup = conversation?.isGroup
+
+  const { data: membersResponse = [] } = useGetConversationMembersQuery(
+    conversation?.id,
+    { skip: !conversation?.id || !isGroup },
+  )
+
+  const groupMembers = useMemo(() => {
+    const list = Array.isArray(membersResponse)
+      ? membersResponse
+      : membersResponse?.data || []
+    return list.length > 0 ? list : conversation?.participants || []
+  }, [membersResponse, conversation?.participants])
+
   // Filter friends that are not already members of this group
   const groupParticipantIds = useMemo(() => {
-    return (conversation?.participants || []).map((p) => p.accountId)
-  }, [conversation?.participants])
+    return groupMembers.map((p) => p.accountId)
+  }, [groupMembers])
+
+  const currentMember = useMemo(() => {
+    return groupMembers.find((p) => p.accountId === currentUser?.id)
+  }, [groupMembers, currentUser?.id])
 
   if (!conversation) return null
 
-  const isGroup = conversation.isGroup
   const otherUser = conversation.friend
   const friendId = otherUser?.accountId || otherUser?.id || conversation?.friendId
   const name = conversation.name
-  const memberCount = conversation.participants?.length || 0
+  const memberCount = groupMembers.length || conversation.participants?.length || 0
   const statusText = isGroup
     ? (t?.chat?.memberCount ? t.chat.memberCount.replace("{{count}}", memberCount) : `${memberCount} members`)
     : null
 
-  // Check if current user is group creator
-  const isCreator = conversation.createdById === currentUser.id
+  const [transferTargetMember, setTransferTargetMember] = useState(null)
+
+  // Group roles & permissions from single source of truth
+  const isOwner = Boolean(
+    currentMember ? currentMember.isOwner : currentUser?.id === conversation?.createdById,
+  )
+  const isAdmin = Boolean(!isOwner && currentMember?.isAdmin)
+  const canEditGroup = isOwner || isAdmin
 
   const handleLeaveGroup = async () => {
+    if (isOwner) {
+      toast.error(
+        t?.chat?.ownerCannotLeavePrompt ||
+          "As group owner, you must transfer ownership to another member before leaving the group.",
+        { duration: 4500, icon: "👑" },
+      )
+      setIsTransferModalOpen(true)
+      return
+    }
+
     try {
-      await removeParticipant({
-        conversationId: conversation.id,
-        accountId: currentUser.id,
-      }).unwrap()
+      await leaveGroupMutation(conversation.id).unwrap()
+      toast.success(t?.chat?.leftGroupSuccess || "You have left the group")
       if (onLeaveGroup) {
         onLeaveGroup()
       } else {
@@ -69,6 +110,11 @@ const ChatUserPanel = ({
       }
     } catch (err) {
       console.error("Failed to leave group:", err)
+      toast.error(
+        err?.data?.message ||
+          t?.chat?.leaveGroupFailed ||
+          "Failed to leave group",
+      )
     }
   }
 
@@ -78,8 +124,14 @@ const ChatUserPanel = ({
         conversationId: conversation.id,
         accountId,
       }).unwrap()
+      toast.success(t?.chat?.memberRemovedSuccess || "Member removed from group")
     } catch (err) {
       console.error("Failed to remove member:", err)
+      toast.error(
+        err?.data?.message ||
+          t?.chat?.removeMemberFailed ||
+          "Failed to remove member",
+      )
     }
   }
 
@@ -153,7 +205,21 @@ const ChatUserPanel = ({
                   {name}
                 </h2>
               ) : (
-                <h2 className="mt-3 font-semibold text-center">{name}</h2>
+                <div className="flex items-center gap-1.5 mt-3 justify-center">
+                  <h2 className="font-semibold text-center">{name}</h2>
+                  {isGroup && canEditGroup && (
+                    <IconButton
+                      onClick={() => setIsEditGroupModalOpen(true)}
+                      size="xs"
+                      variant="ghost"
+                      aria-label="Edit group info"
+                      title={t?.chat?.editGroupTitle || "Edit Group"}
+                      className="text-neutral-400 hover:text-primary"
+                    >
+                      <Edit3 size={15} />
+                    </IconButton>
+                  )}
+                </div>
               )}
               {statusText && (
                 <p className="text-xs text-[#606060] flex items-center gap-1.5">
@@ -171,20 +237,28 @@ const ChatUserPanel = ({
             {/* ── Group members ──────────────────────── */}
             {isGroup && (
               <GroupMemberList
-                participants={conversation.participants}
+                participants={groupMembers}
                 currentUserId={currentUser.id}
-                isCreator={isCreator}
+                conversation={conversation}
                 onSelectMember={setSelectedMember}
                 onRemoveMember={handleRemoveMember}
                 onOpenAddModal={() => setIsAddModalOpen(true)}
+                onOpenTransferModal={(member) => {
+                  setTransferTargetMember(member || null)
+                  setIsTransferModalOpen(true)
+                }}
               />
             )}
+
+            {/* ── Shared Content Gallery (Photos, Videos, Files, Audio, Links) ── */}
+            <SharedMediaGallery conversationId={conversation.id} />
 
             {/* ── Danger zone ────────────────────────── */}
             {isGroup && (
               <div className="p-4">
                 <PillButton
                   onClick={handleLeaveGroup}
+                  disabled={isLeaving}
                   variant="outline"
                   textColor="#DC2626"
                   borderColor="#FECACA"
@@ -205,6 +279,25 @@ const ChatUserPanel = ({
         conversationId={conversation.id}
         currentUser={currentUser}
         groupParticipantIds={groupParticipantIds}
+      />
+
+      <EditGroupModal
+        open={isEditGroupModalOpen}
+        onClose={() => setIsEditGroupModalOpen(false)}
+        conversation={conversation}
+      />
+
+      <TransferOwnershipModal
+        open={isTransferModalOpen}
+        onClose={() => {
+          setIsTransferModalOpen(false)
+          setTransferTargetMember(null)
+        }}
+        conversation={conversation}
+        currentUserId={currentUser.id}
+        initialTargetAccountId={
+          transferTargetMember?.accountId || transferTargetMember?.id
+        }
       />
     </Container>
   )

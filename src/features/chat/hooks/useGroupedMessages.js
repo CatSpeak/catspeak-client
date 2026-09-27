@@ -208,9 +208,20 @@ export const useGroupedMessages = ({
 
       const shouldAnimate = !initialMessageIds.has(msgId)
 
-      // Resolve users who have read this message (only evaluated for the latest message in chat)
+      // Resolve users who have read this message (supported across all messages for real-time stacked avatars)
       let readByUsers = []
-      if (isLastMessageInChat) {
+      const rawReaders = Array.isArray(msg.readByUsers) ? msg.readByUsers : []
+      const currentMyId = Number(currentUser?.id || currentUser?.accountId)
+
+      if (rawReaders.length > 0) {
+        readByUsers = rawReaders
+          .filter((r) => Number(r.accountId || r.id) !== currentMyId)
+          .map((r) => ({
+            id: r.accountId || r.id,
+            name: r.username || r.name || "User",
+            avatar: r.avatarImageUrl || r.avatar || null,
+          }))
+      } else if (isLastMessageInChat) {
         if (isGroup) {
           const participants = conversation.participants || []
           const readIds = Array.isArray(msg.readByAccountIds)
@@ -220,8 +231,8 @@ export const useGroupedMessages = ({
             .filter((p) => {
               const pId = Number(p.accountId || p.id)
               return (
-                pId !== Number(currentUser.id) &&
-                pId !== Number(msg.senderId) &&
+                pId !== currentMyId &&
+                pId !== Number(msgSenderId) &&
                 readIds.includes(pId)
               )
             })
