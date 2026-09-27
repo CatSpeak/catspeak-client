@@ -63,7 +63,7 @@ const SpeakingResultPage = () => {
       topicTitle={session?.topic?.title_vi || session?.topic?.title}
       isAbandoned={session?.status === "abandoned"}
       onBackToCatalog={backToCatalog}
-      onGoHome={() => navigate(`/${lang}`)}
+      onGoHome={backToCatalog}
       onPracticeFlashcards={() => navigate(`/${lang}/ai-tutor/vocabulary-notebook`)}
     />
   )
