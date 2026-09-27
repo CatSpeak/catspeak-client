@@ -40,6 +40,9 @@ const SpeakingResultPage = lazy(
 const SpeakingRoomFlowLayout = lazy(
   () => import("@/features/ai-tutor/layouts/SpeakingRoomFlowLayout"),
 );
+const AiSpeakingReportPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingReportPage"),
+);
 const AiVocabularyNotebookPage = lazy(
   () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
 );
@@ -517,6 +520,15 @@ const routesConfig = [
                       { path: "sessions/:sessionId", element: <LazyRoute><SpeakingSessionPage /></LazyRoute> },
                       { path: "sessions/:sessionId/result", element: <LazyRoute><SpeakingResultPage /></LazyRoute> },
                     ],
+                  },
+                  {
+                    // TASK-AI-15: ss10 → ss11 (+ ss12, ss13) của một buổi nói
+                    path: "speaking-room/report/:sessionId",
+                    element: (
+                      <LazyRoute>
+                        <AiSpeakingReportPage />
+                      </LazyRoute>
+                    ),
                   },
                   {
                     path: "vocabulary-notebook",

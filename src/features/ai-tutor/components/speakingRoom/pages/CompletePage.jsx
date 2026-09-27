@@ -8,8 +8,10 @@ const CompletePage = ({
   progressPercent = 80,
   estimatedTime = "khoảng 2 giây",
   onViewReport,
+  // TASK-AI-15: số mục đã xong trong checklist, container tính theo tiến trình chờ.
+  doneCount = 3,
 }) => {
-  const checklist = [
+  const baseChecklist = [
     {
       id: "fluency",
       icon: "✓",
@@ -39,6 +41,11 @@ const CompletePage = ({
       isDone: false,
     },
   ]
+  const checklist = baseChecklist.map((item, idx) =>
+    idx < doneCount
+      ? { ...item, icon: "✓", statusText: "Hoàn tất", isDone: true }
+      : { ...item, icon: "⏳", statusText: item.isDone ? "Đang xử lý..." : item.statusText, isDone: false },
+  )
 
   return (
     <div className="w-full max-w-3xl mx-auto py-8 sm:py-12 px-4 sm:px-6 space-y-8 flex flex-col items-center justify-center min-h-[70vh]">

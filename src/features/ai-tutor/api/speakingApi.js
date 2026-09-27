@@ -3,9 +3,9 @@ import { baseApi } from "@/store/api/baseApi"
 const getSpeakingApiError = (error) => {
   const body = error?.data?.detail ?? error?.data
   return {
-    message: (typeof body === "string" ? body : body?.message || body?.code) || error?.error || "Yêu cầu phòng luyện nói thất bại.",
+    message: (typeof body === "string" ? body : body?.message || body?.code || body?.errorCode) || error?.error || "Yêu cầu phòng luyện nói thất bại.",
     status: error?.status,
-    code: body?.code,
+    code: body?.code || body?.errorCode,
     details: body,
   }
 }
@@ -16,37 +16,33 @@ export const speakingApi = baseApi.enhanceEndpoints({
   endpoints: (builder) => ({
     getSpeakingTopics: builder.query({
       query: (hskLevel) => ({
-        url: `speaking/topics${hskLevel ? `?hsk_level=${hskLevel}` : ""}`,
+        url: `/v1/speaking/topics${hskLevel ? `?hsk_level=${hskLevel}` : ""}`,
       }),
       transformErrorResponse: getSpeakingApiError,
     }),
     getSpeakingQuota: builder.query({
-      query: () => "speaking/quota",
+      query: () => "/v1/speaking/quota",
       providesTags: ["SpeakingQuota"],
       transformErrorResponse: getSpeakingApiError,
     }),
     getSpeakingLevel: builder.query({
-      query: () => "speaking/level",
+      query: () => "/v1/speaking/level",
       providesTags: ["SpeakingLevel"],
       transformErrorResponse: getSpeakingApiError,
     }),
     getActiveSpeakingSession: builder.query({
-      query: () => "speaking/sessions/active",
+      query: () => "/v1/speaking/sessions/active",
       providesTags: ["SpeakingSession"],
       transformErrorResponse: getSpeakingApiError,
     }),
     getSpeakingSession: builder.query({
-      query: (sessionId) => `speaking/sessions/${encodeURIComponent(sessionId)}`,
+      query: (sessionId) => `/v1/speaking/sessions/${encodeURIComponent(sessionId)}`,
       providesTags: ["SpeakingSession"],
-      transformErrorResponse: getSpeakingApiError,
-    }),
-    getSpeakingReport: builder.query({
-      query: (sessionId) => `speaking/sessions/${encodeURIComponent(sessionId)}/report`,
       transformErrorResponse: getSpeakingApiError,
     }),
     startSpeakingSession: builder.mutation({
       query: ({ topic_id, hsk_level }) => ({
-        url: "speaking/sessions",
+        url: "/v1/speaking/sessions",
         method: "POST",
         body: { topic_id, hsk_level },
       }),
@@ -55,16 +51,16 @@ export const speakingApi = baseApi.enhanceEndpoints({
     }),
     reconnectSpeakingSession: builder.mutation({
       query: (sessionId) => ({
-        url: `speaking/sessions/${encodeURIComponent(sessionId)}/reconnect`,
+        url: `/v1/speaking/sessions/${encodeURIComponent(sessionId)}/reconnect`,
         method: "POST",
       }),
       transformErrorResponse: getSpeakingApiError,
     }),
     endSpeakingSession: builder.mutation({
-      query: ({ sessionId, end_reason = "learner_quit", duration_ms }) => ({
-        url: `speaking/sessions/${encodeURIComponent(sessionId)}/end`,
+      query: ({ sessionId, end_reason = "early_finish" }) => ({
+        url: `/v1/speaking/sessions/${encodeURIComponent(sessionId)}/end`,
         method: "POST",
-        body: { end_reason, duration_ms },
+        body: { end_reason },
       }),
       transformErrorResponse: getSpeakingApiError,
       invalidatesTags: ["SpeakingSession", "SpeakingQuota"],
@@ -79,7 +75,6 @@ export const {
   useGetActiveSpeakingSessionQuery,
   useGetSpeakingSessionQuery,
   useLazyGetSpeakingSessionQuery,
-  useGetSpeakingReportQuery,
   useStartSpeakingSessionMutation,
   useReconnectSpeakingSessionMutation,
   useEndSpeakingSessionMutation,

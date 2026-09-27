@@ -24,7 +24,8 @@ const SpeakingRoomPage = () => {
       setSessionCredentials(credentials)
       navigate(`sessions/${session.session_id}`)
     } catch (error) {
-      const code = error?.data?.code || error?.data?.detail?.code || error?.code
+      const detail = error?.data?.detail
+      const code = detail?.code || detail?.errorCode || error?.data?.code || error?.code
       if (code === "QUOTA_EXCEEDED") {
         setQuotaModalOpen(true)
         return
@@ -33,7 +34,7 @@ const SpeakingRoomPage = () => {
         toast.error("Tài khoản đang có một phiên luyện nói trên thiết bị khác.")
         return
       }
-      toast.error(error?.data?.detail?.message || error?.message || "Không thể bắt đầu phiên luyện nói.")
+      toast.error(detail?.message || error?.data?.message || error?.message || "Không thể bắt đầu phiên luyện nói.")
     }
   }, [isLoading, navigate, setSessionCredentials, startSession])
 

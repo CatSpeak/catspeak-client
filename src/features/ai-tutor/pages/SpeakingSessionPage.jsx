@@ -48,14 +48,18 @@ const SpeakingSessionPage = () => {
     attemptedSession.current = sessionId
     setIsReconnecting(true)
     setConnectError(null)
-    const deadline = Date.now() + 14000
+    let deadline = Date.now() + 14000
     try {
       while (mounted.current && Date.now() < deadline) {
         const latest = await loadSession(sessionId, false).unwrap()
         if (!mounted.current) return
-        if (TERMINAL.has(latest.status)) {
+        if (TERMINAL.has(latest.status) || latest.status === "closing" || latest.status === "completing") {
           navigate(`result`, { replace: true })
           return
+        }
+        if (latest.reconnect_deadline) {
+          const parsed = new Date(latest.reconnect_deadline).getTime()
+          if (!Number.isNaN(parsed)) deadline = parsed
         }
         if (latest.status === "reconnecting") {
           const connection = await reconnect(sessionId).unwrap()
@@ -72,12 +76,13 @@ const SpeakingSessionPage = () => {
       if (mounted.current) setConnectError("Không thể khôi phục kết nối trong thời gian cho phép.")
     } catch (error) {
       if (!mounted.current) return
-      const code = error?.data?.code || error?.data?.detail?.code || error?.code
+      const detail = error?.data?.detail
+      const code = detail?.code || detail?.errorCode || error?.data?.code || error?.code
       if (code === "SESSION_RECONNECT_EXPIRED") {
         setConnectError("Thời gian kết nối lại đã hết. Hãy đóng phiên và bắt đầu buổi mới.")
         return
       }
-      setConnectError(error?.message || "Không thể khôi phục kết nối. Hãy thử lại.")
+      setConnectError(detail?.message || error?.message || "Không thể khôi phục kết nối. Hãy thử lại.")
     } finally {
       reconnecting.current = false
       if (mounted.current) setIsReconnecting(false)
@@ -86,7 +91,7 @@ const SpeakingSessionPage = () => {
 
   useEffect(() => {
     if (!session || credentials || isError) return
-    if (TERMINAL.has(session.status)) {
+    if (TERMINAL.has(session.status) || session.status === "closing" || session.status === "completing") {
       navigate("result", { replace: true })
       return
     }
@@ -98,13 +103,13 @@ const SpeakingSessionPage = () => {
   const handleLeave = useCallback(async () => {
     if (!sessionId || isEnding) return
     try {
-      await endSession({ sessionId, end_reason: "learner_quit", duration_ms: session?.duration_ms }).unwrap()
+      await endSession({ sessionId, end_reason: "early_finish" }).unwrap()
       setSessionCredentials(null)
       navigate("../", { replace: true })
     } catch (error) {
       toast.error(error?.message || "Không thể kết thúc phiên. Hãy thử lại.")
     }
-  }, [endSession, isEnding, navigate, session?.duration_ms, sessionId, setSessionCredentials])
+  }, [endSession, isEnding, navigate, sessionId, setSessionCredentials])
 
   if (isLoading || isReconnecting) {
     return <div className="mx-auto max-w-xl py-20 text-center text-sm font-semibold text-slate-600">Đang xác nhận trạng thái phòng luyện nói...</div>

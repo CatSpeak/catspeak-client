@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useReducer, useRef, useCallback } from "react"
 import { Room, RoomEvent, Track } from "livekit-client"
 import { toast } from "@/shared/utils/toastBridge"
-
-
+import { assistReducer, initialAssistState } from "../../../utils/speakingAssist"
 
 const TOPIC_SUBTITLE = "speaking-subtitle"
 const TOPIC_ASSIST = "speaking-assist"
@@ -12,7 +11,28 @@ const TOPIC_CONTROL = "speaking-control"
 /**
  * SpeakingPage component - interactive live AI speaking session room
  * connected with LiveKit Realtime Speaking Agent.
+ *
+ * Phụ đề, pinyin, nghĩa, gợi ý và mẹo sửa lỗi đi qua assistReducer
+ * (utils/speakingAssist.js): gói speaking-assist tới trước hay sau phụ đề đều
+ * được ghép đúng câu theo seq, và câu AI mới thì pinyin của câu cũ bị xóa
+ * chứ không hiện nhầm. Cách hiện gợi ý theo BR-SS-009: HSK 1-2 hiện sẵn, HSK 3-4
+ * thu vào nút "Gợi ý" (tự mở khi im lặng 10 giây), HSK 5-6 không hiện.
  */
+
+// Câu mẫu khi chưa có phụ đề nào (chưa nối phòng hoặc chạy thử không có token).
+const PLACEHOLDER_AI = {
+  text: "你好！准备好了吗？",
+  pinyin: "Nǐ hǎo! Zhǔnbèi hǎole ma?",
+  meaningVi: "Chào bạn! Bạn đã sẵn sàng chưa?",
+}
+
+const hintModeForLevel = (hskLevel) => {
+  const n = Number(hskLevel?.hsk_level ?? hskLevel?.hskLevel ?? hskLevel)
+  if (!n) return null
+  if (n <= 2) return "proactive"
+  if (n <= 4) return "chip"
+  return "none"
+}
 const SpeakingPage = ({
   sessionData,
   topicTitle = "Luyện nói tiếng Trung",
@@ -34,15 +54,8 @@ const SpeakingPage = ({
   const [totalRounds, setTotalRounds] = useState(
     () => sessionData?.topic?.script_turns || sessionData?.topic?.scriptTurns || 3
   )
-  const [aiText, setAiText] = useState(
-    () => sessionData?.topic?.openingZh || sessionData?.topic?.opening_zh || "你好！准备好了吗？"
-  )
-  const [aiPinyin, setAiPinyin] = useState("")
-  const [aiMeaning, setAiMeaning] = useState(
-    () => (sessionData?.topic?.title_vi ? `Chủ đề: ${sessionData.topic.title_vi}` : "Chào bạn! Bạn đã sẵn sàng chưa?")
-  )
-  const [hints, setHints] = useState([])
-  const [learnerText, setLearnerText] = useState("Micro đang tắt. Nhấn nút Micro bên dưới để bắt đầu nói...")
+  const [assist, dispatchAssist] = useReducer(assistReducer, initialAssistState)
+  const [chipOpenForSeq, setChipOpenForSeq] = useState(null)
   const [isAiSpeaking, setIsAiSpeaking] = useState(false)
   const [warnMessage, setWarnMessage] = useState(null)
   const [sessionSeconds, setSessionSeconds] = useState(0)
@@ -136,19 +149,18 @@ const SpeakingPage = ({
         const raw = new TextDecoder().decode(payload)
         const data = JSON.parse(raw)
 
+        if (topic === TOPIC_SUBTITLE || topic === TOPIC_ASSIST || topic === TOPIC_STATE) {
+          dispatchAssist({ topic, data })
+        }
+
         if (topic === TOPIC_SUBTITLE) {
-          if (data.text) {
-            setAiText(data.text)
+          if (data.text && data.role !== "learner") {
             setIsAiSpeaking(true)
             setTimeout(() => setIsAiSpeaking(false), 3500)
           }
-        } else if (topic === TOPIC_ASSIST) {
-          setAiPinyin(data.pinyin || "")
-          setAiMeaning(data.meaning_vi || "")
-          setHints(Array.isArray(data.hints) ? data.hints : [])
         } else if (topic === TOPIC_STATE) {
-          if (data.turn_index) setCurrentRound(data.turn_index)
-          if (data.script_turns) setTotalRounds(data.script_turns)
+          if (data.turn_index != null) setCurrentRound(data.turn_index)
+          if (data.script_turns != null) setTotalRounds(data.script_turns)
           if (data.warn === "silence_10s") {
             setWarnMessage("Bạn có cần AI hỗ trợ không? Hãy thử phát âm một từ gợi ý nhé!")
           } else if (data.warn === "time_4m") {
@@ -219,16 +231,37 @@ const SpeakingPage = ({
     }
   }, [volume])
 
+  // ── Dữ liệu hiển thị ─────────────────────────────────────────────────────
+  const ai = assist.ai || {
+    ...PLACEHOLDER_AI,
+    text: sessionData?.topic?.opening_zh || PLACEHOLDER_AI.text,
+    pinyin: "",
+    meaningVi: "",
+  }
+  const aiText = ai.text
+  const aiPinyin = ai.pinyin || ""
+  const aiMeaning = ai.meaningVi || ""
+  const learnerText = assist.learner?.text || ""
+  const hints = assist.hints || []
+  const correction = assist.correction
+  // Cấp của buổi quyết định cách hiện gợi ý; chỉ khi không biết cấp mới dùng
+  // hint_mode trong gói assist.
+  const hintMode = hintModeForLevel(sessionData?.hsk_level ?? sessionData?.hskLevel) || assist.hintMode || "none"
+  const chipOpen =
+    (assist.ai && chipOpenForSeq === assist.ai.seq) || assist.warn === "silence_10s"
+
   // ── Send Control Packet Helper ───────────────────────────────────────────
-  const sendControlPacket = async (action, hintId = null) => {
+  const sendControlPacket = async (action, hintId = null, extra = {}) => {
     const room = roomRef.current
-    if (!room || !room.localParticipant) return
-    const payload = { action, hint_id: hintId }
+    if (!room || !room.localParticipant || connectionStatus !== "connected") return false
+    const payload = { action, hint_id: hintId, ...extra }
     try {
       const raw = new TextEncoder().encode(JSON.stringify(payload))
-      await room.localParticipant.publishData(raw, { topic: TOPIC_CONTROL })
+      await room.localParticipant.publishData(raw, { topic: TOPIC_CONTROL, reliable: true })
+      return true
     } catch (err) {
       console.warn("[SpeakingPage] Failed to send control packet:", err)
+      return false
     }
   }
 
@@ -267,7 +300,6 @@ const SpeakingPage = ({
         // Bật mic trên LiveKit participant
         await room.localParticipant.setMicrophoneEnabled(true)
         setIsMicActive(true)
-        setLearnerText("Micro đã bật · Đang lắng nghe giọng nói của bạn...")
       } catch (err) {
         console.warn("[SpeakingPage] Mic permission denied or error:", err)
         const deniedMsg =
@@ -283,7 +315,6 @@ const SpeakingPage = ({
       try {
         await room.localParticipant.setMicrophoneEnabled(false)
         setIsMicActive(false)
-        setLearnerText("Micro đang tắt · Nhấn nút Micro để bật lại.")
       } catch (err) {
         console.warn("[SpeakingPage] Error disabling mic:", err)
       }
@@ -291,11 +322,16 @@ const SpeakingPage = ({
   }
 
 
-  const handleFinishEarly = () => {
+  const handleFinishEarly = async () => {
     if (isWrappingUp) return
     isWrappingUpRef.current = true
     setIsWrappingUp(true)
-    sendControlPacket("finish_early")
+    const sent = await sendControlPacket("finish_early", null, { end_reason: "early_finish" })
+    if (!sent) {
+      isWrappingUpRef.current = false
+      setIsWrappingUp(false)
+      toast.error("Không gửi được yêu cầu kết thúc. Hãy thử lại.")
+    }
   }
 
 
@@ -573,32 +609,67 @@ const SpeakingPage = ({
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm sm:text-base font-medium text-slate-700 leading-snug">
-                {learnerText}
-              </p>
+              {learnerText ? (
+                <p className="text-base sm:text-lg font-bold text-slate-800 leading-snug">
+                  “{learnerText}”
+                </p>
+              ) : (
+                <p className="text-sm sm:text-base font-medium text-slate-700 leading-snug">
+                  Đang lắng nghe bạn nói...
+                </p>
+              )}
             </div>
 
-            {/* Hint Chips Row */}
-            {hints.length > 0 && (
+            {/* Hint Chips Row: BR-SS-009, HSK 1-2 hiện sẵn, HSK 3-4 thu vào nút, HSK 5-6 ẩn */}
+            {hintMode !== "none" && hints.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-xs font-semibold text-amber-600 shrink-0">
-                  💡 Gợi ý:
-                </span>
-                {hints.map((hint, idx) => (
+                {hintMode === "chip" && !chipOpen ? (
                   <button
-                    key={idx}
                     type="button"
-                    onClick={() => sendControlPacket("play_hint", hint.id)}
-                    className="bg-blue-50/80 border border-blue-200 text-blue-700 hover:bg-blue-100/70 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-left flex items-center gap-1"
+                    onClick={() => setChipOpenForSeq(assist.ai?.seq ?? null)}
+                    className="bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100/70 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                   >
-                    <span>🗣️</span>
-                    <span>“{hint.text}” ({hint.meaning_vi || hint.pinyin})</span>
+                    💡 Gợi ý
                   </button>
-                ))}
+                ) : (
+                  <>
+                    <span className="text-xs font-semibold text-amber-600 shrink-0">
+                      💡 Gợi ý:
+                    </span>
+                    {hints.map((hint, idx) => (
+                      <button
+                        key={hint.id || idx}
+                        type="button"
+                        onClick={() => sendControlPacket("play_hint", hint.id)}
+                        title="Bấm để nghe mẫu giọng AI tốc độ chậm"
+                        className="bg-blue-50/80 border border-blue-200 text-blue-700 hover:bg-blue-100/70 text-xs font-medium px-2.5 py-1 rounded-lg transition-colors cursor-pointer text-left flex items-center gap-1"
+                      >
+                        <span>🗣️</span>
+                        <span>“{hint.text}” ({hint.meaning_vi || hint.pinyin})</span>
+                      </button>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </div>
         </div>
+
+        {/* Instant Error Correction Tip: chỉ hiện khi gói assist có correction
+            (lỗi cản trở hiểu nghĩa, ASR >= 0,8, dạng đúng không vượt cấp) */}
+        {correction && (
+          <div className="bg-amber-50/60 border border-amber-200/80 rounded-xl p-3.5 sm:p-4 flex items-start sm:items-center gap-2.5 text-xs sm:text-sm shadow-2xs">
+            <span className="text-amber-600 font-bold shrink-0 text-base">⚡</span>
+            <div className="flex flex-wrap items-center gap-1.5 text-amber-950">
+              <span className="font-extrabold text-amber-900 shrink-0">
+                MẸO SỬA LỖI TỨC THÌ:
+              </span>
+              <span>
+                Bạn nói: “{correction.original}” ➔ Thử nói: “{correction.corrected}”. {correction.note_vi || ""}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Bottom Control Area */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
