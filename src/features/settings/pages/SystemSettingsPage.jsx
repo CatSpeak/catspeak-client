@@ -8,7 +8,11 @@ import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCal
 import PageTitle from "@/shared/components/ui/PageTitle"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { getTimezoneOptions, getBrowserTimeZone } from "@/shared/constants/timezones"
-import { userApi } from "@/store/api/userApi"
+import { userApi, useGetUserProfileQuery } from "@/store/api/userApi"
+import { useProfileState } from "@/features/settings/hooks/useProfileState"
+import { useProfileMutations } from "@/features/settings/hooks/useProfileMutations"
+import AccountCredentialsForm from "@/features/settings/components/AccountCredentialsForm"
+import ChangePasswordSection from "@/features/settings/components/ChangePasswordSection"
 import { setCredentials } from "@/store/slices/authSlice"
 import { toast } from "react-hot-toast"
 
@@ -21,6 +25,23 @@ const SystemSettingsPage = () => {
   const token = useSelector((state) => state.auth?.token)
   const dispatch = useDispatch()
   const [updateUserProfile] = userApi.useUpdateUserProfileMutation()
+
+  // Credentials (username, nickname) moved from /setting/account.
+  const { data: privateProfileData } = useGetUserProfileQuery()
+  const profile = privateProfileData?.data ?? privateProfileData ?? null
+  const stateHooks = useProfileState(profile)
+  const mutationHooks = useProfileMutations(t, profile, stateHooks)
+
+  const {
+    formData,
+    editingField,
+    errors,
+    handleEdit,
+    handleCancel,
+    handleChange,
+  } = stateHooks
+
+  const { isUpdating, handleSave } = mutationHooks
 
   const currentTz = user?.timeZone || getBrowserTimeZone()
   const [selectedTz, setSelectedTz] = useState(currentTz)
@@ -109,7 +130,25 @@ const SystemSettingsPage = () => {
     <div>
       <PageTitle>{t.nav?.systemConfig || "Thiết lập hệ thống"}</PageTitle>
 
-      <div className="space-y-4 mt-3">
+      <div className="flex flex-col gap-6 w-full mt-3">
+        <AccountCredentialsForm
+          formData={formData}
+          editingField={editingField}
+          isUpdating={isUpdating}
+          onEdit={handleEdit}
+          onCancel={handleCancel}
+          onSave={handleSave}
+          onChange={handleChange}
+          errors={errors}
+          t={t}
+        />
+
+        <FluentCard className="flex flex-col w-full p-6 sm:p-8 gap-4 border-border rounded-xl shadow-sm !justify-start">
+          <ChangePasswordSection t={t} />
+        </FluentCard>
+      </div>
+
+      <div className="space-y-4 mt-6">
         <FluentCard>
           <div className="flex items-center justify-between gap-5">
             <label className="text-sm font-medium">

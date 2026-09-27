@@ -90,7 +90,10 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
   const [step, setStep] = useState("input")
   const [bankBin, setBankBin] = useState("")
   const [accountNumber, setAccountNumber] = useState("")
+  const [accountHolderName, setAccountHolderName] = useState("")
   const [accountError, setAccountError] = useState("")
+  const [holderError, setHolderError] = useState("")
+  const [verifyWarning, setVerifyWarning] = useState("")
   const [consent, setConsent] = useState(false)
   const [requestError, setRequestError] = useState("")
   const [verified, setVerified] = useState(null)
@@ -143,45 +146,82 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
       ? ins.bankAccountNumberInvalid || "Số tài khoản phải có từ 6 đến 20 chữ số"
       : ""
   const shownAccountError = accountError || clientAccountError
-  const canCheck = Boolean(bankBin) && accountIsValid
+  const holderName = accountHolderName.trim()
+  const holderIsValid = holderName.length >= 2 && holderName.length <= 100
+  const clientHolderError =
+    accountHolderName !== "" && !holderIsValid
+      ? ins.bankAccountHolderInvalid ||
+        "Tên chủ tài khoản phải từ 2 đến 100 ký tự"
+      : ""
+  const shownHolderError = holderError || clientHolderError
+  const canCheck = Boolean(bankBin) && accountIsValid && holderIsValid
   const maskedCurrentPhone = maskPhone(currentPhone)
 
   const resolveBankError = (err, fallbackMessage, fallbackTarget) => {
     const { errorCode, message } = parseApiError(err)
     switch (errorCode) {
       case "BANK_ACCOUNT_VERIFICATION_FAILED":
-        return { target: "account", message: ins.bankVerifyError || message }
+        return { target: "account", message: message || ins.bankVerifyError }
       case "ACCOUNT_OTP_REQUIRED":
-        return { target: "otp", message: ins.bankOtpRequired || message }
+        return { target: "otp", message: message || ins.bankOtpRequired }
       case "ACCOUNT_INVALID_OTP":
-        return { target: "otp", message: ins.bankOtpInvalid || message }
+        return { target: "otp", message: message || ins.bankOtpInvalid }
       case "ACCOUNT_OTP_TOO_MANY_ATTEMPTS":
         return {
           target: "otp",
-          message: ins.bankOtpAttemptsExceeded || message,
+          message: message || ins.bankOtpAttemptsExceeded,
           tooMany: true,
         }
       default:
-        return { target: fallbackTarget, message: fallbackMessage || message }
+        return { target: fallbackTarget, message: message || fallbackMessage }
     }
   }
+
+  const buildManualVerified = () => ({
+    bankBin,
+    bankShortName: selectedBank?.label || "",
+    bankFullName: "",
+    accountNumber: accountDigits,
+    accountHolderName: holderName.toUpperCase(),
+    isVerified: false,
+  })
 
   const handleCheck = async () => {
     if (!canCheck || isVerifying) return
     setAccountError("")
+    setHolderError("")
+    if (!holderIsValid) {
+      setHolderError(
+        ins.bankAccountHolderInvalid ||
+          "Tên chủ tài khoản phải từ 2 đến 100 ký tự",
+      )
+      return
+    }
     try {
       const result = await verifyBankAccount({
         BankBin: bankBin,
         AccountNumber: accountDigits,
       }).unwrap()
-      setVerified({
-        bankBin: result.bankBin || bankBin,
-        bankShortName:
-          result.bankShortName || selectedBank?.label || "",
-        bankFullName: result.bankFullName || "",
-        accountNumber: result.accountNumber || accountDigits,
-        accountHolderName: result.accountHolderName || "",
-      })
+      const verifiedName = String(result.accountHolderName || "").trim()
+      if (verifiedName) {
+        setVerified({
+          bankBin: result.bankBin || bankBin,
+          bankShortName:
+            result.bankShortName || selectedBank?.label || "",
+          bankFullName: result.bankFullName || "",
+          accountNumber: result.accountNumber || accountDigits,
+          accountHolderName: verifiedName.toUpperCase(),
+          isVerified: true,
+        })
+        setVerifyWarning("")
+      } else {
+        setVerified(buildManualVerified())
+        setVerifyWarning(
+          result.message ||
+            ins.bankUnverifiedWarning ||
+            "Tài khoản chưa được ngân hàng xác thực tự động. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục.",
+        )
+      }
       setConsent(false)
       setRequestError("")
       setStep("confirm")
@@ -191,7 +231,15 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
         ins.bankVerifyError || "Không thể xác thực tài khoản ngân hàng.",
         "account",
       )
-      setAccountError(message)
+      setVerified(buildManualVerified())
+      setVerifyWarning(
+        message ||
+          ins.bankUnverifiedWarning ||
+          "Tài khoản chưa được ngân hàng xác thực tự động. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục.",
+      )
+      setConsent(false)
+      setRequestError("")
+      setStep("confirm")
     }
   }
 
@@ -199,6 +247,7 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
     const result = await requestBankAccountOtp({
       BankBin: verified?.bankBin,
       AccountNumber: verified?.accountNumber,
+      AccountHolderName: verified?.accountHolderName,
       IsDefault: true,
     }).unwrap()
     setChallenge({
@@ -392,16 +441,30 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
         </div>
       ) : isConfirmStep ? (
         <div className="flex flex-col gap-3.5">
-          <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFF3F4] px-3.5 py-2.5">
-            <ShieldCheck
-              size={18}
-              className="mt-0.5 shrink-0 text-[#F52235]"
-            />
-            <p className="text-[10px] font-semibold leading-4 text-[#F52235]">
-              {ins.bankStep2Banner ||
-                "Thông tin tài khoản mới đã được xác thực với ngân hàng. Vui lòng kiểm tra kỹ thông tin bên dưới trước khi gửi mã xác thực."}
-            </p>
-          </div>
+          {verified?.isVerified === false || verifyWarning ? (
+            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFFAEB] px-3.5 py-2.5">
+              <ShieldCheck
+                size={18}
+                className="mt-0.5 shrink-0 text-[#B54708]"
+              />
+              <p className="text-[10px] font-semibold leading-4 text-[#B54708]">
+                {verifyWarning ||
+                  ins.bankUnverifiedWarning ||
+                  "Tài khoản chưa được ngân hàng xác thực tự động. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục."}
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFF3F4] px-3.5 py-2.5">
+              <ShieldCheck
+                size={18}
+                className="mt-0.5 shrink-0 text-[#F52235]"
+              />
+              <p className="text-[10px] font-semibold leading-4 text-[#F52235]">
+                {ins.bankStep2Banner ||
+                  "Thông tin tài khoản mới đã được xác thực với ngân hàng. Vui lòng kiểm tra kỹ thông tin bên dưới trước khi gửi mã xác thực."}
+              </p>
+            </div>
+          )}
 
           <span className="text-sm font-semibold text-[#101828]">
             {ins.bankCurrentAccount || "Tài khoản hiện tại"}
@@ -419,7 +482,9 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
           <Divider />
 
           <span className="text-sm font-semibold text-[#101828]">
-            {ins.bankVerifiedInfo || "Thông tin tài khoản mới (đã được xác thực)"}
+            {verified?.isVerified === false
+              ? ins.bankManualInfo || "Thông tin tài khoản mới (tự nhập)"
+              : ins.bankVerifiedInfo || "Thông tin tài khoản mới (đã được xác thực)"}
           </span>
           <div className="flex flex-col rounded-lg border border-[#D0D5DD] px-4 py-3.5">
             <SummaryRow
@@ -461,8 +526,11 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
               )}
             </span>
             <span className="text-[10px] leading-4 text-[#101828]">
-              {ins.bankConsent ||
-                "Tôi xác nhận thông tin tài khoản trên là chính xác và đồng ý sử dụng tài khoản này để nhận thanh toán từ Cat Speak."}
+              {verified?.isVerified === false
+                ? ins.bankConsentManual ||
+                  "Tôi xác nhận đã kiểm tra kỹ và chịu trách nhiệm nếu sai tên chủ tài khoản. Tôi đồng ý dùng tài khoản này để nhận thanh toán từ Cat Speak."
+                : ins.bankConsent ||
+                  "Tôi xác nhận thông tin tài khoản trên là chính xác và đồng ý sử dụng tài khoản này để nhận thanh toán từ Cat Speak."}
             </span>
           </label>
 
@@ -587,6 +655,34 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
             {shownAccountError && (
               <p role="alert" className="text-xs text-red-500">
                 {shownAccountError}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold text-[#101828]">
+              {ins.bankAccountHolder || "Tên chủ tài khoản"}
+            </span>
+            <input
+              type="text"
+              autoComplete="off"
+              value={accountHolderName}
+              disabled={isVerifying}
+              placeholder={
+                ins.bankAccountHolderPlaceholder ||
+                "Nhập tên chủ tài khoản..."
+              }
+              onChange={(event) => {
+                setAccountHolderName(event.target.value.slice(0, 100))
+                setHolderError("")
+              }}
+              className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
+                shownHolderError ? "border-red-500" : "border-[#D0D5DD]"
+              }`}
+            />
+            {shownHolderError && (
+              <p role="alert" className="text-xs text-red-500">
+                {shownHolderError}
               </p>
             )}
           </div>

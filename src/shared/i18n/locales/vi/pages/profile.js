@@ -303,6 +303,13 @@ export default {
       "Bạn đã nhập sai quá số lần cho phép. Vui lòng lấy mã mới.",
     bankVerifyError:
       "Không thể xác thực tài khoản ngân hàng. Vui lòng kiểm tra lại số tài khoản.",
+    bankAccountHolderPlaceholder: "Nhập tên chủ tài khoản...",
+    bankAccountHolderInvalid: "Tên chủ tài khoản phải từ 2 đến 100 ký tự",
+    bankUnverifiedWarning:
+      "Tài khoản chưa được ngân hàng xác thực tự động. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục.",
+    bankManualInfo: "Thông tin tài khoản mới (tự nhập)",
+    bankConsentManual:
+      "Tôi xác nhận đã kiểm tra kỹ và chịu trách nhiệm nếu sai tên chủ tài khoản. Tôi đồng ý dùng tài khoản này để nhận thanh toán từ Cat Speak.",
     bankRequestError: "Không thể gửi mã xác thực. Vui lòng thử lại.",
     bankConfirmError:
       "Không thể cập nhật tài khoản ngân hàng. Vui lòng thử lại.",

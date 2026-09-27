@@ -1,16 +1,18 @@
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useMemo } from "react"
 import { ChevronDown, X } from "lucide-react"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import Dropdown from "@/shared/components/ui/Dropdown"
 import FluentCard from "@/shared/components/ui/FluentCard"
 import { getLocalizedLanguageName } from "@/features/courses/data/courseFormOptions"
+import {
+  useGetInstructorLanguagesQuery,
+  useGetInstructorLanguageLevelsQuery,
+} from "@/store/api/instructorApi"
 
-const LANGUAGE_LEVELS = {
-  "English": ["B2", "C1", "C2"],
-  "Chinese": ["HSK 4", "HSK 5", "HSK 6", "HSK 7", "HSK 8", "HSK 9"],
-  "Japanese": ["N2", "N1"],
+const toList = (data) => {
+  const raw = data?.data ?? data
+  return Array.isArray(raw) ? raw : []
 }
-const LANGUAGE_OPTIONS = Object.keys(LANGUAGE_LEVELS)
 
 const getLocalizedLanguageLabel = (t, langKey) =>
   getLocalizedLanguageName(langKey, t) || langKey || ""
@@ -29,7 +31,7 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
     if (exists) {
       onChange(selected.filter((item) => item.language !== lang))
     } else {
-      onChange([...selected, { language: lang, level: "", yearsExperience: 0 }])
+      onChange([...selected, { language: lang, level: "" }])
     }
   }
 
@@ -94,6 +96,64 @@ const LanguageMultiSelect = ({ selected, onChange, options, disabled = false, pl
   )
 }
 
+const LanguageLevelDropdown = ({
+  item,
+  index,
+  languageId,
+  readOnly,
+  onLanguagesChange,
+  formData,
+  errors,
+  ins,
+}) => {
+  const { data: levelsData } = useGetInstructorLanguageLevelsQuery(languageId, {
+    skip: !languageId,
+  })
+  const levels = useMemo(
+    () => toList(levelsData).map((l) => l.name || l.Name),
+    [levelsData],
+  )
+
+  return (
+    <div className="flex-1 min-w-0">
+      <Dropdown
+        options={levels.map((code) => ({
+          value: code,
+          label: code,
+        }))}
+        value={item.level}
+        onChange={(val) => {
+          if (readOnly) return
+          const updated = formData.languagesTeach.map((lang, i) =>
+            i === index ? { ...lang, level: val } : lang,
+          )
+          onLanguagesChange(updated)
+        }}
+        disabled={readOnly}
+        placeholder={ins.selectLevel || "Chọn trình độ"}
+        trigger={(isOpen, selectedOption, toggle) => (
+          <button
+            type="button"
+            onClick={toggle}
+            disabled={readOnly}
+            className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${(errors.languagesTeachLevel || errors.languagesTeach) && !item.level ? "border-red-500" : "border-border"}`}
+          >
+            <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
+              {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
+            </span>
+            <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+          </button>
+        )}
+      />
+      {(errors.languagesTeachLevel || errors.languagesTeach) && !item.level && (
+        <p className="text-xs text-red-500 font-medium mt-1">
+          {ins.requiredField || "Trường này là bắt buộc"}
+        </p>
+      )}
+    </div>
+  )
+}
+
 const InstructorLanguages = ({
   formData,
   onChange,
@@ -103,6 +163,12 @@ const InstructorLanguages = ({
   t,
 }) => {
   const ins = t.profile?.instructor || {}
+  const { data: languagesData } = useGetInstructorLanguagesQuery()
+  const languagesList = useMemo(() => toList(languagesData), [languagesData])
+  const languageOptions = useMemo(
+    () => languagesList.map((item) => item.name || item.Name),
+    [languagesList],
+  )
 
   return (
     <FluentCard className="gap-6 !justify-start h-full min-h-[365px]">
@@ -119,7 +185,7 @@ const InstructorLanguages = ({
             selected={formData.languagesTeach || []}
             disabled={readOnly}
             onChange={onLanguagesChange}
-            options={LANGUAGE_OPTIONS}
+            options={languageOptions}
             placeholder={ins.selectLanguages || "Chọn ngôn ngữ"}
             t={t}
           />
@@ -133,102 +199,34 @@ const InstructorLanguages = ({
             </label>
             <div className="grid grid-cols-1 gap-3">
               {formData.languagesTeach.map((item, index) => {
-                const updateYears = (v) => {
-                  if (readOnly) return
-                  let n = parseInt(v, 10)
-                  if (Number.isNaN(n)) n = 0
-                  n = Math.max(0, Math.min(50, n))
-                  const updated = formData.languagesTeach.map((lang, i) =>
-                    i === index ? { ...lang, yearsExperience: n } : lang
-                  )
-                  onLanguagesChange(updated)
-                }
+                const match = languagesList.find(
+                  (l) => (l.name || l.Name) === item.language,
+                )
+                const languageId = match ? (match.id ?? match.Id) : undefined
+
                 return (
-                <div key={item.language} className="flex flex-col gap-2 rounded-xl border border-border bg-white p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-gray-800 truncate">
-                      {getLocalizedLanguageLabel(t, item.language)}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                      <Dropdown
-                        options={(LANGUAGE_LEVELS[item.language] || []).map((code) => ({
-                          value: code,
-                          label: code,
-                        }))}
-                        value={item.level}
-                        onChange={(val) => {
-                          if (readOnly) return
-                          const updated = formData.languagesTeach.map((lang, i) =>
-                            i === index ? { ...lang, level: val } : lang
-                          )
-                          onLanguagesChange(updated)
-                        }}
-                        disabled={readOnly}
-                        placeholder={ins.selectLevel || "Chọn trình độ"}
-                        trigger={(isOpen, selectedOption, toggle) => (
-                          <button
-                            type="button"
-                            onClick={toggle}
-                            disabled={readOnly}
-                            className={`w-full h-11 px-3 rounded-xl flex items-center justify-between gap-2 transition bg-gray-50/50 border text-gray-700 hover:bg-gray-100/50 disabled:opacity-50 ${(errors.languagesTeachLevel || errors.languagesTeach) && !item.level ? "border-red-500" : "border-border"}`}
-                          >
-                            <span className={`flex-1 text-left text-sm truncate min-w-0 ${!selectedOption ? "text-gray-400" : ""}`}>
-                              {selectedOption ? selectedOption.label : (ins.selectLevel || "Chọn trình độ")}
-                            </span>
-                            <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                          </button>
-                        )}
-                      />
-                      {(errors.languagesTeachLevel || errors.languagesTeach) && !item.level && (
-                        <p className="text-xs text-red-500 font-medium mt-1">
-                          {ins.requiredField || "Trường này là bắt buộc"}
-                        </p>
-                      )}
+                  <div key={item.language} className="flex flex-col gap-2 rounded-xl border border-border bg-white p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm font-semibold text-gray-800 truncate">
+                        {getLocalizedLanguageLabel(t, item.language)}
+                      </span>
                     </div>
-                  <div className="flex items-center justify-between gap-2 pt-1">
-                    <label className="text-sm font-medium text-gray-600">
-                      {ins.yearsExperience || "Số năm kinh nghiệm"}
-                    </label>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        disabled={readOnly}
-                        onClick={() => updateYears((item.yearsExperience ?? 0) - 1)}
-                        aria-label="Giảm năm kinh nghiệm"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-gray-50/50 text-lg font-bold text-gray-600 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
-                      >
-                        −
-                      </button>
-                      <input
-                        type="number"
-                        min={0}
-                        max={50}
-                        step={1}
-                        value={item.yearsExperience ?? 0}
-                        disabled={readOnly}
-                        title={ins.yearsExperience || "Số năm kinh nghiệm"}
-                        placeholder="0"
-                        onChange={(e) => updateYears(e.target.value)}
-                        className={`w-16 h-9 px-2 rounded-xl bg-gray-50/50 border text-sm text-gray-700 text-center disabled:opacity-50 ${(errors.languagesTeachExperience || errors.languagesTeach) && (item.yearsExperience === undefined || item.yearsExperience === null) ? "border-red-500" : "border-border"}`}
-                      />
-                      <button
-                        type="button"
-                        disabled={readOnly}
-                        onClick={() => updateYears((item.yearsExperience ?? 0) + 1)}
-                        aria-label="Tăng năm kinh nghiệm"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-gray-50/50 text-lg font-bold text-gray-600 hover:bg-gray-100 transition disabled:opacity-50 cursor-pointer"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+                    <LanguageLevelDropdown
+                      item={item}
+                      index={index}
+                      languageId={languageId}
+                      readOnly={readOnly}
+                      onLanguagesChange={onLanguagesChange}
+                      formData={formData}
+                      errors={errors}
+                      ins={ins}
+                    />
                   </div>
                 )
               })}
-              </div>
             </div>
-          )}
+          </div>
+        )}
 
         <div id="field-nativeLanguage" className="flex flex-col gap-2">
           <label className="text-sm font-semibold text-gray-800">
