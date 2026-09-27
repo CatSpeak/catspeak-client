@@ -81,6 +81,7 @@ export default {
     billing: "Lịch sử thanh toán",
     recordings: "Bản ghi hình",
     myRooms: "Phòng của tôi",
+    pointsAndOffers: "Điểm thưởng & Ưu đãi",
     back: "Quay lại",
     accountInfo: "Thông tin tài khoản",
     systemConfig: "Thiết lập hệ thống",

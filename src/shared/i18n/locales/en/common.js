@@ -81,6 +81,7 @@ export default {
     billing: "Payment History",
     recordings: "Recordings",
     myRooms: "My Rooms",
+    pointsAndOffers: "Points & Offers",
     back: "Back",
     accountInfo: "Account Info",
     systemConfig: "System Configuration",

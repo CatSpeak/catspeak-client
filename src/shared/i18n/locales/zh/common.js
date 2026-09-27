@@ -81,6 +81,7 @@ export default {
     billing: "支付历史",
     recordings: "录像",
     myRooms: "我的房间",
+    pointsAndOffers: "积分与特惠",
     back: "返回",
     accountInfo: "账户信息",
     systemConfig: "系统设置",

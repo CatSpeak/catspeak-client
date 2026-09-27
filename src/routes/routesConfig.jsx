@@ -155,6 +155,9 @@ const CreateVoucherPage = lazy(
 const VoucherDetailPage = lazy(
   () => import("@/features/vouchers/pages/VoucherDetailPage"),
 );
+const PointsAndOffersPage = lazy(
+  () => import("@/features/points-and-offers/pages/PointsAndOffersPage"),
+);
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
 );
@@ -251,6 +254,10 @@ const routesConfig = [
                 </LazyRoute>
               </AuthGuard>
             ),
+          },
+          {
+            path: "points-and-offers",
+            element: <Navigate to="/workspace/points-and-offers" replace />,
           },
           {
             path: "explore-courses",
@@ -1113,6 +1120,22 @@ const routesConfig = [
                     <Profile />
                   </LazyRoute>
                 ),
+              },
+              {
+                path: "points-and-offers",
+                element: (
+                  <LazyRoute>
+                    <PointsAndOffersPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "bonus-points",
+                element: <Navigate to="/workspace/points-and-offers" replace />,
+              },
+              {
+                path: "voucher-exchange",
+                element: <Navigate to="/workspace/points-and-offers" replace />,
               },
               { path: "*", element: <PageNotFound /> },
             ],
