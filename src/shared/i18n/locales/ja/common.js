@@ -78,6 +78,7 @@ export default {
     billing: "支払い履歴",
     recordings: "録画",
     myRooms: "マイルーム",
+    pointsAndOffers: "ポイントと特典",
     back: "戻る",
     accountInfo: "アカウント情報",
     systemConfig: "システム設定",
