@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
   Reply,
   MoreHorizontal,
@@ -9,17 +9,20 @@ import {
   Pin,
   PinOff,
   Forward,
+  Smile,
 } from "lucide-react"
 import toast from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
 import { IconButton } from "@/shared/components/ui/buttons"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import FloatingReactionsBar from "./FloatingReactionsBar"
 
 /**
  * ChatBubbleActions — action bar & popover menu for chat message bubbles.
  *
  * Provides actions:
+ * - React (Messenger style smile icon + emoji bar popover)
  * - Reply
  * - Edit (if allowed)
  * - Pin / Unpin (if authorized)
@@ -30,6 +33,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  */
 const ChatBubbleActions = ({
   isOwn = false,
+  onReact,
   onReply,
   onEdit,
   onForward,
@@ -45,6 +49,24 @@ const ChatBubbleActions = ({
   isWidget = false,
 }) => {
   const { t } = useLanguage()
+  const [isReactionOpen, setIsReactionOpen] = useState(false)
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
+
+  const handleMoreOpenChange = (open) => {
+    setIsMoreOpen(open)
+    onMenuOpenChange?.(open || isReactionOpen)
+  }
+
+  const handleReactionOpenChange = (open) => {
+    setIsReactionOpen(open)
+    onMenuOpenChange?.(open || isMoreOpen)
+  }
+
+  const isAnyMenuOpen = isReactionOpen || isMoreOpen
+  const visibilityClass = isAnyMenuOpen
+    ? "opacity-100"
+    : "opacity-0 group-hover:opacity-100"
+
   const contentToCopy =
     message?.content ||
     message?.messageContent ||
@@ -155,13 +177,13 @@ const ChatBubbleActions = ({
   if (isWidget) {
     return (
       <div
-        className={`absolute bottom-0 z-10 flex items-center transition-opacity opacity-0 group-hover:opacity-100 ${
+        className={`absolute top-1/2 -translate-y-1/2 z-10 flex items-center transition-opacity ${visibilityClass} ${
           isOwn ? "right-full mr-2 flex-row-reverse" : "left-full ml-2 flex-row"
         }`}
       >
         <Popover
           placement="top-right"
-          onOpenChange={onMenuOpenChange}
+          onOpenChange={handleMoreOpenChange}
           trigger={
             <IconButton
               type="button"
@@ -179,10 +201,33 @@ const ChatBubbleActions = ({
 
   return (
     <div
-      className={`absolute bottom-0 z-10 flex items-center transition-opacity opacity-0 group-hover:opacity-100 ${
+      className={`absolute top-1/2 -translate-y-1/2 z-10 flex items-center transition-opacity ${visibilityClass} ${
         isOwn ? "right-full mr-2 flex-row-reverse" : "left-full ml-2 flex-row"
       }`}
     >
+      {onReact && (
+        <Popover
+          placement={isOwn ? "top-right" : "top-left"}
+          onOpenChange={handleReactionOpenChange}
+          trigger={
+            <IconButton
+              type="button"
+              variant="ghost"
+              title={t?.chat?.actions?.react || "React"}
+            >
+              <Smile />
+            </IconButton>
+          }
+          content={(close) => (
+            <FloatingReactionsBar
+              onReact={onReact}
+              onClose={close}
+              isOwn={isOwn}
+            />
+          )}
+        />
+      )}
+
       {onReply && (
         <IconButton
           type="button"
@@ -207,7 +252,7 @@ const ChatBubbleActions = ({
 
       <Popover
         placement="top-right"
-        onOpenChange={onMenuOpenChange}
+        onOpenChange={handleMoreOpenChange}
         trigger={
           <IconButton
             type="button"

@@ -1,18 +1,16 @@
 import React from "react"
 
 /**
- * MessageReactionBadges — Displays reaction chips (e.g. ❤️ 3, 👍 1) under the message bubble.
- * Clicking a badge toggles the reaction for the user.
- * Clicking with Shift or clicking the details pill opens the user breakdown modal.
+ * MessageReactionBadges — Clean, separated reaction badges row below the message bubble.
+ * Displays individual interactive pill buttons with emoji and count.
+ * Clicking any badge opens the ReactionDetailsModal focused on that emoji tab.
  *
  * @param {Array}    reactions - Grouped reactions [{ emoji, count, hasReacted, userIds }]
- * @param {function} onToggle - (emoji) => void
- * @param {function} onViewDetails - () => void
+ * @param {function} onViewDetails - (emoji: string) => void
  * @param {boolean}  isOwn - whether current message belongs to current user
  */
 const MessageReactionBadges = ({
   reactions = [],
-  onToggle,
   onViewDetails,
   isOwn = false,
 }) => {
@@ -22,11 +20,9 @@ const MessageReactionBadges = ({
   const activeGroups = reactions.filter((r) => (r.count || 0) > 0)
   if (activeGroups.length === 0) return null
 
-  const totalCount = activeGroups.reduce((sum, g) => sum + (g.count || 0), 0)
-
   return (
     <div
-      className={`flex flex-wrap items-center gap-1 mt-1 z-10 ${
+      className={`flex flex-wrap items-center gap-1 mt-1 z-10 select-none ${
         isOwn ? "justify-end" : "justify-start"
       }`}
       onClick={(e) => e.stopPropagation()}
@@ -38,35 +34,23 @@ const MessageReactionBadges = ({
           <button
             key={group.emoji}
             type="button"
-            onClick={() => onToggle && onToggle(group.emoji)}
+            onClick={() => onViewDetails && onViewDetails(group.emoji)}
             title={
               hasReacted
-                ? `You reacted with ${group.emoji} (click to remove)`
-                : `React with ${group.emoji}`
+                ? `You reacted with ${group.emoji} • Click to see who reacted`
+                : `Click to see who reacted`
             }
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border transition-all duration-150 active:scale-95 shadow-2xs select-none ${
+            className={`h-8 inline-flex items-center gap-2 px-2.5 rounded-lg text-sm border transition-colors cursor-pointer ${
               hasReacted
-                ? "border-primary/50 bg-primary/10 text-primary font-semibold ring-1 ring-primary/20"
-                : "border-border/60 bg-white/90 dark:bg-zinc-800/90 text-neutral-700 dark:text-neutral-300 hover:border-border hover:bg-neutral-50 dark:hover:bg-zinc-700/60"
+                ? "border-primary bg-primary/10 text-primary hover:bg-primary/15"
+                : "border-border bg-white hover:bg-neutral-50 text-neutral-700"
             }`}
           >
-            <span className="text-xs leading-none">{group.emoji}</span>
-            <span className="text-[11px] leading-none font-semibold">{group.count}</span>
+            <span className="text-sm select-none">{group.emoji}</span>
+            <span className="text-sm font-medium">{group.count}</span>
           </button>
         )
       })}
-
-      {/* Details indicator pill if multiple reactions exist */}
-      {totalCount > 1 && onViewDetails && (
-        <button
-          type="button"
-          onClick={onViewDetails}
-          title="View all reactions"
-          className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-zinc-700/60 border border-border/40 transition-colors"
-        >
-          {totalCount}
-        </button>
-      )}
     </div>
   )
 }

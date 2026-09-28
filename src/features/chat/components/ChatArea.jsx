@@ -1,9 +1,8 @@
-import { memo, useEffect, useRef, useCallback, useMemo, useState } from "react"
+import { memo, useEffect, useRef, useCallback, useMemo } from "react"
 import ChatBubble from "./messages/ChatBubble"
 import MediaUploadBubble from "./messages/MediaUploadBubble"
 import ChatInput from "./ChatInput"
 import ChatHeader from "./ChatHeader"
-import InChatSearchBar from "./search/InChatSearchBar"
 import PinnedMessageBar from "./PinnedMessageBar"
 import ChatMessagesSkeleton from "./ChatMessagesSkeleton"
 import DateSeparator from "./messages/DateSeparator"
@@ -52,6 +51,8 @@ const ChatArea = ({
   onToggleReaction,
   onPin,
   onUnpin,
+  onToggleSearch,
+  isSearchOpen = false,
   pendingUpload = null,
   onRetryUpload,
   onCancelUpload,
@@ -62,7 +63,6 @@ const ChatArea = ({
   const isPrependingRef = useRef(false)
   const prevScrollHeightRef = useRef(0)
   const prevMessagesLengthRef = useRef(0)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
 
   // ── In-Chat LiveKit Calls ──────────────────────────────
   const {
@@ -234,7 +234,7 @@ const ChatArea = ({
         conversation={conversation}
         onBack={onBack}
         onToggleInfo={onToggleInfo}
-        onToggleSearch={() => setIsSearchOpen((prev) => !prev)}
+        onToggleSearch={onToggleSearch}
         onStartCall={startCall}
         isSearchOpen={isSearchOpen}
         friendOnlineStatus={friendOnlineStatus}
@@ -245,14 +245,6 @@ const ChatArea = ({
         conversationId={conversation?.id}
         onJoinCall={joinCall}
         isCallModalOpen={isCallModalOpen}
-      />
-
-      {/* ── In-Chat Search Bar ─────────────────────── */}
-      <InChatSearchBar
-        conversationId={conversation?.id}
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        onJumpToMessage={handleJumpToMessage}
       />
 
       {/* ── Pinned Message Banner ──────────────────── */}

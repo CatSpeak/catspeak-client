@@ -38,18 +38,18 @@ const ChatHeader = ({
   }
   const reduxFriendOnlineStatus = useSelector(
     (state) => state.notification?.friendOnlineStatus || {},
-  );
+  )
   const reduxFriendLastSeen = useSelector(
     (state) => state.notification?.friendLastSeen || {},
-  );
-  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus;
+  )
+  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus
   const isOnline =
     !isGroup &&
     friendId &&
-    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false);
+    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false)
 
   const lastSeenTime =
-    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen;
+    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen
 
   const statusText = isGroup
     ? t?.chat?.memberCount
@@ -57,7 +57,7 @@ const ChatHeader = ({
       : `${memberCount} members`
     : isOnline
       ? t?.chat?.online || "Online"
-      : formatRelative(lastSeenTime);
+      : formatRelative(lastSeenTime)
 
   return (
     <div className="flex items-center justify-between px-4 h-[72px] border-b border-border shrink-0">
@@ -112,7 +112,7 @@ const ChatHeader = ({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
         {/* Voice Call button */}
         {onStartCall && (
           <IconButton
@@ -121,9 +121,8 @@ const ChatHeader = ({
             variant="ghost"
             aria-label="Voice call"
             title={t?.chat?.call?.voiceCall || "Voice Call"}
-            className="hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
           >
-            <Phone size={18} />
+            <Phone />
           </IconButton>
         )}
 
@@ -135,9 +134,8 @@ const ChatHeader = ({
             variant="ghost"
             aria-label="Video call"
             title={t?.chat?.call?.videoCall || "Video Call"}
-            className="hover:text-primary hover:bg-primary/10"
           >
-            <Video size={18} />
+            <Video />
           </IconButton>
         )}
 
@@ -149,7 +147,7 @@ const ChatHeader = ({
           aria-label="Search in conversation"
           title={t?.chat?.searchMessages || "Search messages"}
         >
-          <Search size={18} />
+          <Search />
         </IconButton>
 
         <IconButton
@@ -158,11 +156,11 @@ const ChatHeader = ({
           variant="ghost"
           aria-label="Toggle info panel"
         >
-          <PanelRight size={18} />
+          <PanelRight />
         </IconButton>
       </div>
     </div>
   )
 }
 
-export default ChatHeader;
+export default ChatHeader

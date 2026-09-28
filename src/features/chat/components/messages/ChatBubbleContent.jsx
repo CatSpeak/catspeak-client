@@ -46,6 +46,7 @@ const ChatBubbleContent = ({
   onSaveEdit,
   onCancelEdit,
   isSavingEdit = false,
+  knownNames = [],
 }) => {
   const { t } = useLanguage()
 
@@ -181,6 +182,7 @@ const ChatBubbleContent = ({
                 text={textContent}
                 isOwn={isOwn}
                 currentUserName={currentUserName}
+                knownNames={knownNames}
                 className="whitespace-pre-wrap break-words m-0 inline-block"
               />
               {message?.isEdited && (
@@ -236,6 +238,7 @@ const ChatBubbleContent = ({
                 text={textContent}
                 isOwn={isOwn}
                 currentUserName={currentUserName}
+                knownNames={knownNames}
                 className="whitespace-pre-wrap break-words m-0 inline-block"
               />
               {message?.isEdited && (
@@ -269,6 +272,7 @@ const ChatBubbleContent = ({
               text={textContent}
               isOwn={isOwn}
               currentUserName={currentUserName}
+              knownNames={knownNames}
               className="whitespace-pre-wrap break-words m-0 inline-block max-w-full"
             />
             {message?.isEdited && (

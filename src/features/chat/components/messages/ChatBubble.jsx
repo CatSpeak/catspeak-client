@@ -9,10 +9,10 @@ import ChatBubbleActions from "./ChatBubbleActions"
 import ChatBubbleTyping from "./ChatBubbleTyping"
 import ChatBubbleContent from "./ChatBubbleContent"
 import ChatBubbleReadStatus from "./ChatBubbleReadStatus"
-import FloatingReactionsBar from "./FloatingReactionsBar"
 import MessageReactionBadges from "./MessageReactionBadges"
 import ReactionDetailsModal from "../modals/ReactionDetailsModal"
 import ForwardMessageModal from "../modals/ForwardMessageModal"
+import { useGetConversationMembersQuery } from "@/store/api/social/conversationsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
 
@@ -48,6 +48,7 @@ const ChatBubble = ({
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
   const [targetRect, setTargetRect] = useState(null)
   const [isReactionDetailsOpen, setIsReactionDetailsOpen] = useState(false)
+  const [reactionDetailsEmoji, setReactionDetailsEmoji] = useState("all")
   const [isForwardOpen, setIsForwardOpen] = useState(false)
 
   // Inline editing state
@@ -56,6 +57,31 @@ const ChatBubble = ({
   const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   const { user: currentUser } = useAuth()
+
+  const effectiveConvId = conversationId || message?.conversationId
+  const { data: rawMembers = [] } = useGetConversationMembersQuery(
+    effectiveConvId,
+    { skip: !effectiveConvId },
+  )
+
+  const knownNames = useMemo(() => {
+    const list = Array.isArray(rawMembers)
+      ? rawMembers
+      : rawMembers?.data || rawMembers?.items || []
+    const names = ["all", "tatca"]
+    list.forEach((m) => {
+      if (m.username) names.push(m.username)
+      if (m.fullName) names.push(m.fullName)
+      if (m.name) names.push(m.name)
+      if (m.nickname) names.push(m.nickname)
+    })
+    if (sender?.name) names.push(sender.name)
+    if (sender?.username) names.push(sender.username)
+    if (currentUser?.username) names.push(currentUser.username)
+    if (currentUser?.name) names.push(currentUser.name)
+    if (currentUser?.fullName) names.push(currentUser.fullName)
+    return Array.from(new Set(names.filter(Boolean)))
+  }, [rawMembers, sender, currentUser])
 
   const isCurrentUserMentioned = useMemo(() => {
     if (isOwn) return false
@@ -71,7 +97,19 @@ const ChatBubble = ({
     if (/@all\b|@tatca\b/i.test(text)) return true
     if (
       currentUser?.username &&
-      new RegExp(`@${currentUser.username}\\b`, "i").test(text)
+      new RegExp(
+        `@${currentUser.username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+        "i",
+      ).test(text)
+    ) {
+      return true
+    }
+    if (
+      currentUser?.fullName &&
+      new RegExp(
+        `@${currentUser.fullName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+        "i",
+      ).test(text)
     ) {
       return true
     }
@@ -192,6 +230,7 @@ const ChatBubble = ({
         message={message}
         isOwn={isOwn}
         currentUserName={currentUser?.username}
+        knownNames={knownNames}
         isEditing={isEditing}
         editValue={editValue}
         onEditChange={setEditValue}
@@ -266,55 +305,59 @@ const ChatBubble = ({
       >
         {!isOwn && <div className="w-10 shrink-0">{avatarNode}</div>}
 
-        <div className={`relative ${maxWidthClass} w-fit`}>
-          {/* Floating Reaction Bar on Hover (desktop only) */}
-          {!isRecalled && !isEditing && !isWidget && (
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none group-hover:pointer-events-auto">
-              <FloatingReactionsBar
+        <div
+          className={`${maxWidthClass} w-fit flex flex-col ${
+            isOwn ? "items-end" : "items-start"
+          }`}
+        >
+          {/* Message bubble + Actions wrapper (so actions align ONLY to the bubble) */}
+          <div className="relative w-fit max-w-full">
+            {shouldAnimate ? (
+              <FluentAnimation
+                direction={isOwn ? "left" : "right"}
+                distance={24}
+                duration={0.25}
+                className="w-fit max-w-full"
+              >
+                {bubbleNode}
+              </FluentAnimation>
+            ) : (
+              bubbleNode
+            )}
+
+            {/* Action Popover Icons */}
+            {!isRecalled && !isEditing && (
+              <ChatBubbleActions
                 isOwn={isOwn}
-                onReact={(emoji) => onToggleReaction && onToggleReaction(message, emoji)}
+                onReact={
+                  !isWidget && onToggleReaction
+                    ? (emoji) => onToggleReaction(message, emoji)
+                    : undefined
+                }
+                onReply={onReply}
+                onEdit={handleStartEdit}
+                canEdit={canEdit}
+                onForward={() => setIsForwardOpen(true)}
+                onPin={onPin}
+                onUnpin={onUnpin}
+                isPinned={isPinned}
+                canPin={canPin}
+                onDeleteForMe={onDeleteForMe}
+                onRecall={onRecall}
+                message={message}
+                isWidget={isWidget}
               />
-            </div>
-          )}
-
-          {shouldAnimate ? (
-            <FluentAnimation
-              direction={isOwn ? "left" : "right"}
-              distance={24}
-              duration={0.25}
-              className="w-fit max-w-full"
-            >
-              {bubbleNode}
-            </FluentAnimation>
-          ) : (
-            bubbleNode
-          )}
-
-          {/* Action Popover Icons */}
-          {!isRecalled && !isEditing && (
-            <ChatBubbleActions
-              isOwn={isOwn}
-              onReply={onReply}
-              onEdit={handleStartEdit}
-              canEdit={canEdit}
-              onForward={() => setIsForwardOpen(true)}
-              onPin={onPin}
-              onUnpin={onUnpin}
-              isPinned={isPinned}
-              canPin={canPin}
-              onDeleteForMe={onDeleteForMe}
-              onRecall={onRecall}
-              message={message}
-              isWidget={isWidget}
-            />
-          )}
+            )}
+          </div>
 
           {/* Reaction Badges */}
           {!isRecalled && (
             <MessageReactionBadges
               reactions={message?.reactions}
-              onToggle={(emoji) => onToggleReaction && onToggleReaction(message, emoji)}
-              onViewDetails={() => setIsReactionDetailsOpen(true)}
+              onViewDetails={(emoji) => {
+                setReactionDetailsEmoji(emoji || "all")
+                setIsReactionDetailsOpen(true)
+              }}
               isOwn={isOwn}
             />
           )}
@@ -357,6 +400,7 @@ const ChatBubble = ({
         onClose={() => setIsReactionDetailsOpen(false)}
         message={message}
         conversationId={conversationId || message?.conversationId}
+        initialEmoji={reactionDetailsEmoji}
       />
 
       {/* ── Forward Message Modal ──────────────────── */}

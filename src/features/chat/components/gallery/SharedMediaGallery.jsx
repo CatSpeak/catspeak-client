@@ -34,7 +34,7 @@ const formatDuration = (seconds) => {
  * SharedMediaGallery — Tabbed gallery panel in ChatUserPanel showing
  * photos & videos, files, voice recordings, and links shared in conversation.
  */
-const SharedMediaGallery = ({ conversationId }) => {
+const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
   const { t } = useLanguage()
   const { formatRelative } = useTimezone()
   const [activeTab, setActiveTab] = useState("images_videos")
@@ -142,15 +142,25 @@ const SharedMediaGallery = ({ conversationId }) => {
   ]
 
   return (
-    <div className="flex flex-col border-t border-border mt-3 pt-3">
-      <div className="px-4 mb-2 flex items-center justify-between">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-          {t?.chat?.gallery?.sharedContent || "Shared Content"}
-        </h4>
-      </div>
+    <div
+      className={`flex flex-col ${
+        fullHeight ? "flex-1 overflow-hidden" : "border-t border-border mt-3 pt-3"
+      }`}
+    >
+      {!fullHeight && (
+        <div className="px-4 mb-2 flex items-center justify-between">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+            {t?.chat?.gallery?.sharedContent || "Shared Content"}
+          </h4>
+        </div>
+      )}
 
       {/* ── Tabs Navigation ── */}
-      <div className="flex items-center gap-1 px-3 border-b border-border/70 pb-2">
+      <div
+        className={`flex items-center gap-1 px-3 border-b border-border/70 pb-2 ${
+          fullHeight ? "pt-2 shrink-0" : ""
+        }`}
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -173,7 +183,13 @@ const SharedMediaGallery = ({ conversationId }) => {
       </div>
 
       {/* ── Content View ── */}
-      <div className="p-3 min-h-[160px] max-h-[380px] overflow-y-auto">
+      <div
+        className={`p-3 ${
+          fullHeight
+            ? "flex-1 overflow-y-auto"
+            : "min-h-[160px] max-h-[380px] overflow-y-auto"
+        }`}
+      >
         {isLoading && allItems.length === 0 ? (
           <div className="flex items-center justify-center h-32">
             <Loader2 className="animate-spin text-neutral-400" size={24} />

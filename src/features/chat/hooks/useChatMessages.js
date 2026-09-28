@@ -22,7 +22,7 @@ const EMPTY_ARRAY = []
  */
 export default function useChatMessages(selectedId) {
   const { user } = useAuth()
-  const currentUserId = user?.accountId || user?.id
+  const currentUserId = user?.accountId ?? user?.id ?? user?.userId
 
   const [accumulatedMessages, setAccumulatedMessages] = useState([])
   const [hasMoreMessages, setHasMoreMessages] = useState(true)
@@ -418,7 +418,18 @@ export default function useChatMessages(selectedId) {
         isRecalled: msg.isRecalled,
         isDeleted: msg.isDeleted,
         // Phase 1 enhancements
-        reactions: msg.reactions || [],
+        reactions: (msg.reactions || []).map((group) => {
+          const myId = currentUserId != null ? Number(currentUserId) : null
+          const userIds = group.userIds || group.UserIds || []
+          const hasReacted =
+            myId != null && Array.isArray(userIds) && userIds.length > 0
+              ? userIds.some((id) => Number(id) === myId)
+              : Boolean(group.hasReacted)
+          return {
+            ...group,
+            hasReacted,
+          }
+        }),
         isEdited: msg.isEdited ?? false,
         lastEdited: msg.lastEdited,
         forwardedFromSenderName: msg.forwardedFromSenderName,

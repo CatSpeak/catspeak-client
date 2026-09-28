@@ -70,7 +70,10 @@ const ChatInput = ({
     if (mentionQuery === null) return []
     const list = []
     const cleanQ = (mentionQuery || "").toLowerCase()
-    if (isGroup && (!cleanQ || "all".includes(cleanQ) || "tatca".includes(cleanQ))) {
+    if (
+      isGroup &&
+      (!cleanQ || "all".includes(cleanQ) || "tatca".includes(cleanQ))
+    ) {
       list.push({
         isAll: true,
         accountId: 0,
@@ -82,7 +85,11 @@ const ChatInput = ({
     activeMembers.forEach((m) => {
       const uName = (m.username || "").toLowerCase()
       const fName = (m.fullName || m.name || "").toLowerCase()
-      if (!cleanQTrim || uName.includes(cleanQTrim) || fName.includes(cleanQTrim)) {
+      if (
+        !cleanQTrim ||
+        uName.includes(cleanQTrim) ||
+        fName.includes(cleanQTrim)
+      ) {
         list.push(m)
       }
     })
@@ -92,7 +99,9 @@ const ChatInput = ({
   // ── Voice Recording State ─────────────────────────────
   const [isRecording, setIsRecording] = useState(false)
   const [recordingSeconds, setRecordingSeconds] = useState(0)
-  const [visualizerBars, setVisualizerBars] = useState([20, 35, 60, 40, 75, 50, 30, 65, 45, 80, 55, 35, 70, 40, 25])
+  const [visualizerBars, setVisualizerBars] = useState([
+    20, 35, 60, 40, 75, 50, 30, 65, 45, 80, 55, 35, 70, 40, 25,
+  ])
 
   const mediaRecorderRef = useRef(null)
   const audioContextRef = useRef(null)
@@ -155,7 +164,10 @@ const ChatInput = ({
 
       for (let i = 0; i < clipboardData.items.length; i++) {
         const item = clipboardData.items[i]
-        if (item.type.indexOf("image") !== -1 || (item.kind === "file" && item.type.startsWith("image/"))) {
+        if (
+          item.type.indexOf("image") !== -1 ||
+          (item.kind === "file" && item.type.startsWith("image/"))
+        ) {
           const file = item.getAsFile()
           if (file) {
             e.preventDefault()
@@ -170,11 +182,14 @@ const ChatInput = ({
   )
 
   // ── Drag & Drop ────────────────────────────────────────
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!isDraggingOver) setIsDraggingOver(true)
-  }, [isDraggingOver])
+  const handleDragOver = useCallback(
+    (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!isDraggingOver) setIsDraggingOver(true)
+    },
+    [isDraggingOver],
+  )
 
   const handleDragLeave = useCallback((e) => {
     e.preventDefault()
@@ -230,7 +245,10 @@ const ChatInput = ({
   const startRecording = async () => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast.error(t?.chat?.voiceNotSupported || "Audio recording is not supported in this browser.")
+        toast.error(
+          t?.chat?.voiceNotSupported ||
+            "Audio recording is not supported in this browser.",
+        )
         return
       }
 
@@ -302,7 +320,10 @@ const ChatInput = ({
         for (let i = 0; i < barsCount; i++) {
           const val = dataArray[i * step] || 0
           // Map value (0 - 255) to height percentage (15% - 95%)
-          const height = Math.max(15, Math.min(95, Math.round((val / 255) * 90) + 15))
+          const height = Math.max(
+            15,
+            Math.min(95, Math.round((val / 255) * 90) + 15),
+          )
           newBars.push(height)
         }
         setVisualizerBars(newBars)
@@ -320,11 +341,13 @@ const ChatInput = ({
   }
 
   const cancelRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       mediaRecorderRef.current.stop()
     }
     cleanupRecording()
-    toast(t?.chat?.recordingCancelled || "Recording cancelled", { icon: "🗑️" })
   }
 
   const sendVoiceRecording = () => {
@@ -340,8 +363,13 @@ const ChatInput = ({
       if (onSendVoice) {
         onSendVoice(audioBlob, durationToSend)
       } else if (onSend) {
-        const file = new File([audioBlob], `voice_${Date.now()}.webm`, { type: mime })
-        onSend("", file, { audioDuration: durationToSend, messageType: "Audio" })
+        const file = new File([audioBlob], `voice_${Date.now()}.webm`, {
+          type: mime,
+        })
+        onSend("", file, {
+          audioDuration: durationToSend,
+          messageType: "Audio",
+        })
       }
 
       cleanupRecording()
@@ -543,16 +571,14 @@ const ChatInput = ({
       {/* ── Main Input Box / Voice Recording Bar ── */}
       {isRecording ? (
         /* Recording Mode UI */
-        <div className="w-full flex items-center justify-between px-4 h-14 border-2 border-red-500/80 bg-red-50/50 dark:bg-red-950/20 rounded-[28px] shadow-sm animate-pulse-subtle">
+        <div className="w-full flex items-center justify-between pl-4 pr-1 h-14 border border-cath-red-700 bg-red-50/50 rounded-[28px] animate-pulse-subtle">
           {/* Left: Pulsing Dot & Timer */}
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-3.5 w-3.5">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-red-600" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
             </span>
-            <span className="font-mono font-semibold text-red-600 dark:text-red-400 text-sm">
-              {formatRecordTime(recordingSeconds)}
-            </span>
+            <span>{formatRecordTime(recordingSeconds)}</span>
           </div>
 
           {/* Center: Live Waveform Visualizer */}
@@ -561,30 +587,28 @@ const ChatInput = ({
               <div
                 key={idx}
                 style={{ height: `${height}%` }}
-                className="w-1.5 bg-red-500/80 dark:bg-red-400 rounded-full transition-all duration-75"
+                className="w-1.5 bg-red-500/80 rounded-full transition-all duration-75"
               />
             ))}
           </div>
 
           {/* Right: Cancel & Send Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <IconButton
               onClick={cancelRecording}
               variant="ghost"
               aria-label="Cancel recording"
-              className="text-neutral-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30"
             >
-              <Trash2 size={18} />
+              <Trash2 />
             </IconButton>
 
-            <button
-              type="button"
+            <IconButton
               onClick={sendVoiceRecording}
+              variant="primary"
               aria-label="Send voice message"
-              className="w-10 h-10 rounded-full bg-cath-red-700 text-white flex items-center justify-center hover:bg-cath-red-800 transition-transform active:scale-95 shadow-md cursor-pointer"
             >
-              <Send size={18} className="-translate-x-[1px] translate-y-[1px]" />
-            </button>
+              <Send className="-translate-x-[1px] translate-y-[1px]" />
+            </IconButton>
           </div>
         </div>
       ) : (
@@ -633,7 +657,9 @@ const ChatInput = ({
                   ? "overflow-y-auto pr-4 pt-1"
                   : "overflow-y-hidden py-1"
               }`}
-              placeholder={t?.chat?.typeMessagePlaceholder || "Type a message..."}
+              placeholder={
+                t?.chat?.typeMessagePlaceholder || "Type a message..."
+              }
               value={value}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
@@ -658,8 +684,8 @@ const ChatInput = ({
                   value.length >= maxLength
                     ? "text-red-500 font-bold"
                     : value.length >= maxLength * 0.8
-                    ? "text-amber-600 font-medium"
-                    : "text-gray-400 opacity-75"
+                      ? "text-amber-600 font-medium"
+                      : "text-gray-400 opacity-75"
                 }`}
                 title={`${value.length} / ${maxLength} characters`}
               >
@@ -673,7 +699,11 @@ const ChatInput = ({
                 <Popover
                   placement="top-right"
                   trigger={
-                    <IconButton variant="ghost" aria-label="Emoji" type="button">
+                    <IconButton
+                      variant="ghost"
+                      aria-label="Emoji"
+                      type="button"
+                    >
                       <Smile />
                     </IconButton>
                   }
@@ -693,7 +723,6 @@ const ChatInput = ({
                   disabled={disabled}
                   variant="ghost"
                   aria-label="Record voice message"
-                  className="hover:text-red-600 transition-colors"
                 >
                   <Mic />
                 </IconButton>

@@ -44,8 +44,11 @@ export default {
       removeTitle: "グループから削除",
       student: "生徒",
       teacher: "先生",
+      searchMessages: "メッセージを検索",
+      searchMessagesSubtitle: "このチャットの履歴を検索",
     },
     actions: {
+      react: "リアクション",
       reply: "返信",
       copy: "コピー",
       copyText: "テキストをコピー",

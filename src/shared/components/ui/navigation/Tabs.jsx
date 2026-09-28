@@ -1,7 +1,8 @@
-import React, { memo } from "react"
+import React, { memo, useRef, useEffect, useState } from "react"
 
 /**
  * Reusable Tabs component that prevents layout shift on active bold states and supports optional icons.
+ * Supports smooth keyboard/touch scrolling, mouse wheel scrolling, and mouse click-and-drag scrolling.
  *
  * @param {Array} tabs - Array of tab objects: { id: string, label: string, icon: ReactComponent }
  * @param {string} activeTab - Currently active tab id
@@ -23,12 +24,88 @@ const Tabs = memo(
   }) => {
     const isResponsive = fullWidth === "responsive"
     const isFull = fullWidth === true
+    const containerRef = useRef(null)
+    const isDraggingRef = useRef(false)
+    const startXRef = useRef(0)
+    const scrollLeftRef = useRef(0)
+    const hasDraggedRef = useRef(false)
+    const [isDragging, setIsDragging] = useState(false)
+
+    useEffect(() => {
+      if (!containerRef.current || isDraggingRef.current) return
+      const activeEl = containerRef.current.querySelector('[data-active="true"]')
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" })
+      }
+    }, [activeTab])
+
+    const handleWheel = (e) => {
+      const el = e.currentTarget
+      if (e.deltaY !== 0 && el.scrollWidth > el.clientWidth) {
+        el.scrollLeft += e.deltaY
+      }
+    }
+
+    const handleMouseDown = (e) => {
+      if (e.button !== 0 || !containerRef.current) return
+      if (containerRef.current.scrollWidth <= containerRef.current.clientWidth) return
+
+      isDraggingRef.current = true
+      hasDraggedRef.current = false
+      startXRef.current = e.pageX
+      scrollLeftRef.current = containerRef.current.scrollLeft
+    }
+
+    useEffect(() => {
+      const handleMouseMove = (e) => {
+        if (!isDraggingRef.current || !containerRef.current) return
+        const dx = e.pageX - startXRef.current
+        if (Math.abs(dx) > 5) {
+          if (!hasDraggedRef.current) {
+            hasDraggedRef.current = true
+            setIsDragging(true)
+          }
+          containerRef.current.scrollLeft = scrollLeftRef.current - dx
+        }
+      }
+
+      const handleMouseUp = () => {
+        if (!isDraggingRef.current) return
+        isDraggingRef.current = false
+        if (hasDraggedRef.current) {
+          setTimeout(() => {
+            hasDraggedRef.current = false
+            setIsDragging(false)
+          }, 50)
+        } else {
+          setIsDragging(false)
+        }
+      }
+
+      window.addEventListener("mousemove", handleMouseMove)
+      window.addEventListener("mouseup", handleMouseUp)
+      return () => {
+        window.removeEventListener("mousemove", handleMouseMove)
+        window.removeEventListener("mouseup", handleMouseUp)
+      }
+    }, [])
+
+    const handleClickCapture = (e) => {
+      if (hasDraggedRef.current) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
 
     return (
       <div
-        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${
-          !isFull && !isResponsive ? "gap-1 sm:gap-2" : ""
-        } ${className}`}
+        ref={containerRef}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onClickCapture={handleClickCapture}
+        className={`w-full max-w-full min-w-0 shrink-0 flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${
+          isDragging ? "cursor-grabbing select-none" : ""
+        } ${!isFull && !isResponsive ? "gap-1 sm:gap-2" : ""} ${className}`}
       >
         {tabs.map((tab) => {
           const tabKey = tab.id ?? tab.value
@@ -39,7 +116,12 @@ const Tabs = memo(
             <button
               key={tabKey}
               type="button"
-              onClick={() => onChange(tabKey)}
+              data-active={isActive}
+              onClick={() => {
+                if (!hasDraggedRef.current) {
+                  onChange(tabKey)
+                }
+              }}
               className={`h-10 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
                 }`}
             >

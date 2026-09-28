@@ -110,21 +110,37 @@ export function applyReactionToggle(reactions = [], emoji, currentUserId) {
 export function applyReactionSignalREvent(currentReactions = [], event, currentUserId) {
   if (!event) return currentReactions
 
-  // If server provided precomputed reactionsSummary, map hasReacted and return
-  if (Array.isArray(event.reactionsSummary)) {
-    const myId = Number(currentUserId)
-    return event.reactionsSummary.map((group) => ({
-      ...group,
-      hasReacted:
-        Boolean(group.hasReacted) ||
-        (Array.isArray(group.userIds) && group.userIds.some((id) => Number(id) === myId)),
-    }))
+  const myId = currentUserId != null ? Number(currentUserId) : null
+
+  // If server provided precomputed reactionsSummary, strictly evaluate hasReacted against myId
+  const reactionsSummary = event.reactionsSummary || event.ReactionsSummary
+  if (Array.isArray(reactionsSummary)) {
+    return reactionsSummary.map((group) => {
+      const userIds = group.userIds || group.UserIds || []
+      const hasMyId =
+        myId != null &&
+        Array.isArray(userIds) &&
+        userIds.some((id) => Number(id) === myId)
+
+      return {
+        ...group,
+        emoji: group.emoji || group.Emoji,
+        count: group.count ?? group.Count ?? 0,
+        userIds,
+        hasReacted: hasMyId,
+      }
+    })
   }
 
-  const { emoji, action, accountId } = event
+  const emoji = event.emoji || event.Emoji
+  const action = (event.action || event.Action || "").toLowerCase()
+  const accountId =
+    event.accountId ?? event.AccountId ?? event.userId ?? event.UserId
+
   if (!emoji || accountId == null) return currentReactions
 
-  const isMyReaction = Number(accountId) === Number(currentUserId)
+  const eventAccountId = Number(accountId)
+  const isMyReaction = myId != null && eventAccountId === myId
   const list = Array.isArray(currentReactions)
     ? [...currentReactions.map((r) => ({ ...r, userIds: [...(r.userIds || [])] }))]
     : []
@@ -133,7 +149,7 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
     const idx = list.findIndex((g) => g.emoji === emoji)
     if (idx !== -1) {
       const g = list[idx]
-      const newIds = g.userIds.filter((id) => Number(id) !== Number(accountId))
+      const newIds = g.userIds.filter((id) => Number(id) !== eventAccountId)
       const newCount = Math.max(0, (g.count || 1) - 1)
       if (newCount <= 0) {
         list.splice(idx, 1)
@@ -142,15 +158,20 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
           ...g,
           count: newCount,
           userIds: newIds,
-          hasReacted: isMyReaction ? false : g.hasReacted,
+          hasReacted: isMyReaction
+            ? false
+            : myId != null && newIds.some((id) => Number(id) === myId),
         }
       }
     }
   } else if (action === "added" || action === "updated") {
-    // If user previously had another emoji, clean it up
+    // If this actor previously had another emoji, clean it up from that group
     list.forEach((g, idx) => {
-      if (g.emoji !== emoji && g.userIds.some((id) => Number(id) === Number(accountId))) {
-        const newIds = g.userIds.filter((id) => Number(id) !== Number(accountId))
+      if (
+        g.emoji !== emoji &&
+        g.userIds.some((id) => Number(id) === eventAccountId)
+      ) {
+        const newIds = g.userIds.filter((id) => Number(id) !== eventAccountId)
         const newCount = Math.max(0, (g.count || 1) - 1)
         if (newCount <= 0) {
           list.splice(idx, 1)
@@ -159,7 +180,9 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
             ...g,
             count: newCount,
             userIds: newIds,
-            hasReacted: isMyReaction ? false : g.hasReacted,
+            hasReacted: isMyReaction
+              ? false
+              : myId != null && newIds.some((id) => Number(id) === myId),
           }
         }
       }
@@ -168,20 +191,24 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
     const idx = list.findIndex((g) => g.emoji === emoji)
     if (idx !== -1) {
       const g = list[idx]
-      const userIds = g.userIds.some((id) => Number(id) === Number(accountId))
+      const alreadyHasActor = g.userIds.some((id) => Number(id) === eventAccountId)
+      const userIds = alreadyHasActor
         ? g.userIds
-        : [...g.userIds, Number(accountId)]
+        : [...g.userIds, eventAccountId]
+
       list[idx] = {
         ...g,
-        count: (g.count || 0) + 1,
+        count: alreadyHasActor ? g.count : (g.count || 0) + 1,
         userIds,
-        hasReacted: isMyReaction ? true : g.hasReacted,
+        hasReacted: isMyReaction
+          ? true
+          : myId != null && userIds.some((id) => Number(id) === myId),
       }
     } else {
       list.push({
         emoji,
         count: 1,
-        userIds: [Number(accountId)],
+        userIds: [eventAccountId],
         hasReacted: isMyReaction,
       })
     }
