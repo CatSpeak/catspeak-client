@@ -44,8 +44,11 @@ export default {
       removeTitle: "从群组中移除",
       student: "学员",
       teacher: "教师",
+      searchMessages: "搜索消息",
+      searchMessagesSubtitle: "搜索此对话中的聊天记录",
     },
     actions: {
+      react: "回应",
       reply: "回复",
       copy: "复制",
       copyText: "复制文本",

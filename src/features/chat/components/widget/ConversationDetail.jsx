@@ -18,7 +18,7 @@ const ConversationDetail = ({
   input,
   onInputChange,
   onSendMessage,
-  onKeyPress,
+  onSendVoice,
   isSending,
   typingUsers = [],
   onStartTyping,
@@ -31,6 +31,8 @@ const ConversationDetail = ({
   pendingUpload = null,
   onRetryUpload,
   onCancelUpload,
+  onEdit,
+  onToggleReaction,
 }) => {
   const scrollRef = useRef(null)
   const { t } = useLanguage()
@@ -81,6 +83,9 @@ const ConversationDetail = ({
           onReply={onReply}
           onDeleteForMe={onDeleteForMe}
           onRecall={onRecall}
+          onEdit={onEdit}
+          onToggleReaction={onToggleReaction}
+          conversationId={conversation?.id}
           isWidget={true}
         />
       )
@@ -159,11 +164,14 @@ const ConversationDetail = ({
             }
           }}
           onSend={onSendMessage}
+          onSendVoice={onSendVoice}
           onStartTyping={onStartTyping}
           onStopTyping={onStopTyping}
           replyingTo={replyingTo}
           onCancelReply={onCancelReply}
           disabled={isSending || isLoading}
+          conversationId={conversation?.id}
+          isGroup={conversation?.isGroup}
         />
       </div>
     </div>

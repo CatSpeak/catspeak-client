@@ -1,3 +1,4 @@
+import { Forward } from "lucide-react"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import MediaAttachment from "./MediaAttachment"
 import { FormattedText, findUrlsInText } from "@/shared/utils/linkUtils"
@@ -11,7 +12,9 @@ const isEmojiOnly = (text) => {
   if (!clean) return false
   try {
     const withoutEmojis = clean
-      .replace(/[\s\uFE00-\uFE0F\u200D\u{1F3FB}-\u{1F3FF}]/gu, "")
+      .replace(/\s+/g, "")
+      .replace(/[\uFE00-\uFE0F\u200D]/gu, "")
+      .replace(/\p{Emoji_Modifier}/gu, "")
       .replace(/\p{Extended_Pictographic}/gu, "")
       .replace(/\p{Emoji_Presentation}/gu, "")
     return withoutEmojis.length === 0
@@ -31,10 +34,20 @@ const splitEmojis = (str) => {
 }
 
 /**
- * ChatBubbleContent — renders message content payload (quotes, recalled state, media, link previews, text).
- * Accepts simple (message, isOwn) props and computes derived flags internally.
+ * ChatBubbleContent — renders message content payload (quotes, recalled state, media, link previews, text, forwarded header, inline editor).
  */
-const ChatBubbleContent = ({ message, isOwn }) => {
+const ChatBubbleContent = ({
+  message,
+  isOwn,
+  currentUserName = "",
+  isEditing = false,
+  editValue = "",
+  onEditChange,
+  onSaveEdit,
+  onCancelEdit,
+  isSavingEdit = false,
+  knownNames = [],
+}) => {
   const { t } = useLanguage()
 
   const isRecalled =
@@ -88,11 +101,66 @@ const ChatBubbleContent = ({ message, isOwn }) => {
         />
       )}
 
+      {/* Forwarded Header */}
+      {!isRecalled && message?.forwardedFromSenderName && (
+        <div
+          className={`flex items-center gap-1 text-[11px] mb-1 select-none font-medium ${
+            isOwn ? "text-white/85" : "text-neutral-500"
+          }`}
+        >
+          <Forward size={13} className="shrink-0" />
+          <span>
+            {t?.chat?.forwardedFrom || "Forwarded from"}{" "}
+            <strong className="font-semibold">
+              {message.forwardedFromSenderName}
+            </strong>
+          </span>
+        </div>
+      )}
+
       {/* Recalled State */}
       {isRecalled ? (
         <p className="italic opacity-60 m-0 select-none">
           {t?.chat?.recalledMessage || "Tin nhắn đã bị thu hồi"}
         </p>
+      ) : isEditing ? (
+        /* Inline Edit Mode */
+        <div className="flex flex-col gap-2 min-w-[220px] max-w-full text-left" onClick={(e) => e.stopPropagation()}>
+          <textarea
+            value={editValue}
+            onChange={(e) => onEditChange?.(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault()
+                onSaveEdit?.()
+              } else if (e.key === "Escape") {
+                e.preventDefault()
+                onCancelEdit?.()
+              }
+            }}
+            rows={2}
+            autoFocus
+            className="w-full bg-white dark:bg-zinc-800 text-neutral-900 dark:text-neutral-100 text-sm p-2 rounded-lg border border-primary/50 focus:border-primary focus:outline-hidden resize-none shadow-xs"
+          />
+          <div className="flex items-center justify-end gap-1.5 select-none">
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              disabled={isSavingEdit}
+              className="px-2 py-1 text-xs rounded-md bg-neutral-200/80 hover:bg-neutral-300/80 text-neutral-800 dark:bg-zinc-700 dark:text-neutral-200 transition-colors"
+            >
+              {t?.chat?.cancel || "Cancel"} (Esc)
+            </button>
+            <button
+              type="button"
+              onClick={onSaveEdit}
+              disabled={isSavingEdit || !editValue?.trim()}
+              className="px-2.5 py-1 text-xs font-semibold rounded-md bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              {isSavingEdit ? t?.chat?.saving || "Saving..." : t?.chat?.save || "Save"} (Enter)
+            </button>
+          </div>
+        </div>
       ) : hasMedia ? (
         <div className="flex flex-col w-full max-w-[360px]">
           <MediaAttachment
@@ -113,8 +181,24 @@ const ChatBubbleContent = ({ message, isOwn }) => {
               <FormattedText
                 text={textContent}
                 isOwn={isOwn}
-                className="whitespace-pre-wrap break-words m-0 block"
+                currentUserName={currentUserName}
+                knownNames={knownNames}
+                className="whitespace-pre-wrap break-words m-0 inline-block"
               />
+              {message?.isEdited && (
+                <span
+                  className={`text-[10px] ml-1.5 select-none opacity-75 ${
+                    isOwn ? "text-white/80" : "text-neutral-500"
+                  }`}
+                  title={
+                    message?.lastEdited
+                      ? new Date(message.lastEdited).toLocaleString()
+                      : ""
+                  }
+                >
+                  ({t?.chat?.edited || "edited"})
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -153,8 +237,24 @@ const ChatBubbleContent = ({ message, isOwn }) => {
               <FormattedText
                 text={textContent}
                 isOwn={isOwn}
-                className="whitespace-pre-wrap break-words m-0 block"
+                currentUserName={currentUserName}
+                knownNames={knownNames}
+                className="whitespace-pre-wrap break-words m-0 inline-block"
               />
+              {message?.isEdited && (
+                <span
+                  className={`text-[10px] ml-1.5 select-none opacity-75 ${
+                    isOwn ? "text-white/80" : "text-neutral-500"
+                  }`}
+                  title={
+                    message?.lastEdited
+                      ? new Date(message.lastEdited).toLocaleString()
+                      : ""
+                  }
+                >
+                  ({t?.chat?.edited || "edited"})
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -171,8 +271,24 @@ const ChatBubbleContent = ({ message, isOwn }) => {
             <FormattedText
               text={textContent}
               isOwn={isOwn}
+              currentUserName={currentUserName}
+              knownNames={knownNames}
               className="whitespace-pre-wrap break-words m-0 inline-block max-w-full"
             />
+            {message?.isEdited && (
+              <span
+                className={`text-[10px] ml-1.5 select-none opacity-75 ${
+                  isOwn ? "text-white/80" : "text-neutral-500"
+                }`}
+                title={
+                  message?.lastEdited
+                    ? new Date(message.lastEdited).toLocaleString()
+                    : ""
+                }
+              >
+                ({t?.chat?.edited || "edited"})
+              </span>
+            )}
           </div>
         )
       )}
