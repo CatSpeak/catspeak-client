@@ -5,10 +5,37 @@ import {
   updateCommentInCaches,
 } from "./utils/postsCacheUtils"
 
+/**
+ * @typedef {Object} Topic
+ * @property {number} topicId
+ * @property {string} title
+ * @property {string} slug
+ * @property {0|1|2|3} languageCommunity - 0: All, 1: English, 2: Chinese, 3: Japanese
+ */
+
 export const postsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
+    getTopics: builder.query({
+      query: ({ languageCommunity, keyword, page = 1, pageSize = 10 } = {}) => ({
+        url: "/topics",
+        params: {
+          languageCommunity,
+          keyword,
+          page,
+          pageSize,
+        },
+      }),
+      providesTags: ["Topic"],
+    }),
     getPosts: builder.query({
-      query: ({ page = 1, pageSize = 10, postType, searchKeyword, sortBy } = {}) => ({
+      query: ({
+        page = 1,
+        pageSize = 10,
+        postType,
+        searchKeyword,
+        sortBy,
+        topicIds,
+      } = {}) => ({
         url: "/Post",
         params: {
           page,
@@ -17,31 +44,63 @@ export const postsApi = socialApi.injectEndpoints({
           searchKeyword,
           sortBy,
           sortDesc: true,
+          topicIds:
+            Array.isArray(topicIds) && topicIds.length > 0
+              ? topicIds
+              : topicIds !== undefined && topicIds !== null && topicIds !== ""
+                ? [topicIds]
+                : undefined,
         },
       }),
       providesTags: ["Post"],
       serializeQueryArgs: ({ endpointName, queryArgs }) => {
-        return `${endpointName}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}`
+        const topicKey = Array.isArray(queryArgs?.topicIds)
+          ? queryArgs.topicIds.slice().sort().join(",")
+          : queryArgs?.topicIds || ""
+        return `${endpointName}_${queryArgs?.postType || "all"}_${queryArgs?.searchKeyword || ""}_${queryArgs?.sortBy || "createDate"}_${topicKey}`
+      },
+      transformResponse: (response, meta, arg) => {
+        const items = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response)
+            ? response
+            : []
+        return {
+          ...(typeof response === "object" && response !== null && !Array.isArray(response)
+            ? response
+            : {}),
+          data: items,
+          hasMore: items.length >= (arg?.pageSize || 10),
+        }
       },
       merge: (currentCache, newItems, { arg }) => {
+        const items = Array.isArray(newItems?.data)
+          ? newItems.data
+          : Array.isArray(newItems)
+            ? newItems
+            : []
         if (arg.page === 1) {
-          currentCache.data = newItems.data
+          currentCache.data = items
         } else {
-          const newPosts = newItems.data.filter(
+          const existingData = Array.isArray(currentCache.data)
+            ? currentCache.data
+            : Array.isArray(currentCache)
+              ? currentCache
+              : []
+          const newPosts = items.filter(
             (newPost) =>
-              !currentCache.data.some((p) => p.postId === newPost.postId),
+              !existingData.some((p) => p.postId === newPost.postId),
           )
-          currentCache.data.push(...newPosts)
+          if (Array.isArray(currentCache.data)) {
+            currentCache.data.push(...newPosts)
+          } else {
+            currentCache.data = [...existingData, ...newPosts]
+          }
         }
-        currentCache.hasMore = newItems.data.length === arg.pageSize
+        currentCache.hasMore = items.length >= (arg?.pageSize || 10)
       },
       forceRefetch({ currentArg, previousArg }) {
-        return (
-          currentArg?.page !== previousArg?.page ||
-          currentArg?.postType !== previousArg?.postType ||
-          currentArg?.searchKeyword !== previousArg?.searchKeyword ||
-          currentArg?.sortBy !== previousArg?.sortBy
-        )
+        return currentArg?.page !== previousArg?.page
       },
     }),
     getLandingPosts: builder.query({
@@ -279,6 +338,7 @@ export const postsApi = socialApi.injectEndpoints({
 })
 
 export const {
+  useGetTopicsQuery,
   useGetPostsQuery,
   useGetLandingPostsQuery,
   useGetPostByIdQuery,

@@ -22,6 +22,8 @@ export default {
       newest: "最新",
       mostViewed: "閲覧数が多い",
       mostReactions: "リアクションが多い",
+      seeMore: "もっと見る",
+      topics: "トピック",
     },
     newsDetail: {
       back: "戻る",
