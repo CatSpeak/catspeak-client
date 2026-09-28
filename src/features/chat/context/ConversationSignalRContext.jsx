@@ -37,6 +37,18 @@ const HUB_EVENTS = [
   "FriendshipUpdated",
   "FriendshipStatusChanged",
   "ChatUpdated",
+  "MessageReactionChanged",
+  "MessageEdited",
+  "MessagePinned",
+  "MessageUnpinned",
+  "GroupUpdated",
+  "MemberRoleChanged",
+  "OwnershipTransferred",
+  "MemberLeft",
+  "CallStarted",
+  "CallParticipantJoined",
+  "CallParticipantLeft",
+  "CallEnded",
 ]
 
 const ConversationSignalRContext = createContext(null)

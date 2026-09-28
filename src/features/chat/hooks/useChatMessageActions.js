@@ -4,6 +4,10 @@ import {
   useSendMediaMessageMutation,
   useDeleteMessageForMeMutation,
   useRecallMessageMutation,
+  useEditMessageMutation,
+  useToggleReactionMutation,
+  usePinMessageMutation,
+  useUnpinMessageMutation,
 } from "@/store/api/social/conversationsApi"
 
 /**
@@ -34,6 +38,10 @@ export const useChatMessageActions = (conversationId) => {
     useSendMediaMessageMutation()
   const [deleteMessageForMeMutation] = useDeleteMessageForMeMutation()
   const [recallMessageMutation] = useRecallMessageMutation()
+  const [editMessageMutation] = useEditMessageMutation()
+  const [toggleReactionMutation] = useToggleReactionMutation()
+  const [pinMessageMutation] = usePinMessageMutation()
+  const [unpinMessageMutation] = useUnpinMessageMutation()
 
   const handleReply = useCallback((message) => {
     setReplyingTo(message)
@@ -48,7 +56,7 @@ export const useChatMessageActions = (conversationId) => {
   }, [])
 
   const handleSend = useCallback(
-    async (text, file) => {
+    async (text, file, extraOptions = {}) => {
       if ((!text && !file) || !conversationId) return
 
       const parentId = replyingTo?.id || replyingTo?.messageId || null
@@ -76,7 +84,33 @@ export const useChatMessageActions = (conversationId) => {
           const formData = new FormData()
           formData.append("MessageContent", text || "")
           formData.append("File", file)
-          if (parentId) formData.append("ParentMessageId", parentId)
+          formData.append("file", file)
+          if (extraOptions.audioDuration != null) {
+            formData.append("audioDuration", Math.round(extraOptions.audioDuration))
+          }
+          if (extraOptions.messageType) {
+            formData.append("messageType", extraOptions.messageType)
+          }
+          const clientMsgId =
+            extraOptions.clientMessageId ||
+            (typeof crypto !== "undefined" && crypto.randomUUID
+              ? crypto.randomUUID()
+              : `msg-${Date.now()}`)
+          formData.append("clientMessageId", clientMsgId)
+
+          if (parentId) {
+            formData.append("ParentMessageId", parentId)
+            formData.append("parentMessageId", parentId)
+          }
+
+          if (
+            Array.isArray(extraOptions.mentionedAccountIds) &&
+            extraOptions.mentionedAccountIds.length > 0
+          ) {
+            extraOptions.mentionedAccountIds.forEach((id) => {
+              formData.append("mentionedAccountIds", id)
+            })
+          }
 
           await sendMediaMessageMutation({
             conversationId,
@@ -86,8 +120,12 @@ export const useChatMessageActions = (conversationId) => {
         } else {
           const messageData = {
             messageContent: text,
-            messageType: "Text",
+            messageType: extraOptions.messageType || "Text",
             parentMessageId: parentId,
+            ...(Array.isArray(extraOptions.mentionedAccountIds) &&
+            extraOptions.mentionedAccountIds.length > 0
+              ? { mentionedAccountIds: extraOptions.mentionedAccountIds }
+              : {}),
           }
 
           await sendMessageMutation({
@@ -173,6 +211,91 @@ export const useChatMessageActions = (conversationId) => {
     [conversationId, recallMessageMutation],
   )
 
+  const handleEditMessage = useCallback(
+    async (msg, newContent) => {
+      const msgId = msg?.id || msg?.messageId
+      if (!conversationId || !msgId || !newContent?.trim()) return
+      try {
+        await editMessageMutation({
+          conversationId,
+          messageId: msgId,
+          messageContent: newContent.trim(),
+        }).unwrap()
+      } catch (err) {
+        console.error("Failed to edit message:", err)
+        throw err
+      }
+    },
+    [conversationId, editMessageMutation],
+  )
+
+  const handleToggleReaction = useCallback(
+    async (msg, emoji) => {
+      const msgId = msg?.id || msg?.messageId
+      if (!conversationId || !msgId || !emoji) return
+      try {
+        await toggleReactionMutation({
+          conversationId,
+          messageId: msgId,
+          emoji,
+        }).unwrap()
+      } catch (err) {
+        console.error("Failed to toggle reaction:", err)
+        throw err
+      }
+    },
+    [conversationId, toggleReactionMutation],
+  )
+
+  const handlePinMessage = useCallback(
+    async (msg) => {
+      const msgId = msg?.id || msg?.messageId
+      if (!conversationId || !msgId) return
+      try {
+        await pinMessageMutation({
+          conversationId,
+          messageId: msgId,
+        }).unwrap()
+      } catch (err) {
+        console.error("Failed to pin message:", err)
+        throw err
+      }
+    },
+    [conversationId, pinMessageMutation],
+  )
+
+  const handleUnpinMessage = useCallback(
+    async (msg) => {
+      const msgId = msg?.id || msg?.messageId
+      if (!conversationId || !msgId) return
+      try {
+        await unpinMessageMutation({
+          conversationId,
+          messageId: msgId,
+        }).unwrap()
+      } catch (err) {
+        console.error("Failed to unpin message:", err)
+        throw err
+      }
+    },
+    [conversationId, unpinMessageMutation],
+  )
+
+  const handleSendVoice = useCallback(
+    async (audioBlob, duration) => {
+      if (!audioBlob || !conversationId) return
+      const fileName = `voice_${Date.now()}.webm`
+      const file = new File([audioBlob], fileName, {
+        type: audioBlob.type || "audio/webm",
+      })
+      return handleSend("", file, {
+        audioDuration: duration,
+        messageType: "Audio",
+      })
+    },
+    [conversationId, handleSend],
+  )
+
   return {
     replyingTo,
     pendingUpload:
@@ -184,10 +307,15 @@ export const useChatMessageActions = (conversationId) => {
     handleReply,
     handleCancelReply,
     handleSend,
+    handleSendVoice,
     handleRetryUpload,
     handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
+    handleEditMessage,
+    handleToggleReaction,
+    handlePinMessage,
+    handleUnpinMessage,
     isSending: isSendingText || isSendingMedia,
   }
 }

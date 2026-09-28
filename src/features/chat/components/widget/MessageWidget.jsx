@@ -56,6 +56,7 @@ const MessageWidget = () => {
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
+    handleSendVoice,
     handleRetryUpload,
     handleCancelUpload,
     handleDeleteForMe,
@@ -125,16 +126,20 @@ const MessageWidget = () => {
     };
   }, [selected]);
 
-  // Fetch messages for selected conversation
+  // Fetch messages for selected conversation only when widget detail is open
+  const shouldFetchMessages = Boolean(isOpen && view === "detail" && activeConversationId)
   const { data: messagesResponse = [], isLoading: messagesLoading } =
-    useGetConversationMessagesQuery(activeConversationId, {
-      skip: !activeConversationId,
-    });
+    useGetConversationMessagesQuery(
+      shouldFetchMessages ? activeConversationId : undefined,
+      {
+        skip: !shouldFetchMessages,
+      },
+    )
 
   const activeMessages = useMemo(() => {
     const rawList = Array.isArray(messagesResponse)
       ? messagesResponse
-      : messagesResponse?.data || [];
+      : messagesResponse?.data || []
     return rawList.map((msg) => ({
       id: msg.messageId,
       conversationId: msg.conversationId,
@@ -151,59 +156,69 @@ const MessageWidget = () => {
       mediaUrl: msg.mediaUrl || msg.fileUrl || msg.attachmentUrl,
       isRecalled: msg.isRecalled,
       isDeleted: msg.isDeleted,
-    }));
-  }, [messagesResponse]);
+    }))
+  }, [messagesResponse])
 
   // -- SignalR Integration --
   const { startTyping, stopTyping, typingUsers } = useMessageSignalR({
-    activeConversationId,
-  });
+    activeConversationId: shouldFetchMessages ? activeConversationId : null,
+  })
 
-  const [markConversationAsRead] = useMarkConversationAsReadMutation();
+  const [markConversationAsRead] = useMarkConversationAsReadMutation()
 
   // Clear unread logic
   const clearUnreadLogic = (convId) => {
-    dispatch(clearUnread(convId));
+    dispatch(clearUnread(convId))
     dispatch(
       conversationsApi.util.updateQueryData(
         "getConversations",
         undefined,
         (draft) => {
-          const cachedConv = draft.find((c) => c.conversationId === convId);
+          const cachedConv = draft.find((c) => c.conversationId === convId)
           if (cachedConv) {
-            cachedConv.unreadCount = 0;
+            cachedConv.unreadCount = 0
           }
         },
       ),
-    );
+    )
 
     // Notify server to mark as read
     markConversationAsRead(convId).catch((err) =>
       console.error("Failed to mark conversation as read:", err),
-    );
-  };
+    )
+  }
 
   // Handle conversation selection
   const handleSelectConversation = (conv) => {
-    dispatch(setActiveConversation(conv.conversationId));
-    handleCancelReply();
-    clearUnreadLogic(conv.conversationId);
-  };
+    dispatch(setActiveConversation(conv.conversationId))
+    handleCancelReply()
+    clearUnreadLogic(conv.conversationId)
+  }
+
+  const markedConvIdRef = useRef(null)
 
   // Handle programmatically opened conversations or updates to active conversation
   useEffect(() => {
-    if (!activeConversationId) return;
+    if (!isOpen || view !== "detail" || !activeConversationId) {
+      markedConvIdRef.current = null
+      return
+    }
 
     const currentCached = conversations.find(
       (c) =>
         Number(c.conversationId ?? c.id) === Number(activeConversationId) ||
         String(c.conversationId ?? c.id) === String(activeConversationId),
-    );
+    )
 
-    if (!currentCached || currentCached.unreadCount > 0) {
-      clearUnreadLogic(activeConversationId);
+    if (
+      currentCached &&
+      currentCached.unreadCount > 0 &&
+      markedConvIdRef.current !== activeConversationId
+    ) {
+      markedConvIdRef.current = activeConversationId
+      clearUnreadLogic(activeConversationId)
     }
-  }, [activeConversationId, conversations]);
+  }, [isOpen, view, activeConversationId, conversations])
 
   // Handle back to list
   const handleBackToList = () => {
@@ -303,6 +318,7 @@ const MessageWidget = () => {
               }
             }}
             onSendMessage={handleSendMessage}
+            onSendVoice={handleSendVoice}
             onKeyPress={handleKeyPress}
             isSending={isSending}
             typingUsers={typingUsers}

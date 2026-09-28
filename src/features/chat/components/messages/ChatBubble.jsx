@@ -1,21 +1,23 @@
-import { memo, useState, useRef } from "react";
-import { useTimezone } from "@/shared/hooks/useTimezone";
-import Avatar from "@/shared/components/ui/Avatar";
-import { getParticipantTheme } from "@/features/video-call/utils/participantTheme";
-import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
-import ChatContextMenu from "./ChatContextMenu";
-import ChatBubbleActions from "./ChatBubbleActions";
-import ChatBubbleTyping from "./ChatBubbleTyping";
-import ChatBubbleContent from "./ChatBubbleContent";
-import ChatBubbleReadStatus from "./ChatBubbleReadStatus";
-import { useLanguage } from "@/shared/context/LanguageContext";
+import { memo, useState, useRef, useCallback, useMemo } from "react"
+import { useTimezone } from "@/shared/hooks/useTimezone"
+import { useAuth } from "@/features/auth"
+import Avatar from "@/shared/components/ui/Avatar"
+import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
+import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
+import ChatContextMenu from "./ChatContextMenu"
+import ChatBubbleActions from "./ChatBubbleActions"
+import ChatBubbleTyping from "./ChatBubbleTyping"
+import ChatBubbleContent from "./ChatBubbleContent"
+import ChatBubbleReadStatus from "./ChatBubbleReadStatus"
+import MessageReactionBadges from "./MessageReactionBadges"
+import ReactionDetailsModal from "../modals/ReactionDetailsModal"
+import ForwardMessageModal from "../modals/ForwardMessageModal"
+import { useGetConversationMembersQuery } from "@/store/api/social/conversationsApi"
+import { useLanguage } from "@/shared/context/LanguageContext"
+import toast from "react-hot-toast"
 
 /**
- * ChatBubble — individual message bubble.
- *
- * Supports 1:1 and group chats with message grouping,
- * avatars, sender names, timestamps, read receipts, media display,
- * parent message quote (RepliedMessage), recalled state, and context menu overlay.
+ * ChatBubble — enhanced message bubble with reactions, inline editing, pin actions, and forward support.
  */
 const ChatBubble = ({
   message,
@@ -30,52 +32,174 @@ const ChatBubble = ({
   onReply,
   onDeleteForMe,
   onRecall,
+  onEdit,
+  onToggleReaction,
+  onPin,
+  onUnpin,
+  isPinned = false,
+  canPin = false,
+  conversationId,
   isWidget = false,
 }) => {
-  const { t } = useLanguage();
-  const { formatTime } = useTimezone();
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [targetRect, setTargetRect] = useState(null);
-  const touchTimerRef = useRef(null);
-  const rowRef = useRef(null);
+  const { t } = useLanguage()
+  const { formatTime } = useTimezone()
 
-  const maxWidthClass = isWidget ? "max-w-[65%]" : "max-w-[75%]";
+  // Context menu & Popover states
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
+  const [targetRect, setTargetRect] = useState(null)
+  const [isReactionDetailsOpen, setIsReactionDetailsOpen] = useState(false)
+  const [reactionDetailsEmoji, setReactionDetailsEmoji] = useState("all")
+  const [isForwardOpen, setIsForwardOpen] = useState(false)
+
+  // Inline editing state
+  const [isEditing, setIsEditing] = useState(false)
+  const [editValue, setEditValue] = useState("")
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
+
+  const { user: currentUser } = useAuth()
+
+  const effectiveConvId = conversationId || message?.conversationId
+  const { data: rawMembers = [] } = useGetConversationMembersQuery(
+    effectiveConvId,
+    { skip: !effectiveConvId },
+  )
+
+  const knownNames = useMemo(() => {
+    const list = Array.isArray(rawMembers)
+      ? rawMembers
+      : rawMembers?.data || rawMembers?.items || []
+    const names = ["all", "tatca"]
+    list.forEach((m) => {
+      if (m.username) names.push(m.username)
+      if (m.fullName) names.push(m.fullName)
+      if (m.name) names.push(m.name)
+      if (m.nickname) names.push(m.nickname)
+    })
+    if (sender?.name) names.push(sender.name)
+    if (sender?.username) names.push(sender.username)
+    if (currentUser?.username) names.push(currentUser.username)
+    if (currentUser?.name) names.push(currentUser.name)
+    if (currentUser?.fullName) names.push(currentUser.fullName)
+    return Array.from(new Set(names.filter(Boolean)))
+  }, [rawMembers, sender, currentUser])
+
+  const isCurrentUserMentioned = useMemo(() => {
+    if (isOwn) return false
+    const myId = Number(currentUser?.id || currentUser?.accountId)
+    const mentionedIds = (
+      message?.mentionedAccountIds ||
+      message?.MentionedAccountIds ||
+      []
+    ).map(Number)
+    if (myId && mentionedIds.includes(myId)) return true
+
+    const text = message?.content || message?.messageContent || ""
+    if (/@all\b|@tatca\b/i.test(text)) return true
+    if (
+      currentUser?.username &&
+      new RegExp(
+        `@${currentUser.username.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+        "i",
+      ).test(text)
+    ) {
+      return true
+    }
+    if (
+      currentUser?.fullName &&
+      new RegExp(
+        `@${currentUser.fullName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+        "i",
+      ).test(text)
+    ) {
+      return true
+    }
+
+    return false
+  }, [isOwn, currentUser, message])
+
+  const touchTimerRef = useRef(null)
+  const rowRef = useRef(null)
+
+  const maxWidthClass = isWidget ? "max-w-[70%]" : "max-w-[75%]"
 
   const isRecalled =
     message?.isRecalled ||
     message?.messageType === "Recalled" ||
-    message?.content === "[Message Recalled]";
+    message?.content === "[Message Recalled]" ||
+    message?.messageContent === "Tin nhắn đã bị thu hồi"
+
+  // Check 30-minute window for editing text messages
+  const msgTime = message?.timestamp ? new Date(message.timestamp).getTime() : 0
+  const isWithinEditWindow = Date.now() - msgTime < 30 * 60 * 1000
+  const canEdit =
+    isOwn &&
+    !isRecalled &&
+    !message?.mediaUrl &&
+    isWithinEditWindow &&
+    Boolean(onEdit)
+
+  const handleStartEdit = useCallback(() => {
+    setIsEditing(true)
+    setEditValue(message?.content || message?.messageContent || "")
+  }, [message])
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false)
+    setEditValue("")
+  }, [])
+
+  const handleSaveEdit = useCallback(async () => {
+    const trimmed = editValue.trim()
+    if (!trimmed || trimmed === (message?.content || message?.messageContent)) {
+      setIsEditing(false)
+      return
+    }
+
+    setIsSavingEdit(true)
+    try {
+      if (onEdit) {
+        await onEdit(message, trimmed)
+      }
+      setIsEditing(false)
+      toast.success(t?.chat?.editedSuccess || "Message edited")
+    } catch (err) {
+      console.error("Failed to edit message:", err)
+      toast.error(t?.chat?.editFailed || "Failed to edit message")
+    } finally {
+      setIsSavingEdit(false)
+    }
+  }, [editValue, message, onEdit, t])
 
   const handleContextMenu = (e) => {
-    if (isRecalled) return;
-    e.preventDefault();
+    if (isRecalled || isEditing) return
+    e.preventDefault()
     if (rowRef.current) {
-      setTargetRect(rowRef.current.getBoundingClientRect());
+      setTargetRect(rowRef.current.getBoundingClientRect())
     }
-    setIsContextMenuOpen(true);
-  };
+    setIsContextMenuOpen(true)
+  }
 
   const handleTouchStart = () => {
-    if (isRecalled) return;
+    if (isRecalled || isEditing) return
     touchTimerRef.current = setTimeout(() => {
       if (rowRef.current) {
-        setTargetRect(rowRef.current.getBoundingClientRect());
+        setTargetRect(rowRef.current.getBoundingClientRect())
       }
-      setIsContextMenuOpen(true);
-    }, 400);
-  };
+      setIsContextMenuOpen(true)
+    }, 400)
+  }
 
   const handleTouchEnd = () => {
     if (touchTimerRef.current) {
-      clearTimeout(touchTimerRef.current);
+      clearTimeout(touchTimerRef.current)
     }
-  };
-
-  if (isTyping) {
-    return <ChatBubbleTyping sender={sender} />;
   }
 
-  // Fallback for System messages if passed directly
+  if (isTyping) {
+    return <ChatBubbleTyping sender={sender} />
+  }
+
+  // System message fallback
   if (
     message?.messageType != null &&
     String(message.messageType).toLowerCase() === "system"
@@ -83,25 +207,39 @@ const ChatBubble = ({
     return (
       <div className="flex justify-center my-3 px-4 w-full">
         <span className="bg-[#E5E5E5]/60 text-[#606060] dark:bg-zinc-800 dark:text-zinc-400 text-xs px-3.5 py-1.5 rounded-full font-medium shadow-xs text-center border border-border/40 max-w-[85%] break-words">
-          {message.content}
+          {message.content || message.messageContent}
         </span>
       </div>
-    );
+    )
   }
 
-  // Spacing between groups
-  const marginTop = isFirstInGroup ? "mt-3" : "mt-0.5";
-  const avatarSrc = sender?.avatar || sender?.avatarImageUrl;
+  const marginTop = isFirstInGroup ? "mt-3" : "mt-0.5"
+  const avatarSrc = sender?.avatar || sender?.avatarImageUrl
 
-  const readers = Array.isArray(readByUsers) ? readByUsers : [];
-  const hasBeenSeen =
-    readers.length > 0 ||
-    message?.isRead ||
-    (Array.isArray(message?.readByAccountIds) &&
-      message.readByAccountIds.length > 0) ||
-    message?.status === "read";
+  const readers = Array.isArray(readByUsers) ? readByUsers : []
 
-  const bubbleNode = <ChatBubbleContent message={message} isOwn={isOwn} />;
+  const bubbleNode = (
+    <div
+      className={
+        isCurrentUserMentioned
+          ? "ring-2 ring-amber-500/80 shadow-[0_0_12px_rgba(245,158,11,0.25)] rounded-2xl transition-all"
+          : ""
+      }
+    >
+      <ChatBubbleContent
+        message={message}
+        isOwn={isOwn}
+        currentUserName={currentUser?.username}
+        knownNames={knownNames}
+        isEditing={isEditing}
+        editValue={editValue}
+        onEditChange={setEditValue}
+        onSaveEdit={handleSaveEdit}
+        onCancelEdit={handleCancelEdit}
+        isSavingEdit={isSavingEdit}
+      />
+    </div>
+  )
 
   const avatarNode =
     !isOwn && isLastInGroup ? (
@@ -115,7 +253,7 @@ const ChatBubble = ({
           ).avatarClass
         }
       />
-    ) : null;
+    ) : null
 
   const rowNode = (
     <div
@@ -126,13 +264,16 @@ const ChatBubble = ({
       {!isOwn && <div className="w-10 shrink-0">{avatarNode}</div>}
       <div className={`relative ${maxWidthClass} w-fit`}>{bubbleNode}</div>
     </div>
-  );
+  )
+
+  const messageId = message?.id || message?.messageId
 
   return (
     <div
-      className={`${marginTop} flex flex-col gap-1 ${
+      id={messageId ? `chat-message-${messageId}` : undefined}
+      className={`${marginTop} flex flex-col gap-0.5 ${
         isOwn ? "items-end" : "items-start"
-      } group relative w-full`}
+      } group relative w-full scroll-mt-24 transition-all duration-300`}
     >
       {/* Header with Sender Name + Timestamp */}
       {isFirstInGroup && (
@@ -146,11 +287,12 @@ const ChatBubble = ({
           </span>
 
           <span className="text-xs text-[#606060]">
-            {formatTime(message.timestamp)}
+            {formatTime(message.timestamp || message.createDate)}
           </span>
         </div>
       )}
 
+      {/* Row with Avatar & Message Bubble */}
       <div
         ref={rowRef}
         className={`flex ${
@@ -161,39 +303,69 @@ const ChatBubble = ({
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchEnd}
       >
-        {/* Avatar slot for received messages */}
         {!isOwn && <div className="w-10 shrink-0">{avatarNode}</div>}
 
-        {/* Message Bubble Container */}
-        <div className={`relative ${maxWidthClass} w-fit`}>
-          {shouldAnimate ? (
-            <FluentAnimation
-              direction={isOwn ? "left" : "right"}
-              distance={24}
-              duration={0.25}
-              className="w-fit max-w-full"
-            >
-              {bubbleNode}
-            </FluentAnimation>
-          ) : (
-            bubbleNode
-          )}
+        <div
+          className={`${maxWidthClass} w-fit flex flex-col ${
+            isOwn ? "items-end" : "items-start"
+          }`}
+        >
+          {/* Message bubble + Actions wrapper (so actions align ONLY to the bubble) */}
+          <div className="relative w-fit max-w-full">
+            {shouldAnimate ? (
+              <FluentAnimation
+                direction={isOwn ? "left" : "right"}
+                distance={24}
+                duration={0.25}
+                className="w-fit max-w-full"
+              >
+                {bubbleNode}
+              </FluentAnimation>
+            ) : (
+              bubbleNode
+            )}
 
+            {/* Action Popover Icons */}
+            {!isRecalled && !isEditing && (
+              <ChatBubbleActions
+                isOwn={isOwn}
+                onReact={
+                  !isWidget && onToggleReaction
+                    ? (emoji) => onToggleReaction(message, emoji)
+                    : undefined
+                }
+                onReply={onReply}
+                onEdit={handleStartEdit}
+                canEdit={canEdit}
+                onForward={() => setIsForwardOpen(true)}
+                onPin={onPin}
+                onUnpin={onUnpin}
+                isPinned={isPinned}
+                canPin={canPin}
+                onDeleteForMe={onDeleteForMe}
+                onRecall={onRecall}
+                message={message}
+                isWidget={isWidget}
+              />
+            )}
+          </div>
+
+          {/* Reaction Badges */}
           {!isRecalled && (
-            <ChatBubbleActions
+            <MessageReactionBadges
+              reactions={message?.reactions}
+              onViewDetails={(emoji) => {
+                setReactionDetailsEmoji(emoji || "all")
+                setIsReactionDetailsOpen(true)
+              }}
               isOwn={isOwn}
-              onReply={onReply}
-              onDeleteForMe={onDeleteForMe}
-              onRecall={onRecall}
-              message={message}
-              isWidget={isWidget}
             />
           )}
         </div>
       </div>
 
       {/* Context Menu Overlay */}
-      {!isRecalled && (
+      {!isRecalled && !isEditing && (
         <ChatContextMenu
           isOpen={isContextMenuOpen}
           onClose={() => setIsContextMenuOpen(false)}
@@ -202,6 +374,14 @@ const ChatBubble = ({
           targetRect={targetRect}
           rowElement={rowNode}
           onReply={onReply}
+          onEdit={handleStartEdit}
+          canEdit={canEdit}
+          onForward={() => setIsForwardOpen(true)}
+          onPin={onPin}
+          onUnpin={onUnpin}
+          isPinned={isPinned}
+          canPin={canPin}
+          onReact={onToggleReaction}
           onDeleteForMe={onDeleteForMe}
           onRecall={onRecall}
         />
@@ -210,12 +390,27 @@ const ChatBubble = ({
       {/* Read Status for latest message */}
       <ChatBubbleReadStatus
         isLastMessageInChat={isLastMessageInChat}
-        hasBeenSeen={hasBeenSeen}
         readers={readers}
         isOwn={isOwn}
       />
-    </div>
-  );
-};
 
-export default memo(ChatBubble);
+      {/* ── Reaction Details Modal ─────────────────── */}
+      <ReactionDetailsModal
+        open={isReactionDetailsOpen}
+        onClose={() => setIsReactionDetailsOpen(false)}
+        message={message}
+        conversationId={conversationId || message?.conversationId}
+        initialEmoji={reactionDetailsEmoji}
+      />
+
+      {/* ── Forward Message Modal ──────────────────── */}
+      <ForwardMessageModal
+        open={isForwardOpen}
+        onClose={() => setIsForwardOpen(false)}
+        message={message}
+      />
+    </div>
+  )
+}
+
+export default memo(ChatBubble)

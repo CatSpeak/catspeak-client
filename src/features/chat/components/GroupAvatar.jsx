@@ -6,7 +6,17 @@ import { getParticipantTheme } from "@/features/video-call/utils/participantThem
  * GroupAvatar — displays initials or double overlapping avatars for a group conversation.
  */
 const GroupAvatar = ({ conversation, size = 48 }) => {
-  const participants = conversation.participants || []
+  if (conversation?.avatarImageUrl) {
+    return (
+      <Avatar
+        size={size}
+        name={conversation.groupName || conversation.name || "G"}
+        src={conversation.avatarImageUrl}
+      />
+    )
+  }
+
+  const participants = conversation?.participants || []
 
   if (participants.length === 0) {
     const initial = (conversation.groupName || conversation.name || "G").charAt(0).toUpperCase()

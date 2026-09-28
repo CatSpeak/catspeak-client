@@ -152,15 +152,42 @@ export const MENTION_REGEX = /@([a-zA-Z0-9_\-À-ỹ]+)/gi
 /**
  * React Component to render text with clickable URLs and styled @mentions.
  */
-export const FormattedText = ({ text, isOwn = false, currentUserName = "", className = "" }) => {
+export const FormattedText = ({
+  text,
+  isOwn = false,
+  currentUserName = "",
+  knownNames = [],
+  className = "",
+}) => {
   if (!text) return null
 
-  // Combined regex matcher for links & mentions
-  const combinedRegex = /(https?:\/\/[^\s<]+|(?:www\.)[^\s<]+)|@([a-zA-Z0-9_\-À-ỹ]+)/gi
+  // Combined regex matcher for links & mentions (supporting multi-word usernames/nicknames)
+  const combinedRegex = React.useMemo(() => {
+    const validNames = (Array.isArray(knownNames) ? knownNames : [])
+      .filter((n) => typeof n === "string" && n.trim().length > 0)
+      .map((n) => n.trim())
+
+    if (validNames.length > 0) {
+      const uniqueNames = Array.from(new Set(validNames)).sort(
+        (a, b) => b.length - a.length,
+      )
+      const namesPattern = uniqueNames
+        .map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+        .join("|")
+
+      return new RegExp(
+        `(https?:\\/\\/[^\\s<]+|(?:www\\.)[^\\s<]+)|@(${namesPattern}|[a-zA-Z0-9_\\-À-ỹ]+)`,
+        "gi",
+      )
+    }
+
+    return /(https?:\/\/[^\s<]+|(?:www\.)[^\s<]+)|@([a-zA-Z0-9_\-À-ỹ]+)/gi
+  }, [knownNames])
 
   const parts = []
   let lastIndex = 0
   let match
+  combinedRegex.lastIndex = 0
 
   while ((match = combinedRegex.exec(text)) !== null) {
     const matchIndex = match.index
@@ -235,16 +262,8 @@ export const FormattedText = ({ text, isOwn = false, currentUserName = "", class
         }
 
         if (part.type === "mention") {
-          const isMe = currentUserName && (
-            part.name.toLowerCase() === currentUserName.toLowerCase()
-          )
-
-          const mentionStyle = isOwn
-            ? "inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold bg-white/25 text-white border border-white/50 mx-0.5"
-            : "inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold bg-[#990011] text-white mx-0.5"
-
           return (
-            <span key={index} className={mentionStyle}>
+            <span key={index} className="font-bold">
               {part.content}
             </span>
           )

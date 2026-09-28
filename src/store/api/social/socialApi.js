@@ -43,6 +43,7 @@ export const socialApi = createApi({
     "PostComment",
     "PostMedia",
     "Conversations",
+    "Members",
     "Messages",
     "Friendship",
     "Friend",
