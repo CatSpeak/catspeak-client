@@ -1,3 +1,4 @@
+export * from "./api/pointApi"
 export { default as PointsAndOffersPage } from "./pages/PointsAndOffersPage"
 export { default as PointsBanner } from "./components/PointsBanner"
 export { default as PointsOverviewTab } from "./components/PointsOverviewTab"
@@ -8,3 +9,4 @@ export { default as VoucherCardItem } from "./components/VoucherCardItem"
 export { default as VaultVoucherItem } from "./components/VaultVoucherItem"
 export * from "./hooks/usePointsAndOffers"
 export * from "./constants/mockData"
+

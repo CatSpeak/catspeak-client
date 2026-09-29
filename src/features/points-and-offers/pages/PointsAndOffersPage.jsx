@@ -1,5 +1,5 @@
 import React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 import {
   usePointsAndOffers,
   TAB_KEYS,
@@ -28,6 +28,7 @@ const PointsAndOffersPage = () => {
     setActiveTab,
     userPoints,
     earningMethods,
+    recentActivities,
     vouchers,
     redeemablePreviewVouchers,
     vaultVouchers,
@@ -36,8 +37,8 @@ const PointsAndOffersPage = () => {
     modalStep,
     selectedVoucher,
     newlyRedeemedVoucher,
-    simulationMode,
-    setSimulationMode,
+    isProcessingExchange,
+    technicalErrorCode,
     handleOpenExchangeModal,
     handleConfirmExchange,
     handleCloseModal,
@@ -48,12 +49,17 @@ const PointsAndOffersPage = () => {
     setVaultSubTab,
     historyFilter,
     setHistoryFilter,
+    historyPage,
+    setHistoryPage,
+    historyPageSize,
     exchangeSearchQuery,
     setExchangeSearchQuery,
     exchangeCategoryFilter,
     setExchangeCategoryFilter,
-    isEmptyHistoryPreview,
-    setIsEmptyHistoryPreview,
+    isLoadingOverview,
+    isLoadingTemplates,
+    isLoadingInventory,
+    isLoadingHistory,
   } = usePointsAndOffers()
 
   return (
@@ -64,18 +70,14 @@ const PointsAndOffersPage = () => {
           Quản lý Điểm thưởng và Ưu đãi
         </h1>
         <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          Theo dõi và sử dụng điểm thưởng đã tích lũy và voucher.
+          Theo dõi số dư điểm thưởng, tích lũy điểm và đổi lấy các voucher học tập giá trị.
         </p>
       </div>
 
       {/* Hero Points Banner */}
       <PointsBanner
-        availablePoints={
-          isEmptyHistoryPreview ? 0 : userPoints.availablePoints
-        }
-        expiringPoints={
-          isEmptyHistoryPreview ? 0 : userPoints.expiringPoints
-        }
+        availablePoints={userPoints.availablePoints}
+        expiringPoints={userPoints.expiringPoints}
         expiryDate={userPoints.expiryDate}
         onRedeemClick={() => setActiveTab(TAB_KEYS.EXCHANGE)}
       />
@@ -98,7 +100,7 @@ const PointsAndOffersPage = () => {
               >
                 <span>{tab.label}</span>
                 {isActive && (
-                  <motion.div
+                  <Motion.div
                     layoutId="activeTabUnderline"
                     className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#990011]"
                     transition={{ type: "spring", stiffness: 450, damping: 35 }}
@@ -112,7 +114,7 @@ const PointsAndOffersPage = () => {
 
       {/* Tab Content Panes */}
       <AnimatePresence mode="wait">
-        <motion.div
+        <Motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,10 +125,11 @@ const PointsAndOffersPage = () => {
             <PointsOverviewTab
               userPoints={userPoints}
               earningMethods={earningMethods}
-              pointHistory={pointHistory}
+              pointHistory={recentActivities}
               redeemableVouchers={redeemablePreviewVouchers}
               onNavigateTab={setActiveTab}
               onRedeemVoucher={handleOpenExchangeModal}
+              isLoading={isLoadingOverview || isLoadingTemplates}
             />
           )}
 
@@ -139,6 +142,7 @@ const PointsAndOffersPage = () => {
               categoryFilter={exchangeCategoryFilter}
               onCategoryChange={setExchangeCategoryFilter}
               onRedeemVoucher={handleOpenExchangeModal}
+              isLoading={isLoadingTemplates}
             />
           )}
 
@@ -151,6 +155,7 @@ const PointsAndOffersPage = () => {
               onCopyCode={handleCopyCode}
               onUseNow={handleUseVoucher}
               onGoToExchange={() => setActiveTab(TAB_KEYS.EXCHANGE)}
+              isLoading={isLoadingInventory}
             />
           )}
 
@@ -159,13 +164,13 @@ const PointsAndOffersPage = () => {
               pointHistory={pointHistory}
               historyFilter={historyFilter}
               onFilterChange={setHistoryFilter}
-              isEmptyPreview={isEmptyHistoryPreview}
-              onToggleEmptyPreview={() =>
-                setIsEmptyHistoryPreview((prev) => !prev)
-              }
+              historyPage={historyPage}
+              onPageChange={setHistoryPage}
+              historyPageSize={historyPageSize}
+              isLoading={isLoadingHistory}
             />
           )}
-        </motion.div>
+        </Motion.div>
       </AnimatePresence>
 
       {/* Modals Flow */}
@@ -175,8 +180,7 @@ const PointsAndOffersPage = () => {
         availablePoints={userPoints.availablePoints}
         onClose={handleCloseModal}
         onConfirm={handleConfirmExchange}
-        simulationMode={simulationMode}
-        setSimulationMode={setSimulationMode}
+        isProcessing={isProcessingExchange}
       />
 
       <ExchangeProcessingModal
@@ -199,8 +203,9 @@ const PointsAndOffersPage = () => {
         errorType={
           modalStep === MODAL_STEPS.ERROR_NETWORK ? "network" : "out_of_stock"
         }
+        errorCode={technicalErrorCode}
         onClose={handleCloseModal}
-        onRetry={() => handleConfirmExchange("success")}
+        onRetry={() => handleConfirmExchange()}
         onChooseAnother={() => {
           handleCloseModal()
           setActiveTab(TAB_KEYS.EXCHANGE)

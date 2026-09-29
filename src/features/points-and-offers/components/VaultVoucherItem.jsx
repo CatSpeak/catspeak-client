@@ -1,5 +1,5 @@
 import React from "react"
-import { Copy, Check } from "lucide-react"
+import { Copy } from "lucide-react"
 
 const VaultVoucherItem = ({
   voucher,
@@ -31,7 +31,7 @@ const VaultVoucherItem = ({
         <div>
           <div className="flex flex-wrap items-center gap-2 mb-1.5">
             <h4 className="font-bold text-gray-900 text-sm sm:text-base">
-              {voucher.title}
+              {voucher.title || voucher.name}
             </h4>
 
             {isUnused && (
@@ -62,7 +62,7 @@ const VaultVoucherItem = ({
             <button
               type="button"
               onClick={() => onCopyCode?.(voucher.code)}
-              className="text-gray-400 hover:text-gray-700 transition ml-1"
+              className="text-gray-400 hover:text-gray-700 transition ml-1 cursor-pointer"
               title="Sao chép mã"
             >
               <Copy size={13} />
@@ -86,14 +86,14 @@ const VaultVoucherItem = ({
             <button
               type="button"
               onClick={() => onCopyCode?.(voucher.code)}
-              className="px-3.5 py-2 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg transition"
+              className="px-3.5 py-2 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg transition cursor-pointer"
             >
               Sao chép mã
             </button>
             <button
               type="button"
               onClick={() => onUseNow?.(voucher)}
-              className="px-4 py-2 text-xs font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-lg shadow-xs transition"
+              className="px-4 py-2 text-xs font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-lg shadow-xs transition cursor-pointer"
             >
               Dùng ngay
             </button>
