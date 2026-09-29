@@ -13,14 +13,33 @@ import {
 import VoucherCardItem from "./VoucherCardItem"
 
 const PointsOverviewTab = ({
-  userPoints,
+  userPoints = {},
   earningMethods = [],
   pointHistory = [],
   redeemableVouchers = [],
   onNavigateTab,
   onRedeemVoucher,
+  isLoading = false,
 }) => {
-  const recentActivities = pointHistory.slice(0, 3)
+  // Show up to 5 recent activities as per FE integration guidelines
+  const recentActivities = pointHistory.slice(0, 5)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 pb-10 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white border border-gray-200/90 rounded-2xl p-5 h-24"
+            />
+          ))}
+        </div>
+        <div className="bg-white border border-gray-200/90 rounded-2xl p-6 h-48" />
+        <div className="bg-white border border-gray-200/90 rounded-2xl p-6 h-48" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8 pb-10">
@@ -36,7 +55,7 @@ const PointsOverviewTab = ({
               Tổng điểm đã tích lũy
             </span>
             <div className="text-xl font-bold text-gray-900 mt-0.5">
-              {(userPoints.totalAccumulated || 400).toLocaleString("vi-VN")} điểm
+              {(userPoints.totalAccumulated ?? 0).toLocaleString("vi-VN")} điểm
             </div>
           </div>
         </div>
@@ -51,7 +70,7 @@ const PointsOverviewTab = ({
               Đã đổi
             </span>
             <div className="text-xl font-bold text-gray-900 mt-0.5">
-              {(userPoints.totalRedeemed || 50).toLocaleString("vi-VN")} điểm
+              {(userPoints.totalRedeemed ?? 0).toLocaleString("vi-VN")} điểm
             </div>
           </div>
         </div>
@@ -65,14 +84,16 @@ const PointsOverviewTab = ({
             <span className="text-xs text-gray-400 font-medium block">
               Sắp hết hạn
             </span>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
+            <div className="flex items-baseline mt-0.5">
               <span className="text-xl font-bold text-amber-600">
-                {(userPoints.expiringPoints || 50).toLocaleString("vi-VN")} điểm
-              </span>
-              <span className="text-xs text-gray-400 font-normal">
-                trước {userPoints.expiringBefore || "20/09/2026"}
+                {(userPoints.expiringPoints ?? 0).toLocaleString("vi-VN")} điểm
               </span>
             </div>
+            {userPoints.expiringBefore && (
+              <span className="text-xs text-gray-400 font-normal">
+                trước {userPoints.expiringBefore}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -139,55 +160,70 @@ const PointsOverviewTab = ({
           </button>
         </div>
 
-        <div className="bg-white border border-gray-200/90 rounded-2xl divide-y divide-gray-100 shadow-xs overflow-hidden">
-          {recentActivities.map((act) => {
-            const isSpend = act.type === "spend" || act.points < 0
-            return (
-              <div
-                key={act.id}
-                className="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-gray-50/60 transition"
-              >
-                <div className="flex items-center gap-3 sm:gap-4">
+        {recentActivities.length > 0 ? (
+          <div className="bg-white border border-gray-200/90 rounded-2xl divide-y divide-gray-100 shadow-xs overflow-hidden">
+            {recentActivities.map((act) => {
+              const isSpend =
+                act.type === "spend" ||
+                act.type === "redeem" ||
+                act.type === "expire" ||
+                act.points < 0
+
+              return (
+                <div
+                  key={act.id}
+                  className="p-4 sm:p-5 flex items-center justify-between gap-4 hover:bg-gray-50/60 transition"
+                >
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                        isSpend
+                          ? "bg-rose-50 text-rose-600"
+                          : "bg-emerald-50 text-emerald-600"
+                      }`}
+                    >
+                      {isSpend ? (
+                        <Ticket size={20} />
+                      ) : act.icon === "cap" ? (
+                        <GraduationCap size={20} />
+                      ) : (
+                        <Star size={20} />
+                      )}
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-gray-900 text-sm">
+                        {act.title}
+                      </h5>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {act.date}
+                      </p>
+                    </div>
+                  </div>
+
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                      isSpend
-                        ? "bg-rose-50 text-rose-600"
-                        : "bg-blue-50 text-blue-600"
+                    className={`text-sm font-bold flex items-center gap-1 shrink-0 ${
+                      isSpend ? "text-[#990011]" : "text-emerald-600"
                     }`}
                   >
-                    {isSpend ? (
-                      <Ticket size={20} />
-                    ) : act.icon === "cap" ? (
-                      <GraduationCap size={20} />
-                    ) : (
-                      <Star size={20} />
-                    )}
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-gray-900 text-sm">
-                      {act.title}
-                    </h5>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {act.date}
-                    </p>
+                    <span>{act.points > 0 ? `+${act.points}` : act.points}</span>
+                    <Star
+                      size={14}
+                      className={
+                        isSpend
+                          ? "fill-[#990011] text-[#990011]"
+                          : "fill-emerald-500 text-emerald-500"
+                      }
+                    />
                   </div>
                 </div>
-
-                <div
-                  className={`text-sm font-bold flex items-center gap-1 shrink-0 ${
-                    isSpend ? "text-[#990011]" : "text-amber-500"
-                  }`}
-                >
-                  <span>{act.points > 0 ? `+${act.points}` : act.points}</span>
-                  <Star
-                    size={14}
-                    className={isSpend ? "fill-[#990011] text-[#990011]" : "fill-amber-500 text-amber-500"}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="bg-white border border-gray-200/90 rounded-2xl p-6 text-center shadow-xs">
+            <p className="text-xs text-gray-400">Chưa có hoạt động điểm nào gần đây.</p>
+          </div>
+        )}
       </div>
 
       {/* "Có thể đổi ngay" Section */}
@@ -198,7 +234,7 @@ const PointsOverviewTab = ({
               Có thể đổi ngay
             </h3>
             <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md flex items-center gap-1">
-              <span>{userPoints.availablePoints}</span>
+              <span>{userPoints.availablePoints ?? 0}</span>
               <Star size={12} className="fill-amber-500 text-amber-500" />
             </span>
           </div>
@@ -213,17 +249,25 @@ const PointsOverviewTab = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {redeemableVouchers.map((voucher) => (
-            <VoucherCardItem
-              key={voucher.id}
-              voucher={voucher}
-              userPoints={userPoints.availablePoints}
-              onRedeem={onRedeemVoucher}
-              compact
-            />
-          ))}
-        </div>
+        {redeemableVouchers.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {redeemableVouchers.map((voucher) => (
+              <VoucherCardItem
+                key={voucher.id}
+                voucher={voucher}
+                userPoints={userPoints.availablePoints ?? 0}
+                onRedeem={onRedeemVoucher}
+                compact
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white border border-gray-200/90 rounded-2xl p-6 text-center shadow-xs">
+            <p className="text-xs text-gray-400">
+              Chưa có voucher phù hợp với số điểm hiện có. Hãy tích thêm điểm nhé!
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

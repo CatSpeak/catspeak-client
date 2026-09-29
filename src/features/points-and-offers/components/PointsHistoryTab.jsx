@@ -5,20 +5,25 @@ import {
   Trophy,
   Star,
   GraduationCap,
-  Eye,
-  EyeOff,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
 } from "lucide-react"
 
 const PointsHistoryTab = ({
   pointHistory = [],
   historyFilter = "all",
   onFilterChange,
-  isEmptyPreview = false,
-  onToggleEmptyPreview,
+  historyPage = 1,
+  onPageChange,
+  historyPageSize = 10,
+  isLoading = false,
 }) => {
+  const hasItems = pointHistory.length > 0
+
   return (
     <div className="space-y-6 pb-10">
-      {/* Top Filter Chips & Empty State Preview Toggle */}
+      {/* Top Filter Chips */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
@@ -55,23 +60,18 @@ const PointsHistoryTab = ({
             Sử dụng (-)
           </button>
         </div>
-
-        {/* Toggle Empty Preview Button */}
-        <button
-          type="button"
-          onClick={onToggleEmptyPreview}
-          className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-800 bg-gray-100 hover:bg-gray-200/80 px-3 py-1.5 rounded-lg transition"
-          title="Xem trạng thái rỗng"
-        >
-          {isEmptyPreview ? <EyeOff size={14} /> : <Eye size={14} />}
-          <span>{isEmptyPreview ? "Xem danh sách có dữ liệu" : "Xem giao diện rỗng"}</span>
-        </button>
       </div>
 
-      {/* Main Table or Empty State */}
-      {pointHistory.length > 0 && !isEmptyPreview ? (
+      {/* Loading Skeleton */}
+      {isLoading ? (
+        <div className="bg-white border border-gray-200/90 rounded-2xl p-6 space-y-4 animate-pulse">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-12 bg-gray-100 rounded-xl" />
+          ))}
+        </div>
+      ) : hasItems ? (
         <div className="bg-white border border-gray-200/90 rounded-2xl shadow-xs overflow-hidden">
-          {/* Table Header*/}
+          {/* Table Header */}
           <div className="bg-[#990011] text-white px-5 py-3.5 grid grid-cols-12 text-xs font-bold uppercase tracking-wider">
             <div className="col-span-6 sm:col-span-6">HOẠT ĐỘNG</div>
             <div className="col-span-4 sm:col-span-4 text-center sm:text-left">THỜI GIAN</div>
@@ -88,7 +88,7 @@ const PointsHistoryTab = ({
                   key={item.id}
                   className="px-5 py-4 grid grid-cols-12 items-center hover:bg-gray-50/70 transition"
                 >
-                  {/* Activity with Circle Icon */}
+                  {/* Activity with Icon */}
                   <div className="col-span-6 sm:col-span-6 flex items-center gap-3">
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
@@ -142,9 +142,41 @@ const PointsHistoryTab = ({
             })}
           </div>
 
-          {/* Footer note */}
-          <div className="p-4 text-center text-xs text-gray-400 border-t border-gray-100 bg-gray-50/50">
-            Hiển thị {pointHistory.length} giao dịch gần nhất
+          {/* Pagination Controls */}
+          <div className="p-4 flex items-center justify-between text-xs text-gray-500 border-t border-gray-100 bg-gray-50/50">
+            <span>
+              Trang {historyPage} (Hiển thị tối đa {historyPageSize} mục/trang)
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={historyPage <= 1}
+                onClick={() => onPageChange?.(Math.max(1, historyPage - 1))}
+                className={`p-1.5 rounded-lg border flex items-center gap-1 transition ${
+                  historyPage <= 1
+                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
+                    : "border-gray-300 text-gray-700 hover:bg-white cursor-pointer shadow-2xs"
+                }`}
+              >
+                <ChevronLeft size={14} />
+                <span>Trước</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={pointHistory.length < historyPageSize}
+                onClick={() => onPageChange?.(historyPage + 1)}
+                className={`p-1.5 rounded-lg border flex items-center gap-1 transition ${
+                  pointHistory.length < historyPageSize
+                    ? "opacity-50 cursor-not-allowed border-gray-200 text-gray-400"
+                    : "border-gray-300 text-gray-700 hover:bg-white cursor-pointer shadow-2xs"
+                }`}
+              >
+                <span>Sau</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
       ) : (
@@ -154,10 +186,10 @@ const PointsHistoryTab = ({
             <Star size={48} strokeWidth={1.2} />
           </div>
           <h4 className="text-base sm:text-lg font-bold text-gray-800 mb-1.5">
-            Bạn chưa có điểm thưởng nào
+            Không có lịch sử biến động điểm
           </h4>
           <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-            Hoàn thành các khóa học hoặc tham gia thử thách để kiếm điểm thưởng nhé!
+            Hoàn thành các khóa học hoặc tham gia hoạt động để kiếm điểm thưởng nhé!
           </p>
         </div>
       )}

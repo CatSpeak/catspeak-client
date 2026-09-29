@@ -19,6 +19,7 @@ const VoucherExchangeTab = ({
   categoryFilter = "all",
   onCategoryChange,
   onRedeemVoucher,
+  isLoading = false,
 }) => {
   return (
     <div className="space-y-6 pb-10">
@@ -39,7 +40,7 @@ const VoucherExchangeTab = ({
           />
         </div>
 
-        {/* Categories Bar / Dropdown */}
+        {/* Categories Bar */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <div className="flex items-center gap-1 text-gray-400 text-xs shrink-0 px-1 font-medium">
             <SlidersHorizontal size={14} />
@@ -66,8 +67,17 @@ const VoucherExchangeTab = ({
         </div>
       </div>
 
-      {/* Voucher Grid (2 Columns on desktop, 1 on mobile) */}
-      {vouchers.length > 0 ? (
+      {/* Loading Skeletons */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 animate-pulse">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-white border border-gray-200/90 rounded-2xl p-5 h-44"
+            />
+          ))}
+        </div>
+      ) : vouchers.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {vouchers.map((voucher) => (
             <VoucherCardItem

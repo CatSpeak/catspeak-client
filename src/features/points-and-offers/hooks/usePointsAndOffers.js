@@ -1,13 +1,16 @@
 import { useState, useMemo, useCallback } from "react"
 import { useSearchParams } from "react-router-dom"
+import { useSelector } from "react-redux"
 import toast from "react-hot-toast"
+import { selectCurrentUser } from "@/store/slices/authSlice"
 import {
-  INITIAL_USER_POINTS,
-  AVAILABLE_VOUCHERS,
-  INITIAL_VAULT_VOUCHERS,
-  INITIAL_POINT_HISTORY,
-  EARNING_METHODS,
-} from "../constants/mockData"
+  useGetPointsOverviewQuery,
+  useGetPointsHistoryQuery,
+  useGetVoucherTemplatesQuery,
+  useGetVoucherInventoryQuery,
+  useRedeemVoucherMutation,
+} from "../api/pointApi"
+import { EARNING_METHODS } from "../constants/mockData"
 
 export const TAB_KEYS = {
   OVERVIEW: "overview",
@@ -25,8 +28,43 @@ export const MODAL_STEPS = {
   ERROR_OUT_OF_STOCK: "error_out_of_stock",
 }
 
+/** Format ISO datetime to "DD/MM/YYYY HH:mm" */
+export const formatDateTime = (isoString) => {
+  if (!isoString) return ""
+  try {
+    const d = new Date(isoString)
+    if (isNaN(d.getTime())) return isoString
+    const day = String(d.getDate()).padStart(2, "0")
+    const month = String(d.getMonth() + 1).padStart(2, "0")
+    const year = d.getFullYear()
+    const hours = String(d.getHours()).padStart(2, "0")
+    const minutes = String(d.getMinutes()).padStart(2, "0")
+    return `${day}/${month}/${year} ${hours}:${minutes}`
+  } catch {
+    return isoString
+  }
+}
+
+/** Format ISO datetime to "DD/MM/YYYY" */
+export const formatDateOnly = (isoString) => {
+  if (!isoString) return ""
+  try {
+    const d = new Date(isoString)
+    if (isNaN(d.getTime())) return isoString
+    const day = String(d.getDate()).padStart(2, "0")
+    const month = String(d.getMonth() + 1).padStart(2, "0")
+    const year = d.getFullYear()
+    return `${day}/${month}/${year}`
+  } catch {
+    return isoString
+  }
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export const usePointsAndOffers = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const currentUser = useSelector(selectCurrentUser)
 
   // Tab state synced with search param `?tab=...`
   const activeTab = searchParams.get("tab") || TAB_KEYS.OVERVIEW
@@ -45,54 +83,129 @@ export const usePointsAndOffers = () => {
     [setSearchParams],
   )
 
-  // Core domain states
-  const [userPoints, setUserPoints] = useState(INITIAL_USER_POINTS)
-  const [vouchers, setVouchers] = useState(AVAILABLE_VOUCHERS)
-  const [vaultVouchers, setVaultVouchers] = useState(INITIAL_VAULT_VOUCHERS)
-  const [pointHistory, setPointHistory] = useState(INITIAL_POINT_HISTORY)
+  // Filters and Pagination
+  const [vaultSubTab, setVaultSubTab] = useState("unused") // "unused" | "used" | "expired"
+  const [historyFilter, setHistoryFilter] = useState("all") // "all" | "earn" | "spend"
+  const [historyPage, setHistoryPage] = useState(1)
+  const historyPageSize = 10
+  const [exchangeSearchQuery, setExchangeSearchQuery] = useState("")
+  const [exchangeCategoryFilter, setExchangeCategoryFilter] = useState("all")
 
   // Modal & Exchange workflow states
   const [selectedVoucher, setSelectedVoucher] = useState(null)
   const [modalStep, setModalStep] = useState(MODAL_STEPS.NONE)
-  const [simulationMode, setSimulationMode] = useState("success") // "success" | "error_network" | "error_out_of_stock"
   const [newlyRedeemedVoucher, setNewlyRedeemedVoucher] = useState(null)
+  const [isProcessingExchange, setIsProcessingExchange] = useState(false)
+  const [technicalErrorCode, setTechnicalErrorCode] = useState(null)
 
-  // Filters
-  const [vaultSubTab, setVaultSubTab] = useState("unused") // "unused" | "used" | "expired"
-  const [historyFilter, setHistoryFilter] = useState("all") // "all" | "earn" | "spend"
-  const [exchangeSearchQuery, setExchangeSearchQuery] = useState("")
-  const [exchangeCategoryFilter, setExchangeCategoryFilter] = useState("all")
-  const [isEmptyHistoryPreview, setIsEmptyHistoryPreview] = useState(false)
+  // ─── RTK Query API Hooks ───────────────────────────────────────────
+  const {
+    data: overviewData,
+    isLoading: isLoadingOverview,
+    isFetching: isFetchingOverview,
+    refetch: refetchOverview,
+  } = useGetPointsOverviewQuery()
 
-  // Computed Vault Counts
-  const vaultCounts = useMemo(() => {
+  const {
+    data: historyData = [],
+    isLoading: isLoadingHistory,
+    isFetching: isFetchingHistory,
+    refetch: refetchHistory,
+  } = useGetPointsHistoryQuery({ page: historyPage, pageSize: historyPageSize })
+
+  const {
+    data: templatesData = [],
+    isLoading: isLoadingTemplates,
+    isFetching: isFetchingTemplates,
+    refetch: refetchTemplates,
+  } = useGetVoucherTemplatesQuery()
+
+  const {
+    data: unusedVouchers = [],
+    isLoading: isLoadingUnused,
+    refetch: refetchUnused,
+  } = useGetVoucherInventoryQuery({ status: "Unused" })
+
+  const {
+    data: usedVouchers = [],
+    isLoading: isLoadingUsed,
+    refetch: refetchUsed,
+  } = useGetVoucherInventoryQuery({ status: "Used" })
+
+  const {
+    data: expiredVouchers = [],
+    isLoading: isLoadingExpired,
+    refetch: refetchExpired,
+  } = useGetVoucherInventoryQuery({ status: "Expired" })
+
+  const [redeemVoucherMutation] = useRedeemVoucherMutation()
+
+  // ─── Computed Domain States ────────────────────────────────────────
+  const userPoints = useMemo(() => {
     return {
-      unused: vaultVouchers.filter((v) => v.status === "unused").length,
-      used: vaultVouchers.filter((v) => v.status === "used").length,
-      expired: vaultVouchers.filter((v) => v.status === "expired").length,
+      availablePoints: overviewData?.balance ?? 0,
+      expiringPoints: overviewData?.expiringSoon ?? 0,
+      expiryDate: "trong 30 ngày tới",
+      totalAccumulated: overviewData?.totalEarned ?? 0,
+      totalRedeemed: overviewData?.totalRedeemed ?? 0,
     }
-  }, [vaultVouchers])
+  }, [overviewData])
 
-  // Filtered Vault list
-  const filteredVaultVouchers = useMemo(() => {
-    return vaultVouchers.filter((item) => item.status === vaultSubTab)
-  }, [vaultVouchers, vaultSubTab])
+  // Overview recent activities
+  const recentActivities = useMemo(() => {
+    const raw = overviewData?.recentActivities
+    if (!Array.isArray(raw)) return []
+    return raw.map((item, idx) => ({
+      id: item.transactionId || `recent-${idx}`,
+      transactionId: item.transactionId,
+      title: item.sourceDescription || (item.type === "Earn" ? "Tích lũy điểm" : "Sử dụng điểm"),
+      subtitle:
+        item.type === "Earn"
+          ? "Tích lũy hoàn tất"
+          : item.type === "Redeem"
+            ? "Đổi voucher"
+            : "Điểm hết hạn",
+      date: formatDateTime(item.createdAt),
+      createdAt: item.createdAt,
+      points: item.amount ?? (item.type === "Earn" ? 50 : -50),
+      type: (item.type || "Earn").toLowerCase(),
+      icon: item.type === "Earn" ? "star" : "exchange",
+    }))
+  }, [overviewData?.recentActivities])
 
-  // Filtered History list
-  const filteredHistory = useMemo(() => {
-    if (isEmptyHistoryPreview) return []
-    if (historyFilter === "earn") {
-      return pointHistory.filter((item) => item.type === "earn")
-    }
-    if (historyFilter === "spend") {
-      return pointHistory.filter((item) => item.type === "spend")
-    }
-    return pointHistory
-  }, [pointHistory, historyFilter, isEmptyHistoryPreview])
+  // Formatted & Filtered Voucher Templates
+  const formattedTemplates = useMemo(() => {
+    if (!Array.isArray(templatesData)) return []
+    return templatesData.map((tpl) => {
+      const isPercentage = tpl.discountType === "Percentage"
+      const badge = isPercentage
+        ? `Giảm ${tpl.discountValue}%`
+        : `Giảm ${tpl.discountValue >= 1000 ? `${tpl.discountValue / 1000}k` : `${tpl.discountValue}đ`}`
 
-  // Filtered Exchange Vouchers
+      return {
+        id: tpl.templateId,
+        templateId: tpl.templateId,
+        title: tpl.name,
+        name: tpl.name,
+        badge,
+        discountType: tpl.discountType,
+        discountValue: tpl.discountValue,
+        description: tpl.conditions || "Áp dụng khi thanh toán khóa học/lớp học",
+        conditions: tpl.conditions,
+        expiryDate: tpl.validityDays ? `Hạn ${tpl.validityDays} ngày` : "30 ngày",
+        validityDays: tpl.validityDays,
+        pointsRequired: tpl.pointsRequired || 0,
+        stock: tpl.stock ?? 0,
+        isRedeemable: !!tpl.isRedeemable,
+        notRedeemableReason: tpl.notRedeemableReason || null,
+        status: tpl.stock <= 0 ? "out_of_stock" : tpl.isRedeemable ? "available" : "unavailable",
+        category: "course",
+      }
+    })
+  }, [templatesData])
+
   const filteredExchangeVouchers = useMemo(() => {
-    return vouchers.filter((v) => {
+    return formattedTemplates.filter((v) => {
       const matchSearch =
         v.title.toLowerCase().includes(exchangeSearchQuery.toLowerCase()) ||
         v.description.toLowerCase().includes(exchangeSearchQuery.toLowerCase())
@@ -100,116 +213,238 @@ export const usePointsAndOffers = () => {
         exchangeCategoryFilter === "all" || v.category === exchangeCategoryFilter
       return matchSearch && matchCategory
     })
-  }, [vouchers, exchangeSearchQuery, exchangeCategoryFilter])
+  }, [formattedTemplates, exchangeSearchQuery, exchangeCategoryFilter])
 
-  // Voucher preview for Overview tab (redeemable immediately)
   const redeemablePreviewVouchers = useMemo(() => {
-    return vouchers
-      .filter((v) => v.status === "available" && v.pointsRequired <= userPoints.availablePoints)
+    return formattedTemplates
+      .filter((v) => v.isRedeemable)
       .slice(0, 2)
-  }, [vouchers, userPoints.availablePoints])
+  }, [formattedTemplates])
 
-  // Actions
+  // Formatted Vault Inventory
+  const transformInventoryItem = useCallback((item) => {
+    const isPercentage = item.discountType === "Percentage"
+    const discountTag = isPercentage
+      ? `${item.discountValue}%`
+      : item.discountValue >= 1000
+        ? `${item.discountValue / 1000}k`
+        : `${item.discountValue}đ`
+
+    const statusLower = (item.status || "Unused").toLowerCase()
+    return {
+      id: item.voucherId || `inv-${item.code}`,
+      voucherId: item.voucherId,
+      code: item.code,
+      title: item.name,
+      name: item.name,
+      discountTag,
+      discountType: item.discountType,
+      discountValue: item.discountValue,
+      status: statusLower,
+      expiryDate: formatDateOnly(item.expiresAt),
+      expiresAt: item.expiresAt,
+      usedDate: item.redeemedAt ? formatDateTime(item.redeemedAt) : null,
+      redeemedAt: item.redeemedAt,
+      badge: statusLower === "unused" ? "Chưa dùng" : statusLower === "used" ? "Đã dùng" : "Hết hạn",
+      description:
+        item.discountType === "Percentage"
+          ? `Giảm ${item.discountValue}% học phí khi thanh toán`
+          : `Trừ trực tiếp ${(item.discountValue || 0).toLocaleString("vi-VN")} đ vào hóa đơn`,
+    }
+  }, [])
+
+  const currentVaultRawList = useMemo(() => {
+    if (vaultSubTab === "unused") return unusedVouchers
+    if (vaultSubTab === "used") return usedVouchers
+    return expiredVouchers
+  }, [vaultSubTab, unusedVouchers, usedVouchers, expiredVouchers])
+
+  const filteredVaultVouchers = useMemo(() => {
+    if (!Array.isArray(currentVaultRawList)) return []
+    return currentVaultRawList.map(transformInventoryItem)
+  }, [currentVaultRawList, transformInventoryItem])
+
+  const vaultCounts = useMemo(() => {
+    return {
+      unused: Array.isArray(unusedVouchers) ? unusedVouchers.length : 0,
+      used: Array.isArray(usedVouchers) ? usedVouchers.length : 0,
+      expired: Array.isArray(expiredVouchers) ? expiredVouchers.length : 0,
+    }
+  }, [unusedVouchers, usedVouchers, expiredVouchers])
+
+  // Formatted History List
+  const formattedHistory = useMemo(() => {
+    if (!Array.isArray(historyData)) return []
+    return historyData.map((item, idx) => {
+      const typeLower = (item.type || "Earn").toLowerCase()
+      const isSpend = typeLower === "redeem" || typeLower === "expire" || (item.amount || 0) < 0
+      return {
+        id: item.transactionId || `tx-${idx}`,
+        transactionId: item.transactionId,
+        title: item.sourceDescription || (typeLower === "earn" ? "Tích lũy điểm" : "Sử dụng điểm"),
+        subtitle:
+          typeLower === "earn"
+            ? "Tích lũy hoàn tất"
+            : typeLower === "redeem"
+              ? "Sử dụng điểm đổi voucher"
+              : "Điểm thưởng hết hạn",
+        date: formatDateTime(item.createdAt),
+        createdAt: item.createdAt,
+        points: item.amount || 0,
+        type: isSpend ? "spend" : "earn",
+        rawType: item.type,
+        icon: typeLower === "earn" ? "check" : "exchange",
+      }
+    })
+  }, [historyData])
+
+  const filteredHistory = useMemo(() => {
+    if (historyFilter === "earn") {
+      return formattedHistory.filter((item) => item.type === "earn" || item.points > 0)
+    }
+    if (historyFilter === "spend") {
+      return formattedHistory.filter((item) => item.type === "spend" || item.points < 0)
+    }
+    return formattedHistory
+  }, [formattedHistory, historyFilter])
+
+  // ─── User Actions & Flow ───────────────────────────────────────────
   const handleOpenExchangeModal = useCallback(
     (voucher) => {
-      if (voucher.status === "out_of_stock") {
+      if (voucher.isRedeemable === false && voucher.notRedeemableReason) {
+        toast.error(voucher.notRedeemableReason)
+        return
+      }
+      if (voucher.status === "out_of_stock" || voucher.stock <= 0) {
         toast.error("Voucher này đã hết lượt đổi!")
         return
       }
-      if (voucher.pointsRequired > userPoints.availablePoints) {
-        toast.error(`Bạn cần thêm ${voucher.pointsRequired - userPoints.availablePoints} điểm để đổi voucher này!`)
+      if (voucher.pointsRequired > (overviewData?.balance ?? 0)) {
+        toast.error(
+          `Bạn cần thêm ${voucher.pointsRequired - (overviewData?.balance ?? 0)} điểm để đổi voucher này!`,
+        )
         return
       }
       setSelectedVoucher(voucher)
+      setTechnicalErrorCode(null)
       setModalStep(MODAL_STEPS.CONFIRM)
     },
-    [userPoints.availablePoints],
+    [overviewData?.balance],
   )
 
   const handleCloseModal = useCallback(() => {
+    if (isProcessingExchange) return // Lock modal while in-flight
     setModalStep(MODAL_STEPS.NONE)
     setSelectedVoucher(null)
-  }, [])
+  }, [isProcessingExchange])
 
-  const handleConfirmExchange = useCallback(
-    (forcedOutcome = null) => {
-      const outcome = forcedOutcome || simulationMode
-      setModalStep(MODAL_STEPS.PROCESSING)
+  /**
+   * Redeem Voucher with auto-retry (up to 3 attempts, 2s interval)
+   * and fallback technical error code display `ERR-{Timestamp}-{UserId}`
+   */
+  const handleConfirmExchange = useCallback(async () => {
+    if (!selectedVoucher || isProcessingExchange) return
 
-      setTimeout(() => {
-        if (outcome === "error_network") {
-          setModalStep(MODAL_STEPS.ERROR_NETWORK)
-          return
-        }
-        if (outcome === "error_out_of_stock") {
-          setModalStep(MODAL_STEPS.ERROR_OUT_OF_STOCK)
-          return
-        }
+    const templateId = selectedVoucher.templateId || selectedVoucher.id
+    setModalStep(MODAL_STEPS.PROCESSING)
+    setIsProcessingExchange(true)
+    setTechnicalErrorCode(null)
 
-        // Success flow: deduct points, generate code, add to vault & history
-        if (!selectedVoucher) return
+    const maxRetries = 3
+    let attempt = 0
+    let isSuccessful = false
+    let lastError = null
 
-        const cost = selectedVoucher.pointsRequired
-        setUserPoints((prev) => ({
-          ...prev,
-          availablePoints: Math.max(0, prev.availablePoints - cost),
-          totalRedeemed: prev.totalRedeemed + cost,
-        }))
+    while (attempt < maxRetries && !isSuccessful) {
+      attempt += 1
+      try {
+        const response = await redeemVoucherMutation(templateId).unwrap()
+        isSuccessful = true
 
-        const randomCode = `CAT-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
-        const newVoucherItem = {
-          id: `vault-${Date.now()}`,
-          code: randomCode,
-          title: selectedVoucher.title,
-          discountTag: selectedVoucher.badge,
-          status: "unused",
-          expiryDate: selectedVoucher.expiryDate,
+        const newVoucher = {
+          id: response?.voucherId || `vault-${Date.now()}`,
+          voucherId: response?.voucherId,
+          code: response?.code,
+          title: response?.name || selectedVoucher.title,
+          name: response?.name || selectedVoucher.title,
+          discountType: response?.discountType || selectedVoucher.discountType,
+          discountValue: response?.discountValue || selectedVoucher.discountValue,
+          discountTag:
+            response?.discountType === "Percentage"
+              ? `${response?.discountValue}%`
+              : response?.discountValue >= 1000
+                ? `${response?.discountValue / 1000}k`
+                : `${response?.discountValue}đ`,
+          status: (response?.status || "Unused").toLowerCase(),
+          expiryDate: formatDateOnly(response?.expiresAt) || selectedVoucher.expiryDate,
+          expiresAt: response?.expiresAt,
           badge: "Chưa dùng",
-          description: selectedVoucher.description,
-          createdAt: new Date().toLocaleDateString("vi-VN"),
+          description: selectedVoucher.description || selectedVoucher.conditions,
         }
 
-        setVaultVouchers((prev) => [newVoucherItem, ...prev])
-        setNewlyRedeemedVoucher(newVoucherItem)
-
-        // Add history entry
-        const now = new Date()
-        const formattedDate = `${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
-        setPointHistory((prev) => [
-          {
-            id: `tx-${Date.now()}`,
-            title: `Đổi ${selectedVoucher.title}`,
-            subtitle: `Sử dụng điểm đổi mã ${randomCode}`,
-            date: formattedDate,
-            points: -cost,
-            type: "spend",
-            icon: "exchange",
-          },
-          ...prev,
-        ])
-
-        // Update percent redeemed in catalog
-        setVouchers((prev) =>
-          prev.map((v) =>
-            v.id === selectedVoucher.id
-              ? { ...v, percentRedeemed: Math.min(100, v.percentRedeemed + 2) }
-              : v,
-          ),
-        )
-
+        setNewlyRedeemedVoucher(newVoucher)
         setModalStep(MODAL_STEPS.SUCCESS)
-        toast.success("Đổi voucher thành công!")
-      }, 1000)
-    },
-    [simulationMode, selectedVoucher],
-  )
+        toast.success("Đổi voucher thành công!", { duration: 2000 })
+        break
+      } catch (err) {
+        lastError = err
+        const status = err?.status || err?.originalStatus
+        const isBusinessError = typeof status === "number" && status >= 400 && status < 500
+
+        // If it's a 4xx business error, don't retry
+        if (isBusinessError) {
+          break
+        }
+
+        // If network/5xx error and retries remain, wait 2s
+        if (attempt < maxRetries) {
+          console.warn(`[RedeemVoucher] Attempt ${attempt} failed, retrying in 2s...`, err)
+          await sleep(2000)
+        }
+      }
+    }
+
+    setIsProcessingExchange(false)
+
+    if (!isSuccessful) {
+      const status = lastError?.status || lastError?.originalStatus
+      const errorMessage =
+        lastError?.data?.message || lastError?.data?.title || lastError?.message || ""
+
+      // 1. Out of stock
+      if (
+        errorMessage.toLowerCase().includes("out of stock") ||
+        errorMessage.toLowerCase().includes("hết lượt") ||
+        errorMessage.toLowerCase().includes("hết hàng")
+      ) {
+        setModalStep(MODAL_STEPS.ERROR_OUT_OF_STOCK)
+        return
+      }
+
+      // 2. Business error (4xx)
+      if (typeof status === "number" && status >= 400 && status < 500) {
+        setModalStep(MODAL_STEPS.NONE)
+        setSelectedVoucher(null)
+        toast.error(errorMessage || "Không thể đổi voucher vào lúc này.")
+        return
+      }
+
+      // 3. Network or Server error after retries
+      const userId = currentUser?.id || currentUser?.accountId || "GUEST"
+      const timestamp = Math.floor(Date.now() / 1000)
+      const errCode = `ERR-${timestamp}-${userId}`
+      setTechnicalErrorCode(errCode)
+      setModalStep(MODAL_STEPS.ERROR_NETWORK)
+    }
+  }, [selectedVoucher, isProcessingExchange, redeemVoucherMutation, currentUser])
 
   const handleCopyCode = useCallback((code) => {
+    if (!code) return
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(code)
-      toast.success(`Đã sao chép mã ${code}!`)
+      toast.success(`Đã sao chép mã ${code} vào bộ nhớ tạm!`, { duration: 2000 })
     } else {
-      toast.success(`Mã: ${code}`)
+      toast.success(`Đã sao chép mã ${code}!`, { duration: 2000 })
     }
   }, [])
 
@@ -220,7 +455,7 @@ export const usePointsAndOffers = () => {
   }, [handleCloseModal, setActiveTab])
 
   const handleUseVoucher = useCallback((voucher) => {
-    toast.success(`Đã áp dụng mã ${voucher.code} cho khóa học!`)
+    toast.success(`Đã chọn mã ${voucher.code}. Bạn có thể áp dụng mã này khi thanh toán khóa học!`)
   }, [])
 
   return {
@@ -229,21 +464,47 @@ export const usePointsAndOffers = () => {
     setActiveTab,
     TAB_KEYS,
 
-    // Core Data
+    // Domain Data
     userPoints,
     earningMethods: EARNING_METHODS,
+    recentActivities,
     vouchers: filteredExchangeVouchers,
     redeemablePreviewVouchers,
     vaultVouchers: filteredVaultVouchers,
     vaultCounts,
     pointHistory: filteredHistory,
 
+    // Loading states
+    isLoadingOverview,
+    isFetchingOverview,
+    isLoadingTemplates,
+    isFetchingTemplates,
+    isLoadingInventory:
+      vaultSubTab === "unused"
+        ? isLoadingUnused
+        : vaultSubTab === "used"
+          ? isLoadingUsed
+          : isLoadingExpired,
+    isLoadingHistory,
+    isFetchingHistory,
+
+    // Refetch functions
+    refetchOverview,
+    refetchTemplates,
+    refetchInventory:
+      vaultSubTab === "unused"
+        ? refetchUnused
+        : vaultSubTab === "used"
+          ? refetchUsed
+          : refetchExpired,
+    refetchHistory,
+
     // Modal state & actions
     modalStep,
     selectedVoucher,
     newlyRedeemedVoucher,
-    simulationMode,
-    setSimulationMode,
+    isProcessingExchange,
+    technicalErrorCode,
     handleOpenExchangeModal,
     handleConfirmExchange,
     handleCloseModal,
@@ -251,16 +512,17 @@ export const usePointsAndOffers = () => {
     handleCopyCode,
     handleUseVoucher,
 
-    // Filters
+    // Filters & Pagination
     vaultSubTab,
     setVaultSubTab,
     historyFilter,
     setHistoryFilter,
+    historyPage,
+    setHistoryPage,
+    historyPageSize,
     exchangeSearchQuery,
     setExchangeSearchQuery,
     exchangeCategoryFilter,
     setExchangeCategoryFilter,
-    isEmptyHistoryPreview,
-    setIsEmptyHistoryPreview,
   }
 }

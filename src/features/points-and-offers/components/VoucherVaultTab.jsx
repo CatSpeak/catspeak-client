@@ -10,6 +10,7 @@ const VoucherVaultTab = ({
   onCopyCode,
   onUseNow,
   onGoToExchange,
+  isLoading = false,
 }) => {
   return (
     <div className="space-y-6 pb-10">
@@ -52,8 +53,17 @@ const VoucherVaultTab = ({
         </button>
       </div>
 
-      {/* Vouchers List */}
-      {vaultVouchers.length > 0 ? (
+      {/* Loading Skeletons */}
+      {isLoading ? (
+        <div className="space-y-4 animate-pulse">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white border border-gray-200/90 rounded-2xl h-28"
+            />
+          ))}
+        </div>
+      ) : vaultVouchers.length > 0 ? (
         <div className="space-y-4">
           {vaultVouchers.map((voucher) => (
             <VaultVoucherItem
@@ -78,7 +88,7 @@ const VoucherVaultTab = ({
           <button
             type="button"
             onClick={onGoToExchange}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#85000f] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#85000f] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition cursor-pointer"
           >
             <span>Khám phá kho ưu đãi</span>
             <ArrowRight size={15} />

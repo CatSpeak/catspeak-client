@@ -1,5 +1,5 @@
 import React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 
 const ExchangeProcessingModal = ({ isOpen }) => {
   if (!isOpen) return null
@@ -8,7 +8,7 @@ const ExchangeProcessingModal = ({ isOpen }) => {
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -16,7 +16,7 @@ const ExchangeProcessingModal = ({ isOpen }) => {
         />
 
         {/* Modal Dialog */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
@@ -28,12 +28,12 @@ const ExchangeProcessingModal = ({ isOpen }) => {
           </div>
 
           <h3 className="text-base font-bold text-gray-900 mb-1">
-            Đang xử lý...
+            Đang xử lý đổi voucher...
           </h3>
           <p className="text-xs text-gray-500">
-            Vui lòng không đóng cửa sổ này
+            Vui lòng đợi trong giây lát và không đóng cửa sổ này
           </p>
-        </motion.div>
+        </Motion.div>
       </div>
     </AnimatePresence>
   )

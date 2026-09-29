@@ -1,5 +1,5 @@
 import React from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 import { Check, Copy, Ticket } from "lucide-react"
 
 const ExchangeSuccessModal = ({
@@ -15,16 +15,16 @@ const ExchangeSuccessModal = ({
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs"
         />
 
         {/* Modal Dialog */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -39,10 +39,10 @@ const ExchangeSuccessModal = ({
             Đổi Voucher thành công!
           </h3>
           <p className="text-xs text-gray-500 mb-5 leading-relaxed">
-            Voucher đã được thêm vào kho của bạn. Sử dụng ngay trong lần đăng ký tiếp theo.
+            Voucher <strong>{voucher.title || voucher.name}</strong> đã được thêm vào kho của bạn.
           </p>
 
-          {/* Voucher Code Card Box with Orange Dashed Border */}
+          {/* Voucher Code Card Box */}
           <div className="w-full bg-amber-50/60 border border-dashed border-amber-300 rounded-xl p-3.5 mb-5 flex items-center gap-3 text-left">
             <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-white shrink-0 shadow-xs">
               <Ticket size={20} />
@@ -53,7 +53,7 @@ const ExchangeSuccessModal = ({
                 <button
                   type="button"
                   onClick={() => onCopyCode(voucher.code)}
-                  className="p-1 hover:bg-amber-100 text-amber-700 rounded transition"
+                  className="p-1 hover:bg-amber-100 text-amber-700 rounded transition cursor-pointer"
                   title="Sao chép mã"
                 >
                   <Copy size={13} />
@@ -63,7 +63,7 @@ const ExchangeSuccessModal = ({
                 {voucher.code}
               </div>
               <div className="text-[11px] text-gray-500 mt-0.5">
-                Hiệu lực đến: {voucher.expiryDate || "31/12/2024"}
+                Hiệu lực đến: {voucher.expiryDate || "30 ngày sau"}
               </div>
             </div>
           </div>
@@ -73,19 +73,19 @@ const ExchangeSuccessModal = ({
             <button
               type="button"
               onClick={onViewVault}
-              className="w-full py-2.5 px-4 text-xs sm:text-sm font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-xl shadow-sm transition"
+              className="w-full py-2.5 px-4 text-xs sm:text-sm font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-xl shadow-sm transition cursor-pointer"
             >
-              Xem voucher của tôi
+              Xem kho voucher của tôi
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition"
+              className="w-full py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition cursor-pointer"
             >
               Đóng
             </button>
           </div>
-        </motion.div>
+        </Motion.div>
       </div>
     </AnimatePresence>
   )

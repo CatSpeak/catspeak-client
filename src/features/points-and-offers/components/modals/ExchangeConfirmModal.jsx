@@ -1,6 +1,6 @@
 import React from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Ticket, X, AlertCircle } from "lucide-react"
+import { motion as Motion, AnimatePresence } from "framer-motion"
+import { Ticket, X } from "lucide-react"
 
 const ExchangeConfirmModal = ({
   isOpen,
@@ -8,8 +8,7 @@ const ExchangeConfirmModal = ({
   voucher,
   availablePoints = 0,
   onConfirm,
-  simulationMode = "success",
-  setSimulationMode,
+  isProcessing = false,
 }) => {
   if (!isOpen || !voucher) return null
 
@@ -20,16 +19,16 @@ const ExchangeConfirmModal = ({
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          onClick={!isProcessing ? onClose : undefined}
+          className="fixed inset-0 bg-black/50 backdrop-blur-xs"
         />
 
         {/* Modal Dialog */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -45,25 +44,27 @@ const ExchangeConfirmModal = ({
                 Xác nhận đổi Voucher
               </h3>
             </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 rounded-full p-1 transition-colors"
-            >
-              <X size={18} />
-            </button>
+            {!isProcessing && (
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 rounded-full p-1 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            )}
           </div>
 
           <div className="p-5 pt-3 space-y-4">
             <p className="text-xs text-gray-500">
-              Vui lòng kiểm tra lại thông tin trước khi xác nhận.
+              Bạn có chắc muốn dùng <strong>{cost.toLocaleString("vi-VN")} điểm</strong> để đổi ưu đãi này không?
             </p>
 
-            {/* Details Table */}
+            {/* Details Box */}
             <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100 text-xs sm:text-sm space-y-2.5">
               <div className="flex justify-between items-start gap-4">
                 <span className="text-gray-500 shrink-0">Voucher</span>
                 <span className="font-semibold text-gray-900 text-right">
-                  {voucher.title}
+                  {voucher.title || voucher.name}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -73,84 +74,41 @@ const ExchangeConfirmModal = ({
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-500">Điểm trừ</span>
+                <span className="text-gray-500">Điểm cần trừ</span>
                 <span className="font-bold text-[#990011]">
                   -{cost.toLocaleString("vi-VN")}
                 </span>
               </div>
 
               <div className="border-t border-gray-200/80 pt-2 flex justify-between items-center">
-                <span className="font-semibold text-gray-700">Còn lại</span>
+                <span className="font-semibold text-gray-700">Điểm còn lại</span>
                 <span className="font-bold text-emerald-600 text-base">
                   {remaining.toLocaleString("vi-VN")}
                 </span>
               </div>
             </div>
 
-            {/* Test Simulation Controls to preview all branches */}
-            {setSimulationMode && (
-              <div className="p-2.5 rounded-lg bg-amber-50/70 border border-amber-200/60 text-xs">
-                <div className="flex items-center gap-1.5 text-amber-800 font-medium mb-1.5">
-                  <AlertCircle size={13} />
-                  <span>Kịch bản kiểm thử:</span>
-                </div>
-                <div className="grid grid-cols-3 gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setSimulationMode("success")}
-                    className={`px-2 py-1 rounded text-[11px] font-medium transition ${
-                      simulationMode === "success"
-                        ? "bg-emerald-600 text-white shadow-xs"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    Thành công
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSimulationMode("error_network")}
-                    className={`px-2 py-1 rounded text-[11px] font-medium transition ${
-                      simulationMode === "error_network"
-                        ? "bg-blue-600 text-white shadow-xs"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    Lỗi kết nối
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSimulationMode("error_out_of_stock")}
-                    className={`px-2 py-1 rounded text-[11px] font-medium transition ${
-                      simulationMode === "error_out_of_stock"
-                        ? "bg-[#990011] text-white shadow-xs"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    Lỗi hết quà
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
+                disabled={isProcessing}
                 onClick={onClose}
-                className="px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition"
+                className="px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="button"
-                onClick={() => onConfirm()}
-                className="px-5 py-2 text-xs sm:text-sm font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-lg shadow-sm hover:shadow transition"
+                disabled={isProcessing}
+                onClick={onConfirm}
+                className="px-5 py-2 text-xs sm:text-sm font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-lg shadow-sm hover:shadow transition disabled:opacity-50 cursor-pointer"
               >
                 Xác nhận đổi
               </button>
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
       </div>
     </AnimatePresence>
   )
