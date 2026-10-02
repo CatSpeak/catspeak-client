@@ -409,7 +409,14 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("v1/ai/"))
 
 
+    const cleanUrl = lowerUrl.replace(/^\/?(api\/)?/, "")
+    const isStudentVoucherRoute =
+      cleanUrl.startsWith("vouchers/templates") ||
+      cleanUrl.startsWith("vouchers/redeem") ||
+      cleanUrl.startsWith("vouchers/inventory")
+
     const isCoursesRoute =
+      !isStudentVoucherRoute &&
       lowerUrl &&
       (lowerUrl.startsWith("/teacher/") ||
         lowerUrl.startsWith("teacher/") ||
