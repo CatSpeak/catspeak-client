@@ -94,6 +94,7 @@ const CalendarPage = () => {
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
+    community: lang,
   });
 
   const eventCountsByDay = useMemo(() => {

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatLocation } from "../../utils/eventFormatters";
 import EventDetailFooter from "../EventDetailModal/EventDetailFooter";
+import CommunityBadge from "../CommunityBadge";
 
 const DayScheduleEventDetail = ({
   selectedEvent,
@@ -58,6 +59,7 @@ const DayScheduleEventDetail = ({
             <h2 className="text-2xl font-bold text-black leading-snug pr-4">
               {ev.title || cal.event || "Tên event ngẫu nhiên"}
             </h2>
+            <CommunityBadge languageCommunity={ev.languageCommunity} className="mt-1.5" />
           </div>
 
           {/* Description */}

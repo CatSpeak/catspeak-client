@@ -150,6 +150,7 @@ export default {
   reasonPlaceholder: "例如：换教室，讲师很忙...",
   save: "保存",
   shared: {
+    communityLabel: "社区",
     loadingEventInfo: "正在加载活动信息...",
     invalidLink: "无效链接",
     invalidLinkDesc: "此分享链接已过期，达到浏览上限或不存在。",

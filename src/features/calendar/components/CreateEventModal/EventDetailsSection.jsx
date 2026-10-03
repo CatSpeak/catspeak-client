@@ -1,6 +1,7 @@
 import TextInput from "@/shared/components/ui/inputs/TextInput";
 import Dropdown from "@/shared/components/ui/Dropdown";
 import AddressAutocomplete from "./AddressAutocomplete";
+import { COMMUNITY_CODES } from "../../utils/community";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import {
   useGetCountriesQuery,
@@ -13,6 +14,8 @@ const EventDetailsSection = ({
   title,
   onTitleChange,
   eventColor,
+  community,
+  onCommunityChange,
   countryId,
   onCountryIdChange,
   cityId,
@@ -43,6 +46,10 @@ const EventDetailsSection = ({
 
   const countryOptions = countries.map((c) => ({ label: c.name, value: c.id }));
   const cityOptions = cities.map((c) => ({ label: c.name, value: c.id }));
+  const communityOptions = COMMUNITY_CODES.map((code) => ({
+    value: code,
+    label: t.header?.languages?.[code] || code,
+  }));
 
   let cityPlaceholder = cal.selectCityProvince;
   if (!countryId) cityPlaceholder = cal.selectCountryFirst;
@@ -66,6 +73,24 @@ const EventDetailsSection = ({
             color={eventColor}
             containerClassName="w-full"
             error={errors.title}
+          />
+        </div>
+      </div>
+
+      {/* Community */}
+      <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
+        <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
+          {cal.community || "Community"}
+        </div>
+        <div className="flex-1 flex flex-col w-full">
+          <Dropdown
+            options={communityOptions}
+            value={community}
+            onChange={(val) => onCommunityChange(val)}
+            placeholder={cal.community || "Community"}
+            activeColor={eventColor}
+            className="w-full"
+            roundedClass="rounded-xl"
           />
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Clock, MapPin, Pencil, Trash2, Users, Calendar as CalendarIcon } from "
 import dayjs from "dayjs";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatLocation } from "../../utils/eventFormatters";
+import CommunityBadge from "../CommunityBadge";
 
 const WorkspaceEventCard = memo(function WorkspaceEventCard({
   event,
@@ -98,6 +99,7 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
                 {cal?.recurring || "Recurring"}
               </span>
             )}
+            <CommunityBadge languageCommunity={event.languageCommunity} />
           </div>
 
           {/* Start → End time */}

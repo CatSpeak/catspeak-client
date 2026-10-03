@@ -152,6 +152,7 @@ export default {
   reasonPlaceholder: "e.g., Changed room, instructor is busy...",
   save: "Save",
   shared: {
+    communityLabel: "Community",
     loadingEventInfo: "Loading event info...",
     invalidLink: "Invalid link",
     invalidLinkDesc:

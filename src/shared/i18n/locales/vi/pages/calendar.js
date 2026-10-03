@@ -150,6 +150,7 @@ export default {
   reasonPlaceholder: "Ví dụ: Đổi phòng học, giảng viên có việc bận...",
   save: "Lưu",
   shared: {
+    communityLabel: "Cộng đồng",
     loadingEventInfo: "Đang tải thông tin sự kiện…",
     invalidLink: "Liên kết không hợp lệ",
     invalidLinkDesc:

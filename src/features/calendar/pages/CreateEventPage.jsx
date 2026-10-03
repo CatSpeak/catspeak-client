@@ -15,6 +15,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
 import { useEventForm } from "../hooks/useEventForm";
+import { communityCodeFromValue } from "../utils/community";
 import EventDateTimeSection from "../components/CreateEventModal/EventDateTimeSection";
 import EventRecurrenceSection from "../components/CreateEventModal/EventRecurrenceSection";
 import EventDetailsSection from "../components/CreateEventModal/EventDetailsSection";
@@ -106,6 +107,7 @@ const CreateEventPage = () => {
     form.setEventColor(draft.color || "#990011");
     form.setMaxParticipants(draft.maxParticipants || "");
     form.setVisibility(draft.visibilityScope || "PUBLIC");
+    form.setCommunity(communityCodeFromValue(draft.languageCommunity));
     form.setConditionsInput(
       draft.conditions && draft.conditions.length > 0
         ? draft.conditions.map((c) => c.title).join(", ")
@@ -554,6 +556,8 @@ const CreateEventPage = () => {
                   form.setErrors((prev) => ({ ...prev, title: undefined }));
               }}
               eventColor={form.eventColor || "#990011"}
+              community={form.community}
+              onCommunityChange={form.setCommunity}
               countryId={form.countryId}
               onCountryIdChange={(val) => {
                 form.setCountryId(val);

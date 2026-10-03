@@ -152,6 +152,7 @@ export default {
   reasonPlaceholder: "例: 部屋を変更、講師が忙しい...",
   save: "保存",
   shared: {
+    communityLabel: "コミュニティ",
     loadingEventInfo: "イベント情報を読み込み中...",
     invalidLink: "無効なリンク",
     invalidLinkDesc:

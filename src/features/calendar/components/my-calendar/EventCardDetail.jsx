@@ -7,6 +7,7 @@ import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
 import SharePopover from '../EventDetailModal/SharePopover'
+import CommunityBadge from '../CommunityBadge'
 
 const EventCardDetail = ({ event, onBack }) => {
   const navigate = useNavigate()
@@ -111,6 +112,7 @@ const EventCardDetail = ({ event, onBack }) => {
           <ChevronLeft size={20} />
         </IconButton>
         <h3 className="font-bold text-[15px] text-[#1A1A1A] line-clamp-1">{event.title || t.calendar?.noTitle || 'Không có tiêu đề'}</h3>
+        <CommunityBadge languageCommunity={event.languageCommunity} />
       </div>
 
       {/* Scrollable Body */}

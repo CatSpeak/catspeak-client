@@ -10,6 +10,7 @@ import { Trash2, ChevronRight } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import Modal from "@/shared/components/ui/Modal"
 import { TIMEZONE_IDS, getTimezoneOffset } from "@/shared/constants/timezones"
+import CommunityBadge from "../CommunityBadge"
 
 const EventDetailBody = ({
   ev,
@@ -86,6 +87,11 @@ const EventDetailBody = ({
             </span>
           </div>
         )}
+
+        {/* Community */}
+        <div className="flex items-center gap-2">
+          <CommunityBadge languageCommunity={ev.languageCommunity} />
+        </div>
 
         {/* Time */}
         {!ev.isRecurringGroup && (
