@@ -2,13 +2,15 @@ import React from "react"
 import { Search, SlidersHorizontal, Sparkles } from "lucide-react"
 import VoucherCardItem from "./VoucherCardItem"
 
-const CATEGORIES = [
+const ABILITY_CATEGORIES = [
   { key: "all", label: "Tất cả" },
-  { key: "course", label: "Khóa học" },
-  { key: "ielts", label: "Luyện thi IELTS" },
-  { key: "test", label: "Test trình độ" },
-  { key: "trial", label: "Học thử 1-1" },
-  { key: "package", label: "Gói VIP" },
+  { key: "redeemable", label: "Có thể đổi ngay" },
+]
+
+const TYPE_CATEGORIES = [
+  { key: "all", label: "Tất cả các loại" },
+  { key: "percentage", label: "Giảm theo %" },
+  { key: "fixed", label: "Giảm số tiền" },
 ]
 
 const VoucherExchangeTab = ({
@@ -18,6 +20,8 @@ const VoucherExchangeTab = ({
   onSearchChange,
   categoryFilter = "all",
   onCategoryChange,
+  typeFilter = "all",
+  onTypeChange,
   onRedeemVoucher,
   isLoading = false,
 }) => {
@@ -47,13 +51,33 @@ const VoucherExchangeTab = ({
             <span>Lọc:</span>
           </div>
 
-          {CATEGORIES.map((cat) => {
+          {ABILITY_CATEGORIES.map((cat) => {
             const isActive = categoryFilter === cat.key
             return (
               <button
                 key={cat.key}
                 type="button"
                 onClick={() => onCategoryChange?.(cat.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition cursor-pointer ${
+                  isActive
+                    ? "bg-[#990011] text-white shadow-xs"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200/70"
+                }`}
+              >
+                {cat.label}
+              </button>
+            )
+          })}
+
+          <div className="w-px h-4 bg-gray-300 mx-1 hidden sm:block"></div>
+
+          {TYPE_CATEGORIES.map((cat) => {
+            const isActive = typeFilter === cat.key
+            return (
+              <button
+                key={cat.key}
+                type="button"
+                onClick={() => onTypeChange?.(cat.key)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition cursor-pointer ${
                   isActive
                     ? "bg-[#990011] text-white shadow-xs"
