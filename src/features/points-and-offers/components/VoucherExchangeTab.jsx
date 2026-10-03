@@ -73,8 +73,24 @@ const VoucherExchangeTab = ({
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="bg-white border border-gray-200/90 rounded-2xl p-5 h-44"
-            />
+              className="bg-white border border-gray-200/90 rounded-2xl p-5 h-44 flex flex-col justify-between"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-gray-200" />
+                  <div className="space-y-1.5">
+                    <div className="h-4 bg-gray-200 rounded w-36" />
+                    <div className="h-3 bg-gray-100 rounded w-20" />
+                  </div>
+                </div>
+                <div className="h-6 w-16 bg-gray-200 rounded-full" />
+              </div>
+              <div className="h-3 bg-gray-100 rounded w-5/6" />
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <div className="h-5 bg-gray-200 rounded w-20" />
+                <div className="h-8 bg-gray-200 rounded-xl w-24" />
+              </div>
+            </div>
           ))}
         </div>
       ) : vouchers.length > 0 ? (

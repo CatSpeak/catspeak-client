@@ -57,9 +57,13 @@ const PointsAndOffersPage = () => {
     exchangeCategoryFilter,
     setExchangeCategoryFilter,
     isLoadingOverview,
+    isFetchingOverview,
     isLoadingTemplates,
+    isFetchingTemplates,
     isLoadingInventory,
+    isFetchingInventory,
     isLoadingHistory,
+    isFetchingHistory,
   } = usePointsAndOffers()
 
   return (
@@ -80,6 +84,7 @@ const PointsAndOffersPage = () => {
         expiringPoints={userPoints.expiringPoints}
         expiryDate={userPoints.expiryDate}
         onRedeemClick={() => setActiveTab(TAB_KEYS.EXCHANGE)}
+        isLoading={isLoadingOverview || isFetchingOverview}
       />
 
       {/* Main Tab Navigation Bar */}
@@ -129,7 +134,12 @@ const PointsAndOffersPage = () => {
               redeemableVouchers={redeemablePreviewVouchers}
               onNavigateTab={setActiveTab}
               onRedeemVoucher={handleOpenExchangeModal}
-              isLoading={isLoadingOverview || isLoadingTemplates}
+              isLoading={
+                isLoadingOverview ||
+                isFetchingOverview ||
+                isLoadingTemplates ||
+                isFetchingTemplates
+              }
             />
           )}
 
@@ -142,7 +152,7 @@ const PointsAndOffersPage = () => {
               categoryFilter={exchangeCategoryFilter}
               onCategoryChange={setExchangeCategoryFilter}
               onRedeemVoucher={handleOpenExchangeModal}
-              isLoading={isLoadingTemplates}
+              isLoading={isLoadingTemplates || isFetchingTemplates}
             />
           )}
 
@@ -155,7 +165,7 @@ const PointsAndOffersPage = () => {
               onCopyCode={handleCopyCode}
               onUseNow={handleUseVoucher}
               onGoToExchange={() => setActiveTab(TAB_KEYS.EXCHANGE)}
-              isLoading={isLoadingInventory}
+              isLoading={isLoadingInventory || isFetchingInventory}
             />
           )}
 
@@ -167,7 +177,7 @@ const PointsAndOffersPage = () => {
               historyPage={historyPage}
               onPageChange={setHistoryPage}
               historyPageSize={historyPageSize}
-              isLoading={isLoadingHistory}
+              isLoading={isLoadingHistory || isFetchingHistory}
             />
           )}
         </Motion.div>

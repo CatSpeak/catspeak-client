@@ -27,16 +27,58 @@ const PointsOverviewTab = ({
   if (isLoading) {
     return (
       <div className="space-y-8 pb-10 animate-pulse">
+        {/* 3 Stats Cards Skeleton */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-white border border-gray-200/90 rounded-2xl p-5 h-24"
-            />
+              className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4"
+            >
+              <div className="w-12 h-12 rounded-full bg-gray-200 shrink-0" />
+              <div className="space-y-2 flex-1">
+                <div className="h-3 bg-gray-200 rounded w-24" />
+                <div className="h-5 bg-gray-200 rounded w-32" />
+              </div>
+            </div>
           ))}
         </div>
-        <div className="bg-white border border-gray-200/90 rounded-2xl p-6 h-48" />
-        <div className="bg-white border border-gray-200/90 rounded-2xl p-6 h-48" />
+
+        {/* Earning Methods Section Skeleton */}
+        <div>
+          <div className="h-5 bg-gray-200 rounded w-32 mb-4" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white border border-gray-200/90 rounded-2xl p-6 flex flex-col items-center justify-between h-44 shadow-xs"
+              >
+                <div className="w-12 h-12 rounded-full bg-gray-200 mb-3" />
+                <div className="h-4 bg-gray-200 rounded w-28 mb-1.5" />
+                <div className="h-3 bg-gray-100 rounded w-36 mb-3" />
+                <div className="h-6 bg-gray-200 rounded-full w-20" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activities Section Skeleton */}
+        <div>
+          <div className="h-5 bg-gray-200 rounded w-36 mb-3" />
+          <div className="bg-white border border-gray-200/90 rounded-2xl p-4 divide-y divide-gray-100 shadow-xs">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
+                  <div className="space-y-1.5">
+                    <div className="h-4 bg-gray-200 rounded w-32" />
+                    <div className="h-3 bg-gray-100 rounded w-20" />
+                  </div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
