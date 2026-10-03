@@ -37,6 +37,13 @@ const AiSpeakingReportPage = lazy(
 const AiVocabularyNotebookPage = lazy(
   () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
 );
+// TASK-AI-16: fc02 (phiên ôn) và fc03 (kết quả) của flashcard SRS
+const AiFlashcardReviewPage = lazy(
+  () => import("@/features/ai-tutor/pages/FlashcardReviewPage"),
+);
+const AiFlashcardResultPage = lazy(
+  () => import("@/features/ai-tutor/pages/FlashcardResultPage"),
+);
 const AiHistoryProgressPage = lazy(
   () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
 );
@@ -525,6 +532,24 @@ const routesConfig = [
                     element: (
                       <LazyRoute>
                         <AiVocabularyNotebookPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    // TASK-AI-16: fc02 phiên ôn (?mode=due|early|free&deck=&source=)
+                    path: "vocabulary-notebook/review",
+                    element: (
+                      <LazyRoute>
+                        <AiFlashcardReviewPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    // TASK-AI-16: fc03 kết quả phiên ôn
+                    path: "vocabulary-notebook/review/:sessionId/result",
+                    element: (
+                      <LazyRoute>
+                        <AiFlashcardResultPage />
                       </LazyRoute>
                     ),
                   },
