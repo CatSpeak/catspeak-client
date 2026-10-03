@@ -25,7 +25,7 @@ const VoucherVaultTab = ({
               : "bg-gray-100 text-gray-600 hover:bg-gray-200/70"
           }`}
         >
-          Chưa dùng ({vaultCounts.unused})
+          Chưa dùng {vaultCounts?.unused !== undefined ? `(${vaultCounts.unused})` : ""}
         </button>
 
         <button
@@ -37,7 +37,7 @@ const VoucherVaultTab = ({
               : "bg-gray-100 text-gray-600 hover:bg-gray-200/70"
           }`}
         >
-          Đã dùng ({vaultCounts.used})
+          Đã dùng {vaultCounts?.used !== undefined ? `(${vaultCounts.used})` : ""}
         </button>
 
         <button
@@ -49,7 +49,7 @@ const VoucherVaultTab = ({
               : "bg-gray-100 text-gray-600 hover:bg-gray-200/70"
           }`}
         >
-          Hết hạn ({vaultCounts.expired})
+          Hết hạn {vaultCounts?.expired !== undefined ? `(${vaultCounts.expired})` : ""}
         </button>
       </div>
 
@@ -59,8 +59,20 @@ const VoucherVaultTab = ({
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="bg-white border border-gray-200/90 rounded-2xl h-28"
-            />
+              className="bg-white border border-gray-200/90 rounded-2xl p-5 h-28 flex items-center justify-between shadow-xs"
+            >
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-12 h-12 rounded-xl bg-gray-200 shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-9 w-24 bg-gray-200 rounded-xl" />
+                <div className="h-9 w-20 bg-gray-200 rounded-xl" />
+              </div>
+            </div>
           ))}
         </div>
       ) : vaultVouchers.length > 0 ? (

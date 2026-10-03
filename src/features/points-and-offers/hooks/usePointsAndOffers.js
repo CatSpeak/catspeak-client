@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import toast from "react-hot-toast"
@@ -85,6 +85,11 @@ export const usePointsAndOffers = () => {
 
   // Filters and Pagination
   const [vaultSubTab, setVaultSubTab] = useState("unused") // "unused" | "used" | "expired"
+  const [vaultCounts, setVaultCounts] = useState({
+    unused: undefined,
+    used: undefined,
+    expired: undefined,
+  })
   const [historyFilter, setHistoryFilter] = useState("all") // "all" | "earn" | "spend"
   const [historyPage, setHistoryPage] = useState(1)
   const historyPageSize = 10
@@ -101,42 +106,64 @@ export const usePointsAndOffers = () => {
   // ─── RTK Query API Hooks ───────────────────────────────────────────
   const {
     data: overviewData,
-    isLoading: isLoadingOverview,
+    isLoading: isLoadingOverviewQuery,
     isFetching: isFetchingOverview,
     refetch: refetchOverview,
   } = useGetPointsOverviewQuery()
 
   const {
     data: historyData = [],
-    isLoading: isLoadingHistory,
+    isLoading: isLoadingHistoryQuery,
     isFetching: isFetchingHistory,
     refetch: refetchHistory,
-  } = useGetPointsHistoryQuery({ page: historyPage, pageSize: historyPageSize })
+  } = useGetPointsHistoryQuery(
+    {
+      page: historyPage,
+      pageSize: historyPageSize,
+      type: historyFilter !== "all" ? historyFilter : undefined,
+    },
+    { refetchOnMountOrArgChange: true }
+  )
 
   const {
     data: templatesData = [],
-    isLoading: isLoadingTemplates,
+    isLoading: isLoadingTemplatesQuery,
     isFetching: isFetchingTemplates,
     refetch: refetchTemplates,
-  } = useGetVoucherTemplatesQuery()
+  } = useGetVoucherTemplatesQuery(
+    {
+      category: exchangeCategoryFilter !== "all" ? exchangeCategoryFilter : undefined,
+      search: exchangeSearchQuery?.trim() || undefined,
+    },
+    { refetchOnMountOrArgChange: true }
+  )
+
+  // Format inventory status query param dynamically on filter change
+  const inventoryStatusParam = useMemo(() => {
+    if (!vaultSubTab || vaultSubTab === "all") return undefined
+    return vaultSubTab.charAt(0).toUpperCase() + vaultSubTab.slice(1).toLowerCase()
+  }, [vaultSubTab])
 
   const {
-    data: unusedVouchers = [],
-    isLoading: isLoadingUnused,
-    refetch: refetchUnused,
-  } = useGetVoucherInventoryQuery({ status: "Unused" })
+    data: inventoryData = [],
+    isLoading: isLoadingInventoryQuery,
+    isFetching: isFetchingInventory,
+    refetch: refetchInventory,
+  } = useGetVoucherInventoryQuery(
+    { status: inventoryStatusParam },
+    { refetchOnMountOrArgChange: true }
+  )
 
-  const {
-    data: usedVouchers = [],
-    isLoading: isLoadingUsed,
-    refetch: refetchUsed,
-  } = useGetVoucherInventoryQuery({ status: "Used" })
-
-  const {
-    data: expiredVouchers = [],
-    isLoading: isLoadingExpired,
-    refetch: refetchExpired,
-  } = useGetVoucherInventoryQuery({ status: "Expired" })
+  // Update vault count for active sub-tab upon fetch
+  useEffect(() => {
+    if (Array.isArray(inventoryData)) {
+      const key = (vaultSubTab || "unused").toLowerCase()
+      setVaultCounts((prev) => ({
+        ...prev,
+        [key]: inventoryData.length,
+      }))
+    }
+  }, [inventoryData, vaultSubTab])
 
   const [redeemVoucherMutation] = useRedeemVoucherMutation()
 
@@ -253,24 +280,10 @@ export const usePointsAndOffers = () => {
     }
   }, [])
 
-  const currentVaultRawList = useMemo(() => {
-    if (vaultSubTab === "unused") return unusedVouchers
-    if (vaultSubTab === "used") return usedVouchers
-    return expiredVouchers
-  }, [vaultSubTab, unusedVouchers, usedVouchers, expiredVouchers])
-
   const filteredVaultVouchers = useMemo(() => {
-    if (!Array.isArray(currentVaultRawList)) return []
-    return currentVaultRawList.map(transformInventoryItem)
-  }, [currentVaultRawList, transformInventoryItem])
-
-  const vaultCounts = useMemo(() => {
-    return {
-      unused: Array.isArray(unusedVouchers) ? unusedVouchers.length : 0,
-      used: Array.isArray(usedVouchers) ? usedVouchers.length : 0,
-      expired: Array.isArray(expiredVouchers) ? expiredVouchers.length : 0,
-    }
-  }, [unusedVouchers, usedVouchers, expiredVouchers])
+    if (!Array.isArray(inventoryData)) return []
+    return inventoryData.map(transformInventoryItem)
+  }, [inventoryData, transformInventoryItem])
 
   // Formatted History List
   const formattedHistory = useMemo(() => {
@@ -474,29 +487,20 @@ export const usePointsAndOffers = () => {
     vaultCounts,
     pointHistory: filteredHistory,
 
-    // Loading states
-    isLoadingOverview,
+    // Loading states (combines initial loading and active fetching)
+    isLoadingOverview: isLoadingOverviewQuery,
     isFetchingOverview,
-    isLoadingTemplates,
+    isLoadingTemplates: isLoadingTemplatesQuery,
     isFetchingTemplates,
-    isLoadingInventory:
-      vaultSubTab === "unused"
-        ? isLoadingUnused
-        : vaultSubTab === "used"
-          ? isLoadingUsed
-          : isLoadingExpired,
-    isLoadingHistory,
+    isLoadingInventory: isLoadingInventoryQuery,
+    isFetchingInventory,
+    isLoadingHistory: isLoadingHistoryQuery,
     isFetchingHistory,
 
     // Refetch functions
     refetchOverview,
     refetchTemplates,
-    refetchInventory:
-      vaultSubTab === "unused"
-        ? refetchUnused
-        : vaultSubTab === "used"
-          ? refetchUsed
-          : refetchExpired,
+    refetchInventory,
     refetchHistory,
 
     // Modal state & actions

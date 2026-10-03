@@ -10,19 +10,37 @@ export const pointApi = baseApi.injectEndpoints({
 
     // 2. GET /api/points/history - Lấy lịch sử biến động điểm (phân trang)
     getPointsHistory: builder.query({
-      query: (params = {}) => ({
-        url: "/points/history",
-        params: {
+      query: (params = {}) => {
+        const queryParams = {
           page: params.page || 1,
           pageSize: params.pageSize || 10,
-        },
-      }),
+        }
+        if (params.type && params.type !== "all") {
+          queryParams.type = params.type
+        }
+        return {
+          url: "/points/history",
+          params: queryParams,
+        }
+      },
       providesTags: ["PointsHistory"],
     }),
 
     // 3. GET /api/vouchers/templates - Lấy danh mục Voucher có thể đổi
     getVoucherTemplates: builder.query({
-      query: () => "/vouchers/templates",
+      query: (params = {}) => {
+        const queryParams = {}
+        if (params?.category && params.category !== "all") {
+          queryParams.category = params.category
+        }
+        if (params?.search) {
+          queryParams.search = params.search
+        }
+        return {
+          url: "/vouchers/templates",
+          params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+        }
+      },
       providesTags: ["VoucherTemplates"],
     }),
 

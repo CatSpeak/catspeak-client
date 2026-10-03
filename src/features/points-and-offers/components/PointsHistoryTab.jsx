@@ -64,10 +64,27 @@ const PointsHistoryTab = ({
 
       {/* Loading Skeleton */}
       {isLoading ? (
-        <div className="bg-white border border-gray-200/90 rounded-2xl p-6 space-y-4 animate-pulse">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-12 bg-gray-100 rounded-xl" />
-          ))}
+        <div className="bg-white border border-gray-200/90 rounded-2xl shadow-xs overflow-hidden animate-pulse">
+          <div className="bg-[#990011]/80 h-10 w-full" />
+          <div className="divide-y divide-gray-100">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="px-5 py-4 grid grid-cols-12 items-center">
+                <div className="col-span-6 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3.5 bg-gray-200 rounded w-36" />
+                    <div className="h-2.5 bg-gray-100 rounded w-20" />
+                  </div>
+                </div>
+                <div className="col-span-4 text-center sm:text-left">
+                  <div className="h-3 bg-gray-200 rounded w-24 mx-auto sm:mx-0" />
+                </div>
+                <div className="col-span-2 text-right">
+                  <div className="h-4 bg-gray-200 rounded w-12 ml-auto" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : hasItems ? (
         <div className="bg-white border border-gray-200/90 rounded-2xl shadow-xs overflow-hidden">

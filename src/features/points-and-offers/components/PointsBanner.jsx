@@ -2,10 +2,11 @@ import React from "react"
 import { Star, ArrowRight } from "lucide-react"
 
 const PointsBanner = ({
-  availablePoints = 350,
-  expiringPoints = 50,
-  expiryDate = "31/12/2024",
+  availablePoints = 0,
+  expiringPoints = 0,
+  expiryDate = "",
   onRedeemClick,
+  isLoading = false,
 }) => {
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#990011] via-[#85000f] to-[#5e000a] text-white p-5 sm:p-7 shadow-md mb-6">
@@ -24,10 +25,14 @@ const PointsBanner = ({
             <span className="text-xs sm:text-sm font-medium text-white/80 tracking-wide block mb-0.5">
               Số điểm hiện có
             </span>
-            <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-none">
-              {availablePoints.toLocaleString("vi-VN")}
-            </div>
-            {expiringPoints > 0 && (
+            {isLoading ? (
+              <div className="h-9 sm:h-12 w-32 bg-white/20 rounded-lg animate-pulse my-1" />
+            ) : (
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-none">
+                {availablePoints.toLocaleString("vi-VN")}
+              </div>
+            )}
+            {expiringPoints > 0 && !isLoading && (
               <p className="text-xs text-white/75 mt-1.5 font-light">
                 {expiringPoints} điểm sẽ hết hạn vào {expiryDate}
               </p>
