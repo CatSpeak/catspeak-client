@@ -76,26 +76,28 @@ const PointsOverviewTab = ({
         </div>
 
         {/* Card 3: Sắp hết hạn */}
-        <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-            <Clock size={22} />
-          </div>
-          <div>
-            <span className="text-xs text-gray-400 font-medium block">
-              Sắp hết hạn
-            </span>
-            <div className="flex items-baseline mt-0.5">
-              <span className="text-xl font-bold text-amber-600">
-                {(userPoints.expiringPoints ?? 0).toLocaleString("vi-VN")} điểm
-              </span>
+        {userPoints.expiringSoon > 0 && (
+          <div className="bg-white border border-gray-200/90 rounded-2xl p-5 shadow-xs flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+              <Clock size={22} />
             </div>
-            {userPoints.expiringBefore && (
-              <span className="text-xs text-gray-400 font-normal">
-                trước {userPoints.expiringBefore}
+            <div>
+              <span className="text-xs text-gray-400 font-medium block">
+                Sắp hết hạn
               </span>
-            )}
+              <div className="flex items-baseline mt-0.5">
+                <span className="text-xl font-bold text-amber-600">
+                  {(userPoints.expiringSoon ?? 0).toLocaleString("vi-VN")} điểm
+                </span>
+              </div>
+              {userPoints.expiringBefore && (
+                <span className="text-xs text-gray-400 font-normal">
+                  trước {userPoints.expiringBefore}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* "Cách nhận điểm" Section */}
