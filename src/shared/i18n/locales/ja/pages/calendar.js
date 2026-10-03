@@ -46,6 +46,7 @@ export default {
   processing: "処理中...",
   cancelRegistration: "登録をキャンセル",
   register: "登録",
+  waitlisted: "キャンセル待ち (#{position})",
   deleting: "削除中...",
   confirm: "確認しますか？",
   cancel: "キャンセル",

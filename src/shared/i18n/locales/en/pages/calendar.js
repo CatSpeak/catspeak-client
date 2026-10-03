@@ -46,6 +46,7 @@ export default {
   processing: "Processing...",
   cancelRegistration: "Cancel registration",
   register: "Register",
+  waitlisted: "Waitlist (#{position})",
   deleting: "Deleting...",
   confirm: "Confirm?",
   cancel: "Cancel",

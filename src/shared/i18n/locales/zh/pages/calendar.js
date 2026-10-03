@@ -46,6 +46,7 @@ export default {
   processing: "处理中...",
   cancelRegistration: "取消报名",
   register: "报名",
+  waitlisted: "候补名单 (#{position})",
   deleting: "删除中...",
   confirm: "确认？",
   cancel: "取消",

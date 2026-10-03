@@ -46,6 +46,7 @@ export default {
   processing: "Đang xử lý...",
   cancelRegistration: "Hủy đăng kí",
   register: "Đăng kí",
+  waitlisted: "Danh sách chờ (#{position})",
   deleting: "Đang xóa...",
   confirm: "Xác nhận?",
   cancel: "Hủy",
