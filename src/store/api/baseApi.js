@@ -400,6 +400,10 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("/placement/") ||
         lowerUrl.startsWith("placement/") ||
         // TASK-AI-15: buổi luyện nói (báo cáo, phát âm, vòng đời phiên) nằm trong ai-api.
+        lowerUrl.startsWith("/v1/flashcards") ||
+        lowerUrl.startsWith("v1/flashcards") ||
+        lowerUrl.startsWith("/flashcards") ||
+        lowerUrl.startsWith("flashcards") ||
         lowerUrl.startsWith("/v1/speaking/") ||
         lowerUrl.startsWith("v1/speaking/") ||
         lowerUrl.startsWith("/ai/") ||
