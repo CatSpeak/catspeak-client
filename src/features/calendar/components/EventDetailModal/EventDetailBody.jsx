@@ -9,7 +9,10 @@ import { useCancelEventOccurrenceMutation } from "@/store/api/eventsApi"
 import { Trash2, ChevronRight } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import Modal from "@/shared/components/ui/Modal"
+import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import { TIMEZONE_IDS, getTimezoneOffset } from "@/shared/constants/timezones"
+import LocationLink from "../LocationLink"
+import CommunityBadge from "../CommunityBadge"
 
 const EventDetailBody = ({
   ev,
@@ -25,6 +28,7 @@ const EventDetailBody = ({
   const [cancelOccurrence, { isLoading: isCancelling }] =
     useCancelEventOccurrenceMutation()
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
   const isCreator = Boolean(
     user &&
@@ -55,13 +59,17 @@ const EventDetailBody = ({
     <div className="relative bg-white text-base  max-h-[60vh] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
       {/* Thumbnail banner */}
       {ev.thumbnailUrl && (
-        <div className="w-full h-40 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsViewerOpen(true)}
+          className="w-full h-40 overflow-hidden bg-neutral-100 cursor-zoom-in"
+        >
           <img
             src={ev.thumbnailUrl}
             alt={ev.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
-        </div>
+        </button>
       )}
 
       <div className="flex flex-col gap-3 p-6">
@@ -86,6 +94,11 @@ const EventDetailBody = ({
             </span>
           </div>
         )}
+
+        {/* Community */}
+        <div className="flex items-center gap-2">
+          <CommunityBadge languageCommunity={ev.languageCommunity} />
+        </div>
 
         {/* Time */}
         {!ev.isRecurringGroup && (
@@ -121,45 +134,32 @@ const EventDetailBody = ({
                 );
               }
 
-              const queryParts = [locationStr, cityStr, countryStr].filter(
-                Boolean,
+              const label = (
+                <>
+                  {locationStr && (
+                    <span className="font-medium">{locationStr}</span>
+                  )}
+                  {(cityStr || countryStr) && (
+                    <span
+                      className={`text-sm opacity-80 ${locationStr ? "mt-0.5" : ""}`}
+                    >
+                      {[cityStr, countryStr].filter(Boolean).join(", ")}
+                    </span>
+                  )}
+                </>
               );
-              const queryStr = queryParts.join(", ");
 
-              const isUrl =
-                /^https?:\/\//i.test(locationStr) ||
-                locationStr.includes("google.com/maps") ||
-                locationStr.includes("maps.app.goo.gl");
-
-              const mapUrl = isUrl
-                ? locationStr.startsWith("http")
-                  ? locationStr
-                  : `https://${locationStr}`
-                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`;
+              const linkClass =
+                "flex flex-col hover:opacity-80 transition-opacity text-[#990011] text-left";
 
               return (
                 <div className="flex items-start gap-2">
                   <span className="font-bold min-w-max">
                     {t.calendar?.location || "Location"}:
                   </span>
-                  <a
-                    href={mapUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col hover:opacity-80 transition-opacity text-[#990011]"
-                    // style={{ color: headerColor }}
-                  >
-                    {locationStr && (
-                      <span className="font-medium">{locationStr}</span>
-                    )}
-                    {(cityStr || countryStr) && (
-                      <span
-                        className={`text-sm opacity-80 ${locationStr ? "mt-0.5" : ""}`}
-                      >
-                        {[cityStr, countryStr].filter(Boolean).join(", ")}
-                      </span>
-                    )}
-                  </a>
+                  <LocationLink ev={ev} className={linkClass}>
+                    {label}
+                  </LocationLink>
                 </div>
               );
             })()}
@@ -316,6 +316,13 @@ const EventDetailBody = ({
           </button>
         </div>
       </Modal>
+
+      {isViewerOpen && ev.thumbnailUrl && (
+        <MediaViewerModal
+          media={ev.thumbnailUrl}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </div>
   );
 }

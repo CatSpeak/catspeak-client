@@ -1,8 +1,10 @@
 import React from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { Plus, SlidersHorizontal } from "lucide-react";
 
 const CalendarPageHeader = ({
   title,
+  onCreateEvent,
+  createLabel,
   onOpenFilters,
 }) => {
   return (
@@ -14,6 +16,13 @@ const CalendarPageHeader = ({
           className="w-9 h-9 rounded-full border border-[#990011] flex items-center justify-center hover:bg-[#990011]/5 transition-colors text-[#990011]"
         >
           <SlidersHorizontal size={16} />
+        </button>
+        <button
+          onClick={onCreateEvent}
+          className="flex items-center gap-1.5 h-9 px-4 rounded-full border border-[#990011] text-[#990011] text-sm font-semibold hover:bg-[#990011]/5 transition-colors"
+        >
+          <Plus size={16} />
+          <span>{createLabel}</span>
         </button>
       </div>
     </div>

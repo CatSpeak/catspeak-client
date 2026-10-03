@@ -46,6 +46,7 @@ export default {
   processing: "処理中...",
   cancelRegistration: "登録をキャンセル",
   register: "登録",
+  waitlisted: "キャンセル待ち (#{position})",
   deleting: "削除中...",
   confirm: "確認しますか？",
   cancel: "キャンセル",
@@ -53,6 +54,11 @@ export default {
   shareLink: "リンクを共有",
   copy: "コピー",
   linkExpires: "リンクは7日で期限が切れます",
+  copied: "リンクをコピーしました",
+  copyFailed: "リンクをコピーできませんでした。",
+  shareFailed: "共有リンクを作成できませんでした。",
+  shareCreatorOnly: "共有リンクを作成できるのはイベントの作成者のみです。",
+  shareMissingOccurrence: "共有できません：開催回の情報がありません。",
   maxParticipants: "最大参加者数",
   startTime: "開始時刻",
   endTime: "終了時刻",
@@ -95,6 +101,10 @@ export default {
   noCitiesFound: "都市が見つかりません",
   locationPlaceholder: "場所またはGoogleマップリンクを入力",
   openMaps: "Googleマップを開く",
+  openThisLink: "このリンクを開く",
+  viewOnGoogleMaps: "Googleマップで表示",
+  mapLocationNotFound:
+    "地図上に住所が見つかりません。Googleマップを開きます。",
   descriptionPlaceholder: "説明を入力（最大500語）",
   guest: "ゲスト",
   conditionsPlaceholder: "条件をカンマ区切りで入力",
@@ -152,6 +162,7 @@ export default {
   reasonPlaceholder: "例: 部屋を変更、講師が忙しい...",
   save: "保存",
   shared: {
+    communityLabel: "コミュニティ",
     loadingEventInfo: "イベント情報を読み込み中...",
     invalidLink: "無効なリンク",
     invalidLinkDesc:

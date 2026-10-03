@@ -54,6 +54,10 @@ const EventDetailFooter = ({
         );
 
   const isRegistered = event?.isRegistered ?? false;
+  const registrationStatus =
+    event?.registrationStatus ?? (isRegistered ? "CONFIRMED" : null);
+  const isWaitlisted = registrationStatus === "WAITLISTED";
+  const waitlistPosition = event?.waitlistPosition;
   const isPast = event?.endTime
     ? dayjs(event.endTime).isBefore(dayjs())
     : event?.startTime
@@ -123,7 +127,10 @@ const EventDetailFooter = ({
         body = { eventId, registrationType: "ENTIRE_SERIES" };
       }
 
-      console.log("REGISTER PAYLOAD:", body);
+      // Required for SHARED_LINK_ONLY events opened from a shared link.
+      if (event?.token) {
+        body.sharedLinkToken = event.token;
+      }
 
       await registerForEvent(body).unwrap();
       if (onActionComplete) onActionComplete('register', 'success');
@@ -163,9 +170,14 @@ const EventDetailFooter = ({
                 ? isRegistered
                   ? "Đã tham gia"
                   : "Đã kết thúc"
-                : isRegistered
-                  ? cal.cancelRegistration || "Hủy đăng kí"
-                  : cal.register || "Đăng kí"}
+                : isWaitlisted
+                  ? (cal.waitlisted || "Danh sách chờ (#{position})").replace(
+                      "{position}",
+                      waitlistPosition ?? "",
+                    )
+                  : isRegistered
+                    ? cal.registered || "Đã đăng ký"
+                    : cal.register || "Đăng kí"}
             </PillButton>
           ))}
 
@@ -243,6 +255,9 @@ const EventDetailFooter = ({
               <SharePopover
                 eventId={eventId}
                 occurrenceId={event?.occurrenceId}
+                visibilityScope={event?.visibilityScope}
+                isCreator={isCreator}
+                languageCommunity={event?.languageCommunity}
               />
             </div>
           </div>
