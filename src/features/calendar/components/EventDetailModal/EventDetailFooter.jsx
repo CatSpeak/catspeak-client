@@ -255,6 +255,9 @@ const EventDetailFooter = ({
               <SharePopover
                 eventId={eventId}
                 occurrenceId={event?.occurrenceId}
+                visibilityScope={event?.visibilityScope}
+                isCreator={isCreator}
+                languageCommunity={event?.languageCommunity}
               />
             </div>
           </div>

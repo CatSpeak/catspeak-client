@@ -1,21 +1,48 @@
 import { useState, useRef, useEffect } from "react"
+import { toast } from "react-hot-toast"
 import { useCreateSharedLinkMutation } from "@/store/api/eventsApi"
-import { getShareUrlWithVersion } from "@/shared/utils/shareUtils"
 import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useLocation, useNavigate } from "react-router-dom"
+import { getCommunityLang } from "@/shared/utils/navigation"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
-const useEventShare = (eventId, occurrenceId) => {
+const SHARED_LINK_VISIBILITY = "SHARED_LINK_ONLY"
+
+/**
+ * Builds the direct (no-token) share URL for a PUBLIC occurrence.
+ */
+const buildDirectShareUrl = (occurrenceId, languageCommunity, fallbackLanguage) => {
+  const communityCode =
+    languageCommunity && languageCommunity !== "vi"
+      ? languageCommunity
+      : getCommunityLang(fallbackLanguage)
+  return `${window.location.origin}/${communityCode}/cat-speak/calendar?occurrenceId=${occurrenceId}`
+}
+
+const useEventShare = ({
+  occurrenceId,
+  visibilityScope,
+  isCreator,
+  languageCommunity,
+} = {}) => {
   const { isAuthenticated } = useAuth()
   const { openAuthModal } = useAuthModal()
+  const { language, t } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()
   const [sharePopoverOpen, setSharePopoverOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
   const shareRef = useRef(null)
 
   const [createSharedLink, { isLoading: isSharing }] =
     useCreateSharedLinkMutation()
+
+  const isPublic = visibilityScope !== SHARED_LINK_VISIBILITY
+  const isCreatorOnlyTokenLink =
+    visibilityScope === SHARED_LINK_VISIBILITY && !isCreator
+  const isDisabled = !occurrenceId || isCreatorOnlyTokenLink
 
   // Dismiss popover when clicking outside the share container
   useEffect(() => {
@@ -32,8 +59,8 @@ const useEventShare = (eventId, occurrenceId) => {
   const handleShare = async () => {
     if (!isAuthenticated) {
       if (location.pathname.includes("/events/shared/")) {
-        navigate("/", { 
-          replace: true, 
+        navigate("/", {
+          replace: true,
           state: { requireLogin: true, redirectTo: location.pathname + location.search }
         })
       } else {
@@ -42,33 +69,55 @@ const useEventShare = (eventId, occurrenceId) => {
       return
     }
 
+    if (isDisabled) {
+      setErrorMessage(
+        isCreatorOnlyTokenLink
+          ? t.calendar?.shareCreatorOnly ||
+              "Chỉ người tạo sự kiện mới có thể tạo liên kết chia sẻ."
+          : t.calendar?.shareMissingOccurrence ||
+              "Không thể chia sẻ: thiếu thông tin buổi diễn ra.",
+      )
+      setSharePopoverOpen(true)
+      return
+    }
+
     if (sharePopoverOpen) {
       setSharePopoverOpen(false)
       return
     }
-    if (!shareUrl) {
-      try {
-        if (!occurrenceId) {
-          console.error("Cannot create share link: occurrenceId is missing")
-          return
-        }
-        const payload = {
-          occurrenceId,
-          expiresAt: new Date(
-            Date.now() + 7 * 24 * 60 * 60 * 1000,
-          ).toISOString(),
-        }
 
-        const res = await createSharedLink(payload).unwrap()
+    if (!shareUrl) {
+      setErrorMessage("")
+
+      if (isPublic) {
+        setShareUrl(
+          buildDirectShareUrl(occurrenceId, languageCommunity, language),
+        )
+        setSharePopoverOpen(true)
+        return
+      }
+
+      try {
+        const res = await createSharedLink({ occurrenceId }).unwrap()
         const token =
-          res.token ||
+          res?.token ||
           (typeof res === "string"
             ? res.split("/").pop()
-            : res.shareUrl?.split("/").pop())
-        const url = `${window.location.origin}/events/shared/${token}`
-        setShareUrl(getShareUrlWithVersion(url))
+            : res?.shareUrl?.split("/").pop())
+
+        if (!token) {
+          toast.error(
+            t.calendar?.shareFailed || "Không thể tạo liên kết chia sẻ.",
+          )
+          return
+        }
+
+        setShareUrl(`${window.location.origin}/events/shared/${token}`)
       } catch (err) {
         console.error("Failed to create share link:", err)
+        toast.error(
+          t.calendar?.shareFailed || "Không thể tạo liên kết chia sẻ.",
+        )
         return
       }
     }
@@ -79,7 +128,10 @@ const useEventShare = (eventId, occurrenceId) => {
     shareRef,
     sharePopoverOpen,
     shareUrl,
+    errorMessage,
     isSharing,
+    isPublic,
+    isDisabled,
     handleShare,
   }
 }

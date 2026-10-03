@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { IconButton, PillButton } from '@/shared/components/ui/buttons';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
 import { getAddressHref } from '@/shared/utils/locationLink'
@@ -13,6 +14,7 @@ import SharePopover from '../EventDetailModal/SharePopover'
 const EventBlockDetail = ({ event, open, onClose }) => {
   const navigate = useNavigate()
   const { t, language } = useLanguage()
+  const { user } = useAuth()
   const { formatDate, formatTime } = useTimezone()
 
   const EVENT_STYLES = {
@@ -91,6 +93,13 @@ const EventBlockDetail = ({ event, open, onClose }) => {
             <SharePopover
               eventId={event.id || event._id}
               occurrenceId={event.occurrenceId}
+              visibilityScope={event.visibilityScope}
+              isCreator={
+                Boolean(user) && user?.id != null && event.creatorId != null
+                  ? user.id === event.creatorId
+                  : undefined
+              }
+              languageCommunity={event.languageCommunity}
               className="!bg-transparent border border-border !text-[#1A1A1A] !w-11 !h-11 hover:!bg-gray-50"
             />
           </div>
