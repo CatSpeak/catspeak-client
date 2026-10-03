@@ -2,6 +2,11 @@ import TextInput from "@/shared/components/ui/inputs/TextInput";
 import Dropdown from "@/shared/components/ui/Dropdown";
 import AddressAutocomplete from "./AddressAutocomplete";
 import { COMMUNITY_CODES } from "../../utils/community";
+import {
+  googleMapsSearchUrl,
+  isUrl,
+  normalizeUrl,
+} from "@/shared/utils/locationLink";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import {
   useGetCountriesQuery,
@@ -156,16 +161,23 @@ const EventDetailsSection = ({
                 eventColor={eventColor}
                 error={errors.eventLocation}
               />
-              {/* {eventLocation.trim() && (
-                <button
-                  type="button"
-                  onClick={handleOpenMaps}
+              {eventLocation.trim() && (
+                <a
+                  href={
+                    isUrl(eventLocation)
+                      ? normalizeUrl(eventLocation)
+                      : googleMapsSearchUrl(eventLocation)
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-sm mt-1.5 self-start hover:opacity-80 transition-opacity font-medium"
                   style={{ color: eventColor }}
                 >
-                  {cal.openMaps}
-                </button>
-              )} */}
+                  {isUrl(eventLocation)
+                    ? cal.openThisLink || "Mở liên kết này"
+                    : cal.viewOnGoogleMaps || "Xem trên Google Maps"}
+                </a>
+              )}
             </div>
           </div>
         </div>

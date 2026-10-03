@@ -95,6 +95,10 @@ export default {
   noCitiesFound: "Không có thành phố nào",
   locationPlaceholder: "Nhập địa điểm hoặc link từ ggmap",
   openMaps: "Mở Google Maps",
+  openThisLink: "Mở liên kết này",
+  viewOnGoogleMaps: "Xem trên Google Maps",
+  mapLocationNotFound:
+    "Không tìm thấy địa chỉ trên bản đồ. Đang mở Google Maps.",
   descriptionPlaceholder: "Nhập mô tả (tối đa 500 từ)",
   guest: "Khách",
   conditionsPlaceholder: "Nhập điều kiện, phân cách bằng dấu phẩy",

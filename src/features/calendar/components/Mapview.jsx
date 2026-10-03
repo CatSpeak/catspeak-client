@@ -35,7 +35,7 @@ function MapFlyTo({ center }) {
   return null;
 }
 
-export default function MapView({ dayEvents = [], selectedEvent = null }) {
+export default function MapView({ dayEvents = [], selectedEvent = null, focusLocation = null }) {
   const [markers, setMarkers] = useState([]);
   const [activeCenter, setActiveCenter] = useState(DEFAULT_POS);
   const [flyTrigger, setFlyTrigger] = useState(0);
@@ -129,6 +129,17 @@ export default function MapView({ dayEvents = [], selectedEvent = null }) {
   }, [dayEvents]);
 
   useEffect(() => {
+    // An explicit focus (from an address click) takes priority.
+    if (
+      focusLocation &&
+      focusLocation.lat != null &&
+      focusLocation.lng != null
+    ) {
+      setActiveCenter([focusLocation.lat, focusLocation.lng]);
+      setFlyTrigger((prev) => prev + 1);
+      return;
+    }
+
     if (!selectedEvent) {
       return;
     }
@@ -141,7 +152,7 @@ export default function MapView({ dayEvents = [], selectedEvent = null }) {
       setActiveCenter([marker.lat, marker.lng]);
       setFlyTrigger((prev) => prev + 1);
     }
-  }, [selectedEvent, markers]);
+  }, [selectedEvent, markers, focusLocation]);
 
   return (
     <div className="relative w-full h-[600px] rounded-3xl overflow-hidden">
@@ -184,6 +195,23 @@ export default function MapView({ dayEvents = [], selectedEvent = null }) {
             </Popup>
           </Marker>
         ))}
+
+        {focusLocation &&
+          focusLocation.lat != null &&
+          focusLocation.lng != null &&
+          !markers.some((m) => String(m.id) === String(focusLocation.id)) && (
+            <Marker position={[focusLocation.lat, focusLocation.lng]}>
+              <Popup>
+                <div className="min-w-[220px]">
+                  <div className="font-semibold">{focusLocation.title}</div>
+
+                  <div className="text-sm text-gray-600 mt-1">
+                    {focusLocation.address}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          )}
 
         <MapFlyTo center={activeCenter} key={flyTrigger} />
         <MapControl />

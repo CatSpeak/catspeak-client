@@ -95,6 +95,10 @@ export default {
   noCitiesFound: "都市が見つかりません",
   locationPlaceholder: "場所またはGoogleマップリンクを入力",
   openMaps: "Googleマップを開く",
+  openThisLink: "このリンクを開く",
+  viewOnGoogleMaps: "Googleマップで表示",
+  mapLocationNotFound:
+    "地図上に住所が見つかりません。Googleマップを開きます。",
   descriptionPlaceholder: "説明を入力（最大500語）",
   guest: "ゲスト",
   conditionsPlaceholder: "条件をカンマ区切りで入力",

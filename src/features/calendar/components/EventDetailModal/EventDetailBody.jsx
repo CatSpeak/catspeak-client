@@ -11,6 +11,12 @@ import { useAuth } from "@/features/auth/hooks/useAuth"
 import Modal from "@/shared/components/ui/Modal"
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import { TIMEZONE_IDS, getTimezoneOffset } from "@/shared/constants/timezones"
+import {
+  getAddressHref,
+  isUrl,
+  normalizeUrl,
+} from "@/shared/utils/locationLink"
+import { useMapFocus } from "../../context/MapFocusContext"
 import CommunityBadge from "../CommunityBadge"
 
 const EventDetailBody = ({
@@ -23,6 +29,7 @@ const EventDetailBody = ({
   const { t, language } = useLanguage()
   const { formatDate, formatDateTime } = useTimezone()
   const { user, isAdmin } = useAuth()
+  const { hasMap, focusEventOnMap } = useMapFocus()
   const localeStr = language === "vi" ? "vi-VN" : "en-US"
   const [cancelOccurrence, { isLoading: isCancelling }] =
     useCancelEventOccurrenceMutation()
@@ -133,45 +140,58 @@ const EventDetailBody = ({
                 );
               }
 
-              const queryParts = [locationStr, cityStr, countryStr].filter(
-                Boolean,
+              const label = (
+                <>
+                  {locationStr && (
+                    <span className="font-medium">{locationStr}</span>
+                  )}
+                  {(cityStr || countryStr) && (
+                    <span
+                      className={`text-sm opacity-80 ${locationStr ? "mt-0.5" : ""}`}
+                    >
+                      {[cityStr, countryStr].filter(Boolean).join(", ")}
+                    </span>
+                  )}
+                </>
               );
-              const queryStr = queryParts.join(", ");
 
-              const isUrl =
-                /^https?:\/\//i.test(locationStr) ||
-                locationStr.includes("google.com/maps") ||
-                locationStr.includes("maps.app.goo.gl");
+              const linkClass =
+                "flex flex-col hover:opacity-80 transition-opacity text-[#990011] text-left";
 
-              const mapUrl = isUrl
-                ? locationStr.startsWith("http")
-                  ? locationStr
-                  : `https://${locationStr}`
-                : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryStr)}`;
+              const isLocationUrl = isUrl(locationStr);
 
               return (
                 <div className="flex items-start gap-2">
                   <span className="font-bold min-w-max">
                     {t.calendar?.location || "Location"}:
                   </span>
-                  <a
-                    href={mapUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col hover:opacity-80 transition-opacity text-[#990011]"
-                    // style={{ color: headerColor }}
-                  >
-                    {locationStr && (
-                      <span className="font-medium">{locationStr}</span>
-                    )}
-                    {(cityStr || countryStr) && (
-                      <span
-                        className={`text-sm opacity-80 ${locationStr ? "mt-0.5" : ""}`}
-                      >
-                        {[cityStr, countryStr].filter(Boolean).join(", ")}
-                      </span>
-                    )}
-                  </a>
+                  {isLocationUrl ? (
+                    <a
+                      href={normalizeUrl(locationStr)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={linkClass}
+                    >
+                      {label}
+                    </a>
+                  ) : hasMap ? (
+                    <button
+                      type="button"
+                      onClick={() => focusEventOnMap(ev)}
+                      className={linkClass}
+                    >
+                      {label}
+                    </button>
+                  ) : (
+                    <a
+                      href={getAddressHref(ev)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={linkClass}
+                    >
+                      {label}
+                    </a>
+                  )}
                 </div>
               );
             })()}

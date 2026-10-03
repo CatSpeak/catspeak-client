@@ -7,6 +7,7 @@ import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
 import MediaViewerModal from '@/shared/components/ui/MediaViewerModal'
+import { getAddressHref } from '@/shared/utils/locationLink'
 import SharePopover from '../EventDetailModal/SharePopover'
 import CommunityBadge from '../CommunityBadge'
 
@@ -150,7 +151,14 @@ const EventCardDetail = ({ event, onBack }) => {
           {event.location && (
             <div className="flex items-start gap-3 text-[#7B7979] text-[15px]">
               <MapPin size={18} className="shrink-0 mt-0.5" />
-              <span className="leading-tight">{event.location || t.calendar?.notAssigned || 'Chưa cập nhật'}</span>
+              <a
+                href={getAddressHref(event)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="leading-tight text-[#990011] hover:opacity-80 transition-opacity"
+              >
+                {event.location || t.calendar?.notAssigned || 'Chưa cập nhật'}
+              </a>
             </div>
           )}
 

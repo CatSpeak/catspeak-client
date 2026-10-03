@@ -95,6 +95,10 @@ export default {
   noCitiesFound: "No cities found",
   locationPlaceholder: "Enter location or Google Maps link",
   openMaps: "Open Google Maps",
+  openThisLink: "Open this link",
+  viewOnGoogleMaps: "View on Google Maps",
+  mapLocationNotFound:
+    "Address not found on the map. Opening Google Maps.",
   descriptionPlaceholder: "Enter description (max 500 words)",
   guest: "Guests",
   conditionsPlaceholder: "Enter conditions, separated by commas",
