@@ -74,8 +74,8 @@ const MyCalendarPage = () => {
 
   const tabOptions = [
     { id: 'calendar', label: t.calendar?.generalCalendar || 'Lịch tổng hợp', icon: CalendarDays },
+    { id: 'event', label: t.nav?.events || 'Sự kiện', icon: Ticket },
     ...(isTeacher ? [
-      { id: 'event', label: t.nav?.events || 'Sự kiện', icon: Ticket },
       { id: 'teaching-schedule', label: t.nav?.schedule || 'Lịch giảng dạy', icon: BookOpen },
     ] : []),
   ]
@@ -97,22 +97,22 @@ const MyCalendarPage = () => {
 
       <div className='flex items-center justify-between flex-col md:flex-row'>
         <p className='text-[40px] font-semibold text-[#1A1A1A]'>{t.nav?.myCalendar || 'Lịch của tôi'}</p>
-        {isTeacher && (
-          <div className='flex gap-4'>
+        <div className='flex gap-4'>
+          {isTeacher && (
             <PillButton
               variant='primary'
               startIcon={<CalendarClock className='w-4 h-4' />}
               onClick={() => navigate('/workspace/classes')}>
               {t.calendar?.changeTeachingSchedule || 'Thay đổi lịch dạy'}
             </PillButton>
-            <PillButton
-              variant='outline'
-              endIcon={<Plus className='w-4 h-4' />}
-              onClick={() => navigate("/workspace/events/create")}>
-              {t.calendar?.createEvent || 'Tạo sự kiện'}
-            </PillButton>
-          </div>
-        )}
+          )}
+          <PillButton
+            variant='outline'
+            endIcon={<Plus className='w-4 h-4' />}
+            onClick={() => navigate("/workspace/events/create")}>
+            {t.calendar?.createEvent || 'Tạo sự kiện'}
+          </PillButton>
+        </div>
       </div>
 
       <Tabs tabs={tabOptions} activeTab={activeTab} onChange={setActiveTab} fullWidth={false} />
@@ -152,7 +152,7 @@ const MyCalendarPage = () => {
         </div>
       )}
 
-      {isTeacher && activeTab === 'event' && <EventTab />}
+      {activeTab === 'event' && <EventTab />}
 
       {isTeacher && activeTab === 'teaching-schedule' && (
         <TeachingScheduleTab

@@ -21,6 +21,8 @@ import {
 } from "@/features/rooms";
 import { useCreateAISessionMutation } from "@/store/api/roomsApi";
 import { leaveCall } from "@/store/slices/videoCallSlice";
+import { selectIsAuthenticated } from "@/store/slices/authSlice";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal";
 import {
   pingActiveCall,
@@ -35,6 +37,8 @@ const CalendarPage = () => {
   const { t, language } = useLanguage();
   const cal = t.calendar || {};
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { openAuthModal } = useAuthModal();
   const { isInCall } = useSelector((s) => s.videoCall);
   const { state, actions } = useRoomsPageLogic();
   const [createAISession] = useCreateAISessionMutation();
@@ -201,6 +205,16 @@ const CalendarPage = () => {
     setPendingAction(null);
   };
 
+  const handleCreateEvent = () => {
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+    navigate(`${basePath}/create`, {
+      state: { from: basePath, fromCommunityCalendar: true },
+    });
+  };
+
   const handleCreateAI = async (settings) => {
     actions.closeAISettingsModal();
     const action = () => {
@@ -240,6 +254,8 @@ const CalendarPage = () => {
       <div className="px-6 pt-5 pb-8">
         <CalendarPageHeader
           title={cal.schedule || "Danh sách sự kiện"}
+          createLabel={cal.createEvent || "Tạo sự kiện"}
+          onCreateEvent={handleCreateEvent}
           onOpenFilters={() => setIsFilterOpen(true)}
         />
 
