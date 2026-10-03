@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ChevronLeft, Clock, MapPin, Tag, Share2, Info } from 'lucide-react'
 import dayjs from 'dayjs'
 import { IconButton, PillButton } from '@/shared/components/ui/buttons'
@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '@/shared/context/LanguageContext'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
+import MediaViewerModal from '@/shared/components/ui/MediaViewerModal'
 import SharePopover from '../EventDetailModal/SharePopover'
 import CommunityBadge from '../CommunityBadge'
 
@@ -13,6 +14,7 @@ const EventCardDetail = ({ event, onBack }) => {
   const navigate = useNavigate()
   const { t, language } = useLanguage()
   const { formatDate, formatTime } = useTimezone()
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
   if (!event) return null;
 
@@ -37,9 +39,13 @@ const EventCardDetail = ({ event, onBack }) => {
     return (
       <div>
         {['registered-event', 'my-event'].includes(event.eventType) && event.thumbnailUrl ? (
-          <div className="w-full h-48 bg-[#F8F9FA] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
-            <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-cover" />
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsViewerOpen(true)}
+            className="w-full h-48 bg-neutral-100 rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0 cursor-zoom-in"
+          >
+            <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-contain" />
+          </button>
         ) : (
           <div className="w-full h-48 bg-[#F8F9FA] text-[#7B7979] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
             No Image
@@ -166,6 +172,13 @@ const EventCardDetail = ({ event, onBack }) => {
 
       {/* Footer */}
       {renderFooter(event)}
+
+      {isViewerOpen && event.thumbnailUrl && (
+        <MediaViewerModal
+          media={event.thumbnailUrl}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </div>
   )
 }

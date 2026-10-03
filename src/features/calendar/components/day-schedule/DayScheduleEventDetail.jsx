@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Clock, MapPin, Globe, ChevronLeft, Tag } from "lucide-react";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTimezone } from "@/shared/hooks/useTimezone";
+import MediaViewerModal from "@/shared/components/ui/MediaViewerModal";
 import { formatLocation } from "../../utils/eventFormatters";
 import EventDetailFooter from "../EventDetailModal/EventDetailFooter";
 import CommunityBadge from "../CommunityBadge";
@@ -17,6 +18,7 @@ const DayScheduleEventDetail = ({
   const navigate = useNavigate();
   const { lang } = useParams();
   const { formatDateTime } = useTimezone();
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const ev = fullEvent || selectedEvent;
 
   const startTime = ev.startTime
@@ -119,13 +121,19 @@ const DayScheduleEventDetail = ({
           </div>
 
           {/* Thumbnail */}
-          <div className="mt-auto w-full rounded-[24px] overflow-hidden bg-gray-100 flex-shrink-0">
+          <div className="mt-auto w-full rounded-[24px] overflow-hidden bg-neutral-100 flex-shrink-0">
             {selectedEvent.thumbnailUrl ? (
-              <img
-                src={selectedEvent.thumbnailUrl}
-                alt={selectedEvent.title}
-                className="w-full h-auto max-h-[300px] object-cover"
-              />
+              <button
+                type="button"
+                onClick={() => setIsViewerOpen(true)}
+                className="w-full cursor-zoom-in"
+              >
+                <img
+                  src={selectedEvent.thumbnailUrl}
+                  alt={selectedEvent.title}
+                  className="w-full h-auto max-h-[300px] object-contain"
+                />
+              </button>
             ) : (
               <div className="w-full h-[200px] flex justify-center items-center text-gray-400">
                 No Image
@@ -147,6 +155,13 @@ const DayScheduleEventDetail = ({
           />
         </div>
       </div>
+
+      {isViewerOpen && selectedEvent.thumbnailUrl && (
+        <MediaViewerModal
+          media={selectedEvent.thumbnailUrl}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </>
   );
 };

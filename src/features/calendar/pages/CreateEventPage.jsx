@@ -439,7 +439,7 @@ const CreateEventPage = () => {
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-full object-cover absolute inset-0"
+                    className="w-full h-full object-contain absolute inset-0"
                   />
                 ) : (
                   <>

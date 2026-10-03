@@ -9,6 +9,7 @@ import { useCancelEventOccurrenceMutation } from "@/store/api/eventsApi"
 import { Trash2, ChevronRight } from "lucide-react"
 import { useAuth } from "@/features/auth/hooks/useAuth"
 import Modal from "@/shared/components/ui/Modal"
+import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import { TIMEZONE_IDS, getTimezoneOffset } from "@/shared/constants/timezones"
 import CommunityBadge from "../CommunityBadge"
 
@@ -26,6 +27,7 @@ const EventDetailBody = ({
   const [cancelOccurrence, { isLoading: isCancelling }] =
     useCancelEventOccurrenceMutation()
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
   const isCreator = Boolean(
     user &&
@@ -56,13 +58,17 @@ const EventDetailBody = ({
     <div className="relative bg-white text-base  max-h-[60vh] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#990011] [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb:hover]:border-0 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar]:h-[6px]">
       {/* Thumbnail banner */}
       {ev.thumbnailUrl && (
-        <div className="w-full h-40 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsViewerOpen(true)}
+          className="w-full h-40 overflow-hidden bg-neutral-100 cursor-zoom-in"
+        >
           <img
             src={ev.thumbnailUrl}
             alt={ev.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
-        </div>
+        </button>
       )}
 
       <div className="flex flex-col gap-3 p-6">
@@ -322,6 +328,13 @@ const EventDetailBody = ({
           </button>
         </div>
       </Modal>
+
+      {isViewerOpen && ev.thumbnailUrl && (
+        <MediaViewerModal
+          media={ev.thumbnailUrl}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </div>
   );
 }
