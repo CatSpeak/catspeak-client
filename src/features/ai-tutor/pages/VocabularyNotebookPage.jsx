@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { Layers } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import {
@@ -25,7 +25,9 @@ import { MOCK_FLASHCARD_HOME, MOCK_DECKS } from "@/store/api/flashcardMocks"
  */
 const VocabularyNotebookPage = () => {
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { lang: paramLang } = useParams()
+  const { language, t } = useLanguage()
+  const currentLang = paramLang || language || "vi"
 
   // Lấy dữ liệu thống kê trang chủ và danh sách decks từ API (kèm fallback mock)
   const { data: homeData, isLoading: isHomeLoading } = useGetFlashcardHomeQuery()
@@ -64,23 +66,23 @@ const VocabularyNotebookPage = () => {
 
   // Handlers điều hướng
   const handleStartDueReview = () => {
-    navigate("/flashcards/review?mode=due")
+    navigate(`/${currentLang}/flashcards/review?mode=due`)
   }
 
   const handleStartFreeReview = () => {
-    navigate("/flashcards/review?mode=free")
+    navigate(`/${currentLang}/flashcards/review?mode=free`)
   }
 
   const handleStartSpeaking = () => {
-    navigate("/ai-tutor/speaking-room")
+    navigate(`/${currentLang}/ai-tutor/speaking-room`)
   }
 
   const handleViewAllDecks = () => {
-    navigate("/flashcards/decks")
+    navigate(`/${currentLang}/ai-tutor/vocabulary-notebook`)
   }
 
   const handleSelectDeck = (deckId) => {
-    navigate(`/flashcards/decks/${deckId}`)
+    navigate(`/${currentLang}/ai-tutor/vocabulary-notebook/decks/${deckId}`)
   }
 
   return (

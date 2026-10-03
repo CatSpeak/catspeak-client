@@ -1,5 +1,9 @@
 import { baseApi } from "@/store/api/baseApi"
-import { MOCK_FLASHCARD_HOME, MOCK_DECKS } from "@/store/api/flashcardMocks"
+import {
+  MOCK_FLASHCARD_HOME,
+  MOCK_DECKS,
+  getMockCardsForDeck,
+} from "@/store/api/flashcardMocks"
 
 const getFlashcardApiError = (error) => {
   const body = error?.data?.detail ?? error?.data
@@ -39,6 +43,8 @@ export const flashcardApi = baseApi
           url: `/v1/flashcards/decks/${encodeURIComponent(deckId)}/cards`,
           params: { limit, ...(cursor ? { cursor } : {}) },
         }),
+        transformResponse: (response, meta, arg) =>
+          response && response.items ? response : getMockCardsForDeck(arg?.deckId),
         transformErrorResponse: getFlashcardApiError,
       }),
     }),

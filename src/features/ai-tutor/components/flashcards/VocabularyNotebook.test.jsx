@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
+import { MOCK_DECKS, getMockCardsForDeck } from "../../../../store/api/flashcardMocks"
 
 /**
- * Unit tests cho logic hiển thị trạng thái Flashcard Home (fc01)
+ * Unit tests cho logic hiển thị trạng thái Flashcard Home (fc01) và Decks (fc04/fc05)
  */
 describe("Flashcard Home (fc01) State Logic", () => {
   const resolveHomeState = (totalCards, dueCount) => {
@@ -75,12 +76,56 @@ describe("Flashcard Home (fc01) State Logic", () => {
 
     const statsNormal = formatStats(128, 12, 5)
     expect(statsNormal[0].value).toBe(128)
-    expect(statsNormal[1].value).toBe(12),
+    expect(statsNormal[1].value).toBe(12)
     expect(statsNormal[2].value).toBe(5)
 
     const statsEmpty = formatStats(0, 0, 5)
     expect(statsEmpty[0].value).toBe(0)
     expect(statsEmpty[1].value).toBe(0)
     expect(statsEmpty[2].value).toBe(0)
+  })
+})
+
+describe("Flashcard Decks (fc04 & fc05) Logic", () => {
+  it("phân nhóm chính xác decks thành HSK và Chủ đề", () => {
+    const hskDecks = MOCK_DECKS.filter((d) => d.category !== "topic")
+    const topicDecks = MOCK_DECKS.filter((d) => d.category === "topic")
+
+    expect(hskDecks.length).toBeGreaterThanOrEqual(7)
+    expect(topicDecks.length).toBeGreaterThanOrEqual(2)
+
+    // Kiểm tra các id chuẩn
+    const hskIds = hskDecks.map((d) => d.id)
+    expect(hskIds).toContain("recent_wrong")
+    expect(hskIds).toContain("hsk1")
+    expect(hskIds).toContain("hsk2")
+    expect(hskIds).toContain("outside_hsk")
+
+    const topicIds = topicDecks.map((d) => d.id)
+    expect(topicIds).toContain("topic_beverage")
+    expect(topicIds).toContain("topic_work")
+  })
+
+  it("trả về đúng danh sách thẻ cho bộ HSK 2 trong fc05", () => {
+    const { items } = getMockCardsForDeck("hsk2")
+    expect(items.length).toBeGreaterThan(0)
+    expect(items[0]).toHaveProperty("word")
+    expect(items[0]).toHaveProperty("pinyin")
+    expect(items[0]).toHaveProperty("meaning_vi")
+
+    // Kiểm tra từ 银行 (ngân hàng)
+    const yinhang = items.find((c) => c.word === "银行")
+    expect(yinhang).toBeDefined()
+    expect(yinhang.pinyin).toBe("yínháng")
+    expect(yinhang.meaning_vi).toBe("ngân hàng")
+  })
+
+  it("lọc chính xác theo tab Nhớ lâu dài", () => {
+    const { items } = getMockCardsForDeck("hsk2")
+    const masteredCards = items.filter((c) => c.is_mastered)
+    expect(masteredCards.length).toBeGreaterThan(0)
+    masteredCards.forEach((c) => {
+      expect(c.is_mastered).toBe(true)
+    })
   })
 })

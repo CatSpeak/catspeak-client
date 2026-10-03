@@ -46,6 +46,9 @@ const AiSpeakingReportPage = lazy(
 const AiVocabularyNotebookPage = lazy(
   () => import("@/features/ai-tutor/pages/VocabularyNotebookPage"),
 );
+const AiDeckBrowsePage = lazy(
+  () => import("@/features/ai-tutor/pages/DeckBrowsePage"),
+);
 const AiHistoryProgressPage = lazy(
   () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
 );
@@ -535,6 +538,14 @@ const routesConfig = [
                     element: (
                       <LazyRoute>
                         <AiVocabularyNotebookPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "vocabulary-notebook/decks/:deckId",
+                    element: (
+                      <LazyRoute>
+                        <AiDeckBrowsePage />
                       </LazyRoute>
                     ),
                   },
