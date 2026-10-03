@@ -56,6 +56,8 @@ const PointsAndOffersPage = () => {
     setExchangeSearchQuery,
     exchangeCategoryFilter,
     setExchangeCategoryFilter,
+    exchangeTypeFilter,
+    setExchangeTypeFilter,
     isLoadingOverview,
     isFetchingOverview,
     isLoadingTemplates,
@@ -151,6 +153,8 @@ const PointsAndOffersPage = () => {
               onSearchChange={setExchangeSearchQuery}
               categoryFilter={exchangeCategoryFilter}
               onCategoryChange={setExchangeCategoryFilter}
+              typeFilter={exchangeTypeFilter}
+              onTypeChange={setExchangeTypeFilter}
               onRedeemVoucher={handleOpenExchangeModal}
               isLoading={isLoadingTemplates || isFetchingTemplates}
             />

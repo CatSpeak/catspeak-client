@@ -94,7 +94,8 @@ export const usePointsAndOffers = () => {
   const [historyPage, setHistoryPage] = useState(1)
   const historyPageSize = 10
   const [exchangeSearchQuery, setExchangeSearchQuery] = useState("")
-  const [exchangeCategoryFilter, setExchangeCategoryFilter] = useState("all")
+  const [exchangeCategoryFilter, setExchangeCategoryFilter] = useState("all") // "all" | "redeemable"
+  const [exchangeTypeFilter, setExchangeTypeFilter] = useState("all") // "all" | "percentage" | "fixed"
 
   // Modal & Exchange workflow states
   const [selectedVoucher, setSelectedVoucher] = useState(null)
@@ -236,11 +237,22 @@ export const usePointsAndOffers = () => {
       const matchSearch =
         v.title.toLowerCase().includes(exchangeSearchQuery.toLowerCase()) ||
         v.description.toLowerCase().includes(exchangeSearchQuery.toLowerCase())
-      const matchCategory =
-        exchangeCategoryFilter === "all" || v.category === exchangeCategoryFilter
-      return matchSearch && matchCategory
+      
+      let matchCategory = true
+      if (exchangeCategoryFilter === "redeemable") {
+        matchCategory = v.isRedeemable
+      }
+
+      let matchType = true
+      if (exchangeTypeFilter === "percentage") {
+        matchType = v.discountType === "Percentage"
+      } else if (exchangeTypeFilter === "fixed") {
+        matchType = v.discountType === "FixedAmount"
+      }
+
+      return matchSearch && matchCategory && matchType
     })
-  }, [formattedTemplates, exchangeSearchQuery, exchangeCategoryFilter])
+  }, [formattedTemplates, exchangeSearchQuery, exchangeCategoryFilter, exchangeTypeFilter])
 
   const redeemablePreviewVouchers = useMemo(() => {
     return formattedTemplates
@@ -528,5 +540,7 @@ export const usePointsAndOffers = () => {
     setExchangeSearchQuery,
     exchangeCategoryFilter,
     setExchangeCategoryFilter,
+    exchangeTypeFilter,
+    setExchangeTypeFilter,
   }
 }
