@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth"
 import { useAuthModal } from "@/shared/context/AuthModalContext"
 import { useLocation, useNavigate } from "react-router-dom"
 import { getCommunityLang } from "@/shared/utils/navigation"
+import { communityCodeFromValue } from "../utils/community"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const SHARED_LINK_VISIBILITY = "SHARED_LINK_ONLY"
@@ -13,10 +14,11 @@ const SHARED_LINK_VISIBILITY = "SHARED_LINK_ONLY"
  * Builds the direct (no-token) share URL for a PUBLIC occurrence.
  */
 const buildDirectShareUrl = (occurrenceId, languageCommunity, fallbackLanguage) => {
+  // `languageCommunity` is stored as a canonical value ("Chinese"/"English"/"Japanese");
+  // route segments need the code form (zh/en/ja), so map it and fall back to the
+  // community derived from the current language when it is missing or unknown.
   const communityCode =
-    languageCommunity && languageCommunity !== "vi"
-      ? languageCommunity
-      : getCommunityLang(fallbackLanguage)
+    communityCodeFromValue(languageCommunity) || getCommunityLang(fallbackLanguage)
   return `${window.location.origin}/${communityCode}/cat-speak/calendar?occurrenceId=${occurrenceId}`
 }
 

@@ -11,12 +11,7 @@ import { useAuth } from "@/features/auth/hooks/useAuth"
 import Modal from "@/shared/components/ui/Modal"
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import { TIMEZONE_IDS, getTimezoneOffset } from "@/shared/constants/timezones"
-import {
-  getAddressHref,
-  isUrl,
-  normalizeUrl,
-} from "@/shared/utils/locationLink"
-import { useMapFocus } from "../../context/MapFocusContext"
+import LocationLink from "../LocationLink"
 import CommunityBadge from "../CommunityBadge"
 
 const EventDetailBody = ({
@@ -29,7 +24,6 @@ const EventDetailBody = ({
   const { t, language } = useLanguage()
   const { formatDate, formatDateTime } = useTimezone()
   const { user, isAdmin } = useAuth()
-  const { hasMap, focusEventOnMap } = useMapFocus()
   const localeStr = language === "vi" ? "vi-VN" : "en-US"
   const [cancelOccurrence, { isLoading: isCancelling }] =
     useCancelEventOccurrenceMutation()
@@ -158,40 +152,14 @@ const EventDetailBody = ({
               const linkClass =
                 "flex flex-col hover:opacity-80 transition-opacity text-[#990011] text-left";
 
-              const isLocationUrl = isUrl(locationStr);
-
               return (
                 <div className="flex items-start gap-2">
                   <span className="font-bold min-w-max">
                     {t.calendar?.location || "Location"}:
                   </span>
-                  {isLocationUrl ? (
-                    <a
-                      href={normalizeUrl(locationStr)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={linkClass}
-                    >
-                      {label}
-                    </a>
-                  ) : hasMap ? (
-                    <button
-                      type="button"
-                      onClick={() => focusEventOnMap(ev)}
-                      className={linkClass}
-                    >
-                      {label}
-                    </button>
-                  ) : (
-                    <a
-                      href={getAddressHref(ev)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={linkClass}
-                    >
-                      {label}
-                    </a>
-                  )}
+                  <LocationLink ev={ev} className={linkClass}>
+                    {label}
+                  </LocationLink>
                 </div>
               );
             })()}

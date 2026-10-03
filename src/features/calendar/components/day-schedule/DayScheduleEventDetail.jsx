@@ -5,12 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal";
 import { formatLocation } from "../../utils/eventFormatters";
-import {
-  getAddressHref,
-  isUrl,
-  normalizeUrl,
-} from "@/shared/utils/locationLink";
-import { useMapFocus } from "../../context/MapFocusContext";
+import LocationLink from "../LocationLink";
 import EventDetailFooter from "../EventDetailModal/EventDetailFooter";
 import CommunityBadge from "../CommunityBadge";
 
@@ -24,7 +19,6 @@ const DayScheduleEventDetail = ({
   const navigate = useNavigate();
   const { lang } = useParams();
   const { formatDateTime } = useTimezone();
-  const { hasMap, focusEventOnMap } = useMapFocus();
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const ev = fullEvent || selectedEvent;
 
@@ -98,33 +92,12 @@ const DayScheduleEventDetail = ({
                 <MapPin size={18} className="text-gray-800 shrink-0" />
               )}
               {!selectedEvent.isOnline && location ? (
-                isUrl(ev.location) ? (
-                  <a
-                    href={normalizeUrl(ev.location)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 hover:opacity-80 transition-opacity text-[#990011]"
-                  >
-                    {location}
-                  </a>
-                ) : hasMap ? (
-                  <button
-                    type="button"
-                    onClick={() => focusEventOnMap(ev)}
-                    className="flex-1 text-left hover:opacity-80 transition-opacity text-[#990011]"
-                  >
-                    {location}
-                  </button>
-                ) : (
-                  <a
-                    href={getAddressHref(ev)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 hover:opacity-80 transition-opacity text-[#990011]"
-                  >
-                    {location}
-                  </a>
-                )
+                <LocationLink
+                  ev={ev}
+                  className="flex-1 text-left hover:opacity-80 transition-opacity text-[#990011]"
+                >
+                  {location}
+                </LocationLink>
               ) : (
                 <span className="flex-1">
                   {selectedEvent.isOnline ? "Online" : ""}
