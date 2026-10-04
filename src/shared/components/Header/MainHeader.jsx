@@ -42,11 +42,11 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300  ${
-        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm " : "bg-transparent "
+      className={`sticky top-0 z-40 h-[64px] border-b border-border transition-all duration-300 ${
+        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-white"
       }`}
     >
-      <div className="flex w-full h-[64px] items-center justify-between px-4 lg:px-6">
+      <div className="flex w-full h-full items-center justify-between px-4 lg:px-6">
         {/* Left Section: Mobile Menu + Community Switcher + Online count */}
         <div className="flex items-center gap-3 md:gap-4 shrink-0">
           <button

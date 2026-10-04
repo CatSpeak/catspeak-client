@@ -1,12 +1,13 @@
 import React from "react"
 import { FileIcon } from "lucide-react"
 import ListItem from "@/shared/components/ui/ListItem"
+import VoiceWaveformPlayer from "./VoiceWaveformPlayer"
 
 /**
- * MediaAttachment — renders image previews, inline video players, or document file attachment cards.
+ * MediaAttachment — renders image previews, inline video players, voice audio players, or document file attachment cards.
  *
  * @param {string}  mediaUrl    - URL of media/file
- * @param {string}  messageType - Type of message ("Image", "Video", "File", etc.)
+ * @param {string}  messageType - Type of message ("Image", "Video", "Audio", "File", etc.)
  * @param {string}  fileName    - Optional explicit filename
  * @param {number}  fileSize    - Optional explicit file size in bytes
  * @param {object}  message     - Raw message object (fallback for fileSize / size)
@@ -20,19 +21,29 @@ const MediaAttachment = ({
   message,
   isOwn = false,
   hasCaption = false,
+  hasHeader = false,
 }) => {
   if (!mediaUrl) return null
 
   const msgTypeLower = String(messageType || "").toLowerCase()
 
+  const isAudio =
+    ["audio", "voice"].includes(msgTypeLower) ||
+    message?.audioDuration != null ||
+    Boolean(mediaUrl.match(/\.(weba|mp3|wav|m4a|aac|oga|opus)(\?.*)?$/i)) ||
+    (Boolean(mediaUrl.match(/\.webm(\?.*)?$/i)) && (msgTypeLower === "audio" || !mediaUrl.match(/video/i)))
+
   const isImage =
-    Boolean(mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) ||
-    ["image", "media", "picture", "photo", "1"].includes(msgTypeLower)
+    !isAudio &&
+    (Boolean(mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) ||
+      ["image", "media", "picture", "photo", "1"].includes(msgTypeLower))
 
   const isVideo =
+    !isAudio &&
     !isImage &&
     (Boolean(mediaUrl.match(/\.(mp4|webm|ogg|mov|avi|mkv)(\?.*)?$/i)) ||
       ["video"].includes(msgTypeLower))
+
 
   const getDisplayName = () => {
     if (fileName) return fileName
@@ -73,13 +84,30 @@ const MediaAttachment = ({
     }
   }
 
-  const roundedClass = hasCaption
-    ? "rounded-t-2xl rounded-b-none"
-    : "rounded-2xl"
+  const roundedClass = hasHeader && hasCaption
+    ? "rounded-none"
+    : hasHeader
+      ? "rounded-b-2xl rounded-t-none"
+      : hasCaption
+        ? "rounded-t-2xl rounded-b-none"
+        : "rounded-2xl"
 
   return (
     <div className="w-full max-w-[360px]">
-      {isImage ? (
+      {isAudio ? (
+        <div
+          className={`w-fit max-w-[340px] ${roundedClass} overflow-hidden ${
+            hasHeader ? "bg-transparent" : isOwn ? "bg-[#990011]" : "bg-primaryBg"
+          }`}
+        >
+          <VoiceWaveformPlayer
+            audioUrl={mediaUrl}
+            duration={message?.audioDuration}
+            messageId={message?.id || message?.messageId}
+            isOwn={isOwn}
+          />
+        </div>
+      ) : isImage ? (
         <a
           href={mediaUrl}
           target="_blank"

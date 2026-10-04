@@ -19,6 +19,7 @@ import { EmptyState } from "@/shared/components/ui/indicators"
 import useMediaQuery from "@/shared/hooks/useMediaQuery"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { FluentAnimation } from "@/shared/components/ui/animations"
+import toast from "react-hot-toast"
 
 /**
  * ChatPage — fullscreen chat page.
@@ -43,6 +44,7 @@ const ChatPage = () => {
   // ── UI State ───────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState("")
   const [showInfoPanel, setShowInfoPanel] = useState(false)
+  const [infoPanelView, setInfoPanelView] = useState("main")
   const [inputValue, setInputValue] = useState("")
   const [isNewChatOpen, setIsNewChatOpen] = useState(false)
 
@@ -51,10 +53,11 @@ const ChatPage = () => {
     activeMessages,
     accumulatedMessagesCount,
     isLoadingMessages,
-    isFetchingMessages,
+    isFetchingOlder,
     hasMoreMessages,
     handleLoadMoreMessages,
-    page,
+    optimisticEditMessage,
+    optimisticToggleReaction,
   } = useChatMessages(selectedId)
 
   const { conversations, activeConversation, isLoadingConversations } =
@@ -68,11 +71,34 @@ const ChatPage = () => {
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
+    handleSendVoice,
     handleRetryUpload,
     handleCancelUpload,
     handleDeleteForMe,
     handleRecall,
+    handleEditMessage: editMessageAction,
+    handleToggleReaction: toggleReactionAction,
+    handlePinMessage,
+    handleUnpinMessage,
   } = useChatMessageActions(selectedId)
+
+  const handleEditMessage = useCallback(
+    async (message, newContent) => {
+      const msgId = message?.id || message?.messageId
+      if (msgId) optimisticEditMessage(msgId, newContent)
+      await editMessageAction(message, newContent)
+    },
+    [optimisticEditMessage, editMessageAction],
+  )
+
+  const handleToggleReaction = useCallback(
+    async (message, emoji) => {
+      const msgId = message?.id || message?.messageId
+      if (msgId) optimisticToggleReaction(msgId, emoji)
+      await toggleReactionAction(message, emoji)
+    },
+    [optimisticToggleReaction, toggleReactionAction],
+  )
 
   const { startTyping, stopTyping, typingUsers } = useMessageSignalR({
     activeConversationId: selectedId,
@@ -96,7 +122,7 @@ const ChatPage = () => {
     return {
       id: authUser?.accountId,
       name: userProfile?.username || authUser?.username || t?.chat?.me || "Me",
-      avatar: userProfile?.avatarImageUrl || null,
+      avatar: userProfile?.avatarImageUrl || authUser?.avatarImageUrl || null,
       status: "online",
       about: userProfile?.level || t?.chat?.userPanel?.student || "Student",
     }
@@ -107,6 +133,7 @@ const ChatPage = () => {
     (convId) => {
       navigate(`/chat/${convId}`)
       setInputValue("")
+      setInfoPanelView("main")
       handleCancelReply()
     },
     [navigate, handleCancelReply],
@@ -115,12 +142,51 @@ const ChatPage = () => {
   const handleBack = useCallback(() => {
     navigate("/chat")
     setShowInfoPanel(false)
+    setInfoPanelView("main")
     handleCancelReply()
   }, [navigate, handleCancelReply])
 
   const handleToggleInfo = useCallback(() => {
-    setShowInfoPanel((prev) => !prev)
-  }, [])
+    setShowInfoPanel((prev) => {
+      if (prev && infoPanelView === "main") {
+        return false
+      }
+      setInfoPanelView("main")
+      return true
+    })
+  }, [infoPanelView])
+
+  const handleToggleSearch = useCallback(() => {
+    setShowInfoPanel((prev) => {
+      if (prev && infoPanelView === "search") {
+        return false
+      }
+      setInfoPanelView("search")
+      return true
+    })
+  }, [infoPanelView])
+
+  const handleJumpToMessage = useCallback(
+    (messageId) => {
+      const element = document.getElementById(`chat-message-${messageId}`)
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" })
+        element.classList.add("chat-message-highlight")
+        setTimeout(() => {
+          element.classList.remove("chat-message-highlight")
+        }, 2000)
+      } else {
+        toast(
+          t?.chat?.olderMessagePrompt ||
+            "The message is older. Scroll up to load older messages.",
+          {
+            icon: "📌",
+          },
+        )
+      }
+    },
+    [t],
+  )
 
   const handleLeaveGroup = useCallback(() => {
     navigate("/chat")
@@ -130,8 +196,8 @@ const ChatPage = () => {
   }, [navigate, dispatch, handleCancelReply])
 
   const handleSend = useCallback(
-    async (text, file) => {
-      await sendAction(text, file)
+    async (text, file, extraOptions) => {
+      await sendAction(text, file, extraOptions)
       setInputValue("")
     },
     [sendAction],
@@ -141,7 +207,7 @@ const ChatPage = () => {
     <FluentAnimation className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
       {/* ── Sidebar ──────────────────────────────────── */}
       <div
-        className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-fit shrink-0`}
+        className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-[360px] shrink-0`}
       >
         <ChatSidebar
           conversations={conversations}
@@ -165,12 +231,15 @@ const ChatPage = () => {
           inputValue={inputValue}
           onInputChange={setInputValue}
           onSend={handleSend}
+          onSendVoice={handleSendVoice}
           onBack={handleBack}
           onToggleInfo={handleToggleInfo}
+          onToggleSearch={handleToggleSearch}
+          isSearchOpen={showInfoPanel && infoPanelView === "search"}
           showInfoActive={showInfoPanel}
           friendOnlineStatus={friendOnlineStatus}
-          isLoading={isLoadingMessages && page === 1}
-          isLoadingMore={isFetchingMessages && page > 1}
+          isLoading={isLoadingMessages}
+          isLoadingMore={isFetchingOlder}
           hasMoreMessages={hasMoreMessages}
           onLoadMoreMessages={handleLoadMoreMessages}
           typingUsers={typingUsers}
@@ -181,6 +250,10 @@ const ChatPage = () => {
           onCancelReply={handleCancelReply}
           onDeleteForMe={handleDeleteForMe}
           onRecall={handleRecall}
+          onEdit={handleEditMessage}
+          onToggleReaction={handleToggleReaction}
+          onPin={handlePinMessage}
+          onUnpin={handleUnpinMessage}
           pendingUpload={pendingUpload}
           onRetryUpload={handleRetryUpload}
           onCancelUpload={handleCancelUpload}
@@ -196,7 +269,8 @@ const ChatPage = () => {
                 {t?.chat?.yourMessages || "Your Messages"}
               </h2>
               <p className="text-sm text-[#606060] text-center max-w-[260px]">
-                {t?.chat?.selectConversationPrompt || "Select a conversation from the sidebar to start chatting"}
+                {t?.chat?.selectConversationPrompt ||
+                  "Select a conversation from the sidebar to start chatting"}
               </p>
             </div>
           }
@@ -216,6 +290,8 @@ const ChatPage = () => {
               onLeaveGroup={handleLeaveGroup}
               friendOnlineStatus={friendOnlineStatus}
               isDrawer={false}
+              initialView={infoPanelView}
+              onJumpToMessage={handleJumpToMessage}
             />
           </div>
         ) : (
@@ -227,7 +303,7 @@ const ChatPage = () => {
             />
 
             {/* Mobile drawer container */}
-            <div className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex max-w-[85vw] overflow-hidden">
+            <div className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex w-full max-w-full sm:w-[360px] sm:max-w-[360px] overflow-hidden">
               <ChatUserPanel
                 conversation={activeConversation}
                 currentUser={currentUser}
@@ -235,6 +311,8 @@ const ChatPage = () => {
                 onLeaveGroup={handleLeaveGroup}
                 friendOnlineStatus={friendOnlineStatus}
                 isDrawer={true}
+                initialView={infoPanelView}
+                onJumpToMessage={handleJumpToMessage}
               />
             </div>
           </>
