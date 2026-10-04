@@ -15,6 +15,7 @@ import { useAuthModal } from "@/shared/context/AuthModalContext";
 
 import ParticipantListModal from "./ParticipantListModal";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
+import { getIsCreator } from "../../utils/eventPermissions";
 
 const EventDetailFooter = ({
   eventId,
@@ -23,6 +24,7 @@ const EventDetailFooter = ({
   onEdit,
   onActionComplete,
   hideAdminControls = false,
+  hideShare = false,
   isCreatorOverride,
 }) => {
   const { user } = useAuth();
@@ -33,25 +35,7 @@ const EventDetailFooter = ({
   const cal = t.calendar || {};
   const [showParticipants, setShowParticipants] = useState(false);
 
-  const isCreator =
-    isCreatorOverride !== undefined
-      ? isCreatorOverride
-      : Boolean(
-          user &&
-            event &&
-            ((user.id != null &&
-              event.creatorId != null &&
-              user.id === event.creatorId) ||
-              (user.accountId != null &&
-                event.creatorId != null &&
-                user.accountId === event.creatorId) ||
-              (user.username != null &&
-                event.creatorName != null &&
-                user.username === event.creatorName) ||
-              (user.fullName != null &&
-                event.creatorName != null &&
-                user.fullName === event.creatorName)),
-        );
+  const isCreator = getIsCreator(user, event, isCreatorOverride);
 
   const isRegistered = event?.isRegistered ?? false;
   const registrationStatus =
@@ -252,13 +236,15 @@ const EventDetailFooter = ({
                 </>
               )}
 
-              <SharePopover
-                eventId={eventId}
-                occurrenceId={event?.occurrenceId}
-                visibilityScope={event?.visibilityScope}
-                isCreator={isCreator}
-                languageCommunity={event?.languageCommunity}
-              />
+              {!hideShare && (
+                <SharePopover
+                  eventId={eventId}
+                  occurrenceId={event?.occurrenceId}
+                  visibilityScope={event?.visibilityScope}
+                  isCreator={isCreator}
+                  languageCommunity={event?.languageCommunity}
+                />
+              )}
             </div>
           </div>
         )}

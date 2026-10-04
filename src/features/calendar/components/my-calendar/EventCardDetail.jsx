@@ -11,6 +11,7 @@ import MediaViewerModal from '@/shared/components/ui/MediaViewerModal'
 import { getAddressHref } from '@/shared/utils/locationLink'
 import SharePopover from '../EventDetailModal/SharePopover'
 import CommunityBadge from '../CommunityBadge'
+import { getIsCreator } from '../../utils/eventPermissions'
 
 const EventCardDetail = ({ event, onBack }) => {
   const navigate = useNavigate()
@@ -89,13 +90,10 @@ const EventCardDetail = ({ event, onBack }) => {
               eventId={event.id || event._id}
               occurrenceId={event.occurrenceId}
               visibilityScope={event.visibilityScope}
-              isCreator={
-                Boolean(user) && user?.id != null && event.creatorId != null
-                  ? user.id === event.creatorId
-                  : undefined
-              }
+              isCreator={getIsCreator(user, event)}
               languageCommunity={event.languageCommunity}
-              className="!bg-transparent border border-border !text-[#1A1A1A] !w-11 !h-11 hover:!bg-gray-50"
+              variant="outline"
+              size="sm"
             />
           </div>
         )

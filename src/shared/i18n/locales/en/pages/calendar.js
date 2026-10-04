@@ -51,6 +51,7 @@ export default {
   confirm: "Confirm?",
   cancel: "Cancel",
   shareEvent: "Share event",
+  share: "Share",
   shareLink: "Share link",
   copy: "Copy",
   linkExpires: "Link expires in 7 days",

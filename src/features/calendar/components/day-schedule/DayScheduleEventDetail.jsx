@@ -7,7 +7,12 @@ import MediaViewerModal from "@/shared/components/ui/MediaViewerModal";
 import { formatLocation } from "../../utils/eventFormatters";
 import LocationLink from "../LocationLink";
 import EventDetailFooter from "../EventDetailModal/EventDetailFooter";
+import SharePopover from "../EventDetailModal/SharePopover";
 import CommunityBadge from "../CommunityBadge";
+import useScrollLock from "@/shared/hooks/useScrollLock";
+import useMediaQuery from "@/shared/hooks/useMediaQuery";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { getIsCreator, getEventId } from "../../utils/eventPermissions";
 
 const DayScheduleEventDetail = ({
   selectedEvent,
@@ -19,6 +24,9 @@ const DayScheduleEventDetail = ({
   const navigate = useNavigate();
   const { lang } = useParams();
   const { formatDateTime } = useTimezone();
+  const { user } = useAuth();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  useScrollLock(!isDesktop);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const ev = fullEvent || selectedEvent;
 
@@ -49,8 +57,8 @@ const DayScheduleEventDetail = ({
         onClick={onClose}
       />
 
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  w-[92vw] max-w-[420px] max-h-[85vh] lg:static lg:transform-none lg:w-full lg:max-w-none lg:max-h-none flex flex-col bg-white rounded-[32px] lg:rounded-2xl lg:shadow-sm overflow-hidden shadow-2xl lg:h-max">
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-6 [&::-webkit-scrollbar]:hidden flex flex-col">
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[92vw] max-w-[420px] max-h-[85vh] lg:static lg:transform-none lg:w-full lg:max-w-none lg:max-h-none flex flex-col bg-white rounded-[32px] lg:rounded-2xl lg:shadow-sm overflow-hidden shadow-2xl lg:h-max">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-6 md:p-8 lg:p-6 [&::-webkit-scrollbar]:hidden flex flex-col">
           {/* Header */}
           <div className="flex items-start gap-4 mb-6 shrink-0">
             <button
@@ -59,10 +67,20 @@ const DayScheduleEventDetail = ({
             >
               <ChevronLeft size={24} />
             </button>
-            <h2 className="text-2xl font-bold text-black leading-snug pr-4">
+            <h2 className="text-2xl font-bold text-black leading-snug pr-4 flex-1 min-w-0">
               {ev.title || cal.event || "Tên event ngẫu nhiên"}
             </h2>
             <CommunityBadge languageCommunity={ev.languageCommunity} className="mt-1.5" />
+            <SharePopover
+              eventId={getEventId(ev)}
+              occurrenceId={ev.occurrenceId}
+              visibilityScope={ev.visibilityScope}
+              isCreator={getIsCreator(user, ev, ev.isOwner ?? false)}
+              languageCommunity={ev.languageCommunity}
+              variant="ghost"
+              size="sm"
+              placement="bottom"
+            />
           </div>
 
           {/* Description */}
@@ -155,8 +173,9 @@ const DayScheduleEventDetail = ({
         {/* Footer actions */}
         <div className="shrink-0 bg-white lg:rounded-b-2xl border-t border-border lg:border-t-0 z-10 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
           <EventDetailFooter
-            eventId={ev.eventId || ev.id}
+            eventId={getEventId(ev)}
             event={ev}
+            hideShare={true}
             onClose={onClose}
             onEdit={handleEdit}
             onActionComplete={onActionComplete}

@@ -7,6 +7,21 @@ import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import useEventShare from "../../hooks/useEventShare"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
+const VARIANT_CLASSES = {
+  default: "bg-primaryBg hover:bg-[#D9D9D9]",
+  onPrimary: "bg-white/20 hover:bg-white/30 text-white",
+  ghost: "text-[#990011] hover:bg-gray-100",
+  outline:
+    "bg-transparent border border-border text-[#1A1A1A] hover:bg-gray-50",
+  action:
+    "bg-primaryBg hover:bg-gray-100 text-gray-700 rounded-xl px-4 py-2 sm:py-2.5 text-xs font-medium gap-1.5",
+}
+
+const SIZE_CLASSES = {
+  md: "w-12 h-12",
+  sm: "w-10 h-10",
+}
+
 /**
  * Self-contained share button with a popover that shows the generated link,
  * a QR code, and a copy-to-clipboard action. PUBLIC events share a direct URL;
@@ -18,7 +33,10 @@ const SharePopover = ({
   visibilityScope,
   isCreator,
   languageCommunity,
-  className = "",
+  variant = "default",
+  size = "md",
+  label,
+  placement = "top",
 }) => {
   const { t } = useLanguage()
   const {
@@ -37,6 +55,8 @@ const SharePopover = ({
     languageCommunity,
   })
 
+  const isAction = variant === "action"
+
   const handleCopy = async () => {
     if (!shareUrl) return
     try {
@@ -51,11 +71,20 @@ const SharePopover = ({
   }
 
   return (
-    <div ref={shareRef}>
+    <div
+      ref={shareRef}
+      className={isAction ? "relative flex flex-1" : "relative"}
+    >
       <button
         onClick={handleShare}
         disabled={isSharing}
-        className={`bg-primaryBg hover:bg-[#D9D9D9] transition-colors shrink-0 flex items-center justify-center rounded-full w-12 h-12 disabled:opacity-50 ${isDisabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
+        className={`${VARIANT_CLASSES[variant] || VARIANT_CLASSES.default} ${
+          isAction
+            ? "w-full"
+            : `${SIZE_CLASSES[size] || SIZE_CLASSES.md} rounded-full`
+        } transition-colors shrink-0 flex items-center justify-center disabled:opacity-50 ${
+          isDisabled ? "opacity-50 cursor-not-allowed" : ""
+        }`}
         title={
           isDisabled
             ? t.calendar?.shareCreatorOnly ||
@@ -63,7 +92,15 @@ const SharePopover = ({
             : t.calendar?.shareEvent || "Chia sẻ sự kiện"
         }
       >
-        {isSharing ? <Loader2 className="animate-spin" /> : <Share2 />}
+        {isSharing ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          <Share2
+            size={isAction ? 14 : undefined}
+            className={isAction ? "shrink-0" : undefined}
+          />
+        )}
+        {label ? <span className="truncate">{label}</span> : null}
       </button>
 
       <AnimatePresence>
@@ -71,7 +108,11 @@ const SharePopover = ({
           <FluentAnimation
             direction="up"
             exit
-            className="fixed inset-0 flex items-center justify-center z-[60] pointer-events-none min-[426px]:absolute min-[426px]:inset-auto min-[426px]:bottom-14 min-[426px]:right-0 min-[426px]:block"
+            className={`fixed inset-0 flex items-center justify-center z-[60] pointer-events-none min-[426px]:absolute min-[426px]:inset-auto min-[426px]:block min-[426px]:right-0 ${
+              placement === "bottom"
+                ? "min-[426px]:top-14"
+                : "min-[426px]:bottom-14"
+            }`}
           >
             <div className="w-[calc(100vw-2rem)] min-[426px]:w-80 bg-white border rounded-2xl shadow-xl p-6 pointer-events-auto">
               <p className="mb-3">

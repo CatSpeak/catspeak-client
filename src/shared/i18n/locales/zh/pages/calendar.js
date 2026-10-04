@@ -51,6 +51,7 @@ export default {
   confirm: "确认？",
   cancel: "取消",
   shareEvent: "分享活动",
+  share: "分享",
   shareLink: "分享链接",
   copy: "复制",
   linkExpires: "链接7天后过期",

@@ -51,6 +51,7 @@ export default {
   confirm: "確認しますか？",
   cancel: "キャンセル",
   shareEvent: "イベントを共有",
+  share: "共有",
   shareLink: "リンクを共有",
   copy: "コピー",
   linkExpires: "リンクは7日で期限が切れます",
