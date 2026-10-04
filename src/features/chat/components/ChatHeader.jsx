@@ -119,8 +119,8 @@ const ChatHeader = ({
             onClick={() => onStartCall("audio")}
             size="sm"
             variant="ghost"
-            aria-label="Voice call"
-            title={t?.chat?.call?.voiceCall || "Voice Call"}
+            aria-label={t?.chat?.call?.voiceCall || "Voice call"}
+            title={t?.chat?.call?.voiceCall || "Voice call"}
           >
             <Phone />
           </IconButton>
@@ -132,8 +132,8 @@ const ChatHeader = ({
             onClick={() => onStartCall("video")}
             size="sm"
             variant="ghost"
-            aria-label="Video call"
-            title={t?.chat?.call?.videoCall || "Video Call"}
+            aria-label={t?.chat?.call?.videoCall || "Video call"}
+            title={t?.chat?.call?.videoCall || "Video call"}
           >
             <Video />
           </IconButton>
@@ -144,7 +144,7 @@ const ChatHeader = ({
           onClick={onToggleSearch}
           size="sm"
           variant={isSearchOpen ? "primary" : "ghost"}
-          aria-label="Search in conversation"
+          aria-label={t?.chat?.searchMessages || "Search in conversation"}
           title={t?.chat?.searchMessages || "Search messages"}
         >
           <Search />
@@ -154,7 +154,8 @@ const ChatHeader = ({
           onClick={onToggleInfo}
           size="sm"
           variant="ghost"
-          aria-label="Toggle info panel"
+          aria-label={t?.chat?.toggleInfoPanel || "Toggle info panel"}
+          title={t?.chat?.toggleInfoPanel || "Toggle info panel"}
         >
           <PanelRight />
         </IconButton>

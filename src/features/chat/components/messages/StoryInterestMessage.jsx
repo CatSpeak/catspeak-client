@@ -1,6 +1,7 @@
 import { memo } from "react"
 import Avatar from "@/shared/components/ui/Avatar"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { BookOpen } from "lucide-react"
 
 /**
@@ -34,12 +35,13 @@ const parseStoryInterestContent = (content = "") => {
  * @param {object} sender   - Resolved sender { name, avatar }
  */
 const StoryInterestMessage = memo(({ message, sender }) => {
+  const { t } = useLanguage()
   const { formatTime } = useTimezone()
   const content = message?.content || message?.messageContent || ""
   const { storySnippet } = parseStoryInterestContent(content)
   const timestamp = message?.timestamp || message?.createDate
 
-  const senderName = sender?.name || sender?.username || "Someone"
+  const senderName = sender?.name || sender?.username || t?.chat?.someone || "Someone"
   const senderAvatar = sender?.avatar || sender?.avatarImageUrl
 
   return (
@@ -69,7 +71,7 @@ const StoryInterestMessage = memo(({ message, sender }) => {
             </span>
             {" "}
             <span className="text-[#606060] dark:text-zinc-400">
-              is interested in your story
+              {t?.chat?.interestedInStory || "is interested in your story"}
             </span>
           </p>
         </div>

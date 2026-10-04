@@ -1,14 +1,12 @@
 import React from "react"
 import { Users } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
-import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * MentionAutocomplete — Popup dropdown floating above ChatInput
  * showing autocomplete suggestions for @mentions in conversations.
  */
 const MentionAutocomplete = ({ items = [], selectedIndex = 0, onSelect }) => {
-  const { t } = useLanguage()
 
   if (!items || items.length === 0) {
     return null
@@ -26,8 +24,8 @@ const MentionAutocomplete = ({ items = [], selectedIndex = 0, onSelect }) => {
               onClick={() => onSelect(item)}
               className={`h-14 flex items-center gap-4 px-4 cursor-pointer transition-colors ${
                 isSelected
-                  ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] border-l-2 border-primary"
-                  : "hover:bg-[#F2F2F2]"
+                  ? "bg-itemHover hover:bg-itemActiveHover border-l-2 border-primary"
+                  : "hover:bg-itemHover active:bg-itemActiveHover"
               }`}
             >
               <div className="w-10 h-10 rounded-full bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0">
@@ -46,8 +44,8 @@ const MentionAutocomplete = ({ items = [], selectedIndex = 0, onSelect }) => {
             onClick={() => onSelect(item)}
             className={`h-14 flex items-center gap-4 px-4 cursor-pointer transition-colors ${
               isSelected
-                ? "bg-[#F2F2F2] hover:bg-[#E6E6E6] border-l-2 border-primary"
-                : "hover:bg-[#F2F2F2]"
+                ? "bg-itemHover hover:bg-itemActiveHover border-l-2 border-primary"
+                : "hover:bg-itemHover active:bg-itemActiveHover"
             }`}
           >
             <Avatar

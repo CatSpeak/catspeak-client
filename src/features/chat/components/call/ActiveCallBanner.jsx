@@ -9,7 +9,11 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  * ActiveCallBanner — Shows an ongoing call alert banner under ChatHeader
  * with a quick "Join Call" action.
  */
-const ActiveCallBanner = ({ conversationId, onJoinCall, isCallModalOpen = false }) => {
+const ActiveCallBanner = ({
+  conversationId,
+  onJoinCall,
+  isCallModalOpen = false,
+}) => {
   const { t } = useLanguage()
 
   const { data: rawActiveCall, refetch } = useGetActiveCallQuery(
@@ -26,17 +30,13 @@ const ActiveCallBanner = ({ conversationId, onJoinCall, isCallModalOpen = false 
   const signalRHandlers = useMemo(
     () => ({
       CallStarted: (payload) => {
-        if (
-          Number(payload?.conversationId) === Number(conversationId)
-        ) {
+        if (Number(payload?.conversationId) === Number(conversationId)) {
           setSignalRCallActive(payload)
           refetch()
         }
       },
       CallEnded: (payload) => {
-        if (
-          Number(payload?.conversationId) === Number(conversationId)
-        ) {
+        if (Number(payload?.conversationId) === Number(conversationId)) {
           setSignalRCallActive(null)
           refetch()
         }

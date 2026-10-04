@@ -9,7 +9,12 @@ export { default as ConversationListHeader } from "./components/widget/Conversat
 
 // Global & Context
 export { default as GlobalSignalRHandler } from "./components/GlobalSignalRHandler"
-export { ConversationSignalRProvider, useConversationSignalRContext } from "./context/ConversationSignalRContext"
+export { default as ConversationSignalRProvider } from "./context/ConversationSignalRProvider.jsx"
+export { ConversationSignalRContext } from "./context/ConversationSignalRContext.js"
+export { useConversationSignalRContext } from "./context/useConversationSignalRContext.js"
+export { default as InChatCallProvider } from "./context/InChatCallProvider.jsx"
+export { InChatCallContext } from "./context/InChatCallContext.js"
+export { useInChatCallContext } from "./context/useInChatCallContext.js"
 
 // Hooks
 export { default as useMessageSignalR } from "./hooks/useMessageSignalR"

@@ -11,6 +11,7 @@ import React, { memo, useRef, useEffect, useState } from "react"
  * @param {string} activeClassName - Optional custom active tab classes
  * @param {string} inactiveClassName - Optional custom inactive tab classes
  * @param {boolean} fullWidth - If true, tabs will divide space equally (flex-1)
+ * @param {string} height - Height class for tab buttons (default "h-12")
  */
 const Tabs = memo(
   ({
@@ -21,6 +22,7 @@ const Tabs = memo(
     activeClassName = "text-[#990011]",
     inactiveClassName = "text-[#606060]",
     fullWidth = true,
+    height = "h-12",
   }) => {
     const isResponsive = fullWidth === "responsive"
     const isFull = fullWidth === true
@@ -33,9 +35,15 @@ const Tabs = memo(
 
     useEffect(() => {
       if (!containerRef.current || isDraggingRef.current) return
-      const activeEl = containerRef.current.querySelector('[data-active="true"]')
+      const activeEl = containerRef.current.querySelector(
+        '[data-active="true"]',
+      )
       if (activeEl) {
-        activeEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" })
+        activeEl.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest",
+        })
       }
     }, [activeTab])
 
@@ -48,7 +56,8 @@ const Tabs = memo(
 
     const handleMouseDown = (e) => {
       if (e.button !== 0 || !containerRef.current) return
-      if (containerRef.current.scrollWidth <= containerRef.current.clientWidth) return
+      if (containerRef.current.scrollWidth <= containerRef.current.clientWidth)
+        return
 
       isDraggingRef.current = true
       hasDraggedRef.current = false
@@ -122,12 +131,14 @@ const Tabs = memo(
                   onChange(tabKey)
                 }
               }}
-              className={`h-10 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
-                }`}
+              className={`${height} min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${
+                fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
+              }`}
             >
               <div
-                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${isActive ? activeClassName : inactiveClassName
-                  }`}
+                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${
+                  isActive ? activeClassName : inactiveClassName
+                }`}
               >
                 {Icon && <Icon size={18} className="hidden sm:block" />}
 
@@ -141,10 +152,11 @@ const Tabs = memo(
 
                 {tab.badge && (
                   <span
-                    className={`min-w-4 h-4 px-1 rounded-full text-xs flex items-center justify-center transition-colors ${isActive
-                      ? "bg-[#990011] text-white"
-                      : "bg-gray-200 text-gray-700"
-                      }`}
+                    className={`min-w-4 h-4 px-1 rounded-full text-xs flex items-center justify-center transition-colors ${
+                      isActive
+                        ? "bg-[#990011] text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
                   >
                     {tab.badge}
                   </span>
@@ -152,10 +164,11 @@ const Tabs = memo(
 
                 {/* Underline Indicator */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${isActive
-                    ? "bg-[#990011] scale-x-100"
-                    : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
-                    }`}
+                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${
+                    isActive
+                      ? "bg-[#990011] scale-x-100"
+                      : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
+                  }`}
                 />
               </div>
             </button>

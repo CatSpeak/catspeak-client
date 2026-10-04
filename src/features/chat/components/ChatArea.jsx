@@ -8,14 +8,11 @@ import ChatMessagesSkeleton from "./ChatMessagesSkeleton"
 import DateSeparator from "./messages/DateSeparator"
 import SystemMessage from "./messages/SystemMessage"
 import StoryInterestMessage from "./messages/StoryInterestMessage"
-import FluentCard from "@/shared/components/ui/FluentCard"
 import Skeleton from "@/shared/components/ui/indicators/Skeleton"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import { useGroupedMessages } from "../hooks/useGroupedMessages"
 import useInChatCall from "../hooks/useInChatCall"
 import ActiveCallBanner from "./call/ActiveCallBanner"
-import IncomingCallModal from "./call/IncomingCallModal"
-import InChatCallModal from "./call/InChatCallModal"
 import { useGetPinnedMessagesQuery } from "@/store/api/social/conversationsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
@@ -67,15 +64,10 @@ const ChatArea = ({
   // ── In-Chat LiveKit Calls ──────────────────────────────
   const {
     activeCallSession,
-    incomingCallData,
     isCallModalOpen,
     startCall,
     joinCall,
-    acceptIncomingCall,
-    declineIncomingCall,
-    endCall,
-    closeCallModal,
-  } = useInChatCall(conversation?.id, currentUser)
+  } = useInChatCall(conversation, currentUser)
 
 
   // Fetch pinned messages to determine which messages in timeline are pinned
@@ -151,14 +143,9 @@ const ChatArea = ({
       const element = document.getElementById(`chat-message-${messageId}`)
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "center" })
-        element.classList.add("ring-2", "ring-primary", "rounded-xl", "bg-primary/10")
+        element.classList.add("chat-message-highlight")
         setTimeout(() => {
-          element.classList.remove(
-            "ring-2",
-            "ring-primary",
-            "rounded-xl",
-            "bg-primary/10",
-          )
+          element.classList.remove("chat-message-highlight")
         }, 2000)
       } else {
         toast(
@@ -219,16 +206,14 @@ const ChatArea = ({
           isPinned={isMsgPinned}
           canPin={canPin}
           conversationId={conversation?.id}
+          onJumpToMessage={handleJumpToMessage}
         />
       )
     })
   }
 
   return (
-    <FluentCard
-      className="flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl"
-      padding="p-0"
-    >
+    <div className="flex flex-col flex-1 overflow-hidden bg-white lg:border lg:border-border lg:rounded-xl">
       {/* ── Chat Header ────────────────────────────── */}
       <ChatHeader
         conversation={conversation}
@@ -244,7 +229,10 @@ const ChatArea = ({
       <ActiveCallBanner
         conversationId={conversation?.id}
         onJoinCall={joinCall}
-        isCallModalOpen={isCallModalOpen}
+        isCallModalOpen={
+          isCallModalOpen &&
+          Number(activeCallSession?.conversationId) === Number(conversation?.id)
+        }
       />
 
       {/* ── Pinned Message Banner ──────────────────── */}
@@ -327,23 +315,7 @@ const ChatArea = ({
         isGroup={conversation?.isGroup}
         participants={conversation?.participants || []}
       />
-
-      {/* ── Incoming Call Modal ────────────────────── */}
-      <IncomingCallModal
-        open={Boolean(incomingCallData)}
-        callData={incomingCallData}
-        onAccept={acceptIncomingCall}
-        onDecline={declineIncomingCall}
-      />
-
-      {/* ── In-Chat LiveKit Call Modal / Floating Window ── */}
-      <InChatCallModal
-        open={isCallModalOpen}
-        onClose={closeCallModal}
-        callSession={activeCallSession}
-        onEndCall={endCall}
-      />
-    </FluentCard>
+    </div>
   )
 }
 

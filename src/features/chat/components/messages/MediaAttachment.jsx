@@ -21,6 +21,7 @@ const MediaAttachment = ({
   message,
   isOwn = false,
   hasCaption = false,
+  hasHeader = false,
 }) => {
   if (!mediaUrl) return null
 
@@ -83,16 +84,20 @@ const MediaAttachment = ({
     }
   }
 
-  const roundedClass = hasCaption
-    ? "rounded-t-2xl rounded-b-none"
-    : "rounded-2xl"
+  const roundedClass = hasHeader && hasCaption
+    ? "rounded-none"
+    : hasHeader
+      ? "rounded-b-2xl rounded-t-none"
+      : hasCaption
+        ? "rounded-t-2xl rounded-b-none"
+        : "rounded-2xl"
 
   return (
     <div className="w-full max-w-[360px]">
       {isAudio ? (
         <div
           className={`w-fit max-w-[340px] ${roundedClass} overflow-hidden ${
-            isOwn ? "bg-[#990011]" : "bg-primaryBg"
+            hasHeader ? "bg-transparent" : isOwn ? "bg-[#990011]" : "bg-primaryBg"
           }`}
         >
           <VoiceWaveformPlayer

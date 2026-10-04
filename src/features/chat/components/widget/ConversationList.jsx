@@ -21,11 +21,17 @@ const ConversationList = ({
         {isLoading ? (
           <LoadingSpinner className="flex items-center justify-center py-4" />
         ) : isError ? (
-          <ErrorMessage message={t?.messages?.error || "Error loading data"} className="py-4" />
+          <ErrorMessage
+            message={t?.messages?.error || "Error loading data"}
+            className="py-4"
+          />
         ) : conversations.length === 0 ? (
-          <EmptyState message={t?.messages?.noMessages || "No messages yet"} className="py-4" />
+          <EmptyState
+            message={t?.messages?.noMessages || "No messages yet"}
+            className="py-4"
+          />
         ) : (
-          <div className="flex flex-col gap-1 p-1">
+          <div className="flex flex-col">
             {conversations.map((conv) => (
               <ConversationItem
                 key={conv.conversationId}

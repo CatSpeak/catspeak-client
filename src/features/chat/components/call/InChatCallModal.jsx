@@ -1,130 +1,42 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useMemo } from "react"
+import { createPortal } from "react-dom"
 import {
   LiveKitRoom,
   RoomAudioRenderer,
   useParticipants,
   useLocalParticipant,
-  useIsSpeaking,
 } from "@livekit/components-react"
-import {
-  PhoneOff,
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  Minimize2,
-  Maximize2,
-  Users,
-} from "lucide-react"
-import Avatar from "@/shared/components/ui/Avatar"
-import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
 
-/**
- * ParticipantVideoTile — Renders camera video or fallback avatar for each participant.
- */
-const ParticipantVideoTile = ({ participant, isLocal = false }) => {
-  const videoRef = useRef(null)
-  const isSpeaking = useIsSpeaking(participant)
-  const theme = getParticipantTheme(participant.identity || participant.name || "")
-  const [hasVideo, setHasVideo] = useState(false)
-
-  useEffect(() => {
-    if (!participant) return
-
-    let currentTrack = null
-    const videoEl = videoRef.current
-
-    const checkTrack = () => {
-      const pub = Array.from(participant.videoTrackPublications.values())[0]
-      if (pub && pub.track && !pub.isMuted) {
-        currentTrack = pub.track
-        if (videoEl) {
-          currentTrack.attach(videoEl)
-          setHasVideo(true)
-        }
-      } else {
-        setHasVideo(false)
-      }
-    }
-
-    checkTrack()
-
-    // Listen to track state changes
-    participant.on("trackSubscribed", checkTrack)
-    participant.on("trackUnsubscribed", checkTrack)
-    participant.on("trackMuted", checkTrack)
-    participant.on("trackUnmuted", checkTrack)
-
-    return () => {
-      participant.off("trackSubscribed", checkTrack)
-      participant.off("trackUnsubscribed", checkTrack)
-      participant.off("trackMuted", checkTrack)
-      participant.off("trackUnmuted", checkTrack)
-      if (currentTrack && videoEl) {
-        currentTrack.detach(videoEl)
-      }
-    }
-  }, [participant])
-
-  return (
-    <div
-      className={`relative w-full h-full min-h-[140px] rounded-2xl overflow-hidden bg-neutral-900 flex items-center justify-center border-2 transition-all ${
-        isSpeaking
-          ? "border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
-          : "border-neutral-800"
-      }`}
-    >
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted={isLocal}
-        className={`w-full h-full object-cover ${hasVideo ? "block" : "hidden"}`}
-      />
-
-      {!hasVideo && (
-        <div className="flex flex-col items-center gap-2">
-          <div className="relative">
-            {isSpeaking && (
-              <span className="absolute inset-0 rounded-full bg-emerald-500/30 animate-ping scale-125" />
-            )}
-            <Avatar
-              size={64}
-              name={participant.name || participant.identity}
-              className={`relative z-10 ${theme.avatarClass}`}
-            />
-          </div>
-          <span className="text-xs text-neutral-300 font-medium">
-            {participant.name || participant.identity} {isLocal && "(You)"}
-          </span>
-        </div>
-      )}
-
-      {/* Name tag pill */}
-      <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-[11px] text-white font-medium flex items-center gap-1.5">
-        <span className="truncate max-w-[120px]">
-          {participant.name || participant.identity} {isLocal && "(You)"}
-        </span>
-      </div>
-    </div>
-  )
-}
+import ParticipantVideoTile from "./ParticipantVideoTile"
+import RingingPlaceholderTile from "./RingingPlaceholderTile"
+import CallTopBar from "./CallTopBar"
+import CallBottomDock from "./CallBottomDock"
 
 /**
- * CallControlsInner — Renders in-call media controllers and participant grid.
+ * CallControlsInner — Renders in-call media controllers, top window bar,
+ * floating bottom dock, and the responsive participant video grid.
  */
 const CallControlsInner = ({
   onEndCall,
   isMinimized,
   onToggleMinimize,
   callType,
+  conversation,
+  currentUser,
+  isFullscreen,
+  onToggleFullscreen,
+  callSession,
 }) => {
   const { t } = useLanguage()
   const participants = useParticipants()
-  const { isMicrophoneEnabled, isCameraEnabled, localParticipant } =
-    useLocalParticipant()
+  const {
+    isMicrophoneEnabled,
+    isCameraEnabled,
+    isScreenShareEnabled,
+    localParticipant,
+  } = useLocalParticipant()
 
   const [callDuration, setCallDuration] = useState(0)
 
@@ -134,12 +46,6 @@ const CallControlsInner = ({
     }, 1000)
     return () => clearInterval(timer)
   }, [])
-
-  const formatDuration = (sec) => {
-    const m = Math.floor(sec / 60)
-    const s = sec % 60
-    return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`
-  }
 
   const toggleMic = async () => {
     try {
@@ -163,109 +69,167 @@ const CallControlsInner = ({
     }
   }
 
+  const toggleScreenShare = async () => {
+    try {
+      if (localParticipant) {
+        await localParticipant.setScreenShareEnabled(!isScreenShareEnabled)
+      }
+    } catch (err) {
+      console.error("Failed to toggle screen share:", err)
+      toast.error("Failed to toggle screen share")
+    }
+  }
+
+  // Header display details
+  const activeConversation = callSession?.conversation || conversation
+  const chatTitle =
+    activeConversation?.name ||
+    activeConversation?.friend?.username ||
+    (callType === "video"
+      ? t?.chat?.call?.videoCall || "Video Call"
+      : t?.chat?.call?.voiceCall || "Voice Call")
+
+  const isDirect1on1 = !activeConversation?.isGroup
+  const friendUser =
+    activeConversation?.friend ||
+    activeConversation?.participants?.find(
+      (p) =>
+        Number(p.accountId || p.id) !==
+        Number(currentUser?.id || currentUser?.accountId),
+    )
+  const isWaitingForFriend =
+    isDirect1on1 && participants.length === 1 && friendUser
+
+  // Filter remote participants for spotlight selection in minimized/PiP mode
+  const remoteParticipants = useMemo(
+    () => participants.filter((p) => p !== localParticipant),
+    [participants, localParticipant],
+  )
+
+  // Track the most recent active remote speaker to avoid rapid switching during pauses
+  const [lastSpeakerId, setLastSpeakerId] = useState(null)
+  const activeRemoteSpeaker = remoteParticipants.find((p) => p.isSpeaking)
+  if (activeRemoteSpeaker && lastSpeakerId !== activeRemoteSpeaker.identity) {
+    setLastSpeakerId(activeRemoteSpeaker.identity)
+  }
+
+  // Determine single spotlight participant when minimized
+  const spotlightParticipant = useMemo(() => {
+    if (isDirect1on1) {
+      return remoteParticipants[0] || localParticipant
+    }
+    // Group call priority:
+    // 1. Any remote participant currently sharing screen
+    const screenSharer = remoteParticipants.find((p) => p.isScreenShareEnabled)
+    if (screenSharer) return screenSharer
+
+    // 2. Currently active remote speaker
+    const activeSpeaker = remoteParticipants.find((p) => p.isSpeaking)
+    if (activeSpeaker) return activeSpeaker
+
+    // 3. Most recent speaker
+    if (lastSpeakerId) {
+      const last = remoteParticipants.find((p) => p.identity === lastSpeakerId)
+      if (last) return last
+    }
+
+    // 4. Fallback to first remote participant or self
+    return remoteParticipants[0] || localParticipant
+  }, [isDirect1on1, remoteParticipants, localParticipant, lastSpeakerId])
+
   return (
     <div className="flex flex-col h-full w-full justify-between bg-neutral-950 text-white select-none">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-mono font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            {formatDuration(callDuration)}
+      {/* ── Top Bar ── */}
+      <CallTopBar
+        chatTitle={chatTitle}
+        callDuration={callDuration}
+        isFullscreen={isFullscreen}
+        isMinimized={isMinimized}
+        onToggleFullscreen={onToggleFullscreen}
+        onToggleMinimize={onToggleMinimize}
+      />
+
+      {/* ── Main View (Single Spotlight Tile when Minimized, Grid when Expanded) ── */}
+      <div className="flex-1 p-4 overflow-y-auto min-h-0 bg-radial from-neutral-900/60 via-neutral-950 to-neutral-950">
+        {isMinimized ? (
+          <div className="w-full h-full">
+            {isWaitingForFriend ? (
+              <RingingPlaceholderTile friend={friendUser} />
+            ) : spotlightParticipant ? (
+              <ParticipantVideoTile
+                key={spotlightParticipant.identity}
+                participant={spotlightParticipant}
+                isLocal={spotlightParticipant === localParticipant}
+                isSolo={false}
+                isInitiator={Boolean(callSession?.isInitiator)}
+                conversation={activeConversation}
+                currentUser={currentUser}
+              />
+            ) : null}
           </div>
-          <div className="flex items-center gap-1 text-xs text-neutral-400">
-            <Users size={14} />
-            <span>{participants.length}</span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={onToggleMinimize}
-          className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
-          title={isMinimized ? "Maximize" : "Minimize"}
-        >
-          {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
-        </button>
-      </div>
-
-      {/* Main Grid View */}
-      <div className="flex-1 p-3 overflow-y-auto min-h-0 flex items-center justify-center">
-        <div
-          className={`w-full h-full grid gap-2.5 ${
-            participants.length <= 1
-              ? "grid-cols-1"
-              : participants.length <= 4
-              ? "grid-cols-2"
-              : "grid-cols-2 sm:grid-cols-3"
-          }`}
-        >
-          {participants.map((p) => (
-            <ParticipantVideoTile
-              key={p.identity}
-              participant={p}
-              isLocal={p === localParticipant}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom Controls Bar */}
-      <div className="flex items-center justify-center gap-4 px-4 py-3 bg-neutral-900/90 backdrop-blur-md border-t border-neutral-800 shrink-0">
-        {/* Mic Toggle */}
-        <button
-          type="button"
-          onClick={toggleMic}
-          className={`w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-            isMicrophoneEnabled
-              ? "bg-neutral-800 hover:bg-neutral-700 text-white"
-              : "bg-red-500 hover:bg-red-600 text-white"
-          }`}
-          title={isMicrophoneEnabled ? "Mute Microphone" : "Unmute Microphone"}
-        >
-          {isMicrophoneEnabled ? <Mic size={20} /> : <MicOff size={20} />}
-        </button>
-
-        {/* Cam Toggle */}
-        {callType === "video" && (
-          <button
-            type="button"
-            onClick={toggleCam}
-            className={`w-11 h-11 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-              isCameraEnabled
-                ? "bg-neutral-800 hover:bg-neutral-700 text-white"
-                : "bg-red-500 hover:bg-red-600 text-white"
+        ) : (
+          <div
+            className={`w-full h-full grid gap-2 ${
+              isDirect1on1
+                ? "grid-cols-1 sm:grid-cols-2 grid-rows-2 sm:grid-rows-1"
+                : participants.length <= 1
+                  ? "grid-cols-1"
+                  : participants.length === 2
+                    ? "grid-cols-1 sm:grid-cols-2 grid-rows-2 sm:grid-rows-1"
+                    : participants.length <= 4
+                      ? "grid-cols-2 auto-rows-fr"
+                      : "grid-cols-2 sm:grid-cols-3 auto-rows-fr"
             }`}
-            title={isCameraEnabled ? "Turn Off Camera" : "Turn On Camera"}
           >
-            {isCameraEnabled ? <Video size={20} /> : <VideoOff size={20} />}
-          </button>
-        )}
+            {participants.map((p) => (
+              <ParticipantVideoTile
+                key={p.identity}
+                participant={p}
+                isLocal={p === localParticipant}
+                isSolo={!isDirect1on1 && participants.length <= 1}
+                isInitiator={Boolean(callSession?.isInitiator)}
+                conversation={activeConversation}
+                currentUser={currentUser}
+              />
+            ))}
 
-        {/* End Call Button */}
-        <button
-          type="button"
-          onClick={onEndCall}
-          className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 cursor-pointer"
-          title="End Call"
-        >
-          <PhoneOff size={22} />
-        </button>
+            {/* Discord-style dimmed placeholder for recipient in 1-on-1 calls while waiting */}
+            {isWaitingForFriend && (
+              <RingingPlaceholderTile friend={friendUser} />
+            )}
+          </div>
+        )}
       </div>
+
+      {/* ── Bottom Controls Bar / Dock ── */}
+      <CallBottomDock
+        isMicrophoneEnabled={isMicrophoneEnabled}
+        toggleMic={toggleMic}
+        isCameraEnabled={isCameraEnabled}
+        toggleCam={toggleCam}
+        isScreenShareEnabled={isScreenShareEnabled}
+        toggleScreenShare={toggleScreenShare}
+        isMinimized={isMinimized}
+        onEndCall={onEndCall}
+      />
     </div>
   )
 }
 
 /**
  * InChatCallModal — Main wrapper orchestrating LiveKit connection and
- * rendering full or floating PiP call window.
+ * rendering full, centered, or floating PiP call window via createPortal.
  */
 const InChatCallModal = ({
   open,
   onClose,
   callSession,
   onEndCall,
+  conversation,
+  currentUser,
 }) => {
   const [isMinimized, setIsMinimized] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   if (!open || !callSession?.token) return null
 
@@ -278,15 +242,17 @@ const InChatCallModal = ({
   const callType = callSession.callType || "video"
 
   const containerClasses = isMinimized
-    ? "fixed bottom-5 right-5 z-50 w-72 h-80 rounded-2xl shadow-2xl overflow-hidden border border-neutral-700 animate-in zoom-in-95 duration-200"
-    : "fixed inset-4 sm:inset-10 md:inset-16 z-50 rounded-3xl shadow-2xl overflow-hidden border border-neutral-800 animate-in fade-in zoom-in-95 duration-200"
+    ? "fixed bottom-5 right-5 z-[1301] w-72 sm:w-80 h-96 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden border border-neutral-700/80 bg-neutral-950 flex flex-col animate-in zoom-in-95 duration-200"
+    : isFullscreen
+      ? "fixed inset-0 z-[1301] bg-neutral-950 flex flex-col overflow-hidden animate-in fade-in duration-200"
+      : "fixed inset-3 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[94vw] sm:max-w-4xl sm:h-[82vh] sm:max-h-[720px] z-[1301] rounded-xl shadow-2xl overflow-hidden border border-neutral-800 bg-neutral-950 flex flex-col animate-in fade-in zoom-in-95 duration-200"
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop for full view */}
       {!isMinimized && (
         <div
-          className="fixed inset-0 z-40 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200"
+          className="fixed inset-0 z-[1300] bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setIsMinimized(true)}
         />
       )}
@@ -297,7 +263,7 @@ const InChatCallModal = ({
           token={callSession.token}
           connect={true}
           audio={true}
-          video={callType === "video"}
+          video={false}
           onDisconnected={onClose}
           className="w-full h-full flex flex-col"
         >
@@ -306,11 +272,17 @@ const InChatCallModal = ({
             onEndCall={onEndCall}
             isMinimized={isMinimized}
             onToggleMinimize={() => setIsMinimized((prev) => !prev)}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={() => setIsFullscreen((prev) => !prev)}
             callType={callType}
+            conversation={callSession?.conversation || conversation}
+            currentUser={currentUser}
+            callSession={callSession}
           />
         </LiveKitRoom>
       </div>
-    </>
+    </>,
+    document.body,
   )
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react"
+import React, { useState, useMemo } from "react"
 import Modal from "@/shared/components/ui/Modal"
 import Avatar from "@/shared/components/ui/Avatar"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
@@ -21,12 +21,13 @@ const ReactionDetailsModal = ({
   const { t } = useLanguage()
   const { formatRelative } = useTimezone()
   const [selectedEmoji, setSelectedEmoji] = useState(initialEmoji || "all")
-
-  useEffect(() => {
-    if (open) {
-      setSelectedEmoji(initialEmoji || "all")
-    }
-  }, [open, initialEmoji])
+  const [prevSync, setPrevSync] = useState({ open, initialEmoji })
+  if (open && (!prevSync.open || prevSync.initialEmoji !== initialEmoji)) {
+    setPrevSync({ open, initialEmoji })
+    setSelectedEmoji(initialEmoji || "all")
+  } else if (!open && prevSync.open) {
+    setPrevSync({ open, initialEmoji })
+  }
 
   const messageId = message?.id || message?.messageId
 
@@ -106,7 +107,7 @@ const ReactionDetailsModal = ({
           filteredReactions.map((item, idx) => (
             <div
               key={item.messageReactionId || `${item.accountId}-${idx}`}
-              className="h-[72px] flex items-center justify-between px-4 hover:bg-[#f2f2f2] transition-colors shrink-0"
+              className="h-[72px] flex items-center justify-between px-4 hover:bg-itemHover active:bg-itemActiveHover transition-colors shrink-0"
             >
               <div className="flex items-center gap-4 min-w-0">
                 <Avatar

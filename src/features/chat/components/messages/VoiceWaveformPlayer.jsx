@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { Play, Pause } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 // Simple seeded pseudo-random heights generator for visually pleasant waveforms
 const generateWaveformBars = (seedString = "", barCount = 32) => {
@@ -39,6 +40,7 @@ const VoiceWaveformPlayer = ({
   isOwn = false,
   className = "",
 }) => {
+  const { t } = useLanguage()
   const audioRef = useRef(null)
   const waveformRef = useRef(null)
 
@@ -228,7 +230,7 @@ const VoiceWaveformPlayer = ({
             ? "bg-white/20 hover:bg-white/30 text-white"
             : "bg-neutral-200 dark:bg-zinc-700 hover:bg-neutral-300 text-neutral-700 dark:text-neutral-200"
         }`}
-        title="Toggle playback speed"
+        title={t?.chat?.togglePlaybackSpeed || "Toggle playback speed"}
       >
         {playbackRate}x
       </button>

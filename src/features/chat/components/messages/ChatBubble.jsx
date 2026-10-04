@@ -40,6 +40,7 @@ const ChatBubble = ({
   canPin = false,
   conversationId,
   isWidget = false,
+  onJumpToMessage,
 }) => {
   const { t } = useLanguage()
   const { formatTime } = useTimezone()
@@ -200,10 +201,7 @@ const ChatBubble = ({
   }
 
   // System message fallback
-  if (
-    message?.messageType != null &&
-    String(message.messageType).toLowerCase() === "system"
-  ) {
+  if (String(message?.messageType || "").toLowerCase() === "system") {
     return (
       <div className="flex justify-center my-3 px-4 w-full">
         <span className="bg-[#E5E5E5]/60 text-[#606060] dark:bg-zinc-800 dark:text-zinc-400 text-xs px-3.5 py-1.5 rounded-full font-medium shadow-xs text-center border border-border/40 max-w-[85%] break-words">
@@ -213,7 +211,7 @@ const ChatBubble = ({
     )
   }
 
-  const marginTop = isFirstInGroup ? "mt-3" : "mt-0.5"
+  const marginTop = isFirstInGroup ? "mt-4" : "mt-1"
   const avatarSrc = sender?.avatar || sender?.avatarImageUrl
 
   const readers = Array.isArray(readByUsers) ? readByUsers : []
@@ -237,6 +235,7 @@ const ChatBubble = ({
         onSaveEdit={handleSaveEdit}
         onCancelEdit={handleCancelEdit}
         isSavingEdit={isSavingEdit}
+        onJumpToMessage={onJumpToMessage}
       />
     </div>
   )
@@ -271,9 +270,9 @@ const ChatBubble = ({
   return (
     <div
       id={messageId ? `chat-message-${messageId}` : undefined}
-      className={`${marginTop} flex flex-col gap-0.5 ${
+      className={`${marginTop} flex flex-col ${
         isOwn ? "items-end" : "items-start"
-      } group relative w-full scroll-mt-24 transition-all duration-300`}
+      } group relative w-[calc(100%+2rem)] -mx-4 px-4 scroll-mt-24 transition-all duration-300`}
     >
       {/* Header with Sender Name + Timestamp */}
       {isFirstInGroup && (

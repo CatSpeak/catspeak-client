@@ -84,71 +84,10 @@ const AddMembersModal = ({
       open={open}
       onClose={handleClose}
       title={t?.chat?.modals?.addMembersTitle || "Add members to group"}
-      bodyClassName="px-0 flex-1 flex flex-col overflow-hidden"
-    >
-      <div className="flex flex-col md:max-h-[80vh] flex-1">
-        {/* Search bar */}
-        <div className="px-4 pb-4">
-          <SearchInput
-            placeholder={t?.chat?.modals?.searchFriends || "Search friends..."}
-            value={searchQuery}
-            onChange={setSearchQuery}
-            className="min-w-0"
-          />
-        </div>
-
-        {/* Friends checklist */}
-        <div className="flex-1 flex flex-col gap-1 overflow-y-auto px-4 pb-4">
-          {filteredFriends.length === 0 ? (
-            <EmptyState
-              variant="component"
-              icon={Users}
-              message={
-                addableFriends.length === 0
-                  ? (t?.chat?.modals?.allInGroup || "All of your friends are already in this group")
-                  : (t?.chat?.modals?.noFriendsFound || "No friends found matching your search")
-              }
-            />
-          ) : (
-            filteredFriends.map((friend) => {
-              const isChecked = selectedFriends.includes(friend.accountId)
-              const theme = getParticipantTheme(
-                friend.accountId || friend.username || "",
-              )
-              return (
-                <ListItem
-                  key={friend.accountId}
-                  onClick={() => toggleSelectFriend(friend.accountId)}
-                  hoverEffect={true}
-                  className="overflow-hidden cursor-pointer shrink-0"
-                  contentClassName={`rounded-xl ${isChecked ? "bg-primaryBg" : ""}`}
-                  lines={2}
-                  leftContent={
-                    <Avatar
-                      src={friend.avatarImageUrl}
-                      name={friend.nickname || friend.username}
-                      size={40}
-                      className={theme.avatarClass}
-                    />
-                  }
-                  rightContent={
-                    <Checkbox checked={isChecked} variant="large" as="div" />
-                  }
-                >
-                  <p>{friend.nickname || friend.username}</p>
-                  <p className="text-sm text-[#606060]">
-                    {friend.isTeacher
-                      ? (t?.chat?.userPanel?.teacher || "Giảng viên")
-                      : (friend.level || t?.chat?.userPanel?.student || "Student")}
-                  </p>
-                </ListItem>
-              )
-            })
-          )}
-        </div>
-
-        {/* Footer Actions */}
-        <div className="border-t border-border flex justify-end gap-2 p-4">
+      bodyClassName="px-0 flex-1 flex flex-col overflow-hidden min-h-0"
+      footerClassName="border-t border-border p-4"
+      footer={
+        <div className="flex justify-end gap-2">
           <PillButton onClick={handleClose} variant="secondary-no-outline">
             {t?.chat?.modals?.cancel || "Cancel"}
           </PillButton>
@@ -158,10 +97,73 @@ const AddMembersModal = ({
             loading={isLoading}
           >
             {t?.chat?.modals?.addMembersBtn
-              ? t.chat.modals.addMembersBtn.replace("{{count}}", selectedFriends.length > 0 ? selectedFriends.length : "")
+              ? t.chat.modals.addMembersBtn.replace(
+                  "{{count}}",
+                  selectedFriends.length > 0 ? selectedFriends.length : "",
+                )
               : `Add ${selectedFriends.length > 0 ? `(${selectedFriends.length})` : ""} members`}
           </PillButton>
         </div>
+      }
+    >
+      {/* Search bar */}
+      <div className="px-4 pb-4">
+        <SearchInput
+          placeholder={t?.chat?.modals?.searchFriends || "Search friends..."}
+          value={searchQuery}
+          onChange={setSearchQuery}
+          className="min-w-0"
+        />
+      </div>
+
+      {/* Friends checklist */}
+      <div className="flex-1 flex flex-col gap-1 overflow-y-auto px-4 pb-4 min-h-0">
+        {filteredFriends.length === 0 ? (
+          <EmptyState
+            variant="component"
+            icon={Users}
+            message={
+              addableFriends.length === 0
+                ? (t?.chat?.modals?.allInGroup || "All of your friends are already in this group")
+                : (t?.chat?.modals?.noFriendsFound || "No friends found matching your search")
+            }
+          />
+        ) : (
+          filteredFriends.map((friend) => {
+            const isChecked = selectedFriends.includes(friend.accountId)
+            const theme = getParticipantTheme(
+              friend.accountId || friend.username || "",
+            )
+            return (
+              <ListItem
+                key={friend.accountId}
+                onClick={() => toggleSelectFriend(friend.accountId)}
+                hoverEffect={true}
+                className="overflow-hidden cursor-pointer shrink-0"
+                contentClassName={`rounded-xl ${isChecked ? "bg-primaryBg" : ""}`}
+                lines={2}
+                leftContent={
+                  <Avatar
+                    src={friend.avatarImageUrl}
+                    name={friend.nickname || friend.username}
+                    size={40}
+                    className={theme.avatarClass}
+                  />
+                }
+                rightContent={
+                  <Checkbox checked={isChecked} variant="large" as="div" />
+                }
+              >
+                <p>{friend.nickname || friend.username}</p>
+                <p className="text-sm text-[#606060]">
+                  {friend.isTeacher
+                    ? (t?.chat?.userPanel?.teacher || "Giảng viên")
+                    : (friend.level || t?.chat?.userPanel?.student || "Student")}
+                </p>
+              </ListItem>
+            )
+          })
+        )}
       </div>
     </Modal>
   )
