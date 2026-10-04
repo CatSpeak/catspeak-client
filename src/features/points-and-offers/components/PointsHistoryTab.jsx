@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Clock,
 } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PointsHistoryTab = ({
   pointHistory = [],
@@ -19,7 +20,47 @@ const PointsHistoryTab = ({
   historyPageSize = 10,
   isLoading = false,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const ht = pt.history || {}
+  const ov = pt.overview || {}
   const hasItems = pointHistory.length > 0
+
+  const getLocalizedHistoryTitle = (item) => {
+    if (item.title === "Tích lũy điểm" || item.title === "Points Earned") {
+      return ov.recentActivities?.earnedPoints || item.title
+    }
+    if (item.title === "Sử dụng điểm" || item.title === "Points Used") {
+      return ov.recentActivities?.spentPoints || item.title
+    }
+    return item.title
+  }
+
+  const getLocalizedHistorySubtitle = (item) => {
+    if (item.subtitle === "Tích lũy hoàn tất") {
+      return ov.recentActivities?.earnCompleted || item.subtitle
+    }
+    if (
+      item.subtitle === "Sử dụng điểm đổi voucher" ||
+      item.subtitle === "Đổi voucher" ||
+      item.subtitle === "Sử dụng điểm"
+    ) {
+      return ov.recentActivities?.redeemVoucher || item.subtitle
+    }
+    if (
+      item.subtitle === "Điểm thưởng hết hạn" ||
+      item.subtitle === "Điểm hết hạn"
+    ) {
+      return ov.recentActivities?.expiredPoints || item.subtitle
+    }
+    return item.subtitle
+  }
+
+  const paginationText = ht.pagination?.pageInfo
+    ? ht.pagination.pageInfo
+        .replace("{{page}}", historyPage)
+        .replace("{{pageSize}}", historyPageSize)
+    : `Trang ${historyPage} (Hiển thị tối đa ${historyPageSize} mục/trang)`
 
   return (
     <div className="space-y-6 pb-10">
@@ -35,7 +76,7 @@ const PointsHistoryTab = ({
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Tất cả
+            {ht.filters?.all || "Tất cả"}
           </button>
           <button
             type="button"
@@ -46,7 +87,7 @@ const PointsHistoryTab = ({
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Nhận điểm (+)
+            {ht.filters?.earn || "Nhận điểm (+)"}
           </button>
           <button
             type="button"
@@ -57,7 +98,7 @@ const PointsHistoryTab = ({
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Sử dụng (-)
+            {ht.filters?.spend || "Sử dụng (-)"}
           </button>
         </div>
       </div>
@@ -90,9 +131,15 @@ const PointsHistoryTab = ({
         <div className="bg-white border border-gray-200/90 rounded-2xl shadow-xs overflow-hidden">
           {/* Table Header */}
           <div className="bg-[#990011] text-white px-5 py-3.5 grid grid-cols-12 text-xs font-bold uppercase tracking-wider">
-            <div className="col-span-6 sm:col-span-6">HOẠT ĐỘNG</div>
-            <div className="col-span-4 sm:col-span-4 text-center sm:text-left">THỜI GIAN</div>
-            <div className="col-span-2 sm:col-span-2 text-right">ĐIỂM</div>
+            <div className="col-span-6 sm:col-span-6">
+              {ht.table?.activity || "HOẠT ĐỘNG"}
+            </div>
+            <div className="col-span-4 sm:col-span-4 text-center sm:text-left">
+              {ht.table?.time || "THỜI GIAN"}
+            </div>
+            <div className="col-span-2 sm:col-span-2 text-right">
+              {ht.table?.points || "ĐIỂM"}
+            </div>
           </div>
 
           {/* Table Rows */}
@@ -131,10 +178,10 @@ const PointsHistoryTab = ({
 
                     <div className="min-w-0">
                       <div className="font-semibold text-gray-900 text-xs sm:text-sm truncate">
-                        {item.title}
+                        {getLocalizedHistoryTitle(item)}
                       </div>
                       <div className="text-[11px] text-gray-400 mt-0.5 truncate">
-                        {item.subtitle}
+                        {getLocalizedHistorySubtitle(item)}
                       </div>
                     </div>
                   </div>
@@ -161,9 +208,7 @@ const PointsHistoryTab = ({
 
           {/* Pagination Controls */}
           <div className="p-4 flex items-center justify-between text-xs text-gray-500 border-t border-gray-100 bg-gray-50/50">
-            <span>
-              Trang {historyPage} (Hiển thị tối đa {historyPageSize} mục/trang)
-            </span>
+            <span>{paginationText}</span>
 
             <div className="flex items-center gap-2">
               <button
@@ -177,7 +222,7 @@ const PointsHistoryTab = ({
                 }`}
               >
                 <ChevronLeft size={14} />
-                <span>Trước</span>
+                <span>{ht.pagination?.prev || "Trước"}</span>
               </button>
 
               <button
@@ -190,7 +235,7 @@ const PointsHistoryTab = ({
                     : "border-gray-300 text-gray-700 hover:bg-white cursor-pointer shadow-2xs"
                 }`}
               >
-                <span>Sau</span>
+                <span>{ht.pagination?.next || "Sau"}</span>
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -203,10 +248,10 @@ const PointsHistoryTab = ({
             <Star size={48} strokeWidth={1.2} />
           </div>
           <h4 className="text-base sm:text-lg font-bold text-gray-800 mb-1.5">
-            Không có lịch sử biến động điểm
+            {ht.empty?.title || "Không có lịch sử biến động điểm"}
           </h4>
           <p className="text-xs sm:text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-            Hoàn thành các khóa học hoặc tham gia hoạt động để kiếm điểm thưởng nhé!
+            {ht.empty?.subtitle || "Hoàn thành các khóa học hoặc tham gia hoạt động để kiếm điểm thưởng nhé!"}
           </p>
         </div>
       )}

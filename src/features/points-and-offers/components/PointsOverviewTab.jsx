@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Sparkles,
 } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import VoucherCardItem from "./VoucherCardItem"
 
 const PointsOverviewTab = ({
@@ -21,6 +22,10 @@ const PointsOverviewTab = ({
   onRedeemVoucher,
   isLoading = false,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const ov = pt.overview || {}
+
   // Show up to 5 recent activities as per FE integration guidelines
   const recentActivities = pointHistory.slice(0, 5)
 
@@ -83,6 +88,51 @@ const PointsOverviewTab = ({
     )
   }
 
+  const getLocalizedActivityTitle = (act) => {
+    if (act.title === "Tích lũy điểm" || act.title === "Points Earned") {
+      return ov.recentActivities?.earnedPoints || act.title
+    }
+    if (act.title === "Sử dụng điểm" || act.title === "Points Used") {
+      return ov.recentActivities?.spentPoints || act.title
+    }
+    return act.title
+  }
+
+  const getLocalizedActivitySubtitle = (act) => {
+    if (act.subtitle === "Tích lũy hoàn tất") {
+      return ov.recentActivities?.earnCompleted || act.subtitle
+    }
+    if (act.subtitle === "Đổi voucher") {
+      return ov.recentActivities?.redeemVoucher || act.subtitle
+    }
+    if (act.subtitle === "Điểm hết hạn" || act.subtitle === "Điểm thưởng hết hạn") {
+      return ov.recentActivities?.expiredPoints || act.subtitle
+    }
+    return act.subtitle
+  }
+
+  const getLocalizedMethod = (method) => {
+    if (method.id === "earn-review" && ov.earningMethods?.review) {
+      return {
+        title: ov.earningMethods.review.title || method.title,
+        subtitle: ov.earningMethods.review.subtitle || method.subtitle,
+      }
+    }
+    if (method.id === "earn-referral" && ov.earningMethods?.referral) {
+      return {
+        title: ov.earningMethods.referral.title || method.title,
+        subtitle: ov.earningMethods.referral.subtitle || method.subtitle,
+      }
+    }
+    if (method.id === "earn-milestone" && ov.earningMethods?.milestone) {
+      return {
+        title: ov.earningMethods.milestone.title || method.title,
+        subtitle: ov.earningMethods.milestone.subtitle || method.subtitle,
+      }
+    }
+    return { title: method.title, subtitle: method.subtitle }
+  }
+
   return (
     <div className="space-y-8 pb-10">
       {/* 3 Summary Stats Cards */}
@@ -94,10 +144,10 @@ const PointsOverviewTab = ({
           </div>
           <div>
             <span className="text-xs text-gray-400 font-medium block">
-              Tổng điểm đã tích lũy
+              {ov.stats?.totalAccumulated || "Tổng điểm đã tích lũy"}
             </span>
             <div className="text-xl font-bold text-gray-900 mt-0.5">
-              {(userPoints.totalAccumulated ?? 0).toLocaleString("vi-VN")} điểm
+              {(userPoints.totalAccumulated ?? 0).toLocaleString("vi-VN")} {ov.stats?.pointsUnit || "điểm"}
             </div>
           </div>
         </div>
@@ -109,10 +159,10 @@ const PointsOverviewTab = ({
           </div>
           <div>
             <span className="text-xs text-gray-400 font-medium block">
-              Đã đổi
+              {ov.stats?.redeemed || "Đã đổi"}
             </span>
             <div className="text-xl font-bold text-gray-900 mt-0.5">
-              {(userPoints.totalRedeemed ?? 0).toLocaleString("vi-VN")} điểm
+              {(userPoints.totalRedeemed ?? 0).toLocaleString("vi-VN")} {ov.stats?.pointsUnit || "điểm"}
             </div>
           </div>
         </div>
@@ -125,16 +175,18 @@ const PointsOverviewTab = ({
             </div>
             <div>
               <span className="text-xs text-gray-400 font-medium block">
-                Sắp hết hạn
+                {ov.stats?.expiringSoon || "Sắp hết hạn"}
               </span>
               <div className="flex items-baseline mt-0.5">
                 <span className="text-xl font-bold text-amber-600">
-                  {(userPoints.expiringSoon ?? 0).toLocaleString("vi-VN")} điểm
+                  {(userPoints.expiringSoon ?? 0).toLocaleString("vi-VN")} {ov.stats?.pointsUnit || "điểm"}
                 </span>
               </div>
               {userPoints.expiringBefore && (
                 <span className="text-xs text-gray-400 font-normal">
-                  trước {userPoints.expiringBefore}
+                  {ov.stats?.expiringBefore
+                    ? ov.stats.expiringBefore.replace("{{date}}", userPoints.expiringBefore)
+                    : `trước ${userPoints.expiringBefore}`}
                 </span>
               )}
             </div>
@@ -145,7 +197,7 @@ const PointsOverviewTab = ({
       {/* "Cách nhận điểm" Section */}
       <div>
         <h3 className="text-base font-bold text-gray-900 mb-4">
-          Cách nhận điểm
+          {ov.earningMethods?.title || "Cách nhận điểm"}
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
@@ -160,6 +212,8 @@ const PointsOverviewTab = ({
               iconBg = "bg-amber-500"
             }
 
+            const localized = getLocalizedMethod(method)
+
             return (
               <div
                 key={method.id}
@@ -172,15 +226,15 @@ const PointsOverviewTab = ({
                     <IconComponent size={22} />
                   </div>
                   <h4 className="font-bold text-gray-900 text-sm mb-1">
-                    {method.title}
+                    {localized.title}
                   </h4>
                   <p className="text-xs text-gray-500 mb-3">
-                    {method.subtitle}
+                    {localized.subtitle}
                   </p>
                 </div>
 
                 <span className="inline-block text-xs font-semibold text-[#990011] bg-rose-50 border border-rose-200/90 px-3 py-1 rounded-full">
-                  +{method.points} pts
+                  +{method.points} {ov.stats?.pts || "pts"}
                 </span>
               </div>
             )
@@ -192,14 +246,14 @@ const PointsOverviewTab = ({
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-base font-bold text-gray-900">
-            Hoạt động gần đây
+            {ov.recentActivities?.title || "Hoạt động gần đây"}
           </h3>
           <button
             type="button"
             onClick={() => onNavigateTab("history")}
             className="text-xs font-semibold text-[#990011] hover:underline flex items-center gap-1 cursor-pointer"
           >
-            <span>Xem tất cả</span>
+            <span>{ov.recentActivities?.viewAll || "Xem tất cả"}</span>
             <ArrowRight size={14} />
           </button>
         </div>
@@ -236,10 +290,10 @@ const PointsOverviewTab = ({
                     </div>
                     <div>
                       <h5 className="font-bold text-gray-900 text-sm">
-                        {act.title}
+                        {getLocalizedActivityTitle(act)}
                       </h5>
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {act.date}
+                        {getLocalizedActivitySubtitle(act)} • {act.date}
                       </p>
                     </div>
                   </div>
@@ -265,7 +319,9 @@ const PointsOverviewTab = ({
           </div>
         ) : (
           <div className="bg-white border border-gray-200/90 rounded-2xl p-6 text-center shadow-xs">
-            <p className="text-xs text-gray-400">Chưa có hoạt động điểm nào gần đây.</p>
+            <p className="text-xs text-gray-400">
+              {ov.recentActivities?.empty || "Chưa có hoạt động điểm nào gần đây."}
+            </p>
           </div>
         )}
       </div>
@@ -275,7 +331,7 @@ const PointsOverviewTab = ({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-bold text-gray-900">
-              Có thể đổi ngay
+              {ov.readyToRedeem?.title || "Có thể đổi ngay"}
             </h3>
             <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md flex items-center gap-1">
               <span>{userPoints.availablePoints ?? 0}</span>
@@ -288,7 +344,7 @@ const PointsOverviewTab = ({
             onClick={() => onNavigateTab("exchange")}
             className="text-xs font-semibold text-[#990011] hover:underline flex items-center gap-1 cursor-pointer"
           >
-            <span>Xem tất cả</span>
+            <span>{ov.readyToRedeem?.viewAll || "Xem tất cả"}</span>
             <ArrowRight size={14} />
           </button>
         </div>
@@ -308,7 +364,7 @@ const PointsOverviewTab = ({
         ) : (
           <div className="bg-white border border-gray-200/90 rounded-2xl p-6 text-center shadow-xs">
             <p className="text-xs text-gray-400">
-              Chưa có voucher phù hợp với số điểm hiện có. Hãy tích thêm điểm nhé!
+              {ov.readyToRedeem?.empty || "Chưa có voucher phù hợp với số điểm hiện có. Hãy tích thêm điểm nhé!"}
             </p>
           </div>
         )}

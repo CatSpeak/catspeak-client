@@ -1,6 +1,7 @@
 import React from "react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
 import { WifiOff, PackageX } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ExchangeErrorModal = ({
   isOpen,
@@ -10,9 +11,16 @@ const ExchangeErrorModal = ({
   onRetry,
   onChooseAnother,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const er = pt.modals?.error || {}
+
   if (!isOpen) return null
 
   const isNetwork = errorType === "network"
+  const errorCodeText = er.errorCode
+    ? er.errorCode.replace("{{code}}", errorCode || "ERR-CONNECT-FAIL")
+    : `Mã lỗi: ${errorCode || "ERR-CONNECT-FAIL"}`
 
   return (
     <AnimatePresence>
@@ -41,14 +49,14 @@ const ExchangeErrorModal = ({
               </div>
 
               <h3 className="text-lg font-bold text-gray-900 mb-1.5">
-                Không thể kết nối
+                {er.networkTitle || "Không thể kết nối"}
               </h3>
               <p className="text-xs text-gray-500 mb-4 leading-relaxed">
-                Có lỗi kỹ thuật hoặc mất kết nối mạng. Điểm của bạn không bị trừ. Vui lòng thử lại sau.
+                {er.networkDesc || "Có lỗi kỹ thuật hoặc mất kết nối mạng. Điểm của bạn không bị trừ. Vui lòng thử lại sau."}
               </p>
 
               <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5 text-[11px] font-mono text-gray-500 mb-6">
-                Mã lỗi: {errorCode || "ERR-CONNECT-FAIL"}
+                {errorCodeText}
               </div>
 
               <div className="w-full grid grid-cols-2 gap-3">
@@ -57,14 +65,14 @@ const ExchangeErrorModal = ({
                   onClick={onClose}
                   className="py-2.5 px-3 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition cursor-pointer"
                 >
-                  Đóng
+                  {er.closeBtn || "Đóng"}
                 </button>
                 <button
                   type="button"
                   onClick={onRetry}
                   className="py-2.5 px-3 text-xs sm:text-sm font-semibold text-white bg-[#990011] hover:bg-[#85000f] rounded-xl shadow-xs transition cursor-pointer"
                 >
-                  Thử lại
+                  {er.retryBtn || "Thử lại"}
                 </button>
               </div>
             </>
@@ -76,10 +84,10 @@ const ExchangeErrorModal = ({
               </div>
 
               <h3 className="text-lg font-bold text-gray-900 mb-1.5">
-                Ưu đãi vừa hết lượt
+                {er.outOfStockTitle || "Ưu đãi vừa hết lượt"}
               </h3>
               <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                Rất tiếc, Voucher này đã hết lượt quy đổi trong khi bạn xác nhận! Điểm của bạn không bị trừ.
+                {er.outOfStockDesc || "Rất tiếc, Voucher này đã hết lượt quy đổi trong khi bạn xác nhận! Điểm của bạn không bị trừ."}
               </p>
 
               <div className="w-full grid grid-cols-2 gap-3">
@@ -88,14 +96,14 @@ const ExchangeErrorModal = ({
                   onClick={onClose}
                   className="py-2.5 px-3 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl transition cursor-pointer"
                 >
-                  Đóng
+                  {er.closeBtn || "Đóng"}
                 </button>
                 <button
                   type="button"
                   onClick={onChooseAnother || onClose}
                   className="py-2.5 px-3 text-xs sm:text-sm font-semibold text-white bg-[#990011] hover:bg-[#85000f] rounded-xl shadow-xs transition cursor-pointer"
                 >
-                  Chọn ưu đãi khác
+                  {er.chooseAnotherBtn || "Chọn ưu đãi khác"}
                 </button>
               </div>
             </>

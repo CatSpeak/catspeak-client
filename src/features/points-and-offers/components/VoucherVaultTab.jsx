@@ -1,5 +1,6 @@
 import React from "react"
 import { Ticket, ArrowRight } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import VaultVoucherItem from "./VaultVoucherItem"
 
 const VoucherVaultTab = ({
@@ -12,6 +13,10 @@ const VoucherVaultTab = ({
   onGoToExchange,
   isLoading = false,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const vt = pt.vault || {}
+
   return (
     <div className="space-y-6 pb-10">
       {/* Sub-tab pills */}
@@ -25,7 +30,7 @@ const VoucherVaultTab = ({
               : "bg-gray-100 text-gray-600 hover:bg-gray-200/70"
           }`}
         >
-          Chưa dùng {vaultCounts?.unused !== undefined ? `(${vaultCounts.unused})` : ""}
+          {vt.subTabs?.unused || "Chưa dùng"} {vaultCounts?.unused !== undefined ? `(${vaultCounts.unused})` : ""}
         </button>
 
         <button
@@ -37,7 +42,7 @@ const VoucherVaultTab = ({
               : "bg-gray-100 text-gray-600 hover:bg-gray-200/70"
           }`}
         >
-          Đã dùng {vaultCounts?.used !== undefined ? `(${vaultCounts.used})` : ""}
+          {vt.subTabs?.used || "Đã dùng"} {vaultCounts?.used !== undefined ? `(${vaultCounts.used})` : ""}
         </button>
 
         <button
@@ -49,7 +54,7 @@ const VoucherVaultTab = ({
               : "bg-gray-100 text-gray-600 hover:bg-gray-200/70"
           }`}
         >
-          Hết hạn {vaultCounts?.expired !== undefined ? `(${vaultCounts.expired})` : ""}
+          {vt.subTabs?.expired || "Hết hạn"} {vaultCounts?.expired !== undefined ? `(${vaultCounts.expired})` : ""}
         </button>
       </div>
 
@@ -92,17 +97,17 @@ const VoucherVaultTab = ({
             <Ticket size={28} />
           </div>
           <h4 className="text-base font-bold text-gray-800 mb-1">
-            Chưa có voucher nào trong mục này
+            {vt.empty?.title || "Chưa có voucher nào trong mục này"}
           </h4>
           <p className="text-xs text-gray-500 max-w-sm mx-auto mb-5 leading-relaxed">
-            Bạn có thể tích lũy điểm thưởng qua các hoạt động học tập và đổi ngay những ưu đãi hấp dẫn.
+            {vt.empty?.subtitle || "Bạn có thể tích lũy điểm thưởng qua các hoạt động học tập và đổi ngay những ưu đãi hấp dẫn."}
           </p>
           <button
             type="button"
             onClick={onGoToExchange}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#990011] hover:bg-[#85000f] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-xs transition cursor-pointer"
           >
-            <span>Khám phá kho ưu đãi</span>
+            <span>{vt.empty?.exploreAction || "Khám phá kho ưu đãi"}</span>
             <ArrowRight size={15} />
           </button>
         </div>

@@ -1,6 +1,7 @@
 import React from "react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
 import { Check, Copy, Ticket } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ExchangeSuccessModal = ({
   isOpen,
@@ -9,7 +10,23 @@ const ExchangeSuccessModal = ({
   onViewVault,
   onCopyCode,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const sc = pt.modals?.success || {}
+
   if (!isOpen || !voucher) return null
+
+  const voucherTitle = voucher.title || voucher.name || ""
+  const messageText = sc.message
+    ? sc.message.replace("{{title}}", voucherTitle)
+    : `Voucher ${voucherTitle} đã được thêm vào kho của bạn.`
+
+  const expiryText = sc.validUntil
+    ? sc.validUntil.replace(
+        "{{date}}",
+        voucher.expiryDate || sc.defaultExpiry || "30 ngày sau",
+      )
+    : `Hiệu lực đến: ${voucher.expiryDate || "30 ngày sau"}`
 
   return (
     <AnimatePresence>
@@ -36,10 +53,10 @@ const ExchangeSuccessModal = ({
           </div>
 
           <h3 className="text-lg font-bold text-gray-900 mb-1.5">
-            Đổi Voucher thành công!
+            {sc.title || "Đổi Voucher thành công!"}
           </h3>
           <p className="text-xs text-gray-500 mb-5 leading-relaxed">
-            Voucher <strong>{voucher.title || voucher.name}</strong> đã được thêm vào kho của bạn.
+            {messageText}
           </p>
 
           {/* Voucher Code Card Box */}
@@ -49,12 +66,14 @@ const ExchangeSuccessModal = ({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-1">
-                <span className="text-xs font-semibold text-gray-600">MÃ VOUCHER</span>
+                <span className="text-xs font-semibold text-gray-600">
+                  {sc.codeLabel || "MÃ VOUCHER"}
+                </span>
                 <button
                   type="button"
                   onClick={() => onCopyCode(voucher.code)}
                   className="p-1 hover:bg-amber-100 text-amber-700 rounded transition cursor-pointer"
-                  title="Sao chép mã"
+                  title={sc.copyTooltip || "Sao chép mã"}
                 >
                   <Copy size={13} />
                 </button>
@@ -63,7 +82,7 @@ const ExchangeSuccessModal = ({
                 {voucher.code}
               </div>
               <div className="text-[11px] text-gray-500 mt-0.5">
-                Hiệu lực đến: {voucher.expiryDate || "30 ngày sau"}
+                {expiryText}
               </div>
             </div>
           </div>
@@ -75,14 +94,14 @@ const ExchangeSuccessModal = ({
               onClick={onViewVault}
               className="w-full py-2.5 px-4 text-xs sm:text-sm font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-xl shadow-sm transition cursor-pointer"
             >
-              Xem kho voucher của tôi
+              {sc.viewVaultBtn || "Xem kho voucher của tôi"}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="w-full py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition cursor-pointer"
             >
-              Đóng
+              {sc.closeBtn || "Đóng"}
             </button>
           </div>
         </Motion.div>

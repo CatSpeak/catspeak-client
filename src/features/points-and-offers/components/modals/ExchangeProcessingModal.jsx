@@ -1,7 +1,12 @@
 import React from "react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ExchangeProcessingModal = ({ isOpen }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const pr = pt.modals?.processing || {}
+
   if (!isOpen) return null
 
   return (
@@ -28,10 +33,10 @@ const ExchangeProcessingModal = ({ isOpen }) => {
           </div>
 
           <h3 className="text-base font-bold text-gray-900 mb-1">
-            Đang xử lý đổi voucher...
+            {pr.title || "Đang xử lý đổi voucher..."}
           </h3>
           <p className="text-xs text-gray-500">
-            Vui lòng đợi trong giây lát và không đóng cửa sổ này
+            {pr.subtitle || "Vui lòng đợi trong giây lát và không đóng cửa sổ này"}
           </p>
         </Motion.div>
       </div>

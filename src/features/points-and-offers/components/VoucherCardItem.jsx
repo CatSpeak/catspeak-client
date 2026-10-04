@@ -1,5 +1,6 @@
 import React from "react"
-import { Coffee, BookOpen, Headphones, Sparkles, Gift, Star, AlertCircle } from "lucide-react"
+import { Coffee, BookOpen, Headphones, Sparkles, Gift, Star } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const getCategoryIcon = (iconType) => {
   switch (iconType) {
@@ -22,12 +23,51 @@ const VoucherCardItem = ({
   onRedeem,
   compact = false,
 }) => {
-  const isRedeemable = voucher.isRedeemable !== undefined
-    ? voucher.isRedeemable
-    : userPoints >= voucher.pointsRequired && (voucher.stock === undefined || voucher.stock > 0)
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const cd = pt.cards || {}
 
-  const isOutOfStock = voucher.stock !== undefined ? voucher.stock <= 0 : voucher.status === "out_of_stock"
-  const notRedeemableReason = voucher.notRedeemableReason || (isOutOfStock ? "Hết hàng" : userPoints < voucher.pointsRequired ? `Cần thêm ${voucher.pointsRequired - userPoints} điểm` : null)
+  const isRedeemable =
+    voucher.isRedeemable !== undefined
+      ? voucher.isRedeemable
+      : userPoints >= voucher.pointsRequired &&
+        (voucher.stock === undefined || voucher.stock > 0)
+
+  const isOutOfStock =
+    voucher.stock !== undefined
+      ? voucher.stock <= 0
+      : voucher.status === "out_of_stock"
+
+  const needPointsText = cd.needMorePoints
+    ? cd.needMorePoints.replace(
+        "{{points}}",
+        voucher.pointsRequired - userPoints,
+      )
+    : `Cần thêm ${voucher.pointsRequired - userPoints} điểm`
+
+  const notRedeemableReason =
+    voucher.notRedeemableReason ||
+    (isOutOfStock
+      ? cd.outOfStock || "Hết hàng"
+      : userPoints < voucher.pointsRequired
+        ? needPointsText
+        : null)
+
+  const compactExpiryText =
+    voucher.expiryDate ||
+    (voucher.validityDays
+      ? cd.validDays
+        ? cd.validDays.replace("{{days}}", voucher.validityDays)
+        : `Hạn ${voucher.validityDays} ngày`
+      : cd.valid30Days || "Hạn 30 ngày")
+
+  const fullExpiryText =
+    voucher.expiryDate ||
+    (voucher.validityDays
+      ? cd.validDaysFull
+        ? cd.validDaysFull.replace("{{days}}", voucher.validityDays)
+        : `Hạn sử dụng ${voucher.validityDays} ngày`
+      : cd.valid30DaysShort || "HSD 30 ngày")
 
   if (compact) {
     // Compact version for "Có thể đổi ngay" in Overview Tab
@@ -49,7 +89,7 @@ const VoucherCardItem = ({
           </div>
 
           <p className="text-xs text-gray-400 mb-3 font-normal">
-            {voucher.expiryDate || (voucher.validityDays ? `Hạn ${voucher.validityDays} ngày` : "Hạn 30 ngày")}
+            {compactExpiryText}
           </p>
         </div>
 
@@ -62,10 +102,14 @@ const VoucherCardItem = ({
           <button
             type="button"
             className={`text-xs font-semibold ${
-              isRedeemable ? "text-[#990011] group-hover:underline cursor-pointer" : "text-gray-400 cursor-not-allowed"
+              isRedeemable
+                ? "text-[#990011] group-hover:underline cursor-pointer"
+                : "text-gray-400 cursor-not-allowed"
             }`}
           >
-            {isRedeemable ? "Đổi ngay →" : notRedeemableReason || "Chưa đủ điều kiện"}
+            {isRedeemable
+              ? cd.redeemNowArrow || "Đổi ngay →"
+              : notRedeemableReason || cd.notEligible || "Chưa đủ điều kiện"}
           </button>
         </div>
       </div>
@@ -92,17 +136,25 @@ const VoucherCardItem = ({
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
-              {voucher.description || voucher.conditions}
+              {voucher.description || voucher.conditions || cd.defaultCondition || "Áp dụng khi thanh toán khóa học/lớp học"}
             </p>
           </div>
         </div>
 
         {/* Expiry & Stock info */}
         <div className="flex items-center justify-between text-[11px] text-gray-400 mb-3.5 pl-0 sm:pl-14">
-          <span>{voucher.expiryDate || (voucher.validityDays ? `Hạn sử dụng ${voucher.validityDays} ngày` : "HSD 30 ngày")}</span>
+          <span>{fullExpiryText}</span>
           {voucher.stock !== undefined && (
-            <span className={voucher.stock <= 5 ? "text-amber-600 font-semibold" : "text-gray-400"}>
-              Kho: {voucher.stock} lượt
+            <span
+              className={
+                voucher.stock <= 5
+                  ? "text-amber-600 font-semibold"
+                  : "text-gray-400"
+              }
+            >
+              {cd.stockRemaining
+                ? cd.stockRemaining.replace("{{stock}}", voucher.stock)
+                : `Kho: ${voucher.stock} lượt`}
             </span>
           )}
         </div>
@@ -122,7 +174,7 @@ const VoucherCardItem = ({
               onClick={() => onRedeem?.(voucher)}
               className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] shadow-xs transition cursor-pointer"
             >
-              Đổi ngay
+              {cd.redeemNow || "Đổi ngay"}
             </button>
           ) : (
             <div className="flex flex-col items-end gap-1">
@@ -131,7 +183,7 @@ const VoucherCardItem = ({
                 disabled
                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
               >
-                {notRedeemableReason || "Không khả dụng"}
+                {notRedeemableReason || cd.unavailable || "Không khả dụng"}
               </button>
             </div>
           )}
