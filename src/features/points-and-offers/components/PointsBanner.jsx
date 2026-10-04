@@ -1,5 +1,6 @@
 import React from "react"
 import { Star, ArrowRight } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const PointsBanner = ({
   availablePoints = 0,
@@ -8,6 +9,15 @@ const PointsBanner = ({
   onRedeemClick,
   isLoading = false,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+
+  const expiringText = pt.banner?.expiringNotice
+    ? pt.banner.expiringNotice
+        .replace("{{points}}", expiringPoints)
+        .replace("{{date}}", expiryDate)
+    : `${expiringPoints} điểm sẽ hết hạn vào ${expiryDate}`
+
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#990011] via-[#85000f] to-[#5e000a] text-white p-5 sm:p-7 shadow-md mb-6">
       {/* Decorative background glow / angled accent */}
@@ -23,7 +33,7 @@ const PointsBanner = ({
 
           <div>
             <span className="text-xs sm:text-sm font-medium text-white/80 tracking-wide block mb-0.5">
-              Số điểm hiện có
+              {pt.banner?.currentPoints || "Số điểm hiện có"}
             </span>
             {isLoading ? (
               <div className="h-9 sm:h-12 w-32 bg-white/20 rounded-lg animate-pulse my-1" />
@@ -34,7 +44,7 @@ const PointsBanner = ({
             )}
             {expiringPoints > 0 && !isLoading && (
               <p className="text-xs text-white/75 mt-1.5 font-light">
-                {expiringPoints} điểm sẽ hết hạn vào {expiryDate}
+                {expiringText}
               </p>
             )}
           </div>
@@ -47,7 +57,7 @@ const PointsBanner = ({
             onClick={onRedeemClick}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#990011] font-semibold text-xs sm:text-sm px-5 py-2.5 sm:py-3 rounded-xl shadow-md hover:bg-rose-50 hover:shadow-lg active:scale-98 transition duration-150 group cursor-pointer"
           >
-            <span>Đổi Voucher ngay</span>
+            <span>{pt.banner?.redeemNow || "Đổi Voucher ngay"}</span>
             <ArrowRight
               size={16}
               className="transition-transform group-hover:translate-x-0.5"

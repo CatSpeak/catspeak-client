@@ -9,4 +9,5 @@ export { default as VoucherCardItem } from "./components/VoucherCardItem"
 export { default as VaultVoucherItem } from "./components/VaultVoucherItem"
 export * from "./hooks/usePointsAndOffers"
 export * from "./constants/mockData"
+export { pointsAndOffersTranslations } from "./i18n"
 

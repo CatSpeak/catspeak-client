@@ -1,17 +1,7 @@
 import React from "react"
 import { Search, SlidersHorizontal, Sparkles } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import VoucherCardItem from "./VoucherCardItem"
-
-const ABILITY_CATEGORIES = [
-  { key: "all", label: "Tất cả" },
-  { key: "redeemable", label: "Có thể đổi ngay" },
-]
-
-const TYPE_CATEGORIES = [
-  { key: "all", label: "Tất cả các loại" },
-  { key: "percentage", label: "Giảm theo %" },
-  { key: "fixed", label: "Giảm số tiền" },
-]
 
 const VoucherExchangeTab = ({
   vouchers = [],
@@ -25,6 +15,21 @@ const VoucherExchangeTab = ({
   onRedeemVoucher,
   isLoading = false,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const ex = pt.exchange || {}
+
+  const abilityCategories = [
+    { key: "all", label: ex.categories?.all || "Tất cả" },
+    { key: "redeemable", label: ex.categories?.redeemable || "Có thể đổi ngay" },
+  ]
+
+  const typeCategories = [
+    { key: "all", label: ex.types?.all || "Tất cả các loại" },
+    { key: "percentage", label: ex.types?.percentage || "Giảm theo %" },
+    { key: "fixed", label: ex.types?.fixed || "Giảm số tiền" },
+  ]
+
   return (
     <div className="space-y-6 pb-10">
       {/* Search & Filter Toolbar */}
@@ -39,7 +44,7 @@ const VoucherExchangeTab = ({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
-            placeholder="Tìm kiếm voucher ưu đãi..."
+            placeholder={ex.searchPlaceholder || "Tìm kiếm voucher ưu đãi..."}
             className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm bg-gray-50/80 border border-gray-200 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition"
           />
         </div>
@@ -48,10 +53,10 @@ const VoucherExchangeTab = ({
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <div className="flex items-center gap-1 text-gray-400 text-xs shrink-0 px-1 font-medium">
             <SlidersHorizontal size={14} />
-            <span>Lọc:</span>
+            <span>{ex.filterLabel || "Lọc:"}</span>
           </div>
 
-          {ABILITY_CATEGORIES.map((cat) => {
+          {abilityCategories.map((cat) => {
             const isActive = categoryFilter === cat.key
             return (
               <button
@@ -71,7 +76,7 @@ const VoucherExchangeTab = ({
 
           <div className="w-px h-4 bg-gray-300 mx-1 hidden sm:block"></div>
 
-          {TYPE_CATEGORIES.map((cat) => {
+          {typeCategories.map((cat) => {
             const isActive = typeFilter === cat.key
             return (
               <button
@@ -134,10 +139,10 @@ const VoucherExchangeTab = ({
             <Sparkles size={24} />
           </div>
           <h4 className="text-base font-bold text-gray-800 mb-1">
-            Không tìm thấy voucher phù hợp
+            {ex.empty?.title || "Không tìm thấy voucher phù hợp"}
           </h4>
           <p className="text-xs text-gray-500 max-w-sm mx-auto">
-            Hãy thử tìm kiếm với từ khóa khác hoặc chuyển danh mục bộ lọc.
+            {ex.empty?.subtitle || "Hãy thử tìm kiếm với từ khóa khác hoặc chuyển danh mục bộ lọc."}
           </p>
         </div>
       )}

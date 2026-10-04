@@ -1,5 +1,6 @@
 import React from "react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import {
   usePointsAndOffers,
   TAB_KEYS,
@@ -15,14 +16,16 @@ import ExchangeProcessingModal from "../components/modals/ExchangeProcessingModa
 import ExchangeSuccessModal from "../components/modals/ExchangeSuccessModal"
 import ExchangeErrorModal from "../components/modals/ExchangeErrorModal"
 
-const TABS = [
-  { key: TAB_KEYS.OVERVIEW, label: "Tổng quan" },
-  { key: TAB_KEYS.EXCHANGE, label: "Đổi Voucher" },
-  { key: TAB_KEYS.VAULT, label: "Kho Voucher" },
-  { key: TAB_KEYS.HISTORY, label: "Lịch sử điểm" },
-]
-
 const PointsAndOffersPage = () => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+
+  const tabs = [
+    { key: TAB_KEYS.OVERVIEW, label: pt.tabs?.overview || "Tổng quan" },
+    { key: TAB_KEYS.EXCHANGE, label: pt.tabs?.exchange || "Đổi Voucher" },
+    { key: TAB_KEYS.VAULT, label: pt.tabs?.vault || "Kho Voucher" },
+    { key: TAB_KEYS.HISTORY, label: pt.tabs?.history || "Lịch sử điểm" },
+  ]
   const {
     activeTab,
     setActiveTab,
@@ -73,10 +76,10 @@ const PointsAndOffersPage = () => {
       {/* Page Title & Subtitle */}
       <div className="mb-6">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-          Quản lý Điểm thưởng và Ưu đãi
+          {pt.pageTitle || "Quản lý Điểm thưởng và Ưu đãi"}
         </h1>
         <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          Theo dõi số dư điểm thưởng, tích lũy điểm và đổi lấy các voucher học tập giá trị.
+          {pt.pageSubtitle || "Theo dõi số dư điểm thưởng, tích lũy điểm và đổi lấy các voucher học tập giá trị."}
         </p>
       </div>
 
@@ -92,7 +95,7 @@ const PointsAndOffersPage = () => {
       {/* Main Tab Navigation Bar */}
       <div className="border-b border-gray-200/90 mb-6 overflow-x-auto scrollbar-none">
         <div className="flex items-center gap-6 sm:gap-8 min-w-max">
-          {TABS.map((tab) => {
+          {tabs.map((tab) => {
             const isActive = activeTab === tab.key
             return (
               <button

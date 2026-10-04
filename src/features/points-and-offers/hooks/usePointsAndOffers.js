@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import toast from "react-hot-toast"
+import { useLanguage } from "@/shared/context/LanguageContext"
 import { selectCurrentUser } from "@/store/slices/authSlice"
 import {
   useGetPointsOverviewQuery,
@@ -60,9 +61,13 @@ export const formatDateOnly = (isoString) => {
   }
 }
 
+const EMPTY_ARRAY = []
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const usePointsAndOffers = () => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const ts = pt.toasts || {}
   const [searchParams, setSearchParams] = useSearchParams()
   const currentUser = useSelector(selectCurrentUser)
 
@@ -113,7 +118,7 @@ export const usePointsAndOffers = () => {
   } = useGetPointsOverviewQuery()
 
   const {
-    data: historyData = [],
+    data: historyData = EMPTY_ARRAY,
     isLoading: isLoadingHistoryQuery,
     isFetching: isFetchingHistory,
     refetch: refetchHistory,
@@ -123,11 +128,11 @@ export const usePointsAndOffers = () => {
       pageSize: historyPageSize,
       type: historyFilter !== "all" ? historyFilter : undefined,
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true },
   )
 
   const {
-    data: templatesData = [],
+    data: templatesData = EMPTY_ARRAY,
     isLoading: isLoadingTemplatesQuery,
     isFetching: isFetchingTemplates,
     refetch: refetchTemplates,
@@ -136,7 +141,7 @@ export const usePointsAndOffers = () => {
       category: exchangeCategoryFilter !== "all" ? exchangeCategoryFilter : undefined,
       search: exchangeSearchQuery?.trim() || undefined,
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true },
   )
 
   // Format inventory status query param dynamically on filter change
@@ -146,23 +151,27 @@ export const usePointsAndOffers = () => {
   }, [vaultSubTab])
 
   const {
-    data: inventoryData = [],
+    data: inventoryData = EMPTY_ARRAY,
     isLoading: isLoadingInventoryQuery,
     isFetching: isFetchingInventory,
     refetch: refetchInventory,
   } = useGetVoucherInventoryQuery(
     { status: inventoryStatusParam },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true },
   )
 
   // Update vault count for active sub-tab upon fetch
   useEffect(() => {
     if (Array.isArray(inventoryData)) {
       const key = (vaultSubTab || "unused").toLowerCase()
-      setVaultCounts((prev) => ({
-        ...prev,
-        [key]: inventoryData.length,
-      }))
+      const count = inventoryData.length
+      setVaultCounts((prev) => {
+        if (prev[key] === count) return prev
+        return {
+          ...prev,
+          [key]: count,
+        }
+      })
     }
   }, [inventoryData, vaultSubTab])
 
@@ -341,12 +350,15 @@ export const usePointsAndOffers = () => {
         return
       }
       if (voucher.status === "out_of_stock" || voucher.stock <= 0) {
-        toast.error("Voucher này đã hết lượt đổi!")
+        toast.error(ts.outOfStockError || "Voucher này đã hết lượt đổi!")
         return
       }
       if (voucher.pointsRequired > (overviewData?.balance ?? 0)) {
+        const diff = voucher.pointsRequired - (overviewData?.balance ?? 0)
         toast.error(
-          `Bạn cần thêm ${voucher.pointsRequired - (overviewData?.balance ?? 0)} điểm để đổi voucher này!`,
+          ts.needMorePointsError
+            ? ts.needMorePointsError.replace("{{points}}", diff)
+            : `Bạn cần thêm ${diff} điểm để đổi voucher này!`,
         )
         return
       }
@@ -354,7 +366,7 @@ export const usePointsAndOffers = () => {
       setTechnicalErrorCode(null)
       setModalStep(MODAL_STEPS.CONFIRM)
     },
-    [overviewData?.balance],
+    [overviewData?.balance, ts],
   )
 
   const handleCloseModal = useCallback(() => {
@@ -403,13 +415,13 @@ export const usePointsAndOffers = () => {
           status: (response?.status || "Unused").toLowerCase(),
           expiryDate: formatDateOnly(response?.expiresAt) || selectedVoucher.expiryDate,
           expiresAt: response?.expiresAt,
-          badge: "Chưa dùng",
+          badge: pt.vault?.item?.badgeUnused || "Chưa dùng",
           description: selectedVoucher.description || selectedVoucher.conditions,
         }
 
         setNewlyRedeemedVoucher(newVoucher)
         setModalStep(MODAL_STEPS.SUCCESS)
-        toast.success("Đổi voucher thành công!", { duration: 2000 })
+        toast.success(ts.redeemSuccess || "Đổi voucher thành công!", { duration: 2000 })
         break
       } catch (err) {
         lastError = err
@@ -450,7 +462,7 @@ export const usePointsAndOffers = () => {
       if (typeof status === "number" && status >= 400 && status < 500) {
         setModalStep(MODAL_STEPS.NONE)
         setSelectedVoucher(null)
-        toast.error(errorMessage || "Không thể đổi voucher vào lúc này.")
+        toast.error(errorMessage || ts.cannotRedeemNow || "Không thể đổi voucher vào lúc này.")
         return
       }
 
@@ -461,17 +473,23 @@ export const usePointsAndOffers = () => {
       setTechnicalErrorCode(errCode)
       setModalStep(MODAL_STEPS.ERROR_NETWORK)
     }
-  }, [selectedVoucher, isProcessingExchange, redeemVoucherMutation, currentUser])
+  }, [selectedVoucher, isProcessingExchange, redeemVoucherMutation, currentUser, ts, pt])
 
   const handleCopyCode = useCallback((code) => {
     if (!code) return
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(code)
-      toast.success(`Đã sao chép mã ${code} vào bộ nhớ tạm!`, { duration: 2000 })
+      const msg = ts.copySuccess
+        ? ts.copySuccess.replace("{{code}}", code)
+        : `Đã sao chép mã ${code} vào bộ nhớ tạm!`
+      toast.success(msg, { duration: 2000 })
     } else {
-      toast.success(`Đã sao chép mã ${code}!`, { duration: 2000 })
+      const msg = ts.copySuccessSimple
+        ? ts.copySuccessSimple.replace("{{code}}", code)
+        : `Đã sao chép mã ${code}!`
+      toast.success(msg, { duration: 2000 })
     }
-  }, [])
+  }, [ts])
 
   const handleGoToVault = useCallback(() => {
     handleCloseModal()
@@ -480,8 +498,11 @@ export const usePointsAndOffers = () => {
   }, [handleCloseModal, setActiveTab])
 
   const handleUseVoucher = useCallback((voucher) => {
-    toast.success(`Đã chọn mã ${voucher.code}. Bạn có thể áp dụng mã này khi thanh toán khóa học!`)
-  }, [])
+    const msg = ts.appliedVoucherInfo
+      ? ts.appliedVoucherInfo.replace("{{code}}", voucher.code)
+      : `Đã chọn mã ${voucher.code}. Bạn có thể áp dụng mã này khi thanh toán khóa học!`
+    toast.success(msg)
+  }, [ts])
 
   return {
     // Navigation / Tabs

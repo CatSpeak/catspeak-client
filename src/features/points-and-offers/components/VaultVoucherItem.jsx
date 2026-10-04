@@ -1,14 +1,33 @@
 import React from "react"
 import { Copy } from "lucide-react"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const VaultVoucherItem = ({
   voucher,
   onCopyCode,
   onUseNow,
 }) => {
+  const { t } = useLanguage()
+  const pt = t.pointsAndOffers || {}
+  const viItem = pt.vault?.item || {}
+
   const isUnused = voucher.status === "unused"
   const isUsed = voucher.status === "used"
   const isExpired = voucher.status === "expired"
+
+  const description =
+    voucher.description ||
+    (voucher.discountType === "Percentage" && viItem.percentDiscountDesc
+      ? viItem.percentDiscountDesc.replace(
+          "{{percent}}",
+          voucher.discountValue,
+        )
+      : voucher.discountType === "FixedAmount" && viItem.fixedDiscountDesc
+        ? viItem.fixedDiscountDesc.replace(
+            "{{amount}}",
+            (voucher.discountValue || 0).toLocaleString("vi-VN"),
+          )
+        : voucher.description)
 
   return (
     <div className="relative bg-white border border-gray-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition duration-200 flex flex-col md:flex-row items-stretch">
@@ -18,7 +37,7 @@ const VaultVoucherItem = ({
           {voucher.discountTag}
         </span>
         <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mt-0.5">
-          Voucher
+          {viItem.voucherLabel || "Voucher"}
         </span>
 
         {/* Decorative Ticket Perforation Circles (on md screen) */}
@@ -36,23 +55,23 @@ const VaultVoucherItem = ({
 
             {isUnused && (
               <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                {voucher.badge || "Chưa dùng"}
+                {voucher.badge || viItem.badgeUnused || "Chưa dùng"}
               </span>
             )}
             {isUsed && (
               <span className="text-[11px] font-semibold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
-                Đã dùng
+                {viItem.badgeUsed || "Đã dùng"}
               </span>
             )}
             {isExpired && (
               <span className="text-[11px] font-semibold text-rose-500 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
-                Hết hạn
+                {viItem.badgeExpired || "Hết hạn"}
               </span>
             )}
           </div>
 
           <p className="text-xs text-gray-500 mb-3 leading-relaxed">
-            {voucher.description}
+            {description}
           </p>
         </div>
 
@@ -63,7 +82,7 @@ const VaultVoucherItem = ({
               type="button"
               onClick={() => onCopyCode?.(voucher.code)}
               className="text-gray-400 hover:text-gray-700 transition ml-1 cursor-pointer"
-              title="Sao chép mã"
+              title={viItem.copyTooltip || "Sao chép mã"}
             >
               <Copy size={13} />
             </button>
@@ -71,9 +90,23 @@ const VaultVoucherItem = ({
 
           <div className="text-gray-400 text-[11px]">
             {isUsed ? (
-              <span>Thời gian sử dụng: {voucher.usedDate || voucher.expiryDate}</span>
+              <span>
+                {viItem.usedDate
+                  ? viItem.usedDate.replace(
+                      "{{date}}",
+                      voucher.usedDate || voucher.expiryDate,
+                    )
+                  : `Thời gian sử dụng: ${voucher.usedDate || voucher.expiryDate}`}
+              </span>
             ) : (
-              <span>HSD: {voucher.expiryDate}</span>
+              <span>
+                {viItem.expiryDate
+                  ? viItem.expiryDate.replace(
+                      "{{date}}",
+                      voucher.expiryDate,
+                    )
+                  : `HSD: ${voucher.expiryDate}`}
+              </span>
             )}
           </div>
         </div>
@@ -88,23 +121,23 @@ const VaultVoucherItem = ({
               onClick={() => onCopyCode?.(voucher.code)}
               className="px-3.5 py-2 text-xs font-semibold text-gray-700 bg-white hover:bg-gray-100 border border-gray-200 rounded-lg transition cursor-pointer"
             >
-              Sao chép mã
+              {viItem.copyCode || "Sao chép mã"}
             </button>
             <button
               type="button"
               onClick={() => onUseNow?.(voucher)}
               className="px-4 py-2 text-xs font-semibold text-white bg-[#990011] hover:bg-[#85000f] active:bg-[#72000d] rounded-lg shadow-xs transition cursor-pointer"
             >
-              Dùng ngay
+              {viItem.useNow || "Dùng ngay"}
             </button>
           </>
         ) : isUsed ? (
           <span className="text-xs font-semibold text-gray-400 px-3 py-1 bg-gray-100 rounded-md">
-            Đã dùng
+            {viItem.badgeUsed || "Đã dùng"}
           </span>
         ) : (
           <span className="text-xs font-semibold text-gray-400 px-3 py-1 bg-gray-100 rounded-md">
-            Hết hạn
+            {viItem.badgeExpired || "Hết hạn"}
           </span>
         )}
       </div>
