@@ -46,8 +46,7 @@ export const useGroupedMessages = ({
     const otherUser = conversation.friend
     const FIVE_MIN = 5 * 60 * 1000
 
-    const getMessageTypeStr = (m) =>
-      m && m.messageType != null ? String(m.messageType).toLowerCase() : ""
+    const getMessageTypeStr = (m) => String(m?.messageType || "").toLowerCase()
 
     let lastNonSystemMsgIndex = -1
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -82,8 +81,10 @@ export const useGroupedMessages = ({
         prevDate = msgDate
       }
 
-      // System messages handling
-      if (getMessageTypeStr(msg) === "system") {
+      const msgTypeStr = getMessageTypeStr(msg)
+
+      // System messages handling (messageType 4 or "system")
+      if (msgTypeStr === "system") {
         groupedItems.push({
           type: "system",
           id: msgId,
@@ -94,11 +95,7 @@ export const useGroupedMessages = ({
       }
 
       // StoryInterest messages handling (messageType 6 or "storyinterest")
-      const msgTypeRaw = msg?.messageType
-      const isStoryInterest =
-        msgTypeRaw === 6 ||
-        msgTypeRaw === "6" ||
-        String(msgTypeRaw).toLowerCase() === "storyinterest"
+      const isStoryInterest = msgTypeStr === "storyinterest"
 
       if (isStoryInterest) {
         // Resolve sender so the card can show avatar + name

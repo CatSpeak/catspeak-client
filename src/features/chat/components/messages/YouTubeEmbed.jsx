@@ -10,7 +10,7 @@ import { Play, ExternalLink, RotateCcw } from "lucide-react"
  * @param {string} timestamp    - Optional start timestamp
  * @param {boolean} isOwn       - Bubble owner flag
  */
-const YouTubeEmbed = ({ videoId, originalUrl, timestamp = null, _isOwn = false, hasCaption = false }) => {
+const YouTubeEmbed = ({ videoId, originalUrl, timestamp = null, hasCaption = false }) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [imgSrc, setImgSrc] = useState(
     `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,

@@ -108,7 +108,10 @@ const Popover = ({
 
   const portalContent = (
     <div
+      data-popover-portal
       className="absolute z-[9999]"
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       style={{
         top: actualPlacement.startsWith("top")
           ? `${coords.topEdge - 8}px`

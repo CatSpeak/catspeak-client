@@ -1,11 +1,13 @@
 import { X, FileIcon } from "lucide-react"
 import { IconButton } from "@/shared/components/ui/buttons"
 import ListItem from "@/shared/components/ui/ListItem"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
  * ChatInputPreview — renders thumbnail or document card for selected file attachments.
  */
 const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
+  const { t } = useLanguage()
   if (!selectedFile) return null
 
   if (filePreviewUrl) {
@@ -31,7 +33,8 @@ const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
         <button
           type="button"
           onClick={onClear}
-          aria-label="Remove attachment"
+          aria-label={t?.chat?.removeAttachment || "Remove attachment"}
+          title={t?.chat?.removeAttachment || "Remove attachment"}
           className="absolute -top-5 -right-5 w-12 h-12 flex items-center justify-center focus:outline-none cursor-pointer"
         >
           <span className="w-7 h-7 rounded-full bg-white border border-border flex items-center justify-center hover:bg-primaryBg">
@@ -53,7 +56,8 @@ const ChatInputPreview = ({ selectedFile, filePreviewUrl, onClear }) => {
             size="sm"
             variant="ghost"
             onClick={onClear}
-            aria-label="Remove file attachment"
+            aria-label={t?.chat?.removeFileAttachment || "Remove file attachment"}
+            title={t?.chat?.removeFileAttachment || "Remove file attachment"}
           >
             <X />
           </IconButton>

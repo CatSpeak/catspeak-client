@@ -1,6 +1,4 @@
 import React, {
-  createContext,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -10,6 +8,7 @@ import * as signalR from "@microsoft/signalr"
 import { useAuth } from "@/features/auth"
 import { store } from "@store"
 import { getRefreshPromise } from "@store/api/baseApi"
+import { ConversationSignalRContext } from "./ConversationSignalRContext.js"
 
 const MAX_START_RETRIES = 3
 const RETRY_DELAY_MS = 3000
@@ -50,12 +49,6 @@ const HUB_EVENTS = [
   "CallParticipantLeft",
   "CallEnded",
 ]
-
-const ConversationSignalRContext = createContext(null)
-
-export const useConversationSignalRContext = () => {
-  return useContext(ConversationSignalRContext)
-}
 
 export const ConversationSignalRProvider = ({ children }) => {
   const { token } = useAuth()
@@ -320,3 +313,5 @@ export const ConversationSignalRProvider = ({ children }) => {
     </ConversationSignalRContext.Provider>
   )
 }
+
+export default ConversationSignalRProvider

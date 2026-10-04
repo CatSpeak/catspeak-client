@@ -21,6 +21,7 @@ import {
 } from "@/store/api/social/conversationsApi"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getProfilePath } from "@/shared/utils/navigation"
 import toast from "react-hot-toast"
 
 /**
@@ -168,19 +169,29 @@ const GroupMemberList = ({
     const canManage =
       !isMe && (isCurrentUserOwner || (isCurrentUserAdmin && isRegularMember))
 
+    const handleMemberClick = () => {
+      if (onSelectMember) {
+        onSelectMember(participant)
+      } else if (pId) {
+        navigate(getProfilePath(pId))
+      }
+    }
+
     return (
       <ListItem
         key={pId}
         as="div"
-        onClick={() => onSelectMember(participant)}
+        onClick={handleMemberClick}
         hoverEffect={true}
         lines={2}
+        className="cursor-pointer group"
         leftContent={
           <Avatar
             size={40}
             name={participant.username}
             src={participant.avatarImageUrl}
             accountId={pId}
+            clickable={false}
             className={theme.avatarClass}
           />
         }
@@ -207,12 +218,7 @@ const GroupMemberList = ({
                       <>
                         {isAdmin ? (
                           <MenuItem
-                            icon={
-                              <ShieldAlert
-                                size={16}
-                                className="text-amber-500 shrink-0"
-                              />
-                            }
+                            icon={<ShieldAlert className="shrink-0" />}
                             label={t?.chat?.demoteAdmin || "Demote to Member"}
                             disabled={isDemoting}
                             onClick={() => {
@@ -222,9 +228,7 @@ const GroupMemberList = ({
                           />
                         ) : (
                           <MenuItem
-                            icon={
-                              <ShieldCheck className="text-blue-500 shrink-0" />
-                            }
+                            icon={<ShieldCheck className="shrink-0" />}
                             label={t?.chat?.promoteAdmin || "Promote to Admin"}
                             disabled={isPromoting}
                             onClick={() => {
@@ -235,7 +239,7 @@ const GroupMemberList = ({
                         )}
 
                         <MenuItem
-                          icon={<Crown className="text-amber-500 shrink-0" />}
+                          icon={<Crown className="shrink-0" />}
                           label={
                             t?.chat?.transferOwnership || "Transfer Ownership"
                           }
@@ -245,7 +249,7 @@ const GroupMemberList = ({
                           }}
                         />
 
-                        <div className="my-1 border-t border-border/50" />
+                        <div className="my-1 border-t border-border" />
                       </>
                     )}
 
@@ -271,19 +275,7 @@ const GroupMemberList = ({
         }
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <span
-            onClick={(e) => {
-              if (pId) {
-                e.stopPropagation()
-                navigate(`/profile/${pId}`)
-              }
-            }}
-            className={`truncate font-medium text-neutral-900 ${
-              pId
-                ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors"
-                : ""
-            }`}
-          >
+          <span className="truncate font-medium text-neutral-900 group-hover:text-cath-red-700 transition-colors">
             {participant.username}
             {isMe && (
               <span className="text-[#606060] font-normal">

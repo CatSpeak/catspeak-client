@@ -53,7 +53,7 @@ const ChatPage = () => {
     activeMessages,
     accumulatedMessagesCount,
     isLoadingMessages,
-    isFetchingMessages,
+    isFetchingOlder,
     hasMoreMessages,
     handleLoadMoreMessages,
     optimisticEditMessage,
@@ -171,19 +171,9 @@ const ChatPage = () => {
       const element = document.getElementById(`chat-message-${messageId}`)
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "center" })
-        element.classList.add(
-          "ring-2",
-          "ring-primary",
-          "rounded-xl",
-          "bg-primary/10",
-        )
+        element.classList.add("chat-message-highlight")
         setTimeout(() => {
-          element.classList.remove(
-            "ring-2",
-            "ring-primary",
-            "rounded-xl",
-            "bg-primary/10",
-          )
+          element.classList.remove("chat-message-highlight")
         }, 2000)
       } else {
         toast(
@@ -217,7 +207,7 @@ const ChatPage = () => {
     <FluentAnimation className="flex lg:gap-4 lg:p-4 h-[calc(100dvh-64px)] overflow-hidden bg-primary2">
       {/* ── Sidebar ──────────────────────────────────── */}
       <div
-        className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-fit shrink-0`}
+        className={`${selectedId ? "hidden lg:flex" : "flex"} w-full lg:w-[360px] shrink-0`}
       >
         <ChatSidebar
           conversations={conversations}
@@ -249,7 +239,7 @@ const ChatPage = () => {
           showInfoActive={showInfoPanel}
           friendOnlineStatus={friendOnlineStatus}
           isLoading={isLoadingMessages}
-          isLoadingMore={isFetchingMessages}
+          isLoadingMore={isFetchingOlder}
           hasMoreMessages={hasMoreMessages}
           onLoadMoreMessages={handleLoadMoreMessages}
           typingUsers={typingUsers}
@@ -279,7 +269,8 @@ const ChatPage = () => {
                 {t?.chat?.yourMessages || "Your Messages"}
               </h2>
               <p className="text-sm text-[#606060] text-center max-w-[260px]">
-                {t?.chat?.selectConversationPrompt || "Select a conversation from the sidebar to start chatting"}
+                {t?.chat?.selectConversationPrompt ||
+                  "Select a conversation from the sidebar to start chatting"}
               </p>
             </div>
           }
@@ -312,7 +303,7 @@ const ChatPage = () => {
             />
 
             {/* Mobile drawer container */}
-            <div className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex max-w-[85vw] overflow-hidden">
+            <div className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex w-full max-w-full sm:w-[360px] sm:max-w-[360px] overflow-hidden">
               <ChatUserPanel
                 conversation={activeConversation}
                 currentUser={currentUser}

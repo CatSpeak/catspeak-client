@@ -126,7 +126,7 @@ const PinnedMessageBar = ({
               type="button"
               onClick={handlePrev}
               className="p-1 rounded-md hover:bg-neutral-200/60 dark:hover:bg-zinc-700 hover:text-neutral-900 transition-colors"
-              title="Previous pinned message"
+              title={t?.chat?.prevPinnedMessage || "Previous pinned message"}
             >
               <ChevronLeft size={16} />
             </button>
@@ -134,7 +134,7 @@ const PinnedMessageBar = ({
               type="button"
               onClick={handleNext}
               className="p-1 rounded-md hover:bg-neutral-200/60 dark:hover:bg-zinc-700 hover:text-neutral-900 transition-colors"
-              title="Next pinned message"
+              title={t?.chat?.nextPinnedMessage || "Next pinned message"}
             >
               <ChevronRight size={16} />
             </button>

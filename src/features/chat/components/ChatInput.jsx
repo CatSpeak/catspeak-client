@@ -1,22 +1,28 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react"
-import { Paperclip, Smile, Send, Mic, Trash2, UploadCloud } from "lucide-react"
+import { useState, useRef, useCallback } from "react"
+import {
+  Paperclip,
+  Smile,
+  Send,
+  Mic,
+  UploadCloud,
+  Plus,
+} from "lucide-react"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
+import MenuList from "@/shared/components/ui/MenuList"
+import MenuItem from "@/shared/components/ui/MenuItem"
 import EmojiPickerWrapper from "@/shared/components/ui/EmojiPickerWrapper"
 import useEmojiPicker from "@/shared/hooks/useEmojiPicker"
 import RepliedMessage from "@/shared/components/ui/RepliedMessage"
 import ChatInputPreview from "./ChatInputPreview"
 import MentionAutocomplete from "./mentions/MentionAutocomplete"
-import { useGetConversationMembersQuery } from "@/store/api/social/conversationsApi"
+import ChatInputVoiceBar from "./ChatInputVoiceBar"
+import useVoiceRecorder from "../hooks/useVoiceRecorder"
+import useMentionAutocomplete from "../hooks/useMentionAutocomplete"
 import useTypingDebounce from "../hooks/useTypingDebounce"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getMessagePreview } from "../utils/messagePreviewUtils"
 import toast from "react-hot-toast"
-
-const formatRecordTime = (seconds) => {
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m < 10 ? "0" : ""}${m}:${s < 10 ? "0" : ""}${s}`
-}
 
 /**
  * ChatInput — message input bar with auto-resizing textarea, file attachments,
@@ -39,7 +45,10 @@ const ChatInput = ({
   conversationId = null,
   isGroup = true,
   participants = [],
+  compact = false,
+  isWidget = false,
 }) => {
+  const isCompact = compact || isWidget
   const { t } = useLanguage()
   const textareaRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -48,69 +57,41 @@ const ChatInput = ({
   const [isMultiline, setIsMultiline] = useState(false)
   const [isDraggingOver, setIsDraggingOver] = useState(false)
 
-  // ── @Mentions State ────────────────────────────────────
-  const [mentionQuery, setMentionQuery] = useState(null)
-  const [mentionStartIndex, setMentionStartIndex] = useState(-1)
-  const [mentionSelectedIndex, setMentionSelectedIndex] = useState(0)
-  const [mentionedAccountIds, setMentionedAccountIds] = useState([])
+  // ── Voice Recording Hook ──────────────────────────────
+  const {
+    isRecording,
+    isReviewing,
+    recordingSeconds,
+    visualizerBars,
+    reviewBars,
+    isPlaying,
+    playbackCurrentTime,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+    sendVoiceRecording,
+    togglePlayPreview,
+    seekPreview,
+  } = useVoiceRecorder({ onSendVoice, onSend })
 
-  const { data: membersResponse = [] } = useGetConversationMembersQuery(
+  // ── @Mentions Autocomplete Hook ───────────────────────
+  const {
+    mentionQuery,
+    mentionItems,
+    mentionSelectedIndex,
+    mentionedAccountIds,
+    handleSelectMention,
+    checkMentionTrigger,
+    handleMentionKeyDown,
+    resetMentions,
+  } = useMentionAutocomplete({
+    value,
+    onChange,
     conversationId,
-    { skip: !conversationId || !isGroup },
-  )
-
-  const activeMembers = useMemo(() => {
-    const list = Array.isArray(membersResponse)
-      ? membersResponse
-      : membersResponse?.data || []
-    return list.length > 0 ? list : participants
-  }, [membersResponse, participants])
-
-  const mentionItems = useMemo(() => {
-    if (mentionQuery === null) return []
-    const list = []
-    const cleanQ = (mentionQuery || "").toLowerCase()
-    if (
-      isGroup &&
-      (!cleanQ || "all".includes(cleanQ) || "tatca".includes(cleanQ))
-    ) {
-      list.push({
-        isAll: true,
-        accountId: 0,
-        username: "all",
-        fullName: t?.chat?.mentions?.allMembers || "All members (@all)",
-      })
-    }
-    const cleanQTrim = cleanQ.trim()
-    activeMembers.forEach((m) => {
-      const uName = (m.username || "").toLowerCase()
-      const fName = (m.fullName || m.name || "").toLowerCase()
-      if (
-        !cleanQTrim ||
-        uName.includes(cleanQTrim) ||
-        fName.includes(cleanQTrim)
-      ) {
-        list.push(m)
-      }
-    })
-    return list
-  }, [activeMembers, mentionQuery, isGroup, t])
-
-  // ── Voice Recording State ─────────────────────────────
-  const [isRecording, setIsRecording] = useState(false)
-  const [recordingSeconds, setRecordingSeconds] = useState(0)
-  const [visualizerBars, setVisualizerBars] = useState([
-    20, 35, 60, 40, 75, 50, 30, 65, 45, 80, 55, 35, 70, 40, 25,
-  ])
-
-  const mediaRecorderRef = useRef(null)
-  const audioContextRef = useRef(null)
-  const analyserRef = useRef(null)
-  const animationFrameRef = useRef(null)
-  const recordTimerRef = useRef(null)
-  const audioChunksRef = useRef([])
-  const streamRef = useRef(null)
-  const recordingSecondsRef = useRef(0)
+    isGroup,
+    participants,
+    textareaRef,
+  })
 
   const { insertEmoji, addRecent } = useEmojiPicker()
   const { handleTypingActivity, stopTypingImmediately } = useTypingDebounce({
@@ -210,214 +191,12 @@ const ChatInput = ({
     [handleSelectedFile],
   )
 
-  // ── Voice Recording Logic ──────────────────────────────
-  const cleanupRecording = useCallback(() => {
-    if (recordTimerRef.current) {
-      clearInterval(recordTimerRef.current)
-      recordTimerRef.current = null
-    }
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current)
-      animationFrameRef.current = null
-    }
-    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-      audioContextRef.current.close().catch(() => {})
-      audioContextRef.current = null
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop())
-      streamRef.current = null
-    }
-    analyserRef.current = null
-    mediaRecorderRef.current = null
-    setIsRecording(false)
-    setRecordingSeconds(0)
-    recordingSecondsRef.current = 0
-  }, [])
-
-  // Cleanup on component unmount
-  useEffect(() => {
-    return () => {
-      cleanupRecording()
-    }
-  }, [cleanupRecording])
-
-  const startRecording = async () => {
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        toast.error(
-          t?.chat?.voiceNotSupported ||
-            "Audio recording is not supported in this browser.",
-        )
-        return
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-
-      // Setup Web Audio API Analyser for live wave visualization
-      const AudioCtx = window.AudioContext || window.webkitAudioContext
-      const audioCtx = new AudioCtx()
-      audioContextRef.current = audioCtx
-      const source = audioCtx.createMediaStreamSource(stream)
-      const analyser = audioCtx.createAnalyser()
-      analyser.fftSize = 64
-      source.connect(analyser)
-      analyserRef.current = analyser
-
-      // Determine best audio mime type
-      const mimeTypes = [
-        "audio/webm;codecs=opus",
-        "audio/webm",
-        "audio/ogg;codecs=opus",
-        "audio/mp4",
-      ]
-      let selectedMimeType = ""
-      for (const mime of mimeTypes) {
-        if (MediaRecorder.isTypeSupported(mime)) {
-          selectedMimeType = mime
-          break
-        }
-      }
-
-      const recorder = new MediaRecorder(
-        stream,
-        selectedMimeType ? { mimeType: selectedMimeType } : undefined,
-      )
-      mediaRecorderRef.current = recorder
-      audioChunksRef.current = []
-
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          audioChunksRef.current.push(e.data)
-        }
-      }
-
-      recorder.start(100) // collect chunks every 100ms
-      setIsRecording(true)
-      setRecordingSeconds(0)
-      recordingSecondsRef.current = 0
-
-      // Timer
-      recordTimerRef.current = setInterval(() => {
-        setRecordingSeconds((prev) => {
-          const next = prev + 1
-          recordingSecondsRef.current = next
-          return next
-        })
-      }, 1000)
-
-      // Dynamic Audio Visualizer Loop
-      const dataArray = new Uint8Array(analyser.frequencyBinCount)
-      const updateVisualizer = () => {
-        if (!analyserRef.current) return
-        analyserRef.current.getByteFrequencyData(dataArray)
-
-        // Sample 16 bars from frequency spectrum
-        const barsCount = 16
-        const step = Math.floor(dataArray.length / barsCount) || 1
-        const newBars = []
-        for (let i = 0; i < barsCount; i++) {
-          const val = dataArray[i * step] || 0
-          // Map value (0 - 255) to height percentage (15% - 95%)
-          const height = Math.max(
-            15,
-            Math.min(95, Math.round((val / 255) * 90) + 15),
-          )
-          newBars.push(height)
-        }
-        setVisualizerBars(newBars)
-        animationFrameRef.current = requestAnimationFrame(updateVisualizer)
-      }
-      animationFrameRef.current = requestAnimationFrame(updateVisualizer)
-    } catch (err) {
-      console.error("Failed to start voice recording:", err)
-      toast.error(
-        t?.chat?.micPermissionDenied ||
-          "Microphone access denied. Please allow microphone permissions.",
-      )
-      cleanupRecording()
-    }
-  }
-
-  const cancelRecording = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
-    ) {
-      mediaRecorderRef.current.stop()
-    }
-    cleanupRecording()
-  }
-
-  const sendVoiceRecording = () => {
-    const recorder = mediaRecorderRef.current
-    if (!recorder || recorder.state === "inactive") return
-
-    const durationToSend = Math.max(1, recordingSecondsRef.current)
-
-    recorder.onstop = () => {
-      const mime = recorder.mimeType || "audio/webm"
-      const audioBlob = new Blob(audioChunksRef.current, { type: mime })
-
-      if (onSendVoice) {
-        onSendVoice(audioBlob, durationToSend)
-      } else if (onSend) {
-        const file = new File([audioBlob], `voice_${Date.now()}.webm`, {
-          type: mime,
-        })
-        onSend("", file, {
-          audioDuration: durationToSend,
-          messageType: "Audio",
-        })
-      }
-
-      cleanupRecording()
-    }
-
-    recorder.stop()
-  }
-
-  // ── Mention Selection ─────────────────────────────────
-  const handleSelectMention = useCallback(
-    (item) => {
-      if (!item || mentionStartIndex < 0) return
-      const before = value.slice(0, mentionStartIndex)
-      const mentionText = `@${item.username || "all"} `
-      const cursorPos = textareaRef.current?.selectionStart ?? value.length
-      const after = value.slice(cursorPos)
-      const newValue = `${before}${mentionText}${after}`
-      onChange(newValue)
-
-      if (!item.isAll && item.accountId) {
-        setMentionedAccountIds((prev) =>
-          prev.includes(item.accountId) ? prev : [...prev, item.accountId],
-        )
-      }
-
-      setMentionQuery(null)
-      setMentionStartIndex(-1)
-      setMentionSelectedIndex(0)
-
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus()
-          const newPos = before.length + mentionText.length
-          textareaRef.current.setSelectionRange(newPos, newPos)
-        }
-      }, 0)
-    },
-    [value, mentionStartIndex, onChange],
-  )
-
   // ── Standard Send ──────────────────────────────────────
   const handleSend = useCallback(() => {
     if (!hasContent) return
     stopTypingImmediately()
     onSend(value.trim(), selectedFile, { mentionedAccountIds })
-    setMentionedAccountIds([])
-    setMentionQuery(null)
-    setMentionStartIndex(-1)
+    resetMentions()
     clearSelectedFile()
   }, [
     hasContent,
@@ -425,39 +204,15 @@ const ChatInput = ({
     selectedFile,
     onSend,
     mentionedAccountIds,
-    stopTypingImmediately,
+    resetMentions,
     clearSelectedFile,
+    stopTypingImmediately,
   ])
 
   const handleKeyDown = useCallback(
     (e) => {
-      if (mentionQuery !== null && mentionItems.length > 0) {
-        if (e.key === "ArrowDown") {
-          e.preventDefault()
-          setMentionSelectedIndex((prev) => (prev + 1) % mentionItems.length)
-          return
-        }
-        if (e.key === "ArrowUp") {
-          e.preventDefault()
-          setMentionSelectedIndex(
-            (prev) => (prev - 1 + mentionItems.length) % mentionItems.length,
-          )
-          return
-        }
-        if (e.key === "Enter" || e.key === "Tab") {
-          e.preventDefault()
-          const chosen = mentionItems[mentionSelectedIndex] || mentionItems[0]
-          if (chosen) {
-            handleSelectMention(chosen)
-          }
-          return
-        }
-        if (e.key === "Escape") {
-          e.preventDefault()
-          setMentionQuery(null)
-          setMentionStartIndex(-1)
-          return
-        }
+      if (handleMentionKeyDown(e)) {
+        return
       }
 
       if (e.key === "Enter" && !e.shiftKey) {
@@ -467,35 +222,14 @@ const ChatInput = ({
         }
       }
     },
-    [
-      mentionQuery,
-      mentionItems,
-      mentionSelectedIndex,
-      handleSelectMention,
-      hasContent,
-      handleSend,
-    ],
+    [handleMentionKeyDown, hasContent, handleSend],
   )
 
   const handleChange = useCallback(
     (e) => {
       const val = e.target.value
       onChange(val)
-
-      // Detect @mentions trigger
-      const cursorPos = e.target.selectionStart || 0
-      const textBeforeCursor = val.slice(0, cursorPos)
-      const atMatch = textBeforeCursor.match(/(?:^|\s)@([a-zA-Z0-9_\-À-ỹ]*)$/)
-      if (atMatch) {
-        const query = atMatch[1]
-        const atPos = textBeforeCursor.lastIndexOf("@")
-        setMentionQuery(query)
-        setMentionStartIndex(atPos)
-        setMentionSelectedIndex(0)
-      } else {
-        setMentionQuery(null)
-        setMentionStartIndex(-1)
-      }
+      checkMentionTrigger(val, e.target.selectionStart || 0)
 
       if (val.trim().length > 0) {
         handleTypingActivity()
@@ -510,7 +244,7 @@ const ChatInput = ({
         }
       }
     },
-    [onChange, isMultiline, handleTypingActivity, stopTypingImmediately],
+    [onChange, checkMentionTrigger, isMultiline, handleTypingActivity, stopTypingImmediately],
   )
 
   return (
@@ -528,6 +262,7 @@ const ChatInput = ({
           onSelect={handleSelectMention}
         />
       )}
+
       {/* Drag & Drop Overlay */}
       {isDraggingOver && (
         <div className="absolute inset-x-4 inset-y-2 z-30 bg-primary/10 border-2 border-dashed border-primary rounded-3xl flex items-center justify-center gap-3 backdrop-blur-xs pointer-events-none transition-all">
@@ -547,7 +282,7 @@ const ChatInput = ({
             t?.chat?.someone ||
             "Someone"
           }
-          content={replyingTo.content || replyingTo.messageContent || ""}
+          content={getMessagePreview(replyingTo, t)}
           onCancel={onCancelReply}
         />
       )}
@@ -569,48 +304,21 @@ const ChatInput = ({
       />
 
       {/* ── Main Input Box / Voice Recording Bar ── */}
-      {isRecording ? (
-        /* Recording Mode UI */
-        <div className="w-full flex items-center justify-between pl-4 pr-1 h-14 border border-cath-red-700 bg-red-50/50 rounded-[28px] animate-pulse-subtle">
-          {/* Left: Pulsing Dot & Timer */}
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
-            </span>
-            <span>{formatRecordTime(recordingSeconds)}</span>
-          </div>
-
-          {/* Center: Live Waveform Visualizer */}
-          <div className="flex-1 flex items-center justify-center gap-[3px] px-6 h-8 overflow-hidden max-w-sm">
-            {visualizerBars.map((height, idx) => (
-              <div
-                key={idx}
-                style={{ height: `${height}%` }}
-                className="w-1.5 bg-red-500/80 rounded-full transition-all duration-75"
-              />
-            ))}
-          </div>
-
-          {/* Right: Cancel & Send Buttons */}
-          <div className="flex items-center gap-1">
-            <IconButton
-              onClick={cancelRecording}
-              variant="ghost"
-              aria-label="Cancel recording"
-            >
-              <Trash2 />
-            </IconButton>
-
-            <IconButton
-              onClick={sendVoiceRecording}
-              variant="primary"
-              aria-label="Send voice message"
-            >
-              <Send className="-translate-x-[1px] translate-y-[1px]" />
-            </IconButton>
-          </div>
-        </div>
+      {isRecording || isReviewing ? (
+        <ChatInputVoiceBar
+          isRecording={isRecording}
+          isReviewing={isReviewing}
+          recordingSeconds={recordingSeconds}
+          visualizerBars={visualizerBars}
+          reviewBars={reviewBars}
+          isPlaying={isPlaying}
+          playbackCurrentTime={playbackCurrentTime}
+          onStop={stopRecording}
+          onCancel={cancelRecording}
+          onSend={sendVoiceRecording}
+          onTogglePlay={togglePlayPreview}
+          onSeek={seekPreview}
+        />
       ) : (
         /* Normal Typing Input Mode */
         <div
@@ -620,27 +328,69 @@ const ChatInput = ({
             isMultiline
               ? "pb-[3px] pt-3 min-h-[110px] gap-y-2"
               : "items-center h-14"
-          } ${showLeftIcon ? "pl-2" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}
+          } ${showLeftIcon ? "pl-1" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}
         >
-          {/* Attachment button */}
-          {showLeftIcon && (
-            <IconButton
-              variant="ghost"
-              aria-label="Attach file"
-              onClick={(e) => {
-                e.stopPropagation()
-                fileInputRef.current?.click()
-              }}
-              disabled={disabled}
-              className={`shrink-0 ${
-                isMultiline
-                  ? "col-start-1 row-start-2"
-                  : "col-start-1 row-start-1"
-              }`}
-            >
-              <Paperclip />
-            </IconButton>
-          )}
+          {/* Attachment / Action button */}
+          {showLeftIcon &&
+            (isCompact ? (
+              <Popover
+                placement="top-left"
+                className={`shrink-0 ${
+                  isMultiline
+                    ? "col-start-1 row-start-2"
+                    : "col-start-1 row-start-1"
+                }`}
+                trigger={
+                  <IconButton
+                    variant="ghost"
+                    aria-label={t?.chat?.attachFile || "Add attachment or action"}
+                    title={t?.chat?.attachFile || "Add attachment or action"}
+                    type="button"
+                    disabled={disabled}
+                  >
+                    <Plus />
+                  </IconButton>
+                }
+                content={(close) => (
+                  <MenuList className="w-48 shadow-lg">
+                    <MenuItem
+                      icon={<Paperclip size={18} />}
+                      label={t?.messages?.attach || t?.chat?.attachFile || "Attach file"}
+                      onClick={() => {
+                        close()
+                        fileInputRef.current?.click()
+                      }}
+                    />
+                    <MenuItem
+                      icon={<Mic size={18} />}
+                      label={t?.chat?.voiceMessage || "Voice message"}
+                      onClick={() => {
+                        close()
+                        startRecording()
+                      }}
+                    />
+                  </MenuList>
+                )}
+              />
+            ) : (
+              <IconButton
+                variant="ghost"
+                aria-label={t?.chat?.attachFile || "Attach file"}
+                title={t?.chat?.attachFile || "Attach file"}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  fileInputRef.current?.click()
+                }}
+                disabled={disabled}
+                className={`shrink-0 ${
+                  isMultiline
+                    ? "col-start-1 row-start-2"
+                    : "col-start-1 row-start-1"
+                }`}
+              >
+                <Paperclip />
+              </IconButton>
+            ))}
 
           {/* Textarea Wrapper */}
           <div
@@ -687,7 +437,9 @@ const ChatInput = ({
                       ? "text-amber-600 font-medium"
                       : "text-gray-400 opacity-75"
                 }`}
-                title={`${value.length} / ${maxLength} characters`}
+                title={(t?.chat?.charCount || "{{current}} / {{max}} characters")
+                  .replace(/\{\{current\}\}|\{current\}/g, value.length)
+                  .replace(/\{\{max\}\}|\{max\}/g, maxLength)}
               >
                 {value.length}/{maxLength}
               </span>
@@ -701,7 +453,8 @@ const ChatInput = ({
                   trigger={
                     <IconButton
                       variant="ghost"
-                      aria-label="Emoji"
+                      aria-label={t?.chat?.chooseEmoji || "Choose emoji"}
+                      title={t?.chat?.chooseEmoji || "Choose emoji"}
                       type="button"
                     >
                       <Smile />
@@ -717,22 +470,26 @@ const ChatInput = ({
                   )}
                 />
 
-                {/* Voice Record Button */}
-                <IconButton
-                  onClick={startRecording}
-                  disabled={disabled}
-                  variant="ghost"
-                  aria-label="Record voice message"
-                >
-                  <Mic />
-                </IconButton>
+                {/* Voice Record Button (full mode only; centralized in the + menu for compact mode) */}
+                {!isCompact && (
+                  <IconButton
+                    onClick={startRecording}
+                    disabled={disabled}
+                    variant="ghost"
+                    aria-label={t?.chat?.recordVoiceNote || "Record voice note"}
+                    title={t?.chat?.recordVoiceNote || "Record voice note"}
+                  >
+                    <Mic />
+                  </IconButton>
+                )}
 
                 {/* Send button */}
                 <IconButton
                   onClick={handleSend}
                   disabled={disabled || !hasContent}
                   variant={hasContent ? "primary" : "ghost"}
-                  aria-label="Send message"
+                  aria-label={t?.chat?.sendMessage || "Send message"}
+                  title={t?.chat?.sendMessage || "Send message"}
                 >
                   <Send className="-translate-x-[1px] translate-y-[1px]" />
                 </IconButton>

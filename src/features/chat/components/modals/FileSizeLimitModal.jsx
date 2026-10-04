@@ -27,18 +27,12 @@ const FileSizeLimitModal = ({ open, onClose }) => {
         <AlertCircle className="w-14 h-14 text-[#990011] mb-6 shrink-0" />
 
         <h3 className="font-bold text-xl text-center mb-1">
-          {modalsT.fileSizeLimitTitle || "Dung lượng tệp vượt quá giới hạn"}
+          {modalsT.fileSizeLimitTitle || "File size exceeds limit"}
         </h3>
 
         <p className="text-sm text-[#606060] text-center max-w-sm leading-relaxed mb-6">
-          {modalsT.fileSizeLimitDesc || (
-            <>
-              Tệp tin của bạn vượt quá dung lượng tối đa cho phép là{" "}
-              <strong className="text-black font-semibold">25MB</strong> đối với
-              tài khoản hiện tại. Nâng cấp gói dịch vụ để tận hưởng giới hạn
-              dung lượng tải lên lớn hơn và nhiều tính năng cao cấp khác.
-            </>
-          )}
+          {modalsT.fileSizeLimitDesc ||
+            "Your file exceeds the maximum allowed limit of 25MB for your current account. Upgrade your plan to enjoy larger upload limits and more premium features."}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full">
@@ -47,7 +41,17 @@ const FileSizeLimitModal = ({ open, onClose }) => {
             onClick={onClose}
             className="w-full sm:flex-1"
           >
-            {modalsT.close || "Đóng"}
+            {modalsT.close || "Close"}
+          </PillButton>
+          <PillButton
+            variant="primary"
+            onClick={() => {
+              onClose?.()
+              navigate("/pricing")
+            }}
+            className="w-full sm:flex-1"
+          >
+            {modalsT.viewPricingPlans || "View pricing plans"}
           </PillButton>
         </div>
       </div>

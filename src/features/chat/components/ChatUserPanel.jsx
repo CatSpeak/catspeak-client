@@ -19,12 +19,9 @@ import {
 } from "@/store/api/social/conversationsApi"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
-import Drawer from "@/shared/components/ui/Drawer"
-import FluentCard from "@/shared/components/ui/FluentCard"
 import { IconButton, PillButton } from "@/shared/components/ui/buttons"
 import AddMembersModal from "./modals/AddMembersModal"
 import TransferOwnershipModal from "./modals/TransferOwnershipModal"
-import MemberProfileView from "./MemberProfileView"
 import GroupMemberList from "./GroupMemberList"
 import SharedMediaGallery from "./gallery/SharedMediaGallery"
 import EditGroupView from "./EditGroupView"
@@ -81,7 +78,6 @@ const ChatUserPanel = ({
   const [direction, setDirection] = useState(1)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
-  const [selectedMember, setSelectedMember] = useState(null)
   const [transferTargetMember, setTransferTargetMember] = useState(null)
 
   // Sync when initialView changes externally (e.g. from ChatHeader search button)
@@ -96,7 +92,6 @@ const ChatUserPanel = ({
   if (conversation?.id !== prevConversationId) {
     setPrevConversationId(conversation?.id)
     setCurrentView(initialView || "main")
-    setSelectedMember(null)
   }
 
   const isGroup = conversation?.isGroup
@@ -127,8 +122,7 @@ const ChatUserPanel = ({
   const friendId =
     otherUser?.accountId || otherUser?.id || conversation?.friendId
   const name = conversation?.name
-  const memberCount =
-    groupMembers.length || participants?.length || 0
+  const memberCount = groupMembers.length || participants?.length || 0
   const statusText = isGroup
     ? t?.chat?.memberCount
       ? t.chat.memberCount.replace("{{count}}", memberCount)
@@ -151,12 +145,7 @@ const ChatUserPanel = ({
 
   const handleBack = () => {
     setDirection(-1)
-    if (currentView === "member_profile") {
-      setCurrentView("members")
-      setSelectedMember(null)
-    } else {
-      setCurrentView("main")
-    }
+    setCurrentView("main")
   }
 
   const headerTitle = useMemo(() => {
@@ -165,8 +154,6 @@ const ChatUserPanel = ({
         return t?.chat?.editGroupTitle || "Edit Group"
       case "members":
         return `${t?.chat?.userPanel?.members || "Members"} (${memberCount})`
-      case "member_profile":
-        return t?.chat?.userPanel?.memberProfile || "Member Profile"
       case "media":
         return t?.chat?.userPanel?.sharedMedia || "Media, Files & Links"
       case "search":
@@ -187,8 +174,6 @@ const ChatUserPanel = ({
         id: "edit",
         icon: Edit3,
         title: t?.chat?.userPanel?.editGroup || "Edit Group",
-        subtitle:
-          t?.chat?.userPanel?.editGroupSubtitle || "Name and group photo",
         onClick: () => navigateTo("edit"),
       })
     }
@@ -198,7 +183,6 @@ const ChatUserPanel = ({
         id: "members",
         icon: Users,
         title: t?.chat?.userPanel?.members || "Members",
-        subtitle: statusText,
         onClick: () => navigateTo("members"),
       })
     }
@@ -207,9 +191,6 @@ const ChatUserPanel = ({
       id: "media",
       icon: ImageIcon,
       title: t?.chat?.userPanel?.sharedMedia || "Media, Files & Links",
-      subtitle:
-        t?.chat?.userPanel?.sharedMediaSubtitle ||
-        "Photos, videos, files, links",
       onClick: () => navigateTo("media"),
     })
 
@@ -217,14 +198,11 @@ const ChatUserPanel = ({
       id: "search",
       icon: Search,
       title: t?.chat?.userPanel?.searchMessages || "Search Messages",
-      subtitle:
-        t?.chat?.userPanel?.searchMessagesSubtitle ||
-        "Search history in this chat",
       onClick: () => navigateTo("search"),
     })
 
     return options
-  }, [isGroup, canEditGroup, statusText, t])
+  }, [isGroup, canEditGroup, t])
 
   if (!conversation) return null
 
@@ -276,10 +254,9 @@ const ChatUserPanel = ({
     }
   }
 
-  const Container = isDrawer ? Drawer : FluentCard
   const containerClasses = isDrawer
-    ? "w-[80vw] sm:w-[360px] h-full flex flex-col border-l border-t-0 border-b-0 border-r-0 shrink-0 overflow-hidden"
-    : "w-[340px] h-full flex flex-col justify-start shrink-0 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl"
+    ? "w-full sm:w-[360px] h-full flex flex-col bg-white shrink-0 overflow-hidden"
+    : "w-[360px] h-full flex flex-col shrink-0 overflow-hidden bg-white border border-border rounded-xl"
 
   const renderViewContent = () => {
     switch (currentView) {
@@ -302,10 +279,6 @@ const ChatUserPanel = ({
               currentUserId={currentUser.id}
               conversation={conversation}
               hideHeader={true}
-              onSelectMember={(member) => {
-                setSelectedMember(member)
-                navigateTo("member_profile")
-              }}
               onRemoveMember={handleRemoveMember}
               onOpenAddModal={() => setIsAddModalOpen(true)}
               onOpenTransferModal={(member) => {
@@ -313,13 +286,6 @@ const ChatUserPanel = ({
                 setIsTransferModalOpen(true)
               }}
             />
-          </div>
-        )
-
-      case "member_profile":
-        return (
-          <div className="h-full flex flex-col overflow-y-auto">
-            <MemberProfileView member={selectedMember} />
           </div>
         )
 
@@ -362,40 +328,52 @@ const ChatUserPanel = ({
                   />
                 )}
 
-                <div className="h-[72px] flex flex-col items-center justify-center">
-                  {!isGroup && friendId ? (
-                    <h2
-                      onClick={() => navigate(getProfilePath(friendId))}
-                      className="font-semibold text-center hover:underline hover:text-primary transition-colors cursor-pointer"
-                    >
-                      {name}
-                    </h2>
-                  ) : (
+                {isGroup ? (
+                  <div className="h-[72px] flex flex-col items-center justify-center">
                     <h2 className="font-semibold text-center">{name}</h2>
-                  )}
-
-                  {statusText && (
-                    <p className="text-sm text-[#606060]">{statusText}</p>
-                  )}
-
-                  {!isGroup && otherUser?.level && (
-                    <p className="text-sm text-[#606060] text-center">
-                      {t?.chat?.userPanel?.level || "Level"}: {otherUser.level}
-                    </p>
-                  )}
-                </div>
-
-                {!isGroup && friendId && (
-                  <div className="w-full mt-4">
-                    <PillButton
-                      onClick={() => navigate(getProfilePath(friendId))}
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                    >
-                      {t?.chat?.userPanel?.viewProfile || "View Profile"}
-                    </PillButton>
+                    {statusText && (
+                      <p className="text-sm text-[#606060]">{statusText}</p>
+                    )}
                   </div>
+                ) : (
+                  <>
+                    <div
+                      className={`${
+                        otherUser?.level ? "h-[72px]" : "h-[56px]"
+                      } flex flex-col items-center justify-center`}
+                    >
+                      {friendId ? (
+                        <h2
+                          onClick={() => navigate(getProfilePath(friendId))}
+                          className="font-semibold text-center"
+                        >
+                          {name}
+                        </h2>
+                      ) : (
+                        <h2 className="font-semibold text-center">{name}</h2>
+                      )}
+
+                      {otherUser?.level && (
+                        <p className="text-sm text-secondary text-center">
+                          {t?.chat?.userPanel?.level || "Level"}:{" "}
+                          {otherUser.level}
+                        </p>
+                      )}
+                    </div>
+
+                    {friendId && (
+                      <div className="w-full p-4">
+                        <PillButton
+                          onClick={() => navigate(getProfilePath(friendId))}
+                          variant="primary"
+                          size="sm"
+                          className="w-full"
+                        >
+                          {t?.chat?.userPanel?.viewProfile || "View Profile"}
+                        </PillButton>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -412,18 +390,11 @@ const ChatUserPanel = ({
                       onKeyDown={(e) =>
                         (e.key === "Enter" || e.key === " ") && opt.onClick()
                       }
-                      className="w-full flex items-center justify-between px-4 h-[72px] hover:bg-[#f2f2f2] cursor-pointer select-none"
+                      className="w-full flex items-center justify-between px-4 h-[56px] hover:bg-itemHover active:bg-itemActiveHover transition-colors cursor-pointer select-none"
                     >
                       <div className="flex items-center gap-4 min-w-0 mr-2">
                         <Icon className="shrink-0" />
-                        <div className="min-w-0">
-                          <p className="truncate">{opt.title}</p>
-                          {opt.subtitle && (
-                            <p className="text-sm text-[#606060] truncate">
-                              {opt.subtitle}
-                            </p>
-                          )}
-                        </div>
+                        <p className="truncate">{opt.title}</p>
                       </div>
                       <ChevronRight className="shrink-0" />
                     </div>
@@ -454,27 +425,31 @@ const ChatUserPanel = ({
   }
 
   return (
-    <Container padding="p-0" className={containerClasses}>
+    <div className={containerClasses}>
       {/* ── Header ────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 h-[72px] border-b border-border shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between p-2 shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
           {currentView !== "main" && (
-            <IconButton
-              onClick={handleBack}
-              variant="ghost"
-              size="sm"
-              aria-label="Go back"
-            >
-              <ArrowLeft />
-            </IconButton>
+            <>
+              <IconButton
+                onClick={handleBack}
+                variant="ghost"
+                size="sm"
+                aria-label={t?.chat?.goBack || t?.common?.back || "Go back"}
+                title={t?.chat?.goBack || t?.common?.back || "Go back"}
+              >
+                <ArrowLeft />
+              </IconButton>
+              <span className="font-semibold text-sm truncate">{headerTitle}</span>
+            </>
           )}
-          <h3 className="font-semibold text-base">{headerTitle}</h3>
         </div>
         <IconButton
           onClick={onClose}
           variant="ghost"
           size="sm"
-          aria-label="Close panel"
+          aria-label={t?.chat?.closePanel || t?.common?.close || "Close panel"}
+          title={t?.chat?.closePanel || t?.common?.close || "Close panel"}
         >
           <X />
         </IconButton>
@@ -518,7 +493,7 @@ const ChatUserPanel = ({
           transferTargetMember?.accountId || transferTargetMember?.id
         }
       />
-    </Container>
+    </div>
   )
 }
 

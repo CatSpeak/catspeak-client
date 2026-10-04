@@ -46,11 +46,11 @@ const ListItem = ({
   const effectiveRightContent =
     variant === "radio" ? <Radio checked={selected} /> : rightContent
 
-  const baseBgClass = selected ? "bg-[#F2F2F2]" : ""
+  const baseBgClass = selected ? "bg-itemHover" : ""
 
   const defaultHoverClasses = selected
-    ? "hover:bg-[#E6E6E6] group-hover:bg-[#E6E6E6]"
-    : "hover:bg-[#F2F2F2] group-hover:bg-[#F2F2F2]"
+    ? "hover:bg-itemActiveHover group-hover:bg-itemActiveHover"
+    : "hover:bg-itemHover group-hover:bg-itemHover"
 
   const hoverClasses = hoverBgColor
     ? `hover:${hoverBgColor} group-hover:${hoverBgColor}`
@@ -75,16 +75,16 @@ const ListItem = ({
             }
           : undefined
       }
-      className={`group relative outline-none flex w-full items-center text-left ${heightClass} ${baseBgClass} ${className} ${isClickable ? "cursor-pointer" : ""}`}
+      className={`group relative outline-none flex w-full items-center text-left transition-colors duration-200 ease-in-out ${heightClass} ${baseBgClass} ${className} ${isClickable ? "cursor-pointer" : ""}`}
       disabled={Wrapper === "button" ? false : undefined}
       {...props}
     >
       <div
-        className={`w-full ${heightClass} px-4 flex items-center justify-between transition-colors rounded-[inherit] ${innerHoverClasses} ${contentClassName}`}
+        className={`w-full ${heightClass} px-4 flex items-center justify-between transition-colors duration-200 ease-in-out rounded-[inherit] ${innerHoverClasses} ${contentClassName}`}
       >
         <div className="flex items-center gap-4 min-w-0 flex-1 my-auto">
           {leftContent && (
-            <div className="shrink-0 flex items-center justify-center [&_svg]:w-6 [&_svg]:h-6 [&_img]:w-[56px] [&_img]:h-[56px] [&_img]:object-contain">
+            <div className="shrink-0 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">
               {leftContent}
             </div>
           )}
@@ -96,7 +96,7 @@ const ListItem = ({
           )}
 
           {(rightText !== undefined || effectiveRightContent) && (
-            <div className="flex items-center shrink-0 [&_svg]:w-6 [&_svg]:h-6">
+            <div className="flex items-center shrink-0 [&>svg]:w-6 [&>svg]:h-6">
               {rightText !== undefined && (
                 <span className="text-xs mr-2">{rightText}</span>
               )}

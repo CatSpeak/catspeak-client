@@ -4,18 +4,20 @@ import {
   useLazyGetConversationMessagesQuery,
 } from "@/store/api/social/conversationsApi"
 import { useAuth } from "@/features/auth"
-import useConversationSignalR from "./useConversationSignalR"
+import { applyReactionToggle } from "../utils/reactionUtils"
 import {
-  applyReactionToggle,
-  applyReactionSignalREvent,
-} from "../utils/reactionUtils"
+  normalizeMessageType,
+  mapToChatMessageViewModel,
+} from "../utils/messageMappingUtils"
+import useChatMessagesRealtime from "./useChatMessagesRealtime"
+
+export { normalizeMessageType }
 
 const PAGE_SIZE = 30
-const EMPTY_ARRAY = []
 
 /**
  * Custom hook for managing conversation messages with cursor pagination (beforeId/limit),
- * real-time SignalR updates (NewMessage, MessageEdited, MessageReactionChanged, MessageRecalled),
+ * real-time SignalR updates (delegated to useChatMessagesRealtime),
  * and optimistic UI updates for editing and reactions.
  *
  * @param {string|number|null} selectedId - The currently selected conversation ID
@@ -41,24 +43,39 @@ export default function useChatMessages(selectedId) {
 
   // Initial fetch for the selected conversation (limit = 30)
   const {
-    data: initialMessagesResponse = EMPTY_ARRAY,
-    isLoading: isLoadingMessages,
+    currentData: currentInitialMessages,
+    isLoading: isLoadingQuery,
     isFetching: isFetchingInitial,
+    isError: isMessagesError,
   } = useGetConversationMessagesQuery(
     selectedId ? { conversationId: selectedId, limit: PAGE_SIZE } : undefined,
     { skip: !selectedId },
   )
+
+  // Immediate derivation of initial fetched items for the active conversation
+  const initialFetchedItems = useMemo(() => {
+    if (!currentInitialMessages) return null
+    const rawItems = Array.isArray(currentInitialMessages)
+      ? currentInitialMessages
+      : currentInitialMessages?.data || currentInitialMessages?.items || []
+
+    return rawItems.filter(
+      (m) =>
+        m.conversationId == null ||
+        String(m.conversationId) === String(selectedId),
+    )
+  }, [currentInitialMessages, selectedId])
 
   // Lazy query trigger for cursor pagination (beforeId)
   const [triggerFetchMessages] = useLazyGetConversationMessagesQuery()
 
   // Handle initial fetch results
   useEffect(() => {
-    if (!selectedId || !initialMessagesResponse) return
+    if (!selectedId || !currentInitialMessages) return
 
-    const rawItems = Array.isArray(initialMessagesResponse)
-      ? initialMessagesResponse
-      : initialMessagesResponse?.data || initialMessagesResponse?.items || []
+    const rawItems = Array.isArray(currentInitialMessages)
+      ? currentInitialMessages
+      : currentInitialMessages?.data || currentInitialMessages?.items || []
 
     const fetchedItems = rawItems.filter(
       (m) =>
@@ -67,8 +84,8 @@ export default function useChatMessages(selectedId) {
     )
 
     const serverHasMore =
-      typeof initialMessagesResponse?.hasMore === "boolean"
-        ? initialMessagesResponse.hasMore
+      typeof currentInitialMessages?.hasMore === "boolean"
+        ? currentInitialMessages.hasMore
         : fetchedItems.length >= PAGE_SIZE
 
     setHasMoreMessages(serverHasMore)
@@ -97,199 +114,14 @@ export default function useChatMessages(selectedId) {
       )
       return [...updatedPrev, ...newItems]
     })
-  }, [initialMessagesResponse, selectedId])
+  }, [currentInitialMessages, selectedId])
 
-  // Real-time SignalR Event Handlers
-  const signalRHandlers = useMemo(
-    () => ({
-      NewMessage: (...args) => {
-        let conversationId, message
-        if (args.length >= 2) {
-          conversationId = args[0]
-          message = args[1]
-        } else {
-          message = args[0]
-          conversationId = message?.conversationId
-        }
-
-        if (
-          !selectedId ||
-          !conversationId ||
-          Number(conversationId) !== Number(selectedId)
-        ) {
-          return
-        }
-
-        const msgId = message?.messageId ?? message?.id
-        const clientMsgId = message?.clientMessageId
-
-        setAccumulatedMessages((prev) => {
-          // Prevent duplicates by messageId or clientMessageId
-          const exists = prev.some(
-            (m) =>
-              (msgId != null && (m.messageId ?? m.id) === msgId) ||
-              (clientMsgId && m.clientMessageId === clientMsgId),
-          )
-          if (exists) {
-            return prev.map((m) =>
-              (msgId != null && (m.messageId ?? m.id) === msgId) ||
-              (clientMsgId && m.clientMessageId === clientMsgId)
-                ? { ...m, ...message }
-                : m,
-            )
-          }
-
-          const normalized = {
-            ...message,
-            sender: message.sender || { accountId: message.senderId },
-            mentionedAccountIds:
-              message.mentionedAccountIds || message.MentionedAccountIds || [],
-          }
-          return [...prev, normalized]
-        })
-      },
-
-      MessageEdited: (payload) => {
-        const convId = payload?.conversationId
-        const msgId = payload?.messageId
-        const newContent = payload?.messageContent ?? payload?.newContent
-        const lastEdited = payload?.lastEdited
-
-        if (
-          !selectedId ||
-          !convId ||
-          Number(convId) !== Number(selectedId) ||
-          !msgId
-        ) {
-          return
-        }
-
-        setAccumulatedMessages((prev) =>
-          prev.map((m) => {
-            const currentId = m.messageId ?? m.id
-            if (Number(currentId) === Number(msgId)) {
-              return {
-                ...m,
-                messageContent: newContent,
-                content: newContent,
-                isEdited: true,
-                lastEdited: lastEdited || new Date().toISOString(),
-              }
-            }
-            return m
-          }),
-        )
-      },
-
-      MessageReactionChanged: (payload) => {
-        const convId = payload?.conversationId
-        const msgId = payload?.messageId
-
-        if (
-          !selectedId ||
-          !convId ||
-          Number(convId) !== Number(selectedId) ||
-          !msgId
-        ) {
-          return
-        }
-
-        setAccumulatedMessages((prev) =>
-          prev.map((m) => {
-            const currentId = m.messageId ?? m.id
-            if (Number(currentId) === Number(msgId)) {
-              return {
-                ...m,
-                reactions: applyReactionSignalREvent(
-                  m.reactions,
-                  payload,
-                  currentUserId,
-                ),
-              }
-            }
-            return m
-          }),
-        )
-      },
-
-      MessageRecalled: (payload) => {
-        const convId = payload?.conversationId
-        const msgId = payload?.messageId
-
-        if (
-          !selectedId ||
-          !convId ||
-          Number(convId) !== Number(selectedId) ||
-          !msgId
-        ) {
-          return
-        }
-
-        setAccumulatedMessages((prev) =>
-          prev.map((m) => {
-            const currentId = m.messageId ?? m.id
-            if (Number(currentId) === Number(msgId)) {
-              return {
-                ...m,
-                isRecalled: true,
-                messageType: "Recalled",
-                messageContent: "[Message Recalled]",
-              }
-            }
-            return m
-          }),
-        )
-      },
-
-      MessageRead: (payload) => {
-        const convId = payload?.conversationId
-        const readerAccountId = Number(payload?.accountId)
-        const lastReadMsgId = Number(payload?.lastReadMessageId)
-        if (
-          !selectedId ||
-          !convId ||
-          Number(convId) !== Number(selectedId) ||
-          !readerAccountId ||
-          !lastReadMsgId
-        ) {
-          return
-        }
-
-        setAccumulatedMessages((prev) => {
-          return prev.map((m) => {
-            const currentMsgId = Number(m.messageId ?? m.id)
-            const currentReaders = Array.isArray(m.readByUsers) ? m.readByUsers : []
-            const filteredReaders = currentReaders.filter(
-              (r) => Number(r.accountId || r.id) !== readerAccountId,
-            )
-
-            if (currentMsgId === lastReadMsgId) {
-              const newReader = {
-                accountId: readerAccountId,
-                id: readerAccountId,
-                username: payload.username,
-                name: payload.username,
-                avatarImageUrl: payload.avatarImageUrl,
-                avatar: payload.avatarImageUrl,
-              }
-              return {
-                ...m,
-                readByUsers: [...filteredReaders, newReader],
-              }
-            }
-
-            return {
-              ...m,
-              readByUsers: filteredReaders,
-            }
-          })
-        })
-      },
-    }),
-    [selectedId, currentUserId],
-  )
-
-  useConversationSignalR(signalRHandlers)
+  // Delegate real-time SignalR listeners and state patching to dedicated hook
+  useChatMessagesRealtime({
+    selectedId,
+    currentUserId,
+    setAccumulatedMessages,
+  })
 
   // Cursor-based Load More (Older Messages)
   const handleLoadMoreMessages = useCallback(async () => {
@@ -391,56 +223,46 @@ export default function useChatMessages(selectedId) {
     [currentUserId],
   )
 
-  // Map messages to consistent view models with new Phase 1 properties
+  // Map messages to consistent view models using pure transformer
   const activeMessages = useMemo(() => {
-    return accumulatedMessages
-      .filter(
-        (msg) =>
-          msg.conversationId == null ||
-          String(msg.conversationId) === String(selectedId),
-      )
-      .map((msg) => ({
-        id: msg.messageId ?? msg.id,
-        conversationId: msg.conversationId,
-        senderId: msg.sender?.accountId ?? msg.senderId,
-        content: msg.messageContent ?? msg.content,
-        timestamp: msg.createDate ?? msg.timestamp,
-        messageType: msg.messageType || "Text",
-        isRead: msg.isRead ?? false,
-        status: msg.isRead ? "read" : "delivered",
-        readByAccountIds: msg.readByAccountIds || [],
-        sender: msg.sender,
-        parentMessageId: msg.parentMessageId,
-        parentMessage: msg.parentMessage || msg.replyToMessage,
-        mediaUrl: msg.mediaUrl || msg.fileUrl || msg.attachmentUrl,
-        fileName: msg.fileName,
-        fileSize: msg.fileSize,
-        isRecalled: msg.isRecalled,
-        isDeleted: msg.isDeleted,
-        // Phase 1 enhancements
-        reactions: (msg.reactions || []).map((group) => {
-          const myId = currentUserId != null ? Number(currentUserId) : null
-          const userIds = group.userIds || group.UserIds || []
-          const hasReacted =
-            myId != null && Array.isArray(userIds) && userIds.length > 0
-              ? userIds.some((id) => Number(id) === myId)
-              : Boolean(group.hasReacted)
-          return {
-            ...group,
-            hasReacted,
-          }
-        }),
-        isEdited: msg.isEdited ?? false,
-        lastEdited: msg.lastEdited,
-        forwardedFromSenderName: msg.forwardedFromSenderName,
-        clientMessageId: msg.clientMessageId,
-      }))
-  }, [accumulatedMessages, selectedId])
+    const validAccumulated = accumulatedMessages.filter(
+      (msg) =>
+        msg.conversationId == null ||
+        String(msg.conversationId) === String(selectedId),
+    )
+
+    const sourceMessages =
+      validAccumulated.length > 0
+        ? validAccumulated
+        : initialFetchedItems || []
+
+    return sourceMessages.map((msg) =>
+      mapToChatMessageViewModel(msg, currentUserId),
+    )
+  }, [accumulatedMessages, initialFetchedItems, selectedId, currentUserId])
+
+  const hasMessagesForCurrentConv = useMemo(() => {
+    const hasInAccumulated = accumulatedMessages.some(
+      (m) =>
+        m.conversationId == null ||
+        String(m.conversationId) === String(selectedId),
+    )
+    if (hasInAccumulated) return true
+    return Boolean(initialFetchedItems && initialFetchedItems.length > 0)
+  }, [accumulatedMessages, selectedId, initialFetchedItems])
+
+  const isLoadingMessages = Boolean(
+    selectedId &&
+      !isMessagesError &&
+      !hasMessagesForCurrentConv &&
+      (isLoadingQuery || isFetchingInitial || currentInitialMessages === undefined),
+  )
 
   return {
     activeMessages,
     accumulatedMessagesCount: accumulatedMessages.length,
-    isLoadingMessages: isLoadingMessages && accumulatedMessages.length === 0,
+    isLoadingMessages,
+    isFetchingOlder,
     isFetchingMessages: isFetchingInitial || isFetchingOlder,
     hasMoreMessages,
     handleLoadMoreMessages,
