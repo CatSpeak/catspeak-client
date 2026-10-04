@@ -51,6 +51,7 @@ export default {
   confirm: "Xác nhận?",
   cancel: "Hủy",
   shareEvent: "Chia sẻ sự kiện",
+  share: "Chia sẻ",
   shareLink: "Chia sẻ liên kết",
   copy: "Sao chép",
   linkExpires: "Liên kết hết hạn sau 7 ngày",
