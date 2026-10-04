@@ -1,12 +1,13 @@
 import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Newspaper, Search, X } from "lucide-react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetPostsQuery } from "@/store/api/social/postsApi";
-import { incrementPage, resetPage, selectNewsPage } from "@/store/slices/newsSlice";
+import { resetPage, setPage as setPageAction } from "@/store/slices/newsSlice";
 import NewsCard from "../components/NewsCard";
 import NewsCardSkeleton from "../components/NewsCardSkeleton";
+import TopicFilter from "../components/TopicFilter";
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
 import EmptyState from "@/shared/components/ui/indicators/EmptyState";
 import useColumnCount from "@/shared/hooks/useColumnCount";
@@ -34,16 +35,46 @@ const NewsPage = ({ postType = "1" }) => {
     );
   }, [lang, language]);
 
-  const page = useSelector(selectNewsPage);
+  const filterKey = useMemo(() => {
+    const topicsKey = (filters.topicIds || []).slice().sort().join(",");
+    return `${postType}_${filters.searchKeyword}_${filters.sortBy}_${topicsKey}`;
+  }, [postType, filters.searchKeyword, filters.sortBy, filters.topicIds]);
+
+  const [page, setPage] = useState(1);
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+
+  // Synchronously reset page to 1 during render when filterKey changes,
+  // preventing any outdated fetch with (newFilters, oldPage).
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
   const pageSize = 26;
 
-  const { data, error, isLoading, isFetching } = useGetPostsQuery({
-    page,
-    pageSize,
-    postType,
-    searchKeyword: filters.searchKeyword || undefined,
-    sortBy: filters.sortBy,
-  });
+  const queryArgs = useMemo(
+    () => ({
+      page,
+      pageSize,
+      postType,
+      searchKeyword: filters.searchKeyword || undefined,
+      sortBy: filters.sortBy,
+      topicIds:
+        filters.topicIds && filters.topicIds.length > 0
+          ? filters.topicIds
+          : undefined,
+    }),
+    [
+      page,
+      pageSize,
+      postType,
+      filters.searchKeyword,
+      filters.sortBy,
+      filters.topicIds,
+    ],
+  );
+
+  const { data, error, isLoading, isFetching } = useGetPostsQuery(queryArgs);
 
   // Search input is local state (for snappy typing); URL only updates when the
   // user commits the keyword (Enter key or leaving the field).
@@ -57,15 +88,41 @@ const NewsPage = ({ postType = "1" }) => {
     setSearchInput(filters.searchKeyword);
   }
 
-  // Commit a keyword to the URL (triggers refetch + page reset via the
-  // filter-change effect below). No-op when the value already matches the URL.
-  const commitSearch = (keyword = searchInput) => {
-    const currentKeyword = parseNewsFilter(window.location.search).searchKeyword;
-    if (keyword === currentKeyword) return;
-    setSearchParams(applyNewsFilter(window.location.search, { searchKeyword: keyword }));
+  // Update URL filters only when actual values have changed
+  const updateUrlFilters = ({ searchKeyword, sortBy, topicIds }) => {
+    const nextKeyword =
+      searchKeyword !== undefined ? searchKeyword : filters.searchKeyword;
+    const nextSortBy = sortBy !== undefined ? sortBy : filters.sortBy;
+    const nextTopicIds =
+      topicIds !== undefined ? topicIds : filters.topicIds;
+
+    const isSameKeyword = nextKeyword === filters.searchKeyword;
+    const isSameSort = nextSortBy === filters.sortBy;
+    const isSameTopics =
+      (nextTopicIds || []).slice().sort().join(",") ===
+      (filters.topicIds || []).slice().sort().join(",");
+
+    if (isSameKeyword && isSameSort && isSameTopics) {
+      return;
+    }
+
+    setSearchParams(
+      applyNewsFilter(searchParams, {
+        searchKeyword: nextKeyword,
+        sortBy: nextSortBy,
+        topicIds: nextTopicIds,
+      }),
+    );
   };
 
-  // Whenever the URL filters change, go back to page 1 and scroll to top.
+  // Commit a keyword to the URL. No-op when the value already matches the current filter.
+  const commitSearch = (keyword = searchInput) => {
+    const trimmed = (keyword || "").trim();
+    if (trimmed === filters.searchKeyword) return;
+    updateUrlFilters({ searchKeyword: trimmed });
+  };
+
+  // Whenever the URL filters change, scroll to top only if scrolled down, and reset Redux page.
   const isFirstRender = useRef(true);
   useEffect(() => {
     if (isFirstRender.current) {
@@ -73,12 +130,21 @@ const NewsPage = ({ postType = "1" }) => {
       return;
     }
     dispatch(resetPage());
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [filters.searchKeyword, filters.sortBy, dispatch]);
+    if (
+      typeof window !== "undefined" &&
+      (window.scrollY > 150 || document.documentElement.scrollTop > 150)
+    ) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [filterKey, dispatch]);
 
   // Public posts filtered by current language community or "All"
   const publicPosts = useMemo(() => {
-    const rawList = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
+    const rawList = Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data)
+        ? data
+        : [];
     const targetCommunity = currentCommunity.toLowerCase();
 
     return rawList.filter((post) => {
@@ -102,29 +168,44 @@ const NewsPage = ({ postType = "1" }) => {
 
   // Infinite scroll observer — trigger fetch when the second-to-last post appears
   const secondLastPostElementRef = useRef(null);
+  const hasMore = data?.hasMore ?? (publicPosts.length >= pageSize);
+
   useEffect(() => {
-    if (!secondLastPostElementRef.current) return;
+    if (
+      !secondLastPostElementRef.current ||
+      isFetching ||
+      isLoading ||
+      !hasMore
+    ) {
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          dispatch(incrementPage());
+        if (entry.isIntersecting && !isFetching && !isLoading && hasMore) {
+          setPage((prev) => {
+            const next = prev + 1;
+            dispatch(setPageAction(next));
+            return next;
+          });
         }
       },
       {
         rootMargin: "200px",
       },
     );
+
     observer.observe(secondLastPostElementRef.current);
     return () => observer.disconnect();
-  }, [publicPosts, dispatch]);
-
-  const updateUrlFilters = ({ searchKeyword, sortBy }) => {
-    setSearchParams(applyNewsFilter(window.location.search, { searchKeyword, sortBy }));
-  };
+  }, [publicPosts, isFetching, isLoading, hasMore, dispatch]);
 
   const handleSortChange = (sortBy) => {
     if (sortBy === filters.sortBy) return;
-    updateUrlFilters({ searchKeyword: filters.searchKeyword, sortBy });
+    updateUrlFilters({ sortBy });
+  };
+
+  const handleTopicChange = (topicIds) => {
+    updateUrlFilters({ topicIds });
   };
 
   const handleSearchChange = (value) => {
@@ -144,136 +225,102 @@ const NewsPage = ({ postType = "1" }) => {
 
   const handleClearSearch = () => {
     setSearchInput("");
-    commitSearch();
+    commitSearch("");
   };
 
   const filterBar = (
-    <div className="flex flex-col w-full gap-3 sm:flex-row sm:items-center sm:justify-between">
-      {/* Search box */}
-      <div className="relative w-full sm:max-w-xs">
-        <Search
-          size={18}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]"
-        />
-        <input
-          type="text"
-          value={searchInput}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          onKeyDown={handleSearchKeyDown}
-          onBlur={handleSearchBlur}
-          placeholder={t.news?.filters?.searchPlaceholder || "Search articles..."}
-          className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-9 text-sm text-foreground placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/40"
-          aria-label={t.news?.filters?.searchPlaceholder || "Search articles..."}
-        />
-        {searchInput && (
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={handleClearSearch}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-foreground"
-            aria-label="Clear search"
-          >
-            <X size={16} />
-          </button>
-        )}
+    <div className="flex flex-col w-full gap-3">
+      <div className="flex flex-col w-full gap-3 md:flex-row md:items-center md:justify-between">
+        {/* Search box */}
+        <div className="relative w-full md:max-w-xs">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9ca3af]"
+          />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            onKeyDown={handleSearchKeyDown}
+            onBlur={handleSearchBlur}
+            placeholder={t.news?.filters?.searchPlaceholder || "Search articles..."}
+            className="w-full rounded-xl border border-border bg-white py-2 pl-10 pr-9 text-sm text-foreground placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-primary/40"
+            aria-label={t.news?.filters?.searchPlaceholder || "Search articles..."}
+          />
+          {searchInput && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleClearSearch}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#9ca3af] hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+
+        {/* Sort chips */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 w-full md:w-auto">
+          {NEWS_SORT_OPTIONS.map((option) => {
+            const labelMap = {
+              createDate: t.news?.filters?.newest || "Newest",
+              viewCount: t.news?.filters?.mostViewed || "Most viewed",
+              reactionCount: t.news?.filters?.mostReactions || "Most reactions",
+            };
+            const isActive = filters.sortBy === option;
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => handleSortChange(option)}
+                className={`whitespace-nowrap shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-[#606060] hover:bg-gray-200"
+                }`}
+              >
+                {labelMap[option]}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Sort chips */}
-      <div className="flex items-center gap-2 overflow-x-auto">
-        {NEWS_SORT_OPTIONS.map((option) => {
-          const labelMap = {
-            createDate: t.news?.filters?.newest || "Newest",
-            viewCount: t.news?.filters?.mostViewed || "Most viewed",
-            reactionCount: t.news?.filters?.mostReactions || "Most reactions",
-          };
-          const isActive = filters.sortBy === option;
-          return (
-            <button
-              key={option}
-              type="button"
-              onClick={() => handleSortChange(option)}
-              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-primary text-white"
-                  : "bg-gray-100 text-[#606060] hover:bg-gray-200"
-              }`}
-            >
-              {labelMap[option]}
-            </button>
-          );
-        })}
-      </div>
+      {/* Topic Filter row */}
+      <TopicFilter
+        selectedTopicIds={filters.topicIds}
+        onTopicChange={handleTopicChange}
+      />
     </div>
   );
 
-  // ── Initial Loading State ─────────────────────────────────────────
-  if (isLoading && publicPosts.length === 0) {
-    const skeletonCols = Array.from({ length: columnsCount }, () => []);
+  const isInitialLoading = isLoading && publicPosts.length === 0;
+  const isFilterFetching = isFetching && page === 1;
+
+  const skeletonCols = useMemo(() => {
+    const cols = Array.from({ length: columnsCount }, () => []);
     const totalSkeletons = columnsCount * 3;
     for (let i = 0; i < totalSkeletons; i++) {
-      skeletonCols[i % columnsCount].push(i);
+      cols[i % columnsCount].push(i);
     }
+    return cols;
+  }, [columnsCount]);
 
-    return (
-      <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
-        {filterBar}
-        <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
-          {skeletonCols.map((col, colIndex) => (
-            <div key={colIndex} className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0">
-              {col.map((itemIndex) => (
-                <NewsCardSkeleton key={itemIndex} index={itemIndex} />
-              ))}
-            </div>
+  const renderSkeletons = () => (
+    <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
+      {skeletonCols.map((col, colIndex) => (
+        <div
+          key={colIndex}
+          className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0"
+        >
+          {col.map((itemIndex) => (
+            <NewsCardSkeleton key={itemIndex} index={itemIndex} />
           ))}
         </div>
-      </div>
-    );
-  }
-
-  // ── Error State ───────────────────────────────────────────────────
-  if (error && page === 1) {
-    if (error?.status === 404) {
-      return (
-        <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6 min-h-[60vh] justify-center items-center">
-          <EmptyState
-            message={t.news?.empty?.title || "Chưa có tin tức nào"}
-            description={
-              t.news?.empty?.description ||
-              "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
-            }
-            icon={Newspaper}
-            variant="page"
-          />
-        </div>
-      );
-    }
-    if (error?.status === 401) {
-      return (
-        <EmptyState message={t.catSpeak?.newsLoginPrompt} variant="page" />
-      );
-    }
-    return <ErrorMessage message="Error loading posts" />;
-  }
-
-  // ── Empty State ───────────────────────────────────────────────────
-  if (!isLoading && publicPosts.length === 0) {
-    return (
-      <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6 min-h-[60vh] justify-center items-center">
-        {filterBar}
-        <div className="flex-1 flex flex-col justify-center items-center w-full">
-          <EmptyState
-            message={t.news?.empty?.title || "Chưa có tin tức nào"}
-            description={
-              t.news?.empty?.description ||
-              "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
-            }
-            icon={Newspaper}
-            variant="page"
-          />
-        </div>
-      </div>
-    );
-  }
+      ))}
+    </div>
+  );
 
   const secondLastPostId =
     publicPosts[publicPosts.length - 2]?.postId ??
@@ -284,31 +331,84 @@ const NewsPage = ({ postType = "1" }) => {
     <div className="flex flex-col w-full gap-4 sm:gap-6 p-4 sm:p-6">
       {filterBar}
 
-      {/* Masonry Card Grid */}
-      <div className="flex flex-row w-full gap-4 sm:gap-6 items-start">
-        {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0">
-            {col.map((post) => {
-              const isSecondLast = post.postId === secondLastPostId;
-              return (
-                <div
-                  ref={isSecondLast ? secondLastPostElementRef : null}
-                  key={post.postId}
-                  className="w-full"
-                >
-                  <NewsCard news={post} />
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination Fetching Skeleton */}
-      {isFetching && publicPosts.length > 0 && (
-        <div className="flex justify-center py-4">
-          <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+      {/* ── Filter Transition Loading Progress Bar ── */}
+      {/* {isFilterFetching && !isInitialLoading && (
+        <div className="w-full h-1 bg-primary/10 rounded-full overflow-hidden -mt-2">
+          <div className="w-1/3 h-full bg-primary rounded-full animate-pulse" />
         </div>
+      )} */}
+
+      {/* ── 1. Skeleton Loading State (Only on initial load when no posts exist yet) ── */}
+      {isInitialLoading ? (
+        renderSkeletons()
+      ) : error && page === 1 ? (
+        /* ── 2. Error State ── */
+        <div className="flex flex-col w-full min-h-[50vh] justify-center items-center">
+          {error?.status === 404 ? (
+            <EmptyState
+              message={t.news?.empty?.title || "Chưa có tin tức nào"}
+              description={
+                t.news?.empty?.description ||
+                "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
+              }
+              icon={Newspaper}
+              variant="page"
+            />
+          ) : error?.status === 401 ? (
+            <EmptyState message={t.catSpeak?.newsLoginPrompt} variant="page" />
+          ) : (
+            <ErrorMessage message="Error loading posts" />
+          )}
+        </div>
+      ) : publicPosts.length === 0 ? (
+        /* ── 3. Empty State ── */
+        <div className="flex-1 flex flex-col justify-center items-center w-full min-h-[50vh]">
+          <EmptyState
+            message={t.news?.empty?.title || "Chưa có tin tức nào"}
+            description={
+              t.news?.empty?.description ||
+              "Hiện tại chưa có bài đăng tin tức nào. Hãy quay lại sau!"
+            }
+            icon={Newspaper}
+            variant="page"
+          />
+        </div>
+      ) : (
+        /* ── 4. Content Masonry Grid (Preserved smoothly during filter fetch) ── */
+        <>
+          <div
+            className={`flex flex-row w-full gap-4 sm:gap-6 items-start transition-opacity duration-200 ${
+              isFilterFetching ? "opacity-60 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            {columns.map((col, colIndex) => (
+              <div
+                key={colIndex}
+                className="flex flex-col flex-1 gap-4 sm:gap-6 min-w-0"
+              >
+                {col.map((post) => {
+                  const isSecondLast = post.postId === secondLastPostId;
+                  return (
+                    <div
+                      ref={isSecondLast ? secondLastPostElementRef : null}
+                      key={post.postId}
+                      className="w-full"
+                    >
+                      <NewsCard news={post} />
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Fetching Spinner (for infinite scroll page > 1) */}
+          {isFetching && page > 1 && (
+            <div className="flex justify-center py-4">
+              <div className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

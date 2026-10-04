@@ -22,6 +22,8 @@ export default {
       newest: "Mới nhất",
       mostViewed: "Xem nhiều nhất",
       mostReactions: "Tương tác nhiều",
+      seeMore: "Xem thêm",
+      topics: "Chủ đề",
     },
     newsDetail: {
       back: "Quay lại",

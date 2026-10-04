@@ -10,6 +10,14 @@ export default {
     post: "Post View",
     article: "Article View",
   },
+  filters: {
+    topics: "Topics",
+    searchPlaceholder: "Search articles...",
+    newest: "Newest",
+    mostViewed: "Most viewed",
+    mostReactions: "Most reactions",
+    seeMore: "See more",
+  },
   newsDetail: {
     back: "Back",
     views: "views",
@@ -29,7 +37,6 @@ export default {
     share: "Share",
     copy: "Copy",
     copied: "Copied!",
-    linkCopied: "Link copied to clipboard!",
     comment: "Comment",
     editComment: "Edit comment",
     deleteComment: "Delete comment",

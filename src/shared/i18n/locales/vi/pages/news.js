@@ -10,6 +10,14 @@ export default {
     post: "Dạng bài đăng",
     article: "Dạng bài viết",
   },
+  filters: {
+    topics: "Chủ đề",
+    searchPlaceholder: "Tìm kiếm bài viết...",
+    newest: "Mới nhất",
+    mostViewed: "Xem nhiều nhất",
+    mostReactions: "Tương tác nhiều nhất",
+    seeMore: "Xem thêm",
+  },
   newsDetail: {
     back: "Quay lại",
     views: "lượt xem",
@@ -29,7 +37,6 @@ export default {
     share: "Chia sẻ",
     copy: "Sao chép",
     copied: "Đã sao chép!",
-    linkCopied: "Đã sao chép liên kết!",
     comment: "Bình luận",
     editComment: "Chỉnh sửa bình luận",
     deleteComment: "Xóa bình luận",
