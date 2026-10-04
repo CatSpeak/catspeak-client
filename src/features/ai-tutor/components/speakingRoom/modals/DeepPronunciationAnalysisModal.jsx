@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { Mic, Play, Bot, X } from "lucide-react"
 import { createPortal } from "react-dom"
-import { motion, AnimatePresence } from "framer-motion"
 
 const DEFAULT_ANALYSIS_DATA = {
   hanzi: "苹果",
@@ -65,7 +64,7 @@ const DeepPronunciationAnalysisModal = ({
   const isRecording = isRecordingProp ?? isRecordingLocal
   const analysis = { ...DEFAULT_ANALYSIS_DATA, ...data }
 
-  if (typeof document === "undefined") return null
+  if (!isOpen || typeof document === "undefined") return null
 
   const handleRecordClick = () => {
     if (isRecordingProp === undefined) setIsRecordingLocal((prev) => !prev)
@@ -73,26 +72,18 @@ const DeepPronunciationAnalysisModal = ({
   }
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50"
-          />
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+      />
 
-          {/* Dialog Container */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="relative w-full max-w-xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto"
-          >
+      {/* Dialog Container */}
+      <div
+        className="relative w-full max-w-xl bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
+      >
+
             {/* Header */}
             <div className="flex items-center justify-between gap-4">
               <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 uppercase">
@@ -290,12 +281,11 @@ const DeepPronunciationAnalysisModal = ({
                 Xem video Shorts khẩu hình
               </button>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
+          </div>
+        </div>,
     document.body
   )
 }
+
 
 export default DeepPronunciationAnalysisModal

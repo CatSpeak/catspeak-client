@@ -19,14 +19,13 @@ const sid = (id) => encodeURIComponent(id)
 export const flashcardReviewApi = api.injectEndpoints({
   endpoints: (builder) => ({
     startFlashcardSession: builder.mutation({
-      query: ({ mode = "due", deckId = null, sourceSessionId = null, timezone = null }) => ({
+      query: ({ mode = "due", deckId = null, sourceSessionId = null }) => ({
         url: "/v1/flashcards/sessions",
         method: "POST",
         body: {
           mode,
           deck_id: deckId,
           session_id_source: sourceSessionId,
-          timezone,
         },
       }),
     }),
@@ -47,6 +46,7 @@ export const flashcardReviewApi = api.injectEndpoints({
           is_override: Boolean(isOverride),
         },
       }),
+      invalidatesTags: ["FlashcardHome", "FlashcardDecks", { type: "FlashcardDeck" }],
     }),
 
     finishFlashcardSession: builder.mutation({
@@ -54,7 +54,7 @@ export const flashcardReviewApi = api.injectEndpoints({
         url: `/v1/flashcards/sessions/${sid(sessionId)}/finish`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, sessionId) => [{ type: "FlashcardReviewSession", id: sessionId }],
+      invalidatesTags: (_r, _e, sessionId) => [{ type: "FlashcardReviewSession", id: sessionId }, "FlashcardHome", "FlashcardDecks", { type: "FlashcardDeck" }],
     }),
   }),
   overrideExisting: false,

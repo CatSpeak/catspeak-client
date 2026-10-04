@@ -1,140 +1,62 @@
-import React, { useState } from "react"
-import {
-  SelectionPage,
-  SpeakingPage,
-  CompletePage,
-  ResultPage,
-  SpeakingReportContainer,
-} from "../components/speakingRoom"
-import { startSpeakingSession } from "../api/speakingClient"
+import { useCallback, useState } from "react"
+import { useNavigate, useOutletContext } from "react-router-dom"
+import { toast } from "@/shared/utils/toastBridge"
+import { QuotaExceededModal, SelectionPage } from "../components/speakingRoom"
+import { useStartSpeakingSessionMutation } from "../api/speakingApi"
 
 const SpeakingRoomPage = () => {
-  // Navigation state: 'selection' | 'speaking' | 'complete' | 'result'
-  const [currentStep, setCurrentStep] = useState("selection")
-  const [sessionData, setSessionData] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+  const { setSessionCredentials } = useOutletContext()
+  const [startSession, { isLoading }] = useStartSpeakingSessionMutation()
+  const [isQuotaModalOpen, setQuotaModalOpen] = useState(false)
 
-  // Handle start session from SelectionPage
-  const handleStartSpeaking = async (selectedTopic, currentLevel) => {
-    if (!selectedTopic) return
-    setIsLoading(true)
-
-    // Extract HSK level number (e.g., "HSK 3 (B1)" -> 3)
-    let hskNumber = 1
-    if (typeof currentLevel === "string") {
-      const match = currentLevel.match(/HSK\s*(\d)/i)
-      if (match) {
-        hskNumber = parseInt(match[1], 10)
-      }
-    } else if (typeof selectedTopic.hskLevel === "string") {
-      const match = selectedTopic.hskLevel.match(/HSK\s*(\d)/i)
-      if (match) {
-        hskNumber = parseInt(match[1], 10)
-      }
-    }
-
+  const handleStartSpeaking = useCallback(async (topic, hskLevel) => {
+    if (!topic?.id || isLoading) return
     try {
-      const res = await startSpeakingSession({
-        topic_id: selectedTopic.id,
-        hsk_level: hskNumber,
-        voice: "female",
-        speed: 1.0,
-      })
-
-      // POST /api/speaking/sessions trả token và url trong res.livekit, không nằm ở
-      // gốc; thiếu hai dòng này thì SpeakingPage không bao giờ vào phòng.
-      setSessionData({
-        ...res,
-        token: res?.livekit?.token ?? res?.token ?? null,
-        topic: selectedTopic,
-        hskLevel: res?.hsk_level ?? hskNumber,
-        serverUrl: res?.livekit?.url || import.meta.env.VITE_LIVEKIT_URL || "ws://localhost:7880",
-      })
-      setCurrentStep("speaking")
-    } catch (err) {
-      console.error("[SpeakingRoomPage] Start session error:", err)
-      // Fallback for development/testing if API server is offline
-      setSessionData({
-        session_id: "local_test_sess",
-        token: null,
-        topic: selectedTopic,
-        hskLevel: hskNumber,
-        serverUrl: "ws://localhost:7880",
-      })
-      setCurrentStep("speaking")
-    } finally {
-      setIsLoading(false)
+      const session = await startSession({ topic_id: topic.id, hsk_level: hskLevel }).unwrap()
+      const credentials = {
+        session_id: session.session_id,
+        livekit: session.livekit,
+        topic: session.topic,
+        hsk_level: session.hsk_level,
+        started_at: session.created_at,
+      }
+      setSessionCredentials(credentials)
+      navigate(`sessions/${session.session_id}`)
+    } catch (error) {
+      const detail = error?.data?.detail
+      const code = detail?.code || detail?.errorCode || error?.data?.code || error?.code
+      if (code === "QUOTA_EXCEEDED") {
+        setQuotaModalOpen(true)
+        return
+      }
+      if (code === "SESSION_ACTIVE_ELSEWHERE") {
+        toast.error("Tài khoản đang có một phiên luyện nói trên thiết bị khác.")
+        return
+      }
+      toast.error(detail?.message || error?.data?.message || error?.message || "Không thể bắt đầu phiên luyện nói.")
     }
-  }
-
-  // Handle End Session from SpeakingPage
-  const handleEndSession = () => {
-    setCurrentStep("complete")
-  }
-
-  // Handle Complete Page Action (Go to Result or back to Selection)
-  const handleViewResult = () => {
-    setCurrentStep("result")
-  }
-
-  const handleBackToSelection = () => {
-    setSessionData(null)
-    setCurrentStep("selection")
-  }
-
-  if (currentStep === "speaking") {
-    return (
-      <SpeakingPage
-        sessionData={sessionData}
-        topicTitle={sessionData?.topic?.title || "Mua hoa quả ở chợ"}
-        onEndSession={handleEndSession}
-      />
-    )
-  }
-
-  // Phiên thật (có token) thì màn chờ ss10 và báo cáo ss11-ss13 lấy từ ai-api qua
-  // SpeakingReportContainer. Chạy thử không có token thì giữ hai màn mẫu bên dưới.
-  if ((currentStep === "complete" || currentStep === "result") && sessionData?.token && sessionData?.session_id) {
-    return (
-      <SpeakingReportContainer
-        sessionId={sessionData.session_id}
-        topicTitle={sessionData?.topic?.title}
-        onBackToCatalog={handleBackToSelection}
-        onGoHome={handleBackToSelection}
-      />
-    )
-  }
-
-  if (currentStep === "complete") {
-    return (
-      <CompletePage
-        sessionData={sessionData}
-        onViewResult={handleViewResult}
-        onBackToHome={handleBackToSelection}
-      />
-    )
-  }
-
-  if (currentStep === "result") {
-    return (
-      <ResultPage
-        sessionData={sessionData}
-        onBackToHome={handleBackToSelection}
-      />
-    )
-  }
+  }, [isLoading, navigate, setSessionCredentials, startSession])
 
   return (
     <div className="relative">
       {isLoading && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex items-center justify-center">
-          <div className="bg-white rounded-2xl p-6 shadow-2xl flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-4 border-rose-200 border-t-[#990011] rounded-full animate-spin" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
+          <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-[#990011]" />
             <p className="text-sm font-bold text-slate-800">Đang chuẩn bị phòng luyện nói...</p>
           </div>
         </div>
       )}
-      <SelectionPage onStartSpeaking={handleStartSpeaking} />
+      <SelectionPage
+        onStartSpeaking={handleStartSpeaking}
+        onQuotaExceeded={() => setQuotaModalOpen(true)}
+      />
+      <QuotaExceededModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setQuotaModalOpen(false)}
+        onUpgrade={() => navigate("/pricing")}
+      />
     </div>
   )
 }

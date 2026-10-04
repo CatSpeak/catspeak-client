@@ -31,6 +31,15 @@ const AiLearningPathPage = lazy(
 const AiSpeakingRoomPage = lazy(
   () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
 );
+const SpeakingSessionPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingSessionPage"),
+);
+const SpeakingResultPage = lazy(
+  () => import("@/features/ai-tutor/pages/SpeakingResultPage"),
+);
+const SpeakingRoomFlowLayout = lazy(
+  () => import("@/features/ai-tutor/layouts/SpeakingRoomFlowLayout"),
+);
 const AiSpeakingReportPage = lazy(
   () => import("@/features/ai-tutor/pages/SpeakingReportPage"),
 );
@@ -43,6 +52,9 @@ const AiFlashcardReviewPage = lazy(
 );
 const AiFlashcardResultPage = lazy(
   () => import("@/features/ai-tutor/pages/FlashcardResultPage"),
+);
+const AiDeckBrowsePage = lazy(
+  () => import("@/features/ai-tutor/pages/DeckBrowsePage"),
 );
 const AiHistoryProgressPage = lazy(
   () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
@@ -512,11 +524,12 @@ const routesConfig = [
                   },
                   {
                     path: "speaking-room",
-                    element: (
-                      <LazyRoute>
-                        <AiSpeakingRoomPage />
-                      </LazyRoute>
-                    ),
+                    element: <LazyRoute><SpeakingRoomFlowLayout /></LazyRoute>,
+                    children: [
+                      { index: true, element: <LazyRoute><AiSpeakingRoomPage /></LazyRoute> },
+                      { path: "sessions/:sessionId", element: <LazyRoute><SpeakingSessionPage /></LazyRoute> },
+                      { path: "sessions/:sessionId/result", element: <LazyRoute><SpeakingResultPage /></LazyRoute> },
+                    ],
                   },
                   {
                     // TASK-AI-15: ss10 → ss11 (+ ss12, ss13) của một buổi nói
@@ -535,24 +548,9 @@ const routesConfig = [
                       </LazyRoute>
                     ),
                   },
-                  {
-                    // TASK-AI-16: fc02 phiên ôn (?mode=due|early|free&deck=&source=)
-                    path: "vocabulary-notebook/review",
-                    element: (
-                      <LazyRoute>
-                        <AiFlashcardReviewPage />
-                      </LazyRoute>
-                    ),
-                  },
-                  {
-                    // TASK-AI-16: fc03 kết quả phiên ôn
-                    path: "vocabulary-notebook/review/:sessionId/result",
-                    element: (
-                      <LazyRoute>
-                        <AiFlashcardResultPage />
-                      </LazyRoute>
-                    ),
-                  },
+                  { path: "vocabulary-notebook/review", element: <LazyRoute><AiFlashcardReviewPage /></LazyRoute> },
+                  { path: "vocabulary-notebook/review/:sessionId/result", element: <LazyRoute><AiFlashcardResultPage /></LazyRoute> },
+                  { path: "vocabulary-notebook/decks/:deckId", element: <LazyRoute><AiDeckBrowsePage /></LazyRoute> },
                   {
                     path: "history-progress",
                     element: (

@@ -41,6 +41,7 @@ const ResultPage = ({
   levelPrefix = "Đánh giá trình độ: ",
   notice,
   showPronunciationLink = true,
+  onRetry,
 }) => {
   return (
     <div className="w-full max-w-4xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
@@ -64,8 +65,17 @@ const ResultPage = ({
       </div>
 
       {notice ? (
-        <div className="w-full bg-blue-50/60 border border-blue-200/80 rounded-2xl px-4 py-3 text-xs sm:text-sm text-blue-900">
-          {notice}
+        <div className="w-full bg-blue-50/60 border border-blue-200/80 rounded-2xl px-4 py-3 text-xs sm:text-sm text-blue-900 flex flex-wrap items-center justify-between gap-2">
+          <span>{notice}</span>
+          {onRetry ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              className="text-xs font-bold text-[#990011] underline hover:text-[#85000f] cursor-pointer"
+            >
+              Thử lại
+            </button>
+          ) : null}
         </div>
       ) : null}
 
@@ -74,7 +84,7 @@ const ResultPage = ({
         {/* Score Circle */}
         <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-rose-200 bg-white flex flex-col items-center justify-center shadow-xs shrink-0">
           <span className="text-4xl sm:text-5xl font-extrabold text-[#990011] leading-none">
-            {overallScore}
+            {overallScore ?? "—"}
           </span>
           <span className="text-[10px] sm:text-[11px] font-bold tracking-wider text-slate-500 uppercase mt-1.5">
             ĐIỂM TỔNG QUAN

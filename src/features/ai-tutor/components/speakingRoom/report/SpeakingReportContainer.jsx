@@ -21,9 +21,6 @@ import { WAIT_CUTOFF_MS, toResultPageProps, waitProgress } from "../../../utils/
  *   - Quá 5 giây vẫn chưa có thì vẫn mở ss11 với khung cơ bản và tiếp tục hỏi.
  *   - Báo cáo "partial" (LLM chưa xong) hiện ngay, hỏi lại mỗi 3 giây tới khi
  *     "ready", tối đa 60 giây.
- *
- * Nơi dùng: trang /ai-tutor/speaking-room/report/:sessionId, hoặc phần vòng đời
- * phiên (Thái) render thẳng component này khi agent báo phase = ended.
  */
 const MIN_WAIT_MS = 1200
 const MAX_POLL_MS = 60000
@@ -31,6 +28,7 @@ const MAX_POLL_MS = 60000
 const SpeakingReportContainer = ({
   sessionId,
   topicTitle,
+  isAbandoned = false,
   onBackToCatalog,
   onGoHome,
   onPracticeFlashcards,
@@ -51,7 +49,7 @@ const SpeakingReportContainer = ({
   const settled = cachedHardError || cached?.data?.status === "ready" || elapsed > MAX_POLL_MS
   const pollMs = settled ? 0 : cached?.data?.status === "partial" ? 3000 : 1000
 
-  const { data: report, error } = useGetSpeakingReportQuery(sessionId, {
+  const { data: report, error, refetch } = useGetSpeakingReportQuery(sessionId, {
     skip: !sessionId,
     pollingInterval: pollMs,
     refetchOnMountOrArgChange: true,
@@ -85,7 +83,15 @@ const SpeakingReportContainer = ({
 
   if (!props) {
     // E-SS-007: chưa có báo cáo sau 5 giây, hoặc lỗi thật (không có quyền, mạng).
-    const forbidden = speakingErrorCode(error) === "SPEAKING_REPORT_FORBIDDEN"
+    const errCode = speakingErrorCode(error)
+    const forbidden = errCode === "SPEAKING_REPORT_FORBIDDEN"
+    const isTimeout = elapsed > MAX_POLL_MS && !report
+    const handleRetry = () => {
+      startedAt.current = Date.now()
+      setElapsed(0)
+      refetch()
+    }
+
     return (
       <ResultPage
         {...common}
@@ -102,19 +108,24 @@ const SpeakingReportContainer = ({
         notice={
           forbidden
             ? "Bạn không có quyền xem báo cáo của buổi nói này."
-            : hardError
-              ? "Chưa tải được báo cáo. Bạn thử tải lại trang sau ít phút nhé."
-              : "Báo cáo đang được hoàn tất, trang sẽ tự cập nhật trong giây lát."
+            : isTimeout
+              ? "Quá thời gian tạo báo cáo. Bạn có thể nhấn thử lại bên dưới."
+              : hardError
+                ? "Chưa tải được báo cáo. Bạn thử tải lại trang sau ít phút nhé."
+                : "Báo cáo đang được hoàn tất, trang sẽ tự cập nhật trong giây lát."
         }
+        onRetry={isTimeout || hardError ? handleRetry : undefined}
       />
     )
   }
 
   const notice = props.isEmptySession
     ? "Buổi này chưa ghi nhận câu trả lời nào. Lần sau bạn thử trả lời bằng một câu thật ngắn, AI sẽ giúp bạn nói tiếp."
-    : props.isPartial
-      ? "Đang hoàn tất nhận xét chi tiết và nghĩa từ vựng, báo cáo sẽ tự cập nhật."
-      : null
+    : isAbandoned
+      ? "Phiên đã dừng trước khi hoàn tất. Đây là dữ liệu hiện có của buổi luyện nói."
+      : props.isPartial
+        ? "Đang hoàn tất nhận xét chi tiết và nghĩa từ vựng, báo cáo sẽ tự cập nhật."
+        : null
 
   return (
     <>

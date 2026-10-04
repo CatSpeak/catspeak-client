@@ -17,7 +17,7 @@ const LevelSelectorDropdown = ({
       value={selectedValue}
       onChange={(val, opt) => {
         if (opt?.label) {
-          onSelectLevel(opt.label)
+          onSelectLevel(opt.value)
         } else {
           onSelectLevel(val)
         }

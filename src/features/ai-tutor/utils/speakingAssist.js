@@ -1,16 +1,7 @@
 /**
- * Ghép data packet trong phòng nói thành thứ ss05 hiển thị (contract mục 5.5).
- *
- *   speaking-subtitle  agent → FE  {seq, turn_index, role: "ai", text}, ngay khi AI nói
- *   speaking-assist    agent → FE  nguyên văn response của turn-assist, tới sau
- *                                  khoảng một giây: pinyin, nghĩa, hint_mode, hints,
- *                                  correction
- *   speaking-control   FE → agent  {action: play_hint | replay_question | finish_early, hint_id?}
- *
- * Hai gói của cùng một câu tới không theo thứ tự cố định: turn-assist có thể xong
- * trước khi FE nhận phụ đề (mạng chậm). Gói tới sớm được giữ theo turn_index rồi
- * ghép khi phụ đề tới. Hàm thuần để test; SpeakingPage gọi reducer này ngay trong
- * listener DataReceived của phòng.
+ * Correlates LiveKit speaking packets. Assist packets include both `seq` and
+ * `generation`; turn_index alone is not unique because a script turn can have
+ * multiple questions and the greeting uses a different turn index per topic.
  */
 
 export const TOPICS = {
@@ -21,25 +12,31 @@ export const TOPICS = {
 }
 
 export const initialAssistState = {
-  ai: null, // {seq, turnIndex, text, pinyin, meaningVi}
-  learner: null, // {seq, text}
+  ai: null,
+  learner: null,
   hintMode: "none",
   hints: [],
   correction: null,
   phase: null,
   warn: null,
   scriptTurns: null,
+  turnIndex: null,
   pending: {},
 }
 
-const applyAssist = (state, a) => ({
+const applyAssist = (state, assist) => ({
   ...state,
   ai: state.ai
-    ? { ...state.ai, pinyin: a.pinyin ?? state.ai.pinyin, meaningVi: a.meaning_vi ?? state.ai.meaningVi }
+    ? {
+        ...state.ai,
+        generation: assist.generation ?? state.ai.generation,
+        pinyin: assist.pinyin ?? state.ai.pinyin,
+        meaningVi: assist.meaning_vi ?? state.ai.meaningVi,
+      }
     : state.ai,
-  hintMode: a.hint_mode || state.hintMode,
-  hints: Array.isArray(a.hints) ? a.hints : [],
-  correction: a.correction || null,
+  hintMode: assist.hint_mode || state.hintMode,
+  hints: Array.isArray(assist.hints) ? assist.hints : [],
+  correction: assist.correction || null,
 })
 
 export const assistReducer = (state, { topic, data }) => {
@@ -47,26 +44,47 @@ export const assistReducer = (state, { topic, data }) => {
 
   if (topic === TOPICS.subtitle) {
     if (data.role === "learner") {
-      return { ...state, learner: { seq: data.seq, text: data.text || "" } }
+      if (state.learner && Number(data.seq ?? 0) < state.learner.seq) return state
+      return { ...state, learner: { seq: Number(data.seq ?? 0), text: data.text || "" } }
     }
-    const turnIndex = data.turn_index ?? null
+
+    const seq = Number(data.seq ?? 0)
+    if (state.ai && seq < state.ai.seq) return state
+    // Replays may resend the current subtitle; keep its already joined assist.
+    if (state.ai && seq === state.ai.seq) {
+      return { ...state, ai: { ...state.ai, text: data.text || state.ai.text } }
+    }
+
     const next = {
       ...state,
-      ai: { seq: data.seq, turnIndex, text: data.text || "", pinyin: null, meaningVi: null },
+      ai: {
+        seq,
+        turnIndex: data.turn_index ?? null,
+        generation: -1,
+        text: data.text || "",
+        pinyin: null,
+        meaningVi: null,
+      },
+      hintMode: "none",
       hints: [],
+      correction: null,
     }
-    const early = state.pending[turnIndex]
-    if (early) {
-      const { [turnIndex]: _used, ...rest } = state.pending
-      return applyAssist({ ...next, pending: rest }, early)
-    }
-    return next
+    const early = state.pending[seq]
+    if (!early) return next
+    const { [seq]: _used, ...pending } = state.pending
+    return applyAssist({ ...next, pending }, early)
   }
 
   if (topic === TOPICS.assist) {
-    const turnIndex = data.turn_index ?? null
-    if (state.ai && state.ai.turnIndex === turnIndex) return applyAssist(state, data)
-    return { ...state, pending: { ...state.pending, [turnIndex]: data } }
+    const seq = Number(data.seq ?? 0)
+    if (state.ai && seq === state.ai.seq) {
+      if (Number(data.generation ?? 0) < state.ai.generation) return state
+      return applyAssist(state, data)
+    }
+    if (state.ai && seq < state.ai.seq) return state
+    const previous = state.pending[seq]
+    if (previous && Number(previous.generation ?? 0) > Number(data.generation ?? 0)) return state
+    return { ...state, pending: { ...state.pending, [seq]: data } }
   }
 
   if (topic === TOPICS.state) {
@@ -75,6 +93,7 @@ export const assistReducer = (state, { topic, data }) => {
       phase: data.phase ?? state.phase,
       warn: data.warn ?? null,
       scriptTurns: data.script_turns ?? state.scriptTurns,
+      turnIndex: data.turn_index ?? state.turnIndex,
     }
   }
   return state

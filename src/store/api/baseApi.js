@@ -400,6 +400,10 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("/placement/") ||
         lowerUrl.startsWith("placement/") ||
         // TASK-AI-15: buổi luyện nói (báo cáo, phát âm, vòng đời phiên) nằm trong ai-api.
+        lowerUrl.startsWith("/v1/flashcards") ||
+        lowerUrl.startsWith("v1/flashcards") ||
+        lowerUrl.startsWith("/flashcards") ||
+        lowerUrl.startsWith("flashcards") ||
         lowerUrl.startsWith("/v1/speaking/") ||
         lowerUrl.startsWith("v1/speaking/") ||
         // TASK-AI-16: flashcard SRS (phiên ôn, danh mục deck) nằm trong ai-api.
@@ -408,7 +412,10 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("/ai/") ||
         lowerUrl.startsWith("ai/") ||
         lowerUrl.startsWith("/v1/ai/") ||
-        lowerUrl.startsWith("v1/ai/"))
+        lowerUrl.startsWith("v1/ai/") ||
+        lowerUrl.startsWith("/speaking/") ||
+        lowerUrl.startsWith("speaking/") ||
+        lowerUrl.startsWith("speaking?"))
 
 
     const isCoursesRoute =

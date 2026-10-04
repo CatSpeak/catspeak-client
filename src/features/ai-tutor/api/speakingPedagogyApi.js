@@ -97,7 +97,8 @@ export const {
 } = speakingPedagogyApi
 
 /** Mã lỗi của ai-api nằm ở error.data.detail.errorCode (FastAPI HTTPException). */
-export const speakingErrorCode = (error) => error?.data?.detail?.errorCode || null
+export const speakingErrorCode = (error) =>
+  error?.data?.detail?.errorCode || error?.data?.detail?.code || error?.data?.errorCode || error?.data?.code || null
 
 export const isReportNotReady = (error) =>
   error?.status === 404 && speakingErrorCode(error) === "SPEAKING_REPORT_NOT_READY"

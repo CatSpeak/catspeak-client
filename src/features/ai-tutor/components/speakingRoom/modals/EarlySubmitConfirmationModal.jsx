@@ -1,7 +1,6 @@
 import React from "react"
 import { LogOut, Info, Sparkles, X } from "lucide-react"
 import { createPortal } from "react-dom"
-import { motion, AnimatePresence } from "framer-motion"
 
 const EarlySubmitConfirmationModal = ({
   isOpen = false,
@@ -11,32 +10,24 @@ const EarlySubmitConfirmationModal = ({
   onSubmitEarly,
   onContinueSpeaking,
 }) => {
-  if (typeof document === "undefined") return null
+  if (!isOpen || typeof document === "undefined") return null
 
   const formattedCompleted = String(completedCount).padStart(2, "0")
   const formattedTotal = String(totalCount).padStart(2, "0")
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50"
-          />
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+      />
 
-          {/* Dialog Container */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 text-center max-h-[90vh] overflow-y-auto"
-          >
+      {/* Dialog Container */}
+      <div
+        className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-7 shadow-2xl z-10 text-center max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-150"
+      >
+
             {/* Close Button Top Right */}
             <button
               type="button"
@@ -108,12 +99,11 @@ const EarlySubmitConfirmationModal = ({
                 Tiếp tục luyện nói
               </button>
             </div>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
+          </div>
+        </div>,
     document.body
   )
 }
+
 
 export default EarlySubmitConfirmationModal
