@@ -13,6 +13,7 @@ import { refundTranslations } from "@/features/refunds/i18n"
 import { materialsTranslations } from "@/features/materials/i18n"
 import { landingTranslations } from "@/features/landing/i18n"
 import { voucherTranslations } from "@/features/vouchers/i18n"
+import { pointsAndOffersTranslations } from "@/features/points-and-offers"
 import { bugReportTranslations } from "@/features/bug-report/i18n"
 import { chatAssistantTranslations } from "@/features/chat-assistant/i18n"
 import { helpTranslations } from "@/features/help/i18n"
@@ -53,6 +54,7 @@ export const translations = {
     materialsTranslations.vi,
     landingTranslations.vi,
     voucherTranslations.vi,
+    pointsAndOffersTranslations.vi,
     bugReportTranslations.vi,
     chatAssistantTranslations.vi,
     helpTranslations.vi,
@@ -69,6 +71,7 @@ export const translations = {
     materialsTranslations.en,
     landingTranslations.en,
     voucherTranslations.en,
+    pointsAndOffersTranslations.en,
     bugReportTranslations.en,
     chatAssistantTranslations.en,
     helpTranslations.en,
@@ -85,6 +88,7 @@ export const translations = {
     materialsTranslations.zh,
     landingTranslations.zh,
     voucherTranslations.zh,
+    pointsAndOffersTranslations.zh,
     bugReportTranslations.zh,
     chatAssistantTranslations.zh,
     helpTranslations.zh,
@@ -101,6 +105,7 @@ export const translations = {
     materialsTranslations.ja,
     landingTranslations.ja,
     voucherTranslations.ja,
+    pointsAndOffersTranslations.ja,
     bugReportTranslations.ja,
     chatAssistantTranslations.ja,
     helpTranslations.ja,
