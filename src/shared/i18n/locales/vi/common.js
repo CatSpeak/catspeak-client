@@ -63,6 +63,7 @@ export default {
     teachingTasks: "Việc giảng dạy",
     vouchers: "Ưu đãi & Voucher",
     myLearning: "Góc học tập",
+    vocabularyNotebook: "Sổ từ vựng",
     manageMaterials: "Quản lý tài liệu",
     exploreCourses: "Khám phá khóa học",
     messages: "Tin nhắn",
