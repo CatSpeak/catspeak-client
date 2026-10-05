@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React from "react";
 import { ThumbsUp } from "lucide-react";
 
@@ -143,4 +144,35 @@ export const NEWS_REACTIONS = [
   },
 ];
 
+export const COMMENT_FACEBOOK_REACTIONS = [
+  {
+    type: 1,
+    value: 1,
+    label: "Like",
+    icon: ({ size = 20, className = "" }) => (
+      <LikeBadge size={size} className={className} />
+    ),
+    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+  },
+  {
+    type: 2,
+    value: 2,
+    label: "Love",
+    icon: ({ size = 20, className = "" }) => (
+      <LoveBadge size={size} className={className} />
+    ),
+    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+  },
+  {
+    type: 3,
+    value: 3,
+    label: "Haha",
+    icon: ({ size = 20, className = "" }) => (
+      <HahaBadge size={size} className={className} />
+    ),
+    hoverBgClass: "hover:scale-125 transition-transform duration-150",
+  },
+];
+
 export default ReactionBadge;
+

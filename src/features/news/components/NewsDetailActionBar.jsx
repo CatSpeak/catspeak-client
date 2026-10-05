@@ -1,18 +1,18 @@
 import React, { useState, useRef } from "react";
 import { MessageSquare, ThumbsUp } from "lucide-react";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import ReactionsPopover, {
-  ReactionIcon,
-} from "@/shared/components/ui/ReactionsPopover";
-import { ReactionBadge, NEWS_REACTIONS } from "./ReactionBadge";
+import ReactionsPopover from "@/shared/components/ui/ReactionsPopover";
+import { ReactionBadge, NEWS_REACTIONS } from "./FacebookReactionBadge";
 import ReactionStackedBadges from "./ReactionStackedBadges";
 import {
   normalizeReactions,
   getTotalReactionsCount,
 } from "../utils/reactionUtils";
+import { useGetPostReactionsQuery } from "@/store/api/social/postsApi";
 
 const NewsDetailActionBar = ({
   newsItem,
+  reactions: propReactions,
   handleReact,
   handleShare,
   onCommentClick,
@@ -20,6 +20,12 @@ const NewsDetailActionBar = ({
   const { t } = useLanguage();
   const [showReactions, setShowReactions] = useState(false);
   const holdTimer = useRef(null);
+
+  const postId = newsItem?.postId;
+  const { data: fetchedReactions } = useGetPostReactionsQuery(postId, {
+    skip: !postId || Boolean(propReactions),
+  });
+  const reactions = propReactions || fetchedReactions;
 
   const handleTouchStart = () => {
     holdTimer.current = setTimeout(() => setShowReactions(true), 400);
@@ -37,7 +43,7 @@ const NewsDetailActionBar = ({
     return t.news?.newsDetail?.like || "Thích";
   };
 
-  const normalized = normalizeReactions(newsItem?.reactions);
+  const normalized = normalizeReactions(reactions);
   const totalReactions = getTotalReactionsCount(
     normalized,
     newsItem?.totalReactions !== undefined && newsItem?.totalReactions !== null
@@ -135,7 +141,8 @@ const NewsDetailActionBar = ({
 
       {/* ── Right: Stacked reaction badges (Like · Love · Haha) ── */}
       <ReactionStackedBadges
-        reactions={newsItem?.reactions}
+        postId={postId}
+        reactions={reactions}
         totalReactions={totalReactions}
       />
     </div>

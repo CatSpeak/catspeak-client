@@ -1,7 +1,6 @@
 import React, { useState, useRef } from "react"
 import { MessageSquare, ThumbsUp } from "lucide-react"
 import ReactionsPopover from "@/shared/components/ui/ReactionsPopover"
-import { useLanguage } from "@/shared/context/LanguageContext"
 import { ReactionBadge, NEWS_REACTIONS } from "@/features/news/components/ReactionBadge"
 import ReactionStackedBadges from "@/features/news/components/ReactionStackedBadges"
 import {
@@ -16,7 +15,6 @@ const PostActionBar = ({
   onReact,
   onShare,
 }) => {
-  const { t } = useLanguage()
   const [showReactions, setShowReactions] = useState(false)
   const holdTimer = useRef(null)
 
@@ -130,6 +128,7 @@ const PostActionBar = ({
 
       {/* ── Right: Stacked reaction badges (Like · Love · Haha) ── */}
       <ReactionStackedBadges
+        postId={post?.postId || post?.id}
         reactions={post?.reactions}
         totalReactions={totalReactions}
       />

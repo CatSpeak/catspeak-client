@@ -2,16 +2,18 @@ import React, { useState } from "react";
 import {
   ReactionBadge,
   REACTION_CONFIG,
-} from "./ReactionBadge";
+} from "./FacebookReactionBadge";
 import ReactionTooltip from "./ReactionTooltip";
 import ReactionsListModal from "./ReactionsListModal";
 import {
   normalizeReactions,
   getTotalReactionsCount,
 } from "../utils/reactionUtils";
+import { useGetPostReactionsQuery } from "@/store/api/social/postsApi";
 
 const ReactionStackedBadges = ({
-  reactions,
+  postId,
+  reactions: propReactions,
   totalReactions = 0,
   className = "",
 }) => {
@@ -19,7 +21,12 @@ const ReactionStackedBadges = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState("all");
 
-  const normalized = normalizeReactions(reactions);
+  const { data: fetchedReactions } = useGetPostReactionsQuery(postId, {
+    skip: !postId || Boolean(propReactions),
+  });
+
+  const rawReactions = propReactions || fetchedReactions;
+  const normalized = normalizeReactions(rawReactions);
   const total = getTotalReactionsCount(normalized, totalReactions);
 
   // Determine which reaction badges to display

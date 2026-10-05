@@ -5,6 +5,7 @@ import {
   useGetPostByIdQuery,
   useGetPostBySlugQuery,
   useGetSharedPostQuery,
+  useGetPostReactionsQuery,
   useReactToPostMutation,
   useSharePostMutation,
 } from "@/store/api/social/postsApi";
@@ -26,43 +27,46 @@ import TopicChips from "../components/TopicChips";
 
 const NewsDetailSkeleton = () => (
   <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
-    <div className="mx-auto max-w-7xl">
-      <div className="grid grid-cols-1 items-start gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">
-        {/* Left Column: Article Content Skeleton */}
-        <div className="flex min-w-0 flex-col gap-3.5">
-          {/* Breadcrumb Skeleton */}
-          <div className="flex items-center gap-2 px-1">
+    <div className="mx-auto max-w-7xl flex flex-col gap-5">
+      {/* Top Header Section Skeleton */}
+      <div className="flex flex-col gap-3.5">
+        {/* Breadcrumb Skeleton */}
+        <div className="flex items-center gap-2 px-1">
+          <Skeleton className="h-4 w-20" />
+          <span className="text-gray-300">/</span>
+          <Skeleton className="h-4 w-24" />
+          <span className="text-gray-300">/</span>
+          <Skeleton className="h-4 w-32" />
+        </div>
+
+        {/* Title + Meta Skeleton */}
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-8 w-4/5" />
+          <div className="flex items-center gap-2 mt-1">
             <Skeleton className="h-4 w-20" />
-            <span className="text-gray-300">/</span>
             <Skeleton className="h-4 w-24" />
-            <span className="text-gray-300">/</span>
-            <Skeleton className="h-4 w-32" />
           </div>
+        </div>
 
-          {/* Carousel Skeleton Island */}
-          <FluentCard
-            padding="p-2 sm:p-2.5"
-            rounded="rounded-2xl"
-            className="shadow-sm border-[#e5e7eb]"
-          >
-            <Skeleton className="w-full aspect-video rounded-xl" />
-          </FluentCard>
+        {/* Carousel Skeleton Island */}
+        <FluentCard
+          padding="p-2 sm:p-2.5"
+          rounded="rounded-2xl"
+          className="shadow-sm border-[#e5e7eb]"
+        >
+          <Skeleton className="w-full aspect-video rounded-xl max-h-[500px]" />
+        </FluentCard>
+      </div>
 
-          {/* Article Body Skeleton Island */}
+      {/* Two-column layout Skeleton */}
+      <div className="grid grid-cols-1 items-start lg:items-stretch gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">
+        {/* Left Column: Article Body Skeleton Island */}
+        <div className="min-w-0">
           <FluentCard
             padding="p-4 sm:p-5 md:p-6"
             rounded="rounded-2xl"
             className="shadow-sm border-[#e5e7eb] flex flex-col gap-4"
           >
-            <div className="flex flex-col gap-2 pb-3 border-b border-border">
-              <Skeleton className="h-7 w-4/5" />
-              <Skeleton className="h-5 w-3/5" />
-              <div className="flex items-center gap-2 mt-1">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-            </div>
-
             <div className="flex flex-col gap-3 py-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-[95%]" />
@@ -82,26 +86,28 @@ const NewsDetailSkeleton = () => (
         </div>
 
         {/* Right Column: Comments Sidebar Skeleton Island */}
-        <div className="w-full min-w-0 lg:sticky lg:top-[76px] lg:self-start">
-          <FluentCard
-            padding="p-3.5 sm:p-4"
-            rounded="rounded-2xl"
-            className="shadow-sm border-[#e5e7eb]"
-          >
-            <Skeleton className="h-6 w-32 mb-4" />
-            <div className="flex flex-col gap-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-3">
-                  <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-                  <div className="flex-1 flex flex-col gap-2">
-                    <Skeleton className="h-3.5 w-28" />
-                    <Skeleton className="h-3 w-full" />
-                    <Skeleton className="h-3 w-3/4" />
+        <div className="w-full min-w-0 relative lg:h-full">
+          <div className="lg:absolute lg:inset-0">
+            <FluentCard
+              padding="p-3.5 sm:p-4"
+              rounded="rounded-2xl"
+              className="shadow-sm border-[#e5e7eb] h-full w-full !justify-start overflow-hidden"
+            >
+              <Skeleton className="h-6 w-32 mb-4 shrink-0" />
+              <div className="flex flex-col gap-4 overflow-hidden">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                    <div className="flex-1 flex flex-col gap-2">
+                      <Skeleton className="h-3.5 w-28" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-3/4" />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </FluentCard>
+                ))}
+              </div>
+            </FluentCard>
+          </div>
         </div>
       </div>
     </div>
@@ -130,18 +136,21 @@ const NewsDetailPage = () => {
     data: slugData,
     isLoading: slugLoading,
     error: slugError,
+    refetch: refetchSlug,
   } = useGetPostBySlugQuery(slug, { skip: !isSlug });
 
   const {
     data: normalData,
     isLoading: normalLoading,
     error: normalError,
+    refetch: refetchNormal,
   } = useGetPostByIdQuery(slug, { skip: !isNumeric });
 
   const {
     data: sharedData,
     isLoading: sharedLoading,
     error: sharedError,
+    refetch: refetchShared,
   } = useGetSharedPostQuery(slug, { skip: !isSharedToken });
 
   useEffect(() => {
@@ -173,7 +182,13 @@ const NewsDetailPage = () => {
       : slugError;
   const [reactToPost] = useReactToPostMutation();
   const newsItem = data?.data ?? data ?? null;
-  const handleReact = (type) => {
+  const postId = newsItem?.postId;
+  const {
+    data: postReactions,
+    refetch: refetchReactions,
+  } = useGetPostReactionsQuery(postId, { skip: !postId });
+
+  const handleReact = async (type) => {
     if (!isAuthenticated) {
       openAuthModal("login");
       return;
@@ -181,10 +196,23 @@ const NewsDetailPage = () => {
 
     if (!newsItem?.postId) return;
 
-    reactToPost({
-      postId: newsItem.postId,
-      type,
-    });
+    try {
+      await reactToPost({
+        postId: newsItem.postId,
+        type,
+      }).unwrap();
+    } catch (e) {
+      console.error("React failed", e);
+    } finally {
+      refetchReactions?.();
+      if (isSharedToken) {
+        refetchShared();
+      } else if (isNumeric) {
+        refetchNormal();
+      } else {
+        refetchSlug();
+      }
+    }
   };
 
   const [sharePost] = useSharePostMutation();
@@ -261,56 +289,58 @@ const NewsDetailPage = () => {
   return (
     <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
       <div className="mx-auto max-w-7xl flex flex-col gap-5">
-        {/* ── Two-column layout ─────────────────────────────────── */}
-        <div className="grid grid-cols-1 items-start gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">
-          {/* ── Left Column: Article Content & Carousel ────────────── */}
-          <div className="flex min-w-0 flex-col gap-3.5">
-            {/* ── Breadcrumb ─────────────────────────────────────── */}
-            <Breadcrumb items={breadcrumbItems} className="w-full px-1" />
+        {/* ── Top Header Section: Breadcrumb, Title + Meta, Hero Carousel ── */}
+        <div className="flex flex-col gap-3.5">
+          {/* ── Breadcrumb ─────────────────────────────────────── */}
+          <Breadcrumb items={breadcrumbItems} className="w-full px-1" />
 
-            {/* ── Title + Meta ───────────────────────────────────── */}
-            <div className="flex flex-col gap-3 md:gap-4">
-              <div className="flex flex-col">
-                <h1
-                  className="text-[24px] font-semibold leading-[1.35] text-black md:text-[32px] line-clamp-2"
-                  title={newsItem.title}
-                >
-                  {newsItem.title}
-                </h1>
-                {newsItem.topics && newsItem.topics.length > 0 && (
-                  <TopicChips topics={newsItem.topics} className="mt-2" />
-                )}
-                {/* Inline dot-separated metadata row */}
-                <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                  {newsItem.viewCount !== undefined && (
-                    <span className="font-medium text-sm text-[#7b7979]">
-                      {newsItem.viewCount} lượt xem
-                    </span>
-                  )}
-                  <span className="w-1 h-1 rounded-full bg-[#7b7979] inline-block shrink-0" />
-                  <span className="font-medium text-sm text-[#7b7979]">
-                    {getTranslatedTimeAgo(
-                      newsItem.createDate,
-                      t.news?.newsCard?.timeAgo,
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* ── Hero Image / Carousel ────────────────────────── */}
-              {newsItem.media && newsItem.media.length > 0 && (
-                <Carousel
-                  images={newsItem.media.map((item) => ({
-                    url: getImageUrl(item.mediaUrl),
-                    alt: newsItem.title,
-                  }))}
-                  className="rounded-2xl bg-black/5 aspect-video"
-                  objectFit="contain"
-                />
+          {/* ── Title + Meta ───────────────────────────────────── */}
+          <div className="flex flex-col gap-3 md:gap-4">
+            <div className="flex flex-col">
+              <h1
+                className="text-[24px] font-semibold leading-[1.35] text-black md:text-[32px] line-clamp-2"
+                title={newsItem.title}
+              >
+                {newsItem.title}
+              </h1>
+              {newsItem.topics && newsItem.topics.length > 0 && (
+                <TopicChips topics={newsItem.topics} className="mt-2" />
               )}
+              {/* Inline dot-separated metadata row */}
+              <div className="flex items-center gap-1.5 flex-wrap mt-2">
+                {newsItem.viewCount !== undefined && (
+                  <span className="font-medium text-sm text-[#7b7979]">
+                    {newsItem.viewCount} lượt xem
+                  </span>
+                )}
+                <span className="w-1 h-1 rounded-full bg-[#7b7979] inline-block shrink-0" />
+                <span className="font-medium text-sm text-[#7b7979]">
+                  {getTranslatedTimeAgo(
+                    newsItem.createDate,
+                    t.news?.newsCard?.timeAgo,
+                  )}
+                </span>
+              </div>
             </div>
 
-            {/* ── Article Body Island ───────────────────────────── */}
+            {/* ── Hero Image / Carousel ────────────────────────── */}
+            {newsItem.media && newsItem.media.length > 0 && (
+              <Carousel
+                images={newsItem.media.map((item) => ({
+                  url: getImageUrl(item.mediaUrl),
+                  alt: newsItem.title,
+                }))}
+                className="rounded-2xl bg-black/5 aspect-video max-h-[500px]"
+                objectFit="contain"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* ── Two-column layout: Article Body Island & Comments Island ──── */}
+        <div className="grid grid-cols-1 items-start lg:items-stretch gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">
+          {/* ── Left Column: Article Body Island ───────────────────────── */}
+          <div className="min-w-0">
             <FluentCard
               padding="p-4"
               rounded="rounded-2xl"
@@ -326,6 +356,7 @@ const NewsDetailPage = () => {
                 {/* Action Bar */}
                 <NewsDetailActionBar
                   newsItem={newsItem}
+                  reactions={postReactions}
                   handleReact={handleReact}
                   handleShare={handleShare}
                   onCommentClick={() =>
@@ -337,18 +368,20 @@ const NewsDetailPage = () => {
           </div>
 
           {/* ── Right Column: Comments Sidebar Island ───────────── */}
-          <div className="w-full min-w-0 lg:sticky lg:top-[76px] lg:self-start">
-            <FluentCard
-              padding="p-3.5 sm:p-4"
-              rounded="rounded-2xl"
-              className="shadow-sm border-[#e5e7eb] lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto"
-            >
-              <CommentsSection
-                ref={commentsRef}
-                postId={newsItem.postId}
-                totalComments={newsItem.totalComments || 0}
-              />
-            </FluentCard>
+          <div className="w-full min-w-0 relative lg:h-full">
+            <div className="lg:absolute lg:inset-0">
+              <FluentCard
+                padding="p-3.5 sm:p-4"
+                rounded="rounded-2xl"
+                className="shadow-sm border-[#e5e7eb] h-full w-full !justify-start overflow-y-auto overflow-x-hidden"
+              >
+                <CommentsSection
+                  ref={commentsRef}
+                  postId={newsItem.postId || newsItem.id}
+                  totalComments={newsItem.totalComments || 0}
+                />
+              </FluentCard>
+            </div>
           </div>
         </div>
 

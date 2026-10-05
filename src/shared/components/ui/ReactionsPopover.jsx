@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { useRef, useState, useLayoutEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { ThumbsUp, Heart, Smile } from "lucide-react";
@@ -66,7 +67,7 @@ const ReactionsPopover = ({
   className = "",
   size = "sm",
   placement = "center",
-  color,
+  iconSize,
 }) => {
   const popoverRef = useRef(null);
   const [shiftX, setShiftX] = useState(0);
@@ -74,6 +75,7 @@ const ReactionsPopover = ({
   // Smart viewport edge detection & auto-clamping
   useLayoutEffect(() => {
     if (!show) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShiftX(0);
       return;
     }
@@ -147,7 +149,7 @@ const ReactionsPopover = ({
                     className="hover:-translate-y-1 transition-transform"
                     innerClassName={item.hoverBgClass || ""}
                   >
-                    <IconComp className={item.colorClass} />
+                    <IconComp size={iconSize} className={item.colorClass} />
                   </IconButton>
                 );
               })}

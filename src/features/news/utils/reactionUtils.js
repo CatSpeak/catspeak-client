@@ -12,8 +12,10 @@ export const normalizeReactions = (reactions) => {
 
   if (!reactions) return result;
 
-  if (typeof reactions === "object" && !Array.isArray(reactions)) {
-    const keys = Object.keys(reactions);
+  const raw = reactions?.data ?? reactions;
+
+  if (typeof raw === "object" && !Array.isArray(raw)) {
+    const keys = Object.keys(raw);
     for (const key of keys) {
       const lowerKey = key.toLowerCase();
       const targetKey =
@@ -27,7 +29,7 @@ export const normalizeReactions = (reactions) => {
 
       if (!targetKey) continue;
 
-      const list = reactions[key];
+      const list = raw[key];
       if (Array.isArray(list)) {
         result[targetKey] = list.map((item) => {
           if (typeof item === "string") {
