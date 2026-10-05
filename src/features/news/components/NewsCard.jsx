@@ -12,6 +12,11 @@ import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import ReactionsPopover, {
   ReactionIcon,
 } from "@/shared/components/ui/ReactionsPopover";
+import { ReactionBadge, NEWS_REACTIONS } from "./ReactionBadge";
+import {
+  normalizeReactions,
+  getTotalReactionsCount,
+} from "../utils/reactionUtils";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useAuth } from "@/features/auth";
 import TopicChips from "./TopicChips";
@@ -65,6 +70,20 @@ const NewsCard = ({ news }) => {
     return COLORS[index].value;
   }, [news.postId, news.title]);
 
+  const totalReactions = useMemo(() => {
+    const norm = normalizeReactions(news.reactions);
+    return getTotalReactionsCount(
+      norm,
+      news.totalReactions !== undefined && news.totalReactions !== null
+        ? news.totalReactions
+        : 0,
+    );
+  }, [news.reactions, news.totalReactions]);
+
+  const totalComments =
+    news.totalComments ?? news.commentCount ?? news.commentsCount ?? news.comments?.length ?? 0;
+  const totalShares = news.totalShares ?? news.shareCount ?? 0;
+
   /* ── Handlers ──────────────────────────────────────────────────── */
   const handleCardClick = () => {
     navigate(`/${currentLang}/cat-speak/news/${news.slug || news.postId}`);
@@ -110,7 +129,9 @@ const NewsCard = ({ news }) => {
   return (
     <div
       onClick={handleCardClick}
-      className="group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-visible"
+      className={`group flex flex-col bg-white border border-border rounded-xl cursor-pointer hover:shadow-md transition-shadow duration-200 overflow-visible relative ${
+        showReactions ? "z-40" : ""
+      }`}
     >
       {/* ── Image area ───────────────────────────────────────────── */}
       <div className="relative w-full rounded-t-xl overflow-hidden">
@@ -167,7 +188,9 @@ const NewsCard = ({ news }) => {
         onPointerDown={(e) => e.stopPropagation()}
       >
         <div
-          className="group/reactions relative flex items-center justify-center overflow-visible"
+          className={`group/reactions relative flex items-center justify-center overflow-visible ${
+            showReactions ? "z-50" : ""
+          }`}
           onMouseEnter={() => setShowReactions(true)}
           onMouseLeave={() => setShowReactions(false)}
         >
@@ -176,11 +199,11 @@ const NewsCard = ({ news }) => {
               const type = news.currentUserReaction || "Like";
               handleReact(e, type);
             }}
-            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-bl-xl"
+            className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-bl-xl cursor-pointer"
           >
-            <ReactionIcon reaction={news.currentUserReaction} size={20} />
+            <ReactionBadge type={news.currentUserReaction} size={20} />
             <span className="text-sm text-[#606060]">
-              {news.totalReactions || 0}
+              {totalReactions}
             </span>
           </button>
 
@@ -189,7 +212,8 @@ const NewsCard = ({ news }) => {
             show={showReactions}
             onClose={() => setShowReactions(false)}
             onSelect={(e, type) => handleReact(e, type)}
-            iconSize={18}
+            reactions={NEWS_REACTIONS}
+            iconSize={20}
           />
 
           {/* Touch hold for mobile reactions */}
@@ -203,26 +227,29 @@ const NewsCard = ({ news }) => {
         </div>
 
         {/* Comments */}
-        <button className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg">
+        <button
+          onClick={handleCardClick}
+          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg cursor-pointer"
+        >
           <MessageSquare
             size={20}
             strokeWidth={1.5}
             className="text-[#606060]"
           />
           <span className="text-sm text-[#606060]">
-            {news.totalComments || 0}
+            {totalComments}
           </span>
         </button>
 
         {/* Share */}
         <button
           onClick={handleShare}
-          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-br-xl"
+          className="w-full h-12 flex items-center justify-center gap-2 transition-colors hover:bg-primaryBg rounded-br-xl cursor-pointer"
           aria-label="Share"
         >
           <Share size={20} strokeWidth={1.5} className="text-[#606060]" />
           <span className="text-sm text-[#606060]">
-            {news.totalShares || 0}
+            {totalShares}
           </span>
         </button>
       </div>

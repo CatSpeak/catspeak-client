@@ -85,9 +85,19 @@ const ReactionsPopover = ({
       const viewportWidth = window.innerWidth;
       const margin = 8;
 
+      let minLeft = margin;
+      // Account for desktop sidebar boundary if present
+      const desktopSidebar = document.querySelector("aside.sticky");
+      if (desktopSidebar && window.innerWidth >= 1024) {
+        const sidebarRect = desktopSidebar.getBoundingClientRect();
+        if (sidebarRect.right > 0 && sidebarRect.width > 0) {
+          minLeft = sidebarRect.right + margin;
+        }
+      }
+
       let offset = 0;
-      if (rect.left < margin) {
-        offset = margin - rect.left;
+      if (rect.left < minLeft) {
+        offset = minLeft - rect.left;
       } else if (rect.right > viewportWidth - margin) {
         offset = viewportWidth - margin - rect.right;
       }
@@ -116,7 +126,7 @@ const ReactionsPopover = ({
       {show && (
         <div
           ref={popoverRef}
-          className={`absolute bottom-full mb-1 z-20 group-hover/reactions:block ${getPlacementClass()} ${className}`}
+          className={`absolute bottom-full mb-1 z-50 group-hover/reactions:block ${getPlacementClass()} ${className}`}
           style={dynamicTransform ? { transform: dynamicTransform } : undefined}
         >
           <FluentAnimation direction="up" distance={10} duration={0.2} exit>

@@ -217,12 +217,18 @@ const NewsDetailPage = () => {
     return <NewsDetailSkeleton />;
   }
 
+  const isGlobalNews = Number(newsItem?.postType) === 2;
+
   if (error || !newsItem || newsItem.privacy !== "Public") {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center bg-primaryBg px-4">
         <h5 className="mb-4 text-2xl font-bold">{t.news?.error?.notFound}</h5>
         <button
-          onClick={() => navigate(`/${lang}/cat-speak/news`)}
+          onClick={() =>
+            navigate(
+              `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
+            )
+          }
           className="rounded-full border border-cath-red-700 px-6 py-2 text-sm font-medium text-cath-red-700 transition-colors hover:bg-cath-red-50"
         >
           {t.news?.error?.backToNews}
@@ -235,11 +241,19 @@ const NewsDetailPage = () => {
     { label: "Trang chủ", onClick: () => navigate(`/${lang}/community`) },
     {
       label: "Cat Speak",
-      onClick: () => navigate(`/${lang}/cat-speak/news`),
+      onClick: () =>
+        navigate(
+          `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
+        ),
     },
     {
-      label: "Bản tin CatSpeak",
-      onClick: () => navigate(`/${lang}/cat-speak/news`),
+      label: isGlobalNews
+        ? t.news?.globalNews || "Bản tin thế giới"
+        : t.news?.catSpeakNews || "Bản tin CatSpeak",
+      onClick: () =>
+        navigate(
+          `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
+        ),
     },
     { label: newsItem.title },
   ];
