@@ -121,17 +121,11 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                 ref={contentRef}
                 className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
               >
-                {hasRichContent ? (
-                  <PostContent
-                    html={post.content}
-                    contentUrl={contentUrl}
-                    className="text-sm text-[#606060]"
-                  />
-                ) : (
-                  <p className="text-sm text-[#606060] whitespace-pre-line break-words">
-                    {excerpt}
-                  </p>
-                )}
+                <PostContent
+                  html={post?.content || (!contentUrl ? excerpt : null)}
+                  contentUrl={contentUrl}
+                  className={!isExpanded ? "text-sm text-[#606060]" : ""}
+                />
               </div>
               {(isOverflowing || isExpanded) && (
                 <button
