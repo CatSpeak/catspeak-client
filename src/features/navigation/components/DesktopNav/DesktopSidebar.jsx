@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 import { useSelector } from "react-redux"
 import { LandingPageIcon } from "@/features/landing/assets"
 import { useSidebar } from "@/shared/context/SidebarContext"
@@ -193,6 +193,7 @@ const DesktopSidebar = () => {
       if (item.hideInSidebar) return false
       if (item.lang && item.lang !== currentLang) return false
       if (item.isPrivate && !isAuthenticated) return false
+      if (item.roles && !item.roles.includes(activeRole)) return false
       return true
     }
 
@@ -412,7 +413,7 @@ const DesktopSidebar = () => {
       {/* 2. SECONDARY EXPANDABLE SIDEBAR PANEL */}
       <AnimatePresence initial={false}>
         {isPanelOpen && (
-          <motion.div
+          <Motion.div
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 280, opacity: 1 }}
             exit={{
@@ -439,7 +440,7 @@ const DesktopSidebar = () => {
 
               {/* Content Sub-Links */}
               <AnimatePresence mode="wait">
-                <motion.div
+                <Motion.div
                   key={`section-${currentSectionKey}`}
                   variants={listContainerVariants}
                   initial="hidden"
@@ -462,7 +463,7 @@ const DesktopSidebar = () => {
                           const label =
                             t.nav?.[item.key] || item.label || item.key
                           return (
-                            <motion.div
+                            <Motion.div
                               key={item.key}
                               variants={itemVariants}
                               initial="hidden"
@@ -478,7 +479,7 @@ const DesktopSidebar = () => {
                                 isDocked={false}
                                 sectionId={currentSectionKey}
                               />
-                            </motion.div>
+                            </Motion.div>
                           )
                         })
                     : getVisibleGroupsForSection(currentSectionKey).map(
@@ -495,7 +496,7 @@ const DesktopSidebar = () => {
                                 itemPath = `/workspace/profile/${user.accountId || user.id || ""}`
                               }
                               return (
-                                <motion.div
+                                <Motion.div
                                   key={item.key}
                                   variants={itemVariants}
                                   initial="hidden"
@@ -511,16 +512,16 @@ const DesktopSidebar = () => {
                                     isDocked={false}
                                     sectionId={currentSectionKey}
                                   />
-                                </motion.div>
+                                </Motion.div>
                               )
                             })}
                           </React.Fragment>
                         ),
                       )}
-                </motion.div>
+                </Motion.div>
               </AnimatePresence>
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </aside>
