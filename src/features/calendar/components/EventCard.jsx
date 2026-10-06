@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation";
 import EventCardDetails from "./EventCardDetails";
+import CommunityBadge from "./CommunityBadge";
 
 const DEFAULT_COLOR = "#990011";
 
@@ -64,6 +65,7 @@ const EventCard = ({ event, onClick, isSelected, onActionComplete }) => {
           <span className="text-[15px] font-semibold text-black truncate leading-tight">
             {event.title || t.calendar?.event || "Sự kiện"}
           </span>
+          <CommunityBadge languageCommunity={event.languageCommunity} />
           {timeStr && (
             <div className="flex items-center gap-2 text-sm text-black/75">
               <Clock size={14} className="shrink-0 text-black/75" />

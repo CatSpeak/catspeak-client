@@ -10,10 +10,12 @@ import {
   BookmarkCheck,
 } from "lucide-react";
 import dayjs from "dayjs";
+import { toast } from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
 import { useEventForm } from "../hooks/useEventForm";
+import { communityCodeFromValue } from "../utils/community";
 import EventDateTimeSection from "../components/CreateEventModal/EventDateTimeSection";
 import EventRecurrenceSection from "../components/CreateEventModal/EventRecurrenceSection";
 import EventDetailsSection from "../components/CreateEventModal/EventDetailsSection";
@@ -62,6 +64,7 @@ const CreateEventPage = () => {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const performSaveRef = useRef(null);
+  const draftIntentRef = useRef(false);
   const [imagePreview, setImagePreview] = useState(
     editEvent?.thumbnailUrl || null,
   );
@@ -78,10 +81,12 @@ const CreateEventPage = () => {
 
   const handleSaveDraft = async () => {
     try {
+      draftIntentRef.current = true;
       await form.handleSubmit(null, true);
       setDraftSaved(true);
       setTimeout(() => setDraftSaved(false), 2000);
     } catch (e) {
+      draftIntentRef.current = false;
       console.log(e);
     }
   };
@@ -102,6 +107,7 @@ const CreateEventPage = () => {
     form.setEventColor(draft.color || "#990011");
     form.setMaxParticipants(draft.maxParticipants || "");
     form.setVisibility(draft.visibilityScope || "PUBLIC");
+    form.setCommunity(communityCodeFromValue(draft.languageCommunity));
     form.setConditionsInput(
       draft.conditions && draft.conditions.length > 0
         ? draft.conditions.map((c) => c.title).join(", ")
@@ -187,10 +193,17 @@ const CreateEventPage = () => {
   };
 
   const handleSuccess = () => {
+    if (!draftIntentRef.current && location.state?.fromCommunityCalendar) {
+      toast.success(cal.createEventSuccess || "Tạo sự kiện thành công!");
+      navigate(returnPath);
+      return;
+    }
+    draftIntentRef.current = false;
     setSubmitStatus("success");
   };
 
   const handleError = () => {
+    draftIntentRef.current = false;
     setSubmitStatus("error");
   };
 
@@ -426,7 +439,7 @@ const CreateEventPage = () => {
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-full h-full object-cover absolute inset-0"
+                    className="w-full h-full object-contain absolute inset-0"
                   />
                 ) : (
                   <>
@@ -543,6 +556,8 @@ const CreateEventPage = () => {
                   form.setErrors((prev) => ({ ...prev, title: undefined }));
               }}
               eventColor={form.eventColor || "#990011"}
+              community={form.community}
+              onCommunityChange={form.setCommunity}
               countryId={form.countryId}
               onCountryIdChange={(val) => {
                 form.setCountryId(val);

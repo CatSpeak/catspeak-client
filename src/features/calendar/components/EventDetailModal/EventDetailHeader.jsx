@@ -1,12 +1,16 @@
 import React from "react"
 import { Globe, Lock, RefreshCw, X, User, ChevronLeft } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import SharePopover from "./SharePopover"
+import { useAuth } from "@/features/auth/hooks/useAuth"
+import { getIsCreator, getEventId } from "../../utils/eventPermissions"
 
 const EventDetailHeader = ({ ev, onClose, onBack }) => {
   const { t } = useLanguage()
+  const { user } = useAuth()
 
   return (
-    <div className="text-white p-6 rounded-none min-[426px]:rounded-t-[24px] z-10 relative overflow-hidden flex flex-col bg-[#990011]">
+    <div className="text-white p-6 rounded-none min-[426px]:rounded-t-[24px] z-10 relative flex flex-col bg-[#990011]">
       {/* Mobile Close Button */}
       {onClose && (
         <div className=" justify-end w-full mb-2 max-[425px]:flex hidden -mt-2 -mr-2">
@@ -49,13 +53,23 @@ const EventDetailHeader = ({ ev, onClose, onBack }) => {
             <ChevronLeft size={24} />
           </button>
         )}
-        <h2 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold flex-1 min-w-0">
           {ev.title || (
             <span className="opacity-60 italic text-xl">
               {t.calendar?.noTitle || "Không có tiêu đề"}
             </span>
           )}
         </h2>
+        <SharePopover
+          eventId={getEventId(ev)}
+          occurrenceId={ev.occurrenceId}
+          visibilityScope={ev.visibilityScope}
+          isCreator={getIsCreator(user, ev)}
+          languageCommunity={ev.languageCommunity}
+          variant="onPrimary"
+          size="sm"
+          placement="bottom"
+        />
       </div>
 
       {/* Creator Name */}

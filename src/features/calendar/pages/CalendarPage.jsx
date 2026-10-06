@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
+import { toast } from "react-hot-toast";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetEventCountsQuery } from "@/store/api/eventsApi";
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb";
@@ -12,6 +13,14 @@ import CalendarFilterChips from "../components/CalendarFilterChips";
 import CalendarMonthPanel from "../components/CalendarMonthPanel.jsx";
 import EventDetailModal from "../components/EventDetailModal/index";
 import MapView from "../components/Mapview";
+import MapFocusContext from "../context/MapFocusContext";
+import { geocodeAddress } from "@/shared/utils/geocode";
+import {
+  buildAddressQuery,
+  googleMapsSearchUrl,
+  isUrl,
+  openInNewTab,
+} from "@/shared/utils/locationLink";
 import { WorkshopCarousel } from "@/features/workshops";
 import {
   CreateRoomModal,
@@ -21,6 +30,8 @@ import {
 } from "@/features/rooms";
 import { useCreateAISessionMutation } from "@/store/api/roomsApi";
 import { leaveCall } from "@/store/slices/videoCallSlice";
+import { selectIsAuthenticated } from "@/store/slices/authSlice";
+import { useAuthModal } from "@/shared/context/AuthModalContext";
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal";
 import {
   pingActiveCall,
@@ -35,6 +46,8 @@ const CalendarPage = () => {
   const { t, language } = useLanguage();
   const cal = t.calendar || {};
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const { openAuthModal } = useAuthModal();
   const { isInCall } = useSelector((s) => s.videoCall);
   const { state, actions } = useRoomsPageLogic();
   const [createAISession] = useCreateAISessionMutation();
@@ -54,6 +67,78 @@ const CalendarPage = () => {
 
   const [dayEvents, setDayEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [mapFocusLocation, setMapFocusLocation] = useState(null);
+  const mapSectionRef = useRef(null);
+
+  const closeDetail = useCallback(() => {
+    setSelectedEvent(null);
+    if (
+      searchParams.has("eventId") ||
+      searchParams.has("occurrenceId") ||
+      searchParams.has("token")
+    ) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("eventId");
+      newParams.delete("occurrenceId");
+      newParams.delete("token");
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const focusEventOnMap = useCallback(
+    async (event) => {
+      if (!event) return;
+      const location = (event.location || "").trim();
+
+      // A pasted URL is an external link, not something to geocode.
+      if (isUrl(location)) {
+        openInNewTab(location);
+        return;
+      }
+
+      const address = buildAddressQuery(event);
+      if (!address) return;
+
+      let coords = null;
+      try {
+        coords = await geocodeAddress(address);
+      } catch (error) {
+        console.error("Geocode failed:", error);
+      }
+
+      if (!coords) {
+        toast.error(
+          cal.mapLocationNotFound ||
+            "Không tìm thấy địa chỉ trên bản đồ. Đang mở Google Maps.",
+        );
+        openInNewTab(googleMapsSearchUrl(address));
+        return;
+      }
+
+      // Close the detail popup, then pin + flyTo on the map.
+      closeDetail();
+      setMapFocusLocation({
+        id: event.id ?? event.eventId ?? event.occurrenceId,
+        lat: coords.lat,
+        lng: coords.lng,
+        title: event.title,
+        address,
+      });
+      requestAnimationFrame(() => {
+        mapSectionRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    },
+    [cal.mapLocationNotFound, closeDetail],
+  );
+
+  const handleEventSelect = useCallback((ev) => {
+    // A normal selection takes over the map focus, so drop any address focus.
+    setMapFocusLocation(null);
+    setSelectedEvent(ev);
+  }, []);
 
   const basePath = lang ? `/${lang}/cat-speak/calendar` : "/cat-speak/calendar";
 
@@ -90,6 +175,7 @@ const CalendarPage = () => {
   const { data: eventCountsData } = useGetEventCountsQuery({
     startDate: currentDate.startOf("month").toISOString(),
     endDate: currentDate.endOf("month").toISOString(),
+    community: lang,
   });
 
   const eventCountsByDay = useMemo(() => {
@@ -201,6 +287,16 @@ const CalendarPage = () => {
     setPendingAction(null);
   };
 
+  const handleCreateEvent = () => {
+    if (!isAuthenticated) {
+      openAuthModal("login");
+      return;
+    }
+    navigate(`${basePath}/create`, {
+      state: { from: basePath, fromCommunityCalendar: true },
+    });
+  };
+
   const handleCreateAI = async (settings) => {
     actions.closeAISettingsModal();
     const action = () => {
@@ -219,7 +315,13 @@ const CalendarPage = () => {
     action();
   };
 
+  const mapFocusValue = useMemo(
+    () => ({ hasMap: true, focusEventOnMap }),
+    [focusEventOnMap],
+  );
+
   return (
+    <MapFocusContext.Provider value={mapFocusValue}>
     <div className="w-full flex flex-col gap-4 overflow-hidden bg-primaryBg min-h-screen">
       <div className="px-6 pt-4">
         <Breadcrumb items={breadcrumbItems} />
@@ -240,6 +342,8 @@ const CalendarPage = () => {
       <div className="px-6 pt-5 pb-8">
         <CalendarPageHeader
           title={cal.schedule || "Danh sách sự kiện"}
+          createLabel={cal.createEvent || "Tạo sự kiện"}
+          onCreateEvent={handleCreateEvent}
           onOpenFilters={() => setIsFilterOpen(true)}
         />
 
@@ -262,6 +366,7 @@ const CalendarPage = () => {
               onSelectDate={(d) => {
                 setSelectedDate(d);
                 setSelectedEvent(null);
+                setMapFocusLocation(null);
               }}
               viewType={viewType}
               onChangeView={setViewType}
@@ -276,7 +381,7 @@ const CalendarPage = () => {
                 currentDate={currentDate}
                 activeFilters={activeFilters}
                 selectedEvent={selectedEvent}
-                onEventSelect={setSelectedEvent}
+                onEventSelect={handleEventSelect}
                 onEventsUpdate={setDayEvents}
                 eventCountsByDay={eventCountsByDay}
                 totalUniqueEvents={eventCountsData?.totalUniqueEvents || 0}
@@ -286,6 +391,7 @@ const CalendarPage = () => {
                 onSelectDate={(d) => {
                   setSelectedDate(d);
                   setSelectedEvent(null);
+                  setMapFocusLocation(null);
                 }}
               />
             </div>
@@ -293,8 +399,15 @@ const CalendarPage = () => {
         </div>
 
         {/* FULL WIDTH MAP */}
-        <div className="relative z-0 rounded-3xl overflow-hidden bg-white p-3 shadow-sm w-full  mt-6">
-          <MapView dayEvents={dayEvents} selectedEvent={selectedEvent} />
+        <div
+          ref={mapSectionRef}
+          className="relative z-0 rounded-3xl overflow-hidden bg-white p-3 shadow-sm w-full  mt-6"
+        >
+          <MapView
+            dayEvents={dayEvents}
+            selectedEvent={selectedEvent}
+            focusLocation={mapFocusLocation}
+          />
         </div>
       </div>
 
@@ -335,16 +448,11 @@ const CalendarPage = () => {
             occurrenceId: occurrenceIdFromUrl || undefined,
             token: tokenFromUrl || undefined,
           }}
-          onClose={() => {
-            const newParams = new URLSearchParams(searchParams);
-            newParams.delete("eventId");
-            newParams.delete("occurrenceId");
-            newParams.delete("token");
-            setSearchParams(newParams, { replace: true });
-          }}
+          onClose={closeDetail}
         />
       )}
     </div>
+    </MapFocusContext.Provider>
   );
 };
 
