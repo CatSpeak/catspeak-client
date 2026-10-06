@@ -5,7 +5,6 @@ import { PageNotFound } from "@/shared/pages"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 const TEACHER_ONLY_PREFIXES = [
-  "/workspace/dashboard",
   "/workspace/courses",
   "/workspace/classes",
   "/workspace/analytics",

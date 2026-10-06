@@ -134,6 +134,18 @@ const SessionAnalyticsDetailPage = lazy(
 const WorkspaceDashboardPage = lazy(
   () => import("@/features/courses/components/WorkspaceDashboardPage"),
 );
+const WorkspaceDashboardRouter = lazy(
+  () =>
+    import(
+      "@/features/workspace/components/learner-dashboard/WorkspaceDashboardRouter"
+    ),
+);
+const LearnerDashboardPage = lazy(
+  () =>
+    import(
+      "@/features/workspace/components/learner-dashboard/LearnerDashboardPage"
+    ),
+);
 const CreateVoucherPage = lazy(
   () => import("@/features/vouchers/pages/CreateVoucherPage"),
 );
@@ -673,11 +685,17 @@ const routesConfig = [
               {
                 path: "dashboard",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
-                    <LazyRoute>
-                      <WorkspaceDashboardPage />
-                    </LazyRoute>
-                  </RoleGuard>
+                  <LazyRoute>
+                    <WorkspaceDashboardRouter />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learner-dashboard",
+                element: (
+                  <LazyRoute>
+                    <LearnerDashboardPage />
+                  </LazyRoute>
                 ),
               },
               {
