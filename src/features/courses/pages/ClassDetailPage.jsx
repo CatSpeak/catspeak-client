@@ -193,18 +193,15 @@ const ClassDetailPage = () => {
     { value: "members", label: cd.members || "Members" },
     { value: "lecture-hall", label: cd.lectureHall || "Lecture Hall" },
     { value: "grading", label: cd.grading || "Grading" },
-<<<<<<< HEAD
     ...(isClassTeacher
       ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }]
       : []),
     ...(isClassTeacher
       ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }]
       : []),
-=======
-    ...(isClassTeacher ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }] : []),
-    ...(isClassTeacher ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }] : []),
-    ...(isClassTeacher ? [{ value: "recordings", label: cd.recordings || "Video bài giảng" }] : []),
->>>>>>> feature/TASK-173
+    ...(isClassTeacher
+      ? [{ value: "recordings", label: cd.recordings || "Video bài giảng" }]
+      : []),
   ]
 
   const getWeeklyScheduleText = () =>
