@@ -615,6 +615,8 @@ export default {
     feed: "フィード",
     lectureHall: "講堂",
     grading: "採点",
+    vouchers: "クーポン",
+    recordings: "授業録画",
     classOverview: "クラス概要",
     classInformation: "クラス情報",
     tuitionFee: "受講料",

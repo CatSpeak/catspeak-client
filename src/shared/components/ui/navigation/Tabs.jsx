@@ -1,4 +1,4 @@
-import React, { memo } from "react"
+import React, { memo, useEffect, useRef } from "react"
 
 /**
  * Reusable Tabs component that prevents layout shift on active bold states and supports optional icons.
@@ -9,7 +9,7 @@ import React, { memo } from "react"
  * @param {string} className - Optional extra class name for the tab container
  * @param {string} activeClassName - Optional custom active tab classes
  * @param {string} inactiveClassName - Optional custom inactive tab classes
- * @param {boolean} fullWidth - If true, tabs will divide space equally (flex-1)
+ * @param {boolean|'responsive'} fullWidth - If true, tabs will divide space equally (flex-1). If false, tabs retain content width and scroll horizontally.
  */
 const Tabs = memo(
   ({
@@ -23,10 +23,22 @@ const Tabs = memo(
   }) => {
     const isResponsive = fullWidth === "responsive"
     const isFull = fullWidth === true
+    const activeTabRef = useRef(null)
+
+    // Tự động cuộn tab đang chọn vào khung nhìn (ví dụ khi deep link hoặc đổi tab)
+    useEffect(() => {
+      if (activeTabRef.current) {
+        activeTabRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        })
+      }
+    }, [activeTab])
 
     return (
       <div
-        className={`flex items-center overflow-x-auto scrollbar-hidden z-30 border-b border-border ${
+        className={`w-full max-w-full min-w-0 flex items-center overflow-x-auto  overscroll-x-contain z-30 border-b border-border ${
           !isFull && !isResponsive ? "gap-1 sm:gap-2" : ""
         } ${className}`}
       >
@@ -38,31 +50,39 @@ const Tabs = memo(
           return (
             <button
               key={tabKey}
+              ref={isActive ? activeTabRef : null}
               type="button"
               onClick={() => onChange(tabKey)}
-              className={`h-10 min-w-fit sm:min-w-[120px] shrink-0 group relative flex items-center justify-center transition-colors flex-1 ${fullWidth ? "" : "sm:flex-none px-2 sm:px-4"
-                }`}
+              className={`h-10 min-w-fit shrink-0 group relative flex items-center justify-center transition-colors ${
+                isFull
+                  ? "flex-1 px-2"
+                  : isResponsive
+                    ? "flex-1 sm:flex-none px-3 sm:px-4"
+                    : "flex-none px-3 sm:px-4"
+              }`}
             >
               <div
-                className={`relative h-full flex items-center gap-2 text-sm transition-colors ${isActive ? activeClassName : inactiveClassName
-                  }`}
+                className={`relative h-full flex items-center gap-2 text-sm transition-colors whitespace-nowrap ${
+                  isActive ? activeClassName : inactiveClassName
+                }`}
               >
-                {Icon && <Icon size={18} className="hidden sm:block" />}
+                {Icon && <Icon size={18} className="hidden sm:block shrink-0" />}
 
-                <span className="relative flex flex-col items-center justify-center">
+                <span className="relative flex flex-col items-center justify-center whitespace-nowrap">
                   {/* Invisible bold text to reserve space and prevent layout shift */}
-                  <span className="invisible h-0 overflow-hidden font-bold">
+                  <span className="invisible h-0 overflow-hidden font-bold whitespace-nowrap select-none" aria-hidden="true">
                     {tab.label}
                   </span>
-                  <span className="truncate">{tab.label}</span>
+                  <span className="whitespace-nowrap font-medium">{tab.label}</span>
                 </span>
 
                 {tab.badge && (
                   <span
-                    className={`min-w-4 h-4 px-1 rounded-full text-xs flex items-center justify-center transition-colors ${isActive
-                      ? "bg-[#990011] text-white"
-                      : "bg-gray-200 text-gray-700"
-                      }`}
+                    className={`min-w-4 h-4 px-1 rounded-full text-xs flex items-center justify-center transition-colors shrink-0 ${
+                      isActive
+                        ? "bg-[#990011] text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
                   >
                     {tab.badge}
                   </span>
@@ -70,10 +90,11 @@ const Tabs = memo(
 
                 {/* Underline Indicator */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${isActive
-                    ? "bg-[#990011] scale-x-100"
-                    : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
-                    }`}
+                  className={`absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full transition-all duration-200 ${
+                    isActive
+                      ? "bg-[#990011] scale-x-100"
+                      : "bg-[#990011]/40 scale-x-0 group-hover:scale-x-100 origin-center"
+                  }`}
                 />
               </div>
             </button>
