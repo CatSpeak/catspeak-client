@@ -26,11 +26,12 @@ const ListItem = ({
   variant,
   className = "",
   contentClassName = "",
+  as,
   ...props
 }) => {
   const isClickable = !!onClick
 
-  const Wrapper = isClickable ? "button" : "div"
+  const Wrapper = as || (isClickable ? "button" : "div")
 
   const linesClasses = {
     1: "h-14",
@@ -60,10 +61,22 @@ const ListItem = ({
 
   return (
     <Wrapper
-      type={isClickable ? "button" : undefined}
+      type={Wrapper === "button" && isClickable ? "button" : undefined}
+      role={Wrapper === "div" && isClickable ? "button" : undefined}
+      tabIndex={Wrapper === "div" && isClickable ? 0 : undefined}
+      onKeyDown={
+        Wrapper === "div" && isClickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onClick?.(e)
+              }
+            }
+          : undefined
+      }
       onClick={onClick}
       className={`group relative outline-none flex w-full items-center text-left ${heightClass} ${baseBgClass} ${className}`}
-      disabled={isClickable ? false : undefined}
+      disabled={Wrapper === "button" && isClickable ? false : undefined}
       {...props}
     >
       <div

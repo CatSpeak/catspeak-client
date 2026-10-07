@@ -1,12 +1,14 @@
-import React from "react"
+import React, { useState } from "react"
 import { FileText, Download, FileArchive } from "lucide-react"
 import { useGetUserWallDocumentsQuery } from "../../../store/api/social/profilePostsApi"
 import { Skeleton, EmptyState } from "@/shared/components/ui/indicators"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import FilePreviewModal from "@/shared/components/ui/FilePreviewModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfileDocumentsTab = ({ targetAccountId }) => {
   const { t } = useLanguage()
+  const [previewDoc, setPreviewDoc] = useState(null)
   const { data, isLoading } = useGetUserWallDocumentsQuery({
     accountId: targetAccountId,
     page: 1,
@@ -73,6 +75,7 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
               return (
                 <FluentCard
                   key={fileId}
+                  onClick={() => setPreviewDoc(doc)}
                   className="flex-row items-center justify-between p-4 sm:p-4 min-h-[80px] hover:border-[#990011]/20 hover:shadow-sm transition-all group cursor-pointer bg-white"
                 >
                   <div className="flex items-center gap-4 overflow-hidden flex-1">
@@ -109,6 +112,16 @@ const ProfileDocumentsTab = ({ targetAccountId }) => {
           </div>
         )}
       </div>
+
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <FilePreviewModal
+          open={Boolean(previewDoc)}
+          onClose={() => setPreviewDoc(null)}
+          item={previewDoc}
+          recordMaterialView={false}
+        />
+      )}
     </div>
   )
 }

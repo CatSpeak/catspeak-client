@@ -3,6 +3,7 @@ import { Download, Play, Image as ImageIcon } from "lucide-react"
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import FileAttachmentItem from "@/shared/components/ui/FileAttachmentItem"
+import FilePreviewModal from "@/shared/components/ui/FilePreviewModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 /**
@@ -194,8 +195,7 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
   const { t } = useLanguage()
   const [activeMediaIndex, setActiveMediaIndex] = useState(null)
   const [isDocsExpanded, setIsDocsExpanded] = useState(false)
-
-  if (!media || media.length === 0) return null
+  const [previewDoc, setPreviewDoc] = useState(null)
 
   // Categorize media into visual (images/videos) and documents
   const visualMedia = useMemo(
@@ -218,6 +218,8 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
     : documents.slice(0, initialDocsLimit)
   const hasMoreDocuments = documents.length > initialDocsLimit
 
+  if (!media || media.length === 0) return null
+
   return (
     <div className="flex flex-col gap-3 w-full">
       {/* Visual media gallery */}
@@ -236,6 +238,8 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
               key={doc.postMediaId}
               fileName={doc.fileName || t.profile?.post?.document || "Tài liệu"}
               fileSize={doc.fileSize}
+              onClick={() => setPreviewDoc(doc)}
+              className="cursor-pointer hover:bg-gray-50 transition-colors"
               rightAction={
                 <IconButton
                   as="a"
@@ -277,6 +281,16 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
           mediaList={visualMedia}
           initialIndex={activeMediaIndex}
           onClose={() => setActiveMediaIndex(null)}
+        />
+      )}
+
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <FilePreviewModal
+          open={Boolean(previewDoc)}
+          onClose={() => setPreviewDoc(null)}
+          item={previewDoc}
+          recordMaterialView={false}
         />
       )}
     </div>

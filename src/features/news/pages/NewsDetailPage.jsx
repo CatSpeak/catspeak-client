@@ -24,6 +24,10 @@ import { Skeleton } from "@/shared/components/ui/indicators";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useAuth } from "@/features/auth";
 import TopicChips from "../components/TopicChips";
+import FilePreviewModal from "@/shared/components/ui/FilePreviewModal";
+import FileAttachmentItem from "@/shared/components/ui/FileAttachmentItem";
+import IconButton from "@/shared/components/ui/buttons/IconButton";
+import { Download } from "lucide-react";
 
 const NewsDetailSkeleton = () => (
   <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
@@ -218,6 +222,7 @@ const NewsDetailPage = () => {
   const [sharePost] = useSharePostMutation();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   const handleShare = async () => {
     if (!newsItem?.postId) return;
@@ -324,16 +329,21 @@ const NewsDetailPage = () => {
             </div>
 
             {/* ── Hero Image / Carousel ────────────────────────── */}
-            {newsItem.media && newsItem.media.length > 0 && (
-              <Carousel
-                images={newsItem.media.map((item) => ({
-                  url: getImageUrl(item.mediaUrl),
-                  alt: newsItem.title,
-                }))}
-                className="rounded-2xl bg-black/5 aspect-video max-h-[500px]"
-                objectFit="contain"
-              />
-            )}
+            {(() => {
+              const visualMedia = (newsItem.media || []).filter(
+                (item) => item.mediaType === "Image" || item.mediaType === "Video"
+              );
+              return visualMedia.length > 0 ? (
+                <Carousel
+                  images={visualMedia.map((item) => ({
+                    url: getImageUrl(item.mediaUrl),
+                    alt: newsItem.title,
+                  }))}
+                  className="rounded-2xl bg-black/5 aspect-video max-h-[500px]"
+                  objectFit="contain"
+                />
+              ) : null;
+            })()}
           </div>
         </div>
 
@@ -352,6 +362,46 @@ const NewsDetailPage = () => {
                   html={newsItem.content}
                   contentUrl={newsItem.contentUrl || newsItem.ContentUrl}
                 />
+
+                {/* Document Attachments */}
+                {(() => {
+                  const documentMedia = (newsItem.media || []).filter(
+                    (item) => item.mediaType !== "Image" && item.mediaType !== "Video"
+                  );
+                  return documentMedia.length > 0 ? (
+                    <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
+                      <h3 className="text-sm font-semibold text-gray-700">
+                        Tài liệu đính kèm ({documentMedia.length})
+                      </h3>
+                      <div className="flex flex-col gap-2">
+                        {documentMedia.map((doc) => (
+                          <FileAttachmentItem
+                            key={doc.postMediaId || doc.mediaUrl}
+                            fileName={doc.fileName || "Tài liệu"}
+                            fileSize={doc.fileSize}
+                            onClick={() => setPreviewDoc(doc)}
+                            className="cursor-pointer hover:bg-gray-50 transition-colors"
+                            rightAction={
+                              <IconButton
+                                as="a"
+                                href={getImageUrl(doc.mediaUrl)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                variant="ghost"
+                                size="sm"
+                                className="shrink-0"
+                                title="Tải xuống"
+                              >
+                                <Download size={20} />
+                              </IconButton>
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
 
                 {/* Action Bar */}
                 <NewsDetailActionBar
@@ -395,6 +445,16 @@ const NewsDetailPage = () => {
         onClose={() => setIsShareModalOpen(false)}
         shareUrl={shareUrl}
       />
+
+      {/* ── Document Preview Modal ──────────────────────────────── */}
+      {previewDoc && (
+        <FilePreviewModal
+          open={Boolean(previewDoc)}
+          onClose={() => setPreviewDoc(null)}
+          item={previewDoc}
+          recordMaterialView={false}
+        />
+      )}
     </div>
   );
 };

@@ -1,13 +1,16 @@
 import React from 'react';
 import { FileText, Image as ImageIcon, Film, Music, FileSpreadsheet, FileIcon } from 'lucide-react';
+import { getImageUrl } from '@/shared/utils/imageUtils';
 
 const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => {
+  const resolvedUrl = getImageUrl(url);
+
   const getExtension = () => {
     if (fileName && fileName.includes('.')) {
       return fileName.split('.').pop().toLowerCase();
     }
-    if (url && url.includes('.')) {
-      const cleanUrl = url.split('?')[0];
+    if (resolvedUrl && resolvedUrl.includes('.')) {
+      const cleanUrl = resolvedUrl.split('?')[0];
       return cleanUrl.split('.').pop().toLowerCase();
     }
     return '';
@@ -45,7 +48,7 @@ const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => 
     );
   };
 
-  if (!url) {
+  if (!resolvedUrl) {
     return renderPlaceholder();
   }
 
@@ -53,7 +56,7 @@ const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => 
     return (
       <div className={`flex items-center justify-center overflow-hidden bg-[#F3F3F3] ${className}`}>
         <img
-          src={url}
+          src={resolvedUrl}
           alt={fileName || 'Preview'}
           className={`w-full h-full ${isThumbnail ? 'object-cover' : 'object-contain'}`}
           loading="lazy"
@@ -66,7 +69,7 @@ const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => 
     if (isThumbnail) return renderPlaceholder();
     return (
       <div className={`flex items-center justify-center bg-black ${className}`}>
-        <video src={url} controls className="w-full h-full max-h-full object-contain" />
+        <video src={resolvedUrl} controls className="w-full h-full max-h-full object-contain" />
       </div>
     );
   }
@@ -75,7 +78,7 @@ const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => 
     if (isThumbnail) return renderPlaceholder();
     return (
       <div className={`flex items-center justify-center bg-[#F3F3F3] p-4 ${className}`}>
-        <audio src={url} controls className="w-full" />
+        <audio src={resolvedUrl} controls className="w-full" />
       </div>
     );
   }
@@ -84,7 +87,7 @@ const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => 
     if (isThumbnail) return renderPlaceholder();
     return (
       <iframe
-        src={url}
+        src={resolvedUrl}
         className={`w-full h-full border-none ${className}`}
         title={fileName}
       />
@@ -95,7 +98,7 @@ const FilePreview = ({ url, fileName, isThumbnail = false, className = '' }) => 
     if (isThumbnail) return renderPlaceholder();
 
     // Microsoft Office Online Viewer requires public URL
-    const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+    const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(resolvedUrl)}`;
 
     return (
       <iframe
