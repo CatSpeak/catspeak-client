@@ -511,6 +511,7 @@ export const baseApi = createApi({
     "InstructorCompetency",
     "PlacementSession",
     "PlacementResult",
+    "ClassRecordings",
   ],
   endpoints: () => ({}),
 })

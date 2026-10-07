@@ -48,6 +48,9 @@ const ClassInviteFriendsTab = lazy(
 const VouchersTab = lazy(
   () => import("@/features/vouchers/components/VouchersTab"),
 )
+const ClassRecordingsTab = lazy(
+  () => import("../components/recordings/ClassRecordingsTab"),
+)
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
@@ -86,6 +89,7 @@ const ClassDetailPage = () => {
     "grading",
     "invite-friends",
     "vouchers",
+    "recordings",
   ]
   const initialTab = urlTab && VALID_TABS.includes(urlTab) ? urlTab : "overview"
   const activeTab = hasGradingDeepLink ? "grading" : initialTab
@@ -189,12 +193,18 @@ const ClassDetailPage = () => {
     { value: "members", label: cd.members || "Members" },
     { value: "lecture-hall", label: cd.lectureHall || "Lecture Hall" },
     { value: "grading", label: cd.grading || "Grading" },
+<<<<<<< HEAD
     ...(isClassTeacher
       ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }]
       : []),
     ...(isClassTeacher
       ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }]
       : []),
+=======
+    ...(isClassTeacher ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }] : []),
+    ...(isClassTeacher ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }] : []),
+    ...(isClassTeacher ? [{ value: "recordings", label: cd.recordings || "Video bài giảng" }] : []),
+>>>>>>> feature/TASK-173
   ]
 
   const getWeeklyScheduleText = () =>
@@ -267,7 +277,7 @@ const ClassDetailPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6 text-[#2e2e2e]">
+    <div className="flex flex-col gap-6 text-[#2e2e2e] w-full max-w-full min-w-0">
       {isDetailFetching && (
         <span role="status" className="sr-only">
           {cd.refreshing || "Refreshing class details"}
@@ -336,13 +346,15 @@ const ClassDetailPage = () => {
           </div>
 
           {/* ─── Navigation Tabs ─── */}
-          <Tabs
-            tabs={tabs}
-            activeTab={activeTab}
-            onChange={handleTabChange}
-            fullWidth={false}
-            className="border-b border-border/80"
-          />
+          <div className="w-full max-w-full min-w-0">
+            <Tabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onChange={handleTabChange}
+              fullWidth={false}
+              className="border-b border-border/80 w-full"
+            />
+          </div>
         </>
       )}
 
@@ -436,6 +448,13 @@ const ClassDetailPage = () => {
             scope="class"
             classId={id}
             courseId={classData?.courseId || classData?.course?.id}
+          />
+        )}
+
+        {activeTab === "recordings" && isClassTeacher && (
+          <ClassRecordingsTab
+            classId={id}
+            classData={classData}
           />
         )}
       </Suspense>
