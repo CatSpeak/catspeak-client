@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import {
   useUpdatePostMutation,
   useDeletePostMutation,
@@ -17,7 +18,10 @@ import PostActionBar from "./PostActionBar"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
 const ProfilePostCard = ({ post, isOwnProfile }) => {
-  const { t } = useLanguage()
+  const navigate = useNavigate()
+  const { lang: paramLang } = useParams()
+  const { t, language } = useLanguage()
+  const currentLang = paramLang || language || "vi"
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isCommentsOpen, setIsCommentsOpen] = useState(false)
@@ -93,7 +97,22 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
           />
 
           {post.title && post.title !== "Untitled" && (
-            <h4 className="text-2xl font-bold">{post.title}</h4>
+            <h4
+              onClick={() => {
+                if (post.slug || post.postId) {
+                  navigate(
+                    `/${currentLang}/cat-speak/news/${post.slug || post.postId}`,
+                  )
+                }
+              }}
+              className={`text-2xl font-bold ${
+                post.slug || post.postId
+                  ? "cursor-pointer hover:text-cath-red-700 transition-colors"
+                  : ""
+              }`}
+            >
+              {post.title}
+            </h4>
           )}
 
           {hasContent && (
@@ -102,17 +121,11 @@ const ProfilePostCard = ({ post, isOwnProfile }) => {
                 ref={contentRef}
                 className={!isExpanded ? "line-clamp-2 overflow-hidden" : ""}
               >
-                {hasRichContent ? (
-                  <PostContent
-                    html={post.content}
-                    contentUrl={contentUrl}
-                    className="text-sm text-[#606060]"
-                  />
-                ) : (
-                  <p className="text-sm text-[#606060] whitespace-pre-line break-words">
-                    {excerpt}
-                  </p>
-                )}
+                <PostContent
+                  html={post?.content || (!contentUrl ? excerpt : null)}
+                  contentUrl={contentUrl}
+                  className={!isExpanded ? "text-sm text-[#606060]" : ""}
+                />
               </div>
               {(isOverflowing || isExpanded) && (
                 <button

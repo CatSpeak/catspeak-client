@@ -61,12 +61,11 @@ const ListItem = ({
 
   return (
     <Wrapper
-      type={Wrapper === "button" ? "button" : undefined}
-      role={Wrapper !== "button" && isClickable ? "button" : undefined}
-      tabIndex={Wrapper !== "button" && isClickable ? 0 : undefined}
-      onClick={onClick}
+      type={Wrapper === "button" && isClickable ? "button" : undefined}
+      role={Wrapper === "div" && isClickable ? "button" : undefined}
+      tabIndex={Wrapper === "div" && isClickable ? 0 : undefined}
       onKeyDown={
-        Wrapper !== "button" && isClickable
+        Wrapper === "div" && isClickable
           ? (e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault()
@@ -75,8 +74,9 @@ const ListItem = ({
             }
           : undefined
       }
-      className={`group relative outline-none flex w-full items-center text-left transition-colors duration-200 ease-in-out ${heightClass} ${baseBgClass} ${className} ${isClickable ? "cursor-pointer" : ""}`}
-      disabled={Wrapper === "button" ? false : undefined}
+      onClick={onClick}
+      className={`group relative outline-none flex w-full items-center text-left ${heightClass} ${baseBgClass} ${className}`}
+      disabled={Wrapper === "button" && isClickable ? false : undefined}
       {...props}
     >
       <div

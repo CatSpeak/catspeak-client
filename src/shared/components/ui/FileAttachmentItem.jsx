@@ -2,7 +2,7 @@ import React from "react"
 import { FileText } from "lucide-react"
 import ListItem from "@/shared/components/ui/ListItem"
 
-export const formatFileSize = (bytes) => {
+const formatFileSize = (bytes) => {
   if (!bytes || typeof bytes !== "number") return null
   const mb = bytes / (1024 * 1024)
   if (mb < 0.1) {
@@ -21,6 +21,7 @@ const FileAttachmentItem = ({
 }) => {
   return (
     <ListItem
+      as="div"
       lines={2}
       className={`rounded-xl border border-border bg-white ${className}`}
       leftContent={<FileText className="shrink-0" />}

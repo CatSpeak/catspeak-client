@@ -3,24 +3,16 @@ import DOMPurify from "dompurify"
 import { CmsCarousel } from "./CmsCarousel"
 import { parseContentSegments } from "../utils/parseContentSegments"
 import { CONTENT_CLASSES } from "../constants/contentClasses"
+import { normalizeContent } from "../utils/contentNormalizer"
 
 const PostContent = ({ html, contentUrl, className = "" }) => {
-  const [fetchedHtml, setFetchedHtml] = useState("")
-  const [isLoading, setIsLoading] = useState(!html && Boolean(contentUrl))
+  const [fetchedData, setFetchedData] = useState({ url: null, html: "" })
 
   useEffect(() => {
-    if (html) {
-      setIsLoading(false)
-      return
-    }
+    if (html || !contentUrl) return
 
-    if (!contentUrl) {
-      setIsLoading(false)
-      return
-    }
-
+    let isSubscribed = true
     const controller = new AbortController()
-    setIsLoading(true)
 
     fetch(contentUrl, { signal: controller.signal })
       .then((res) => {
@@ -28,24 +20,45 @@ const PostContent = ({ html, contentUrl, className = "" }) => {
         return res.text()
       })
       .then((text) => {
-        setFetchedHtml(text)
-        setIsLoading(false)
+        if (isSubscribed) {
+          setFetchedData({ url: contentUrl, html: text })
+        }
       })
       .catch((err) => {
         if (err.name !== "AbortError") {
           console.error("Error loading HTML from MinIO:", err)
-          setIsLoading(false)
+          if (isSubscribed) {
+            setFetchedData({ url: contentUrl, html: "" })
+          }
         }
       })
 
-    return () => controller.abort()
+    return () => {
+      isSubscribed = false
+      controller.abort()
+    }
   }, [html, contentUrl])
 
-  const displayHtml = html || fetchedHtml || ""
+  const isLoading =
+    !html && Boolean(contentUrl) && fetchedData.url !== contentUrl
+  const displayHtml =
+    html || (fetchedData.url === contentUrl ? fetchedData.html : "")
 
   const segments = useMemo(() => {
     if (!displayHtml) return []
-    const sanitized = DOMPurify.sanitize(displayHtml, {
+    const normalizedHtml = normalizeContent(displayHtml)
+    const sanitized = DOMPurify.sanitize(normalizedHtml, {
+      ADD_TAGS: [
+        "mark",
+        "sub",
+        "sup",
+        "small",
+        "del",
+        "s",
+        "u",
+        "strike",
+        "iframe",
+      ],
       ADD_ATTR: [
         "style",
         "width",
@@ -54,6 +67,11 @@ const PostContent = ({ html, contentUrl, className = "" }) => {
         "cellpadding",
         "cellspacing",
         "class",
+        "align",
+        "target",
+        "rel",
+        "colspan",
+        "rowspan",
       ],
     })
     return parseContentSegments(sanitized)

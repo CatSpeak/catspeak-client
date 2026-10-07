@@ -11,10 +11,10 @@ const CommentMoreMenu = ({ onEdit, onDelete }) => {
       placement="bottom-left"
       trigger={
         <button
-          className="h-10 w-10 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-[#F6F6F6] transition-colors focus:outline-none"
+          className="h-7 w-7 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-[#F6F6F6] transition-colors focus:outline-none shrink-0"
           title={t.news?.newsDetail?.moreOptions || "More options"}
         >
-          <MoreVertical />
+          <MoreVertical size={16} />
         </button>
       }
       content={(close) => (
