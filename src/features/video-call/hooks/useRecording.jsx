@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { toast } from "react-hot-toast"
 import {
   useStartRecordingMutation,
@@ -24,6 +24,7 @@ import {
  */
 export function useRecording(lkRoom = null, syncState = {}) {
   const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
   const { t } = useLanguage()
   const { startTask } = useGlobalTask()
   const {
@@ -55,19 +56,24 @@ export function useRecording(lkRoom = null, syncState = {}) {
     const isHost = syncState?.isHost
     const coHost = syncState?.coHost ?? null
     const localAccountId = syncState?.accountId
+    const isTeacher = user?.accountType === "Teacher"
+    const isPro = user?.isPro || user?.tier?.toLowerCase() === "pro"
+    
     // Ticket 02: the member recording gate is read from the room-state cache
     // (passed in via syncState). Host or co-host with record always bypass
     // (shared recording); anyone else may record only while the gate is open.
     const allowMemberRecording = syncState?.allowMemberRecording ?? true
     const canSharedRecord =
       isHost ||
+      isTeacher ||
+      isPro ||
       hasCoHostPermission(coHost, localAccountId, CO_HOST_PERMISSIONS.RECORD)
 
     if (!isRecording && !canSharedRecord && !allowMemberRecording) {
       toast.error(
         t.rooms?.videoCall?.participantList?.memberRecordingBlocked ||
           t.rooms?.videoCall?.recordingDisabledByHost ||
-          "Host đã tắt quyền ghi hình phòng họp đối với thành viên."
+          "Chỉ Pro hoặc Giảng viên mới được phép ghi hình."
       )
       return
     }

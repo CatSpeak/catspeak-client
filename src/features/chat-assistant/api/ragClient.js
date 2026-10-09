@@ -277,7 +277,7 @@ export async function fetchSource(chunkId) {
  *
  * `reason` và `note` chỉ có nghĩa khi value = -1, và server bỏ qua chúng ở các giá
  * trị khác. Gọi lại lần hai với cùng queryLogId là GHI ĐÈ chứ không cộng dồn: bảng
- * khoá theo id dòng nhật ký, nên gửi lý do sau khi đã bấm không làm số liệu đếm hai
+ * khoá theo id dòng nhật ký, nên gửi lý do sau kh  i đã bấm không làm số liệu đếm hai
  * lần.
  */
 export async function sendFeedback(queryLogId, value, { reason, note } = {}) {
