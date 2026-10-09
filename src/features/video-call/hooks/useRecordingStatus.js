@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react"
 import { useGetStorageQuery } from "@/store/api/recordingsApi"
 import toast from "react-hot-toast"
 
-export const useRecordingStatus = (isRecording, onStopRecording) => {
-  const { data: storage, refetch } = useGetStorageQuery(undefined, {
+export const useRecordingStatus = (isRecording, onStopRecording, sessionId) => {
+  const { data: storage } = useGetStorageQuery(sessionId ?? undefined, {
     skip: !isRecording,
   })
 
@@ -44,23 +44,34 @@ export const useRecordingStatus = (isRecording, onStopRecording) => {
   const MB_PER_SECOND = 70.5 / 1024
 
   const baseUsedMb = storage?.usedMb ?? 0
-  const limitMb = storage?.limitMb ?? 200
 
-  // Calculate dynamic growth
+  // limitMb = 0 means "no limit configured" — treat as unlimited.
+  // limitMb = null means "API not loaded yet" — also skip enforcement.
+  const rawLimitMb = storage?.limitMb
+  const limitMb = rawLimitMb != null ? rawLimitMb : null
+
+  // Calculate dynamic estimated usage
   const sessionMb = elapsedSeconds * MB_PER_SECOND
-  const totalUsedMb = Math.min(baseUsedMb + sessionMb, limitMb)
-  const usagePercent = Math.min((totalUsedMb / limitMb) * 100, 100)
+  const totalUsedMb =
+    limitMb != null && limitMb > 0
+      ? Math.min(baseUsedMb + sessionMb, limitMb)
+      : baseUsedMb + sessionMb
+
+  const usagePercent =
+    limitMb != null && limitMb > 0
+      ? Math.min((totalUsedMb / limitMb) * 100, 100)
+      : 0
 
   const isDanger = usagePercent >= 90
   const isWarning = usagePercent >= 80 && usagePercent < 90
 
-  // Quota auto-stop safety guard
+  // Quota auto-stop safety guard — only fire when there is a real limit > 0
   useEffect(() => {
-    if (isRecording && totalUsedMb >= limitMb) {
-      toast.error("Recording stopped automatically. CatSpeak storage limit (200MB) reached.", {
-        icon: "⚠️",
-        duration: 5000,
-      })
+    if (isRecording && limitMb != null && limitMb > 0 && totalUsedMb >= limitMb) {
+      toast.error(
+        `Recording stopped automatically. CatSpeak storage limit (${limitMb}MB) reached.`,
+        { icon: "⚠️", duration: 5000 },
+      )
       onStopRecording?.()
     }
   }, [isRecording, totalUsedMb, limitMb, onStopRecording])

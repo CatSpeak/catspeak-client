@@ -3,7 +3,9 @@ import {
   useGetClassRecordingsQuery,
   useUpdateRecordingPublishStatusMutation,
   useDeleteClassRecordingMutation,
+  useCreateClassRecordingMutation
 } from "@/store/api/social/teacherRecordingApi"
+import { useGetMyRecordingsQuery } from "@/store/api/recordingsApi"
 import { toast } from "react-hot-toast"
 import {
   Video,
@@ -27,7 +29,6 @@ import Switch from "@/shared/components/ui/inputs/Switch"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import RecordingPlayerModal from "./RecordingPlayerModal"
-import SaveOrPublishRecordingModal from "./SaveOrPublishRecordingModal"
 
 /**
  * Format số giây thành chuỗi thời gian: hh:mm:ss hoặc mm:ss
@@ -59,16 +60,27 @@ const ClassRecordingsTab = ({ classId, classData }) => {
   // ── Queries & Mutations ──────────────────────────────────────────────
   const {
     data: recordings = [],
-    isLoading,
-    isFetching,
-    error,
-    refetch,
+    isLoading: isClassLoading,
+    error: classError,
+    refetch: refetchClassRecordings,
   } = useGetClassRecordingsQuery(classId, { skip: !classId })
+
+  const {
+    data: myRecordings = [],
+    isLoading: isMyLoading,
+    error: myError,
+    refetch: refetchMyRecordings,
+  } = useGetMyRecordingsQuery()
+
+  const isLoading = isClassLoading || isMyLoading
+  const error = classError || myError
 
   const [updatePublishStatus, { isLoading: isUpdatingStatus }] =
     useUpdateRecordingPublishStatusMutation()
   const [deleteRecording, { isLoading: isDeleting }] =
     useDeleteClassRecordingMutation()
+  const [createClassRecording, { isLoading: isCreating }] = 
+    useCreateClassRecordingMutation()
 
   // ── Local States ────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState("")
@@ -78,12 +90,82 @@ const ClassRecordingsTab = ({ classId, classData }) => {
   // Modals state
   const [selectedVideoToPlay, setSelectedVideoToPlay] = useState(null)
   const [videoToDelete, setVideoToDelete] = useState(null)
-  const [showAddModal, setShowAddModal] = useState(false)
   const [updatingId, setUpdatingId] = useState(null)
+
+  // ── Auto Merge Logic ────────────────────────────────────────────────
+  const allRecordings = useMemo(() => {
+    if (!classId) return []
+
+    const classSessions = classData?.classSessions || []
+
+    // Lấy các video quay trong phòng của lớp học này
+    const roomRecordings = myRecordings.filter(
+      (r) => String(r.roomId) === String(classData?.roomId)
+    )
+
+    // Tạo map để tra cứu video đã được gán vào lớp
+    const savedRecordingsMap = new Map(
+      recordings.map((r) => [r.recordingId, r])
+    )
+
+    const merged = roomRecordings.map((raw) => {
+      const saved = savedRecordingsMap.get(raw.recordingId)
+      if (saved) {
+        return {
+          ...raw,
+          ...saved,
+          isNewRaw: false, // đã có trong DB của lớp học
+        }
+      }
+
+      // Auto-map session dựa vào ngày
+      const dateStr = raw.createdAt
+        ? new Date(raw.createdAt).toISOString().split("T")[0]
+        : null
+
+      const matchedSession = dateStr
+        ? classSessions.find((s) => {
+            const sDate = s.date || s.Date || s.dateOnly
+            if (!sDate) return false
+            return sDate.split("T")[0] === dateStr
+          })
+        : null
+
+      return {
+        ...raw,
+        id: `raw-${raw.recordingId}`, // id tạm
+        title: `Video bài giảng ${dateStr || ""}`,
+        sessionNumber: matchedSession ? matchedSession.sessionNumber : null,
+        classSessionId: matchedSession ? matchedSession.id || matchedSession.Id : null,
+        sessionDate: dateStr,
+        isPublished: false,
+        isNewRaw: true, // chưa có trong DB lớp học
+      }
+    })
+
+    // Ghép thêm những video đã save nhưng không có trong myRecordings (phòng hờ)
+    const rawIds = new Set(roomRecordings.map((r) => r.recordingId))
+    recordings.forEach((saved) => {
+      if (!rawIds.has(saved.recordingId)) {
+        merged.push({
+          ...saved,
+          isNewRaw: false,
+        })
+      }
+    })
+
+    // Sắp xếp video mới nhất lên đầu
+    return merged.sort((a, b) => {
+      const timeA = new Date(a.createdAt || a.sessionDate || 0).getTime()
+      const timeB = new Date(b.createdAt || b.sessionDate || 0).getTime()
+      return timeB - timeA
+    })
+  }, [myRecordings, recordings, classId, classData])
+
 
   // ── Filtered Recordings ─────────────────────────────────────────────
   const filteredRecordings = useMemo(() => {
-    return recordings.filter((item) => {
+    return allRecordings.filter((item) => {
       // Filter theo trạng thái
       if (statusFilter === "published" && !item.isPublished) return false
       if (statusFilter === "draft" && item.isPublished) return false
@@ -99,30 +181,45 @@ const ClassRecordingsTab = ({ classId, classData }) => {
 
       return true
     })
-  }, [recordings, statusFilter, searchQuery])
+  }, [allRecordings, statusFilter, searchQuery])
 
   // ── Thống kê ────────────────────────────────────────────────────────
   const stats = useMemo(() => {
-    const total = recordings.length
-    const published = recordings.filter((r) => r.isPublished).length
+    const total = allRecordings.length
+    const published = allRecordings.filter((r) => r.isPublished).length
     const draft = total - published
-    const totalSeconds = recordings.reduce(
+    const totalSeconds = allRecordings.reduce(
       (sum, r) => sum + (r.durationSeconds || 0),
       0,
     )
     return { total, published, draft, totalSeconds }
-  }, [recordings])
+  }, [allRecordings])
 
   // ── Handlers ────────────────────────────────────────────────────────
   const handleTogglePublish = async (recording) => {
     const nextStatus = !recording.isPublished
-    setUpdatingId(recording.id)
+    setUpdatingId(recording.recordingId)
     try {
-      await updatePublishStatus({
-        classId,
-        id: recording.id,
-        isPublished: nextStatus,
-      }).unwrap()
+      if (recording.isNewRaw) {
+        // Tạo mới
+        await createClassRecording({
+          classId,
+          classSessionId: recording.classSessionId,
+          recordingId: recording.recordingId,
+          title: recording.title,
+          isPublished: nextStatus,
+          videoUrl: recording.fileUrl || recording.videoUrl,
+          durationSeconds: recording.durationSeconds,
+          fileSizeBytes: recording.fileSizeBytes,
+        }).unwrap()
+      } else {
+        // Cập nhật
+        await updatePublishStatus({
+          classId,
+          id: recording.id,
+          isPublished: nextStatus,
+        }).unwrap()
+      }
 
       toast.success(
         nextStatus
@@ -141,16 +238,25 @@ const ClassRecordingsTab = ({ classId, classData }) => {
   const handleDeleteConfirm = async () => {
     if (!videoToDelete) return
     try {
-      await deleteRecording({
-        classId,
-        id: videoToDelete.id,
-      }).unwrap()
-      toast.success("Đã xóa video bài giảng thành công!")
+      if (!videoToDelete.isNewRaw) {
+        await deleteRecording({
+          classId,
+          id: videoToDelete.id,
+        }).unwrap()
+      }
+      // Lưu ý: Chúng ta không xóa video gốc khỏi hệ thống ở đây, 
+      // chỉ xóa khỏi danh sách của lớp (nếu đã liên kết).
+      toast.success("Đã xóa video bài giảng khỏi danh sách lớp học!")
       setVideoToDelete(null)
     } catch (err) {
       const msg = err?.data?.message || err?.data || "Không thể xóa video."
       toast.error(typeof msg === "string" ? msg : JSON.stringify(msg))
     }
+  }
+
+  const handleRefetch = () => {
+    refetchClassRecordings()
+    refetchMyRecordings()
   }
 
   // ── Render Loading & Error ──────────────────────────────────────────
@@ -178,7 +284,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
               "Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau."}
           </p>
         </div>
-        <PillButton variant="secondary" onClick={refetch} className="mt-2 text-xs">
+        <PillButton variant="secondary" onClick={handleRefetch} className="mt-2 text-xs">
           Thử lại
         </PillButton>
       </div>
@@ -201,19 +307,6 @@ const ClassRecordingsTab = ({ classId, classData }) => {
           <p className="text-xs text-neutral-500 ml-1">
             Lưu trữ, phát trực tiếp và xuất bản các video ghi hình buổi dạy cho học viên
           </p>
-        </div>
-
-        {/* Nút thêm video bài giảng */}
-        <div className="flex items-center gap-3">
-          <PillButton
-            variant="primary"
-            bgColor="#990011"
-            icon={<Plus className="w-4 h-4" />}
-            onClick={() => setShowAddModal(true)}
-            className="shadow-xs font-semibold text-xs sm:text-sm"
-          >
-            Thêm video bài giảng
-          </PillButton>
         </div>
       </div>
 
@@ -261,7 +354,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm theo tiêu đề, buổi số hoặc ngày học..."
-            className="w-full pl-9 pr-3 py-2 bg-white border border-neutral-200 rounded-lg text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all"
+            className="w-full pl-9 pr-3 py-2 bg-white border border-neutral-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#990011]/20 focus:border-[#990011] transition-all"
           />
         </div>
 
@@ -278,7 +371,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                   : "text-neutral-600 hover:text-neutral-900"
               }`}
             >
-              Tất cả ({recordings.length})
+              Tất cả ({allRecordings.length})
             </button>
             <button
               type="button"
@@ -349,28 +442,30 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             <p className="text-xs text-neutral-500">
               {searchQuery || statusFilter !== "all"
                 ? "Thử thay đổi từ khóa tìm kiếm hoặc bỏ bộ lọc trạng thái để xem lại."
-                : "Các buổi dạy khi kết thúc ghi hình hoặc video được thêm sẽ hiển thị tại đây để bạn đăng tải cho học viên."}
+                : "Các buổi dạy khi kết thúc ghi hình sẽ tự động hiển thị tại đây để bạn đăng tải cho học viên."}
             </p>
           </div>
-          <PillButton
-            variant="secondary"
-            icon={<Plus className="w-4 h-4" />}
-            onClick={() => setShowAddModal(true)}
-            className="mt-2 text-xs"
-          >
-            Thêm video đầu tiên
-          </PillButton>
         </div>
       ) : viewMode === "grid" ? (
         /* ── Grid Cards View ── */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredRecordings.map((recording) => {
-            const isToggling = updatingId === recording.id
+            const isToggling = updatingId === recording.recordingId
             const titleDisplay =
               recording.title ||
               (recording.sessionNumber
                 ? `Buổi ${recording.sessionNumber}${recording.sessionDate ? ` - ${recording.sessionDate}` : ""}`
                 : "Video bài giảng")
+            
+            // Format time correctly
+            let formattedDate = recording.sessionDate || "";
+            if (recording.createdAt) {
+               const d = new Date(recording.createdAt);
+               formattedDate = d.toLocaleString('vi-VN', {
+                  day: '2-digit', month: '2-digit', year: 'numeric',
+                  hour: '2-digit', minute: '2-digit'
+               });
+            }
 
             return (
               <div
@@ -437,19 +532,24 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                     </h3>
 
                     {/* Metadata tags */}
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-neutral-500 mt-1">
-                      {recording.sessionDate && (
+                    <div className="flex flex-col gap-1 mt-1 text-xs text-neutral-500">
+                      {classData?.name && (
+                         <span className="flex items-center gap-1 font-medium text-[#990011]">
+                           Lớp: {classData.name} ({classId})
+                         </span>
+                      )}
+                      <div className="flex flex-wrap items-center gap-3 mt-1">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-neutral-400" />
-                          {recording.sessionDate}
+                          {formattedDate}
                         </span>
-                      )}
-                      {recording.fileSizeBytes != null && recording.fileSizeBytes > 0 && (
-                        <span className="flex items-center gap-1">
-                          <HardDrive className="w-3.5 h-3.5 text-neutral-400" />
-                          {formatFileSize(recording.fileSizeBytes)}
-                        </span>
-                      )}
+                        {recording.fileSizeBytes != null && recording.fileSizeBytes > 0 && (
+                          <span className="flex items-center gap-1">
+                            <HardDrive className="w-3.5 h-3.5 text-neutral-400" />
+                            {formatFileSize(recording.fileSizeBytes)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -461,7 +561,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                         size="sm"
                         checked={recording.isPublished}
                         onChange={() => handleTogglePublish(recording)}
-                        disabled={isToggling}
+                        disabled={isToggling || (!recording.classSessionId && recording.isNewRaw)}
                       />
                       <span className="text-xs font-medium text-neutral-600">
                         {recording.isPublished ? "Đăng giảng đường" : "Lưu nháp"}
@@ -469,14 +569,16 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                     </div>
 
                     {/* Delete button */}
-                    <button
-                      type="button"
-                      onClick={() => setVideoToDelete(recording)}
-                      className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                      title="Xóa video khỏi danh sách"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {!recording.isNewRaw && (
+                       <button
+                         type="button"
+                         onClick={() => setVideoToDelete(recording)}
+                         className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                         title="Xóa video khỏi danh sách"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -490,9 +592,10 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             <table className="w-full text-left text-sm text-neutral-700">
               <thead className="bg-neutral-50/80 border-b border-neutral-200 text-xs font-semibold text-neutral-600 uppercase">
                 <tr>
+                  <th className="px-4 py-3.5">Lớp học</th>
                   <th className="px-4 py-3.5">Buổi</th>
                   <th className="px-4 py-3.5">Tiêu đề bài giảng</th>
-                  <th className="px-4 py-3.5">Ngày học</th>
+                  <th className="px-4 py-3.5">Ngày giờ học</th>
                   <th className="px-4 py-3.5">Thời lượng</th>
                   <th className="px-4 py-3.5">Dung lượng</th>
                   <th className="px-4 py-3.5">Trạng thái</th>
@@ -501,16 +604,29 @@ const ClassRecordingsTab = ({ classId, classData }) => {
               </thead>
               <tbody className="divide-y divide-neutral-100">
                 {filteredRecordings.map((recording) => {
-                  const isToggling = updatingId === recording.id
+                  const isToggling = updatingId === recording.recordingId
                   const titleDisplay =
                     recording.title ||
                     `Buổi ${recording.sessionNumber || "N/A"}`
+                  
+                  let formattedDate = recording.sessionDate || "";
+                  if (recording.createdAt) {
+                     const d = new Date(recording.createdAt);
+                     formattedDate = d.toLocaleString('vi-VN', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                     });
+                  }
 
                   return (
                     <tr
                       key={recording.id}
                       className="hover:bg-neutral-50/50 transition-colors"
                     >
+                      <td className="px-4 py-3 text-neutral-900 max-w-xs truncate text-xs">
+                        <span className="font-semibold text-[#990011] block truncate" title={classData?.name}>{classData?.name}</span>
+                        <span className="text-neutral-500 text-[10px]">ID: {classId}</span>
+                      </td>
                       <td className="px-4 py-3 font-semibold text-neutral-900 whitespace-nowrap">
                         Buổi {recording.sessionNumber ?? "--"}
                       </td>
@@ -518,7 +634,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                         {titleDisplay}
                       </td>
                       <td className="px-4 py-3 text-neutral-600 text-xs whitespace-nowrap">
-                        {recording.sessionDate || "--"}
+                        {formattedDate}
                       </td>
                       <td className="px-4 py-3 text-neutral-600 text-xs whitespace-nowrap font-mono">
                         {formatDuration(recording.durationSeconds)}
@@ -532,7 +648,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                             size="sm"
                             checked={recording.isPublished}
                             onChange={() => handleTogglePublish(recording)}
-                            disabled={isToggling}
+                            disabled={isToggling || (!recording.classSessionId && recording.isNewRaw)}
                           />
                           <span
                             className={`text-xs font-medium ${
@@ -555,14 +671,16 @@ const ClassRecordingsTab = ({ classId, classData }) => {
                           >
                             <Play className="w-4 h-4 fill-current" />
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => setVideoToDelete(recording)}
-                            className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                            title="Xóa video"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {!recording.isNewRaw && (
+                            <button
+                              type="button"
+                              onClick={() => setVideoToDelete(recording)}
+                              className="p-1.5 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title="Xóa video"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -581,14 +699,6 @@ const ClassRecordingsTab = ({ classId, classData }) => {
         open={Boolean(selectedVideoToPlay)}
         onClose={() => setSelectedVideoToPlay(null)}
         recording={selectedVideoToPlay}
-      />
-
-      {/* Modal Thêm hoặc Đăng video */}
-      <SaveOrPublishRecordingModal
-        open={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        classId={classId}
-        onSuccess={() => refetch()}
       />
 
       {/* Confirmation Modal khi Xóa */}

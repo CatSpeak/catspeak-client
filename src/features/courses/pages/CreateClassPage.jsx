@@ -409,21 +409,22 @@ const CreateClassPage = () => {
       return
     }
 
-    if (!isEditMode) {
-      const now = new Date()
-      if (enrollStart && enrollStart <= now) {
-        toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
-        return
-      }
-      if (enrollEnd && enrollEnd <= now) {
-        toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
-        return
-      }
-      if (start && start <= now) {
-        toast.error(cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!")
-        return
-      }
-    }
+    // [VALIDATION BYPASSED BY REQUEST]
+    // if (!isEditMode) {
+    //   const now = new Date()
+    //   if (enrollStart && enrollStart <= now) {
+    //     toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
+    //     return
+    //   }
+    //   if (enrollEnd && enrollEnd <= now) {
+    //     toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
+    //     return
+    //   }
+    //   if (start && start <= now) {
+    //     toast.error(cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!")
+    //     return
+    //   }
+    // }
 
     if (enrollStart && enrollEnd && enrollEnd <= enrollStart) {
       toast.error(cc.toastAdmissionEndLater || "Enrollment end date must be later than enrollment start date!")
@@ -1075,7 +1076,7 @@ const CreateClassPage = () => {
                       clearError("admissionStart")
                     }}
                     color="#990011"
-                    minDate={isEditMode ? null : today}
+                  // minDate={isEditMode ? null : today}
                     error={Boolean(errors.admissionStart)}
                     className="w-full"
                   />
@@ -1091,7 +1092,7 @@ const CreateClassPage = () => {
                       clearError("admissionEnd")
                     }}
                     color="#990011"
-                    minDate={isEditMode ? null : today}
+                  // minDate={isEditMode ? null : today}
                     error={Boolean(errors.admissionEnd)}
                     className="w-full"
                   />
@@ -1115,7 +1116,7 @@ const CreateClassPage = () => {
                     clearError("startDate")
                   }}
                   color="#990011"
-                  minDate={isEditMode ? null : today}
+                  // minDate={isEditMode ? null : today}
                   error={Boolean(errors.startDate)}
                   className="w-full"
                 />
