@@ -63,6 +63,7 @@ export default {
     teachingTasks: "Teaching Tasks",
     vouchers: "Vouchers & Discounts",
     myLearning: "My Learning",
+    vocabularyNotebook: "Vocabulary Notebook",
     manageMaterials: "Manage Materials",
     exploreCourses: "Explore Courses",
     messages: "Messages",
