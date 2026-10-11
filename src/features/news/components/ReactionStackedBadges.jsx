@@ -69,12 +69,12 @@ const ReactionStackedBadges = ({
 
             const zIndexClass =
               index === 0
-                ? "z-10"
+                ? "z-30"
                 : index === 1
                   ? "z-20"
                   : index === 2
-                    ? "z-30"
-                    : "z-40";
+                    ? "z-10"
+                    : "z-0";
 
             return (
               <div
