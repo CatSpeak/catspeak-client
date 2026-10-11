@@ -88,6 +88,12 @@ export const navSections = [
       {
         key: "general",
         items: [
+          {
+            key: "dashboard",
+            path: "/workspace/dashboard",
+            icon: LayoutDashboard,
+            roles: ["Student"],
+          },
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
           { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
@@ -159,6 +165,12 @@ export const navLinks = [
       {
         key: "general",
         items: [
+          {
+            key: "dashboard",
+            path: "/workspace/dashboard",
+            icon: LayoutDashboard,
+            roles: ["Student"],
+          },
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
           { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
