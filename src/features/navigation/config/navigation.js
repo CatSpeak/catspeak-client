@@ -19,6 +19,8 @@ import {
   Compass,
   Folder,
   Ticket,
+  Gift,
+  Bookmark,
 } from "lucide-react"
 
 export const navSections = [
@@ -94,6 +96,7 @@ export const navSections = [
           },
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",
@@ -102,6 +105,11 @@ export const navSections = [
           { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
           { key: "recordings", path: "/workspace/recordings", icon: Mic },
           { key: "workspaceReels", path: "/workspace/reels", icon: Film },
+          {
+            key: "pointsAndOffers",
+            path: "/workspace/points-and-offers",
+            icon: Gift,
+          },
         ],
       },
     ],
@@ -165,6 +173,7 @@ export const navLinks = [
           },
           { key: "profile", path: "/workspace/profile", icon: User },
           { key: "myLearning", path: "/workspace/learning", icon: BookOpen },
+          { key: "vocabularyNotebook", label: "Sổ từ vựng", path: "/workspace/vocabulary", icon: Bookmark },
           {
             key: "myCalendar",
             path: "/workspace/my-calendar",
@@ -173,6 +182,11 @@ export const navLinks = [
           { key: "myRooms", path: "/workspace/rooms", icon: DoorOpen },
           { key: "recordings", path: "/workspace/recordings", icon: Mic },
           { key: "reels", path: "/workspace/reels", icon: Film },
+          {
+            key: "pointsAndOffers",
+            path: "/workspace/points-and-offers",
+            icon: Gift,
+          },
         ],
       },
     ],

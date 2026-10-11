@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 
@@ -35,7 +35,7 @@ const MessageModal = ({ isOpen, children }) => {
             className="fixed inset-0 z-[1200] flex items-center justify-center"
           >
             {/* Backdrop */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -44,7 +44,7 @@ const MessageModal = ({ isOpen, children }) => {
             />
 
             {/* Fullscreen container */}
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 12 }}
@@ -52,7 +52,7 @@ const MessageModal = ({ isOpen, children }) => {
               className="relative flex h-full w-full flex-col overflow-hidden bg-white"
             >
               {children}
-            </motion.div>
+            </Motion.div>
           </div>
         )}
       </AnimatePresence>,

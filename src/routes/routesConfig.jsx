@@ -152,6 +152,9 @@ const CreateVoucherPage = lazy(
 const VoucherDetailPage = lazy(
   () => import("@/features/vouchers/pages/VoucherDetailPage"),
 );
+const PointsAndOffersPage = lazy(
+  () => import("@/features/points-and-offers/pages/PointsAndOffersPage"),
+);
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
 );
@@ -204,6 +207,9 @@ const StudentTakeQuizView = lazy(
 const ReviewClassPage = lazy(
   () => import("@/features/courses/pages/ReviewClassPage"),
 );
+const VocabularyNotebookPage = lazy(
+  () => import("@/features/interactive-script/pages/VocabularyNotebookPage"),
+);
 
 const routesConfig = [
   {
@@ -245,6 +251,10 @@ const routesConfig = [
                 </LazyRoute>
               </AuthGuard>
             ),
+          },
+          {
+            path: "points-and-offers",
+            element: <Navigate to="/workspace/points-and-offers" replace />,
           },
           {
             path: "explore-courses",
@@ -589,6 +599,14 @@ const routesConfig = [
                 element: (
                   <LazyRoute>
                     <MyCalendarPage />
+                  </LazyRoute>
+                )
+              },
+              {
+                path: "vocabulary",
+                element: (
+                  <LazyRoute>
+                    <VocabularyNotebookPage />
                   </LazyRoute>
                 )
               },
@@ -1045,6 +1063,22 @@ const routesConfig = [
                     <Profile />
                   </LazyRoute>
                 ),
+              },
+              {
+                path: "points-and-offers",
+                element: (
+                  <LazyRoute>
+                    <PointsAndOffersPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "bonus-points",
+                element: <Navigate to="/workspace/points-and-offers" replace />,
+              },
+              {
+                path: "voucher-exchange",
+                element: <Navigate to="/workspace/points-and-offers" replace />,
               },
               { path: "*", element: <PageNotFound /> },
             ],
