@@ -55,6 +55,7 @@ export const teacherRecordingApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { classId }) => [
         { type: "ClassRecordings", id: String(classId) },
         { type: "ClassRecordings", id: "LIST" },
+        { type: "StudentClassRecordings", id: String(classId) },
       ],
     }),
 
@@ -72,6 +73,7 @@ export const teacherRecordingApi = baseApi.injectEndpoints({
         { type: "ClassRecordings", id: String(classId) },
         { type: "ClassRecordings", id: String(id) },
         { type: "ClassRecordings", id: "LIST" },
+        { type: "StudentClassRecordings", id: String(classId) },
       ],
     }),
 
@@ -86,7 +88,45 @@ export const teacherRecordingApi = baseApi.injectEndpoints({
         { type: "ClassRecordings", id: String(classId) },
         { type: "ClassRecordings", id: String(id) },
         { type: "ClassRecordings", id: "LIST" },
+        { type: "StudentClassRecordings", id: String(classId) },
       ],
+    }),
+
+    // 5. Lấy danh sách video đã đăng dành cho học viên (có phân trang)
+    // GET /api/student/classes/{classId}/recordings?page=1&pageSize=10
+    getStudentClassRecordings: builder.query({
+      query: (arg) => {
+        const classId = typeof arg === "object" ? arg.classId : arg
+        const page = typeof arg === "object" ? arg?.page || 1 : 1
+        const pageSize = typeof arg === "object" ? arg?.pageSize || 10 : 10
+        return {
+          url: `/student/classes/${encodePathSegment(classId)}/recordings`,
+          method: "GET",
+          params: {
+            page: Number(page) || 1,
+            pageSize: Number(pageSize) || 10,
+          },
+        }
+      },
+      transformResponse: (response) => {
+        const data = response?.data ?? response
+        return {
+          recordings: Array.isArray(data?.recordings) ? data.recordings : [],
+          pagination: data?.pagination || {
+            page: 1,
+            pageSize: 10,
+            total: Array.isArray(data?.recordings) ? data.recordings.length : 0,
+            totalPages: 1,
+          },
+        }
+      },
+      providesTags: (result, error, arg) => {
+        const classId = typeof arg === "object" ? arg.classId : arg
+        return [
+          { type: "StudentClassRecordings", id: String(classId) },
+          { type: "ClassRecordings", id: String(classId) },
+        ]
+      },
     }),
   }),
   overrideExisting: false,
@@ -97,4 +137,5 @@ export const {
   useCreateClassRecordingMutation,
   useUpdateRecordingPublishStatusMutation,
   useDeleteClassRecordingMutation,
+  useGetStudentClassRecordingsQuery,
 } = teacherRecordingApi

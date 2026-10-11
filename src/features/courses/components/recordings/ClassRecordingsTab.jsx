@@ -29,6 +29,7 @@ import Switch from "@/shared/components/ui/inputs/Switch"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import RecordingPlayerModal from "./RecordingPlayerModal"
+import SaveOrPublishRecordingModal from "./SaveOrPublishRecordingModal"
 
 /**
  * Format số giây thành chuỗi thời gian: hh:mm:ss hoặc mm:ss
@@ -75,12 +76,10 @@ const ClassRecordingsTab = ({ classId, classData }) => {
   const isLoading = isClassLoading || isMyLoading
   const error = classError || myError
 
-  const [updatePublishStatus, { isLoading: isUpdatingStatus }] =
-    useUpdateRecordingPublishStatusMutation()
+  const [updatePublishStatus] = useUpdateRecordingPublishStatusMutation()
   const [deleteRecording, { isLoading: isDeleting }] =
     useDeleteClassRecordingMutation()
-  const [createClassRecording, { isLoading: isCreating }] = 
-    useCreateClassRecordingMutation()
+  const [createClassRecording] = useCreateClassRecordingMutation()
 
   // ── Local States ────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState("")
@@ -91,6 +90,7 @@ const ClassRecordingsTab = ({ classId, classData }) => {
   const [selectedVideoToPlay, setSelectedVideoToPlay] = useState(null)
   const [videoToDelete, setVideoToDelete] = useState(null)
   const [updatingId, setUpdatingId] = useState(null)
+  const [showAddModal, setShowAddModal] = useState(false)
 
   // ── Auto Merge Logic ────────────────────────────────────────────────
   const allRecordings = useMemo(() => {
@@ -308,6 +308,16 @@ const ClassRecordingsTab = ({ classId, classData }) => {
             Lưu trữ, phát trực tiếp và xuất bản các video ghi hình buổi dạy cho học viên
           </p>
         </div>
+
+        <PillButton
+          variant="primary"
+          bgColor="#990011"
+          icon={<Plus className="w-4 h-4" />}
+          onClick={() => setShowAddModal(true)}
+          className="shadow-xs self-start md:self-auto shrink-0"
+        >
+          Thêm video bài giảng
+        </PillButton>
       </div>
 
       {/* ── Thống kê nhanh ─────────────────────────────────────────── */}
@@ -714,6 +724,14 @@ const ClassRecordingsTab = ({ classId, classData }) => {
         confirmText="Xác nhận xóa"
         cancelText="Hủy"
         confirmVariant="destructive"
+      />
+
+      {/* Save or Publish Modal */}
+      <SaveOrPublishRecordingModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        classId={classId}
+        onSuccess={handleRefetch}
       />
     </div>
   )
