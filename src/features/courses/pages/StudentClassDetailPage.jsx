@@ -31,6 +31,9 @@ const ClassLectureHallPage = lazy(() => import("../components/lecture-hall/pages
 // const ClassGradingTab = lazy(() => import("../components/grading/ClassGradingTab"))
 const StudentGradingTab = lazy(() => import("../components/grading/StudentGradingTab"))
 const ClassMembersTab = lazy(() => import("../components/members/ClassMembersTab"))
+const StudentClassRecordingsTab = lazy(
+  () => import("../components/recordings/StudentClassRecordingsTab"),
+)
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
@@ -42,8 +45,8 @@ const GRADING_DETAIL_PARAM_KEYS = [
   "studentId",
   "submissionId",
 ]
-const VALID_TABS = ["overview", "members", "lecture-hall", "feed", "grading"]
-const ENROLLED_ONLY_TABS = new Set(["members", "lecture-hall", "feed", "grading"])
+const VALID_TABS = ["overview", "members", "lecture-hall", "feed", "grading", "recordings"]
+const ENROLLED_ONLY_TABS = new Set(["members", "lecture-hall", "feed", "grading", "recordings"])
 
 const StudentClassDetailPage = () => {
   const { id } = useParams()
@@ -216,6 +219,7 @@ const StudentClassDetailPage = () => {
       members: c.student?.toastEnrollToViewClassmates || "Please enroll and pay tuition to view classmates!",
       "lecture-hall": scd.toastEnrollToViewLectureHall || c.student?.toastEnrollToViewFeed || "Please enroll and pay tuition to view lecture hall!",
       grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
+      recordings: c.student?.toastEnrollToViewRecordings || "Vui lòng đăng ký và thanh toán học phí để xem video bài giảng!",
     }
     toast.error(messages[tab])
   }
@@ -225,6 +229,7 @@ const StudentClassDetailPage = () => {
     ...(!isStudent ? [{ value: "members", label: c.student?.classmates || "Classmates", locked: !isEnrolled }] : []),
     { value: "lecture-hall", label: c.student?.lectureHall || "Lecture Hall", locked: !isEnrolled },
     { value: "grading", label: c.student?.myGrades || "My Grades", locked: !isEnrolled },
+    { value: "recordings", label: cd.recordings || "Video bài giảng", locked: !isEnrolled },
   ]
 
   const getWeeklyScheduleText = () => formatWeeklySchedule(classData || {}, ui.tba)
@@ -418,6 +423,13 @@ const StudentClassDetailPage = () => {
         {activeTab === "grading" && isEnrolled && (
           <StudentGradingTab
             id={id}
+          />
+        )}
+
+        {activeTab === "recordings" && isEnrolled && (
+          <StudentClassRecordingsTab
+            classId={id}
+            classData={classData}
           />
         )}
       </Suspense>

@@ -51,6 +51,9 @@ const VouchersTab = lazy(
 const ClassRecordingsTab = lazy(
   () => import("../components/recordings/ClassRecordingsTab"),
 )
+const StudentClassRecordingsTab = lazy(
+  () => import("../components/recordings/StudentClassRecordingsTab"),
+)
 
 const TabLoadingFallback = () => (
   <LoadingSpinner className="flex justify-center items-center min-h-[240px]" />
@@ -195,7 +198,7 @@ const ClassDetailPage = () => {
     { value: "grading", label: cd.grading || "Grading" },
     ...(isClassTeacher ? [{ value: "invite-friends", label: cd.inviteFriends || "Mời bạn bè" }] : []),
     ...(isClassTeacher ? [{ value: "vouchers", label: cd.vouchers || "Ưu đãi" }] : []),
-    ...(isClassTeacher ? [{ value: "recordings", label: cd.recordings || "Video bài giảng" }] : []),
+    { value: "recordings", label: cd.recordings || "Video bài giảng" },
   ]
 
   const getWeeklyScheduleText = () =>
@@ -442,11 +445,18 @@ const ClassDetailPage = () => {
           />
         )}
 
-        {activeTab === "recordings" && isClassTeacher && (
-          <ClassRecordingsTab
-            classId={id}
-            classData={classData}
-          />
+        {activeTab === "recordings" && (
+          isClassTeacher ? (
+            <ClassRecordingsTab
+              classId={id}
+              classData={classData}
+            />
+          ) : (
+            <StudentClassRecordingsTab
+              classId={id}
+              classData={classData}
+            />
+          )
         )}
       </Suspense>
 
