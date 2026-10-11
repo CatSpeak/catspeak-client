@@ -16,6 +16,7 @@ const FluentAnimation = React.forwardRef(
       direction = "up",
       distance = 20,
       exit = false,
+      exitDirection,
       duration = 0.28,
       className,
     },
@@ -50,7 +51,11 @@ const FluentAnimation = React.forwardRef(
         initial={{ y: initialPos.y, x: initialPos.x, opacity: 0 }}
         animate={{ y: 0, x: 0, opacity: 1 }}
         exit={
-          exit ? { y: initialPos.y, x: initialPos.x, opacity: 0 } : undefined
+          exit
+            ? exit === "fade" || exitDirection === "none"
+              ? { opacity: 0 }
+              : { y: initialPos.y, x: initialPos.x, opacity: 0 }
+            : undefined
         }
         transition={{
           duration: duration,

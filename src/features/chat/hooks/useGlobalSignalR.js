@@ -17,6 +17,8 @@ import {
 } from "@/store/api/social/friendshipApi"
 import FriendRequestToast from "@/features/profile/components/FriendRequestToast"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { useAuth } from "@/features/auth"
+import { normalizeMessageType } from "../utils/messageMappingUtils"
 import useConversationSignalR from "./useConversationSignalR"
 
 /**
@@ -27,6 +29,13 @@ import useConversationSignalR from "./useConversationSignalR"
 export const useGlobalSignalR = () => {
   const dispatch = useDispatch()
   const { t: tLanguage } = useLanguage()
+  const { user } = useAuth()
+  const currentUserId = user?.accountId ?? user?.id ?? user?.userId
+  const primaryUserId =
+    user?.sourceAccountId ??
+    user?.primaryAccountId ??
+    user?.primaryUserId ??
+    currentUserId
   const [respondFriendRequest] = useRespondFriendRequestMutation()
   const activeConversationId = useSelector(
     (state) => state.messageWidget.activeConversationId,
@@ -217,6 +226,20 @@ export const useGlobalSignalR = () => {
               { type: "Messages", id: conversationId },
             ]),
           )
+
+          // Invalidate invite link and member cache when system messages arrive (e.g. invite link status changed/reset)
+          const rawType = message?.messageType ?? message?.MessageType
+          const msgType = normalizeMessageType(rawType)
+          if (msgType === "System") {
+            dispatch(
+              conversationsApi.util.invalidateTags([
+                { type: "GroupInviteLink", id: Number(conversationId) },
+                { type: "GroupInviteLink", id: String(conversationId) },
+                { type: "Members", id: Number(conversationId) },
+                { type: "Members", id: String(conversationId) },
+              ]),
+            )
+          }
         }
 
         const isChatPageOpen =
@@ -290,6 +313,32 @@ export const useGlobalSignalR = () => {
         setTimeout(() => {
           dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
         }, 500)
+      },
+
+      GroupUpdated: (data) => {
+        const convId =
+          typeof data === "object"
+            ? (data?.conversationId ?? data?.ConversationId)
+            : data
+        if (convId) {
+          dispatch(
+            conversationsApi.util.invalidateTags([
+              { type: "Conversations" },
+              { type: "GroupInviteLink", id: Number(convId) },
+              { type: "GroupInviteLink", id: String(convId) },
+              { type: "Members", id: Number(convId) },
+              { type: "Members", id: String(convId) },
+            ]),
+          )
+        } else {
+          dispatch(
+            conversationsApi.util.invalidateTags([
+              "Conversations",
+              "GroupInviteLink",
+              "Members",
+            ]),
+          )
+        }
       },
 
       ConversationUpdated: (data) => {
@@ -516,6 +565,72 @@ export const useGlobalSignalR = () => {
       },
       NewConversation: handleNewConversationEvent,
       ConversationCreated: handleNewConversationEvent,
+      MemberRemoved: (payload) => {
+        const cId = Number(payload?.conversationId)
+        const removedAccountId = Number(
+          payload?.removedAccountId ?? payload?.accountId ?? payload?.userId,
+        )
+        const myId = Number(currentUserId)
+        const myPrimaryId = primaryUserId ? Number(primaryUserId) : null
+
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            "Conversations",
+            { type: "Members", id: cId },
+            { type: "Messages", id: cId },
+          ]),
+        )
+
+        // If current user (or primary teacher ID) is the removed member, close chat
+        if (
+          removedAccountId === myId ||
+          (myPrimaryId && removedAccountId === myPrimaryId)
+        ) {
+          if (
+            typeof window !== "undefined" &&
+            window.location.pathname.includes(`/chat/${cId}`)
+          ) {
+            window.location.href = "/chat"
+          }
+          toast.error(
+            payload?.actorName
+              ? `Bạn đã bị ${payload.actorName} xóa khỏi nhóm.`
+              : "Bạn đã bị xóa khỏi nhóm trò chuyện.",
+          )
+        }
+      },
+      MessagePinned: (payload) => {
+        const cId =
+          typeof payload === "object"
+            ? payload?.conversationId ?? payload?.conversation_id
+            : payload
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            ...(cId
+              ? [
+                  { type: "PinnedMessages", id: Number(cId) },
+                  { type: "PinnedMessages", id: String(cId) },
+                ]
+              : ["PinnedMessages"]),
+          ]),
+        )
+      },
+      MessageUnpinned: (payload) => {
+        const cId =
+          typeof payload === "object"
+            ? payload?.conversationId ?? payload?.conversation_id
+            : payload
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            ...(cId
+              ? [
+                  { type: "PinnedMessages", id: Number(cId) },
+                  { type: "PinnedMessages", id: String(cId) },
+                ]
+              : ["PinnedMessages"]),
+          ]),
+        )
+      },
     }),
     [
       dispatch,
@@ -541,20 +656,37 @@ export const useGlobalSignalR = () => {
 
   // Automatically join SignalR groups for ALL of the user's conversations as soon as SignalR connects
   useEffect(() => {
-    if (isConnected && invoke && conversations.length > 0) {
-      conversations.forEach((c) => {
-        const convId = c.conversationId || c.id
-        if (convId) {
-          invoke("JoinConversation", Number(convId)).catch((err) => {
-            console.warn(
-              `[GlobalSignalR] Auto-join failed for conversation ${convId}:`,
-              err,
-            )
-          })
+    if (isConnected && invoke) {
+      if (conversations.length > 0) {
+        conversations.forEach((c) => {
+          const convId = c.conversationId || c.id
+          if (convId) {
+            invoke("JoinConversation", Number(convId)).catch((err) => {
+              console.warn(
+                `[GlobalSignalR] Auto-join failed for conversation ${convId}:`,
+                err,
+              )
+            })
+          }
+        })
+      }
+
+      // Section 3.3: Automatically subscribe to user channels: user_{userId} and user_{primaryUserId}
+      if (currentUserId) {
+        const joinUserGroup = (uid) => {
+          if (!uid) return
+          invoke("JoinGroup", `user_${uid}`).catch(() => {})
+          invoke("JoinUserChannel", Number(uid)).catch(() => {})
+          invoke("JoinUser", Number(uid)).catch(() => {})
         }
-      })
+
+        joinUserGroup(currentUserId)
+        if (primaryUserId && String(primaryUserId) !== String(currentUserId)) {
+          joinUserGroup(primaryUserId)
+        }
+      }
     }
-  }, [isConnected, invoke, conversations])
+  }, [isConnected, invoke, conversations, currentUserId, primaryUserId])
 }
 
 export default useGlobalSignalR

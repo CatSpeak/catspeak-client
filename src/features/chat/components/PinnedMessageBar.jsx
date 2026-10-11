@@ -1,9 +1,10 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Pin, ChevronLeft, ChevronRight, X } from "lucide-react"
 import {
   useGetPinnedMessagesQuery,
   useUnpinMessageMutation,
 } from "@/store/api/social/conversationsApi"
+import { IconButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import toast from "react-hot-toast"
 
@@ -25,9 +26,22 @@ const PinnedMessageBar = ({
   const { t } = useLanguage()
   const [currentIndex, setCurrentIndex] = useState(0)
 
-  const { data: rawPins = [] } = useGetPinnedMessagesQuery(conversationId, {
-    skip: !conversationId,
-  })
+  const { data: rawPins = [], error: pinsError } = useGetPinnedMessagesQuery(
+    conversationId,
+    {
+      skip: !conversationId,
+    },
+  )
+
+  useEffect(() => {
+    if (pinsError) {
+      console.error(
+        "[PinnedMessageBar] Failed to load pinned messages for conversation",
+        conversationId,
+        pinsError,
+      )
+    }
+  }, [pinsError, conversationId])
 
   const [unpinMessageMutation, { isLoading: isUnpinning }] =
     useUnpinMessageMutation()
@@ -49,12 +63,19 @@ const PinnedMessageBar = ({
 
   const handlePrev = (e) => {
     e.stopPropagation()
-    setCurrentIndex((prev) => (prev - 1 + pinnedList.length) % pinnedList.length)
+    setCurrentIndex(
+      (prev) => (prev - 1 + pinnedList.length) % pinnedList.length,
+    )
   }
 
   const handleUnpin = async (e) => {
     e.stopPropagation()
-    const msgId = currentPin?.messageId || currentPin?.id
+    const msgId =
+      currentPin?.messageId ||
+      currentPin?.id ||
+      currentPin?.message?.messageId ||
+      currentPin?.message?.id
+
     if (!conversationId || !msgId || isUnpinning) return
 
     try {
@@ -73,7 +94,12 @@ const PinnedMessageBar = ({
   }
 
   const handleClickBanner = () => {
-    const msgId = currentPin?.messageId || currentPin?.id
+    const msgId =
+      currentPin?.messageId ||
+      currentPin?.id ||
+      currentPin?.message?.messageId ||
+      currentPin?.message?.id
+
     if (msgId && onJumpToMessage) {
       onJumpToMessage(msgId)
     }
@@ -81,76 +107,79 @@ const PinnedMessageBar = ({
 
   const senderName =
     currentPin?.pinnedByName ||
+    currentPin?.pinnedBy?.username ||
+    currentPin?.pinnedBy?.name ||
     currentPin?.sender?.username ||
     currentPin?.sender?.name ||
+    currentPin?.senderName ||
     t?.chat?.someone ||
     "Someone"
 
   const previewContent =
     currentPin?.messageContent ||
     currentPin?.content ||
+    currentPin?.message?.messageContent ||
+    currentPin?.message?.content ||
     (currentPin?.mediaUrl ? `[${t?.chat?.media || "Media"}]` : "")
 
   return (
     <div
       onClick={handleClickBanner}
-      className="flex items-center justify-between px-4 py-2 bg-neutral-50 dark:bg-zinc-800/80 hover:bg-neutral-100/90 dark:hover:bg-zinc-800 border-b border-border/70 transition-colors cursor-pointer select-none shrink-0"
+      className="flex items-center justify-between px-4 h-[72px] border-b border-border/70 transition-colors cursor-pointer select-none shrink-0"
     >
-      <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
-        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary shrink-0">
-          <Pin size={15} className="rotate-45" />
-        </div>
+      <div className="flex items-center gap-4 min-w-0 flex-1 mr-2">
+        <Pin className="rotate-45" />
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="font-semibold text-primary truncate max-w-[140px]">
-              {senderName}
-            </span>
-            <span className="text-neutral-400">•</span>
-            <span className="text-neutral-500 font-medium">
-              {t?.chat?.pinnedMessageLabel || "Pinned message"}
-              {pinnedList.length > 1 && ` (${safeIndex + 1}/${pinnedList.length})`}
+          <div className="flex items-center gap-1">
+            <span className="font-bold truncate">{senderName}</span>
+            <span className="text-secondary">
+              {t?.chat?.pinnedMessageLabel || "pinned"}
+              {pinnedList.length > 1 &&
+                ` (${safeIndex + 1}/${pinnedList.length})`}
             </span>
           </div>
-          <p className="text-xs text-neutral-600 dark:text-neutral-300 truncate">
+          <p className="text-sm text-secondary truncate">
             {previewContent || "..."}
           </p>
         </div>
       </div>
 
       {/* ── Controls (prev, next, unpin) ────────────────────────── */}
-      <div className="flex items-center gap-1 shrink-0">
+      <div className="flex items-center shrink-0">
         {pinnedList.length > 1 && (
-          <div className="flex items-center text-neutral-500 mr-1">
-            <button
-              type="button"
+          <div className="flex items-center">
+            <IconButton
+              variant="ghost"
               onClick={handlePrev}
-              className="p-1 rounded-md hover:bg-neutral-200/60 dark:hover:bg-zinc-700 hover:text-neutral-900 transition-colors"
               title={t?.chat?.prevPinnedMessage || "Previous pinned message"}
+              aria-label={
+                t?.chat?.prevPinnedMessage || "Previous pinned message"
+              }
             >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              type="button"
+              <ChevronLeft />
+            </IconButton>
+            <IconButton
+              variant="ghost"
               onClick={handleNext}
-              className="p-1 rounded-md hover:bg-neutral-200/60 dark:hover:bg-zinc-700 hover:text-neutral-900 transition-colors"
               title={t?.chat?.nextPinnedMessage || "Next pinned message"}
+              aria-label={t?.chat?.nextPinnedMessage || "Next pinned message"}
             >
-              <ChevronRight size={16} />
-            </button>
+              <ChevronRight />
+            </IconButton>
           </div>
         )}
 
         {canUnpin && (
-          <button
-            type="button"
+          <IconButton
+            variant="ghost"
             onClick={handleUnpin}
             disabled={isUnpinning}
-            className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
             title={t?.chat?.unpinMessage || "Unpin message"}
+            aria-label={t?.chat?.unpinMessage || "Unpin message"}
           >
-            <X size={16} />
-          </button>
+            <X />
+          </IconButton>
         )}
       </div>
     </div>

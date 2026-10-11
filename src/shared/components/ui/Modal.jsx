@@ -85,28 +85,28 @@ const ModalContent = ({
   }, [])
 
   return (
-    <div
+    <motion.div
       {...{ [CAPTURE_IGNORE_ATTR]: "true" }}
       className={`fixed inset-0 z-[1300] flex items-center justify-center ${fullScreenOnMobile ? "p-0 md:p-4" : "p-4"}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
     >
       {/* Backdrop */}
-      <motion.div
+      <div
         role="presentation"
         aria-hidden="true"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 bg-black/50 "
+        className="fixed inset-0 bg-black/50"
         onClick={onClose}
       />
 
       {/* Modal Container */}
       <motion.div
         ref={dialogRef}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98 }}
         transition={{ duration: 0.2 }}
         className={`relative flex flex-col w-full shadow-xl overflow-hidden ${
           /(^|\s)(md:|lg:|xl:|2xl:)?h-/.test(className)
@@ -180,7 +180,7 @@ const ModalContent = ({
 
         {footer && <div className={footerClassName}>{footer}</div>}
       </motion.div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -188,7 +188,13 @@ const Modal = ({ open, isOpen, ...props }) => {
   const isModalOpen = open ?? isOpen
   return createPortal(
     <AnimatePresence>
-      {isModalOpen && <ModalContent onClose={props.onClose} {...props} />}
+      {isModalOpen && (
+        <ModalContent
+          key={props.id || "modal-content"}
+          onClose={props.onClose}
+          {...props}
+        />
+      )}
     </AnimatePresence>,
     document.body,
   )

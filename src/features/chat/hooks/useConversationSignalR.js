@@ -78,6 +78,8 @@ export const useConversationSignalR = (handlers = {}) => {
       "CallParticipantJoined",
       "CallParticipantLeft",
       "CallEnded",
+      "CallRejected",
+      "MemberRemoved",
       "OnConnected",
       "OnReconnected",
     ]

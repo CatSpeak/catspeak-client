@@ -13,6 +13,7 @@ const ConfirmationModal = ({
   confirmText,
   confirmVariant = "destructive", // "primary" | "destructive"
   isPending = false,
+  className = "",
   children,
 }) => {
   const { t } = useLanguage()
@@ -27,9 +28,10 @@ const ConfirmationModal = ({
       title={title}
       showCloseButton={false}
       fullScreenOnMobile={false}
-      headerClassName="flex items-start justify-between px-4 sm:px-6 pt-4 sm:pt-6"
-      bodyClassName="px-4 sm:px-6 pt-2"
-      footerClassName="p-4 sm:p-6"
+      className={`rounded-xl border border-border ${className}`.trim()}
+      headerClassName="flex items-start justify-between p-4"
+      bodyClassName="px-4"
+      footerClassName="p-4"
       footer={
         <div className="flex justify-end gap-2">
           {!isPending && (

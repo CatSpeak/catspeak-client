@@ -1,4 +1,6 @@
 import { useMemo } from "react"
+import { useDispatch } from "react-redux"
+import { conversationsApi } from "@/store/api/social/conversationsApi"
 import useConversationSignalR from "./useConversationSignalR"
 import { applyReactionSignalREvent } from "../utils/reactionUtils"
 import { normalizeMessageType } from "../utils/messageMappingUtils"
@@ -21,6 +23,8 @@ export default function useChatMessagesRealtime({
   currentUserId,
   setAccumulatedMessages,
 }) {
+  const dispatch = useDispatch()
+
   const signalRHandlers = useMemo(
     () => ({
       NewMessage: (...args) => {
@@ -41,19 +45,19 @@ export default function useChatMessagesRealtime({
           return
         }
 
-        const msgId = message?.messageId ?? message?.id
+        const msgId = message?.messageId
         const clientMsgId = message?.clientMessageId
 
         setAccumulatedMessages((prev) => {
           // Prevent duplicates by messageId or clientMessageId
           const exists = prev.some(
             (m) =>
-              (msgId != null && (m.messageId ?? m.id) === msgId) ||
+              (msgId != null && m.messageId === msgId) ||
               (clientMsgId && m.clientMessageId === clientMsgId),
           )
           if (exists) {
             return prev.map((m) =>
-              (msgId != null && (m.messageId ?? m.id) === msgId) ||
+              (msgId != null && m.messageId === msgId) ||
               (clientMsgId && m.clientMessageId === clientMsgId)
                 ? { ...m, ...message }
                 : m,
@@ -62,13 +66,10 @@ export default function useChatMessagesRealtime({
 
           const normalized = {
             ...message,
-            messageType: normalizeMessageType(
-              message?.messageType ?? message?.MessageType,
-            ),
-            content: message?.content ?? message?.messageContent,
-            sender: message.sender || { accountId: message.senderId },
-            mentionedAccountIds:
-              message.mentionedAccountIds || message.MentionedAccountIds || [],
+            messageType: normalizeMessageType(message?.messageType),
+            messageContent: message?.messageContent,
+            sender: message.sender,
+            mentionedAccountIds: message.mentionedAccountIds || [],
           }
           return [...prev, normalized]
         })
@@ -91,12 +92,10 @@ export default function useChatMessagesRealtime({
 
         setAccumulatedMessages((prev) =>
           prev.map((m) => {
-            const currentId = m.messageId ?? m.id
-            if (Number(currentId) === Number(msgId)) {
+            if (Number(m.messageId) === Number(msgId)) {
               return {
                 ...m,
                 messageContent: newContent,
-                content: newContent,
                 isEdited: true,
                 lastEdited: lastEdited || new Date().toISOString(),
               }
@@ -121,8 +120,7 @@ export default function useChatMessagesRealtime({
 
         setAccumulatedMessages((prev) =>
           prev.map((m) => {
-            const currentId = m.messageId ?? m.id
-            if (Number(currentId) === Number(msgId)) {
+            if (Number(m.messageId) === Number(msgId)) {
               return {
                 ...m,
                 reactions: applyReactionSignalREvent(
@@ -152,8 +150,7 @@ export default function useChatMessagesRealtime({
 
         setAccumulatedMessages((prev) =>
           prev.map((m) => {
-            const currentId = m.messageId ?? m.id
-            if (Number(currentId) === Number(msgId)) {
+            if (Number(m.messageId) === Number(msgId)) {
               return {
                 ...m,
                 isRecalled: true,
@@ -182,7 +179,7 @@ export default function useChatMessagesRealtime({
 
         setAccumulatedMessages((prev) => {
           return prev.map((m) => {
-            const currentMsgId = Number(m.messageId ?? m.id)
+            const currentMsgId = Number(m.messageId)
             const currentReaders = Array.isArray(m.readByUsers)
               ? m.readByUsers
               : []
@@ -212,8 +209,42 @@ export default function useChatMessagesRealtime({
           })
         })
       },
+
+      MessagePinned: (payload) => {
+        const convId =
+          typeof payload === "object"
+            ? payload?.conversationId ?? payload?.conversation_id
+            : payload
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            ...(convId
+              ? [
+                  { type: "PinnedMessages", id: Number(convId) },
+                  { type: "PinnedMessages", id: String(convId) },
+                ]
+              : ["PinnedMessages"]),
+          ]),
+        )
+      },
+
+      MessageUnpinned: (payload) => {
+        const convId =
+          typeof payload === "object"
+            ? payload?.conversationId ?? payload?.conversation_id
+            : payload
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            ...(convId
+              ? [
+                  { type: "PinnedMessages", id: Number(convId) },
+                  { type: "PinnedMessages", id: String(convId) },
+                ]
+              : ["PinnedMessages"]),
+          ]),
+        )
+      },
     }),
-    [selectedId, currentUserId, setAccumulatedMessages],
+    [selectedId, currentUserId, setAccumulatedMessages, dispatch],
   )
 
   useConversationSignalR(signalRHandlers)

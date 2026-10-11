@@ -25,10 +25,20 @@ const PAGE_SIZE = 30
 export default function useChatMessages(selectedId) {
   const { user } = useAuth()
   const currentUserId = user?.accountId ?? user?.id ?? user?.userId
+  const primaryUserId =
+    user?.sourceAccountId ??
+    user?.primaryAccountId ??
+    user?.primaryUserId ??
+    currentUserId
 
   const [accumulatedMessages, setAccumulatedMessages] = useState([])
   const [hasMoreMessages, setHasMoreMessages] = useState(true)
+  const [hasMoreAfter, setHasMoreAfter] = useState(false)
   const [isFetchingOlder, setIsFetchingOlder] = useState(false)
+  const [isFetchingNewer, setIsFetchingNewer] = useState(false)
+  const [isViewingAroundWindow, setIsViewingAroundWindow] = useState(false)
+  const [targetHighlightId, setTargetHighlightId] = useState(null)
+  const [isJumpingToMessage, setIsJumpingToMessage] = useState(false)
   const prevSelectedIdRef = useRef(selectedId)
 
   // Reset pagination state on active conversation change
@@ -37,7 +47,11 @@ export default function useChatMessages(selectedId) {
       prevSelectedIdRef.current = selectedId
       setAccumulatedMessages([])
       setHasMoreMessages(true)
+      setHasMoreAfter(false)
       setIsFetchingOlder(false)
+      setIsFetchingNewer(false)
+      setIsViewingAroundWindow(false)
+      setTargetHighlightId(null)
     }
   }, [selectedId])
 
@@ -47,6 +61,7 @@ export default function useChatMessages(selectedId) {
     isLoading: isLoadingQuery,
     isFetching: isFetchingInitial,
     isError: isMessagesError,
+    refetch: refetchInitial,
   } = useGetConversationMessagesQuery(
     selectedId ? { conversationId: selectedId, limit: PAGE_SIZE } : undefined,
     { skip: !selectedId },
@@ -54,47 +69,34 @@ export default function useChatMessages(selectedId) {
 
   // Immediate derivation of initial fetched items for the active conversation
   const initialFetchedItems = useMemo(() => {
-    if (!currentInitialMessages) return null
-    const rawItems = Array.isArray(currentInitialMessages)
-      ? currentInitialMessages
-      : currentInitialMessages?.data || currentInitialMessages?.items || []
-
-    return rawItems.filter(
+    if (!currentInitialMessages?.items) return null
+    return currentInitialMessages.items.filter(
       (m) =>
         m.conversationId == null ||
-        String(m.conversationId) === String(selectedId),
+        Number(m.conversationId) === Number(selectedId),
     )
   }, [currentInitialMessages, selectedId])
 
-  // Lazy query trigger for cursor pagination (beforeId)
+  // Lazy query trigger for cursor pagination (beforeId, aroundId, afterId)
   const [triggerFetchMessages] = useLazyGetConversationMessagesQuery()
 
-  // Handle initial fetch results
+  // Handle initial fetch results (skip if currently browsing an aroundId window)
   useEffect(() => {
-    if (!selectedId || !currentInitialMessages) return
+    if (!selectedId || !currentInitialMessages?.items || isViewingAroundWindow) return
 
-    const rawItems = Array.isArray(currentInitialMessages)
-      ? currentInitialMessages
-      : currentInitialMessages?.data || currentInitialMessages?.items || []
-
-    const fetchedItems = rawItems.filter(
+    const fetchedItems = currentInitialMessages.items.filter(
       (m) =>
         m.conversationId == null ||
-        String(m.conversationId) === String(selectedId),
+        Number(m.conversationId) === Number(selectedId),
     )
 
-    const serverHasMore =
-      typeof currentInitialMessages?.hasMore === "boolean"
-        ? currentInitialMessages.hasMore
-        : fetchedItems.length >= PAGE_SIZE
-
-    setHasMoreMessages(serverHasMore)
+    setHasMoreMessages(currentInitialMessages.hasMoreBefore)
 
     setAccumulatedMessages((prev) => {
       const validPrev = prev.filter(
         (m) =>
           m.conversationId == null ||
-          String(m.conversationId) === String(selectedId),
+          Number(m.conversationId) === Number(selectedId),
       )
 
       if (validPrev.length === 0) {
@@ -102,19 +104,13 @@ export default function useChatMessages(selectedId) {
       }
 
       // Merge fetched items with validPrev, keeping newest instances
-      const fetchedMap = new Map(
-        fetchedItems.map((m) => [m.messageId ?? m.id, m]),
-      )
-      const updatedPrev = validPrev.map(
-        (m) => fetchedMap.get(m.messageId ?? m.id) || m,
-      )
-      const prevIds = new Set(validPrev.map((m) => m.messageId ?? m.id))
-      const newItems = fetchedItems.filter(
-        (m) => !prevIds.has(m.messageId ?? m.id),
-      )
+      const fetchedMap = new Map(fetchedItems.map((m) => [m.messageId, m]))
+      const updatedPrev = validPrev.map((m) => fetchedMap.get(m.messageId) || m)
+      const prevIds = new Set(validPrev.map((m) => m.messageId))
+      const newItems = fetchedItems.filter((m) => !prevIds.has(m.messageId))
       return [...updatedPrev, ...newItems]
     })
-  }, [currentInitialMessages, selectedId])
+  }, [currentInitialMessages, selectedId, isViewingAroundWindow])
 
   // Delegate real-time SignalR listeners and state patching to dedicated hook
   useChatMessagesRealtime({
@@ -132,14 +128,14 @@ export default function useChatMessages(selectedId) {
     const validMessages = accumulatedMessages.filter(
       (m) =>
         m.conversationId == null ||
-        String(m.conversationId) === String(selectedId),
+        Number(m.conversationId) === Number(selectedId),
     )
 
     if (validMessages.length === 0) return
 
     // Find the oldest message id to serve as cursor beforeId
     const oldestMsg = validMessages[0]
-    const beforeId = oldestMsg.messageId ?? oldestMsg.id
+    const beforeId = oldestMsg.messageId
 
     if (!beforeId) return
 
@@ -151,27 +147,21 @@ export default function useChatMessages(selectedId) {
         limit: PAGE_SIZE,
       }).unwrap()
 
-      const rawItems = Array.isArray(res) ? res : res?.data || res?.items || []
-      const olderItems = rawItems.filter(
+      const olderItems = (res?.items || []).filter(
         (m) =>
           m.conversationId == null ||
-          String(m.conversationId) === String(selectedId),
+          Number(m.conversationId) === Number(selectedId),
       )
 
-      const serverHasMore =
-        typeof res?.hasMore === "boolean"
-          ? res.hasMore
-          : olderItems.length >= PAGE_SIZE
+      setHasMoreMessages(res?.hasMoreBefore ?? false)
 
-      setHasMoreMessages(serverHasMore)
-
-      setAccumulatedMessages((prev) => {
-        const existingIds = new Set(prev.map((m) => m.messageId ?? m.id))
-        const newOlderItems = olderItems.filter(
-          (m) => !existingIds.has(m.messageId ?? m.id),
-        )
-        return [...newOlderItems, ...prev]
-      })
+      if (olderItems.length > 0) {
+        setAccumulatedMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.messageId))
+          const newOlderItems = olderItems.filter((m) => !existingIds.has(m.messageId))
+          return [...newOlderItems, ...prev]
+        })
+      }
     } catch (err) {
       console.error("Failed to load older messages via cursor:", err)
     } finally {
@@ -186,16 +176,144 @@ export default function useChatMessages(selectedId) {
     triggerFetchMessages,
   ])
 
+  // Cursor-based Load Newer Messages (When viewing aroundId window)
+  const handleLoadNewerMessages = useCallback(async () => {
+    if (!hasMoreAfter || isFetchingNewer || !selectedId) {
+      return
+    }
+
+    const validMessages = accumulatedMessages.filter(
+      (m) =>
+        m.conversationId == null ||
+        Number(m.conversationId) === Number(selectedId),
+    )
+
+    if (validMessages.length === 0) return
+
+    const newestMsg = validMessages[validMessages.length - 1]
+    const newestId = newestMsg.messageId
+
+    if (!newestId) return
+
+    setIsFetchingNewer(true)
+    try {
+      const res = await triggerFetchMessages({
+        conversationId: selectedId,
+        afterId: newestId,
+        limit: PAGE_SIZE,
+      }).unwrap()
+
+      const newerItems = (res?.items || []).filter(
+        (m) =>
+          m.conversationId == null ||
+          Number(m.conversationId) === Number(selectedId),
+      )
+
+      setHasMoreAfter(res?.hasMoreAfter ?? false)
+
+      if (newerItems.length > 0) {
+        setAccumulatedMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.messageId))
+          const newItems = newerItems.filter((m) => !existingIds.has(m.messageId))
+          return [...prev, ...newItems]
+        })
+      }
+    } catch (err) {
+      console.error("Failed to load newer messages:", err)
+    } finally {
+      setIsFetchingNewer(false)
+    }
+  }, [
+    accumulatedMessages,
+    hasMoreAfter,
+    isFetchingNewer,
+    selectedId,
+    triggerFetchMessages,
+  ])
+
+  // Section 3.2: Jump to message with aroundId two-directional pagination
+  const jumpToMessage = useCallback(
+    async (targetMessageId) => {
+      if (!targetMessageId || !selectedId) return
+
+      // 1. If already present in current accumulated messages
+      const existingMsg = accumulatedMessages.find(
+        (m) => Number(m.messageId) === Number(targetMessageId),
+      )
+      if (existingMsg) {
+        setTargetHighlightId(targetMessageId)
+        return
+      }
+
+      // 2. Not in current window -> fetch aroundId with window limit 50
+      setIsJumpingToMessage(true)
+      try {
+        const res = await triggerFetchMessages({
+          conversationId: selectedId,
+          aroundId: Number(targetMessageId),
+          limit: 50,
+        }).unwrap()
+
+        const fetchedItems = (res?.items || []).filter(
+          (m) =>
+            m.conversationId == null ||
+            Number(m.conversationId) === Number(selectedId),
+        )
+
+        if (fetchedItems.length > 0) {
+          setAccumulatedMessages(fetchedItems)
+          setHasMoreMessages(res?.hasMoreBefore ?? false)
+          setHasMoreAfter(res?.hasMoreAfter ?? false)
+          setIsViewingAroundWindow(true)
+          setTargetHighlightId(targetMessageId)
+        }
+      } catch (err) {
+        console.error("Failed to fetch messages around target ID:", err)
+      } finally {
+        setIsJumpingToMessage(false)
+      }
+    },
+    [accumulatedMessages, selectedId, triggerFetchMessages],
+  )
+
+  // Reset from historical aroundId window back to real-time present (non-blocking)
+  const resetToLatest = useCallback(() => {
+    setIsViewingAroundWindow(false)
+    setHasMoreAfter(false)
+    setTargetHighlightId(null)
+    if (initialFetchedItems && initialFetchedItems.length > 0) {
+      setAccumulatedMessages(initialFetchedItems)
+    }
+    // Revalidate in background without blocking the caller
+    refetchInitial()
+      .then((res) => {
+        if (res?.data?.items) {
+          const fetchedItems = res.data.items.filter(
+            (m) =>
+              m.conversationId == null ||
+              Number(m.conversationId) === Number(selectedId),
+          )
+          setAccumulatedMessages(fetchedItems)
+          setHasMoreMessages(res.data.hasMoreBefore ?? false)
+        }
+      })
+      .catch((err) => {
+        console.warn("refetchInitial background error:", err)
+      })
+  }, [initialFetchedItems, refetchInitial, selectedId])
+
+  const clearTargetHighlight = useCallback(() => {
+    setTargetHighlightId(null)
+  }, [])
+
   // Optimistic UI Updaters
   const optimisticEditMessage = useCallback((messageId, newContent) => {
     setAccumulatedMessages((prev) =>
       prev.map((m) => {
-        const currentId = m.messageId ?? m.id
-        if (Number(currentId) === Number(messageId)) {
+        if (Number(m.messageId) === Number(messageId)) {
           return {
             ...m,
             messageContent: newContent,
-            content: newContent,
             isEdited: true,
             lastEdited: new Date().toISOString(),
           }
@@ -209,8 +327,7 @@ export default function useChatMessages(selectedId) {
     (messageId, emoji) => {
       setAccumulatedMessages((prev) =>
         prev.map((m) => {
-          const currentId = m.messageId ?? m.id
-          if (Number(currentId) === Number(messageId)) {
+          if (Number(m.messageId) === Number(messageId)) {
             return {
               ...m,
               reactions: applyReactionToggle(m.reactions, emoji, currentUserId),
@@ -237,9 +354,9 @@ export default function useChatMessages(selectedId) {
         : initialFetchedItems || []
 
     return sourceMessages.map((msg) =>
-      mapToChatMessageViewModel(msg, currentUserId),
+      mapToChatMessageViewModel(msg, currentUserId, primaryUserId),
     )
-  }, [accumulatedMessages, initialFetchedItems, selectedId, currentUserId])
+  }, [accumulatedMessages, initialFetchedItems, selectedId, currentUserId, primaryUserId])
 
   const hasMessagesForCurrentConv = useMemo(() => {
     const hasInAccumulated = accumulatedMessages.some(
@@ -263,9 +380,18 @@ export default function useChatMessages(selectedId) {
     accumulatedMessagesCount: accumulatedMessages.length,
     isLoadingMessages,
     isFetchingOlder,
-    isFetchingMessages: isFetchingInitial || isFetchingOlder,
+    isFetchingNewer,
+    isFetchingMessages: isFetchingInitial || isFetchingOlder || isFetchingNewer,
     hasMoreMessages,
+    hasMoreAfter,
+    isViewingAroundWindow,
+    targetHighlightId,
+    isJumpingToMessage,
+    jumpToMessage,
+    clearTargetHighlight,
     handleLoadMoreMessages,
+    handleLoadNewerMessages,
+    resetToLatest,
     optimisticEditMessage,
     optimisticToggleReaction,
   }

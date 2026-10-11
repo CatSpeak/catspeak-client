@@ -55,6 +55,8 @@ export const socialApi = createApi({
     "FriendshipCounts",
     "Stories",
     "MyStories",
+    "GroupInviteLink",
+    "PinnedMessages",
   ],
   endpoints: () => ({}),
 })
