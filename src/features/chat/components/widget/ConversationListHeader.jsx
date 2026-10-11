@@ -9,8 +9,8 @@ const ConversationListHeader = ({ onClose, isLoading }) => {
 
   return (
     <div className="border-b border-border">
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-4 h-14">
+        <div className="flex items-center gap-4">
           <IconButton
             onClick={onClose}
             className="min-[426px]:hidden"
@@ -20,7 +20,7 @@ const ConversationListHeader = ({ onClose, isLoading }) => {
             <ArrowLeft />
           </IconButton>
 
-          <h3 className="text-sm font-semibold">{t.messages.title}</h3>
+          <h3>{t.messages.title}</h3>
 
           {isLoading && (
             <span className="text-xs text-gray-400">{t.messages.loading}</span>

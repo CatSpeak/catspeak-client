@@ -9,8 +9,10 @@ const coreColors = {
   secondaryGray: "#606060", // Secondary text / subtext
   borderColor: "#E5E5E5", // Fluent UI
   youtubeBorderColor: "#C6C6C6", // Youtube border color
-  // #F2F2F2 hover/active bg
-  // #E6E6E6 hover for active
+
+  // ── Interactive Item Tokens ──
+  itemHover: "#F2F2F2", // hover & active background
+  itemActiveHover: "#E6E6E6", // hover background when item is already active
 }
 
 export const colors = {
@@ -48,8 +50,8 @@ export const colors = {
 
   // ── Gray & Neutral Background Options ─────────────────
   // Main page background color (used for core page/layout content panels)
-  primary2: "#F5F5F7", 
-  
+  primary2: "#F5F5F7",
+
   // Custom colors
   headingColor: "#2e2e2e",
   textColor: "#515151",
