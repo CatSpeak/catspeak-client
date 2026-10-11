@@ -509,6 +509,7 @@ export const baseApi = createApi({
     "RoomParticipants",
     "ExploreTeachers",
     "InstructorCompetency",
+    "StudentDashboard",
     "PlacementSession",
     "PlacementResult",
     "ClassRecordings",
