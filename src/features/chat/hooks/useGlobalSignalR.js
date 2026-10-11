@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useEffect } from "react"
+import React, { useMemo, useRef, useEffect, useCallback } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import toast from "react-hot-toast"
 import {
@@ -49,122 +49,155 @@ export const useGlobalSignalR = () => {
   // without creating a circular dependency (invoke comes from useConversationSignalR
   // which needs handlers, but handlers need invoke).
   const invokeRef = useRef(null)
+  const reconnectRef = useRef(null)
   const activeFriendToastIdsRef = useRef([])
 
   // Single internal helper for presence updates
-  const handleStatusUpdate = (data, forcedStatus = null) => {
-    const userId =
-      typeof data === "object"
-        ? (data?.userId ?? data?.accountId ?? data?.id)
-        : data
-    if (userId == null) return
+  const handleStatusUpdate = useCallback(
+    (data, forcedStatus = null) => {
+      const userId =
+        typeof data === "object"
+          ? (data?.userId ?? data?.accountId ?? data?.id)
+          : data
+      if (userId == null) return
 
-    const isOnline =
-      forcedStatus !== null
-        ? forcedStatus
-        : typeof data === "object"
-        ? (data?.isOnline ??
-          data?.status === "online" ??
-          data?.status === 1)
-        : true
+      const isOnline =
+        forcedStatus !== null
+          ? forcedStatus
+          : typeof data === "object"
+          ? (typeof data?.isOnline === "boolean"
+            ? data.isOnline
+            : (data?.status === "online" || data?.status === 1))
+          : true
 
-    const lastSeen =
-      (typeof data === "object" &&
-        (data?.lastSeen || data?.lastOnline || data?.timestamp)) ||
-      (!isOnline ? new Date().toISOString() : null)
+      const lastSeen =
+        (typeof data === "object" &&
+          (data?.lastSeen || data?.lastOnline || data?.timestamp)) ||
+        (!isOnline ? new Date().toISOString() : null)
 
-    dispatch(setFriendOnlineStatus({ userId, isOnline, lastSeen }))
+      dispatch(setFriendOnlineStatus({ userId, isOnline, lastSeen }))
 
-    dispatch(
-      conversationsApi.util.updateQueryData(
-        "getConversations",
-        undefined,
-        (draft) => {
-          const list = Array.isArray(draft) ? draft : draft?.data || []
-          list.forEach((conv) => {
-            if (
-              conv.friend &&
-              Number(conv.friend.accountId || conv.friend.id) === Number(userId)
-            ) {
-              conv.friend.isOnline = isOnline
-              if (lastSeen) {
-                conv.friend.lastSeen = lastSeen
-              }
-            }
-            if (Array.isArray(conv.participants)) {
-              conv.participants.forEach((p) => {
-                if (Number(p.accountId || p.id) === Number(userId)) {
-                  p.isOnline = isOnline
-                  if (lastSeen) {
-                    p.lastSeen = lastSeen
-                  }
+      dispatch(
+        conversationsApi.util.updateQueryData(
+          "getConversations",
+          undefined,
+          (draft) => {
+            const list = Array.isArray(draft) ? draft : draft?.data || []
+            list.forEach((conv) => {
+              if (
+                conv.friend &&
+                Number(conv.friend.accountId || conv.friend.id) === Number(userId)
+              ) {
+                conv.friend.isOnline = isOnline
+                if (lastSeen) {
+                  conv.friend.lastSeen = lastSeen
                 }
-              })
-            }
-          })
-        },
-      ),
-    )
-  }
+              }
+              if (Array.isArray(conv.participants)) {
+                conv.participants.forEach((p) => {
+                  if (Number(p.accountId || p.id) === Number(userId)) {
+                    p.isOnline = isOnline
+                    if (lastSeen) {
+                      p.lastSeen = lastSeen
+                    }
+                  }
+                })
+              }
+            })
+          },
+        ),
+      )
+    },
+    [dispatch],
+  )
 
   // Single internal helper for read receipts
-  const handleReadReceipt = (...args) => {
-    const convId =
-      typeof args[0] === "object" ? args[0]?.conversationId : args[0]
-    if (convId) {
-      dispatch(
-        conversationsApi.util.invalidateTags([
-          { type: "Messages", id: Number(convId) },
-          { type: "Messages", id: String(convId) },
-        ]),
-      )
-    }
-  }
+  const handleReadReceipt = useCallback(
+    (...args) => {
+      const convId =
+        typeof args[0] === "object" ? args[0]?.conversationId : args[0]
+      if (convId) {
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            { type: "Messages", id: Number(convId) },
+            { type: "Messages", id: String(convId) },
+          ]),
+        )
+      }
+    },
+    [dispatch],
+  )
 
   // Helper for real-time friend request response (accept / decline)
-  const handleFriendResponse = (data, isAccepted = null) => {
-    const userObj =
-      data?.user ||
-      data?.responder ||
-      data?.addressee ||
-      data?.friend ||
-      data?.requester ||
-      data?.sender ||
-      (typeof data === "object" ? data : null)
+  const handleFriendResponse = useCallback(
+    (data) => {
+      const userObj =
+        data?.user ||
+        data?.responder ||
+        data?.addressee ||
+        data?.friend ||
+        data?.requester ||
+        data?.sender ||
+        (typeof data === "object" ? data : null)
 
-    const displayName =
-      userObj?.nickname ||
-      userObj?.username ||
-      userObj?.displayName ||
-      userObj?.name ||
-      "Người dùng"
+      const targetId =
+        userObj?.accountId ??
+        userObj?.userId ??
+        userObj?.id ??
+        data?.targetAccountId ??
+        data?.addresseeId ??
+        data?.requesterId
 
-    const targetId =
-      userObj?.accountId ??
-      userObj?.userId ??
-      userObj?.id ??
-      data?.targetAccountId ??
-      data?.addresseeId ??
-      data?.requesterId
+      // Invalidate RTK Query cache tags so Profile button and Friends lists auto-update
+      dispatch(
+        friendshipApi.util.invalidateTags([
+          ...(targetId
+            ? [
+                { type: "Friendship", id: targetId },
+                { type: "Friend", id: `LIST-${targetId}` },
+              ]
+            : []),
+          "Friendship",
+          "Friend",
+          "Follower",
+          "Following",
+          "FriendRequest",
+          "Recommendation",
+        ]),
+      )
+    },
+    [dispatch],
+  )
 
-    // Invalidate RTK Query cache tags so Profile button and Friends lists auto-update
-    dispatch(
-      friendshipApi.util.invalidateTags([
-        ...(targetId
-          ? [
-              { type: "Friendship", id: targetId },
-              { type: "Friend", id: `LIST-${targetId}` },
-            ]
-          : []),
-        "Friendship",
-        "Friend",
-        "Follower",
-        "Following",
-        "FriendRequest",
-        "Recommendation",
-      ]),
-    )
-  }
+  // Define the helper here and assign it so we cover multiple possible event names
+  // the backend developer might have used. Delay reconnects so the DB commits.
+  const handleNewConversationEvent = useCallback(
+    (conversation) => {
+      setTimeout(() => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
+      }, 500)
+
+      const convId =
+        typeof conversation === "object"
+          ? (conversation?.conversationId ?? conversation?.ConversationId)
+          : conversation
+
+      if (convId && invokeRef.current) {
+        invokeRef.current("JoinConversation", Number(convId)).catch((err) => {
+          console.warn(
+            "[GlobalSignalR] Failed to join conversation group, falling back to reconnect:",
+            err,
+          )
+          if (reconnectRef.current) {
+            setTimeout(() => reconnectRef.current(), 500)
+          }
+        })
+      } else if (reconnectRef.current) {
+        setTimeout(() => reconnectRef.current(), 500)
+      }
+    },
+    [dispatch],
+  )
 
   const handlers = useMemo(
     () => ({
@@ -481,50 +514,26 @@ export const useGlobalSignalR = () => {
           },
         )
       },
+      NewConversation: handleNewConversationEvent,
+      ConversationCreated: handleNewConversationEvent,
     }),
-    [dispatch, activeConversationId, isWidgetOpen, respondFriendRequest, tLanguage],
+    [
+      dispatch,
+      activeConversationId,
+      isWidgetOpen,
+      respondFriendRequest,
+      tLanguage,
+      handleReadReceipt,
+      handleStatusUpdate,
+      handleFriendResponse,
+      markConversationAsRead,
+      handleNewConversationEvent,
+    ],
   )
-
-  // Define the helper here and assign it so we cover multiple possible event names
-  // the backend developer might have used. Delay reconnects so the DB commits.
-  const handleNewConversationEvent = useMemo(
-    () => (conversation) => {
-      setTimeout(() => {
-        dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
-      }, 500)
-
-      const convId =
-        typeof conversation === "object"
-          ? (conversation?.conversationId ?? conversation?.ConversationId)
-          : conversation
-
-      if (convId && invokeRef.current) {
-        invokeRef.current("JoinConversation", Number(convId)).catch((err) => {
-          console.warn(
-            "[GlobalSignalR] Failed to join conversation group, falling back to reconnect:",
-            err,
-          )
-          if (reconnectRef.current) {
-            setTimeout(() => reconnectRef.current(), 500)
-          }
-        })
-      } else if (reconnectRef.current) {
-        setTimeout(() => reconnectRef.current(), 500)
-      }
-    },
-    [dispatch],
-  )
-
-  // Attach to handlers object
-  useEffect(() => {
-    handlers.NewConversation = handleNewConversationEvent
-    handlers.ConversationCreated = handleNewConversationEvent
-  }, [handlers, handleNewConversationEvent])
 
   const { isConnected, invoke, reconnect } = useConversationSignalR(handlers)
 
   // Keep invokeRef and reconnectRef in sync
-  const reconnectRef = useRef(null)
   useEffect(() => {
     invokeRef.current = invoke
     reconnectRef.current = reconnect

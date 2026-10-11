@@ -2,10 +2,11 @@ import React from "react"
 
 const IconButton = ({
   children,
+  badge,
   onClick,
   title,
   disabled = false,
-  variant = "filled", // "filled" | "ghost" | "outline" | "primary" | "iconOnly" | "transparent" | "overlay" | "secondary" | "cathRed" | "cathOutline" | "white"
+  variant = "filled", // "filled" | "ghost" | "outline" | "primary" | "iconOnly" | "transparent" | "overlay" | "secondary" | "cathRed" | "cathOutline" | "white" | "darkGhost" | "darkFilled" | "danger" | "success" | "darkMuted"
   size = "sm", // "xs" | "sm" | "md"
   className = "",
   innerClassName = "",
@@ -46,6 +47,16 @@ const IconButton = ({
       "bg-[#910B09] group-hover/icon:bg-[#7a0907] text-white transition-colors",
     cathOutline:
       "bg-white border border-[#910B09] text-[#910B09] group-hover/icon:bg-[#910B09] group-hover/icon:text-white transition-colors shadow-sm",
+    darkGhost:
+      "bg-transparent text-neutral-400 group-hover/icon:text-white group-hover/icon:bg-white/10 transition-colors",
+    darkFilled:
+      "bg-neutral-800 text-white group-hover/icon:bg-neutral-700 transition-colors",
+    danger:
+      "bg-red-600 text-white group-hover/icon:bg-red-700 shadow-md shadow-red-600/30 transition-colors",
+    success:
+      "bg-emerald-600 text-white group-hover/icon:bg-emerald-700 shadow-md shadow-emerald-600/30 transition-colors",
+    darkMuted:
+      "bg-neutral-800/80 border border-white/10 text-neutral-400 group-hover/icon:text-white group-hover/icon:bg-neutral-700 transition-colors",
   }
 
   const currentSize = sizeClasses[size] || sizeClasses.sm
@@ -59,9 +70,10 @@ const IconButton = ({
       {...props}
     >
       <span
-        className={`inline-flex items-center justify-center rounded-full transition-colors ${currentSize.inner} ${variantClasses[variant] || variantClasses.filled} ${innerClassName}`}
+        className={`relative inline-flex items-center justify-center rounded-full transition-colors ${currentSize.inner} ${variantClasses[variant] || variantClasses.filled} ${innerClassName}`}
       >
         {children}
+        {badge}
       </span>
     </Component>
   )

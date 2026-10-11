@@ -3,6 +3,10 @@ import { Clock, MapPin, Pencil, Trash2, Users, Calendar as CalendarIcon } from "
 import dayjs from "dayjs";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { formatLocation } from "../../utils/eventFormatters";
+import CommunityBadge from "../CommunityBadge";
+import SharePopover from "../EventDetailModal/SharePopover";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { getIsCreator, getWorkspaceOccurrenceId } from "../../utils/eventPermissions";
 
 const WorkspaceEventCard = memo(function WorkspaceEventCard({
   event,
@@ -26,6 +30,11 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
   const editEventId = event.eventId ?? event.recurringEventId ?? event.id;
 
   const { formatDateTime } = useTimezone();
+  const { user } = useAuth();
+  const isCreator = getIsCreator(user, event);
+  const shareOccurrenceId = isRecurring
+    ? occIdForReg
+    : getWorkspaceOccurrenceId(event);
   const location =
     (isRecurring
       ? event.subOccurrences?.[0]?.location
@@ -71,7 +80,7 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
       <div className="flex items-start gap-3">
         {/* Circular thumbnail — matches preview card */}
         <div
-          className="w-14 h-14 rounded-full shrink-0 overflow-hidden flex items-center justify-center bg-gray-100"
+          className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl shrink-0 overflow-hidden flex items-center justify-center bg-gray-100"
           style={{ backgroundColor: event.thumbnailUrl ? "transparent" : (event.color || "#990011") }}
         >
           {event.thumbnailUrl ? (
@@ -83,28 +92,33 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
 
         {/* Info */}
         <div className="flex flex-col flex-1 min-w-0">
-          {/* Title + badges */}
-          <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <span className="text-base font-semibold text-black truncate flex-1 min-w-[120px] max-w-full">
-              {event.title || cal?.noTitle || "No title"}
-            </span>
-            {isPast && (
-              <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-gray-100 text-gray-400 shrink-0">
-                {cal?.workspacePast || "Past"}
-              </span>
-            )}
-            {isRecurring && (
-              <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 shrink-0">
-                {cal?.recurring || "Recurring"}
-              </span>
-            )}
-          </div>
+          {/* Title */}
+          <span className="text-base font-semibold text-black truncate">
+            {event.title || cal?.noTitle || "No title"}
+          </span>
+
+          {/* Badges */}
+          {(isPast || isRecurring || event.languageCommunity) && (
+            <div className="flex items-center gap-2 flex-wrap mt-1">
+              {isPast && (
+                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-gray-100 text-gray-400 shrink-0">
+                  {cal?.workspacePast || "Past"}
+                </span>
+              )}
+              {isRecurring && (
+                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-50 text-blue-500 shrink-0">
+                  {cal?.recurring || "Recurring"}
+                </span>
+              )}
+              <CommunityBadge languageCommunity={event.languageCommunity} />
+            </div>
+          )}
 
           {/* Start → End time */}
           {(startDateStr || endDateStr) && (
             <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mt-1">
               <Clock size={13} className="shrink-0" />
-              <span className="truncate max-w-[80vw]">
+              <span className="truncate">
                 {startDateStr || "--:--"}
                 {endDateStr ? ` - ${endDateStr}` : ""}
               </span>
@@ -112,17 +126,12 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
           )}
 
           {/* Location */}
-          {location ? (
-            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mt-0.5">
-              <MapPin size={13} className="shrink-0" />
-              <span className="truncate max-w-[80vw]">{location}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 text-sm text-gray-400 mt-0.5 italic">
-              <MapPin size={13} />
-              <span>{cal?.location || "Location"}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 mt-0.5">
+            <MapPin size={13} className="shrink-0" />
+            <span className={`truncate ${location ? "" : "text-gray-400 italic"}`}>
+              {location || cal?.location || "Location"}
+            </span>
+          </div>
 
           {/* Occurrences count for recurring */}
           {isRecurring && (event.subOccurrences?.length ?? 0) > 0 && (
@@ -150,6 +159,17 @@ const WorkspaceEventCard = memo(function WorkspaceEventCard({
             <span className="truncate">{event.registeredCount || 0} {cal?.workspaceRegistrants || "Đã đăng ký"}</span>
           </button>
         )}
+
+        {/* Share */}
+        <SharePopover
+          eventId={editEventId}
+          occurrenceId={shareOccurrenceId}
+          visibilityScope={event.visibilityScope}
+          isCreator={isCreator}
+          languageCommunity={event.languageCommunity}
+          variant="action"
+          label={cal?.share || "Chia sẻ"}
+        />
 
         {/* Edit */}
         <button

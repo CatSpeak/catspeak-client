@@ -22,6 +22,8 @@ export default {
       newest: "最新",
       mostViewed: "最多浏览",
       mostReactions: "最多互动",
+      seeMore: "查看更多",
+      topics: "话题",
     },
     newsDetail: {
       back: "返回",

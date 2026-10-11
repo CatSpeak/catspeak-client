@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react"
 import { SquarePen, Users, BellOff } from "lucide-react"
 import SearchInput from "@/shared/components/ui/inputs/SearchInput"
-import FluentCard from "@/shared/components/ui/FluentCard"
 import { IconButton } from "@/shared/components/ui/buttons"
 import ListItem from "@/shared/components/ui/ListItem"
 import EmptyState from "@/shared/components/ui/indicators/EmptyState"
@@ -32,7 +31,8 @@ const ChatSidebar = ({
 
     // Filter out empty 1:1 conversations unless they are currently selected/active
     result = result.filter((c) => {
-      if (c.conversationId === selectedId) return true
+      const cId = c.conversationId ?? c.id
+      if (selectedId != null && String(cId) === String(selectedId)) return true
       if (c.isGroup) return true
       return Boolean(c.lastMessage || c.lastMessageType || c.lastMessageTime)
     })
@@ -61,35 +61,32 @@ const ChatSidebar = ({
   }, [conversations, filter, searchQuery, selectedId])
 
   return (
-    <FluentCard
-      padding="p-0"
-      className="w-full h-full flex-1 overflow-hidden !border-0 !rounded-none lg:!border lg:!rounded-xl"
-    >
+    <div className="flex flex-col w-full lg:w-[360px] h-full overflow-hidden bg-white lg:border lg:border-border lg:rounded-xl">
       {/* ── Header ───────────────────────────────────── */}
-      <div className="flex flex-col gap-4 p-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold">{t?.chat?.title || "Chats"}</h1>
-          <IconButton
-            onClick={onNewChatClick}
-            size="sm"
-            variant="transparent"
-            className="text-[#606060] hover:bg-primaryBg"
-            aria-label="New chat or group"
-          >
-            <SquarePen size={20} />
-          </IconButton>
-        </div>
-
+      <div className="p-2 pl-4 flex items-center justify-between">
+        <h1 className="font-bold">{t?.chat?.title || "Chats"}</h1>
+        <IconButton
+          onClick={onNewChatClick}
+          size="sm"
+          variant="ghost"
+          aria-label="New chat or group"
+        >
+          <SquarePen />
+        </IconButton>
+      </div>
+      <div className="h-14 px-4 flex items-center">
         {/* ── Search ───────────────────────────────── */}
         <SearchInput
-          placeholder={t?.chat?.sidebar?.searchPlaceholder || "Search conversations..."}
+          placeholder={
+            t?.chat?.sidebar?.searchPlaceholder || "Search conversations..."
+          }
           value={searchQuery}
           onChange={onSearchChange}
         />
       </div>
 
       {/* ── Conversation list ────────────────────────── */}
-      <div className="flex-1 overflow-y-auto p-1 flex flex-col gap-1 w-0 min-w-full">
+      <div className="flex-1 overflow-y-auto flex flex-col w-0 min-w-full">
         {isLoading ? (
           Array.from({ length: 5 }).map((_, idx) => (
             <ListItem
@@ -102,8 +99,6 @@ const ChatSidebar = ({
                   <Skeleton className="h-4 w-4 rounded-full" />
                 </div>
               }
-              contentClassName="rounded-xl"
-              className="rounded-xl"
             >
               <div className="flex flex-col gap-1.5 text-left">
                 <Skeleton className="h-4 w-24" />
@@ -115,22 +110,29 @@ const ChatSidebar = ({
           <EmptyState
             variant="component"
             icon={Users}
-            message={t?.chat?.sidebar?.noConversations || "No conversations found"}
+            message={
+              t?.chat?.sidebar?.noConversations || "No conversations found"
+            }
           />
         ) : (
-          filtered.map((conv) => (
-            <ConversationItem
-              key={conv.conversationId}
-              conversation={conv}
-              currentUser={currentUser}
-              friendOnlineStatus={friendOnlineStatus}
-              isSelected={selectedId === conv.conversationId}
-              onClick={() => onSelect(conv.conversationId)}
-            />
-          ))
+          filtered.map((conv) => {
+            const convId = conv.conversationId ?? conv.id
+            return (
+              <ConversationItem
+                key={convId}
+                conversation={conv}
+                currentUser={currentUser}
+                friendOnlineStatus={friendOnlineStatus}
+                isSelected={
+                  selectedId != null && String(selectedId) === String(convId)
+                }
+                onClick={() => onSelect(convId)}
+              />
+            )
+          })
         )}
       </div>
-    </FluentCard>
+    </div>
   )
 }
 

@@ -101,6 +101,8 @@ const CreateEventModal = ({ onClose, editEvent }) => {
                     form.setErrors((prev) => ({ ...prev, title: undefined }))
                 }}
                 eventColor={form.eventColor}
+                community={form.community}
+                onCommunityChange={form.setCommunity}
                 countryId={form.countryId}
                 onCountryIdChange={(val) => {
                   form.setCountryId(val)

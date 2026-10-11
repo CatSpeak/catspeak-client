@@ -52,6 +52,11 @@ export default {
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         primaryBg: "#F5F5F7",
+
+        // ── Interactive Item Tokens ──
+        itemHover: "#F2F2F2",
+        itemActiveHover: "#E6E6E6",
+
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

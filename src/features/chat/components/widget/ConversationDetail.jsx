@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react"
+import { Loader2 } from "lucide-react"
 import ChatBubble from "../messages/ChatBubble"
 import MediaUploadBubble from "../messages/MediaUploadBubble"
 import ChatInput from "../ChatInput"
@@ -15,10 +16,13 @@ const ConversationDetail = ({
   messages = [],
   currentUser,
   isLoading,
+  hasMoreMessages = false,
+  isLoadingMore = false,
+  onLoadMoreMessages,
   input,
   onInputChange,
   onSendMessage,
-  onKeyPress,
+  onSendVoice,
   isSending,
   typingUsers = [],
   onStartTyping,
@@ -31,8 +35,13 @@ const ConversationDetail = ({
   pendingUpload = null,
   onRetryUpload,
   onCancelUpload,
+  onEdit,
+  onToggleReaction,
 }) => {
   const scrollRef = useRef(null)
+  const isPrependingRef = useRef(false)
+  const prevScrollHeightRef = useRef(0)
+  const prevMessagesLengthRef = useRef(0)
   const { t } = useLanguage()
   const { userTimeZone } = useTimezone()
 
@@ -44,11 +53,45 @@ const ConversationDetail = ({
     userTimeZone,
   })
 
-  // Auto-scroll to bottom on new messages, pending uploads, or typing indicator changes
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+  // Trigger top scroll load more
+  const handleScroll = (e) => {
+    const el = e.currentTarget
+    if (
+      !el ||
+      isLoading ||
+      isLoadingMore ||
+      !hasMoreMessages ||
+      !onLoadMoreMessages
+    ) {
+      return
     }
+
+    if (el.scrollTop < 80) {
+      isPrependingRef.current = true
+      prevScrollHeightRef.current = el.scrollHeight
+      onLoadMoreMessages()
+    }
+  }
+
+  // Auto-scroll to bottom on new messages/typing, preserve offset on prepending older messages
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
+    if (isPrependingRef.current) {
+      const newScrollHeight = el.scrollHeight
+      const heightDiff = newScrollHeight - prevScrollHeightRef.current
+      el.scrollTop = heightDiff
+      isPrependingRef.current = false
+    } else {
+      const isInitial = prevMessagesLengthRef.current === 0
+      const isNearBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight < 150
+      if (isInitial || isNearBottom || pendingUpload) {
+        el.scrollTop = el.scrollHeight
+      }
+    }
+    prevMessagesLengthRef.current = messages.length
   }, [messages, typingUsers, pendingUpload])
 
   if (!conversation) {
@@ -81,6 +124,9 @@ const ConversationDetail = ({
           onReply={onReply}
           onDeleteForMe={onDeleteForMe}
           onRecall={onRecall}
+          onEdit={onEdit}
+          onToggleReaction={onToggleReaction}
+          conversationId={conversation?.id}
           isWidget={true}
         />
       )
@@ -92,22 +138,32 @@ const ConversationDetail = ({
       {/* ── Messages List ──────────────────────────────── */}
       <div
         ref={scrollRef}
+        onScroll={handleScroll}
         className="flex-1 overflow-y-auto overflow-x-hidden p-3 min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-transparent hover:[&::-webkit-scrollbar-thumb]:bg-cath-red-700"
       >
         {isLoading ? (
-          <LoadingSpinner className="flex items-center justify-center py-4" />
+          <div className="flex h-full items-center justify-center py-4">
+            <LoadingSpinner />
+          </div>
         ) : groupedItems.length === 0 ? (
-          <EmptyState
-            message={
-              t?.chat?.noMessagesStart ||
-              t?.messages?.noMessages ||
-              "No messages yet. Start a conversation!"
-            }
-            className="py-4"
-          />
+          <div className="flex h-full items-center justify-center py-4">
+            <EmptyState
+              message={
+                t?.chat?.noMessagesStart ||
+                t?.messages?.noMessages ||
+                "No messages yet. Start a conversation!"
+              }
+              className="py-4"
+            />
+          </div>
         ) : (
           <>
             <div className="flex-1" />
+            {isLoadingMore && (
+              <div className="flex items-center justify-center py-2 shrink-0">
+                <Loader2 className="h-5 w-5 animate-spin text-cath-red-700" />
+              </div>
+            )}
             {renderMessages()}
             {pendingUpload && (
               <MediaUploadBubble
@@ -151,6 +207,7 @@ const ConversationDetail = ({
       <div className="border-t border-border">
         <ChatInput
           value={input}
+          compact={true}
           onChange={(val) => {
             if (typeof val === "string") {
               onInputChange(val)
@@ -159,11 +216,14 @@ const ConversationDetail = ({
             }
           }}
           onSend={onSendMessage}
+          onSendVoice={onSendVoice}
           onStartTyping={onStartTyping}
           onStopTyping={onStopTyping}
           replyingTo={replyingTo}
           onCancelReply={onCancelReply}
           disabled={isSending || isLoading}
+          conversationId={conversation?.id}
+          isGroup={conversation?.isGroup}
         />
       </div>
     </div>
