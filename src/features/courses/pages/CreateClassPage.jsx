@@ -49,6 +49,8 @@ import { useClassFormReducer } from "../hooks/useClassFormReducer"
 import { resolveClassErrorMessage } from "../utils/classErrorMessages"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import ClassScheduleCalendarPreview from "../components/ClassScheduleCalendarPreview"
+import ClassCreationOptions from "../components/ClassCreationOptions"
+import { classTimeToIso, normalizeClassInvitees, assertExistingScheduleSupport } from "../utils/classRecurrence"
 
 const DAYS_OF_WEEK = [
   { key: "monday", label: "Mon", code: "T2", fullName: "Monday" },
@@ -62,7 +64,6 @@ const DAYS_OF_WEEK = [
 
 const CreateClassPage = () => {
   const { t } = useLanguage()
-  const { userTimeZone, toIsoInZone, convertTimeToUtc, getShiftedDayToUtc } = useTimezone()
   const c = t.courses || {}
   const navigate = useNavigate()
   const { id } = useParams()
@@ -83,7 +84,7 @@ const CreateClassPage = () => {
   const mountedRef = useRef(true)
 
   // Localizations
-  const cc = c.createClass || {}
+  const cc = useMemo(() => c.createClass || {}, [c.createClass])
 
   const {
     currentData: coursesData,
@@ -157,13 +158,6 @@ const CreateClassPage = () => {
     return d
   }, [])
 
-  const tomorrow = useMemo(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 1)
-    d.setHours(0, 0, 0, 0)
-    return d
-  }, [])
-
   const handleToastError = useCallback((key) => {
     const courses = t.courses || {}
     const createCls = courses.createClass || {}
@@ -182,6 +176,8 @@ const CreateClassPage = () => {
     clearError,
     setField,
     minFee,
+    recurrenceResult,
+    effectiveSessions,
     levelsList,
     editingClassData,
     feeDetails,
@@ -218,12 +214,12 @@ const CreateClassPage = () => {
     startDateHours,
     retentionDays = 10,
     sessions,
+    recurrence,
     capacity,
     description,
     fee,
     requireMinimumAttendance = true,
     requireMinAttendance = true,
-    minimumAttendanceRate = 80,
     minAttendanceRate = 80,
     lateAttendancePolicy = "CountLate",
     includeLateAttendance = true,
@@ -234,6 +230,7 @@ const CreateClassPage = () => {
     errors,
     showDeleteModal,
   } = state
+  const { userTimeZone, toIsoInZone } = useTimezone()
 
   const isLevelDisabled = useMemo(() => {
     if (!isEditMode || !editingClassData) return false
@@ -379,7 +376,7 @@ const CreateClassPage = () => {
     if (!admissionEnd) newErrors.admissionEnd = true
     if (!startDate) newErrors.startDate = true
 
-    const sessionCount = parseInt(sessions, 10) || 0
+    const sessionCount = isEditMode ? Number(sessions) : effectiveSessions
     const classCapacity = parseInt(capacity, 10) || 0
     if (!Number.isSafeInteger(sessionCount) || sessionCount <= 0) newErrors.sessions = true
     if (!Number.isSafeInteger(classCapacity) || classCapacity <= 0) newErrors.capacity = true
@@ -401,9 +398,22 @@ const CreateClassPage = () => {
 
     setErrors({})
 
-    const start = parseLocalDateString(startDate, startDateHours || "00:00")
-    const enrollStart = parseLocalDateString(admissionStart, admissionStartHours || "00:00")
-    const enrollEnd = parseLocalDateString(admissionEnd, admissionEndHours || "00:00")
+    let start, enrollStart, enrollEnd
+    try {
+      start = new Date(classTimeToIso(startDate, startDateHours || "00:00", userTimeZone))
+      enrollStart = new Date(classTimeToIso(admissionStart, admissionStartHours || "00:00", userTimeZone))
+      enrollEnd = new Date(classTimeToIso(admissionEnd, admissionEndHours || "00:00", userTimeZone))
+      if (!isEditMode) {
+        if (recurrenceResult.error) throw new Error(recurrenceResult.error)
+        assertExistingScheduleSupport(recurrence, recurrenceResult.dates, userTimeZone)
+        if (start > new Date(recurrenceResult.dates[0].startTime)) throw new Error("The class start time must be on or before its first session.")
+        normalizeClassInvitees(state.invitedAccountIds)
+        if (state.coHostAccountId) normalizeClassInvitees([state.coHostAccountId])
+      }
+    } catch (error) {
+      toast.error(error.message)
+      return
+    }
     if (!start || !enrollStart || !enrollEnd) {
       toast.error(cc.toastInvalidDates || "Enter valid enrollment and class dates.")
       return
@@ -430,13 +440,8 @@ const CreateClassPage = () => {
       return
     }
 
-    if (enrollEnd && start && start < enrollEnd) {
-      toast.error(cc.toastStartLater || "Start date must be later than or equal to enrollment end date!")
-      return
-    }
-
-    if (enrollEnd && start && start < enrollEnd) {
-      toast.error(cc.toastStartLater || "Ngày khai giảng phải bằng hoặc trễ hơn thời gian kết thúc tuyển sinh!")
+    if (start <= enrollEnd) {
+      toast.error(cc.toastStartLater || "Start date must be later than enrollment end date!")
       return
     }
 
@@ -463,23 +468,18 @@ const CreateClassPage = () => {
       return
     }
 
-    const daysCodeMap = {
-      monday: "MON",
-      tuesday: "TUE",
-      wednesday: "WED",
-      thursday: "THU",
-      friday: "FRI",
-      saturday: "SAT",
-      sunday: "SUN"
-    }
     const schedule = checkedDaysList.map(k => {
-      const rawDay = daysCodeMap[k]
       const localStart = timeSlots[k].start
       const localEnd = timeSlots[k].end
+      const startDayIndex = dayjs(startDate).day()
+      const localDayIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"].indexOf(k)
+      const referenceDate = dayjs(startDate).add((localDayIndex - startDayIndex + 7) % 7, "day").format("YYYY-MM-DD")
+      const utcStart = dayjs.tz(`${referenceDate}T${localStart}:00`, userTimeZone).utc()
+      const utcEnd = dayjs.tz(`${referenceDate}T${localEnd}:00`, userTimeZone).utc()
       return {
-        dayOfWeek: getShiftedDayToUtc(rawDay, localStart),
-        startTime: convertTimeToUtc(localStart),
-        endTime: convertTimeToUtc(localEnd)
+        dayOfWeek: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][utcStart.day()],
+        startTime: utcStart.format("HH:mm"),
+        endTime: utcEnd.format("HH:mm")
       }
     })
 
@@ -503,12 +503,6 @@ const CreateClassPage = () => {
         : [level]
 
       const activeTz = userTimeZone || "Asia/Ho_Chi_Minh"
-
-      const formatToLocalISO = (dateStr) => {
-        if (!dateStr) return ""
-        const clean = String(dateStr).split("T")[0]
-        return dayjs.tz(`${clean}T00:00:00`, activeTz).toISOString()
-      }
 
       const payload = {
         courseId,
@@ -878,13 +872,15 @@ const CreateClassPage = () => {
                   <button
                     type="button"
                     onClick={() => setField("sessions", Math.max(1, (parseInt(sessions, 10) || 1) - 1))}
+                    disabled={recurrence.endCondition === "until"}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Minus size={14} />
                   </button>
                   <input
                     type="number"
-                    value={sessions}
+                    value={recurrence.endCondition === "until" ? effectiveSessions : sessions}
+                    disabled={recurrence.endCondition === "until"}
                     onChange={(e) => {
                       setField("sessions", Math.max(1, parseInt(e.target.value, 10) || 1))
                       clearError("sessions")
@@ -894,6 +890,7 @@ const CreateClassPage = () => {
                   <button
                     type="button"
                     onClick={() => setField("sessions", (parseInt(sessions, 10) || 0) + 1)}
+                    disabled={recurrence.endCondition === "until"}
                     className="w-12 h-full bg-[#990011] hover:bg-[#80000e] text-white flex items-center justify-center transition-all font-bold select-none active:scale-95 cursor-pointer"
                   >
                     <Plus size={14} />
@@ -1169,6 +1166,31 @@ const CreateClassPage = () => {
             {/* Teaching Schedule */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">{cc.teachingSchedule}</label>
+              {!isEditMode && <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white rounded-2xl p-4 border border-border">
+                <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.recurrenceFrequency || "Repeat"}
+                  <Dropdown value={recurrence.frequency} options={[{ value: "weekly", label: cc.selectedWeekdays || "On selected weekdays" }, { value: "daily", label: cc.daily || "Daily" }]}
+                    onChange={frequency => {
+                      setField("recurrence", { ...recurrence, frequency })
+                      if (frequency === "daily") setField("checkedDays", Object.fromEntries(DAYS_OF_WEEK.map(day => [day.key, true])))
+                    }} />
+                </label>
+                <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.repeatEvery || "Repeat every"} ({recurrence.frequency === "daily" ? (cc.recurrenceDaysUnit || "days") : (cc.weeksUnit || "weeks")})
+                  <input type="number" min="1" max="52" value={recurrence.interval} onChange={event => setField("recurrence", { ...recurrence, interval: event.target.value })} className="h-11 px-4 rounded-xl border border-border text-sm" />
+                </label>
+                <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.recurrenceEnds || "Ends"}
+                  <Dropdown value={recurrence.endCondition} options={[{ value: "count", label: cc.afterSessions || "After the number of sessions above" }, { value: "until", label: cc.onDate || "On a date (inclusive)" }]} onChange={endCondition => setField("recurrence", { ...recurrence, endCondition })} />
+                </label>
+                {recurrence.endCondition === "until" && <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
+                  {cc.recurrenceEndDate || "Last teaching date"}
+                  <DatePicker selected={parseLocalDateString(recurrence.endDate)} onChange={date => setField("recurrence", { ...recurrence, endDate: toLocalDateString(date) })} minDate={parseLocalDateString(startDate)} />
+                </label>}
+                <p className="text-xs text-gray-500 sm:col-span-2">{cc.scheduleTimezone || "Schedule time zone"}: {userTimeZone}</p>
+                {Number(recurrence.interval) !== 1 && <p role="status" className="text-xs text-amber-700 sm:col-span-2">{cc.recurrencePreviewOnly || "Intervals greater than one are preview only. Choose an interval of one to create the class."}</p>}
+                {startDate && recurrenceResult.error && <p role="alert" className="text-xs text-red-700 sm:col-span-2">{recurrenceResult.error}</p>}
+              </div>}
 
               {/* Outer Gray Container */}
               <div className={`bg-white rounded-2xl p-4 border ${errors.checkedDays ? "border-red-500 ring-2 ring-red-200" : "border-border"} flex flex-col gap-4`}>
@@ -1181,9 +1203,12 @@ const CreateClassPage = () => {
                   {DAYS_OF_WEEK.map((day) => {
                     const isChecked = checkedDays[day.key]
                     return (
-                      <div
+                      <button
+                        type="button"
                         key={day.key}
-                        onClick={() => handleToggleDay(day.key)}
+                        aria-pressed={isChecked}
+                        disabled={!isEditMode && recurrence.frequency === "daily"}
+                        onClick={() => (isEditMode || recurrence.frequency !== "daily") && handleToggleDay(day.key)}
                         className={`flex flex-col gap-1.5 sm:gap-2 py-2 cursor-pointer select-none transition-all rounded-lg ${isChecked ? "bg-[#990011] text-white" : "bg-transparent hover:bg-white"
                           }`}
                       >
@@ -1198,7 +1223,7 @@ const CreateClassPage = () => {
                             {isChecked && <div className="w-1 h-1 rounded-full bg-[#990011]" />}
                           </div>
                         </div>
-                      </div>
+                      </button>
                     )
                   })}
                 </div>
@@ -1375,8 +1400,9 @@ const CreateClassPage = () => {
               </div>
             )}
 
-            {/* Calendar & Schedule Preview (Only show in edit mode) */}
-            {isEditMode && (
+            {!isEditMode && <ClassCreationOptions state={state} setField={setField} />}
+            {/* Calendar & Schedule Preview */}
+            {(
               <ClassScheduleCalendarPreview
                 startDate={startDate}
                 sessions={sessions}
@@ -1384,6 +1410,7 @@ const CreateClassPage = () => {
                 timeSlots={timeSlots}
                 editingClassId={id}
                 isEditMode={isEditMode}
+                occurrenceDates={isEditMode ? undefined : recurrenceResult.dates}
               />
             )}
           </div>
