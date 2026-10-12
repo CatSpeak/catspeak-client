@@ -22,7 +22,7 @@ export const TOPICS = [
   "Productivity",
 ]
 
-export const LANGUAGES = ["English", "Chinese", "Japanese", "Vietnamese"]
+export const LANGUAGES = ["English", "Chinese", "Japanese"]
 
 export const LEVELS = {
   English: [

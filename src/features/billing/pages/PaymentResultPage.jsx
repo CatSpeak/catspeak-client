@@ -2,6 +2,8 @@ import React, { useEffect } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { CheckCircle2, Loader2 } from "lucide-react"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
+import { useDispatch } from "react-redux"
+import { plansApi } from "@/store/api/plansApi"
 import {
   useGetPaymentHistoryQuery,
   useCancelPaymentMutation,
@@ -18,9 +20,16 @@ const PaymentResultPage = () => {
   const orderCodeStr = searchParams.get("orderCode")
   const orderCode = orderCodeStr ? parseInt(orderCodeStr, 10) : null
 
+  const dispatch = useDispatch()
   const { data: invoices = [], isLoading: isHistoryLoading } =
     useGetPaymentHistoryQuery()
   const [cancelPayment] = useCancelPaymentMutation()
+
+  useEffect(() => {
+    if (!isCancelled) {
+      dispatch(plansApi.util.invalidateTags(["PlanUsage", "Plans"]))
+    }
+  }, [isCancelled, dispatch])
 
   useEffect(() => {
     if (isCancelled && orderCode && invoices.length > 0) {

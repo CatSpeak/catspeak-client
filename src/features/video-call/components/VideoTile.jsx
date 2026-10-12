@@ -138,7 +138,8 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
       const mst = cameraTrack.mediaStreamTrack
       const raw = cameraTrack._mediaStreamTrack ?? mst
       // Check both the processed track and the underlying raw track
-      if (mst?.readyState === "ended" || raw?.readyState === "ended") return false
+      if (mst?.readyState === "ended" || raw?.readyState === "ended")
+        return false
       if (mst?.muted) return false
       if (cameraTrack.isMuted) return false
       return true
@@ -146,7 +147,10 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
       return !!cameraTrack
     }
   })()
-  const isVideoVisible = webcamOn && (!!cameraTrack || participant.isMockCamera) && (isLocal ? isTrackLive || !!cameraTrack : true)
+  const isVideoVisible =
+    webcamOn &&
+    (!!cameraTrack || participant.isMockCamera) &&
+    (isLocal ? isTrackLive || !!cameraTrack : true)
 
   const videoRef = useRef(null)
 
@@ -181,7 +185,10 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
       // Safari 15/16 black-frame workaround: re-assign srcObject after a tick
       // (mirrors LiveKit's attachToElement Safari fix but ensures it runs
       // even when LiveKit thought the track was already attached).
-      if (typeof navigator !== "undefined" && /^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+      if (
+        typeof navigator !== "undefined" &&
+        /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+      ) {
         const mst = cameraTrack.mediaStreamTrack
         if (mst) {
           setTimeout(() => {
@@ -206,7 +213,7 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
         } catch {}
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraTrack, isVideoVisible, trackProcessorVersionRef.current])
 
   return (
@@ -284,7 +291,9 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
               speaking={false}
               accountId={
                 meta.accountId ||
-                (/^\d+$/.test(participant.identity) ? participant.identity : null)
+                (/^\d+$/.test(participant.identity)
+                  ? participant.identity
+                  : null)
               }
               className={`${getVideoTileAvatarClass({ compact })} ${
                 avatarUrl ? "shadow-xl" : ""
@@ -307,7 +316,9 @@ const VideoTileInner = ({ participant, onClick, compact = false }) => {
             onClick={(e) => {
               const accountId =
                 meta.accountId ||
-                (/^\d+$/.test(participant.identity) ? participant.identity : null)
+                (/^\d+$/.test(participant.identity)
+                  ? participant.identity
+                  : null)
               if (accountId) {
                 e.stopPropagation()
                 window.open(

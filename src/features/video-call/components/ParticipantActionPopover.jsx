@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { useSelector } from "react-redux"
 import { MoreVertical, Volume2, VolumeX, MicOff, VideoOff, UserX, MonitorUp, Shield, MessageSquareOff, Mic } from "lucide-react"
 import { toast } from "react-hot-toast"
 import Popover from "@/shared/components/ui/Popover"
@@ -7,6 +8,11 @@ import Slider from "@/shared/components/ui/Slider"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGlobalVideoCall as useVideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { isRoomHost, isClassOrCustom } from "@/features/video-call/utils/roomTypeHelpers"
+import { selectCurrentUser } from "@/store/slices/authSlice"
+import {
+  getSavedParticipantVolume,
+  saveParticipantVolume,
+} from "@/features/video-call/utils/participantVolumePreferences"
 import {
   useKickParticipantMutation,
   useMuteParticipantMutation,
@@ -30,14 +36,34 @@ import { resolveCoHostErrorMessage } from "@/features/co-host/errors"
 export const ParticipantVolumeSlider = ({ participant, className = "", isInline = false }) => {
   const { t } = useLanguage()
   const pl = t.rooms.videoCall.participantList
+  const currentUser = useSelector(selectCurrentUser)
+  const myAccountId = currentUser?.accountId
 
   // Volume is 0 → 1
-  const [volume, setVolume] = useState(1)
-  const [prevVolume, setPrevVolume] = useState(1)
+  const [volume, setVolume] = useState(() => {
+    const saved = getSavedParticipantVolume(participant, myAccountId)
+    if (typeof saved === "number" && !isNaN(saved)) return saved
+    if (participant && typeof participant.getVolume === "function") {
+      const v = participant.getVolume()
+      if (typeof v === "number" && !isNaN(v)) return v
+    }
+    return 1
+  })
+  const [prevVolume, setPrevVolume] = useState(() => (volume > 0 ? volume : 1))
 
-  // Initial load from participant
+  // Initial load from participant / storage
   useEffect(() => {
     if (!participant || participant.isLocal) return
+    const saved = getSavedParticipantVolume(participant, myAccountId)
+    if (typeof saved === "number" && !isNaN(saved)) {
+      setVolume(saved)
+      if (saved > 0) setPrevVolume(saved)
+      if (typeof participant.setVolume === "function") {
+        participant.setVolume(saved)
+      }
+      return
+    }
+
     if (typeof participant.getVolume === "function") {
       let v = participant.getVolume()
       if (typeof v !== "number" || isNaN(v)) {
@@ -46,7 +72,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
       setVolume(v)
       if (v > 0) setPrevVolume(v)
     }
-  }, [participant])
+  }, [participant, myAccountId])
 
   const handleVolumeChange = (eOrVal) => {
     const val =
@@ -63,6 +89,7 @@ export const ParticipantVolumeSlider = ({ participant, className = "", isInline 
     if (participant && typeof participant.setVolume === "function") {
       participant.setVolume(val)
     }
+    saveParticipantVolume(participant, val, myAccountId)
   }
 
   const toggleMute = () => {

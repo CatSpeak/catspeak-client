@@ -23,7 +23,7 @@ const RightSideControls = ({ className = "" }) => {
   const unreadMessages = (unreadRoomChat || 0) + (unreadAiChat || 0)
 
   return (
-    <div className={`flex justify-end ${className}`}>
+    <div className={`flex items-center justify-end ${className}`}>
       <div className="relative text-base pr-1">
         <PillButton
           onClick={() => setShowParticipants(!showParticipants)}

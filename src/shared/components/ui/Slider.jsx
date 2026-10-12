@@ -1,5 +1,4 @@
 import React from "react"
-import colors from "@/shared/utils/colors"
 
 const Slider = ({
   value,
@@ -9,12 +8,19 @@ const Slider = ({
   onChange,
   onValueChange,
   className = "",
+  trackColor = "bg-gray-200",
+  activeColor = "bg-cath-red-700",
+  thumbColor = "bg-cath-red-700",
   ...props
 }) => {
   const numericValue = Array.isArray(value) ? (value[0] ?? min) : (value ?? min)
-  const percentage = ((numericValue - min) / (max - min)) * 100
+  const percentage =
+    max > min
+      ? Math.max(0, Math.min(100, ((numericValue - min) / (max - min)) * 100))
+      : 0
 
   const handleChange = (e) => {
+    if (props.disabled) return
     if (typeof onChange === "function") {
       onChange(e)
     }
@@ -23,8 +29,55 @@ const Slider = ({
     }
   }
 
+  // Handle position clamped so the 4px pill remains flush within the [0, 100%] bounds
+  // At 0% -> left edge is exactly 0px; at 100% -> right edge is exactly 100%
+  const handleLeft = `calc(2px + (${percentage} / 100) * (100% - 4px))`
+
+  // Material Design 3 track gaps:
+  // 6px gap between handle edges and the active/inactive tracks
+  // Handle occupies [handleLeft - 2px, handleLeft + 2px]
+  // Active track ends at handleLeft - 8px; inactive track starts at handleLeft + 8px
+  const hasActiveTrack = percentage > 2.5
+  const hasInactiveTrack = percentage < 97.5
+
   return (
-    <div className={`relative flex items-center w-full h-8 ${className}`}>
+    <div
+      className={`relative flex items-center w-full h-11 select-none ${
+        props.disabled ? "opacity-50 cursor-not-allowed" : ""
+      } ${className}`}
+    >
+      {/* Material Design 3 Visual Track & Handle Layer */}
+      <div className="relative w-full h-4 flex items-center pointer-events-none">
+        {/* Active Track (Left) */}
+        {hasActiveTrack && (
+          <div
+            className={`absolute left-0 top-0 h-full rounded-full ${activeColor}`}
+            style={{
+              width: `calc(${handleLeft} - 8px)`,
+            }}
+          />
+        )}
+
+        {/* Inactive Track (Right) */}
+        {hasInactiveTrack && (
+          <div
+            className={`absolute right-0 top-0 h-full rounded-full ${trackColor}`}
+            style={{
+              left: `calc(${handleLeft} + 8px)`,
+            }}
+          />
+        )}
+
+        {/* M3 Vertical Pill Handle (4px wide × 40px tall) */}
+        <div
+          className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1 h-10 rounded-full shadow-sm peer-focus-visible:ring-4 peer-focus-visible:ring-cath-red-700/30 ${thumbColor}`}
+          style={{
+            left: handleLeft,
+          }}
+        />
+      </div>
+
+      {/* Accessible native range input handling interaction, keyboard, drag & screen readers */}
       <input
         type="range"
         min={min}
@@ -32,14 +85,8 @@ const Slider = ({
         step={step}
         value={numericValue}
         onChange={handleChange}
-        className="absolute w-full h-1.5 rounded-lg appearance-none cursor-pointer outline-none z-10 bg-transparent
-          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 
-          [&::-webkit-slider-thumb]:bg-cath-red-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md
-          [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-cath-red-600 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:shadow-md
-          [&::-moz-range-thumb]:box-border"
-        style={{
-          background: `linear-gradient(to right, ${colors?.primaryRed || '#b91c1c'} ${percentage}%, #e5e7eb ${percentage}%)`,
-        }}
+        disabled={props.disabled}
+        className="peer absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed z-10"
         {...props}
       />
     </div>

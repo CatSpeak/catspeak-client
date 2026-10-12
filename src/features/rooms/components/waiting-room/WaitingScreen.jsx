@@ -99,9 +99,9 @@ const WaitingScreen = ({
 
       {/* Mobile: flex-1 + min-h-0 lets this row shrink so the card fits the
           viewport; from md up it goes back to its natural height. */}
-      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 w-full items-center flex-1 min-h-0 md:flex-none">
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 w-full items-center flex-1 min-h-0 md:flex-none">
         {/* Left Column: Video Preview & Nickname */}
-        <div className="flex flex-col items-center w-full lg:col-span-7 gap-3 flex-1 min-h-0 md:flex-none">
+        <div className="flex flex-col items-center w-full lg:col-span-7 flex-1 min-h-0 md:flex-none">
           <VideoPreview
             user={user}
             localStream={localStream}
@@ -123,7 +123,7 @@ const WaitingScreen = ({
         </div>
 
         {/* Right Column: Room Details & Action Container */}
-        <div className="flex flex-col items-center justify-center w-full lg:col-span-5 h-auto md:h-full gap-6 shrink-0">
+        <div className="flex flex-col items-center justify-center w-full lg:col-span-5 h-auto lg:h-full gap-4 shrink-0">
           {/* Desktop Only: Room name, topic & participants preview */}
           <RoomInformation
             session={session}
@@ -134,22 +134,21 @@ const WaitingScreen = ({
           />
 
           {/* Copy Link, Join Buttons */}
-          <div className="flex flex-col items-center gap-3 w-full max-w-[360px]">
-            <div className="flex w-full flex-col sm:flex-row gap-2.5">
+          <div className="flex flex-col items-center w-full max-w-[360px]">
+            <div className="flex w-full flex-col sm:flex-row gap-2">
               <PillButton
                 onClick={onJoin}
                 disabled={isFull}
                 aria-disabled={isFull}
                 title={isFull ? t.rooms.waitingScreen.roomFull : undefined}
-                className="w-full sm:flex-1 py-2.5"
+                className="w-full sm:flex-1"
               >
                 {t.rooms.waitingScreen.joinNow}
               </PillButton>
               <PillButton
                 onClick={handleCopyLink}
                 variant="secondary"
-                startIcon={<Copy />}
-                className="w-full sm:flex-1 py-2.5"
+                className="w-full sm:flex-1"
               >
                 {t?.rooms?.waitingScreen?.copyLink || "Copy Link"}
               </PillButton>
@@ -165,7 +164,7 @@ const WaitingScreen = ({
             <EditNickname
               user={user}
               onEditName={() => setIsEditingName(true)}
-              className="flex lg:hidden mt-1"
+              className="flex lg:hidden"
             />
           </div>
         </div>

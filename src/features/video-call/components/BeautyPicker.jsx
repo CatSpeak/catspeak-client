@@ -5,6 +5,8 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import Slider from "@/shared/components/ui/Slider"
 
 import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHelpers"
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 
 const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions"
 
@@ -16,12 +18,16 @@ const readStoredBeautyOptions = () => {
   return null
 }
 
-const BeautyPicker = ({ beautyOptions: propOptions, onChange }) => {
+const BeautyPicker = ({ beautyOptions: propOptions, onChange, roomType: propRoomType }) => {
   const { t } = useLanguage()
   const ctx = useGlobalVideoCall()
+  const { hasFeature, isPro } = usePlanFeatures()
 
-  // Guard against unsupported room types
-  if (!isBeautyFilterSupported(ctx?.room?.roomType)) {
+  const userHasProPlan = Boolean(isPro || hasFeature(PLAN_FEATURES.BEAUTY_FILTER))
+  const currentRoomType = propRoomType ?? ctx?.room?.roomType
+
+  // Guard against unsupported room types or non-pro users in restricted rooms
+  if (!isBeautyFilterSupported(currentRoomType, userHasProPlan)) {
     return null
   }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Sparkles, Users } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -6,7 +6,6 @@ import Modal from "@/shared/components/ui/Modal"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import SwitchCallModal from "@/features/video-call/components/SwitchCallModal"
 import { useCallInterceptor } from "@/features/video-call/hooks/useCallInterceptor"
-import { useGetUserProfileQuery } from "@/store/api/userApi"
 import { useAuth } from "@/features/auth"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { useCreateCustomRoomForm } from "../hooks/useCreateCustomRoomForm"
@@ -21,12 +20,7 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const cr = t.rooms?.createRoom || {}
   const { isAuthenticated } = useAuth()
 
-  const { data: profileResponse } = useGetUserProfileQuery(undefined, {
-    skip: !isAuthenticated,
-  })
-  const userTier = profileResponse?.tier?.toLowerCase()
-  const isPro = userTier === "pro"
-  const { limits } = usePlanFeatures()
+  const { isPro, limits } = usePlanFeatures()
   const maxParticipantsLimit = limits.maxParticipantsInCustomRooms || 100
 
   const [mode, setMode] = useState(initialMode)
@@ -40,17 +34,14 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
   const { resetForm: resetGroupForm } = groupForm
   const { resetForm: resetCustomForm } = customForm
 
-  // Reset back to the requested type each time the modal is (re)opened.
-  // Adjusting state during render avoids the set-state-in-effect anti-pattern.
-  const [prevOpen, setPrevOpen] = useState(open)
-  if (open !== prevOpen) {
-    setPrevOpen(open)
+  // Reset back to the requested type each time the modal is (re)opened
+  useEffect(() => {
     if (open) {
       setMode(initialMode)
       resetGroupForm()
       resetCustomForm()
     }
-  }
+  }, [open, initialMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Call interceptor
   const { showSwitchModal, intercept, confirmSwitch, cancelSwitch } =
@@ -105,8 +96,9 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
     {
       value: "custom",
       label: cr.typeCustom || "Custom",
-      description: (cr.typeCustomDesc || "Persistent room, up to {max} people")
-        .replace("{max}", maxParticipantsLimit),
+      description: (
+        cr.typeCustomDesc || "Persistent room, up to {max} people"
+      ).replace("{max}", maxParticipantsLimit),
       icon: <Sparkles size={18} />,
       badge: ct.proBadge || "PRO",
       locked: !isPro,
@@ -122,14 +114,13 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
       />
 
       <Modal
+        id="create-room-modal"
         open={open}
         onClose={onCancel}
         title={cr.title || "Create Room"}
-        description={
-          isCustomMode ? ct.formHint || "" : cr.formHint || ""
-        }
         showCloseButton={true}
-        className="md:max-w-3xl"
+        className="md:max-w-3xl rounded-none md:rounded-xl md:border md:border-border"
+        headerClassName="flex items-center justify-between p-4"
         subHeader={
           <RoomTypeSelector
             options={roomTypeOptions}
@@ -138,18 +129,11 @@ const CreateRoomModal = ({ open, onCancel, initialMode = "group" }) => {
             ariaLabel={cr.roomTypeLabel || "Room type"}
           />
         }
-        bodyClassName="px-4 sm:px-6 py-5 flex flex-col flex-1 min-h-0 overflow-y-auto"
-        footerClassName="px-4 sm:px-6 py-4 border-t border-border bg-white"
+        subHeaderClassName="px-4 mb-4 shrink-0"
+        bodyClassName="px-4 flex flex-col flex-1 min-h-0 overflow-y-auto"
+        footerClassName="p-4"
         footer={
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-end gap-2 shrink-0 w-full">
-            <PillButton
-              onClick={onCancel}
-              variant="secondary"
-              className="w-full sm:w-auto"
-            >
-              {cr.cancel || t.back || "Cancel"}
-            </PillButton>
-
+          <div className="flex justify-end">
             <PillButton
               onClick={handleCreateSubmit}
               loading={isCreating}
