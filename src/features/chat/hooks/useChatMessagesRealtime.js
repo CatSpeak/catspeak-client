@@ -21,6 +21,7 @@ import { normalizeMessageType } from "../utils/messageMappingUtils"
 export default function useChatMessagesRealtime({
   selectedId,
   currentUserId,
+  sourceAccountId,
   setAccumulatedMessages,
 }) {
   const dispatch = useDispatch()
@@ -127,6 +128,7 @@ export default function useChatMessagesRealtime({
                   m.reactions,
                   payload,
                   currentUserId,
+                  sourceAccountId,
                 ),
               }
             }
@@ -244,7 +246,7 @@ export default function useChatMessagesRealtime({
         )
       },
     }),
-    [selectedId, currentUserId, setAccumulatedMessages, dispatch],
+    [selectedId, currentUserId, sourceAccountId, setAccumulatedMessages, dispatch],
   )
 
   useConversationSignalR(signalRHandlers)

@@ -24,12 +24,8 @@ const PAGE_SIZE = 30
  */
 export default function useChatMessages(selectedId) {
   const { user } = useAuth()
-  const currentUserId = user?.accountId ?? user?.id ?? user?.userId
-  const primaryUserId =
-    user?.sourceAccountId ??
-    user?.primaryAccountId ??
-    user?.primaryUserId ??
-    currentUserId
+  const currentUserId = user?.accountId
+  const sourceAccountId = user?.sourceAccountId ?? null
 
   const [accumulatedMessages, setAccumulatedMessages] = useState([])
   const [hasMoreMessages, setHasMoreMessages] = useState(true)
@@ -116,6 +112,7 @@ export default function useChatMessages(selectedId) {
   useChatMessagesRealtime({
     selectedId,
     currentUserId,
+    sourceAccountId,
     setAccumulatedMessages,
   })
 
@@ -354,9 +351,9 @@ export default function useChatMessages(selectedId) {
         : initialFetchedItems || []
 
     return sourceMessages.map((msg) =>
-      mapToChatMessageViewModel(msg, currentUserId, primaryUserId),
+      mapToChatMessageViewModel(msg, currentUserId, sourceAccountId),
     )
-  }, [accumulatedMessages, initialFetchedItems, selectedId, currentUserId, primaryUserId])
+  }, [accumulatedMessages, initialFetchedItems, selectedId, currentUserId, sourceAccountId])
 
   const hasMessagesForCurrentConv = useMemo(() => {
     const hasInAccumulated = accumulatedMessages.some(

@@ -30,12 +30,8 @@ export const useGlobalSignalR = () => {
   const dispatch = useDispatch()
   const { t: tLanguage } = useLanguage()
   const { user } = useAuth()
-  const currentUserId = user?.accountId ?? user?.id ?? user?.userId
-  const primaryUserId =
-    user?.sourceAccountId ??
-    user?.primaryAccountId ??
-    user?.primaryUserId ??
-    currentUserId
+  const currentUserId = user?.accountId
+  const sourceAccountId = user?.sourceAccountId ?? null
   const [respondFriendRequest] = useRespondFriendRequestMutation()
   const activeConversationId = useSelector(
     (state) => state.messageWidget.activeConversationId,
@@ -571,7 +567,7 @@ export const useGlobalSignalR = () => {
           payload?.removedAccountId ?? payload?.accountId ?? payload?.userId,
         )
         const myId = Number(currentUserId)
-        const myPrimaryId = primaryUserId ? Number(primaryUserId) : null
+        const mySourceId = sourceAccountId ? Number(sourceAccountId) : null
 
         dispatch(
           conversationsApi.util.invalidateTags([
@@ -581,10 +577,10 @@ export const useGlobalSignalR = () => {
           ]),
         )
 
-        // If current user (or primary teacher ID) is the removed member, close chat
+        // If current user (or source teacher ID) is the removed member, close chat
         if (
           removedAccountId === myId ||
-          (myPrimaryId && removedAccountId === myPrimaryId)
+          (mySourceId && removedAccountId === mySourceId)
         ) {
           if (
             typeof window !== "undefined" &&
@@ -681,12 +677,12 @@ export const useGlobalSignalR = () => {
         }
 
         joinUserGroup(currentUserId)
-        if (primaryUserId && String(primaryUserId) !== String(currentUserId)) {
-          joinUserGroup(primaryUserId)
+        if (sourceAccountId && String(sourceAccountId) !== String(currentUserId)) {
+          joinUserGroup(sourceAccountId)
         }
       }
     }
-  }, [isConnected, invoke, conversations, currentUserId, primaryUserId])
+  }, [isConnected, invoke, conversations, currentUserId, sourceAccountId])
 }
 
 export default useGlobalSignalR

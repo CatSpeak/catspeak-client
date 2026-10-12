@@ -128,12 +128,14 @@ const ChatPage = () => {
 
   // ── Current User Formatting ────────────────────────────
   const currentUser = useMemo(() => {
+    const profile = userProfile?.data
     return {
       id: authUser?.accountId,
-      name: userProfile?.username || authUser?.username || t?.chat?.me || "Me",
-      avatar: userProfile?.avatarImageUrl || authUser?.avatarImageUrl || null,
+      sourceAccountId: authUser?.sourceAccountId ?? profile?.sourceAccountId ?? null,
+      name: profile?.username || authUser?.username || t?.chat?.me || "Me",
+      avatar: profile?.avatarImageUrl || authUser?.avatarImageUrl || null,
       status: "online",
-      about: userProfile?.level || t?.chat?.userPanel?.student || "Student",
+      about: profile?.level || t?.chat?.userPanel?.student || "Student",
     }
   }, [authUser, userProfile, t])
 

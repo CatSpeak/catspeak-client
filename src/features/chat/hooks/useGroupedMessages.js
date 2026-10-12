@@ -99,14 +99,15 @@ export const useGroupedMessages = ({
 
       if (isStoryInterest) {
         // Resolve sender so the card can show avatar + name
-        const siSenderId = msg.senderId ?? msg.sender?.accountId
-        const myId = Number(currentUser?.id || currentUser?.accountId)
-        const myPrimaryId = currentUser?.primaryAccountId
-          ? Number(currentUser.primaryAccountId)
-          : null
+        const siSenderId = msg.sender?.accountId ?? msg.senderId
+        const myId = Number(currentUser?.id)
+        const sourceId =
+          currentUser?.sourceAccountId != null
+            ? Number(currentUser.sourceAccountId)
+            : null
         const siIsOwn =
           Number(siSenderId) === myId ||
-          (myPrimaryId != null && Number(siSenderId) === myPrimaryId)
+          (sourceId != null && Number(siSenderId) === sourceId)
         const siSender = siIsOwn
           ? {
               id: currentUser?.id || currentUser?.accountId,
@@ -171,13 +172,14 @@ export const useGroupedMessages = ({
 
       const isFirstInGroup = !isSameSenderAsPrev
       const isLastInGroup = !isSameSenderAsNext
-      const myId = Number(currentUser?.id || currentUser?.accountId)
-      const myPrimaryId = currentUser?.primaryAccountId
-        ? Number(currentUser.primaryAccountId)
-        : null
+      const myId = Number(currentUser?.id)
+      const sourceId =
+        currentUser?.sourceAccountId != null
+          ? Number(currentUser.sourceAccountId)
+          : null
       const isOwn =
         Number(msgSenderId) === myId ||
-        (myPrimaryId != null && Number(msgSenderId) === myPrimaryId)
+        (sourceId != null && Number(msgSenderId) === sourceId)
       const isLastMessageInChat = i === lastNonSystemMsgIndex
 
       // Resolve sender info

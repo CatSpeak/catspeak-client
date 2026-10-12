@@ -25,9 +25,9 @@ export const normalizeMessageType = (rawType) => {
  * @param {number|string|null} currentUserId - The authenticated user's ID
  * @returns {object} Formatted UI message view model
  */
-export const mapToChatMessageViewModel = (msg, currentUserId, primaryUserId) => {
+export const mapToChatMessageViewModel = (msg, currentUserId, sourceAccountId) => {
   const myId = currentUserId != null ? Number(currentUserId) : null
-  const myPrimaryId = primaryUserId != null ? Number(primaryUserId) : null
+  const sourceId = sourceAccountId != null ? Number(sourceAccountId) : null
 
   return {
     id: msg.messageId,
@@ -59,7 +59,7 @@ export const mapToChatMessageViewModel = (msg, currentUserId, primaryUserId) => 
       const hasReacted =
         Boolean(group.hasReacted) ||
         (myId != null && userIds.includes(myId)) ||
-        (myPrimaryId != null && userIds.includes(myPrimaryId))
+        (sourceId != null && userIds.includes(sourceId))
       return {
         ...group,
         userIds,
