@@ -162,11 +162,11 @@ const VideoPreview = ({
   // up height and the whole pre-join card fits the viewport. From md up it
   // keeps the original card frame (border + surface).
   return (
-    <div className="relative w-full max-w-[440px] lg:max-w-none flex flex-col items-center flex-1 min-h-0 rounded-none border-0 bg-transparent md:flex-none md:rounded-xl md:border md:border-[#F5F5F5] md:bg-[#FCFCFC]">
+    <div className="relative w-full max-w-[440px] lg:max-w-none flex flex-col items-center flex-1 min-h-0 rounded-none border-0 bg-transparent md:flex-none md:rounded-xl md:border md:border-neutral-800 md:bg-neutral-900">
       {/* Mobile portrait: the box is height-driven (flex-1) and its width
           follows the 3/4 ratio, so the camera image is never squashed.
           Desktop/tablet keeps the original width-driven 16:9 box. */}
-      <div className="relative flex-1 min-h-0 min-w-0 w-auto max-w-full aspect-[3/4] overflow-hidden rounded-xl border border-[#F5F5F5] bg-[#FCFCFC] md:flex-none md:w-full md:aspect-video md:max-h-none md:border-0 md:bg-transparent">
+      <div className="relative flex-1 min-h-0 min-w-0 w-auto max-w-full aspect-[3/4] overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 md:flex-none md:w-full md:aspect-video md:max-h-none md:border-0 md:bg-transparent">
         {showIphoneDiag && (
           <IphoneDiagOverlay videoRef={videoRef} localStream={localStream} />
         )}
@@ -182,7 +182,7 @@ const VideoPreview = ({
         )}
 
         {!cameraOn && (
-          <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+          <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-neutral-900">
             {displayAvatar && (
               <>
                 <div className="absolute inset-0 z-0 bg-neutral-900" />

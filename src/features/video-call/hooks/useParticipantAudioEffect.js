@@ -12,33 +12,15 @@ Object.values(globalSounds).forEach((audio) => {
   audio.preload = "auto"
 })
 
-let isUnlocked = false
-const unlockAudio = () => {
-  if (isUnlocked) return
-  isUnlocked = true
-  Object.values(globalSounds).forEach((audio) => {
-    audio
-      .play()
-      .then(() => {
-        audio.pause()
-        audio.currentTime = 0
-      })
-      .catch(() => {})
-  })
-  window.removeEventListener("touchstart", unlockAudio)
-  window.removeEventListener("click", unlockAudio)
-}
-
-if (typeof window !== "undefined") {
-  window.addEventListener("touchstart", unlockAudio)
-  window.addEventListener("click", unlockAudio)
-}
-
 export const playGlobalSound = (name) => {
-  const audio = globalSounds[name]
-  if (audio) {
-    audio.currentTime = 0
-    audio.play().catch(() => {})
+  try {
+    const audio = globalSounds[name]
+    if (audio) {
+      audio.currentTime = 0
+      audio.play().catch(() => {})
+    }
+  } catch {
+    /* ignore */
   }
 }
 export const useParticipantAudioEffect = (participants, isSoundEnabled = false) => {

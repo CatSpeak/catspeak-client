@@ -141,7 +141,7 @@ const IDLE_VALUE = {
   setSpeakingAssistantEnabled: () => {},
   activeChatTab: "room",
   setActiveChatTab: () => {},
-  layoutMode: "auto",
+  layoutMode: "grid",
   setLayoutMode: () => {},
   maxTiles: 16,
   setMaxTiles: () => {},
