@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
-import { ArrowLeft, PanelRight } from "lucide-react"
+import { ArrowLeft, PanelRight, Search, Phone, Video } from "lucide-react"
 import Avatar from "@/shared/components/ui/Avatar"
 import GroupAvatar from "./GroupAvatar"
 import { IconButton } from "@/shared/components/ui/buttons"
@@ -16,6 +16,9 @@ const ChatHeader = ({
   conversation,
   onBack,
   onToggleInfo,
+  onToggleSearch,
+  onStartCall,
+  isSearchOpen = false,
   friendOnlineStatus,
 }) => {
   const { t } = useLanguage()
@@ -35,18 +38,18 @@ const ChatHeader = ({
   }
   const reduxFriendOnlineStatus = useSelector(
     (state) => state.notification?.friendOnlineStatus || {},
-  );
+  )
   const reduxFriendLastSeen = useSelector(
     (state) => state.notification?.friendLastSeen || {},
-  );
-  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus;
+  )
+  const onlineStatusMap = friendOnlineStatus || reduxFriendOnlineStatus
   const isOnline =
     !isGroup &&
     friendId &&
-    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false);
+    (onlineStatusMap[friendId] ?? otherUser?.isOnline ?? false)
 
   const lastSeenTime =
-    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen;
+    (friendId && reduxFriendLastSeen[friendId]) || otherUser?.lastSeen
 
   const statusText = isGroup
     ? t?.chat?.memberCount
@@ -54,7 +57,7 @@ const ChatHeader = ({
       : `${memberCount} members`
     : isOnline
       ? t?.chat?.online || "Online"
-      : formatRelative(lastSeenTime);
+      : formatRelative(lastSeenTime)
 
   return (
     <div className="flex items-center justify-between px-4 h-[72px] border-b border-border shrink-0">
@@ -109,18 +112,56 @@ const ChatHeader = ({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
+        {/* Voice Call button */}
+        {onStartCall && (
+          <IconButton
+            onClick={() => onStartCall("audio")}
+            size="sm"
+            variant="ghost"
+            aria-label={t?.chat?.call?.voiceCall || "Voice call"}
+            title={t?.chat?.call?.voiceCall || "Voice call"}
+          >
+            <Phone />
+          </IconButton>
+        )}
+
+        {/* Video Call button */}
+        {onStartCall && (
+          <IconButton
+            onClick={() => onStartCall("video")}
+            size="sm"
+            variant="ghost"
+            aria-label={t?.chat?.call?.videoCall || "Video call"}
+            title={t?.chat?.call?.videoCall || "Video call"}
+          >
+            <Video />
+          </IconButton>
+        )}
+
+        {/* Search button */}
+        <IconButton
+          onClick={onToggleSearch}
+          size="sm"
+          variant={isSearchOpen ? "primary" : "ghost"}
+          aria-label={t?.chat?.searchMessages || "Search in conversation"}
+          title={t?.chat?.searchMessages || "Search messages"}
+        >
+          <Search />
+        </IconButton>
+
         <IconButton
           onClick={onToggleInfo}
           size="sm"
           variant="ghost"
-          aria-label="Toggle info panel"
+          aria-label={t?.chat?.toggleInfoPanel || "Toggle info panel"}
+          title={t?.chat?.toggleInfoPanel || "Toggle info panel"}
         >
           <PanelRight />
         </IconButton>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ChatHeader;
+export default ChatHeader

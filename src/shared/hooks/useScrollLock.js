@@ -7,6 +7,10 @@ let lockCount = 0
 let gapReserveCount = 0
 let originalOverflow = ""
 let originalPaddingRight = ""
+let originalPosition = ""
+let originalTop = ""
+let originalWidth = ""
+let lockedScrollY = 0
 
 /**
  * Locks the body scroll while preventing layout shift.
@@ -80,4 +84,3 @@ const useScrollLock = (locked, { reserveScrollBarGap = true } = {}) => {
 }
 
 export default useScrollLock
-

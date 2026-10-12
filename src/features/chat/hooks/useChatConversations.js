@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useRef } from "react"
 import { useDispatch } from "react-redux"
 import {
   conversationsApi,
@@ -6,6 +6,7 @@ import {
   useMarkConversationAsReadMutation,
 } from "@/store/api/social/conversationsApi"
 import { clearUnread } from "@/store/slices/notificationSlice"
+import useConversationSignalR from "./useConversationSignalR"
 
 /**
  * Custom hook for fetching conversation lists, formatting active conversation details,
@@ -14,8 +15,32 @@ import { clearUnread } from "@/store/slices/notificationSlice"
  * @param {string|number|null} selectedId - The currently selected conversation ID
  * @param {number} accumulatedMessagesCount - Total length of currently accumulated messages for active conversation
  */
-export default function useChatConversations(selectedId, accumulatedMessagesCount = 0) {
+export default function useChatConversations(selectedId) {
   const dispatch = useDispatch()
+  const lastMarkedConvRef = useRef(null)
+
+  // Real-time group governance updates
+  const signalRHandlers = useMemo(
+    () => ({
+      GroupUpdated: () => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations", "Messages"]))
+      },
+      MemberRoleChanged: () => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations", "Members"]))
+      },
+      OwnershipTransferred: () => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations", "Members"]))
+      },
+      MemberLeft: () => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations", "Members", "Messages"]))
+      },
+      ConversationUpdated: () => {
+        dispatch(conversationsApi.util.invalidateTags(["Conversations", "Members", "Messages"]))
+      },
+    }),
+    [dispatch],
+  )
+  useConversationSignalR(signalRHandlers)
 
   const {
     data: conversationsResponse = [],
@@ -43,9 +68,12 @@ export default function useChatConversations(selectedId, accumulatedMessagesCoun
     })
   }, [conversationsResponse, selectedId])
 
-  // Automatically mark active conversation as read when selected, when new messages arrive, or when conversation list updates while viewing
+  // Automatically mark active conversation as read when selected or when new unread messages arrive for it
   useEffect(() => {
-    if (!selectedId) return
+    if (!selectedId) {
+      lastMarkedConvRef.current = null
+      return
+    }
 
     const rawList = Array.isArray(conversationsResponse)
       ? conversationsResponse
@@ -57,8 +85,13 @@ export default function useChatConversations(selectedId, accumulatedMessagesCoun
         String(c.conversationId ?? c.id) === String(selectedId),
     )
 
-    // Clear unread if active conversation has unread items in RTK Query cache
-    if (!currentCached || currentCached.unreadCount > 0) {
+    // Clear unread only if active conversation has unread items in RTK Query cache
+    if (
+      currentCached &&
+      currentCached.unreadCount > 0 &&
+      lastMarkedConvRef.current !== selectedId
+    ) {
+      lastMarkedConvRef.current = selectedId
       dispatch(clearUnread(selectedId))
       dispatch(
         conversationsApi.util.updateQueryData(
@@ -76,11 +109,10 @@ export default function useChatConversations(selectedId, accumulatedMessagesCoun
           },
         ),
       )
-      markConversationAsRead(selectedId).catch(() => { })
+      markConversationAsRead(selectedId).catch(() => {})
     }
   }, [
     selectedId,
-    accumulatedMessagesCount,
     conversationsResponse,
     markConversationAsRead,
     dispatch,
@@ -102,7 +134,9 @@ export default function useChatConversations(selectedId, accumulatedMessagesCoun
   const activeConversation = useMemo(() => {
     if (!activeConversationRaw) return null
     return {
-      id: activeConversationRaw.conversationId,
+      ...activeConversationRaw,
+      id: activeConversationRaw.conversationId ?? activeConversationRaw.id,
+      createdById: activeConversationRaw.createdById,
       type: activeConversationRaw.isGroup ? "group" : "direct",
       name: activeConversationRaw.isGroup
         ? activeConversationRaw.groupName

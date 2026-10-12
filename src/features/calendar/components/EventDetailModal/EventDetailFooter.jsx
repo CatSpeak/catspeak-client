@@ -15,6 +15,7 @@ import { useAuthModal } from "@/shared/context/AuthModalContext";
 
 import ParticipantListModal from "./ParticipantListModal";
 import PillButton from "@/shared/components/ui/buttons/PillButton";
+import { getIsCreator } from "../../utils/eventPermissions";
 
 const EventDetailFooter = ({
   eventId,
@@ -23,6 +24,7 @@ const EventDetailFooter = ({
   onEdit,
   onActionComplete,
   hideAdminControls = false,
+  hideShare = false,
   isCreatorOverride,
 }) => {
   const { user } = useAuth();
@@ -33,27 +35,13 @@ const EventDetailFooter = ({
   const cal = t.calendar || {};
   const [showParticipants, setShowParticipants] = useState(false);
 
-  const isCreator =
-    isCreatorOverride !== undefined
-      ? isCreatorOverride
-      : Boolean(
-          user &&
-            event &&
-            ((user.id != null &&
-              event.creatorId != null &&
-              user.id === event.creatorId) ||
-              (user.accountId != null &&
-                event.creatorId != null &&
-                user.accountId === event.creatorId) ||
-              (user.username != null &&
-                event.creatorName != null &&
-                user.username === event.creatorName) ||
-              (user.fullName != null &&
-                event.creatorName != null &&
-                user.fullName === event.creatorName)),
-        );
+  const isCreator = getIsCreator(user, event, isCreatorOverride);
 
   const isRegistered = event?.isRegistered ?? false;
+  const registrationStatus =
+    event?.registrationStatus ?? (isRegistered ? "CONFIRMED" : null);
+  const isWaitlisted = registrationStatus === "WAITLISTED";
+  const waitlistPosition = event?.waitlistPosition;
   const isPast = event?.endTime
     ? dayjs(event.endTime).isBefore(dayjs())
     : event?.startTime
@@ -123,7 +111,10 @@ const EventDetailFooter = ({
         body = { eventId, registrationType: "ENTIRE_SERIES" };
       }
 
-      console.log("REGISTER PAYLOAD:", body);
+      // Required for SHARED_LINK_ONLY events opened from a shared link.
+      if (event?.token) {
+        body.sharedLinkToken = event.token;
+      }
 
       await registerForEvent(body).unwrap();
       if (onActionComplete) onActionComplete('register', 'success');
@@ -163,9 +154,14 @@ const EventDetailFooter = ({
                 ? isRegistered
                   ? "Đã tham gia"
                   : "Đã kết thúc"
-                : isRegistered
-                  ? cal.cancelRegistration || "Hủy đăng kí"
-                  : cal.register || "Đăng kí"}
+                : isWaitlisted
+                  ? (cal.waitlisted || "Danh sách chờ (#{position})").replace(
+                      "{position}",
+                      waitlistPosition ?? "",
+                    )
+                  : isRegistered
+                    ? cal.registered || "Đã đăng ký"
+                    : cal.register || "Đăng kí"}
             </PillButton>
           ))}
 
@@ -240,10 +236,15 @@ const EventDetailFooter = ({
                 </>
               )}
 
-              <SharePopover
-                eventId={eventId}
-                occurrenceId={event?.occurrenceId}
-              />
+              {!hideShare && (
+                <SharePopover
+                  eventId={eventId}
+                  occurrenceId={event?.occurrenceId}
+                  visibilityScope={event?.visibilityScope}
+                  isCreator={isCreator}
+                  languageCommunity={event?.languageCommunity}
+                />
+              )}
             </div>
           </div>
         )}

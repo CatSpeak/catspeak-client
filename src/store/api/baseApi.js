@@ -3,6 +3,7 @@ import { setCredentials, logout } from "../slices/authSlice"
 import { setServerDown, setServerUp } from "../slices/serverStatusSlice"
 import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
 import { getBrowserTimeZone } from "@/shared/constants/timezones"
+import { defaultParamsSerializer } from "./utils/paramsSerializer"
 import {
   savePendingAutoCrashReport,
   flushPendingAutoCrashReport,
@@ -35,6 +36,7 @@ export const PROACTIVE_REFRESH_BUFFER = 0
 // ─── Base Query ─────────────────────────────────────────────────────
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
+  paramsSerializer: defaultParamsSerializer,
   prepareHeaders: (headers, { getState, extraOptions }) => {
     if (!extraOptions?.skipAuthHeader) {
       const token = getState().auth.token
@@ -65,6 +67,7 @@ const baseQuery = fetchBaseQuery({
 
 const instructorBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_INSTRUCTOR_API_BASE_URL || "/api",
+  paramsSerializer: defaultParamsSerializer,
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token
     if (token) {
@@ -90,6 +93,7 @@ const instructorBaseQuery = fetchBaseQuery({
 
 const aiBaseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_AI_API_BASE_URL || "/api/ai",
+  paramsSerializer: defaultParamsSerializer,
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.token
     if (token) {
@@ -400,7 +404,14 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.startsWith("v1/ai/"))
 
 
+    const cleanUrl = lowerUrl.replace(/^\/?(api\/)?/, "")
+    const isStudentVoucherRoute =
+      cleanUrl.startsWith("vouchers/templates") ||
+      cleanUrl.startsWith("vouchers/redeem") ||
+      cleanUrl.startsWith("vouchers/inventory")
+
     const isCoursesRoute =
+      !isStudentVoucherRoute &&
       lowerUrl &&
       (lowerUrl.startsWith("/teacher/") ||
         lowerUrl.startsWith("teacher/") ||
@@ -481,6 +492,10 @@ export const baseApi = createApi({
     "VoucherDetail",
     "VoucherStats",
     "VoucherUsages",
+    "PointsOverview",
+    "PointsHistory",
+    "VoucherTemplates",
+    "VoucherInventory",
     "CoHost",
     "ClassCoHost",
     "RoomState",
@@ -489,6 +504,7 @@ export const baseApi = createApi({
     "RoomParticipants",
     "ExploreTeachers",
     "InstructorCompetency",
+    "StudentDashboard",
   ],
   endpoints: () => ({}),
 })

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import {
@@ -55,6 +56,7 @@ const DaySchedule = ({
   onSelectDate,
 }) => {
   const { t } = useLanguage();
+  const { lang } = useParams();
   const { formatCustom } = useTimezone();
   const cal = t.calendar || {};
 
@@ -71,11 +73,11 @@ const DaySchedule = ({
   const needsTwoQueries = utcDateA.split("T")[0] !== utcDateB.split("T")[0];
 
   const { data: eventsDataA, isLoading: isLoadingA } = useGetEventsByDateQuery(
-    { date: utcDateA },
+    { date: utcDateA, community: lang },
     { skip: selectedDate == null },
   );
   const { data: eventsDataB, isLoading: isLoadingB } = useGetEventsByDateQuery(
-    { date: utcDateB },
+    { date: utcDateB, community: lang },
     { skip: selectedDate == null || !needsTwoQueries },
   );
   const isLoading = isLoadingA || isLoadingB;

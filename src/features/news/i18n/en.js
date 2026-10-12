@@ -22,6 +22,8 @@ export default {
       newest: "Newest",
       mostViewed: "Most viewed",
       mostReactions: "Most reactions",
+      seeMore: "See more",
+      topics: "Topics",
     },
     newsDetail: {
       back: "Back",

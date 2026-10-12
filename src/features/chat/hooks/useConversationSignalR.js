@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { useConversationSignalRContext } from "../../chat/context/ConversationSignalRContext"
+import { useConversationSignalRContext } from "../context/useConversationSignalRContext.js"
 
 /**
  * Hook to consume SignalR connection for Real-time Conversations
@@ -66,6 +66,18 @@ export const useConversationSignalR = (handlers = {}) => {
       "FriendshipUpdated",
       "FriendshipStatusChanged",
       "ChatUpdated",
+      "MessageReactionChanged",
+      "MessageEdited",
+      "MessagePinned",
+      "MessageUnpinned",
+      "GroupUpdated",
+      "MemberRoleChanged",
+      "OwnershipTransferred",
+      "MemberLeft",
+      "CallStarted",
+      "CallParticipantJoined",
+      "CallParticipantLeft",
+      "CallEnded",
       "OnConnected",
       "OnReconnected",
     ]
