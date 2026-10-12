@@ -20,28 +20,33 @@ const ParticipantsPreview = ({ participants = [], participantCount }) => {
   return (
     <div className="flex w-full flex-col items-center">
       {/* Participant List - Overlapping Avatars */}
-      <div className="mb-1.5 sm:mb-2 flex flex-row items-center justify-center">
+      <div className="mb-1 flex flex-row items-center justify-center">
         {visibleParticipants.map((p, index) => (
-          <div key={p.accountId || index} title={p.username} className={`relative ${index !== 0 ? "-ml-3" : ""}`}>
+          <div
+            key={p.accountId || index}
+            title={p.username}
+            className={`relative ${index !== 0 ? "-ml-3" : ""}`}
+          >
             <Avatar
               src={p.avatarUrl}
               name={p.username || "User"}
-              size={40}
+              size={44}
               className="border-2 border-white shadow-sm"
             />
           </div>
         ))}
         {remainingCount > 0 && (
-          <div className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-semibold text-gray-600 shadow-sm ${visibleParticipants.length > 0 ? "-ml-3" : ""}`}>
+          <div
+            className={`z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs font-semibold text-gray-600 shadow-sm ${visibleParticipants.length > 0 ? "-ml-3" : ""}`}
+          >
             +{remainingCount}
           </div>
         )}
       </div>
 
       {/* Meta Text */}
-      <p className="text-sm text-[#606060]">
-        <span className="font-medium text-gray-900">{count}</span>{" "}
-        {t.rooms.waitingScreen.isHere}
+      <p className="text-sm text-secondary">
+        <span>{count}</span> {t.rooms.waitingScreen.isHere}
       </p>
     </div>
   )

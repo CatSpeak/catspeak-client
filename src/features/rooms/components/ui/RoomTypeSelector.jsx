@@ -1,5 +1,5 @@
 import React from "react"
-import { Check, Lock } from "lucide-react"
+import { Lock } from "lucide-react"
 
 /**
  * Descriptive two-up choice cards used in place of tabs.
@@ -23,7 +23,7 @@ const RoomTypeSelector = ({ value, onChange, options = [], ariaLabel }) => {
             type="button"
             aria-pressed={isSelected}
             onClick={() => onChange(option.value)}
-            className={`group relative flex w-full items-start gap-3 rounded-2xl border p-3.5 text-left outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cath-red-700 focus-visible:ring-offset-2 ${
+            className={`group relative flex w-full items-center gap-4 rounded-md border px-4 h-[72px] text-left outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-cath-red-700 focus-visible:ring-offset-2 ${
               isSelected
                 ? "border-cath-red-700 bg-cath-red-700/[0.06] shadow-sm"
                 : "border-border bg-white hover:border-gray-300 hover:bg-gray-50"
@@ -37,11 +37,11 @@ const RoomTypeSelector = ({ value, onChange, options = [], ariaLabel }) => {
               }`}
               aria-hidden="true"
             >
-              {option.icon}
+              {showLock ? <Lock size={18} /> : option.icon}
             </span>
 
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5 pr-6">
-              <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="flex items-center gap-2">
                 {option.label}
                 {option.badge && (
                   <span className="rounded-full bg-cath-red-700 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
@@ -49,24 +49,10 @@ const RoomTypeSelector = ({ value, onChange, options = [], ariaLabel }) => {
                   </span>
                 )}
               </span>
-              <span className="text-xs leading-snug text-secondary">
+              <span className="text-sm text-secondary">
                 {option.description}
               </span>
             </span>
-
-            {isSelected ? (
-              <Check
-                size={18}
-                className="absolute right-3.5 top-3.5 text-cath-red-700"
-                aria-hidden="true"
-              />
-            ) : showLock ? (
-              <Lock
-                size={16}
-                className="absolute right-3.5 top-3.5 text-gray-400"
-                aria-hidden="true"
-              />
-            ) : null}
           </button>
         )
       })}

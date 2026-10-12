@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { Mic, MicOff, Video, VideoOff, Image, Settings } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Avatar from "@/shared/components/ui/Avatar"
+import IconButton from "@/shared/components/ui/buttons/IconButton"
 import { useMeetingAvatar } from "@/features/video-call/hooks/useMeetingAvatar"
 
 // [DIAG-v4 TEMP] On-screen orientation readout for iPhone debugging without
@@ -44,8 +45,12 @@ const IphoneDiagOverlay = ({ videoRef, localStream }) => {
   return (
     <div className="absolute top-1 left-1 z-20 rounded bg-black/70 px-2 py-1 font-mono text-[10px] leading-tight text-lime-300">
       <div>cam:{snap.settings}</div>
-      <div>el:{snap.el} win:{snap.vw}</div>
-      <div>in:{snap.in} raw:{snap.raw} eff:{snap.eff} fp:{snap.fp}</div>
+      <div>
+        el:{snap.el} win:{snap.vw}
+      </div>
+      <div>
+        in:{snap.in} raw:{snap.raw} eff:{snap.eff} fp:{snap.fp}
+      </div>
       <div>out:{snap.out}</div>
     </div>
   )
@@ -53,7 +58,10 @@ const IphoneDiagOverlay = ({ videoRef, localStream }) => {
 
 const showIphoneDiag = (() => {
   try {
-    return typeof window !== "undefined" && window.location?.search?.includes("iphonedbg") === true
+    return (
+      typeof window !== "undefined" &&
+      window.location?.search?.includes("iphonedbg") === true
+    )
   } catch {
     return false
   }
@@ -83,7 +91,9 @@ const VideoPreview = ({
     // still live. Attaching an ended (stopped) track is the classic "black
     // screen on second toggle" — the element keeps showing the dead track.
     const liveLkTrack =
-      lkVideoTrack?.mediaStreamTrack?.readyState === "ended" ? null : lkVideoTrack
+      lkVideoTrack?.mediaStreamTrack?.readyState === "ended"
+        ? null
+        : lkVideoTrack
 
     if (liveLkTrack) {
       try {
@@ -118,7 +128,9 @@ const VideoPreview = ({
     try {
       const hasLiveVideo = (() => {
         try {
-          return (localStream?.getVideoTracks() || []).some((t) => t.readyState === "live")
+          return (localStream?.getVideoTracks() || []).some(
+            (t) => t.readyState === "live",
+          )
         } catch {
           return false
         }
@@ -199,46 +211,48 @@ const VideoPreview = ({
       </div>
 
       {/* Controls Overlay */}
-      <div className="flex flex-row gap-3 min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
-        <button
+      <div className="flex flex-row min-[426px]:absolute min-[426px]:bottom-4 min-[426px]:left-1/2 min-[426px]:z-10 min-[426px]:-translate-x-1/2 min-[426px]:mt-0 mt-2">
+        <IconButton
           onClick={onToggleMic}
-          className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
+          variant={micOn ? "primary" : "secondary"}
+          title={
             micOn
-              ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
-              : "bg-white hover:bg-[#E5E5E5]"
-          }`}
+              ? t?.rooms?.videoCall?.controls?.micOff || "Turn microphone off"
+              : t?.rooms?.videoCall?.controls?.micOn || "Turn microphone on"
+          }
         >
           {micOn ? <Mic /> : <MicOff />}
-        </button>
+        </IconButton>
 
-        <button
+        <IconButton
           onClick={onToggleCam}
-          className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ${
+          variant={cameraOn ? "primary" : "secondary"}
+          title={
             cameraOn
-              ? "bg-cath-red-700 text-white hover:bg-[#7a000e]"
-              : "bg-white hover:bg-[#E5E5E5]"
-          }`}
+              ? t?.rooms?.videoCall?.controls?.camOff || "Turn camera off"
+              : t?.rooms?.videoCall?.controls?.camOn || "Turn camera on"
+          }
         >
           {cameraOn ? <Video /> : <VideoOff />}
-        </button>
+        </IconButton>
 
-        <button
+        <IconButton
           onClick={onOpenBgModal}
+          variant="secondary"
           title={
             t?.rooms?.waitingScreen?.changeBackground || "Change Background"
           }
-          className={`border border-border flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
           <Image />
-        </button>
+        </IconButton>
 
-        <button
+        <IconButton
           onClick={onOpenSettings}
+          variant="secondary"
           title={t?.rooms?.waitingScreen?.deviceSettings || "Device Settings"}
-          className={`border border-border flex h-12 w-12 items-center justify-center rounded-full transition-all duration-200 bg-white text-gray-700 hover:bg-[#E5E5E5]`}
         >
           <Settings />
-        </button>
+        </IconButton>
       </div>
     </div>
   )

@@ -41,11 +41,13 @@ const ImageUploadInput = ({
   const uploadT = t.imageCrop?.upload || {}
 
   const finalUploadText =
-    uploadText !== "Upload Image" ? uploadText : (uploadT.uploadImage || "Upload Image")
+    uploadText !== "Upload Image"
+      ? uploadText
+      : uploadT.uploadImage || "Upload Image"
   const finalDragDropText =
     dragDropText !== "Drag & drop image here"
       ? dragDropText
-      : (uploadT.dragDrop || "Drag & drop image here")
+      : uploadT.dragDrop || "Drag & drop image here"
   const finalHintText =
     hintText !== "PNG, JPG, WEBP up to 5MB"
       ? hintText
@@ -53,13 +55,12 @@ const ImageUploadInput = ({
         ? uploadT.hint.replace("{{maxSize}}", maxSizeMB)
         : `PNG, JPG, WEBP up to ${maxSizeMB}MB`
   const finalChangeText =
-    changeText !== "Change" ? changeText : (uploadT.change || "Change")
+    changeText !== "Change" ? changeText : uploadT.change || "Change"
   const finalRemoveText =
-    removeText !== "Remove" ? removeText : (uploadT.remove || "Remove")
-  const finalCropText =
-    cropText !== "Crop" ? cropText : (uploadT.crop || "Crop")
+    removeText !== "Remove" ? removeText : uploadT.remove || "Remove"
+  const finalCropText = cropText !== "Crop" ? cropText : uploadT.crop || "Crop"
   const finalCropTitle =
-    cropTitle !== "Crop Image" ? cropTitle : (t.imageCrop?.title || "Crop Image")
+    cropTitle !== "Crop Image" ? cropTitle : t.imageCrop?.title || "Crop Image"
 
   const [prevValue, setPrevValue] = useState(value)
   const [objectUrl, setObjectUrl] = useState(() =>
@@ -92,11 +93,7 @@ const ImageUploadInput = ({
 
   // Derive preview URL during rendering
   const previewUrl =
-    value instanceof File
-      ? objectUrl
-      : typeof value === "string"
-        ? value
-        : null
+    value instanceof File ? objectUrl : typeof value === "string" ? value : null
 
   const handleFileSelect = (file) => {
     if (!file) return
@@ -106,8 +103,8 @@ const ImageUploadInput = ({
       const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1)
       const errorMsg = uploadT.sizeExceeded
         ? uploadT.sizeExceeded
-          .replace("{{fileSize}}", fileSizeMB)
-          .replace("{{maxSize}}", maxSizeMB)
+            .replace("{{fileSize}}", fileSizeMB)
+            .replace("{{maxSize}}", maxSizeMB)
         : `File size (${fileSizeMB} MB) exceeds the ${maxSizeMB} MB limit.`
       toast.error(errorMsg)
       return
@@ -201,19 +198,16 @@ const ImageUploadInput = ({
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            className={`relative flex flex-col items-center justify-center text-center p-6 rounded-xl border-2 border-dashed ${frameClassName} w-full max-sm:aspect-auto max-sm:flex-1 cursor-pointer ${isDragging
-              ? "border-cath-red-700 bg-red-50/40 scale-[0.99]"
-              : "border-border bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300"
-              }`}
+            className={`relative flex flex-col items-center justify-center text-center p-6 rounded-md border-2 border-dashed ${frameClassName} w-full max-sm:aspect-auto max-sm:flex-1 cursor-pointer ${
+              isDragging
+                ? "border-cath-red-700 bg-red-50/40 scale-[0.99]"
+                : "border-border bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300"
+            }`}
           >
             <UploadCloud className="w-12 h-12 mb-4 text-gray-400" />
 
-            <p className="text-lg font-semibold text-gray-800 mb-1">
-              {finalDragDropText}
-            </p>
-            <p className="text-sm text-[#606060] max-w-[360px] mb-4">
-              {finalHintText}
-            </p>
+            <p className="truncate">{finalDragDropText}</p>
+            <p className="text-sm text-secondary mb-4">{finalHintText}</p>
 
             <PillButton
               type="button"
@@ -223,7 +217,6 @@ const ImageUploadInput = ({
                 fileInputRef.current?.click()
               }}
               disabled={disabled}
-              startIcon={<Upload size={16} />}
             >
               {finalUploadText}
             </PillButton>
@@ -234,10 +227,11 @@ const ImageUploadInput = ({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`relative rounded-xl overflow-hidden border ${frameClassName} w-full max-sm:aspect-auto max-sm:flex-1 bg-gray-900 ${isDragging
-              ? "border-cath-red-700 ring-2 ring-cath-red-700/20"
-              : "border-border"
-              }`}
+            className={`relative rounded-md overflow-hidden border ${frameClassName} w-full max-sm:aspect-auto max-sm:flex-1 bg-gray-900 ${
+              isDragging
+                ? "border-cath-red-700 ring-2 ring-cath-red-700/20"
+                : "border-border"
+            }`}
           >
             {/* Blurred Backdrop Image */}
             <div
@@ -289,106 +283,110 @@ const ImageUploadInput = ({
           </div>
         )
       ) : /* Compact Mode */
-        !previewUrl ? (
-          <div
-            onDragEnter={handleDragOver}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border-2 border-dashed ${isDragging
+      !previewUrl ? (
+        <div
+          onDragEnter={handleDragOver}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-md border-2 border-dashed ${
+            isDragging
               ? "border-cath-red-700 bg-red-50/40 scale-[0.99]"
               : "border-border bg-gray-50/50 hover:bg-gray-50 hover:border-gray-300"
-              }`}
-          >
-            <div className="flex items-center gap-3">
-              <UploadCloud className="w-8 h-8 text-gray-400 shrink-0" />
-              <div className="flex flex-col text-left">
-                <span className="text-sm font-semibold text-gray-800">
-                  {finalDragDropText}
-                </span>
-                <span className="text-xs text-[#606060]">{finalHintText}</span>
-              </div>
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <UploadCloud className="w-8 h-8 text-gray-400 shrink-0" />
+            <div className="flex flex-col text-left">
+              <span className="text-sm font-semibold text-gray-800">
+                {finalDragDropText}
+              </span>
+              <span className="text-xs text-[#606060]">{finalHintText}</span>
             </div>
-
-            <PillButton
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={disabled}
-              startIcon={<Upload size={16} />}
-            >
-              {finalUploadText}
-            </PillButton>
           </div>
-        ) : (
-          <div
-            onDragEnter={handleDragOver}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 rounded-xl border ${isDragging
+
+          <PillButton
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled}
+            startIcon={<Upload size={16} />}
+          >
+            {finalUploadText}
+          </PillButton>
+        </div>
+      ) : (
+        <div
+          onDragEnter={handleDragOver}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-4 p-3 rounded-md border ${
+            isDragging
               ? "border-cath-red-700 bg-red-50/30 ring-2 ring-cath-red-700/20"
               : "border-border bg-gray-50"
-              }`}
-          >
-            {/* Local Image Preview */}
-            <div className="relative w-36 h-20 shrink-0 rounded-lg overflow-hidden border border-border bg-gray-900 flex items-center justify-center">
-              <img
-                src={previewUrl}
-                alt={uploadT.uploadedImage || "Uploaded Preview"}
-                onClick={() => setIsFullscreen(true)}
-                className="w-full h-full object-cover cursor-zoom-in hover:opacity-95 transition-opacity"
-                title={uploadT.clickToViewFull || "Click to view full image"}
-              />
+          }`}
+        >
+          {/* Local Image Preview */}
+          <div className="relative w-36 h-20 shrink-0 rounded-lg overflow-hidden border border-border bg-gray-900 flex items-center justify-center">
+            <img
+              src={previewUrl}
+              alt={uploadT.uploadedImage || "Uploaded Preview"}
+              onClick={() => setIsFullscreen(true)}
+              className="w-full h-full object-cover cursor-zoom-in hover:opacity-95 transition-opacity"
+              title={uploadT.clickToViewFull || "Click to view full image"}
+            />
+          </div>
+
+          {/* File Info & Action Buttons */}
+          <div className="flex flex-1 flex-col justify-between gap-2 overflow-hidden w-full">
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-medium truncate">
+                {value instanceof File
+                  ? value.name
+                  : uploadT.uploadedImage || "Uploaded Image"}
+              </span>
+              {value instanceof File && (
+                <span className="text-xs text-gray-500">
+                  {formatFileSize(value.size)}
+                </span>
+              )}
             </div>
 
-            {/* File Info & Action Buttons */}
-            <div className="flex flex-1 flex-col justify-between gap-2 overflow-hidden w-full">
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium truncate">
-                  {value instanceof File ? value.name : (uploadT.uploadedImage || "Uploaded Image")}
-                </span>
-                {value instanceof File && (
-                  <span className="text-xs text-gray-500">
-                    {formatFileSize(value.size)}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                {enableCrop && (
-                  <PillButton
-                    type="button"
-                    variant="secondary"
-                    onClick={handleOpenExistingCrop}
-                    disabled={disabled}
-                    startIcon={<Crop size={14} />}
-                  >
-                    {finalCropText}
-                  </PillButton>
-                )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {enableCrop && (
                 <PillButton
                   type="button"
                   variant="secondary"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={handleOpenExistingCrop}
                   disabled={disabled}
-                  startIcon={<Upload size={14} />}
+                  startIcon={<Crop size={14} />}
                 >
-                  {finalChangeText}
+                  {finalCropText}
                 </PillButton>
-                <PillButton
-                  type="button"
-                  variant="secondary"
-                  onClick={handleRemove}
-                  disabled={disabled}
-                  startIcon={<Trash2 size={14} />}
-                >
-                  {finalRemoveText}
-                </PillButton>
-              </div>
+              )}
+              <PillButton
+                type="button"
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={disabled}
+                startIcon={<Upload size={14} />}
+              >
+                {finalChangeText}
+              </PillButton>
+              <PillButton
+                type="button"
+                variant="secondary"
+                onClick={handleRemove}
+                disabled={disabled}
+                startIcon={<Trash2 size={14} />}
+              >
+                {finalRemoveText}
+              </PillButton>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       {/* Shared Reusable Fullscreen Media Viewer Modal */}
       {isFullscreen && previewUrl && (
