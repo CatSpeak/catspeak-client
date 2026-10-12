@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useContext } from "react"
 import { Phone, Video, PhoneCall } from "lucide-react"
 import { useGetActiveCallQuery } from "@/store/api/social/conversationsApi"
 import useConversationSignalR from "../../hooks/useConversationSignalR"
+import { InChatCallContext } from "../../context/InChatCallContext"
+import { VideoCallContext } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { useLanguage } from "@/shared/context/LanguageContext"
 
@@ -11,15 +13,18 @@ import { useLanguage } from "@/shared/context/LanguageContext"
  */
 const ActiveCallBanner = ({
   conversationId,
+  isGroup = false,
   onJoinCall,
   isCallModalOpen = false,
 }) => {
   const { t } = useLanguage()
+  const inChatCallContext = useContext(InChatCallContext)
+  const videoCallContext = useContext(VideoCallContext)
 
   const { data: rawActiveCall, refetch } = useGetActiveCallQuery(
     conversationId,
     {
-      skip: !conversationId,
+      skip: !conversationId || !isGroup,
       pollingInterval: 10000,
     },
   )
@@ -30,13 +35,27 @@ const ActiveCallBanner = ({
   const signalRHandlers = useMemo(
     () => ({
       CallStarted: (payload) => {
-        if (Number(payload?.conversationId) === Number(conversationId)) {
-          setSignalRCallActive(payload)
+        const payloadConvId =
+          payload?.conversationId ??
+          payload?.ConversationId ??
+          payload?.data?.conversationId
+        if (
+          String(payloadConvId) === String(conversationId) ||
+          Number(payloadConvId) === Number(conversationId)
+        ) {
+          setSignalRCallActive(payload?.data || payload)
           refetch()
         }
       },
       CallEnded: (payload) => {
-        if (Number(payload?.conversationId) === Number(conversationId)) {
+        const payloadConvId =
+          payload?.conversationId ??
+          payload?.ConversationId ??
+          payload?.data?.conversationId
+        if (
+          String(payloadConvId) === String(conversationId) ||
+          Number(payloadConvId) === Number(conversationId)
+        ) {
           setSignalRCallActive(null)
           refetch()
         }
@@ -46,14 +65,56 @@ const ActiveCallBanner = ({
   )
   useConversationSignalR(signalRHandlers)
 
-  const activeCall =
-    signalRCallActive ||
-    (rawActiveCall?.isActive || rawActiveCall?.data?.isActive
-      ? rawActiveCall?.data || rawActiveCall
-      : null)
+  const activeCall = useMemo(() => {
+    if (signalRCallActive) return signalRCallActive
 
-  // Don't render banner if no active call or user is already in the call modal
-  if (!activeCall || isCallModalOpen) {
+    const callObj = rawActiveCall?.data ?? rawActiveCall
+    if (!callObj || typeof callObj !== "object") return null
+
+    // Explicitly inactive flags
+    if (
+      callObj.isActive === false ||
+      callObj.hasActiveCall === false ||
+      callObj.isCallActive === false ||
+      callObj.hasActive === false
+    ) {
+      return null
+    }
+
+    // Active if explicit flag is true
+    if (
+      callObj.isActive === true ||
+      callObj.hasActiveCall === true ||
+      callObj.isCallActive === true
+    ) {
+      return callObj
+    }
+
+    // Active if it contains call identification (callId, roomName, token, or non-empty participants)
+    if (
+      callObj.callId ||
+      callObj.CallId ||
+      callObj.roomName ||
+      callObj.RoomName ||
+      callObj.token ||
+      (Array.isArray(callObj.participants) && callObj.participants.length > 0)
+    ) {
+      return callObj
+    }
+
+    return null
+  }, [signalRCallActive, rawActiveCall])
+
+  const isInCall =
+    Boolean(inChatCallContext?.activeCallSession) ||
+    Boolean(inChatCallContext?.isCallModalOpen) ||
+    Boolean(isCallModalOpen) ||
+    Boolean(videoCallContext?.isInCall)
+
+  const isIncomingCall = Boolean(inChatCallContext?.incomingCallData)
+
+  // Don't render banner if not group chat, no active call, user is in a call, or incoming call modal is showing
+  if (!isGroup || !activeCall || isInCall || isIncomingCall) {
     return null
   }
 
@@ -62,37 +123,38 @@ const ActiveCallBanner = ({
     activeCall.type === "video" ||
     activeCall.isVideo
 
+  const callerDisplayName =
+    activeCall.callerName ||
+    activeCall.callerUsername ||
+    activeCall.initiatorName ||
+    (Array.isArray(activeCall.participants) &&
+      (activeCall.participants[0]?.name ||
+        activeCall.participants[0]?.username)) ||
+    ""
+
   return (
-    <div className="mx-4 mt-2 mb-1 p-3 bg-gradient-to-r from-emerald-500/15 via-teal-500/15 to-emerald-500/10 dark:from-emerald-950/40 dark:to-teal-950/30 border border-emerald-500/30 rounded-2xl flex items-center justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500 text-white shadow-sm shrink-0">
-          {isVideo ? <Video size={20} /> : <Phone size={20} />}
-          <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
-          </span>
-        </div>
+    <div className="flex gap-4 justify-between px-4 h-[72px] items-center border-b border-border">
+      <div className="flex items-center gap-4 min-w-0">
+        {isVideo ? <Video /> : <Phone />}
 
         <div className="min-w-0">
-          <p className="text-xs font-bold text-emerald-900 dark:text-emerald-200 truncate">
+          <p className="truncate">
             {isVideo
               ? t?.chat?.call?.activeVideoCall || "Ongoing Video Call"
               : t?.chat?.call?.activeAudioCall || "Ongoing Voice Call"}
           </p>
-          <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 truncate">
-            {activeCall.callerName
-              ? `${t?.chat?.call?.startedBy || "Started by"} ${activeCall.callerName}`
+          <p className="text-sm text-secondary truncate">
+            {callerDisplayName
+              ? `${t?.chat?.call?.startedBy || "Started by"} ${callerDisplayName}`
               : t?.chat?.call?.inProgress || "Call is currently in progress..."}
           </p>
         </div>
       </div>
 
       <PillButton
-        size="sm"
         variant="primary"
         onClick={() => onJoinCall(activeCall)}
-        className="!bg-emerald-600 hover:!bg-emerald-700 shrink-0 font-semibold"
-        startIcon={<PhoneCall size={14} />}
+        className="shrink-0 font-semibold"
       >
         {t?.chat?.call?.joinCall || "Join Call"}
       </PillButton>

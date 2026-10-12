@@ -26,7 +26,7 @@ const RingingPlaceholderTile = ({ friend }) => {
 
   return (
     <div
-      className={`${getVideoTileRootClass({ isVideoVisible: false })} border border-white/10 bg-neutral-900 opacity-60 transition-opacity duration-300`}
+      className={`${getVideoTileRootClass({ isVideoVisible: false })} border border-border bg-white shadow-sm opacity-80 transition-opacity duration-300`}
     >
       {/* Ambient blurred backdrop + Avatar when waiting */}
       <div
@@ -35,7 +35,7 @@ const RingingPlaceholderTile = ({ friend }) => {
       >
         {avatarUrl && (
           <>
-            <div className="absolute inset-0 z-0 bg-neutral-900" />
+            <div className="absolute inset-0 z-0 bg-primaryBg" />
             <img
               src={avatarUrl}
               alt=""

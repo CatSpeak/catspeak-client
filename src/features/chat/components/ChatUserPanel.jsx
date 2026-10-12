@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react"
+import { memo, useMemo, useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   X,
@@ -9,6 +9,9 @@ import {
   Image as ImageIcon,
   ChevronRight,
   Search,
+  Link2,
+  Camera,
+  Trash2,
 } from "lucide-react"
 import { motion as Motion, AnimatePresence } from "framer-motion"
 import GroupAvatar from "./GroupAvatar"
@@ -16,6 +19,7 @@ import {
   useRemoveParticipantMutation,
   useLeaveGroupMutation,
   useGetConversationMembersQuery,
+  useUpdateGroupInfoMutation,
 } from "@/store/api/social/conversationsApi"
 import Avatar from "@/shared/components/ui/Avatar"
 import { getParticipantTheme } from "@/features/video-call/utils/participantTheme"
@@ -24,8 +28,9 @@ import AddMembersModal from "./modals/AddMembersModal"
 import TransferOwnershipModal from "./modals/TransferOwnershipModal"
 import GroupMemberList from "./GroupMemberList"
 import SharedMediaGallery from "./gallery/SharedMediaGallery"
-import EditGroupView from "./EditGroupView"
+import EditGroupModal from "./modals/EditGroupModal"
 import ChatSearchView from "./search/ChatSearchView"
+import GroupInviteLinkView from "./GroupInviteLinkView"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { getProfilePath } from "@/shared/utils/navigation"
 import toast from "react-hot-toast"
@@ -73,11 +78,14 @@ const ChatUserPanel = ({
   const navigate = useNavigate()
   const [removeParticipant] = useRemoveParticipantMutation()
   const [leaveGroupMutation, { isLoading: isLeaving }] = useLeaveGroupMutation()
+  const [updateGroupInfo] = useUpdateGroupInfoMutation()
+  const avatarInputRef = useRef(null)
 
   const [currentView, setCurrentView] = useState(initialView || "main")
   const [direction, setDirection] = useState(1)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
+  const [isChangeNameModalOpen, setIsChangeNameModalOpen] = useState(false)
   const [transferTargetMember, setTransferTargetMember] = useState(null)
 
   // Sync when initialView changes externally (e.g. from ChatHeader search button)
@@ -150,14 +158,14 @@ const ChatUserPanel = ({
 
   const headerTitle = useMemo(() => {
     switch (currentView) {
-      case "edit":
-        return t?.chat?.editGroupTitle || "Edit Group"
       case "members":
         return `${t?.chat?.userPanel?.members || "Members"} (${memberCount})`
       case "media":
         return t?.chat?.userPanel?.sharedMedia || "Media, Files & Links"
       case "search":
         return t?.chat?.userPanel?.searchMessages || "Search Messages"
+      case "invite":
+        return t?.chat?.userPanel?.inviteLink || "Liên kết mời vào nhóm"
       case "main":
       default:
         return isGroup
@@ -166,6 +174,51 @@ const ChatUserPanel = ({
     }
   }, [currentView, isGroup, memberCount, t])
 
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      toast.error(t?.chat?.imageOnlyPrompt || "Please select an image file")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const base64 = reader.result
+      try {
+        await updateGroupInfo({
+          conversationId: conversation.id,
+          groupName: conversation.name || conversation.groupName,
+          groupAvatar: base64,
+        }).unwrap()
+      } catch (err) {
+        console.error("Failed to update group avatar:", err)
+        toast.error(
+          err?.data?.message ||
+            t?.chat?.groupUpdateFailed ||
+            "Failed to update group photo",
+        )
+      } finally {
+        if (avatarInputRef.current) avatarInputRef.current.value = ""
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemoveGroupPhoto = async () => {
+    try {
+      await updateGroupInfo({
+        conversationId: conversation.id,
+        groupName: conversation.name || conversation.groupName,
+        groupAvatar: "",
+      }).unwrap()
+    } catch (err) {
+      console.error("Failed to remove group photo:", err)
+      toast.error(err?.data?.message || "Failed to remove group photo")
+    }
+  }
+
   const navOptions = useMemo(() => {
     const options = []
 
@@ -173,9 +226,28 @@ const ChatUserPanel = ({
       options.push({
         id: "edit",
         icon: Edit3,
-        title: t?.chat?.userPanel?.editGroup || "Edit Group",
-        onClick: () => navigateTo("edit"),
+        title: t?.chat?.changeGroupName || "Change Group Name",
+        hasChevron: false,
+        onClick: () => setIsChangeNameModalOpen(true),
       })
+
+      options.push({
+        id: "change_avatar",
+        icon: Camera,
+        title: t?.chat?.changeGroupPhoto || "Change group photo",
+        hasChevron: false,
+        onClick: () => avatarInputRef.current?.click(),
+      })
+
+      if (conversation?.avatarImageUrl) {
+        options.push({
+          id: "remove_avatar",
+          icon: Trash2,
+          title: t?.chat?.removePhoto || "Remove photo",
+          hasChevron: false,
+          onClick: handleRemoveGroupPhoto,
+        })
+      }
     }
 
     if (isGroup) {
@@ -184,6 +256,13 @@ const ChatUserPanel = ({
         icon: Users,
         title: t?.chat?.userPanel?.members || "Members",
         onClick: () => navigateTo("members"),
+      })
+
+      options.push({
+        id: "invite",
+        icon: Link2,
+        title: t?.chat?.userPanel?.inviteLink || "Liên kết mời vào nhóm",
+        onClick: () => navigateTo("invite"),
       })
     }
 
@@ -202,7 +281,7 @@ const ChatUserPanel = ({
     })
 
     return options
-  }, [isGroup, canEditGroup, t])
+  }, [isGroup, canEditGroup, conversation?.avatarImageUrl, t])
 
   if (!conversation) return null
 
@@ -260,17 +339,6 @@ const ChatUserPanel = ({
 
   const renderViewContent = () => {
     switch (currentView) {
-      case "edit":
-        return (
-          <div className="h-full flex flex-col overflow-y-auto">
-            <EditGroupView
-              conversation={conversation}
-              onSaved={handleBack}
-              onCancel={handleBack}
-            />
-          </div>
-        )
-
       case "members":
         return (
           <div className="h-full flex flex-col overflow-y-auto">
@@ -278,7 +346,6 @@ const ChatUserPanel = ({
               participants={groupMembers}
               currentUserId={currentUser.id}
               conversation={conversation}
-              hideHeader={true}
               onRemoveMember={handleRemoveMember}
               onOpenAddModal={() => setIsAddModalOpen(true)}
               onOpenTransferModal={(member) => {
@@ -305,13 +372,21 @@ const ChatUserPanel = ({
           />
         )
 
+      case "invite":
+        return (
+          <GroupInviteLinkView
+            conversation={conversation}
+            canManage={canEditGroup}
+          />
+        )
+
       case "main":
       default:
         return (
           <div className="h-full flex flex-col justify-between overflow-y-auto">
             <div>
               {/* Profile header section */}
-              <div className="flex flex-col items-center pt-4">
+              <div className="flex flex-col items-center">
                 {isGroup ? (
                   <GroupAvatar conversation={conversation} size={84} />
                 ) : (
@@ -396,7 +471,9 @@ const ChatUserPanel = ({
                         <Icon className="shrink-0" />
                         <p className="truncate">{opt.title}</p>
                       </div>
-                      <ChevronRight className="shrink-0" />
+                      {opt.hasChevron !== false && (
+                        <ChevronRight className="shrink-0" />
+                      )}
                     </div>
                   )
                 })}
@@ -427,8 +504,8 @@ const ChatUserPanel = ({
   return (
     <div className={containerClasses}>
       {/* ── Header ────────────────────────────────── */}
-      <div className="flex items-center justify-between p-2 shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center justify-between h-[72px] px-4 shrink-0">
+        <div className="flex items-center gap-1 min-w-0">
           {currentView !== "main" && (
             <>
               <IconButton
@@ -440,7 +517,7 @@ const ChatUserPanel = ({
               >
                 <ArrowLeft />
               </IconButton>
-              <span className="font-semibold text-sm truncate">{headerTitle}</span>
+              <span className="font-semibold truncate">{headerTitle}</span>
             </>
           )}
         </div>
@@ -472,6 +549,23 @@ const ChatUserPanel = ({
           </Motion.div>
         </AnimatePresence>
       </div>
+
+      {isGroup && canEditGroup && (
+        <>
+          <input
+            type="file"
+            ref={avatarInputRef}
+            onChange={handleAvatarFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          <EditGroupModal
+            open={isChangeNameModalOpen}
+            onClose={() => setIsChangeNameModalOpen(false)}
+            conversation={conversation}
+          />
+        </>
+      )}
 
       <AddMembersModal
         open={isAddModalOpen}

@@ -81,10 +81,12 @@ const MessageWidget = () => {
   const widgetRef = useRef(null)
 
   const currentUser = useMemo(() => {
+    const profile = userProfile?.data
     return {
       id: authUser?.accountId,
-      name: userProfile?.username || authUser?.username || "Me",
-      avatar: userProfile?.avatarImageUrl || null,
+      sourceAccountId: authUser?.sourceAccountId ?? profile?.sourceAccountId ?? null,
+      name: profile?.username || authUser?.username || "Me",
+      avatar: profile?.avatarImageUrl || authUser?.avatarImageUrl || null,
     }
   }, [authUser, userProfile])
 

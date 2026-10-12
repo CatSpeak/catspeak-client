@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
+import { useLocation } from "react-router-dom"
 import NProgress from "nprogress"
 import "nprogress/nprogress.css"
-import { useSelector } from "react-redux"
 
 // Configure NProgress
 NProgress.configure({
@@ -9,84 +9,40 @@ NProgress.configure({
   trickleSpeed: 200,
   minimum: 0.08,
   easing: "ease",
-  speed: 400,
+  speed: 300,
 })
 
 /**
- * Global navigation progress bar component.
- * Listens to all RTK Query API requests and shows/hides
- * the NProgress bar based on active query count.
+ * NavigationProgress — Route-driven top navigation loading bar.
+ * Listens strictly to React Router pathname transitions.
  *
- * Place this component once inside the Redux Provider.
+ * Guarantees:
+ * - Starting a call, prev/next pagination, chat micro-interactions,
+ *   and background polling NEVER trigger NProgress because they do
+ *   not change the page route.
+ * - Only genuine top-level route/page transitions trigger the bar.
  */
 const NavigationProgress = () => {
-  const apiState = useSelector((state) => state.api)
-  const activeCountRef = useRef(0)
+  const location = useLocation()
+  const prevPathnameRef = useRef(location.pathname)
 
   useEffect(() => {
-    if (!apiState?.queries) return
+    // Only trigger when the route pathname actually changes (ignore query params or internal state)
+    if (prevPathnameRef.current !== location.pathname) {
+      prevPathnameRef.current = location.pathname
 
-    // Count how many queries are currently in a "pending" state
-    const pendingCount = Object.values(apiState.queries).filter((query) => {
-      if (query?.status !== "pending") return false
-      // Ignore pagination requests for getRooms so they don't trigger global nprogress
-      if (query?.endpointName === "getRooms" && query?.originalArgs?.page > 1) {
-        return false
-      }
-
-      // Ignore real-time background syncing for messages so it doesn't interrupt UX
-      if (
-        query?.endpointName === "getConversations" ||
-        query?.endpointName === "getConversationMessages"
-      ) {
-        return false
-      }
-
-      // Ignore getEventsByDate and getEventCounts so clicking a date/switching months in the calendar doesn't trigger global nprogress
-      if (
-        query?.endpointName === "getEventsByDate" ||
-        query?.endpointName === "getEventCounts"
-      ) {
-        return false
-      }
-
-      // Ignore background refetches and in-form actions that shouldn't interrupt UX
-      if (
-        query?.endpointName === "getProfile" ||
-        query?.endpointName === "getSampleBackgrounds" ||
-        query?.endpointName === "getReelsFeed" ||
-        query?.endpointName === "getReelById" ||
-        query?.endpointName === "getReelComments" ||
-        query?.endpointName === "getBreakoutStatus" ||
-        query?.endpointName === "getPostComments" ||
-        query?.endpointName === "setDefaultInstructorBankAccount" ||
-        query?.endpointName === "getInstructorBankAccounts" ||
-        query?.endpointName === "getPersonalMaterials" ||
-        query?.endpointName === "getFolderTree" ||
-        query?.endpointName === "getPublicMaterialsByUserId" ||
-        query?.endpointName === "generateVoucherCode" ||
-        query?.endpointName === "getVoucherDepositInfo" ||
-        query?.endpointName === "getVouchers" ||
-        query?.endpointName === "getVoucherStats" ||
-        query?.endpointName === "getVoucherUsages"
-      ) {
-        return false
-      }
-
-      return true
-    }).length
-
-    const wasFetching = activeCountRef.current > 0
-    const isFetching = pendingCount > 0
-
-    activeCountRef.current = pendingCount
-
-    if (isFetching && !wasFetching) {
       NProgress.start()
-    } else if (!isFetching && wasFetching) {
-      NProgress.done()
+
+      const timer = setTimeout(() => {
+        NProgress.done()
+      }, 300)
+
+      return () => {
+        clearTimeout(timer)
+        NProgress.done()
+      }
     }
-  }, [apiState])
+  }, [location.pathname])
 
   return null
 }

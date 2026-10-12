@@ -8,7 +8,6 @@ import { ConversationSignalRProvider } from "@/features/chat/context/Conversatio
 import { InChatCallProvider } from "@/features/chat/context/InChatCallProvider"
 import GlobalSignalRHandler from "@/features/chat/components/GlobalSignalRHandler"
 import ServerDownScreen from "@/shared/components/ServerDownScreen"
-import NavigationProgress from "@/shared/components/NavigationProgress"
 import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
 import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 import { GlobalPresenceProvider } from "@/shared/context/GlobalPresenceContext"
@@ -36,7 +35,6 @@ function App() {
         <GlobalErrorBoundary>
           <WebViewGuard>
             <GlobalVideoCallProvider>
-              <NavigationProgress />
               <ServerDownScreen />
               <SidebarProvider>
                 <ConversationSignalRProvider>
