@@ -60,6 +60,8 @@ const MoreMenuMobileGeneralView = ({
     room,
     closingRemainingSeconds,
     isSubtitleActive,
+    isStartingSubtitles,
+    isStoppingSubtitles,
     stopSubtitles,
     showWatchTogether,
     setShowWatchTogether,
@@ -244,11 +246,12 @@ const MoreMenuMobileGeneralView = ({
               }
             }
           }}
+          disabled={!isAISession && (isStartingSubtitles || isStoppingSubtitles)}
           className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
             (isAISession ? showCC : isSubtitleActive)
               ? "bg-red-100 text-red-600"
               : "bg-[#F5F5F5]"
-          }`}
+          } ${!isAISession && (isStartingSubtitles || isStoppingSubtitles) ? "opacity-70 cursor-not-allowed" : ""}`}
         >
           <Captions size={24} />
         </button>

@@ -579,6 +579,9 @@ export default {
     linkCopied: "Link copied!",
     leaveCall: "Leave call",
     leaveCallConfirmText: "Are you sure you want to leave this call?",
+    leaveCallBlockedTitle: "Cannot leave call right now",
+    leaveCallBlockedDesc:
+      "Breakout rooms are currently active. As the Host, you must close all breakout rooms (Stop Breakout) before leaving.",
     pictureInPicture: "Picture-in-Picture",
     controls: {
       micOn: "Turn microphone on",
@@ -633,7 +636,9 @@ export default {
         errorCannotGet: "Unable to get data",
       },
     },
-    subtitleWaiting: "Waiting for subtitles...",
+    subtitleWaiting: "Subtitles will appear when someone speaks...",
+    startingSubtitles: "Turning on subtitles...",
+    closingSubtitles: "Turning off subtitles...",
     speechWaiting: "Waiting for speech...",
     displayLanguage: "Display language",
     fontSize: "Font size",
@@ -676,7 +681,7 @@ export default {
       switchMessage:
         "You are already in an active call. Do you want to leave your current call and join this new one?",
       switchConfirm: "Leave & Continue",
-      switchCancel: "Stay in Current Call",
+      switchCancel: "Stay in Call",
     },
     error: {
       micPermission:

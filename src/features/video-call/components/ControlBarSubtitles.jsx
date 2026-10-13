@@ -33,7 +33,7 @@ const ControlBarSubtitles = ({ className = "" }) => {
     <div className={`relative ${className}`}>
       <ControlButton
         isActive={showRoomSubtitles}
-        isLoading={isStartingSubtitles || isStoppingSubtitles}
+        disabled={isStartingSubtitles || isStoppingSubtitles}
         onClick={() => {
           if (showRoomSubtitles) {
             stopSubtitles()
