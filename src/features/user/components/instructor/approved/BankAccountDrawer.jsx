@@ -220,27 +220,14 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
         setVerifyWarning("")
       } else {
         setVerified(buildManualVerified())
-        setVerifyWarning(
-          result.message ||
-            ins.bankUnverifiedWarning ||
-            "Tài khoản chưa được ngân hàng xác thực tự động. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục.",
-        )
+        setVerifyWarning(result.message || "")
       }
       setConsent(false)
       setRequestError("")
       setStep("confirm")
     } catch (err) {
-      const { message } = resolveBankError(
-        err,
-        ins.bankVerifyError || "Không thể xác thực tài khoản ngân hàng.",
-        "account",
-      )
       setVerified(buildManualVerified())
-      setVerifyWarning(
-        message ||
-          ins.bankUnverifiedWarning ||
-          "Tài khoản chưa được ngân hàng xác thực tự động. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục.",
-      )
+      setVerifyWarning("")
       setConsent(false)
       setRequestError("")
       setStep("confirm")
@@ -445,16 +432,14 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
         </div>
       ) : isConfirmStep ? (
         <div className="flex flex-col gap-3.5">
-          {verified?.isVerified === false || verifyWarning ? (
+          {verifyWarning ? (
             <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFFAEB] px-3.5 py-2.5">
               <ShieldCheck
                 size={18}
                 className="mt-0.5 shrink-0 text-[#B54708]"
               />
               <p className="text-[10px] font-semibold leading-4 text-[#B54708]">
-                {verifyWarning ||
-                  ins.bankUnverifiedWarning ||
-                  "Tài khoản chưa được ngân hàng xác thực tự động. Vui lòng kiểm tra kỹ thông tin trước khi tiếp tục."}
+                {verifyWarning}
               </p>
             </div>
           ) : (

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react"
-import { useLanguage } from "@/shared/context/LanguageContext"
 import { useVerifyBankAccountMutation } from "../api/instructorBankAccountsApi"
 import { sanitizeAccountNumber } from "../utils/bankAccountUtils"
 
@@ -15,7 +14,6 @@ export default function useBankVerification(
   accountNumber,
   enabled = true,
 ) {
-  const { t } = useLanguage()
   const [verifiedName, setVerifiedName] = useState("")
   const [verifyError, setVerifyError] = useState("")
   const [canBypass, setCanBypass] = useState(false)
@@ -65,27 +63,20 @@ export default function useBankVerification(
         } else {
           setVerifiedName("")
           setCanBypass(Boolean(result?.canBypass))
-          setVerifyError(
-            result?.message ||
-              t?.bankAccounts?.modal?.autoVerifyError ||
-              "Không thể tự động tra cứu tên chủ tài khoản lúc này. Bạn vẫn có thể tiếp tục thêm tài khoản.",
-          )
+          // Display genuine account error from the bank if present
+          setVerifyError(result?.message || "")
         }
       } catch (err) {
         setVerifiedName("")
-        setCanBypass(Boolean(err?.data?.canBypass))
-        setVerifyError(
-          err?.data?.message ||
-            t?.bankAccounts?.modal?.autoVerifyError ||
-            "Không thể xác thực số tài khoản. Vui lòng kiểm tra lại.",
-        )
+        setCanBypass(true)
+        setVerifyError("")
       } finally {
         setIsChecking(false)
       }
     }, 600)
 
     return () => clearTimeout(timer)
-  }, [accountNumber, selectedBank, verifyBankAccount, enabled, resetVerification, t])
+  }, [accountNumber, selectedBank, verifyBankAccount, enabled, resetVerification])
 
   return {
     verifiedName,
