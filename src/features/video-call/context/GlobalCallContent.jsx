@@ -36,6 +36,7 @@ import {
 } from "@/store/api/assistantApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
+import { useSavedParticipantVolumes } from "@/features/video-call/hooks/useSavedParticipantVolumes"
 import { useSubscriptionPolicy } from "@/features/video-call/hooks/useSubscriptionPolicy"
 import {
   getNavigate,
@@ -188,7 +189,7 @@ const GlobalCallContent = ({
     } catch {
       /* ignore */
     }
-    return "auto"
+    return "grid"
   })
   const [maxTiles, setMaxTiles] = useState(() => {
     try {
@@ -839,6 +840,9 @@ const GlobalCallContent = ({
 
   // ── Join/Leave Audio (personal preference, off by default) ──
   useParticipantAudioEffect(participants, joinLeaveSound)
+
+  // ── Auto-apply saved participant volume levels ──
+  useSavedParticipantVolumes(allParticipants, user?.accountId)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}

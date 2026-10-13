@@ -96,7 +96,7 @@ strong,
 b {
   font-weight: 700;
   -webkit-text-stroke: 0.2px currentColor;
-  color: #0f172a;
+  color: inherit;
 }
 
 #root {
@@ -477,4 +477,10 @@ input[type="number"] {
   width: 100%;
   max-height: calc(100vh - 150px);
   margin: auto 0;
+}
+
+/* In-chat message jump flash highlight: 2px left indicator + subtle background tint without content shift */
+.chat-message-highlight {
+  box-shadow: inset 2px 0 0 0 var(--cath-primary, #72000d) !important;
+  background-color: rgba(114, 0, 13, 0.1) !important;
 }

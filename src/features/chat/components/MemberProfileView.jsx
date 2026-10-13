@@ -18,21 +18,20 @@ const MemberProfileView = ({ member }) => {
         src={member.avatarImageUrl}
         accountId={member.accountId}
         className={
-          getParticipantTheme(
-            member.accountId || member.username || "",
-          ).avatarClass
+          getParticipantTheme(member.accountId || member.username || "")
+            .avatarClass
         }
       />
 
-      <h2 className="mt-3 font-semibold text-center">{member.username}</h2>
+      <h2 className="mt-4 text-center">{member.username}</h2>
 
-      <p className="mt-4 text-sm text-[#606060] text-center">
+      <p className="text-sm text-[#606060] text-center">
         {member.isTeacher
-          ? (t?.chat?.userPanel?.teacher || "Giảng viên")
-          : (`${t?.chat?.userPanel?.level || "Level"}: ${member.level || t?.chat?.userPanel?.student || "Student"}`)}
+          ? t?.chat?.userPanel?.teacher || "Giảng viên"
+          : `${t?.chat?.userPanel?.level || "Level"}: ${member.level || t?.chat?.userPanel?.student || "Student"}`}
       </p>
 
-      <div className="w-full mt-6">
+      <div className="w-full mt-4">
         <PillButton
           onClick={() => window.open(`/profile/${member.accountId}`, "_blank")}
           variant="primary"

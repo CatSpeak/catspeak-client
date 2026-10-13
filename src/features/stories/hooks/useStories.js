@@ -10,7 +10,7 @@ import {
   useDeleteStoryMutation,
   useReportStoryMutation,
 } from "../api/storiesApi"
-import { useConversationSignalRContext } from "@/features/chat/context/ConversationSignalRContext"
+import { useConversationSignalRContext } from "@/features/chat/context/useConversationSignalRContext.js"
 
 const useStories = (languageCommunity) => {
   const dispatch = useDispatch()
@@ -52,9 +52,10 @@ const useStories = (languageCommunity) => {
         storyContent: content,
         languageCommunity,
       }).unwrap()
-
       setInputValue("")
-    } catch (error) {}
+    } catch {
+      // Ignore creation error
+    }
   }
 
   const handleInteract = async (storyId, actionType) => {

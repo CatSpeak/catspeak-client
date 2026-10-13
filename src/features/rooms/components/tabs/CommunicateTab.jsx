@@ -81,7 +81,7 @@ const CommunicateTab = ({
               onBackToOverview={handleBackToOverview}
             />
           ) : (
-            <div className="w-full flex flex-col gap-10">
+            <div className="w-full flex flex-col gap-4">
               {sortedSections.map((section) => (
                 <CategoryRoomSection
                   key={section.key}

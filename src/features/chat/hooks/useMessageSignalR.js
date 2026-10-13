@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useRef, useCallback } from "react"
 import { useDispatch } from "react-redux"
 import { conversationsApi } from "@/store/api/social/conversationsApi"
-import { useConversationSignalRContext } from "../../chat/context/ConversationSignalRContext"
+import { useConversationSignalRContext } from "../context/useConversationSignalRContext.js"
 import useConversationSignalR from "./useConversationSignalR"
 
 export const useMessageSignalR = ({ activeConversationId }) => {
@@ -16,16 +16,23 @@ export const useMessageSignalR = ({ activeConversationId }) => {
   } = context || {}
 
   const [typingUsersMap, setTypingUsersMap] = useState({})
+  const [prevConversationId, setPrevConversationId] = useState(activeConversationId)
   const typingTimersRef = useRef({})
 
-  // Reset typing state when active conversation changes
-  useEffect(() => {
+  // Reset typing state when active conversation changes (render-time adjustment)
+  if (prevConversationId !== activeConversationId) {
+    setPrevConversationId(activeConversationId)
     setTypingUsersMap({})
-    // Clear all existing timeouts
-    Object.values(typingTimersRef.current).forEach((timer) =>
-      clearTimeout(timer),
-    )
-    typingTimersRef.current = {}
+  }
+
+  // Clear timers when activeConversationId changes or on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(typingTimersRef.current).forEach((timer) =>
+        clearTimeout(timer),
+      )
+      typingTimersRef.current = {}
+    }
   }, [activeConversationId])
 
   // Join conversation on select

@@ -1,6 +1,7 @@
 import React from "react"
 import { ArrowLeft } from "lucide-react"
 import FluentCard from "@/shared/components/ui/FluentCard"
+import PillButton from "@/shared/components/ui/buttons/PillButton"
 
 const FullscreenOverlayShell = ({
   backgroundImageUrl,
@@ -22,24 +23,26 @@ const FullscreenOverlayShell = ({
     >
       <div className="fixed inset-0 bg-[#111111]/40 blur-sm" />
 
-      <div className="relative z-50 w-full p-3 sm:p-5 flex justify-start shrink-0">
-        <button
+      <div className="relative z-50 w-full p-4 flex justify-start shrink-0">
+        <PillButton
+          variant="transparent"
           onClick={onBack}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-md border border-white/10 text-white transition-all duration-300 shadow-sm"
+          startIcon={
+            <ArrowLeft
+              size={16}
+              className="transition-transform group-hover/pill:-translate-x-1"
+            />
+          }
         >
-          <ArrowLeft
-            size={16}
-            className="transition-transform group-hover:-translate-x-1"
-          />
-          <span className="text-sm font-medium pr-1">{backLabel}</span>
-        </button>
+          {backLabel}
+        </PillButton>
       </div>
 
       <div
-        className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-5 ${contentClassName}`}
+        className={`relative z-10 flex flex-1 w-full flex-col items-center justify-center px-4 pb-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] ${contentClassName}`}
       >
         <FluentCard
-          className={`shadow-2xl w-full ${maxWidthClass} items-center ${cardClassName}`}
+          className={`shadow-2xl w-full ${maxWidthClass} items-center my-auto ${cardClassName}`}
         >
           {children}
         </FluentCard>

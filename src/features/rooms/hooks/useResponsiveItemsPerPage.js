@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react"
 
-const MOBILE_MAX = 425 // ≤425px → touch scroll (returns null)
-const DESKTOP_MIN = 1024 // ≥1024px → 4 cards, below → 2 cards
+const MOBILE_MAX = 640 // ≤640px → touch scroll (returns null)
+const DESKTOP_MIN = 1024 // ≥1024px → 4 cards, 641px–1023px → 2 cards
 
 /**
  * Returns the number of visible carousel items per breakpoint.
- * Returns null on mobile/tablet (≤1024px) to signal touch-scroll mode instead of button carousel.
+ * - Mobile (≤640px): returns null (touch-scroll mode, no pagination buttons)
+ * - Tablet / half-screen (641px–1023px): returns 2 (2 cards, pagination buttons, no scroll)
+ * - Desktop (≥1024px): returns 4 (4 cards, pagination buttons, no scroll)
  * @returns {number | null}
  */
 const useResponsiveItemsPerPage = () => {
@@ -19,7 +21,8 @@ const useResponsiveItemsPerPage = () => {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  if (width <= DESKTOP_MIN) return null // mobile & tablet: use touch scroll
+  if (width <= MOBILE_MAX) return null // mobile: touch scroll without pagination buttons
+  if (width < DESKTOP_MIN) return 2 // tablet / half-screen: 2 cards with pagination
   return 4 // desktop: 4 columns
 }
 

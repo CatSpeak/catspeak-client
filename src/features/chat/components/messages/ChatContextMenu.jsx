@@ -1,15 +1,25 @@
 import React, { useEffect, useCallback } from "react"
 import { createPortal } from "react-dom"
-import { motion, AnimatePresence } from "framer-motion"
-import { Reply, Copy, Trash2, Undo2 } from "lucide-react"
+import { AnimatePresence } from "framer-motion"
+import {
+  Reply,
+  Copy,
+  Trash2,
+  Undo2,
+  Pencil,
+  Pin,
+  PinOff,
+  Forward,
+} from "lucide-react"
 import toast from "react-hot-toast"
 import MenuItem, { MenuList } from "@/shared/components/ui/MenuItem"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { QUICK_REACTIONS } from "../../utils/reactionUtils"
 
 /**
- * ChatContextMenu — Context menu overlay with pixel-accurate positioning & avatar.
- * Uses Framer Motion AnimatePresence and FluentAnimation for direction-aware entrance/exit.
+ * ChatContextMenu — Context menu overlay with pixel-accurate positioning,
+ * quick reaction emoji row, and full actions (Reply, Edit, Forward, Pin/Unpin, Copy, Delete, Recall).
  */
 const ChatContextMenu = ({
   isOpen,
@@ -19,10 +29,19 @@ const ChatContextMenu = ({
   targetRect,
   rowElement,
   onReply,
+  onEdit,
+  onForward,
+  onPin,
+  onUnpin,
+  onReact,
+  canPin = false,
+  canEdit = false,
+  isPinned = false,
   onDeleteForMe,
   onRecall,
 }) => {
   const { t } = useLanguage()
+
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === "Escape") {
@@ -44,27 +63,21 @@ const ChatContextMenu = ({
   const vh = typeof window !== "undefined" ? window.innerHeight : 800
   const vw = typeof window !== "undefined" ? window.innerWidth : 1200
 
-  const menuHeight = 205
+  const menuHeight = 260
   const gap = 8
   const padding = 16
 
-  // Check if menu fits below message in its exact original spot
   const fitsBelow = vh - bottom >= menuHeight + gap + padding
-
-  // Check if menu fits above message in its exact original spot
   const fitsAbove = top >= menuHeight + gap + padding
 
   let elevatedTop = top
   let menuTop
 
   if (fitsBelow) {
-    // Fits below -> Message stays in exact spot, menu goes below
     menuTop = bottom + gap
   } else if (fitsAbove) {
-    // Fits above -> Message stays in exact spot, menu goes above
     menuTop = top - gap - menuHeight
   } else {
-    // Edge case: shift slightly to fit within screen padding
     const shiftY = bottom + gap + menuHeight - (vh - padding)
     elevatedTop = Math.max(padding, top - shiftY)
     menuTop = elevatedTop + height + gap
@@ -110,7 +123,7 @@ const ChatContextMenu = ({
             onClick={onClose}
           />
 
-          {/* Elevated Message + Avatar Row (static placement) */}
+          {/* Elevated Message + Avatar Row */}
           <div
             className="fixed z-[100000] pointer-events-none"
             style={{
@@ -122,7 +135,7 @@ const ChatContextMenu = ({
             {rowElement}
           </div>
 
-          {/* Action MenuList with FluentAnimation */}
+          {/* Action MenuList */}
           <div
             className="fixed z-[100001]"
             style={{
@@ -136,47 +149,107 @@ const ChatContextMenu = ({
               duration={0.2}
               exit={true}
             >
-              <MenuList className="max-h-[calc(100vh-40px)] overflow-y-auto shadow-2xl">
-                {onReply && (
-                  <MenuItem
-                    onClick={() => handleAction(onReply)}
-                    icon={<Reply />}
-                    label={t?.chat?.actions?.reply || "Reply"}
-                  />
+              <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-2xl border border-border/80 overflow-hidden min-w-[200px] max-h-[calc(100vh-40px)] flex flex-col">
+                {/* Quick Emoji Reaction Header */}
+                {onReact && (
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-border/60 bg-neutral-50/70 dark:bg-zinc-900/50">
+                    {QUICK_REACTIONS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          onClose?.()
+                          onReact(message, emoji)
+                        }}
+                        className="text-lg p-1 hover:scale-125 active:scale-95 transition-transform duration-150 leading-none select-none"
+                        title={emoji}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
                 )}
 
-                {contentToCopy && (
-                  <MenuItem
-                    onClick={() => {
-                      onClose?.()
-                      handleCopy()
-                    }}
-                    icon={<Copy />}
-                    label={
-                      message?.mediaUrl || message?.fileUrl
-                        ? (t?.chat?.actions?.copyLink || "Copy link")
-                        : (t?.chat?.actions?.copyText || "Copy text")
-                    }
-                  />
-                )}
+                <MenuList className="overflow-y-auto p-1 border-0 shadow-none">
+                  {onReply && (
+                    <MenuItem
+                      onClick={() => handleAction(onReply)}
+                      icon={<Reply />}
+                      label={t?.chat?.actions?.reply || "Reply"}
+                    />
+                  )}
 
-                {onDeleteForMe && (
-                  <MenuItem
-                    onClick={() => handleAction(onDeleteForMe)}
-                    icon={<Trash2 />}
-                    label={t?.chat?.actions?.removeForMe || "Remove for me"}
-                  />
-                )}
+                  {canEdit && onEdit && (
+                    <MenuItem
+                      onClick={() => handleAction(onEdit)}
+                      icon={<Pencil />}
+                      label={t?.chat?.actions?.edit || "Edit"}
+                    />
+                  )}
 
-                {isOwn && onRecall && (
-                  <MenuItem
-                    onClick={() => handleAction(onRecall)}
-                    className="text-red-600"
-                    icon={<Undo2 />}
-                    label={t?.chat?.actions?.removeForEveryone || "Remove for everyone"}
-                  />
-                )}
-              </MenuList>
+                  {onForward && (
+                    <MenuItem
+                      onClick={() => handleAction(onForward)}
+                      icon={<Forward />}
+                      label={t?.chat?.actions?.forward || "Forward"}
+                    />
+                  )}
+
+                  {canPin && (
+                    <MenuItem
+                      onClick={() => {
+                        onClose?.()
+                        if (isPinned) {
+                          onUnpin && onUnpin(message)
+                        } else {
+                          onPin && onPin(message)
+                        }
+                      }}
+                      icon={isPinned ? <PinOff /> : <Pin />}
+                      label={
+                        isPinned
+                          ? t?.chat?.actions?.unpin || "Unpin"
+                          : t?.chat?.actions?.pin || "Pin"
+                      }
+                    />
+                  )}
+
+                  {contentToCopy && (
+                    <MenuItem
+                      onClick={() => {
+                        onClose?.()
+                        handleCopy()
+                      }}
+                      icon={<Copy />}
+                      label={
+                        message?.mediaUrl || message?.fileUrl
+                          ? t?.chat?.actions?.copyLink || "Copy link"
+                          : t?.chat?.actions?.copyText || "Copy text"
+                      }
+                    />
+                  )}
+
+                  {onDeleteForMe && (
+                    <MenuItem
+                      onClick={() => handleAction(onDeleteForMe)}
+                      icon={<Trash2 />}
+                      label={t?.chat?.actions?.removeForMe || "Remove for me"}
+                    />
+                  )}
+
+                  {isOwn && onRecall && (
+                    <MenuItem
+                      onClick={() => handleAction(onRecall)}
+                      className="text-red-600 hover:text-red-700"
+                      icon={<Undo2 />}
+                      label={
+                        t?.chat?.actions?.removeForEveryone ||
+                        "Remove for everyone"
+                      }
+                    />
+                  )}
+                </MenuList>
+              </div>
             </FluentAnimation>
           </div>
         </div>
@@ -189,4 +262,4 @@ const ChatContextMenu = ({
     : null
 }
 
-export default ChatContextMenu
+export default React.memo(ChatContextMenu)

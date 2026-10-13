@@ -20,7 +20,9 @@ const ConversationItem = ({
   const { user } = useAuth()
   const { formatRelative } = useTimezone()
 
-  const currentUserId = currentUser?.id || user?.accountId
+  const currentUserId = currentUser?.id ?? user?.accountId
+  const sourceAccountId =
+    currentUser?.sourceAccountId ?? user?.sourceAccountId ?? null
 
   const isGroup = conversation?.isGroup
   const name = isGroup
@@ -50,9 +52,16 @@ const ConversationItem = ({
     const isSystemMessage = typeStr === "system" || typeVal === 4
     const rawMsg = conversation?.lastMessage || ""
 
-    const senderId = conversation?.lastMessageSenderId != null ? Number(conversation.lastMessageSenderId) : null
+    const senderId =
+      conversation?.lastMessageSenderId != null
+        ? Number(conversation.lastMessageSenderId)
+        : null
     const myId = currentUserId != null ? Number(currentUserId) : null
-    const isOwn = senderId != null && myId != null && senderId === myId
+    const sourceId = sourceAccountId != null ? Number(sourceAccountId) : null
+    const isOwn =
+      senderId != null &&
+      ((myId != null && senderId === myId) ||
+        (sourceId != null && senderId === sourceId))
 
     let senderName = ""
     if (isGroup && conversation?.participants && senderId != null && !isOwn) {
@@ -82,9 +91,9 @@ const ConversationItem = ({
       preview = isOwn
         ? t?.chat?.youRecalledMessage || "Bạn đã thu hồi một tin nhắn"
         : senderName
-          ? (t?.chat?.userRecalledMessage
-              ? t.chat.userRecalledMessage.replace("{{name}}", senderName)
-              : `${senderName} đã thu hồi một tin nhắn`)
+          ? t?.chat?.userRecalledMessage
+            ? t.chat.userRecalledMessage.replace("{{name}}", senderName)
+            : `${senderName} đã thu hồi một tin nhắn`
           : t?.chat?.recalledMessage || "Tin nhắn đã bị thu hồi"
     } else if (hasText) {
       // If there is text attached with media/file or plain text, prioritize the text
@@ -93,25 +102,25 @@ const ConversationItem = ({
       preview = isOwn
         ? t?.chat?.youSentImage || "Bạn đã gửi một hình ảnh"
         : senderName
-          ? (t?.chat?.userSentImage
-              ? t.chat.userSentImage.replace("{{name}}", senderName)
-              : `${senderName} đã gửi một hình ảnh`)
+          ? t?.chat?.userSentImage
+            ? t.chat.userSentImage.replace("{{name}}", senderName)
+            : `${senderName} đã gửi một hình ảnh`
           : t?.chat?.sentImage || "Đã gửi một hình ảnh"
     } else if (typeStr === "video" || typeVal === 2) {
       preview = isOwn
         ? t?.chat?.youSentVideo || "Bạn đã gửi một video"
         : senderName
-          ? (t?.chat?.userSentVideo
-              ? t.chat.userSentVideo.replace("{{name}}", senderName)
-              : `${senderName} đã gửi một video`)
+          ? t?.chat?.userSentVideo
+            ? t.chat.userSentVideo.replace("{{name}}", senderName)
+            : `${senderName} đã gửi một video`
           : t?.chat?.sentVideo || "Đã gửi một video"
     } else if (typeStr === "file" || typeStr === "document" || typeVal === 3) {
       preview = isOwn
         ? t?.chat?.youSentFile || "Bạn đã gửi một tệp"
         : senderName
-          ? (t?.chat?.userSentFile
-              ? t.chat.userSentFile.replace("{{name}}", senderName)
-              : `${senderName} đã gửi một tệp`)
+          ? t?.chat?.userSentFile
+            ? t.chat.userSentFile.replace("{{name}}", senderName)
+            : `${senderName} đã gửi một tệp`
           : t?.chat?.sentFile || "Đã gửi một tệp"
     } else {
       preview = textPrefix + rawMsg
@@ -173,16 +182,16 @@ const ConversationItem = ({
   return (
     <ListItem
       onClick={onClick}
-      hoverEffect={!isSelected}
-      className={`rounded-xl ${isSelected ? "bg-primary2" : ""}`}
-      contentClassName="rounded-xl"
+      selected={isSelected}
       lines={2}
       leftContent={leftContent}
       rightContent={rightContent}
     >
       <span
         className={`truncate ${
-          unreadCount > 0 ? "font-semibold text-black" : "font-medium text-gray-900"
+          unreadCount > 0
+            ? "font-semibold text-black"
+            : "font-medium text-gray-900"
         }`}
       >
         {name}
@@ -192,7 +201,10 @@ const ConversationItem = ({
           unreadCount > 0 ? "font-medium text-black" : "text-[#606060]"
         }`}
       >
-        {preview || t?.chat?.noMessages || t?.messages?.noMessages || "No messages yet"}
+        {preview ||
+          t?.chat?.noMessages ||
+          t?.messages?.noMessages ||
+          "No messages yet"}
       </span>
     </ListItem>
   )
@@ -201,4 +213,3 @@ const ConversationItem = ({
 ConversationItem.displayName = "ConversationItem"
 
 export default React.memo(ConversationItem)
-

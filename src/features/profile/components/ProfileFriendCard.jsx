@@ -22,10 +22,14 @@ import AnimatedNameFallback from "./AnimatedNameFallback"
 
 const isUserTeacher = (user) => {
   const v =
-    user?.isTeacher ?? user?.IsTeacher ?? user?.isTeacherAccount ?? user?.IsTeacherAccount
+    user?.isTeacher ??
+    user?.IsTeacher ??
+    user?.isTeacherAccount ??
+    user?.IsTeacherAccount
   if (v === true || v === 1 || v === "true") return true
   const role = String(user?.roleName ?? user?.RoleName ?? "").toLowerCase()
-  if (role === "teacher" || role === "instructor" || role === "expert") return true
+  if (role === "teacher" || role === "instructor" || role === "expert")
+    return true
   return false
 }
 
@@ -100,7 +104,11 @@ const ProfileFriendCard = memo(
 
     // Đã gửi = local optimistic hoặc parent Set (server-persistent outgoing + optimistic).
     // Reload persistence do backend đảm nhiệm (GET /requests/sent).
-    const sent = requestSent || isRequestSent || isOutgoingRequest || Boolean(user?.isOutgoingRequest)
+    const sent =
+      requestSent ||
+      isRequestSent ||
+      isOutgoingRequest ||
+      Boolean(user?.isOutgoingRequest)
     const resolvedFriendshipId =
       friendshipIdProp ?? user?.friendshipId ?? user?.FriendshipId ?? null
 
@@ -152,7 +160,9 @@ const ProfileFriendCard = memo(
         {activeSubTab === "find" && !isSelf && sent && (
           <MenuItem
             icon={<UserMinus className="text-red-600" />}
-            label={t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
+            label={
+              t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"
+            }
             className="text-red-600"
             onClick={() => handleCancel(close)}
           />
@@ -184,7 +194,9 @@ const ProfileFriendCard = memo(
         {(isOutgoingRequest || user?.isOutgoingRequest) && (
           <MenuItem
             icon={<UserMinus className="text-red-600" />}
-            label={t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
+            label={
+              t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"
+            }
             className="text-red-600"
             onClick={() => handleCancel(close)}
           />
@@ -231,7 +243,7 @@ const ProfileFriendCard = memo(
           <MenuItem
             icon={<MessageSquare />}
             label={t.profile?.friends?.actions?.message || "Nhắn tin"}
-            onClick={() => handleStartChat(user.accountId, close)}
+            onClick={() => handleStartChat(user.accountId ?? user.id ?? user.userId, close)}
           />
         )}
 
@@ -263,7 +275,7 @@ const ProfileFriendCard = memo(
           <MenuItem
             icon={<MessageSquare />}
             label={t.profile?.friends?.actions?.message || "Nhắn tin"}
-            onClick={() => handleStartChat(user.accountId, close)}
+            onClick={() => handleStartChat(user.accountId ?? user.id ?? user.userId, close)}
           />
         )}
 
@@ -310,8 +322,14 @@ const ProfileFriendCard = memo(
             />
           }
           rightContent={
-            <div className="shrink-0 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              {((activeSubTab === "find" && sent && !isSelf) || isOutgoingRequest || user?.isOutgoingRequest) && resolvedFriendshipId ? (
+            <div
+              className="shrink-0 flex items-center gap-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {((activeSubTab === "find" && sent && !isSelf) ||
+                isOutgoingRequest ||
+                user?.isOutgoingRequest) &&
+              resolvedFriendshipId ? (
                 <PillButton
                   variant="secondary"
                   className="!h-8 !px-3 !text-xs !text-red-600"
@@ -320,7 +338,12 @@ const ProfileFriendCard = memo(
                   {t.profile?.friends?.actions?.cancelRequest || "Thu hồi"}
                 </PillButton>
               ) : null}
-              {!(activeSubTab === "find" && sent && !isSelf && !resolvedFriendshipId) && (
+              {!(
+                activeSubTab === "find" &&
+                sent &&
+                !isSelf &&
+                !resolvedFriendshipId
+              ) && (
                 <Popover
                   placement="bottom-right"
                   trigger={
@@ -392,7 +415,10 @@ const ProfileFriendCard = memo(
           </div>
 
           {/* Primary Action Button via PillButton (Desktop only) */}
-          <div className="w-full mt-auto flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="w-full mt-auto flex flex-col gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Find Friends / Recommendations */}
             {activeSubTab === "find" && !isSelf && !sent && (
               <PillButton
@@ -429,7 +455,8 @@ const ProfileFriendCard = memo(
                 className="w-full !text-red-600"
                 onClick={() => handleCancel()}
               >
-                {t.profile?.friends?.actions?.cancelRequest || "Thu hồi lời mời"}
+                {t.profile?.friends?.actions?.cancelRequest ||
+                  "Thu hồi lời mời"}
               </PillButton>
             )}
 
@@ -458,7 +485,7 @@ const ProfileFriendCard = memo(
               <PillButton
                 variant="secondary"
                 className="w-full"
-                onClick={() => handleStartChat(user.accountId)}
+                onClick={() => handleStartChat(user.accountId ?? user.id ?? user.userId)}
               >
                 {t.profile?.friends?.actions?.message || "Nhắn tin"}
               </PillButton>
@@ -525,8 +552,10 @@ const ProfileFriendCard = memo(
           }
         >
           <p className="text-sm text-gray-600">
-            {(t.profile?.friends?.actions?.cancelMessage || "Thu hồi lời mời kết bạn đã gửi tới {name}? Bạn sẽ đồng thời bỏ theo dõi người này.")
-              .replace("{name}", displayName)}
+            {(
+              t.profile?.friends?.actions?.cancelMessage ||
+              "Thu hồi lời mời kết bạn đã gửi tới {name}? Bạn sẽ đồng thời bỏ theo dõi người này."
+            ).replace("{name}", displayName)}
           </p>
         </Modal>
       </div>

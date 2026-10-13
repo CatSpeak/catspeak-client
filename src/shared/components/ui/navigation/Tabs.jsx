@@ -22,10 +22,10 @@ const Tabs = memo(
     activeClassName = "text-[#990011]",
     inactiveClassName = "text-[#606060]",
     fullWidth = true,
+    height = "h-12",
   }) => {
     const isResponsive = fullWidth === "responsive"
     const isFull = fullWidth === true
-
     const scrollContainerRef = useRef(null)
     const activeTabRef = useRef(null)
 

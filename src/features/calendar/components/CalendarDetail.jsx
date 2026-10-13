@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useMemo } from "react"
 import { useSelector } from "react-redux"
 import { selectCurrentUser } from "@/store/slices/authSlice"
+import { useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetEventsByDateQuery } from "@/store/api/eventsApi"
 import { processOverlappingEvents, parseTime } from "../utils/EventUtils"
@@ -16,6 +17,7 @@ const DEFAULT_COLOR = "#B91264"
 
 const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { t } = useLanguage()
+  const { lang } = useParams()
   const scrollRef = useRef(null)
   const hasScrolledToEvent = useRef(false)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -40,6 +42,7 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { data: eventsDataA, isLoading: isLoadingA } = useGetEventsByDateQuery(
     {
       date: utcDateA,
+      community: lang,
     },
     { skip: selectedDate === null },
   )
@@ -47,6 +50,7 @@ const CalendarDetail = ({ selectedDate, currentDate }) => {
   const { data: eventsDataB, isLoading: isLoadingB } = useGetEventsByDateQuery(
     {
       date: utcDateB,
+      community: lang,
     },
     { skip: selectedDate === null || !needsTwoQueries },
   )

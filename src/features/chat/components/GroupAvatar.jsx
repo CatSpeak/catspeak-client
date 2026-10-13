@@ -6,10 +6,31 @@ import { getParticipantTheme } from "@/features/video-call/utils/participantThem
  * GroupAvatar — displays initials or double overlapping avatars for a group conversation.
  */
 const GroupAvatar = ({ conversation, size = 48 }) => {
-  const participants = conversation.participants || []
+  const groupAvatarUrl =
+    conversation?.avatarImageUrl ||
+    conversation?.groupAvatar ||
+    conversation?.avatar
+
+  if (groupAvatarUrl) {
+    return (
+      <Avatar
+        size={size}
+        name={conversation?.groupName || conversation?.name || "G"}
+        src={groupAvatarUrl}
+      />
+    )
+  }
+
+  const participants = conversation?.participants || []
 
   if (participants.length === 0) {
-    const initial = (conversation.groupName || conversation.name || "G").charAt(0).toUpperCase()
+    const initial = (
+      conversation?.groupName ||
+      conversation?.name ||
+      "G"
+    )
+      .charAt(0)
+      .toUpperCase()
     return (
       <div
         className="rounded-full bg-gradient-to-br from-[#990011] to-[#c00015] flex items-center justify-center shrink-0 text-white font-bold"
@@ -23,13 +44,13 @@ const GroupAvatar = ({ conversation, size = 48 }) => {
   if (participants.length === 1) {
     const member = participants[0]
     const theme = getParticipantTheme(
-      member?.accountId || member?.username || "",
+      member?.accountId || member?.id || member?.username || "",
     )
     return (
       <Avatar
         size={size}
-        name={member?.username}
-        src={member?.avatarImageUrl}
+        name={member?.username || member?.name}
+        src={member?.avatarImageUrl || member?.avatar || member?.avatarUrl}
         className={theme.avatarClass}
       />
     )
@@ -41,26 +62,30 @@ const GroupAvatar = ({ conversation, size = 48 }) => {
   const smallSize = Math.round(size * 0.62)
 
   const themeFirst = getParticipantTheme(
-    first?.accountId || first?.username || "",
+    first?.accountId || first?.id || first?.username || "",
   )
   const themeSecond = getParticipantTheme(
-    second?.accountId || second?.username || "",
+    second?.accountId || second?.id || second?.username || "",
   )
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <Avatar
-        size={smallSize}
-        name={first?.username}
-        src={first?.avatarImageUrl}
-        className={`absolute top-0 left-0 z-[1] border-2 border-white ${themeFirst.avatarClass}`}
-      />
-      <Avatar
-        size={smallSize}
-        name={second?.username}
-        src={second?.avatarImageUrl}
-        className={`absolute bottom-0 right-0 z-[2] border-2 border-white ${themeSecond.avatarClass}`}
-      />
+      <div className="absolute top-0 left-0 z-[1] rounded-full">
+        <Avatar
+          size={smallSize}
+          name={first?.username || first?.name}
+          src={first?.avatarImageUrl || first?.avatar || first?.avatarUrl}
+          className={`border-2 border-white ${themeFirst.avatarClass}`}
+        />
+      </div>
+      <div className="absolute bottom-0 right-0 z-[2] rounded-full">
+        <Avatar
+          size={smallSize}
+          name={second?.username || second?.name}
+          src={second?.avatarImageUrl || second?.avatar || second?.avatarUrl}
+          className={`border-2 border-white ${themeSecond.avatarClass}`}
+        />
+      </div>
     </div>
   )
 }

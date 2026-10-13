@@ -1,17 +1,24 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ChevronLeft, Clock, MapPin, Tag, Share2, Info } from 'lucide-react'
 import dayjs from 'dayjs'
 import { IconButton, PillButton } from '@/shared/components/ui/buttons'
 import { useNavigate } from 'react-router-dom'
 import { useLanguage } from '@/shared/context/LanguageContext'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useTimezone } from '@/shared/hooks/useTimezone'
 import { getClassLanguageCode, getCommunityLang } from '@/shared/utils/navigation'
+import MediaViewerModal from '@/shared/components/ui/MediaViewerModal'
+import { getAddressHref } from '@/shared/utils/locationLink'
 import SharePopover from '../EventDetailModal/SharePopover'
+import CommunityBadge from '../CommunityBadge'
+import { getIsCreator } from '../../utils/eventPermissions'
 
 const EventCardDetail = ({ event, onBack }) => {
   const navigate = useNavigate()
   const { t, language } = useLanguage()
+  const { user } = useAuth()
   const { formatDate, formatTime } = useTimezone()
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
 
   if (!event) return null;
 
@@ -36,9 +43,13 @@ const EventCardDetail = ({ event, onBack }) => {
     return (
       <div>
         {['registered-event', 'my-event'].includes(event.eventType) && event.thumbnailUrl ? (
-          <div className="w-full h-48 bg-[#F8F9FA] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
-            <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-cover" />
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsViewerOpen(true)}
+            className="w-full h-48 bg-neutral-100 rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0 cursor-zoom-in"
+          >
+            <img src={event.thumbnailUrl} alt="thumbnail" className="w-full h-full object-contain" />
+          </button>
         ) : (
           <div className="w-full h-48 bg-[#F8F9FA] text-[#7B7979] rounded-2xl flex items-center justify-center overflow-hidden border border-border mt-2 shrink-0">
             No Image
@@ -78,7 +89,11 @@ const EventCardDetail = ({ event, onBack }) => {
             <SharePopover
               eventId={event.id || event._id}
               occurrenceId={event.occurrenceId}
-              className="!bg-transparent border border-border !text-[#1A1A1A] !w-11 !h-11 hover:!bg-gray-50"
+              visibilityScope={event.visibilityScope}
+              isCreator={getIsCreator(user, event)}
+              languageCommunity={event.languageCommunity}
+              variant="outline"
+              size="sm"
             />
           </div>
         )
@@ -111,6 +126,7 @@ const EventCardDetail = ({ event, onBack }) => {
           <ChevronLeft size={20} />
         </IconButton>
         <h3 className="font-bold text-[15px] text-[#1A1A1A] line-clamp-1">{event.title || t.calendar?.noTitle || 'Không có tiêu đề'}</h3>
+        <CommunityBadge languageCommunity={event.languageCommunity} />
       </div>
 
       {/* Scrollable Body */}
@@ -142,7 +158,14 @@ const EventCardDetail = ({ event, onBack }) => {
           {event.location && (
             <div className="flex items-start gap-3 text-[#7B7979] text-[15px]">
               <MapPin size={18} className="shrink-0 mt-0.5" />
-              <span className="leading-tight">{event.location || t.calendar?.notAssigned || 'Chưa cập nhật'}</span>
+              <a
+                href={getAddressHref(event)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="leading-tight text-[#990011] hover:opacity-80 transition-opacity"
+              >
+                {event.location || t.calendar?.notAssigned || 'Chưa cập nhật'}
+              </a>
             </div>
           )}
 
@@ -164,6 +187,13 @@ const EventCardDetail = ({ event, onBack }) => {
 
       {/* Footer */}
       {renderFooter(event)}
+
+      {isViewerOpen && event.thumbnailUrl && (
+        <MediaViewerModal
+          media={event.thumbnailUrl}
+          onClose={() => setIsViewerOpen(false)}
+        />
+      )}
     </div>
   )
 }

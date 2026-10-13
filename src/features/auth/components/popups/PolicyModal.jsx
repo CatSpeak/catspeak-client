@@ -4,21 +4,21 @@ import { useEffect } from "react"
 import { createPortal } from "react-dom"
 import { getPolicyComponent } from "./policies"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import useScrollLock from "@/shared/hooks/useScrollLock"
 
 const PolicyModal = ({ open, onClose, title }) => {
   const { t } = useLanguage()
   const PolicyComponent = getPolicyComponent(title)
 
+  useScrollLock(open)
+
   useEffect(() => {
     if (!open) return
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
     const onKeyDown = (e) => {
       if (e.key === "Escape") onClose?.()
     }
     document.addEventListener("keydown", onKeyDown)
     return () => {
-      document.body.style.overflow = prevOverflow
       document.removeEventListener("keydown", onKeyDown)
     }
   }, [open, onClose])
