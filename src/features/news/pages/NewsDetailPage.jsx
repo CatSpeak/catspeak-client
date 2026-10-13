@@ -237,12 +237,43 @@ const NewsDetailPage = () => {
         url = `${window.location.origin}${url}`;
       }
 
-      if (url) {
-        setShareUrl(getShareUrlWithVersion(url));
+      const finalShareUrl = url ? getShareUrlWithVersion(url) : window.location.href;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: newsItem.title || "CatSpeak",
+            text: newsItem.excerpt || newsItem.title || "",
+            url: finalShareUrl,
+          });
+        } catch (err) {
+          if (err.name === "NotAllowedError") {
+            setShareUrl(finalShareUrl);
+            setIsShareModalOpen(true);
+          } else if (err.name !== "AbortError") {
+            console.error("Share failed", err);
+          }
+        }
+      } else {
+        setShareUrl(finalShareUrl);
         setIsShareModalOpen(true);
       }
     } catch (e) {
-      console.error("Share failed", e);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: newsItem?.title || "CatSpeak",
+            text: newsItem?.excerpt || newsItem?.title || "",
+            url: window.location.href,
+          });
+        } catch (err) {
+          if (err.name !== "AbortError") {
+            console.error("Share failed", err);
+          }
+        }
+      } else {
+        console.error("Share failed", e);
+      }
     }
   };
 
