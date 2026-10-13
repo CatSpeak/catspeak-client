@@ -54,8 +54,17 @@ const ChatPage = () => {
     accumulatedMessagesCount,
     isLoadingMessages,
     isFetchingOlder,
+    isFetchingNewer,
     hasMoreMessages,
+    hasMoreAfter,
+    isViewingAroundWindow,
+    targetHighlightId,
+    isJumpingToMessage,
+    jumpToMessage,
+    clearTargetHighlight,
     handleLoadMoreMessages,
+    handleLoadNewerMessages,
+    resetToLatest,
     optimisticEditMessage,
     optimisticToggleReaction,
   } = useChatMessages(selectedId)
@@ -71,7 +80,7 @@ const ChatPage = () => {
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
-    handleSendVoice,
+    handleSendVoice: sendVoiceAction,
     handleRetryUpload,
     handleCancelUpload,
     handleDeleteForMe,
@@ -119,12 +128,14 @@ const ChatPage = () => {
 
   // ── Current User Formatting ────────────────────────────
   const currentUser = useMemo(() => {
+    const profile = userProfile?.data
     return {
       id: authUser?.accountId,
-      name: userProfile?.username || authUser?.username || t?.chat?.me || "Me",
-      avatar: userProfile?.avatarImageUrl || authUser?.avatarImageUrl || null,
+      sourceAccountId: authUser?.sourceAccountId ?? profile?.sourceAccountId ?? null,
+      name: profile?.username || authUser?.username || t?.chat?.me || "Me",
+      avatar: profile?.avatarImageUrl || authUser?.avatarImageUrl || null,
       status: "online",
-      about: userProfile?.level || t?.chat?.userPanel?.student || "Student",
+      about: profile?.level || t?.chat?.userPanel?.student || "Student",
     }
   }, [authUser, userProfile, t])
 
@@ -168,24 +179,9 @@ const ChatPage = () => {
 
   const handleJumpToMessage = useCallback(
     (messageId) => {
-      const element = document.getElementById(`chat-message-${messageId}`)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" })
-        element.classList.add("chat-message-highlight")
-        setTimeout(() => {
-          element.classList.remove("chat-message-highlight")
-        }, 2000)
-      } else {
-        toast(
-          t?.chat?.olderMessagePrompt ||
-            "The message is older. Scroll up to load older messages.",
-          {
-            icon: "📌",
-          },
-        )
-      }
+      jumpToMessage(messageId)
     },
-    [t],
+    [jumpToMessage],
   )
 
   const handleLeaveGroup = useCallback(() => {
@@ -197,10 +193,23 @@ const ChatPage = () => {
 
   const handleSend = useCallback(
     async (text, file, extraOptions) => {
-      await sendAction(text, file, extraOptions)
       setInputValue("")
+      if (hasMoreAfter || isViewingAroundWindow) {
+        resetToLatest()
+      }
+      return sendAction(text, file, extraOptions)
     },
-    [sendAction],
+    [hasMoreAfter, isViewingAroundWindow, resetToLatest, sendAction],
+  )
+
+  const handleSendVoice = useCallback(
+    async (file, duration) => {
+      if (hasMoreAfter || isViewingAroundWindow) {
+        resetToLatest()
+      }
+      return sendVoiceAction(file, duration)
+    },
+    [hasMoreAfter, isViewingAroundWindow, resetToLatest, sendVoiceAction],
   )
 
   return (
@@ -226,6 +235,7 @@ const ChatPage = () => {
       {selectedId ? (
         <ChatArea
           conversation={activeConversation}
+          conversationId={selectedId}
           messages={activeMessages}
           currentUser={currentUser}
           inputValue={inputValue}
@@ -240,8 +250,16 @@ const ChatPage = () => {
           friendOnlineStatus={friendOnlineStatus}
           isLoading={isLoadingMessages}
           isLoadingMore={isFetchingOlder}
+          isLoadingNewer={isFetchingNewer}
           hasMoreMessages={hasMoreMessages}
+          hasMoreAfter={hasMoreAfter}
+          isViewingAroundWindow={isViewingAroundWindow}
           onLoadMoreMessages={handleLoadMoreMessages}
+          onLoadNewerMessages={handleLoadNewerMessages}
+          onResetToLatest={resetToLatest}
+          targetHighlightId={targetHighlightId}
+          clearTargetHighlight={clearTargetHighlight}
+          onJumpToMessage={handleJumpToMessage}
           typingUsers={typingUsers}
           onStartTyping={startTyping}
           onStopTyping={stopTyping}

@@ -1,7 +1,8 @@
-import React from "react"
-import { FileIcon } from "lucide-react"
+import React, { useState } from "react"
+import { FileIcon, Play } from "lucide-react"
 import ListItem from "@/shared/components/ui/ListItem"
 import VoiceWaveformPlayer from "./VoiceWaveformPlayer"
+import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 
 /**
  * MediaAttachment — renders image previews, inline video players, voice audio players, or document file attachment cards.
@@ -23,6 +24,8 @@ const MediaAttachment = ({
   hasCaption = false,
   hasHeader = false,
 }) => {
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
+
   if (!mediaUrl) return null
 
   const msgTypeLower = String(messageType || "").toLowerCase()
@@ -108,26 +111,78 @@ const MediaAttachment = ({
           />
         </div>
       ) : isImage ? (
-        <a
-          href={mediaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
-        >
-          <img
-            src={mediaUrl}
-            alt={displayName}
-            className={`${roundedClass} max-h-60 object-cover w-full cursor-pointer block`}
-          />
-        </a>
+        <>
+          <div
+            onClick={() => setIsViewerOpen(true)}
+            className={`block cursor-pointer select-none ${roundedClass} overflow-hidden`}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                setIsViewerOpen(true)
+              }
+            }}
+          >
+            <img
+              src={mediaUrl}
+              alt={displayName}
+              className="max-h-60 object-cover w-full cursor-pointer block hover:opacity-95 transition-opacity"
+              loading="lazy"
+            />
+          </div>
+
+          {isViewerOpen && (
+            <MediaViewerModal
+              media={{
+                mediaUrl,
+                fileName: displayName,
+                mediaType: "Image",
+              }}
+              onClose={() => setIsViewerOpen(false)}
+            />
+          )}
+        </>
       ) : isVideo ? (
-        /* Inline video player — natural aspect ratio, capped at max-h-60 */
-        <video
-          src={mediaUrl}
-          controls
-          playsInline
-          className={`${roundedClass} max-h-60 w-full bg-black block`}
-        />
+        <>
+          <div
+            onClick={() => setIsViewerOpen(true)}
+            className={`relative block cursor-pointer select-none group ${roundedClass} overflow-hidden`}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                setIsViewerOpen(true)
+              }
+            }}
+          >
+            <video
+              src={mediaUrl}
+              preload="metadata"
+              muted
+              playsInline
+              className="max-h-60 w-full bg-black object-cover block pointer-events-none"
+            />
+            {/* Play badge overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-colors">
+              <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-xs border border-white/20 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                <Play size={22} className="ml-0.5 fill-white" />
+              </div>
+            </div>
+          </div>
+
+          {isViewerOpen && (
+            <MediaViewerModal
+              media={{
+                mediaUrl,
+                fileName: displayName,
+                mediaType: "Video",
+              }}
+              onClose={() => setIsViewerOpen(false)}
+            />
+          )}
+        </>
       ) : (
         /* Document / file attachment card */
         <a

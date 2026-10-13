@@ -23,7 +23,7 @@ import {
   useFollowUserMutation,
   useUnfollowUserMutation,
 } from "../../../store/api/social/friendshipApi"
-import { openWidget } from "@/store/slices/messageWidgetSlice"
+import { useFriendActions } from "../hooks/useFriendActions"
 import ProfileAvatarNCover from "@/shared/components/profile/ProfileAvatarNCover"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 
@@ -38,19 +38,20 @@ const SocialProfileHeader = ({
 }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const { handleStartChat } = useFriendActions()
   const [isBioExpanded, setIsBioExpanded] = useState(false)
+  const [isStartingChat, setIsStartingChat] = useState(false)
 
   const displayName = profile?.fullName || profile?.username || ""
   const username = profile?.username || ""
   const showHandle = Boolean(
     profile?.fullName &&
     profile?.username &&
-    profile?.fullName.toLowerCase() !== profile?.username.toLowerCase()
+    profile?.fullName.toLowerCase() !== profile?.username.toLowerCase(),
   )
 
   const isTeacher = Boolean(
-    profile?.isTeacher ||
-    profile?.accountType === "Teacher"
+    profile?.isTeacher || profile?.accountType === "Teacher",
   )
   const { isTeacher: isActiveTeacher } = useRoleOverride()
   const headline = profile?.headline || null
@@ -122,15 +123,24 @@ const SocialProfileHeader = ({
   const handleEdit = () => {
     if (onEditClick) {
       onEditClick()
-    } else if (isOwnProfile && (isActiveTeacher === true || (isActiveTeacher == null && isTeacher))) {
+    } else if (
+      isOwnProfile &&
+      (isActiveTeacher === true || (isActiveTeacher == null && isTeacher))
+    ) {
       navigate("/setting/instructor")
     } else {
       navigate("/setting/account")
     }
   }
 
-  const handleSendMessage = () => {
-    dispatch(openWidget())
+  const handleSendMessage = async () => {
+    if (!targetAccountId || isStartingChat) return
+    setIsStartingChat(true)
+    try {
+      await handleStartChat(targetAccountId)
+    } finally {
+      setIsStartingChat(false)
+    }
   }
 
   const actions = (
@@ -165,7 +175,13 @@ const SocialProfileHeader = ({
         <div className="flex items-center gap-2 w-full md:w-auto">
           <PillButton
             variant={status?.isFollowing ? "secondary" : "primary"}
-            startIcon={status?.isFollowing ? <Check className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+            startIcon={
+              status?.isFollowing ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <UserPlus className="w-4 h-4" />
+              )
+            }
             onClick={handleFollowToggle}
             disabled={isFollowLoading}
             loading={isFollowLoading}
@@ -189,6 +205,8 @@ const SocialProfileHeader = ({
             variant="outline"
             startIcon={<MessageSquare className="w-4 h-4" />}
             onClick={handleSendMessage}
+            loading={isStartingChat}
+            disabled={isStartingChat}
             className="max-[425px]:flex-1"
           >
             {t.profile?.social?.message || "Nhắn tin"}
@@ -197,13 +215,17 @@ const SocialProfileHeader = ({
           {isTeacher && (
             <Link
               to={`/explore/teachers/${encodeURIComponent(teacherSlug)}`}
-              title={t.profile?.instructor?.viewPublicPage || "Xem trang giảng viên công khai"}
-              aria-label={t.profile?.instructor?.viewPublicPage || "Xem trang giảng viên công khai"}
+              title={
+                t.profile?.instructor?.viewPublicPage ||
+                "Xem trang giảng viên công khai"
+              }
+              aria-label={
+                t.profile?.instructor?.viewPublicPage ||
+                "Xem trang giảng viên công khai"
+              }
               className="inline-flex items-center justify-center h-12 shrink-0"
             >
-              <div
-                className="w-10 h-10 rounded-full bg-cath-red-700 text-white hover:brightness-90 active:brightness-75 transition flex items-center justify-center shadow-xs cursor-pointer"
-              >
+              <div className="w-10 h-10 rounded-full bg-cath-red-700 text-white hover:brightness-90 active:brightness-75 transition flex items-center justify-center shadow-xs cursor-pointer">
                 <ExternalLink className="w-4 h-4" />
               </div>
             </Link>
@@ -225,7 +247,9 @@ const SocialProfileHeader = ({
         {isTeacher && (
           <div
             className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 shadow-xs select-none"
-            title={t.profile?.badges?.verifiedTeacher || "Giảng viên đã xác thực"}
+            title={
+              t.profile?.badges?.verifiedTeacher || "Giảng viên đã xác thực"
+            }
           >
             <BadgeCheck className="w-4 h-4 text-blue-600 fill-blue-100 shrink-0" />
             <span>{t.profile?.badges?.teacher || "Giảng viên"}</span>
@@ -236,9 +260,7 @@ const SocialProfileHeader = ({
       {/* Handle & Headline */}
       <div className="flex flex-col gap-0.5">
         {showHandle && (
-          <span className="text-xs font-medium text-gray-500">
-            @{username}
-          </span>
+          <span className="text-xs font-medium text-gray-500">@{username}</span>
         )}
         {headline && (
           <p className="text-sm font-medium text-gray-600 line-clamp-2 max-w-2xl">
@@ -270,7 +292,7 @@ const SocialProfileHeader = ({
     teachingMotto ||
     introduction ||
     parsedLanguages.length > 0 ||
-    (isOwnProfile && isTeacher && !introduction)
+    (isOwnProfile && isTeacher && !introduction),
   )
 
   return (
@@ -297,7 +319,9 @@ const SocialProfileHeader = ({
             <div className="bg-gray-50/80 rounded-xl p-4 border border-gray-100 max-w-3xl">
               <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span>{t.profile?.sections?.aboutMe || "Giới thiệu bản thân"}</span>
+                <span>
+                  {t.profile?.sections?.aboutMe || "Giới thiệu bản thân"}
+                </span>
               </div>
               <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                 {isBioExpanded || introduction.length <= 220
@@ -329,7 +353,8 @@ const SocialProfileHeader = ({
             <div className="flex items-center flex-wrap gap-2 pt-0.5">
               <span className="text-xs font-medium text-gray-500 inline-flex items-center gap-1">
                 <Globe className="w-3.5 h-3.5 text-gray-400" />
-                {t.profile?.instructor?.teachingLanguages || "Ngôn ngữ giảng dạy:"}
+                {t.profile?.instructor?.teachingLanguages ||
+                  "Ngôn ngữ giảng dạy:"}
               </span>
               {parsedLanguages.map((lang, idx) => (
                 <span

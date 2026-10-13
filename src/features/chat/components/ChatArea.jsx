@@ -1,4 +1,8 @@
-import { memo, useEffect, useRef, useCallback, useMemo } from "react"
+import { memo, useEffect, useRef, useCallback, useMemo, useState } from "react"
+import { ArrowDown } from "lucide-react"
+import { AnimatePresence } from "framer-motion"
+import { FluentAnimation } from "@/shared/components/ui/animations"
+import { IconButton } from "@/shared/components/ui/buttons"
 import ChatBubble from "./messages/ChatBubble"
 import MediaUploadBubble from "./messages/MediaUploadBubble"
 import ChatInput from "./ChatInput"
@@ -23,6 +27,7 @@ import toast from "react-hot-toast"
  */
 const ChatArea = ({
   conversation,
+  conversationId: propConversationId,
   messages = [],
   currentUser,
   inputValue,
@@ -34,8 +39,16 @@ const ChatArea = ({
   friendOnlineStatus,
   isLoading,
   isLoadingMore = false,
+  isLoadingNewer = false,
   hasMoreMessages = false,
+  hasMoreAfter = false,
+  isViewingAroundWindow = false,
   onLoadMoreMessages,
+  onLoadNewerMessages,
+  onResetToLatest,
+  targetHighlightId = null,
+  clearTargetHighlight,
+  onJumpToMessage,
   typingUsers = [],
   onStartTyping,
   onStopTyping,
@@ -60,20 +73,25 @@ const ChatArea = ({
   const isPrependingRef = useRef(false)
   const prevScrollHeightRef = useRef(0)
   const prevMessagesLengthRef = useRef(0)
+  const shouldScrollBottomRef = useRef(false)
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
 
   // ── In-Chat LiveKit Calls ──────────────────────────────
-  const {
-    activeCallSession,
-    isCallModalOpen,
-    startCall,
-    joinCall,
-  } = useInChatCall(conversation, currentUser)
+  const { activeCallSession, isCallModalOpen, startCall, joinCall } =
+    useInChatCall(conversation, currentUser)
 
+  const effectiveConversationId =
+    propConversationId ||
+    conversation?.id ||
+    conversation?.conversationId
 
   // Fetch pinned messages to determine which messages in timeline are pinned
-  const { data: rawPins = [] } = useGetPinnedMessagesQuery(conversation?.id, {
-    skip: !conversation?.id,
-  })
+  const { data: rawPins = [] } = useGetPinnedMessagesQuery(
+    effectiveConversationId,
+    {
+      skip: !effectiveConversationId,
+    },
+  )
 
   const pinnedIds = useMemo(() => {
     const list = Array.isArray(rawPins)
@@ -96,25 +114,54 @@ const ChatArea = ({
     userTimeZone,
   })
 
-  // Trigger top scroll load more
+  // Trigger 2-directional scroll pagination (top = older, bottom = newer when viewing aroundId)
   const handleScroll = (e) => {
     const el = e.currentTarget
-    if (
-      !el ||
-      isLoading ||
-      isLoadingMore ||
-      !hasMoreMessages ||
-      !onLoadMoreMessages
-    ) {
-      return
-    }
+    if (!el || isLoading) return
 
-    if (el.scrollTop < 80) {
+    // Scroll near top: load older messages
+    if (
+      el.scrollTop < 80 &&
+      !isLoadingMore &&
+      hasMoreMessages &&
+      onLoadMoreMessages
+    ) {
       isPrependingRef.current = true
       prevScrollHeightRef.current = el.scrollHeight
       onLoadMoreMessages()
     }
+
+    // Scroll near bottom: load newer messages when viewing aroundId window
+    const scrollBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    if (
+      scrollBottom < 80 &&
+      !isLoadingNewer &&
+      hasMoreAfter &&
+      onLoadNewerMessages
+    ) {
+      onLoadNewerMessages()
+    }
+
+    setShowScrollToBottom(
+      scrollBottom > 220 || hasMoreAfter || isViewingAroundWindow,
+    )
   }
+
+  // Smart hybrid scroll: smooth glide when close to bottom; instant snap for large jumps / history resets
+  const scrollToBottomOptimally = useCallback(
+    (smooth = true) => {
+      const el = scrollRef.current
+      if (!el) return
+      const distance = el.scrollHeight - el.scrollTop - el.clientHeight
+
+      if (smooth && distance < 800 && !hasMoreAfter && !isViewingAroundWindow) {
+        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
+      } else {
+        el.scrollTop = el.scrollHeight
+      }
+    },
+    [hasMoreAfter, isViewingAroundWindow],
+  )
 
   // Auto-scroll to bottom on initial load / new bottom messages / pending uploads, preserve offset on prepending
   useEffect(() => {
@@ -126,18 +173,51 @@ const ChatArea = ({
       const heightDiff = newScrollHeight - prevScrollHeightRef.current
       el.scrollTop = heightDiff
       isPrependingRef.current = false
-    } else {
+    } else if (!hasMoreAfter) {
       const isInitial = prevMessagesLengthRef.current === 0
       const isNearBottom =
         el.scrollHeight - el.scrollTop - el.clientHeight < 150
-      if (isInitial || isNearBottom || pendingUpload) {
-        el.scrollTop = el.scrollHeight
+      if (
+        isInitial ||
+        isNearBottom ||
+        pendingUpload ||
+        shouldScrollBottomRef.current
+      ) {
+        scrollToBottomOptimally(!isInitial && !shouldScrollBottomRef.current)
+        shouldScrollBottomRef.current = false
       }
     }
     prevMessagesLengthRef.current = messages.length
-  }, [messages, typingUsers, pendingUpload])
+  }, [
+    messages,
+    typingUsers,
+    pendingUpload,
+    hasMoreAfter,
+    scrollToBottomOptimally,
+  ])
 
-  // Smooth scroll and 2-second flash highlight for pinned messages
+  // Scroll to and flash highlight target message when aroundId jump triggers
+  useEffect(() => {
+    if (!targetHighlightId) return
+
+    const timer = setTimeout(() => {
+      const element = document.getElementById(
+        `chat-message-${targetHighlightId}`,
+      )
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" })
+        element.classList.add("chat-message-highlight")
+        setTimeout(() => {
+          element.classList.remove("chat-message-highlight")
+          clearTargetHighlight?.()
+        }, 2000)
+      }
+    }, 120)
+
+    return () => clearTimeout(timer)
+  }, [targetHighlightId, messages, clearTargetHighlight])
+
+  // Smooth scroll and 2-second flash highlight for pinned messages / replies
   const handleJumpToMessage = useCallback(
     (messageId) => {
       const element = document.getElementById(`chat-message-${messageId}`)
@@ -147,17 +227,53 @@ const ChatArea = ({
         setTimeout(() => {
           element.classList.remove("chat-message-highlight")
         }, 2000)
+      } else if (onJumpToMessage) {
+        onJumpToMessage(messageId)
       } else {
         toast(
           t?.chat?.olderMessagePrompt ||
-            "The pinned message is older. Scroll up to load older messages.",
+            "The message is older. Scroll up to load older messages.",
           {
             icon: "📌",
           },
         )
       }
     },
-    [t],
+    [onJumpToMessage, t],
+  )
+
+  const handleScrollToBottom = useCallback(() => {
+    shouldScrollBottomRef.current = true
+    if ((hasMoreAfter || isViewingAroundWindow) && onResetToLatest) {
+      onResetToLatest()
+    }
+    scrollToBottomOptimally(true)
+    setShowScrollToBottom(false)
+  }, [
+    hasMoreAfter,
+    isViewingAroundWindow,
+    onResetToLatest,
+    scrollToBottomOptimally,
+  ])
+
+  const handleSendMessage = useCallback(
+    (text, file, extraOptions) => {
+      shouldScrollBottomRef.current = true
+      scrollToBottomOptimally(true)
+      setShowScrollToBottom(false)
+      return onSend?.(text, file, extraOptions)
+    },
+    [onSend, scrollToBottomOptimally],
+  )
+
+  const handleSendVoiceMessage = useCallback(
+    (file, duration) => {
+      shouldScrollBottomRef.current = true
+      scrollToBottomOptimally(true)
+      setShowScrollToBottom(false)
+      return onSendVoice?.(file, duration)
+    },
+    [onSendVoice, scrollToBottomOptimally],
   )
 
   if (!conversation) return null
@@ -225,19 +341,19 @@ const ChatArea = ({
         friendOnlineStatus={friendOnlineStatus}
       />
 
-      {/* ── Active Call Banner ───────────────────────── */}
-      <ActiveCallBanner
-        conversationId={conversation?.id}
-        onJoinCall={joinCall}
-        isCallModalOpen={
-          isCallModalOpen &&
-          Number(activeCallSession?.conversationId) === Number(conversation?.id)
-        }
-      />
+      {/* ── Active Call Banner (Group Calls Only) ─── */}
+      {conversation?.isGroup && (
+        <ActiveCallBanner
+          conversationId={effectiveConversationId}
+          isGroup={conversation?.isGroup}
+          onJoinCall={joinCall}
+          isCallModalOpen={isCallModalOpen}
+        />
+      )}
 
       {/* ── Pinned Message Banner ──────────────────── */}
       <PinnedMessageBar
-        conversationId={conversation?.id}
+        conversationId={effectiveConversationId}
         onJumpToMessage={handleJumpToMessage}
         canUnpin={canPin}
       />
@@ -300,12 +416,41 @@ const ChatArea = ({
         )}
       </div>
 
+      {/* ── Floating Jump to Bottom / Latest Button ─ */}
+      <div className="relative w-full flex justify-center pointer-events-none">
+        <AnimatePresence>
+          {(showScrollToBottom || hasMoreAfter || isViewingAroundWindow) && (
+            <FluentAnimation
+              direction="up"
+              distance={16}
+              exit="fade"
+              duration={0.2}
+              className="!absolute -top-12 z-20 pointer-events-auto"
+            >
+              <IconButton
+                variant="secondary"
+                size="sm"
+                onClick={handleScrollToBottom}
+                innerClassName="shadow-md"
+                title={
+                  hasMoreAfter || isViewingAroundWindow
+                    ? t?.chat?.jumpToLatest || "Tin nhắn mới nhất"
+                    : t?.chat?.scrollToBottom || "Cuộn xuống"
+                }
+              >
+                <ArrowDown size={20} className="text-cath-red-700" />
+              </IconButton>
+            </FluentAnimation>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* ── Input ──────────────────────────────────── */}
       <ChatInput
         value={inputValue}
         onChange={onInputChange}
-        onSend={onSend}
-        onSendVoice={onSendVoice}
+        onSend={handleSendMessage}
+        onSendVoice={handleSendVoiceMessage}
         onStartTyping={onStartTyping}
         onStopTyping={onStopTyping}
         replyingTo={replyingTo}

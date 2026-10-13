@@ -11,6 +11,7 @@ import {
 } from "@store/slices/authSlice"
 
 import { baseApi } from "@/store/api/baseApi"
+import { socialApi } from "@/store/api/social/socialApi"
 
 export const useAuth = () => {
   const dispatch = useDispatch()
@@ -37,6 +38,7 @@ export const useAuth = () => {
       logout: () => {
         dispatch(logout())
         dispatch(baseApi.util.resetApiState())
+        dispatch(socialApi.util.resetApiState())
       },
     }),
     [user, token, refreshToken, isAuthenticated, role, status, dispatch],

@@ -25,41 +25,48 @@ export const normalizeMessageType = (rawType) => {
  * @param {number|string|null} currentUserId - The authenticated user's ID
  * @returns {object} Formatted UI message view model
  */
-export const mapToChatMessageViewModel = (msg, currentUserId) => {
+export const mapToChatMessageViewModel = (msg, currentUserId, sourceAccountId) => {
   const myId = currentUserId != null ? Number(currentUserId) : null
+  const sourceId = sourceAccountId != null ? Number(sourceAccountId) : null
 
   return {
-    id: msg.messageId ?? msg.id,
+    id: msg.messageId,
+    messageId: msg.messageId,
     conversationId: msg.conversationId,
-    senderId: msg.sender?.accountId ?? msg.senderId,
-    content: msg.messageContent ?? msg.content,
-    timestamp: msg.createDate ?? msg.timestamp,
-    messageType: normalizeMessageType(msg.messageType ?? msg.MessageType),
-    isRead: msg.isRead ?? false,
+    senderId: msg.sender?.accountId,
+    sender: msg.sender,
+    content: msg.messageContent,
+    messageContent: msg.messageContent,
+    timestamp: msg.createDate,
+    createDate: msg.createDate,
+    messageType: normalizeMessageType(msg.messageType),
+    isRead: Boolean(msg.isRead),
     status: msg.isRead ? "read" : "delivered",
     readByAccountIds: msg.readByAccountIds || [],
-    sender: msg.sender,
+    readByUsers: msg.readByUsers || [],
+    mentionedAccountIds: msg.mentionedAccountIds || [],
     parentMessageId: msg.parentMessageId,
-    parentMessage: msg.parentMessage || msg.replyToMessage,
-    mediaUrl: msg.mediaUrl || msg.fileUrl || msg.attachmentUrl,
+    parentMessage: msg.replyToMessage,
+    replyToMessage: msg.replyToMessage,
+    mediaUrl: msg.mediaUrl,
     fileName: msg.fileName,
     fileSize: msg.fileSize,
-    isRecalled: msg.isRecalled,
-    isDeleted: msg.isDeleted,
-    readByUsers: msg.readByUsers,
+    audioDuration: msg.audioDuration,
+    isRecalled: Boolean(msg.isRecalled),
+    recalledAt: msg.recalledAt,
     reactions: (msg.reactions || []).map((group) => {
-      const userIds = group.userIds || group.UserIds || []
+      const userIds = (group.userIds || []).map(Number)
       const hasReacted =
-        myId != null && Array.isArray(userIds) && userIds.length > 0
-          ? userIds.some((id) => Number(id) === myId)
-          : Boolean(group.hasReacted)
+        Boolean(group.hasReacted) ||
+        (myId != null && userIds.includes(myId)) ||
+        (sourceId != null && userIds.includes(sourceId))
       return {
         ...group,
+        userIds,
         hasReacted,
       }
     }),
-    isEdited: msg.isEdited ?? false,
-    lastEdited: msg.lastEdited,
+    isEdited: Boolean(msg.isEdited),
     forwardedFromSenderName: msg.forwardedFromSenderName,
     clientMessageId: msg.clientMessageId,
   }

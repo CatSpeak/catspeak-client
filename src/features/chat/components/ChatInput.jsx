@@ -1,12 +1,5 @@
 import { useState, useRef, useCallback } from "react"
-import {
-  Paperclip,
-  Smile,
-  Send,
-  Mic,
-  UploadCloud,
-  Plus,
-} from "lucide-react"
+import { Paperclip, Smile, Send, Mic, UploadCloud, Plus } from "lucide-react"
 import { IconButton } from "@/shared/components/ui/buttons"
 import Popover from "@/shared/components/ui/Popover"
 import MenuList from "@/shared/components/ui/MenuList"
@@ -244,7 +237,13 @@ const ChatInput = ({
         }
       }
     },
-    [onChange, checkMentionTrigger, isMultiline, handleTypingActivity, stopTypingImmediately],
+    [
+      onChange,
+      checkMentionTrigger,
+      isMultiline,
+      handleTypingActivity,
+      stopTypingImmediately,
+    ],
   )
 
   return (
@@ -343,7 +342,9 @@ const ChatInput = ({
                 trigger={
                   <IconButton
                     variant="ghost"
-                    aria-label={t?.chat?.attachFile || "Add attachment or action"}
+                    aria-label={
+                      t?.chat?.attachFile || "Add attachment or action"
+                    }
                     title={t?.chat?.attachFile || "Add attachment or action"}
                     type="button"
                     disabled={disabled}
@@ -355,7 +356,11 @@ const ChatInput = ({
                   <MenuList className="w-48 shadow-lg">
                     <MenuItem
                       icon={<Paperclip size={18} />}
-                      label={t?.messages?.attach || t?.chat?.attachFile || "Attach file"}
+                      label={
+                        t?.messages?.attach ||
+                        t?.chat?.attachFile ||
+                        "Attach file"
+                      }
                       onClick={() => {
                         close()
                         fileInputRef.current?.click()
@@ -421,7 +426,7 @@ const ChatInput = ({
 
           {/* Right controls (counter when multiline + action buttons) */}
           <div
-            className={`flex items-center h-12 gap-1 ${
+            className={`flex items-center h-12 ${
               isMultiline
                 ? "col-start-3 row-start-2"
                 : "col-start-3 row-start-1"
@@ -437,7 +442,9 @@ const ChatInput = ({
                       ? "text-amber-600 font-medium"
                       : "text-gray-400 opacity-75"
                 }`}
-                title={(t?.chat?.charCount || "{{current}} / {{max}} characters")
+                title={(
+                  t?.chat?.charCount || "{{current}} / {{max}} characters"
+                )
                   .replace(/\{\{current\}\}|\{current\}/g, value.length)
                   .replace(/\{\{max\}\}|\{max\}/g, maxLength)}
               >

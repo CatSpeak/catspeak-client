@@ -20,7 +20,9 @@ const ConversationItem = ({
   const { user } = useAuth()
   const { formatRelative } = useTimezone()
 
-  const currentUserId = currentUser?.id || user?.accountId
+  const currentUserId = currentUser?.id ?? user?.accountId
+  const sourceAccountId =
+    currentUser?.sourceAccountId ?? user?.sourceAccountId ?? null
 
   const isGroup = conversation?.isGroup
   const name = isGroup
@@ -55,7 +57,11 @@ const ConversationItem = ({
         ? Number(conversation.lastMessageSenderId)
         : null
     const myId = currentUserId != null ? Number(currentUserId) : null
-    const isOwn = senderId != null && myId != null && senderId === myId
+    const sourceId = sourceAccountId != null ? Number(sourceAccountId) : null
+    const isOwn =
+      senderId != null &&
+      ((myId != null && senderId === myId) ||
+        (sourceId != null && senderId === sourceId))
 
     let senderName = ""
     if (isGroup && conversation?.participants && senderId != null && !isOwn) {

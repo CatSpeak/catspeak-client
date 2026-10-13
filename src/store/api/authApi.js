@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi"
+import { socialApi } from "./social/socialApi"
 import { setCredentials, logout } from "../slices/authSlice"
 
 export const authApi = baseApi.injectEndpoints({
@@ -75,6 +76,7 @@ export const authApi = baseApi.injectEndpoints({
           // Reset the whole API cache so every query refetches under the new
           // account instead of serving stale data from the previous account.
           dispatch(baseApi.util.resetApiState())
+          dispatch(socialApi.util.resetApiState())
         } catch (error) {
           console.error(error)
         }
