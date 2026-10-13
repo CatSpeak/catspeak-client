@@ -62,6 +62,7 @@ const MoreMenuDesktopView = ({
     setActiveSettingsTab,
     isSubtitleActive,
     isStartingSubtitles,
+    isStoppingSubtitles,
     stopSubtitles,
     showWatchTogether,
     setShowWatchTogether,
@@ -233,14 +234,8 @@ const MoreMenuDesktopView = ({
             }
           }
         }}
-        disabled={!isAISession && isStartingSubtitles}
-        icon={
-          !isAISession && isStartingSubtitles ? (
-            <Loader2 size={20} className="animate-spin" />
-          ) : (
-            <Captions size={20} />
-          )
-        }
+        disabled={!isAISession && (isStartingSubtitles || isStoppingSubtitles)}
+        icon={<Captions size={20} />}
         label={
           (isAISession ? showCC : isSubtitleActive)
             ? t?.rooms?.videoCall?.controls?.captionsOff || "Turn off captions"

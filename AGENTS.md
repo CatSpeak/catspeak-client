@@ -27,10 +27,25 @@ This document defines core behavior, efficiency standards, and coding convention
 
 ---
 
-## 3. How to Extend Rules (For Developers)
+## 3. UI/UX Loading & Progress Feedback Standards
+
+Choose a loading or progress indicator that corresponds to the expected wait time and kind of process:
+
+| Expected wait time | Recommendation |
+| :--- | :--- |
+| **Instant (under 200ms)** | No indicator |
+| **Short (between 200ms and 5s)** | Loading indicator (e.g. `LoadingSpinner`, spinner overlay) |
+| **Long (Over 5s)** | Progress indicator (e.g. progress bar, step progress) |
+
+- If the wait is very long, consider allowing people to navigate away from the page while the process finishes up.
+
+---
+
+## 4. How to Extend Rules (For Developers)
 
 To add new rules or guidelines for your team:
 
 1. **Global/Workspace Rules:** Edit this file (`AGENTS.md`) directly. The agent automatically loads it at the root of the workspace.
 2. **Modular Rules:** Create markdown rule files under `.agents/rules/` (e.g., `.agents/rules/components.md`, `.agents/rules/api-conventions.md`).
 3. **Directory-Specific Rules:** Place a localized `AGENTS.md` or `GEMINI.md` within any sub-directory (e.g., `src/features/video-call/AGENTS.md`) to apply rules scoped only to that feature.
+

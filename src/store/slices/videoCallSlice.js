@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit"
 import { logout } from "./authSlice"
 
-
 const initialState = {
   /** Whether a call is currently active (LiveKit connected) */
   isInCall: false,
