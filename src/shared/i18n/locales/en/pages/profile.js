@@ -184,6 +184,7 @@ export default {
     approvedAddLanguage: "Add language",
     approvedUpdate: "Update",
     approvedChange: "Change",
+    approvedAdd: "Add",
     approvedView: "View",
     approvedStatusApproved: "Approved",
     approvedStatusPending: "Pending",
@@ -273,6 +274,7 @@ export default {
     contactEmailUpdated: "Email updated successfully",
     contactPhoneUpdated: "Phone number updated successfully",
     bankChangeTitle: "Change bank account",
+    bankAddTitle: "Add bank account",
     bankVerifyTitle: "Verify new bank account",
     bankCurrentAccount: "Current account",
     bankLabel: "Bank",
@@ -292,11 +294,11 @@ export default {
     bankConsent:
       "I confirm that the account details above are correct and agree to use this account to receive payments from Cat Speak.",
     bankOtpWillSendTo:
-      "The verification code (OTP) will be sent to your verified phone number:",
+      "The verification code (OTP) will be sent to your email:",
     bankOtpHelper:
-      "The verification code has been sent to your current verified phone number by default.",
+      "The verification code has been sent to your email.",
     bankOtpInputLabel: "Enter verification code (OTP)",
-    bankAccountNumberInvalid: "The account number must be 6 to 20 digits",
+    bankAccountNumberInvalid: "The account number must be 6 to 34 characters",
     bankNoAccount: "No bank account yet",
     bankOtpRequired: "Please enter the verification code",
     bankOtpInvalid: "The verification code is invalid or has expired",

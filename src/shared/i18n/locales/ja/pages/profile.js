@@ -165,6 +165,7 @@ export default {
     approvedAddLanguage: "言語を追加",
     approvedUpdate: "更新",
     approvedChange: "変更",
+    approvedAdd: "追加",
     approvedView: "表示",
     approvedStatusApproved: "承認済み",
     approvedStatusPending: "審査中",
@@ -250,6 +251,7 @@ export default {
     contactEmailUpdated: "メールアドレスを更新しました",
     contactPhoneUpdated: "電話番号を更新しました",
     bankChangeTitle: "銀行口座の変更",
+    bankAddTitle: "銀行口座を追加",
     bankVerifyTitle: "新しい銀行口座の認証",
     bankCurrentAccount: "現在の口座",
     bankLabel: "銀行",
@@ -268,12 +270,10 @@ export default {
     bankCurrentBadge: "現在",
     bankConsent:
       "上記の口座情報が正確であることを確認し、Cat Speak からの支払いを受け取るためにこの口座を使用することに同意します。",
-    bankOtpWillSendTo:
-      "認証コード（OTP）は認証済みの電話番号に送信されます：",
-    bankOtpHelper:
-      "認証コードは、現在認証済みの電話番号に既定で送信されました。",
+    bankOtpWillSendTo: "認証コード（OTP）はメールアドレスに送信されます：",
+    bankOtpHelper: "認証コードはメールアドレスに送信されました。",
     bankOtpInputLabel: "認証コード（OTP）を入力",
-    bankAccountNumberInvalid: "口座番号は6〜20桁の数字で入力してください",
+    bankAccountNumberInvalid: "口座番号は6〜34文字で入力してください",
     bankNoAccount: "銀行口座がまだありません",
     bankOtpRequired: "認証コードを入力してください",
     bankOtpInvalid: "認証コードが無効または期限切れです",
