@@ -13,7 +13,7 @@ import HeaderFilter from "./HeaderFilter"
 import { Link } from "react-router-dom"
 import { MainLogo, IconLogo } from "@/shared/assets/icons/logo"
 
-const MainHeader = ({ onGetStarted, onMenuClick }) => {
+const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
 
   const [scrolled, setScrolled] = useState(false)
@@ -49,15 +49,22 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
       <div className="flex w-full h-full items-center justify-between px-4 lg:px-6">
         {/* Left Section: Mobile Menu + Community Switcher + Online count */}
         <div className="flex items-center gap-3 md:gap-4 shrink-0">
-          <button
-            onClick={handleDrawerToggle}
-            className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md shrink-0"
-          >
-            <Menu size={24} />
-          </button>
+          {showSidebar && (
+            <button
+              onClick={handleDrawerToggle}
+              className="lg:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-md shrink-0 cursor-pointer"
+            >
+              <Menu size={24} />
+            </button>
+          )}
 
-          {/* Logo (Mobile Only) */}
-          <Link to="/" className="flex items-center gap-2 lg:hidden">
+          {/* Logo */}
+          <Link
+            to="/"
+            className={`flex items-center gap-2 ${
+              showSidebar ? "lg:hidden" : "flex"
+            }`}
+          >
             <img src={IconLogo} alt="Cat Speak" className="h-7 w-7" />
             <img
               src={MainLogo}
@@ -67,9 +74,11 @@ const MainHeader = ({ onGetStarted, onMenuClick }) => {
           </Link>
 
           {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
-          <div className="hidden lg:block">
-            <CommunitySwitcher />
-          </div>
+          {showSidebar && (
+            <div className="hidden lg:block">
+              <CommunitySwitcher />
+            </div>
+          )}
 
           {/* Online User Count */}
           <OnlinePresence />

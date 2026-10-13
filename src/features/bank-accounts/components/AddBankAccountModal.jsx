@@ -21,11 +21,37 @@ import { EmptyState } from "@/shared/components/ui/indicators"
 import BankListSkeleton from "./BankListSkeleton"
 import useDebounce from "@/shared/hooks/useDebounce"
 import useBankVerification from "../hooks/useBankVerification"
-import { sanitizeNumericInput } from "../utils/bankAccountUtils"
+import {
+  sanitizeAccountNumber,
+  isValidAccountNumber,
+  normalizeAccountHolderName,
+  isValidAccountHolderName,
+} from "../utils/bankAccountUtils"
 import {
   useGetBanksQuery,
   useAddInstructorBankAccountMutation,
 } from "../api/instructorBankAccountsApi"
+
+function BankLogo({ logo, name }) {
+  const [hasError, setHasError] = useState(false)
+
+  if (logo && !hasError) {
+    return (
+      <img
+        src={logo}
+        alt={name}
+        onError={() => setHasError(true)}
+        className="w-14 h-14 object-contain shrink-0 border border-border rounded-xl p-1 bg-white"
+      />
+    )
+  }
+
+  return (
+    <div className="w-14 h-14 shrink-0 flex items-center justify-center rounded-xl border border-border bg-white">
+      <Building2 className="w-6 h-6 text-neutral-400" />
+    </div>
+  )
+}
 
 export default function AddBankAccountModal({ isOpen, onClose }) {
   const { t } = useLanguage()
@@ -33,6 +59,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
   const [direction, setDirection] = useState(1) // 1: Next, -1: Back
   const [selectedBank, setSelectedBank] = useState(null)
   const [accountNumber, setAccountNumber] = useState("")
+  const [accountHolderName, setAccountHolderName] = useState("")
   const [isDefault, setIsDefault] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -68,6 +95,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
     setStep(1)
     setSelectedBank(null)
     setAccountNumber("")
+    setAccountHolderName("")
     setIsDefault(false)
     setSearchQuery("")
     resetVerification()
@@ -84,14 +112,22 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
       toast.error(t?.bankAccounts?.modal?.errorSelectBank || "Vui lòng chọn ngân hàng")
       return
     }
-    if (accountNumber.trim().length < 6) {
-      toast.error(t?.bankAccounts?.modal?.errorMinLength || "Số tài khoản phải có ít nhất 6 chữ số")
+    const cleanedAccount = sanitizeAccountNumber(accountNumber)
+    if (!isValidAccountNumber(cleanedAccount)) {
+      toast.error(t?.bankAccounts?.modal?.errorMinLength || "Số tài khoản phải có từ 6 đến 34 ký tự")
+      return
+    }
+    const finalHolderName = (verifiedName || accountHolderName).trim()
+    const normalizedHolderName = normalizeAccountHolderName(finalHolderName)
+    if (!isValidAccountHolderName(normalizedHolderName)) {
+      toast.error(t?.bankAccounts?.modal?.errorAccountHolder || "Vui lòng nhập tên chủ tài khoản (2 đến 70 ký tự)")
       return
     }
     try {
       await addBankAccount({
         bankBin: selectedBank.bin,
-        accountNumber: accountNumber.trim(),
+        accountNumber: cleanedAccount,
+        accountHolderName: normalizedHolderName,
         isDefault,
       }).unwrap()
 
@@ -122,9 +158,15 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
           loading={isAdding}
           disabled={
             !selectedBank ||
-            accountNumber.trim().length < 6 ||
+            !isValidAccountNumber(sanitizeAccountNumber(accountNumber)) ||
             isChecking ||
-            isVerifying
+            isVerifying ||
+            !(
+              verifiedName ||
+              isValidAccountHolderName(
+                normalizeAccountHolderName(accountHolderName),
+              )
+            )
           }
           className="min-w-[130px]"
         >
@@ -164,7 +206,7 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
             </div>
 
             {/* Scrollable Bank List */}
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-6">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-y-contain px-4 sm:px-6">
               {isListLoading ? (
                 <BankListSkeleton />
               ) : banks.length === 0 ? (
@@ -191,15 +233,10 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                       className="rounded-xl"
                       contentClassName="rounded-xl"
                       leftContent={
-                        bank.logo ? (
-                          <img
-                            src={bank.logo}
-                            alt={bank.shortName || bank.name}
-                            className="border border-border rounded-xl p-1 bg-white"
-                          />
-                        ) : (
-                          <Building2 className="text-neutral-400" />
-                        )
+                        <BankLogo
+                          logo={bank.logo}
+                          name={bank.shortName || bank.name}
+                        />
                       }
                       rightContent={
                         <ChevronRight className="text-neutral-400" />
@@ -227,17 +264,10 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
               {/* Selected Bank Header */}
               {selectedBank && (
                 <div className="flex items-center gap-4">
-                  {selectedBank.logo ? (
-                    <img
-                      src={selectedBank.logo}
-                      alt={selectedBank.shortName || selectedBank.name}
-                      className="w-14 h-14 object-contain shrink-0 border border-border rounded-xl p-1 bg-white"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 shrink-0 flex items-center justify-center rounded-xl border border-border bg-white">
-                      <Building2 className="w-8 h-8 text-neutral-400" />
-                    </div>
-                  )}
+                  <BankLogo
+                    logo={selectedBank.logo}
+                    name={selectedBank.shortName || selectedBank.name}
+                  />
                   <div className="flex flex-col min-w-0">
                     <p className="font-semibold text-neutral-900 dark:text-white truncate">
                       {selectedBank.shortName}
@@ -264,14 +294,13 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                   }
                   value={accountNumber}
                   onChange={(e) =>
-                    setAccountNumber(sanitizeNumericInput(e.target.value))
+                    setAccountNumber(sanitizeAccountNumber(e.target.value))
                   }
-                  inputMode="numeric"
+                  autoCapitalize="characters"
                   variant="semi-round"
                   helperText={
                     verifyError && !verifiedName && !isVerifying && !isChecking
-                      ? t?.bankAccounts?.modal?.helperErrorText ||
-                        "Không thể tự động tra cứu tên chủ tài khoản lúc này. Bạn vẫn có thể tiếp tục thêm tài khoản."
+                      ? verifyError
                       : undefined
                   }
                   helperTextClassName="text-amber-600"
@@ -299,6 +328,37 @@ export default function AddBankAccountModal({ isOpen, onClose }) {
                       </p>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Manual Account Holder Name (when auto-lookup fails or is unavailable) */}
+              {!verifiedName && (
+                <div>
+                  <TextInput
+                    label={
+                      <span>
+                        {t?.bankAccounts?.modal?.accountHolderLabel || "Tên chủ tài khoản"}{" "}
+                        <span className="text-red-500">*</span>
+                      </span>
+                    }
+                    placeholder={
+                      t?.bankAccounts?.modal?.accountHolderPlaceholder ||
+                      "Nhập tên chủ tài khoản (ví dụ: NGUYEN VAN A)"
+                    }
+                    value={accountHolderName}
+                    onChange={(e) =>
+                      setAccountHolderName(
+                        e.target.value
+                          .replace(/đ/g, "D")
+                          .replace(/Đ/g, "D")
+                          .normalize("NFD")
+                          .replace(/[\u0300-\u036f]/g, "")
+                          .toUpperCase()
+                          .slice(0, 70),
+                      )
+                    }
+                    variant="semi-round"
+                  />
                 </div>
               )}
 

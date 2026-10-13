@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
@@ -153,7 +153,7 @@ const PlanCard = ({
       : "0 18px 40px rgba(15, 23, 42, 0.08)";
 
   return (
-    <motion.article
+    <Motion.article
       initial={{ opacity: 0, y: 12 }}
       animate={
         isHighlighted
@@ -175,7 +175,7 @@ const PlanCard = ({
             }
           : { duration: 0.7, ease: "easeOut" }
       }
-      className={`group relative flex h-[680px] max-h-[calc(100dvh-2rem)] min-h-0 flex-col overflow-hidden rounded-xl border bg-white transition-[box-shadow,border-color,background-color] duration-500 ${
+      className={`group relative flex w-full h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px] flex-col overflow-hidden rounded-xl border bg-white transition-[box-shadow,border-color,background-color] duration-500 ${
         isHighlighted ? "ring-4 ring-cath-red-700/60 shadow-2xl" : ""
       }`}
       style={{
@@ -277,7 +277,7 @@ const PlanCard = ({
                   : feature.id || index;
 
                 return (
-                  <motion.li
+                  <Motion.li
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{
@@ -326,7 +326,7 @@ const PlanCard = ({
                         feature.name
                       )}
                     </span>
-                  </motion.li>
+                  </Motion.li>
                 );
               })}
             </ul>
@@ -373,7 +373,7 @@ const PlanCard = ({
           )}
         </footer>
       </div>
-    </motion.article>
+    </Motion.article>
   );
 };
 

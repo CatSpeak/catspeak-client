@@ -17,6 +17,12 @@ import {
   useRequestBankAccountOtpMutation,
   useConfirmBankAccountChangeMutation,
 } from "@/features/bank-accounts/api/instructorBankAccountsApi"
+import {
+  sanitizeAccountNumber,
+  isValidAccountNumber,
+  normalizeAccountHolderName,
+  isValidAccountHolderName,
+} from "@/features/bank-accounts/utils/bankAccountUtils"
 import { toast } from "@/shared/utils/toastBridge"
 import { parseApiError } from "@/shared/utils/apiError"
 import { maskAccountNumber } from "./utils"
@@ -26,9 +32,8 @@ import useResendCountdown, {
   formatCountdown,
 } from "./contact/useResendCountdown"
 
-const digitsOnly = (value) => String(value || "").replace(/\D/g, "")
-const MIN_ACCOUNT_DIGITS = 6
-const MAX_ACCOUNT_DIGITS = 20
+const MIN_ACCOUNT_CHARS = 6
+const MAX_ACCOUNT_CHARS = 34
 
 /** Masks the middle of an account number, e.g. 1029384756 -> 1029••••56. */
 const maskAccountMiddle = (value) => {
@@ -137,21 +142,20 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
       )}`.trim()
     : ""
 
-  const accountDigits = digitsOnly(accountNumber)
-  const accountIsValid =
-    accountDigits.length >= MIN_ACCOUNT_DIGITS &&
-    accountDigits.length <= MAX_ACCOUNT_DIGITS
+  const cleanAccount = sanitizeAccountNumber(accountNumber)
+  const accountIsValid = isValidAccountNumber(cleanAccount)
   const clientAccountError =
     accountNumber !== "" && !accountIsValid
-      ? ins.bankAccountNumberInvalid || "Số tài khoản phải có từ 6 đến 20 chữ số"
+      ? ins.bankAccountNumberInvalid || "Số tài khoản phải có từ 6 đến 34 ký tự"
       : ""
   const shownAccountError = accountError || clientAccountError
   const holderName = accountHolderName.trim()
-  const holderIsValid = holderName.length >= 2 && holderName.length <= 100
+  const normalizedHolder = normalizeAccountHolderName(holderName)
+  const holderIsValid = isValidAccountHolderName(normalizedHolder)
   const clientHolderError =
     accountHolderName !== "" && !holderIsValid
       ? ins.bankAccountHolderInvalid ||
-        "Tên chủ tài khoản phải từ 2 đến 100 ký tự"
+        "Tên chủ tài khoản phải từ 2 đến 70 ký tự"
       : ""
   const shownHolderError = holderError || clientHolderError
   const canCheck = Boolean(bankBin) && accountIsValid && holderIsValid
@@ -181,8 +185,8 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
     bankBin,
     bankShortName: selectedBank?.label || "",
     bankFullName: "",
-    accountNumber: accountDigits,
-    accountHolderName: holderName.toUpperCase(),
+    accountNumber: cleanAccount,
+    accountHolderName: normalizedHolder,
     isVerified: false,
   })
 
@@ -193,24 +197,24 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
     if (!holderIsValid) {
       setHolderError(
         ins.bankAccountHolderInvalid ||
-          "Tên chủ tài khoản phải từ 2 đến 100 ký tự",
+          "Tên chủ tài khoản phải từ 2 đến 70 ký tự",
       )
       return
     }
     try {
       const result = await verifyBankAccount({
         BankBin: bankBin,
-        AccountNumber: accountDigits,
+        AccountNumber: cleanAccount,
       }).unwrap()
       const verifiedName = String(result.accountHolderName || "").trim()
-      if (verifiedName) {
+      if (result.success && verifiedName) {
         setVerified({
           bankBin: result.bankBin || bankBin,
           bankShortName:
             result.bankShortName || selectedBank?.label || "",
           bankFullName: result.bankFullName || "",
-          accountNumber: result.accountNumber || accountDigits,
-          accountHolderName: verifiedName.toUpperCase(),
+          accountNumber: result.accountNumber || cleanAccount,
+          accountHolderName: normalizeAccountHolderName(verifiedName),
           isVerified: true,
         })
         setVerifyWarning("")
@@ -635,17 +639,15 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
             </span>
             <input
               type="text"
-              inputMode="numeric"
               autoComplete="off"
+              autoCapitalize="characters"
               value={accountNumber}
               disabled={isVerifying}
               placeholder={
                 ins.bankAccountNumberPlaceholder || "Nhập số tài khoản..."
               }
               onChange={(event) => {
-                setAccountNumber(
-                  digitsOnly(event.target.value).slice(0, MAX_ACCOUNT_DIGITS),
-                )
+                setAccountNumber(sanitizeAccountNumber(event.target.value))
                 setAccountError("")
               }}
               className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
@@ -673,7 +675,15 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
                 "Nhập tên chủ tài khoản..."
               }
               onChange={(event) => {
-                setAccountHolderName(event.target.value.slice(0, 100))
+                setAccountHolderName(
+                  event.target.value
+                    .replace(/đ/g, "D")
+                    .replace(/Đ/g, "D")
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "")
+                    .toUpperCase()
+                    .slice(0, 70),
+                )
                 setHolderError("")
               }}
               className={`h-11 w-full rounded-[7px] border bg-white px-3.5 text-[13px] text-[#101828] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#990011] disabled:cursor-not-allowed disabled:opacity-60 ${
