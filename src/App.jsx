@@ -4,10 +4,10 @@ import { store } from "@store"
 import "@styles/app.css"
 import AppToaster from "@/shared/components/ui/AppToaster"
 
-import { ConversationSignalRProvider } from "@/features/chat/context/ConversationSignalRContext"
+import { ConversationSignalRProvider } from "@/features/chat/context/ConversationSignalRProvider"
+import { InChatCallProvider } from "@/features/chat/context/InChatCallProvider"
 import GlobalSignalRHandler from "@/features/chat/components/GlobalSignalRHandler"
 import ServerDownScreen from "@/shared/components/ServerDownScreen"
-import NavigationProgress from "@/shared/components/NavigationProgress"
 import { GlobalVideoCallProvider } from "@/features/video-call/context/GlobalVideoCallProvider"
 import PiPWidget from "@/features/video-call/components/pip/PiPWidget"
 
@@ -36,27 +36,28 @@ function App() {
         <GlobalErrorBoundary>
           <WebViewGuard>
             <GlobalVideoCallProvider>
-              <NavigationProgress />
               <ServerDownScreen />
               <SidebarProvider>
                 <ConversationSignalRProvider>
-                  <GlobalPresenceProvider>
-                    <GlobalSignalRHandler />
-                    <AppToaster />
-                    <CompletionReviewPrompt />
-                    {/* <ScrollToTopButton /> */}
-                    <AppRouter />
-                    <PiPWidget />
-                    <GlobalTaskProgressWidget />
-                    <RecordingPoller />
-                    <GlobalTaskSync />
-                    <AutoCrashReporterSync />
-                    <HelpWidget />
-                    {/* TASK-AI-08: nút nổi trợ lý chatbot, hiện trên mọi màn hình
-                        sau khi đăng nhập (FR-rag-chatbot-001). Mount ở đây chứ không
-                        ở từng layout để khỏi lặp lại bốn lần. */}
-                    <ChatAssistantWidget />
-                  </GlobalPresenceProvider>
+                  <InChatCallProvider>
+                    <GlobalPresenceProvider>
+                      <GlobalSignalRHandler />
+                      <AppToaster />
+                      <CompletionReviewPrompt />
+                      {/* <ScrollToTopButton /> */}
+                      <AppRouter />
+                      <PiPWidget />
+                      <GlobalTaskProgressWidget />
+                      <RecordingPoller />
+                      <GlobalTaskSync />
+                      <AutoCrashReporterSync />
+                      <HelpWidget />
+                      {/* TASK-AI-08: nút nổi trợ lý chatbot, hiện trên mọi màn hình
+                          sau khi đăng nhập (FR-rag-chatbot-001). Mount ở đây chứ không
+                          ở từng layout để khỏi lặp lại bốn lần. */}
+                      <ChatAssistantWidget />
+                    </GlobalPresenceProvider>
+                  </InChatCallProvider>
                 </ConversationSignalRProvider>
               </SidebarProvider>
             </GlobalVideoCallProvider>

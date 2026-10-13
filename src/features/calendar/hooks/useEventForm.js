@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -12,6 +13,10 @@ import {
   useUpdateEventOccurrenceMutation,
 } from "@/store/api/eventsApi";
 import { mapFormToPayload, objectToFormData } from "../utils/mapFormToPayload";
+import {
+  communityCodeFromValue,
+  getDefaultCommunityCode,
+} from "../utils/community";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { useTimezone } from "@/shared/hooks/useTimezone";
 import { TIMEZONE_IDS, getTimezoneOptions } from "@/shared/constants/timezones";
@@ -33,6 +38,7 @@ export const useEventForm = (
 ) => {
   const { t } = useLanguage();
   const { userTimeZone } = useTimezone();
+  const { pathname } = useLocation();
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
   // eslint-disable-next-line no-unused-vars
@@ -53,6 +59,9 @@ export const useEventForm = (
   const initialCityId = editEvent?.cityId || 0;
   const initialParticipants = editEvent?.maxParticipants || "";
   const initialVisibility = editEvent?.visibilityScope || "PUBLIC";
+  const initialCommunity =
+    communityCodeFromValue(editEvent?.languageCommunity) ||
+    getDefaultCommunityCode(pathname);
   const initialConditions =
     editEvent?.conditions?.map((c) => c.title).join(", ") || "";
   const initialTicketPrice = editEvent?.ticketPrice ?? null;
@@ -140,6 +149,7 @@ export const useEventForm = (
   };
 
   const [visibility, setVisibility] = useState(initialVisibility);
+  const [community, setCommunity] = useState(initialCommunity);
   const [conditionsInput, setConditionsInput] = useState(initialConditions);
   const [ticketPrice, setTicketPrice] = useState(initialTicketPrice);
 
@@ -274,6 +284,7 @@ export const useEventForm = (
       isOnline,
       maxParticipants,
       visibility,
+      languageCommunity: community,
       startTime,
       endTime,
       recurrenceOption,
@@ -365,6 +376,8 @@ export const useEventForm = (
     setMaxParticipants,
     visibility,
     setVisibility,
+    community,
+    setCommunity,
     startTime,
     setStartTime,
     endTime,

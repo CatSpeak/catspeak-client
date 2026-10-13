@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import { getProfilePath } from "@/shared/utils/navigation"
-import { useLanguage } from "@/shared/context/LanguageContext"
-import { getNavigate } from "@/features/video-call/hooks/useNavigateRef"
 
 export const TeacherHat = ({ size = 32, className = "" }) => (
   <svg
@@ -48,7 +45,7 @@ export const TeacherHat = ({ size = 32, className = "" }) => (
  * Reusable Avatar component — displays a user image or initial fallback.
  * Clicking on an Avatar with an `accountId` automatically navigates to that user's profile.
  *
- * @param {number}  [size=24]        - Width & height in pixels
+ * @param {number|string} [size=24]  - Width & height in pixels (or "sm"|"md"|"lg")
  * @param {string}  [src]            - Image URL
  * @param {string}  [alt]            - Alt text for the image
  * @param {string}  [name]           - Used to derive the fallback initial
@@ -88,14 +85,6 @@ const Avatar = ({
       ? 48
       : parseInt(size, 10) || 24
   const [imgError, setImgError] = useState(false)
-  let navigate
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    navigate = useNavigate()
-  } catch {
-    navigate = getNavigate()
-  }
-  const { currentLang } = useLanguage()
 
   useEffect(() => {
     setImgError(false)
@@ -139,27 +128,43 @@ const Avatar = ({
   const hatSize = Math.round(numericSize * 0.72)
   const hatTop = -Math.round(numericSize * 0.05)
 
+  const hasValidSrc = Boolean(
+    src && typeof src === "string" && src.trim().length > 0 && !imgError,
+  )
+
   const renderAvatarContent = () => {
-    if (src && !imgError) {
+    const positionClass =
+      className && /\b(absolute|fixed)\b/.test(className) ? "" : "relative"
+
+    if (hasValidSrc) {
       return (
         <div
-          className={`overflow-hidden rounded-full shrink-0 ${speakingClass} ${cursorClass} ${className}`}
+          className={`overflow-hidden rounded-full shrink-0 select-none ${positionClass} ${speakingClass} ${cursorClass} ${className}`}
           style={baseStyle}
           onClick={isClickable ? handleClick : onClick}
         >
           <img
             src={src}
             alt={alt}
-            className="h-full w-full object-cover"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+            className="!w-full !h-full !object-cover pointer-events-none"
             onError={() => setImgError(true)}
           />
         </div>
       )
     }
 
+    const hasCustomBg = className && className.includes("bg-")
+    const fallbackBgClass = hasCustomBg ? "" : "bg-cath-red-700 text-white"
+
     return (
       <div
-        className={`flex items-center justify-center rounded-full font-semibold bg-cath-red-700 text-white shrink-0 ${speakingClass} ${cursorClass} ${className}`}
+        className={`flex items-center justify-center rounded-full font-semibold shrink-0 select-none ${fallbackBgClass} ${speakingClass} ${cursorClass} ${className}`}
         style={baseStyle}
         onClick={isClickable ? handleClick : onClick}
       >

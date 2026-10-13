@@ -43,7 +43,7 @@ const Banner = ({
 
   return (
     <div
-      className={`flex items-center gap-2 p-3 min-h-12 shrink-0 rounded-xl border text-sm transition-all ${currentVariant.container} ${className}`}
+      className={`flex items-center gap-2 p-3 min-h-12 shrink-0 rounded-md border text-sm transition-all ${currentVariant.container} ${className}`}
       role="alert"
     >
       {icon !== null && (

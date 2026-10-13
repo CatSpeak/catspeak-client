@@ -1,9 +1,10 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouteError, useNavigate } from "react-router-dom"
 import PillButton from "@/shared/components/ui/buttons/PillButton"
 import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react"
 import BugReportModal from "@/features/bug-report/components/BugReportModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import NProgress from "nprogress"
 
 const RouteErrorBoundary = () => {
   const error = useRouteError()
@@ -11,6 +12,10 @@ const RouteErrorBoundary = () => {
   const [isReportOpen, setIsReportOpen] = useState(false)
   const { t } = useLanguage()
   const lang = t.bugReport?.errorBoundary || {}
+
+  useEffect(() => {
+    NProgress.done()
+  }, [])
 
   console.error("Unhandled Route Error:", error)
 

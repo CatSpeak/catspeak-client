@@ -11,6 +11,7 @@ import {
   friendshipApi,
 } from "@/store/api/social/friendshipApi"
 import { useCreatePrivateConversationMutation } from "@/store/api/social/conversationsApi"
+import { closeWidget } from "@/store/slices/messageWidgetSlice"
 
 export const useFriendActions = () => {
   const { t } = useLanguage()
@@ -26,15 +27,23 @@ export const useFriendActions = () => {
 
   const handleStartChat = async (targetId, close) => {
     if (close) close()
-    if (!targetId) return
+    if (!targetId) return null
     try {
       const res = await createPrivateConversation(targetId).unwrap()
-      const convId = res?.id ?? res?.conversationId ?? res?.data?.id
-      navigate(convId ? `/chat/${encodeURIComponent(String(convId))}` : "/chat")
+      const convId = res.conversationId
+      dispatch(closeWidget())
+      if (convId) {
+        navigate(`/chat/${encodeURIComponent(String(convId))}`)
+      } else {
+        navigate("/chat")
+      }
+      return convId
     } catch {
       toast.error(
-        t.profile?.friends?.actions?.chatError || "Không thể mở cuộc trò chuyện",
+        t.profile?.friends?.actions?.chatError ||
+          "Không thể mở cuộc trò chuyện",
       )
+      return null
     }
   }
 
@@ -70,31 +79,25 @@ export const useFriendActions = () => {
 
   const handleUnfriend = async (idOrObj, close) => {
     if (close) close()
-    const targetAccountId =
-      typeof idOrObj === "object" ? idOrObj?.accountId : idOrObj
     let friendshipId =
       typeof idOrObj === "object" ? idOrObj?.friendshipId : undefined
+    const targetAccountId =
+      typeof idOrObj === "object" ? idOrObj?.accountId : idOrObj
 
     try {
       if (!friendshipId && targetAccountId) {
-        try {
-          const statusRes = await dispatch(
-            friendshipApi.endpoints.getConnectionStatus.initiate(
-              targetAccountId,
-              { forceRefetch: true },
-            ),
-          ).unwrap()
-          const raw = statusRes?.data ?? statusRes
-          friendshipId = raw?.friendshipId ?? raw?.id
-        } catch {
-          friendshipId = targetAccountId
-        }
+        const status = await dispatch(
+          friendshipApi.endpoints.getConnectionStatus.initiate(
+            targetAccountId,
+            { forceRefetch: true },
+          ),
+        ).unwrap()
+        friendshipId = status?.friendshipId
       }
 
-      const finalId = friendshipId || targetAccountId
-      if (!finalId) return
+      if (!friendshipId) return
 
-      await deleteFriendship(finalId).unwrap()
+      await deleteFriendship(friendshipId).unwrap()
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }
@@ -129,7 +132,9 @@ export const useFriendActions = () => {
     if (!friendshipId) return
     try {
       await deleteFriendship(friendshipId).unwrap()
-      toast.success(t.profile?.friends?.actions?.cancelSuccess || "Đã thu hồi lời mời")
+      toast.success(
+        t.profile?.friends?.actions?.cancelSuccess || "Đã thu hồi lời mời",
+      )
     } catch {
       toast.error(t.profile?.friends?.actions?.error || "Có lỗi xảy ra")
     }

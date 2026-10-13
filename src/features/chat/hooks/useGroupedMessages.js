@@ -46,8 +46,7 @@ export const useGroupedMessages = ({
     const otherUser = conversation.friend
     const FIVE_MIN = 5 * 60 * 1000
 
-    const getMessageTypeStr = (m) =>
-      m && m.messageType != null ? String(m.messageType).toLowerCase() : ""
+    const getMessageTypeStr = (m) => String(m?.messageType || "").toLowerCase()
 
     let lastNonSystemMsgIndex = -1
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -82,8 +81,10 @@ export const useGroupedMessages = ({
         prevDate = msgDate
       }
 
-      // System messages handling
-      if (getMessageTypeStr(msg) === "system") {
+      const msgTypeStr = getMessageTypeStr(msg)
+
+      // System messages handling (messageType 4 or "system")
+      if (msgTypeStr === "system") {
         groupedItems.push({
           type: "system",
           id: msgId,
@@ -94,17 +95,19 @@ export const useGroupedMessages = ({
       }
 
       // StoryInterest messages handling (messageType 6 or "storyinterest")
-      const msgTypeRaw = msg?.messageType
-      const isStoryInterest =
-        msgTypeRaw === 6 ||
-        msgTypeRaw === "6" ||
-        String(msgTypeRaw).toLowerCase() === "storyinterest"
+      const isStoryInterest = msgTypeStr === "storyinterest"
 
       if (isStoryInterest) {
         // Resolve sender so the card can show avatar + name
-        const siSenderId = msg.senderId ?? msg.sender?.accountId
+        const siSenderId = msg.sender?.accountId ?? msg.senderId
+        const myId = Number(currentUser?.id)
+        const sourceId =
+          currentUser?.sourceAccountId != null
+            ? Number(currentUser.sourceAccountId)
+            : null
         const siIsOwn =
-          Number(siSenderId) === Number(currentUser?.id || currentUser?.accountId)
+          Number(siSenderId) === myId ||
+          (sourceId != null && Number(siSenderId) === sourceId)
         const siSender = siIsOwn
           ? {
               id: currentUser?.id || currentUser?.accountId,
@@ -169,7 +172,14 @@ export const useGroupedMessages = ({
 
       const isFirstInGroup = !isSameSenderAsPrev
       const isLastInGroup = !isSameSenderAsNext
-      const isOwn = Number(msgSenderId) === Number(currentUser?.id || currentUser?.accountId)
+      const myId = Number(currentUser?.id)
+      const sourceId =
+        currentUser?.sourceAccountId != null
+          ? Number(currentUser.sourceAccountId)
+          : null
+      const isOwn =
+        Number(msgSenderId) === myId ||
+        (sourceId != null && Number(msgSenderId) === sourceId)
       const isLastMessageInChat = i === lastNonSystemMsgIndex
 
       // Resolve sender info
@@ -208,9 +218,20 @@ export const useGroupedMessages = ({
 
       const shouldAnimate = !initialMessageIds.has(msgId)
 
-      // Resolve users who have read this message (only evaluated for the latest message in chat)
+      // Resolve users who have read this message (supported across all messages for real-time stacked avatars)
       let readByUsers = []
-      if (isLastMessageInChat) {
+      const rawReaders = Array.isArray(msg.readByUsers) ? msg.readByUsers : []
+      const currentMyId = Number(currentUser?.id || currentUser?.accountId)
+
+      if (rawReaders.length > 0) {
+        readByUsers = rawReaders
+          .filter((r) => Number(r.accountId || r.id) !== currentMyId)
+          .map((r) => ({
+            id: r.accountId || r.id,
+            name: r.username || r.name || "User",
+            avatar: r.avatarImageUrl || r.avatar || null,
+          }))
+      } else if (isLastMessageInChat) {
         if (isGroup) {
           const participants = conversation.participants || []
           const readIds = Array.isArray(msg.readByAccountIds)
@@ -220,8 +241,8 @@ export const useGroupedMessages = ({
             .filter((p) => {
               const pId = Number(p.accountId || p.id)
               return (
-                pId !== Number(currentUser.id) &&
-                pId !== Number(msg.senderId) &&
+                pId !== currentMyId &&
+                pId !== Number(msgSenderId) &&
                 readIds.includes(pId)
               )
             })

@@ -34,9 +34,12 @@ const NotificationWidget = () => {
   const { openAuthModal } = useContext(AuthModalContext)
   const isMobile = useIsMobile(425)
   const { t } = useLanguage()
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+  const { notifications, unreadCount, markAsRead, markAllAsRead } =
+    useNotifications()
 
-  useClickOutside(dropdownRef, () => setIsOpen(false), { enabled: isOpen && !isMobile })
+  useClickOutside(dropdownRef, () => setIsOpen(false), {
+    enabled: isOpen && !isMobile,
+  })
   useScrollLock(isOpen && isMobile)
 
   const toggleDropdown = () => {
@@ -85,15 +88,16 @@ const NotificationWidget = () => {
       <IconButton
         onClick={toggleDropdown}
         variant="filled"
-        className="relative"
         aria-label={t.header?.notifications || "Notifications"}
+        badge={
+          unreadCount > 0 && (
+            <span className="absolute top-0 right-0 z-10 flex h-4 min-w-[1rem] items-center justify-center rounded-full border-2 border-white bg-red-500 px-1 text-[10px] font-bold leading-none text-white shadow-xs pointer-events-none dark:border-gray-800">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )
+        }
       >
-        <Bell size={20} />
-        {unreadCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white z-10">
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        )}
+        <Bell />
       </IconButton>
 
       <AnimatePresence>

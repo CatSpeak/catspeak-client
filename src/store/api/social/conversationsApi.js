@@ -30,22 +30,55 @@ export const conversationsApi = socialApi.injectEndpoints({
       invalidatesTags: ["Conversations"],
     }),
 
-    // Get messages from a conversation (supports pagination)
+    // Get messages from a conversation (supports cursor beforeId, aroundId, afterId & limit, as well as legacy pagination)
     getConversationMessages: builder.query({
       query: (arg) => {
         const conversationId =
           typeof arg === "object" && arg !== null ? arg.conversationId : arg
-        const page = typeof arg === "object" && arg !== null ? arg.page : undefined
+        const beforeId =
+          typeof arg === "object" && arg !== null ? arg.beforeId : undefined
+        const aroundId =
+          typeof arg === "object" && arg !== null ? arg.aroundId : undefined
+        const afterId =
+          typeof arg === "object" && arg !== null ? arg.afterId : undefined
+        const limit =
+          typeof arg === "object" && arg !== null ? arg.limit : undefined
+        const page =
+          typeof arg === "object" && arg !== null ? arg.page : undefined
         const pageSize =
           typeof arg === "object" && arg !== null ? arg.pageSize : undefined
 
         const params = {}
+        if (beforeId !== undefined) params.beforeId = beforeId
+        if (aroundId !== undefined) params.aroundId = aroundId
+        if (afterId !== undefined) params.afterId = afterId
+        if (limit !== undefined) params.limit = limit
         if (page !== undefined) params.page = page
         if (pageSize !== undefined) params.pageSize = pageSize
 
         return {
           url: `/conversations/${conversationId}/messages`,
           params,
+        }
+      },
+      transformResponse: (response, meta) => {
+        const parseHeaderBool = (headerName) => {
+          const val = meta?.response?.headers?.get?.(headerName)
+          if (val === "true" || val === "True" || val === "1") return true
+          if (val === "false" || val === "False" || val === "0") return false
+          return undefined
+        }
+
+        const items = Array.isArray(response) ? response : []
+        const hasMoreBefore = parseHeaderBool("X-Has-More-Before")
+        const hasMoreAfter = parseHeaderBool("X-Has-More-After")
+        const targetFound = parseHeaderBool("X-Target-Found")
+
+        return {
+          items,
+          hasMoreBefore: hasMoreBefore !== undefined ? hasMoreBefore : items.length >= 30,
+          hasMoreAfter: hasMoreAfter !== undefined ? hasMoreAfter : false,
+          targetFound: targetFound !== undefined ? targetFound : true,
         }
       },
       providesTags: (result, error, arg) => {
@@ -161,6 +194,8 @@ export const conversationsApi = socialApi.injectEndpoints({
       }),
       invalidatesTags: (result, error, { conversationId }) => [
         "Conversations",
+        { type: "Members", id: Number(conversationId) },
+        { type: "Members", id: String(conversationId) },
         { type: "Messages", id: Number(conversationId) },
         { type: "Messages", id: String(conversationId) },
       ],
@@ -171,6 +206,327 @@ export const conversationsApi = socialApi.injectEndpoints({
       query: () => "/conversations/staff",
       providesTags: ["Conversations"],
     }),
+
+    // Edit message content
+    editMessage: builder.mutation({
+      queryFn: async (
+        { conversationId, messageId, messageContent },
+        api,
+        extraOptions,
+        baseQuery,
+      ) =>
+        baseQuery({
+          url: `/conversations/${conversationId}/messages/${messageId}`,
+          method: "PUT",
+          body: await maskBody(api, { messageContent }),
+        }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+      ],
+    }),
+
+    // Toggle reaction on a message
+    toggleReaction: builder.mutation({
+      query: ({ conversationId, messageId, emoji }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}/reactions`,
+        method: "POST",
+        body: { emoji },
+      }),
+    }),
+
+    // Get reactions detail for a message
+    getMessageReactions: builder.query({
+      query: ({ conversationId, messageId }) =>
+        `/conversations/${conversationId}/messages/${messageId}/reactions`,
+    }),
+
+    // Get pinned messages of a conversation
+    getPinnedMessages: builder.query({
+      query: (conversationId) => `/conversations/${conversationId}/pins`,
+      providesTags: (result, error, conversationId) => [
+        { type: "PinnedMessages", id: Number(conversationId) },
+        { type: "PinnedMessages", id: String(conversationId) },
+      ],
+    }),
+
+    // Pin a message
+    pinMessage: builder.mutation({
+      query: ({ conversationId, messageId }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}/pin`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "PinnedMessages", id: Number(conversationId) },
+        { type: "PinnedMessages", id: String(conversationId) },
+      ],
+    }),
+
+    // Unpin a message
+    unpinMessage: builder.mutation({
+      query: ({ conversationId, messageId }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}/pin`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "PinnedMessages", id: Number(conversationId) },
+        { type: "PinnedMessages", id: String(conversationId) },
+      ],
+    }),
+
+    // Forward a message to multiple target conversations
+    forwardMessages: builder.mutation({
+      query: ({ sourceMessageId, targetConversationIds, comment }) => ({
+        url: "/conversations/messages/forward",
+        method: "POST",
+        body: {
+          sourceMessageId,
+          targetConversationIds,
+          ...(comment ? { comment } : {}),
+        },
+      }),
+      invalidatesTags: (result, error, { targetConversationIds = [] }) => [
+        "Conversations",
+        ...targetConversationIds.flatMap((id) => [
+          { type: "Messages", id: Number(id) },
+          { type: "Messages", id: String(id) },
+        ]),
+      ],
+    }),
+
+    // Route-specific forward for a message
+    forwardMessageById: builder.mutation({
+      query: ({ conversationId, messageId, targetConversationIds }) => ({
+        url: `/conversations/${conversationId}/messages/${messageId}/forward`,
+        method: "POST",
+        body: { targetConversationIds },
+      }),
+      invalidatesTags: (result, error, { targetConversationIds = [] }) => [
+        "Conversations",
+        ...targetConversationIds.flatMap((id) => [
+          { type: "Messages", id: Number(id) },
+          { type: "Messages", id: String(id) },
+        ]),
+      ],
+    }),
+
+    // Get shared media / files / links / audio gallery for a conversation
+    getConversationMedia: builder.query({
+      query: ({ conversationId, type = "all", beforeId, limit = 30 }) => {
+        const params = { type, limit }
+        if (beforeId !== undefined && beforeId !== null) params.beforeId = beforeId
+        return {
+          url: `/conversations/${conversationId}/media`,
+          params,
+        }
+      },
+      providesTags: (result, error, { conversationId }) => [
+        { type: "Messages", id: Number(conversationId) },
+        { type: "Messages", id: String(conversationId) },
+      ],
+    }),
+
+    // Search messages in a conversation
+    searchConversationMessages: builder.query({
+      query: ({ conversationId, query, beforeId, limit = 20 }) => {
+        const params = { query, limit }
+        if (beforeId !== undefined && beforeId !== null) params.beforeId = beforeId
+        return {
+          url: `/conversations/${conversationId}/messages/search`,
+          params,
+        }
+      },
+    }),
+
+    // ── Phase 3: @Mentions & Group Governance Endpoints ──
+
+    // Get members of conversation (Single source of truth with roles: isOwner, isAdmin, isOnline)
+    getConversationMembers: builder.query({
+      query: (arg) => {
+        const conversationId =
+          typeof arg === "object" && arg !== null ? arg.conversationId : arg
+        const query =
+          typeof arg === "object" && arg !== null ? arg.query : undefined
+        return {
+          url: `/conversations/${conversationId}/members`,
+          params: query ? { query } : undefined,
+        }
+      },
+      providesTags: (result, error, arg) => {
+        const conversationId =
+          typeof arg === "object" && arg !== null ? arg.conversationId : arg
+        return [
+          { type: "Members", id: Number(conversationId) },
+          { type: "Members", id: String(conversationId) },
+          "Members",
+        ]
+      },
+    }),
+
+    // Update group info (Name & Avatar, Owner/Admin)
+    updateGroupInfo: builder.mutation({
+      query: ({ conversationId, groupName, groupAvatar }) => ({
+        url: `/conversations/${conversationId}/group-info`,
+        method: "PUT",
+        body: { groupName, groupAvatar },
+      }),
+      invalidatesTags: ["Conversations"],
+    }),
+
+    // Promote participant to Admin (Owner only)
+    promoteParticipant: builder.mutation({
+      query: ({ conversationId, accountId }) => ({
+        url: `/conversations/${conversationId}/participants/${accountId}/promote`,
+        method: "PUT",
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        "Conversations",
+        { type: "Members", id: Number(conversationId) },
+        { type: "Members", id: String(conversationId) },
+      ],
+    }),
+
+    // Demote Admin to Member (Owner only)
+    demoteParticipant: builder.mutation({
+      query: ({ conversationId, accountId }) => ({
+        url: `/conversations/${conversationId}/participants/${accountId}/demote`,
+        method: "PUT",
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        "Conversations",
+        { type: "Members", id: Number(conversationId) },
+        { type: "Members", id: String(conversationId) },
+      ],
+    }),
+
+    // Transfer group ownership to another member (Owner only)
+    transferOwnership: builder.mutation({
+      query: ({ conversationId, newOwnerAccountId }) => ({
+        url: `/conversations/${conversationId}/transfer-ownership`,
+        method: "PUT",
+        body: { newOwnerAccountId },
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        "Conversations",
+        { type: "Members", id: Number(conversationId) },
+        { type: "Members", id: String(conversationId) },
+      ],
+    }),
+
+    // Leave group (Owner must transfer ownership first)
+    leaveGroup: builder.mutation({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/leave`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, conversationId) => [
+        "Conversations",
+        { type: "Members", id: Number(conversationId) },
+        { type: "Members", id: String(conversationId) },
+      ],
+    }),
+
+    // ── Phase 3: In-Chat LiveKit Calls ───────────────────
+
+    // Initiate voice or video call
+    initiateCall: builder.mutation({
+      query: ({ conversationId, callType = "video" }) => ({
+        url: `/conversations/${conversationId}/calls/initiate`,
+        method: "POST",
+        body: { callType },
+      }),
+    }),
+
+    // Join active call
+    joinCall: builder.mutation({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/calls/join`,
+        method: "POST",
+      }),
+    }),
+
+    // End or leave active call
+    endCall: builder.mutation({
+      query: ({ conversationId, forceEnd = false }) => ({
+        url: `/conversations/${conversationId}/calls/end`,
+        method: "POST",
+        params: { forceEnd },
+      }),
+    }),
+
+    // Get active call status for conversation
+    getActiveCall: builder.query({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/calls/active`,
+      }),
+    }),
+
+    // ── Phase 4: Chat Enhancement ────────────────────────
+
+    // GET /api/conversations/calls/active-incoming — Recover incoming call state on reload/F5
+    getActiveIncomingCall: builder.query({
+      query: () => ({
+        url: "/conversations/calls/active-incoming",
+      }),
+    }),
+
+    // POST /api/conversations/{conversationId}/calls/reject — Reject incoming call
+    rejectCall: builder.mutation({
+      query: ({ conversationId, callId, reason = "rejected" }) => ({
+        url: `/conversations/${conversationId}/calls/reject`,
+        method: "POST",
+        body: { callId, reason },
+      }),
+    }),
+
+    // GET /api/conversations/{conversationId}/invite-link — Get or create group invite link
+    getGroupInviteLink: builder.query({
+      query: (conversationId) => `/conversations/${conversationId}/invite-link`,
+      providesTags: (result, error, conversationId) => [
+        { type: "GroupInviteLink", id: Number(conversationId) },
+        { type: "GroupInviteLink", id: String(conversationId) },
+      ],
+    }),
+
+    // POST /api/conversations/{conversationId}/invite-link/reset — Revoke old link & generate new one (Admin/Owner)
+    resetGroupInviteLink: builder.mutation({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/invite-link/reset`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, conversationId) => [
+        { type: "GroupInviteLink", id: Number(conversationId) },
+        { type: "GroupInviteLink", id: String(conversationId) },
+      ],
+    }),
+
+    // PATCH /api/conversations/{conversationId}/invite-link/status — Toggle link invite status (Admin/Owner)
+    updateGroupInviteLinkStatus: builder.mutation({
+      query: ({ conversationId, isEnabled }) => ({
+        url: `/conversations/${conversationId}/invite-link/status`,
+        method: "PATCH",
+        body: { isEnabled },
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "GroupInviteLink", id: Number(conversationId) },
+        { type: "GroupInviteLink", id: String(conversationId) },
+      ],
+    }),
+
+    // GET /api/conversations/invite/{code}/preview — Public preview of group chat before joining
+    previewGroupInvite: builder.query({
+      query: (code) => `/conversations/invite/${code}/preview`,
+      keepUnusedDataFor: 0,
+    }),
+
+    // POST /api/conversations/invite/{code}/join — Join group via invite code
+    joinGroupViaInvite: builder.mutation({
+      query: (code) => ({
+        url: `/conversations/invite/${code}/join`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Conversations"],
+    }),
   }),
 })
 
@@ -180,6 +536,7 @@ export const {
   useCreatePrivateConversationMutation,
   useCreateGroupConversationMutation,
   useGetConversationMessagesQuery,
+  useLazyGetConversationMessagesQuery,
   useSendMessageMutation,
   useSendMediaMessageMutation,
   useDeleteMessageForMeMutation,
@@ -188,4 +545,41 @@ export const {
   useAddParticipantsMutation,
   useRemoveParticipantMutation,
   useGetSupportStaffQuery,
+  useEditMessageMutation,
+  useToggleReactionMutation,
+  useGetMessageReactionsQuery,
+  useGetPinnedMessagesQuery,
+  usePinMessageMutation,
+  useUnpinMessageMutation,
+  useForwardMessagesMutation,
+  useForwardMessageByIdMutation,
+  useGetConversationMediaQuery,
+  useLazyGetConversationMediaQuery,
+  useSearchConversationMessagesQuery,
+  useLazySearchConversationMessagesQuery,
+  useUpdateGroupInfoMutation,
+  usePromoteParticipantMutation,
+  useDemoteParticipantMutation,
+  useTransferOwnershipMutation,
+  useLeaveGroupMutation,
+  useInitiateCallMutation,
+  useJoinCallMutation,
+  useEndCallMutation,
+  useGetActiveCallQuery,
+  useLazyGetActiveCallQuery,
+  useGetConversationMembersQuery,
+  useLazyGetConversationMembersQuery,
+  useGetActiveIncomingCallQuery,
+  useLazyGetActiveIncomingCallQuery,
+  useRejectCallMutation,
+  useGetGroupInviteLinkQuery,
+  useLazyGetGroupInviteLinkQuery,
+  useResetGroupInviteLinkMutation,
+  useUpdateGroupInviteLinkStatusMutation,
+  usePreviewGroupInviteQuery,
+  useLazyPreviewGroupInviteQuery,
+  useJoinGroupViaInviteMutation,
 } = conversationsApi
+
+
+

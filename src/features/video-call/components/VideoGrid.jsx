@@ -19,7 +19,7 @@ import PiPLayout from "./layouts/PiPLayout"
  *  - "sidebar"   → always SpotlightLayout with first item as spotlight
  */
 const VideoGrid = () => {
-  const { participants, screenShareTracks, layoutMode, setLayoutMode, maxTiles, hideEmptyTiles, setPinnedParticipantId } = useVideoCallContext()
+  const { participants, screenShareTracks, layoutMode, maxTiles, hideEmptyTiles, setPinnedParticipantId } = useVideoCallContext()
   const { gameState, gameType } = useGame()
   const isGameActive = gameState !== "idle" && !!gameType
 
@@ -58,18 +58,7 @@ const VideoGrid = () => {
   }
 
   const handleSpotlightTileClick = (item) => {
-    const isCurrentSpotlight =
-      spotlightItem &&
-      spotlightItem.type === item.type &&
-      (item.type === "video"
-        ? spotlightItem.participant?.identity === item.participant?.identity
-        : spotlightItem.trackRef?.publication?.trackSid === item.trackRef?.publication?.trackSid)
-
     handleTileClick(item)
-
-    if (isCurrentSpotlight) {
-      setLayoutMode("grid")
-    }
   }
 
   // ── Khi Game đang chạy: Tự động dùng SpotlightLayout để nhúng Game vào ô chính (trái) ──
@@ -81,24 +70,6 @@ const VideoGrid = () => {
         participants={filteredParticipants}
         handleTileClick={() => {}}
         totalItems={totalItems}
-      />
-    )
-  }
-
-  // ── "grid" mode: always NormalVideoLayout ──
-  if (layoutMode === "grid") {
-    const handleGridTileClick = (item) => {
-      handleTileClick(item)
-      setLayoutMode("sidebar")
-    }
-
-    return (
-      <NormalVideoLayout
-        screenShareTracks={screenShareTracks}
-        participants={filteredParticipants}
-        handleTileClick={handleGridTileClick}
-        totalItems={totalItems}
-        maxTiles={maxTiles}
       />
     )
   }
@@ -144,15 +115,16 @@ const VideoGrid = () => {
     )
   }
 
-  // ── "auto" mode: original behavior ──
+  // ── "grid" mode or "auto" mode: ──
+  // If an item is spotlighted (screen share active or user pinned a tile):
   if (spotlightItem) {
-    if (totalItems === 2) {
+    if (layoutMode === "auto" && totalItems === 2) {
       return (
         <PiPLayout
           spotlightItem={spotlightItem}
           screenShareTracks={screenShareTracks}
           participants={filteredParticipants}
-          handleTileClick={handleTileClick}
+          handleTileClick={handleSpotlightTileClick}
         />
       )
     }
@@ -162,7 +134,7 @@ const VideoGrid = () => {
         spotlightItem={spotlightItem}
         screenShareTracks={screenShareTracks}
         participants={filteredParticipants}
-        handleTileClick={handleTileClick}
+        handleTileClick={handleSpotlightTileClick}
         totalItems={totalItems}
       />
     )

@@ -19,6 +19,7 @@ import MailPage from "@/features/mail/pages/MailPage";
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage";
 import CalendarPage from "@/features/calendar/pages/CalendarPage";
 import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
+import GroupInvitePage from "@/features/chat/pages/GroupInvitePage";
 
 // Shared Pages
 import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages";
@@ -134,11 +135,26 @@ const SessionAnalyticsDetailPage = lazy(
 const WorkspaceDashboardPage = lazy(
   () => import("@/features/courses/components/WorkspaceDashboardPage"),
 );
+const WorkspaceDashboardRouter = lazy(
+  () =>
+    import(
+      "@/features/workspace/components/learner-dashboard/WorkspaceDashboardRouter"
+    ),
+);
+const LearnerDashboardPage = lazy(
+  () =>
+    import(
+      "@/features/workspace/components/learner-dashboard/LearnerDashboardPage"
+    ),
+);
 const CreateVoucherPage = lazy(
   () => import("@/features/vouchers/pages/CreateVoucherPage"),
 );
 const VoucherDetailPage = lazy(
   () => import("@/features/vouchers/pages/VoucherDetailPage"),
+);
+const PointsAndOffersPage = lazy(
+  () => import("@/features/points-and-offers/pages/PointsAndOffersPage"),
 );
 const WorkspaceCalendarPage = lazy(
   () => import("@/features/calendar/pages/WorkspaceCalendarPage"),
@@ -192,6 +208,9 @@ const StudentTakeQuizView = lazy(
 const ReviewClassPage = lazy(
   () => import("@/features/courses/pages/ReviewClassPage"),
 );
+const VocabularyNotebookPage = lazy(
+  () => import("@/features/interactive-script/pages/VocabularyNotebookPage"),
+);
 
 const routesConfig = [
   {
@@ -233,6 +252,10 @@ const routesConfig = [
                 </LazyRoute>
               </AuthGuard>
             ),
+          },
+          {
+            path: "points-and-offers",
+            element: <Navigate to="/workspace/points-and-offers" replace />,
           },
           {
             path: "explore-courses",
@@ -581,6 +604,14 @@ const routesConfig = [
                 )
               },
               {
+                path: "vocabulary",
+                element: (
+                  <LazyRoute>
+                    <VocabularyNotebookPage />
+                  </LazyRoute>
+                )
+              },
+              {
                 path: "teaching-tasks",
                 element: (
                   <RoleGuard allowedRoles={["Teacher"]}>
@@ -673,11 +704,17 @@ const routesConfig = [
               {
                 path: "dashboard",
                 element: (
-                  <RoleGuard allowedRoles={["Teacher"]}>
-                    <LazyRoute>
-                      <WorkspaceDashboardPage />
-                    </LazyRoute>
-                  </RoleGuard>
+                  <LazyRoute>
+                    <WorkspaceDashboardRouter />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "learner-dashboard",
+                element: (
+                  <LazyRoute>
+                    <LearnerDashboardPage />
+                  </LazyRoute>
                 ),
               },
               {
@@ -1028,6 +1065,22 @@ const routesConfig = [
                   </LazyRoute>
                 ),
               },
+              {
+                path: "points-and-offers",
+                element: (
+                  <LazyRoute>
+                    <PointsAndOffersPage />
+                  </LazyRoute>
+                ),
+              },
+              {
+                path: "bonus-points",
+                element: <Navigate to="/workspace/points-and-offers" replace />,
+              },
+              {
+                path: "voucher-exchange",
+                element: <Navigate to="/workspace/points-and-offers" replace />,
+              },
               { path: "*", element: <PageNotFound /> },
             ],
           },
@@ -1176,6 +1229,14 @@ const routesConfig = [
             ),
           },
         ],
+      },
+      {
+        path: "/invite/:code",
+        element: <GroupInvitePage />,
+      },
+      {
+        path: "/chat/invite/:code",
+        element: <GroupInvitePage />,
       },
       {
         path: "/connect",

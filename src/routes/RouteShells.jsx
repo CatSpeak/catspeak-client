@@ -1,18 +1,29 @@
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import LandingPage from "@/features/landing/pages/LandingPage"
 import { useRegisterNavigate } from "@/features/video-call/context/GlobalVideoCallProvider"
 import BottomRightStack from "@/shared/components/BottomRightStack"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
+import NavigationProgress from "@/shared/components/NavigationProgress"
+import NProgress from "nprogress"
+
+const LazyFallback = ({ fallback }) => {
+  useEffect(() => {
+    NProgress.start()
+    return () => {
+      NProgress.done()
+    }
+  }, [])
+
+  return (
+    fallback || (
+      <LoadingSpinner className="flex min-h-[320px] items-center justify-center" />
+    )
+  )
+}
 
 export const LazyRoute = ({ children, fallback }) => (
-  <Suspense
-    fallback={
-      fallback || (
-        <LoadingSpinner className="flex min-h-[320px] items-center justify-center" />
-      )
-    }
-  >
+  <Suspense fallback={<LazyFallback fallback={fallback} />}>
     {children}
   </Suspense>
 )
@@ -23,6 +34,7 @@ export const RootLayout = () => {
   useRegisterNavigate(navigate, location)
   return (
     <>
+      <NavigationProgress />
       <Outlet />
       <BottomRightStack />
     </>
@@ -32,3 +44,4 @@ export const RootLayout = () => {
 export const RootRoute = () => {
   return <LandingPage />
 }
+

@@ -1,12 +1,14 @@
-import React from "react"
-import { FileIcon } from "lucide-react"
+import React, { useState } from "react"
+import { FileIcon, Play } from "lucide-react"
 import ListItem from "@/shared/components/ui/ListItem"
+import VoiceWaveformPlayer from "./VoiceWaveformPlayer"
+import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 
 /**
- * MediaAttachment — renders image previews, inline video players, or document file attachment cards.
+ * MediaAttachment — renders image previews, inline video players, voice audio players, or document file attachment cards.
  *
  * @param {string}  mediaUrl    - URL of media/file
- * @param {string}  messageType - Type of message ("Image", "Video", "File", etc.)
+ * @param {string}  messageType - Type of message ("Image", "Video", "Audio", "File", etc.)
  * @param {string}  fileName    - Optional explicit filename
  * @param {number}  fileSize    - Optional explicit file size in bytes
  * @param {object}  message     - Raw message object (fallback for fileSize / size)
@@ -20,19 +22,31 @@ const MediaAttachment = ({
   message,
   isOwn = false,
   hasCaption = false,
+  hasHeader = false,
 }) => {
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
+
   if (!mediaUrl) return null
 
   const msgTypeLower = String(messageType || "").toLowerCase()
 
+  const isAudio =
+    ["audio", "voice"].includes(msgTypeLower) ||
+    message?.audioDuration != null ||
+    Boolean(mediaUrl.match(/\.(weba|mp3|wav|m4a|aac|oga|opus)(\?.*)?$/i)) ||
+    (Boolean(mediaUrl.match(/\.webm(\?.*)?$/i)) && (msgTypeLower === "audio" || !mediaUrl.match(/video/i)))
+
   const isImage =
-    Boolean(mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) ||
-    ["image", "media", "picture", "photo", "1"].includes(msgTypeLower)
+    !isAudio &&
+    (Boolean(mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) ||
+      ["image", "media", "picture", "photo", "1"].includes(msgTypeLower))
 
   const isVideo =
+    !isAudio &&
     !isImage &&
     (Boolean(mediaUrl.match(/\.(mp4|webm|ogg|mov|avi|mkv)(\?.*)?$/i)) ||
       ["video"].includes(msgTypeLower))
+
 
   const getDisplayName = () => {
     if (fileName) return fileName
@@ -73,33 +87,102 @@ const MediaAttachment = ({
     }
   }
 
-  const roundedClass = hasCaption
-    ? "rounded-t-2xl rounded-b-none"
-    : "rounded-2xl"
+  const roundedClass = hasHeader && hasCaption
+    ? "rounded-none"
+    : hasHeader
+      ? "rounded-b-2xl rounded-t-none"
+      : hasCaption
+        ? "rounded-t-2xl rounded-b-none"
+        : "rounded-2xl"
 
   return (
     <div className="w-full max-w-[360px]">
-      {isImage ? (
-        <a
-          href={mediaUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
+      {isAudio ? (
+        <div
+          className={`w-fit max-w-[340px] ${roundedClass} overflow-hidden ${
+            hasHeader ? "bg-transparent" : isOwn ? "bg-[#990011]" : "bg-primaryBg"
+          }`}
         >
-          <img
-            src={mediaUrl}
-            alt={displayName}
-            className={`${roundedClass} max-h-60 object-cover w-full cursor-pointer block`}
+          <VoiceWaveformPlayer
+            audioUrl={mediaUrl}
+            duration={message?.audioDuration}
+            messageId={message?.id || message?.messageId}
+            isOwn={isOwn}
           />
-        </a>
+        </div>
+      ) : isImage ? (
+        <>
+          <div
+            onClick={() => setIsViewerOpen(true)}
+            className={`block cursor-pointer select-none ${roundedClass} overflow-hidden`}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                setIsViewerOpen(true)
+              }
+            }}
+          >
+            <img
+              src={mediaUrl}
+              alt={displayName}
+              className="max-h-60 object-cover w-full cursor-pointer block hover:opacity-95 transition-opacity"
+              loading="lazy"
+            />
+          </div>
+
+          {isViewerOpen && (
+            <MediaViewerModal
+              media={{
+                mediaUrl,
+                fileName: displayName,
+                mediaType: "Image",
+              }}
+              onClose={() => setIsViewerOpen(false)}
+            />
+          )}
+        </>
       ) : isVideo ? (
-        /* Inline video player — natural aspect ratio, capped at max-h-60 */
-        <video
-          src={mediaUrl}
-          controls
-          playsInline
-          className={`${roundedClass} max-h-60 w-full bg-black block`}
-        />
+        <>
+          <div
+            onClick={() => setIsViewerOpen(true)}
+            className={`relative block cursor-pointer select-none group ${roundedClass} overflow-hidden`}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                setIsViewerOpen(true)
+              }
+            }}
+          >
+            <video
+              src={mediaUrl}
+              preload="metadata"
+              muted
+              playsInline
+              className="max-h-60 w-full bg-black object-cover block pointer-events-none"
+            />
+            {/* Play badge overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/35 transition-colors">
+              <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-xs border border-white/20 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform">
+                <Play size={22} className="ml-0.5 fill-white" />
+              </div>
+            </div>
+          </div>
+
+          {isViewerOpen && (
+            <MediaViewerModal
+              media={{
+                mediaUrl,
+                fileName: displayName,
+                mediaType: "Video",
+              }}
+              onClose={() => setIsViewerOpen(false)}
+            />
+          )}
+        </>
       ) : (
         /* Document / file attachment card */
         <a

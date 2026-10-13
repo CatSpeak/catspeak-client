@@ -117,14 +117,14 @@ const VideoCallControlBar = () => {
     hasCoHostPermission(
       coHost,
       user?.accountId,
-      CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE
+      CO_HOST_PERMISSIONS.ALLOW_SELF_UNMUTE,
     )
   const canSelfCamera =
     isHost ||
     hasCoHostPermission(
       coHost,
       user?.accountId,
-      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA
+      CO_HOST_PERMISSIONS.ALLOW_SELF_CAMERA,
     )
 
   const handleMicWithGate = async () => {
@@ -133,14 +133,14 @@ const VideoCallControlBar = () => {
     if (tryingToUnmute && isVoiceRestricted) {
       toast.error(
         t.rooms?.videoCall?.participantList?.voiceRestrictedBlocked ||
-          "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế."
+          "Bạn đang bị hạn chế bật mic. Vui lòng chờ Host gỡ hạn chế.",
       )
       return
     }
     if (tryingToUnmute && !allowSelfUnmute && !canSelfUnmute) {
       toast.error(
         t.rooms?.videoCall?.participantList?.selfUnmuteBlocked ||
-          "Host đã tắt quyền tự bật mic. Vui lòng chờ host bật giùm."
+          "Host đã tắt quyền tự bật mic. Vui lòng chờ host bật giùm.",
       )
       return
     }
@@ -155,7 +155,7 @@ const VideoCallControlBar = () => {
     if (tryingToEnable && !allowSelfCamera && !canSelfCamera) {
       toast.error(
         t.rooms?.videoCall?.participantList?.selfCameraBlocked ||
-          "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm."
+          "Host đã tắt quyền tự bật camera. Vui lòng chờ host bật giùm.",
       )
       return
     }
@@ -178,7 +178,10 @@ const VideoCallControlBar = () => {
       try {
         await raiseHand({ sessionId, isRaised: newRaised }).unwrap()
       } catch (error) {
-        console.warn("Backend raiseHand notification error (LiveKit metadata active):", error)
+        console.warn(
+          "Backend raiseHand notification error (LiveKit metadata active):",
+          error,
+        )
       }
     }
   }
@@ -193,8 +196,9 @@ const VideoCallControlBar = () => {
   const iconClass = "w-6 h-6"
 
   return (
-    <div className="flex w-full shrink-0 items-center justify-center gap-2 bg-white p-2 pb-[calc(0.5rem_+_env(safe-area-inset-bottom,0px))] border-t border-border">
-      <div className="flex gap-2 w-full items-center md:justify-center justify-center">
+    <div className="relative flex w-full shrink-0 items-center justify-center bg-white px-3 sm:px-4 py-2 pb-[calc(0.5rem_+_env(safe-area-inset-bottom,0px))] border-t border-border">
+      {/* Centered call controls across the entire bar width */}
+      <div className="flex items-center justify-center gap-1">
         <ControlButton
           isActive={micOn}
           isLoading={isTogglingMic}
@@ -249,7 +253,7 @@ const VideoCallControlBar = () => {
           inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
         />
 
-        <div className="relative hidden min-[769px]:block z-50">
+        <div className="relative hidden lg:block z-50">
           <RecordingButton
             isRecording={isRecording}
             isTogglingRecording={isTogglingRecording}
@@ -267,7 +271,7 @@ const VideoCallControlBar = () => {
               title="Breakout Rooms"
               iconActive={<Split className={iconClass} />}
               iconInactive={<Split className={iconClass} />}
-              className="hidden min-[769px]:flex"
+              className="hidden lg:flex"
               inactiveClassOverride="bg-primaryBg hover:bg-[#E6E6E6] text-black"
             />
           )}
@@ -318,7 +322,10 @@ const VideoCallControlBar = () => {
         />
       </div>
 
-      <RightSideControls className="hidden md:flex gap-2" />
+      {/* Docked right-side controls on tablets, laptops, and desktops */}
+      <div className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 hidden md:flex items-center">
+        <RightSideControls className="gap-1" />
+      </div>
 
       {showStopModal && (
         <StopRecordingModal
