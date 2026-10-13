@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useVerifyBankAccountMutation } from "../api/instructorBankAccountsApi"
+import { sanitizeAccountNumber } from "../utils/bankAccountUtils"
 
 /**
  * Custom hook to handle silent debounced verification of bank account numbers.
@@ -17,6 +18,7 @@ export default function useBankVerification(
   const { t } = useLanguage()
   const [verifiedName, setVerifiedName] = useState("")
   const [verifyError, setVerifyError] = useState("")
+  const [canBypass, setCanBypass] = useState(false)
   const [isChecking, setIsChecking] = useState(false)
 
   const [verifyBankAccount, { isLoading: isVerifying }] =
@@ -25,6 +27,7 @@ export default function useBankVerification(
   const resetVerification = useCallback(() => {
     setVerifiedName("")
     setVerifyError("")
+    setCanBypass(false)
     setIsChecking(false)
   }, [])
 
@@ -34,11 +37,12 @@ export default function useBankVerification(
       return
     }
 
-    const trimmed = accountNumber ? accountNumber.trim() : ""
+    const cleaned = sanitizeAccountNumber(accountNumber)
     setVerifiedName("")
     setVerifyError("")
+    setCanBypass(false)
 
-    if (!selectedBank || trimmed.length < 6) {
+    if (!selectedBank || cleaned.length < 6) {
       setIsChecking(false)
       return
     }
@@ -49,15 +53,27 @@ export default function useBankVerification(
       try {
         const result = await verifyBankAccount({
           bankBin: selectedBank.bin,
-          accountNumber: trimmed,
+          accountNumber: cleaned,
         }).unwrap()
 
         const holderName =
           result?.accountHolderName || result?.data?.accountHolderName || ""
-        setVerifiedName(holderName)
-        setVerifyError("")
+        if (result?.success && holderName) {
+          setVerifiedName(holderName)
+          setCanBypass(false)
+          setVerifyError("")
+        } else {
+          setVerifiedName("")
+          setCanBypass(Boolean(result?.canBypass))
+          setVerifyError(
+            result?.message ||
+              t?.bankAccounts?.modal?.autoVerifyError ||
+              "Không thể tự động tra cứu tên chủ tài khoản lúc này. Bạn vẫn có thể tiếp tục thêm tài khoản.",
+          )
+        }
       } catch (err) {
         setVerifiedName("")
+        setCanBypass(Boolean(err?.data?.canBypass))
         setVerifyError(
           err?.data?.message ||
             t?.bankAccounts?.modal?.autoVerifyError ||
@@ -74,8 +90,10 @@ export default function useBankVerification(
   return {
     verifiedName,
     verifyError,
+    canBypass,
     isChecking,
     isVerifying,
     resetVerification,
   }
 }
+

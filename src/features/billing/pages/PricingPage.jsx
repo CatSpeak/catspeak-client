@@ -6,8 +6,7 @@ import { useGetPlansQuery } from "@/store/api/plansApi";
 import { useAuth } from "@/features/auth";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { getGridClasses } from "../utils/planUtils";
-import { History } from "lucide-react";
-import PageTitle from "@/shared/components/ui/PageTitle";
+import { X } from "lucide-react";
 
 const PricingPage = () => {
   const navigate = useNavigate();
@@ -38,32 +37,29 @@ const PricingPage = () => {
       // Clear route state so refreshing (F5) will not re-trigger highlight
       navigate(location.pathname, { replace: true, state: {} });
 
-      // 1. Scroll first while card is in normal state
-      const scrollTimer = setTimeout(() => {
-        highlightedRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }, 300);
-
-      // 2. Trigger highlight AFTER scroll completes (at 600ms)
       const startHighlightTimer = setTimeout(() => {
         setActiveHighlight(true);
-      }, 600);
+      }, 300);
 
-      // 3. Hold highlight for 3 seconds, then revert to original UI (at 3600ms)
       const revertTimer = setTimeout(() => {
         setActiveHighlight(false);
       }, 3600);
 
       return () => {
-        clearTimeout(scrollTimer);
         clearTimeout(startHighlightTimer);
         clearTimeout(revertTimer);
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlansLoading]);
+
+  const handleClose = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate("/");
+    }
+  };
 
   const handleUpgradeClick = (plan) => {
     navigate("/checkout", { state: { plan } });
@@ -76,8 +72,6 @@ const PricingPage = () => {
   );
 
   // Union of features per applicableRole (sorted by displayOrder).
-  // A plan renders the full union of its role group: features missing from
-  // the plan (or inactive / false / zero) are shown struck-through in PlanCard.
   const unionByRole = {};
   publishedPlans.forEach((plan) => {
     const role = (plan.applicableRole || "__all__").toLowerCase();
@@ -143,58 +137,50 @@ const PricingPage = () => {
   });
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 -mx-4 sm:-mx-6 lg:-mx-8 -my-8 px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-70px)]">
-      {/* <div className="mb-8">
-        <Breadcrumb items={breadcrumbItems} />
-      </div> */}
+    <div className="relative w-full h-screen max-h-screen overflow-hidden bg-primaryBg flex items-center justify-center px-4 sm:px-6 lg:px-8 select-none animate-in fade-in duration-300">
+      {/* Top-Right Close Button (X) */}
+      <button
+        onClick={handleClose}
+        aria-label="Đóng"
+        className="absolute top-5 right-5 sm:top-6 sm:right-6 p-2 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-200/60 active:scale-95 transition-all cursor-pointer z-50"
+      >
+        <X size={24} />
+      </button>
 
-      {/* Title & History Header row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 w-full">
-        {/* <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
-            {t.billing.pricing.title}
+      {/* Unified Centered Block (Title + Cards) */}
+      <div className="w-full max-w-6xl mx-auto flex flex-col items-center justify-center">
+        {/* Centered Page Title */}
+        <div className="shrink-0 text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-950 tracking-tight leading-tight">
+            {t.billing?.pricing?.title || "Gói đăng ký"}
           </h1>
-        </div> */}
-        <div className="mb-8">
-          <PageTitle>{t.billing.pricing.title || "Gói đăng ký"}</PageTitle>
         </div>
 
-        {/* Billing History Button */}
-        <button
-          onClick={() => navigate("/billing")}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#990011] text-[#990011] font-semibold text-sm hover:bg-[#990011]/5 transition-all w-fit cursor-pointer active:scale-95 shadow-sm hover:shadow"
-        >
-          <span>{t.billing.billingHistory || "Lịch sử thanh toán"}</span>
-          <History size={16} />
-        </button>
-      </div>
-
-      {isPlansLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto w-full">
-          {[1, 2].map((i) => (
-            <div
-              key={i}
-              className="border border-border bg-white p-6 rounded-3xl shadow-sm animate-pulse space-y-6"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gray-200 rounded-2xl" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-5 bg-gray-200 rounded w-1/3" />
-                  <div className="h-3 bg-gray-200 rounded w-2/3" />
+        {/* Main Pricing Cards Area */}
+        <div className="w-full flex items-center justify-center">
+          {isPlansLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto w-full items-stretch">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="border border-border bg-white p-6 rounded-xl shadow-sm animate-pulse flex flex-col justify-between h-[calc(100dvh-11rem)] min-h-[550px] max-h-[740px]"
+                >
+                <div className="space-y-6">
+                  <div className="h-6 bg-gray-200 rounded w-1/3" />
+                  <div className="h-4 bg-gray-100 rounded w-2/3" />
+                  <div className="h-10 bg-gray-200 rounded w-1/2" />
+                  <div className="border-t border-border pt-4 space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-full" />
+                    <div className="h-4 bg-gray-200 rounded w-5/6" />
+                    <div className="h-4 bg-gray-200 rounded w-4/5" />
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  </div>
                 </div>
+                <div className="h-12 bg-gray-200 rounded-lg w-full" />
               </div>
-              <div className="h-10 bg-gray-200 rounded w-1/2" />
-              <div className="space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-full" />
-                <div className="h-4 bg-gray-200 rounded w-5/6" />
-                <div className="h-4 bg-gray-200 rounded w-4/5" />
-              </div>
-              <div className="h-12 bg-gray-200 rounded-xl w-full" />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="relative">
+            ))}
+          </div>
+        ) : (
           <div className={getGridClasses(formattedPlans.length)}>
             {formattedPlans.map((plan) => {
               const isActive = userTier === plan.name?.toLowerCase();
@@ -207,7 +193,7 @@ const PricingPage = () => {
                 <div
                   key={plan.id}
                   ref={isTargetMatch ? highlightedRef : null}
-                  className="w-full"
+                  className="w-full flex justify-center"
                 >
                   <PlanCard
                     plan={plan}
@@ -218,10 +204,12 @@ const PricingPage = () => {
                         ? `Unlocks ${featureName}`
                         : undefined
                     }
-                    actionLabel={t.billing.pricing.upgradeTo.replace(
-                      "{{planName}}",
-                      plan.name,
-                    )}
+                    actionLabel={
+                      t.billing?.pricing?.upgradeTo?.replace(
+                        "{{planName}}",
+                        plan.name,
+                      ) || `Nâng cấp lên ${plan.name}`
+                    }
                     isProcessing={isProcessing}
                     onAction={
                       plan.price > 0
@@ -233,10 +221,11 @@ const PricingPage = () => {
               );
             })}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default PricingPage;
