@@ -3,8 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { COLORS } from "@/shared/constants/constants";
 import { Share, MessageSquare } from "lucide-react";
-import { useReactToPostMutation } from "@/store/api/social/postsApi";
-import useSharePost from "@/shared/hooks/useSharePost";
+import {
+  useReactToPostMutation,
+  useSharePostMutation,
+} from "@/store/api/social/postsApi";
+import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import ShareModal from "./ShareModal";
 import Carousel from "@/shared/components/ui/Carousel";
 import { getImageUrl } from "@/shared/utils/imageUtils";
@@ -41,12 +44,9 @@ const NewsCard = ({ news }) => {
 
   /* ── API mutations & hooks ───────────────────────────────────────── */
   const [reactToPost] = useReactToPostMutation();
-  const {
-    shareUrl,
-    isShareModalOpen,
-    setIsShareModalOpen,
-    handleShare: triggerShare,
-  } = useSharePost();
+  const [sharePost] = useSharePostMutation();
+  const [shareUrl, setShareUrl] = useState("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   /* ── Local state ───────────────────────────────────────────────── */
   const [showReactions, setShowReactions] = useState(false);
@@ -89,8 +89,61 @@ const NewsCard = ({ news }) => {
     navigate(`/${currentLang}/cat-speak/news/${news.slug || news.postId}`);
   };
 
-  const handleShare = (e) => {
-    triggerShare(e, news?.postId);
+  const handleShare = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    const postId = news?.postId || news?.id;
+    if (!postId) return;
+
+    try {
+      const result = await sharePost(postId).unwrap();
+      let url =
+        (typeof result === "string" ? result : result?.shareLink) ||
+        `${window.location.origin}/${currentLang}/cat-speak/news/${news.slug || postId}`;
+
+      if (url && !url.startsWith("http")) {
+        url = url.startsWith("/") ? url : `/${url}`;
+        url = `${window.location.origin}${url}`;
+      }
+
+      const finalShareUrl = getShareUrlWithVersion(url);
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: news.title || "CatSpeak",
+            text: news.excerpt || news.title || "",
+            url: finalShareUrl,
+          });
+        } catch (err) {
+          if (err.name === "NotAllowedError") {
+            setShareUrl(finalShareUrl);
+            setIsShareModalOpen(true);
+          } else if (err.name !== "AbortError") {
+            console.error("Share failed", err);
+          }
+        }
+      } else {
+        setShareUrl(finalShareUrl);
+        setIsShareModalOpen(true);
+      }
+    } catch (err) {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: news.title || "CatSpeak",
+            text: news.excerpt || news.title || "",
+            url: `${window.location.origin}/${currentLang}/cat-speak/news/${news.slug || postId}`,
+          });
+        } catch (shareErr) {
+          if (shareErr.name !== "AbortError") {
+            console.error("Share failed", shareErr);
+          }
+        }
+      } else {
+        console.error("Share failed", err);
+      }
+    }
   };
 
   const handleReact = (e, type) => {

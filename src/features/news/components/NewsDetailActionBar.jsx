@@ -53,6 +53,27 @@ const NewsDetailActionBar = ({
   const totalComments = newsItem?.totalComments ?? newsItem?.commentCount ?? 0;
   const shareCount = newsItem?.totalShares ?? newsItem?.shareCount ?? 0;
 
+  const onShareClick = (e) => {
+    if (handleShare) {
+      handleShare(e);
+      return;
+    }
+
+    if (navigator.share) {
+      navigator
+        .share({
+          title: newsItem?.title || "CatSpeak",
+          text: newsItem?.excerpt || newsItem?.title || "",
+          url: window.location.href,
+        })
+        .catch((err) => {
+          if (err?.name !== "AbortError") {
+            console.error("Error sharing:", err);
+          }
+        });
+    }
+  };
+
   return (
     <div className="border-t border-[#e2e2e2] pt-3.5 pb-1 flex items-center justify-between gap-3">
       {/* ── Left: Action buttons (react · comment · share) ─────── */}
@@ -117,7 +138,7 @@ const NewsDetailActionBar = ({
         {/* Share button */}
         <button
           type="button"
-          onClick={handleShare}
+          onClick={onShareClick}
           className="p-1.5 -m-1.5 rounded-full hover:bg-gray-100 transition-colors flex items-center gap-1.5 text-[#4b5563] hover:text-black cursor-pointer"
           title={t.news?.newsDetail?.share || "Chia sẻ"}
         >
