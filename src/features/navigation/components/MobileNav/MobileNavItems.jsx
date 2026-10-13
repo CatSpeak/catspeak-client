@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react"
 import { Settings, ChevronRight, ChevronLeft, Globe } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import DesktopNavItem from "../DesktopNav/DesktopNavItem"
-import { navLinks, footerLinks, settingNavLinks } from "../../config/navigation"
+import {
+  navLinks,
+  footerLinks,
+  settingNavLinks,
+  isNavItemVisible,
+} from "../../config/navigation"
 import { useActiveLink } from "../../hooks/useActiveLink"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useAuth } from "@/features/auth"
@@ -105,13 +110,14 @@ const MobileNavItems = ({
   const getVisibleGroupsForDrilldown = (item) => {
     if (!item) return []
 
-    const isSubVisible = (sub) => {
-      if (sub.lang && sub.lang !== currentLang) return false
-      if (isHorizontal && sub.showOnHorizontalBar === false) return false
-      if (sub.isPrivate && !isAuthenticated) return false
-      if (sub.roles && !sub.roles.includes(activeRole)) return false
-      return true
-    }
+    const isSubVisible = (sub) =>
+      isNavItemVisible(sub, {
+        currentLang,
+        isHorizontal,
+        isAuthenticated,
+        activeRole,
+        isTeacher,
+      })
 
     if (item.groups) {
       return item.groups
@@ -128,20 +134,7 @@ const MobileNavItems = ({
         .filter((group) => group.items.length > 0)
     }
 
-    const legacySubs = (item.subItems || []).filter((sub) => {
-      if (!isSubVisible(sub)) return false
-      const teacherTabs = [
-        "dashboard",
-        "myCourses",
-        "myClass",
-        "analytics",
-        "schedule",
-        "teachingTasks",
-        "manageMaterials",
-      ]
-      if (teacherTabs.includes(sub.key) && !isTeacher) return false
-      return true
-    })
+    const legacySubs = (item.subItems || []).filter(isSubVisible)
 
     return legacySubs.length > 0 ? [{ key: "default", items: legacySubs }] : []
   }
@@ -158,24 +151,16 @@ const MobileNavItems = ({
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 pb-6 flex flex-col gap-1 scrollbar-none scrollbar-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {navLinks
-            .filter((item) => {
-              if (item.hideInSidebar) return false
-              if (item.lang && item.lang !== currentLang) return false
-              if (isHorizontal && item.showOnHorizontalBar === false)
-                return false
-              if (item.isPrivate && !isAuthenticated) return false
-              const teacherTabs = [
-                "dashboard",
-                "myCourses",
-                "myClass",
-                "analytics",
-                "schedule",
-                "teachingTasks",
-                "manageMaterials",
-              ]
-              if (teacherTabs.includes(item.key) && !isTeacher) return false
-              return true
-            })
+            .filter((item) =>
+              item.isHorizontalBar
+                ? true
+                : isNavItemVisible(item, {
+                    currentLang,
+                    isHorizontal,
+                    isAuthenticated,
+                    isTeacher,
+                  }),
+            )
             .map((item) => {
               if (item.isHorizontalBar) {
                 return (
