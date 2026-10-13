@@ -66,6 +66,7 @@ const InvititeDropdown = ({
   const { data: friendsResponse, isLoading: isFriendsLoading } =
     useGetFriendsQuery(effectiveAccountId, {
       skip: !effectiveAccountId || activeMode !== "friends",
+      refetchOnFocus: false,
     })
 
   // 2. Recommendations Query (for mode="all" or "teachers", pageSize = 5 for all, 20 for teachers to filter)
@@ -79,7 +80,7 @@ const InvititeDropdown = ({
       Page: 1,
       PageSize: activeMode === "all" ? 5 : 20,
     },
-    { skip: !isRecMode },
+    { skip: !isRecMode, refetchOnFocus: false },
   )
 
   // Normalize friends data
@@ -200,13 +201,16 @@ const InvititeDropdown = ({
         : Number(value)
   }, [value])
 
-  const isLoading =
+  const isInitialLoading =
+    activeMode === "friends" ? isFriendsLoading : isRecLoading
+
+  const isQueryLoading =
     activeMode === "friends" ? isFriendsLoading : isRecLoading || isRecFetching
 
   // Default placeholders
   const resolvedPlaceholder = useMemo(() => {
     if (placeholder) return placeholder
-    if (isLoading)
+    if (isInitialLoading && dropdownOptions.length === 0)
       return (
         t?.inviteDropdown.loading ||
         t?.common?.loading ||
@@ -234,7 +238,7 @@ const InvititeDropdown = ({
     if (activeMode === "teachers" || activeMode === "teacher")
       return t?.inviteDropdown.selectTeachers || "Chọn giảng viên..."
     return t?.inviteDropdown.selectUsers || "Chọn người dùng..."
-  }, [placeholder, isLoading, dropdownOptions.length, activeMode, t])
+  }, [placeholder, isInitialLoading, dropdownOptions.length, activeMode, t])
 
   const resolvedSearchPlaceholder = useMemo(() => {
     if (searchPlaceholder) return searchPlaceholder
@@ -259,9 +263,8 @@ const InvititeDropdown = ({
 
     return (
       <div
-        className={`w-full px-3 py-2 flex items-center justify-between transition-colors rounded-xl text-left text-sm hover:bg-neutral-100 ${
-          isSelected ? "bg-neutral-50" : ""
-        }`}
+        className={`w-full px-3 py-2 flex items-center justify-between transition-colors rounded-xl text-left text-sm hover:bg-neutral-100 ${isSelected ? "bg-neutral-50" : ""
+          }`}
       >
         <div className="flex items-center gap-2.5 overflow-hidden flex-1 min-w-0">
           <Avatar
@@ -292,11 +295,10 @@ const InvititeDropdown = ({
         <div className="flex items-center ml-2 shrink-0">
           {isMultiple ? (
             <div
-              className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${
-                isSelected
-                  ? "bg-[#990011] border-[#990011] text-white"
-                  : "border-gray-300 bg-white group-hover:border-gray-400"
-              }`}
+              className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${isSelected
+                ? "bg-[#990011] border-[#990011] text-white"
+                : "border-gray-300 bg-white group-hover:border-gray-400"
+                }`}
             >
               {isSelected && <Check size={12} strokeWidth={3} />}
             </div>
@@ -316,10 +318,10 @@ const InvititeDropdown = ({
       onChange={onChange}
       enableSearch={true}
       handleSearch={isRecMode ? (query) => setSearchKeyword(query) : undefined}
-      loading={isLoading}
+      loading={isQueryLoading}
       placeholder={resolvedPlaceholder}
       searchPlaceholder={resolvedSearchPlaceholder}
-      disabled={isLoading || restProps.disabled}
+      disabled={restProps.disabled}
       className={className}
       dropdownClassName={dropdownClassName}
       maxHeightClass={maxHeightClass}

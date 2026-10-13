@@ -770,9 +770,8 @@ const CreateClassPage = () => {
                     type="button"
                     onClick={toggle}
                     disabled={isEditMode || isRecoverMode || !!initialCourseId}
-                    className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
-                      errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border"
-                    }`}
+                    className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${errors.courseId ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                      }`}
                   >
                     <span className={courseId ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
                       {selectedOption?.label || (courseId ? lockedCourseTitle : (cc.noCourseOption || cc.selectCourseOption || "-- Standalone Class (No Course) --"))}
@@ -819,9 +818,8 @@ const CreateClassPage = () => {
                       type="button"
                       onClick={toggle}
                       disabled={isRecoverMode || !!initialCourseId || !!courseId}
-                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
-                        errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
-                      }`}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${errors.selectedLanguage ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                        }`}
                     >
                       <span className={selectedLanguage ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
                         {selectedOption?.label || (selectedLanguage ? getLocalizedLanguageName(selectedLanguage, t) : (c.languagePlaceholder || cc.languagePlaceholder || "—"))}
@@ -849,9 +847,8 @@ const CreateClassPage = () => {
                       type="button"
                       onClick={toggle}
                       disabled={!selectedLanguage || isRecoverMode || isLevelDisabled}
-                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${
-                        errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border"
-                      }`}
+                      className={`w-full h-11 px-4 rounded-xl flex items-center justify-between gap-2 transition bg-white border text-gray-800 hover:border-gray-300 focus:border-[#990011] cursor-pointer text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed disabled:bg-gray-100/70 ${errors.level ? "border-red-500 ring-2 ring-red-200" : "border-border"
+                        }`}
                     >
                       <span className={level ? "text-gray-800 font-semibold truncate" : "text-gray-400 font-normal truncate"}>
                         {selectedOption?.label || level || (c.levelPlaceholder || "Eg. A1, B2...")}
@@ -1426,11 +1423,10 @@ const CreateClassPage = () => {
                 placement="top-left"
                 trigger={
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-                      feeDetails.openingFee > 0
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 cursor-pointer transition-colors ${feeDetails.openingFee > 0
                         ? "bg-[#990011]/10 text-[#990011] hover:bg-[#990011]/20"
                         : "bg-[#15803D]/10 text-[#15803D] hover:bg-[#15803D]/20"
-                    }`}
+                      }`}
                     title={cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
                   >
                     <Info size={17} />
