@@ -5,8 +5,8 @@ import {
   CreditCard,
   Info,
   Landmark,
+  Mail,
   ShieldCheck,
-  Smartphone,
   User,
 } from "lucide-react"
 import ProfileDrawer from "@/features/user/components/instructor/ProfileDrawer"
@@ -42,14 +42,13 @@ const maskAccountMiddle = (value) => {
   return `${digits.slice(0, 4)}••••${digits.slice(-2)}`
 }
 
-/** Mirrors the server's mask (first 3 + stars + last 2 — SRS BR-PRO-14/36). */
-const maskPhone = (phone) => {
-  const value = String(phone || "")
-  if (!value) return ""
-  if (value.length <= 4) return "*".repeat(value.length)
-  return `${value.slice(0, 3)}${"*".repeat(
-    Math.max(1, value.length - 5),
-  )}${value.slice(-2)}`
+/** Masks an email address, e.g. thienloc@gmail.com -> th***@gmail.com. */
+const maskEmail = (email) => {
+  const val = String(email || "").trim()
+  if (!val || !val.includes("@")) return val
+  const [user, domain] = val.split("@")
+  if (user.length <= 2) return `${user.charAt(0)}***@${domain}`
+  return `${user.slice(0, 2)}***@${domain}`
 }
 
 const BankLogo = ({ logo, name, size = 24 }) => {
@@ -89,7 +88,14 @@ const SummaryRow = ({ icon, label, value }) => (
 
 const Divider = () => <div className="h-px w-full bg-[#E4E7EC]" />
 
-const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
+const BankAccountDrawer = ({
+  open,
+  onClose,
+  currentBank,
+  currentPhone,
+  currentEmail,
+  t,
+}) => {
   const ins = t.profile?.instructor || {}
 
   const [step, setStep] = useState("input")
@@ -159,7 +165,6 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
       : ""
   const shownHolderError = holderError || clientHolderError
   const canCheck = Boolean(bankBin) && accountIsValid && holderIsValid
-  const maskedCurrentPhone = maskPhone(currentPhone)
 
   const resolveBankError = (err, fallbackMessage, fallbackTarget) => {
     const { errorCode, message } = parseApiError(err)
@@ -242,7 +247,7 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
       IsDefault: true,
     }).unwrap()
     setChallenge({
-      maskedPhone: result.maskedPhone || "",
+      maskedEmail: result.maskedEmail || maskEmail(currentEmail) || "",
       bankBin: result.bankBin || verified?.bankBin,
       bankShortName: result.bankShortName || verified?.bankShortName || "",
       accountNumber: result.accountNumber || verified?.accountNumber,
@@ -337,7 +342,9 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
       title={
         isOtpStep
           ? ins.bankVerifyTitle || "Xác thực Tài khoản ngân hàng mới"
-          : ins.bankChangeTitle || "Thay đổi Tài khoản ngân hàng"
+          : currentBank
+            ? ins.bankChangeTitle || "Thay đổi Tài khoản ngân hàng"
+            : ins.bankAddTitle || "Thêm Tài khoản ngân hàng"
       }
       secondaryLabel={ins.contactCancel || "Hủy"}
       onSecondary={onClose}
@@ -369,17 +376,15 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
 
           <p className="text-[10px] text-[#667085]">
             {ins.bankOtpHelper ||
-              "Mã xác thực đã được gửi đến số điện thoại hiện tại đã xác thực của bạn theo mặc định."}
+              "Mã xác thực đã được gửi đến email của bạn."}
           </p>
 
-          {challenge?.maskedPhone ? (
-            <div className="flex items-center gap-2">
-              <Smartphone size={18} className="shrink-0 text-[#101828]" />
-              <span className="text-[13px] font-semibold text-[#101828]">
-                {challenge.maskedPhone}
-              </span>
-            </div>
-          ) : null}
+          <div className="flex items-center gap-2">
+            <Mail size={18} className="shrink-0 text-[#101828]" />
+            <span className="text-[13px] font-semibold text-[#101828]">
+              {challenge?.maskedEmail || maskEmail(currentEmail) || "—"}
+            </span>
+          </div>
 
           <div className="flex flex-col gap-2">
             <span className="text-[13px] font-semibold text-[#101828]">
@@ -432,7 +437,18 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
         </div>
       ) : isConfirmStep ? (
         <div className="flex flex-col gap-3.5">
-          {verifyWarning ? (
+          {verified?.isVerified ? (
+            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#ECFDF3] px-3.5 py-2.5">
+              <ShieldCheck
+                size={18}
+                className="mt-0.5 shrink-0 text-[#039855]"
+              />
+              <p className="text-[10px] font-semibold leading-4 text-[#027A48]">
+                {ins.bankStep2Banner ||
+                  "Thông tin tài khoản mới đã được xác thực với ngân hàng. Vui lòng kiểm tra kỹ thông tin bên dưới trước khi gửi mã xác thực."}
+              </p>
+            </div>
+          ) : verifyWarning ? (
             <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFFAEB] px-3.5 py-2.5">
               <ShieldCheck
                 size={18}
@@ -442,33 +458,25 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
                 {verifyWarning}
               </p>
             </div>
-          ) : (
-            <div className="flex items-start gap-2.5 rounded-[7px] bg-[#FFF3F4] px-3.5 py-2.5">
-              <ShieldCheck
-                size={18}
-                className="mt-0.5 shrink-0 text-[#F52235]"
-              />
-              <p className="text-[10px] font-semibold leading-4 text-[#F52235]">
-                {ins.bankStep2Banner ||
-                  "Thông tin tài khoản mới đã được xác thực với ngân hàng. Vui lòng kiểm tra kỹ thông tin bên dưới trước khi gửi mã xác thực."}
-              </p>
-            </div>
-          )}
+          ) : null}
 
-          <span className="text-sm font-semibold text-[#101828]">
-            {ins.bankCurrentAccount || "Tài khoản hiện tại"}
-          </span>
-          <div className="flex items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] bg-[#F8FAFC] px-3.5 py-3.5">
-            <Landmark size={20} className="shrink-0 text-[#101828]" />
-            <span className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828]">
-              {currentAccountLabel || "—"}
-            </span>
-            <span className="shrink-0 rounded-[7px] bg-[#EFF4FF] px-3 py-1 text-[11px] font-semibold text-[#2E6FE8]">
-              {ins.bankCurrentBadge || "Hiện tại"}
-            </span>
-          </div>
-
-          <Divider />
+          {currentBank && currentAccountLabel ? (
+            <>
+              <span className="text-sm font-semibold text-[#101828]">
+                {ins.bankCurrentAccount || "Tài khoản hiện tại"}
+              </span>
+              <div className="flex items-center gap-2.5 rounded-[7px] border border-[#D0D5DD] bg-[#F8FAFC] px-3.5 py-3.5">
+                <Landmark size={20} className="shrink-0 text-[#101828]" />
+                <span className="min-w-0 flex-1 truncate text-xs font-medium text-[#101828]">
+                  {currentAccountLabel}
+                </span>
+                <span className="shrink-0 rounded-[7px] bg-[#EFF4FF] px-3 py-1 text-[11px] font-semibold text-[#2E6FE8]">
+                  {ins.bankCurrentBadge || "Hiện tại"}
+                </span>
+              </div>
+              <Divider />
+            </>
+          ) : null}
 
           <span className="text-sm font-semibold text-[#101828]">
             {verified?.isVerified === false
@@ -524,17 +532,17 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
           </label>
 
           <div className="flex items-start gap-2.5 rounded-[7px] bg-[#EFF4FF] px-3 py-2.5">
-            <Smartphone
+            <Mail
               size={18}
               className="mt-0.5 shrink-0 text-[#101828]"
             />
             <div className="flex flex-col gap-0.5">
               <span className="text-[9px] text-[#667085]">
                 {ins.bankOtpWillSendTo ||
-                  "Mã xác thực (OTP) sẽ được gửi về số điện thoại đã xác thực của bạn:"}
+                  "Mã xác thực (OTP) sẽ được gửi về email của bạn:"}
               </span>
               <span className="text-[11px] font-semibold text-[#101828]">
-                {maskedCurrentPhone || "—"}
+                {challenge?.maskedEmail || maskEmail(currentEmail) || "—"}
               </span>
             </div>
           </div>
@@ -547,14 +555,16 @@ const BankAccountDrawer = ({ open, onClose, currentBank, currentPhone, t }) => {
         </div>
       ) : (
         <div className="flex flex-col gap-[18px]">
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold text-[#101828]">
-              {ins.bankCurrentAccount || "Tài khoản hiện tại"}
-            </span>
-            <div className="flex h-11 w-full items-center rounded-[7px] border border-[#D0D5DD] bg-[#F2F4F7] px-3.5 text-[13px] text-[#667085]">
-              {currentAccountLabel || ins.bankNoAccount || "—"}
+          {currentBank && currentAccountLabel ? (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-semibold text-[#101828]">
+                {ins.bankCurrentAccount || "Tài khoản hiện tại"}
+              </span>
+              <div className="flex h-11 w-full items-center rounded-[7px] border border-[#D0D5DD] bg-[#F2F4F7] px-3.5 text-[13px] text-[#667085]">
+                {currentAccountLabel}
+              </div>
             </div>
-          </div>
+          ) : null}
 
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold text-[#101828]">

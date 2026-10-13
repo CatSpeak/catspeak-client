@@ -352,6 +352,7 @@ const ApprovedProfilePage = () => {
         onClose={() => setBankDrawerOpen(false)}
         currentBank={bankAccount}
         currentPhone={pick(profile, "phoneNumber", "PhoneNumber")}
+        currentEmail={pick(profile, "email", "Email")}
         t={t}
       />
       <IdCardDrawer
