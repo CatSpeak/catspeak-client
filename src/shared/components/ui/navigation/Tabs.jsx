@@ -26,7 +26,6 @@ const Tabs = memo(
   }) => {
     const isResponsive = fullWidth === "responsive"
     const isFull = fullWidth === true
-
     const scrollContainerRef = useRef(null)
     const activeTabRef = useRef(null)
 
