@@ -7,20 +7,31 @@
  */
 
 export const isOneToOneOrGroup = (roomType) => {
-  if (roomType === undefined || roomType === null) return false;
+  if (!roomType) return false;
   const str = String(roomType).toLowerCase();
-  return str === "onetoone" || str === "1" || str === "group" || str === "2";
+  return str === "onetoone" || str === "group";
 };
 
 export const isClassOrCustom = (roomType) => {
-  if (roomType === undefined || roomType === null) return true; // Default fallback to custom
+  if (!roomType) return true; // Default fallback to custom
   const str = String(roomType).toLowerCase();
-  return str === "class" || str === "3" || str === "custom" || str === "4";
+  return str === "class" || str === "custom";
 };
 
-export const isBeautyFilterSupported = (roomType) => {
-  // Beauty filter is disabled for OneToOne and Group, enabled for Class and Custom
-  if (isOneToOneOrGroup(roomType)) return false;
+export const isBeautyFilterSupported = (roomType, isPro = false) => {
+  if (!roomType) return true; // Default fallback to custom
+  const str = String(roomType).toLowerCase();
+
+  // Specifically for Group room (2:5 room): allowed when user has Pro plan
+  if (str === "group") {
+    return Boolean(isPro);
+  }
+
+  // OneToOne is disabled
+  if (str === "onetoone") {
+    return false;
+  }
+
   return isClassOrCustom(roomType);
 };
 
@@ -31,9 +42,8 @@ export const isBreakoutSupported = (roomType) => {
 };
 
 export const isCustomRoom = (roomType) => {
-  if (roomType === undefined || roomType === null) return false;
-  const str = String(roomType).toLowerCase();
-  return str === "custom" || str === "4";
+  if (!roomType) return false;
+  return String(roomType).toLowerCase() === "custom";
 };
 
 /**
@@ -72,11 +82,10 @@ export const isSpeakingTimeBalanceSupported = (room, roomType) => {
   // If room has classId property
   if (room?.classId != null) return true;
 
-  // Check explicit roomType (Class = 3)
+  // Check explicit roomType (Class)
   const targetType = room?.roomType !== undefined ? room.roomType : roomType;
-  if (targetType !== undefined && targetType !== null) {
-    const str = String(targetType).toLowerCase();
-    return str === "class" || str === "3";
+  if (targetType) {
+    return String(targetType).toLowerCase() === "class";
   }
 
   return false;

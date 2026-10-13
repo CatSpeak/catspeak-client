@@ -6,6 +6,7 @@ import CommunityRoomCard from "../CommunityRoomCard"
 import EmptyRoomState from "../EmptyRoomState"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import useResponsiveItemsPerPage from "@/features/rooms/hooks/useResponsiveItemsPerPage"
+import { IconButton } from "@/shared/components/ui/buttons"
 
 const CategoryRoomSection = ({
   categoryKey,
@@ -47,7 +48,14 @@ const CategoryRoomSection = ({
       topics,
       categories: [categoryKey],
     },
-    { skip: isOther || !responseData?.additionalData?.hasNextPage },
+    {
+      skip:
+        isOther ||
+        !(
+          responseData?.pagination?.hasNextPage ??
+          responseData?.additionalData?.hasNextPage
+        ),
+    },
   )
 
   const { currentRooms, totalCount, totalPages, hasNextPage } = useMemo(() => {
@@ -57,7 +65,8 @@ const CategoryRoomSection = ({
     // Sort by currentParticipantCount descending (rooms with most people first)
     const sortByParticipants = (rooms) => {
       return [...rooms].sort(
-        (a, b) => (b.currentParticipantCount || 0) - (a.currentParticipantCount || 0),
+        (a, b) =>
+          (b.currentParticipantCount || 0) - (a.currentParticipantCount || 0),
       )
     }
 
@@ -172,39 +181,57 @@ const CategoryRoomSection = ({
     }
   }
 
+  // Keep page within bounds if totalPages shrinks on resize or data update
+  useEffect(() => {
+    if (page > totalPages && totalPages > 0) {
+      setPage(totalPages)
+    }
+  }, [page, totalPages])
+
   const renderHeader = () => {
-    const showRightSide = totalCount > 0 || isLoading || isFetching
+    const showRightSide = isMobile
+      ? !isLoading && totalCount > 0
+      : totalCount > 0 || isLoading || isFetching
 
     return (
-      <div className="relative z-10 flex w-full items-center justify-between">
+      <div className="relative z-10 flex w-full items-end justify-between">
         <button
           onClick={() => onSeeMore(categoryKey)}
-          className="group w-fit flex h-10 items-center gap-1.5 sm:gap-2 rounded-md hover:bg-[#E5E5E5] pr-4 sm:pr-6 border-none"
+          className="group relative w-fit flex h-10 items-center rounded-lg px-4 border-none bg-transparent overflow-hidden cursor-pointer select-none"
         >
-          <div className="flex items-center gap-1.5 sm:gap-2 transition-transform duration-300 group-hover:translate-x-2 sm:group-hover:translate-x-4">
-            <h6 className="text-lg sm:text-xl font-bold text-cath-red-700">
-              {title}
-            </h6>
-            <ChevronRight
-              className="text-cath-red-700 w-5 h-5 sm:w-6 sm:h-6"
-              strokeWidth={3}
-            />
+          {/* Base: Red text on transparent background */}
+          <div className="flex items-center gap-1 text-cath-red-700 whitespace-nowrap">
+            <h6 className="text-xl font-bold">{title}</h6>
+            <ChevronRight />
+          </div>
+
+          {/* Inverted overlay: White text on red background, swept left-to-right on hover, right-to-left on hover away */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 flex items-center px-4 bg-cath-red-700 text-white rounded-lg pointer-events-none whitespace-nowrap transition-[clip-path] duration-300 ease-out [clip-path:inset(0_100%_0_0)] group-hover:[clip-path:inset(0_0_0_0)]"
+          >
+            <div className="flex items-center gap-1">
+              <h6 className="text-xl font-bold">{title}</h6>
+              <ChevronRight />
+            </div>
           </div>
         </button>
 
         {showRightSide && (
-          <div className="flex items-center gap-1.5 sm:gap-2 pr-1 sm:pr-2">
-            <button
-              onClick={goPrev}
-              disabled={!canGoPrev || isFetching}
-              aria-label="Previous rooms"
-              className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-            >
-              <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
-            </button>
+          <div className="flex items-center gap-2 pr-4">
+            {!isMobile && (
+              <IconButton
+                onClick={goPrev}
+                disabled={!canGoPrev || isFetching}
+                aria-label="Previous rooms"
+                variant="secondary"
+              >
+                <ChevronLeft />
+              </IconButton>
+            )}
 
             {!isLoading && (
-              <span className="text-sm sm:text-base font-medium text-[#606060] whitespace-nowrap">
+              <span className="text-sm whitespace-nowrap">
                 {totalCount}{" "}
                 {totalCount === 1
                   ? t?.rooms?.filters?.room || "room"
@@ -212,14 +239,16 @@ const CategoryRoomSection = ({
               </span>
             )}
 
-            <button
-              onClick={goNext}
-              disabled={!canGoNext || isFetching}
-              aria-label="Next rooms"
-              className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#F8F8F8] shadow-sm border border-[#C6C6C6] transition-all duration-200 hover:bg-primaryBg active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
-            >
-              <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
-            </button>
+            {!isMobile && (
+              <IconButton
+                onClick={goNext}
+                disabled={!canGoNext || isFetching}
+                aria-label="Next rooms"
+                variant="secondary"
+              >
+                <ChevronRight />
+              </IconButton>
+            )}
           </div>
         )}
       </div>
@@ -241,7 +270,7 @@ const CategoryRoomSection = ({
     )
   }
 
-  // ── Mobile (≤425px): touch scroll, no buttons ──────────────────────────────
+  // ── Mobile (≤640px): touch scroll, edge-to-edge bleed, no pagination buttons ──
   if (isMobile) {
     return (
       <div className="flex flex-col gap-2">
@@ -249,12 +278,12 @@ const CategoryRoomSection = ({
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex gap-4 overflow-x-auto py-8 -my-8 -mx-6 px-6 snap-x snap-mandatory scrollbar-hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-4 overflow-x-auto py-4 -my-4 -mx-4 px-4 scroll-px-4 snap-x snap-mandatory scrollbar-hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {roomsToDisplay.map((room) => (
             <div
               key={room.roomId}
-              className="w-[85%] sm:w-[45%] md:w-[320px] flex-shrink-0 snap-center sm:snap-start flex"
+              className="w-[85%] sm:w-[45%] flex-shrink-0 snap-start flex"
             >
               <CommunityRoomCard room={room} />
             </div>
@@ -263,9 +292,11 @@ const CategoryRoomSection = ({
             Array.from({ length: 3 }).map((_, idx) => (
               <div
                 key={`loading-${idx}`}
-                className="h-[280px] w-[85%] sm:w-[45%] md:w-[320px] flex-shrink-0 animate-pulse rounded-2xl bg-gray-200 snap-center sm:snap-start"
+                className="h-[280px] w-[85%] sm:w-[45%] flex-shrink-0 animate-pulse rounded-2xl bg-gray-200 snap-start"
               />
             ))}
+          {/* Trailing spacer so the last card has padding when scrolled to the end */}
+          <div className="w-0.5 flex-shrink-0" aria-hidden="true" />
         </div>
       </div>
     )
@@ -320,9 +351,11 @@ const CategoryRoomSection = ({
                     className="h-[280px] w-full animate-pulse rounded-2xl bg-gray-200"
                   />
                 ))
-              : displayRooms.map((room) => (
-                  <CommunityRoomCard key={room.roomId} room={room} />
-                ))}
+              : displayRooms
+                  .slice(0, itemsPerPage)
+                  .map((room) => (
+                    <CommunityRoomCard key={room.roomId} room={room} />
+                  ))}
           </Motion.div>
         </AnimatePresence>
       </div>

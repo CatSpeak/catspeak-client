@@ -33,6 +33,8 @@ export const useSpotlight = (screenShareTracks, participants) => {
         autoSpottedRef.current.add(trackSid)
         setSpotlightItem({ type: "screen", trackRef: firstTrack })
       }
+    } else {
+      autoSpottedRef.current.clear()
     }
   }, [screenShareTracks, isGameActive])
 

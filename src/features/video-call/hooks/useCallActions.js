@@ -195,15 +195,20 @@ export const useCallActions = ({
       // 1. Document Picture-in-Picture (Desktop Chrome / Edge / Chrome Android)
       if ("documentPictureInPicture" in window) {
         if (!window.documentPictureInPicture?.window) {
+          console.log("[Auto-PiP] Calling documentPictureInPicture.requestWindow()...")
           window.__pipWindowPromise = window.documentPictureInPicture
             .requestWindow({
               width: 400,
               height: 300,
             })
+            .then((win) => {
+              console.log("[Auto-PiP] Document PiP window successfully created:", win)
+              return win
+            })
             .catch((err) => {
-              console.error("Failed to request PiP window in click handler", err);
-              return null;
-            });
+              console.error("[Auto-PiP] Failed to request PiP window:", err)
+              return null
+            })
         }
 
         dispatch(setPiPAction(true));

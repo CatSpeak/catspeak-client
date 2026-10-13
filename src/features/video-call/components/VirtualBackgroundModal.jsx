@@ -6,6 +6,8 @@ import MeetingAvatarPicker from "./MeetingAvatarPicker";
 import { useLanguage } from "@/shared/context/LanguageContext";
 
 import { isBeautyFilterSupported } from "@/features/video-call/utils/roomTypeHelpers";
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
+import { PLAN_FEATURES } from "@/shared/constants/planFeatures";
 
 const BEAUTY_STORAGE_KEY = "catspeak:beautyOptions";
 
@@ -38,6 +40,10 @@ const VirtualBackgroundModal = ({
 }) => {
   const { t } = useLanguage();
   const videoRef = useRef(null);
+  const { hasFeature, isPro } = usePlanFeatures();
+  const userHasProPlan = Boolean(isPro || hasFeature(PLAN_FEATURES.BEAUTY_FILTER));
+  const isBeautyAllowed =
+    userHasProPlan && isBeautyFilterSupported(room?.roomType, userHasProPlan);
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -180,7 +186,7 @@ const VirtualBackgroundModal = ({
           {/* Tab strip */}
           {(() => {
             const availableTabs = [
-              ...(isBeautyFilterSupported(room?.roomType)
+              ...(isBeautyAllowed
                 ? ["backgrounds", "beauty"]
                 : ["backgrounds"]),
               "avatar",
@@ -210,10 +216,13 @@ const VirtualBackgroundModal = ({
           ) : activeTab === "avatar" ? (
             <MeetingAvatarPicker className="p-0" />
           ) : (
-            <BeautyPicker
-              beautyOptions={beautyOptions}
-              onChange={handleBeautyChange}
-            />
+            isBeautyAllowed && (
+              <BeautyPicker
+                beautyOptions={beautyOptions}
+                onChange={handleBeautyChange}
+                roomType={room?.roomType}
+              />
+            )
           )}
         </div>
       </div>

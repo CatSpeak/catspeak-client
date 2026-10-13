@@ -52,8 +52,8 @@ const RoomHeader = () => {
     hostParticipant.identity === localParticipant.identity
 
   return (
-    <div className="flex items-center justify-between bg-white px-4 min-h-[56px] shrink-0 border-b border-border">
-      <div className="flex items-center gap-2 md:gap-4">
+    <div className="flex items-center justify-between bg-white px-4 h-[56px] shrink-0 border-b border-border">
+      <div className="flex items-center gap-4">
         <div className="hidden w-40 shrink-0 items-center md:flex">
           <div className="flex items-center gap-4 p-0">
             <Link
@@ -70,8 +70,8 @@ const RoomHeader = () => {
           </div>
         </div>
         <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="text-base font-semibold">{rawRoomName}</div>
+          <div className="flex items-center flex-wrap">
+            <div className="font-bold">{rawRoomName}</div>
             <IconButton
               variant="ghost"
               innerClassName="!bg-transparent group-hover/icon:!bg-[#D9D9D9]"
@@ -104,15 +104,15 @@ const RoomHeader = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center">
         {hasDuration && (
           <div
             className={`hidden md:flex items-center justify-center gap-2 text-xs md:text-sm font-semibold rounded-full py-1.5 px-4 h-9 transition-all select-none ${
               effectiveRemaining !== null && effectiveRemaining <= 60
                 ? "bg-red-50 text-red-600 border border-red-200 shadow-2xs animate-pulse"
                 : effectiveRemaining !== null && effectiveRemaining <= 300
-                ? "bg-amber-50 text-amber-700 border border-amber-200/90 shadow-2xs"
-                : "bg-neutral-100/80 text-neutral-600 border border-neutral-200/60"
+                  ? "bg-amber-50 text-amber-700 border border-amber-200/90 shadow-2xs"
+                  : "bg-neutral-100/80 text-neutral-600 border border-neutral-200/60"
             }`}
           >
             <Clock
@@ -121,47 +121,52 @@ const RoomHeader = () => {
                 effectiveRemaining !== null && effectiveRemaining <= 60
                   ? "text-red-500"
                   : effectiveRemaining !== null && effectiveRemaining <= 300
-                  ? "text-amber-500"
-                  : "text-neutral-400"
+                    ? "text-amber-500"
+                    : "text-neutral-400"
               }
             />
             <span>
-              {formattedRemaining} <span className="opacity-40 font-normal">/ {formattedMax}</span>
+              {formattedRemaining}{" "}
+              <span className="opacity-40 font-normal">/ {formattedMax}</span>
             </span>
           </div>
         )}
         {/* Q2/Q9: [counter] [?] [troubleshoot] — cụm phải header, luôn hiện cả mobile */}
-        <button
-          type="button"
+        <IconButton
+          variant="ghost"
           onClick={() => setIsReportOpen(true)}
-          title={t?.bugReport?.buttonTooltip || t?.helpBox?.helpTooltip || "Báo cáo sự cố"}
-          aria-label={t?.bugReport?.buttonTooltip || t?.helpBox?.helpTooltip || "Báo cáo sự cố"}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
+          title={
+            t?.bugReport?.buttonTooltip ||
+            t?.helpBox?.helpTooltip ||
+            "Báo cáo sự cố"
+          }
+          aria-label={
+            t?.bugReport?.buttonTooltip ||
+            t?.helpBox?.helpTooltip ||
+            "Báo cáo sự cố"
+          }
         >
-          <HelpCircle size={20} />
-        </button>
-        <button
-          type="button"
+          <HelpCircle />
+        </IconButton>
+        <IconButton
+          variant="ghost"
           onClick={() => setShowTroubleshoot?.(!showTroubleshoot)}
           title={t?.rooms?.videoCall?.reconnect || "Khắc phục sự cố kết nối"}
-          aria-label={t?.rooms?.videoCall?.reconnect || "Khắc phục sự cố kết nối"}
+          aria-label={
+            t?.rooms?.videoCall?.reconnect || "Khắc phục sự cố kết nối"
+          }
           aria-pressed={Boolean(showTroubleshoot)}
-          className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-            showTroubleshoot
-              ? "bg-red-100 text-red-600"
-              : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800"
-          }`}
         >
-          <RefreshCcw size={18} />
-        </button>
+          <RefreshCcw />
+        </IconButton>
       </div>
       <BugReportModal
         open={isReportOpen}
         onClose={() => setIsReportOpen(false)}
         roomContext={{
-            roomId: room?.id || routeRoomId || "",
-            roomName: room?.name || routeRoomId || rawRoomName,
-          }}
+          roomId: room?.id || routeRoomId || "",
+          roomName: room?.name || routeRoomId || rawRoomName,
+        }}
       />
     </div>
   )

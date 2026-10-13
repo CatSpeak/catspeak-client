@@ -3,6 +3,7 @@ import Banner from "@/shared/components/ui/Banner"
 import TextInput from "@/shared/components/ui/inputs/TextInput"
 import ImageUploadInput from "@/shared/components/ui/inputs/ImageUploadInput"
 import Switch from "@/shared/components/ui/inputs/Switch"
+import Slider from "@/shared/components/ui/Slider"
 import TopicSelect from "./TopicSelect"
 import LevelSelector from "./LevelSelector"
 import LanguageSelect from "./LanguageSelect"
@@ -10,19 +11,7 @@ import { TOPICS, LEVELS } from "../../config/constants"
 import { Crown } from "lucide-react"
 import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 
-const labelClass = "text-sm font-medium text-gray-800"
-
-const SectionHeading = ({ children }) => (
-  <div className="flex items-center gap-3 pt-1">
-    <span className="text-sm font-semibold uppercase tracking-wide text-cath-red-700">
-      {children}
-    </span>
-    <span
-      className="h-px flex-1 bg-cath-red-700/20"
-      aria-hidden="true"
-    />
-  </div>
-)
+const labelClass = "text-xs"
 
 /**
  * A centralized, DRY form component for room creation.
@@ -66,14 +55,8 @@ const CreateRoomFormFields = ({
 
       <fieldset
         disabled={isDisabled}
-        className="flex flex-col gap-5 border-0 p-0 m-0 min-w-0"
+        className="flex flex-col gap-4 border-0 p-0 m-0 min-w-0"
       >
-        {isCustomMode && (
-          <SectionHeading>
-            {ct.sectionBasic || "Basic information"}
-          </SectionHeading>
-        )}
-
         {/* Room Name Input (Shared) */}
         <TextInput
           id="room-name"
@@ -95,7 +78,7 @@ const CreateRoomFormFields = ({
           autoFocus
           data-autofocus="true"
           autoComplete="off"
-          variant="rounded-xl"
+          variant="square"
           disabled={isDisabled}
           maxLength={isCustomMode ? 50 : 100}
           showCount
@@ -153,17 +136,13 @@ const CreateRoomFormFields = ({
         {/* Room Settings (Custom Mode Only) */}
         {isCustomMode && (
           <>
-            <SectionHeading>
-              {ct.sectionSettings || "Room settings"}
-            </SectionHeading>
-
             {/* Room Privacy & Password Group */}
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1">
                 <span className={labelClass}>
                   {cr.privateRoom || "Private Room"}
                 </span>
-                <div className="flex items-center justify-between gap-4 w-full rounded-xl border border-border px-4 min-h-[56px] bg-white transition-all duration-200">
+                <div className="flex items-center justify-between gap-4 w-full rounded-md border border-border px-4 min-h-[56px] bg-white transition-all duration-200">
                   <span className="flex-1">
                     {formData.isPrivate
                       ? ct.privateHint ||
@@ -202,46 +181,76 @@ const CreateRoomFormFields = ({
                   }
                   disabled={isDisabled}
                   autoComplete="new-password"
-                  variant="rounded-xl"
+                  variant="square"
                 />
               )}
             </div>
 
             {/* Max Participants Selection */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               <label
                 htmlFor="custom-room-max-participants"
                 className={labelClass}
               >
                 {ct.maxParticipantsLabel || "Max Participants"}
               </label>
-              <div className="flex flex-col gap-3 rounded-xl border border-border px-4 py-3 bg-white">
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-cath-red-700">
-                    {formData.maxParticipants || 10}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {ct.maxParticipantsLimit?.replace("{max}", maxParticipantsLimit) || `Max: ${maxParticipantsLimit} participants`}
-                  </span>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <Slider
+                    id="custom-room-max-participants"
+                    min={5}
+                    max={maxParticipantsLimit}
+                    step={1}
+                    value={formData.maxParticipants || 10}
+                    onChange={(e) =>
+                      handleChange(
+                        "maxParticipants",
+                        parseInt(e.target.value, 10),
+                      )
+                    }
+                    disabled={isDisabled}
+                    aria-label={ct.maxParticipantsLabel || "Max Participants"}
+                  />
                 </div>
-                <input
-                  id="custom-room-max-participants"
-                  type="range"
-                  min={5}
-                  max={maxParticipantsLimit}
-                  step={1}
-                  value={formData.maxParticipants || 10}
-                  onChange={(e) => handleChange("maxParticipants", parseInt(e.target.value, 10))}
-                  disabled={isDisabled}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-cath-red-700"
-                />
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>5</span>
-                  <span>{maxParticipantsLimit}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <TextInput
+                    id="custom-room-max-participants-input"
+                    type="number"
+                    min={5}
+                    max={maxParticipantsLimit}
+                    value={formData.maxParticipants ?? 10}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      if (val === "") {
+                        handleChange("maxParticipants", "")
+                      } else {
+                        const num = parseInt(val, 10)
+                        if (!isNaN(num)) {
+                          handleChange(
+                            "maxParticipants",
+                            Math.min(maxParticipantsLimit, num),
+                          )
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      const num = parseInt(formData.maxParticipants, 10)
+                      if (isNaN(num) || num < 5) {
+                        handleChange("maxParticipants", 5)
+                      } else if (num > maxParticipantsLimit) {
+                        handleChange("maxParticipants", maxParticipantsLimit)
+                      }
+                    }}
+                    disabled={isDisabled}
+                    className="text-center"
+                    containerClassName="shrink-0"
+                    variant="square"
+                    aria-label={ct.maxParticipantsLabel || "Max Participants"}
+                  />
+                  <span>/ {maxParticipantsLimit}</span>
                 </div>
               </div>
             </div>
-
           </>
         )}
       </fieldset>

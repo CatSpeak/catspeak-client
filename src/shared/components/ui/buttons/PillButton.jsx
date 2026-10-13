@@ -9,7 +9,7 @@ const PillButton = ({
   loading = false,
   disabled = false,
   loadingText,
-  variant = "primary", // "primary" | "secondary" | "outline" | "secondary-no-outline"
+  variant = "primary", // "primary" | "secondary" | "outline" | "secondary-no-outline" | "transparent" | "snackbar"
   bgColor,
   textColor,
   borderColor,
@@ -21,21 +21,25 @@ const PillButton = ({
   const isSecondaryNoOutline = variant === "secondary-no-outline"
   const isOutline = variant === "outline"
   const isSnackbar = variant === "snackbar"
+  const isTransparent = variant === "transparent"
   const isActuallyDisabled = disabled || loading
 
   // Default variant styles applied to inner div
   const variantStyles = isSnackbar
     ? "bg-transparent border-none text-[#FF6B6B] group-hover/pill:text-[#FF9999] hover:text-[#FF9999] hover:bg-transparent active:bg-transparent p-0 h-auto font-semibold cursor-pointer transition-colors duration-150"
-    : isOutline
-      ? "bg-transparent group-hover/pill:bg-primaryBg group-active/pill:bg-[#e5e5e5]"
-      : isSecondary
-        ? "bg-white border border-[#e5e5e5] text-black group-hover/pill:bg-primaryBg group-active/pill:bg-[#e0e0e0]"
-        : isSecondaryNoOutline
-          ? "bg-transparent border border-transparent text-black group-hover/pill:bg-[#E5E5E5] group-active/pill:bg-[#e0e0e0]"
-          : "bg-cath-red-700 border border-transparent text-white group-hover/pill:brightness-90 group-active/pill:brightness-75"
+    : isTransparent
+      ? "bg-black/30 backdrop-blur-md border border-white/10 text-white group-hover/pill:bg-black/50 group-active/pill:bg-black/60 shadow-sm transition-all duration-300"
+      : isOutline
+        ? "bg-transparent group-hover/pill:bg-primaryBg group-active/pill:bg-[#e5e5e5]"
+        : isSecondary
+          ? "bg-white border border-[#e5e5e5] text-black group-hover/pill:bg-primaryBg group-active/pill:bg-[#e0e0e0]"
+          : isSecondaryNoOutline
+            ? "bg-transparent border border-transparent text-black group-hover/pill:bg-[#E5E5E5] group-active/pill:bg-[#e0e0e0]"
+            : "bg-cath-red-700 border border-transparent text-white group-hover/pill:brightness-90 group-active/pill:brightness-75"
 
-  const disabledStyles =
-    "group-disabled/pill:bg-[#BFBFBF] group-disabled/pill:text-white group-disabled/pill:brightness-100 group-disabled/pill:border-transparent group-disabled/pill:cursor-not-allowed cursor-pointer"
+  const disabledStyles = isTransparent
+    ? "group-disabled/pill:opacity-50 group-disabled/pill:cursor-not-allowed cursor-pointer"
+    : "group-disabled/pill:bg-[#BFBFBF] group-disabled/pill:text-white group-disabled/pill:brightness-100 group-disabled/pill:border-transparent group-disabled/pill:cursor-not-allowed cursor-pointer"
 
   const variantCustomStyle = isOutline
     ? {
