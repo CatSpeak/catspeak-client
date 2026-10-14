@@ -1,7 +1,9 @@
 import { useState, useCallback, useMemo, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useParams, useNavigate } from "react-router-dom"
 import { MessageCircle } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 import ChatSidebar from "../components/ChatSidebar"
 import ChatArea from "../components/ChatArea"
 import ChatUserPanel from "../components/ChatUserPanel"
@@ -19,20 +21,20 @@ import { EmptyState } from "@/shared/components/ui/indicators"
 import useMediaQuery from "@/shared/hooks/useMediaQuery"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { FluentAnimation } from "@/shared/components/ui/animations"
-import toast from "react-hot-toast"
 
 /**
  * ChatPage — fullscreen chat page.
  *
  * Orchestrates the three-panel layout:
- *   Sidebar (360px) | Chat Area (flex-1) | Info Panel (340px, toggleable)
+ *   Sidebar (360px) | Chat Area (flex-1) | Info Panel (360px, toggleable inline or drawer)
  */
 const ChatPage = () => {
   const { t } = useLanguage()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { id: routeId } = useParams()
-  const isDesktop = useMediaQuery("(min-width: 1280px)")
+  // Wide screen breakpoint: only show 3 inline columns when >= 1440px to prevent crushing ChatArea
+  const isWideScreen = useMediaQuery("(min-width: 1440px)")
 
   // ── Auth & Profile ─────────────────────────────────────
   const { user: authUser } = useAuth()
@@ -54,8 +56,16 @@ const ChatPage = () => {
     accumulatedMessagesCount,
     isLoadingMessages,
     isFetchingOlder,
+    isFetchingNewer,
     hasMoreMessages,
+    hasMoreAfter,
+    isViewingAroundWindow,
+    targetHighlightId,
+    jumpToMessage,
+    clearTargetHighlight,
     handleLoadMoreMessages,
+    handleLoadNewerMessages,
+    resetToLatest,
     optimisticEditMessage,
     optimisticToggleReaction,
   } = useChatMessages(selectedId)
@@ -71,7 +81,7 @@ const ChatPage = () => {
     handleReply,
     handleCancelReply,
     handleSend: sendAction,
-    handleSendVoice,
+    handleSendVoice: sendVoiceAction,
     handleRetryUpload,
     handleCancelUpload,
     handleDeleteForMe,
@@ -119,12 +129,14 @@ const ChatPage = () => {
 
   // ── Current User Formatting ────────────────────────────
   const currentUser = useMemo(() => {
+    const profile = userProfile?.data
     return {
       id: authUser?.accountId,
-      name: userProfile?.username || authUser?.username || t?.chat?.me || "Me",
-      avatar: userProfile?.avatarImageUrl || authUser?.avatarImageUrl || null,
+      sourceAccountId: authUser?.sourceAccountId ?? profile?.sourceAccountId ?? null,
+      name: profile?.username || authUser?.username || t?.chat?.me || "Me",
+      avatar: profile?.avatarImageUrl || authUser?.avatarImageUrl || null,
       status: "online",
-      about: userProfile?.level || t?.chat?.userPanel?.student || "Student",
+      about: profile?.level || t?.chat?.userPanel?.student || "Student",
     }
   }, [authUser, userProfile, t])
 
@@ -168,24 +180,9 @@ const ChatPage = () => {
 
   const handleJumpToMessage = useCallback(
     (messageId) => {
-      const element = document.getElementById(`chat-message-${messageId}`)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" })
-        element.classList.add("chat-message-highlight")
-        setTimeout(() => {
-          element.classList.remove("chat-message-highlight")
-        }, 2000)
-      } else {
-        toast(
-          t?.chat?.olderMessagePrompt ||
-            "The message is older. Scroll up to load older messages.",
-          {
-            icon: "📌",
-          },
-        )
-      }
+      jumpToMessage(messageId)
     },
-    [t],
+    [jumpToMessage],
   )
 
   const handleLeaveGroup = useCallback(() => {
@@ -195,12 +192,37 @@ const ChatPage = () => {
     dispatch(conversationsApi.util.invalidateTags(["Conversations"]))
   }, [navigate, dispatch, handleCancelReply])
 
+  // Close drawer on Escape key when open in drawer mode
+  useEffect(() => {
+    if (!showInfoPanel || isWideScreen) return
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowInfoPanel(false)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [showInfoPanel, isWideScreen])
+
   const handleSend = useCallback(
     async (text, file, extraOptions) => {
-      await sendAction(text, file, extraOptions)
       setInputValue("")
+      if (hasMoreAfter || isViewingAroundWindow) {
+        resetToLatest()
+      }
+      return sendAction(text, file, extraOptions)
     },
-    [sendAction],
+    [hasMoreAfter, isViewingAroundWindow, resetToLatest, sendAction],
+  )
+
+  const handleSendVoice = useCallback(
+    async (file, duration) => {
+      if (hasMoreAfter || isViewingAroundWindow) {
+        resetToLatest()
+      }
+      return sendVoiceAction(file, duration)
+    },
+    [hasMoreAfter, isViewingAroundWindow, resetToLatest, sendVoiceAction],
   )
 
   return (
@@ -226,6 +248,7 @@ const ChatPage = () => {
       {selectedId ? (
         <ChatArea
           conversation={activeConversation}
+          conversationId={selectedId}
           messages={activeMessages}
           currentUser={currentUser}
           inputValue={inputValue}
@@ -240,8 +263,16 @@ const ChatPage = () => {
           friendOnlineStatus={friendOnlineStatus}
           isLoading={isLoadingMessages}
           isLoadingMore={isFetchingOlder}
+          isLoadingNewer={isFetchingNewer}
           hasMoreMessages={hasMoreMessages}
+          hasMoreAfter={hasMoreAfter}
+          isViewingAroundWindow={isViewingAroundWindow}
           onLoadMoreMessages={handleLoadMoreMessages}
+          onLoadNewerMessages={handleLoadNewerMessages}
+          onResetToLatest={resetToLatest}
+          targetHighlightId={targetHighlightId}
+          clearTargetHighlight={clearTargetHighlight}
+          onJumpToMessage={handleJumpToMessage}
           typingUsers={typingUsers}
           onStartTyping={startTyping}
           onStopTyping={stopTyping}
@@ -277,46 +308,62 @@ const ChatPage = () => {
         />
       )}
 
-      {/* ── Info Panel (desktop inline, mobile drawer overlay) ── */}
-      {showInfoPanel &&
-        selectedId &&
-        (isDesktop ? (
-          /* Desktop inline panel */
-          <div className="hidden xl:flex shrink-0">
-            <ChatUserPanel
-              conversation={activeConversation}
-              currentUser={currentUser}
-              onClose={() => setShowInfoPanel(false)}
-              onLeaveGroup={handleLeaveGroup}
-              friendOnlineStatus={friendOnlineStatus}
-              isDrawer={false}
-              initialView={infoPanelView}
-              onJumpToMessage={handleJumpToMessage}
-            />
-          </div>
-        ) : (
-          <>
-            {/* Mobile backdrop */}
-            <div
-              className="fixed inset-0 bg-black/40 z-40 xl:hidden backdrop-blur-xs"
-              onClick={() => setShowInfoPanel(false)}
-            />
+      {/* ── Info Panel (desktop inline on extra-wide screens) ── */}
+      {showInfoPanel && selectedId && isWideScreen && (
+        <div className="flex shrink-0 h-full">
+          <ChatUserPanel
+            conversation={activeConversation}
+            currentUser={currentUser}
+            onClose={() => setShowInfoPanel(false)}
+            onLeaveGroup={handleLeaveGroup}
+            friendOnlineStatus={friendOnlineStatus}
+            isDrawer={false}
+            initialView={infoPanelView}
+            onJumpToMessage={handleJumpToMessage}
+          />
+        </div>
+      )}
 
-            {/* Mobile drawer container */}
-            <div className="fixed right-0 top-0 h-full z-50 shadow-2xl xl:hidden flex w-full max-w-full sm:w-[360px] sm:max-w-[360px] overflow-hidden">
-              <ChatUserPanel
-                conversation={activeConversation}
-                currentUser={currentUser}
-                onClose={() => setShowInfoPanel(false)}
-                onLeaveGroup={handleLeaveGroup}
-                friendOnlineStatus={friendOnlineStatus}
-                isDrawer={true}
-                initialView={infoPanelView}
-                onJumpToMessage={handleJumpToMessage}
-              />
-            </div>
-          </>
-        ))}
+      {/* ── Info Panel Drawer (slide-over overlay on laptops, tablets, mobile) ── */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {showInfoPanel && selectedId && !isWideScreen && (
+              <div className="fixed inset-0 z-[100] flex justify-end">
+                {/* Backdrop */}
+                <Motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+                  onClick={() => setShowInfoPanel(false)}
+                />
+
+                {/* Drawer Container */}
+                <Motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 28, stiffness: 300 }}
+                  className="relative z-10 h-full w-full max-w-full sm:w-[360px] sm:max-w-[360px] shadow-2xl bg-white overflow-hidden flex flex-col"
+                >
+                  <ChatUserPanel
+                    conversation={activeConversation}
+                    currentUser={currentUser}
+                    onClose={() => setShowInfoPanel(false)}
+                    onLeaveGroup={handleLeaveGroup}
+                    friendOnlineStatus={friendOnlineStatus}
+                    isDrawer={true}
+                    initialView={infoPanelView}
+                    onJumpToMessage={handleJumpToMessage}
+                  />
+                </Motion.div>
+              </div>
+            )}
+          </AnimatePresence>,
+          document.body,
+        )}
 
       {/* ── New Chat Modal ───────────────────────────── */}
       <NewChatModal

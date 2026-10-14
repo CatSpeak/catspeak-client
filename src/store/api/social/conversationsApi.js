@@ -30,13 +30,17 @@ export const conversationsApi = socialApi.injectEndpoints({
       invalidatesTags: ["Conversations"],
     }),
 
-    // Get messages from a conversation (supports cursor beforeId & limit, as well as legacy pagination)
+    // Get messages from a conversation (supports cursor beforeId, aroundId, afterId & limit, as well as legacy pagination)
     getConversationMessages: builder.query({
       query: (arg) => {
         const conversationId =
           typeof arg === "object" && arg !== null ? arg.conversationId : arg
         const beforeId =
           typeof arg === "object" && arg !== null ? arg.beforeId : undefined
+        const aroundId =
+          typeof arg === "object" && arg !== null ? arg.aroundId : undefined
+        const afterId =
+          typeof arg === "object" && arg !== null ? arg.afterId : undefined
         const limit =
           typeof arg === "object" && arg !== null ? arg.limit : undefined
         const page =
@@ -46,6 +50,8 @@ export const conversationsApi = socialApi.injectEndpoints({
 
         const params = {}
         if (beforeId !== undefined) params.beforeId = beforeId
+        if (aroundId !== undefined) params.aroundId = aroundId
+        if (afterId !== undefined) params.afterId = afterId
         if (limit !== undefined) params.limit = limit
         if (page !== undefined) params.page = page
         if (pageSize !== undefined) params.pageSize = pageSize
@@ -53,6 +59,26 @@ export const conversationsApi = socialApi.injectEndpoints({
         return {
           url: `/conversations/${conversationId}/messages`,
           params,
+        }
+      },
+      transformResponse: (response, meta) => {
+        const parseHeaderBool = (headerName) => {
+          const val = meta?.response?.headers?.get?.(headerName)
+          if (val === "true" || val === "True" || val === "1") return true
+          if (val === "false" || val === "False" || val === "0") return false
+          return undefined
+        }
+
+        const items = Array.isArray(response) ? response : []
+        const hasMoreBefore = parseHeaderBool("X-Has-More-Before")
+        const hasMoreAfter = parseHeaderBool("X-Has-More-After")
+        const targetFound = parseHeaderBool("X-Target-Found")
+
+        return {
+          items,
+          hasMoreBefore: hasMoreBefore !== undefined ? hasMoreBefore : items.length >= 30,
+          hasMoreAfter: hasMoreAfter !== undefined ? hasMoreAfter : false,
+          targetFound: targetFound !== undefined ? targetFound : true,
         }
       },
       providesTags: (result, error, arg) => {
@@ -434,6 +460,73 @@ export const conversationsApi = socialApi.injectEndpoints({
         url: `/conversations/${conversationId}/calls/active`,
       }),
     }),
+
+    // ── Phase 4: Chat Enhancement ────────────────────────
+
+    // GET /api/conversations/calls/active-incoming — Recover incoming call state on reload/F5
+    getActiveIncomingCall: builder.query({
+      query: () => ({
+        url: "/conversations/calls/active-incoming",
+      }),
+    }),
+
+    // POST /api/conversations/{conversationId}/calls/reject — Reject incoming call
+    rejectCall: builder.mutation({
+      query: ({ conversationId, callId, reason = "rejected" }) => ({
+        url: `/conversations/${conversationId}/calls/reject`,
+        method: "POST",
+        body: { callId, reason },
+      }),
+    }),
+
+    // GET /api/conversations/{conversationId}/invite-link — Get or create group invite link
+    getGroupInviteLink: builder.query({
+      query: (conversationId) => `/conversations/${conversationId}/invite-link`,
+      providesTags: (result, error, conversationId) => [
+        { type: "GroupInviteLink", id: Number(conversationId) },
+        { type: "GroupInviteLink", id: String(conversationId) },
+      ],
+    }),
+
+    // POST /api/conversations/{conversationId}/invite-link/reset — Revoke old link & generate new one (Admin/Owner)
+    resetGroupInviteLink: builder.mutation({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}/invite-link/reset`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, conversationId) => [
+        { type: "GroupInviteLink", id: Number(conversationId) },
+        { type: "GroupInviteLink", id: String(conversationId) },
+      ],
+    }),
+
+    // PATCH /api/conversations/{conversationId}/invite-link/status — Toggle link invite status (Admin/Owner)
+    updateGroupInviteLinkStatus: builder.mutation({
+      query: ({ conversationId, isEnabled }) => ({
+        url: `/conversations/${conversationId}/invite-link/status`,
+        method: "PATCH",
+        body: { isEnabled },
+      }),
+      invalidatesTags: (result, error, { conversationId }) => [
+        { type: "GroupInviteLink", id: Number(conversationId) },
+        { type: "GroupInviteLink", id: String(conversationId) },
+      ],
+    }),
+
+    // GET /api/conversations/invite/{code}/preview — Public preview of group chat before joining
+    previewGroupInvite: builder.query({
+      query: (code) => `/conversations/invite/${code}/preview`,
+      keepUnusedDataFor: 0,
+    }),
+
+    // POST /api/conversations/invite/{code}/join — Join group via invite code
+    joinGroupViaInvite: builder.mutation({
+      query: (code) => ({
+        url: `/conversations/invite/${code}/join`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Conversations"],
+    }),
   }),
 })
 
@@ -476,6 +569,16 @@ export const {
   useLazyGetActiveCallQuery,
   useGetConversationMembersQuery,
   useLazyGetConversationMembersQuery,
+  useGetActiveIncomingCallQuery,
+  useLazyGetActiveIncomingCallQuery,
+  useRejectCallMutation,
+  useGetGroupInviteLinkQuery,
+  useLazyGetGroupInviteLinkQuery,
+  useResetGroupInviteLinkMutation,
+  useUpdateGroupInviteLinkStatusMutation,
+  usePreviewGroupInviteQuery,
+  useLazyPreviewGroupInviteQuery,
+  useJoinGroupViaInviteMutation,
 } = conversationsApi
 
 

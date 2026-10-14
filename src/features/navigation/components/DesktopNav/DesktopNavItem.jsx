@@ -1,7 +1,6 @@
 import React, { useState } from "react"
 import { NavLink } from "react-router-dom"
 import { Globe } from "lucide-react"
-import { motion } from "framer-motion"
 import ListItem from "@/shared/components/ui/ListItem"
 
 const DesktopNavItem = ({
@@ -14,7 +13,6 @@ const DesktopNavItem = ({
   img,
   rightContent,
   rightText,
-  sectionId = "default",
 }) => {
   const [imgError, setImgError] = useState(false)
   const [prevImg, setPrevImg] = useState(img)
@@ -47,42 +45,37 @@ const DesktopNavItem = ({
         className="relative block w-full outline-none no-underline"
       >
         {({ isActive }) => (
-          <>
-            {isActive && !isDocked && (
-              <motion.div
-                layoutId={`desktopNavActiveIndicator-${sectionId}`}
-                className="absolute left-0 inset-y-0 my-auto w-[3px] h-5 bg-cath-red-700 rounded-r-full z-20"
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
-              />
-            )}
-            <ListItem
-              lines={1}
-              leftContent={leftIcon}
-              rightContent={rightContent}
-              rightText={rightText}
-              className={`rounded-xl transition-all duration-200 ${isDocked ? "justify-center" : ""
-                }`}
-              contentClassName={`rounded-xl transition-all duration-200 ${isDocked ? "px-0 justify-center" : "px-4"
-                } ${isActive
-                  ? isDocked
-                    ? "text-cath-red-700"
-                    : "bg-primaryBg hover:bg-[#E6E6E6]"
-                  : isDocked
-                    ? "text-white hover:bg-white/20"
-                    : "hover:bg-primaryBg"
-                }`}
-            >
-              <span
-                className={`whitespace-nowrap transition-all duration-300 truncate relative z-10 ${isDocked
+          <ListItem
+            lines={1}
+            leftContent={leftIcon}
+            rightContent={rightContent}
+            rightText={rightText}
+            className={`transition-all duration-200 ${
+              isDocked ? "justify-center" : ""
+            }`}
+            contentClassName={`transition-all duration-200 ${
+              isDocked ? "px-0 justify-center" : "px-4"
+            } ${
+              isActive
+                ? isDocked
+                  ? "text-cath-red-700"
+                  : "bg-primaryBg hover:bg-[#E6E6E6]"
+                : isDocked
+                  ? "text-white hover:bg-white/20"
+                  : "hover:bg-primaryBg"
+            }`}
+          >
+            <span
+              className={`whitespace-nowrap transition-all duration-300 truncate relative z-10 ${
+                isDocked
                   ? "opacity-0 w-0 pointer-events-none hidden"
                   : "opacity-100 min-w-0 flex-1"
-                  }`}
-                style={color ? { color } : undefined}
-              >
-                {label}
-              </span>
-            </ListItem>
-          </>
+              }`}
+              style={color ? { color } : undefined}
+            >
+              {label}
+            </span>
+          </ListItem>
         )}
       </NavLink>
 

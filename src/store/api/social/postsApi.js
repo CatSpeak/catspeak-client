@@ -112,16 +112,37 @@ export const postsApi = socialApi.injectEndpoints({
     }),
     getPostById: builder.query({
       query: (postId) => `/Post/${postId}`,
-      providesTags: (result, error, id) => [{ type: "Post", id }],
+      providesTags: (result, error, id) => [
+        { type: "Post", id: String(id) },
+        "Post",
+      ],
     }),
     getPostBySlug: builder.query({
       query: (slug) => `/Post/slug/${slug}`,
-      providesTags: (result, error, slug) => [{ type: "Post", id: slug }],
+      providesTags: (result, error, slug) => {
+        const pId = result?.data?.postId || result?.postId;
+        return [
+          { type: "Post", id: String(slug) },
+          ...(pId ? [{ type: "Post", id: String(pId) }] : []),
+          "Post",
+        ];
+      },
     }),
     getSharedPost: builder.query({
       query: (shareToken) => `/Post/shared/${shareToken}`,
-      providesTags: (result, error, id) => [
-        { type: "Post", id: `shared-${id}` },
+      providesTags: (result, error, id) => {
+        const pId = result?.data?.postId || result?.postId;
+        return [
+          { type: "Post", id: `shared-${id}` },
+          ...(pId ? [{ type: "Post", id: String(pId) }] : []),
+          "Post",
+        ];
+      },
+    }),
+    getPostReactions: builder.query({
+      query: (postId) => `/Post/${postId}/reactions`,
+      providesTags: (result, error, postId) => [
+        { type: "PostReactions", id: String(postId) },
       ],
     }),
     reactToPost: builder.mutation({
@@ -130,6 +151,10 @@ export const postsApi = socialApi.injectEndpoints({
         method: "POST",
         params: { type },
       }),
+      invalidatesTags: (result, error, { postId }) => [
+        { type: "Post", id: String(postId) },
+        { type: "PostReactions", id: String(postId) },
+      ],
       async onQueryStarted(
         { postId, type },
         { dispatch, getState, queryFulfilled },
@@ -344,6 +369,8 @@ export const {
   useGetPostByIdQuery,
   useGetPostBySlugQuery,
   useGetSharedPostQuery,
+  useGetPostReactionsQuery,
+  useLazyGetPostReactionsQuery,
   useReactToPostMutation,
   useSharePostMutation,
   useGetPostCommentsQuery,

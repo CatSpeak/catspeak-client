@@ -112,7 +112,7 @@ const ChatHeader = ({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center">
         {/* Voice Call button */}
         {onStartCall && (
           <IconButton

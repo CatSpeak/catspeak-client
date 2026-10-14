@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PlanCard from "../subscription/components/PlanCard";
-import { useGetUserProfileQuery } from "@/store/api/userApi";
 import { useGetPlansQuery } from "@/store/api/plansApi";
+import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures";
 import { useAuth } from "@/features/auth";
 import { useLanguage } from "@/shared/context/LanguageContext";
 import { getGridClasses } from "../utils/planUtils";
@@ -12,13 +12,10 @@ const PricingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLanguage();
-  const { isAuthenticated } = useAuth();
-  const { data: profileResponse, isLoading: isProfileLoading } =
-    useGetUserProfileQuery(undefined, { skip: !isAuthenticated });
+  const { planName: currentPlanName, isPro, isLoading: isPlanLoading } =
+    usePlanFeatures();
   const { data: plansResponse = [], isLoading: isPlansLoading } =
     useGetPlansQuery();
-
-  const userTier = profileResponse?.tier?.toLowerCase();
 
   // Capture route state into a ref at mount so navigate() clearing history state
   // doesn't cause highlightPlan to become undefined mid-effect.
@@ -65,7 +62,7 @@ const PricingPage = () => {
     navigate("/checkout", { state: { plan } });
   };
 
-  const isProcessing = isProfileLoading || isPlansLoading;
+  const isProcessing = isPlanLoading || isPlansLoading;
 
   const publishedPlans = plansResponse.filter(
     (plan) => plan.packageStatus === "Published",
@@ -183,7 +180,13 @@ const PricingPage = () => {
         ) : (
           <div className={getGridClasses(formattedPlans.length)}>
             {formattedPlans.map((plan) => {
-              const isActive = userTier === plan.name?.toLowerCase();
+              const planNameLower = plan.name?.toLowerCase() || "";
+              const currentPlanLower = currentPlanName?.toLowerCase() || "";
+              const isActive = isPro
+                ? planNameLower.includes("pro") || planNameLower === currentPlanLower
+                : !isPro && currentPlanLower
+                  ? planNameLower === currentPlanLower || planNameLower.includes(currentPlanLower)
+                  : plan.price === 0 || planNameLower.includes("free");
               const isTargetMatch =
                 highlightPlan &&
                 plan.name?.toLowerCase().includes(highlightPlan);
@@ -212,7 +215,7 @@ const PricingPage = () => {
                     }
                     isProcessing={isProcessing}
                     onAction={
-                      plan.price > 0
+                      plan.price > 0 && !isActive
                         ? () => handleUpgradeClick(plan)
                         : undefined
                     }

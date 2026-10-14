@@ -6,6 +6,7 @@ import {
 } from "@/store/api/social/conversationsApi"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import Tabs from "@/shared/components/ui/navigation/Tabs"
+import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import { useGalleryAudio } from "../../hooks/useGalleryAudio"
 import {
   formatFileSize,
@@ -23,6 +24,7 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
   const [activeTab, setActiveTab] = useState("images_videos")
   const [olderItems, setOlderItems] = useState([])
   const [hasMore, setHasMore] = useState(true)
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState(null)
 
   // Fetch initial page directly from RTK Query cache
   const {
@@ -63,6 +65,19 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
     )
     return [...initialItems, ...uniqueOlder]
   }, [initialItems, olderItems])
+
+  const galleryMediaList = useMemo(() => {
+    return allItems.map((item) => {
+      const isVid =
+        item.itemType === "video" ||
+        item.mediaUrl?.match(/\.(mp4|webm|mov|mkv)/i)
+      return {
+        mediaUrl: item.mediaUrl,
+        fileName: item.fileName || "Shared media",
+        mediaType: isVid ? "Video" : "Image",
+      }
+    })
+  }, [allItems])
 
   const handleLoadMore = async () => {
     if (allItems.length === 0 || isFetching || isFetchingOlder || !hasMore)
@@ -156,12 +171,11 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                 item.itemType === "video" ||
                 item.mediaUrl?.match(/\.(mp4|webm|mov|mkv)/i)
               return (
-                <a
+                <button
+                  type="button"
                   key={item.messageId || idx}
-                  href={item.mediaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative aspect-square rounded-lg overflow-hidden bg-neutral-100 border border-border/40 hover:opacity-95 transition-all"
+                  onClick={() => setSelectedMediaIndex(idx)}
+                  className="group relative aspect-square rounded-lg overflow-hidden bg-neutral-100 border border-border/40 hover:opacity-95 transition-all text-left p-0 cursor-pointer focus:outline-hidden"
                 >
                   {isVid ? (
                     <video
@@ -183,7 +197,7 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
                       <Play className="text-white fill-white" />
                     </div>
                   )}
-                </a>
+                </button>
               )
             })}
           </div>
@@ -326,6 +340,15 @@ const SharedMediaGallery = ({ conversationId, fullHeight = false }) => {
         onClose={handleCloseAudio}
         t={t}
       />
+
+      {/* ── Fullscreen Media Viewer Modal ── */}
+      {selectedMediaIndex !== null && (
+        <MediaViewerModal
+          mediaList={galleryMediaList}
+          initialIndex={selectedMediaIndex}
+          onClose={() => setSelectedMediaIndex(null)}
+        />
+      )}
     </div>
   )
 }

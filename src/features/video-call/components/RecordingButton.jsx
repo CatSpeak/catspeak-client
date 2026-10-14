@@ -3,6 +3,8 @@ import { Circle, Loader2, AlertTriangle } from "lucide-react"
 import { useRecordingStatus } from "../hooks/useRecordingStatus"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import ProgressBar from "@/shared/components/ui/ProgressBar"
+import { useSelector } from "react-redux"
+import { useRoomContext } from "@livekit/components-react"
 
 const RecordingButton = ({
   isRecording,
@@ -11,6 +13,8 @@ const RecordingButton = ({
   onStopRecording,
 }) => {
   const { t } = useLanguage()
+  const sessionId = useSelector((s) => s.videoCall?.callInfo?.sessionId)
+
   const {
     formattedTime,
     totalUsedMb,
@@ -18,7 +22,7 @@ const RecordingButton = ({
     usagePercent,
     isDanger,
     isWarning,
-  } = useRecordingStatus(isRecording, onStopRecording)
+  } = useRecordingStatus(isRecording, onStopRecording, sessionId)
 
   const title = isRecording
     ? t.rooms?.videoCall?.controls?.recordOff || "Stop recording"
@@ -80,7 +84,7 @@ const RecordingButton = ({
               <span>Storage</span>
 
               <span>
-                {totalUsedMb.toFixed(1)}MB / {limitMb.toFixed(0)}MB
+                {totalUsedMb.toFixed(1)}MB {limitMb != null && limitMb > 0 ? `/ ${limitMb.toFixed(0)}MB` : "(Unlimited)"}
               </span>
             </div>
 

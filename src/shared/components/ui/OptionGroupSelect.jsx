@@ -11,7 +11,7 @@ const OptionGroupSelect = ({
   multiple = false,
   maxSelect = Infinity,
   disabled = false,
-  labelClassName = "text-sm font-medium text-gray-800",
+  labelClassName = "text-xs",
   getOptionLabel = (option) =>
     typeof option === "object" ? option.label : option,
   getOptionValue = (option) =>
@@ -38,13 +38,13 @@ const OptionGroupSelect = ({
   }
 
   return (
-    <div className={`text-left flex flex-col gap-2 ${className}`}>
+    <div className={`text-left flex flex-col gap-1 ${className}`}>
       {(label || subLabel) && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1">
           {label && <label className={labelClassName}>{label}</label>}
           {subLabel && (
             <p
-              className="m-0 text-sm transition-opacity"
+              className="m-0 text-xs transition-opacity"
               style={{ color: colors.subtext }}
             >
               {subLabel}
@@ -73,7 +73,6 @@ const OptionGroupSelect = ({
               disabled={isDisabled}
               aria-pressed={isSelected}
               variant={isSelected ? "primary" : "secondary"}
-              className="h-12"
             >
               {optLabel}
             </PillButton>

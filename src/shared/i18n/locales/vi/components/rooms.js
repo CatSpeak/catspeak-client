@@ -557,6 +557,9 @@ export default {
     linkCopied: "Đã sao chép!",
     leaveCall: "Rời phòng",
     leaveCallConfirmText: "Bạn có chắc chắn muốn rời khỏi cuộc gọi này không?",
+    leaveCallBlockedTitle: "Không thể rời cuộc họp lúc này",
+    leaveCallBlockedDesc:
+      "Đang có các phòng thảo luận nhóm hoạt động. Với tư cách là Host, bạn cần đóng tất cả phòng nhỏ (Stop Breakout) trước khi rời họp.",
     pictureInPicture: "Hình trong Hình (PiP)",
     controls: {
       micOn: "Bật micro",
@@ -611,7 +614,9 @@ export default {
         errorCannotGet: "Không thể lấy dữ liệu",
       },
     },
-    subtitleWaiting: "Đang đợi phụ đề...",
+    subtitleWaiting: "Phụ đề sẽ hiển thị khi có người nói...",
+    startingSubtitles: "Đang bật phụ đề...",
+    closingSubtitles: "Đang tắt phụ đề...",
     speechWaiting: "Đang đợi giọng nói...",
     displayLanguage: "Ngôn ngữ hiển thị",
     fontSize: "Cỡ chữ",
@@ -654,7 +659,7 @@ export default {
       switchMessage:
         "Bạn đang trong một cuộc gọi khác. Bạn có muốn rời khỏi cuộc gọi hiện tại và tham gia cuộc gọi mới này không?",
       switchConfirm: "Rời và tiếp tục",
-      switchCancel: "Ở lại cuộc gọi hiện tại",
+      switchCancel: "Ở lại cuộc gọi",
     },
     error: {
       micPermission:

@@ -549,6 +549,9 @@ export default {
     linkCopied: "リンクをコピーしました！",
     leaveCall: "通話を退出",
     leaveCallConfirmText: "この通話を退出してもよろしいですか？",
+    leaveCallBlockedTitle: "現在ミーティングから退出できません",
+    leaveCallBlockedDesc:
+      "ブレイクアウトルームが現在進行中です。ホストとして退出する前に、すべてのブレイクアウトルームを終了（Stop Breakout）してください。",
     pictureInPicture: "ピクチャーインピクチャー",
     controls: {
       micOn: "マイクをオンにする",
@@ -603,7 +606,9 @@ export default {
         errorCannotGet: "データを取得できません",
       },
     },
-    subtitleWaiting: "字幕を待っています...",
+    subtitleWaiting: "誰かが話すと字幕が表示されます...",
+    startingSubtitles: "字幕をオンにしています...",
+    closingSubtitles: "字幕をオフにしています...",
     speechWaiting: "音声を待っています...",
     displayLanguage: "表示言語",
     fontSize: "文字サイズ",
@@ -646,7 +651,7 @@ export default {
       switchMessage:
         "現在通話中です。現在の通話を退出して新しい通話に参加しますか？",
       switchConfirm: "退出して続行",
-      switchCancel: "現在の通話に留まる",
+      switchCancel: "通話に留まる",
     },
     error: {
       micPermission:

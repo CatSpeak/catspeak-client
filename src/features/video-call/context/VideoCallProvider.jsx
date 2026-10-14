@@ -11,7 +11,11 @@ import {
   useMediaPreview,
   useDeviceSelection,
 } from "@/features/rooms"
-import { useVerifyJoinRoomMutation, roomsApi, useGetRoomStateQuery } from "@/store/api/roomsApi"
+import {
+  useVerifyJoinRoomMutation,
+  roomsApi,
+  useGetRoomStateQuery,
+} from "@/store/api/roomsApi"
 import {
   useGetClassDetailQuery,
   useGetStudentClassDetailQuery,
@@ -59,12 +63,10 @@ export const VideoCallProvider = ({ children }) => {
   const { user } = useAuth()
 
   // ── Room Expiration Check for Direct URL Access ──
-  const {
-    data: rawRoomData,
-    isLoading: isLoadingRoomDataCheck,
-  } = useGetRoomByIdQuery(roomId, {
-    skip: !roomId || !user,
-  })
+  const { data: rawRoomData, isLoading: isLoadingRoomDataCheck } =
+    useGetRoomByIdQuery(roomId, {
+      skip: !roomId || !user,
+    })
 
   const currentRoomObj = rawRoomData?.data || rawRoomData
 
@@ -73,7 +75,8 @@ export const VideoCallProvider = ({ children }) => {
 
     if (isRoomExpired(currentRoomObj)) {
       toast.error(
-        t?.rooms?.callEnded?.expiredToast || "Cuộc gọi đã kết thúc do hết thời lượng phòng"
+        t?.rooms?.callEnded?.expiredToast ||
+          "Cuộc gọi đã kết thúc do hết thời lượng phòng",
       )
       const communityLang = getCommunityLang(language)
       navigate(`/${communityLang}/community`, { replace: true })
@@ -165,7 +168,9 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   // Check active role override (student mode vs teacher mode).
   const isTeacher = isRoleResolved
     ? !!isRoleTeacher
-    : (user ? !!user.isTeacher : false)
+    : user
+      ? !!user.isTeacher
+      : false
 
   // --- Class room detail ---
   const {
@@ -232,8 +237,12 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   // Ticket 04: cath-api RoomId used by the waiting/approval endpoints. Class
   // rooms expose it as classData.roomId (distinct from the URL "class-{id}").
   const apiRoomId = isClassRoom
-    ? (Number(classData?.roomId) > 0 ? Number(classData.roomId) : null)
-    : (Number(roomId) > 0 ? Number(roomId) : null)
+    ? Number(classData?.roomId) > 0
+      ? Number(classData.roomId)
+      : null
+    : Number(roomId) > 0
+      ? Number(roomId)
+      : null
 
   // Ticket 04: pre-join approval gate state, read from the RoomState cache.
   const { data: roomStateData } = useGetRoomStateQuery(apiRoomId, {
@@ -320,27 +329,35 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
     // Private room — check for URL pwd param or existing grant
     verifyTriggered.current = true
-      ; (async () => {
-        try {
-          const searchParams = new URLSearchParams(location.search)
-          const pwdParam = searchParams.get("pwd")
-          const payload = {
-            roomId: Number(roomId),
-            ...(pwdParam ? { password: pwdParam } : {}),
-          }
-          const result = await verifyJoinRoom(payload).unwrap()
-          const isAuthorized = result?.authorized ?? result?.data?.authorized
-          if (isAuthorized) {
-            setPhase("waiting")
-          } else {
-            setPhase("password-required")
-          }
-        } catch {
-          // 403 = no grant yet → show password screen
+    ;(async () => {
+      try {
+        const searchParams = new URLSearchParams(location.search)
+        const pwdParam = searchParams.get("pwd")
+        const payload = {
+          roomId: Number(roomId),
+          ...(pwdParam ? { password: pwdParam } : {}),
+        }
+        const result = await verifyJoinRoom(payload).unwrap()
+        const isAuthorized = result?.authorized ?? result?.data?.authorized
+        if (isAuthorized) {
+          setPhase("waiting")
+        } else {
           setPhase("password-required")
         }
-      })()
-  }, [room, user, isLoadingRoomData, isLoadingUser, fromQueue, roomId, location.search])
+      } catch {
+        // 403 = no grant yet → show password screen
+        setPhase("password-required")
+      }
+    })()
+  }, [
+    room,
+    user,
+    isLoadingRoomData,
+    isLoadingUser,
+    fromQueue,
+    roomId,
+    location.search,
+  ])
 
   // ── Handle password submission from PasswordScreen ──
   const handlePasswordSubmit = async (password) => {
@@ -433,7 +450,14 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     setPhase("joining")
 
     try {
-      let token, serverUrl, sessionId, activeSubSessionId, activeSubSessionName, egressProfile, highQuality, roomState
+      let token,
+        serverUrl,
+        sessionId,
+        activeSubSessionId,
+        activeSubSessionName,
+        egressProfile,
+        highQuality,
+        roomState
 
       if (isClassRoom) {
         // Fetch LiveKit token using the appropriate endpoint based on user role
@@ -554,10 +578,10 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
       const backendMessage = err?.data?.message || err?.data
       const isBanned =
         err?.status === 403 &&
-        (typeof backendMessage === "string" &&
-          (backendMessage.includes("cấm") ||
-            backendMessage.includes("banned") ||
-            backendMessage.includes("禁止")))
+        typeof backendMessage === "string" &&
+        (backendMessage.includes("cấm") ||
+          backendMessage.includes("banned") ||
+          backendMessage.includes("禁止"))
 
       let errorMsg = ""
       if (isBanned || (err?.status === 403 && !isClassRoom)) {
@@ -641,7 +665,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   // Loading user data
   if (isLoadingUser) {
-    return <VideoCallLoading message={t?.rooms?.waitingScreen?.loadingRoom || "Loading room..."} />
+    return (
+      <VideoCallLoading
+        message={t?.rooms?.waitingScreen?.loadingRoom || "Loading room..."}
+      />
+    )
   }
 
   // User not authenticated
@@ -664,7 +692,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     isLoadingRoomData ||
     (!isClassRoom && isRoomQuerySkipped)
   ) {
-    return <VideoCallLoading message={t?.rooms?.waitingScreen?.loadingRoom || "Loading room..."} />
+    return (
+      <VideoCallLoading
+        message={t?.rooms?.waitingScreen?.loadingRoom || "Loading room..."}
+      />
+    )
   }
 
   // Room not found
@@ -712,7 +744,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   }
 
   // ---- PHASE: WAITING ----
-  if (phase === "waiting") {    const displaySession = {
+  if (phase === "waiting") {
+    const displaySession = {
       name: room.name,
       roomName: room.name,
       topic: room.topic,

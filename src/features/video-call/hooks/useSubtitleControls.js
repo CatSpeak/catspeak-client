@@ -40,13 +40,15 @@ export const useSubtitleControls = ({
     : roomLangCode
 
   const startSubtitles = async (language) => {
+    const chosenLang = language || defaultDisplayLang
+    setShowRoomSubtitles?.(true)
+    setSubtitleSelectedLanguage?.(chosenLang)
     try {
-      const chosenLang = language || defaultDisplayLang
       await startMutation({ sessionId, language: chosenLang }).unwrap()
-      setSubtitleSelectedLanguage?.(chosenLang)
-      setShowRoomSubtitles?.(true)
     } catch (err) {
       console.error("[useSubtitleControls] Failed to start subtitles:", err)
+      setShowRoomSubtitles?.(false)
+      setSubtitleSelectedLanguage?.(null)
     }
   }
 

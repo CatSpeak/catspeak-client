@@ -119,6 +119,102 @@ export const navSections = [
   },
 ]
 
+export const dockNavGroups = [
+  {
+    key: "main",
+    items: [
+      { key: "community", icon: Home, path: "/community", hasSublinks: false },
+      {
+        key: "catSpeak",
+        icon: Globe,
+        path: "/cat-speak/global-news",
+        hasSublinks: true,
+      },
+    ],
+  },
+  {
+    key: "secondary",
+    items: [
+      {
+        key: "exploreCourses",
+        icon: Compass,
+        path: "/explore-courses",
+        hasSublinks: false,
+      },
+      {
+        key: "learningResources",
+        icon: LayoutDashboard,
+        path: "/resources",
+        hasSublinks: false,
+      },
+    ],
+  },
+  {
+    key: "workspace",
+    items: [
+      {
+        key: "workspace",
+        icon: Briefcase,
+        path: "/workspace",
+        hasSublinks: true,
+      },
+    ],
+  },
+]
+
+export const TEACHER_ONLY_TABS = [
+  "dashboard",
+  "myCourses",
+  "myClass",
+  "analytics",
+  "schedule",
+  "teachingTasks",
+  "manageMaterials",
+]
+
+export const isNavItemVisible = (
+  item,
+  {
+    currentLang,
+    isAuthenticated,
+    activeRole,
+    isTeacher,
+    isStudent,
+    isHorizontal = false,
+  } = {},
+) => {
+  if (!item) return false
+  if (item.hideInSidebar) return false
+  if (item.lang && currentLang && item.lang !== currentLang) return false
+  if (isHorizontal && item.showOnHorizontalBar === false) return false
+  if (item.isPrivate && !isAuthenticated) return false
+  if (item.roles && activeRole && !item.roles.includes(activeRole)) return false
+  if (TEACHER_ONLY_TABS.includes(item.key)) {
+    if (isStudent) return false
+    if (isTeacher === false) return false
+  }
+  return true
+}
+
+export const getActiveDockSection = (pathname) => {
+  if (!pathname) return "community"
+  if (
+    pathname.startsWith("/setting") ||
+    pathname.startsWith("/pricing") ||
+    pathname.startsWith("/billing") ||
+    pathname.startsWith("/refunds")
+  ) {
+    return "settings"
+  }
+  if (pathname.includes("/cat-speak")) return "catSpeak"
+  if (pathname.includes("/profile")) return "profile"
+  if (pathname.includes("/explore-courses")) return "exploreCourses"
+  if (pathname.includes("/resources")) return "learningResources"
+  if (pathname.includes("/workspace")) return "workspace"
+  if (pathname.includes("/community")) return "community"
+  return "community"
+}
+
 export const navLinks = [
   {
     key: "community",
@@ -128,14 +224,39 @@ export const navLinks = [
   {
     key: "catSpeak",
     hasDropdown: true,
-    icon: LayoutDashboard,
+    icon: Globe,
     subItems: [
       { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
-      { key: "calendar", path: "/cat-speak/calendar", icon: Calendar },
+      { key: "events", path: "/cat-speak/calendar", icon: Calendar },
     ],
+  },
+  {
+    key: "horizontalBar-secondary",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  {
+    key: "exploreCourses",
+    label: "Explore Courses",
+    path: "/explore-courses",
+    icon: Compass,
+  },
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: LayoutDashboard,
+    isPrivate: true,
+  },
+  {
+    key: "horizontalBar-workspace",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
   },
   {
     key: "workspace",
@@ -193,25 +314,6 @@ export const navLinks = [
     get subItems() {
       return this.groups.flatMap((g) => g.items)
     },
-  },
-  {
-    key: "horizontalBar",
-    label: "Horizontal bar",
-    isHorizontalBar: true,
-    showOnHorizontalBar: false,
-  },
-  {
-    key: "exploreCourses",
-    label: "Explore Courses",
-    path: "/explore-courses",
-    icon: Compass,
-  },
-  {
-    key: "learningResources",
-    label: "Resource Hub",
-    path: "/resources",
-    icon: Globe,
-    isPrivate: true,
   },
 ]
 

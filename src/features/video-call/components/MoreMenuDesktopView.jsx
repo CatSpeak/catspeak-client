@@ -62,13 +62,16 @@ const MoreMenuDesktopView = ({
     setActiveSettingsTab,
     isSubtitleActive,
     isStartingSubtitles,
+    isStoppingSubtitles,
     stopSubtitles,
     showWatchTogether,
     setShowWatchTogether,
   } = useGlobalVideoCall()
 
-  const { isBreakoutActive } = useSelector((s) => s.videoCall)
+  const { isBreakoutActive, callInfo } = useSelector((s) => s.videoCall)
   const { isHost, canStartGame, gameDisabledReason } = useGameControlStatus()
+
+  const sessionId = callInfo?.sessionId
 
   const {
     formattedTime,
@@ -77,7 +80,7 @@ const MoreMenuDesktopView = ({
     usagePercent,
     isDanger,
     isWarning,
-  } = useRecordingStatus(isRecording, confirmStopRecording)
+  } = useRecordingStatus(isRecording, confirmStopRecording, sessionId)
 
   return (
     <div className="hidden md:flex flex-col py-[2px]">
@@ -200,7 +203,7 @@ const MoreMenuDesktopView = ({
             <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
               <span>Storage</span>
               <span>
-                {totalUsedMb.toFixed(1)}MB / {limitMb.toFixed(0)}MB
+                {totalUsedMb.toFixed(1)}MB {limitMb != null && limitMb > 0 ? `/ ${limitMb.toFixed(0)}MB` : "(Unlimited)"}
               </span>
             </div>
             <ProgressBar
@@ -233,14 +236,8 @@ const MoreMenuDesktopView = ({
             }
           }
         }}
-        disabled={!isAISession && isStartingSubtitles}
-        icon={
-          !isAISession && isStartingSubtitles ? (
-            <Loader2 size={20} className="animate-spin" />
-          ) : (
-            <Captions size={20} />
-          )
-        }
+        disabled={!isAISession && (isStartingSubtitles || isStoppingSubtitles)}
+        icon={<Captions size={20} />}
         label={
           (isAISession ? showCC : isSubtitleActive)
             ? t?.rooms?.videoCall?.controls?.captionsOff || "Turn off captions"

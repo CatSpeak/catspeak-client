@@ -44,6 +44,7 @@ export default {
     deleteCommentMessage: "Are you sure you want to delete this comment? This action cannot be undone.",
     deleteCommentConfirm: "Delete",
     totalComments: "{{count}} Comments",
+    loginToComment: "Log in to comment",
   },
   newsCard: {
     reaction: "reaction",

@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { Download, Play, Image as ImageIcon } from "lucide-react"
 import MediaViewerModal from "@/shared/components/ui/MediaViewerModal"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import FileAttachmentItem from "@/shared/components/ui/FileAttachmentItem"
+import FilePreviewModal from "@/shared/components/ui/FilePreviewModal"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { getImageUrl } from "@/shared/utils/imageUtils"
 
 /**
  * Unified tile component for both Images and Videos
@@ -89,20 +91,160 @@ const VisualMediaItem = ({
 }
 
 /**
+ * Single Visual Media with Facebook-style adaptive rendering:
+ * - Nếu tỷ lệ giữa w và h <= 2 (hoặc ngược lại, tức 0.5 <= ratio <= 2): Hiển thị chính xác tỷ lệ ảnh
+ * - Nếu tỷ lệ giữa w và h > 2 (hoặc ngược lại, tức ratio > 2 hoặc ratio < 0.5): Hiển thị đầy đủ ảnh trong khung 2:3 chiều ngang (3:2) + hiệu ứng blur phần thừa
+ */
+const SingleVisualMediaItem = ({ media, onClick }) => {
+  const [dimensions, setDimensions] = useState(null)
+  const [hasError, setHasError] = useState(false)
+  const isVideo = media.mediaType === "Video"
+
+  const rawUrl = media?.mediaUrl || media?.url
+  const resolvedUrl = getImageUrl(rawUrl)
+
+  useEffect(() => {
+    if (!resolvedUrl || isVideo) return
+    let active = true
+    const img = new Image()
+    img.src = resolvedUrl
+
+    const handleSuccess = () => {
+      if (active && img.naturalWidth && img.naturalHeight) {
+        setDimensions({
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        })
+      }
+    }
+
+    if (img.complete && img.naturalWidth && img.naturalHeight) {
+      handleSuccess()
+    } else {
+      img.onload = handleSuccess
+      img.onerror = () => {
+        if (active) setHasError(true)
+      }
+    }
+
+    return () => {
+      active = false
+    }
+  }, [resolvedUrl, isVideo])
+
+  // Single video player with inline controls (giữ nguyên hành vi video)
+  if (isVideo) {
+    return (
+      <div className="relative w-full rounded-xl overflow-hidden bg-black border border-border flex items-center justify-center aspect-video max-h-[500px]">
+        <video
+          src={resolvedUrl}
+          controls
+          preload="metadata"
+          className="w-full h-full object-contain bg-black"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    )
+  }
+
+  if (hasError || !resolvedUrl) {
+    return (
+      <div className="w-full aspect-video max-h-[500px] flex flex-col items-center justify-center bg-gray-100 text-gray-400 p-2 rounded-xl border border-border">
+        <ImageIcon className="w-8 h-8 opacity-40 mb-1" />
+        <span className="text-[11px] text-gray-400 text-center truncate w-full px-1">
+          Không thể tải hình ảnh
+        </span>
+      </div>
+    )
+  }
+
+  const { width, height } = dimensions || {}
+  const ratio = width && height ? width / height : null
+
+  // Rule:
+  // - Nếu tỷ lệ giữa w và h <= 2 (hoặc ngược lại, tức 0.5 <= ratio <= 2): Hiển thị chính xác tỷ lệ ảnh
+  // - Nếu tỷ lệ giữa w và h > 2 (hoặc ngược lại, tức ratio > 2 hoặc ratio < 0.5): Hiển thị trong khung 2:3 chiều ngang (3:2) + blur phần thừa
+  const isExtremeRatio = ratio !== null && (ratio > 2 || ratio < 0.5)
+
+  const containerStyle = dimensions
+    ? {
+        aspectRatio: isExtremeRatio ? "3 / 2" : `${width} / ${height}`,
+      }
+    : undefined
+
+  return (
+    <div
+      onClick={onClick}
+      style={containerStyle}
+      className={`relative group cursor-pointer overflow-hidden rounded-xl bg-gray-900 border border-border flex items-center justify-center w-full ${
+        !dimensions ? "aspect-video max-h-[500px] bg-gray-100" : ""
+      }`}
+    >
+      {isExtremeRatio ? (
+        <>
+          {/* Blurred backdrop image filling extra space */}
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <img
+              src={resolvedUrl}
+              alt=""
+              aria-hidden="true"
+              className="w-full h-full object-cover blur-2xl scale-125 select-none"
+              style={{ filter: "blur(30px)", transform: "scale(1.3)" }}
+            />
+            {/* Subtle dark tint overlay */}
+            <div className="absolute inset-0 bg-black/15" />
+          </div>
+
+          {/* Main Image shown fully without crop */}
+          <img
+            src={resolvedUrl}
+            alt={media.fileName || "Post media"}
+            loading="lazy"
+            onLoad={(e) => {
+              const { naturalWidth, naturalHeight } = e.target
+              if (naturalWidth && naturalHeight) {
+                setDimensions({ width: naturalWidth, height: naturalHeight })
+              }
+            }}
+            onError={() => setHasError(true)}
+            className="relative z-10 w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+          />
+        </>
+      ) : (
+        <img
+          src={resolvedUrl}
+          alt={media.fileName || "Post media"}
+          loading="lazy"
+          onLoad={(e) => {
+            const { naturalWidth, naturalHeight } = e.target
+            if (naturalWidth && naturalHeight) {
+              setDimensions({ width: naturalWidth, height: naturalHeight })
+            }
+          }}
+          onError={() => setHasError(true)}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      )}
+
+      {/* Dark hover tint */}
+      <div className="absolute inset-0 z-20 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+    </div>
+  )
+}
+
+/**
  * Adaptive Gallery Layout for 1 to 5+ visual media items
  */
 const VisualMediaGrid = ({ mediaList, onMediaClick }) => {
   const count = mediaList.length
   if (count === 0) return null
 
-  // 1 Item: Full width with 16:9 aspect-video default
+  // 1 Item: Facebook-style adaptive rendering
   if (count === 1) {
     return (
-      <VisualMediaItem
+      <SingleVisualMediaItem
         media={mediaList[0]}
         onClick={() => onMediaClick(0)}
-        className="w-full aspect-video max-h-[500px]"
-        isSingle
       />
     )
   }
@@ -194,8 +336,7 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
   const { t } = useLanguage()
   const [activeMediaIndex, setActiveMediaIndex] = useState(null)
   const [isDocsExpanded, setIsDocsExpanded] = useState(false)
-
-  if (!media || media.length === 0) return null
+  const [previewDoc, setPreviewDoc] = useState(null)
 
   // Categorize media into visual (images/videos) and documents
   const visualMedia = useMemo(
@@ -218,6 +359,8 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
     : documents.slice(0, initialDocsLimit)
   const hasMoreDocuments = documents.length > initialDocsLimit
 
+  if (!media || media.length === 0) return null
+
   return (
     <div className="flex flex-col gap-3 w-full">
       {/* Visual media gallery */}
@@ -236,6 +379,8 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
               key={doc.postMediaId}
               fileName={doc.fileName || t.profile?.post?.document || "Tài liệu"}
               fileSize={doc.fileSize}
+              onClick={() => setPreviewDoc(doc)}
+              className="cursor-pointer hover:bg-gray-50 transition-colors"
               rightAction={
                 <IconButton
                   as="a"
@@ -277,6 +422,16 @@ const PostMediaGallery = ({ media = [], initialDocsLimit = 2 }) => {
           mediaList={visualMedia}
           initialIndex={activeMediaIndex}
           onClose={() => setActiveMediaIndex(null)}
+        />
+      )}
+
+      {/* Document Preview Modal */}
+      {previewDoc && (
+        <FilePreviewModal
+          open={Boolean(previewDoc)}
+          onClose={() => setPreviewDoc(null)}
+          item={previewDoc}
+          recordMaterialView={false}
         />
       )}
     </div>

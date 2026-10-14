@@ -17,11 +17,13 @@ const BackgroundsAndEffectsPanel = () => {
   const { t } = useLanguage()
   const { room } = useGlobalVideoCall()
   const [activeTab, setActiveTab] = useState("backgrounds")
-  const { hasFeature } = usePlanFeatures()
+  const { hasFeature, isPro } = usePlanFeatures()
+
+  const userHasProPlan = Boolean(isPro || hasFeature(PLAN_FEATURES.BEAUTY_FILTER))
 
   const isBeautyAllowed =
-    hasFeature(PLAN_FEATURES.BEAUTY_FILTER) &&
-    isBeautyFilterSupported(room?.roomType)
+    userHasProPlan &&
+    isBeautyFilterSupported(room?.roomType, userHasProPlan)
 
   const tabs = [
     { id: "backgrounds", label: t?.rooms?.videoCall?.tabBackgrounds || "Backgrounds" },

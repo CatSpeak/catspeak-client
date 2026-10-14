@@ -618,6 +618,7 @@ export default {
     lectureHall: "Lecture Hall",
     grading: "Grading",
     vouchers: "Vouchers",
+    recordings: "Class Recordings",
     classOverview: "Class Overview",
     classInformation: "Class Information",
     tuitionFee: "TUITION FEE",

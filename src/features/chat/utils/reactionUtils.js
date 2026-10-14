@@ -107,20 +107,26 @@ export function applyReactionToggle(reactions = [], emoji, currentUserId) {
  * @param {number|string} currentUserId - Local user account ID
  * @returns {Array} Updated reactions list
  */
-export function applyReactionSignalREvent(currentReactions = [], event, currentUserId) {
+export function applyReactionSignalREvent(
+  currentReactions = [],
+  event,
+  currentUserId,
+  sourceAccountId = null,
+) {
   if (!event) return currentReactions
 
   const myId = currentUserId != null ? Number(currentUserId) : null
+  const sourceId = sourceAccountId != null ? Number(sourceAccountId) : null
 
-  // If server provided precomputed reactionsSummary, strictly evaluate hasReacted against myId
+  // If server provided precomputed reactionsSummary, strictly evaluate hasReacted against myId or sourceId
   const reactionsSummary = event.reactionsSummary || event.ReactionsSummary
   if (Array.isArray(reactionsSummary)) {
     return reactionsSummary.map((group) => {
       const userIds = group.userIds || group.UserIds || []
       const hasMyId =
-        myId != null &&
         Array.isArray(userIds) &&
-        userIds.some((id) => Number(id) === myId)
+        ((myId != null && userIds.some((id) => Number(id) === myId)) ||
+          (sourceId != null && userIds.some((id) => Number(id) === sourceId)))
 
       return {
         ...group,
@@ -140,10 +146,16 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
   if (!emoji || accountId == null) return currentReactions
 
   const eventAccountId = Number(accountId)
-  const isMyReaction = myId != null && eventAccountId === myId
+  const isMyReaction =
+    (myId != null && eventAccountId === myId) ||
+    (sourceId != null && eventAccountId === sourceId)
   const list = Array.isArray(currentReactions)
     ? [...currentReactions.map((r) => ({ ...r, userIds: [...(r.userIds || [])] }))]
     : []
+
+  const checkHasReacted = (ids) =>
+    (myId != null && ids.some((id) => Number(id) === myId)) ||
+    (sourceId != null && ids.some((id) => Number(id) === sourceId))
 
   if (action === "removed") {
     const idx = list.findIndex((g) => g.emoji === emoji)
@@ -158,9 +170,7 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
           ...g,
           count: newCount,
           userIds: newIds,
-          hasReacted: isMyReaction
-            ? false
-            : myId != null && newIds.some((id) => Number(id) === myId),
+          hasReacted: isMyReaction ? false : checkHasReacted(newIds),
         }
       }
     }
@@ -180,9 +190,7 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
             ...g,
             count: newCount,
             userIds: newIds,
-            hasReacted: isMyReaction
-              ? false
-              : myId != null && newIds.some((id) => Number(id) === myId),
+            hasReacted: isMyReaction ? false : checkHasReacted(newIds),
           }
         }
       }
@@ -200,9 +208,7 @@ export function applyReactionSignalREvent(currentReactions = [], event, currentU
         ...g,
         count: alreadyHasActor ? g.count : (g.count || 0) + 1,
         userIds,
-        hasReacted: isMyReaction
-          ? true
-          : myId != null && userIds.some((id) => Number(id) === myId),
+        hasReacted: isMyReaction ? true : checkHasReacted(userIds),
       }
     } else {
       list.push({

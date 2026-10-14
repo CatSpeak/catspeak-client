@@ -150,13 +150,13 @@ const ParticipantVideoTile = ({
     <div
       className={`${getVideoTileRootClass({
         isVideoVisible: hasVideo,
-      })} border border-white/10 bg-neutral-900`}
+      })} border border-border bg-white shadow-sm`}
     >
-      {/* Speaking Indicator Overlay (Dark-mode emerald glow without light-mode white ring) */}
+      {/* Speaking Indicator Overlay */}
       <div
         className={`pointer-events-none absolute inset-0 z-10 rounded-xl transition-all duration-200 ${
           isSpeaking
-            ? "border-2 border-solid border-emerald-500 ring-1 ring-inset ring-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.35)]"
+            ? "border-2 border-solid border-emerald-500 ring-2 ring-emerald-500/20 shadow-md"
             : "border-2 border-solid border-transparent"
         }`}
       />
@@ -180,7 +180,7 @@ const ParticipantVideoTile = ({
         >
           {resolvedAvatar && (
             <>
-              <div className="absolute inset-0 z-0 bg-neutral-900" />
+              <div className="absolute inset-0 z-0 bg-primaryBg" />
               <img
                 src={resolvedAvatar}
                 alt=""
@@ -203,17 +203,6 @@ const ParticipantVideoTile = ({
                 resolvedAvatar ? "shadow-xl" : ""
               } ${theme.avatarClass}`}
             />
-
-            {/* Solo Waiting Notice (Only for group calls when alone) */}
-            {isSolo && isInitiator && (
-              <div className="mt-3 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/10 text-xs text-neutral-300 shadow-md animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>
-                  {t?.chat?.call?.waitingForOthers ||
-                    "Waiting for others to join..."}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -226,12 +215,8 @@ const ParticipantVideoTile = ({
             {screenShareOn && (
               <MonitorUp size={14} className="sm:w-4 sm:h-4 text-yellow-400" />
             )}
-            {!micOn && (
-              <MicOff size={14} className="sm:w-4 sm:h-4 text-red-400" />
-            )}
-            {!hasVideo && (
-              <VideoOff size={14} className="sm:w-4 sm:h-4 text-neutral-400" />
-            )}
+            {!micOn && <MicOff size={14} className="sm:w-4 sm:h-4" />}
+            {!hasVideo && <VideoOff size={14} className="sm:w-4 sm:h-4" />}
           </div>
           <div
             onClick={(e) => {

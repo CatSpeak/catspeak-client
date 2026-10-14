@@ -42,7 +42,7 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
 
   return (
     <header
-      className={`sticky top-0 z-40 h-[64px] border-b border-border transition-all duration-300 ${
+      className={`sticky top-0 z-40 h-14 border-b border-border transition-all duration-300 ${
         scrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-white"
       }`}
     >

@@ -23,6 +23,7 @@ export { usePiPUnread } from "./hooks/usePiPUnread"
 export { useRegisterNavigate, getNavigate, getLocation } from "./hooks/useNavigateRef"
 export { useSpeakingStats } from "./hooks/useSpeakingStats"
 export { useBreakoutSpeakingStats } from "./hooks/useBreakoutSpeakingStats"
+export { useSavedParticipantVolumes } from "./hooks/useSavedParticipantVolumes"
 
 // Context
 export { GlobalVideoCallProvider, useGlobalVideoCall } from "./context/GlobalVideoCallProvider"

@@ -48,6 +48,8 @@ const HUB_EVENTS = [
   "CallParticipantJoined",
   "CallParticipantLeft",
   "CallEnded",
+  "CallRejected",
+  "MemberRemoved",
 ]
 
 export const ConversationSignalRProvider = ({ children }) => {

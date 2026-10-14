@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useMemo } from "react"
 import { Globe, X, Check } from "lucide-react"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import { useSubtitles } from "@/features/video-call/hooks/useSubtitles"
 import { useGlobalVideoCall } from "@/features/video-call/context/GlobalVideoCallProvider"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -42,6 +43,8 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
   const {
     room,
     subtitleSelectedLanguage,
+    isStartingSubtitles,
+    isStoppingSubtitles,
     stopSubtitles,
     changeSubtitleLanguage,
   } = useGlobalVideoCall()
@@ -101,14 +104,27 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
     FONT_SIZES.find((s) => s.id === fontSize)?.className || "text-sm"
 
   return (
-    <div className="w-full shrink-0 flex flex-col items-center mt-1 z-20 relative">
-      <div className="w-full flex flex-col h-52 bg-white rounded-xl border border-border group/subtitles relative">
+    <div className="w-full shrink-0 flex flex-col items-center mt-4 z-20 relative">
+      <div className="w-full flex flex-col h-52 bg-white rounded-xl border border-border group/subtitles relative overflow-hidden">
+        {/* Full Loading Overlay when starting or stopping */}
+        {(isStartingSubtitles || isStoppingSubtitles) && (
+          <div className="absolute inset-0 z-30 bg-white/85 backdrop-blur-[2px] flex items-center justify-center select-none pointer-events-auto">
+            <LoadingSpinner
+              text={
+                isStoppingSubtitles
+                  ? t.rooms?.videoCall?.closingSubtitles || "Turning off subtitles..."
+                  : t.rooms?.videoCall?.startingSubtitles || "Turning on subtitles..."
+              }
+            />
+          </div>
+        )}
+
         {/* Header bar with Language switcher, Font size button and Close button - absolute UI overlay on hover */}
-        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 px-4 h-[56px] rounded-t-xl opacity-0 group-hover/subtitles:opacity-100 pointer-events-none group-hover/subtitles:pointer-events-auto transition-all duration-200 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div className="absolute top-0 inset-x-0 z-10 flex items-center justify-between border-b border-border/80 px-4 h-14 rounded-t-xl opacity-0 group-hover/subtitles:opacity-100 pointer-events-none group-hover/subtitles:pointer-events-auto transition-all duration-200 bg-white/90 backdrop-blur-sm shadow-sm">
           <span className="font-semibold">
             {t.rooms?.videoCall?.subtitles || "Subtitles"}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <PillButton
               variant="secondary"
               onClick={() => setShowLangPicker(true)}
@@ -132,63 +148,67 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
                 "Language"}
             </PillButton>
 
-            {/* Font Size Selector */}
-            <div className="relative" ref={sizePickerRef}>
+            <div className="flex">
+              {/* Font Size Selector */}
+              <div className="relative" ref={sizePickerRef}>
+                <IconButton
+                  onClick={() => setShowSizePicker((prev) => !prev)}
+                  title={t.rooms?.videoCall?.fontSize || "Cỡ chữ"}
+                  variant={showSizePicker ? "filled" : "ghost"}
+                >
+                  <TextSizeIcon className="w-5 h-5" />
+                </IconButton>
+
+                {showSizePicker && (
+                  <div className="absolute bottom-full right-0 mb-2 z-50 min-w-[170px] bg-white text-gray-800 rounded-2xl shadow-xl border border-border py-1.5 flex flex-col overflow-hidden pointer-events-auto">
+                    {FONT_SIZES.map((size) => {
+                      const isSelected = fontSize === size.id
+                      return (
+                        <button
+                          key={size.id}
+                          type="button"
+                          onClick={() => {
+                            setFontSize(size.id)
+                            localStorage.setItem(
+                              "catspeak_subtitle_font_size",
+                              size.id,
+                            )
+                            setShowSizePicker(false)
+                          }}
+                          className={`flex items-center gap-2.5 px-3.5 py-2 text-sm text-left transition cursor-pointer ${
+                            isSelected
+                              ? "bg-primaryBg text-[#d40018] font-semibold"
+                              : "text-gray-700 hover:bg-primaryBg hover:text-gray-900"
+                          }`}
+                        >
+                          <div className="w-4 h-4 flex items-center justify-center shrink-0">
+                            {isSelected && (
+                              <Check className="w-4 h-4 text-[#d40018]" />
+                            )}
+                          </div>
+                          <span>
+                            {t.rooms?.videoCall?.fontSizes?.[size.id] ||
+                              size.id}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
               <IconButton
-                onClick={() => setShowSizePicker((prev) => !prev)}
-                title={t.rooms?.videoCall?.fontSize || "Cỡ chữ"}
-                variant={showSizePicker ? "filled" : "ghost"}
+                onClick={stopSubtitles}
+                disabled={isStoppingSubtitles || isStartingSubtitles}
+                title={
+                  t.rooms?.videoCall?.controls?.captionsOff ||
+                  "Turn off subtitles"
+                }
+                variant="ghost"
               >
-                <TextSizeIcon className="w-5 h-5" />
+                <X />
               </IconButton>
-
-              {showSizePicker && (
-                <div className="absolute bottom-full right-0 mb-2 z-50 min-w-[170px] bg-white text-gray-800 rounded-2xl shadow-xl border border-border py-1.5 flex flex-col overflow-hidden pointer-events-auto">
-                  {FONT_SIZES.map((size) => {
-                    const isSelected = fontSize === size.id
-                    return (
-                      <button
-                        key={size.id}
-                        type="button"
-                        onClick={() => {
-                          setFontSize(size.id)
-                          localStorage.setItem(
-                            "catspeak_subtitle_font_size",
-                            size.id,
-                          )
-                          setShowSizePicker(false)
-                        }}
-                        className={`flex items-center gap-2.5 px-3.5 py-2 text-sm text-left transition cursor-pointer ${
-                          isSelected
-                            ? "bg-primaryBg text-[#d40018] font-semibold"
-                            : "text-gray-700 hover:bg-primaryBg hover:text-gray-900"
-                        }`}
-                      >
-                        <div className="w-4 h-4 flex items-center justify-center shrink-0">
-                          {isSelected && (
-                            <Check className="w-4 h-4 text-[#d40018]" />
-                          )}
-                        </div>
-                        <span>
-                          {t.rooms?.videoCall?.fontSizes?.[size.id] || size.id}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
             </div>
-
-            <IconButton
-              onClick={stopSubtitles}
-              title={
-                t.rooms?.videoCall?.controls?.captionsOff ||
-                "Turn off subtitles"
-              }
-              variant="ghost"
-            >
-              <X />
-            </IconButton>
           </div>
         </div>
 
@@ -238,7 +258,7 @@ const SubtitleOverlayNonAI = ({ showRoomSubtitles }) => {
             <div className="flex h-full items-center justify-center">
               <span className="text-gray-400 italic text-sm">
                 {t.rooms?.videoCall?.subtitleWaiting ||
-                  "Waiting for subtitles..."}
+                  "Subtitles will appear when someone speaks..."}
               </span>
             </div>
           ) : (

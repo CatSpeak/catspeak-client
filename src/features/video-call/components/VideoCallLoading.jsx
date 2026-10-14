@@ -1,5 +1,5 @@
 import React from "react"
-import { Loader2 } from "lucide-react"
+import { LoadingSpinner } from "@/shared/components/ui/indicators"
 
 /**
  * Full-screen loading overlay shown while the video call session is being prepared.
@@ -7,11 +7,11 @@ import { Loader2 } from "lucide-react"
  */
 const VideoCallLoading = ({ message = "Loading room..." }) => {
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-neutral-950 text-white">
-      <Loader2 className="w-8 h-8 animate-spin text-white mb-4" />
-      <p className="text-sm font-medium text-neutral-200">{message}</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primaryBg">
+      <LoadingSpinner text={message} />
     </div>
   )
 }
 
 export default VideoCallLoading
+

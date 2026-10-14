@@ -63,7 +63,7 @@ const ChatSidebar = ({
   return (
     <div className="flex flex-col w-full lg:w-[360px] h-full overflow-hidden bg-white lg:border lg:border-border lg:rounded-xl">
       {/* ── Header ───────────────────────────────────── */}
-      <div className="p-2 pl-4 flex items-center justify-between">
+      <div className="h-[72px] px-4 flex items-center justify-between">
         <h1 className="font-bold">{t?.chat?.title || "Chats"}</h1>
         <IconButton
           onClick={onNewChatClick}
@@ -74,7 +74,7 @@ const ChatSidebar = ({
           <SquarePen />
         </IconButton>
       </div>
-      <div className="h-14 px-4 flex items-center">
+      <div className="px-4 mb-4">
         {/* ── Search ───────────────────────────────── */}
         <SearchInput
           placeholder={

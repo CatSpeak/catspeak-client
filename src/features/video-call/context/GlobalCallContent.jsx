@@ -10,9 +10,6 @@ import {
 } from "@livekit/components-react"
 import { ConnectionState, RoomEvent, Track, VideoPresets } from "livekit-client"
 import { toast } from "react-hot-toast"
-import { Clock } from "lucide-react"
-
-import Modal from "@/shared/components/ui/Modal"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import { leaveCall } from "@/store/slices/videoCallSlice"
 import { useVideoCallSignaling } from "@/features/video-call/hooks/useVideoCallSignaling"
@@ -36,6 +33,7 @@ import {
 } from "@/store/api/assistantApi"
 import { useGetRecordingsBySessionQuery } from "@/store/api/recordingsApi"
 import { useParticipantAudioEffect } from "@/features/video-call/hooks/useParticipantAudioEffect"
+import { useSavedParticipantVolumes } from "@/features/video-call/hooks/useSavedParticipantVolumes"
 import { useSubscriptionPolicy } from "@/features/video-call/hooks/useSubscriptionPolicy"
 import {
   getNavigate,
@@ -50,9 +48,7 @@ import {
   useGetRoomStateQuery,
   useGetRoomParticipantsQuery,
 } from "@/store/api/roomsApi"
-import {
-  normalizeCoHost,
-} from "@/features/co-host/constants"
+import { normalizeCoHost } from "@/features/co-host/constants"
 import { useChatManager } from "@/features/video-call/hooks/useChatManager"
 import { useSubtitleControls } from "@/features/video-call/hooks/useSubtitleControls"
 import { useDeviceSelection } from "@/features/rooms/hooks/useDeviceSelection"
@@ -74,11 +70,7 @@ import {
 import { buildRoomOptions } from "@/features/video-call/utils/roomOptions"
 
 const roomParticipantsList = (draft) =>
-  Array.isArray(draft)
-    ? draft
-    : Array.isArray(draft?.data)
-      ? draft.data
-      : null
+  Array.isArray(draft) ? draft : Array.isArray(draft?.data) ? draft.data : null
 
 // Writes one restriction snapshot into the cached participant list, creating
 // the row when the list has not seen that account yet. Returns the flags it
@@ -127,7 +119,8 @@ const GlobalCallContent = ({
   // cath-api room id separately (callInfo.apiRoomId). Every room-governance
   // call and the SignalR room group must use the numeric id.
   const urlRoomId = callInfo?.roomId || roomData?.id
-  const apiRoomId = callInfo?.apiRoomId ?? (Number(urlRoomId) > 0 ? Number(urlRoomId) : null)
+  const apiRoomId =
+    callInfo?.apiRoomId ?? (Number(urlRoomId) > 0 ? Number(urlRoomId) : null)
   const currentRoomId = apiRoomId ?? urlRoomId
   const isAISession = callInfo?.isAISession ?? false
 
@@ -188,7 +181,7 @@ const GlobalCallContent = ({
     } catch {
       /* ignore */
     }
-    return "auto"
+    return "grid"
   })
   const [maxTiles, setMaxTiles] = useState(() => {
     try {
@@ -207,7 +200,8 @@ const GlobalCallContent = ({
     }
     return 16
   })
-  const [hideEmptyTiles, setHideEmptyTiles] = useState(() => {    try {
+  const [hideEmptyTiles, setHideEmptyTiles] = useState(() => {
+    try {
       const saved = localStorage.getItem("catspeak_video_layout_settings")
       if (saved) {
         const parsed = JSON.parse(saved)
@@ -295,7 +289,9 @@ const GlobalCallContent = ({
       delete lkRoom.options.publishDefaults.videoSimulcastLayers
     }
 
-    const publication = localParticipant.getTrackPublication(Track.Source.Camera)
+    const publication = localParticipant.getTrackPublication(
+      Track.Source.Camera,
+    )
     const track = publication?.videoTrack
     if (!track?.restartTrack || publication?.isMuted) return
 
@@ -569,180 +565,182 @@ const GlobalCallContent = ({
     }
   }, [sessionRecordings, t])
 
-  useVideoChatSignalR(sessionId, token, (event, data) => {
-    if (event === "RoomSettingsChanged") {
-      // Ticket 01: single store = RTK Query cache. Patch the room state in
-      // place so every client (incl. late joiners) reflects policy instantly.
-      const settings = data?.settings
-      if (settings && currentRoomId) {
-        dispatch(
-          roomsApi.util.updateQueryData(
-            "getRoomState",
-            currentRoomId,
-            (draft) => {
-              if (!draft?.settings) return
-              draft.settings = { ...draft.settings, ...settings }
-            },
-          ),
-        )
+  useVideoChatSignalR(
+    sessionId,
+    token,
+    (event, data) => {
+      if (event === "RoomSettingsChanged") {
+        // Ticket 01: single store = RTK Query cache. Patch the room state in
+        // place so every client (incl. late joiners) reflects policy instantly.
+        const settings = data?.settings
+        if (settings && currentRoomId) {
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                if (!draft?.settings) return
+                draft.settings = { ...draft.settings, ...settings }
+              },
+            ),
+          )
+        }
+        return
       }
-      return
-    }
-    if (event === "CoHostChanged") {
-      // Ticket 03: host changed the co-host slice mid-session. Apply it to the
-      // state store (and the co-host query used by the 12-code gates) at once.
-      const coHost = data?.coHost ?? null
-      if (currentRoomId) {
-        const myAccountId = user?.accountId
-        dispatch(
-          roomsApi.util.updateQueryData(
-            "getRoomState",
-            currentRoomId,
-            (draft) => {
-              draft.coHost = coHost
-                ? {
-                    accountId: coHost.accountId,
-                    permissions: coHost.permissions ?? [],
-                    isCoHost:
-                      String(coHost.accountId) === String(myAccountId),
-                  }
-                : null
-            },
-          ),
-        )
-        dispatch(
-          roomsApi.util.updateQueryData(
-            "getRoomCoHost",
-            currentRoomId,
-            () =>
+      if (event === "CoHostChanged") {
+        // Ticket 03: host changed the co-host slice mid-session. Apply it to the
+        // state store (and the co-host query used by the 12-code gates) at once.
+        const coHost = data?.coHost ?? null
+        if (currentRoomId) {
+          const myAccountId = user?.accountId
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomState",
+              currentRoomId,
+              (draft) => {
+                draft.coHost = coHost
+                  ? {
+                      accountId: coHost.accountId,
+                      permissions: coHost.permissions ?? [],
+                      isCoHost:
+                        String(coHost.accountId) === String(myAccountId),
+                    }
+                  : null
+              },
+            ),
+          )
+          dispatch(
+            roomsApi.util.updateQueryData("getRoomCoHost", currentRoomId, () =>
               coHost
                 ? {
                     coHostAccountId: coHost.accountId,
                     permissions: coHost.permissions ?? [],
                   }
                 : null,
-          ),
-        )
-      }
-      return
-    }
-    if (event === "WaitingQueueChanged") {
-      // Ticket 04: real-time queue update (no 10s polling). Refetch the
-      // WaitingQueue cache for host/co-host.
-      if (currentRoomId) {
-        dispatch(
-          roomsApi.util.invalidateTags([
-            { type: "WaitingQueue", id: currentRoomId },
-          ]),
-        )
-      }
-      return
-    }
-    if (event === "ParticipantRestrictionChanged") {
-      // Ticket 05: room-scoped chat/voice restriction changed. Patch the
-      // participant-list cache in place (no reload) so badges and the chat
-      // input react immediately; late joiners read the same table on join.
-      const restriction = data?.restriction
-      let notice = null
-      if (restriction?.accountId != null && currentRoomId) {
-        dispatch(
-          roomsApi.util.updateQueryData(
-            "getRoomParticipants",
-            currentRoomId,
-            (draft) => {
-              const list = roomParticipantsList(draft)
-              if (!list) return
-              notice = resolveRestrictionNotice(
-                writeCachedRestriction(list, restriction),
-                restriction,
-              )
-            },
-          ),
-        )
-      }
-
-      const isTarget =
-        restriction?.accountId != null &&
-        String(restriction.accountId) === String(user?.accountId)
-      if (isTarget && notice) {
-        const pl = t.rooms?.videoCall?.participantList || {}
-        toast[notice.severity](pl[notice.messageKey])
-      }
-      return
-    }
-
-    if (event === "ParticipantRestrictionsChanged") {
-      // Ticket 05: Block All Mics — one message carries the whole list, so it
-      // announces itself once instead of once per restricted member.
-      const restrictions = Array.isArray(data?.restrictions)
-        ? data.restrictions
-        : []
-      if (restrictions.length > 0 && currentRoomId) {
-        dispatch(
-          roomsApi.util.updateQueryData(
-            "getRoomParticipants",
-            currentRoomId,
-            (draft) => {
-              const list = roomParticipantsList(draft)
-              if (!list) return
-              restrictions.forEach((restriction) => {
-                if (restriction?.accountId == null) return
-                writeCachedRestriction(list, restriction)
-              })
-            },
-          ),
-        )
-      }
-
-      const notice = resolveBlockAllMicsNotice(
-        restrictions.map((restriction) => restriction?.accountId),
-        user?.accountId,
-      )
-      if (notice) {
-        const pl = t.rooms?.videoCall?.participantList || {}
-        toast[notice.severity](pl[notice.messageKey])
-      }
-      return
-    }
-    if (event === "RecordingStatusChanged") {
-      const isActive = data.status === "started" || data.status === "active"
-      setIsRecording(isActive)
-      setEgressId(isActive ? data.egressId : null)
-      setStartedByAccountId(isActive ? data.startedByAccountId : null)
-
-      if (data.status === "Partial Completed") {
-        if (data.reason === "storage_exceeded") {
-          toast.error(
-            t.recordings?.storage?.warningLimitReached ||
-              "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
-            { duration: 6000 },
-          )
-        } else if (data.reason === "reconnect_timeout") {
-          toast.error(
-            t.recordings?.errors?.interrupted ||
-              "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
-            { duration: 6000 },
+            ),
           )
         }
+        return
       }
-    } else if (event === "RecordingWarning") {
-      toast.error(
-        t.recordings?.storage?.warningAlmostFull ||
-          "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
-        { icon: "⚠️", duration: 6000 },
-      )
-    } else if (event === "MediaEnded") {
-      toast.info(
-        t?.rooms?.videoCall?.watchTogether?.ended ||
-          "Video chung đã kết thúc.",
-        { duration: 5000 },
-      )
-      // Server marked the playback stopped (live webhook / natural end) —
-      // reset this viewer's synced copy so the spotlight hides even when the
-      // host could not publish a stop message itself.
-      watchTogether.stopLocal?.()
-    }
-  }, currentRoomId)
+      if (event === "WaitingQueueChanged") {
+        // Ticket 04: real-time queue update (no 10s polling). Refetch the
+        // WaitingQueue cache for host/co-host.
+        if (currentRoomId) {
+          dispatch(
+            roomsApi.util.invalidateTags([
+              { type: "WaitingQueue", id: currentRoomId },
+            ]),
+          )
+        }
+        return
+      }
+      if (event === "ParticipantRestrictionChanged") {
+        // Ticket 05: room-scoped chat/voice restriction changed. Patch the
+        // participant-list cache in place (no reload) so badges and the chat
+        // input react immediately; late joiners read the same table on join.
+        const restriction = data?.restriction
+        let notice = null
+        if (restriction?.accountId != null && currentRoomId) {
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomParticipants",
+              currentRoomId,
+              (draft) => {
+                const list = roomParticipantsList(draft)
+                if (!list) return
+                notice = resolveRestrictionNotice(
+                  writeCachedRestriction(list, restriction),
+                  restriction,
+                )
+              },
+            ),
+          )
+        }
+
+        const isTarget =
+          restriction?.accountId != null &&
+          String(restriction.accountId) === String(user?.accountId)
+        if (isTarget && notice) {
+          const pl = t.rooms?.videoCall?.participantList || {}
+          toast[notice.severity](pl[notice.messageKey])
+        }
+        return
+      }
+
+      if (event === "ParticipantRestrictionsChanged") {
+        // Ticket 05: Block All Mics — one message carries the whole list, so it
+        // announces itself once instead of once per restricted member.
+        const restrictions = Array.isArray(data?.restrictions)
+          ? data.restrictions
+          : []
+        if (restrictions.length > 0 && currentRoomId) {
+          dispatch(
+            roomsApi.util.updateQueryData(
+              "getRoomParticipants",
+              currentRoomId,
+              (draft) => {
+                const list = roomParticipantsList(draft)
+                if (!list) return
+                restrictions.forEach((restriction) => {
+                  if (restriction?.accountId == null) return
+                  writeCachedRestriction(list, restriction)
+                })
+              },
+            ),
+          )
+        }
+
+        const notice = resolveBlockAllMicsNotice(
+          restrictions.map((restriction) => restriction?.accountId),
+          user?.accountId,
+        )
+        if (notice) {
+          const pl = t.rooms?.videoCall?.participantList || {}
+          toast[notice.severity](pl[notice.messageKey])
+        }
+        return
+      }
+      if (event === "RecordingStatusChanged") {
+        const isActive = data.status === "started" || data.status === "active"
+        setIsRecording(isActive)
+        setEgressId(isActive ? data.egressId : null)
+        setStartedByAccountId(isActive ? data.startedByAccountId : null)
+
+        if (data.status === "Partial Completed") {
+          if (data.reason === "storage_exceeded") {
+            toast.error(
+              t.recordings?.storage?.warningLimitReached ||
+                "Recording đã tự động dừng do vượt quá dung lượng lưu trữ. File recording đã được lưu một phần.",
+              { duration: 6000 },
+            )
+          } else if (data.reason === "reconnect_timeout") {
+            toast.error(
+              t.recordings?.errors?.interrupted ||
+                "Recording trước đó đã bị gián đoạn. File recording đã được lưu một phần.",
+              { duration: 6000 },
+            )
+          }
+        }
+      } else if (event === "RecordingWarning") {
+        toast.error(
+          t.recordings?.storage?.warningAlmostFull ||
+            "Dung lượng lưu trữ sắp đầy. Recording có thể tự động dừng nếu vượt quá giới hạn.",
+          { icon: "⚠️", duration: 6000 },
+        )
+      } else if (event === "MediaEnded") {
+        toast.info(
+          t?.rooms?.videoCall?.watchTogether?.ended ||
+            "Video chung đã kết thúc.",
+          { duration: 5000 },
+        )
+        // Server marked the playback stopped (live webhook / natural end) —
+        // reset this viewer's synced copy so the spotlight hides even when the
+        // host could not publish a stop message itself.
+        watchTogether.stopLocal?.()
+      }
+    },
+    currentRoomId,
+  )
 
   const prevConnectionState = useRef(connectionState)
   useEffect(() => {
@@ -839,6 +837,9 @@ const GlobalCallContent = ({
 
   // ── Join/Leave Audio (personal preference, off by default) ──
   useParticipantAudioEffect(participants, joinLeaveSound)
+
+  // ── Auto-apply saved participant volume levels ──
+  useSavedParticipantVolumes(allParticipants, user?.accountId)
 
   const localMetadata = (() => {
     if (!localParticipant?.metadata) return {}
@@ -941,7 +942,7 @@ const GlobalCallContent = ({
             localParticipant.setMicrophoneEnabled(false)
             toast[moderationNoticeSeverity(data.action)](
               pl.hostMutedAll ||
-                "Host đã tắt tiếng tất cả mọi người trong phòng."
+                "Host đã tắt tiếng tất cả mọi người trong phòng.",
             )
           }
           return
@@ -957,7 +958,7 @@ const GlobalCallContent = ({
             localParticipant.setCameraEnabled(false)
             toast[moderationNoticeSeverity(data.action)](
               pl.hostCameraOffAll ||
-                "Host đã tắt camera tất cả mọi người trong phòng."
+                "Host đã tắt camera tất cả mọi người trong phòng.",
             )
           }
           return
@@ -966,8 +967,8 @@ const GlobalCallContent = ({
         if (data.action === "SELF_UNMUTE_POLICY") {
           toast.info(
             data.allow
-              ? (pl.selfUnmuteOn || "Host đã cho phép học viên tự bật mic.")
-              : (pl.selfUnmuteOff || "Host đã tắt quyền học viên tự bật mic.")
+              ? pl.selfUnmuteOn || "Host đã cho phép học viên tự bật mic."
+              : pl.selfUnmuteOff || "Host đã tắt quyền học viên tự bật mic.",
           )
           return
         }
@@ -977,8 +978,8 @@ const GlobalCallContent = ({
         if (data.action === "SELF_CAMERA_POLICY") {
           toast.info(
             data.allow
-              ? (pl.selfCameraOn || "Host đã cho phép học viên tự bật camera.")
-              : (pl.selfCameraOff || "Host đã tắt quyền học viên tự bật camera.")
+              ? pl.selfCameraOn || "Host đã cho phép học viên tự bật camera."
+              : pl.selfCameraOff || "Host đã tắt quyền học viên tự bật camera.",
           )
           return
         }
@@ -997,13 +998,15 @@ const GlobalCallContent = ({
                   ...draft.settings,
                   allowStudentShare: data.allow !== false,
                 }
-              }
-            )
+              },
+            ),
           )
           toast.info(
             data.allow
-              ? (pl.studentShareOn || "Host đã cho phép học viên chia sẻ màn hình.")
-              : (pl.studentShareOff || "Host đã tắt quyền học viên chia sẻ màn hình.")
+              ? pl.studentShareOn ||
+                  "Host đã cho phép học viên chia sẻ màn hình."
+              : pl.studentShareOff ||
+                  "Host đã tắt quyền học viên chia sẻ màn hình.",
           )
           return
         }
@@ -1021,15 +1024,15 @@ const GlobalCallContent = ({
                   ...draft.settings,
                   allowMemberRecording: data.allow !== false,
                 }
-              }
-            )
+              },
+            ),
           )
           toast.info(
             data.allow !== false
-              ? (pl.hostAllowedRecording ||
-                  "Host đã CHO PHÉP thành viên ghi hình cuộc họp.")
-              : (pl.hostDisabledRecording ||
-                  "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.")
+              ? pl.hostAllowedRecording ||
+                  "Host đã CHO PHÉP thành viên ghi hình cuộc họp."
+              : pl.hostDisabledRecording ||
+                  "Host đã TẮT quyền ghi hình cuộc họp đối với thành viên.",
           )
           return
         }
@@ -1047,15 +1050,15 @@ const GlobalCallContent = ({
               (draft) => {
                 if (!draft?.settings) return
                 draft.settings = { ...draft.settings, highQuality: enabled }
-              }
-            )
+              },
+            ),
           )
           toast.info(
             enabled
-              ? (pl.hostHighQualityOn ||
-                  "Host đã bật chế độ chất lượng cao cho phòng.")
-              : (pl.hostHighQualityOff ||
-                  "Host đã tắt chế độ chất lượng cao cho phòng.")
+              ? pl.hostHighQualityOn ||
+                  "Host đã bật chế độ chất lượng cao cho phòng."
+              : pl.hostHighQualityOff ||
+                  "Host đã tắt chế độ chất lượng cao cho phòng.",
           )
           return
         }
@@ -1070,14 +1073,14 @@ const GlobalCallContent = ({
               (draft) => {
                 if (!draft?.settings) return
                 draft.settings = { ...draft.settings, roomLocked: locked }
-              }
-            )
+              },
+            ),
           )
           toast.info(
             locked
-              ? (pl.hostLockedRoom ||
-                  "Host đã khóa phòng. Người mới không thể tham gia.")
-              : (pl.hostUnlockedRoom || "Host đã mở khóa phòng.")
+              ? pl.hostLockedRoom ||
+                  "Host đã khóa phòng. Người mới không thể tham gia."
+              : pl.hostUnlockedRoom || "Host đã mở khóa phòng.",
           )
           return
         }
@@ -1134,8 +1137,8 @@ const GlobalCallContent = ({
                   ...draft.settings,
                   allowMemberRecording: data.allowed !== false,
                 }
-              }
-            )
+              },
+            ),
           )
           toast.info(
             data.allowed
@@ -1183,14 +1186,14 @@ const GlobalCallContent = ({
           if (data.trackKind === "audio" && localParticipant) {
             localParticipant.setMicrophoneEnabled(!shouldMute)
             const msg = shouldMute
-              ? (pl.hostMutedMic || "Host đã tắt mic của bạn.")
-              : (pl.hostUnmutedMic || "Host đã bật mic của bạn.")
+              ? pl.hostMutedMic || "Host đã tắt mic của bạn."
+              : pl.hostUnmutedMic || "Host đã bật mic của bạn."
             toast[moderationNoticeSeverity(data.action)](msg)
           } else if (data.trackKind === "video" && localParticipant) {
             localParticipant.setCameraEnabled(!shouldMute)
             const msg = shouldMute
-              ? (pl.hostMutedCam || "Host đã tắt camera của bạn.")
-              : (pl.hostUnmutedCam || "Host đã bật camera của bạn.")
+              ? pl.hostMutedCam || "Host đã tắt camera của bạn."
+              : pl.hostUnmutedCam || "Host đã bật camera của bạn."
             toast[moderationNoticeSeverity(data.action)](msg)
           } else if (
             (data.trackKind === "screen" ||
@@ -1200,7 +1203,8 @@ const GlobalCallContent = ({
             if (shouldMute) {
               localParticipant.setScreenShareEnabled(false)
               toast[moderationNoticeSeverity(data.action)](
-                pl.hostStoppedScreen || "Host đã dừng chia sẻ màn hình của bạn."
+                pl.hostStoppedScreen ||
+                  "Host đã dừng chia sẻ màn hình của bạn.",
               )
             }
           }
@@ -1216,13 +1220,7 @@ const GlobalCallContent = ({
     return () => {
       lkRoom.off(RoomEvent.DataReceived, handleModerationData)
     }
-  }, [
-    lkRoom,
-    localParticipant,
-    user?.accountId,
-    roomData,
-    actions,
-  ])
+  }, [lkRoom, localParticipant, user?.accountId, roomData, actions])
 
   // ── Room Lifecycle ──
   const activeSessionId = callInfo?.sessionId || localMetadata?.sessionId
@@ -1234,7 +1232,8 @@ const GlobalCallContent = ({
   })
 
   // ── Student Floating Speaking Widget ──
-  const [showStudentSpeakingWidget, setShowStudentSpeakingWidget] = useState(false)
+  const [showStudentSpeakingWidget, setShowStudentSpeakingWidget] =
+    useState(false)
 
   // ── Realtime Speaking Statistics ──
   const {
@@ -1259,16 +1258,12 @@ const GlobalCallContent = ({
     isFetching: isSpeakingStatsFetching,
     isError: isSpeakingStatsError,
     refetchStats: refetchSpeakingStats,
-  } = useSpeakingStats(
-    lkRoom,
-    activeSessionId,
-    {
-      enabled:
-        isSpeakingTimeBalanceSupported(roomData) &&
-        (panelState.showSpeakingTimeBalance || showStudentSpeakingWidget),
-      pollingInterval: 60000,
-    },
-  )
+  } = useSpeakingStats(lkRoom, activeSessionId, {
+    enabled:
+      isSpeakingTimeBalanceSupported(roomData) &&
+      (panelState.showSpeakingTimeBalance || showStudentSpeakingWidget),
+    pollingInterval: 60000,
+  })
 
   // ── Context value ──
   const value = {

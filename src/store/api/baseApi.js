@@ -504,6 +504,7 @@ export const baseApi = createApi({
     "RoomParticipants",
     "ExploreTeachers",
     "InstructorCompetency",
+    "ClassRecordings",
     "StudentDashboard",
   ],
   endpoints: () => ({}),

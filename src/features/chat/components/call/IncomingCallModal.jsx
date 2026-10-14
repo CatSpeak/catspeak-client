@@ -46,22 +46,22 @@ const IncomingCallModal = ({ open, callData, onAccept, onDecline }) => {
       bodyClassName="!p-0 !m-0 overflow-hidden"
       footer={<></>}
       footerClassName="hidden"
-      className="max-w-xs sm:max-w-sm rounded-xl bg-neutral-950 border border-white/10 shadow-2xl !p-0 overflow-hidden"
+      className="max-w-xs sm:max-w-sm rounded-2xl bg-white border border-border shadow-2xl !p-0 overflow-hidden"
     >
-      <div className="flex flex-col items-center text-center p-6 bg-neutral-950 text-white">
+      <div className="flex flex-col items-center text-center p-6 bg-white text-black">
         {/* Clean Static Avatar */}
         <div className="mb-6 flex items-center justify-center">
           <Avatar
             size={88}
             name={callerName}
             src={avatarUrl}
-            className={`shadow-2xl border-none ${theme.avatarClass}`}
+            className={`shadow-xl border-none ${theme.avatarClass}`}
           />
         </div>
 
         {/* Caller Info */}
-        <h3 className="text-lg font-bold text-white">{callerName}</h3>
-        <p className="text-sm text-[#AAAAAA] mt-1">
+        <h3 className="text-lg font-bold text-black">{callerName}</h3>
+        <p className="text-sm text-secondary mt-1">
           {isVideo
             ? t?.chat?.call?.incomingVideoCall || "Incoming Video Call..."
             : t?.chat?.call?.incomingVoiceCall || "Incoming Voice Call..."}
@@ -80,7 +80,7 @@ const IncomingCallModal = ({ open, callData, onAccept, onDecline }) => {
             >
               <PhoneOff />
             </IconButton>
-            <span className="text-xs text-[#AAAAAA]">
+            <span className="text-xs text-secondary font-medium">
               {t?.chat?.call?.decline || "Decline"}
             </span>
           </div>
@@ -96,7 +96,7 @@ const IncomingCallModal = ({ open, callData, onAccept, onDecline }) => {
             >
               {isVideo ? <Video /> : <Phone />}
             </IconButton>
-            <span className="text-xs text-emerald-400">
+            <span className="text-xs text-emerald-600 font-medium">
               {t?.chat?.call?.accept || "Accept"}
             </span>
           </div>

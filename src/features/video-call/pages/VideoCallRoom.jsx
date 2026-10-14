@@ -168,17 +168,54 @@ const VideoCallRoomContent = () => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload)
   }, [isHost, isBreakoutActive])
 
+  // ── Automatic Picture-in-Picture on browser tab switch (Google Meet style) ──
+  useEffect(() => {
+    if (!isConnected || !enterPiP) return
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) {
+      console.warn(
+        "[Auto-PiP] navigator.mediaSession not supported in this browser.",
+      )
+      return
+    }
+
+    try {
+      navigator.mediaSession.playbackState = "playing"
+      console.log(
+        "[Auto-PiP] Registered 'enterpictureinpicture' MediaSession action handler",
+      )
+      navigator.mediaSession.setActionHandler("enterpictureinpicture", () => {
+        console.log(
+          "[Auto-PiP] Browser fired 'enterpictureinpicture' action handler!",
+        )
+        enterPiP()
+      })
+    } catch (err) {
+      console.warn(
+        "[Auto-PiP] enterpictureinpicture action handler not supported:",
+        err,
+      )
+    }
+
+    return () => {
+      try {
+        navigator.mediaSession.setActionHandler("enterpictureinpicture", null)
+      } catch (_) {}
+    }
+  }, [isConnected, enterPiP])
+
   const isSidePanelOpen = activeSidePanel !== null
   const sidePanelTitle = showParticipants
     ? (t?.rooms?.videoCall?.participantList?.title ?? "Participants")
     : showSpeakingTimeBalance
-      ? t.rooms?.videoCall?.speakingTimeBalance?.title || "Speaking Time Balance"
+      ? t.rooms?.videoCall?.speakingTimeBalance?.title ||
+        "Speaking Time Balance"
       : showVirtualBackground
-        ? (t?.rooms?.videoCall?.backgroundsAndEffects || "Backgrounds and effects")
+        ? t?.rooms?.videoCall?.backgroundsAndEffects ||
+          "Backgrounds and effects"
         : showAvatarPicker
-          ? (t?.rooms?.avatarPicker?.title || "Meeting Avatar")
+          ? t?.rooms?.avatarPicker?.title || "Meeting Avatar"
           : showTroubleshoot
-            ? (t?.rooms?.videoCall?.reconnect || "Troubleshoot connection")
+            ? t?.rooms?.videoCall?.reconnect || "Troubleshoot connection"
             : showBreakout
               ? isBreakoutActive
                 ? "Phòng thảo luận"
@@ -301,7 +338,9 @@ const VideoCallRoomContent = () => {
                       needsTapToSync={isMediaHost ? false : needsTapToSync}
                       onTapToSync={tapToSync}
                       onError={reportSyncError}
-                      onStateChange={isMediaHost ? setHostPlayerState : undefined}
+                      onStateChange={
+                        isMediaHost ? setHostPlayerState : undefined
+                      }
                       showCenterPlay={shouldShowCenterPlay(hostPlayerState, {
                         isHost: isMediaHost,
                         needsTapToSync: isMediaHost ? false : needsTapToSync,
@@ -337,13 +376,15 @@ const VideoCallRoomContent = () => {
 
             {/* Student Floating Speaking Time Balance Widget */}
             <AnimatePresence>
-              {showStudentSpeakingWidget && !isHost && isSpeakingTimeBalanceSupported(room) && (
-                <div className="absolute right-4 bottom-4 z-30 pointer-events-auto">
-                  <StudentSpeakingWidget
-                    onClose={() => setShowStudentSpeakingWidget(false)}
-                  />
-                </div>
-              )}
+              {showStudentSpeakingWidget &&
+                !isHost &&
+                isSpeakingTimeBalanceSupported(room) && (
+                  <div className="absolute right-4 bottom-4 z-30 pointer-events-auto">
+                    <StudentSpeakingWidget
+                      onClose={() => setShowStudentSpeakingWidget(false)}
+                    />
+                  </div>
+                )}
             </AnimatePresence>
           </div>
           {/* Watch Together host panel */}
@@ -378,11 +419,13 @@ const VideoCallRoomContent = () => {
             >
               <div className="w-full h-full flex flex-col shrink-0 bg-white rounded-xl shadow-sm border border-border overflow-hidden">
                 {showParticipants && <ParticipantList />}
-                {showSpeakingTimeBalance && isHost && isSpeakingTimeBalanceSupported(room) && (
-                  <SpeakingTimeBalancePanel
-                    onClose={() => setActiveSidePanel(null)}
-                  />
-                )}
+                {showSpeakingTimeBalance &&
+                  isHost &&
+                  isSpeakingTimeBalanceSupported(room) && (
+                    <SpeakingTimeBalancePanel
+                      onClose={() => setActiveSidePanel(null)}
+                    />
+                  )}
                 {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                 {showAvatarPicker && <AvatarUrlPicker />}
                 {showTroubleshoot && <TroubleshootPanel />}
@@ -428,11 +471,13 @@ const VideoCallRoomContent = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {showParticipants && <ParticipantList />}
-              {showSpeakingTimeBalance && isHost && isSpeakingTimeBalanceSupported(room) && (
-                <SpeakingTimeBalancePanel
-                  onClose={() => setActiveSidePanel(null)}
-                />
-              )}
+              {showSpeakingTimeBalance &&
+                isHost &&
+                isSpeakingTimeBalanceSupported(room) && (
+                  <SpeakingTimeBalancePanel
+                    onClose={() => setActiveSidePanel(null)}
+                  />
+                )}
               {showVirtualBackground && <BackgroundsAndEffectsPanel />}
               {showAvatarPicker && <AvatarUrlPicker />}
               {showTroubleshoot && <TroubleshootPanel />}
@@ -513,11 +558,13 @@ const VideoCallRoomContent = () => {
                   </div>
                 ) : (
                   <div className="flex-1 overflow-y-auto bg-white min-h-0">
-                    {showSpeakingTimeBalance && isHost && isSpeakingTimeBalanceSupported(room) && (
-                      <SpeakingTimeBalancePanel
-                        onClose={() => setActiveSidePanel(null)}
-                      />
-                    )}
+                    {showSpeakingTimeBalance &&
+                      isHost &&
+                      isSpeakingTimeBalanceSupported(room) && (
+                        <SpeakingTimeBalancePanel
+                          onClose={() => setActiveSidePanel(null)}
+                        />
+                      )}
                     {showVirtualBackground && <BackgroundsAndEffectsPanel />}
                     {showAvatarPicker && <AvatarUrlPicker />}
                     {showTroubleshoot && <TroubleshootPanel hideTitle />}
@@ -544,7 +591,9 @@ const VideoCallRoomWrapper = () => {
   const { lang } = useParams()
   return (
     <VideoCallProvider>
-      <GameProvider roomLanguage={lang === "zh" ? "zh" : lang === "ja" ? "ja" : "en"}>
+      <GameProvider
+        roomLanguage={lang === "zh" ? "zh" : lang === "ja" ? "ja" : "en"}
+      >
         <VideoCallRoomContent />
       </GameProvider>
     </VideoCallProvider>

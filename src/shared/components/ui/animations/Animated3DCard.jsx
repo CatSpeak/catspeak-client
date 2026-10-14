@@ -30,7 +30,7 @@ const Animated3DCard = ({
     >
       {/* Card front — lift on hover, push on press */}
       <div
-        className={`relative rounded-2xl bg-white flex flex-col overflow-hidden border border-border will-change-transform transition-[transform,box-shadow] duration-[280ms] ease-[cubic-bezier(.25,.8,.25,1)] shadow-sm sm:group-hover/card:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.14),0_2px_8px_-2px_rgba(0,0,0,0.08)] sm:group-hover/card:-translate-y-[5px] ${className}`}
+        className={`relative rounded-xl bg-white flex flex-col overflow-hidden border border-border will-change-transform transition-[transform,box-shadow] duration-[280ms] ease-[cubic-bezier(.25,.8,.25,1)] shadow-sm sm:group-hover/card:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.14),0_2px_8px_-2px_rgba(0,0,0,0.08)] sm:group-hover/card:-translate-y-[5px] ${className}`}
         style={
           isPressed
             ? {

@@ -19,6 +19,7 @@ import MailPage from "@/features/mail/pages/MailPage";
 import SharedEventPage from "@/features/calendar/pages/SharedEventPage";
 import CalendarPage from "@/features/calendar/pages/CalendarPage";
 import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
+import GroupInvitePage from "@/features/chat/pages/GroupInvitePage";
 
 // Shared Pages
 import { PageNotFound, ForbiddenPage, ComingSoonPage } from "@/shared/pages";
@@ -1241,6 +1242,14 @@ const routesConfig = [
             ),
           },
         ],
+      },
+      {
+        path: "/invite/:code",
+        element: <GroupInvitePage />,
+      },
+      {
+        path: "/chat/invite/:code",
+        element: <GroupInvitePage />,
       },
       {
         path: "/connect",

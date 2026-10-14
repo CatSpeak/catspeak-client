@@ -23,12 +23,12 @@ const CallTopBar = ({
   }
 
   return (
-    <div className="flex items-center justify-between p-4 bg-neutral-900/90 backdrop-blur-md border-b border-white/10 shrink-0 z-20">
+    <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-border shrink-0 z-20">
       <div className="flex flex-col min-w-0">
-        <h4 className="text-white truncate max-w-[200px] sm:max-w-xs font-medium">
+        <h4 className="text-black font-semibold truncate max-w-[200px] sm:max-w-xs text-sm sm:text-base">
           {chatTitle}
         </h4>
-        <div className="text-sm text-emerald-400 font-mono">
+        <div className="text-xs sm:text-sm text-secondary font-mono">
           {formatDuration(callDuration)}
         </div>
       </div>
@@ -39,7 +39,7 @@ const CallTopBar = ({
           <IconButton
             onClick={onToggleFullscreen}
             size="sm"
-            variant="darkGhost"
+            variant="ghost"
             aria-label={
               isFullscreen
                 ? t?.chat?.call?.exitFullscreen || "Exit fullscreen"
@@ -58,7 +58,7 @@ const CallTopBar = ({
         <IconButton
           onClick={onToggleMinimize}
           size="sm"
-          variant="darkGhost"
+          variant="ghost"
           aria-label={
             isMinimized
               ? t?.chat?.call?.maximize || "Maximize"

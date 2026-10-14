@@ -37,6 +37,38 @@ export default function useChatConversations(selectedId) {
       ConversationUpdated: () => {
         dispatch(conversationsApi.util.invalidateTags(["Conversations", "Members", "Messages"]))
       },
+      MessagePinned: (payload) => {
+        const cId =
+          typeof payload === "object"
+            ? payload?.conversationId ?? payload?.conversation_id
+            : payload
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            ...(cId
+              ? [
+                  { type: "PinnedMessages", id: Number(cId) },
+                  { type: "PinnedMessages", id: String(cId) },
+                ]
+              : ["PinnedMessages"]),
+          ]),
+        )
+      },
+      MessageUnpinned: (payload) => {
+        const cId =
+          typeof payload === "object"
+            ? payload?.conversationId ?? payload?.conversation_id
+            : payload
+        dispatch(
+          conversationsApi.util.invalidateTags([
+            ...(cId
+              ? [
+                  { type: "PinnedMessages", id: Number(cId) },
+                  { type: "PinnedMessages", id: String(cId) },
+                ]
+              : ["PinnedMessages"]),
+          ]),
+        )
+      },
     }),
     [dispatch],
   )

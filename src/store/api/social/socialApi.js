@@ -39,6 +39,7 @@ export const socialApi = createApi({
   refetchOnReconnect: true,
   tagTypes: [
     "Post",
+    "PostReactions",
     "Topic",
     "PostComment",
     "PostMedia",
@@ -55,6 +56,8 @@ export const socialApi = createApi({
     "FriendshipCounts",
     "Stories",
     "MyStories",
+    "GroupInviteLink",
+    "PinnedMessages",
   ],
   endpoints: () => ({}),
 })

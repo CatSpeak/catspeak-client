@@ -27,13 +27,13 @@ const CallBottomDock = ({
   const { t } = useLanguage()
 
   return (
-    <div className="p-4 pt-0 bg-neutral-950/90 backdrop-blur-md flex items-center justify-center shrink-0 z-20">
-      <div className="flex items-center gap-2 p-2 rounded-full bg-neutral-900/90 border border-white/10 shadow-[0_10px_35px_rgba(0,0,0,0.6)]">
+    <div className="p-4 pt-0 bg-transparent flex items-center justify-center shrink-0 z-20">
+      <div className="flex items-center gap-2 p-2 rounded-full bg-white border border-border shadow-xl">
         {/* Mic Toggle */}
         <IconButton
           onClick={toggleMic}
           size="sm"
-          variant={isMicrophoneEnabled ? "darkFilled" : "danger"}
+          variant={isMicrophoneEnabled ? "filled" : "danger"}
           aria-label={
             isMicrophoneEnabled
               ? t?.chat?.call?.muteMic || "Mute microphone"
@@ -52,7 +52,7 @@ const CallBottomDock = ({
         <IconButton
           onClick={toggleCam}
           size="sm"
-          variant={isCameraEnabled ? "darkFilled" : "darkMuted"}
+          variant={isCameraEnabled ? "filled" : "secondary"}
           aria-label={
             isCameraEnabled
               ? t?.chat?.call?.turnCamOff || "Turn camera off"
@@ -72,7 +72,7 @@ const CallBottomDock = ({
           <IconButton
             onClick={toggleScreenShare}
             size="sm"
-            variant={isScreenShareEnabled ? "success" : "darkFilled"}
+            variant={isScreenShareEnabled ? "primary" : "filled"}
             aria-label={
               isScreenShareEnabled
                 ? t?.chat?.call?.stopSharing || "Stop sharing"
@@ -89,7 +89,7 @@ const CallBottomDock = ({
         )}
 
         {/* Divider */}
-        <div className="w-[1px] h-5 bg-white/10 mx-0.5" />
+        <div className="w-[1px] h-5 bg-border mx-0.5" />
 
         {/* End Call Button */}
         <IconButton

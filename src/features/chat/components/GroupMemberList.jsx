@@ -36,7 +36,6 @@ const GroupMemberList = ({
   onRemoveMember,
   onOpenAddModal,
   onOpenTransferModal,
-  hideHeader = false,
 }) => {
   const { t } = useLanguage()
   const navigate = useNavigate()
@@ -295,14 +294,6 @@ const GroupMemberList = ({
 
   return (
     <div className="flex-1 pb-4">
-      {!hideHeader && (
-        <div className="px-4 mb-2">
-          <h4 className="text-sm font-semibold text-[#606060]">
-            {t?.chat?.userPanel?.members || "Members"} ({members.length})
-          </h4>
-        </div>
-      )}
-
       {/* Add member button as a list item at the top */}
       <ListItem
         onClick={onOpenAddModal}
