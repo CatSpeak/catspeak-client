@@ -77,7 +77,7 @@ const ChatArea = ({
   const [showScrollToBottom, setShowScrollToBottom] = useState(false)
 
   // ── In-Chat LiveKit Calls ──────────────────────────────
-  const { activeCallSession, isCallModalOpen, startCall, joinCall } =
+  const { isCallModalOpen, startCall, joinCall } =
     useInChatCall(conversation, currentUser)
 
   const effectiveConversationId =
@@ -329,7 +329,7 @@ const ChatArea = ({
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden bg-white lg:border lg:border-border lg:rounded-xl">
+    <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-white lg:border lg:border-border lg:rounded-xl">
       {/* ── Chat Header ────────────────────────────── */}
       <ChatHeader
         conversation={conversation}
