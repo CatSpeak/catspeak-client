@@ -187,6 +187,7 @@ export default {
     approvedAddLanguage: "Thêm ngôn ngữ",
     approvedUpdate: "Cập nhật",
     approvedChange: "Thay đổi",
+    approvedAdd: "Thêm",
     approvedView: "Xem",
     approvedStatusApproved: "Đã duyệt",
     approvedStatusPending: "Chờ duyệt",
@@ -272,6 +273,7 @@ export default {
     contactEmailUpdated: "Cập nhật email thành công",
     contactPhoneUpdated: "Cập nhật số điện thoại thành công",
     bankChangeTitle: "Thay đổi Tài khoản ngân hàng",
+    bankAddTitle: "Thêm Tài khoản ngân hàng",
     bankVerifyTitle: "Xác thực Tài khoản ngân hàng mới",
     bankCurrentAccount: "Tài khoản hiện tại",
     bankLabel: "Ngân hàng",
@@ -290,12 +292,10 @@ export default {
     bankCurrentBadge: "Hiện tại",
     bankConsent:
       "Tôi xác nhận thông tin tài khoản trên là chính xác và đồng ý sử dụng tài khoản này để nhận thanh toán từ Cat Speak.",
-    bankOtpWillSendTo:
-      "Mã xác thực (OTP) sẽ được gửi về số điện thoại đã xác thực của bạn:",
-    bankOtpHelper:
-      "Mã xác thực đã được gửi đến số điện thoại hiện tại đã xác thực của bạn theo mặc định.",
+    bankOtpWillSendTo: "Mã xác thực (OTP) sẽ được gửi về email của bạn:",
+    bankOtpHelper: "Mã xác thực đã được gửi đến email của bạn.",
     bankOtpInputLabel: "Nhập mã xác thực (OTP)",
-    bankAccountNumberInvalid: "Số tài khoản phải có từ 6 đến 20 chữ số",
+    bankAccountNumberInvalid: "Số tài khoản phải có từ 6 đến 34 ký tự",
     bankNoAccount: "Chưa có tài khoản ngân hàng",
     bankOtpRequired: "Vui lòng nhập mã xác thực",
     bankOtpInvalid: "Mã xác thực không hợp lệ hoặc đã hết hạn",

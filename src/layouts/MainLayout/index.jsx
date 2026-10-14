@@ -16,7 +16,11 @@ import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader"
 
-const MainLayout = ({ showHeader = true, showFooter = true }) => {
+const MainLayout = ({
+  showHeader = true,
+  showFooter = true,
+  showSidebar = true,
+}) => {
   const { isMobileSidebarOpen, setIsMobileSidebarOpen, isDesktopExpanded } =
     useSidebar()
 
@@ -35,6 +39,8 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
   const [searchParams] = useSearchParams()
   const isLandingPage = location.pathname === "/"
   const isCommunityPage = location.pathname.includes("/community")
+  const isPricingPage = location.pathname.startsWith("/pricing")
+  const shouldShowSidebar = showSidebar && !isLandingPage && !isPricingPage
 
   // Check for reset password intent or login redirect intent
   useEffect(() => {
@@ -155,9 +161,9 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
       <div
         className={`relative flex min-h-screen text-left overflow-x-clip ${
           isLandingPage ? "bg-white" : "bg-primaryBg"
-        }`}
+        } ${isPricingPage ? "h-screen max-h-screen overflow-hidden" : ""}`}
       >
-        {!isLandingPage && (
+        {shouldShowSidebar && (
           <MainSidebar
             isMobileOpen={isMobileSidebarOpen}
             setIsMobileOpen={setIsMobileSidebarOpen}
@@ -170,12 +176,19 @@ const MainLayout = ({ showHeader = true, showFooter = true }) => {
               <LandingHeader onGetStarted={() => openAuthModal("login")} />
             ) : (
               <MainHeader
+                showSidebar={shouldShowSidebar}
                 onGetStarted={() => openAuthModal("login")}
                 onMenuClick={() => setIsMobileSidebarOpen(true)}
               />
             ))}
 
-          <main className="flex-1 flex flex-col min-w-0 overflow-x-clip">
+          <main
+            className={`flex-1 flex flex-col min-w-0 ${
+              isPricingPage
+                ? "h-screen max-h-screen overflow-hidden"
+                : "overflow-x-clip"
+            }`}
+          >
             <Outlet />
           </main>
 

@@ -28,7 +28,8 @@ const useStories = (languageCommunity) => {
   const [reportStory] = useReportStoryMutation()
 
   // Data Extraction (unwrapped by baseApi, guaranteed Array to prevent .map()/.filter() errors)
-  const stories = Array.isArray(storiesData) ? storiesData : []
+  const storiesRaw = Array.isArray(storiesData) ? storiesData : []
+  const stories = storiesRaw.filter((story) => !story.isReported)
   const myStoriesRaw = Array.isArray(myStoriesData) ? myStoriesData : []
 
   // Filter out expired stories

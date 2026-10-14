@@ -86,7 +86,11 @@ const VerificationCard = ({
           icon={<Landmark size={20} />}
           label={ins.approvedBankAccount || "Tài khoản ngân hàng"}
           value={bankLabel}
-          actionLabel={ins.approvedChange || "Thay đổi"}
+          actionLabel={
+            bankAccount
+              ? ins.approvedChange || "Thay đổi"
+              : ins.approvedAdd || "Thêm"
+          }
           onAction={onChangeBank}
         />
       </div>

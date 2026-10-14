@@ -181,10 +181,14 @@ const ProfileDropdown = () => {
           </p>
           <button
             onClick={async () => {
+              if (isStudent) {
+                handleCloseMenu()
+                return
+              }
               const success = await switchRole("Student")
               if (success) {
                 handleCloseMenu()
-                navigate("/")
+                window.location.reload()
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isStudent ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}
@@ -194,10 +198,14 @@ const ProfileDropdown = () => {
           </button>
           <button
             onClick={async () => {
+              if (isTeacher) {
+                handleCloseMenu()
+                return
+              }
               const success = await switchRole("Teacher")
               if (success) {
                 handleCloseMenu()
-                navigate("/")
+                window.location.reload()
               }
             }}
             className={`flex w-full items-center gap-3 px-3 h-10 rounded-lg text-sm transition-colors ${isTeacher ? "bg-white shadow-sm font-semibold text-cath-red-700" : "hover:bg-[#E5E5E5]"}`}

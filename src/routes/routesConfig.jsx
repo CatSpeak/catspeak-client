@@ -1152,14 +1152,6 @@ const routesConfig = [
                 ),
               },
               {
-                path: "pricing",
-                element: (
-                  <LazyRoute>
-                    <PricingPage />
-                  </LazyRoute>
-                ),
-              },
-              {
                 path: "billing",
                 element: (
                   <LazyRoute>
@@ -1181,6 +1173,27 @@ const routesConfig = [
               },
               { path: "*", element: <PageNotFound /> },
             ],
+          },
+        ],
+      },
+
+      {
+        path: "pricing",
+        element: (
+          <MainLayout
+            showHeader={false}
+            showSidebar={false}
+            showFooter={false}
+          />
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <LazyRoute>
+                <PricingPage />
+              </LazyRoute>
+            ),
           },
         ],
       },
