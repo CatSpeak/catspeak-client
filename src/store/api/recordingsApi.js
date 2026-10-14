@@ -54,7 +54,10 @@ export const recordingsApi = baseApi.injectEndpoints({
 
     // ── Storage API ─────────────────────────────────────────────────────
     getStorage: builder.query({
-      query: () => "/livekit/storage",
+      query: (sessionId) => {
+        if (sessionId) return `/livekit/storage?sessionId=${sessionId}`
+        return "/livekit/storage"
+      },
       providesTags: ["Storage"],
     }),
 

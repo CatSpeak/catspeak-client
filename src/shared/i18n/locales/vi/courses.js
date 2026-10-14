@@ -621,6 +621,7 @@ export default {
     lectureHall: "Giảng đường",
     grading: "Chấm điểm",
     vouchers: "Ưu đãi",
+    recordings: "Video bài giảng",
     classOverview: "Tổng quan lớp học",
     classInformation: "Thông tin lớp học",
     tuitionFee: "HỌC PHÍ",

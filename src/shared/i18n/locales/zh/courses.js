@@ -598,6 +598,7 @@ export default {
     lectureHall: "演讲厅",
     grading: "打分",
     vouchers: "优惠券",
+    recordings: "课程录像",
     classOverview: "班级概览",
     classInformation: "班级信息",
     tuitionFee: "学费",
