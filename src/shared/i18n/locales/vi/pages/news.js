@@ -44,6 +44,7 @@ export default {
     deleteCommentMessage: "Bạn có chắc chắn muốn xóa bình luận này không? Hành động này không thể hoàn tác.",
     deleteCommentConfirm: "Xóa",
     totalComments: "{{count}} bình luận",
+    loginToComment: "Đăng nhập để bình luận",
   },
   newsCard: {
     reaction: "lượt tương tác",
