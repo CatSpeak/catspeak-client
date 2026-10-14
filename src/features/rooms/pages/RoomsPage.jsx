@@ -231,7 +231,7 @@ const RoomsPage = () => {
           className="w-full h-full flex flex-col"
         >
           <div className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mb-4">
               <RoomsBannerContent
                 sessionProps={{
                   handleCreateOneOnOneSession: proceedCreateOneOnOne,

@@ -541,6 +541,9 @@ export default {
     linkCopied: "已复制！",
     leaveCall: "离开房间",
     leaveCallConfirmText: "您确定要离开此通话吗？",
+    leaveCallBlockedTitle: "当前无法离开会议",
+    leaveCallBlockedDesc:
+      "分组讨论室正在进行中。作为主持人，您必须在离开前关闭所有分组讨论室（停止分组）。",
     pictureInPicture: "画中画 (PiP)",
     controls: {
       micOn: "开启麦克风",
@@ -595,7 +598,9 @@ export default {
         errorCannotGet: "无法获取数据",
       },
     },
-    subtitleWaiting: "等待字幕...",
+    subtitleWaiting: "有人发言时将显示字幕...",
+    startingSubtitles: "正在开启字幕...",
+    closingSubtitles: "正在关闭字幕...",
     speechWaiting: "等待语音...",
     displayLanguage: "显示语言",
     fontSize: "字号大小",
@@ -637,7 +642,7 @@ export default {
       switchMessage:
         "您已经在进行一个通话。您想离开当前通话并加入这个新通话吗？",
       switchConfirm: "离开并继续",
-      switchCancel: "留在当前通话",
+      switchCancel: "留在通话",
     },
     error: {
       micPermission:
