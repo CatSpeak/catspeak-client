@@ -211,6 +211,9 @@ const ReviewClassPage = lazy(
 const VocabularyNotebookPage = lazy(
   () => import("@/features/interactive-script/pages/VocabularyNotebookPage"),
 );
+const LearningPathCalendarPage = lazy(
+  () => import("@/features/learning-path/pages/LearningPathCalendarPage"),
+);
 
 const routesConfig = [
   {
@@ -430,9 +433,44 @@ const routesConfig = [
                     path: "calendar/create",
                     element: <CreateEventPage />,
                   },
+                  {
+                    path: "learning-path",
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
                   { path: "*", element: <PageNotFound /> },
                 ],
               },
+            ],
+          },
+        ],
+      },
+
+      // Language-prefixed learning-path route
+      {
+        path: "/:lang/learning-path",
+        element: <LanguageLayout />,
+        children: [
+          {
+            element: <MainLayout />,
+            children: [
+              {
+                element: <CatSpeakLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
+              },
+              { path: "*", element: <PageNotFound /> },
             ],
           },
         ],

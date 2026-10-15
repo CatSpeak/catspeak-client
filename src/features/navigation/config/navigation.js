@@ -49,6 +49,7 @@ export const navSections = [
     defaultLabel: "Cat Speak",
     maxInitial: 5,
     items: [
+      { key: "learningPath", label: "Lộ trình học", path: "/learning-path", icon: CalendarDays },
       { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
