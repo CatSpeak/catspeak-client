@@ -827,6 +827,8 @@ export default {
     voucher: "Voucher lớp học",
     noVoucher: "Không chọn voucher",
     retryVouchers: "Không thể tải voucher. Thử lại.",
+    voucherDraftNotice: "Voucher vẫn ở trạng thái Bản nháp. Hãy gửi duyệt trong phần quản lý voucher khi sẵn sàng.",
+    toastVoucherUnavailable: "Voucher này không còn khả dụng. Hãy chọn voucher lớp học ở trạng thái Bản nháp của bạn hoặc không chọn voucher.",
     selectStudents: "Chọn học viên",
     coHost: "Đồng chủ trì",
     selectCoHost: "Chọn một đồng chủ trì",

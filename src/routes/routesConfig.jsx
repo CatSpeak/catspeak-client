@@ -37,6 +37,7 @@ import SettingIndexRedirect from "./SettingIndexRedirect";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
 import WorkspaceCourseRedirect from "@/features/courses/components/WorkspaceCourseRedirect";
+import ClassroomAccessGuard from "@/features/courses/components/ClassroomAccessGuard";
 import { WebsitePage, ResourcesHubPage } from "@/features/websites";
 import BulletinBoardPage from "@/features/courses/components/lecture-hall/pages/BulletinBoardPage";
 import PostDetailPage from "@/features/courses/components/lecture-hall/pages/PostDetailPage";
@@ -486,9 +487,11 @@ const routesConfig = [
         path: "/workspace/courses/class/:classId/quiz/:quizId/take",
         element: (
           <AuthGuard>
-            <LazyRoute>
-              <StudentTakeQuizView />
-            </LazyRoute>
+            <ClassroomAccessGuard>
+              <LazyRoute>
+                <StudentTakeQuizView />
+              </LazyRoute>
+            </ClassroomAccessGuard>
           </AuthGuard>
         ),
       },
@@ -831,108 +834,113 @@ const routesConfig = [
                 ),
               },
               {
-                path: "courses/class/:id",
-                element: (
-                  <LazyRoute>
-                    <ClassDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/create-assignment",
-                element: (
-                  <LazyRoute>
-                    <CreateAssignmentPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/:boardId",
-                element: (
-                  <LazyRoute>
-                    <BulletinBoardPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/posts/:postId",
-                element: (
-                  <LazyRoute>
-                    <PostDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/:boardId/create-post",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/bulletin-board/:boardId/edit-post/:postId",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/links/:itemId",
-                element: (
-                  <LazyRoute>
-                    <LinkYoutubePage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/assignment/:assignmentId",
-                element: (
-                  <LazyRoute>
-                    <CreateAssignmentPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/assignment/:assignmentId/edit",
-                element: (
-                  <LazyRoute>
-                    <CreateAssignmentPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/create-exam",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/quiz/:quizId",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/quiz/:quizId/submission/:studentId",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "courses/class/:id/quiz/:quizId/edit",
-                element: (
-                  <LazyRoute>
-                    <CreateExamPage />
-                  </LazyRoute>
-                ),
+                element: <ClassroomAccessGuard instructorView />,
+                children: [
+                  {
+                    path: "courses/class/:id",
+                    element: (
+                      <LazyRoute>
+                        <ClassDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/create-assignment",
+                    element: (
+                      <LazyRoute>
+                        <CreateAssignmentPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/:boardId",
+                    element: (
+                      <LazyRoute>
+                        <BulletinBoardPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/posts/:postId",
+                    element: (
+                      <LazyRoute>
+                        <PostDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/:boardId/create-post",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/links/:itemId",
+                    element: (
+                      <LazyRoute>
+                        <LinkYoutubePage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/assignment/:assignmentId",
+                    element: (
+                      <LazyRoute>
+                        <CreateAssignmentPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/assignment/:assignmentId/edit",
+                    element: (
+                      <LazyRoute>
+                        <CreateAssignmentPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/create-exam",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/quiz/:quizId",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/quiz/:quizId/submission/:studentId",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "courses/class/:id/quiz/:quizId/edit",
+                    element: (
+                      <LazyRoute>
+                        <CreateExamPage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
               },
               {
                 path: "courses/details/:id",
@@ -959,60 +967,65 @@ const routesConfig = [
                 ),
               },
               {
-                path: "learning/class/:id",
-                element: (
-                  <LazyRoute>
-                    <StudentClassDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/review",
-                element: (
-                  <LazyRoute>
-                    <ReviewClassPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/:boardId",
-                element: (
-                  <LazyRoute>
-                    <BulletinBoardPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/posts/:postId",
-                element: (
-                  <LazyRoute>
-                    <PostDetailPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/:boardId/create-post",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/bulletin-board/:boardId/edit-post/:postId",
-                element: (
-                  <LazyRoute>
-                    <CreatePostPage />
-                  </LazyRoute>
-                ),
-              },
-              {
-                path: "learning/class/:id/links/:itemId",
-                element: (
-                  <LazyRoute>
-                    <LinkYoutubePage />
-                  </LazyRoute>
-                ),
+                element: <ClassroomAccessGuard />,
+                children: [
+                  {
+                    path: "learning/class/:id",
+                    element: (
+                      <LazyRoute>
+                        <StudentClassDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/review",
+                    element: (
+                      <LazyRoute>
+                        <ReviewClassPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/:boardId",
+                    element: (
+                      <LazyRoute>
+                        <BulletinBoardPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/posts/:postId",
+                    element: (
+                      <LazyRoute>
+                        <PostDetailPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/:boardId/create-post",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/bulletin-board/:boardId/edit-post/:postId",
+                    element: (
+                      <LazyRoute>
+                        <CreatePostPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "learning/class/:id/links/:itemId",
+                    element: (
+                      <LazyRoute>
+                        <LinkYoutubePage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
               },
               {
                 path: "recordings",

@@ -6,16 +6,20 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 export default function ClassCreationOptions({ state, setField }) {
   const { t } = useLanguage()
   const cc = t.courses?.createClass || {}
-  const { data, isLoading, error, refetch } = useGetVouchersQuery({ page: 1, pageSize: 100, sponsorType: "Instructor", scopeType: "SpecificClasses", status: "Draft" })
+  const { currentData: data, isLoading, error, refetch } = useGetVouchersQuery(
+    { page: 1, pageSize: 100, forClassCreation: true },
+    { refetchOnMountOrArgChange: true },
+  )
   const vouchers = (Array.isArray(data?.data) ? data.data : []).filter(v => v.status === "Draft")
   const labelStyle = "text-xs font-extrabold text-gray-700 uppercase tracking-wider"
   return (
     <div className="bg-white rounded-2xl p-4 border border-border flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <label className={labelStyle}>{cc.voucher || "Class voucher"}</label>
-        <Dropdown value={state.voucherId} onChange={value => setField("voucherId", value)} disabled={Boolean(error)} loading={isLoading}
+        <Dropdown value={state.voucherId} onChange={value => setField("voucherId", value)} disabled={isLoading} loading={isLoading}
           options={[{ value: "", label: cc.noVoucher || "No voucher" }, ...vouchers.map(v => ({ value: v.id, label: `${v.code} — ${v.title}` }))]} />
         {error && <button type="button" onClick={refetch} className="text-xs text-[#990011] text-left">{cc.retryVouchers || "Vouchers could not be loaded. Try again."}</button>}
+        <p className="text-xs text-gray-500">{cc.voucherDraftNotice || "The voucher stays in Draft. Submit it for approval in voucher management when ready."}</p>
       </div>
       <div className="flex flex-col gap-2">
         <label className={labelStyle}>{cc.creationInviteStudents || "Invite students"}</label>

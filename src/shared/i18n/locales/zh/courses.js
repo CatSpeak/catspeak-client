@@ -794,6 +794,8 @@ export default {
     voucher: "班级优惠券",
     noVoucher: "不选择优惠券",
     retryVouchers: "无法加载优惠券。重试。",
+    voucherDraftNotice: "优惠券将保持草稿状态。准备好后，请在优惠券管理中提交审核。",
+    toastVoucherUnavailable: "此优惠券已不可用。请选择您自己的班级优惠券草稿，或不选择优惠券。",
     selectStudents: "选择学生",
     coHost: "共同主持人",
     selectCoHost: "选择一名共同主持人",

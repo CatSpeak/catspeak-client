@@ -826,6 +826,8 @@ export default {
     voucher: "Class voucher",
     noVoucher: "No voucher",
     retryVouchers: "Vouchers could not be loaded. Try again.",
+    voucherDraftNotice: "The voucher stays in Draft. Submit it for approval in voucher management when ready.",
+    toastVoucherUnavailable: "This voucher is no longer available. Select one of your draft class vouchers or choose no voucher.",
     selectStudents: "Select students",
     coHost: "Co-host",
     selectCoHost: "Select one co-host",

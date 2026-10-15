@@ -38,6 +38,8 @@ export function resolveClassErrorMessage(error, { cc = {}, isEditMode = false } 
   }
 
   switch (code) {
+    case "CLASS_VOUCHER_UNAVAILABLE":
+      return cc.toastVoucherUnavailable || "This voucher is no longer available. Select one of your draft class vouchers or choose no voucher."
     case "LANGUAGE_NOT_ALLOWED":
     case "LANGUAGE_MISMATCH":
       return cc.languageNotAllowed || failDefault

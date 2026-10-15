@@ -506,6 +506,7 @@ const CreateClassPage = () => {
 
       const payload = {
         courseId,
+        voucherId: state.voucherId || null,
         title: className.trim(),
         language: selectedLanguage,
         levels: payloadLevels,
