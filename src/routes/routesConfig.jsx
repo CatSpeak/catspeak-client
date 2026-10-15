@@ -71,7 +71,7 @@ import UserPagesLayout from "@/features/user/layouts/UserPagesLayout";
 import LanguageLayout from "./LanguageLayout";
 import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { AuthGuard, CommunityGuard, RoleGuard } from "@/shared/components";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";
 
@@ -225,6 +225,28 @@ const WorkspaceRoomsPage = lazy(
   () => import("@/features/rooms/pages/WorkspaceRoomsPage"),
 );
 
+const AiLevelAssessmentRoute = () => {
+  const { lang } = useParams()
+
+  if (lang !== "zh") {
+    return (
+      <LazyRoute>
+        <AiLevelAssessmentPage />
+      </LazyRoute>
+    )
+  }
+
+  return (
+    <CommunityGuard>
+      <AuthGuard>
+        <LazyRoute>
+          <PlacementTestPage />
+        </LazyRoute>
+      </AuthGuard>
+    </CommunityGuard>
+  )
+}
+
 const CreateExamPage = lazy(
   () => import("@/features/courses/pages/CreateExamPage"),
 );
@@ -330,66 +352,6 @@ const routesConfig = [
               <LazyRoute>
                 <WebsitePage />
               </LazyRoute>
-            ),
-          },
-          {
-            path: "placement-test",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementTestPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/session",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementSessionPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/scoring",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementScoringPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/result",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementResultPage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
-            ),
-          },
-          {
-            path: "placement-test/profile",
-            element: (
-              <CommunityGuard>
-                <AuthGuard>
-                  <LazyRoute>
-                    <PlacementProfilePage />
-                  </LazyRoute>
-                </AuthGuard>
-              </CommunityGuard>
             ),
           },
           {
@@ -508,10 +470,54 @@ const routesConfig = [
                   },
                   {
                     path: "level-assessment",
+                    element: <AiLevelAssessmentRoute />,
+                  },
+                  {
+                    path: "level-assessment/session",
                     element: (
-                      <LazyRoute>
-                        <AiLevelAssessmentPage />
-                      </LazyRoute>
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementSessionPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/scoring",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementScoringPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/result",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementResultPage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
+                    ),
+                  },
+                  {
+                    path: "level-assessment/profile",
+                    element: (
+                      <CommunityGuard>
+                        <AuthGuard>
+                          <LazyRoute>
+                            <PlacementProfilePage />
+                          </LazyRoute>
+                        </AuthGuard>
+                      </CommunityGuard>
                     ),
                   },
                   {
