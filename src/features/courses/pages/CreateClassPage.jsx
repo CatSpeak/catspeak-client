@@ -50,6 +50,7 @@ import { resolveClassErrorMessage } from "../utils/classErrorMessages"
 import { useTimezone } from "@/shared/hooks/useTimezone"
 import ClassScheduleCalendarPreview from "../components/ClassScheduleCalendarPreview"
 import ClassCreationOptions from "../components/ClassCreationOptions"
+import { normalizeClassCreationParticipants } from "../utils/classCreationParticipants"
 import { classTimeToIso, normalizeClassInvitees, assertExistingScheduleSupport } from "../utils/classRecurrence"
 
 const DAYS_OF_WEEK = [
@@ -508,6 +509,7 @@ const CreateClassPage = () => {
       const payload = {
         courseId,
         voucherId: state.voucherId || null,
+        ...(!isEditMode ? normalizeClassCreationParticipants(state) : {}),
         title: className.trim(),
         language: selectedLanguage,
         levels: payloadLevels,
@@ -589,6 +591,9 @@ const CreateClassPage = () => {
         } else {
           // Class created (free flow or direct creation)
           toast.success(cc.toastCreateSuccess || "Class created successfully!")
+          if (resultPayload.warnings?.includes("CLASS_INVITATION_DELIVERY_FAILED")) {
+            toast(cc.toastInvitationsFailed || "Class created, but some invitations could not be sent. Send them again from the class page.", { icon: "⚠️", duration: 8000 })
+          }
           navigate("/workspace/classes/all-classes")
         }
       }
@@ -1169,6 +1174,7 @@ const CreateClassPage = () => {
                 <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
                   {cc.recurrenceFrequency || "Repeat"}
                   <Dropdown value={recurrence.frequency} options={[{ value: "weekly", label: cc.selectedWeekdays || "On selected weekdays" }, { value: "daily", label: cc.daily || "Daily" }]}
+                    dropdownClassName="w-full"
                     onChange={frequency => {
                       setField("recurrence", { ...recurrence, frequency })
                       if (frequency === "daily") setField("checkedDays", Object.fromEntries(DAYS_OF_WEEK.map(day => [day.key, true])))
@@ -1180,7 +1186,7 @@ const CreateClassPage = () => {
                 </label>
                 <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
                   {cc.recurrenceEnds || "Ends"}
-                  <Dropdown value={recurrence.endCondition} options={[{ value: "count", label: cc.afterSessions || "After the number of sessions above" }, { value: "until", label: cc.onDate || "On a date (inclusive)" }]} onChange={endCondition => setField("recurrence", { ...recurrence, endCondition })} />
+                  <Dropdown value={recurrence.endCondition} options={[{ value: "count", label: cc.afterSessions || "After the number of sessions above" }, { value: "until", label: cc.onDate || "On a date (inclusive)" }]} onChange={endCondition => setField("recurrence", { ...recurrence, endCondition })} dropdownClassName="w-full" />
                 </label>
                 {recurrence.endCondition === "until" && <label className="text-xs font-bold text-gray-700 flex flex-col gap-2">
                   {cc.recurrenceEndDate || "Last teaching date"}

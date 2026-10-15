@@ -245,7 +245,7 @@ const CoHostManager = ({
 
   if (!isTeacher) {
     // Non-host view: only badge when they are the co-host is handled by parent.
-    return hasCoHost ? <CoHostBadge /> : null
+    return hasCoHost && !coHost?.isPending ? <CoHostBadge /> : null
   }
 
   const modals = (
@@ -331,7 +331,7 @@ const CoHostManager = ({
                   </p>
                   {assignedName && (
                     <p className="text-[10px] font-semibold text-[#8B5A2B]">
-                      Co-host
+                      {coHost?.isPending ? (t.courses?.createClass?.coHostPendingStatus || "Pending enrollment") : "Co-host"}
                     </p>
                   )}
                 </div>
@@ -384,6 +384,7 @@ const CoHostManager = ({
   return (
     <>
       <div className="flex w-full flex-col gap-2">
+        {coHost?.isPending && <p className="text-xs text-amber-700">{t.courses?.createClass?.coHostPendingNotice || "Co-host permissions activate after this person enrolls."}</p>}
         {!hasCoHost && (
           <div className="w-full rounded-lg border border-dashed border-gray-300 bg-gray-50/70 px-3 py-2 text-xs font-medium text-gray-500">
             {emptyLabel}
