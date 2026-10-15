@@ -22,6 +22,7 @@ export const vouchersApi = baseApi.injectEndpoints({
           classId: params.classId || undefined,
           courseId: params.courseId || undefined,
           scopeType: params.scopeType || undefined,
+          forClassCreation: params.forClassCreation || undefined,
         },
       }),
       providesTags: (result) => {
