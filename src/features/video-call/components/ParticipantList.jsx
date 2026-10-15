@@ -238,7 +238,7 @@ const ParticipantItem = ({ participant, hostAccountId, coHostAccountId }) => {
       <div className="flex min-w-0 items-center gap-1.5">
         {accountId ? (
           <a
-            href={`/profile/${accountId}`}
+            href={`/workspace/profile/${accountId}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}

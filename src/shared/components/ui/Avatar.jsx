@@ -51,7 +51,7 @@ export const TeacherHat = ({ size = 32, className = "" }) => (
  * @param {string}  [name]           - Used to derive the fallback initial
  * @param {string}  [fallback]       - Explicit fallback character (overrides name)
  * @param {boolean} [speaking]       - Show green speaking-indicator border
- * @param {number|string} [accountId]- If provided, clicking navigates to /profile/:accountId
+ * @param {number|string} [accountId]- If provided, clicking navigates to /workspace/profile/:accountId
  * @param {function} [onClick]       - Custom click handler
  * @param {boolean} [clickable=true] - Enable click-to-profile behavior when accountId or onClick is provided
  * @param {string}  [className]      - Extra classes merged onto outer wrapper
