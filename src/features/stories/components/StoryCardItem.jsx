@@ -96,7 +96,7 @@ const StoryCardItem = ({ story, onClick }) => {
             onClick={(e) => {
               if (authorAccountId) {
                 e.stopPropagation();
-                navigate(`/profile/${authorAccountId}`);
+                navigate(`/workspace/profile/${authorAccountId}`);
               }
             }}
             className={`truncate text-sm font-semibold text-[#1a1a1a] ${authorAccountId ? "hover:underline hover:text-cath-red-700 transition-colors cursor-pointer" : ""}`}

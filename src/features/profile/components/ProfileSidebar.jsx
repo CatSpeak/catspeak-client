@@ -110,10 +110,7 @@ const ProfileSidebar = ({ isOwnProfile, onNavigateToFriends }) => {
                 lines={2}
                 className="rounded-xl overflow-hidden"
                 onClick={() => {
-                  const isWorkspace = location.pathname.startsWith("/workspace")
-                  navigate(
-                    `${isWorkspace ? "/workspace" : ""}/profile/${user.accountId}`,
-                  )
+                  navigate(`/workspace/profile/${user.accountId}`)
                 }}
                 leftContent={
                   <Avatar

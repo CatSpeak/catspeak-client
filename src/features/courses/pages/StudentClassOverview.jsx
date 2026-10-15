@@ -65,7 +65,7 @@ const StudentClassOverview = ({ classData = {}, onJoinRoom, onChat }) => {
 
         {/* Right Column: Instructor Profile */}
         <div
-          onClick={() => teacherAccountId && navigate(`/profile/${teacherAccountId}`)}
+          onClick={() => teacherAccountId && navigate(`/workspace/profile/${teacherAccountId}`)}
           className="flex items-center justify-end gap-3 cursor-pointer shrink-0 self-start sm:self-auto hover:opacity-90 transition-opacity flex-row-reverse md:flex-row"
         >
           <div className="flex flex-col text-left sm:text-right">

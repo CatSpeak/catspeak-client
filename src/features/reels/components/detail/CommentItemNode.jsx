@@ -53,7 +53,7 @@ const CommentItemNode = React.memo(function CommentItemNode({
               onClick={(e) => {
                 if (comment.accountId) {
                   e.stopPropagation()
-                  navigate(`/profile/${comment.accountId}`)
+                  navigate(`/workspace/profile/${comment.accountId}`)
                 }
               }}
               className={`font-bold text-[13px] text-headingColor ${comment.accountId ? "cursor-pointer hover:underline" : ""}`}

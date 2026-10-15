@@ -105,7 +105,7 @@ const HistoryMatchItem = ({ match, isExpanded, onToggle }) => {
                             const id = item.player.accountId || item.player.userId
                             if (id) {
                               e.stopPropagation()
-                              navigate(`/profile/${id}`)
+                              navigate(`/workspace/profile/${id}`)
                             }
                           }}
                           className="truncate max-w-[150px] sm:max-w-[200px] cursor-pointer hover:underline hover:text-cath-red-700 transition-colors"
