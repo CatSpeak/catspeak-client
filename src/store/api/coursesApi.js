@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi"
+import { normalizeClassCreationParticipants } from "@/features/courses/utils/classCreationParticipants"
 import {
   buildQuizFormData,
   buildQuestionFormData,
@@ -1177,6 +1178,7 @@ export const coursesApi = baseApi.injectEndpoints({
         const pendingClassData = {
           courseId: parseIntegerOrNull(data.courseId),
           voucherId: parseIntegerOrNull(data.voucherId),
+          ...normalizeClassCreationParticipants(data),
           name: data.title || data.name,
           language: data.language ? data.language.toUpperCase() : "",
           levels: data.levels || [],
