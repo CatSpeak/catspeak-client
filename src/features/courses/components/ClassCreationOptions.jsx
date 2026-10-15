@@ -16,10 +16,9 @@ export default function ClassCreationOptions({ state, setField }) {
     <div className="bg-white rounded-2xl p-4 border border-border flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <label className={labelStyle}>{cc.voucher || "Class voucher"}</label>
-        <Dropdown value={state.voucherId} onChange={value => setField("voucherId", value)} disabled={isLoading} loading={isLoading}
+        <Dropdown value={state.voucherId} onChange={value => setField("voucherId", value)} loading={isLoading}
           options={[{ value: "", label: cc.noVoucher || "No voucher" }, ...vouchers.map(v => ({ value: v.id, label: `${v.code} — ${v.title}` }))]} />
         {error && <button type="button" onClick={refetch} className="text-xs text-[#990011] text-left">{cc.retryVouchers || "Vouchers could not be loaded. Try again."}</button>}
-        <p className="text-xs text-gray-500">{cc.voucherDraftNotice || "The voucher stays in Draft. Submit it for approval in voucher management when ready."}</p>
       </div>
       <div className="flex flex-col gap-2">
         <label className={labelStyle}>{cc.creationInviteStudents || "Invite students"}</label>

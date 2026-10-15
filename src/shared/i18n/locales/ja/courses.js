@@ -823,7 +823,6 @@ export default {
     voucher: "クラスのクーポン",
     noVoucher: "クーポンなし",
     retryVouchers: "クーポンを読み込めませんでした。再試行。",
-    voucherDraftNotice: "クーポンは下書きのままです。準備ができたらクーポン管理から承認申請してください。",
     toastVoucherUnavailable: "このクーポンは利用できません。自分のクラス用クーポンの下書きを選択するか、クーポンなしを選んでください。",
     selectStudents: "受講者を選択",
     coHost: "共同ホスト",
