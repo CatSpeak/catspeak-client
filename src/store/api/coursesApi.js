@@ -1,4 +1,5 @@
 import { baseApi } from "./baseApi"
+import { normalizeClassCreationParticipants } from "@/features/courses/utils/classCreationParticipants"
 import {
   buildQuizFormData,
   buildQuestionFormData,
@@ -1176,6 +1177,8 @@ export const coursesApi = baseApi.injectEndpoints({
         }
         const pendingClassData = {
           courseId: parseIntegerOrNull(data.courseId),
+          voucherId: parseIntegerOrNull(data.voucherId),
+          ...normalizeClassCreationParticipants(data),
           name: data.title || data.name,
           language: data.language ? data.language.toUpperCase() : "",
           levels: data.levels || [],
@@ -1214,6 +1217,13 @@ export const coursesApi = baseApi.injectEndpoints({
         "Classes",
         "Courses",
         "Schedule",
+        ...(data.voucherId
+          ? [
+            { type: "Vouchers", id: data.voucherId },
+            { type: "Vouchers", id: "LIST" },
+            { type: "VoucherDetail", id: data.voucherId },
+          ]
+          : []),
         { type: "CourseDetail", id: String(data.courseId) },
       ],
     }),
@@ -2852,12 +2862,14 @@ export const {
   useShareStudentClassMutation,
   useGetStudentCourseDetailQuery,
   useGetStudentClassDetailQuery,
+  useLazyGetStudentClassDetailQuery,
   useEnrollInCourseMutation,
   useGetAllCoursesQuery,
   useGetAllClassesQuery,
   useLazyGetAllClassesQuery,
   useGetCourseDetailQuery,
   useGetClassDetailQuery,
+  useLazyGetClassDetailQuery,
   useCreateCourseMutation,
   useUpdateCourseMutation,
   useDeleteCourseMutation,

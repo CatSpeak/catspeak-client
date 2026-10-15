@@ -12,6 +12,7 @@ import {
 } from "../utils/courseUtils"
 import { convertTimeStrToTz, getShiftedDayOfWeek } from "@/shared/utils/dateUtils"
 import { useTimezone } from "@/shared/hooks/useTimezone"
+import { generateClassRecurrence } from "../utils/classRecurrence"
 
 // ─── Defaults ───
 
@@ -48,6 +49,11 @@ const createInitialState = (initialCourseId) => ({
   startDateHours: "",
   retentionDays: 10,
   sessions: 24,
+  recurrence: { frequency: "weekly", interval: 1, endCondition: "count", endDate: "" },
+  voucherId: "",
+  coHostAccountId: "",
+  coHostPermissions: ["share_screen"],
+  invitedAccountIds: [],
   capacity: 6,
   description: "",
   fee: "850000",
@@ -170,6 +176,11 @@ function classFormReducer(state, action) {
         startDateHours,
         retentionDays: cls.retentionDays ?? cls.archiveRetentionDays ?? 10,
         sessions: cls.totalSessions ?? "",
+        recurrence: { frequency: Object.values(checkedDays).every(Boolean) ? "daily" : "weekly", interval: 1, endCondition: "count", endDate: "" },
+        voucherId: "",
+        coHostAccountId: "",
+        coHostPermissions: ["share_screen"],
+        invitedAccountIds: [],
         capacity: cls.slots ?? "",
         description: cls.description || "",
         fee: cls.tuitionFee?.toString() || "",
@@ -334,9 +345,15 @@ export function useClassFormReducer({
   }, [formInstanceKey, initialCourseId])
 
   // ─── Derived values ───
-  const minFee = useMemo(() => {
-    return 100000 + 50000 * (parseInt(state.sessions, 10) || 0)
-  }, [state.sessions])
+  const recurrenceResult = useMemo(() => {
+    try {
+      return { dates: generateClassRecurrence({ startDate: state.startDate, sessions: state.sessions, checkedDays: state.checkedDays, timeSlots: state.timeSlots, recurrence: state.recurrence, timeZone: userTimeZone }), error: "" }
+    } catch (error) {
+      return { dates: [], error: error.message }
+    }
+  }, [state.startDate, state.sessions, state.checkedDays, state.timeSlots, state.recurrence, userTimeZone])
+  const effectiveSessions = state.recurrence.endCondition === "until" ? recurrenceResult.dates.length : Number(state.sessions)
+  const minFee = 100000 + 50000 * (effectiveSessions || 0)
 
   // ─── Auto min-fee enforcement (create mode only) ───
   useEffect(() => {
@@ -487,6 +504,8 @@ export function useClassFormReducer({
     isEditMode,
     isRecoverMode,
     userTimeZone,
+    formatTime,
+    getZoneDateStr,
   ])
 
   // ─── Handlers ───
@@ -564,6 +583,8 @@ export function useClassFormReducer({
 
     // Derived values
     minFee,
+    recurrenceResult,
+    effectiveSessions,
     levelsList,
     selectedCourse,
     editingClassData,
