@@ -17,7 +17,7 @@ import { parseTopic, getCategoryBadgeInfo } from "../utils/learningPathUtils"
 const parseVocab = (vocabStr = "") => {
   if (!vocabStr) return { hanzi: "", pinyin: "", meaning: "" }
   // Match "Hanzi (pinyin): meaning" or "Hanzi - pinyin - meaning"
-  const match = vocabStr.match(/^([^\(\-:]+)(?:\(([^\)]+)\))?\s*[-:]?\s*(.*)$/)
+  const match = vocabStr.match(/^([^(:-]+)(?:\(([^)]+)\))?\s*[-:]?\s*(.*)$/)
   if (match) {
     return {
       hanzi: (match[1] || "").trim(),

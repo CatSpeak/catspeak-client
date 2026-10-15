@@ -4,7 +4,6 @@ import {
   Sparkles,
   Compass,
   ArrowRight,
-  BookOpen,
   GraduationCap,
   MessageCircle,
   RotateCcw,

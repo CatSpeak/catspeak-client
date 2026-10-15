@@ -1,5 +1,3 @@
-import dayjs from "dayjs"
-
 /**
  * Parses Chinese topic title into Hanzi, Pinyin, and Vietnamese meaning
  * Common formats:
@@ -18,7 +16,7 @@ export const parseTopic = (title = "", description = "") => {
   }
 
   // Check format: "Hanzi (Pinyin) - Meaning"
-  const fullMatch = title.match(/^([^\(\-]+)\s*(?:\(([^\)]+)\))?\s*(?:[-–—:]\s*(.+))?$/)
+  const fullMatch = title.match(/^([^(–—:-]+)\s*(?:\(([^)]+)\))?\s*(?:[-–—:]\s*(.+))?$/)
 
   if (fullMatch) {
     const hanzi = (fullMatch[1] || "").trim()

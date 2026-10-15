@@ -6,26 +6,23 @@ import { formatResetsIn } from "../utils/learningPathUtils"
 
 const QuotaLockedModal = ({ isOpen, onClose, quotaInfo }) => {
   const navigate = useNavigate()
+  const [prevResetsIn, setPrevResetsIn] = useState(quotaInfo?.resetsInSeconds)
   const [secondsRemaining, setSecondsRemaining] = useState(
     quotaInfo?.resetsInSeconds || 0,
   )
 
-  useEffect(() => {
-    if (quotaInfo?.resetsInSeconds) {
-      setSecondsRemaining(quotaInfo.resetsInSeconds)
-    }
-  }, [quotaInfo?.resetsInSeconds])
+  if (quotaInfo?.resetsInSeconds !== prevResetsIn) {
+    setPrevResetsIn(quotaInfo?.resetsInSeconds)
+    setSecondsRemaining(quotaInfo?.resetsInSeconds || 0)
+  }
 
-  // Live 1-second interval countdown
   useEffect(() => {
-    if (!isOpen || secondsRemaining <= 0) return
-
+    if (!isOpen) return
     const timer = setInterval(() => {
       setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0))
     }, 1000)
-
     return () => clearInterval(timer)
-  }, [isOpen, secondsRemaining])
+  }, [isOpen])
 
   if (!isOpen) return null
 

@@ -3,8 +3,6 @@ import Confetti from "react-confetti"
 import {
   Trophy,
   CheckCircle2,
-  AlertTriangle,
-  RotateCcw,
   Sparkles,
   ArrowRight,
   TrendingUp,

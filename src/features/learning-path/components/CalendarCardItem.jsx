@@ -85,7 +85,15 @@ const CalendarCardItem = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onSelectCard?.(card)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onSelectCard?.(card)
+        }
+      }}
       className={`group relative flex flex-col justify-between rounded-2xl p-4 sm:p-5 transition-all duration-200 cursor-pointer ${containerStyles}`}
     >
       {/* Top Header: Day & Category */}

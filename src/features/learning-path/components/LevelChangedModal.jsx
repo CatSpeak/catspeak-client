@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import {
   GraduationCap,
   AlertCircle,
@@ -54,11 +54,13 @@ const LevelChangedModal = ({
   onConfirmLevelChange,
   isLoading = false,
 }) => {
+  const [prevCurrentLevel, setPrevCurrentLevel] = useState(currentLevel)
   const [selectedLevel, setSelectedLevel] = useState(currentLevel)
 
-  useEffect(() => {
+  if (currentLevel !== prevCurrentLevel) {
+    setPrevCurrentLevel(currentLevel)
     setSelectedLevel(currentLevel)
-  }, [currentLevel, isOpen])
+  }
 
   if (!isOpen) return null
 

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import {
   AlertCircle,
   RotateCcw,
-  Sparkles,
   Compass,
 } from "lucide-react"
 import { toast } from "@/shared/utils/toastBridge"
@@ -64,7 +63,6 @@ const LearningPathCalendarPage = () => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [isQuotaLockedOpen, setIsQuotaLockedOpen] = useState(false)
   const [isLevelModalOpen, setIsLevelModalOpen] = useState(false)
-  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false)
   const [hasDismissedSummary, setHasDismissedSummary] = useState(false)
 
   // API hooks
@@ -78,15 +76,16 @@ const LearningPathCalendarPage = () => {
     pollingInterval: 120000,
   })
 
+  const isSummaryModalOpen = Boolean(
+    calendarData?.summaryModal && !hasDismissedSummary,
+  )
+
+  const handleCloseSummary = () => {
+    setHasDismissedSummary(true)
+  }
+
   const [launchSession, { isLoading: isLaunching }] = useLaunchSessionMutation()
   const [changeLevel, { isLoading: isChangingLevel }] = useChangeLevelMutation()
-
-  // Auto trigger summary modal if backend reports a summary and user hasn't dismissed it
-  useEffect(() => {
-    if (calendarData?.summaryModal && !hasDismissedSummary) {
-      setIsSummaryModalOpen(true)
-    }
-  }, [calendarData?.summaryModal, hasDismissedSummary])
 
   // If level is ComingSoon (HSK 4-6) or status is ComingSoon (2)
   const isComingSoon =
@@ -264,14 +263,10 @@ const LearningPathCalendarPage = () => {
       {/* lp04: Cycle Summary Modal */}
       <CycleSummaryModal
         isOpen={isSummaryModalOpen}
-        onClose={() => {
-          setIsSummaryModalOpen(false)
-          setHasDismissedSummary(true)
-        }}
+        onClose={handleCloseSummary}
         summary={calendarData?.summaryModal}
         onStartNewCycle={() => {
-          setIsSummaryModalOpen(false)
-          setHasDismissedSummary(true)
+          handleCloseSummary()
           refetch()
         }}
       />
