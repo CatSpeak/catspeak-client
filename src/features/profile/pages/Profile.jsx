@@ -37,13 +37,12 @@ const Profile = () => {
 
   useEffect(() => {
     if (!urlAccountId && user?.accountId) {
-      const isWorkspace = location.pathname.startsWith("/workspace")
       navigate(
-        `${isWorkspace ? "/workspace/profile" : "/profile"}/${user.accountId}${location.search}`,
+        `/workspace/profile/${user.accountId}${location.search}`,
         { replace: true },
       )
     }
-  }, [urlAccountId, user, navigate, location.pathname, location.search])
+  }, [urlAccountId, user, navigate, location.search])
 
   // Single centralized query for social profile (/api/Account/{id})
   const { data: publicProfileResponse, isLoading } = useGetPublicProfileQuery(

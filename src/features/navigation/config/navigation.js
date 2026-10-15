@@ -219,20 +219,24 @@ export const isNavItemVisible = (
 
 export const getActiveDockSection = (pathname) => {
   if (!pathname) return "community"
+  const cleanPath = pathname.replace(/^\/(?:zh|en|vi)(?=\/|$)/, "")
+  if (cleanPath.startsWith("/pricing")) {
+    return "pricing"
+  }
   if (
-    pathname.startsWith("/setting") ||
-    pathname.startsWith("/pricing") ||
-    pathname.startsWith("/billing") ||
-    pathname.startsWith("/refunds")
+    cleanPath.startsWith("/setting") ||
+    cleanPath.startsWith("/billing") ||
+    cleanPath.startsWith("/refunds")
   ) {
     return "settings"
   }
-  if (pathname.includes("/cat-speak")) return "catSpeak"
-  if (pathname.includes("/profile")) return "profile"
-  if (pathname.includes("/explore-courses")) return "exploreCourses"
-  if (pathname.includes("/resources")) return "learningResources"
-  if (pathname.includes("/workspace")) return "workspace"
-  if (pathname.includes("/community")) return "community"
+  if (cleanPath.startsWith("/workspace") || cleanPath.includes("/workspace")) {
+    return "workspace"
+  }
+  if (cleanPath.includes("/cat-speak")) return "catSpeak"
+  if (cleanPath.includes("/explore-courses")) return "exploreCourses"
+  if (cleanPath.includes("/resources")) return "learningResources"
+  if (cleanPath.includes("/community")) return "community"
   return "community"
 }
 

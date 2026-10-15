@@ -18,11 +18,7 @@ import Avatar from "@/shared/components/ui/Avatar"
 import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
 import { AnimatePresence, motion } from "framer-motion"
-import {
-  useGetProfileQuery,
-  useAuth,
-  useLogoutMutation,
-} from "@/features/auth"
+import { useGetProfileQuery, useAuth, useLogoutMutation } from "@/features/auth"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import FluentAnimation from "@/shared/components/ui/animations/FluentAnimation"
@@ -95,11 +91,6 @@ const ProfileDropdown = () => {
   const handleProfileClick = () => {
     handleCloseMenu()
     navigate(`/workspace/profile/${user?.accountId || user?.id || ""}`)
-  }
-
-  const handlePricingClick = () => {
-    handleCloseMenu()
-    navigate("/pricing")
   }
 
   const handleSettingsClick = () => {
