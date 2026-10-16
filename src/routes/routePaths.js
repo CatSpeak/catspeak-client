@@ -18,6 +18,9 @@ export const ROUTE_PATHS = {
   CHAT: "/chat",
   CHAT_DETAIL: "/chat/:id",
 
+  // Learning Path
+  LEARNING_PATH: "/:lang/learning-path",
+
   // Admin routes
   ADMIN: "/admin",
 

@@ -510,6 +510,7 @@ export const baseApi = createApi({
     "ExploreTeachers",
     "InstructorCompetency",
     "StudentDashboard",
+    "LearningPath",
     "PlacementSession",
     "PlacementResult",
     "ClassRecordings",
