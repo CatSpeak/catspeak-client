@@ -215,8 +215,7 @@ const CommentItem = ({
         {/* Author & Timestamp + More menu */}
         <div className="flex flex-col gap-1 w-full max-w-full min-w-0">
           <div className="flex items-start justify-between gap-1 w-full min-w-0">
-            {/* On laptop (lg:), timestamp sits directly under authorName */}
-            <div className="flex flex-row lg:flex-col lg:items-start items-center flex-wrap gap-x-2 gap-y-0.5 min-w-0">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
               <span
                 onClick={(e) => {
                   if (authorAccountId) {
@@ -229,7 +228,7 @@ const CommentItem = ({
                 {authorName}
               </span>
               <div className="flex items-center gap-1.5 text-xs text-slate-400 leading-tight">
-                <span className="lg:hidden leading-none">•</span>
+                <span className="leading-none" aria-hidden="true">•</span>
                 <span className="whitespace-nowrap">
                   {getTranslatedTimeAgo(
                     comment.createDate,

@@ -14,109 +14,17 @@ import { getShareUrlWithVersion } from "@/shared/utils/shareUtils";
 import { Breadcrumb } from "@/shared/components/ui/navigation";
 import PostContent from "../components/PostContent";
 import CommentsSection from "../components/CommentsSection";
-import Carousel from "@/shared/components/ui/Carousel";
+import NewsArticleHeader from "../components/NewsArticleHeader";
 import ShareModal from "../components/ShareModal";
 import RelatedNewsSection from "../components/RelatedNewsSection";
-import { getTranslatedTimeAgo } from "@/features/news/utils/newsUtils";
 import { getImageUrl } from "@/shared/utils/imageUtils";
-import FluentCard from "@/shared/components/ui/FluentCard";
-import { Skeleton } from "@/shared/components/ui/indicators";
+import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner";
 import { useAuthModal } from "@/shared/context/AuthModalContext";
 import { useAuth } from "@/features/auth";
-import TopicChips from "../components/TopicChips";
 import FilePreviewModal from "@/shared/components/ui/FilePreviewModal";
 import FileAttachmentItem from "@/shared/components/ui/FileAttachmentItem";
 import IconButton from "@/shared/components/ui/buttons/IconButton";
 import { Download } from "lucide-react";
-
-const NewsDetailSkeleton = () => (
-  <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
-    <div className="mx-auto max-w-7xl flex flex-col gap-5">
-      {/* Top Header Section Skeleton */}
-      <div className="flex flex-col gap-3.5">
-        {/* Breadcrumb Skeleton */}
-        <div className="flex items-center gap-2 px-1">
-          <Skeleton className="h-4 w-20" />
-          <span className="text-gray-300">/</span>
-          <Skeleton className="h-4 w-24" />
-          <span className="text-gray-300">/</span>
-          <Skeleton className="h-4 w-32" />
-        </div>
-
-        {/* Title + Meta Skeleton */}
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-8 w-4/5" />
-          <div className="flex items-center gap-2 mt-1">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-4 w-24" />
-          </div>
-        </div>
-
-        {/* Carousel Skeleton Island */}
-        <FluentCard
-          padding="p-2 sm:p-2.5"
-          rounded="rounded-2xl"
-          className="shadow-sm border-[#e5e7eb]"
-        >
-          <Skeleton className="w-full aspect-video rounded-xl max-h-[500px]" />
-        </FluentCard>
-      </div>
-
-      {/* Two-column layout Skeleton */}
-      <div className="grid grid-cols-1 items-start lg:items-stretch gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">
-        {/* Left Column: Article Body Skeleton Island */}
-        <div className="min-w-0">
-          <FluentCard
-            padding="p-4 sm:p-5 md:p-6"
-            rounded="rounded-2xl"
-            className="shadow-sm border-[#e5e7eb] flex flex-col gap-4"
-          >
-            <div className="flex flex-col gap-3 py-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-[95%]" />
-              <Skeleton className="h-4 w-[90%]" />
-              <Skeleton className="h-4 w-[98%]" />
-              <Skeleton className="h-4 w-[75%]" />
-
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-8 w-20 rounded-full" />
-                  <Skeleton className="h-8 w-20 rounded-full" />
-                </div>
-                <Skeleton className="h-8 w-24 rounded-full" />
-              </div>
-            </div>
-          </FluentCard>
-        </div>
-
-        {/* Right Column: Comments Sidebar Skeleton Island */}
-        <div className="w-full min-w-0 relative lg:h-full">
-          <div className="lg:absolute lg:inset-0">
-            <FluentCard
-              padding="p-3.5 sm:p-4"
-              rounded="rounded-2xl"
-              className="shadow-sm border-[#e5e7eb] h-full w-full !justify-start overflow-hidden"
-            >
-              <Skeleton className="h-6 w-32 mb-4 shrink-0" />
-              <div className="flex flex-col gap-4 overflow-hidden">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex gap-3">
-                    <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-                    <div className="flex-1 flex flex-col gap-2">
-                      <Skeleton className="h-3.5 w-28" />
-                      <Skeleton className="h-3 w-full" />
-                      <Skeleton className="h-3 w-3/4" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </FluentCard>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 const NewsDetailPage = () => {
   const { lang: paramLang, slug } = useParams();
@@ -278,7 +186,11 @@ const NewsDetailPage = () => {
   };
 
   if (isLoading) {
-    return <NewsDetailSkeleton />;
+    return (
+      <div role="status" aria-label={t.loading || "Loading..."} className="flex min-h-[50vh] items-center justify-center bg-primaryBg">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   const isGlobalNews = Number(newsItem?.postType) === 2;
@@ -301,173 +213,99 @@ const NewsDetailPage = () => {
     );
   }
 
-  const breadcrumbItems = [
-    { label: "Trang chủ", onClick: () => navigate(`/${lang}/community`) },
-    {
-      label: "Cat Speak",
-      onClick: () =>
-        navigate(
-          `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
-        ),
-    },
-    {
-      label: isGlobalNews
-        ? t.news?.globalNews || "Bản tin thế giới"
-        : t.news?.catSpeakNews || "Bản tin CatSpeak",
-      onClick: () =>
-        navigate(
-          `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
-        ),
-    },
-    { label: newsItem.title },
-  ];
+  // const breadcrumbItems = [
+  //   { label: t.nav?.home || "Home", onClick: () => navigate(`/${lang}/community`) },
+  //   {
+  //     label: isGlobalNews
+  //       ? t.news?.globalNews || "Bản tin thế giới"
+  //       : t.news?.catSpeakNews || "Bản tin CatSpeak",
+  //     onClick: () =>
+  //       navigate(
+  //         `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
+  //       ),
+  //   },
+  // ];
+
+  const videoMedia = (newsItem.media || []).filter((item) => item.mediaType === "Video");
+  const documentMedia = (newsItem.media || []).filter(
+    (item) => item.mediaType !== "Image" && item.mediaType !== "Video",
+  );
+  const labels = t.news?.newsDetail;
 
   return (
-    <div className="w-full min-h-screen bg-primaryBg py-4 px-3 sm:px-5 md:py-6">
-      <div className="mx-auto max-w-7xl flex flex-col gap-5">
-        {/* ── Top Header Section: Breadcrumb, Title + Meta, Hero Carousel ── */}
-        <div className="flex flex-col gap-3.5">
-          {/* ── Breadcrumb ─────────────────────────────────────── */}
-          <Breadcrumb items={breadcrumbItems} className="w-full px-1" />
+    <div className="min-h-screen w-full bg-primaryBg">
+      {/* <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
+        <Breadcrumb items={breadcrumbItems} className="w-full !gap-2 !text-xs" />
+      </div> */}
+      <article aria-labelledby="news-article-title" className="min-w-0">
+        <NewsArticleHeader key={postId || slug} newsItem={newsItem} />
+        <div className="mx-auto w-full max-w-7xl bg-white px-4 pt-4 sm:w-[calc(100%-3rem)] sm:px-6 sm:pt-6 lg:w-[calc(100%-4rem)]">
+          {videoMedia.map((item) => (
+            <video key={item.postMediaId || item.mediaUrl} controls preload="metadata" className="mb-5 max-h-[560px] w-full bg-black" aria-label={newsItem.title}>
+              <source src={getImageUrl(item.mediaUrl)} />
+            </video>
+          ))}
 
-          {/* ── Title + Meta ───────────────────────────────────── */}
-          <div className="flex flex-col gap-3 md:gap-4">
-            <div className="flex flex-col">
-              <h1
-                className="text-[24px] font-semibold leading-[1.35] text-black md:text-[32px] line-clamp-2"
-                title={newsItem.title}
-              >
-                {newsItem.title}
-              </h1>
-              {newsItem.topics && newsItem.topics.length > 0 && (
-                <TopicChips topics={newsItem.topics} className="mt-2" />
-              )}
-              {/* Inline dot-separated metadata row */}
-              <div className="flex items-center gap-1.5 flex-wrap mt-2">
-                {newsItem.viewCount !== undefined && (
-                  <span className="font-medium text-sm text-[#7b7979]">
-                    {newsItem.viewCount} lượt xem
-                  </span>
-                )}
-                <span className="w-1 h-1 rounded-full bg-[#7b7979] inline-block shrink-0" />
-                <span className="font-medium text-sm text-[#7b7979]">
-                  {getTranslatedTimeAgo(
-                    newsItem.createDate,
-                    t.news?.newsCard?.timeAgo,
-                  )}
-                </span>
-              </div>
-            </div>
+          <PostContent
+            html={newsItem.content}
+            contentUrl={newsItem.contentUrl || newsItem.ContentUrl}
+            className="[&>div:first-child>:first-child]:!mt-0 [&_img]:!rounded-none [&_img]:!shadow-none [&_figure]:max-w-full [&_iframe]:max-w-full [&_video]:max-w-full [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
+          />
 
-            {/* ── Hero Image / Carousel ────────────────────────── */}
-            {(() => {
-              const visualMedia = (newsItem.media || []).filter(
-                (item) => item.mediaType === "Image" || item.mediaType === "Video"
-              );
-              return visualMedia.length > 0 ? (
-                <Carousel
-                  images={visualMedia.map((item) => ({
-                    url: getImageUrl(item.mediaUrl),
-                    alt: newsItem.title,
-                  }))}
-                  className="rounded-2xl bg-black/5 aspect-video max-h-[500px]"
-                  objectFit="contain"
-                />
-              ) : null;
-            })()}
-          </div>
-        </div>
-
-        {/* ── Two-column layout: Article Body Island & Comments Island ──── */}
-        <div className="grid grid-cols-1 items-start lg:items-stretch gap-3.5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] lg:gap-4.5">
-          {/* ── Left Column: Article Body Island ───────────────────────── */}
-          <div className="min-w-0">
-            <FluentCard
-              padding="p-4"
-              rounded="rounded-2xl"
-              className="shadow-sm border-[#e5e7eb] bg-white flex flex-col gap-4"
-            >
-              {/* Article Content */}
-              <article className="min-w-0">
-                <PostContent
-                  html={newsItem.content}
-                  contentUrl={newsItem.contentUrl || newsItem.ContentUrl}
-                />
-
-                {/* Document Attachments */}
-                {(() => {
-                  const documentMedia = (newsItem.media || []).filter(
-                    (item) => item.mediaType !== "Image" && item.mediaType !== "Video"
-                  );
-                  return documentMedia.length > 0 ? (
-                    <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
-                      <h3 className="text-sm font-semibold text-gray-700">
-                        Tài liệu đính kèm ({documentMedia.length})
-                      </h3>
-                      <div className="flex flex-col gap-2">
-                        {documentMedia.map((doc) => (
-                          <FileAttachmentItem
-                            key={doc.postMediaId || doc.mediaUrl}
-                            fileName={doc.fileName || "Tài liệu"}
-                            fileSize={doc.fileSize}
-                            onClick={() => setPreviewDoc(doc)}
-                            className="cursor-pointer hover:bg-gray-50 transition-colors"
-                            rightAction={
-                              <IconButton
-                                as="a"
-                                href={getImageUrl(doc.mediaUrl)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                variant="ghost"
-                                size="sm"
-                                className="shrink-0"
-                                title="Tải xuống"
-                              >
-                                <Download size={20} />
-                              </IconButton>
-                            }
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ) : null;
-                })()}
-
-                {/* Action Bar */}
-                <NewsDetailActionBar
-                  newsItem={newsItem}
-                  reactions={postReactions}
-                  handleReact={handleReact}
-                  handleShare={handleShare}
-                  onCommentClick={() =>
-                    commentsRef.current?.scrollIntoView({ behavior: "smooth" })
+          {documentMedia.length > 0 && (
+            <section className="mt-6 flex flex-col gap-3 border-t border-border pt-4">
+              <h2 className="text-sm font-semibold text-gray-700">
+                {labels?.attachments || "Attachments"} ({documentMedia.length})
+              </h2>
+              {documentMedia.map((doc) => (
+                <FileAttachmentItem
+                  key={doc.postMediaId || doc.mediaUrl}
+                  fileName={doc.fileName || labels?.document || "Document"}
+                  fileSize={doc.fileSize}
+                  onClick={() => setPreviewDoc(doc)}
+                  className="cursor-pointer transition-colors hover:bg-gray-50"
+                  rightAction={
+                    <IconButton
+                      as="a"
+                      href={getImageUrl(doc.mediaUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      variant="ghost"
+                      size="sm"
+                      className="shrink-0"
+                      title={labels?.download || "Download"}
+                    >
+                      <Download size={20} />
+                    </IconButton>
                   }
                 />
-              </article>
-            </FluentCard>
-          </div>
+              ))}
+            </section>
+          )}
 
-          {/* ── Right Column: Comments Sidebar Island ───────────── */}
-          <div className="w-full min-w-0 relative lg:h-full">
-            <div className="lg:absolute lg:inset-0">
-              <FluentCard
-                padding="p-3.5 sm:p-4"
-                rounded="rounded-2xl"
-                className="shadow-sm border-[#e5e7eb] h-full w-full !justify-start overflow-y-auto overflow-x-hidden"
-              >
-                <CommentsSection
-                  ref={commentsRef}
-                  postId={newsItem.postId || newsItem.id}
-                  totalComments={newsItem.totalComments || 0}
-                />
-              </FluentCard>
-            </div>
+          <div className="mt-6">
+            <NewsDetailActionBar
+              newsItem={newsItem}
+              reactions={postReactions}
+              handleReact={handleReact}
+              handleShare={handleShare}
+              onCommentClick={() => commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            />
           </div>
         </div>
+      </article>
 
-        {/* ── Related News (full width) ───────────────────────────── */}
-        <RelatedNewsSection currentPostId={newsItem.postId} />
+      <div className="mx-auto flow-root w-full max-w-7xl bg-white px-4 pb-8 sm:w-[calc(100%-3rem)] sm:px-6 lg:w-[calc(100%-4rem)]">
+        <RelatedNewsSection currentPostId={newsItem.postId || newsItem.id} postType={isGlobalNews ? "2" : "1"} />
+
+        <section ref={commentsRef} aria-label={labels?.comment || "Comments"} className="mt-8 scroll-mt-24 border-t border-border pt-6">
+          <CommentsSection
+            key={postId}
+            postId={newsItem.postId || newsItem.id}
+            totalComments={newsItem.totalComments ?? newsItem.commentCount ?? 0}
+          />
+        </section>
       </div>
 
       {/* ── Share Modal ──────────────────────────────────────────── */}
