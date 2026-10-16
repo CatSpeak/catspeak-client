@@ -1,3 +1,5 @@
+import dayjs from "dayjs"
+
 /**
  * Parses Chinese topic title into Hanzi, Pinyin, and Vietnamese meaning
  * Common formats:
@@ -6,6 +8,36 @@
  * - "你好 (Nǐ hǎo)"
  * - "Topic 1"
  */
+export const getDayOfWeekLabel = (date) => {
+  if (!date) return ""
+  const d = dayjs(date).day()
+  const map = {
+    0: "CN",
+    1: "T2",
+    2: "T3",
+    3: "T4",
+    4: "T5",
+    5: "T6",
+    6: "T7",
+  }
+  return map[d] || ""
+}
+
+export const getDayOfWeekFull = (date) => {
+  if (!date) return ""
+  const d = dayjs(date).day()
+  const map = {
+    0: "Chủ nhật",
+    1: "Thứ 2",
+    2: "Thứ 3",
+    3: "Thứ 4",
+    4: "Thứ 5",
+    5: "Thứ 6",
+    6: "Thứ 7",
+  }
+  return map[d] || ""
+}
+
 export const parseTopic = (title = "", description = "") => {
   if (!title) {
     return {

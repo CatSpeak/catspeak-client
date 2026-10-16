@@ -1,26 +1,20 @@
-import React from "react"
+import React, { useState } from "react"
 import dayjs from "dayjs"
-import {
-  CheckCircle2,
-  Clock,
-  Lock,
-  AlertCircle,
-  Play,
-  RotateCcw,
-  Sparkles,
-  Flame,
-  ChevronRight,
-  Eye,
-} from "lucide-react"
-import { parseTopic, getCategoryBadgeInfo } from "../utils/learningPathUtils"
+import { Check } from "lucide-react"
+import { parseTopic, getDayOfWeekLabel } from "../utils/learningPathUtils"
+import CompletedCardPopover from "./CompletedCardPopover"
 
 const CalendarCardItem = ({
   card,
   isToday: isTodayProp,
   onSelectCard,
   onLaunchCard,
+  onSkipCard,
   isLaunching = false,
+  startsTomorrow = false,
 }) => {
+  const [showPopover, setShowPopover] = useState(false)
+
   if (!card) return null
 
   const isToday = isTodayProp ?? card.isToday ?? false
@@ -28,57 +22,45 @@ const CalendarCardItem = ({
   const formattedDate = card.scheduledDate
     ? dayjs(card.scheduledDate).format("DD/MM")
     : ""
+  const dayOfWeek = getDayOfWeekLabel(card.scheduledDate)
 
   const { hanzi, pinyin, vietnamese } = parseTopic(
     card.topicTitle,
     card.topicDescription,
   )
 
-  const catBadge = getCategoryBadgeInfo(card.category)
-
   // Status flags
-  const isScheduled = status === "Scheduled"
+  const isScheduled = status === "Scheduled" || (isToday && status !== "Completed" && status !== "Missed")
   const isCompleted = status === "Completed"
   const isMissed = status === "Missed"
   const isUpcoming = status === "Upcoming"
   const isQuotaLocked = status === "QuotaLocked" || card.isQuotaLocked
+  const isSkipped = status === "Skipped"
   const isInProgress = status === "InProgress"
 
-  // Base card container styling based on status
-  let containerStyles =
-    "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 shadow-sm"
-
-  if (isScheduled) {
-    containerStyles =
-      "bg-gradient-to-b from-white via-white to-cath-red-50/20 dark:from-gray-800 dark:via-gray-800 dark:to-cath-red-950/20 border-2 border-cath-red-600 ring-4 ring-cath-red-500/15 shadow-xl shadow-cath-red-500/10 scale-[1.01] z-10"
-  } else if (isCompleted) {
-    containerStyles =
-      "bg-white dark:bg-gray-800 border-emerald-300/80 dark:border-emerald-800/80 shadow-sm hover:shadow-md"
-  } else if (isMissed) {
-    containerStyles =
-      "bg-amber-50/30 dark:bg-amber-950/15 border-amber-300 dark:border-amber-700/70 shadow-sm"
-  } else if (isInProgress) {
-    containerStyles =
-      "bg-orange-50/20 dark:bg-orange-950/10 border-orange-400 dark:border-orange-600 ring-2 ring-orange-400/20 shadow-md"
-  } else if (isQuotaLocked) {
-    containerStyles =
-      "bg-gray-50/80 dark:bg-gray-850/60 border-gray-200 dark:border-gray-700/80 opacity-75"
-  } else if (isUpcoming) {
-    containerStyles =
-      "bg-gray-50/60 dark:bg-gray-850/40 border-gray-200/80 dark:border-gray-700/60 opacity-90 hover:opacity-100"
+  // Base card container styling based on Figma screens
+  let borderClass = "border border-gray-200"
+  if (isScheduled && !isQuotaLocked) {
+    borderClass = "border-2 border-[#980019] shadow-sm"
   }
 
-  const handlePrimaryAction = (e) => {
+  const handleCardClick = () => {
+    if (isCompleted) {
+      setShowPopover((prev) => !prev)
+      return
+    }
+    onSelectCard?.(card)
+  }
+
+  const handlePrimaryBtnClick = (e) => {
     e.stopPropagation()
     if (isQuotaLocked) {
       onSelectCard?.(card)
       return
     }
-
     if (isScheduled || isInProgress) {
       onLaunchCard?.(card)
     } else {
-      // Upcoming, Missed, Completed all open preview / review modal first
       onSelectCard?.(card)
     }
   }
@@ -87,184 +69,191 @@ const CalendarCardItem = ({
     <div
       role="button"
       tabIndex={0}
-      onClick={() => onSelectCard?.(card)}
+      onClick={handleCardClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault()
-          onSelectCard?.(card)
+          handleCardClick()
         }
       }}
-      className={`group relative flex flex-col justify-between rounded-2xl p-4 sm:p-5 transition-all duration-200 cursor-pointer ${containerStyles}`}
+      className={`group relative flex flex-col justify-between rounded-2xl bg-white p-5 transition-all duration-200 cursor-pointer min-h-[220px] ${borderClass}`}
     >
-      {/* Top Header: Day & Category */}
+      {/* Popover for completed card (Figma screen 13 lp01c) */}
+      {isCompleted && showPopover && (
+        <CompletedCardPopover
+          dayIndex={card.dayIndex}
+          topicTitle={vietnamese || card.topicTitle}
+          score={card.score !== null ? Math.round(card.score) : 82}
+          onClose={() => setShowPopover(false)}
+        />
+      )}
+
+      {/* Top Header: Day & Status Badge */}
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Ngày {card.dayIndex}
+        <div className="flex items-start justify-between gap-1 mb-2">
+          <div className="flex flex-col text-left">
+            <span className="text-xs font-bold text-gray-900 leading-tight">
+              Ngày {card.dayIndex}{dayOfWeek ? ` · ${dayOfWeek}` : ""}
             </span>
             {formattedDate && (
-              <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
-                ({formattedDate})
-              </span>
-            )}
-            {isToday && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cath-red-600 text-white shadow-xs">
-                Hôm nay
+              <span className="text-[11px] text-gray-400 font-normal mt-0.5">
+                {formattedDate}
               </span>
             )}
           </div>
 
-          {/* Category Badge */}
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${catBadge.bgColor} ${catBadge.textColor} ${catBadge.borderColor}`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${catBadge.dotColor}`} />
-            {catBadge.label}
-          </span>
+          {/* Right Badge matching Figma 100% */}
+          <div>
+            {isCompleted && (
+              <div className="w-5 h-5 rounded-full bg-[#12B76A] flex items-center justify-center text-white shadow-xs">
+                <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+            )}
+
+            {isMissed && (
+              <div className="w-5 h-5 rounded-full bg-[#FDB022] flex items-center justify-center text-white font-extrabold text-xs shadow-xs">
+                !
+              </div>
+            )}
+
+            {isScheduled && !isQuotaLocked && (
+              <span className="inline-block bg-[#980019] text-white text-[11px] font-semibold px-2 py-0.5 rounded-md">
+                Hôm nay
+              </span>
+            )}
+
+            {isQuotaLocked && (
+              <span className="inline-block bg-gray-100 text-gray-500 text-[11px] font-medium px-2 py-0.5 rounded-md">
+                Khóa
+              </span>
+            )}
+
+            {isSkipped && (
+              <span className="inline-block bg-gray-100 text-gray-500 text-[11px] font-medium px-2 py-0.5 rounded-md">
+                Đã bỏ qua
+              </span>
+            )}
+
+            {isUpcoming && !isQuotaLocked && !isSkipped && (
+              <span className="inline-block bg-gray-100 text-gray-400 text-[11px] font-medium px-2 py-0.5 rounded-md">
+                Sắp tới
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Hanzi / Chinese Title */}
-        <div className="my-2">
-          <h3 className="text-xl sm:text-2xl font-bold font-serif text-gray-900 dark:text-white tracking-wide leading-tight group-hover:text-cath-red-700 dark:group-hover:text-cath-red-400 transition-colors">
-            {hanzi}
+        {/* Card Body: Title (Vietnamese) & Subtitle (Hanzi / Pinyin / Desc) */}
+        <div className="my-3 text-left">
+          <h3 className="text-base font-bold text-gray-900 leading-snug line-clamp-1 group-hover:text-[#980019] transition-colors">
+            {vietnamese || card.topicTitle}
           </h3>
 
-          {/* Pinyin Subtitle */}
-          {pinyin && (
-            <p className="text-xs sm:text-sm font-medium text-cath-red-600 dark:text-cath-red-400 mt-0.5">
-              {pinyin}
-            </p>
-          )}
-
-          {/* Vietnamese translation */}
-          <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-2 leading-relaxed">
-            {vietnamese}
+          <p className="text-xs text-gray-400 mt-1 line-clamp-1">
+            {hanzi && <span>{hanzi}</span>}
+            {hanzi && (pinyin || card.topicDescription) && <span> · </span>}
+            <span>{card.topicDescription || pinyin}</span>
           </p>
         </div>
       </div>
 
-      {/* Middle Status Indicator */}
-      <div className="my-3 pt-3 border-t border-gray-100 dark:border-gray-700/40">
+      {/* Card Bottom Actions */}
+      <div className="mt-4 flex flex-col justify-end">
+        {/* Completed: Green Score Pill */}
         {isCompleted && (
-          <div className="flex items-center justify-between">
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              Đã hoàn thành
-            </span>
-            {card.score !== null && card.score !== undefined && (
-              <span className="text-xs font-extrabold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                ⭐ {Math.round(card.score)}%
-              </span>
-            )}
-          </div>
-        )}
-
-        {isMissed && (
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-            <AlertCircle className="w-4 h-4 text-amber-500" />
-            <span>Đã lỡ buổi học</span>
-          </div>
-        )}
-
-        {isUpcoming && (
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-            <Clock className="w-3.5 h-3.5 text-gray-400" />
-            <span>Chưa đến lịch</span>
-          </div>
-        )}
-
-        {isQuotaLocked && (
-          <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-            <Lock className="w-3.5 h-3.5 text-rose-500" />
-            <span className="text-rose-600 dark:text-rose-400 font-semibold">
-              Đã khóa hôm nay
+          <div className="text-left">
+            <span
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowPopover((prev) => !prev)
+              }}
+              className="inline-block bg-[#E6F8EB] text-[#12B76A] font-bold text-xs py-1.5 px-3 rounded-lg hover:bg-[#D5F4DE] transition-colors"
+            >
+              {card.score !== null ? Math.round(card.score) : 82} điểm
             </span>
           </div>
         )}
 
-        {isInProgress && (
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-orange-600 dark:text-orange-400">
-            <Flame className="w-4 h-4 text-orange-500 fill-orange-500 animate-pulse" />
-            <span>Đang làm dở</span>
-          </div>
-        )}
-
-        {isScheduled && (
-          <div className="flex items-center gap-1 text-xs font-bold text-cath-red-700 dark:text-cath-red-400">
-            <Sparkles className="w-3.5 h-3.5 text-cath-red-600" />
-            <span>Mục tiêu chính hôm nay</span>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom CTA Button */}
-      <div className="mt-2">
-        {isScheduled && (
-          <button
-            type="button"
-            disabled={isLaunching}
-            onClick={handlePrimaryAction}
-            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cath-red-700 via-cath-red-600 to-cath-red-700 hover:brightness-110 shadow-md shadow-cath-red-600/20 transition-all active:scale-95 disabled:opacity-50"
-          >
-            <Play className="w-3.5 h-3.5 fill-current" />
-            <span>{isLaunching ? "Đang chuẩn bị..." : "Vào học ngay"}</span>
-          </button>
-        )}
-
-        {isInProgress && (
-          <button
-            type="button"
-            disabled={isLaunching}
-            onClick={handlePrimaryAction}
-            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 shadow-md shadow-orange-600/20 transition-all active:scale-95 disabled:opacity-50"
-          >
-            <Play className="w-3.5 h-3.5 fill-current" />
-            <span>{isLaunching ? "Đang kết nối..." : "Tiếp tục"}</span>
-          </button>
-        )}
-
-        {isCompleted && (
-          <button
-            type="button"
-            onClick={handlePrimaryAction}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800 transition-all"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span>Xem lại</span>
-          </button>
-        )}
-
+        {/* Missed: Yellow "Học bù →" Button */}
         {isMissed && (
           <button
             type="button"
-            onClick={handlePrimaryAction}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 shadow-sm shadow-amber-500/20 transition-all active:scale-95"
+            onClick={handlePrimaryBtnClick}
+            className="w-full bg-[#FEF6EE] text-[#D97706] hover:bg-[#FDE8D0] font-semibold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1 transition-colors"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
             <span>Học bù</span>
+            <span>→</span>
           </button>
         )}
 
-        {isUpcoming && (
-          <button
-            type="button"
-            onClick={handlePrimaryAction}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700/60 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 transition-all"
-          >
-            <span>Học sớm</span>
-            <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-          </button>
+        {/* Scheduled / InProgress (Today Active) */}
+        {(isScheduled || isInProgress) && !isQuotaLocked && (
+          <div className="flex flex-col gap-1.5">
+            {/* Small skip button (Figma screen 14) */}
+            {onSkipCard && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onSkipCard?.(card)
+                }}
+                className="self-end text-[11px] text-gray-400 hover:text-gray-600 transition-colors pr-1"
+              >
+                Bỏ qua
+              </button>
+            )}
+
+            <button
+              type="button"
+              disabled={isLaunching}
+              onClick={handlePrimaryBtnClick}
+              className="w-full bg-[#980019] text-white hover:bg-[#800014] font-medium text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1 shadow-xs transition-colors disabled:opacity-50"
+            >
+              <span>{isLaunching ? "Đang kết nối..." : "Vào học"}</span>
+              <span>→</span>
+            </button>
+          </div>
         )}
 
+        {/* QuotaLocked: Gray "Cần Premium" Button (Figma screen 11) */}
         {isQuotaLocked && (
           <button
             type="button"
-            onClick={handlePrimaryAction}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/30 hover:bg-gray-200 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-600 transition-all"
+            onClick={handlePrimaryBtnClick}
+            className="w-full bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium text-xs py-2 px-3 rounded-xl text-center transition-colors"
           >
-            <Lock className="w-3 h-3 text-gray-400" />
-            <span>Chi tiết</span>
+            Cần Premium
+          </button>
+        )}
+
+        {/* Upcoming (Figma screen 01 & screen 12) */}
+        {isUpcoming && !isQuotaLocked && !isSkipped && (
+          startsTomorrow ? (
+            <button
+              type="button"
+              onClick={handlePrimaryBtnClick}
+              className="w-full bg-[#FEF6EE] text-[#D97706] hover:bg-[#FDE8D0] font-semibold text-xs py-2 px-3 rounded-xl text-center transition-colors"
+            >
+              Học sớm
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="w-full bg-gray-50 text-gray-400 text-xs py-2 px-3 rounded-xl text-center cursor-not-allowed"
+            >
+              Chưa tới
+            </button>
+          )
+        )}
+
+        {/* Skipped */}
+        {isSkipped && (
+          <button
+            type="button"
+            disabled
+            className="w-full bg-gray-50 text-gray-400 text-xs py-2 px-3 rounded-xl text-center cursor-not-allowed"
+          >
+            Đã bỏ qua
           </button>
         )}
       </div>
