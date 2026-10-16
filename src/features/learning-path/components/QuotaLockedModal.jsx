@@ -1,5 +1,5 @@
 import React from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Lock } from "lucide-react"
 import Modal from "@/shared/components/ui/Modal"
 
@@ -9,14 +9,12 @@ const QuotaLockedModal = ({
   topicTitle = "Gọi món ăn",
 }) => {
   const navigate = useNavigate()
-  const { lang } = useParams()
-  const currentLang = lang || "vi"
 
   if (!isOpen) return null
 
   const handleUpgrade = () => {
     onClose?.()
-    navigate(`/${currentLang}/pricing`)
+    navigate("/pricing")
   }
 
   return (

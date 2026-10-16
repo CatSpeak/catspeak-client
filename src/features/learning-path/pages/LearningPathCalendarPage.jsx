@@ -4,7 +4,6 @@ import dayjs from "dayjs"
 import {
   AlertCircle,
   RotateCcw,
-  Compass,
   X,
 } from "lucide-react"
 import { toast } from "@/shared/utils/toastBridge"
@@ -355,16 +354,13 @@ const LearningPathCalendarPage = () => {
           />
 
           {/* 2. Five-Card Calendar Header */}
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-2">
-              <Compass className="w-5 h-5 text-[#980019]" />
-              <h2 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
-                Lịch học chu kỳ 5 ngày
-              </h2>
-            </div>
-            <div className="text-xs text-gray-500 font-medium">
-              Còn {calendarData?.remainingDays ?? 0} ngày
-            </div>
+          <div className="flex flex-col text-left mt-2">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
+              Buổi học trong chu kỳ
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Bấm vào buổi để vào học · Học sớm hoặc học bù trong chu kỳ
+            </p>
           </div>
 
           {/* 3. Five-Card Calendar Grid / Carousel */}

@@ -21,6 +21,11 @@ import {
   Ticket,
   Gift,
   Bookmark,
+  Bot,
+  CircleDot,
+  Layers,
+  History,
+  LayoutGrid,
 } from "lucide-react"
 
 export const navSections = [
@@ -44,12 +49,49 @@ export const navSections = [
     ],
   },
   {
+    key: "aiTutor",
+    labelKey: "aiTutor",
+    defaultLabel: "Gia sư AI",
+    maxInitial: 5,
+    items: [
+      {
+        key: "placementTest",
+        label: "Đánh giá trình độ",
+        path: "/cat-speak/placement-test",
+        icon: CircleDot,
+      },
+      {
+        key: "learningPath",
+        label: "Lộ trình 5 ngày",
+        path: "/learning-path",
+        icon: CalendarDays,
+      },
+      {
+        key: "speakingRooms",
+        label: "Phòng luyện nói",
+        path: "/community",
+        icon: Mic,
+      },
+      {
+        key: "vocabularyNotebook",
+        label: "Sổ tay từ vựng",
+        path: "/workspace/vocabulary",
+        icon: Layers,
+      },
+      {
+        key: "learningHistory",
+        label: "Lịch sử & Tiến độ",
+        path: "/workspace/learning",
+        icon: History,
+      },
+    ],
+  },
+  {
     key: "catSpeak",
     labelKey: "catSpeak",
     defaultLabel: "Cat Speak",
     maxInitial: 5,
     items: [
-      { key: "learningPath", label: "Lộ trình học", path: "/learning-path", icon: CalendarDays },
       { key: "globalNews", path: "/cat-speak/global-news", icon: Globe },
       { key: "catSpeakNews", path: "/cat-speak/news", icon: Newspaper },
       { key: "reels", path: "/cat-speak/reels", icon: Film },
@@ -131,11 +173,18 @@ export const dockNavGroups = [
         path: "/cat-speak/global-news",
         hasSublinks: true,
       },
-    ],
-  },
-  {
-    key: "secondary",
-    items: [
+      {
+        key: "workspace",
+        icon: Briefcase,
+        path: "/workspace",
+        hasSublinks: true,
+      },
+      {
+        key: "aiTutor",
+        icon: Bot,
+        path: "/learning-path",
+        hasSublinks: true,
+      },
       {
         key: "exploreCourses",
         icon: Compass,
@@ -144,20 +193,9 @@ export const dockNavGroups = [
       },
       {
         key: "learningResources",
-        icon: LayoutDashboard,
+        icon: LayoutGrid,
         path: "/resources",
         hasSublinks: false,
-      },
-    ],
-  },
-  {
-    key: "workspace",
-    items: [
-      {
-        key: "workspace",
-        icon: Briefcase,
-        path: "/workspace",
-        hasSublinks: true,
       },
     ],
   },
@@ -207,6 +245,13 @@ export const getActiveDockSection = (pathname) => {
   ) {
     return "settings"
   }
+  if (
+    pathname.includes("/learning-path") ||
+    pathname.includes("/ai-tutor") ||
+    pathname.includes("/cat-speak/placement-test")
+  ) {
+    return "aiTutor"
+  }
   if (pathname.includes("/cat-speak")) return "catSpeak"
   if (pathname.includes("/profile")) return "profile"
   if (pathname.includes("/explore-courses")) return "exploreCourses"
@@ -233,31 +278,6 @@ export const navLinks = [
       { key: "letters", path: "/cat-speak/letters", icon: Mail },
       { key: "events", path: "/cat-speak/calendar", icon: Calendar },
     ],
-  },
-  {
-    key: "horizontalBar-secondary",
-    label: "Horizontal bar",
-    isHorizontalBar: true,
-    showOnHorizontalBar: false,
-  },
-  {
-    key: "exploreCourses",
-    label: "Explore Courses",
-    path: "/explore-courses",
-    icon: Compass,
-  },
-  {
-    key: "learningResources",
-    label: "Resource Hub",
-    path: "/resources",
-    icon: LayoutDashboard,
-    isPrivate: true,
-  },
-  {
-    key: "horizontalBar-workspace",
-    label: "Horizontal bar",
-    isHorizontalBar: true,
-    showOnHorizontalBar: false,
   },
   {
     key: "workspace",
@@ -315,6 +335,38 @@ export const navLinks = [
     get subItems() {
       return this.groups.flatMap((g) => g.items)
     },
+  },
+  {
+    key: "aiTutor",
+    label: "Gia sư AI",
+    hasDropdown: true,
+    icon: Bot,
+    subItems: [
+      { key: "placementTest", label: "Đánh giá trình độ", path: "/cat-speak/placement-test", icon: CircleDot },
+      { key: "learningPath", label: "Lộ trình 5 ngày", path: "/learning-path", icon: CalendarDays },
+      { key: "speakingRooms", label: "Phòng luyện nói", path: "/community", icon: Mic },
+      { key: "vocabularyNotebook", label: "Sổ tay từ vựng", path: "/workspace/vocabulary", icon: Layers },
+      { key: "learningHistory", label: "Lịch sử & Tiến độ", path: "/workspace/learning", icon: History },
+    ],
+  },
+  {
+    key: "horizontalBar-secondary",
+    label: "Horizontal bar",
+    isHorizontalBar: true,
+    showOnHorizontalBar: false,
+  },
+  {
+    key: "exploreCourses",
+    label: "Explore Courses",
+    path: "/explore-courses",
+    icon: Compass,
+  },
+  {
+    key: "learningResources",
+    label: "Resource Hub",
+    path: "/resources",
+    icon: LayoutDashboard,
+    isPrivate: true,
   },
 ]
 

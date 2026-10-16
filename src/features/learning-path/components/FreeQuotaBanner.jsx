@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 
 const FreeQuotaBanner = ({
   quota,
-  lang = "vi",
 }) => {
   const navigate = useNavigate()
 
@@ -21,11 +20,11 @@ const FreeQuotaBanner = ({
     <div
       role="button"
       tabIndex={0}
-      onClick={() => navigate(`/${lang}/pricing`)}
+      onClick={() => navigate("/pricing")}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault()
-          navigate(`/${lang}/pricing`)
+          navigate("/pricing")
         }
       }}
       className={`w-full rounded-2xl py-3.5 px-4 text-center text-xs sm:text-sm font-medium my-6 transition-all cursor-pointer select-none ${
