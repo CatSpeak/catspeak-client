@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Search, ArrowLeft } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSearchParams, useNavigate, useLocation, useParams } from "react-router-dom"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
@@ -70,7 +70,11 @@ const HeaderSearchBar = () => {
               handleSearch()
             }
           }}
-          placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
+          placeholder={
+            location.pathname.includes("/learning-path")
+              ? "Tìm chủ đề..."
+              : t.header?.searchPlaceholder || "Tìm kiếm phòng"
+          }
           className="w-full h-10 pl-11 pr-4 bg-primaryBg border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[14px] outline-none transition-all placeholder-gray-500"
         />
       </div>
@@ -78,7 +82,7 @@ const HeaderSearchBar = () => {
       {/* Expanded Search Overlay (Mobile & Tablet overlay when toggled on) */}
       <AnimatePresence>
         {isExpanded && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
@@ -117,7 +121,7 @@ const HeaderSearchBar = () => {
             <div className="lg:hidden shrink-0">
               <HeaderFilter />
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </>

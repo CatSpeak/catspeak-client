@@ -371,8 +371,6 @@ const VideoCallRoomContent = () => {
             ) : (
               <VideoGrid />
             )}
-            {/* AI Floating Widget */}
-            {isAISession && <AIFloatingWidget />}
 
             {/* Student Floating Speaking Time Balance Widget */}
             <AnimatePresence>

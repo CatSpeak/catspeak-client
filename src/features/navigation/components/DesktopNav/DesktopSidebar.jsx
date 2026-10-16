@@ -97,6 +97,8 @@ const DesktopSidebar = () => {
       pathname.startsWith("/refunds")
     ) {
       setLastSublink("settings", cleanPath)
+    } else if (pathname.includes("/learning-path") || pathname.includes("/placement-test")) {
+      setLastSublink("aiTutor", cleanPath)
     } else if (pathname.includes("/cat-speak")) {
       setLastSublink("catSpeak", cleanPath)
     } else if (pathname.includes("/workspace")) {

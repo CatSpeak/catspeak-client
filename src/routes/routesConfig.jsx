@@ -517,6 +517,10 @@ const routesConfig = [
                       </LazyRoute>
                     ),
                   },
+                  {
+                    path: "placement-test",
+                    element: <ComingSoonPage />,
+                  },
                   { path: "*", element: <PageNotFound /> },
                 ],
               },
@@ -550,6 +554,12 @@ const routesConfig = [
             ],
           },
         ],
+      },
+
+      // Language-prefixed pricing redirect
+      {
+        path: "/:lang/pricing",
+        element: <Navigate to="/pricing" replace />,
       },
 
       // Language-prefixed video call route

@@ -5,11 +5,13 @@ const FiveCardCalendar = ({
   cards = [],
   onSelectCard,
   onLaunchCard,
+  onSkipCard,
   isLaunching = false,
+  startsTomorrow = false,
 }) => {
   if (!cards || cards.length === 0) {
     return (
-      <div className="w-full py-12 text-center text-gray-500 dark:text-gray-400">
+      <div className="w-full py-12 text-center text-gray-500">
         Không có buổi học nào trong chu kỳ này.
       </div>
     )
@@ -21,7 +23,7 @@ const FiveCardCalendar = ({
   return (
     <div className="w-full">
       {/* Mobile Hint */}
-      <div className="flex md:hidden items-center justify-between text-[11px] text-gray-400 dark:text-gray-500 px-1 mb-2">
+      <div className="flex md:hidden items-center justify-between text-[11px] text-gray-400 px-1 mb-2">
         <span>Chu kỳ 5 buổi</span>
         <span>Vuốt ngang để xem đủ 5 ngày ➔</span>
       </div>
@@ -38,7 +40,9 @@ const FiveCardCalendar = ({
               isToday={card.isToday}
               onSelectCard={onSelectCard}
               onLaunchCard={onLaunchCard}
+              onSkipCard={onSkipCard}
               isLaunching={isLaunching}
+              startsTomorrow={startsTomorrow}
             />
           </div>
         ))}
