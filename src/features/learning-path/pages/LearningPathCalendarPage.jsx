@@ -124,16 +124,29 @@ const LearningPathCalendarPage = () => {
       const result = await launchSession(cardId).unwrap()
       setIsPreviewOpen(false)
 
-      if (result.roomName) {
+      if (result.roomId || result.roomName) {
         toast.success("Đang kết nối vào phòng luyện nói...")
+        const targetRoomId = result.roomId || result.roomName
         const queryParams = new URLSearchParams({
           token: result.token || "",
           sessionId: result.sessionId || "",
           cardId: String(result.cardId || cardId),
           topicId: String(result.topicId || ""),
+          isLearningPath: "true",
         }).toString()
 
-        navigate(`/${currentLang}/meet/${result.roomName}?${queryParams}`)
+        navigate(`/${currentLang}/meet/${targetRoomId}?${queryParams}`, {
+          state: {
+            fromQueue: true,
+            isAISession: true,
+            isLearningPath: true,
+            cardId: result.cardId || cardId,
+            topicId: result.topicId,
+            sessionId: result.sessionId,
+            livekitToken: result.token,
+            livekitServerUrl: result.liveKitUrl,
+          },
+        })
       }
     } catch (err) {
       const isQuotaError =
