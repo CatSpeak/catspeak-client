@@ -2,9 +2,12 @@ import React, { useState, useMemo } from "react"
 import { SlidersHorizontal } from "lucide-react"
 import RoomFilterModal from "@/features/rooms/components/navigation/RoomFilterModal"
 import { useSearchParams } from "react-router-dom"
+import { useLanguage } from "@/shared/context/LanguageContext"
 
 const HeaderFilter = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const { t } = useLanguage()
+  const filterLabel = t?.header?.filterRooms || "Lọc phòng"
   const [searchParams] = useSearchParams()
 
   const activeFilterCount = useMemo(() => {
@@ -23,8 +26,10 @@ const HeaderFilter = () => {
       <button 
         className="relative flex items-center justify-center w-10 h-10 rounded-full bg-primaryBg hover:bg-gray-200 text-gray-700 transition-colors shrink-0"
         onClick={() => setIsFilterOpen(true)}
+        aria-label={filterLabel}
+        title={filterLabel}
       >
-        <SlidersHorizontal size={20} strokeWidth={2} />
+        <SlidersHorizontal size={20} strokeWidth={2} aria-hidden="true" />
         {activeFilterCount > 0 && (
           <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-cath-red-700 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
             {activeFilterCount}
