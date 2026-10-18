@@ -1,12 +1,9 @@
 import { useState } from "react"
-import { ArrowRight, BarChart3, ExternalLink, Lightbulb, Mic, Target } from "lucide-react"
+import { ArrowRight, BarChart3, Lightbulb, Mic, Target } from "lucide-react"
 import { Checkbox } from "@/shared/components/ui/inputs"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { cn } from "@/lib/utils"
 import StepCard from "./StepCard"
-
-// Trang chính sách quyền riêng tư có sẵn trên website.
-const PRIVACY_POLICY_URL = "/policy"
 
 const FEATURE_ICONS = [Target, Mic, BarChart3]
 const FEATURE_ICON_TONES = [
@@ -100,15 +97,6 @@ const ConsentStep = ({
             <li>• {consent.bulletAudioOnly}</li>
             <li>• {consent.bulletNoShare}</li>
           </ul>
-          <a
-            href={PRIVACY_POLICY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex w-fit items-center gap-1 rounded text-[11px] font-semibold text-cath-red-700 underline underline-offset-2 hover:text-cath-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
-          >
-            {consent.privacyLink || "Chính sách quyền riêng tư"}
-            <ExternalLink size={11} />
-          </a>
         </div>
         <div className="flex items-center gap-3">
           <Checkbox

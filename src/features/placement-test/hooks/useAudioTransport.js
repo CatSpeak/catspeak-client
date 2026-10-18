@@ -39,10 +39,7 @@ const useAudioTransport = ({ deviceId } = {}) => {
       transportRef.current?.playAudioBase64(base64Data, format, options),
     [],
   )
-  const setMuted = useCallback(
-    (value) => transportRef.current?.setMuted(value) ?? false,
-    [],
-  )
+
   const stopAudio = useCallback(
     () => transportRef.current?.stopAudio(),
     [],
@@ -77,7 +74,6 @@ const useAudioTransport = ({ deviceId } = {}) => {
     stopRecording,
     getRecordedBlob,
     getRecordingUrl,
-    setMuted,
   }
 }
 

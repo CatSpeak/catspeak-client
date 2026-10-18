@@ -15,7 +15,6 @@ export const createMicCapture = ({ deviceId } = {}) => {
   let level = 0
   let lastNotifyAt = 0
   let destroyed = false
-  let muted = false
 
   const levelSubscribers = new Set()
 
@@ -68,20 +67,6 @@ export const createMicCapture = ({ deviceId } = {}) => {
         stream.getAudioTracks().length > 0 &&
         stream.getAudioTracks().some((t) => t.readyState === "live"),
     )
-
-  const applyMuted = () => {
-    if (!stream) return
-    stream.getAudioTracks().forEach((track) => {
-      track.enabled = !muted
-    })
-  }
-
-  const setMuted = (value) => {
-    muted = Boolean(value)
-    applyMuted()
-    return muted
-  }
-
   const start = async () => {
     if (destroyed) return { ok: false, error: "destroyed" }
     if (isStreamActive()) return { ok: true }
@@ -104,7 +89,6 @@ export const createMicCapture = ({ deviceId } = {}) => {
       stream = null
       return { ok: false, error: "destroyed" }
     }
-    applyMuted()
 
     try {
       const AudioContextCtor = window.AudioContext || window.webkitAudioContext
@@ -239,8 +223,6 @@ export const createMicCapture = ({ deviceId } = {}) => {
     getRecordedBlob,
     subscribeLevel,
     isRecording: () => Boolean(recorder && recorder.state === "recording"),
-    setMuted,
-    isMuted: () => muted,
     destroy,
   }
 }

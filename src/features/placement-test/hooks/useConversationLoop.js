@@ -112,7 +112,6 @@ const useConversationLoop = () => {
   const [connectionLost, setConnectionLost] = useState(false)
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
-  const [isMuted, setIsMuted] = useState(false)
   // BUG-PT-13 / FR-PT-012: F5 giữa bài thì hỏi tiếp tục hay thi lại (sc14).
   const [resumePrompt, setResumePrompt] = useState(null)
   const [restarting, setRestarting] = useState(false)
@@ -135,7 +134,6 @@ const useConversationLoop = () => {
     stopRecording,
     getRecordedBlob,
     getRecordingUrl,
-    setMuted: setTransportMuted,
   } = useAudioTransport()
 
   const [isPlayingUserAudio, setIsPlayingUserAudio] = useState(false)
@@ -361,15 +359,6 @@ const useConversationLoop = () => {
   useEffect(() => {
     startRecordRef.current = handleStartRecord
   }, [handleStartRecord])
-
-  // BUG-PT-02: nút mic chỉ tắt/bật tiếng, không mở hay kết thúc lượt trả lời.
-  const handleToggleMute = useCallback(() => {
-    setIsMuted((prev) => {
-      const next = !prev
-      setTransportMuted(next)
-      return next
-    })
-  }, [setTransportMuted])
 
   const handleStopRecord = useCallback(async () => {
     if (!isRecordingRef.current) return
@@ -938,7 +927,6 @@ const useConversationLoop = () => {
     notice,
     retryCount,
     isRecording,
-    isMuted,
     aiSpeaking,
     micLevel,
     hasRecorded,
@@ -965,7 +953,6 @@ const useConversationLoop = () => {
     handleCancel,
     handleReconnectNow,
     handleToggleRecord,
-    handleToggleMute,
     handleStartRecord,
     handleStopRecord,
     handlePlayUserAudio,

@@ -74,8 +74,7 @@ const PlacementProfilePage = () => {
     const eligibility = retakeStatus
       ? {
           hasHistory: retakeStatus.hasHistory,
-          // BUG-PT-16: khóa thi lại 14 ngày theo máy chủ; tài khoản Premium
-          // được máy chủ trả eligible = true (cooldownBypassed).
+          // BUG-PT-16: khóa thi lại 14 ngày theo máy chủ, áp dụng cho mọi gói (v1).
           eligible: Boolean(retakeStatus.eligible),
           cooldownBypassed: Boolean(retakeStatus.cooldownBypassed),
           lastTestedAt: retakeStatus.lastTestedAt,

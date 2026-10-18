@@ -3,7 +3,6 @@ import {
   Clock,
   Loader2,
   Mic,
-  MicOff,
   RotateCcw,
   SkipForward,
   Square,
@@ -21,7 +20,6 @@ const SessionControlRow = ({
   phase,
   notice,
   isRecording = false,
-  isMuted = false,
   aiSpeaking = false,
   micLevel = 0,
   hasRecorded = false,
@@ -31,7 +29,7 @@ const SessionControlRow = ({
   isPlayingUserAudio = false,
   onPlayUserAudio,
   onStopUserAudio,
-  onToggleMute,
+  onToggleRecord,
   onReRecord,
   onSubmit,
   onSkip,
@@ -40,9 +38,7 @@ const SessionControlRow = ({
   const waiting = notice === CONVERSATION_NOTICE.NO_HEARING && isRecording
 
   let timerText = ""
-  if (isRecording && isMuted) {
-    timerText = `${formatClock(recordedMs)} / ${formatClock(maxDurationMs)} • ${copy.timerMuted || "Đang tắt tiếng"}`
-  } else if (isRecording) {
+  if (isRecording) {
     if (waiting) {
       timerText = formatTemplate(
         copy.timerWaiting || "{{time}} / 00:45 • Đang chờ âm thanh",
@@ -64,10 +60,13 @@ const SessionControlRow = ({
     }`
   }
 
-  const muteLabel = isMuted
-    ? copy.unmuteCta || "Bật tiếng"
-    : copy.muteCta || "Tắt tiếng"
-  const showLevelRing = isRecording && !isMuted
+  // VAD tự mở ghi âm; bấm mic để dừng sớm (hoặc ghi lại), bấm Hoàn tất để nộp.
+  const micLabel = isRecording
+    ? copy.stopRecordCta || "Dừng ghi âm"
+    : hasRecorded
+      ? copy.reRecordCta || "Thu âm lại"
+      : copy.startRecordCta || "Bắt đầu nói"
+  const showLevelRing = isRecording
 
   return (
     // Lưới 3 cột 1fr-auto-1fr: hai bên rộng hẹp khác nhau nhưng mic luôn nằm giữa thẻ.
@@ -100,7 +99,7 @@ const SessionControlRow = ({
         {timerText}
       </span>
 
-      {/* Nút mic = công tắc tắt/bật tiếng; việc ghi âm do VAD tự mở */}
+      {/* VAD tự ghi âm sau khi AI đọc xong; nút mic để dừng sớm hoặc ghi lại */}
       <div className="relative flex items-center justify-center">
         {showLevelRing && (
           <>
@@ -122,24 +121,25 @@ const SessionControlRow = ({
         )}
         <button
           type="button"
-          onClick={onToggleMute}
+          onClick={onToggleRecord}
           disabled={analyzing}
-          aria-pressed={isMuted}
-          aria-label={muteLabel}
-          title={muteLabel}
+          aria-label={micLabel}
+          title={micLabel}
           className={cn(
             "relative flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full text-white transition-all",
             analyzing
               ? "bg-slate-300 shadow-none cursor-not-allowed"
-              : isMuted
-                ? "bg-slate-500 hover:bg-slate-600 shadow-[0_4px_14px_rgba(51,65,85,0.3)]"
+              : isRecording
+                ? "bg-[#E2443F] hover:bg-[#C9302B] shadow-[0_0_16px_rgba(240,90,87,0.45)]"
                 : "bg-[#F05A57] hover:bg-[#E2443F] shadow-[0_6px_18px_rgba(240,90,87,0.4)] hover:scale-105",
           )}
         >
           {analyzing ? (
             <Loader2 size={22} className="animate-spin" />
-          ) : isMuted ? (
-            <MicOff size={22} strokeWidth={2} />
+          ) : isRecording ? (
+            <Square size={20} className="fill-white" />
+          ) : hasRecorded ? (
+            <RotateCcw size={22} strokeWidth={2} />
           ) : (
             <Mic size={22} strokeWidth={2} />
           )}

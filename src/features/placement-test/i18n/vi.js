@@ -31,7 +31,6 @@ export default {
         "Âm thanh chỉ dùng để chấm điểm và cải thiện mô hình phản xạ.",
       bulletNoShare:
         "Không chia sẻ bên thứ ba, dữ liệu mã hóa lưu tối đa 30 ngày.",
-      privacyLink: "Chính sách quyền riêng tư",
       checkbox:
         "Tôi đồng ý cho phép CatSpeak sử dụng microphone và xử lý âm thanh phục vụ kiểm tra đầu vào.",
       startCta: "Bắt đầu làm bài kiểm tra",
@@ -199,15 +198,10 @@ export default {
       reRecordCta: "Thu âm lại",
       stopRecordCta: "Dừng ghi âm",
       startRecordCta: "Bắt đầu nói",
-      statusMuted: "● Đang tắt tiếng",
       aiAutoRecord: "Hệ thống sẽ tự ghi âm sau khi AI đọc xong câu hỏi.",
       aiSpeaking: "AI đang đọc câu hỏi, hãy lắng nghe...",
-      aiMuted: "Micro đang tắt tiếng. Bấm nút mic để bật lại.",
       autoRecordHint: "Tự ghi âm sau khi AI đọc xong",
       timerAiSpeaking: "AI đang đọc câu hỏi",
-      timerMuted: "Đang tắt tiếng",
-      unmuteCta: "Bật tiếng",
-      muteCta: "Tắt tiếng",
       submitCta: "Hoàn tất câu trả lời",
       skipCta: "Bỏ qua câu này (0 điểm) →",
       scoringSummary: "Đang tổng hợp điểm đánh giá...",

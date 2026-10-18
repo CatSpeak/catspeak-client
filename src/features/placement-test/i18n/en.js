@@ -31,7 +31,6 @@ export default {
         "Audio is used only for scoring and improving the response model.",
       bulletNoShare:
         "Never shared with third parties; encrypted and stored for up to 30 days.",
-      privacyLink: "Privacy Policy",
       checkbox:
         "I consent to CatSpeak using my microphone and processing my audio for this placement test.",
       startCta: "Start the test",
@@ -199,15 +198,10 @@ export default {
       reRecordCta: "Record again",
       stopRecordCta: "Stop recording",
       startRecordCta: "Start speaking",
-      statusMuted: "● Muted",
       aiAutoRecord: "Recording will start automatically after the AI finishes the question.",
       aiSpeaking: "The AI is reading the question, please listen...",
-      aiMuted: "Your microphone is muted. Press the mic button to unmute.",
       autoRecordHint: "Recording starts after the AI finishes",
       timerAiSpeaking: "AI is reading the question",
-      timerMuted: "Muted",
-      unmuteCta: "Unmute",
-      muteCta: "Mute",
       submitCta: "Finish answer",
       skipCta: "Skip this question (0 points) →",
       scoringSummary: "Compiling your score...",
