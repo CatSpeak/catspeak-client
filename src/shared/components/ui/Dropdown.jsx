@@ -279,7 +279,7 @@ const Dropdown = ({
 
     if (selectedValues.length === 0) {
       return (
-        <span className="flex-1 text-left truncate min-w-0 text-gray-500">
+        <span className="flex-1 text-left truncate min-w-0">
           {placeholder}
         </span>
       )
@@ -390,8 +390,8 @@ const Dropdown = ({
                     direction={portalCoords.flipUp ? "up" : "down"}
                     exit={true}
                     className={`absolute ${portalCoords.flipUp
-                        ? "bottom-full mb-2 origin-bottom"
-                        : "top-full mt-2"
+                      ? "bottom-full mb-2 origin-bottom"
+                      : "top-full mt-2"
                       } flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
                     data-dropdown-portal="true"
                   >
@@ -478,8 +478,8 @@ const Dropdown = ({
                                   <div className="flex items-center ml-2">
                                     <div
                                       className={`w-4 h-4 rounded border transition-colors flex items-center justify-center ${isSelected
-                                          ? "bg-[#990011] border-[#990011] text-white"
-                                          : "border-gray-300 bg-white group-hover:border-gray-400"
+                                        ? "bg-[#990011] border-[#990011] text-white"
+                                        : "border-gray-300 bg-white group-hover:border-gray-400"
                                         }`}
                                     >
                                       {isSelected && (
