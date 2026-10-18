@@ -31,9 +31,10 @@ export default {
         "Âm thanh chỉ dùng để chấm điểm và cải thiện mô hình phản xạ.",
       bulletNoShare:
         "Không chia sẻ bên thứ ba, dữ liệu mã hóa lưu tối đa 30 ngày.",
+      privacyLink: "Chính sách quyền riêng tư",
       checkbox:
         "Tôi đồng ý cho phép CatSpeak sử dụng microphone và xử lý âm thanh phục vụ kiểm tra đầu vào.",
-      startCta: "Bắt đầu Kiểm tra Microphone",
+      startCta: "Bắt đầu làm bài kiểm tra",
       recommend:
         "Khuyến nghị: Đeo tai nghe có micro và ngồi trong môi trường yên tĩnh để đạt độ chính xác âm học cao nhất.",
     },
@@ -46,22 +47,26 @@ export default {
         "Hệ thống không thể cấp chứng nhận trình độ HSK hợp lệ.",
         "Không thể tạo lộ trình học tập cá nhân hóa chính xác.",
       ],
-      stepsTitle: "3 Bước Mở Khóa Microphone",
+      stepsTitle: "4 Bước Mở Khóa Microphone",
       steps: [
         {
           title: "1. Nhấp biểu tượng Ổ khóa / Quyền hạn",
           desc: "Nhấp vào icon ổ khóa ở góc trái thanh địa chỉ trình duyệt.",
         },
         {
-          title: "2. Cho phép Microphone (Allow)",
+          title: "2. Mở mục Quyền của trang web",
+          desc: "Chọn \"Cài đặt trang web\" (Site settings) hoặc \"Quyền\" trong menu vừa mở.",
+        },
+        {
+          title: "3. Cho phép Microphone (Allow)",
           desc: "Gạt chuyển trạng thái Microphone từ Chặn sang Cho phép.",
         },
         {
-          title: "3. Nhấp Thử lại để kết nối",
+          title: "4. Bấm thử lại để kết nối",
           desc: "Bấm nút bên dưới để hệ thống nhận diện và kết nối lại micro.",
         },
       ],
-      retryCta: "Đã Mở Khóa, Kiểm Tra Lại",
+      retryCta: "Tôi đã mở quyền, thử lại ngay",
       trust: "CatSpeak cam kết mã hóa và bảo mật 100% dữ liệu âm thanh.",
     },
     device: {
@@ -70,6 +75,8 @@ export default {
       statusListening: "Đang lắng nghe…",
       statusNoSignal: "Chưa phát hiện giọng nói",
       statusError: "Không truy cập được micro",
+      statusPending: "Chưa đo tín hiệu",
+      pendingHint: "Hãy ghi âm thử câu mẫu bên trái. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn.",
       instruction:
         "Hãy đọc to câu tiếng Trung mẫu bên dưới để kiểm tra chất lượng giọng nói:",
       sampleHanzi: "你好！欢迎来到 CatSpeak。",
@@ -78,6 +85,7 @@ export default {
       record: "Nhấn để ghi âm giọng mẫu",
       recording: "Đang ghi âm… nhấn để dừng",
       replay: "Nghe lại đoạn thử giọng vừa thu ({{duration}}s)",
+      reRecord: "Ghi âm lại",
       deviceTitle: "Cấu hình Thiết bị Đầu vào",
       deviceCaption: "Mặc định hệ điều hành · Đang hoạt động tốt",
       devicePlaceholder: "Chưa tìm thấy microphone",
@@ -86,7 +94,7 @@ export default {
         "Đường truyền ổn định, kết nối nhanh chóng",
         "Thiết bị thu âm sẵn sàng cho bài thi",
       ],
-      continueCta: "Âm Thanh Đã Tốt, Tiếp Tục",
+      continueCta: "Vào phòng kiểm tra",
       errorTitle: "Không thể truy cập Microphone",
       errorBody:
         "CatSpeak không thể kết nối tới thiết bị thu âm. Hãy kiểm tra quyền truy cập micro và thử lại.",
@@ -120,7 +128,8 @@ export default {
       subtitle:
         "AI Tutor sẽ khởi tạo câu hỏi đầu tiên theo mốc này, sau đó tự động điều chỉnh độ khó theo phản xạ thực tế.",
       difficultyLabel: "Độ khó:",
-      startCta: "Bắt Đầu Luyện Nói ({{band}})",
+      startCta: "Bắt đầu thi ({{band}})",
+      startCtaEmpty: "Bắt đầu thi",
       lockedNote:
         "Khảo sát thích ứng gồm 5 câu hỏi · Độ khó tự động điều chỉnh theo phản xạ của bạn",
       items: {
@@ -194,6 +203,15 @@ export default {
       reRecordCta: "Thu âm lại",
       stopRecordCta: "Dừng ghi âm",
       startRecordCta: "Bắt đầu nói",
+      statusMuted: "● Đang tắt tiếng",
+      aiAutoRecord: "Hệ thống sẽ tự ghi âm sau khi AI đọc xong câu hỏi.",
+      aiSpeaking: "AI đang đọc câu hỏi, hãy lắng nghe...",
+      aiMuted: "Micro đang tắt tiếng. Bấm nút mic để bật lại.",
+      autoRecordHint: "Tự ghi âm sau khi AI đọc xong",
+      timerAiSpeaking: "AI đang đọc câu hỏi",
+      timerMuted: "Đang tắt tiếng",
+      unmuteCta: "Bật tiếng",
+      muteCta: "Tắt tiếng",
       submitCta: "Hoàn tất câu trả lời",
       skipCta: "Bỏ qua câu này (0 điểm) →",
       scoringSummary: "Đang tổng hợp điểm đánh giá...",
@@ -287,6 +305,7 @@ export default {
         fluency: "Độ trôi chảy & Phản xạ",
       },
       scoreOf: "{{score}} / 100",
+      notMeasured: "Chưa đo được",
       aiNote:
         "Khuyến nghị AI: Trình độ HSK {{band}} rất phù hợp để bắt đầu luyện phản xạ giao tiếp tự nhiên cùng AI Tutor.",
       startCta: "Bắt Đầu Học Lộ Trình HSK {{band}} →",
@@ -314,6 +333,8 @@ export default {
       optionKeep: "Giữ nguyên kết quả AI đề xuất",
       optionUp: "Tăng 1 cấp (Thử thách cao hơn, bứt phá)",
       recommended: "Khuyến nghị",
+      lowestNote: "HSK 1 là cấp thấp nhất",
+      highestNote: "HSK 6 là cấp cao nhất",
       warning:
         "Lưu ý: Sau khi xác nhận, lộ trình 5 ngày sẽ được tạo mới theo cấp độ này và quyền điều chỉnh sẽ bị khóa vĩnh viễn.",
       cancelCta: "Hủy bỏ / Giữ HSK {{band}}",
@@ -389,7 +410,7 @@ export default {
         cooldownTitle: "Lưu ý chu kỳ làm mát (Cooldown 14 ngày):",
         cooldownBody:
           "Sau khi hoàn thành, bạn sẽ phải đợi tối thiểu 14 ngày rèn luyện tiếp theo để được làm lại bài kiểm tra mới.",
-        bullet1: "Kết quả bài thi mới sẽ cập nhật trực tiếp vào hồ sơ năng lực.",
+        bullet1: "Kết quả bài thi mới sẽ ghi đè kết quả cũ trong hồ sơ năng lực.",
         bullet2:
           "Lộ trình 5 ngày bứt phá sẽ được AI Tutor thiết lập lại từ đầu.",
         cancelCta: "Hủy Bỏ",

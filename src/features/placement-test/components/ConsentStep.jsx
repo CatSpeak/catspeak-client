@@ -1,9 +1,12 @@
 import { useState } from "react"
-import { ArrowRight, BarChart3, Lightbulb, Mic, Target } from "lucide-react"
+import { ArrowRight, BarChart3, ExternalLink, Lightbulb, Mic, Target } from "lucide-react"
 import { Checkbox } from "@/shared/components/ui/inputs"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { cn } from "@/lib/utils"
 import StepCard from "./StepCard"
+
+// Trang chính sách quyền riêng tư có sẵn trên website.
+const PRIVACY_POLICY_URL = "/policy"
 
 const FEATURE_ICONS = [Target, Mic, BarChart3]
 const FEATURE_ICON_TONES = [
@@ -44,7 +47,7 @@ const ConsentStep = ({
 
   return (
     <>
-      <StepCard className="gap-4 lg:w-[440px] lg:shrink-0">
+      <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
         <span className="inline-flex h-[26px] w-fit items-center rounded-full bg-red-50 px-2.5 text-[11px] font-medium text-cath-red-700">
           {consent.pill}
         </span>
@@ -82,7 +85,7 @@ const ConsentStep = ({
         </div>
       </StepCard>
 
-      <StepCard className="gap-5 lg:flex-1">
+      <StepCard className="min-w-0 gap-5 xl:flex-1">
         <h2 className="text-xl font-bold leading-7 text-[#09090B]">
           {consent.agreementTitle}
         </h2>
@@ -97,16 +100,31 @@ const ConsentStep = ({
             <li>• {consent.bulletAudioOnly}</li>
             <li>• {consent.bulletNoShare}</li>
           </ul>
+          <a
+            href={PRIVACY_POLICY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-fit items-center gap-1 rounded text-[11px] font-semibold text-cath-red-700 underline underline-offset-2 hover:text-cath-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-cath-red-700/40"
+          >
+            {consent.privacyLink || "Chính sách quyền riêng tư"}
+            <ExternalLink size={11} />
+          </a>
         </div>
         <div className="flex items-center gap-3">
           <Checkbox
+            id="placement-consent-checkbox"
             checked={agreed}
             onChange={handleCheckboxChange}
-            aria-label={consent.checkbox}
+            aria-labelledby="placement-consent-label"
           />
-          <span className="text-xs font-semibold leading-[18px] text-[#09090B]">
+          <label
+            id="placement-consent-label"
+            htmlFor="placement-consent-checkbox"
+            onClick={handleCheckboxChange}
+            className="cursor-pointer text-xs font-semibold leading-[18px] text-[#09090B]"
+          >
             {consent.checkbox}
-          </span>
+          </label>
         </div>
         <PillButton
           onClick={onStart}

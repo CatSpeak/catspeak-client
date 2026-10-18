@@ -12,7 +12,7 @@ import {
 } from "lucide-react"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { cn } from "@/lib/utils"
-import { DEFAULT_TARGET_BAND, TARGET_BANDS } from "../constants/bands"
+import { TARGET_BANDS } from "../constants/bands"
 
 const BAND_ICONS = {
   hsk1_2: Sparkles,
@@ -50,8 +50,9 @@ const formatTemplate = (template, token, value) =>
 const BandStep = ({ copy, onStart, creating }) => {
   const bandCopy = copy?.band || {}
   const items = bandCopy.items || {}
-  const [selected, setSelected] = useState(DEFAULT_TARGET_BAND)
-  const selectedTitle = items[selected]?.title || ""
+  // BUG-PT-07: không chọn sẵn cấp nào, người dùng phải tự chọn mới bắt đầu được.
+  const [selected, setSelected] = useState(null)
+  const selectedTitle = selected ? items[selected]?.title || "" : ""
 
   return (
     <div className="flex w-full flex-col items-center gap-6">
@@ -185,14 +186,17 @@ const BandStep = ({ copy, onStart, creating }) => {
 
       <div className="flex flex-col items-center gap-2">
         <PillButton
-          onClick={() => onStart(selected)}
+          onClick={() => selected && onStart(selected)}
+          disabled={!selected}
           loading={creating}
           startIcon={<Mic size={16} />}
           endIcon={<ArrowRight size={16} />}
           className="w-full max-w-[400px]"
           roundedClass="rounded-[14px]"
         >
-          {formatTemplate(bandCopy.startCta, "band", selectedTitle)}
+          {selected
+            ? formatTemplate(bandCopy.startCta, "band", selectedTitle)
+            : bandCopy.startCtaEmpty || "Bắt đầu thi"}
         </PillButton>
         <span className="flex items-center gap-1.5 text-[11px] font-medium leading-4 text-slate-600">
           <Lock size={12} className="text-slate-400" />

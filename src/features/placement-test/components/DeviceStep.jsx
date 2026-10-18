@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   ArrowRight,
   CheckCircle2,
@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { PillButton } from "@/shared/components/ui/buttons"
 import { cn } from "@/lib/utils"
+import { SILENCE_LEVEL } from "../services/audio/constants"
 import { formatTemplate } from "../utils/format"
 import useMicCapture from "../hooks/useMicCapture"
 import DeviceSelect from "./DeviceSelect"
@@ -26,6 +27,9 @@ const FIX_TONES = [
   "bg-blue-50 text-blue-600",
   "bg-emerald-50 text-emerald-600",
 ]
+
+// Ghi mẫu quá thời gian này thì tự dừng để đo.
+const SAMPLE_MAX_MS = 8000
 
 const DeviceStep = ({ copy, onContinue }) => {
   const device = copy?.device || {}
@@ -45,14 +49,49 @@ const DeviceStep = ({ copy, onContinue }) => {
     retry,
   } = useMicCapture()
 
-  const isNoAudio = status === "nosignal"
+  // BUG-PT-03: chỉ báo "đạt chuẩn" và nút tiếp tục dựa trên lần ghi thử thật,
+  // không dựa trên tiếng ồn nền micro bắt được lúc vừa mở màn.
+  // sampleResult: null = chưa đo, "pass" = có giọng, "fail" = ghi xong mà im lặng.
+  const [sampleResult, setSampleResult] = useState(null)
+  const peakRef = useRef(0)
+
+  useEffect(() => {
+    if (recording && level > peakRef.current) peakRef.current = level
+  }, [level, recording])
+
+  useEffect(() => {
+    setSampleResult(null)
+    peakRef.current = 0
+  }, [deviceId])
+
+  const finishSample = async () => {
+    await stopRecording()
+    setSampleResult(peakRef.current >= SILENCE_LEVEL ? "pass" : "fail")
+  }
+
+  useEffect(() => {
+    if (!recording) return undefined
+    const id = window.setTimeout(() => {
+      finishSample()
+    }, SAMPLE_MAX_MS)
+    return () => window.clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recording])
+
+  const isNoAudio = status === "nosignal" || sampleResult === "fail"
   const isError = status === "error"
-  const isReady = status === "ready"
-  const canContinue = isReady || status === "listening"
+  const isReady = sampleResult === "pass" && !isError
+  const canContinue = isReady
+
+  const beginSample = () => {
+    peakRef.current = 0
+    setSampleResult(null)
+    startRecording()
+  }
 
   const handleSampleAction = () => {
     if (recording) {
-      stopRecording()
+      finishSample()
       return
     }
     if (recordingUrl) {
@@ -63,7 +102,13 @@ const DeviceStep = ({ copy, onContinue }) => {
       }
       return
     }
-    startRecording()
+    beginSample()
+  }
+
+  const handleRetry = () => {
+    peakRef.current = 0
+    setSampleResult(null)
+    retry()
   }
 
   const actionLabel = recording
@@ -80,14 +125,19 @@ const DeviceStep = ({ copy, onContinue }) => {
       ? { className: "bg-[#F0FDF4] text-[#15803D]", label: device.statusReady }
       : isError
         ? { className: "bg-[#FEF2F2] text-red-600", label: device.statusError }
-        : { className: "bg-slate-100 text-slate-600", label: device.statusListening }
+        : recording
+          ? { className: "bg-slate-100 text-slate-600", label: device.statusListening }
+          : {
+              className: "bg-slate-100 text-slate-600",
+              label: device.statusPending || "Chưa đo tín hiệu",
+            }
 
   const checklist = device.checklist || []
   const fixes = noAudio.fixes || []
 
   return (
     <>
-      <StepCard className="gap-4 lg:w-[440px] lg:shrink-0">
+      <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-base font-semibold leading-6 text-[#09090B]">
             {device.title}
@@ -140,8 +190,8 @@ const DeviceStep = ({ copy, onContinue }) => {
 
         <MicLevelMeter
           level={level}
-          tone={isNoAudio || isError ? "danger" : isReady ? "primary" : "muted"}
-          active={isReady}
+          tone={isNoAudio || isError ? "danger" : isReady || recording ? "primary" : "muted"}
+          active={isReady || recording}
         />
 
         {isNoAudio ? (
@@ -168,11 +218,12 @@ const DeviceStep = ({ copy, onContinue }) => {
             </div>
           </>
         ) : (
+          <div className="flex items-stretch gap-2">
           <button
             type="button"
             onClick={handleSampleAction}
             disabled={isError}
-            className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-2.5 text-left transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex flex-1 items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-2.5 text-left transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span className="text-[13px] font-semibold leading-[19px] text-[#09090B]">
               {actionLabel}
@@ -192,12 +243,24 @@ const DeviceStep = ({ copy, onContinue }) => {
               )}
             </span>
           </button>
+          {recordingUrl && !recording && (
+            <button
+              type="button"
+              onClick={beginSample}
+              title={device.reRecord || "Ghi âm lại"}
+              aria-label={device.reRecord || "Ghi âm lại"}
+              className="flex w-11 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-cath-red-700 transition-colors hover:bg-slate-100"
+            >
+              <RotateCcw size={16} />
+            </button>
+          )}
+          </div>
         )}
 
         <audio ref={audioRef} src={recordingUrl || undefined} className="hidden" />
       </StepCard>
 
-      <StepCard className="gap-4 lg:flex-1">
+      <StepCard className="min-w-0 gap-4 xl:flex-1">
         {isNoAudio ? (
           <>
             <h2 className="text-lg font-semibold leading-7 text-[#09090B]">
@@ -241,7 +304,7 @@ const DeviceStep = ({ copy, onContinue }) => {
               })}
             </div>
             <PillButton
-              onClick={retry}
+              onClick={handleRetry}
               startIcon={<RotateCcw size={16} />}
               className="w-full"
               roundedClass="rounded-xl"
@@ -261,7 +324,7 @@ const DeviceStep = ({ copy, onContinue }) => {
               {device.errorBody}
             </p>
             <PillButton
-              onClick={retry}
+              onClick={handleRetry}
               startIcon={<RotateCcw size={16} />}
               className="w-full"
               roundedClass="rounded-xl"
@@ -282,20 +345,30 @@ const DeviceStep = ({ copy, onContinue }) => {
               caption={device.deviceCaption}
               placeholder={device.devicePlaceholder}
             />
-            <div className="flex flex-col gap-2.5 rounded-xl bg-[#F0FDF4] px-4 py-3.5">
-              {checklist.map((item) => (
-                <div key={item} className="flex items-center gap-2.5">
-                  <CheckCircle2
-                    size={16}
-                    strokeWidth={2}
-                    className="shrink-0 text-green-600"
-                  />
-                  <span className="text-xs font-medium leading-[17px] text-[#15803D]">
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {isReady ? (
+              <div className="flex flex-col gap-2.5 rounded-xl bg-[#F0FDF4] px-4 py-3.5">
+                {checklist.map((item) => (
+                  <div key={item} className="flex items-center gap-2.5">
+                    <CheckCircle2
+                      size={16}
+                      strokeWidth={2}
+                      className="shrink-0 text-green-600"
+                    />
+                    <span className="text-xs font-medium leading-[17px] text-[#15803D]">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-start gap-2.5 rounded-xl bg-slate-50 px-4 py-3.5">
+                <Info size={16} className="mt-0.5 shrink-0 text-slate-500" />
+                <span className="text-xs font-medium leading-[17px] text-slate-600">
+                  {device.pendingHint ||
+                    "Hãy ghi âm thử câu mẫu bên trái. Hệ thống chỉ cho vào phòng kiểm tra khi đo được tín hiệu giọng nói đạt chuẩn."}
+                </span>
+              </div>
+            )}
             <PillButton
               onClick={onContinue}
               disabled={!canContinue}
