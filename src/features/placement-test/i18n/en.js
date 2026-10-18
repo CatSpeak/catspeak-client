@@ -47,23 +47,19 @@ export default {
         "The system cannot issue a valid HSK level certificate.",
         "It cannot build an accurate personalised study roadmap.",
       ],
-      stepsTitle: "4 Steps to Unblock the Microphone",
+      stepsTitle: "3 Steps to Unblock the Microphone",
       steps: [
         {
           title: "1. Click the Lock / Permissions icon",
-          desc: "Click the lock icon at the left of the browser address bar.",
+          desc: "Click the lock icon on the left of the browser address bar.",
         },
         {
-          title: "2. Open the site permissions",
-          desc: "Choose \"Site settings\" or \"Permissions\" in the menu that opens.",
+          title: "2. Allow the Microphone",
+          desc: "Switch Microphone from Block to Allow.",
         },
         {
-          title: "3. Allow the Microphone",
-          desc: "Switch the Microphone setting from Block to Allow.",
-        },
-        {
-          title: "4. Click retry to reconnect",
-          desc: "Press the button below so the system can detect and reconnect your mic.",
+          title: "3. Click Retry to connect",
+          desc: "Press the button below so the system can detect and reconnect the microphone.",
         },
       ],
       retryCta: "I've allowed it, retry now",

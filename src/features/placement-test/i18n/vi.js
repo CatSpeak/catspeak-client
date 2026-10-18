@@ -47,22 +47,18 @@ export default {
         "Hệ thống không thể cấp chứng nhận trình độ HSK hợp lệ.",
         "Không thể tạo lộ trình học tập cá nhân hóa chính xác.",
       ],
-      stepsTitle: "4 Bước Mở Khóa Microphone",
+      stepsTitle: "3 Bước Mở Khóa Microphone",
       steps: [
         {
           title: "1. Nhấp biểu tượng Ổ khóa / Quyền hạn",
           desc: "Nhấp vào icon ổ khóa ở góc trái thanh địa chỉ trình duyệt.",
         },
         {
-          title: "2. Mở mục Quyền của trang web",
-          desc: "Chọn \"Cài đặt trang web\" (Site settings) hoặc \"Quyền\" trong menu vừa mở.",
-        },
-        {
-          title: "3. Cho phép Microphone (Allow)",
+          title: "2. Cho phép Microphone (Allow)",
           desc: "Gạt chuyển trạng thái Microphone từ Chặn sang Cho phép.",
         },
         {
-          title: "4. Bấm thử lại để kết nối",
+          title: "3. Nhấp Thử lại để kết nối",
           desc: "Bấm nút bên dưới để hệ thống nhận diện và kết nối lại micro.",
         },
       ],
