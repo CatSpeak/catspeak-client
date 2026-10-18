@@ -18,7 +18,7 @@ const CommunityOverviewSection = ({ data }) => {
       titleEn: "Friends",
       value: data?.friends?.count || 0,
       subtext: isEn ? data?.friends?.newFriendsDeltaEn : data?.friends?.newFriendsDelta,
-      targetUrl: data?.friends?.targetUrl || "/profile",
+      targetUrl: data?.friends?.targetUrl || "/workspace/profile?tab=friends",
     },
     {
       id: "createdRooms",
@@ -62,7 +62,7 @@ const CommunityOverviewSection = ({ data }) => {
       titleEn: "Articles Posted",
       value: data?.publishedArticles?.count || 0,
       subtext: isEn ? "Community posts" : "Bài viết kinh nghiệm",
-      targetUrl: data?.publishedArticles?.targetUrl || "/profile",
+      targetUrl: data?.publishedArticles?.targetUrl || "/workspace/profile",
     },
   ]
 

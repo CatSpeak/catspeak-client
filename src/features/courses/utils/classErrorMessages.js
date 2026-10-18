@@ -38,6 +38,12 @@ export function resolveClassErrorMessage(error, { cc = {}, isEditMode = false } 
   }
 
   switch (code) {
+    case "CLASS_INVITEES_INVALID":
+    case "CLASS_COHOST_INVALID":
+    case "COHOST_PERMISSION_INVALID":
+      return cc.toastInvalidParticipants || "Some selected accounts or co-host permissions are unavailable. Check your selections."
+    case "CLASS_VOUCHER_UNAVAILABLE":
+      return cc.toastVoucherUnavailable || "This voucher is no longer available. Select one of your draft class vouchers or choose no voucher."
     case "LANGUAGE_NOT_ALLOWED":
     case "LANGUAGE_MISMATCH":
       return cc.languageNotAllowed || failDefault

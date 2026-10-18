@@ -45,6 +45,28 @@ const itemVariants = {
   },
 }
 
+const DockButton = ({ to, onClick, icon: Icon, label, isActive }) => (
+  <div className="relative group/dock px-2 py-1">
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`w-14 h-14 rounded-2xl flex items-center justify-center cursor-pointer outline-none transition-all duration-150 ${
+        isActive
+          ? "bg-white text-cath-red-700 shadow-md"
+          : "text-white/80 hover:text-white hover:bg-white/15"
+      }`}
+    >
+      {Icon && <Icon />}
+    </Link>
+
+    {/* Tooltip on Hover */}
+    <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
+      <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45 rounded-xs" />
+      <span className="relative z-10">{label}</span>
+    </div>
+  </div>
+)
+
 const DesktopSidebar = () => {
   const { pathname } = useLocation()
   const { t } = useLanguage()
@@ -62,7 +84,6 @@ const DesktopSidebar = () => {
 
   const isSettingsPage =
     pathname.startsWith("/setting") ||
-    pathname.startsWith("/pricing") ||
     pathname.startsWith("/billing") ||
     pathname.startsWith("/refunds")
 
@@ -71,7 +92,6 @@ const DesktopSidebar = () => {
     const cleanPath = normalizePath(pathname)
     if (
       pathname.startsWith("/setting") ||
-      pathname.startsWith("/pricing") ||
       pathname.startsWith("/billing") ||
       pathname.startsWith("/refunds")
     ) {
@@ -177,7 +197,14 @@ const DesktopSidebar = () => {
 
   const getFooterLinkPath = (item) => {
     if (item.key === "settings" && lastSublinks?.settings) {
-      return resolvePath(lastSublinks.settings)
+      const remembered = lastSublinks.settings
+      if (
+        remembered.startsWith("/setting") ||
+        remembered.startsWith("/billing") ||
+        remembered.startsWith("/refunds")
+      ) {
+        return resolvePath(remembered)
+      }
     }
     return resolvePath(item.path)
   }
@@ -186,47 +213,25 @@ const DesktopSidebar = () => {
   const isPanelOpen = isDesktopExpanded && currentHasSublinks
   const currentSectionKey = isSettingsPage ? "settings" : activeDockSection
 
-  const renderDockItem = (item) => {
-    const Icon = item.icon
-    const isActive = activeDockSection === item.key
-    const label = t.nav?.[item.key] || item.key
-    const targetPath = getDockItemPath(item)
-
-    return (
-      <div key={item.key} className="relative group/dock">
-        <Link
-          to={targetPath}
-          onClick={(e) => handleDockClick(item, e)}
-          className="relative w-12 h-12 flex items-center justify-center cursor-pointer outline-none"
-        >
-          <span
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 ${
-              isActive
-                ? "bg-white text-cath-red-700 shadow-md"
-                : "text-white/80 hover:text-white hover:bg-white/15"
-            }`}
-          >
-            <Icon />
-          </span>
-        </Link>
-
-        {/* Tooltip on Hover */}
-        <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
-          <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45 rounded-xs" />
-          <span className="relative z-10">{label}</span>
-        </div>
-      </div>
-    )
-  }
+  const renderDockItem = (item) => (
+    <DockButton
+      key={item.key}
+      to={getDockItemPath(item)}
+      onClick={(e) => handleDockClick(item, e)}
+      icon={item.icon}
+      label={t.nav?.[item.key] || item.key}
+      isActive={activeDockSection === item.key}
+    />
+  )
 
   return (
     <aside className="hidden lg:flex sticky top-0 h-screen shrink-0 z-30 select-none">
       {/* 1. PRIMARY SLIM DOCK (ALWAYS DOCKED - 72px) */}
-      <div className="h-full bg-cath-red-700 text-white flex flex-col items-center p-2 shrink-0 shadow-lg relative z-20">
+      <div className="h-full bg-cath-red-700 text-white flex flex-col items-center shrink-0 shadow-lg relative z-20">
         {/* Brand Icon */}
         <Link
           to="/"
-          className="mb-4 flex items-center justify-center"
+          className="flex items-center justify-center py-4"
           title="CatSpeak Home"
         >
           <img
@@ -238,7 +243,7 @@ const DesktopSidebar = () => {
         </Link>
 
         {/* Dock Section Icons */}
-        <div className="flex-1 flex flex-col items-center w-full">
+        <div className="flex-1 flex flex-col gap-1 items-center w-full">
           {dockNavGroups.map((group, groupIdx) => {
             const visibleItems = group.items.filter((item) =>
               isNavItemVisible(item, { isStudent }),
@@ -248,7 +253,7 @@ const DesktopSidebar = () => {
             return (
               <React.Fragment key={group.key}>
                 {groupIdx > 0 && (
-                  <div className="w-8 h-[1px] bg-white/20 my-1 shrink-0" />
+                  <div className="w-8 h-[1px] bg-white/20 shrink-0" />
                 )}
                 {visibleItems.map(renderDockItem)}
               </React.Fragment>
@@ -257,50 +262,32 @@ const DesktopSidebar = () => {
         </div>
 
         {/* Bottom Dock Links (Settings / Footer) */}
-        <div className="flex flex-col items-center w-full">
-          <div className="w-8 h-[1px] bg-white/20 my-1 shrink-0" />
+        <div className="flex flex-col gap-1 items-center w-full">
+          <div className="w-8 h-[1px] bg-white/20 shrink-0" />
           {footerLinks.map((item) => {
-            const Icon = item.icon || Settings
-            const isActive =
-              activeDockSection === item.key ||
-              (item.key === "settings" && isSettingsPage)
-            const label = t.nav?.[item.key] || item.key
-            const targetPath = getFooterLinkPath(item)
+            const isSettingsItem = item.key === "settings"
+            const isActive = isSettingsItem
+              ? activeDockSection === "settings" || isSettingsPage
+              : activeDockSection === item.key
 
             return (
-              <div key={item.key} className="relative group/dock">
-                <Link
-                  to={targetPath}
-                  onClick={(e) => {
-                    if (
-                      activeDockSection === item.key ||
-                      (item.key === "settings" && isSettingsPage)
-                    ) {
+              <DockButton
+                key={item.key}
+                to={getFooterLinkPath(item)}
+                onClick={(e) => {
+                  if (isSettingsItem) {
+                    if (activeDockSection === "settings" || isSettingsPage) {
                       e.preventDefault()
                       setIsDesktopExpanded((prev) => !prev)
                     } else {
                       setIsDesktopExpanded(true)
                     }
-                  }}
-                  className="relative w-12 h-12 flex items-center justify-center cursor-pointer outline-none"
-                >
-                  <span
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 ${
-                      isActive
-                        ? "bg-white text-cath-red-700 shadow-md"
-                        : "text-white/80 hover:text-white hover:bg-white/15"
-                    }`}
-                  >
-                    <Icon />
-                  </span>
-                </Link>
-
-                {/* Tooltip on Hover */}
-                <div className="absolute left-full ml-6 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-gray-900 text-white text-xs font-semibold rounded-md opacity-0 invisible group-hover/dock:opacity-100 group-hover/dock:visible transition-all duration-150 whitespace-nowrap z-50 pointer-events-none drop-shadow-md flex items-center">
-                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45 rounded-xs" />
-                  <span className="relative z-10">{label}</span>
-                </div>
-              </div>
+                  }
+                }}
+                icon={item.icon || Settings}
+                label={t.nav?.[item.key] || item.key}
+                isActive={isActive}
+              />
             )
           })}
         </div>
