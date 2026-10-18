@@ -5,9 +5,10 @@ import {
   ANALYZE_MIN_MS,
   CONVERSATION_NOTICE,
   CONVERSATION_PHASE,
-  NOT_HEARING_BANNER_MS,
+  NOTICE_BANNER_MS,
   QUESTION_DURATION_MS,
   TICK_MS,
+  VAD_SILENCE_MS,
 } from "../constants/conversation"
 import {
   PLACEMENT_TEST_PATH,
@@ -19,6 +20,7 @@ import { TOTAL_TURNS, evaluateTurn, selectNextQuestion } from "../engine"
 import {
   placementTestApi,
   useCancelSessionMutation,
+  useCreateSessionMutation,
   useSubmitTurnMutation,
 } from "../api"
 import { SILENCE_LEVEL } from "../services/audio/constants"
@@ -37,6 +39,27 @@ import {
 } from "../utils/lifecycle"
 import { upsertTurn } from "../utils/turns"
 import useAudioTransport from "./useAudioTransport"
+
+// Đánh dấu phòng thi đang mở trong tab này. Rời phòng bằng điều hướng trong app
+// thì xóa dấu; F5 không chạy cleanup nên dấu còn, lần mount sau biết là tải lại.
+const ROOM_MARKER_KEY = "catspeak_pt_room_open"
+
+const readRoomMarker = () => {
+  try {
+    return window.sessionStorage.getItem(ROOM_MARKER_KEY)
+  } catch {
+    return null
+  }
+}
+
+const writeRoomMarker = (value) => {
+  try {
+    if (value) window.sessionStorage.setItem(ROOM_MARKER_KEY, value)
+    else window.sessionStorage.removeItem(ROOM_MARKER_KEY)
+  } catch {
+    // sessionStorage bị chặn: bỏ qua, chỉ mất hộp thoại tiếp tục
+  }
+}
 
 const isOnline = () =>
   typeof navigator === "undefined" || navigator.onLine !== false
@@ -89,8 +112,14 @@ const useConversationLoop = () => {
   const [connectionLost, setConnectionLost] = useState(false)
   const [reconnect, setReconnect] = useState(() => startReconnect())
   const [suspended, setSuspended] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+  // BUG-PT-13 / FR-PT-012: F5 giữa bài thì hỏi tiếp tục hay thi lại (sc14).
+  const [resumePrompt, setResumePrompt] = useState(null)
+  const [restarting, setRestarting] = useState(false)
+  const [aiSpeaking, setAiSpeaking] = useState(false)
   const [submitTurn] = useSubmitTurnMutation()
   const [cancelSession] = useCancelSessionMutation()
+  const [createSession] = useCreateSessionMutation()
   const [triggerGetQuestion] = placementTestApi.useLazyGetQuestionQuery()
 
   const {
@@ -106,6 +135,7 @@ const useConversationLoop = () => {
     stopRecording,
     getRecordedBlob,
     getRecordingUrl,
+    setMuted: setTransportMuted,
   } = useAudioTransport()
 
   const [isPlayingUserAudio, setIsPlayingUserAudio] = useState(false)
@@ -129,6 +159,11 @@ const useConversationLoop = () => {
   const handleLeaveRef = useRef(() => {})
 
   const finishTurnRef = useRef(() => {})
+  const autoRecordTimerRef = useRef(null)
+  const audioTokenRef = useRef(0)
+  const suspendedRef = useRef(false)
+  const startRecordRef = useRef(() => {})
+  const reloadDecisionRef = useRef(null)
   const loadQuestionRef = useRef(() => {})
   const stateRef = useRef({})
 
@@ -219,20 +254,72 @@ const useConversationLoop = () => {
     recordedMs,
   ])
 
+  const clearAutoRecord = useCallback(() => {
+    if (autoRecordTimerRef.current != null) {
+      window.clearTimeout(autoRecordTimerRef.current)
+      autoRecordTimerRef.current = null
+    }
+  }, [])
+
+  // VAD (BUG-PT-01): không bắt người dùng bấm mic. AI ngừng nói được
+  // VAD_SILENCE_MS thì tự mở ghi âm cho câu hiện tại.
+  const scheduleAutoRecord = useCallback(
+    (delay = VAD_SILENCE_MS) => {
+      clearAutoRecord()
+      const token = audioTokenRef.current
+      autoRecordTimerRef.current = window.setTimeout(() => {
+        autoRecordTimerRef.current = null
+        if (!mountedRef.current) return
+        if (token !== audioTokenRef.current) return
+        const current = stateRef.current
+        if (
+          suspendedRef.current ||
+          finishingRef.current ||
+          isRecordingRef.current ||
+          current.hasRecorded ||
+          current.phase !== CONVERSATION_PHASE.LISTENING
+        ) {
+          return
+        }
+        startRecordRef.current()
+      }, delay)
+    },
+    [clearAutoRecord],
+  )
+
   const playQuestionAudio = useCallback(
     (q) => {
       handleStopUserAudio()
+      clearAutoRecord()
+      audioTokenRef.current += 1
+      const token = audioTokenRef.current
+      const handleEnd = () => {
+        if (token !== audioTokenRef.current) return
+        setAiSpeaking(false)
+        scheduleAutoRecord()
+      }
+      let started = false
       if (q?.audioBase64) {
-        playAudioBase64(q.audioBase64, q.audioFormat)
+        started = Boolean(
+          playAudioBase64(q.audioBase64, q.audioFormat, { onEnd: handleEnd }),
+        )
       } else if (q?.hanzi) {
-        speakText(q.hanzi)
+        started = Boolean(speakText(q.hanzi, { onEnd: handleEnd }))
+      }
+      if (started) {
+        setAiSpeaking(true)
+      } else {
+        handleEnd()
       }
     },
-    [handleStopUserAudio, playAudioBase64, speakText],
+    [clearAutoRecord, handleStopUserAudio, playAudioBase64, scheduleAutoRecord, speakText],
   )
 
   const handleStartRecord = useCallback(async () => {
     if (finishingRef.current) return
+    clearAutoRecord()
+    audioTokenRef.current += 1
+    setAiSpeaking(false)
     handleStopUserAudio()
     stopSpeakingText()
     stopAudio()
@@ -269,7 +356,20 @@ const useConversationLoop = () => {
         if (finalText) setTranscript(finalText)
       },
     })
-  }, [startAudioListening, startRecording, stopAudio, stopSpeakingText])
+  }, [clearAutoRecord, handleStopUserAudio, startAudioListening, startRecording, stopAudio, stopSpeakingText])
+
+  useEffect(() => {
+    startRecordRef.current = handleStartRecord
+  }, [handleStartRecord])
+
+  // BUG-PT-02: nút mic chỉ tắt/bật tiếng, không mở hay kết thúc lượt trả lời.
+  const handleToggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const next = !prev
+      setTransportMuted(next)
+      return next
+    })
+  }, [setTransportMuted])
 
   const handleStopRecord = useCallback(async () => {
     if (!isRecordingRef.current) return
@@ -306,6 +406,7 @@ const useConversationLoop = () => {
 
   const loadQuestion = useCallback(
     async (nextOrder, sourceTurns, preferredQuestion) => {
+      clearAutoRecord()
       finishingRef.current = false
       recordingStoppedRef.current = false
       const current = stateRef.current
@@ -362,6 +463,7 @@ const useConversationLoop = () => {
       playQuestionAudio(nextQuestion)
     },
     [
+      clearAutoRecord,
       handleStopUserAudio,
       navigate,
       playQuestionAudio,
@@ -376,6 +478,9 @@ const useConversationLoop = () => {
     async ({ transcript: rawTranscript = "", skipped = false } = {}) => {
       if (finishingRef.current) return
       finishingRef.current = true
+      clearAutoRecord()
+      audioTokenRef.current += 1
+      setAiSpeaking(false)
       handleStopUserAudio()
       setIsRecording(false)
       stopAudioListening()
@@ -448,6 +553,7 @@ const useConversationLoop = () => {
         setIsRecording(false)
         setHasRecorded(false)
         setRecordedMs(0)
+        scheduleAutoRecord()
         return
       }
 
@@ -490,7 +596,10 @@ const useConversationLoop = () => {
       )
     },
     [
+      clearAutoRecord,
+      handleStopUserAudio,
       navigate,
+      scheduleAutoRecord,
       stopAudioListening,
       stopSpeakingText,
       stopAudio,
@@ -509,6 +618,10 @@ const useConversationLoop = () => {
   }, [loadQuestion])
 
   const suspendSession = useCallback(() => {
+    clearAutoRecord()
+    audioTokenRef.current += 1
+    setAiSpeaking(false)
+    suspendedRef.current = true
     handleStopUserAudio()
     stopAudioListening()
     stopSpeakingText()
@@ -519,11 +632,16 @@ const useConversationLoop = () => {
       setHasRecorded(true)
     }
     setSuspended(true)
-  }, [handleStopUserAudio, stopAudioListening, stopSpeakingText, stopAudio, stopRecording])
+  }, [clearAutoRecord, handleStopUserAudio, stopAudioListening, stopSpeakingText, stopAudio, stopRecording])
 
   const resumeSession = useCallback(() => {
+    suspendedRef.current = false
     setSuspended(false)
-  }, [])
+    const current = stateRef.current
+    if (!current.hasRecorded && current.phase === CONVERSATION_PHASE.LISTENING) {
+      scheduleAutoRecord()
+    }
+  }, [scheduleAutoRecord])
 
   const handlePause = useCallback(() => {
     if (connectionLost) return
@@ -671,15 +789,39 @@ const useConversationLoop = () => {
         mountedRef.current = false
       }
     }
-    loadQuestionRef.current(startOrder, stored.turns || [])
+    // Giữ quyết định trong ref để StrictMode (mount hai lần ở dev) không đọc sai dấu.
+    if (reloadDecisionRef.current === null) {
+      reloadDecisionRef.current =
+        Boolean(stored.id) && readRoomMarker() === String(stored.id)
+    }
+    const reloaded = reloadDecisionRef.current
+    writeRoomMarker(stored.id ? String(stored.id) : null)
+    if (reloaded) {
+      setResumePrompt({
+        answeredCount: stored.turns?.length || 0,
+        nextOrder: startOrder,
+        expiresAt: Number(stored.expiresAt) || null,
+      })
+    } else {
+      loadQuestionRef.current(startOrder, stored.turns || [])
+    }
     return () => {
       mountedRef.current = false
+      writeRoomMarker(null)
+      clearAutoRecord()
       handleStopUserAudio()
       stopAudioListening()
       stopSpeakingText()
       stopAudio()
     }
-  }, [handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
+  }, [clearAutoRecord, handleStopUserAudio, navigate, stopAudioListening, stopSpeakingText, stopAudio])
+
+  // FR-PT-008: banner cảnh báo tự ẩn sau NOTICE_BANNER_MS.
+  useEffect(() => {
+    if (!notice) return undefined
+    const id = window.setTimeout(() => setNotice(null), NOTICE_BANNER_MS)
+    return () => window.clearTimeout(id)
+  }, [notice, retryCount])
 
   // Tick loop: smoothly updates recording timer
   useEffect(() => {
@@ -725,10 +867,58 @@ const useConversationLoop = () => {
     finishTurnRef.current({ transcript: "", skipped: true })
   }, [stopAudioListening, stopRecording])
 
-  const handleReplay = useCallback(() => {
-    const q = stateRef.current.question
-    if (q) playQuestionAudio(q)
-  }, [playQuestionAudio])
+  const handleReplay = useCallback(async () => {
+    const current = stateRef.current
+    const q = current.question
+    if (!q || current.phase !== CONVERSATION_PHASE.LISTENING) return
+    // Đang ghi mà nghe lại câu hỏi thì loa sẽ lọt vào bản ghi: bỏ bản đang ghi,
+    // phát xong câu hỏi thì VAD tự mở ghi âm lại.
+    if (isRecordingRef.current) {
+      setIsRecording(false)
+      stopAudioListening()
+      await stopRecording()
+      setHasRecorded(false)
+      setRecordedMs(0)
+    }
+    playQuestionAudio(q)
+  }, [playQuestionAudio, stopAudioListening, stopRecording])
+
+  const handlePromptResume = useCallback(() => {
+    const prompt = resumePrompt
+    if (!prompt) return
+    setResumePrompt(null)
+    loadQuestionRef.current(prompt.nextOrder, stateRef.current.turns || [])
+  }, [resumePrompt])
+
+  const handlePromptRestart = useCallback(async () => {
+    const current = stateRef.current
+    setRestarting(true)
+    try {
+      if (current.session?.id) {
+        try {
+          await cancelSession({ sessionId: current.session.id }).unwrap()
+        } catch {
+          // phiên cũ hủy lỗi vẫn cho tạo phiên mới
+        }
+      }
+      const fresh = await createSession({
+        targetBand: current.session?.targetBand,
+      }).unwrap()
+      writeRoomMarker(fresh?.id ? String(fresh.id) : null)
+      setSession(fresh)
+      setTurns([])
+      setRetryCount(0)
+      setPauseSpentMs(0)
+      pauseSpentRef.current = 0
+      stateRef.current = { ...stateRef.current, session: fresh, turns: [] }
+      setResumePrompt(null)
+      loadQuestionRef.current(1, [], fresh?.initialQuestion || null)
+    } catch {
+      toast.error("Không thể bắt đầu lại bài thi. Vui lòng thử lại.")
+    } finally {
+      setRestarting(false)
+    }
+  }, [cancelSession, createSession])
 
   const toggleHanzi = useCallback(() => setShowHanzi((value) => !value), [])
   const togglePinyin = useCallback(() => setShowPinyin((value) => !value), [])
@@ -736,6 +926,10 @@ const useConversationLoop = () => {
 
   return {
     ready: Boolean(question),
+    resumePrompt,
+    restarting,
+    handlePromptResume,
+    handlePromptRestart,
     session,
     order,
     question,
@@ -744,6 +938,8 @@ const useConversationLoop = () => {
     notice,
     retryCount,
     isRecording,
+    isMuted,
+    aiSpeaking,
     micLevel,
     hasRecorded,
     recordedMs,
@@ -769,6 +965,7 @@ const useConversationLoop = () => {
     handleCancel,
     handleReconnectNow,
     handleToggleRecord,
+    handleToggleMute,
     handleStartRecord,
     handleStopRecord,
     handlePlayUserAudio,

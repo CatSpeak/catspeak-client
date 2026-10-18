@@ -8,10 +8,13 @@ import { formatTemplate } from "../../utils/format"
 
 const statusFor = (
   copy,
-  { phase, notice, transcript, isRecording, hasRecorded },
+  { phase, notice, transcript, isRecording, isMuted, hasRecorded },
 ) => {
   if (phase === CONVERSATION_PHASE.ANALYZING) {
     return { label: copy.statusSubmitted || "Đã nộp bài", tone: "green" }
+  }
+  if (isRecording && isMuted) {
+    return { label: copy.statusMuted || "● Đang tắt tiếng", tone: "amber" }
   }
   if (isRecording) {
     return { label: "● Đang ghi âm...", tone: "green" }
@@ -57,6 +60,7 @@ const TranscriptCards = ({
   phase,
   notice,
   isRecording = false,
+  isMuted = false,
   hasRecorded = false,
   isPlayingUserAudio = false,
   onPlayUserAudio,
@@ -74,6 +78,7 @@ const TranscriptCards = ({
     notice,
     transcript,
     isRecording,
+    isMuted,
     hasRecorded,
   })
   const subline =

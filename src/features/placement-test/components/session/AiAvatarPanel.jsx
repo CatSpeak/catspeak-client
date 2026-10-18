@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils"
+// Chưa có file mascot Voxis: tạm dùng logo mèo CatSpeak, có file thật thì thay đường dẫn này.
+import MascotIcon from "@/shared/assets/icons/logo/icon.svg"
 
 const BAR_HEIGHTS = [38, 72, 52, 86, 44, 66, 34]
 
@@ -60,14 +62,12 @@ const AiAvatarPanel = ({
         })}
       </div>
 
-      <span
-        className={cn(
-          "text-[44px] font-bold leading-none",
-          palette.glyph,
-        )}
-      >
-        ω
-      </span>
+      <img
+        src={MascotIcon}
+        alt="Voxis"
+        className="h-14 w-14 select-none"
+        draggable={false}
+      />
 
       <span
         className={cn(

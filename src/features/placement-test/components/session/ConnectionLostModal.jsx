@@ -43,7 +43,13 @@ const ConnectionLostModal = ({
         </div>
       }
     >
-      <div className="flex flex-col items-center gap-2.5 text-center">
+      {/* BUG-PT-19: role="alert" để trình đọc màn hình đọc ngay khi mất mạng */}
+      <div
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        className="flex flex-col items-center gap-2.5 text-center"
+      >
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FEF2F2] ring-1 ring-[#FECACA]">
           <WifiOff size={24} strokeWidth={2} className="text-[#B91C1C]" />
         </span>

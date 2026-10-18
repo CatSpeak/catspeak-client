@@ -13,14 +13,39 @@ import TranscriptCards from "./TranscriptCards"
 import SessionControlRow from "./SessionControlRow"
 import PauseSessionModal from "./PauseSessionModal"
 import ConnectionLostModal from "./ConnectionLostModal"
+import ResumeSessionModal from "../lifecycle/ResumeSessionModal"
+import { TOTAL_TURNS } from "../../engine"
 
 const SessionRoom = () => {
   const { t } = useLanguage()
   const copy = t.placementTest?.room || {}
+  const resumeCopy = t.placementTest?.lifecycle?.resume || {}
   const loop = useConversationLoop()
 
   const handleConfigure = () => {
     if (copy.configureNotice) toast.info(copy.configureNotice)
+  }
+
+  if (loop.resumePrompt) {
+    const prompt = loop.resumePrompt
+    return (
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center bg-primaryBg">
+        <ResumeSessionModal
+          open
+          copy={resumeCopy}
+          answeredCount={prompt.answeredCount}
+          totalTurns={TOTAL_TURNS}
+          nextOrder={prompt.nextOrder}
+          remainingMs={
+            prompt.expiresAt ? Math.max(0, prompt.expiresAt - Date.now()) : 0
+          }
+          expiresAt={prompt.expiresAt}
+          busy={loop.restarting}
+          onResume={loop.handlePromptResume}
+          onDiscard={loop.handlePromptRestart}
+        />
+      </div>
+    )
   }
 
   if (!loop.ready) {
@@ -43,6 +68,9 @@ const SessionRoom = () => {
   if (analyzing) {
     tone = "analyzing"
     statusText = copy.aiAnalyzing
+  } else if (isRecording && loop.isMuted) {
+    tone = "notHearing"
+    statusText = copy.aiMuted || "Micro đang tắt tiếng. Bấm nút mic để bật lại."
   } else if (notHearing) {
     tone = "notHearing"
     statusText = copy.aiNotHearing
@@ -53,10 +81,14 @@ const SessionRoom = () => {
     tone = "analyzing"
     statusText =
       "Đã thu âm câu trả lời. Bạn có thể kiểm tra, thu âm lại hoặc bấm hoàn tất để nộp."
+  } else if (loop.aiSpeaking) {
+    tone = "listening"
+    statusText = copy.aiSpeaking || "AI đang đọc câu hỏi, hãy lắng nghe..."
   } else {
     tone = "listening"
     statusText =
-      "Hãy lắng nghe câu hỏi và nhấn biểu tượng Micro để bắt đầu trả lời."
+      copy.aiAutoRecord ||
+      "Hệ thống sẽ tự ghi âm sau khi AI đọc xong câu hỏi."
   }
 
   return (
@@ -78,7 +110,7 @@ const SessionRoom = () => {
           <AiAvatarPanel
             tone={tone}
             statusText={statusText}
-            isRecording={loop.isRecording}
+            isRecording={loop.isRecording && !loop.isMuted}
             micLevel={loop.micLevel}
           />
           <TranscriptCards
@@ -88,6 +120,7 @@ const SessionRoom = () => {
             phase={loop.phase}
             notice={loop.notice}
             isRecording={loop.isRecording}
+            isMuted={loop.isMuted}
             hasRecorded={loop.hasRecorded}
             isPlayingUserAudio={loop.isPlayingUserAudio}
             onPlayUserAudio={loop.handlePlayUserAudio}
@@ -105,6 +138,8 @@ const SessionRoom = () => {
             phase={loop.phase}
             notice={loop.notice}
             isRecording={loop.isRecording}
+            isMuted={loop.isMuted}
+            aiSpeaking={loop.aiSpeaking}
             micLevel={loop.micLevel}
             hasRecorded={loop.hasRecorded}
             recordedMs={loop.recordedMs}
@@ -114,7 +149,7 @@ const SessionRoom = () => {
             isPlayingUserAudio={loop.isPlayingUserAudio}
             onPlayUserAudio={loop.handlePlayUserAudio}
             onStopUserAudio={loop.handleStopUserAudio}
-            onToggleRecord={loop.handleToggleRecord}
+            onToggleMute={loop.handleToggleMute}
             onReRecord={loop.handleReRecord}
             onSubmit={loop.handleSubmit}
             onSkip={loop.handleSkip}
