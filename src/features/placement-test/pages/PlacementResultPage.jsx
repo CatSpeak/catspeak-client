@@ -11,9 +11,9 @@ import {
 } from "../constants/routes"
 import {
   buildAdjustOptions,
+  getAllDimensionScores,
   computeOverallScore,
   getBandDescriptor,
-  getDimensionScores,
   getStrengthDimension,
   getTargetRoadmapBand,
   getWeaknessDimension,
@@ -62,10 +62,12 @@ const PlacementResultPage = () => {
       weakness: hasWeakness ? getWeaknessDimension(result) : null,
       roadmapBand: getTargetRoadmapBand(result.band),
       options: buildAdjustOptions(result.band),
-      skills: getDimensionScores(result).map((item) => ({
+      skills: getAllDimensionScores(result).map((item) => ({
         ...item,
         label: copy.dimensions?.[item.key] || item.key,
-        scoreText: formatTemplate(copy.scoreOf, { score: item.score }),
+        scoreText: item.measured
+          ? formatTemplate(copy.scoreOf, { score: item.score })
+          : copy.notMeasured || "Chưa đo được",
       })),
     }
   }, [result, copy.scoreOf, copy.dimensions])

@@ -37,7 +37,7 @@ const ProfileSkillsCard = ({ copy = {}, items = [] }) => (
           <div className="h-[5px] w-full overflow-hidden rounded-full bg-[#F1F5F9]">
             <div
               className="h-full rounded-full"
-              style={{ width: `${item.score}%`, backgroundColor: color }}
+              style={{ width: `${item.score ?? 0}%`, backgroundColor: color }}
             />
           </div>
         </div>

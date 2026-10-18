@@ -22,7 +22,11 @@ const useSessionResume = ({ copy = {} } = {}) => {
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
   const [resumeSession] = useResumeSessionMutation()
   const [cancelSession, { isLoading: cancelling }] = useCancelSessionMutation()
-  const { data: activeSession } = useGetActiveSessionQuery(undefined, {
+  const {
+    data: activeSession,
+    isSuccess: activeLoaded,
+    isError: activeFailed,
+  } = useGetActiveSessionQuery(undefined, {
     refetchOnMountOrArgChange: true,
   })
 
@@ -73,6 +77,7 @@ const useSessionResume = ({ copy = {} } = {}) => {
 
   return {
     lifecycle,
+    loaded: Boolean(activeLoaded || activeFailed),
     creating: creating || cancelling,
     resume,
     restart,
