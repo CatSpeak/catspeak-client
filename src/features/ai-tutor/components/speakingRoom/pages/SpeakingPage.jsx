@@ -2,6 +2,13 @@ import React, { useState, useEffect, useReducer, useRef, useCallback } from "rea
 import { Room, RoomEvent, Track } from "livekit-client"
 import { toast } from "@/shared/utils/toastBridge"
 import { assistReducer, initialAssistState } from "../../../utils/speakingAssist"
+import EarlySubmitConfirmationModal from "../modals/EarlySubmitConfirmationModal"
+import NetworkDisconnectedModal from "../modals/NetworkDisconnectedModal"
+
+// Agent không phản hồi yêu cầu kết thúc trong khoảng này thì gọi API kết thúc.
+const FINISH_FALLBACK_MS = 6000
+// E-SS-003: chờ kết nối lại tối đa 15 giây.
+const RECONNECT_WINDOW_S = 15
 
 const TOPIC_SUBTITLE = "speaking-subtitle"
 const TOPIC_ASSIST = "speaking-assist"
@@ -39,6 +46,7 @@ const SpeakingPage = ({
   onEndSession,
   onBackToSelection,
   onConnectionLost,
+  onRequestEnd,
 }) => {
   const [isMicActive, setIsMicActive] = useState(false) // Mặc định tắt mic
   const [isRequestingMic, setIsRequestingMic] = useState(false)
@@ -60,6 +68,10 @@ const SpeakingPage = ({
   const [warnMessage, setWarnMessage] = useState(null)
   const [sessionSeconds, setSessionSeconds] = useState(0)
   const [retryCount, setRetryCount] = useState(0)
+  const [showEarlySubmit, setShowEarlySubmit] = useState(false)
+  const [networkLost, setNetworkLost] = useState(false)
+  const micWasActiveRef = useRef(false)
+  const finishFallbackRef = useRef(null)
 
   const roomRef = useRef(null)
   const audioRef = useRef(null)
@@ -67,6 +79,10 @@ const SpeakingPage = ({
 
   const onEndSessionRef = useRef(onEndSession)
   const onConnectionLostRef = useRef(onConnectionLost)
+  const onRequestEndRef = useRef(onRequestEnd)
+  useEffect(() => {
+    onRequestEndRef.current = onRequestEnd
+  }, [onRequestEnd])
   const didFinishSessionRef = useRef(false)
   const wasConnectedRef = useRef(false)
   const isWrappingUpRef = useRef(false)
@@ -80,7 +96,41 @@ const SpeakingPage = ({
   const finishSessionOnce = useCallback(() => {
     if (didFinishSessionRef.current) return
     didFinishSessionRef.current = true
+    if (finishFallbackRef.current) {
+      clearTimeout(finishFallbackRef.current)
+      finishFallbackRef.current = null
+    }
     onEndSessionRef.current?.()
+  }, [])
+
+  // BUG-SS-06 (E-SS-003, FR-SS-013): mất mạng thì tạm dừng thu âm (tắt mic) và
+  // hiện ss07; có mạng lại trong 15 giây thì bật lại mic và tiếp tục đúng lượt.
+  const networkLostRef = useRef(false)
+  const pauseForNetwork = useCallback(() => {
+    if (networkLostRef.current) return
+    networkLostRef.current = true
+    const room = roomRef.current
+    const micOn = Boolean(room?.localParticipant?.isMicrophoneEnabled)
+    micWasActiveRef.current = micOn
+    if (micOn) {
+      room.localParticipant.setMicrophoneEnabled(false).catch(() => {})
+    }
+    setIsMicActive(false)
+    setNetworkLost(true)
+  }, [])
+
+  const resumeAfterNetwork = useCallback(() => {
+    if (!networkLostRef.current) return
+    networkLostRef.current = false
+    const room = roomRef.current
+    if (micWasActiveRef.current && room?.localParticipant) {
+      room.localParticipant
+        .setMicrophoneEnabled(true)
+        .then(() => setIsMicActive(true))
+        .catch(() => {})
+    }
+    micWasActiveRef.current = false
+    setNetworkLost(false)
   }, [])
 
   const token = sessionData?.livekit?.token || sessionData?.token
@@ -129,18 +179,29 @@ const SpeakingPage = ({
 
     room.on(RoomEvent.Disconnected, () => {
       if (!isCancelled) {
+        if (isWrappingUpRef.current) {
+          finishSessionOnce()
+          return
+        }
+        if (wasConnectedRef.current) {
+          // Giữ giao diện phòng và hộp thoại ss07; hết 15 giây mới chuyển trang.
+          pauseForNetwork()
+          return
+        }
         setConnectionStatus("disconnected")
-        if (wasConnectedRef.current && !isWrappingUpRef.current) onConnectionLostRef.current?.()
-        if (isWrappingUpRef.current) finishSessionOnce()
       }
     })
 
     room.on(RoomEvent.Reconnecting, () => {
-      if (!isCancelled) setConnectionStatus("connecting")
+      if (isCancelled) return
+      if (wasConnectedRef.current) pauseForNetwork()
+      else setConnectionStatus("connecting")
     })
 
     room.on(RoomEvent.Reconnected, () => {
-      if (!isCancelled) setConnectionStatus("connected")
+      if (isCancelled) return
+      setConnectionStatus("connected")
+      resumeAfterNetwork()
     })
 
     // 2. Data Packet Listener from AI Agent
@@ -207,7 +268,44 @@ const SpeakingPage = ({
         room.disconnect()
       }
     }
-  }, [token, serverUrl, retryCount, finishSessionOnce])
+  }, [token, serverUrl, retryCount, finishSessionOnce, pauseForNetwork, resumeAfterNetwork])
+
+  // Trình duyệt báo mất/có mạng nhanh hơn LiveKit nhiều giây.
+  useEffect(() => {
+    const handleOffline = () => {
+      if (wasConnectedRef.current && !isWrappingUpRef.current) pauseForNetwork()
+    }
+    const handleOnline = () => {
+      const room = roomRef.current
+      if (room && room.state === "connected") resumeAfterNetwork()
+    }
+    window.addEventListener("offline", handleOffline)
+    window.addEventListener("online", handleOnline)
+    return () => {
+      window.removeEventListener("offline", handleOffline)
+      window.removeEventListener("online", handleOnline)
+    }
+  }, [pauseForNetwork, resumeAfterNetwork])
+
+  // Quá 15 giây chưa có mạng lại: giao cho trang phiên xử lý (khôi phục hoặc tổng kết).
+  useEffect(() => {
+    if (!networkLost) return undefined
+    const id = setTimeout(() => {
+      const room = roomRef.current
+      const online = typeof navigator === "undefined" || navigator.onLine !== false
+      if (online && room && room.state === "connected") {
+        resumeAfterNetwork()
+        return
+      }
+      setConnectionStatus("disconnected")
+      onConnectionLostRef.current?.()
+    }, RECONNECT_WINDOW_S * 1000)
+    return () => clearTimeout(id)
+  }, [networkLost, resumeAfterNetwork])
+
+  useEffect(() => () => {
+    if (finishFallbackRef.current) clearTimeout(finishFallbackRef.current)
+  }, [])
 
   // Timer effect when connected
   useEffect(() => {
@@ -247,8 +345,8 @@ const SpeakingPage = ({
   // Cấp của buổi quyết định cách hiện gợi ý; chỉ khi không biết cấp mới dùng
   // hint_mode trong gói assist.
   const hintMode = hintModeForLevel(sessionData?.hsk_level ?? sessionData?.hskLevel) || assist.hintMode || "none"
-  const chipOpen =
-    (assist.ai && chipOpenForSeq === assist.ai.seq) || assist.warn === "silence_10s"
+  // BUG-SS-05 (BR-SS-009): HSK 3-4 gợi ý thu gọn thành chip, chỉ mở khi học viên bấm.
+  const chipOpen = Boolean(assist.ai && chipOpenForSeq === assist.ai.seq)
 
   // ── Send Control Packet Helper ───────────────────────────────────────────
   const sendControlPacket = async (action, hintId = null, extra = {}) => {
@@ -322,16 +420,35 @@ const SpeakingPage = ({
   }
 
 
-  const handleFinishEarly = async () => {
-    if (isWrappingUp) return
-    isWrappingUpRef.current = true
-    setIsWrappingUp(true)
-    const sent = await sendControlPacket("finish_early", null, { end_reason: "early_finish" })
-    if (!sent) {
+  // Gọi API kết thúc khi agent không nhận/không phản hồi yêu cầu qua phòng.
+  const requestEndViaApi = async () => {
+    if (didFinishSessionRef.current) return
+    try {
+      await onRequestEndRef.current?.()
+      finishSessionOnce()
+    } catch {
       isWrappingUpRef.current = false
       setIsWrappingUp(false)
       toast.error("Không gửi được yêu cầu kết thúc. Hãy thử lại.")
     }
+  }
+
+  // BUG-SS-01/09: "Kết thúc" mở ss09; "Nộp bài" mới kết thúc thật.
+  const handleFinishEarly = async () => {
+    if (isWrappingUp) return
+    setShowEarlySubmit(false)
+    isWrappingUpRef.current = true
+    setIsWrappingUp(true)
+    const sent = await sendControlPacket("finish_early", null, { end_reason: "early_finish" })
+    if (!sent) {
+      await requestEndViaApi()
+      return
+    }
+    if (finishFallbackRef.current) clearTimeout(finishFallbackRef.current)
+    finishFallbackRef.current = setTimeout(() => {
+      finishFallbackRef.current = null
+      requestEndViaApi()
+    }, FINISH_FALLBACK_MS)
   }
 
 
@@ -480,7 +597,7 @@ const SpeakingPage = ({
           </div>
           <button
             type="button"
-            onClick={handleFinishEarly}
+            onClick={() => setShowEarlySubmit(true)}
             disabled={isWrappingUp}
             className="px-3 py-2 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold rounded-xl transition cursor-pointer"
           >
@@ -672,9 +789,10 @@ const SpeakingPage = ({
         )}
 
         {/* Bottom Control Area */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+        {/* Lưới 3 cột 1fr-auto-1fr để nút mic luôn nằm chính giữa thẻ */}
+        <div className="flex flex-col items-center gap-4 pt-4 border-t border-slate-100 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
           {/* Left Timer Pill */}
-          <div className="bg-rose-50/60 border border-rose-200/70 text-[#990011] text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-2xs">
+          <div className="bg-rose-50/60 border border-rose-200/70 text-[#990011] text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-2xs sm:justify-self-start">
             <span>⏱</span>
             <span>{formattedTime()} / 05:00 · Thu âm phản xạ</span>
           </div>
@@ -712,7 +830,7 @@ const SpeakingPage = ({
           </div>
 
           {/* Volume Control */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:justify-self-end">
             <button
               type="button"
               onClick={() => setVolume(volume === 100 ? 50 : volume === 50 ? 0 : 100)}
@@ -724,6 +842,26 @@ const SpeakingPage = ({
           </div>
         </div>
       </div>
+
+      <EarlySubmitConfirmationModal
+        isOpen={showEarlySubmit}
+        onClose={() => setShowEarlySubmit(false)}
+        completedCount={Math.max(0, currentRound - 1)}
+        totalCount={totalRounds}
+        onSubmitEarly={handleFinishEarly}
+        onContinueSpeaking={() => setShowEarlySubmit(false)}
+      />
+      <NetworkDisconnectedModal
+        isOpen={networkLost}
+        onClose={() => {}}
+        initialSeconds={RECONNECT_WINDOW_S}
+        maxSeconds={RECONNECT_WINDOW_S}
+        onRetry={() => {
+          const room = roomRef.current
+          if (room && room.state === "connected" && navigator.onLine !== false) resumeAfterNetwork()
+        }}
+        onEndAndSave={handleFinishEarly}
+      />
     </div>
   )
 }
