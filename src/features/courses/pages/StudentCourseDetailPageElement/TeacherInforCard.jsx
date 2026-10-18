@@ -18,7 +18,7 @@ const TeacherInforCard = ({
   const teacherId = teacher.accountId || teacher.id
   const goToProfile = () => {
     if (teacherId) {
-      navigate(`/profile/${encodeURIComponent(String(teacherId))}`)
+      navigate(`/workspace/profile/${encodeURIComponent(String(teacherId))}`)
     }
   }
 

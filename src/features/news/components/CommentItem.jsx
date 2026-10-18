@@ -106,7 +106,7 @@ const CommentItem = ({
   const handleReplyToClick = (e) => {
     if (replyToAccountId) {
       e.stopPropagation()
-      navigate(`/profile/${replyToAccountId}`)
+      navigate(`/workspace/profile/${replyToAccountId}`)
     }
   }
 
@@ -221,7 +221,7 @@ const CommentItem = ({
                 onClick={(e) => {
                   if (authorAccountId) {
                     e.stopPropagation()
-                    navigate(`/profile/${authorAccountId}`)
+                    navigate(`/workspace/profile/${authorAccountId}`)
                   }
                 }}
                 className={`font-semibold text-sm text-slate-800 leading-snug break-words ${authorAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}

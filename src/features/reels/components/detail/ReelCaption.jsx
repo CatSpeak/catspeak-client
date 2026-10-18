@@ -45,7 +45,7 @@ const ReelCaption = React.memo(({ reel, isMobile = false }) => {
               className={`font-bold flex items-center gap-1 cursor-pointer transition-colors duration-200 ${isMobile ? "text-white text-[14px] drop-shadow-md hover:text-gray-200" : "text-headingColor text-[15px] hover:text-cath-red-700"}`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (reel.author?.id) navigate(`/profile/${reel.author.id}`);
+                if (reel.author?.id) navigate(`/workspace/profile/${reel.author.id}`);
               }}
             >
               {reel.author?.name}

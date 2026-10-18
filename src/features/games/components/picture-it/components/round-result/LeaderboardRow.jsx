@@ -44,7 +44,7 @@ const LeaderboardRow = ({ player, index }) => {
         onClick={(e) => {
           if (playerAccountId) {
             e.stopPropagation()
-            navigate(`/profile/${playerAccountId}`)
+            navigate(`/workspace/profile/${playerAccountId}`)
           }
         }}
         className={`flex-1 min-w-0 items-center text-sm font-semibold ${playerAccountId ? "cursor-pointer hover:underline hover:text-cath-red-700 transition-colors" : ""}`}

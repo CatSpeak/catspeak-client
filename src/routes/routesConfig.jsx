@@ -1108,14 +1108,6 @@ const routesConfig = [
         ),
         children: [
           {
-            path: "profile/:accountId?",
-            element: (
-              <LazyRoute fallback={<ProfilePageSkeleton />}>
-                <Profile />
-              </LazyRoute>
-            ),
-          },
-          {
             element: <UserPagesLayout />,
             children: [
               {

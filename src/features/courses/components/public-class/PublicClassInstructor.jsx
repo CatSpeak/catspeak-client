@@ -51,7 +51,7 @@ const PublicClassInstructor = ({ classData }) => {
           onClick={() => {
             const teacherId = teacher.accountId || teacher.id
             if (teacherId) {
-              navigate(`/profile/${encodeURIComponent(String(teacherId))}`)
+              navigate(`/workspace/profile/${encodeURIComponent(String(teacherId))}`)
             }
           }}
         >

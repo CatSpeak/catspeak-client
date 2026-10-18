@@ -340,7 +340,7 @@ const CompletedClass = ({ isOwnProfile }) => {
                         onClick={(e) => {
                           if (teacherId) {
                             e.stopPropagation()
-                            navigate(`/profile/${teacherId}`)
+                            navigate(`/workspace/profile/${teacherId}`)
                           }
                         }}
                       />
@@ -360,7 +360,7 @@ const CompletedClass = ({ isOwnProfile }) => {
                           onClick={(e) => {
                             if (teacherId) {
                               e.stopPropagation()
-                              navigate(`/profile/${teacherId}`)
+                              navigate(`/workspace/profile/${teacherId}`)
                             }
                           }}
                         >

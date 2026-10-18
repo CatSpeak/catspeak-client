@@ -94,7 +94,7 @@ const ProfileDropdown = () => {
 
   const handleProfileClick = () => {
     handleCloseMenu()
-    navigate("/profile")
+    navigate("/workspace/profile")
   }
 
   const handleSettingsClick = () => {

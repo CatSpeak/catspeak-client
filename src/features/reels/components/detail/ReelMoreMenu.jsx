@@ -102,7 +102,7 @@ const ReelMoreMenu = memo(function ReelMoreMenu({ isMobile, showMenu, onClose, r
 
       aboutAccount: () => {
         if (reel?.author?.id) {
-          navigate(`/profile/${reel.author.id}`)
+          navigate(`/workspace/profile/${reel.author.id}`)
         } else {
           toast(t?.catSpeak?.reels?.detail?.moreMenu?.featureNotAvailable || "This feature is not available yet.", { icon: "🚧" })
         }
