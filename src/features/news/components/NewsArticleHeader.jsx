@@ -18,7 +18,7 @@ const NewsArticleHeader = ({ newsItem }) => {
           <img
             src={images[0].url}
             alt=""
-            className="absolute -inset-8 h-[calc(100%+4rem)] w-[calc(100%+4rem)] max-w-none object-cover opacity-40 blur-2xl"
+            className="absolute -inset-8 h-[calc(100%+4rem)] w-[calc(100%+4rem)] max-w-none object-cover opacity-100 blur-lg"
           />
         </div>
       )}
@@ -30,7 +30,7 @@ const NewsArticleHeader = ({ newsItem }) => {
             <Carousel
               images={images}
               className="aspect-video rounded-none bg-black/5"
-              objectFit="contain"
+              objectFit="cover"
               autoPlay={false}
             />
           </div>
