@@ -22,6 +22,8 @@ import CreateEventPage from "@/features/calendar/pages/CreateEventPage";
 
 // AI Tutor Feature Pages
 import AiTutorLayout from "@/features/ai-tutor/layouts/AiTutorLayout";
+// Nạp sẵn (không lazy): phải hiện được cả khi mất mạng không tải được module khác.
+import AiFlashcardRouteError from "@/features/ai-tutor/components/flashcards/FlashcardRouteError";
 const AiLevelAssessmentPage = lazy(
   () => import("@/features/ai-tutor/pages/LevelAssessmentPage"),
 );
@@ -55,6 +57,18 @@ const AiFlashcardResultPage = lazy(
 );
 const AiDeckBrowsePage = lazy(
   () => import("@/features/ai-tutor/pages/DeckBrowsePage"),
+);
+const AiDeckListPage = lazy(
+  () => import("@/features/ai-tutor/pages/DeckListPage"),
+);
+const AiAddFlashcardPage = lazy(
+  () => import("@/features/ai-tutor/pages/AddFlashcardPage"),
+);
+const AiPronunciationPracticePage = lazy(
+  () => import("@/features/ai-tutor/pages/PronunciationPracticePage"),
+);
+const AiFlashcardLayout = lazy(
+  () => import("@/features/ai-tutor/layouts/FlashcardLayout"),
 );
 const AiHistoryProgressPage = lazy(
   () => import("@/features/ai-tutor/pages/HistoryProgressPage"),
@@ -547,16 +561,27 @@ const routesConfig = [
                     ),
                   },
                   {
+                    // TASK-AI-16: Sổ tay từ vựng (flashcard). Bắt đăng nhập (CHK-103),
+                    // khung chung có banner offline và bộ đệm offline (CHK-098..100).
                     path: "vocabulary-notebook",
                     element: (
-                      <LazyRoute>
-                        <AiVocabularyNotebookPage />
-                      </LazyRoute>
+                      <AuthGuard>
+                        <LazyRoute>
+                          <AiFlashcardLayout />
+                        </LazyRoute>
+                      </AuthGuard>
                     ),
+                    errorElement: <AiFlashcardRouteError />,
+                    children: [
+                      { index: true, element: <LazyRoute><AiVocabularyNotebookPage /></LazyRoute> },
+                      { path: "review", element: <LazyRoute><AiFlashcardReviewPage /></LazyRoute> },
+                      { path: "review/:sessionId/result", element: <LazyRoute><AiFlashcardResultPage /></LazyRoute> },
+                      { path: "decks", element: <LazyRoute><AiDeckListPage /></LazyRoute> },
+                      { path: "decks/:deckId", element: <LazyRoute><AiDeckBrowsePage /></LazyRoute> },
+                      { path: "add", element: <LazyRoute><AiAddFlashcardPage /></LazyRoute> },
+                      { path: "practice", element: <LazyRoute><AiPronunciationPracticePage /></LazyRoute> },
+                    ],
                   },
-                  { path: "vocabulary-notebook/review", element: <LazyRoute><AiFlashcardReviewPage /></LazyRoute> },
-                  { path: "vocabulary-notebook/review/:sessionId/result", element: <LazyRoute><AiFlashcardResultPage /></LazyRoute> },
-                  { path: "vocabulary-notebook/decks/:deckId", element: <LazyRoute><AiDeckBrowsePage /></LazyRoute> },
                   {
                     path: "history-progress",
                     element: (

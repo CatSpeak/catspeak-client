@@ -1,7 +1,7 @@
 /**
  * API phiên ôn flashcard (TASK-AI-16, lát của Khôi) trên catspeak-ai.
  *
- *   POST /v1/flashcards/sessions                  mở phiên: { mode, deck_id, session_id_source, timezone }
+ *   POST /v1/flashcards/sessions                  mở phiên: { mode, deck_id, session_id_source, card_ids }
  *   GET  /v1/flashcards/sessions/{id}             đọc lại phiên đang mở (tải lại trang)
  *   POST /v1/flashcards/sessions/{id}/review      chấm một thẻ (idempotent, server thắng)
  *   POST /v1/flashcards/sessions/{id}/finish      kết thúc, trả số liệu cho fc03
@@ -19,15 +19,18 @@ const sid = (id) => encodeURIComponent(id)
 export const flashcardReviewApi = api.injectEndpoints({
   endpoints: (builder) => ({
     startFlashcardSession: builder.mutation({
-      query: ({ mode = "due", deckId = null, sourceSessionId = null }) => ({
+      query: ({ mode = "due", deckId = null, sourceSessionId = null, cardIds = null }) => ({
         url: "/v1/flashcards/sessions",
         method: "POST",
         body: {
           mode,
           deck_id: deckId,
           session_id_source: sourceSessionId,
+          ...(cardIds?.length ? { card_ids: cardIds } : {}),
         },
       }),
+      // Mở phiên đóng phiên cũ ở server: fc01 phải đọc lại "phiên đang dở".
+      invalidatesTags: ["FlashcardHome"],
     }),
 
     getFlashcardSession: builder.query({
@@ -46,7 +49,7 @@ export const flashcardReviewApi = api.injectEndpoints({
           is_override: Boolean(isOverride),
         },
       }),
-      invalidatesTags: ["FlashcardHome", "FlashcardDecks", { type: "FlashcardDeck" }],
+      invalidatesTags: ["FlashcardHome", "FlashcardDecks", "FlashcardDeck"],
     }),
 
     finishFlashcardSession: builder.mutation({
@@ -54,7 +57,12 @@ export const flashcardReviewApi = api.injectEndpoints({
         url: `/v1/flashcards/sessions/${sid(sessionId)}/finish`,
         method: "POST",
       }),
-      invalidatesTags: (_r, _e, sessionId) => [{ type: "FlashcardReviewSession", id: sessionId }, "FlashcardHome", "FlashcardDecks", { type: "FlashcardDeck" }],
+      invalidatesTags: (_r, _e, sessionId) => [
+        { type: "FlashcardReviewSession", id: sessionId },
+        "FlashcardHome",
+        "FlashcardDecks",
+        "FlashcardDeck",
+      ],
     }),
   }),
   overrideExisting: false,

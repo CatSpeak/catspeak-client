@@ -8,15 +8,18 @@
  * Server idempotent theo (session_id, card_id) và "server thắng": gửi lại một kết
  * quả đã có trên server không đổi gì. Vì vậy:
  *
- *   lỗi mạng, 5xx, 408, 429   giữ lại, thử lại sau (backoff tới 30 giây)
- *   4xx khác (phiên đã đóng,   bỏ khỏi hàng đợi: gửi lại bao nhiêu lần cũng vậy,
- *   thẻ không thuộc phiên...)  và giữ lại thì hàng đợi kẹt mãi
+ *   lỗi mạng, 5xx, 408, 429,   giữ lại, thử lại sau (backoff tới 30 giây). 401 là
+ *   401 (hết phiên đăng nhập)  phiên đăng nhập hết hạn: giữ lại, đăng nhập lại thì gửi.
+ *   4xx khác (thẻ đã xoá,      bỏ khỏi hàng đợi: gửi lại bao nhiêu lần cũng vậy,
+ *   phiên của người khác...)   và giữ lại thì hàng đợi kẹt mãi
  *
  * Hai lượt cho cùng một thẻ trong hàng đợi (lượt sai rồi bấm "Tôi đúng rồi" khi
  * đang offline) gộp làm một: lượt sau thay lượt trước, server nhận thẳng bản cuối.
  */
 
 export const STORAGE_KEY = "catspeak.flashcard.pendingReviews.v1"
+/** Sự kiện cửa sổ bắn ra mỗi khi hàng đợi đổi, để mọi hook đọc lại số chưa đồng bộ. */
+export const REVIEW_QUEUE_EVENT = "catspeak:flashcard-queue"
 export const MAX_BACKOFF_MS = 30_000
 export const BASE_BACKOFF_MS = 2_000
 
@@ -55,12 +58,18 @@ export const createReviewQueue = ({ storage, key = STORAGE_KEY } = {}) => {
 
   const write = (items) => {
     memory = items
-    if (!store) return
+    if (store) {
+      try {
+        if (items.length) store.setItem(key, JSON.stringify(items))
+        else store.removeItem(key)
+      } catch {
+        // đầy bộ nhớ: vẫn giữ bản trong bộ nhớ cho phiên hiện tại
+      }
+    }
     try {
-      if (items.length) store.setItem(key, JSON.stringify(items))
-      else store.removeItem(key)
+      if (typeof window !== "undefined") window.dispatchEvent(new Event(REVIEW_QUEUE_EVENT))
     } catch {
-      // đầy bộ nhớ: vẫn giữ bản trong bộ nhớ cho phiên hiện tại
+      // môi trường không có Event (test cũ)
     }
   }
 
@@ -96,7 +105,7 @@ export const isRetryableError = (error) => {
   if (!error) return true
   const status = error.status ?? error.originalStatus
   if (typeof status !== "number") return true // FETCH_ERROR, TIMEOUT_ERROR, PARSING_ERROR, mất mạng
-  if (status === 408 || status === 429) return true
+  if (status === 401 || status === 408 || status === 429) return true
   return status >= 500
 }
 

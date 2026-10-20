@@ -77,7 +77,7 @@ export const resultLines = (m) => {
   if (m.improved) lines.push({ key: "improved", tone: "good", text: `${m.improved} thẻ nhớ tốt hơn lần trước` })
   if (m.need_review_soon) lines.push({ key: "soon", tone: "warn", text: `${m.need_review_soon} thẻ cần ôn lại sớm` })
   if (m.entered_long_term)
-    lines.push({ key: "longterm", tone: "celebrate", text: `${m.entered_long_term} thẻ đã vào bộ nhớ dài hạn` })
+    lines.push({ key: "longterm", tone: "celebrate", text: `${m.entered_long_term} thẻ vào bộ nhớ dài hạn` })
   return lines
 }
 
@@ -99,11 +99,15 @@ export const resolveTimezone = (user) => {
  *   flashcardReviewPath("vi")                                     ôn thẻ đến hạn
  *   flashcardReviewPath("vi", { mode: "free", deckId: "hsk-2" })  ôn tự do một deck
  *   flashcardReviewPath("vi", { mode: "early", sourceSessionId })  ôn sớm sau buổi nói
+ *   flashcardReviewPath("vi", { mode: "free", cardIds: [3, 8] })   ôn các thẻ đã chọn ở fc05
+ *   flashcardReviewPath("vi", { sessionId })                        tiếp tục phiên đang dở
  */
-export const flashcardReviewPath = (lang = "vi", { mode = "due", deckId, sourceSessionId } = {}) => {
+export const flashcardReviewPath = (lang = "vi", { mode = "due", deckId, sourceSessionId, cardIds, sessionId } = {}) => {
   const q = new URLSearchParams({ mode })
   if (deckId) q.set("deck", deckId)
   if (sourceSessionId) q.set("source", sourceSessionId)
+  if (cardIds?.length) q.set("cards", cardIds.join(","))
+  if (sessionId) q.set("session", sessionId)
   return `/${lang}/ai-tutor/vocabulary-notebook/review?${q.toString()}`
 }
 
@@ -114,10 +118,29 @@ export const flashcardResultPath = (lang = "vi", sessionId) =>
 export const parseReviewParams = (search) => {
   const q = new URLSearchParams(search || "")
   const mode = ["due", "early", "free"].includes(q.get("mode")) ? q.get("mode") : "due"
+  const cardIds = (q.get("cards") || "")
+    .split(",")
+    .map((x) => Number.parseInt(x, 10))
+    .filter((n) => Number.isInteger(n) && n > 0)
+    .slice(0, 20)
   return {
     mode,
     deckId: q.get("deck") || null,
     sourceSessionId: q.get("source") || null,
     sessionId: q.get("session") || null,
+    cardIds: cardIds.length ? cardIds : null,
+  }
+}
+
+/** Đường dẫn các màn sổ từ vựng. */
+export const notebookPaths = (lang = "vi") => {
+  const base = `/${lang}/ai-tutor/vocabulary-notebook`
+  return {
+    home: base,
+    decks: `${base}/decks`,
+    deck: (deckId) => `${base}/decks/${encodeURIComponent(deckId)}`,
+    add: `${base}/add`,
+    practice: (deckId = "recent-wrong") => `${base}/practice?deck=${encodeURIComponent(deckId)}`,
+    search: (term) => `${base}/decks?search=${encodeURIComponent(term)}`,
   }
 }

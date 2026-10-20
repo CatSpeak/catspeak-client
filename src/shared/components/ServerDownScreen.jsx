@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react"
+import React, { useEffect, useCallback, useSyncExternalStore } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import {
   selectIsServerDown,
@@ -9,6 +9,13 @@ import { ServerCrash } from "lucide-react"
 import toast from "react-hot-toast"
 import { checkIsServerHealthy } from "@/shared/utils/healthCheck"
 import { flushPendingAutoCrashReport } from "@/shared/utils/telemetry/autoCrashSync"
+import {
+  isOfflineCapableRoute,
+  subscribeOfflineCapableRoute,
+} from "@/shared/utils/offlineCapableRoute"
+
+const offlineSnapshot = () =>
+  isOfflineCapableRoute() && typeof navigator !== "undefined" && navigator.onLine === false
 
 const POLLING_INTERVAL_MS = 5000 // 5 seconds
 
@@ -22,6 +29,8 @@ const ServerDownScreen = () => {
   const isServerDown = useSelector(selectIsServerDown)
   const isInCall = useSelector((state) => state.videoCall?.isInCall)
   const { t } = useLanguage()
+  // Màn tự xử lý offline (Sổ tay từ vựng) + trình duyệt đang offline: không phủ màn.
+  const offlineHandled = useSyncExternalStore(subscribeOfflineCapableRoute, offlineSnapshot, () => false)
 
   const checkHealth = useCallback(async () => {
     // When polling in the background while the screen is shown,
@@ -47,7 +56,7 @@ const ServerDownScreen = () => {
 
   // Do not block the UI if the user is actively in a video call,
   // since LiveKit runs on a separate server and the call can continue.
-  if (!isServerDown || isInCall) return null
+  if (!isServerDown || isInCall || offlineHandled) return null
 
   const strings = t?.errors?.serverDown ?? {}
 

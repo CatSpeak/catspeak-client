@@ -1,5 +1,5 @@
 import React from "react"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Play, Shuffle } from "lucide-react"
 
 /**
  * FlashcardHeroBanner component (fc01)
@@ -7,16 +7,21 @@ import { ArrowRight } from "lucide-react"
  * @param {Object} props
  * @param {number} props.dueCount - Số thẻ đến hạn hôm nay
  * @param {number} props.totalCards - Tổng số thẻ trong sổ
- * @param {number} [props.overdueCount=3] - Số thẻ quá hạn (nếu có)
+ * @param {number} [props.overdueCount=0] - Số thẻ quá hạn (đến hạn từ trước hôm nay)
+ * @param {Object|null} [props.activeSession] - Phiên ôn đang dở trong ngày { answered, total_cards }
  * @param {Function} [props.onStartDue] - Callback khi bấm "Bắt đầu ôn"
- * @param {Function} [props.onStartFree] - Callback khi bấm "Ôn tập (tự do)"
+ * @param {Function} [props.onStartFree] - Callback khi bấm "Ôn tập" (ôn tự do, FR-FC-021)
+ * @param {Function} [props.onResume] - Callback khi bấm "Tiếp tục ôn" (FR-FC-009)
  * @param {Function} [props.onStartSpeaking] - Callback khi bấm "Luyện nói với AI"
  */
 const FlashcardHeroBanner = ({
   dueCount = 0,
   totalCards = 0,
-  overdueCount = 3,
+  overdueCount = 0,
+  activeSession = null,
   onStartDue,
+  onStartFree,
+  onResume,
   onStartSpeaking,
 }) => {
   const isEmpty = totalCards === 0
@@ -55,27 +60,47 @@ const FlashcardHeroBanner = ({
           </span>
           <span className="text-white/90 font-medium">
             {isEmpty && "— luyện nói với AI để tạo thẻ đầu tiên"}
-            {isDone && "— quay lại vào ngày mai"}
+            {isDone && "— bấm Ôn tập để ôn tự do, hoặc quay lại vào ngày mai"}
             {hasDue && "— ưu tiên ôn thẻ quá hạn trước"}
           </span>
         </div>
 
         {/* Actions Row */}
         <div className="flex flex-wrap items-center gap-3 pt-1">
-          {hasDue && (
-            <>
-              <button
-                type="button"
-                onClick={onStartDue}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-white px-6 py-2.5 text-sm sm:text-base font-bold text-[#680411] shadow-xs transition-all hover:bg-white/95 active:scale-98"
-              >
-                Bắt đầu ôn
-                <ArrowRight className="h-4 w-4 stroke-[2.5]" />
-              </button>
-
-            </>
+          {activeSession && (
+            <button
+              type="button"
+              onClick={onResume}
+              data-testid="flashcard-resume"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-6 py-2.5 text-sm sm:text-base font-bold text-[#680411] shadow-xs transition-all hover:bg-white/95 active:scale-98"
+            >
+              <Play className="h-4 w-4 fill-current" />
+              Tiếp tục ôn ({activeSession.answered}/{activeSession.total_cards})
+            </button>
           )}
 
+          {hasDue && (!activeSession || activeSession.mode !== "due") && (
+            <button
+              type="button"
+              onClick={onStartDue}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-6 py-2.5 text-sm sm:text-base font-bold text-[#680411] shadow-xs transition-all hover:bg-white/95 active:scale-98"
+            >
+              Bắt đầu ôn
+              <ArrowRight className="h-4 w-4 stroke-[2.5]" />
+            </button>
+          )}
+
+          {!isEmpty && (
+            <button
+              type="button"
+              onClick={onStartFree}
+              title="Ôn tự do toàn bộ sổ, kể cả thẻ chưa đến hạn"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/70 bg-white/10 px-6 py-2.5 text-sm sm:text-base font-bold text-white transition-all hover:bg-white/20 active:scale-98"
+            >
+              <Shuffle className="h-4 w-4" />
+              Ôn tập
+            </button>
+          )}
 
           {isEmpty && (
             <button

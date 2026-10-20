@@ -12,6 +12,8 @@ import { flashcardResultPath, parseReviewParams } from "../utils/flashcardReview
  *   fc05 "Ôn tập"       mode=free&deck=<deck_id>
  *   ss11 "Ôn ngay"      mode=early&source=<speaking session_id>
  *   fc06 thông báo      mode=due
+ *   fc05 chọn thẻ       mode=free&cards=1,2,3
+ *   fc01 "Tiếp tục"     session=<review session_id>
  */
 const FlashcardReviewPage = () => {
   const { lang = "vi" } = useParams()
@@ -26,6 +28,7 @@ const FlashcardReviewPage = () => {
       deckId={params.deckId}
       sourceSessionId={params.sourceSessionId}
       resumeSessionId={params.sessionId}
+      cardIds={params.cardIds}
       onExit={() => navigate(notebook)}
       onFinished={(sessionId, state) => navigate(flashcardResultPath(lang, sessionId), { replace: true, state })}
     />

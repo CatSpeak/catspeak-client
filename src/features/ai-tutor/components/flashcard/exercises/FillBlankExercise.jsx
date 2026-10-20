@@ -9,17 +9,23 @@ import { isExactMatch } from "../../../utils/flashcardReview"
  * Điền từ (fc02, kiểu 2). Câu ví dụ khuyết từ, học viên gõ chữ Hán, so khớp chính xác.
  *
  *   Đúng  -> tự phát giọng mẫu, hiện câu đầy đủ.
+ *   Trống -> tính sai như gõ sai (CHK-096): hiện đáp án đúng, không có "Tôi đúng rồi".
  *   Sai   -> hiện đáp án đúng, ghi "Quên" ngay (để bộ đệm offline có kết quả), kèm
  *            nút "Tôi đúng rồi" (E-FC-005): so khớp chính xác có thể chấm sai một
  *            đáp án đúng (biến thể chữ, gõ thừa), học viên tự sửa thành "Nhớ".
  */
 const FillBlankExercise = ({ card, onResult, onNext }) => {
   const [value, setValue] = useState("")
-  const [state, setState] = useState("idle") // idle | correct | wrong | overridden
+  const [state, setState] = useState("idle") // idle | correct | wrong | blank | overridden
   const audio = useSampleAudio(card.audio_url)
 
   const check = () => {
-    if (state !== "idle" || !value.trim()) return
+    if (state !== "idle") return
+    if (!value.trim()) {
+      setState("blank")
+      onResult({ isCorrect: false, isOverride: false })
+      return
+    }
     if (isExactMatch(value, card.word)) {
       setState("correct")
       audio.play()
@@ -74,7 +80,7 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
           className={`w-full max-w-xs h-12 rounded-xl border px-4 text-center text-xl outline-none transition-colors ${
             state === "correct" || state === "overridden"
               ? "border-emerald-400 bg-emerald-50"
-              : state === "wrong"
+              : state === "wrong" || state === "blank"
                 ? "border-rose-400 bg-rose-50"
                 : "border-slate-300 focus:border-[#990011]"
           }`}
@@ -90,9 +96,13 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
           </div>
         )}
 
-        {(state === "wrong" || state === "overridden") && (
+        {(state === "wrong" || state === "overridden" || state === "blank") && (
           <div className="flex flex-col items-center gap-3">
-            {state === "wrong" ? (
+            {state === "blank" ? (
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-700">
+                <X className="w-4 h-4" /> Bạn chưa điền - thẻ này được đánh dấu Quên
+              </span>
+            ) : state === "wrong" ? (
               <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-700">
                 <X className="w-4 h-4" /> Chưa đúng - thẻ này được đánh dấu Quên
               </span>
@@ -111,8 +121,7 @@ const FillBlankExercise = ({ card, onResult, onNext }) => {
         <button
           type="button"
           onClick={check}
-          disabled={!value.trim()}
-          className="h-11 px-8 rounded-full bg-[#990011] text-sm font-semibold text-white hover:brightness-95 disabled:bg-[#BFBFBF] disabled:cursor-not-allowed"
+          className="h-11 px-8 rounded-full bg-[#990011] text-sm font-semibold text-white hover:brightness-95"
         >
           Kiểm tra
         </button>

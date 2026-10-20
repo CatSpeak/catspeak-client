@@ -51,7 +51,7 @@ describe("fc03 ngôn ngữ người học", () => {
     const text = lines.map((l) => l.text).join(" | ")
     expect(text).toContain("8/10 thẻ nhớ được")
     expect(text).toContain("2 thẻ cần ôn lại sớm")
-    expect(text).toContain("1 thẻ đã vào bộ nhớ dài hạn")
+    expect(text).toContain("1 thẻ vào bộ nhớ dài hạn")
     expect(text.toLowerCase()).not.toContain("hộp")
   })
 

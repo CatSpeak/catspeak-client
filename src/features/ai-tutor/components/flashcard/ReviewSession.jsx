@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
+import { useBlocker } from "react-router-dom"
 import { X } from "lucide-react"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import {
@@ -9,6 +10,8 @@ import {
 import useFlashcardSync from "../../hooks/useFlashcardSync"
 import { createReviewQueue } from "../../utils/flashcardOfflineSync"
 import { remainingCards } from "../../utils/flashcardReview"
+import { isNetworkFailure, reportNetworkError } from "../../utils/onlineStatus"
+import FlashcardModal from "./FlashcardModal"
 import FillBlankExercise from "./exercises/FillBlankExercise"
 import FlipCardExercise from "./exercises/FlipCardExercise"
 import MultipleChoiceExercise from "./exercises/MultipleChoiceExercise"
@@ -35,12 +38,17 @@ const MODE_LABEL = {
  * Mỗi lượt chấm đi qua bộ đệm offline (useFlashcardSync): mất mạng vẫn ôn tiếp.
  * Hết thẻ thì gọi `onFinished(sessionId, { localResults, totalCards })`; fc03 tự
  * chờ đồng bộ xong rồi mới gọi /finish.
+ *
+ * Thoát giữa phiên (nút X hoặc nút Back của trình duyệt) hỏi lại trước (CHK-119):
+ * kết quả đã chấm đã được lưu, thẻ chưa ôn giữ lịch cũ, vào lại trong ngày thì
+ * tiếp tục đúng thẻ chưa chấm (FR-FC-009).
  */
 const ReviewSession = ({
   mode = "due",
   deckId = null,
   sourceSessionId = null,
   resumeSessionId = null,
+  cardIds = null,
   timezone = null,
   onFinished,
   onExit,
@@ -54,6 +62,9 @@ const ReviewSession = ({
   const [loading, setLoading] = useState(true)
   const results = useRef(new Map())
   const sync = useFlashcardSync(session?.session_id)
+  const leaving = useRef(false)
+  const [confirmExit, setConfirmExit] = useState(false)
+  const cardKey = cardIds?.join(",") || ""
 
   const [reloadKey, setReloadKey] = useState(0)
 
@@ -61,7 +72,7 @@ const ReviewSession = ({
     let cancelled = false
     const request = resumeSessionId
       ? loadSession(resumeSessionId)
-      : startSession({ mode, deckId, sourceSessionId, timezone })
+      : startSession({ mode, deckId, sourceSessionId, timezone, cardIds: cardKey ? cardKey.split(",").map(Number) : null })
     request
       .unwrap()
       .then((data) => {
@@ -76,6 +87,7 @@ const ReviewSession = ({
         setError(null)
       })
       .catch((err) => {
+        if (isNetworkFailure(err)) reportNetworkError()
         if (!cancelled) setError(err)
       })
       .finally(() => {
@@ -84,7 +96,7 @@ const ReviewSession = ({
     return () => {
       cancelled = true
     }
-  }, [mode, deckId, sourceSessionId, resumeSessionId, timezone, startSession, loadSession, reloadKey])
+  }, [mode, deckId, sourceSessionId, resumeSessionId, cardKey, timezone, startSession, loadSession, reloadKey])
 
   const retry = () => {
     setLoading(true)
@@ -94,6 +106,31 @@ const ReviewSession = ({
 
   const card = queue[index]
   const total = session?.total_cards || 0
+  const inProgress = Boolean(session?.session_id && card)
+
+  // Back của trình duyệt (và mọi điều hướng khác) giữa phiên: hỏi trước khi rời.
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      inProgress && !leaving.current && currentLocation.pathname + currentLocation.search !==
+        nextLocation.pathname + nextLocation.search,
+  )
+
+  const exitNow = useCallback(() => {
+    leaving.current = true
+    setConfirmExit(false)
+    if (blocker.state === "blocked") blocker.proceed()
+    else onExit?.()
+  }, [blocker, onExit])
+
+  const stay = useCallback(() => {
+    setConfirmExit(false)
+    if (blocker.state === "blocked") blocker.reset()
+  }, [blocker])
+
+  const askExit = useCallback(() => {
+    if (inProgress) setConfirmExit(true)
+    else onExit?.()
+  }, [inProgress, onExit])
   const doneBefore = total - queue.length
   const position = Math.min(total, doneBefore + index + 1)
 
@@ -117,6 +154,7 @@ const ReviewSession = ({
       setIndex(index + 1)
       return
     }
+    leaving.current = true
     onFinished?.(session.session_id, {
       localResults: [...results.current.values()],
       totalCards: total,
@@ -177,7 +215,10 @@ const ReviewSession = ({
         <p className="text-base font-semibold text-slate-800">Bạn đã ôn xong mẻ thẻ này.</p>
         <button
           type="button"
-          onClick={() => onFinished?.(session.session_id, { localResults: [], totalCards: total, mode: session.mode })}
+          onClick={() => {
+            leaving.current = true
+            onFinished?.(session.session_id, { localResults: [], totalCards: total, mode: session.mode })
+          }}
           className="h-10 px-6 rounded-full bg-[#990011] text-white text-sm font-medium"
         >
           Xem kết quả
@@ -193,7 +234,7 @@ const ReviewSession = ({
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={onExit}
+          onClick={askExit}
           aria-label="Thoát phiên ôn"
           className="w-9 h-9 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100"
         >
@@ -220,6 +261,38 @@ const ReviewSession = ({
       <Exercise key={card.card_id} card={card} onResult={handleResult} onNext={handleNext} />
 
       <SyncToast isOnline={sync.isOnline} isRetrying={sync.isRetrying} pendingCount={sync.pendingCount} />
+
+      <FlashcardModal
+        isOpen={confirmExit || blocker.state === "blocked"}
+        title="Thoát phiên ôn?"
+        onClose={stay}
+        labelledBy="flashcard-exit-title"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={exitNow}
+              className="h-11 rounded-full border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Thoát
+            </button>
+            <button
+              type="button"
+              onClick={stay}
+              autoFocus
+              className="h-11 rounded-full bg-[#990011] px-6 text-sm font-semibold text-white hover:brightness-95"
+            >
+              Tiếp tục ôn
+            </button>
+          </>
+        }
+      >
+        <p className="font-medium text-slate-800">Kết quả của bạn đã được lưu.</p>
+        <p className="mt-1">
+          Bạn đã ôn {Math.max(0, position - 1)}/{total} thẻ. Các thẻ chưa ôn giữ nguyên lịch, vào lại trong hôm nay
+          sẽ tiếp tục đúng chỗ đang dừng.
+        </p>
+      </FlashcardModal>
     </div>
   )
 }

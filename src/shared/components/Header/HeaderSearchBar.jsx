@@ -14,6 +14,11 @@ const HeaderSearchBar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { lang } = useParams()
+  // Ở các trang Sổ tay từ vựng (flashcard), ô tìm kiếm là "Tìm từ vựng…" và tìm trong sổ.
+  const isVocabulary = /\/ai-tutor\/vocabulary-notebook(\/|$)/.test(location.pathname)
+  const placeholder = isVocabulary
+    ? "Tìm từ vựng…"
+    : t.header?.searchPlaceholder || "Tìm kiếm phòng"
 
   // Sync state if URL changes externally
   React.useEffect(() => {
@@ -22,6 +27,12 @@ const HeaderSearchBar = () => {
 
   const handleSearch = () => {
     const trimmed = searchValue.trim()
+    if (isVocabulary) {
+      const base = `/${lang || "vi"}/ai-tutor/vocabulary-notebook/decks`
+      navigate(trimmed ? `${base}?search=${encodeURIComponent(trimmed)}` : base)
+      setIsExpanded(false)
+      return
+    }
     const newParams = new URLSearchParams(searchParams)
     if (trimmed) {
       newParams.set("search", trimmed)
@@ -48,7 +59,7 @@ const HeaderSearchBar = () => {
         <IconButton
           variant="filled"
           onClick={() => setIsExpanded(true)}
-          aria-label={t.header?.searchPlaceholder || "Search"}
+          aria-label={isVocabulary ? placeholder : t.header?.searchPlaceholder || "Search"}
         >
           <Search size={20} strokeWidth={2} />
         </IconButton>
@@ -70,7 +81,7 @@ const HeaderSearchBar = () => {
               handleSearch()
             }
           }}
-          placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
+          placeholder={placeholder}
           className="w-full h-10 pl-11 pr-4 bg-primaryBg border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[14px] outline-none transition-all placeholder-gray-500"
         />
       </div>
@@ -109,7 +120,7 @@ const HeaderSearchBar = () => {
                     handleSearch()
                   }
                 }}
-                placeholder={t.header?.searchPlaceholder || "Tìm kiếm phòng"}
+                placeholder={placeholder}
                 className="w-full h-10 pl-11 pr-4 bg-primaryBg border-transparent focus:bg-white focus:border-cath-red-700 focus:ring-1 focus:ring-cath-red-700 rounded-full text-[15px] outline-none transition-all placeholder-gray-500"
               />
             </div>

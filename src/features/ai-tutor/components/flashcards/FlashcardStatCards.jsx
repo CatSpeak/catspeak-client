@@ -1,5 +1,5 @@
 import React from "react"
-import { Layers, Clock } from "lucide-react"
+import { Layers, Clock, Flame } from "lucide-react"
 
 /**
  * FlashcardStatCards component (fc01)
@@ -7,9 +7,9 @@ import { Layers, Clock } from "lucide-react"
  * @param {Object} props
  * @param {number} props.totalCards - Tổng số thẻ
  * @param {number} props.dueCount - Số thẻ đến hạn hôm nay
- * @param {number} [props.streakDays=5] - Số ngày streak
+ * @param {number} [props.streakDays=0] - Số ngày học liên tiếp (FR-FC-019)
  */
-const FlashcardStatCards = ({ totalCards = 0, dueCount = 0 }) => {
+const FlashcardStatCards = ({ totalCards = 0, dueCount = 0, streakDays = 0 }) => {
   const stats = [
     {
       id: "total",
@@ -27,10 +27,18 @@ const FlashcardStatCards = ({ totalCards = 0, dueCount = 0 }) => {
       icon: Clock,
       valueColor: "text-[#680411]", // Màu đỏ theo thiết kế fc01
     },
+    {
+      id: "streak",
+      label: "Chuỗi ngày ôn",
+      value: streakDays,
+      unit: " ngày",
+      icon: Flame,
+      valueColor: "text-amber-600",
+    },
   ]
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {stats.map((stat) => {
         const IconComponent = stat.icon
         return (
