@@ -31,7 +31,8 @@ const Dropdown = ({
   renderOption,
   placeholder = "Select...",
   className = "",
-  dropdownClassName = "min-w-[260px] max-w-[260px]",
+  dropdownClassName,
+  fullWidth = false,
   triggerClassName = "",
   roundedClass = "rounded-full",
   align = "left", // 'left' | 'right' | 'center'
@@ -92,20 +93,29 @@ const Dropdown = ({
     setIsOpen(false)
   })
 
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen)
+    if (!isOpen) {
+      setSearchQuery("")
+    }
+  }
+
   // Focus search input on open
   useEffect(() => {
     if (isOpen && isSearchActive) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         searchInputRef.current?.focus()
       }, 100)
-    } else if (!isOpen) {
-      setSearchQuery("")
+      return () => clearTimeout(timer)
     }
   }, [isOpen, isSearchActive])
 
   // Debounced API search callback
   const handleSearchRef = useRef(handleSearch)
-  handleSearchRef.current = handleSearch
+  useEffect(() => {
+    handleSearchRef.current = handleSearch
+  }, [handleSearch])
 
   useEffect(() => {
     if (!isOpen || !handleSearchRef.current) return
@@ -345,8 +355,15 @@ const Dropdown = ({
           ? "-translate-x-1/2 left-1/2 origin-top"
           : "left-0 origin-top-left"
 
+  const resolvedDropdownClassName =
+    dropdownClassName !== undefined
+      ? dropdownClassName
+      : fullWidth
+        ? "w-full"
+        : "min-w-[260px] max-w-[260px]"
+
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div className={`relative ${fullWidth ? "w-full" : ""} ${className}`} ref={dropdownRef}>
       {trigger
         ? typeof trigger === "function"
           ? trigger(
@@ -392,7 +409,7 @@ const Dropdown = ({
                     className={`absolute ${portalCoords.flipUp
                       ? "bottom-full mb-2 origin-bottom"
                       : "top-full mt-2"
-                      } flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${dropdownClassName}`}
+                      } flex flex-col pointer-events-auto shadow-lg border border-border rounded-xl bg-white ${maxHeightClass} overflow-hidden ${alignClass} ${resolvedDropdownClassName}`}
                     data-dropdown-portal="true"
                   >
                     {isSearchActive && (

@@ -28,6 +28,8 @@ const StudentGradingTab = ({ id: classId }) => {
     handleTabChange,
     handleTypeChange,
     isLoading,
+    isError,
+    retry,
     normalizedItems,
     visibleItems,
     totalItems,
@@ -101,7 +103,15 @@ const StudentGradingTab = ({ id: classId }) => {
         onTypeChange={handleTypeChange}
       />
 
-      {visibleItems.length === 0 ? (
+      {isError && (
+        <div role="alert" className="rounded-xl border border-border p-4 text-center">
+          <p>{gradingT.studentListLoadError}</p>
+          <button type="button" onClick={retry} className="mt-2 text-cath-red-700 underline">
+            {gradingT.retry}
+          </button>
+        </div>
+      )}
+      {visibleItems.length === 0 && !isError ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center text-gray-500">
           {gradingT.noMatchingItems}
         </div>

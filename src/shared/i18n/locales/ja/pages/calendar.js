@@ -1,4 +1,6 @@
 export default {
+  onlineLink: "オンライン会議リンク",
+  onlineLinkInvalid: "https:// または http:// で始まる有効な会議リンクを入力してください。",
   searchClass: "クラスを検索...",
   generalCalendar: "一般カレンダー",
   personalCalendar: "個人カレンダー",

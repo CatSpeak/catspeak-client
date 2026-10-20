@@ -1,4 +1,5 @@
 export default {
+  validationDobInvalid: "Enter a valid date in DD/MM/YYYY format.",
   loginTitle: "Log in",
   registerTitle: "Sign up",
   forgotTitle: "Forgot password",

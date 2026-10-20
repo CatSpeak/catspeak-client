@@ -440,6 +440,9 @@ export default {
     retry: "Try again",
   },
   studentCourseDetail: {
+    enrollmentAccessNotice: "Your access to this class has not been confirmed. If you have enrolled or paid, check your status again.",
+    recheckEnrollment: "Check status again",
+    viewEnrollmentDetails: "View class enrollment details",
     classUnavailable: "This class is not available for enrollment.",
     enrollFailed: "Enrollment could not be completed. Please try again.",
     courseLoadFailed: "This course could not be loaded. Please try again.",
@@ -1016,6 +1019,13 @@ export default {
     noResults: "No classes found.",
   },
   student: {
+    verifiedTeacher: "Verified teacher",
+    teacherReviews: "{{count}} reviews",
+    teacherNoReviews: "No reviews yet",
+    teacherStudents: "{{count}} students",
+    teacherOpenClasses: "{{count}} open classes",
+    teacherNoOpenClasses: "No open classes",
+    teacherLanguageHeadline: "{{languages}} teacher",
     myLearningOverview: {
       registered: "Registered",
       completed: "Completed",
@@ -1616,6 +1626,7 @@ export default {
     },
   },
   grading: {
+    studentListLoadError: "Could not load assignments or quizzes. Please try again.",
     searchPlaceholder: "Search assignments...",
     statusFilter: "Assignment Status",
     statusAll: "All Statuses",

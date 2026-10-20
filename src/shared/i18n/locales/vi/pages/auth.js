@@ -1,4 +1,5 @@
 export default {
+  validationDobInvalid: "Nhập ngày hợp lệ theo định dạng DD/MM/YYYY.",
   loginTitle: "Đăng nhập",
   registerTitle: "Đăng ký",
   forgotTitle: "Quên mật khẩu",

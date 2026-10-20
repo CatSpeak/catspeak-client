@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo } from "react"
+import { isAllowedInstructorLevel } from "../../utils/instructorLevels"
 import { ChevronDown, X } from "lucide-react"
 import useClickOutside from "@/shared/hooks/useClickOutside"
 import Dropdown from "@/shared/components/ui/Dropdown"
@@ -110,7 +111,7 @@ const LanguageLevelDropdown = ({
     skip: !languageId,
   })
   const levels = useMemo(
-    () => toList(levelsData).map((l) => l.name || l.Name),
+    () => toList(levelsData).map((l) => l.name || l.Name).filter(isAllowedInstructorLevel),
     [levelsData],
   )
 
@@ -145,7 +146,7 @@ const LanguageLevelDropdown = ({
           </button>
         )}
       />
-      {(errors.languagesTeachLevel || errors.languagesTeach) && !item.level && (
+      {(errors.languagesTeachLevel || errors.languagesTeach) && !isAllowedInstructorLevel(item.level) && (
         <p className="text-xs text-red-500 font-medium mt-1">
           {ins.requiredField || "Trường này là bắt buộc"}
         </p>

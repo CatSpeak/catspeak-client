@@ -45,12 +45,16 @@ export const useStudentGradingData = ({ classId, gradingT, filterT, formatDateTi
     currentData: assignmentsData,
     isLoading: isAssignmentsInitialLoading,
     isFetching: isAssignmentsFetching,
+    isError: isAssignmentsError,
+    refetch: refetchAssignments,
   } = useGetStudentAssignmentsQuery({ classId }, { skip: !classId });
 
   const {
     currentData: quizzesData,
     isLoading: isQuizzesInitialLoading,
     isFetching: isQuizzesFetching,
+    isError: isQuizzesError,
+    refetch: refetchQuizzes,
   } = useGetStudentQuizzesQuery({ classId }, { skip: !classId });
 
   const isAssignmentsLoading =
@@ -298,6 +302,12 @@ export const useStudentGradingData = ({ classId, gradingT, filterT, formatDateTi
     handleTabChange,
     handleTypeChange,
     isLoading,
+    isError: isAssignmentsError || isQuizzesError,
+    retry: () => {
+      if (!classId) return;
+      refetchAssignments();
+      refetchQuizzes();
+    },
     normalizedItems,
     visibleItems,
     totalItems,

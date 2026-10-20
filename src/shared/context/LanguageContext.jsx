@@ -12,10 +12,22 @@ const defaultContextValue = {
 export const LanguageContext = createContext(defaultContextValue)
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState("vi")
+  const [language, setLanguage] = useState(() => {
+    try {
+      const saved = localStorage.getItem("interfaceLanguage")
+      return Object.hasOwn(translations, saved) ? saved : "vi"
+    } catch {
+      return "vi"
+    }
+  })
 
   useEffect(() => {
     document.documentElement.lang = language
+    try {
+      localStorage.setItem("interfaceLanguage", language)
+    } catch {
+      // Language selection still works when browser storage is unavailable.
+    }
   }, [language])
 
   const value = useMemo(

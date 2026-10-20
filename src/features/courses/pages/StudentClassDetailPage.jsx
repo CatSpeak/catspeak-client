@@ -83,7 +83,10 @@ const StudentClassDetailPage = () => {
     isFetching: isDetailFetching,
     error: detailError,
     refetch: refetchDetail,
-  } = useGetStudentClassDetailQuery(id, { skip: !id })
+  } = useGetStudentClassDetailQuery(id, {
+    skip: !id,
+    refetchOnMountOrArgChange: true,
+  })
   const [enrollInCourse, { isLoading: isEnrolling }] = useEnrollInCourseMutation()
   const { data: profileResponse } = useGetUserProfileQuery()
   const profile = profileResponse?.data || profileResponse || {}
@@ -221,7 +224,7 @@ const StudentClassDetailPage = () => {
       grading: c.student?.toastEnrollToViewGrades || "Please enroll and pay tuition to view grades!",
       recordings: c.student?.toastEnrollToViewRecordings || "Vui lòng đăng ký và thanh toán học phí để xem video bài giảng!",
     }
-    toast.error(messages[tab])
+    toast.error(messages[tab], { id: `class-access-${id}` })
   }
 
   const tabs = [
@@ -380,6 +383,28 @@ const StudentClassDetailPage = () => {
       />
 
       {/* ─── Tab Contents ─── */}
+      {!isEnrolled && ENROLLED_ONLY_TABS.has(activeTab) && (
+        <div role="status" className="flex flex-col items-start gap-3 rounded-xl border border-border bg-white p-6 text-sm">
+          <p>{scd.enrollmentAccessNotice}</p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={refetchDetail}
+              disabled={isDetailFetching}
+              className="rounded-full bg-cath-red-700 px-4 py-2 font-semibold text-white disabled:opacity-50"
+            >
+              {isDetailFetching ? scd.refreshingClass : scd.recheckEnrollment}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(`/workspace/explore-courses/class/${encodeURIComponent(id)}`)}
+              className="rounded-full border border-border px-4 py-2 font-semibold"
+            >
+              {scd.viewEnrollmentDetails}
+            </button>
+          </div>
+        </div>
+      )}
       <Suspense fallback={<TabLoadingFallback />}>
         {activeTab === "overview" && (
           <StudentClassOverviewTab

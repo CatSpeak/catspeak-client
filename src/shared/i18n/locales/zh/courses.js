@@ -426,6 +426,9 @@ export default {
     retry: "重试",
   },
   studentCourseDetail: {
+    enrollmentAccessNotice: "尚未确认您有权访问此班级。如果您已报名或付款，请重新检查状态。",
+    recheckEnrollment: "重新检查状态",
+    viewEnrollmentDetails: "查看班级报名信息",
     classUnavailable: "此班级目前无法报名。",
     enrollFailed: "无法完成报名，请重试。",
     courseLoadFailed: "无法加载此课程，请重试。",
@@ -949,6 +952,13 @@ export default {
     noResults: "未找到班级。"
   },
   student: {
+    verifiedTeacher: "已认证教师",
+    teacherReviews: "{{count}} 条评价",
+    teacherNoReviews: "暂无评价",
+    teacherStudents: "{{count}} 名学员",
+    teacherOpenClasses: "{{count}} 个开放班级",
+    teacherNoOpenClasses: "暂无开放班级",
+    teacherLanguageHeadline: "{{languages}}教师",
     myLearningOverview: {
       registered: "已注册",
       completed: "已完成",
@@ -1511,6 +1521,7 @@ export default {
     },
   },
   grading: {
+    studentListLoadError: "无法加载作业或测验，请重试。",
     justNow: "刚刚",
     searchPlaceholder: "搜索提交...",
     statusFilter: "提交状态",

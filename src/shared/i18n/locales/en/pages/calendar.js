@@ -1,4 +1,6 @@
 export default {
+  onlineLink: "Online meeting link",
+  onlineLinkInvalid: "Enter a valid https:// or http:// meeting link.",
   searchClass: "Search for a class...",
   generalCalendar: "General Calendar",
   personalCalendar: "Personal Calendar",

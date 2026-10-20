@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react"
+import { isAllowedInstructorLevel } from "../../../utils/instructorLevels"
 import ProfileDrawer from "@/features/user/components/instructor/ProfileDrawer"
 import {
   useGetInstructorLanguagesQuery,
@@ -71,7 +72,7 @@ const AddLanguageDrawer = ({ open, onClose, excludedLanguages = [], t }) => {
       toList(levelsData).map((item) => {
         const name = pick(item, "name", "Name")
         return { value: name, label: name }
-      }),
+      }).filter((option) => isAllowedInstructorLevel(option.value)),
     [levelsData],
   )
 

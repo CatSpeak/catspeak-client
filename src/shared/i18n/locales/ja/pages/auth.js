@@ -1,4 +1,5 @@
 export default {
+  validationDobInvalid: "DD/MM/YYYY形式で有効な日付を入力してください。",
   loginTitle: "ログイン",
   registerTitle: "アカウント登録",
   forgotTitle: "パスワードをお忘れですか",

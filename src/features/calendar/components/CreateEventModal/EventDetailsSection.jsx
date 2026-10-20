@@ -101,6 +101,16 @@ const EventDetailsSection = ({
       </div>
 
       {/* Location (Country, City, Address) */}
+      {isOnline && (
+        <TextInput
+          label={cal.onlineLink}
+          value={eventLocation}
+          onChange={(e) => onLocationChange(e.target.value)}
+          placeholder="https://..."
+          variant="semi-round"
+          error={errors.eventLocation}
+        />
+      )}
       {!isOnline && (
         <div className="flex items-start max-[425px]:flex-col max-[425px]:gap-1">
           <div className="w-[150px] shrink-0 pt-[10px] max-[425px]:pt-0 max-[425px]:w-full">
