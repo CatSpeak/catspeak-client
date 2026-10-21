@@ -562,6 +562,15 @@ export const websites = [
     lang: "zh",
     subItems: [
       {
+        key: "little-fox",
+        label: "Little Fox",
+        path: "/resources/little-fox",
+        img: "https://img-chinese.littlefox.com/static/layout/en/img/common/header/logo.png",
+        color: "#2E3192",
+        description:
+          "Enjoy learning Chinese and gain real skills! Little Fox Chinese uses animation for fun Chinese language education.",
+      },
+      {
         key: "mandarin-bean",
         label: "MandarinBean",
         path: "/resources/mandarin-bean",
