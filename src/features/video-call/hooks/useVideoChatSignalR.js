@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useStore } from "react-redux"
 import * as signalR from "@microsoft/signalr"
 
 /**
@@ -13,15 +14,18 @@ import * as signalR from "@microsoft/signalr"
  */
 export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) => {
   const [isConnected, setIsConnected] = useState(false)
+  const [connection, setConnection] = useState(null)
   const connectionRef = useRef(null)
   const onEventReceivedRef = useRef(onEventReceived)
+  const store = useStore()
+  const hasToken = Boolean(token)
 
   useEffect(() => {
     onEventReceivedRef.current = onEventReceived
   }, [onEventReceived])
 
   useEffect(() => {
-    if (!token) {
+    if (!hasToken) {
       console.warn(
         "[VideoChatSignalR] Missing token — skipping hub instantiation.",
       )
@@ -36,7 +40,11 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
 
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
-        accessTokenFactory: () => token,
+        accessTokenFactory: () =>
+          store.getState()?.auth?.token ||
+          token ||
+          localStorage.getItem("token") ||
+          "",
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.None)
@@ -226,7 +234,7 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
         console.error("[VideoChatSignalR] Connection failed:", err)
       })
 
-    connection.onreconnected((connectionId) => {
+    connection.onreconnected(() => {
       console.log(
         "[VideoChatSignalR] Automatically reconnected. Re-joining session/room:",
         sessionId,
@@ -236,16 +244,19 @@ export const useVideoChatSignalR = (sessionId, token, onEventReceived, roomId) =
     })
 
     connectionRef.current = connection
+    setConnection(connection)
 
     return () => {
       if (connectionRef.current) {
         console.log("[VideoChatSignalR] Stopping connection...")
         connectionRef.current.stop()
       }
+      setConnection(null)
     }
-  }, [sessionId, token, roomId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId, hasToken, roomId, store])
 
-  return { isConnected, connection: connectionRef.current }
+  return { isConnected, connection }
 }
 
 export default useVideoChatSignalR
