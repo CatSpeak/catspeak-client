@@ -15,6 +15,16 @@ import MainSidebar from "../../shared/components/Sidebar/MainSidebar"
 import BackgroundV2 from "@/shared/assets/backgrounds/background-v2.png"
 import { useSidebar } from "@/shared/context/SidebarContext"
 import LandingHeader from "@/features/landing/components/LandingHeader/LandingHeader"
+import {
+  TourGuideProvider,
+  TourGuideContainer,
+  useTourGuideTrigger,
+} from "@/features/tour-guide"
+
+const TourGuideManager = () => {
+  useTourGuideTrigger()
+  return <TourGuideContainer />
+}
 
 const MainLayout = ({
   showHeader = true,
@@ -138,7 +148,9 @@ const MainLayout = ({
     }))
 
   return (
-    <AuthModalContext.Provider
+    <TourGuideProvider>
+      <TourGuideManager />
+      <AuthModalContext.Provider
       value={{
         openAuthModal,
         closeAuthModal,
@@ -209,7 +221,8 @@ const MainLayout = ({
       />
 
       <ScrollRestoration />
-    </AuthModalContext.Provider>
+      </AuthModalContext.Provider>
+    </TourGuideProvider>
   )
 }
 

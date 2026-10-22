@@ -3,6 +3,7 @@ export default {
   personalPage: "Trang cá nhân",
   settings: "Cài đặt",
   generalInfo: "Sửa thông tin",
+  tourGuide: "Hướng dẫn người dùng mới",
   logout: "Đăng xuất",
   soon: "Sắp ra mắt",
   language: "Ngôn ngữ",

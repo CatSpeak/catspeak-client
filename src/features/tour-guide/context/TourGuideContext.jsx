@@ -2,12 +2,23 @@ import { createContext, useContext } from "react"
 
 export const TourGuideContext = createContext(null)
 
+const defaultContextValue = {
+  isOpen: false,
+  currentStepIndex: 0,
+  currentStep: null,
+  totalSteps: 8,
+  hasCompletedTour: true,
+  startTour: () => {},
+  nextStep: () => {},
+  prevStep: () => {},
+  skipTour: () => {},
+  completeTour: () => {},
+  resetTour: () => {},
+}
+
 export const useTourGuide = () => {
   const context = useContext(TourGuideContext)
-  if (!context) {
-    throw new Error("useTourGuide must be used within a TourGuideProvider")
-  }
-  return context
+  return context || defaultContextValue
 }
 
 export default TourGuideContext
