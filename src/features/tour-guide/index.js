@@ -1,0 +1,7 @@
+export { TourGuideProvider } from "./context/TourGuideProvider"
+export { useTourGuide, TourGuideContext } from "./context/TourGuideContext"
+export { TourGuideContainer } from "./components/TourGuideContainer"
+export { TOUR_STEPS, TOTAL_TOUR_STEPS } from "./config/tourGuideSteps"
+export { default as TourGuideOverlay } from "./components/TourGuideOverlay"
+export { default as TourGuideCard } from "./components/TourGuideCard"
+export { default as TourGuideModal } from "./components/TourGuideModal"
