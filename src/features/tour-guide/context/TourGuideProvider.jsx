@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "@/features/auth"
 import { TourGuideContext } from "./TourGuideContext"
 import { TOUR_STEPS, TOTAL_TOUR_STEPS } from "../config/tourGuideSteps"
 
 export const TourGuideProvider = ({ children }) => {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const [isOpen, setIsOpen] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
 
-  // Storage key is scoped to current user or guest
+  // Storage key is scoped to current user
   const storageKey = useMemo(() => {
     const id = user?.accountId || user?.id || "guest"
     return `catspeak_tour_completed_${id}`
@@ -34,11 +37,30 @@ export const TourGuideProvider = ({ children }) => {
     [currentStepIndex]
   )
 
-  const startTour = useCallback((fromStep = 0) => {
-    const safeIndex = Math.max(0, Math.min(fromStep, TOTAL_TOUR_STEPS - 1))
-    setCurrentStepIndex(safeIndex)
-    setIsOpen(true)
-  }, [])
+  // Route navigation helper ensuring the current step's route is active
+  const ensureRoute = useCallback(
+    (step) => {
+      if (!step) return
+      const communityLang = localStorage.getItem("communityLanguage") || "zh"
+      const stepRoute = step.route || "/community"
+      const targetPath = `/${communityLang}${stepRoute}`
+
+      if (!location.pathname.startsWith(targetPath)) {
+        navigate(targetPath)
+      }
+    },
+    [location.pathname, navigate]
+  )
+
+  const startTour = useCallback(
+    (fromStep = 0) => {
+      const safeIndex = Math.max(0, Math.min(fromStep, TOTAL_TOUR_STEPS - 1))
+      ensureRoute(TOUR_STEPS[safeIndex])
+      setCurrentStepIndex(safeIndex)
+      setIsOpen(true)
+    },
+    [ensureRoute]
+  )
 
   const completeTour = useCallback(() => {
     try {
@@ -72,19 +94,23 @@ export const TourGuideProvider = ({ children }) => {
 
   const nextStep = useCallback(() => {
     if (currentStepIndex < TOTAL_TOUR_STEPS - 1) {
-      setCurrentStepIndex((prev) => prev + 1)
+      const nextIdx = currentStepIndex + 1
+      ensureRoute(TOUR_STEPS[nextIdx])
+      setCurrentStepIndex(nextIdx)
     } else {
       completeTour()
     }
-  }, [currentStepIndex, completeTour])
+  }, [currentStepIndex, completeTour, ensureRoute])
 
   const prevStep = useCallback(() => {
     if (currentStepIndex > 0) {
-      setCurrentStepIndex((prev) => prev - 1)
+      const prevIdx = currentStepIndex - 1
+      ensureRoute(TOUR_STEPS[prevIdx])
+      setCurrentStepIndex(prevIdx)
     }
-  }, [currentStepIndex])
+  }, [currentStepIndex, ensureRoute])
 
-  // Expose global debug helpers for testing in browser console
+  // Expose global debug helpers for quick testing in browser console
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.startCatSpeakTour = (step = 0) => startTour(step)
