@@ -1,5 +1,5 @@
 import React from "react"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import Confetti from "react-confetti"
 import TourGuideMascot from "./TourGuideMascot"
 
@@ -26,7 +26,7 @@ export const TourGuideModal = ({
         </div>
       )}
 
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0, scale: 0.9, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: -16 }}
@@ -90,7 +90,7 @@ export const TourGuideModal = ({
             </button>
           </div>
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   )
 }

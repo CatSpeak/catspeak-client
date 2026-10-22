@@ -1,5 +1,5 @@
 import React, { useMemo } from "react"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 import TourGuideMascot from "./TourGuideMascot"
 
 export const TourGuideCard = ({
@@ -78,7 +78,7 @@ export const TourGuideCard = ({
   }, [targetRect, step.preferredPosition])
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, scale: 0.95, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -143,7 +143,7 @@ export const TourGuideCard = ({
           </button>
         </div>
       </div>
-    </motion.div>
+    </Motion.div>
   )
 }
 

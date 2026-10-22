@@ -1,10 +1,10 @@
 import React from "react"
-import { motion } from "framer-motion"
+import { motion as Motion } from "framer-motion"
 
 export const TourGuideOverlay = ({ targetRect, padding = 8, onBackdropClick }) => {
   if (!targetRect) {
     return (
-      <motion.div
+      <Motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -28,7 +28,7 @@ export const TourGuideOverlay = ({ targetRect, padding = 8, onBackdropClick }) =
             {/* White area = visible backdrop */}
             <rect width="100%" height="100%" fill="white" />
             {/* Black cut-out = clear spotlight hole */}
-            <motion.rect
+            <Motion.rect
               initial={false}
               animate={{
                 x: spotlightX,
@@ -59,7 +59,7 @@ export const TourGuideOverlay = ({ targetRect, padding = 8, onBackdropClick }) =
       </svg>
 
       {/* Brand accent pulse glow ring around spotlighted element */}
-      <motion.div
+      <Motion.div
         initial={false}
         animate={{
           x: spotlightX,

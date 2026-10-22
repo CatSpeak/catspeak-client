@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { createPortal } from "react-dom"
 import { AnimatePresence } from "framer-motion"
 import { useTourGuide } from "../context/TourGuideContext"
@@ -19,13 +19,7 @@ export const TourGuideContainer = () => {
 
   const { targetRect } = useTourTarget(currentStep?.targetSelector, isOpen)
 
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted || !isOpen || !currentStep) {
+  if (typeof document === "undefined" || !isOpen || !currentStep) {
     return null
   }
 
