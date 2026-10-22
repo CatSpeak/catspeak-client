@@ -84,6 +84,18 @@ export const TourGuideProvider = ({ children }) => {
     }
   }, [currentStepIndex])
 
+  // Expose global debug helpers for testing in browser console
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.startCatSpeakTour = (step = 0) => startTour(step)
+      window.resetCatSpeakTour = () => resetTour()
+    }
+    return () => {
+      delete window.startCatSpeakTour
+      delete window.resetCatSpeakTour
+    }
+  }, [startTour, resetTour])
+
   // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return
