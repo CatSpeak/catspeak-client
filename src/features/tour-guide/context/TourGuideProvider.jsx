@@ -4,6 +4,8 @@ import { useAuth } from "@/features/auth"
 import { TourGuideContext } from "./TourGuideContext"
 import { TOUR_STEPS, TOTAL_TOUR_STEPS } from "../config/tourGuideSteps"
 
+const PENDING_TOUR_STEP_KEY = "catspeak_pending_tour_step"
+
 export const TourGuideProvider = ({ children }) => {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -55,6 +57,11 @@ export const TourGuideProvider = ({ children }) => {
   const startTour = useCallback(
     (fromStep = 0) => {
       const safeIndex = Math.max(0, Math.min(fromStep, TOTAL_TOUR_STEPS - 1))
+      try {
+        sessionStorage.setItem(PENDING_TOUR_STEP_KEY, String(safeIndex))
+      } catch {
+        // ignore storage error
+      }
       ensureRoute(TOUR_STEPS[safeIndex])
       setCurrentStepIndex(safeIndex)
       setIsOpen(true)
@@ -62,9 +69,26 @@ export const TourGuideProvider = ({ children }) => {
     [ensureRoute]
   )
 
+  // Sync pending tour step across route transitions (e.g. if navigating to community page)
+  useEffect(() => {
+    try {
+      const pending = sessionStorage.getItem(PENDING_TOUR_STEP_KEY)
+      if (pending !== null) {
+        const stepNum = parseInt(pending, 10)
+        if (!isNaN(stepNum)) {
+          setCurrentStepIndex(stepNum)
+          setIsOpen(true)
+        }
+      }
+    } catch {
+      // ignore storage error
+    }
+  }, [location.pathname])
+
   const completeTour = useCallback(() => {
     try {
       localStorage.setItem(storageKey, "true")
+      sessionStorage.removeItem(PENDING_TOUR_STEP_KEY)
     } catch {
       // ignore storage errors
     }
@@ -75,6 +99,7 @@ export const TourGuideProvider = ({ children }) => {
   const skipTour = useCallback(() => {
     try {
       localStorage.setItem(storageKey, "true")
+      sessionStorage.removeItem(PENDING_TOUR_STEP_KEY)
     } catch {
       // ignore storage errors
     }
@@ -85,6 +110,7 @@ export const TourGuideProvider = ({ children }) => {
   const resetTour = useCallback(() => {
     try {
       localStorage.removeItem(storageKey)
+      sessionStorage.removeItem(PENDING_TOUR_STEP_KEY)
     } catch {
       // ignore storage errors
     }
@@ -95,6 +121,11 @@ export const TourGuideProvider = ({ children }) => {
   const nextStep = useCallback(() => {
     if (currentStepIndex < TOTAL_TOUR_STEPS - 1) {
       const nextIdx = currentStepIndex + 1
+      try {
+        sessionStorage.setItem(PENDING_TOUR_STEP_KEY, String(nextIdx))
+      } catch {
+        // ignore
+      }
       ensureRoute(TOUR_STEPS[nextIdx])
       setCurrentStepIndex(nextIdx)
     } else {
@@ -105,6 +136,11 @@ export const TourGuideProvider = ({ children }) => {
   const prevStep = useCallback(() => {
     if (currentStepIndex > 0) {
       const prevIdx = currentStepIndex - 1
+      try {
+        sessionStorage.setItem(PENDING_TOUR_STEP_KEY, String(prevIdx))
+      } catch {
+        // ignore
+      }
       ensureRoute(TOUR_STEPS[prevIdx])
       setCurrentStepIndex(prevIdx)
     }

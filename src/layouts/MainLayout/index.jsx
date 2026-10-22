@@ -31,8 +31,7 @@ const MainLayout = ({
   showFooter = true,
   showSidebar = true,
 }) => {
-  const { isMobileSidebarOpen, setIsMobileSidebarOpen, isDesktopExpanded } =
-    useSidebar()
+  const { isMobileSidebarOpen, setIsMobileSidebarOpen } = useSidebar()
 
   const [authModal, setAuthModal] = useState({
     isOpen: false,
@@ -57,6 +56,7 @@ const MainLayout = ({
     // If we are on the reset-password route OR we have parameters indicating a reset
     if (location.pathname === "/reset-password") {
       // Assuming parameters are passed in query string: ?token=...&email=...
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAuthModal((prev) => ({
         ...prev,
         isOpen: true,
@@ -148,8 +148,6 @@ const MainLayout = ({
     }))
 
   return (
-    <TourGuideProvider>
-      <TourGuideManager />
       <AuthModalContext.Provider
       value={{
         openAuthModal,
@@ -222,7 +220,6 @@ const MainLayout = ({
 
       <ScrollRestoration />
       </AuthModalContext.Provider>
-    </TourGuideProvider>
   )
 }
 

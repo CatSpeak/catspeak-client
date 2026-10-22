@@ -9,6 +9,8 @@ export const TourGuideCard = ({
   onNext,
   onPrev,
   onSkip,
+  isNudging = false,
+  isCelebrating = false,
 }) => {
   // Compute floating coordinates with boundary safety
   const positionStyle = useMemo(() => {
@@ -81,14 +83,44 @@ export const TourGuideCard = ({
   return (
     <Motion.div
       initial={{ opacity: 0, scale: 0.95, y: 10 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
+      animate={{
+        opacity: 1,
+        scale: isCelebrating ? 1.03 : 1,
+        y: 0,
+        x: isNudging ? [-7, 7, -5, 5, -2, 2, 0] : 0,
+      }}
       exit={{ opacity: 0, scale: 0.95, y: -10 }}
-      transition={{ duration: 0.28, ease: "easeOut" }}
+      transition={{
+        duration: isNudging ? 0.45 : 0.28,
+        ease: "easeOut",
+      }}
       style={positionStyle}
       className="fixed z-[9995] flex items-center select-none"
     >
       {/* Floating Mascot standing on the left */}
-      <div className="shrink-0 -mr-6 sm:-mr-8 z-10 w-28 sm:w-36 md:w-40 pointer-events-none drop-shadow-md">
+      <div className="shrink-0 -mr-6 sm:-mr-8 z-10 w-28 sm:w-36 md:w-40 pointer-events-none drop-shadow-md relative">
+        {/* Playful hint bubble when user clicks backdrop */}
+        {isNudging && (
+          <Motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute -top-8 left-0 bg-[#980019] text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow-lg whitespace-nowrap animate-bounce flex items-center gap-1"
+          >
+            <span>👉 Bấm &quot;Tiếp theo&quot; nhé! 🐾</span>
+          </Motion.div>
+        )}
+
+        {/* Celebration reaction bubble when user clicks target zone */}
+        {isCelebrating && (
+          <Motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 6 }}
+            animate={{ opacity: 1, scale: 1.05, y: -4 }}
+            className="absolute -top-8 left-0 bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1 rounded-full shadow-lg whitespace-nowrap flex items-center gap-1"
+          >
+            <span>✨ Tuyệt vời! 👍</span>
+          </Motion.div>
+        )}
+
         <TourGuideMascot
           src={step.mascot}
           alt={step.mascotAlt}

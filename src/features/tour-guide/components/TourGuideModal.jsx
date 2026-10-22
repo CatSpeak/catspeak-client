@@ -8,6 +8,7 @@ export const TourGuideModal = ({
   totalSteps,
   onNext,
   onSkip,
+  isNudging = false,
 }) => {
   const isCompletionStep = step.stepIndex === totalSteps
 
@@ -28,9 +29,17 @@ export const TourGuideModal = ({
 
       <Motion.div
         initial={{ opacity: 0, scale: 0.9, y: 16 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          x: isNudging ? [-6, 6, -4, 4, -2, 2, 0] : 0,
+        }}
         exit={{ opacity: 0, scale: 0.9, y: -16 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+        transition={{
+          duration: isNudging ? 0.45 : 0.3,
+          ease: "easeOut",
+        }}
         className="relative bg-white rounded-[32px] p-7 sm:p-9 md:p-10 shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-[#ffe6ea] max-w-[660px] w-full text-left select-none"
       >
         {/* Content body with Mascot on left and text on right */}

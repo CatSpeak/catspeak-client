@@ -1,6 +1,7 @@
 export { TourGuideProvider } from "./context/TourGuideProvider"
 export { useTourGuide, TourGuideContext } from "./context/TourGuideContext"
 export { TourGuideContainer } from "./components/TourGuideContainer"
+export { TourGuideManager } from "./components/TourGuideManager"
 export { TOUR_STEPS, TOTAL_TOUR_STEPS } from "./config/tourGuideSteps"
 export { useTourGuideTrigger } from "./hooks/useTourGuideTrigger"
 export { default as TourGuideOverlay } from "./components/TourGuideOverlay"
