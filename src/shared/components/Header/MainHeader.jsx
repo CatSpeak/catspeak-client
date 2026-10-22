@@ -17,7 +17,6 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
   const { isAuthenticated: isLoggedIn } = useAuth()
 
   const [scrolled, setScrolled] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleDrawerToggle = () => {
     if (onMenuClick) {
@@ -75,7 +74,7 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
 
           {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
           {showSidebar && (
-            <div className="hidden lg:block">
+            <div className="hidden lg:block" data-tour="community-switcher">
               <CommunitySwitcher />
             </div>
           )}
@@ -87,15 +86,17 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
         {/* Right Section: Search + Filter + Lang + User */}
         <div className="flex items-center justify-end gap-1 shrink-0">
           {/* Search */}
-          <HeaderSearchBar />
+          <div className="flex items-center gap-1" data-tour="header-search-filter">
+            <HeaderSearchBar />
 
-          {/* Filter */}
-          <div className="hidden md:block">
-            <HeaderFilter />
+            {/* Filter */}
+            <div className="hidden md:block">
+              <HeaderFilter />
+            </div>
           </div>
 
           {/* Language flag */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block" data-tour="language-switcher">
             <LanguageSwitcher />
           </div>
 

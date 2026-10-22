@@ -249,7 +249,7 @@ const RoomsPage = () => {
               <WorkshopCarousel hideTitle={true} />
             </div>
 
-            <div className="w-full flex flex-col">
+            <div className="w-full flex flex-col" data-tour="rooms-category-section">
               {/* Tabs hidden temporarily to save vertical space */}
               {/* <RoomsTabs tab={tab} setTab={setTab} /> */}
 
