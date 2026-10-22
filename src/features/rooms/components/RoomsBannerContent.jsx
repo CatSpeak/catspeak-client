@@ -15,7 +15,7 @@ const RoomsBannerContent = ({ sessionProps }) => {
 
       <div className="flex flex-col gap-4">
         <InteractiveScriptWidget />
-        <div className="-mt-4">
+        <div className="-mt-4" data-tour="session-action-buttons">
           <SessionActionButtons {...sessionProps} />
         </div>
       </div>

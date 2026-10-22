@@ -5,6 +5,7 @@ import { useRegisterNavigate } from "@/features/video-call/context/GlobalVideoCa
 import BottomRightStack from "@/shared/components/BottomRightStack"
 import { LoadingSpinner } from "@/shared/components/ui/indicators"
 import NavigationProgress from "@/shared/components/NavigationProgress"
+import { TourGuideProvider, TourGuideManager } from "@/features/tour-guide"
 import NProgress from "nprogress"
 
 const LazyFallback = ({ fallback }) => {
@@ -33,15 +34,15 @@ export const RootLayout = () => {
   const location = useLocation()
   useRegisterNavigate(navigate, location)
   return (
-    <>
+    <TourGuideProvider>
+      <TourGuideManager />
       <NavigationProgress />
       <Outlet />
       <BottomRightStack />
-    </>
+    </TourGuideProvider>
   )
 }
 
 export const RootRoute = () => {
   return <LandingPage />
 }
-

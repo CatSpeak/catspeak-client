@@ -3,6 +3,7 @@ export default {
   personalPage: "My Profile",
   settings: "Settings",
   generalInfo: "Edit Profile",
+  tourGuide: "Take a Tour",
   logout: "Log out",
   soon: "Soon",
   language: "Language",

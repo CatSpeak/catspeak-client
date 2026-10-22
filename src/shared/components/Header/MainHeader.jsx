@@ -73,6 +73,12 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
             />
           </Link>
 
+          {/* Community Switcher Dropdown (Desktop only, drawer handles mobile/tablet) */}
+          {showSidebar && (
+            <div className="hidden lg:block" data-tour="community-switcher">
+              <CommunitySwitcher />
+            </div>
+          )}
           {/* Learning path title or Community Switcher */}
           {location.pathname.includes("/learning-path") ? (
             <div className="hidden lg:flex items-center gap-2.5">
@@ -99,15 +105,17 @@ const MainHeader = ({ onGetStarted, onMenuClick, showSidebar = true }) => {
         {/* Right Section: Search + Filter + Lang + User */}
         <div className="flex items-center justify-end gap-1 shrink-0">
           {/* Search */}
-          <HeaderSearchBar />
+          <div className="flex items-center gap-1" data-tour="header-search-filter">
+            <HeaderSearchBar />
 
-          {/* Filter */}
-          <div className="hidden md:block">
-            <HeaderFilter />
+            {/* Filter */}
+            <div className="hidden md:block">
+              <HeaderFilter />
+            </div>
           </div>
 
           {/* Language flag */}
-          <div className="hidden lg:block">
+          <div className="hidden lg:block" data-tour="language-switcher">
             <LanguageSwitcher />
           </div>
 
