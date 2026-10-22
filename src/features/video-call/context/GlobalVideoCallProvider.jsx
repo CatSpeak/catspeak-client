@@ -15,6 +15,7 @@ import {
   setUserPref,
 } from "@/features/video-call/utils/userPreferences"
 import GlobalCallContent from "./GlobalCallContent"
+import { useVideoCallAuthHeartbeat } from "@/features/video-call/hooks/useVideoCallAuthHeartbeat"
 
 const PREF_KEYS = {
   RECEIVE_SYSTEM_MSGS: "receiveSystemMsgs",
@@ -184,6 +185,7 @@ const IdleCallContent = ({
 // --- Main Provider ----------------------------------------------------------
 
 export const GlobalVideoCallProvider = ({ children }) => {
+  useVideoCallAuthHeartbeat()
   const dispatch = useDispatch()
   const { isInCall, livekitToken, livekitServerUrl, callInfo } = useSelector(
     (s) => s.videoCall,
