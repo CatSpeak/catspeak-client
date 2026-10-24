@@ -26,7 +26,8 @@ import {
   useCreateClassMutation,
   useGetClassDetailQuery,
   useUpdateClassMutation,
-  useDeleteClassMutation
+  useDeleteClassMutation,
+  useGetCommissionTiersQuery,
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
@@ -35,6 +36,7 @@ import ConfirmationModal from "@/shared/components/ui/ConfirmationModal"
 import Breadcrumb from "@/shared/components/ui/navigation/Breadcrumb"
 import InfoTooltip from "@/shared/components/ui/InfoTooltip"
 import {
+  DEFAULT_CLASS_FEE_TIERS,
   getInstructorFormLanguages,
   getLocalizedLanguageName,
 } from "../data/courseFormOptions"
@@ -145,6 +147,14 @@ const CreateClassPage = () => {
   const { data: instructorProfileData } = useGetInstructorProfileQuery()
   const instructorProfile = instructorProfileData?.data || instructorProfileData
 
+  const { data: commissionTiersRaw } = useGetCommissionTiersQuery()
+  const commissionTiers = useMemo(() => {
+    const list = Array.isArray(commissionTiersRaw?.data)
+      ? commissionTiersRaw.data
+      : (Array.isArray(commissionTiersRaw) ? commissionTiersRaw : null)
+    return list
+  }, [commissionTiersRaw])
+
   const languagesList = useMemo(
     () => getInstructorFormLanguages(instructorProfile),
     [instructorProfile]
@@ -200,6 +210,7 @@ const CreateClassPage = () => {
       activeMutationRequestRef.current = null
     },
     toastError: handleToastError,
+    commissionTiers,
   })
 
   const {
@@ -326,44 +337,57 @@ const CreateClassPage = () => {
 
   const classCapacityNum = parseInt(capacity, 10) || 0
 
-  const feeTiersTooltipContent = useMemo(() => (
-    <div className="flex flex-col gap-2 min-w-[260px] p-1">
-      <div className="font-bold text-gray-900 border-b border-gray-100 pb-1.5 text-xs">
-        {cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
+  const feeTiersTooltipContent = useMemo(() => {
+    const tiersToRender = (Array.isArray(commissionTiers) && commissionTiers.length > 0)
+      ? commissionTiers
+      : DEFAULT_CLASS_FEE_TIERS
+
+    return (
+      <div className="flex flex-col gap-2 min-w-[260px] p-1">
+        <div className="font-bold text-gray-900 border-b border-gray-100 pb-1.5 text-xs">
+          {cc.classOpeningFeeTooltipTitle || "Quy tắc tính phí mở lớp và hoa hồng"}
+        </div>
+        <table className="w-full text-left text-[11px] border-collapse">
+          <thead>
+            <tr className="border-b border-gray-100 text-gray-400 font-semibold">
+              <th className="py-1 pr-2">{cc.classOpeningFeeTierHeader || "Quy mô lớp"}</th>
+              <th className="py-1 px-2 text-right">{cc.classOpeningFeeHeader || "Phí mở lớp"}</th>
+              <th className="py-1 pl-2 text-right">{cc.commissionRateHeader || "Hoa hồng"}</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50 text-gray-700">
+            {tiersToRender.map((tier, idx) => {
+              const min = tier.minSlots ?? tier.minSlot ?? 1
+              const max = tier.maxSlots ?? tier.maxSlot ?? null
+              const isInfinite = max === null || max === undefined || max === Infinity
+              const isMatch = classCapacityNum >= min && (isInfinite || classCapacityNum <= max)
+              const openingFeeVal = tier.openingFee ?? 0
+              const commPercentVal = tier.commissionRate !== undefined
+                ? tier.commissionRate
+                : ((tier.commissionPercent ?? 0) <= 1 ? (tier.commissionPercent ?? 0) * 100 : (tier.commissionPercent ?? 0))
+
+              const labelSlot = isInfinite
+                ? (min > 1 ? `> ${min - 1} slots` : "Không giới hạn")
+                : `${min} - ${max} slots`
+
+              const labelFee = openingFeeVal > 0 ? formatCurrencyVND(openingFeeVal) : (cc.free || "Miễn phí")
+              const labelComm = `${commPercentVal}%`
+
+              return (
+                <tr key={idx} className={isMatch ? "font-bold text-[#990011] bg-red-50/60" : ""}>
+                  <td className="py-1.5 pr-2">{labelSlot}</td>
+                  <td className={`py-1.5 px-2 text-right font-semibold ${openingFeeVal === 0 ? "text-emerald-600" : ""}`}>
+                    {labelFee}
+                  </td>
+                  <td className="py-1.5 pl-2 text-right">{labelComm}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
-      <table className="w-full text-left text-[11px] border-collapse">
-        <thead>
-          <tr className="border-b border-gray-100 text-gray-400 font-semibold">
-            <th className="py-1 pr-2">{cc.classOpeningFeeTierHeader || "Quy mô lớp"}</th>
-            <th className="py-1 px-2 text-right">{cc.classOpeningFeeHeader || "Phí mở lớp"}</th>
-            <th className="py-1 pl-2 text-right">{cc.commissionRateHeader || "Hoa hồng"}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-50 text-gray-700">
-          <tr className={classCapacityNum >= 1 && classCapacityNum <= 6 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">1 - 6 slots</td>
-            <td className="py-1.5 px-2 text-right text-emerald-600 font-semibold">{cc.free || "Miễn phí"}</td>
-            <td className="py-1.5 pl-2 text-right">10%</td>
-          </tr>
-          <tr className={classCapacityNum >= 7 && classCapacityNum <= 20 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">7 - 20 slots</td>
-            <td className="py-1.5 px-2 text-right font-semibold">200.000đ</td>
-            <td className="py-1.5 pl-2 text-right">12%</td>
-          </tr>
-          <tr className={classCapacityNum >= 21 && classCapacityNum <= 50 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">21 - 50 slots</td>
-            <td className="py-1.5 px-2 text-right font-semibold">500.000đ</td>
-            <td className="py-1.5 pl-2 text-right">15%</td>
-          </tr>
-          <tr className={classCapacityNum > 50 ? "font-bold text-[#990011] bg-red-50/60" : ""}>
-            <td className="py-1.5 pr-2">&gt; 50 slots</td>
-            <td className="py-1.5 px-2 text-right text-emerald-600 font-semibold">{cc.free || "Miễn phí"}</td>
-            <td className="py-1.5 pl-2 text-right">20%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  ), [classCapacityNum, cc])
+    )
+  }, [classCapacityNum, cc, commissionTiers])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -412,7 +436,22 @@ const CreateClassPage = () => {
         if (state.coHostAccountId) normalizeClassInvitees([state.coHostAccountId])
       }
     } catch (error) {
-      toast.error(error.message)
+      const msg = error?.message || ""
+      if (msg.includes("Choose a start date that falls on a selected teaching weekday")) {
+        toast.error(cc.toastStartDateMismatchFirstSessionDefault || "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!")
+      } else if (msg.includes("Select at least one teaching day")) {
+        toast.error(cc.toastSelectSchedule || "Vui lòng chọn ít nhất một ngày dạy!")
+      } else if (msg.includes("The class start time must be on or before its first session")) {
+        toast.error(cc.toastStartTimeBeforeFirstSession || "Giờ bắt đầu lớp học phải trước hoặc cùng giờ với buổi học đầu tiên!")
+      } else if (msg.includes("Each class must end after it starts")) {
+        toast.error(cc.toastInvalidScheduleTime || "Each class must end after it starts.")
+      } else if (msg.includes("Intervals greater than one")) {
+        toast.error(cc.recurrencePreviewOnly || msg)
+      } else if (msg.includes("student accounts") || msg.includes("invite at most")) {
+        toast.error(cc.toastInvalidParticipants || msg)
+      } else {
+        toast.error(msg)
+      }
       return
     }
     if (!start || !enrollStart || !enrollEnd) {
@@ -420,22 +459,21 @@ const CreateClassPage = () => {
       return
     }
 
-    // [VALIDATION BYPASSED BY REQUEST]
-    // if (!isEditMode) {
-    //   const now = new Date()
-    //   if (enrollStart && enrollStart <= now) {
-    //     toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
-    //     return
-    //   }
-    //   if (enrollEnd && enrollEnd <= now) {
-    //     toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
-    //     return
-    //   }
-    //   if (start && start <= now) {
-    //     toast.error(cc.toastStartPast || "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!")
-    //     return
-    //   }
-    // }
+    if (!isEditMode) {
+      const now = new Date()
+      if (enrollStart && enrollStart <= now) {
+        toast.error(cc.toastAdmissionStartPast || "Thời gian bắt đầu tuyển sinh không được ở quá khứ!")
+        return
+      }
+      if (enrollEnd && enrollEnd <= now) {
+        toast.error(cc.toastAdmissionEndPast || "Thời gian kết thúc tuyển sinh không được ở quá khứ!")
+        return
+      }
+      if (start && start <= now) {
+        toast.error(cc.toastStartPast || "Thời gian bắt đầu lớp học không được ở quá khứ!")
+        return
+      }
+    }
 
     if (enrollStart && enrollEnd && enrollEnd <= enrollStart) {
       toast.error(cc.toastAdmissionEndLater || "Enrollment end date must be later than enrollment start date!")
@@ -1194,7 +1232,6 @@ const CreateClassPage = () => {
                 </label>}
                 <p className="text-xs text-gray-500 sm:col-span-2">{cc.scheduleTimezone || "Schedule time zone"}: {userTimeZone}</p>
                 {Number(recurrence.interval) !== 1 && <p role="status" className="text-xs text-amber-700 sm:col-span-2">{cc.recurrencePreviewOnly || "Intervals greater than one are preview only. Choose an interval of one to create the class."}</p>}
-                {startDate && recurrenceResult.error && <p role="alert" className="text-xs text-red-700 sm:col-span-2">{recurrenceResult.error}</p>}
               </div>}
 
               {/* Outer Gray Container */}
