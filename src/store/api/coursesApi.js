@@ -1044,6 +1044,14 @@ export const coursesApi = baseApi.injectEndpoints({
     }),
 
     // 3. Get All Classes
+    getCommissionTiers: builder.query({
+      query: () => ({
+        url: "/teacher/classes/commission-tiers",
+        method: "GET",
+      }),
+      providesTags: ["CommissionTiers"],
+    }),
+
     getAllClasses: builder.query({
       query: (params = {}) => ({
         url: "/teacher/classes",
@@ -2865,6 +2873,7 @@ export const {
   useLazyGetStudentClassDetailQuery,
   useEnrollInCourseMutation,
   useGetAllCoursesQuery,
+  useGetCommissionTiersQuery,
   useGetAllClassesQuery,
   useLazyGetAllClassesQuery,
   useGetCourseDetailQuery,
