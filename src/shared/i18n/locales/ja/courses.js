@@ -903,16 +903,18 @@ export default {
       "クラス開始日（{{startDate}}）が最初のセッション日（{{firstSessionDate}}）と一致しません。予定された曜日のいずれかに該当する開始日を選択してください。",
     toastStartDateMismatchFirstSessionDefault:
       "クラス開始日が最初のセッション日と一致しません。予定された曜日のいずれかに該当する開始日を選択してください。",
+    toastStartTimeBeforeFirstSession:
+      "クラス開始時刻は最初のセッション以前である必要があります。",
     toastAdmissionStartPast: "受付開始日は過去にすることはできません！",
     toastAdmissionEndPast: "受付終了日は過去にすることはできません！",
     toastStartPast:
-      "クラス開始日は受付終了日の1日以上後である必要があります！",
+      "クラス開始日は過去にすることはできません！",
     toastAdmissionEndLater:
       "受付終了日は受付開始日より後である必要があります！",
     toastStartLater:
-      "クラス開始日は受付終了日の1日以上後である必要があります！",
+      "クラス開始日は受付終了日より後である必要があります！",
     toastPayOSEnrollmentFuture:
-      "クラス開始日は受付終了日の1日以上後である必要があります！",
+      "受付開始日は未来の日時である必要があります！",
     toastUpdateSuccess: "クラスを更新しました！",
     toastRedirectPayment: "支払いにリダイレクト中...",
     toastUpdateFail: "クラスの更新に失敗しました！",

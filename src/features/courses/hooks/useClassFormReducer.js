@@ -297,6 +297,7 @@ export function useClassFormReducer({
   recoverClassResponse,
   onFormInstanceChange,
   toastError,
+  commissionTiers,
 }) {
   const { userTimeZone, getZoneDateStr, formatTime } = useTimezone()
   const [state, dispatch] = useReducer(
@@ -420,8 +421,8 @@ export function useClassFormReducer({
   const feeNum = parseFloat(state.fee.replace(/[^0-9]/g, "")) || 0
 
   const feeDetails = useMemo(() => {
-    return calculateFees(state.capacity, feeNum, DEFAULT_CLASS_FEE_TIERS)
-  }, [feeNum, state.capacity])
+    return calculateFees(state.capacity, feeNum, commissionTiers || DEFAULT_CLASS_FEE_TIERS)
+  }, [feeNum, state.capacity, commissionTiers])
 
   const amountReceived = formatCurrency(feeDetails.netPerStudent)
 

@@ -920,18 +920,20 @@ export default {
       "Ngày bắt đầu lớp học ({{startDate}}) không trùng với ngày buổi học đầu tiên ({{firstSessionDate}}). Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
     toastStartDateMismatchFirstSessionDefault:
       "Ngày bắt đầu lớp học không trùng với ngày buổi học đầu tiên. Vui lòng chọn ngày bắt đầu rơi vào một trong các thứ có lịch học!",
+    toastStartTimeBeforeFirstSession:
+      "Giờ bắt đầu lớp học phải trước hoặc cùng giờ với buổi học đầu tiên!",
     toastAdmissionStartPast:
       "Thời gian bắt đầu tuyển sinh không được ở quá khứ!",
     toastAdmissionEndPast:
       "Thời gian kết thúc tuyển sinh không được ở quá khứ!",
     toastStartPast:
-      "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
+      "Thời gian bắt đầu lớp học không được ở quá khứ!",
     toastAdmissionEndLater:
       "Thời gian kết thúc tuyển sinh phải trễ hơn thời gian bắt đầu tuyển sinh!",
     toastStartLater:
-      "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
+      "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh!",
     toastPayOSEnrollmentFuture:
-      "Ngày bắt đầu lớp học phải sau ngày kết thúc tuyển sinh 1 ngày!",
+      "Thời gian bắt đầu tuyển sinh phải ở trong tương lai!",
     toastUpdateSuccess: "Cập nhật lớp học thành công!",
     toastRedirectPayment: "Đang chuyển đến trang thanh toán...",
     toastUpdateFail: "Lỗi cập nhật lớp học!",
