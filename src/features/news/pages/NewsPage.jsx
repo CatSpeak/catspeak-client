@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { Newspaper, Search, X } from "lucide-react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useLanguage } from "@/shared/context/LanguageContext";
-import { useGetPostsQuery } from "@/store/api/social/postsApi";
+import { useGetPostsQuery, useGetTopicsQuery } from "@/store/api/social/postsApi";
 import { resetPage, setPage as setPageAction } from "@/store/slices/newsSlice";
 import NewsCard from "../components/NewsCard";
 import NewsCardSkeleton from "../components/NewsCardSkeleton";
@@ -11,7 +11,7 @@ import TopicFilter from "../components/TopicFilter";
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
 import EmptyState from "@/shared/components/ui/indicators/EmptyState";
 import useColumnCount from "@/shared/hooks/useColumnCount";
-import { getCommunityName } from "../utils/newsUtils";
+import { getCommunityName, getCommunityLanguageId } from "../utils/newsUtils";
 import {
   NEWS_SORT_OPTIONS,
   applyNewsFilter,
@@ -35,10 +35,42 @@ const NewsPage = ({ postType = "1" }) => {
     );
   }, [lang, language]);
 
+  const currentCommunityId = useMemo(() => {
+    return getCommunityLanguageId(lang || currentCommunity);
+  }, [lang, currentCommunity]);
+
+  // Fetch topics for current community to validate URL topic filters
+  const {
+    data: topicsData,
+    isLoading: isTopicsLoading,
+    isError: isTopicsError,
+  } = useGetTopicsQuery({
+    languageCommunity: currentCommunityId,
+    page: 1,
+    pageSize: 100,
+  });
+
+  const validTopicIdSet = useMemo(() => {
+    const raw = topicsData?.data ?? topicsData ?? [];
+    if (!Array.isArray(raw) || raw.length === 0) return null;
+    return new Set(
+      raw
+        .filter((topic) => {
+          const topicLang = topic.languageCommunity ?? topic.LanguageCommunity;
+          return (
+            topicLang === undefined ||
+            topicLang === 0 ||
+            topicLang === currentCommunityId
+          );
+        })
+        .map((t) => t.topicId ?? t.TopicId ?? t.id),
+    );
+  }, [topicsData, currentCommunityId]);
+
   const filterKey = useMemo(() => {
     const topicsKey = (filters.topicIds || []).slice().sort().join(",");
-    return `${postType}_${filters.searchKeyword}_${filters.sortBy}_${topicsKey}`;
-  }, [postType, filters.searchKeyword, filters.sortBy, filters.topicIds]);
+    return `${postType}_${currentCommunityId}_${filters.searchKeyword}_${filters.sortBy}_${topicsKey}`;
+  }, [postType, currentCommunityId, filters.searchKeyword, filters.sortBy, filters.topicIds]);
 
   const [page, setPage] = useState(1);
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
@@ -74,7 +106,12 @@ const NewsPage = ({ postType = "1" }) => {
     ],
   );
 
-  const { data, error, isLoading, isFetching } = useGetPostsQuery(queryArgs);
+  const shouldSkipPostsQuery =
+    filters.topicIds.length > 0 && isTopicsLoading && !isTopicsError;
+
+  const { data, error, isLoading, isFetching } = useGetPostsQuery(queryArgs, {
+    skip: shouldSkipPostsQuery,
+  });
 
   // Search input is local state (for snappy typing); URL only updates when the
   // user commits the keyword (Enter key or leaving the field).
@@ -89,7 +126,10 @@ const NewsPage = ({ postType = "1" }) => {
   }
 
   // Update URL filters only when actual values have changed
-  const updateUrlFilters = ({ searchKeyword, sortBy, topicIds }) => {
+  const updateUrlFilters = (
+    { searchKeyword, sortBy, topicIds },
+    navOptions,
+  ) => {
     const nextKeyword =
       searchKeyword !== undefined ? searchKeyword : filters.searchKeyword;
     const nextSortBy = sortBy !== undefined ? sortBy : filters.sortBy;
@@ -112,8 +152,22 @@ const NewsPage = ({ postType = "1" }) => {
         sortBy: nextSortBy,
         topicIds: nextTopicIds,
       }),
+      navOptions,
     );
   };
+
+  // Sanitize invalid topic IDs from URL when topics finish loading
+  useEffect(() => {
+    if (!validTopicIdSet || filters.topicIds.length === 0) return;
+
+    const sanitizedTopicIds = filters.topicIds.filter((id) =>
+      validTopicIdSet.has(id),
+    );
+
+    if (sanitizedTopicIds.length !== filters.topicIds.length) {
+      updateUrlFilters({ topicIds: sanitizedTopicIds }, { replace: true });
+    }
+  }, [validTopicIdSet, filters.topicIds]);
 
   // Commit a keyword to the URL. No-op when the value already matches the current filter.
   const commitSearch = (keyword = searchInput) => {
@@ -204,8 +258,8 @@ const NewsPage = ({ postType = "1" }) => {
     updateUrlFilters({ sortBy });
   };
 
-  const handleTopicChange = (topicIds) => {
-    updateUrlFilters({ topicIds });
+  const handleTopicChange = (topicIds, navOptions) => {
+    updateUrlFilters({ topicIds }, navOptions);
   };
 
   const handleSearchChange = (value) => {
@@ -289,13 +343,15 @@ const NewsPage = ({ postType = "1" }) => {
 
       {/* Topic Filter row */}
       <TopicFilter
+        languageCommunity={currentCommunityId}
         selectedTopicIds={filters.topicIds}
         onTopicChange={handleTopicChange}
       />
     </div>
   );
 
-  const isInitialLoading = isLoading && publicPosts.length === 0;
+  const isInitialLoading =
+    (isLoading || shouldSkipPostsQuery) && publicPosts.length === 0;
   const isFilterFetching = isFetching && page === 1;
 
   const skeletonCols = useMemo(() => {

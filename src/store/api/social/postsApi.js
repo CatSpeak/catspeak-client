@@ -16,8 +16,8 @@ import {
 export const postsApi = socialApi.injectEndpoints({
   endpoints: (builder) => ({
     getTopics: builder.query({
-      query: ({ languageCommunity, keyword, page = 1, pageSize = 10 } = {}) => ({
-        url: "/topics",
+      query: ({ languageCommunity, keyword, page = 1, pageSize = 100 } = {}) => ({
+        url: "/Topic",
         params: {
           languageCommunity,
           keyword,
