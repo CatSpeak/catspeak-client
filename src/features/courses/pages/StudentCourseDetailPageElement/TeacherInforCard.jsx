@@ -43,7 +43,7 @@ const TeacherInforCard = ({
 
   return (
     <div
-      className={`rounded-3xl p-5 shadow-sm flex flex-col items-center gap-4 bg-[linear-gradient(44deg,white_1%,white_35%,#F5DBDB_100%)] relative overflow-hidden ${className}`}
+      className={`rounded-xl p-1 shadow-sm flex flex-col items-center gap-4 bg-[linear-gradient(44deg,white_1%,white_35%,#F5DBDB_100%)] relative overflow-hidden ${className}`}
     >
       {/* Avatar + Name + handle */}
       <div className="w-36 flex flex-col items-center gap-1">

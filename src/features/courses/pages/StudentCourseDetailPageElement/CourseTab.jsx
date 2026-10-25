@@ -32,7 +32,7 @@ const CourseTab = ({
 }) => {
   const { t } = useLanguage()
   return (
-    <div className={`flex flex-col gap-6 w-full ${className}`}>
+    <div className={`flex flex-col gap-6 w-full ${className} mt-7`}>
       {/* Tabs Bar */}
       <div className="border-b border-gray-200">
         <CourseTabs
