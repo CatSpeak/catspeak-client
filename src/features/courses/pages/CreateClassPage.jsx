@@ -28,6 +28,7 @@ import {
   useUpdateClassMutation,
   useDeleteClassMutation,
   useGetCommissionTiersQuery,
+  useGetTuitionFeeConfigQuery,
 } from "@/store/api/coursesApi"
 import { useGetInstructorProfileQuery } from "@/store/api/instructorApi"
 import { DatePicker, DateTimePicker } from "@/shared/components/ui/inputs"
@@ -155,6 +156,10 @@ const CreateClassPage = () => {
     return list
   }, [commissionTiersRaw])
 
+  const { data: tuitionConfigRaw } = useGetTuitionFeeConfigQuery()
+  const baseTuitionFee = tuitionConfigRaw?.baseFee ?? tuitionConfigRaw?.data?.baseFee ?? 100000
+  const perSessionTuitionFee = tuitionConfigRaw?.perSessionFee ?? tuitionConfigRaw?.data?.perSessionFee ?? 50000
+
   const languagesList = useMemo(
     () => getInstructorFormLanguages(instructorProfile),
     [instructorProfile]
@@ -211,6 +216,8 @@ const CreateClassPage = () => {
     },
     toastError: handleToastError,
     commissionTiers,
+    baseTuitionFee,
+    perSessionTuitionFee,
   })
 
   const {

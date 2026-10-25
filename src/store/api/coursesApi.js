@@ -1052,6 +1052,14 @@ export const coursesApi = baseApi.injectEndpoints({
       providesTags: ["CommissionTiers"],
     }),
 
+    getTuitionFeeConfig: builder.query({
+      query: () => ({
+        url: "/teacher/classes/tuition-fee-config",
+        method: "GET",
+      }),
+      providesTags: ["TuitionFeeConfig"],
+    }),
+
     getAllClasses: builder.query({
       query: (params = {}) => ({
         url: "/teacher/classes",
@@ -2874,6 +2882,7 @@ export const {
   useEnrollInCourseMutation,
   useGetAllCoursesQuery,
   useGetCommissionTiersQuery,
+  useGetTuitionFeeConfigQuery,
   useGetAllClassesQuery,
   useLazyGetAllClassesQuery,
   useGetCourseDetailQuery,
