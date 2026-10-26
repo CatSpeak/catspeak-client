@@ -3,6 +3,7 @@ export { default as LiquidGlassButton } from "./ui/buttons/LiquidGlassButton"
 
 // Guards
 export { default as AuthGuard } from "./guards/AuthGuard"
+export { default as CommunityGuard } from "./guards/CommunityGuard"
 export { default as GuestGuard } from "./guards/GuestGuard"
 export { default as RoleGuard } from "./RoleGuard"
 

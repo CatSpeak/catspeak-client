@@ -1,0 +1,89 @@
+import { useCallback, useRef, useState } from "react"
+import { useNavigate, useOutletContext } from "react-router-dom"
+import { toast } from "@/shared/utils/toastBridge"
+import {
+  ActiveSessionConflictModal,
+  QuotaExceededModal,
+  SelectionPage,
+} from "../components/speakingRoom"
+import { useStartSpeakingSessionMutation } from "../api/speakingApi"
+
+const SpeakingRoomPage = () => {
+  const navigate = useNavigate()
+  const { setSessionCredentials } = useOutletContext()
+  const [startSession, { isLoading }] = useStartSpeakingSessionMutation()
+  const [isQuotaModalOpen, setQuotaModalOpen] = useState(false)
+  const [conflictSession, setConflictSession] = useState(null)
+  // BUG-SS-13: chặn bấm trùng ngay lập tức. isLoading của RTK chỉ đổi sau lần
+  // render kế tiếp nên hai cú bấm liên tiếp vẫn lọt qua và tạo hai yêu cầu.
+  const startingRef = useRef(false)
+
+  const handleStartSpeaking = useCallback(async (topic, hskLevel) => {
+    if (!topic?.id || isLoading || startingRef.current) return
+    startingRef.current = true
+    try {
+      const session = await startSession({ topic_id: topic.id, hsk_level: hskLevel }).unwrap()
+      const credentials = {
+        session_id: session.session_id,
+        livekit: session.livekit,
+        topic: session.topic,
+        hsk_level: session.hsk_level,
+        started_at: session.created_at,
+      }
+      setSessionCredentials(credentials)
+      navigate(`sessions/${session.session_id}`)
+    } catch (error) {
+      const detail = error?.data?.detail
+      const code = detail?.code || detail?.errorCode || error?.data?.code || error?.code
+      if (code === "QUOTA_EXCEEDED") {
+        setQuotaModalOpen(true)
+        return
+      }
+      if (code === "SESSION_ACTIVE_ELSEWHERE") {
+        // BUG-SS-08: hộp thoại ss08, không vào phòng
+        setConflictSession({ session_id: detail?.active_session_id })
+        return
+      }
+      toast.error(detail?.message || error?.data?.message || error?.message || "Không thể bắt đầu phiên luyện nói.")
+    } finally {
+      startingRef.current = false
+    }
+  }, [isLoading, navigate, setSessionCredentials, startSession])
+
+  return (
+    <div className="relative">
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs">
+          <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-rose-200 border-t-[#990011]" />
+            <p className="text-sm font-bold text-slate-800">Đang chuẩn bị phòng luyện nói...</p>
+          </div>
+        </div>
+      )}
+      <SelectionPage
+        onStartSpeaking={handleStartSpeaking}
+        onQuotaExceeded={() => setQuotaModalOpen(true)}
+        onActiveSessionConflict={(session) => setConflictSession(session || {})}
+        isStarting={isLoading}
+      />
+      <QuotaExceededModal
+        isOpen={isQuotaModalOpen}
+        onClose={() => setQuotaModalOpen(false)}
+        onUpgrade={() => navigate("/pricing")}
+        onLater={() => setQuotaModalOpen(false)}
+      />
+      <ActiveSessionConflictModal
+        isOpen={Boolean(conflictSession)}
+        onClose={() => setConflictSession(null)}
+        sessionInfo={
+          conflictSession?.topic?.title_vi
+            ? { topic: `${conflictSession.topic.title_vi}${conflictSession.hsk_level ? ` · HSK ${conflictSession.hsk_level}` : ""}` }
+            : null
+        }
+        onCloseAndReturnHome={() => navigate("/", { replace: true })}
+      />
+    </div>
+  )
+}
+
+export default SpeakingRoomPage

@@ -13,6 +13,7 @@ export default {
   newNotificationTitle: "New Notification",
   newNotificationBody: "You have a new notification to view.",
   searchPlaceholder: "Search rooms",
+  filterRooms: "Filter rooms",
   languages: {
     vi: "Vietnamese",
     viNom: "Vietnamese (Nom) - Coming soon",

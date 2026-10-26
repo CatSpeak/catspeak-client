@@ -398,11 +398,28 @@ const baseQueryWithReauth = createReauthBaseQuery(
         lowerUrl.includes("speaking-analytics") ||
         lowerUrl.includes("speaking-history") ||
         lowerUrl.includes("room-chat") ||
+        // TASK-AI-14: dong co cham diem bai kiem tra dau vao nam trong ai-api.
+        lowerUrl.startsWith("/v1/placement") ||
+        lowerUrl.startsWith("v1/placement") ||
+        lowerUrl.startsWith("/placement/") ||
+        lowerUrl.startsWith("placement/") ||
+        // TASK-AI-15: buổi luyện nói (báo cáo, phát âm, vòng đời phiên) nằm trong ai-api.
+        lowerUrl.startsWith("/v1/flashcards") ||
+        lowerUrl.startsWith("v1/flashcards") ||
+        lowerUrl.startsWith("/flashcards") ||
+        lowerUrl.startsWith("flashcards") ||
+        lowerUrl.startsWith("/v1/speaking/") ||
+        lowerUrl.startsWith("v1/speaking/") ||
+        // TASK-AI-16: flashcard SRS (phiên ôn, danh mục deck) nằm trong ai-api.
+        lowerUrl.startsWith("/v1/flashcards") ||
+        lowerUrl.startsWith("v1/flashcards") ||
         lowerUrl.startsWith("/ai/") ||
         lowerUrl.startsWith("ai/") ||
         lowerUrl.startsWith("/v1/ai/") ||
-        lowerUrl.startsWith("v1/ai/"))
-
+        lowerUrl.startsWith("v1/ai/") ||
+        lowerUrl.startsWith("/speaking/") ||
+        lowerUrl.startsWith("speaking/") ||
+        lowerUrl.startsWith("speaking?"))
 
     const cleanUrl = lowerUrl.replace(/^\/?(api\/)?/, "")
     const isStudentVoucherRoute =
@@ -506,6 +523,8 @@ export const baseApi = createApi({
     "InstructorCompetency",
     "ClassRecordings",
     "StudentDashboard",
+    "PlacementSession",
+    "PlacementResult",
   ],
   endpoints: () => ({}),
 })

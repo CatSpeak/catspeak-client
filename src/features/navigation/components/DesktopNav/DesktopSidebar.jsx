@@ -7,6 +7,7 @@ import { useLanguage } from "@/shared/context/LanguageContext"
 import { useAuth } from "@/features/auth"
 import { useRoleOverride } from "@/features/courses/components/RoleSwitcher"
 import { useActiveLink } from "../../hooks/useActiveLink"
+import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation"
 import {
   navSections,
   footerLinks,
@@ -21,7 +22,7 @@ import ListItem from "@/shared/components/ui/ListItem"
 
 const normalizePath = (path) => {
   if (!path) return path
-  return path.replace(/^\/(?:zh|en|vi)(?=\/|$)/, "")
+  return path.replace(/^\/(?:zh|en|vi|ja)(?=\/|$)/, "")
 }
 
 const listContainerVariants = {
@@ -100,6 +101,8 @@ const DesktopSidebar = () => {
       setLastSublink("catSpeak", cleanPath)
     } else if (pathname.includes("/workspace")) {
       setLastSublink("workspace", cleanPath)
+    } else if (pathname.includes("/ai-tutor")) {
+      setLastSublink("aiTutor", cleanPath)
     }
   }, [pathname, setLastSublink])
 
