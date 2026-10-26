@@ -73,8 +73,32 @@ export const stripHtmlToText = (html) => {
  * @returns {{ openingFee: number, commissionRate: number, minSlots: number, maxSlots: number }}
  */
 export function getFeeTier(slots, tiers = DEFAULT_CLASS_FEE_TIERS) {
-  const tier = tiers.find((t) => slots >= t.minSlots && slots <= t.maxSlots)
-  return tier || tiers[tiers.length - 1]
+  if (!Array.isArray(tiers) || tiers.length === 0) {
+    return { minSlots: 1, maxSlots: Infinity, openingFee: 0, commissionRate: 0 }
+  }
+  const s = parseInt(slots, 10) || 0
+  for (const t of tiers) {
+    const min = t.minSlots ?? t.minSlot ?? 1
+    const max = t.maxSlots ?? t.maxSlot ?? Infinity
+    if (s >= min && (max === null || max === undefined || s <= max)) {
+      const comm = t.commissionRate ?? (t.commissionPercent !== undefined ? (t.commissionPercent <= 1 ? t.commissionPercent * 100 : t.commissionPercent) : 0)
+      return {
+        minSlots: min,
+        maxSlots: max,
+        openingFee: t.openingFee ?? 0,
+        commissionRate: comm,
+      }
+    }
+  }
+  const last = tiers[tiers.length - 1]
+  const min = last.minSlots ?? last.minSlot ?? 1
+  const comm = last.commissionRate ?? (last.commissionPercent !== undefined ? (last.commissionPercent <= 1 ? last.commissionPercent * 100 : last.commissionPercent) : 0)
+  return {
+    minSlots: min,
+    maxSlots: Infinity,
+    openingFee: last.openingFee ?? 0,
+    commissionRate: comm,
+  }
 }
 
 /**

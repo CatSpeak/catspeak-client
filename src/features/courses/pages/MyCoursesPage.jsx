@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from "react"
+import React, { useMemo, useRef, useState, useEffect } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { BookOpen, FilterX, GraduationCap, Plus } from "lucide-react"
+import { BookOpen, ChevronDown, FilterX, GraduationCap, Plus } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 import {
@@ -88,6 +88,33 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
       return next
     })
   }
+
+  // Create Dropdown Handler
+  const [isCreateDropdownOpen, setIsCreateDropdownOpen] = useState(false)
+  const createDropdownRef = useRef(null)
+
+  useEffect(() => {
+    if (!isCreateDropdownOpen) return
+
+    const handleClickOutside = (e) => {
+      if (createDropdownRef.current && !createDropdownRef.current.contains(e.target)) {
+        setIsCreateDropdownOpen(false)
+      }
+    }
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsCreateDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isCreateDropdownOpen])
 
   // Course Deletion Handler
   const deleteCourseHelper = useDeleteCourse(t)
@@ -286,25 +313,47 @@ const MyCoursesPage = ({ initialTab = "courses" }) => {
           {isCoursesTab ? (c.myCoursesTab || "My Courses") : (c.myClassesTab || "My Classes")}
         </h1>
 
-        {isCoursesTab ? (
+        <div className="relative" ref={createDropdownRef}>
           <button
             type="button"
-            onClick={() => navigate("/workspace/courses/create")}
+            onClick={() => setIsCreateDropdownOpen((prev) => !prev)}
+            aria-expanded={isCreateDropdownOpen}
+            aria-haspopup="true"
             className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm cursor-pointer"
           >
             <Plus size={16} />
-            <span>{c.createCourse?.title || "Create Course"}</span>
+            <span>{c.createNew || "Tạo mới"}</span>
+            <ChevronDown size={14} className={`transition-transform duration-200 ${isCreateDropdownOpen ? "rotate-180" : ""}`} />
           </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => navigate("/workspace/classes/create-class")}
-            className="h-10 px-5 bg-[#b20a1c] hover:bg-[#990011] text-white font-extrabold text-sm rounded-full flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 active:shadow-sm cursor-pointer"
-          >
-            <Plus size={16} />
-            <span>{c.createClass?.createClass || "Create Class"}</span>
-          </button>
-        )}
+
+          {isCreateDropdownOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreateDropdownOpen(false)
+                  navigate("/workspace/courses/create")
+                }}
+                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 cursor-pointer transition-colors"
+              >
+                <BookOpen size={16} className="text-[#b20a1c]" />
+                <span>{c.createCourse?.title || "Tạo khóa học"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreateDropdownOpen(false)
+                  navigate("/workspace/classes/create-class")
+                }}
+                className="w-full px-4 py-2.5 text-left text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 cursor-pointer transition-colors"
+              >
+                <GraduationCap size={16} className="text-[#b20a1c]" />
+                <span>{c.createClass?.createClass || "Tạo lớp học"}</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ─── Overview Section: Upcoming Classes (3/5) & Teaching Tasks (2/5) ─── */}
