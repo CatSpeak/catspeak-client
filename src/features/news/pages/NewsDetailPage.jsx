@@ -213,18 +213,19 @@ const NewsDetailPage = () => {
     );
   }
 
-  // const breadcrumbItems = [
-  //   { label: t.nav?.home || "Home", onClick: () => navigate(`/${lang}/community`) },
-  //   {
-  //     label: isGlobalNews
-  //       ? t.news?.globalNews || "Bản tin thế giới"
-  //       : t.news?.catSpeakNews || "Bản tin CatSpeak",
-  //     onClick: () =>
-  //       navigate(
-  //         `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
-  //       ),
-  //   },
-  // ];
+  const breadcrumbItems = [
+    { label: t.nav?.home || "Home", onClick: () => navigate(`/${lang}/community`) },
+    {
+      label: isGlobalNews
+        ? t.news?.globalNews || "Bản tin thế giới"
+        : t.news?.catSpeakNews || "Bản tin CatSpeak",
+      onClick: () =>
+        navigate(
+          `/${lang}/cat-speak/${isGlobalNews ? "global-news" : "news"}`,
+        ),
+    },
+    { label: newsItem.title },
+  ];
 
   const videoMedia = (newsItem.media || []).filter((item) => item.mediaType === "Video");
   const documentMedia = (newsItem.media || []).filter(
@@ -234,78 +235,84 @@ const NewsDetailPage = () => {
 
   return (
     <div className="min-h-screen w-full bg-primaryBg">
-      {/* <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
-        <Breadcrumb items={breadcrumbItems} className="w-full !gap-2 !text-xs" />
-      </div> */}
-      <article aria-labelledby="news-article-title" className="min-w-0">
-        <NewsArticleHeader key={postId || slug} newsItem={newsItem} />
-        <div className="mx-auto w-full max-w-7xl bg-white px-4 pt-4 sm:w-[calc(100%-3rem)] sm:px-6 sm:pt-6 lg:w-[calc(100%-4rem)]">
-          {videoMedia.map((item) => (
-            <video key={item.postMediaId || item.mediaUrl} controls preload="metadata" className="mb-5 max-h-[560px] w-full bg-black" aria-label={newsItem.title}>
-              <source src={getImageUrl(item.mediaUrl)} />
-            </video>
-          ))}
-
-          <PostContent
-            html={newsItem.content}
-            contentUrl={newsItem.contentUrl || newsItem.ContentUrl}
-            className="[&>div:first-child>:first-child]:!mt-0 [&_img]:!rounded-none [&_img]:!shadow-none [&_figure]:max-w-full [&_iframe]:max-w-full [&_video]:max-w-full [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
-          />
-
-          {documentMedia.length > 0 && (
-            <section className="mt-6 flex flex-col gap-3 border-t border-border pt-4">
-              <h2 className="text-sm font-semibold text-gray-700">
-                {labels?.attachments || "Attachments"} ({documentMedia.length})
-              </h2>
-              {documentMedia.map((doc) => (
-                <FileAttachmentItem
-                  key={doc.postMediaId || doc.mediaUrl}
-                  fileName={doc.fileName || labels?.document || "Document"}
-                  fileSize={doc.fileSize}
-                  onClick={() => setPreviewDoc(doc)}
-                  className="cursor-pointer transition-colors hover:bg-gray-50"
-                  rightAction={
-                    <IconButton
-                      as="a"
-                      href={getImageUrl(doc.mediaUrl)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      variant="ghost"
-                      size="sm"
-                      className="shrink-0"
-                      title={labels?.download || "Download"}
-                    >
-                      <Download size={20} />
-                    </IconButton>
-                  }
-                />
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10 lg:px-8 lg:py-8">
+        <div className="min-w-0">
+          <nav aria-label="Breadcrumb" className="mb-5">
+            <Breadcrumb items={breadcrumbItems} className="w-full !gap-2 !text-xs" />
+          </nav>
+          <article aria-labelledby="news-article-title" className="min-w-0">
+            <NewsArticleHeader key={postId || slug} newsItem={newsItem} />
+            <div className="pt-5 sm:pt-6">
+              {videoMedia.map((item) => (
+                <video key={item.postMediaId || item.mediaUrl} controls preload="metadata" className="mb-5 max-h-[560px] w-full bg-black" aria-label={newsItem.title}>
+                  <source src={getImageUrl(item.mediaUrl)} />
+                </video>
               ))}
+
+              <PostContent
+                html={newsItem.content}
+                contentUrl={newsItem.contentUrl || newsItem.ContentUrl}
+                className="[&>div:first-child>:first-child]:!mt-0 [&_img]:!rounded-none [&_img]:!shadow-none [&_figure]:max-w-full [&_iframe]:max-w-full [&_video]:max-w-full [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
+              />
+
+              {documentMedia.length > 0 && (
+                <section className="mt-6 flex flex-col gap-3 border-t border-border pt-4">
+                  <h2 className="text-sm font-semibold text-gray-700">
+                    {labels?.attachments || "Attachments"} ({documentMedia.length})
+                  </h2>
+                  {documentMedia.map((doc) => (
+                    <FileAttachmentItem
+                      key={doc.postMediaId || doc.mediaUrl}
+                      fileName={doc.fileName || labels?.document || "Document"}
+                      fileSize={doc.fileSize}
+                      onClick={() => setPreviewDoc(doc)}
+                      className="cursor-pointer transition-colors hover:bg-gray-50"
+                      rightAction={
+                        <IconButton
+                          as="a"
+                          href={getImageUrl(doc.mediaUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0"
+                          title={labels?.download || "Download"}
+                        >
+                          <Download size={20} />
+                        </IconButton>
+                      }
+                    />
+                  ))}
+                </section>
+              )}
+
+              <div className="mt-6">
+                <NewsDetailActionBar
+                  newsItem={newsItem}
+                  reactions={postReactions}
+                  handleReact={handleReact}
+                  handleShare={handleShare}
+                  onCommentClick={() => commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                />
+              </div>
+            </div>
+          </article>
+
+          <div className="flow-root pb-8">
+            <section ref={commentsRef} aria-label={labels?.comment || "Comments"} className="mt-8 scroll-mt-24 border-t border-border pt-6">
+              <CommentsSection
+                key={postId}
+                postId={newsItem.postId || newsItem.id}
+                totalComments={newsItem.totalComments ?? newsItem.commentCount ?? 0}
+              />
             </section>
-          )}
-
-          <div className="mt-6">
-            <NewsDetailActionBar
-              newsItem={newsItem}
-              reactions={postReactions}
-              handleReact={handleReact}
-              handleShare={handleShare}
-              onCommentClick={() => commentsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-            />
           </div>
+
         </div>
-      </article>
-
-      <div className="mx-auto flow-root w-full max-w-7xl bg-white px-4 pb-8 sm:w-[calc(100%-3rem)] sm:px-6 lg:w-[calc(100%-4rem)]">
-        <RelatedNewsSection currentPostId={newsItem.postId || newsItem.id} postType={isGlobalNews ? "2" : "1"} />
-
-        <section ref={commentsRef} aria-label={labels?.comment || "Comments"} className="mt-8 scroll-mt-24 border-t border-border pt-6">
-          <CommentsSection
-            key={postId}
-            postId={newsItem.postId || newsItem.id}
-            totalComments={newsItem.totalComments ?? newsItem.commentCount ?? 0}
-          />
-        </section>
+        <aside className="min-w-0 border-t border-border pt-6 lg:border-t-0 lg:pt-0">
+          <RelatedNewsSection currentPostId={newsItem.postId || newsItem.id} postType={isGlobalNews ? "2" : "1"} />
+        </aside>
       </div>
 
       {/* ── Share Modal ──────────────────────────────────────────── */}

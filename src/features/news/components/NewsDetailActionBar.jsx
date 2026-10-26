@@ -75,7 +75,7 @@ const NewsDetailActionBar = ({
   };
 
   return (
-    <div className="border-b border-border pt-1 pb-3.5 flex items-center justify-between gap-3">
+    <div className="flex items-center justify-between gap-3">
       {/* ── Left: Action buttons (react · comment · share) ─────── */}
       <div className="flex items-center gap-5 sm:gap-6">
         {/* Like / Reactions button */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion as Motion, AnimatePresence } from "framer-motion"
 import useScrollLock from "@/shared/hooks/useScrollLock"
 
 /**
@@ -105,7 +105,7 @@ const Carousel = ({
       >
         {/* Slides (Sliding Effect with Framer Motion) */}
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
-          <motion.div
+          <Motion.div
             key={page}
             custom={direction}
             variants={{
@@ -119,11 +119,13 @@ const Carousel = ({
             transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
             className="absolute inset-0 w-full h-full flex-shrink-0 overflow-hidden"
           >
-            {/* Blurred Background Image */}
-            <div
-              className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
-              style={{ backgroundImage: `url(${images[currentIndex].url})` }}
-            />
+            {/* Only contained images expose space that needs a background. */}
+            {(isFullscreen || objectFit === "contain") && (
+              <div
+                className="absolute inset-0 z-0 bg-cover bg-center blur-2xl scale-110 opacity-60"
+                style={{ backgroundImage: `url(${images[currentIndex].url})` }}
+              />
+            )}
             {/* Main Image */}
             <img
               src={images[currentIndex].url}
@@ -136,7 +138,7 @@ const Carousel = ({
             />
             {/* Subtle overlay */}
             <div className="absolute inset-0 z-20 bg-black/5 pointer-events-none" />
-          </motion.div>
+          </Motion.div>
         </AnimatePresence>
 
         {/* Navigation Arrows */}
