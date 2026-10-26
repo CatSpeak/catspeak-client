@@ -67,28 +67,38 @@ export const navSections = [
     key: "aiTutor",
     labelKey: "aiTutor",
     defaultLabel: "Gia sư AI",
+    excludeLangs: ["en", "ja"],
     maxInitial: 5,
     items: [
       {
         key: "levelAssessment",
         path: "/ai-tutor/level-assessment",
         icon: Target,
+        excludeLangs: ["en", "ja"],
       },
       {
         key: "learningPath",
         path: "/ai-tutor/learning-path",
         icon: CalendarDays,
+        excludeLangs: ["en", "ja"],
       },
-      { key: "speakingRoom", path: "/ai-tutor/speaking-room", icon: Mic },
+      {
+        key: "speakingRoom",
+        path: "/ai-tutor/speaking-room",
+        icon: Mic,
+        excludeLangs: ["en", "ja"],
+      },
       {
         key: "vocabularyNotebook",
         path: "/ai-tutor/vocabulary-notebook",
         icon: Layers,
+        excludeLangs: ["en", "ja"],
       },
       {
         key: "historyProgress",
         path: "/ai-tutor/history-progress",
         icon: History,
+        excludeLangs: ["en", "ja"],
       },
     ],
   },
@@ -176,6 +186,7 @@ export const dockNavGroups = [
         icon: Bot,
         path: "/ai-tutor/level-assessment",
         hasSublinks: true,
+        excludeLangs: ["en", "ja"],
       },
     ],
   },
@@ -233,6 +244,8 @@ export const isNavItemVisible = (
   if (!item) return false
   if (item.hideInSidebar) return false
   if (item.lang && currentLang && item.lang !== currentLang) return false
+  if (item.excludeLangs && currentLang && item.excludeLangs.includes(currentLang)) return false
+  if (item.supportedLangs && currentLang && !item.supportedLangs.includes(currentLang)) return false
   if (isHorizontal && item.showOnHorizontalBar === false) return false
   if (item.isPrivate && !isAuthenticated) return false
   if (item.roles && activeRole && !item.roles.includes(activeRole)) return false
@@ -259,8 +272,15 @@ export const getActiveDockSection = (pathname) => {
   if (cleanPath.startsWith("/workspace") || cleanPath.includes("/workspace")) {
     return "workspace"
   }
-  if (cleanPath.includes("/ai-tutor")) return "aiTutor"
+  if (
+    cleanPath.includes("/ai-tutor") ||
+    cleanPath.includes("/learning-path") ||
+    cleanPath.includes("/cat-speak/placement-test")
+  ) {
+    return "aiTutor"
+  }
   if (cleanPath.includes("/cat-speak")) return "catSpeak"
+  if (cleanPath.includes("/profile")) return "profile"
   if (cleanPath.includes("/explore-courses")) return "exploreCourses"
   if (cleanPath.includes("/resources")) return "learningResources"
   if (cleanPath.includes("/community")) return "community"
@@ -314,6 +334,7 @@ export const navLinks = [
     key: "aiTutor",
     hasDropdown: true,
     icon: Bot,
+    excludeLangs: ["en", "ja"],
     subItems: [
       {
         key: "levelAssessment",

@@ -28,9 +28,6 @@ import AiFlashcardRouteError from "@/features/ai-tutor/components/flashcards/Fla
 const AiLevelAssessmentPage = lazy(
   () => import("@/features/ai-tutor/pages/LevelAssessmentPage"),
 )
-const AiLearningPathPage = lazy(
-  () => import("@/features/ai-tutor/pages/LearningPathPage"),
-)
 const AiSpeakingRoomPage = lazy(
   () => import("@/features/ai-tutor/pages/SpeakingRoomPage"),
 )
@@ -301,6 +298,9 @@ const ReviewClassPage = lazy(
 const VocabularyNotebookPage = lazy(
   () => import("@/features/interactive-script/pages/VocabularyNotebookPage"),
 )
+const LearningPathCalendarPage = lazy(
+  () => import("@/features/learning-path/pages/LearningPathCalendarPage"),
+)
 
 const routesConfig = [
   {
@@ -520,6 +520,18 @@ const routesConfig = [
                     path: "calendar/create",
                     element: <CreateEventPage />,
                   },
+                  {
+                    path: "learning-path",
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
+                  {
+                    path: "placement-test",
+                    element: <ComingSoonPage />,
+                  },
                   { path: "*", element: <PageNotFound /> },
                 ],
               },
@@ -599,7 +611,7 @@ const routesConfig = [
                     path: "learning-path",
                     element: (
                       <LazyRoute>
-                        <AiLearningPathPage />
+                        <LearningPathCalendarPage />
                       </LazyRoute>
                     ),
                   },
@@ -731,6 +743,39 @@ const routesConfig = [
             ],
           },
         ],
+      },
+
+      // Language-prefixed learning-path route (backward compatibility)
+      {
+        path: "/:lang/learning-path",
+        element: <LanguageLayout />,
+        children: [
+          {
+            element: <MainLayout />,
+            children: [
+              {
+                element: <CatSpeakLayout />,
+                children: [
+                  {
+                    index: true,
+                    element: (
+                      <LazyRoute>
+                        <LearningPathCalendarPage />
+                      </LazyRoute>
+                    ),
+                  },
+                ],
+              },
+              { path: "*", element: <PageNotFound /> },
+            ],
+          },
+        ],
+      },
+
+      // Language-prefixed pricing redirect
+      {
+        path: "/:lang/pricing",
+        element: <Navigate to="/pricing" replace />,
       },
 
       // Language-prefixed video call route

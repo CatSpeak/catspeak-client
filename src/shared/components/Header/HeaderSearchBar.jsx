@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Search, ArrowLeft } from "lucide-react"
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion as Motion } from "framer-motion"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useSearchParams, useNavigate, useLocation, useParams } from "react-router-dom"
 import IconButton from "@/shared/components/ui/buttons/IconButton"
@@ -16,9 +16,12 @@ const HeaderSearchBar = () => {
   const { lang } = useParams()
   // Ở các trang Sổ tay từ vựng (flashcard), ô tìm kiếm là "Tìm từ vựng…" và tìm trong sổ.
   const isVocabulary = /\/ai-tutor\/vocabulary-notebook(\/|$)/.test(location.pathname)
+  const isLearningPath = location.pathname.includes("/learning-path")
   const placeholder = isVocabulary
     ? "Tìm từ vựng…"
-    : t.header?.searchPlaceholder || "Tìm kiếm phòng"
+    : isLearningPath
+      ? "Tìm chủ đề..."
+      : t.header?.searchPlaceholder || "Tìm kiếm phòng"
 
   // Sync state if URL changes externally
   React.useEffect(() => {
@@ -59,7 +62,7 @@ const HeaderSearchBar = () => {
         <IconButton
           variant="filled"
           onClick={() => setIsExpanded(true)}
-          aria-label={isVocabulary ? placeholder : t.header?.searchPlaceholder || "Search"}
+          aria-label={isVocabulary || isLearningPath ? placeholder : t.header?.searchPlaceholder || "Search"}
         >
           <Search size={20} strokeWidth={2} />
         </IconButton>
@@ -89,7 +92,7 @@ const HeaderSearchBar = () => {
       {/* Expanded Search Overlay (Mobile & Tablet overlay when toggled on) */}
       <AnimatePresence>
         {isExpanded && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
@@ -128,7 +131,7 @@ const HeaderSearchBar = () => {
             <div className="lg:hidden shrink-0">
               <HeaderFilter />
             </div>
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
     </>

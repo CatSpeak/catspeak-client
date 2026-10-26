@@ -13,7 +13,8 @@ export const useActiveLink = () => {
     if (
       p.startsWith("/community") ||
       p.startsWith("/cat-speak") ||
-      p.startsWith("/ai-tutor")
+      p.startsWith("/ai-tutor") ||
+      p.startsWith("/learning-path")
     ) {
       return `/${currentLang}${p}`
     }
@@ -45,6 +46,6 @@ export const useActiveLink = () => {
     resolvePath,
     checkIsActive,
     currentLang,
-    pathname: location.pathname
+    pathname: location.pathname,
   }
 }

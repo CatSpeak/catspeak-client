@@ -525,6 +525,7 @@ export const baseApi = createApi({
     "StudentDashboard",
     "PlacementSession",
     "PlacementResult",
+    "LearningPath",
   ],
   endpoints: () => ({}),
 })

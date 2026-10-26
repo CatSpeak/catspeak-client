@@ -140,7 +140,7 @@ export const useCallActions = ({
     // Dùng CustomEvent trên window để tránh phải truyền signalR connection xuống đây.
     try {
       window.dispatchEvent(new CustomEvent("hostLeaveGame"))
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -150,9 +150,13 @@ export const useCallActions = ({
     // Navigate away if on the call page (not in PiP)
     const navigate = getNavigate();
     if (!isPiP && navigate) {
-      navigate(getCommunityPath(language), { replace: true });
+      if (callInfo?.isLearningPath) {
+        navigate(`/${language || "vi"}/learning-path`, { replace: true });
+      } else {
+        navigate(getCommunityPath(language), { replace: true });
+      }
     }
-  }, [isPiP, language, leaveMeetingFn, dispatch]);
+  }, [isPiP, language, leaveMeetingFn, dispatch, callInfo?.isLearningPath]);
 
   // ── Copy link ──
 

@@ -56,16 +56,25 @@ import { isRoomHost } from "@/features/video-call/utils/roomTypeHelpers"
  */
 export const VideoCallProvider = ({ children }) => {
   const { id: roomId, lang } = useParams()
+  const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { t, language } = useLanguage()
 
   const { user } = useAuth()
 
+  const isClassRoom = roomId && roomId.startsWith("class-")
+  const isLearningPathRoom = Boolean(
+    (roomId && (roomId.startsWith("lp_") || roomId.startsWith("lp-"))) ||
+      location.state?.isLearningPath ||
+      new URLSearchParams(location.search).get("isLearningPath") === "true",
+  )
+  const isNumericRoomId = !isNaN(Number(roomId)) && Number(roomId) > 0
+
   // ── Room Expiration Check for Direct URL Access ──
   const { data: rawRoomData, isLoading: isLoadingRoomDataCheck } =
     useGetRoomByIdQuery(roomId, {
-      skip: !roomId || !user,
+      skip: !roomId || !user || isClassRoom || isLearningPathRoom || !isNumericRoomId,
     })
 
   const currentRoomObj = rawRoomData?.data || rawRoomData
@@ -164,6 +173,26 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
 
   const isClassRoom = roomId && roomId.startsWith("class-")
   const classId = isClassRoom ? roomId.replace("class-", "") : null
+  const isLearningPathRoom = Boolean(
+    (roomId && (roomId.startsWith("lp_") || roomId.startsWith("lp-"))) ||
+      location.state?.isLearningPath ||
+      new URLSearchParams(location.search).get("isLearningPath") === "true",
+  )
+  const isNumericRoomId = !isNaN(Number(roomId)) && Number(roomId) > 0
+
+  const learningPathTokenRef = useRef(
+    location.state?.livekitToken ||
+      new URLSearchParams(location.search).get("token") ||
+      null,
+  )
+  const learningPathServerUrlRef = useRef(
+    location.state?.livekitServerUrl || null,
+  )
+  const learningPathSessionIdRef = useRef(
+    location.state?.sessionId ||
+      new URLSearchParams(location.search).get("sessionId") ||
+      null,
+  )
 
   // Check active role override (student mode vs teacher mode).
   const isTeacher = isRoleResolved
@@ -197,7 +226,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   const classData = classResponse?.data || classResponse
 
   // --- Room data (fetched by roomId from URL) ---
-  const isRoomQuerySkipped = !roomId || !user || isClassRoom
+  const isRoomQuerySkipped =
+    !roomId || !user || isClassRoom || (!isNumericRoomId && isLearningPathRoom)
   const {
     data: rawRoom,
     isLoading: isLoadingRoom,
@@ -206,7 +236,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     skip: isRoomQuerySkipped,
   })
 
-  // Map class details to the room structure expected by video call features
+  // Map class or learning-path details to the room structure expected by video call features
   const room = useMemo(() => {
     if (isClassRoom) {
       if (!classData) return null
@@ -228,11 +258,43 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           classData.teacher?.accountId,
       }
     }
+    if (isLearningPathRoom && (!rawRoom || roomError)) {
+      const searchParams = new URLSearchParams(location.search)
+      return {
+        id: roomId,
+        name: "Lộ trình học AI",
+        topic: searchParams.get("topicTitle") || "Luyện nói lộ trình AI",
+        privacy: "Public",
+        hasPassword: false,
+        maxParticipants: 2,
+        currentParticipantCount: 1,
+        isLearningPath: true,
+        creatorId: user?.accountId,
+      }
+    }
     return rawRoom?.data || rawRoom
-  }, [isClassRoom, classData, rawRoom, roomId, classId])
+  }, [
+    isClassRoom,
+    isLearningPathRoom,
+    classData,
+    rawRoom,
+    roomId,
+    classId,
+    user?.accountId,
+    roomError,
+    location.search,
+  ])
 
-  const isLoadingRoomData = isClassRoom ? isLoadingClass : isLoadingRoom
-  const errorRoomData = isClassRoom ? classError : roomError
+  const isLoadingRoomData = isClassRoom
+    ? isLoadingClass
+    : isLearningPathRoom && !isNumericRoomId
+      ? false
+      : isLoadingRoom
+  const errorRoomData = isClassRoom
+    ? classError
+    : isLearningPathRoom && !isNumericRoomId
+      ? null
+      : roomError
 
   // Ticket 04: cath-api RoomId used by the waiting/approval endpoints. Class
   // rooms expose it as classData.roomId (distinct from the URL "class-{id}").
@@ -487,6 +549,25 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
         } else {
           roomState = rawClassRoomState
         }
+      } else if (
+        isLearningPathRoom &&
+        (learningPathTokenRef.current ||
+          location.state?.livekitToken ||
+          new URLSearchParams(location.search).get("token"))
+      ) {
+        const searchParams = new URLSearchParams(location.search)
+        token =
+          learningPathTokenRef.current ||
+          location.state?.livekitToken ||
+          searchParams.get("token")
+        serverUrl =
+          learningPathServerUrlRef.current ||
+          location.state?.livekitServerUrl ||
+          import.meta.env.VITE_LIVEKIT_SERVER_URL
+        sessionId =
+          learningPathSessionIdRef.current ||
+          location.state?.sessionId ||
+          searchParams.get("sessionId")
       } else {
         // Fetch LiveKit token to validate connectivity and join
         const livekitTokenBody = {
@@ -548,7 +629,8 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
           user,
           initMicOn: micOn,
           initCamOn: cameraOn,
-          isAISession,
+          isAISession: isAISession || isLearningPathRoom,
+          isLearningPath: isLearningPathRoom || location.state?.isLearningPath,
           egressProfile,
           highQuality: highQuality ?? false,
           country: user?.country,
@@ -632,11 +714,19 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     }
   }
 
-  // --- Auto-join for queue-matched users (skip WaitingScreen) ---
+  // --- Auto-join for queue-matched users or learning-path users (skip WaitingScreen) ---
   const autoJoinTriggered = useRef(false)
+  const shouldAutoJoin =
+    fromQueue ||
+    (isLearningPathRoom &&
+      Boolean(
+        location.state?.fromQueue ||
+          learningPathTokenRef.current ||
+          location.state?.livekitToken,
+      ))
   useEffect(() => {
     if (
-      fromQueue &&
+      shouldAutoJoin &&
       !autoJoinTriggered.current &&
       user &&
       room &&
@@ -645,11 +735,11 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
     ) {
       autoJoinTriggered.current = true
       // Clear fromQueue state to prevent re-trigger on page refresh
-      navigate(location.pathname, { replace: true, state: {} })
+      navigate(location.pathname + location.search, { replace: true, state: {} })
       // Auto-join with mic/camera OFF, bypassing room-full check
       handleJoinClick({ skipRoomFullCheck: true, isAutoJoin: true })
     }
-  }, [fromQueue, user, room, isLoadingUser, isLoadingRoom])
+  }, [shouldAutoJoin, user, room, isLoadingUser, isLoadingRoom])
 
   // ========================================
   //  RENDER: Guards & phase-based rendering
@@ -690,7 +780,7 @@ const VideoCallProviderInner = ({ children, roomId, lang }) => {
   if (
     isLoadingUser ||
     isLoadingRoomData ||
-    (!isClassRoom && isRoomQuerySkipped)
+    (!isClassRoom && !isLearningPathRoom && isRoomQuerySkipped)
   ) {
     return (
       <VideoCallLoading
