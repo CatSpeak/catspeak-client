@@ -71,3 +71,12 @@ export const getCommunityName = (code) => {
   return code
 }
 
+export const isPostInCommunity = (post, communityName) => {
+  const postCommunity = String(post?.languageCommunity || "")
+    .trim()
+    .toLowerCase()
+  const targetCommunity = String(communityName || "")
+    .trim()
+    .toLowerCase()
+  return postCommunity !== "" && postCommunity === targetCommunity
+}

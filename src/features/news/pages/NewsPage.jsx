@@ -11,7 +11,7 @@ import TopicFilter from "../components/TopicFilter";
 import ErrorMessage from "@/shared/components/ui/indicators/ErrorMessage";
 import EmptyState from "@/shared/components/ui/indicators/EmptyState";
 import useColumnCount from "@/shared/hooks/useColumnCount";
-import { getCommunityName } from "../utils/newsUtils";
+import { getCommunityName, isPostInCommunity } from "../utils/newsUtils";
 import {
   NEWS_SORT_OPTIONS,
   applyNewsFilter,
@@ -37,8 +37,14 @@ const NewsPage = ({ postType = "1" }) => {
 
   const filterKey = useMemo(() => {
     const topicsKey = (filters.topicIds || []).slice().sort().join(",");
-    return `${postType}_${filters.searchKeyword}_${filters.sortBy}_${topicsKey}`;
-  }, [postType, filters.searchKeyword, filters.sortBy, filters.topicIds]);
+    return `${postType}_${currentCommunity}_${filters.searchKeyword}_${filters.sortBy}_${topicsKey}`;
+  }, [
+    postType,
+    currentCommunity,
+    filters.searchKeyword,
+    filters.sortBy,
+    filters.topicIds,
+  ]);
 
   const [page, setPage] = useState(1);
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
@@ -138,20 +144,16 @@ const NewsPage = ({ postType = "1" }) => {
     }
   }, [filterKey, dispatch]);
 
-  // Public posts filtered by current language community or "All"
+  // Show only public posts assigned to the active community.
   const publicPosts = useMemo(() => {
     const rawList = Array.isArray(data?.data)
       ? data.data
       : Array.isArray(data)
         ? data
         : [];
-    const targetCommunity = currentCommunity.toLowerCase();
-
     return rawList.filter((post) => {
       if (post.privacy !== "Public") return false;
-
-      const postCommunity = (post.languageCommunity || "All").toLowerCase();
-      return postCommunity === "all" || postCommunity === targetCommunity;
+      return isPostInCommunity(post, currentCommunity);
     });
   }, [data, currentCommunity]);
 
@@ -295,7 +297,8 @@ const NewsPage = ({ postType = "1" }) => {
     </div>
   );
 
-  const isInitialLoading = isLoading && publicPosts.length === 0;
+  const isInitialLoading =
+    publicPosts.length === 0 && (isLoading || isFetching);
   const isFilterFetching = isFetching && page === 1;
 
   const skeletonCols = useMemo(() => {
@@ -341,7 +344,7 @@ const NewsPage = ({ postType = "1" }) => {
       {/* ── 1. Skeleton Loading State (Only on initial load when no posts exist yet) ── */}
       {isInitialLoading ? (
         renderSkeletons()
-      ) : error && page === 1 ? (
+      ) : error && publicPosts.length === 0 ? (
         /* ── 2. Error State ── */
         <div className="flex flex-col w-full min-h-[50vh] justify-center items-center">
           {error?.status === 404 ? (

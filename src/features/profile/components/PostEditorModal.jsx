@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
+import { useParams } from "react-router-dom"
 import { Editor } from "@tinymce/tinymce-react"
 import {
   Image,
@@ -18,6 +19,13 @@ import Modal from "@/shared/components/ui/Modal"
 import LoadingSpinner from "@/shared/components/ui/indicators/LoadingSpinner"
 import PostEditorPreviews from "./PostEditorPreviews"
 import { useLanguage } from "@/shared/context/LanguageContext"
+import { LANGUAGE_CONFIG } from "@/features/navigation/config/languages"
+
+const COMMUNITY_VALUE_BY_CODE = {
+  zh: "Chinese",
+  en: "English",
+  ja: "Japanese",
+}
 
 const getFileType = (file) => {
   if (file && file.type) {
@@ -53,6 +61,24 @@ const PostEditorModal = ({
   isEditMode = false,
 }) => {
   const { t } = useLanguage()
+  const { lang } = useParams()
+  const savedCommunityCode = localStorage.getItem("communityLanguage")
+  const activeCommunityCode = LANGUAGE_CONFIG.some(
+    (community) => community.code === lang,
+  )
+    ? lang
+    : savedCommunityCode
+  const languageCommunity = isEditMode
+    ? initialLanguageCommunity
+    : COMMUNITY_VALUE_BY_CODE[activeCommunityCode] || "All"
+  const selectedCommunity = LANGUAGE_CONFIG.find(
+    (community) =>
+      COMMUNITY_VALUE_BY_CODE[community.code] === languageCommunity,
+  )
+  const communityLabel = selectedCommunity
+    ? t.header?.countries?.[selectedCommunity.labelKey] ||
+      selectedCommunity.fallbackLabel
+    : languageCommunity
 
   const PRIVACY_OPTIONS = [
     {
@@ -78,14 +104,6 @@ const PostEditorModal = ({
   const [removedMediaIds, setRemovedMediaIds] = useState([])
   const [errors, setErrors] = useState({})
   const [submitError, setSubmitError] = useState("")
-  const [languageCommunity] = useState(() => {
-    if (isEditMode) return initialLanguageCommunity
-    const localLang = localStorage.getItem("communityLanguage")
-    if (localLang === "zh") return "Chinese"
-    if (localLang === "en") return "English"
-    if (localLang === "ja") return "Japanese"
-    return "All"
-  })
   const [files, setFiles] = useState([])
   const imageInputRef = useRef(null)
   const videoInputRef = useRef(null)
@@ -407,6 +425,10 @@ const PostEditorModal = ({
               </PillButton>
             )}
           />
+          <span className="text-sm text-gray-500">
+            {t.header?.community || "Cộng đồng"}:{" "}
+            <span className="font-medium text-gray-700">{communityLabel}</span>
+          </span>
         </div>
 
         <TextInput

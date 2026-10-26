@@ -4,7 +4,7 @@ import { useLanguage } from "@/shared/context/LanguageContext";
 import { useGetPostsQuery } from "@/store/api/social/postsApi";
 import { ArrowRight } from "lucide-react";
 import RelatedNewsCard from "./RelatedNewsCard";
-import { getCommunityName } from "../utils/newsUtils";
+import { getCommunityName, isPostInCommunity } from "../utils/newsUtils";
 
 /**
  * RelatedNewsSection — Displays a clean, curated 4-item grid of related news articles.
@@ -34,15 +34,11 @@ const RelatedNewsSection = ({ currentPostId, postType = "1" }) => {
       : Array.isArray(data)
         ? data
         : [];
-    const targetCommunity = currentCommunity.toLowerCase();
-
     const filtered = rawList.filter((post) => {
       const postId = post.postId || post.id;
       if (postId === currentPostId) return false;
       if (post.privacy && post.privacy !== "Public") return false;
-
-      const postCommunity = (post.languageCommunity || "All").toLowerCase();
-      return postCommunity === "all" || postCommunity === targetCommunity;
+      return isPostInCommunity(post, currentCommunity);
     });
 
     return {

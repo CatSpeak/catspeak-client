@@ -1,11 +1,21 @@
 import React, { useState, useRef, useEffect, useMemo } from "react"
 import { Globe } from "lucide-react"
+import { useParams } from "react-router-dom"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetPostsQuery } from "@/store/api/social/postsApi"
 import PostFeedList from "@/features/profile/components/PostFeedList"
+import { getCommunityName, isPostInCommunity } from "../utils/newsUtils"
 
 const GlobalNewsPage = () => {
-  const { t } = useLanguage()
+  const { lang } = useParams()
+  const { t, language } = useLanguage()
+  const currentCommunity = useMemo(
+    () =>
+      getCommunityName(
+        lang || localStorage.getItem("communityLanguage") || language || "en",
+      ),
+    [lang, language],
+  )
   const [page, setPage] = useState(1)
   const pageSize = 10
 
@@ -22,8 +32,8 @@ const GlobalNewsPage = () => {
     return rawList.filter(
       (post) =>
         !post.privacy || String(post.privacy).toLowerCase() === "public",
-    )
-  }, [data])
+    ).filter((post) => isPostInCommunity(post, currentCommunity))
+  }, [data, currentCommunity])
 
   // Infinite scroll observer for vertical social feed
   const lastPostRef = useRef(null)
@@ -45,9 +55,9 @@ const GlobalNewsPage = () => {
     <div className="flex flex-col w-full max-w-3xl mx-auto p-4 sm:p-6">
       <PostFeedList
         posts={posts}
-        isLoading={isLoading && page === 1}
-        isFetching={isFetching && page > 1}
-        error={error && page === 1}
+        isLoading={posts.length === 0 && (isLoading || isFetching)}
+        isFetching={isFetching && posts.length > 0}
+        error={error && posts.length === 0}
         errorMessage="Không thể tải tin tức thế giới"
         emptyMessage={t.news?.empty?.title || "Chưa có bài đăng nào"}
         emptyIcon={Globe}

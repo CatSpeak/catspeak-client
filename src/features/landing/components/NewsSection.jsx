@@ -3,7 +3,10 @@ import { useNavigate, useParams } from "react-router-dom"
 import { ArrowRight, Newspaper } from "lucide-react"
 import { useLanguage } from "@/shared/context/LanguageContext"
 import { useGetLandingPostsQuery } from "@/store/api/social/postsApi"
-import { getCommunityName } from "@/features/news/utils/newsUtils"
+import {
+  getCommunityName,
+  isPostInCommunity,
+} from "@/features/news/utils/newsUtils"
 import { PillButton } from "@/shared/components/ui/buttons"
 import LandingNewsCard from "./LandingNewsCard"
 import LandingNewsSkeletonCard from "./LandingNewsSkeletonCard"
@@ -17,6 +20,7 @@ const NewsSection = () => {
   const savedLang = localStorage.getItem("communityLanguage")
   const navLang =
     lang || (savedLang && savedLang !== "vi" ? savedLang : language) || "zh"
+  const currentCommunity = getCommunityName(navLang)
 
   const { data, isLoading } = useGetLandingPostsQuery(12)
 
@@ -28,9 +32,11 @@ const NewsSection = () => {
         : []
 
     return rawList.filter(
-      (post) => !post.privacy || post.privacy === "Public",
+      (post) =>
+        (!post.privacy || post.privacy === "Public") &&
+        isPostInCommunity(post, currentCommunity),
     )
-  }, [data])
+  }, [data, currentCommunity])
 
   const displayPosts = useMemo(
     () => publicPosts.slice(0, 6),
