@@ -117,8 +117,8 @@ const CommentItem = ({
 
   const isOwner = Boolean(
     user?.accountId &&
-      authorAccountId &&
-      String(user.accountId) === String(authorAccountId)
+    authorAccountId &&
+    String(user.accountId) === String(authorAccountId)
   )
 
   const commentAvatarRaw =
@@ -186,9 +186,8 @@ const CommentItem = ({
 
   return (
     <div
-      className={`flex gap-3 group relative w-full max-w-full min-w-0 ${
-        isNested ? "justify-start" : ""
-      }`}
+      className={`flex gap-3 group relative w-full max-w-full min-w-0 ${isNested ? "justify-start" : ""
+        }`}
     >
       {/* ── Avatar column ────────────────────────────────────────── */}
       <div className="flex flex-col items-center shrink-0">
@@ -294,11 +293,10 @@ const CommentItem = ({
               {comment.replyToAccountName && (
                 <span
                   onClick={handleReplyToClick}
-                  className={`font-semibold mr-1.5 text-cath-red-700 ${
-                    replyToAccountId
-                      ? "cursor-pointer hover:underline hover:text-cath-red-800 transition-colors"
-                      : ""
-                  }`}
+                  className={`font-semibold mr-1.5 text-cath-red-700 ${replyToAccountId
+                    ? "cursor-pointer hover:underline hover:text-cath-red-800 transition-colors"
+                    : ""
+                    }`}
                   title={
                     replyToAccountId
                       ? `Xem trang cá nhân của @${comment.replyToAccountName}`
@@ -312,11 +310,10 @@ const CommentItem = ({
                 <>
                   <span
                     onClick={handleReplyToClick}
-                    className={`font-semibold mr-1.5 text-cath-red-700 ${
-                      replyToAccountId
-                        ? "cursor-pointer hover:underline hover:text-cath-red-800 transition-colors"
-                        : ""
-                    }`}
+                    className={`font-semibold mr-1.5 text-cath-red-700 ${replyToAccountId
+                      ? "cursor-pointer hover:underline hover:text-cath-red-800 transition-colors"
+                      : ""
+                      }`}
                   >
                     {mentionMatch[1]}
                   </span>
@@ -334,9 +331,8 @@ const CommentItem = ({
           <div className="flex items-center gap-3 mt-1.5 w-full max-w-full">
             {/* Reaction button */}
             <div
-              className={`group/reactions relative flex items-center ${
-                showReactions ? "z-50" : ""
-              }`}
+              className={`group/reactions relative flex items-center ${showReactions ? "z-50" : ""
+                }`}
               onMouseEnter={() => setShowReactions(true)}
               onMouseLeave={() => setShowReactions(false)}
               onTouchStart={handleTouchStart}
@@ -352,10 +348,10 @@ const CommentItem = ({
                 className="flex items-center gap-1.5 cursor-pointer text-[#7b7979] hover:text-black transition-colors"
                 title={
                   comment.currentUserReaction === 2 ||
-                  comment.currentUserReaction === "Love"
+                    comment.currentUserReaction === "Love"
                     ? t.news?.newsDetail?.love || "Yêu"
                     : comment.currentUserReaction === 3 ||
-                        comment.currentUserReaction === "Haha"
+                      comment.currentUserReaction === "Haha"
                       ? t.news?.newsDetail?.haha || "Haha"
                       : t.news?.newsDetail?.like || "Thích"
                 }
@@ -430,6 +426,8 @@ const CommentItem = ({
             <div className="flex items-center justify-between">
               <Popover
                 placement="bottom-right"
+                estimatedWidth={280}
+                estimatedHeight={320}
                 trigger={
                   <button
                     type="button"
@@ -474,9 +472,8 @@ const CommentItem = ({
         {/* Replies — rendered first so toggle anchors at the bottom */}
         {showReplies && hasReplies && (
           <div
-            className={`mt-3.5 flex flex-col gap-4 sm:gap-4.5 relative z-10 w-full max-w-full ${
-              nestLevel >= 1 ? "-ml-[38px] sm:-ml-[42px]" : ""
-            }`}
+            className={`mt-3.5 flex flex-col gap-4 sm:gap-4.5 relative z-10 w-full max-w-full ${nestLevel >= 1 ? "-ml-[38px] sm:-ml-[42px]" : ""
+              }`}
           >
             {replies
               .slice()

@@ -188,6 +188,8 @@ const CommentsSection = forwardRef(({ postId, totalComments }, ref) => {
               <div className="absolute right-2">
                 <Popover
                   placement="bottom-right"
+                  estimatedWidth={280}
+                  estimatedHeight={320}
                   trigger={
                     <button
                       type="button"

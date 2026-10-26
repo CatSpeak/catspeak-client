@@ -323,22 +323,20 @@ const ChatInput = ({
         <div
           onClick={() => textareaRef.current?.focus()}
           onPaste={handlePaste}
-          className={`w-full grid grid-cols-[auto_1fr_auto] border border-border focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${
-            isMultiline
-              ? "pb-[3px] pt-3 min-h-[110px] gap-y-2"
-              : "items-center h-14"
-          } ${showLeftIcon ? "pl-1" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}
+          className={`w-full grid grid-cols-[auto_1fr_auto] border border-border focus-within:border-cath-red-700 transition-colors bg-white cursor-text rounded-[28px] ${isMultiline
+            ? "pb-[3px] pt-3 min-h-[110px] gap-y-2"
+            : "items-center h-14"
+            } ${showLeftIcon ? "pl-1" : "pl-6"} ${showRightIcons ? "pr-1" : "pr-6"}`}
         >
           {/* Attachment / Action button */}
           {showLeftIcon &&
             (isCompact ? (
               <Popover
                 placement="top-left"
-                className={`shrink-0 ${
-                  isMultiline
-                    ? "col-start-1 row-start-2"
-                    : "col-start-1 row-start-1"
-                }`}
+                className={`shrink-0 ${isMultiline
+                  ? "col-start-1 row-start-2"
+                  : "col-start-1 row-start-1"
+                  }`}
                 trigger={
                   <IconButton
                     variant="ghost"
@@ -387,11 +385,10 @@ const ChatInput = ({
                   fileInputRef.current?.click()
                 }}
                 disabled={disabled}
-                className={`shrink-0 ${
-                  isMultiline
-                    ? "col-start-1 row-start-2"
-                    : "col-start-1 row-start-1"
-                }`}
+                className={`shrink-0 ${isMultiline
+                  ? "col-start-1 row-start-2"
+                  : "col-start-1 row-start-1"
+                  }`}
               >
                 <Paperclip />
               </IconButton>
@@ -399,19 +396,17 @@ const ChatInput = ({
 
           {/* Textarea Wrapper */}
           <div
-            className={`h-full ${
-              isMultiline
-                ? "col-span-3 col-start-1 row-start-1 px-3"
-                : "col-start-2 row-start-1 flex items-center px-1"
-            }`}
+            className={`h-full ${isMultiline
+              ? "col-span-3 col-start-1 row-start-1 px-3"
+              : "col-start-2 row-start-1 flex items-center px-1"
+              }`}
           >
             <textarea
               ref={textareaRef}
-              className={`bg-transparent placeholder-[#606060] resize-none focus:outline-none w-full ${
-                isMultiline
-                  ? "overflow-y-auto pr-4 pt-1"
-                  : "overflow-y-hidden py-1"
-              }`}
+              className={`bg-transparent placeholder-[#606060] resize-none focus:outline-none w-full ${isMultiline
+                ? "overflow-y-auto pr-4 pt-1"
+                : "overflow-y-hidden py-1"
+                }`}
               placeholder={
                 t?.chat?.typeMessagePlaceholder || "Type a message..."
               }
@@ -426,22 +421,20 @@ const ChatInput = ({
 
           {/* Right controls (counter when multiline + action buttons) */}
           <div
-            className={`flex items-center h-12 ${
-              isMultiline
-                ? "col-start-3 row-start-2"
-                : "col-start-3 row-start-1"
-            }`}
+            className={`flex items-center h-12 ${isMultiline
+              ? "col-start-3 row-start-2"
+              : "col-start-3 row-start-1"
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             {isMultiline && (
               <span
-                className={`text-[11px] font-mono select-none px-1 ${
-                  value.length >= maxLength
-                    ? "text-red-500 font-bold"
-                    : value.length >= maxLength * 0.8
-                      ? "text-amber-600 font-medium"
-                      : "text-gray-400 opacity-75"
-                }`}
+                className={`text-[11px] font-mono select-none px-1 ${value.length >= maxLength
+                  ? "text-red-500 font-bold"
+                  : value.length >= maxLength * 0.8
+                    ? "text-amber-600 font-medium"
+                    : "text-gray-400 opacity-75"
+                  }`}
                 title={(
                   t?.chat?.charCount || "{{current}} / {{max}} characters"
                 )
@@ -457,6 +450,8 @@ const ChatInput = ({
                 {/* Emoji button */}
                 <Popover
                   placement="top-right"
+                  estimatedWidth={320}
+                  estimatedHeight={380}
                   trigger={
                     <IconButton
                       variant="ghost"
