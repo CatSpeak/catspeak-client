@@ -66,7 +66,7 @@ const HeaderSearchBar = () => {
       </div>
 
       {/* Desktop Search Bar Input (Visible on lg screens and above) */}
-      <div className="hidden lg:flex relative items-center w-[200px] xl:w-[260px] shrink-0">
+      <div className="hidden lg:flex relative min-w-[150px] max-w-[260px] flex-1 items-center">
         <Search
           className="w-[17px] h-[17px] text-gray-500 absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer"
           strokeWidth={2.5}

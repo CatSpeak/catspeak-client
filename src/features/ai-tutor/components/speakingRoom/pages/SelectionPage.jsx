@@ -55,7 +55,7 @@ function getTopicEmoji(topic, index = 0) {
   return list[index % list.length]
 }
 
-const SelectionPage = ({ onStartSpeaking, onQuotaExceeded }) => {
+const SelectionPage = ({ onStartSpeaking, onQuotaExceeded, onActiveSessionConflict, isStarting = false }) => {
   const navigate = useNavigate()
   const { data: rawTopics = [], isLoading: isLoadingTopics, isError: topicsError, refetch: refetchTopics } = useGetSpeakingTopicsQuery()
   const { data: quotaData } = useGetSpeakingQuotaQuery()
@@ -132,9 +132,13 @@ const SelectionPage = ({ onStartSpeaking, onQuotaExceeded }) => {
     }
   }, [quotaData])
 
-  // ponytail: Tạm thời comment logic kiểm tra giới hạn quota để tiện test tính năng
+  // BUG-SS-02 (E-SS-002): Free đã dùng hết buổi trong ngày thì không cho vào
+  // phòng, kể cả khi máy chủ đang bật cờ bỏ qua hạn mức để thử nghiệm.
   const isQuotaExceeded = useMemo(() => {
-    return quotaData?.can_start_session === false
+    if (!quotaData) return false
+    if (quotaData.can_start_session === false) return true
+    const remaining = Number(quotaData.remaining_sessions)
+    return !quotaData.is_premium && Number.isFinite(remaining) && remaining <= 0
   }, [quotaData])
 
   // Dynamic filter tabs with real topic counts
@@ -318,8 +322,11 @@ const SelectionPage = ({ onStartSpeaking, onQuotaExceeded }) => {
         selectedTopic={selectedTopic}
         isQuotaExceeded={isQuotaExceeded}
         onStartSpeaking={() => {
+          if (isStarting) return
           if (hasActiveSession) {
-            toast.error("Hãy tiếp tục hoặc đóng phiên cũ trước khi bắt đầu buổi mới.")
+            // BUG-SS-08: đã có phiên đang chạy (tab/thiết bị khác) thì hiện ss08
+            if (onActiveSessionConflict) onActiveSessionConflict(activeSession)
+            else toast.error("Hãy tiếp tục hoặc đóng phiên cũ trước khi bắt đầu buổi mới.")
             return
           }
           if (isQuotaExceeded) {

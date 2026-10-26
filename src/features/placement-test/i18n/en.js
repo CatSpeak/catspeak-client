@@ -33,7 +33,7 @@ export default {
         "Never shared with third parties; encrypted and stored for up to 30 days.",
       checkbox:
         "I consent to CatSpeak using my microphone and processing my audio for this placement test.",
-      startCta: "Start Microphone Check",
+      startCta: "Start the test",
       recommend:
         "Tip: Wear a headset with a microphone and sit in a quiet room for the most accurate acoustic result.",
     },
@@ -61,7 +61,7 @@ export default {
           desc: "Press the button below so the system can detect and reconnect the microphone.",
         },
       ],
-      retryCta: "Unblocked, Check Again",
+      retryCta: "I've allowed it, retry now",
       trust: "CatSpeak guarantees 100% encryption and security of your audio data.",
     },
     device: {
@@ -70,6 +70,8 @@ export default {
       statusListening: "Listening…",
       statusNoSignal: "No voice detected",
       statusError: "Microphone unavailable",
+      statusPending: "Signal not measured yet",
+      pendingHint: "Record the sample sentence on the left. You can enter the test room only after a clear voice signal is measured.",
       instruction:
         "Read the Chinese sample sentence below out loud to check your voice quality:",
       sampleHanzi: "你好！欢迎来到 CatSpeak。",
@@ -78,6 +80,7 @@ export default {
       record: "Tap to record a voice sample",
       recording: "Recording… tap to stop",
       replay: "Replay the sample you just recorded ({{duration}}s)",
+      reRecord: "Record again",
       deviceTitle: "Input Device Settings",
       deviceCaption: "System default · Working properly",
       devicePlaceholder: "No microphone found",
@@ -86,7 +89,7 @@ export default {
         "Connection is stable and responds quickly",
         "Recording device is ready for the test",
       ],
-      continueCta: "Sound Is Good, Continue",
+      continueCta: "Enter the test room",
       errorTitle: "Cannot Access the Microphone",
       errorBody:
         "CatSpeak could not connect to your recording device. Check your microphone permission and try again.",
@@ -120,7 +123,8 @@ export default {
       subtitle:
         "The AI Tutor will start the first question at this level, then automatically adjust the difficulty to your actual responses.",
       difficultyLabel: "Difficulty:",
-      startCta: "Start Speaking Practice ({{band}})",
+      startCta: "Start the test ({{band}})",
+      startCtaEmpty: "Start the test",
       lockedNote:
         "The adaptive assessment has 5 questions · Difficulty adjusts automatically to your responses",
       items: {
@@ -194,6 +198,10 @@ export default {
       reRecordCta: "Record again",
       stopRecordCta: "Stop recording",
       startRecordCta: "Start speaking",
+      aiAutoRecord: "Recording will start automatically after the AI finishes the question.",
+      aiSpeaking: "The AI is reading the question, please listen...",
+      autoRecordHint: "Recording starts after the AI finishes",
+      timerAiSpeaking: "AI is reading the question",
       submitCta: "Finish answer",
       skipCta: "Skip this question (0 points) →",
       scoringSummary: "Compiling your score...",
@@ -290,6 +298,7 @@ export default {
         fluency: "Fluency & reflexes",
       },
       scoreOf: "{{score}} / 100",
+      notMeasured: "Not measured",
       aiNote:
         "AI recommendation: HSK {{band}} is a great level to start practising natural conversational reflexes with the AI Tutor.",
       startCta: "Start the HSK {{band}} Learning Roadmap →",
@@ -317,6 +326,8 @@ export default {
       optionKeep: "Keep the AI-recommended result",
       optionUp: "Go up 1 level (higher challenge, break through)",
       recommended: "Recommended",
+      lowestNote: "HSK 1 is the lowest level",
+      highestNote: "HSK 6 is the highest level",
       warning:
         "Note: After confirming, the 5-day roadmap will be regenerated for this level and the adjustment right will be locked permanently.",
       cancelCta: "Cancel / Keep HSK {{band}}",
@@ -395,8 +406,7 @@ export default {
         cooldownTitle: "Note on the cooldown cycle (14-day cooldown):",
         cooldownBody:
           "After completing it, you must wait at least 14 days of further practice before you can retake the test.",
-        bullet1:
-          "The new test result will update your proficiency profile directly.",
+        bullet1: "The new result will overwrite your previous result in your proficiency profile.",
         bullet2:
           "The 5-day breakthrough roadmap will be reset from scratch by AI Tutor.",
         cancelCta: "Cancel",

@@ -11,6 +11,30 @@ import {
 
 const TERMINAL = new Set(["completed", "abandoned"])
 
+const AI_API_BASE = (import.meta.env.VITE_AI_API_BASE_URL || "/api/ai").replace(/\/$/, "")
+
+// BUG-SS-07: đóng tab/trình duyệt thì báo máy chủ ngay để mốc 15 giây bắt đầu
+// tính; quá 15 giây mà mới nói dưới 30 giây thì máy chủ hoàn lại buổi.
+const notifyDisconnect = (sessionId) => {
+  if (!sessionId || typeof fetch === "undefined") return
+  let token = null
+  try {
+    token = window.localStorage.getItem("token")
+  } catch {
+    token = null
+  }
+  if (!token) return
+  try {
+    fetch(`${AI_API_BASE}/v1/speaking/sessions/${encodeURIComponent(sessionId)}/disconnect`, {
+      method: "POST",
+      keepalive: true,
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {})
+  } catch {
+    // trình duyệt đang đóng: bỏ qua
+  }
+}
+
 const SpeakingSessionPage = () => {
   const { sessionId } = useParams()
   const navigate = useNavigate()
@@ -100,6 +124,18 @@ const SpeakingSessionPage = () => {
     }
   }, [attemptReconnect, credentials, isError, navigate, session, sessionId])
 
+  useEffect(() => {
+    if (!credentials?.session_id) return undefined
+    const handlePageHide = () => notifyDisconnect(credentials.session_id)
+    window.addEventListener("pagehide", handlePageHide)
+    return () => window.removeEventListener("pagehide", handlePageHide)
+  }, [credentials?.session_id])
+
+  // Agent không nhận yêu cầu kết thúc qua phòng thì kết thúc bằng API (BUG-SS-01).
+  const handleRequestEnd = useCallback(async () => {
+    await endSession({ sessionId, end_reason: "early_finish" }).unwrap()
+  }, [endSession, sessionId])
+
   const handleLeave = useCallback(async () => {
     if (!sessionId || isEnding) return
     try {
@@ -134,6 +170,7 @@ const SpeakingSessionPage = () => {
       onEndSession={() => navigate("result", { replace: true })}
       onBackToSelection={handleLeave}
       onConnectionLost={() => attemptReconnect(true)}
+      onRequestEnd={handleRequestEnd}
     />
   )
 }

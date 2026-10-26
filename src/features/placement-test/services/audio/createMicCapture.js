@@ -60,13 +60,13 @@ export const createMicCapture = ({ deviceId } = {}) => {
     }
   }
 
+  // Không xét track.enabled: track bị tắt tiếng vẫn là stream đang sống.
   const isStreamActive = () =>
     Boolean(
       stream &&
         stream.getAudioTracks().length > 0 &&
-        stream.getAudioTracks().some((t) => t.readyState === "live" && t.enabled),
+        stream.getAudioTracks().some((t) => t.readyState === "live"),
     )
-
   const start = async () => {
     if (destroyed) return { ok: false, error: "destroyed" }
     if (isStreamActive()) return { ok: true }

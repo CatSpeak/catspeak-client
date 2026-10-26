@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "@/components/ui/toast"
 import { useLanguage } from "@/shared/context/LanguageContext"
@@ -7,10 +7,13 @@ import { usePlanFeatures } from "@/shared/hooks/usePlanFeatures"
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures"
 import { PlanRequiredState } from "@/shared/components/ui/indicators"
 import { PLACEMENT_TEST_STEPS } from "../constants/steps"
-import { PLACEMENT_TEST_SESSION_PATH } from "../constants/routes"
+import {
+  PLACEMENT_TEST_PROFILE_PATH,
+  PLACEMENT_TEST_SESSION_PATH,
+} from "../constants/routes"
 import useMicrophonePermission from "../hooks/useMicrophonePermission"
 import useSessionResume from "../hooks/useSessionResume"
-import { useCreateSessionMutation } from "../api"
+import { useCreateSessionMutation, useGetRetakeStatusQuery } from "../api"
 import ConsentStep from "../components/ConsentStep"
 import PermissionBlockedStep from "../components/PermissionBlockedStep"
 import DeviceStep from "../components/DeviceStep"
@@ -31,6 +34,19 @@ const PlacementTestPage = () => {
   const { requesting, request } = useMicrophonePermission()
   const [createSession, { isLoading: creating }] = useCreateSessionMutation()
   const entry = useSessionResume({ copy: lifecycleCopy })
+  const { data: retakeStatus, isLoading: retakeLoading } = useGetRetakeStatusQuery(
+    undefined,
+    { skip: !canAccessPlacement, refetchOnMountOrArgChange: true },
+  )
+
+  // BUG-PT-16: người đã có kết quả thì vào thẳng hồ sơ kết quả (sc12), không
+  // quay lại màn đồng ý như người chưa thi. Việc thi lại đi qua sc12 → sc13.
+  const hasHistory = Boolean(retakeStatus?.hasHistory)
+  const shouldOpenProfile =
+    canAccessPlacement && hasHistory && entry.loaded && !entry.lifecycle
+  useEffect(() => {
+    if (shouldOpenProfile) navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+  }, [navigate, shouldOpenProfile])
 
   const handleRequestMic = async () => {
     const granted = await request()
@@ -78,7 +94,7 @@ const PlacementTestPage = () => {
     setStep(PLACEMENT_TEST_STEPS.CONSENT)
   }
 
-  if (isPlanLoading) {
+  if (isPlanLoading || (canAccessPlacement && retakeLoading) || shouldOpenProfile) {
     return (
       <div className="min-h-[calc(100vh-200px)] bg-primaryBg flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-cath-red-600 border-t-transparent" />
@@ -103,7 +119,8 @@ const PlacementTestPage = () => {
 
   return (
     <div className="min-h-[calc(100vh-200px)] bg-primaryBg px-4 py-8 md:px-8">
-      <div className="mx-auto flex w-full max-w-[960px] flex-col items-start gap-6 lg:flex-row">
+      {/* Hai cột chỉ đặt cạnh nhau từ xl: ở 1024px vùng nội dung chỉ ~670px (BUG-PT-17) */}
+      <div className="mx-auto flex w-full max-w-[960px] flex-col items-stretch gap-6 xl:flex-row xl:items-start">
         {step === PLACEMENT_TEST_STEPS.CONSENT && (
           <ConsentStep
             copy={copy}

@@ -50,13 +50,24 @@ export const createAudioTransport = ({
     }
   }
 
-  const playAudioBase64 = (base64Data, format = "audio/wav") => {
+  // onEnd chạy đúng một lần khi audio phát xong, lỗi, hoặc trình duyệt chặn phát.
+  // Không gọi khi bị stopAudio() cắt ngang.
+  const playAudioBase64 = (base64Data, format = "audio/wav", { onEnd } = {}) => {
     stopAudio()
     if (!base64Data || typeof Audio === "undefined") return null
     try {
       const audio = new Audio(`data:${format};base64,${base64Data}`)
       currentAudio = audio
-      audio.play().catch(() => {})
+      let done = false
+      const finish = () => {
+        if (done || currentAudio !== audio) return
+        done = true
+        currentAudio = null
+        if (typeof onEnd === "function") onEnd()
+      }
+      audio.onended = finish
+      audio.onerror = finish
+      audio.play().catch(finish)
       return audio
     } catch {
       return null
@@ -118,7 +129,6 @@ export const createAudioTransport = ({
     capture.destroy()
     statusSubscribers.clear()
   }
-
   return {
     start,
     stop: () => {

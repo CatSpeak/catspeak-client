@@ -322,6 +322,7 @@ const DesktopSidebar = () => {
                 <div key={item.key} className="relative group/dock">
                   <Link
                     to={targetPath}
+                    aria-label={label}
                     onClick={(e) => handleDockClick(item, e)}
                     className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${
                       isActive
@@ -329,7 +330,7 @@ const DesktopSidebar = () => {
                         : "text-white/80 hover:text-white hover:bg-white/15"
                     }`}
                   >
-                    <Icon strokeWidth={2} />
+                    <Icon strokeWidth={2} aria-hidden="true" />
                     {item.key === "messages" && unreadChatCount > 0 && (
                       <span className="absolute -top-1 -right-1 z-20 flex h-5 min-w-[1.25rem] px-1 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-md border-2 border-cath-red-700">
                         {unreadChatCount > 99 ? "99+" : unreadChatCount}
@@ -358,6 +359,7 @@ const DesktopSidebar = () => {
               <div key={item.key} className="relative group/dock">
                 <Link
                   to={targetPath}
+                  aria-label={label}
                   onClick={(e) => handleDockClick(item, e)}
                   className={`relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer ${
                     isActive
@@ -365,7 +367,7 @@ const DesktopSidebar = () => {
                       : "text-white/80 hover:text-white hover:bg-white/15"
                   }`}
                 >
-                  <Icon strokeWidth={2} />
+                  <Icon strokeWidth={2} aria-hidden="true" />
                 </Link>
 
                 {/* Tooltip on Hover */}
@@ -391,6 +393,7 @@ const DesktopSidebar = () => {
               <div key={item.key} className="relative group/dock">
                 <Link
                   to={targetPath}
+                  aria-label={label}
                   onClick={(e) => {
                     if (
                       activeDockSection === item.key ||
@@ -408,7 +411,7 @@ const DesktopSidebar = () => {
                       : "text-white/80 hover:text-white hover:bg-white/15"
                   }`}
                 >
-                  <Icon strokeWidth={2} />
+                  <Icon strokeWidth={2} aria-hidden="true" />
                 </Link>
 
                 {/* Tooltip on Hover */}

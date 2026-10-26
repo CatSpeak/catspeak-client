@@ -36,7 +36,7 @@ const SkillBar = ({ item }) => {
       <div className="h-[7px] w-full overflow-hidden rounded-full bg-[#F1F5F9]">
         <div
           className="h-full rounded-full"
-          style={{ width: `${item.score}%`, backgroundColor: style.color }}
+          style={{ width: `${item.score ?? 0}%`, backgroundColor: style.color }}
         />
       </div>
     </div>

@@ -13,6 +13,7 @@ export default {
   newNotificationTitle: "新しい通知",
   newNotificationBody: "閲覧できる新しい通知があります。",
   searchPlaceholder: "ルームを検索",
+  filterRooms: "ルームを絞り込む",
   languages: {
     vi: "ベトナム語",
     viNom: "ベトナム語（ノム文字） - 近日公開",

@@ -31,7 +31,7 @@ export default {
       bulletNoShare: "第三者と共有せず、暗号化して最大 30 日間保存します。",
       checkbox:
         "CatSpeak がマイクを使用し、入門テストのために音声を処理することに同意します。",
-      startCta: "マイクの確認を開始",
+      startCta: "テストを開始する",
       recommend:
         "推奨：マイク付きヘッドセットを着用し、静かな環境で行うと最も正確に測定できます。",
     },
@@ -59,7 +59,7 @@ export default {
           desc: "下のボタンを押して、システムにマイクを検出させ再接続します。",
         },
       ],
-      retryCta: "解除しました、再確認",
+      retryCta: "許可しました、今すぐ再試行",
       trust: "CatSpeak は音声データの 100% の暗号化と安全性を約束します。",
     },
     device: {
@@ -68,6 +68,8 @@ export default {
       statusListening: "聞き取り中…",
       statusNoSignal: "音声が検出されません",
       statusError: "マイクにアクセスできません",
+      statusPending: "まだ測定していません",
+      pendingHint: "左の例文を試しに録音してください。音声信号が基準を満たした場合のみテストルームに入れます。",
       instruction:
         "下の中国語サンプル文を声に出して読み、音声品質を確認してください：",
       sampleHanzi: "你好！欢迎来到 CatSpeak。",
@@ -76,6 +78,7 @@ export default {
       record: "タップして音声サンプルを録音",
       recording: "録音中…タップで停止",
       replay: "録音したサンプルを再生（{{duration}} 秒）",
+      reRecord: "録音し直す",
       deviceTitle: "入力デバイス設定",
       deviceCaption: "OS の既定 · 正常に動作中",
       devicePlaceholder: "マイクが見つかりません",
@@ -84,7 +87,7 @@ export default {
         "接続は安定し、応答も迅速",
         "録音デバイスは試験の準備完了",
       ],
-      continueCta: "音声は良好、続行",
+      continueCta: "テストルームに入る",
       errorTitle: "マイクにアクセスできません",
       errorBody:
         "CatSpeak が録音デバイスに接続できませんでした。マイクの権限を確認して再試行してください。",
@@ -118,7 +121,8 @@ export default {
       subtitle:
         "AI チューターはこのレベルを基準に最初の質問を出し、その後あなたの実際の反応に合わせて難易度を自動調整します。",
       difficultyLabel: "難易度：",
-      startCta: "スピーキング練習を開始（{{band}}）",
+      startCta: "テストを開始（{{band}}）",
+      startCtaEmpty: "テストを開始",
       lockedNote: "適応型評価は全 5 問 · 難易度はあなたの反応に合わせて自動調整",
       items: {
         hsk1_2: {
@@ -191,6 +195,10 @@ export default {
       reRecordCta: "再録音",
       stopRecordCta: "録音停止",
       startRecordCta: "話し始める",
+      aiAutoRecord: "AI が質問を読み終えると自動で録音が始まります。",
+      aiSpeaking: "AI が質問を読み上げています。聞いてください...",
+      autoRecordHint: "AI の読み上げ後に自動で録音",
+      timerAiSpeaking: "AI が質問を読み上げ中",
       submitCta: "回答を完了する",
       skipCta: "この問題をスキップ（0点）→",
       scoringSummary: "スコアを集計中...",
@@ -283,6 +291,7 @@ export default {
         fluency: "流暢さと反応",
       },
       scoreOf: "{{score}} / 100",
+      notMeasured: "未測定",
       aiNote:
         "AI の提案：HSK {{band}} は AI チューターと自然な会話反応を練習するのに最適なレベルです。",
       startCta: "HSK {{band}} 学習ロードマップを開始 →",
@@ -310,6 +319,8 @@ export default {
       optionKeep: "AI の提案どおり維持する",
       optionUp: "1 レベル上げる（より高い挑戦で飛躍する）",
       recommended: "おすすめ",
+      lowestNote: "HSK 1 は最も低いレベルです",
+      highestNote: "HSK 6 は最も高いレベルです",
       warning:
         "注意：確定すると、5 日間のロードマップがこのレベルで再作成され、調整権限は永久にロックされます。",
       cancelCta: "キャンセル / HSK {{band}} を維持",
@@ -385,7 +396,7 @@ export default {
         cooldownTitle: "クールダウン周期の注意（14日間）：",
         cooldownBody:
           "完了後、再度受験するには最低14日間の練習期間が必要です。",
-        bullet1: "新しい結果は能力プロフィールに直接反映されます。",
+        bullet1: "新しい結果は能力プロフィールの以前の結果を上書きします。",
         bullet2:
           "5日間の突破ロードマップは AIチューターが最初から再設定します。",
         cancelCta: "キャンセル",

@@ -5,7 +5,7 @@ import { createPortal } from "react-dom"
 const NetworkDisconnectedModal = ({
   isOpen = false,
   onClose,
-  initialSeconds = 12,
+  initialSeconds = 15,
   maxSeconds = 15,
   onRetry,
   onEndAndSave,
@@ -14,6 +14,8 @@ const NetworkDisconnectedModal = ({
 
   useEffect(() => {
     if (!isOpen) return
+    // Mỗi lần mất kết nối đếm lại từ đầu (BUG-SS-06)
+    setSeconds(initialSeconds)
 
     const timer = setInterval(() => {
       setSeconds((prev) => {
@@ -28,7 +30,7 @@ const NetworkDisconnectedModal = ({
     return () => {
       clearInterval(timer)
     }
-  }, [isOpen])
+  }, [isOpen, initialSeconds])
 
   if (!isOpen || typeof document === "undefined") return null
 
@@ -65,8 +67,12 @@ const NetworkDisconnectedModal = ({
             {seconds}s
           </div>
 
-          <div className="text-xs sm:text-sm font-semibold text-[#990011]">
-            Đang tự động thử kết nối lại... ({seconds} / {maxSeconds} giây)
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="text-xs sm:text-sm font-semibold text-[#990011]"
+          >
+            Mất kết nối âm thanh. Đang kết nối lại... ({seconds}s)
           </div>
 
           <p className="text-xs text-slate-500">

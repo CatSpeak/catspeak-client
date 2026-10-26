@@ -44,7 +44,7 @@ const ConsentStep = ({
 
   return (
     <>
-      <StepCard className="gap-4 lg:w-[440px] lg:shrink-0">
+      <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
         <span className="inline-flex h-[26px] w-fit items-center rounded-full bg-red-50 px-2.5 text-[11px] font-medium text-cath-red-700">
           {consent.pill}
         </span>
@@ -82,7 +82,7 @@ const ConsentStep = ({
         </div>
       </StepCard>
 
-      <StepCard className="gap-5 lg:flex-1">
+      <StepCard className="min-w-0 gap-5 xl:flex-1">
         <h2 className="text-xl font-bold leading-7 text-[#09090B]">
           {consent.agreementTitle}
         </h2>
@@ -100,13 +100,19 @@ const ConsentStep = ({
         </div>
         <div className="flex items-center gap-3">
           <Checkbox
+            id="placement-consent-checkbox"
             checked={agreed}
             onChange={handleCheckboxChange}
-            aria-label={consent.checkbox}
+            aria-labelledby="placement-consent-label"
           />
-          <span className="text-xs font-semibold leading-[18px] text-[#09090B]">
+          <label
+            id="placement-consent-label"
+            htmlFor="placement-consent-checkbox"
+            onClick={handleCheckboxChange}
+            className="cursor-pointer text-xs font-semibold leading-[18px] text-[#09090B]"
+          >
             {consent.checkbox}
-          </span>
+          </label>
         </div>
         <PillButton
           onClick={onStart}

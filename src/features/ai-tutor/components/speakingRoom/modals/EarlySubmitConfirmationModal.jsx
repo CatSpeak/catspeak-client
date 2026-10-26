@@ -85,7 +85,7 @@ const EarlySubmitConfirmationModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-rose-50 hover:bg-rose-100/80 text-[#990011] font-semibold text-xs sm:text-sm transition-colors cursor-pointer text-center"
               >
-                Nộp bài & Xem điểm
+                Nộp bài
               </button>
 
               <button
@@ -96,7 +96,7 @@ const EarlySubmitConfirmationModal = ({
                 }}
                 className="w-full sm:flex-1 py-3.5 px-6 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
               >
-                Tiếp tục luyện nói
+                Tiếp tục ở lại
               </button>
             </div>
           </div>

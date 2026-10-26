@@ -58,14 +58,15 @@ export const parseSeedBand = (band) => {
 
 /** 1. Khởi tạo phiên thi: POST /v1/placement/sessions/start */
 export const createSessionReal = async (
-  { targetBand = 1, seedBand, voiceConsentGranted = true, forceRetake = true, activeTabToken } = {},
+  { targetBand = 1, seedBand, voiceConsentGranted = true, forceRetake = false, activeTabToken } = {},
   { baseQuery, api, extraOptions, persist = saveActiveSession } = {},
 ) => {
   const effectiveSeedBand = parseSeedBand(seedBand ?? targetBand)
   const body = {
     seed_band: effectiveSeedBand,
     voice_consent_granted: Boolean(voiceConsentGranted),
-    force_retake: true,
+    // BUG-PT-16: không tự vượt khóa 14 ngày nữa; máy chủ quyết theo gói.
+    force_retake: Boolean(forceRetake),
     active_tab_token: activeTabToken ?? null,
   }
 
@@ -375,6 +376,7 @@ export const getRetakeStatusReal = async ({
   return {
     data: {
       eligible: Boolean(cd.can_retake),
+      cooldownBypassed: Boolean(cd.bypassed),
       lastTestedAt,
       eligibleRetakeAt: eligibleAt,
       daysRemaining: cd.days_remaining ?? eligibility.daysRemaining,

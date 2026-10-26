@@ -119,14 +119,14 @@ describe("buildAdjustOptions", () => {
       { key: "up", level: 4 },
     ])
     expect(buildAdjustOptions(1)).toEqual([
-      { key: "down", level: 1 },
+      { key: "down", level: 1, disabled: true },
       { key: "keep", level: 1 },
       { key: "up", level: 2 },
     ])
     expect(buildAdjustOptions(6)).toEqual([
       { key: "down", level: 5 },
       { key: "keep", level: 6 },
-      { key: "up", level: 6 },
+      { key: "up", level: 6, disabled: true },
     ])
   })
 })

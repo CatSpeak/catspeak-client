@@ -1,7 +1,7 @@
 import { Pause, Settings2, Sparkles } from "lucide-react"
 
 const SessionTopbar = ({ copy = {}, onPause, onConfigure }) => (
-  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+  <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
     <div className="flex items-center gap-3">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#FFF1F2] text-cath-red-700">
         <Sparkles size={20} strokeWidth={2} />

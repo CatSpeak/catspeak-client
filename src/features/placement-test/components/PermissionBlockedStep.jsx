@@ -24,7 +24,7 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
 
   return (
     <>
-      <StepCard className="gap-4 lg:w-[440px] lg:shrink-0">
+      <StepCard className="gap-4 xl:w-[440px] xl:shrink-0">
         <span className="flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-red-50 text-red-600">
           <MicOff size={26} strokeWidth={2} />
         </span>
@@ -46,7 +46,7 @@ const PermissionBlockedStep = ({ copy, onRetry, requesting }) => {
         </div>
       </StepCard>
 
-      <StepCard className="gap-4 lg:flex-1">
+      <StepCard className="min-w-0 gap-4 xl:flex-1">
         <h2 className="text-xl font-semibold leading-7 text-[#09090B]">
           {blocked.stepsTitle}
         </h2>

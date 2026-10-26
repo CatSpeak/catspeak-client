@@ -2,11 +2,8 @@ import React from "react"
 import { AlertTriangle } from "lucide-react"
 import { createPortal } from "react-dom"
 
-const DEFAULT_SESSION_INFO = {
-  device: "Chrome trên Windows (Bắt đầu lúc 14:20)",
-  topic: "Mua hoa quả ở chợ (买水果) · HSK 3",
-  status: "Đang kết nối âm thanh tương tác 2 chiều",
-}
+// Không bịa thông tin thiết bị: chỉ hiện dòng nào có dữ liệu thật.
+const DEFAULT_SESSION_INFO = {}
 
 const ActiveSessionConflictModal = ({
   isOpen = false,
@@ -15,7 +12,10 @@ const ActiveSessionConflictModal = ({
   onTransferSession,
   onCloseAndReturnHome,
 }) => {
-  const currentSession = { ...DEFAULT_SESSION_INFO, ...sessionInfo }
+  const currentSession = { ...DEFAULT_SESSION_INFO, ...(sessionInfo || {}) }
+  const hasDetails = Boolean(currentSession.device || currentSession.topic || currentSession.status)
+  // Không truyền onTransferSession thì là hộp thoại ss08 dạng thông báo: một nút "Đã hiểu".
+  const noticeOnly = !onTransferSession
 
   if (!isOpen || typeof document === "undefined") return null
 
@@ -44,21 +44,29 @@ const ActiveSessionConflictModal = ({
 
             {/* Subtitle */}
             <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed max-w-md mx-auto">
-              Tài khoản của bạn đang có một phiên luyện nói AI đang chạy ở cửa sổ trình duyệt hoặc thiết bị khác:
+              Bạn đang có buổi luyện nói ở thiết bị khác.
             </p>
 
             {/* Session details box */}
-            <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-slate-50 border border-slate-100 text-left space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
-              <p>
-                • <strong>Thiết bị:</strong> {currentSession.device}
-              </p>
-              <p>
-                • <strong>Chủ đề:</strong> {currentSession.topic}
-              </p>
-              <p>
-                • <strong>Trạng thái:</strong> {currentSession.status}
-              </p>
-            </div>
+            {hasDetails && (
+              <div className="mt-4 p-4 sm:p-4.5 rounded-2xl bg-slate-50 border border-slate-100 text-left space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed">
+                {currentSession.device && (
+                  <p>
+                    • <strong>Thiết bị:</strong> {currentSession.device}
+                  </p>
+                )}
+                {currentSession.topic && (
+                  <p>
+                    • <strong>Chủ đề:</strong> {currentSession.topic}
+                  </p>
+                )}
+                {currentSession.status && (
+                  <p>
+                    • <strong>Trạng thái:</strong> {currentSession.status}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Security note */}
             <div className="mt-3.5 p-4 sm:p-4.5 rounded-2xl bg-amber-50/70 border border-amber-200/50 text-xs text-amber-900 leading-relaxed text-left">
@@ -66,6 +74,20 @@ const ActiveSessionConflictModal = ({
             </div>
 
             {/* Footer Action Buttons */}
+            {noticeOnly ? (
+              <div className="flex items-center justify-center mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onCloseAndReturnHome?.()
+                    onClose?.()
+                  }}
+                  className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-6 rounded-xl bg-[#990011] hover:bg-[#85000f] text-white font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center shadow-md shadow-rose-950/20"
+                >
+                  Đã hiểu
+                </button>
+              </div>
+            ) : (
             <div className="flex flex-col sm:flex-row items-center gap-3 mt-6">
               <button
                 type="button"
@@ -89,6 +111,7 @@ const ActiveSessionConflictModal = ({
                 Chuyển phiên sang thiết bị này
               </button>
             </div>
+            )}
           </div>
         </div>,
     document.body
