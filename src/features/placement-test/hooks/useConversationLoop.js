@@ -37,6 +37,7 @@ import {
   startReconnect,
   tickReconnect,
 } from "../utils/lifecycle"
+import { isUnfinishedSession } from "../utils/sessionLifecycle"
 import { upsertTurn } from "../utils/turns"
 import useAudioTransport from "./useAudioTransport"
 
@@ -409,7 +410,17 @@ const useConversationLoop = () => {
         try {
           const res = await triggerGetQuestion({ sessionId: current.session.id }).unwrap()
           rawQuestion = res
-        } catch {
+        } catch (err) {
+          if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
+            clearActiveSession()
+            const msg =
+              err?.data?.detail?.message ||
+              err?.data?.message ||
+              "Phiên thi đã kết thúc hoặc không thể tiếp tục."
+            toast.error(msg)
+            navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+            return
+          }
           rawQuestion = null
         }
       }
@@ -517,7 +528,17 @@ const useConversationLoop = () => {
           skipped: Boolean(skipped),
           ...turn,
         }).unwrap()
-      } catch {
+      } catch (err) {
+        if (err?.status === 400 || err?.status === 403 || err?.status === 410) {
+          clearActiveSession()
+          const msg =
+            err?.data?.detail?.message ||
+            err?.data?.message ||
+            "Phiên thi đã hoàn tất."
+          toast.error(msg)
+          navigate(PLACEMENT_TEST_PROFILE_PATH, { replace: true })
+          return
+        }
         // Network or server error: stay on current question and allow retrying submit
         finishingRef.current = false
         setPhase(CONVERSATION_PHASE.LISTENING)
@@ -764,20 +785,29 @@ const useConversationLoop = () => {
   useEffect(() => {
     mountedRef.current = true
     const stored = readActiveSession()
-    if (!stored) {
+    if (!stored || !isUnfinishedSession(stored)) {
+      clearActiveSession()
       navigate(PLACEMENT_TEST_PATH, { replace: true })
       return () => {
         mountedRef.current = false
       }
     }
-    const startOrder =
-      Number(stored.currentOrder) || (stored.turns?.length || 0) + 1
-    if (startOrder > TOTAL_TURNS) {
+    const answeredTurns = (stored.turns || []).filter(
+      (t) =>
+        Boolean(
+          t.answeredAt ||
+            t.submittedAt ||
+            (t.transcript && t.transcript.trim() !== ""),
+        ),
+    ).length
+    if (answeredTurns >= TOTAL_TURNS) {
+      clearActiveSession()
       navigate(PLACEMENT_TEST_SCORING_PATH, { replace: true })
       return () => {
         mountedRef.current = false
       }
     }
+    const startOrder = Math.min(answeredTurns + 1, TOTAL_TURNS)
     // Giữ quyết định trong ref để StrictMode (mount hai lần ở dev) không đọc sai dấu.
     if (reloadDecisionRef.current === null) {
       reloadDecisionRef.current =

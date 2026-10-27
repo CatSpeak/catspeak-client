@@ -19,7 +19,7 @@ import {
   getWeaknessDimension,
 } from "../utils/result"
 import { formatTemplate } from "../utils/format"
-import { readActiveSession, readResult } from "../utils/sessionStorage"
+import { clearActiveSession, readActiveSession, readResult } from "../utils/sessionStorage"
 import ResultTopbar from "../components/result/ResultTopbar"
 import ResultHeroCard from "../components/result/ResultHeroCard"
 import ResultFeedbackCard from "../components/result/ResultFeedbackCard"

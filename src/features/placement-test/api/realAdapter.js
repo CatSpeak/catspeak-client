@@ -461,6 +461,7 @@ export const scoreSessionReal = async (
   { sessionId } = {},
   {
     read = readActiveSession,
+    clear = clearActiveSession,
     readResult: readStoredResult = readResult,
   } = {},
 ) => {
@@ -468,12 +469,58 @@ export const scoreSessionReal = async (
   const result = readStoredResult()
   if (!session && !result) return notFound()
 
+  clear()
+
   return {
     data: {
       result: result || { band: session?.finalBand || 1, sessionId: session?.id },
       session,
     },
   }
+}
+
+/** 8. Tiếp tục phiên thi: kiểm tra trạng thái trên máy chủ */
+export const resumeSessionReal = async (
+  { sessionId } = {},
+  {
+    baseQuery,
+    api,
+    extraOptions,
+    read = readActiveSession,
+    clear = clearActiveSession,
+  } = {},
+) => {
+  const session = read()
+  const activeSessionId = sessionId || session?.id
+  if (!activeSessionId) {
+    return notFound()
+  }
+
+  const response = await baseQuery(
+    { url: `/v1/placement/sessions/${activeSessionId}`, method: "GET" },
+    api,
+    extraOptions,
+  )
+
+  if (response.error) {
+    return normalizeError(response.error)
+  }
+
+  const s = response.data || {}
+  if (s.status === "completed" || Number(s.current_turn) > 5) {
+    clear()
+    return {
+      error: {
+        status: 400,
+        data: {
+          code: "SESSION_ALREADY_COMPLETED",
+          message: "Session is already completed.",
+        },
+      },
+    }
+  }
+
+  return { data: { session: s } }
 }
 
 /** 8. Hủy phiên thi: POST /v1/placement/sessions/{id}/cancel */
