@@ -83,7 +83,7 @@ import UserPagesLayout from "@/features/user/layouts/UserPagesLayout";
 import LanguageLayout from "./LanguageLayout";
 import { LazyRoute, RootLayout, RootRoute } from "./RouteShells";
 
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { AuthGuard, CommunityGuard, RoleGuard } from "@/shared/components";
 import SettingIndexRedirect from "./SettingIndexRedirect";
 import RouteErrorBoundary from "@/shared/components/RouteErrorBoundary";

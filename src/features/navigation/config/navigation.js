@@ -26,6 +26,7 @@ import {
   History,
   LayoutGrid,
   Gift,
+  CircleDot,
 } from "lucide-react";
 import { DEFAULT_COMMUNITY_LANG } from "@/shared/utils/navigation";
 import { PLAN_FEATURES } from "@/shared/constants/planFeatures";
