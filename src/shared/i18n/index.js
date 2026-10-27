@@ -19,6 +19,7 @@ import { chatAssistantTranslations } from "@/features/chat-assistant/i18n";
 import { helpTranslations } from "@/features/help/i18n";
 import { interactiveScriptTranslations } from "@/features/interactive-script/i18n";
 import { placementTestTranslations } from "@/features/placement-test/i18n";
+import { aiTutorTranslations } from "@/features/ai-tutor/i18n";
 
 const isObject = (item) =>
   Boolean(item && typeof item === "object" && !Array.isArray(item));
